@@ -120,8 +120,21 @@ export const TABLE_COLUMNS = {
       defaultMessage: 'Status',
     }),
   },
+  source: {
+    display: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTablesourceHeader', {
+      defaultMessage: 'Source',
+    }),
+  },
 } as const;
 
 export type TableColumnName = keyof typeof TABLE_COLUMNS;
+
+export const DEFAULT_TABLE_COLUMN_NAMES: TableColumnName[] = [
+  'name',
+  'type',
+  'format',
+  'parent',
+  'status',
+];
 
 export const SUPPORTED_TABLE_COLUMN_NAMES = Object.keys(TABLE_COLUMNS) as TableColumnName[];
