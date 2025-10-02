@@ -434,15 +434,9 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           maxTimeout: 1500,
           factor: 1.5,
           onFailedAttempt: (error) => {
-            if (error.retriesLeft) {
-              this.log.debug(
-                `Attempt ${error.attemptNumber} to fetch MDE action [${machineActionId}] failed. ${error.retriesLeft} retries left. [ERROR: ${error.message}]`
-              );
-            } else {
-              this.log.warn(
-                `All retry attempts exhausted for fetching MDE action [${machineActionId}]. [ERROR: ${error.message}]`
-              );
-            }
+            this.log.debug(
+              `Attempt ${error.attemptNumber} to fetch MDE action [${machineActionId}] failed. ${error.retriesLeft} retries left. [ERROR: ${error.message}]`
+            );
           },
         }
       );
