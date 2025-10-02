@@ -181,6 +181,28 @@ describe('Walker static methods', () => {
         },
       ]);
     });
+
+    test('can collect params from function trailing map argument', () => {
+      const query =
+        'FROM a | WHERE MATCH( aws.s3.bucket.name, ?variable, {"minimum_should_match": ?min_should_match})';
+      const { ast } = parse(query);
+      const params = Walker.params(ast);
+
+      expect(params).toMatchObject([
+        {
+          type: 'literal',
+          literalType: 'param',
+          paramType: 'named',
+          value: 'variable',
+        },
+        {
+          type: 'literal',
+          literalType: 'param',
+          paramType: 'named',
+          value: 'min_should_match',
+        },
+      ]);
+    });
   });
 
   describe('Walker.find()', () => {
@@ -318,6 +340,34 @@ describe('Walker static methods', () => {
       expect(res).toMatchObject({
         type: 'column',
         name: 'a.b.c',
+      });
+    });
+
+    test('can find map and inside map', () => {
+      const query = 'ROW F(1, {"b": ?var, "a": 123})';
+      const { root } = parse(query);
+      const map = Walker.match(root, {
+        type: 'map',
+      });
+      const number = Walker.match(root, {
+        type: 'literal',
+        value: 123,
+      });
+      const param = Walker.match(root, {
+        type: 'literal',
+        literalType: 'param',
+      });
+
+      expect(map).toMatchObject({
+        type: 'map',
+      });
+      expect(number).toMatchObject({
+        type: 'literal',
+        value: 123,
+      });
+      expect(param).toMatchObject({
+        type: 'literal',
+        literalType: 'param',
       });
     });
 

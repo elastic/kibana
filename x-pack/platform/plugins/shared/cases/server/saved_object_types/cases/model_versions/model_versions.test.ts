@@ -138,8 +138,19 @@ describe('Model versions', () => {
                 },
                 "type": "unsigned_long",
               },
+              "settings": Object {
+                "properties": Object {
+                  "extractObservables": Object {
+                    "type": "boolean",
+                  },
+                },
+              },
             },
             "type": "mappings_addition",
+          },
+          Object {
+            "backfillFn": [Function],
+            "type": "data_backfill",
           },
         ]
       `);

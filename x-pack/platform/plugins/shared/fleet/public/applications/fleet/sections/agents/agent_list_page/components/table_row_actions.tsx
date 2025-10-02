@@ -65,7 +65,11 @@ export const TableRowActions: React.FunctionComponent<{
       <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
     </EuiContextMenuItem>,
   ];
-  if (!agentPolicy?.is_protected && !isFleetServerAgent && isAgentMigrationSupported(agent)) {
+
+  if (
+    authz.fleet.allAgents && !agentPolicy?.is_protected && !isFleetServerAgent && isAgentMigrationSupported(agent)
+  ) {
+
     menuItems.push(
       <EuiContextMenuItem
         icon="cluster"

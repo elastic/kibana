@@ -19,23 +19,26 @@ import {
   EuiSpacer,
   EuiBasicTable,
   EuiFlexGroup,
-  EuiToken,
+  EuiBadge,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useAbortController } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../util/errors';
 import type { MappedSchemaField, SchemaField } from './types';
 import { FIELD_TYPE_MAP } from './constants';
 import { convertToFieldDefinitionConfig } from './utils';
 
 interface SchemaChangesReviewModalProps {
   onClose: () => void;
-  stream: string;
+  streamType?: 'wired' | 'classic' | 'unknown';
+  definition: Streams.ingest.all.GetResponse;
   fields: SchemaField[];
   storedFields: SchemaField[];
   submitChanges: () => Promise<void>;
@@ -43,7 +46,8 @@ interface SchemaChangesReviewModalProps {
 
 export function SchemaChangesReviewModal({
   fields,
-  stream,
+  streamType,
+  definition,
   storedFields,
   submitChanges,
   onClose,
@@ -57,18 +61,36 @@ export function SchemaChangesReviewModal({
   } = useKibana();
   const { signal } = useAbortController();
 
-  const changes = React.useMemo(() => {
-    const addedFields = fields.filter(
-      (field) => !storedFields.some((stored) => stored.name === field.name)
-    );
+  const changes = React.useMemo(() => getChanges(fields, storedFields), [fields, storedFields]);
 
-    const changedFields = fields.filter((field) => {
-      const stored = storedFields.find((storedField) => storedField.name === field.name);
-      return stored && !isEqual(stored, field);
+  const existingFields = React.useMemo(() => {
+    // Fields that have esType (from Field Caps API) - these are existing in ES
+    return changes.filter((field) => field.esType && field.status === 'mapped');
+  }, [changes]);
+
+  const autoMappedFields = React.useMemo(() => {
+    // Fields that have source (from metadata service) but no esType - these are new and auto-mapped
+    return changes.filter((field) => field.status === 'mapped' && field.source && !field.esType);
+  }, [changes]);
+
+  const reviewRequiredFields = React.useMemo(() => {
+    // Fields that need manual review (unmapped)
+    return changes.filter((field) => field.status === 'unmapped');
+  }, [changes]);
+
+  // Sort changes to show review required first, then auto-mapped, then existing
+  const sortedChanges = React.useMemo(() => {
+    return [...changes].sort((a, b) => {
+      const getFieldPriority = (field: SchemaField) => {
+        if (reviewRequiredFields.includes(field)) return 1; // Highest priority
+        if (autoMappedFields.includes(field)) return 2;
+        if (existingFields.includes(field)) return 3; // Lowest priority
+        return 4; // Fallback
+      };
+
+      return getFieldPriority(a) - getFieldPriority(b);
     });
-
-    return [...addedFields, ...changedFields];
-  }, [fields, storedFields]);
+  }, [changes, reviewRequiredFields, autoMappedFields, existingFields]);
 
   const [{ loading }, handleSubmit] = useAsyncFn(async () => {
     await submitChanges();
@@ -90,29 +112,34 @@ export function SchemaChangesReviewModal({
           name: field.name,
         }));
 
-      const simulationResults = await streamsRepositoryClient.fetch(
-        'POST /internal/streams/{name}/schema/fields_simulation',
-        {
-          signal,
-          params: {
-            path: { name: stream },
-            body: {
-              field_definitions: mappedFields,
+      try {
+        const simulationResults = await streamsRepositoryClient.fetch(
+          'POST /internal/streams/{name}/schema/fields_simulation',
+          {
+            signal,
+            params: {
+              path: { name: definition.stream.name },
+              body: {
+                field_definitions: mappedFields,
+              },
             },
-          },
+          }
+        );
+
+        if (simulationResults.status === 'failure') {
+          setHasSimulationErrors(true);
+          setSimulationError(simulationResults.simulationError);
         }
-      );
-
-      if (simulationResults.status === 'failure') {
+      } catch (err) {
         setHasSimulationErrors(true);
-        setSimulationError(simulationResults.simulationError);
+        setSimulationError(getFormattedError(err).message);
+      } finally {
+        setIsSimulating(false);
       }
-
-      setIsSimulating(false);
     }
 
     simulate();
-  }, [changes, streamsRepositoryClient, signal, stream]);
+  }, [changes, streamsRepositoryClient, signal, definition.stream.name]);
 
   const confirmChangesTitle = i18n.translate(
     'xpack.streams.schemaEditor.confirmChangesModal.title',
@@ -121,27 +148,149 @@ export function SchemaChangesReviewModal({
     }
   );
 
+  const fieldColumns = [
+    {
+      field: 'name',
+      name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnField', {
+        defaultMessage: 'Field',
+      }),
+      render: (name: string) => <>{name}</>,
+    },
+    {
+      field: 'type',
+      name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnType', {
+        defaultMessage: 'type',
+      }),
+      render: (type: FieldDefinitionConfig['type'] | undefined, field: SchemaField) => {
+        // Prioritize showing esType if available and different from our supported type
+        if (field.esType && (!type || type === 'system')) {
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <FieldIcon type={field.esType} />
+              {field.esType}
+            </EuiFlexGroup>
+          );
+        }
+
+        if (!type || field.status === 'unmapped') {
+          // Only show <dynamic> for classic streams with unmapped fields
+          if (streamType === 'classic') {
+            const dynamicText = i18n.translate(
+              'xpack.streams.schemaEditor.confirmChangesModal.dynamicText',
+              {
+                defaultMessage: 'Dynamic',
+              }
+            );
+            return <EuiBadge color="hollow">{dynamicText}</EuiBadge>;
+          }
+          // For wired streams, don't show <dynamic> for unmanaged fields
+          return null;
+        }
+
+        // Handle unknown types gracefully
+        const typeInfo = FIELD_TYPE_MAP[type as keyof typeof FIELD_TYPE_MAP];
+        const typeLabel = typeInfo ? typeInfo.label : type;
+
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <FieldIcon type={type} />
+            {typeLabel}
+          </EuiFlexGroup>
+        );
+      },
+    },
+    {
+      field: 'status',
+      name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnStatus', {
+        defaultMessage: 'Status',
+      }),
+      width: '200px',
+      render: (status: string, field: SchemaField) => {
+        if (reviewRequiredFields.includes(field)) {
+          return (
+            <EuiBadge color="warning">
+              {i18n.translate('xpack.streams.fieldColumns.newReviewRequiredBadgeLabel', {
+                defaultMessage: 'Review required',
+              })}
+            </EuiBadge>
+          );
+        }
+        if (autoMappedFields.includes(field)) {
+          return (
+            <EuiBadge color="success">
+              {i18n.translate('xpack.streams.fieldColumns.newAutomaticallyMappedBadgeLabel', {
+                defaultMessage: 'Automatically mapped',
+              })}
+            </EuiBadge>
+          );
+        }
+        if (existingFields.includes(field)) {
+          return (
+            <EuiBadge color="hollow">
+              {i18n.translate('xpack.streams.fieldColumns.existingBadgeLabel', {
+                defaultMessage: 'Existing',
+              })}
+            </EuiBadge>
+          );
+        }
+        return <EuiBadge color="default">{status}</EuiBadge>;
+      },
+    },
+    {
+      field: 'source',
+      name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnSource', {
+        defaultMessage: 'Source',
+      }),
+      render: (source: string | undefined, field: SchemaField) => {
+        // Don't show source for existing fields (those that are truly from ES)
+        if (existingFields.includes(field)) {
+          return null;
+        }
+
+        if (!source) return null;
+
+        const sourceLabels = {
+          ecs: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.sourceLabel.ecs', {
+            defaultMessage: 'ECS Standard',
+          }),
+          otel: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.sourceLabel.otel', {
+            defaultMessage: 'OpenTelemetry',
+          }),
+        };
+
+        return (
+          <EuiBadge color="default">
+            {sourceLabels[source as keyof typeof sourceLabels] || source}
+          </EuiBadge>
+        );
+      },
+    },
+  ];
+
   return (
-    <EuiModal onClose={onClose} maxWidth={600} aria-label={confirmChangesTitle}>
+    <EuiModal onClose={onClose} maxWidth={800} aria-label={confirmChangesTitle}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>{confirmChangesTitle}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.streams.schemaEditor.confirmChangesModal.affectsAllStreamsCalloutTitle',
-            {
-              defaultMessage: 'Schema edits affect all dependent streams.',
-            }
-          )}
-          iconType="info"
-        />
+        {Streams.WiredStream.GetResponse.is(definition) ? (
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate(
+              'xpack.streams.schemaEditor.confirmChangesModal.affectsAllStreamsCalloutTitle',
+              {
+                defaultMessage: 'Schema edits affect all dependent streams.',
+              }
+            )}
+            iconType="info"
+          />
+        ) : null}
         <EuiSpacer size="m" />
         <EuiText>
           {i18n.translate(
             'xpack.streams.schemaEditor.confirmChangesModal.fieldsWillBeUpdatedText',
             {
-              defaultMessage: 'The fields below will be updated.',
+              defaultMessage: 'Some fields below will be updated.',
             }
           )}
         </EuiText>
@@ -149,6 +298,7 @@ export function SchemaChangesReviewModal({
         {hasSimulationErrors && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.streams.schemaEditor.confirmChangesModal.simulationErrorCalloutTitle',
                 {
@@ -163,44 +313,7 @@ export function SchemaChangesReviewModal({
             <EuiSpacer size="m" />
           </>
         )}
-        <EuiBasicTable
-          items={changes}
-          columns={[
-            {
-              field: 'name',
-              name: i18n.translate(
-                'xpack.streams.schemaEditor.confirmChangesModal.tableColumnName',
-                { defaultMessage: 'Name' }
-              ),
-            },
-            {
-              field: 'type',
-              name: i18n.translate(
-                'xpack.streams.schemaEditor.confirmChangesModal.tableColumnType',
-                { defaultMessage: 'Type' }
-              ),
-              render: (type: FieldDefinitionConfig['type'] | undefined, field: SchemaField) => {
-                if (!type || field.status === 'unmapped')
-                  return (
-                    <EuiFlexGroup alignItems="center" gutterSize="s">
-                      <EuiToken iconType="tokenNull" />
-                      <FormattedMessage
-                        id="xpack.streams.schemaEditor.unmanagedLabel"
-                        defaultMessage="Unmanaged"
-                      />
-                    </EuiFlexGroup>
-                  );
-
-                return (
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <FieldIcon type={type} />
-                    {FIELD_TYPE_MAP[type].label}
-                  </EuiFlexGroup>
-                );
-              },
-            },
-          ]}
-        />
+        <EuiBasicTable items={sortedChanges} columns={fieldColumns} />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
@@ -216,13 +329,35 @@ export function SchemaChangesReviewModal({
           fill
           color="primary"
           onClick={handleSubmit}
-          isLoading={loading}
+          isLoading={loading || isSimulating}
           disabled={isSimulating || hasSimulationErrors}
           data-test-subj="streamsAppSchemaChangesReviewModalSubmitButton"
         >
-          {confirmChangesTitle}
+          {isSimulating
+            ? i18n.translate(
+                'xpack.streams.schemaEditor.confirmChangesModal.verifyingChangesText',
+                { defaultMessage: 'Verifying changes' }
+              )
+            : confirmChangesTitle}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );
+}
+
+export function getChanges(fields: SchemaField[], storedFields: SchemaField[]) {
+  const addedFields = fields.filter(
+    (field) =>
+      (field.status === 'mapped' || field.status === 'unmapped') &&
+      !storedFields.some((stored) => stored.name === field.name)
+  );
+
+  const changedFields = fields.filter((field) => {
+    const stored = storedFields.find(
+      (storedField) => field.status !== 'inherited' && storedField.name === field.name
+    );
+    return stored && !isEqual(stored, field);
+  });
+
+  return [...addedFields, ...changedFields];
 }

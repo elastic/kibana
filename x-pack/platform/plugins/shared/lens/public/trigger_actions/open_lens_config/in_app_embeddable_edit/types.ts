@@ -33,4 +33,6 @@ export interface InlineEditLensEmbeddableContext {
   // custom container element, use in case you need to render outside a flyout
   // in that case, the styling is responsibility of the consumer
   container?: HTMLElement | null;
+
+  applyButtonLabel?: string;
 }
