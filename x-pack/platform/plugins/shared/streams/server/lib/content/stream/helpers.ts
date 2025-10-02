@@ -10,6 +10,7 @@ import type { ContentPackIncludedObjects, ContentPackStream } from '@kbn/content
 import { ROOT_STREAM_ID, isIncludeAll } from '@kbn/content-packs-schema';
 import { type FieldDefinition } from '@kbn/streams-schema';
 import { ContentPackIncludeError } from '../error';
+import { baseFields } from '../../streams/component_templates/logs_layer';
 
 export function withoutRootPrefix(root: string, name: string) {
   const prefix = `${root}.`;
