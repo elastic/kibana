@@ -158,6 +158,13 @@ export const SYNC_ALERTS_LC = i18n.translate('xpack.cases.caseView.syncAlertsLow
   defaultMessage: `sync alerts`,
 });
 
+export const EXTRACT_OBSERVABLES_LC = i18n.translate(
+  'xpack.cases.caseView.extractObservablesLowercaseLabel',
+  {
+    defaultMessage: `extract observables`,
+  }
+);
+
 export const DOES_NOT_EXIST_TITLE = i18n.translate('xpack.cases.caseView.doesNotExist.title', {
   defaultMessage: 'This case does not exist',
 });
@@ -240,7 +247,3 @@ export const TOTAL_USERS_ASSIGNED = (total: number) =>
     defaultMessage: '{total} assigned',
     values: { total },
   });
-
-export const CASE_SUMMARY_TITLE = i18n.translate('xpack.cases.caseSummary.title', {
-  defaultMessage: 'Case summary',
-});
