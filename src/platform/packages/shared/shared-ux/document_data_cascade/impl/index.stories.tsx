@@ -44,6 +44,7 @@ import { getESQLStatsQueryMeta } from './src/lib/parse_esql';
  */
 export default {
   title: 'Data Cascade/Configuration Examples',
+  tags: ['autodocs'],
 } satisfies Meta;
 
 function useCustomTableHeader({ headerTitle }: { headerTitle: React.ReactNode }) {

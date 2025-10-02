@@ -20,7 +20,6 @@ import { SelectionDropdown } from './group_selection_combobox';
 import { styles as cascadeHeaderStyles } from './cascade_header.styles';
 
 export function CascadeHeaderPrimitive<G extends GroupNode, L extends LeafNode>({
-  tableInstance,
   customTableHeader,
   tableTitleSlot: TableTitleSlot,
   onCascadeGroupingChange,
