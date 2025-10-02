@@ -80,16 +80,3 @@ export const ADDITIONAL_FIELDS_LABEL = i18n.translate(
     defaultMessage: 'Additional Fields',
   }
 );
-
-export const INVALID_JSON_FORMAT = i18n.translate(
-  'xpack.cases.connectors.serviceNow.additionalFieldsFormatErrorMessage',
-  {
-    defaultMessage: 'Invalid JSON.',
-  }
-);
-
-export const MAX_ATTRIBUTES_ERROR = (length: number) =>
-  i18n.translate('xpack.cases.connectors.serviceNow.additionalFieldsLengthError', {
-    values: { length },
-    defaultMessage: 'A maximum of {length} additional fields can be defined at a time.',
-  });
