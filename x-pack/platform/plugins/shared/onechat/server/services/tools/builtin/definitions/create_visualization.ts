@@ -24,12 +24,14 @@ import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schem
 import { getToolResultId } from '@kbn/onechat-server/src/tools';
 import { generateEsql } from '@kbn/onechat-genai-utils';
 
+const metricSchema = parse(esqlMetricState.getSchema());
+
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
   existingConfig: z
     .string()
     .optional()
-    .describe('An existing visualization configuration to modify.'),
+    .describe('(optional) An existing visualization configuration to modify.'),
   chartType: z
     .enum(['metric', 'gauge', 'tagcloud', 'pie'])
     .optional()
@@ -67,6 +69,9 @@ const VisualizationStateAnnotation = Annotation.Root({
     reducer: (_, newValue) => newValue,
     default: () => 0,
   }),
+  generatedConfig: Annotation<any>({
+    reducer: (_, newValue) => newValue,
+  }),
 
   // Outputs
   validatedConfig: Annotation<any | null>(),
@@ -75,8 +80,18 @@ const VisualizationStateAnnotation = Annotation.Root({
 
 type VisualizationState = typeof VisualizationStateAnnotation.State;
 
+// Generic Zod schema for visualization config structure (for structured output)
+const visualizationConfigSchema = z
+  .record(z.unknown())
+  .describe('Lens visualization configuration');
+
 // Create the langgraph for config generation with validation retry
 const createVisualizationGraph = (model: any, logger: any) => {
+  // Create a model with structured output to ensure we get valid JSON
+  const structuredModel = model.chatModel.withStructuredOutput(visualizationConfigSchema, {
+    name: 'visualization_config',
+  });
+
   // Node: Generate configuration
   const generateConfigNode = async (state: VisualizationState) => {
     const attemptCount = state.attemptCount + 1;
@@ -94,11 +109,10 @@ ${JSON.stringify(state.schema, null, 2)}
 ${state.existingConfig ? `Existing configuration to modify: ${state.existingConfig}` : ''}
 
 IMPORTANT RULES:
-1. The response must be valid JSON only, no markdown or explanations
-2. The 'dataset' field must contain: { type: "esql", query: "<the provided ES|QL query>" }
-3. always use { operation: 'value', column: '<esql column name>', ...other options } for operations
-4. All field names must match those available in the ES|QL query result
-5. Make sure to follow schema definition strictly`;
+1. The 'dataset' field must contain: { type: "esql", query: "<the provided ES|QL query>" }
+2. always use { operation: 'value', column: '<esql column name>', ...other options } for operations
+3. All field names must match those available in the ES|QL query result
+4. Make sure to follow schema definition strictly`;
 
     // Build messages array - include previous messages for retry context
     const messages: BaseMessage[] = [
@@ -107,29 +121,28 @@ IMPORTANT RULES:
               
 ES|QL query: ${state.esqlQuery}
 
-Generate the ${state.chartType} visualization configuration in valid JSON format.`),
+Generate the ${state.chartType} visualization configuration.`),
       ...state.messages,
     ];
 
-    const configResponse = await model.chatModel.invoke(messages);
+    // Use structured output to get JSON directly (no manual parsing needed)
+    const config = await structuredModel.invoke(messages);
 
     return {
-      messages: [new AIMessage(configResponse.content)],
+      messages: [new AIMessage(JSON.stringify(config))],
       attemptCount,
+      // Store the parsed config directly in state for validation
+      generatedConfig: config,
     };
   };
 
   // Node: Validate configuration
   const validateConfigNode = async (state: VisualizationState) => {
-    const lastMessage = state.messages[state.messages.length - 1];
-    let configStr = lastMessage.content.toString().trim();
-
-    // Remove markdown code blocks if present
-    configStr = configStr.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    // Get the config from state (already parsed by structured output)
+    const config = state.generatedConfig as VisualizationConfig;
 
     try {
-      const config = JSON.parse(configStr) as VisualizationConfig;
-      logger.debug(`Configuration: ${configStr}`);
+      logger.debug(`Configuration: ${JSON.stringify(config)}`);
 
       let validatedConfig: any | null = null;
       if (state.chartType === 'metric') {
@@ -290,7 +303,7 @@ Guidelines:
 
         // Step 3: Generate visualization configuration using langgraph with validation retry
         const model = await modelProvider.getDefaultModel();
-        const schema = parse(esqlMetricState.getSchema());
+        const schema = metricSchema;
 
         // Create and invoke the validation retry graph
         const graph = createVisualizationGraph(model, logger);
@@ -303,6 +316,7 @@ Guidelines:
           existingConfig,
           messages: [],
           attemptCount: 0,
+          generatedConfig: null,
           validatedConfig: null,
           error: null,
         });
