@@ -17,6 +17,9 @@ import type {
   LensPieConfig,
 } from '@kbn/lens-embeddable-utils/config_builder';
 import parse from 'joi-to-json';
+import { StateGraph, Annotation, messagesStateReducer } from '@langchain/langgraph';
+import type { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, AIMessage } from '@langchain/core/messages';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { getToolResultId } from '@kbn/onechat-server/src/tools';
@@ -46,6 +49,161 @@ type VisualizationConfig = LensMetricConfig | LensGaugeConfig | LensTagCloudConf
 
 const MAX_RETRY_ATTEMPTS = 5;
 
+// Langgraph state definition
+const VisualizationStateAnnotation = Annotation.Root({
+  // Inputs
+  nlQuery: Annotation<string>(),
+  esqlQuery: Annotation<string>(),
+  chartType: Annotation<SupportedChartType>(),
+  schema: Annotation<any>(),
+  existingConfig: Annotation<string | undefined>(),
+
+  // Internal state
+  messages: Annotation<BaseMessage[]>({
+    reducer: messagesStateReducer,
+    default: () => [],
+  }),
+  attemptCount: Annotation<number>({
+    reducer: (_, newValue) => newValue,
+    default: () => 0,
+  }),
+
+  // Outputs
+  validatedConfig: Annotation<any | null>(),
+  error: Annotation<string | null>(),
+});
+
+type VisualizationState = typeof VisualizationStateAnnotation.State;
+
+// Create the langgraph for config generation with validation retry
+const createVisualizationGraph = (model: any, logger: any) => {
+  // Node: Generate configuration
+  const generateConfigNode = async (state: VisualizationState) => {
+    const attemptCount = state.attemptCount + 1;
+    logger.debug(
+      `Attempting to generate visualization configuration (attempt ${attemptCount}/${MAX_RETRY_ATTEMPTS})`
+    );
+
+    const systemPrompt = `You are a Kibana Lens visualization configuration expert. Generate a valid JSON configuration for a ${
+      state.chartType
+    } visualization based on the provided schema and ES|QL query.
+
+Schema for ${state.chartType}:
+${JSON.stringify(state.schema, null, 2)}
+
+${state.existingConfig ? `Existing configuration to modify: ${state.existingConfig}` : ''}
+
+IMPORTANT RULES:
+1. The response must be valid JSON only, no markdown or explanations
+2. The 'dataset' field must contain: { type: "esql", query: "<the provided ES|QL query>" }
+3. always use { operation: 'value', column: '<esql column name>', ...other options } for operations
+4. All field names must match those available in the ES|QL query result
+5. Make sure to follow schema definition strictly`;
+
+    // Build messages array - include previous messages for retry context
+    const messages: BaseMessage[] = [
+      new HumanMessage(systemPrompt),
+      new HumanMessage(`User query: ${state.nlQuery}
+              
+ES|QL query: ${state.esqlQuery}
+
+Generate the ${state.chartType} visualization configuration in valid JSON format.`),
+      ...state.messages,
+    ];
+
+    const configResponse = await model.chatModel.invoke(messages);
+
+    return {
+      messages: [new AIMessage(configResponse.content)],
+      attemptCount,
+    };
+  };
+
+  // Node: Validate configuration
+  const validateConfigNode = async (state: VisualizationState) => {
+    const lastMessage = state.messages[state.messages.length - 1];
+    let configStr = lastMessage.content.toString().trim();
+
+    // Remove markdown code blocks if present
+    configStr = configStr.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+
+    try {
+      const config = JSON.parse(configStr) as VisualizationConfig;
+      logger.debug(`Configuration: ${configStr}`);
+
+      let validatedConfig: any | null = null;
+      if (state.chartType === 'metric') {
+        validatedConfig = esqlMetricState.validate(config);
+      }
+      // TODO: Add validation for other chart types (gauge, tagcloud, pie)
+
+      logger.debug('Configuration validated successfully');
+      return {
+        validatedConfig,
+        error: null,
+      };
+    } catch (error) {
+      const errorMessage = error.message;
+      logger.warn(
+        `Configuration validation failed (attempt ${state.attemptCount}/${MAX_RETRY_ATTEMPTS}): ${errorMessage}`
+      );
+
+      return {
+        validatedConfig: null,
+        error: errorMessage,
+      };
+    }
+  };
+
+  // Node: Add validation feedback for retry
+  const addValidationFeedbackNode = async (state: VisualizationState) => {
+    const feedbackMessage = new HumanMessage(
+      `The configuration you provided failed JOI schema validation with the following error:
+
+${state.error}
+
+Please fix the configuration and provide a corrected version that passes validation. Remember to return valid JSON only, no markdown or explanations.`
+    );
+
+    return {
+      messages: [feedbackMessage],
+      error: null, // Clear error for next attempt
+    };
+  };
+
+  // Router: Decide whether to continue or end based on validation result
+  const shouldRetryRouter = (state: VisualizationState) => {
+    // If validation succeeded, end the flow
+    if (state.validatedConfig) {
+      return '__end__';
+    }
+
+    // If max attempts reached, end with error
+    if (state.attemptCount >= MAX_RETRY_ATTEMPTS) {
+      return '__end__';
+    }
+
+    // Otherwise, add feedback and retry
+    return 'add_feedback';
+  };
+
+  // Build the graph
+  const graph = new StateGraph(VisualizationStateAnnotation)
+    .addNode('generate_config', generateConfigNode)
+    .addNode('validate_config', validateConfigNode)
+    .addNode('add_feedback', addValidationFeedbackNode)
+    .addEdge('__start__', 'generate_config')
+    .addEdge('generate_config', 'validate_config')
+    .addConditionalEdges('validate_config', shouldRetryRouter, {
+      add_feedback: 'add_feedback',
+      __end__: '__end__',
+    })
+    .addEdge('add_feedback', 'generate_config')
+    .compile();
+
+  return graph;
+};
+
 export const createVisualizationTool = (): BuiltinToolDefinition<
   typeof createVisualizationSchema
 > => {
@@ -56,9 +214,7 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
 This tool will:
 1. Determine the best chart type if not specified (from: metric, gauge, tagcloud, pie)
 2. Generate an ES|QL query if not provided
-3. Use LLM to create a valid visualization configuration
-4. Validate the configuration and retry if needed
-5. Return a validated configuration ready to be used`,
+3. Generate a valid visualization configuration`,
     schema: createVisualizationSchema,
     handler: async (
       { query: nlQuery, chartType, esql, existingConfig },
@@ -142,98 +298,33 @@ Guidelines:
           logger.debug('Using provided ES|QL query');
         }
 
-        // Step 3: Generate visualization configuration with validation retry loop
+        // Step 3: Generate visualization configuration using langgraph with validation retry
         const model = await modelProvider.getDefaultModel();
-        let validatedConfig: any | null = null;
-
         const schema = parse(esqlMetricState.getSchema());
 
-        const systemPrompt = `You are a Kibana Lens visualization configuration expert. Generate a valid JSON configuration for a ${selectedChartType} visualization based on the provided schema and ES|QL query.
+        // Create and invoke the validation retry graph
+        const graph = createVisualizationGraph(model, logger);
 
+        const finalState = await graph.invoke({
+          nlQuery,
+          esqlQuery,
+          chartType: selectedChartType,
+          schema,
+          existingConfig,
+          messages: [],
+          attemptCount: 0,
+          validatedConfig: null,
+          error: null,
+        });
 
-Schema for ${selectedChartType}:
-${JSON.stringify(schema, null, 2)}
-
-${existingConfig ? `Existing configuration to modify: ${existingConfig}` : ''}
-
-IMPORTANT RULES:
-1. The response must be valid JSON only, no markdown or explanations
-2. The 'dataset' field must contain: { type: "esql", query: "<the provided ES|QL query>" }
-3. always use { operation: 'value', column: '<esql column name>', ...other options } for operations
-4. All field names must match those available in the ES|QL query result
-5. Make sure to follow schema definition strictly`;
-
-        // logger.debug(`System prompt: ${systemPrompt}`);
-
-        // Build conversation messages array that will accumulate across retries
-        const conversationMessages: Array<{ role: string; content: string }> = [
-          {
-            role: 'system',
-            content: systemPrompt,
-          },
-          {
-            role: 'user',
-            content: `User query: ${nlQuery}
-              
-ES|QL query: ${esqlQuery}
-
-Generate the ${selectedChartType} visualization configuration in valid JSON format.`,
-          },
-        ];
-
-        for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
-          logger.debug(
-            `Attempting to generate visualization configuration (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`
-          );
-
-          const configResponse = await model.chatModel.invoke(conversationMessages);
-
-          // Parse the LLM response
-          let configStr = configResponse.content.toString().trim();
-
-          // Remove markdown code blocks if present
-          configStr = configStr.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-
-          // Add the assistant's response to the conversation
-          conversationMessages.push({
-            role: 'assistant',
-            content: configStr,
-          });
-
-          try {
-            const config = JSON.parse(configStr) as VisualizationConfig;
-            logger.debug(`Configuration: ${configStr}`);
-            if (selectedChartType === 'metric') {
-              validatedConfig = esqlMetricState.validate(config);
-            }
-            logger.debug('Configuration validated successfully');
-            break;
-          } catch (error) {
-            const errorMessage = error.message;
-            logger.warn(
-              `Configuration validation failed (attempt ${attempt}/${MAX_RETRY_ATTEMPTS}): ${errorMessage}`
-            );
-
-            if (attempt === MAX_RETRY_ATTEMPTS) {
-              throw new Error(
-                `Failed to generate valid configuration after ${MAX_RETRY_ATTEMPTS} attempts. Last error: ${errorMessage}`
-              );
-            }
-
-            // Add validation error feedback to conversation for next attempt
-            conversationMessages.push({
-              role: 'user',
-              content: `The configuration you provided failed JOI schema validation with the following error:
-
-${errorMessage}
-
-Please fix the configuration and provide a corrected version that passes validation. Remember to return valid JSON only, no markdown or explanations.`,
-            });
-          }
-        }
+        const { validatedConfig, error, attemptCount } = finalState;
 
         if (!validatedConfig) {
-          throw new Error('Failed to generate validated configuration');
+          throw new Error(
+            `Failed to generate valid configuration after ${attemptCount} attempts. Last error: ${
+              error || 'Unknown error'
+            }`
+          );
         }
 
         return {
