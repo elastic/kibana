@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 import type { EuiSuperSelectProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -21,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useSelector } from 'react-redux';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { AgentPolicyCallout } from './agent_policy_callout';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
