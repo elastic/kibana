@@ -30,39 +30,42 @@ const useLicenseManagementLocator = () => {
   // https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/share/README.mdx#using-locator-of-another-app
   const locator = share.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
 
-  return () => {
-    // license management does not exist on serverless
-    if (!locator) {
-      return;
-    }
+  // license management does not exist on serverless
+  if (!locator) {
+    return null;
+  }
 
+  return () => {
     locator.navigate({
       page: 'dashboard',
     });
   };
 };
 
+const SUBSCRIPTIONS_LINK = 'https://www.elastic.co/subscriptions';
+
 const UpgradeLicenseActions: React.FC<{}> = () => {
   const navigateToLicenseManagement = useLicenseManagementLocator();
-  const subscriptionsHref = 'https://www.elastic.co/subscriptions';
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiButton fill href={subscriptionsHref} target="_blank">
+        <EuiButton fill href={SUBSCRIPTIONS_LINK} target="_blank">
           <FormattedMessage
             id="xpack.onechat.access.prompt.upgradeLicense.actions.subscriptionPlansButton"
             defaultMessage="Subscription plans"
           />
         </EuiButton>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButtonEmpty onClick={navigateToLicenseManagement}>
-          <FormattedMessage
-            id="xpack.onechat.access.prompt.upgradeLicense.actions.manageLicenseButton"
-            defaultMessage="Manage license"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+      {navigateToLicenseManagement && (
+        <EuiFlexItem>
+          <EuiButtonEmpty onClick={navigateToLicenseManagement}>
+            <FormattedMessage
+              id="xpack.onechat.access.prompt.upgradeLicense.actions.manageLicenseButton"
+              defaultMessage="Manage license"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
@@ -72,20 +75,24 @@ export const UpgradeLicensePrompt: React.FC<{}> = () => {
     <PromptLayout>
       <EuiPanel hasShadow={false}>
         <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
-          <EuiTitle>
-            <h2>
+          <EuiFlexItem>
+            <EuiTitle>
+              <h2>
+                <FormattedMessage
+                  id="xpack.onechat.access.prompt.upgradeLicense.title"
+                  defaultMessage="Upgrade your cluster license"
+                />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText color="subdued">
               <FormattedMessage
-                id="xpack.onechat.access.prompt.upgradeLicense.title"
-                defaultMessage="Upgrade your cluster license"
+                id="xpack.onechat.access.prompt.upgradeLicense.description"
+                defaultMessage="Your cluster needs an Enterprise license to use the Elastic Agent Builder."
               />
-            </h2>
-          </EuiTitle>
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.onechat.access.prompt.upgradeLicense.description"
-              defaultMessage="Your cluster needs an Enterprise license to use the Elastic Agent Builder."
-            />
-          </EuiText>
+            </EuiText>
+          </EuiFlexItem>
           <EuiFlexItem>
             <UpgradeLicenseActions />
           </EuiFlexItem>

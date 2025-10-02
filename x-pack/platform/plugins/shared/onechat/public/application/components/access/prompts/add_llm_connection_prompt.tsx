@@ -12,6 +12,7 @@ import {
   EuiLink,
   EuiPanel,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
@@ -55,14 +56,14 @@ const AddLlmConnectionPanel: React.FC<{}> = () => {
     <EuiPanel css={panelStyles} color="warning">
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiText>
+          <EuiTitle>
             <h3>
               <FormattedMessage
                 id="xpack.onechat.access.prompt.addLlm.title"
                 defaultMessage="No Large Language Model (LLM) detected"
               />
             </h3>
-          </EuiText>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>
