@@ -82,8 +82,8 @@ export async function bulkMigrateAgentsBatch(
     }
   });
   const actionId = options.actionId ?? uuidv4();
-  const total = options.total ?? agents.length;
   const agentIds = agentsToAction.map((agent) => agent.id);
+  const total = agentIds.length; // Always use the actual agents being processed in this batch so that progress tracking is accurate
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 
