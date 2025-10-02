@@ -8,7 +8,7 @@
  */
 
 import type { AnyAction, Dispatch, Middleware, MiddlewareAPI } from '@reduxjs/toolkit';
-import type { WorkflowEditorState } from './types';
+import type { RootState, WorkflowEditorState } from './types';
 import { setYamlString } from './slice';
 import { performComputation } from './utils/computation';
 
@@ -34,28 +34,29 @@ const debounceComputation = (
 };
 
 // Side effects middleware - computes derived data when yamlString changes (debounced)
-export const workflowComputationMiddleware: Middleware = (store) => (next) => (action) => {
-  const result = next(action);
+export const workflowComputationMiddleware: Middleware =
+  (store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) => (next) => (action) => {
+    const result = next(action);
 
-  // Only react to yamlString changes
-  if (action.type === setYamlString.type) {
-    const state = store.getState() as { workflow: WorkflowEditorState };
-    const { yamlString } = state.workflow;
+    // Only react to yamlString changes
+    if (action.type === setYamlString.type) {
+      const state = store.getState();
+      const { yamlString } = state.workflow;
 
-    // Do computation immediately if yaml string is defined and no previous workflow graph exists
-    if (yamlString && !state.workflow.computed) {
-      performComputation(store, yamlString);
-      return result;
+      // Do computation immediately if yaml string is defined and no previous workflow graph exists
+      if (yamlString && !state.workflow.computed) {
+        performComputation(store, yamlString);
+        return result;
+      }
+
+      // Clear any pending computation
+      if (computationTimeoutId) {
+        clearTimeout(computationTimeoutId);
+        computationTimeoutId = null;
+      }
+
+      debounceComputation(store, yamlString);
     }
 
-    // Clear any pending computation
-    if (computationTimeoutId) {
-      clearTimeout(computationTimeoutId);
-      computationTimeoutId = null;
-    }
-
-    debounceComputation(store, yamlString);
-  }
-
-  return result;
-};
+    return result;
+  };

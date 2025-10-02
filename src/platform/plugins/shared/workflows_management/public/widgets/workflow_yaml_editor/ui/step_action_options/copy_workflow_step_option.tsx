@@ -13,6 +13,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useSelector } from 'react-redux';
 import { selectFocusedStepInfo } from '../../lib/store';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from 'react-intl';
 
 export interface CopyWorkflowStepOption {
   onClick: () => void;
@@ -35,14 +37,29 @@ export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onCli
 
       if (notifications) {
         notifications.toasts.addSuccess({
-          title: 'Copied to clipboard',
-          text: 'Console command copied successfully',
+          title: i18n.translate(
+            'plugins.workflowsManagement.copyWorkflowStepToClipboard.successTitle',
+            {
+              defaultMessage: 'Copied to clipboard',
+            }
+          ),
+          text: i18n.translate(
+            'plugins.workflowsManagement.copyWorkflowStepToClipboard.successText',
+            {
+              defaultMessage: 'Workflow step copied successfully',
+            }
+          ),
         });
       }
     } catch (error) {
       if (notifications) {
         notifications.toasts.addError(error as Error, {
-          title: 'Failed to copy',
+          title: i18n.translate(
+            'plugins.workflowsManagement.copyWorkflowStepToClipboard.errorTitle',
+            {
+              defaultMessage: 'Failed to copy',
+            }
+          ),
         });
       }
     }
@@ -56,7 +73,10 @@ export const CopyWorkflowStepOption: React.FC<CopyWorkflowStepOption> = ({ onCli
       onClick={copy}
       icon="copy"
     >
-      Copy workflow step
+      <FormattedMessage
+        id="plugins.workflowsManagement.copyWorkflowStepToClipboard.buttonLabel"
+        defaultMessage="Copy workflow step"
+      />
     </EuiContextMenuItem>
   );
 };

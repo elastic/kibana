@@ -12,16 +12,9 @@ import type { RootState } from './types';
 
 // Selectors
 export const selectYamlString = (state: RootState) => state.workflow.yamlString;
-
-export const selectYamlDocument = (state: RootState) =>
-  state.workflow.computed ? state.workflow.computed.yamlDocument : undefined;
-
-export const selectWorkflowLookup = (state: RootState) =>
-  state.workflow.computed ? state.workflow.computed.workflowLookup : undefined;
-
-export const selectWorkflowGraph = (state: RootState) =>
-  state.workflow.computed ? state.workflow.computed.workflowGraph : undefined;
-
+export const selectYamlDocument = (state: RootState) => state.workflow.computed?.yamlDocument;
+export const selectWorkflowLookup = (state: RootState) => state.workflow.computed?.workflowLookup;
+export const selectWorkflowGraph = (state: RootState) => state.workflow.computed?.workflowGraph;
 export const selectFocusedStepId = (state: RootState) => state.workflow.focusedStepId;
 
 export const selectFocusedStepInfo = createSelector(

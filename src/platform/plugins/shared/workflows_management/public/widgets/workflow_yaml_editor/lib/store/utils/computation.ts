@@ -14,9 +14,10 @@ import { buildWorkflowLookup } from './build_workflow_lookup';
 import { getWorkflowZodSchemaLoose } from '../../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
 import { clearComputedData, _setComputedDataInternal } from '../slice';
+import type { RootState } from '../types';
 
 export const performComputation = (
-  store: MiddlewareAPI<Dispatch<AnyAction>, any>,
+  store: MiddlewareAPI<Dispatch<AnyAction>, RootState>,
   yamlString: string | undefined
 ) => {
   if (!yamlString) {

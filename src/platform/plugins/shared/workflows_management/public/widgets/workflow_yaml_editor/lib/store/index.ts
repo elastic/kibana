@@ -27,3 +27,4 @@ export {
 // Middleware (if needed for custom store setup)
 export { workflowComputationMiddleware } from './middleware';
 export type { WorkflowLookup, StepInfo } from './utils/build_workflow_lookup';
+export { WorkflowEditorStoreProvider } from './provider';

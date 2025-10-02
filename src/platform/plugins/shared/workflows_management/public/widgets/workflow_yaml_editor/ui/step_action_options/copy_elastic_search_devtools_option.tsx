@@ -9,12 +9,13 @@
 
 import React, { useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '../../../../hooks/use_kibana';
 import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
 import { useSelector } from 'react-redux';
 import { selectFocusedStepInfo, selectWorkflowGraph } from '../../lib/store';
 import { getElasticsearchRequestInfo } from '../../lib/elasticsearch_step_utils';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from 'react-intl';
 
 export interface CopyElasticSearchDevToolsOptionProps {
   onClick: () => void;
@@ -27,7 +28,7 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
   const focusedStepInfo = useSelector(selectFocusedStepInfo);
   const {
     services: { notifications },
-  } = useKibana<CoreStart>();
+  } = useKibana();
 
   function generateConsoleFormat(
     requestInfo: { method: string; url: string; data?: string[] },
@@ -43,13 +44,15 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
   }
 
   const copy = useCallback(async () => {
-    if (!focusedStepInfo) {
+    if (!focusedStepInfo || !workflowGraph) {
       return;
     }
 
     try {
-      const stepGraph = workflowGraph?.getStepGraph(focusedStepInfo?.stepId);
-      const elasticSearchNode = stepGraph?.getAllNodes()[0] as ElasticsearchGraphNode;
+      const stepGraph = workflowGraph.getStepGraph(focusedStepInfo.stepId);
+      const elasticSearchNode = stepGraph
+        .getAllNodes()
+        .find((node) => node.type.startsWith('kibana')) as ElasticsearchGraphNode;
       const stepType = elasticSearchNode.stepType;
       const requestInfo = getElasticsearchRequestInfo(
         stepType,
@@ -64,14 +67,29 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
 
       if (notifications) {
         notifications.toasts.addSuccess({
-          title: 'Copied to clipboard',
-          text: 'Devtools command copied successfully',
+          title: i18n.translate(
+            'plugins.workflowsManagement.copyDevToolsSnippetToClipboard.successTitle',
+            {
+              defaultMessage: 'Copied to clipboard',
+            }
+          ),
+          text: i18n.translate(
+            'plugins.workflowsManagement.copyDevToolsSnippetToClipboard.successText',
+            {
+              defaultMessage: 'Devtools command copied successfully',
+            }
+          ),
         });
       }
     } catch (error) {
       if (notifications) {
         notifications.toasts.addError(error as Error, {
-          title: 'Failed to copy',
+          title: i18n.translate(
+            'plugins.workflowsManagement.copyDevToolsSnippetToClipboard.errorTitle',
+            {
+              defaultMessage: 'Failed to copy',
+            }
+          ),
         });
       }
     }
@@ -85,7 +103,10 @@ export const CopyElasticSearchDevToolsOption: React.FC<CopyElasticSearchDevTools
       onClick={copy}
       icon="copy"
     >
-      Copy as devtools snippet
+      <FormattedMessage
+        id="plugins.workflowsManagement.copyDevToolsSnippetToClipboard.buttonLabel"
+        defaultMessage="Copy as devtools snippet"
+      />
     </EuiContextMenuItem>
   );
 };

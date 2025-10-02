@@ -9,6 +9,7 @@
 
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type YAML from 'yaml';
+import type { EnhancedStore } from '@reduxjs/toolkit';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 
 // State interface - only serializable data
@@ -23,6 +24,8 @@ export interface WorkflowEditorState {
 }
 
 // Store types (will be properly typed when store.ts is imported)
-export type WorkflowEditorStore = ReturnType<typeof import('./store').createWorkflowEditorStore>;
-export type RootState = ReturnType<WorkflowEditorStore['getState']>;
+export interface RootState {
+  workflow: WorkflowEditorState;
+}
+export type WorkflowEditorStore = EnhancedStore<RootState>;
 export type AppDispatch = WorkflowEditorStore['dispatch'];
