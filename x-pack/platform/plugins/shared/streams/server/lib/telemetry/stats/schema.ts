@@ -17,7 +17,7 @@ export const streamsStatsSchema: MakeSchemaFrom<StreamsStatsTelemetry> = {
       type: 'long',
       _meta: {
         description:
-          'Number of classic streams that have been modified from their default configuration. Calculated by counting streams stored in .kibana_streams index, as presence indicates customization from unmanaged defaults.',
+          'Number of classic streams that have been modified from their default configuration. Calculated by presence in .kibana_streams (managed) index and type is "classic".',
       },
     },
     with_processing_count: {
@@ -46,59 +46,7 @@ export const streamsStatsSchema: MakeSchemaFrom<StreamsStatsTelemetry> = {
     count: {
       type: 'long',
       _meta: {
-        description:
-          'Total number of wired streams in the system. Calculated by counting streams that match WiredStream schema and are not GroupStreams.',
-      },
-    },
-  },
-  significant_events: {
-    rules_count: {
-      type: 'long',
-      _meta: {
-        description:
-          'Total number of significant event detection rules configured. Calculated by querying .kibana* index for alert documents with alertTypeId="streams.rules.esql".',
-      },
-    },
-    stored_count: {
-      type: 'long',
-      _meta: {
-        description:
-          'Total number of significant events detected and stored across all spaces. Calculated by querying .alerts-streams.alerts-* index pattern for alerts with kibana.alert.rule.category matching significant event rule types.',
-      },
-    },
-    unique_wired_streams_with_stored_count: {
-      type: 'long',
-      _meta: {
-        description:
-          'Number of unique wired streams that have significant events stored in the alerts index. Calculated by aggregating unique stream names from stored alert documents and filtering by stream type.',
-      },
-    },
-    unique_classic_streams_with_stored_count: {
-      type: 'long',
-      _meta: {
-        description:
-          'Number of unique classic streams that have significant events stored in the alerts index. Calculated by aggregating unique stream names from stored alert documents and filtering by stream type.',
-      },
-    },
-    rule_execution_ms_avg_24h: {
-      type: 'float',
-      _meta: {
-        description:
-          'Average execution time in milliseconds for significant event rules in the last 24 hours. Calculated from event.duration field in .kibana-event-log-* indices, converted from nanoseconds to milliseconds and rounded to 3 decimal places.',
-      },
-    },
-    rule_execution_ms_p95_24h: {
-      type: 'float',
-      _meta: {
-        description:
-          '95th percentile execution time in milliseconds for significant event rules in the last 24 hours. Calculated from event.duration field in .kibana-event-log-* indices using percentile calculation, converted from nanoseconds to milliseconds and rounded to 3 decimal places.',
-      },
-    },
-    executions_count_24h: {
-      type: 'long',
-      _meta: {
-        description:
-          'Total number of rule executions in the last 24 hours. Calculated by counting documents in .kibana-event-log-* indices with event.action="execute" and rule.id matching significant event rules.',
+        description: 'Total number of wired streams in the system.',
       },
     },
   },

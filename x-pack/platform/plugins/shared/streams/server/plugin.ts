@@ -68,16 +68,12 @@ export class StreamsPlugin
   public server?: StreamsServer;
   private isDev: boolean;
   private ebtTelemetryService = new EbtTelemetryService();
-  private statsTelemetryService: StatsTelemetryService;
+  private statsTelemetryService = new StatsTelemetryService();
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
-    this.statsTelemetryService = new StatsTelemetryService(
-      this.logger.get('streams-stats-telemetry'),
-      this.isDev
-    );
   }
 
   public setup(
@@ -90,7 +86,11 @@ export class StreamsPlugin
     } as StreamsServer;
 
     this.ebtTelemetryService.setup(core.analytics);
-    this.statsTelemetryService.setup(core, plugins.usageCollection);
+    this.statsTelemetryService.setup(
+      core,
+      this.logger.get('streams-stats-telemetry'),
+      plugins.usageCollection
+    );
 
     const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
       ruleTypeId,

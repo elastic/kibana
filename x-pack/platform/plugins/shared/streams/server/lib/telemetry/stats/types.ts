@@ -23,20 +23,4 @@ export interface StreamsStatsTelemetry {
     /** Total number of wired streams in the system */
     count: number;
   };
-  significant_events: {
-    /** Total number of significant event detection rules configured */
-    rules_count: number;
-    /** Total number of significant events detected and stored in the last collection period */
-    stored_count: number;
-    /** Number of unique wired streams that have significant events stored */
-    unique_wired_streams_with_stored_count: number;
-    /** Number of unique classic streams that have significant events stored */
-    unique_classic_streams_with_stored_count: number;
-    /** Average execution time in milliseconds for significant event rules in the last 24 hours */
-    rule_execution_ms_avg_24h: number | null;
-    /** 95th percentile execution time in milliseconds for significant event rules in the last 24 hours */
-    rule_execution_ms_p95_24h: number | null;
-    /** Total number of rule executions in the last 24 hours */
-    executions_count_24h: number;
-  };
 }

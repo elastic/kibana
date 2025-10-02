@@ -5,51 +5,31 @@
  * 2.0.
  */
 
-import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { Streams } from '@kbn/streams-schema';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { StreamsClient } from '../../streams/client';
-import { hasChangedRetention, percentiles } from './utils';
+import { hasChangedRetention } from './utils';
 import type { StreamsStatsTelemetry } from './types';
 import { registerStreamsUsageCollector as registerCollector } from './register_collector';
 
-function createFetchFunction(
-  logger: Logger,
-  getStreamsClient: () => Promise<StreamsClient>,
-  isDev: boolean
-) {
-  return async function fetchStreamsUsageStats({
-    esClient,
-  }: {
+// Reader abstraction to hide storage/client specifics from the collector
+export interface StreamsUsageReader {
+  readAllManagedStreams(): Promise<Streams.all.Definition[]>;
+}
+
+function createFetchFunction(logger: Logger, getReader: () => Promise<StreamsUsageReader>) {
+  return async function fetchStreamsUsageStats(_: {
     esClient: ElasticsearchClient;
   }): Promise<StreamsStatsTelemetry> {
     try {
-      const streamsClient = await getStreamsClient();
+      const reader = await getReader();
+      const allStreamsData = await reader.readAllManagedStreams();
 
-      const [allStreamsData, significantEventsMetrics, ruleExecutionMetrics] = await Promise.all([
-        streamsClient.listStreams(),
-        fetchSignificantEventsMetrics(esClient),
-        fetchRuleExecutionMetrics(esClient),
-      ]);
-
-      const { classicStreamsMetrics, wiredStreamsCount, streamsCache } =
-        processStreamsData(allStreamsData);
-
-      // Pass the cache to avoid additional ES calls
-      const categorizedSignificantEventsMetrics = await categorizeSignificantEvents(
-        significantEventsMetrics,
-        streamsCache
-      );
+      const { classicStreamsMetrics, wiredStreamsCount } = processStreamsData(allStreamsData);
 
       return {
         classic_streams: classicStreamsMetrics,
         wired_streams: { count: wiredStreamsCount },
-        significant_events: {
-          ...categorizedSignificantEventsMetrics,
-          ...ruleExecutionMetrics,
-        },
       };
     } catch (error) {
       logger.error('Failed to collect Streams telemetry data', error);
@@ -64,14 +44,16 @@ function createFetchFunction(
     let withChangedRetentionCount = 0;
     let wiredCount = 0;
 
-    const streamsCache = new Map<string, Streams.all.Definition>();
-
     for (const definition of streamDefinitions) {
+      if (Streams.GroupStream.Definition.is(definition)) {
+        // Ignore group streams for current metrics
+        continue;
+      }
+
       if (Streams.WiredStream.Definition.is(definition)) {
         wiredCount++;
-        streamsCache.set(definition.name, definition);
       } else if (Streams.ClassicStream.Definition.is(definition)) {
-        // Presence of a classic stream in the streams client implies it has been stored/changed
+        // Presence of a classic stream in storage implies it has been stored/changed
         changedCount++;
 
         if (hasProcessingSteps(definition)) {
@@ -85,8 +67,6 @@ function createFetchFunction(
         if (hasChangedRetention(definition.ingest.lifecycle)) {
           withChangedRetentionCount++;
         }
-
-        streamsCache.set(definition.name, definition);
       }
     }
 
@@ -98,178 +78,6 @@ function createFetchFunction(
         with_changed_retention_count: withChangedRetentionCount,
       },
       wiredStreamsCount: wiredCount,
-      streamsCache, // Return the cache
-    };
-  }
-
-  async function fetchSignificantEventsMetrics(esClient: ElasticsearchClient) {
-    const [rulesCount, eventsData] = await Promise.all([
-      fetchSignificantEventRulesCount(esClient),
-      fetchSignificantEventsData(esClient),
-    ]);
-
-    return {
-      rules_count: rulesCount,
-      ...eventsData,
-    };
-  }
-
-  async function fetchSignificantEventRulesCount(esClient: ElasticsearchClient) {
-    const rulesCountResponse = await esClient.search({
-      index: '.kibana*',
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { type: 'alert' } },
-            { terms: { 'alert.alertTypeId': STREAMS_RULE_TYPE_IDS } },
-          ],
-        },
-      },
-      track_total_hits: true,
-    });
-
-    return (rulesCountResponse.hits?.total as { value: number })?.value ?? 0;
-  }
-
-  async function fetchSignificantEventsData(esClient: ElasticsearchClient) {
-    const significantEventsResponse = await esClient.search({
-      index: '.alerts-streams.alerts-*',
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              bool: {
-                should: [
-                  { terms: { 'kibana.alert.rule.category': STREAMS_RULE_TYPE_IDS } },
-                  { terms: { 'kibana.alert.rule.category': ['ES|QL Rule'] } },
-                ],
-              },
-            },
-            { terms: { 'kibana.alert.rule.tags': ['streams'] } },
-          ],
-        },
-      },
-      aggs: {
-        by_stream_tags: {
-          terms: {
-            field: 'kibana.alert.rule.tags',
-            size: 10000,
-            exclude: 'streams',
-          },
-        },
-      },
-      track_total_hits: true,
-    });
-
-    const storedCount = (significantEventsResponse.hits?.total as { value: number })?.value ?? 0;
-    const streamTagsAgg = significantEventsResponse.aggregations?.by_stream_tags as {
-      buckets: Array<{ key: string }>;
-    };
-    const streamTags = streamTagsAgg?.buckets || [];
-
-    return {
-      stored_count: storedCount,
-      stream_tags: streamTags.map((bucket) => bucket.key),
-    };
-  }
-
-  async function categorizeSignificantEvents(
-    significantEventsMetrics: { rules_count: number; stored_count: number; stream_tags: string[] },
-    streamsCache: Map<string, Streams.all.Definition>
-  ) {
-    const { stored_count: storedCount, stream_tags: streamTags } = significantEventsMetrics;
-
-    if (streamTags.length === 0) {
-      return {
-        rules_count: significantEventsMetrics.rules_count,
-        stored_count: storedCount,
-        unique_wired_streams_with_stored_count: 0,
-        unique_classic_streams_with_stored_count: 0,
-      };
-    }
-
-    const { uniqueWiredStreamsCount, uniqueClassicStreamsCount } = categorizeStreamsByTypeFromCache(
-      streamTags,
-      streamsCache
-    );
-
-    return {
-      rules_count: significantEventsMetrics.rules_count,
-      stored_count: storedCount,
-      unique_wired_streams_with_stored_count: uniqueWiredStreamsCount,
-      unique_classic_streams_with_stored_count: uniqueClassicStreamsCount,
-    };
-  }
-
-  function categorizeStreamsByTypeFromCache(
-    streamNames: string[],
-    streamsCache: Map<string, Streams.all.Definition>
-  ) {
-    let wiredCount = 0;
-    let classicCount = 0;
-
-    for (const streamName of streamNames) {
-      const definition = streamsCache.get(streamName);
-
-      if (!definition) {
-        // Stream not found in cache, skip
-        continue;
-      }
-
-      if (Streams.WiredStream.Definition.is(definition)) {
-        wiredCount++;
-      } else if (Streams.ClassicStream.Definition.is(definition)) {
-        classicCount++;
-      }
-    }
-
-    return {
-      uniqueWiredStreamsCount: wiredCount,
-      uniqueClassicStreamsCount: classicCount,
-    };
-  }
-
-  async function fetchRuleExecutionMetrics(esClient: ElasticsearchClient) {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const eventLogResponse = await esClient.search<{
-      event: { duration: number | string };
-    }>({
-      index: '.kibana-event-log-*',
-      size: 10000,
-      query: {
-        bool: {
-          filter: [
-            { term: { 'event.action': 'execute' } },
-            { terms: { 'rule.category': STREAMS_RULE_TYPE_IDS } },
-            { range: { '@timestamp': { gte: twentyFourHoursAgo } } },
-          ],
-        },
-      },
-      _source: ['event.duration'],
-    });
-
-    const durationsNs = extractValidDurations(eventLogResponse.hits.hits);
-    const executionsCount24h = durationsNs.length;
-
-    if (executionsCount24h === 0) {
-      return {
-        rule_execution_ms_avg_24h: null,
-        rule_execution_ms_p95_24h: null,
-        executions_count_24h: 0,
-      };
-    }
-
-    const durationsMs = durationsNs.map((ns: number) => ns / 1e6);
-    const sum = durationsMs.reduce((a: number, b: number) => a + b, 0);
-    const ruleExecutionMsAvg24h = Math.round((sum / durationsMs.length) * 1000) / 1000;
-    const ruleExecutionMsP9524h = Math.round(percentiles(durationsMs, [95])[0] * 1000) / 1000;
-
-    return {
-      rule_execution_ms_avg_24h: ruleExecutionMsAvg24h,
-      rule_execution_ms_p95_24h: ruleExecutionMsP9524h,
-      executions_count_24h: executionsCount24h,
     };
   }
 
@@ -282,16 +90,6 @@ function createFetchFunction(
     const fieldOverrides = definition.ingest?.classic?.field_overrides ?? {};
     return fieldOverrides && Object.keys(fieldOverrides).length > 0;
   }
-
-  function extractValidDurations(
-    hits: Array<SearchHit<{ event: { duration: number | string } }>>
-  ): number[] {
-    return hits
-      .map((hit) => hit._source?.event?.duration)
-      .filter((v): v is number | string => v != null)
-      .map((v) => (typeof v === 'string' ? parseInt(v, 10) : v))
-      .filter((v): v is number => typeof v === 'number' && !isNaN(v));
-  }
 }
 
 /**
@@ -300,11 +98,10 @@ function createFetchFunction(
 export function registerStreamsUsageCollector(
   usageCollection: UsageCollectionSetup,
   logger: Logger,
-  getStreamsClient: () => Promise<StreamsClient>,
-  isDev: boolean
+  getReader: () => Promise<StreamsUsageReader>
 ) {
   registerCollector(usageCollection, {
     isReady: () => true,
-    fetch: createFetchFunction(logger, getStreamsClient, isDev),
+    fetch: createFetchFunction(logger, getReader),
   });
 }

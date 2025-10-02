@@ -5,242 +5,77 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger, IScopedClusterClient } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import type { FakeRawRequest, Headers } from '@kbn/core/server';
-import { StorageIndexAdapter } from '@kbn/storage-adapter';
-import { LockManagerService } from '@kbn/lock-manager';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { IStorageClient } from '@kbn/storage-adapter';
+import type { Streams } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../../types';
-import type { StreamsClient } from '../../streams/client';
-import { StreamsClient as StreamsClientClass } from '../../streams/client';
-import { AssetClient } from '../../streams/assets/asset_client';
-import { SystemClient } from '../../streams/system/system_client';
-import { QueryClient } from '../../streams/assets/query/query_client';
-import type { AssetStorageSettings } from '../../streams/assets/storage_settings';
-import { assetStorageSettings } from '../../streams/assets/storage_settings';
-import type { SystemStorageSettings } from '../../streams/system/storage_settings';
-import { systemStorageSettings } from '../../streams/system/storage_settings';
-import { streamsStorageSettings } from '../../streams/service';
-import { migrateOnRead } from '../../streams/helpers/migrate_on_read';
 import { registerStreamsUsageCollector } from './streams_usage_collector';
-import type { StoredAssetLink } from '../../streams/assets/asset_client';
-import type { StoredSystem } from '../../streams/system/stored_system';
+import { createStreamsStorageClient } from '../../streams/storage/streams_storage_client';
+import type { StreamsUsageReader } from './streams_usage_collector';
 
 /**
  * Service for collecting Streams usage statistics for telemetry
- *
- * This service creates internal StreamsClient instances optimized for read-only
- * telemetry collection. It bypasses authentication requirements by using:
- *
- * 1. Internal Elasticsearch clients (asInternalUser) for direct data access
- * 2. Internal SavedObjects repositories for system-level access
- * 3. Read-only mock RulesClients that handle interface requirements without auth
  */
 export class StatsTelemetryService {
-  private readonly logger: Logger;
-  private readonly isDev: boolean;
-
-  constructor(logger: Logger, isDev: boolean) {
-    this.logger = logger;
-    this.isDev = isDev;
-  }
+  constructor() {}
 
   public setup(
     core: CoreSetup<StreamsPluginStartDependencies>,
+    logger: Logger,
     usageCollection?: UsageCollectionSetup
   ) {
-    if (usageCollection) {
-      this.logger.debug('[Streams Stats Telemetry Service] Setting up streams usage collector');
-      registerStreamsUsageCollector(
-        usageCollection,
-        this.logger,
-        () => this.getInternalStreamsClient(core),
-        this.isDev
-      );
-    } else {
-      this.logger.debug(
+    if (!usageCollection) {
+      logger.debug(
         '[Streams Stats Telemetry Service] Usage collection not available, skipping setup'
       );
+      return;
     }
+
+    logger.debug('[Streams Stats Telemetry Service] Setting up streams usage collector');
+
+    // Provide a reader factory so future methods can share the same storage client
+    registerStreamsUsageCollector(usageCollection, logger, () => this.getUsageReader(core, logger));
   }
 
-  /**
-   * Creates an internal StreamsClient for telemetry collection
-   * Uses minimal clients that bypass/faking authentication requirements
-   */
-  private async getInternalStreamsClient(
-    core: CoreSetup<StreamsPluginStartDependencies>
-  ): Promise<StreamsClient> {
-    const [coreStart] = await core.getStartServices();
-    const logger = this.logger;
-
-    // Create minimal clients for telemetry that don't require authentication
-    const assetClient = await this.createMinimalAssetClient(core);
-    const systemClient = await this.createMinimalSystemClient(core);
-    const queryClient = await this.createMinimalQueryClient(core, assetClient);
-
-    // Create StreamsClient with internal cluster client
-    const internalClusterClient = coreStart.elasticsearch.client.asInternalUser;
-    const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
-
-    // Create a mock scoped cluster client that uses internal user
-    const mockScopedClusterClient: IScopedClusterClient = {
-      asCurrentUser: internalClusterClient,
-      asInternalUser: internalClusterClient,
-      asSecondaryAuthUser: internalClusterClient,
-    };
-
-    const storageAdapter = new StorageIndexAdapter(
-      internalClusterClient,
-      logger,
-      streamsStorageSettings,
-      {
-        migrateSource: migrateOnRead,
-      }
-    );
-
-    const mockRequest = this.createFakeRequestForTelemetry(core);
-
-    return new StreamsClientClass({
-      assetClient,
-      queryClient,
-      systemClient,
-      logger,
-      scopedClusterClient: mockScopedClusterClient,
-      lockManager: new LockManagerService(core, logger),
-      storageClient: storageAdapter.getClient(),
-      request: mockRequest,
-      isServerless,
-      isDev: this.isDev,
-    });
-  }
-
-  /**
-   * Creates a minimal AssetClient for telemetry with mock RulesClient
-   */
-  private async createMinimalAssetClient(core: CoreSetup<StreamsPluginStartDependencies>) {
-    const [coreStart] = await core.getStartServices();
-
-    const adapter = new StorageIndexAdapter(
-      coreStart.elasticsearch.client.asInternalUser,
-      this.logger.get('assets'),
-      assetStorageSettings
-    );
-
-    const mockRulesClient = this.createReadOnlyMockRulesClient('AssetClient');
-
-    return new AssetClient({
-      storageClient: adapter.getClient() as IStorageClient<AssetStorageSettings, StoredAssetLink>,
-      soClient: coreStart.savedObjects.createInternalRepository(),
-      rulesClient: mockRulesClient,
-    });
-  }
-
-  /**
-   * Creates a minimal SystemClient for telemetry
-   */
-  private async createMinimalSystemClient(core: CoreSetup<StreamsPluginStartDependencies>) {
-    const [coreStart] = await core.getStartServices();
-
-    const adapter = new StorageIndexAdapter(
-      coreStart.elasticsearch.client.asInternalUser,
-      this.logger.get('systems'),
-      systemStorageSettings
-    );
-
-    return new SystemClient({
-      storageClient: adapter.getClient() as IStorageClient<SystemStorageSettings, StoredSystem>,
-    });
-  }
-
-  /**
-   * Creates a minimal QueryClient for telemetry with mock RulesClient
-   */
-  private async createMinimalQueryClient(
+  private async getUsageReader(
     core: CoreSetup<StreamsPluginStartDependencies>,
-    assetClient: AssetClient
-  ) {
-    const isSignificantEventsEnabled = false; // Default to false for telemetry
+    logger: Logger
+  ): Promise<StreamsUsageReader> {
+    const [coreStart] = await core.getStartServices();
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const storageClient = createStreamsStorageClient(esClient, logger);
 
-    const mockRulesClient = this.createReadOnlyMockRulesClient('QueryClient');
-
-    return new QueryClient(
-      {
-        assetClient,
-        rulesClient: mockRulesClient,
-        logger: this.logger,
-      },
-      isSignificantEventsEnabled
-    );
-  }
-
-  /**
-   * Creates a minimal mock RulesClient for telemetry collection
-   *
-   * Only implements the methods actually used by AssetClient and QueryClient:
-   * - AssetClient: uses get() method
-   * - QueryClient: uses create() and update() methods
-   *
-   * @param clientType - The type of client using this mock (for logging context)
-   */
-  private createReadOnlyMockRulesClient(clientType: string): RulesClient {
-    const unimpl = (name: string) => () => {
-      const error = `${name} not supported in read-only telemetry mode (${clientType})`;
-      this.logger.warn(`[Telemetry:${clientType}] ${error}`);
-      throw new Error(error);
-    };
     return {
-      // AssetClient uses this - return "not found" error (handled gracefully)
-      get: async ({ id }: { id: string }) => {
-        this.logger.debug(`[Telemetry:${clientType}] Rule get skipped for ID: ${id}`);
-        throw new Error(`Rule ${id} not found`);
+      async readAllManagedStreams(): Promise<Streams.all.Definition[]> {
+        const results: Streams.all.Definition[] = [];
+        const pageSize = 2000; // To avoid ES circuit_breaker_exception
+        let from = 0;
+        while (true) {
+          const resp = await storageClient.search({
+            from,
+            size: pageSize,
+            track_total_hits: false,
+            query: { match_all: {} },
+          });
+
+          const hits = resp.hits.hits as Array<{ _source?: Streams.all.Definition }>;
+          if (hits.length === 0) {
+            break;
+          }
+
+          for (const { _source } of hits) {
+            if (_source) {
+              results.push(_source);
+            }
+          }
+
+          if (hits.length < pageSize) {
+            break;
+          }
+          from += pageSize;
+        }
+        return results;
       },
-
-      // QueryClient uses this - block write operation for telemetry
-      create: async () => {
-        const error = `Rule creation not supported in read-only telemetry mode (${clientType})`;
-        this.logger.warn(`[Telemetry:${clientType}] ${error}`);
-        throw new Error(error);
-      },
-
-      // QueryClient uses this - block write operation for telemetry
-      update: async ({ id }: { id: string }) => {
-        const error = `Rule update not supported in read-only telemetry mode (${clientType})`;
-        this.logger.warn(`[Telemetry:${clientType}] ${error} - attempted to update rule: ${id}`);
-        throw new Error(error);
-      },
-
-      aggregate: unimpl('aggregate'),
-      clone: unimpl('clone'),
-      delete: unimpl('delete'),
-      find: unimpl('find'),
-      resolve: unimpl('resolve'),
-    } as unknown as RulesClient;
-  }
-
-  /**
-   * Creates a fake Kibana request for internal telemetry collection
-   * This request is used to create clients which are dependencies of StreamsClient
-   */
-  private createFakeRequestForTelemetry(core: CoreSetup<StreamsPluginStartDependencies>) {
-    const requestHeaders: Headers = {
-      'kbn-system-request': 'true', // Mark as system request
-      'x-elastic-internal-origin': 'streams-telemetry', // Mark as internal operation
     };
-
-    const fakeRawRequest: FakeRawRequest = {
-      headers: requestHeaders,
-      path: '/',
-      // Mark this as authenticated for internal telemetry collection
-      auth: { isAuthenticated: true },
-      // Mark this as an internal cross-space telemetry request
-      route: { settings: { tags: ['internal', 'telemetry', 'cross-space'] } },
-    };
-
-    const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-    return fakeRequest;
   }
 }
