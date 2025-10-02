@@ -389,7 +389,7 @@ describe('#delete', () => {
       });
     });
 
-    describe('security', () => {
+    describe.only('security', () => {
       it('calls securityExtension.authorizeDelete with the correct parameters', async () => {
         client.get.mockResponse({
           _source: {
