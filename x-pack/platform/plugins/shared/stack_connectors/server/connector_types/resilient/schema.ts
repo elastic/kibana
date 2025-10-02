@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { type TypeOf, schema } from '@kbn/config-schema';
+import { validateKeysAllowed, validateRecordMaxKeys } from '../lib/validators';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
@@ -25,13 +26,49 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
   ExternalIncidentServiceSecretConfiguration
 );
 
+const MAX_ADDITIONAL_FIELDS_LENGTH = 50;
+
+const AdditionalFields = {
+  additionalFields: schema.nullable(
+    schema.recordOf(
+      schema.string({
+        validate: (value) => validateOtherFieldsKeys(value),
+      }),
+      schema.any(),
+      {
+        validate: (value) =>
+          validateRecordMaxKeys({
+            record: value,
+            maxNumberOfFields: MAX_ADDITIONAL_FIELDS_LENGTH,
+            fieldName: 'additionalFields',
+          }),
+      }
+    )
+  ),
+};
+
+const CommonIncidentAttributes = {
+  name: schema.string(),
+  description: schema.nullable(schema.string()),
+  externalId: schema.nullable(schema.string()),
+  incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
+  severityCode: schema.nullable(schema.number()),
+  ...AdditionalFields,
+};
+
+export const commonIncidentSchemaObjectProperties = Object.keys(CommonIncidentAttributes);
+
+const validateOtherFieldsKeys = (key: string): string | undefined => {
+  return validateKeysAllowed({
+    key,
+    disallowList: commonIncidentSchemaObjectProperties,
+    fieldName: 'additionalFields',
+  });
+};
+
 export const ExecutorSubActionPushParamsSchema = schema.object({
   incident: schema.object({
-    name: schema.string(),
-    description: schema.nullable(schema.string()),
-    externalId: schema.nullable(schema.string()),
-    incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
-    severityCode: schema.nullable(schema.number()),
+    ...CommonIncidentAttributes,
   }),
   comments: schema.nullable(
     schema.arrayOf(
@@ -48,6 +85,7 @@ export const PushToServiceIncidentSchema = {
   description: schema.nullable(schema.string()),
   incidentTypes: schema.nullable(schema.arrayOf(schema.number())),
   severityCode: schema.nullable(schema.number()),
+  ...AdditionalFields,
 };
 
 // Reserved for future implementation
@@ -79,6 +117,17 @@ export const GetSeverityResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
+const ValuesItemSchema = schema.object(
+  {
+    value: schema.oneOf([schema.number(), schema.string()]),
+    label: schema.string(),
+    enabled: schema.boolean(),
+    hidden: schema.boolean(),
+    default: schema.boolean(),
+  },
+  { unknowns: 'allow' }
+);
+
 export const ExternalServiceFieldsSchema = schema.object(
   {
     input_type: schema.string(),
@@ -86,9 +135,13 @@ export const ExternalServiceFieldsSchema = schema.object(
     read_only: schema.boolean(),
     required: schema.nullable(schema.string()),
     text: schema.string(),
+    prefix: schema.nullable(schema.string()),
+    values: schema.nullable(schema.arrayOf(ValuesItemSchema)),
   },
   { unknowns: 'allow' }
 );
+
+export type ResilientFieldMeta = TypeOf<typeof ExternalServiceFieldsSchema>;
 
 export const GetCommonFieldsResponseSchema = schema.arrayOf(ExternalServiceFieldsSchema);
 

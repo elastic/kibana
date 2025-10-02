@@ -134,6 +134,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enable resetting risk scores to zero for outdated entities
    */
   enableRiskScoreResetToZero: false,
+
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
@@ -236,10 +237,6 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
   /**
 
-   /**
-   * Enables Integrations Sync for Privileged User Monitoring
-   */
-  integrationsSyncEnabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -284,7 +281,7 @@ export const allowedExperimentalValues = Object.freeze({
   eventCollectionDataReductionBannerEnabled: true,
 
   /** Enables new Data View Picker */
-  newDataViewPickerEnabled: false,
+  newDataViewPickerEnabled: true,
 
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command
