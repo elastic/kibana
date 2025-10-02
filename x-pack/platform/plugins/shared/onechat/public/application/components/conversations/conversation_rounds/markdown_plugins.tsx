@@ -12,8 +12,9 @@ import {
   visualizationElement,
   type VisualizationElementAttributes,
   type TabularDataResult,
+  type VisualizationResult,
 } from '@kbn/onechat-common/tools/tool_result';
-import type { ConversationRoundStep, OtherResult } from '@kbn/onechat-common';
+import type { ConversationRoundStep } from '@kbn/onechat-common';
 import classNames from 'classnames';
 import { EuiCode, EuiText, useEuiTheme } from '@elastic/eui';
 
@@ -134,36 +135,36 @@ export function createVisualizationRenderer({
 
     const steps = [...stepsFromPrevRounds, ...stepsFromCurrentRound];
 
-    let toolResult: TabularDataResult | OtherResult | undefined = steps
-      .filter((s) => s.type === 'tool_call')
-      .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-      .find((r) => r.type === 'tabular_data' && r.tool_result_id === toolResultId) as
-      | TabularDataResult
-      | undefined;
-
     const ToolResultAttribute = (
       <EuiCode>
         {visualizationElement.attributes.toolResultId}={toolResultId}
       </EuiCode>
     );
 
+    // First, look for tabular data results (from execute_esql)
+    let toolResult: TabularDataResult | VisualizationResult | undefined = steps
+      .filter((s) => s.type === 'tool_call')
+      .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
+      .find((r) => r.type === 'tabular_data' && r.tool_result_id === toolResultId) as
+      | TabularDataResult
+      | undefined;
+
+    // If not found, look for visualization results (from create_visualization)
     if (!toolResult) {
       toolResult = steps
         .filter((s) => s.type === 'tool_call')
         .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-        .find(
-          (r) =>
-            r.type === 'other' &&
-            r.data.type === 'visualization' &&
-            r.tool_result_id === toolResultId
-        ) as OtherResult | undefined;
+        .find((r) => r.type === 'visualization' && r.tool_result_id === toolResultId) as
+        | VisualizationResult
+        | undefined;
     }
 
     if (!toolResult) {
       return <EuiText>Unable to find visualization for {ToolResultAttribute}.</EuiText>;
     }
 
-    if (toolResult.type === 'other') {
+    // Handle visualization result (pre-built Lens config)
+    if (toolResult.type === 'visualization') {
       const { visualization } = toolResult.data;
       return (
         <VisualizeLens

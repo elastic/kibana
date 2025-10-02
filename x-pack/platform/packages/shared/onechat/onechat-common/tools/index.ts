@@ -51,5 +51,6 @@ export {
   type QueryResult,
   type ResourceResult,
   type TabularDataResult,
+  type VisualizationResult,
   type OtherResult,
 } from './tool_result';

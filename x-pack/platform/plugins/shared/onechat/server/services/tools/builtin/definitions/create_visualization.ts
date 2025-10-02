@@ -320,10 +320,9 @@ Guidelines:
         return {
           results: [
             {
-              type: ToolResultType.other,
+              type: ToolResultType.visualization,
               tool_result_id: getToolResultId(),
               data: {
-                type: 'visualization',
                 query: nlQuery,
                 visualization: validatedConfig,
                 chartType: selectedChartType,
