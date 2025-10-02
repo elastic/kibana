@@ -136,12 +136,14 @@ export const useTopNavLinks = ({
           onClick: () => {
             services.data.search.showSearchSessionsFlyout({
               appId,
-              onBackgroundSearchOpened: ({ session, event }) => {
-                event?.preventDefault();
-                dispatch(
-                  internalStateActions.openSearchSessionInNewTab({ searchSession: session })
-                );
-              },
+              onBackgroundSearchOpened: services.discoverFeatureFlags.getTabsEnabled()
+                ? ({ session, event }) => {
+                    event?.preventDefault();
+                    dispatch(
+                      internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+                    );
+                  }
+                : undefined,
             });
           },
         });
