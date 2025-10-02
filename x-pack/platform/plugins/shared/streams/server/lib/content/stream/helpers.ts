@@ -75,16 +75,7 @@ export function getFields(
   include: ContentPackIncludedObjects
 ): FieldDefinition {
   if (isIncludeAll(include) || include.objects.mappings) {
-    if (isRoot(entry.name)) {
-      return entry.request.stream.ingest.wired.fields;
-    }
-
-    return Object.keys(entry.request.stream.ingest.wired.fields)
-      .filter((key) => !baseFields[key])
-      .reduce((fields, key) => {
-        fields[key] = entry.request.stream.ingest.wired.fields[key];
-        return fields;
-      }, {} as FieldDefinition);
+    return entry.request.stream.ingest.wired.fields;
   }
   return {};
 }
