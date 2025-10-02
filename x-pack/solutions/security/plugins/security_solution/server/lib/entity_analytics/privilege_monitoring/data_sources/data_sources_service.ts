@@ -17,11 +17,9 @@ export const createDataSourcesService = (
   soClient: SavedObjectsClientContract,
   maxUsersAllowed: number
 ) => {
-  const { deps } = dataClient;
   const esClient = dataClient.deps.clusterClient.asCurrentUser;
   const indexSyncService = createIndexSyncService(dataClient, maxUsersAllowed);
   const integrationsSyncService = createIntegrationsSyncService(dataClient, soClient);
-  const integrationsSyncFlag = deps.experimentalFeatures?.integrationsSyncEnabled ?? false;
 
   /**
    * This creates an index for the user to populate privileged users.
@@ -64,7 +62,7 @@ export const createDataSourcesService = (
   };
   const syncAllSources = async () => {
     const jobs = [indexSyncService.plainIndexSync(soClient)];
-    if (integrationsSyncFlag) jobs.push(integrationsSyncService.integrationsSync());
+    jobs.push(integrationsSyncService.integrationsSync());
 
     const settled = await Promise.allSettled(jobs);
     settled
