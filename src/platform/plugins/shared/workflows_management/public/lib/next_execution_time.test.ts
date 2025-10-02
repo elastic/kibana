@@ -232,8 +232,7 @@ describe('next_execution_time', () => {
           type: 'scheduled',
           enabled: true,
           with: {
-            every: '5',
-            unit: 'minute',
+            every: '5m',
           },
         };
 
@@ -247,8 +246,7 @@ describe('next_execution_time', () => {
           type: 'scheduled',
           enabled: true,
           with: {
-            every: '2',
-            unit: 'hour',
+            every: '2h',
           },
         };
 
@@ -262,8 +260,7 @@ describe('next_execution_time', () => {
           type: 'scheduled',
           enabled: true,
           with: {
-            every: '1',
-            unit: 'day',
+            every: '1d',
           },
         };
 
@@ -273,15 +270,14 @@ describe('next_execution_time', () => {
       });
 
       it('should handle different unit formats', () => {
-        const units = ['minute', 'minutes', 'min', 'm', 'hour', 'hours', 'h', 'day', 'days', 'd'];
+        const units = ['s', 'm', 'h', 'd'];
 
         units.forEach((unit) => {
           const trigger: WorkflowTrigger = {
             type: 'scheduled',
             enabled: true,
             with: {
-              every: '1',
-              unit,
+              every: `1${unit}`,
             },
           };
 
@@ -295,8 +291,7 @@ describe('next_execution_time', () => {
           type: 'scheduled',
           enabled: true,
           with: {
-            every: 'invalid',
-            unit: 'minute',
+            every: 'invalid-m',
           },
         };
 
@@ -309,8 +304,7 @@ describe('next_execution_time', () => {
           type: 'scheduled',
           enabled: true,
           with: {
-            every: '1',
-            unit: 'invalid',
+            every: '1-invalid',
           },
         };
 
@@ -420,34 +414,6 @@ describe('next_execution_time', () => {
       });
     });
 
-    describe('Cron-based schedules', () => {
-      it('should handle basic cron expressions', () => {
-        const trigger: WorkflowTrigger = {
-          type: 'scheduled',
-          enabled: true,
-          with: {
-            cron: '0 9 * * *',
-          },
-        };
-
-        const result = calculateNextExecutionTime(trigger);
-        expect(result).toBeInstanceOf(Date);
-      });
-
-      it('should return null for invalid cron', () => {
-        const trigger: WorkflowTrigger = {
-          type: 'scheduled',
-          enabled: true,
-          with: {
-            cron: 'invalid',
-          },
-        };
-
-        const result = calculateNextExecutionTime(trigger);
-        expect(result).toBeNull();
-      });
-    });
-
     describe('Edge cases', () => {
       it('should return null for non-scheduled trigger', () => {
         const trigger: WorkflowTrigger = {
@@ -464,8 +430,7 @@ describe('next_execution_time', () => {
           type: 'scheduled',
           enabled: false,
           with: {
-            every: '1',
-            unit: 'minute',
+            every: '1m',
           },
         };
 
@@ -498,7 +463,7 @@ describe('next_execution_time', () => {
 
     it('should return null for workflows with no enabled scheduled triggers', () => {
       const triggers: WorkflowTrigger[] = [
-        { type: 'scheduled', enabled: false, with: { every: '1', unit: 'minute' } },
+        { type: 'scheduled', enabled: false, with: { every: '1m' } },
         { type: 'manual', enabled: true },
       ];
 
@@ -508,7 +473,7 @@ describe('next_execution_time', () => {
 
     it('should return next execution time for single scheduled trigger', () => {
       const triggers: WorkflowTrigger[] = [
-        { type: 'scheduled', enabled: true, with: { every: '5', unit: 'minute' } },
+        { type: 'scheduled', enabled: true, with: { every: '5m' } },
         { type: 'manual', enabled: true },
       ];
 
@@ -519,8 +484,8 @@ describe('next_execution_time', () => {
 
     it('should return earliest next execution time for multiple scheduled triggers', () => {
       const triggers: WorkflowTrigger[] = [
-        { type: 'scheduled', enabled: true, with: { every: '10', unit: 'minute' } },
-        { type: 'scheduled', enabled: true, with: { every: '5', unit: 'minute' } },
+        { type: 'scheduled', enabled: true, with: { every: '10m' } },
+        { type: 'scheduled', enabled: true, with: { every: '5m' } },
         { type: 'manual', enabled: true },
       ];
 
@@ -545,7 +510,7 @@ describe('next_execution_time', () => {
             },
           },
         },
-        { type: 'scheduled', enabled: true, with: { every: '1', unit: 'minute' } },
+        { type: 'scheduled', enabled: true, with: { every: '1m' } },
         { type: 'manual', enabled: true },
       ];
 
@@ -557,8 +522,8 @@ describe('next_execution_time', () => {
 
     it('should handle triggers with invalid configurations', () => {
       const triggers: WorkflowTrigger[] = [
-        { type: 'scheduled', enabled: true, with: { every: 'invalid', unit: 'minute' } },
-        { type: 'scheduled', enabled: true, with: { every: '5', unit: 'minute' } },
+        { type: 'scheduled', enabled: true, with: { every: 'invalid-m' } },
+        { type: 'scheduled', enabled: true, with: { every: '5m' } },
       ];
 
       const result = getWorkflowNextExecutionTime(triggers);
@@ -569,7 +534,7 @@ describe('next_execution_time', () => {
 
     it('should return null when all scheduled triggers have invalid configurations', () => {
       const triggers: WorkflowTrigger[] = [
-        { type: 'scheduled', enabled: true, with: { every: 'invalid', unit: 'minute' } },
+        { type: 'scheduled', enabled: true, with: { every: 'invalid-m' } },
         { type: 'scheduled', enabled: true, with: { rrule: { freq: 'INVALID' } } },
       ];
 
