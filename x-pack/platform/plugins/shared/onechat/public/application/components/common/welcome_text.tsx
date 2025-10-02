@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
-import { TechPreviewBadge } from './tech_preview_badge';
+import { TechPreviewBadge } from './tech_preview';
 
 export const WelcomeText: React.FC<{}> = () => {
   const labels = {
