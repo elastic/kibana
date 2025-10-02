@@ -9,6 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
 import { waitFor } from 'xstate5';
+import type { RoutingDefinition } from '@kbn/streams-schema';
 import {
   streamRoutingMachine,
   createStreamRoutingMachineImplementations,
@@ -20,7 +21,6 @@ import type {
   RoutingSamplesActorRef,
   RoutingSamplesActorSnapshot,
 } from './routing_samples_state_machine';
-import { RoutingDefinition } from '@kbn/streams-schema';
 
 const consoleInspector = createConsoleInspector();
 
