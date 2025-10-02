@@ -143,13 +143,14 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
       >
         <EuiFlexItem>
           <ConnectorSelector
-            displayFancy={(displayText) => (
+            fullWidth={fullWidth}
+            displayFancy={(label) => (
               <EuiText
                 className={inputDisplayClassName}
                 size="s"
                 color={euiTheme.colors.textPrimary}
               >
-                {displayText}
+                {label}
               </EuiText>
             )}
             isOpen={isOpen}
