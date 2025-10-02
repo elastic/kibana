@@ -31,7 +31,12 @@ const streamsStorageSettings = {
 type StreamsStorageSettings = typeof streamsStorageSettings;
 export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, Streams.all.Definition>;
 
-// Factory to create a migration-aware Streams storage client (full surface, including `search`)
+/**
+ * This ensures there's only one way to initialize a storage client for streams, with the proper
+ * settings and migration on read.
+ * @param esClient
+ * @param logger
+ */
 export function createStreamsStorageClient(
   esClient: ElasticsearchClient,
   logger: Logger
