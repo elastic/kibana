@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import type { AgentPolicy, Agent } from '../../types';
 
-import { FleetError } from '../../errors';
+import { FleetError, FleetUnauthorizedError } from '../../errors';
 
 import { bulkMigrateAgents, migrateSingleAgent } from './migrate';
 import { createAgentAction, createErrorActionResults } from './actions';
@@ -24,6 +24,17 @@ jest.mock('./crud', () => {
     getAgents: jest.fn(),
     getAgentsByKuery: jest.fn(),
     openPointInTime: jest.fn(),
+  };
+});
+
+// Mock the license service
+jest.mock('..', () => {
+  const actual = jest.requireActual('..');
+  return {
+    ...actual,
+    licenseService: {
+      hasAtLeast: jest.fn(),
+    },
   };
 });
 
@@ -63,6 +74,7 @@ const mockedPolicy: AgentPolicy = {
 
 describe('Agent migration', () => {
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+  let mockLicenseService: any;
   const soClientMock = {
     getCurrentNamespace: jest.fn(),
   } as any;
@@ -71,6 +83,11 @@ describe('Agent migration', () => {
     // Reset mocks before each test
     jest.resetAllMocks();
     esClientMock = elasticsearchServiceMock.createInternalClient();
+
+    // Get the mocked license service
+    mockLicenseService = jest.requireMock('..').licenseService;
+    // Default to having the required license
+    mockLicenseService.hasAtLeast.mockReturnValue(true);
 
     (getAgentPolicyForAgents as jest.Mock).mockResolvedValue([mockedPolicy]);
 
@@ -208,6 +225,58 @@ describe('Agent migration', () => {
         'Agent cannot be migrated. Migrate action is supported from version 9.2.0.'
       );
     });
+
+    it('should throw FleetUnauthorizedError when license is insufficient', async () => {
+      // Mock license as not having the required level
+      mockLicenseService.hasAtLeast.mockReturnValue(false);
+
+      const agentId = 'agent-123';
+      const options = {
+        policyId: 'policy-456',
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+        settings: { timeout: 300 },
+      };
+
+      await expect(
+        migrateSingleAgent(esClientMock, soClientMock, agentId, mockedPolicy, mockedAgent, options)
+      ).rejects.toThrow(FleetUnauthorizedError);
+
+      await expect(
+        migrateSingleAgent(esClientMock, soClientMock, agentId, mockedPolicy, mockedAgent, options)
+      ).rejects.toThrow(
+        'Agent migration requires an enterprise license. Please upgrade your license.'
+      );
+
+      // Verify that createAgentAction was not called when license is insufficient
+      expect(mockedCreateAgentAction).not.toHaveBeenCalled();
+    });
+
+    it('should proceed normally when license is sufficient', async () => {
+      // Ensure license is valid (default mock)
+      mockLicenseService.hasAtLeast.mockReturnValue(true);
+
+      const agentId = 'agent-123';
+      const options = {
+        policyId: 'policy-456',
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+        settings: { timeout: 300 },
+      };
+
+      const result = await migrateSingleAgent(
+        esClientMock,
+        soClientMock,
+        agentId,
+        mockedPolicy,
+        mockedAgent,
+        options
+      );
+
+      // Verify createAgentAction was called when license is sufficient
+      expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ actionId: 'test-action-id' });
+    });
   });
 
   // Bulk migrate
@@ -342,6 +411,48 @@ describe('Agent migration', () => {
         },
         'agent does not support migration action'
       );
+    });
+
+    it('should throw FleetUnauthorizedError when license is insufficient', async () => {
+      // Mock license as not having the required level
+      mockLicenseService.hasAtLeast.mockReturnValue(false);
+
+      const options = {
+        agentIds: ['agent-123', 'agent-456'],
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+        settings: { timeout: 300 },
+      };
+
+      await expect(bulkMigrateAgents(esClientMock, soClientMock, options)).rejects.toThrow(
+        FleetUnauthorizedError
+      );
+
+      await expect(bulkMigrateAgents(esClientMock, soClientMock, options)).rejects.toThrow(
+        'Agent migration requires an enterprise license. Please upgrade your license.'
+      );
+
+      // Verify that getAgents was not called when license is insufficient
+      expect(getAgents as jest.Mock).not.toHaveBeenCalled();
+    });
+
+    it('should proceed normally when license is sufficient', async () => {
+      // Ensure license is valid (default mock)
+      mockLicenseService.hasAtLeast.mockReturnValue(true);
+      (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
+
+      const options = {
+        agentIds: ['agent-123', 'agent-456'],
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+        settings: { timeout: 300 },
+      };
+
+      const result = await bulkMigrateAgents(esClientMock, soClientMock, options);
+
+      // Verify that the bulk migration proceeded normally
+      expect(getAgents as jest.Mock).toHaveBeenCalled();
+      expect(result).toEqual({ actionId: 'test-action-id' });
     });
   });
 });

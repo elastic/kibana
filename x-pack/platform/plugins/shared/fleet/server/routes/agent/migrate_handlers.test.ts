@@ -187,17 +187,23 @@ describe('Migrate handlers', () => {
     it('returns 403 when license does not support agent migration', async () => {
       // Mock license as not having the required level
       mockLicenseService.hasAtLeast.mockReturnValue(false);
+      // Mock the service to throw FleetUnauthorizedError when license is insufficient
+      (AgentService.migrateSingleAgent as jest.Mock).mockRejectedValue(
+        new FleetUnauthorizedError(
+          'Agent migration requires an enterprise license. Please upgrade your license.'
+        )
+      );
 
-      await migrateSingleAgentHandler(mockContext, mockRequest, mockResponse);
+      await expect(
+        migrateSingleAgentHandler(mockContext, mockRequest, mockResponse)
+      ).rejects.toThrow(
+        'Agent migration requires an enterprise license. Please upgrade your license.'
+      );
 
-      expect(mockResponse.forbidden).toHaveBeenCalledWith({
-        body: {
-          message: 'Agent migration requires an enterprise license. Please upgrade your license.',
-        },
-      });
-      // Verify that agent services were not called when license is insufficient
-      expect(AgentService.getAgentById).not.toHaveBeenCalled();
-      expect(AgentService.migrateSingleAgent).not.toHaveBeenCalled();
+      // Verify that getAgentById was called (since handlers get agent first)
+      expect(AgentService.getAgentById).toHaveBeenCalled();
+      // Verify that migrateSingleAgent was called and threw the error
+      expect(AgentService.migrateSingleAgent).toHaveBeenCalled();
     });
 
     it('calls migrateSingleAgent when license supports agent migration', async () => {
@@ -306,20 +312,25 @@ describe('Migrate handlers', () => {
     it('returns 403 when license does not support agent migration', async () => {
       // Mock license as not having the required level
       mockLicenseService.hasAtLeast.mockReturnValue(false);
+      // Mock the service to throw FleetUnauthorizedError when license is insufficient
+      (AgentService.bulkMigrateAgents as jest.Mock).mockRejectedValue(
+        new FleetUnauthorizedError(
+          'Agent migration requires an enterprise license. Please upgrade your license.'
+        )
+      );
 
       mockRequest = {
         body: mockSettings,
       };
 
-      await bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse);
+      await expect(
+        bulkMigrateAgentsHandler(mockContext, mockRequest, mockResponse)
+      ).rejects.toThrow(
+        'Agent migration requires an enterprise license. Please upgrade your license.'
+      );
 
-      expect(mockResponse.forbidden).toHaveBeenCalledWith({
-        body: {
-          message: 'Agent migration requires an enterprise license. Please upgrade your license.',
-        },
-      });
-      // Verify that agent services were not called when license is insufficient
-      expect(AgentService.bulkMigrateAgents).not.toHaveBeenCalled();
+      // Verify that bulkMigrateAgents was called and threw the error
+      expect(AgentService.bulkMigrateAgents).toHaveBeenCalled();
     });
 
     it('calls bulkMigrateAgents when license supports agent migration', async () => {

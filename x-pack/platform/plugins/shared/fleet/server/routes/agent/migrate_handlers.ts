@@ -12,9 +12,7 @@ import type {
   MigrateSingleAgentRequestSchema,
   BulkMigrateAgentsRequestSchema,
 } from '../../types';
-import { LICENSE_FOR_AGENT_MIGRATION } from '../../../common/constants';
 import * as AgentService from '../../services/agents';
-import { licenseService } from '../../services';
 
 export const migrateSingleAgentHandler: FleetRequestHandler<
   TypeOf<typeof MigrateSingleAgentRequestSchema.params>,
@@ -22,15 +20,6 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
   TypeOf<typeof MigrateSingleAgentRequestSchema.body>
 > = async (context, request, response) => {
   const [coreContext] = await Promise.all([context.core, context.fleet]);
-
-  // Check the user has the correct license
-  if (!licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)) {
-    return response.forbidden({
-      body: {
-        message: `Agent migration requires an ${LICENSE_FOR_AGENT_MIGRATION} license. Please upgrade your license.`,
-      },
-    });
-  }
 
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
@@ -69,14 +58,6 @@ export const bulkMigrateAgentsHandler: FleetRequestHandler<
   const { agents, ...options } = request.body;
 
   const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
-
-  if (!licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)) {
-    return response.forbidden({
-      body: {
-        message: `Agent migration requires an ${LICENSE_FOR_AGENT_MIGRATION} license. Please upgrade your license.`,
-      },
-    });
-  }
 
   const body = await AgentService.bulkMigrateAgents(esClient, soClient, {
     ...options,
