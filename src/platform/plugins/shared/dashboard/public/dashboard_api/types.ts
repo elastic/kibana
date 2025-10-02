@@ -189,4 +189,5 @@ export interface DashboardInternalApi {
   getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
+  untilControlsInitialized: () => Promise<void>;
 }

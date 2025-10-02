@@ -12,7 +12,7 @@ import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plug
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
-import { BehaviorSubject, debounceTime, merge } from 'rxjs';
+import { BehaviorSubject, debounceTime, merge, first, skipWhile, switchMap } from 'rxjs';
 import { v4 } from 'uuid';
 import {
   getReferencesForControls,
@@ -271,6 +271,21 @@ export function getDashboardApi({
       },
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
         controlGroupApi$.next(controlGroupApi),
+      untilControlsInitialized: async () => {
+        return new Promise((resolve) => {
+          controlGroupApi$
+            .pipe(
+              skipWhile((controlGroupApi) => !controlGroupApi),
+              switchMap(async (controlGroupApi) => {
+                await controlGroupApi?.untilInitialized();
+              }),
+              first()
+            )
+            .subscribe(() => {
+              resolve();
+            });
+        });
+      },
     } as DashboardInternalApi,
     cleanup: () => {
       dataLoadingManager.cleanup();
