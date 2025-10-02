@@ -23,6 +23,7 @@ interface UpdateIndexMappingsAndSettingsOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
+  ilmPolicyName?: string;
   concreteIndices: ConcreteIndexInfo[];
   simulatedMapping: MappingTypeMapping | undefined;
 }
@@ -36,32 +37,38 @@ interface UpdateIndexOpts {
   attempt?: number;
 }
 
-interface UpdateTotalFieldLimitSettingOpts {
+interface UpdateIndexSettingOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
+  ilmPolicyName?: string;
   concreteIndexInfo: ConcreteIndexInfo;
 }
 
 const MAX_FIELDS_LIMIT_INCREASE_ATTEMPTS = 100;
 
-const updateTotalFieldLimitSetting = async ({
+const updateIndexSettings = async ({
   logger,
   esClient,
   totalFieldsLimit,
+  ilmPolicyName,
   concreteIndexInfo,
-}: UpdateTotalFieldLimitSettingOpts) => {
+}: UpdateIndexSettingOpts) => {
   const { index, alias } = concreteIndexInfo;
   try {
+    const updatedSettings = {
+      'index.mapping.total_fields.limit': totalFieldsLimit,
+      'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+    };
+
+    if (ilmPolicyName) {
+      Object.assign(updatedSettings, { 'index.lifecycle.name': ilmPolicyName });
+    }
+
+    logger.debug(`Updating index settings for ${index}: ${JSON.stringify(updatedSettings)}`);
+
     await retryTransientEsErrors(
-      () =>
-        esClient.indices.putSettings({
-          index,
-          settings: {
-            'index.mapping.total_fields.limit': totalFieldsLimit,
-            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-          },
-        }),
+      () => esClient.indices.putSettings({ index, settings: updatedSettings }),
       { logger }
     );
     return;
@@ -139,10 +146,11 @@ export const updateIndexMappingsAndSettings = async ({
   esClient,
   totalFieldsLimit,
   concreteIndices,
+  ilmPolicyName,
   simulatedMapping,
 }: UpdateIndexMappingsAndSettingsOpts) => {
   logger.debug(
-    `Updating underlying mappings for ${concreteIndices.length} indices / data streams.`
+    `Updating underlying mappings and settings for ${concreteIndices.length} indices / data streams.`
   );
 
   if (simulatedMapping == null) {
@@ -155,7 +163,13 @@ export const updateIndexMappingsAndSettings = async ({
   // Other index setting changes are not updated at this time
   await Promise.all(
     concreteIndices.map((index) =>
-      updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
+      updateIndexSettings({
+        logger,
+        esClient,
+        totalFieldsLimit,
+        concreteIndexInfo: index,
+        ilmPolicyName,
+      })
     )
   );
 
@@ -177,6 +191,7 @@ export interface CreateConcreteWriteIndexOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
+  ilmPolicyName?: string;
   indexPatterns: IIndexPatternString;
   dataStreamAdapter: DataStreamAdapter;
 }
@@ -277,7 +292,7 @@ const increaseFieldsLimit = async ({
     const template = indexTemplates[0];
 
     // Update the limit in the index
-    await updateTotalFieldLimitSetting({
+    await updateIndexSettings({
       logger,
       esClient,
       totalFieldsLimit: newLimit,

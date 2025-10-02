@@ -370,6 +370,62 @@ describe('createConcreteWriteIndex', () => {
 
         expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
         expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+
+        if (useDataStream) {
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            settings: {
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+              'index.mapping.total_fields.limit': 2500,
+            },
+          });
+        } else {
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
+            index: '.internal.alerts-test.alerts-default-000001',
+            settings: {
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+              'index.mapping.total_fields.limit': 2500,
+            },
+          });
+        }
+      });
+
+      it(`should update settings with custom ilm policy name if defined`, async () => {
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        await createConcreteWriteIndex({
+          logger,
+          esClient: clusterClient,
+          indexPatterns: IndexPatterns,
+          totalFieldsLimit: 2500,
+          dataStreamAdapter,
+          ilmPolicyName: 'my-custom-ilm-policy',
+        });
+
+        expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+        expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+
+        if (useDataStream) {
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            settings: {
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+              'index.mapping.total_fields.limit': 2500,
+            },
+          });
+        } else {
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
+            index: '.internal.alerts-test.alerts-default-000001',
+            settings: {
+              'index.lifecycle.name': 'my-custom-ilm-policy',
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+              'index.mapping.total_fields.limit': 2500,
+            },
+          });
+        }
       });
 
       it(`should skip updating underlying settings and mappings of existing concrete indices if they follow an unexpected naming convention`, async () => {
@@ -709,14 +765,30 @@ describe('createConcreteWriteIndex', () => {
           );
           expect(logger.debug).toHaveBeenNthCalledWith(
             3,
-            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2501. Attempt: 1`
+            `Updating index settings for .alerts-test.alerts-default: {\"index.mapping.total_fields.limit\":2500,\"index.mapping.total_fields.ignore_dynamic_beyond_limit\":true}`
           );
           expect(logger.debug).toHaveBeenNthCalledWith(
             4,
-            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2503. Attempt: 2`
+            `Updating index settings for .alerts-test.alerts-default: {\"index.mapping.total_fields.limit\":2501,\"index.mapping.total_fields.ignore_dynamic_beyond_limit\":true}`
           );
           expect(logger.debug).toHaveBeenNthCalledWith(
             5,
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2501. Attempt: 1`
+          );
+          expect(logger.debug).toHaveBeenNthCalledWith(
+            6,
+            `Updating index settings for .alerts-test.alerts-default: {\"index.mapping.total_fields.limit\":2503,\"index.mapping.total_fields.ignore_dynamic_beyond_limit\":true}`
+          );
+          expect(logger.debug).toHaveBeenNthCalledWith(
+            7,
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2503. Attempt: 2`
+          );
+          expect(logger.debug).toHaveBeenNthCalledWith(
+            8,
+            `Updating index settings for .alerts-test.alerts-default: {\"index.mapping.total_fields.limit\":2506,\"index.mapping.total_fields.ignore_dynamic_beyond_limit\":true}`
+          );
+          expect(logger.debug).toHaveBeenNthCalledWith(
+            9,
             `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2506. Attempt: 3`
           );
         } else {
