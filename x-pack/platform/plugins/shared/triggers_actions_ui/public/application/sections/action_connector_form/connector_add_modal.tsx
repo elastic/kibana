@@ -79,10 +79,12 @@ const ConnectorAddModal = ({
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
     actionTypeModel && actionTypeModel.subtype
-      ? (actionTypeModel?.subtype ?? []).map((subtypeAction) => ({
-          ...actionTypeRegistry.get(subtypeAction.id),
-          name: subtypeAction.name,
-        }))
+      ? (actionTypeModel?.subtype ?? [])
+          .filter((item) => allActionTypes && allActionTypes[item.id].enabledInConfig)
+          .map((subtypeAction) => ({
+            ...actionTypeRegistry.get(subtypeAction.id),
+            name: subtypeAction.name,
+          }))
       : [];
 
   const groupActionButtons = groupActionTypeModel.map((gAction) => ({

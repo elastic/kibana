@@ -296,7 +296,11 @@ export const ActionForm = ({
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      .filter((item) => actionTypesIndex[item.id] && !item.hideInUi)
+      .filter(
+        (item) =>
+          actionTypesIndex[item.id] &&
+          !(item.hideInUi != null ? item.hideInUi(Object.values(actionTypesIndex)) : false)
+      )
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)

@@ -47,7 +47,8 @@ export const getConnectorType = (): ConnectorTypeModel<
 > => ({
   id: SLACK_API_CONNECTOR_ID,
   subtype,
-  hideInUi: true,
+  hideInUi: (actionTypes) =>
+    actionTypes.find((actionType) => actionType.id === '.slack')?.enabledInConfig === true,
   modalWidth: 675,
   iconClass: 'logoSlack',
   selectMessage: SELECT_MESSAGE,
