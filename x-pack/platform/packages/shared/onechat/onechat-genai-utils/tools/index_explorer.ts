@@ -130,32 +130,45 @@ export const indexExplorer = async ({
     esClient,
   });
 
-  const hasIndices = sources.indices.length > 0;
-  const hasAliases = sources.aliases.length > 0;
-  const hasDataStreams = sources.data_streams.length > 0;
+  const indexCount = sources.indices.length;
+  const aliasCount = sources.aliases.length;
+  const dataStreamCount = sources.data_streams.length;
+  const totalCount = indexCount + aliasCount + dataStreamCount;
 
   logger?.trace(
     () =>
-      `index_explorer - found ${sources.indices.length} indices, ${sources.aliases.length} aliases, ${sources.data_streams.length} datastreams for query="${nlQuery}"`
+      `index_explorer - found ${indexCount} indices, ${aliasCount} aliases, ${dataStreamCount} datastreams for query="${nlQuery}"`
   );
 
-  if (!hasAliases && !hasIndices && !hasDataStreams) {
+  if (totalCount === 0) {
     return { resources: [] };
+  }
+  if (totalCount === 1) {
+    const resource = [...sources.indices, ...sources.aliases, ...sources.data_streams][0];
+    return {
+      resources: [
+        {
+          name: resource.name,
+          type: resource.type,
+          reason: 'Index pattern matched exactly one resource',
+        },
+      ],
+    };
   }
 
   const resources: ResourceDescriptor[] = [];
-  if (hasIndices) {
+  if (indexCount > 0) {
     const indexDescriptors = await createIndexSummaries({ indices: sources.indices, esClient });
     resources.push(...indexDescriptors);
   }
-  if (hasDataStreams && includeDatastream) {
+  if (dataStreamCount > 0 && includeDatastream) {
     const dsDescriptors = await createDatastreamSummaries({
       datastreams: sources.data_streams,
       esClient,
     });
     resources.push(...dsDescriptors);
   }
-  if (hasAliases && includeAliases) {
+  if (aliasCount > 0 && includeAliases) {
     const aliasDescriptors = await createAliasSummaries({ aliases: sources.aliases });
     resources.push(...aliasDescriptors);
   }
