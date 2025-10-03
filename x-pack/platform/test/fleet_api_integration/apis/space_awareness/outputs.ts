@@ -15,7 +15,6 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
   const kibanaServer = getService('kibanaServer');
-  const spaces = getService('spaces');
   const TEST_SPACE_1 = 'test1';
 
   describe('outputs', function () {
