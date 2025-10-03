@@ -1,0 +1,118 @@
+================================================================================
+EuiFlyout Accessibility Violations - Summary Report
+================================================================================
+
+TOTAL VIOLATIONS: 78 instances across 65 files
+
+BREAKDOWN BY CATEGORY:
+----------------------
+
+Core Packages:                    2 files,  2 violations
+Platform Packages:                9 files, 12 violations  
+Platform Plugins:                11 files, 15 violations
+X-Pack Examples:                  1 file,   1 violation
+X-Pack Platform Packages:         1 file,   1 violation
+X-Pack Platform Plugins:         35 files, 41 violations
+X-Pack Solutions (Observability): 6 files,  6 violations
+X-Pack Solutions (Search):        3 files,  3 violations
+X-Pack Solutions (Security):      6 files,  7 violations
+
+FILE TYPES:
+-----------
+Production code (.tsx files):    57 files
+Storybook stories (.stories.tsx): 5 files
+Test files:                       3 files (stories/examples)
+
+HIGHEST VIOLATION AREAS:
+------------------------
+1. X-Pack Platform Plugins: 35 files (53.8% of total files)
+2. Platform Plugins: 11 files (16.9% of total files)
+3. Platform Packages: 9 files (13.8% of total files)
+4. X-Pack Solutions: 15 files (23.1% of total files)
+
+KEY OBSERVATIONS:
+-----------------
+• Most violations in production code that directly impacts accessibility
+• Several violations in core infrastructure (flyout_service.tsx, global_flyout.tsx)
+• Storybook stories also need fixing for proper documentation examples
+• Security, ML, and Fleet plugins have multiple violations each
+
+RECOMMENDED ACTION:
+-------------------
+Prioritize fixing production code over storybook stories. Start with:
+1. Core infrastructure files (flyout_service.tsx, global_flyout.tsx)
+2. High-traffic user-facing features (Security, Fleet, ML plugins)
+3. Platform packages (affects multiple consumers)
+4. Storybook stories (for proper documentation)
+
+All specific file paths and line numbers are documented in:
+EUIFLYOUT_ACCESSIBILITY_VIOLATIONS.md
+================================================================================
+
+COMPLETE LIST OF FILES:
+=======================
+File: src/core/packages/chrome/browser-internal/src/ui/project/sidenav_v2/fixed_layout_sidenav.tsx
+File: src/core/packages/overlays/browser-internal/src/flyout/flyout_service.tsx
+File: src/platform/packages/private/kbn-language-documentation/src/components/as_flyout/index.tsx
+File: src/platform/packages/shared/cloud/connection_details/connection_details_flyout_content.stories.tsx
+File: src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/__stories__/color_mapping.stories.tsx
+File: src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/__stories__/raw_color_mapping.stories.tsx
+File: src/platform/packages/shared/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx
+File: src/platform/packages/shared/response-ops/alerts-delete/alerts_delete.stories.tsx
+File: src/platform/packages/shared/response-ops/alerts-table/components/alert_detail_flyout.tsx
+File: src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx
+File: src/platform/plugins/private/event_annotation_listing/public/components/group_editor_flyout/group_editor_flyout.tsx
+File: src/platform/plugins/shared/data_view_editor/public/components/data_view_editor.tsx
+File: src/platform/plugins/shared/data_view_management/public/components/field_editor/components/scripting_help/help_flyout.tsx
+File: src/platform/plugins/shared/discover/public/context_awareness/profile_providers/example/example_data_source_profile/profile.tsx
+File: src/platform/plugins/shared/discover/public/context_awareness/profile_providers/example/example_root_profile/profile.tsx
+File: src/platform/plugins/shared/es_ui_shared/__packages_do_not_import__/global_flyout/global_flyout.tsx
+File: src/platform/plugins/shared/presentation_util/public/components/labs/labs_flyout.tsx
+File: src/platform/plugins/shared/saved_objects_management/public/management_section/objects_table/components/flyout.tsx
+File: src/platform/plugins/shared/share/public/components/export_integrations/export_integrations.tsx
+File: src/platform/plugins/shared/ui_actions_enhanced/public/drilldowns/drilldown_manager/components/flyout_frame/flyout_frame.stories.tsx
+File: x-pack/examples/lens_embeddable_inline_editing_example/public/flyout.tsx
+File: x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/common/components/assistant_settings_management/flyout/index.tsx
+File: x-pack/platform/plugins/private/canvas/public/components/keyboard_shortcuts_doc/keyboard_shortcuts_doc.tsx
+File: x-pack/platform/plugins/private/data_visualizer/public/application/common/components/filebeat_config_flyout/filebeat_config_flyout.tsx
+File: x-pack/platform/plugins/private/reporting/public/management/components/scheduled_report_flyout.tsx
+File: x-pack/platform/plugins/private/watcher/public/application/sections/watch_edit_page/components/json_watch_edit/simulate_watch_results_flyout.tsx
+File: x-pack/platform/plugins/private/watcher/public/application/sections/watch_status_page/components/execution_history_panel.tsx
+File: x-pack/platform/plugins/shared/automatic_import/public/components/create_integration/create_automatic_import/steps/review_step/review_step.tsx
+File: x-pack/platform/plugins/shared/content_connectors/public/components/connectors/create_connector/components/manual_configuration_flyout.tsx
+File: x-pack/platform/plugins/shared/content_connectors/public/components/search_index/connector/sync_rules/edit_sync_rules_flyout.tsx
+File: x-pack/platform/plugins/shared/fleet/public/applications/fleet/components/fleet_server_instructions/index.tsx
+File: x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/edit_package_policy_page/components/upgrade.tsx
+File: x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_list_page/components/agent_activity_flyout/index.tsx
+File: x-pack/platform/plugins/shared/fleet/public/components/agentless_enrollment_flyout/index.tsx
+File: x-pack/platform/plugins/shared/fleet/public/components/uninstall_command_flyout/uninstall_command_flyout.tsx
+File: x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/component_templates_flyout_with_context.tsx
+File: x-pack/platform/plugins/shared/index_management/public/application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_detail_panel.tsx
+File: x-pack/platform/plugins/shared/index_management/public/application/sections/home/template_list/template_details/index_template_flyout_with_context.tsx
+File: x-pack/platform/plugins/shared/ingest_pipelines/public/application/components/pipeline_editor/components/processor_form/edit_processor_form.tsx
+File: x-pack/platform/plugins/shared/lens/public/app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration.tsx
+File: x-pack/platform/plugins/shared/ml/public/alerting/anomaly_detection_alerts_table/alerts_table_flyout.tsx
+File: x-pack/platform/plugins/shared/ml/public/application/components/import_export_jobs/export_jobs_flyout/export_jobs_flyout_content.tsx
+File: x-pack/platform/plugins/shared/ml/public/application/components/import_export_jobs/import_jobs_flyout/import_jobs_flyout.tsx
+File: x-pack/platform/plugins/shared/ml/public/application/data_frame_analytics/pages/analytics_exploration/components/analytics_detail_flyout/analytics_detail_flyout.tsx
+File: x-pack/platform/plugins/shared/ml/public/application/jobs/components/job_details_flyout/job_details_flyout.tsx
+File: x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/pages/components/common/edit_categorization_analyzer_flyout/edit_categorization_analyzer_flyout.tsx
+File: x-pack/platform/plugins/shared/ml/public/application/jobs/new_job/pages/components/common/json_editor_flyout/json_editor_flyout.tsx
+File: x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/privilege_summary.tsx
+File: x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/space_aware_privilege_section/privilege_space_form.tsx
+File: x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_details/components/rule_action_error_log_flyout.tsx
+File: x-pack/solutions/observability/plugins/apm/public/components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/responsive_flyout.tsx
+File: x-pack/solutions/observability/plugins/profiling/public/components/frame_information_window/frame_information_tooltip.tsx
+File: x-pack/solutions/observability/plugins/profiling/public/components/stack_traces/index.tsx
+File: x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/components/common/components/view_document.tsx
+File: x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/fields/script_recorder_fields.tsx
+File: x-pack/solutions/observability/plugins/synthetics/public/apps/synthetics/components/monitors_page/overview/overview/monitor_detail_flyout.tsx
+File: x-pack/solutions/search/plugins/enterprise_search/public/applications/enterprise_search_content/components/connectors/create_connector/components/manual_configuration_flyout.tsx
+File: x-pack/solutions/search/plugins/enterprise_search/public/applications/enterprise_search_content/components/search_index/connector/sync_rules/edit_sync_rules_flyout.tsx
+File: x-pack/solutions/search/plugins/enterprise_search/public/applications/shared/layout/endpoints_header_action.tsx
+File: x-pack/solutions/security/plugins/cloud_security_posture/public/pages/rules/rules_flyout.tsx
+File: x-pack/solutions/security/plugins/security_solution/public/exceptions/components/import_exceptions_list_flyout/index.tsx
+File: x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/components/take_action_button.tsx
+File: x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/host_right/content.stories.tsx
+File: x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/user_right/content.stories.tsx
+File: x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/view/details/index.tsx
