@@ -27,7 +27,14 @@ import {
 
 export function runTelemetryCheck() {
   run(
-    async ({ flags: { fix = false, 'ignore-stored-json': ignoreStoredJson, path }, log }) => {
+    async ({ flags: { baselineSha, fix, ignoreStoredJson, path }, log }) => {
+      if (typeof baselineSha !== 'string' || !baselineSha.trim()) {
+        throw createFailError(
+          `${chalk.white.bgRed(
+            ' TELEMETRY ERROR '
+          )} You must provide a --baseline <SHA> to compare current working tree against.`
+        );
+      }
       if (typeof fix !== 'boolean') {
         throw createFailError(`${chalk.white.bgRed(' TELEMETRY ERROR ')} --fix can't have a value`);
       }
@@ -123,7 +130,7 @@ export function runTelemetryCheck() {
       );
 
       try {
-        const context = createTaskContext();
+        const context = createTaskContext({ baselineSha });
         await list.run(context);
       } catch (error) {
         process.exitCode = 1;
@@ -138,6 +145,15 @@ export function runTelemetryCheck() {
     },
     {
       flags: {
+        alias: {
+          baseline: 'baselineSha',
+          'ignore-stored-json': 'ignoreStoredJson',
+        },
+        boolean: ['fix', 'ignoreStoredJson'],
+        string: ['baselineSha'],
+        default: {
+          fix: false,
+        },
         allowUnexpected: true,
         guessTypesForUnexpectedFlags: true,
       },
