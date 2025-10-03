@@ -129,6 +129,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enable resetting risk scores to zero for outdated entities
    */
   enableRiskScoreResetToZero: false,
+
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
@@ -200,12 +201,6 @@ export const allowedExperimentalValues = Object.freeze({
   bulkFillRuleGapsEnabled: true,
 
   /**
-   * Allows users to see the advanced setting that changes the behavior of the suppression window on alert closure
-   */
-
-  continueSuppressionWindowAdvancedSettingEnabled: false,
-
-  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -237,10 +232,6 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
   /**
 
-   /**
-   * Enables Integrations Sync for Privileged User Monitoring
-   */
-  integrationsSyncEnabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -285,7 +276,7 @@ export const allowedExperimentalValues = Object.freeze({
   eventCollectionDataReductionBannerEnabled: true,
 
   /** Enables new Data View Picker */
-  newDataViewPickerEnabled: false,
+  newDataViewPickerEnabled: true,
 
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command

@@ -4212,6 +4212,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/autoops-promotion-callout@link:src/platform/packages/shared/kbn-management/autoops_promotion_callout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/avc-banner@link:src/platform/packages/shared/kbn-avc-banner":
   version "0.0.0"
   uid ""
@@ -4261,10 +4265,6 @@
   uid ""
 
 "@kbn/capture-oas-snapshot-cli@link:packages/kbn-capture-oas-snapshot-cli":
-  version "0.0.0"
-  uid ""
-
-"@kbn/cases-ai@link:x-pack/platform/packages/shared/cases-ai":
   version "0.0.0"
   uid ""
 
@@ -5900,10 +5900,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-eui-a11y@link:packages/kbn-eslint-plugin-eui-a11y":
-  version "0.0.0"
-  uid ""
-
 "@kbn/eslint-plugin-i18n@link:packages/kbn-eslint-plugin-i18n":
   version "0.0.0"
   uid ""
@@ -6097,6 +6093,10 @@
   uid ""
 
 "@kbn/fec-alerts-test-plugin@link:x-pack/platform/test/functional_execution_context/plugins/alerts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/field-formats-common@link:src/platform/packages/shared/kbn-field-formats-common":
   version "0.0.0"
   uid ""
 
@@ -7057,10 +7057,6 @@
   uid ""
 
 "@kbn/paertial-results-example-plugin@link:examples/partial_results_example":
-  version "0.0.0"
-  uid ""
-
-"@kbn/page-attachment-schema@link:x-pack/platform/packages/shared/kbn-page-attachment-schema":
   version "0.0.0"
   uid ""
 
@@ -17512,10 +17508,10 @@ cssstyle@^2.3.0:
   dependencies:
     cssom "~0.3.6"
 
-cssstyle@^5.2.1:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/cssstyle/-/cssstyle-5.3.0.tgz#9d0750a5bda34351464850e5524c414435b8d72c"
-  integrity sha512-RveJPnk3m7aarYQ2bJ6iw+Urh55S6FzUiqtBq+TihnTDP4cI8y/TYDqGOyqgnG1J1a6BxJXZsV9JFSTulm9Z7g==
+cssstyle@^5.3.0:
+  version "5.3.1"
+  resolved "https://registry.yarnpkg.com/cssstyle/-/cssstyle-5.3.1.tgz#f55a9cc73d12705da8a341261d5e85003fe3a441"
+  integrity sha512-g5PC9Aiph9eiczFpcgUhd9S4UUO3F+LHGRIi5NUMZ+4xtoIYbHNZwZnWA2JsFGe8OU8nl4WyaEFiZuGuxlutJQ==
   dependencies:
     "@asamuzakjp/css-color" "^4.0.3"
     "@csstools/css-syntax-patches-for-csstree" "^1.0.14"
@@ -32405,6 +32401,11 @@ undici-types@~6.21.0:
   version "6.21.0"
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
   integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
+
+undici@6.21.2:
+  version "6.21.2"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.21.2.tgz#49c5884e8f9039c65a89ee9018ef3c8e2f1f4928"
+  integrity sha512-uROZWze0R0itiAKVPsYhFov9LxrPMHLMEQFszeI2gCN6bnIIZ8twzBCJcN2LJrBBLfrP0t1FW0g+JmKVl8Vk1g==
 
 undici@^5.29.0:
   version "5.29.0"
