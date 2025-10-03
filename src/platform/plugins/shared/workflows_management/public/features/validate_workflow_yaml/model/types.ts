@@ -39,7 +39,7 @@ interface YamlValidationResultBase {
 }
 
 interface YamlValidationResultNonUniqueStepName extends YamlValidationResultBase {
-  severity: 'error';
+  severity: YamlValidationErrorSeverity;
   message: string;
   source: 'step-name-validation';
 }

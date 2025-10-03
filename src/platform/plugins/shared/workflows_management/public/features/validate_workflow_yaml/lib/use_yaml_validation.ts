@@ -260,7 +260,7 @@ export function useYamlValidation({
           id: `${marker.startLineNumber}-${marker.startColumn}-${marker.endLineNumber}-${marker.endColumn}`,
           source: validatedSource,
           hoverMessage: null,
-        } as YamlValidationResult);
+        });
       }
       const errorsUpdater = (prevErrors: YamlValidationResult[] | null) => {
         const prevOtherOwners = prevErrors?.filter((e) => e.source !== owner);
