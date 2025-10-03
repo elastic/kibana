@@ -22,7 +22,7 @@ import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../sh
 import { AxisSettingsPopover } from './axis_settings_popover';
 import type { AxisGroupConfiguration } from '../axes_configuration';
 import { getAxesConfiguration, getXDomain } from '../axes_configuration';
-import { VisualOptionsPopover } from './visual_options_popover';
+import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
 import { TextPopover } from './titles_and_text_popover';
 import { getScaleType } from '../to_expression';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
