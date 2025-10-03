@@ -51,7 +51,7 @@ import { testUsers } from '../test_users';
 
 function expectStatusCode200(res: Response) {
   if (res.statusCode === 200) {
-    return res;
+    return;
   }
 
   if (res.statusCode === 404) {
