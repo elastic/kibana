@@ -13,5 +13,4 @@ export const createAnomalyExplorerChartsServiceMock = () =>
     getAnomalyData$: jest.fn(),
     setTimeRange: jest.fn(),
     getTimeBounds: jest.fn(),
-    loadDataForCharts$: jest.fn(),
   } as unknown as jest.Mocked<AnomalyExplorerChartsService>);

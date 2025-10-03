@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 
 import { i18n } from '@kbn/i18n';
@@ -20,7 +20,6 @@ import { useMlKibana } from '../../../contexts/kibana';
 import type { MlJobWithTimeRange } from '../../../../../common/types/anomaly_detection_jobs';
 import { useRefresh } from '../../use_refresh';
 import { Explorer } from '../../../explorer';
-import { useExplorerData } from '../../../explorer/actions';
 import { useJobSelection } from '../../../components/job_selector/use_job_selection';
 import { useTableSeverity } from '../../../components/controls/select_severity';
 import { MlPageHeader } from '../../../components/page_header';
@@ -30,9 +29,6 @@ import { AnomalyDetectionEmptyState } from '../../../jobs/jobs_list/components/a
 import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
 import { getInfluencers } from '../../../explorer/explorer_utils';
 import { useMlJobService } from '../../../services/job_service';
-import type { ExplorerState } from '../../../explorer/explorer_data';
-import { getExplorerDefaultState } from '../../../explorer/explorer_data';
-import type { LoadExplorerDataConfig } from '../../../explorer/actions/load_explorer_data';
 
 export interface ExplorerUrlStateManagerProps {
   jobsWithTimeRange: MlJobWithTimeRange[];
@@ -59,10 +55,8 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
   );
 
   const anomalyExplorerContext = useAnomalyExplorerContext();
-  const [explorerState, setExplorerState] = useState<ExplorerState>(getExplorerDefaultState());
 
   const refresh = useRefresh();
-  const lastRefresh = refresh?.lastRefresh ?? 0;
 
   const getJobsWithStoppedPartitions = useCallback(async (selectedJobIds: string[]) => {
     try {
@@ -92,14 +86,6 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
     }
   }, [getJobsWithStoppedPartitions, jobIds]);
 
-  const [explorerData, loadExplorerData] = useExplorerData();
-
-  useEffect(() => {
-    if (explorerData !== undefined && Object.keys(explorerData).length > 0) {
-      setExplorerState((prevState) => ({ ...prevState, ...explorerData }));
-    }
-  }, [explorerData]);
-
   const [tableSeverity] = useTableSeverity();
 
   const showCharts = useObservable(
@@ -112,52 +98,17 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
     anomalyExplorerContext.anomalyTimelineStateService.getSelectedCells()
   );
 
-  const viewByFieldName = useObservable(
-    anomalyExplorerContext.anomalyTimelineStateService.getViewBySwimlaneFieldName$()
-  );
-
   const swimLaneSeverity = useObservable(
     anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity$(),
     anomalyExplorerContext.anomalyTimelineStateService.getSwimLaneSeverity()
   );
-
-  const influencersFilterQuery = useObservable(
-    anomalyExplorerContext.anomalyExplorerCommonStateService.influencerFilterQuery$
-  );
-
-  const loadExplorerDataConfig = useMemo(
-    (): LoadExplorerDataConfig => ({
-      lastRefresh,
-      influencersFilterQuery: influencersFilterQuery!,
-      noInfluencersConfigured,
-      selectedCells,
-      selectedJobs,
-      viewBySwimlaneFieldName: viewByFieldName!,
-    }),
-    [
-      lastRefresh,
-      influencersFilterQuery,
-      noInfluencersConfigured,
-      selectedCells,
-      selectedJobs,
-      viewByFieldName,
-    ]
-  );
-
-  useEffect(() => {
-    if (!loadExplorerDataConfig || loadExplorerDataConfig?.selectedCells === undefined) return;
-    // TODO: Find other way to set loading state as it causes unnecessary re-renders - handle it in anomaly_explorer_common_state
-    setExplorerState((prevState) => ({ ...prevState, loading: true }));
-    loadExplorerData(loadExplorerDataConfig);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(loadExplorerDataConfig)]);
 
   const overallSwimlaneData = useObservable(
     anomalyExplorerContext.anomalyTimelineStateService.getOverallSwimLaneData$(),
     null
   );
 
-  if (explorerState === undefined || refresh === undefined) {
+  if (refresh === undefined) {
     return null;
   }
 
@@ -188,7 +139,6 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
         ) : (
           <Explorer
             {...{
-              explorerState,
               noInfluencersConfigured,
               overallSwimlaneData,
               showCharts,

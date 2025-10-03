@@ -106,11 +106,7 @@ export const AnomalyExplorerContextProvider: FC<PropsWithChildren<unknown>> = ({
       timefilter
     );
 
-    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(
-      timefilter,
-      mlApi,
-      mlResultsService
-    );
+    const anomalyExplorerChartsService = new AnomalyExplorerChartsService(timefilter, mlApi);
 
     const chartsStateService = new AnomalyChartsStateService(
       anomalyExplorerCommonStateService,
