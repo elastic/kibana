@@ -27,10 +27,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await common.navigateToApp('dashboard');
     });
 
-    beforeEach(async () => {
-      await searchSessions.markTourDone();
-    });
-
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await searchSessions.deleteAllSearchSessions();
@@ -40,7 +36,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     loadTestFile(require.resolve('./session_searches_integration'));
     loadTestFile(require.resolve('./save_search_session'));
     loadTestFile(require.resolve('./save_search_session_relative_time'));
-    loadTestFile(require.resolve('./search_sessions_tour'));
     loadTestFile(require.resolve('./sessions_in_space'));
   });
 }
