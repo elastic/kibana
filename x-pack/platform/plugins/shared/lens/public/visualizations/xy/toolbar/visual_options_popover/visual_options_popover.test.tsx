@@ -11,7 +11,7 @@ import type { FramePublicAPI } from '../../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
 import type { SeriesType, State } from '../../types';
 import type { VisualOptionsPopoverProps } from './visual_options_popover';
-import { XyAppearanceSettings } from './visual_options_popover';
+import { VisualOptionsPopover } from './visual_options_popover';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -48,7 +48,7 @@ describe('Visual options popover', () => {
   const renderVisualOptionsPopover = (overrideProps?: Partial<VisualOptionsPopoverProps>) => {
     const state = testState();
     return render(
-      <XyAppearanceSettings
+      <VisualOptionsPopover
         datasourceLayers={frame.datasourceLayers}
         setState={jest.fn()}
         state={state}
