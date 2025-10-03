@@ -219,7 +219,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     describe('last successful managed snapshot protection', () => {
       test('marks the most recent successful snapshot in managed repository as non-deletable', async () => {
         const managedRepository = 'myManagedRepository';
-        const mockSnapshotGetManagedRepositoryEsResponse = {
+        const mockManagedRepoSettings = {
           defaults: {
             'cluster.metadata.managed_repository': managedRepository,
           },
@@ -265,7 +265,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
           [managedRepository]: {},
         };
 
-        getClusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+        getClusterSettingsFn.mockResolvedValue(mockManagedRepoSettings);
         getLifecycleFn.mockResolvedValue({});
         getRepoFn.mockResolvedValue(mockGetRepositoryEsResponse);
         // First call is for the last successful snapshot, second is for the main list
@@ -298,7 +298,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       test('does not mark snapshots in non-managed repositories', async () => {
         const managedRepository = 'myManagedRepository';
         const regularRepository = 'regularRepository';
-        const mockSnapshotGetManagedRepositoryEsResponse = {
+        const mockManagedRepoSettings2 = {
           defaults: {
             'cluster.metadata.managed_repository': managedRepository,
           },
@@ -339,7 +339,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
           [regularRepository]: {},
         };
 
-        getClusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+        getClusterSettingsFn.mockResolvedValue(mockManagedRepoSettings2);
         getLifecycleFn.mockResolvedValue({});
         getRepoFn.mockResolvedValue(mockGetRepositoryEsResponse);
         getSnapshotFn.mockResolvedValueOnce(mockGetLastSuccessfulSnapshotResponse);
@@ -369,7 +369,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
 
       test('handles case when managed repository has no successful snapshots', async () => {
         const managedRepository = 'myManagedRepository';
-        const mockSnapshotGetManagedRepositoryEsResponse = {
+        const mockManagedRepoSettings3 = {
           defaults: {
             'cluster.metadata.managed_repository': managedRepository,
           },
@@ -395,7 +395,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
           [managedRepository]: {},
         };
 
-        getClusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+        getClusterSettingsFn.mockResolvedValue(mockManagedRepoSettings3);
         getLifecycleFn.mockResolvedValue({});
         getRepoFn.mockResolvedValue(mockGetRepositoryEsResponse);
         getSnapshotFn.mockResolvedValueOnce(mockGetLastSuccessfulSnapshotResponse);
@@ -415,7 +415,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       });
 
       test('handles case when there is no managed repository', async () => {
-        const mockSnapshotGetManagedRepositoryEsResponse = {
+        const mockManagedRepoSettings4 = {
           defaults: {},
         };
 
@@ -434,7 +434,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
           regularRepository: {},
         };
 
-        getClusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+        getClusterSettingsFn.mockResolvedValue(mockManagedRepoSettings4);
         getLifecycleFn.mockResolvedValue({});
         getRepoFn.mockResolvedValue(mockGetRepositoryEsResponse);
         getSnapshotFn.mockResolvedValueOnce(mockGetSnapshotsResponse);
@@ -454,7 +454,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
 
       test('continues to work if fetching last successful snapshot fails', async () => {
         const managedRepository = 'myManagedRepository';
-        const mockSnapshotGetManagedRepositoryEsResponse = {
+        const mockManagedRepoSettings5 = {
           defaults: {
             'cluster.metadata.managed_repository': managedRepository,
           },
@@ -475,7 +475,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
           [managedRepository]: {},
         };
 
-        getClusterSettingsFn.mockResolvedValue(mockSnapshotGetManagedRepositoryEsResponse);
+        getClusterSettingsFn.mockResolvedValue(mockManagedRepoSettings5);
         getLifecycleFn.mockResolvedValue({});
         getRepoFn.mockResolvedValue(mockGetRepositoryEsResponse);
         // First call fails, second succeeds
