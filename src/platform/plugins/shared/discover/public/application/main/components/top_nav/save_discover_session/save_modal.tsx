@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
@@ -35,7 +35,7 @@ export interface DiscoverSessionSaveModalProps {
 
 export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> = ({
   isTimeBased,
-  services: { savedObjectsTagging },
+  services: { savedObjectsTagging, discoverFeatureFlags },
   title,
   description,
   tags,
@@ -48,6 +48,7 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
 }) => {
   const [timeRestore, setTimeRestore] = useState(Boolean(isTimeBased && savedTimeRestore));
   const [currentTags, setCurrentTags] = useState(tags);
+  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
   const onModalSave = async (params: OnSaveProps) => {
     await onSave({
@@ -98,6 +99,24 @@ export const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> =
 
   return (
     <SavedObjectSaveModal
+      customModalTitle={
+        <>
+          <FormattedMessage
+            id="discover.localMenu.saveModalTitle"
+            defaultMessage="Save Discover session"
+          />
+          {tabsEnabled && (
+            <EuiText size="xs" color="subdued">
+              <EuiSpacer size="xs" />
+              <p>
+                {i18n.translate('discover.localMenu.saveModalSubtitle', {
+                  defaultMessage: 'All open tabs will be saved to this session',
+                })}
+              </p>
+            </EuiText>
+          )}
+        </>
+      }
       title={title}
       showCopyOnSave={showCopyOnSave}
       initialCopyOnSave={initialCopyOnSave}
