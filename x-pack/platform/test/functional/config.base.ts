@@ -196,9 +196,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       enterpriseSearch: {
         pathname: '/app/elasticsearch/overview',
       },
-      elasticsearchStart: {
-        pathname: '/app/elasticsearch/start',
-      },
       elasticsearchIndices: {
         pathname: '/app/elasticsearch/indices',
       },

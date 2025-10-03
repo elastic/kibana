@@ -109,29 +109,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // await searchStart.expectAPIKeyVisibleInCodeBlock(newApiKeyUI);
       });
 
-      it('should create a new api key when the existing one is invalidated', async () => {
-        await searchStart.expectToBeOnStartPage();
-        await searchStart.clickCodeViewButton();
-        await searchApiKeys.expectAPIKeyAvailable();
-
-        // Get initial API key
-        const initialApiKey = await searchApiKeys.getAPIKeyFromSessionStorage();
-        expect(initialApiKey).to.not.be(null);
-        expect(initialApiKey!.id).to.not.be(null);
-
-        // Navigate away to keep key in current session, invalidate key and return back
-        await searchNavigation.navigateToIndexManagementPage();
-        await searchApiKeys.invalidateAPIKey(initialApiKey!.id);
-        await searchNavigation.navigateToElasticsearchStartPage(false, `/s/${spaceCreated.id}`);
-        await searchStart.clickCodeViewButton();
-
-        // Check that new key was generated
-        await searchApiKeys.expectAPIKeyAvailable();
-        const newApiKey = await searchApiKeys.getAPIKeyFromSessionStorage();
-        expect(newApiKey).to.not.be(null);
-        expect(newApiKey!.id).to.not.eql(initialApiKey!.id);
-      });
-
       it('should explicitly ask to create api key when project already has an apikey', async () => {
         await searchApiKeys.clearAPIKeySessionStorage();
         await searchApiKeys.createAPIKey();
