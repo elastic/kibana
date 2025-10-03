@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.5>>
 * <<release-notes-8.19.4>>
 * <<release-notes-8.19.3>>
 * <<release-notes-8.19.2>>
@@ -109,6 +110,29 @@ Review important information about the {kib} 8.x releases.
 
 
 include::upgrade-notes.asciidoc[]
+
+[[release-notes-8.19.5]]
+== {kib} 8.19.5
+
+The 8.19.5 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.5]]
+=== Fixes
+Alerting::
+* Rolls over the reporting data stream if its template version is newer than the version in the data stream's mappings ({kibana-pull}234119[#234119]).
+Data ingestion and Fleet::
+* Fixes malformed synthetics package policies ({kibana-pull}236176[#236176]).
+Discover::
+* Fixes sizing issues with the **Actions** column header ({kibana-pull}235227[#235227]).
+Elastic Observability solution::
+* Prevents synthetics package policies from becoming malformed and reporting elastic-agents as unhealthy ({kibana-pull}236104[#236104]).
+* Cleans up extra synthetics package policies ({kibana-pull}235200[#235200]).
+Elastic Security solution::
+For the Elastic Security 8.19.5 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+Machine Learning::
+* Improves trained model performance by adding filters to the request to fetch all index settings ({kibana-pull}237072[#237072]).
+
 
 [[release-notes-8.19.4]]
 == {kib} 8.19.4
