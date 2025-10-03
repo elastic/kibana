@@ -217,8 +217,8 @@ export const GetStartedWithElasticsearch = () => {
           application={application}
           consolePlugin={consolePlugin}
           sharePlugin={share}
-          telemetryId="console_tutorials_search_basics"
-          data-test-subj="console_tutorials_search_basics"
+          telemetryId="console_tutorials_search_basics_console_btn"
+          data-test-subj="console_tutorials_search_basics_console_btn"
         />
       ),
       badgeText: i18n.translate('xpack.searchHomepage.getStarted.newBadge', {
@@ -243,8 +243,8 @@ export const GetStartedWithElasticsearch = () => {
           application={application}
           consolePlugin={consolePlugin}
           sharePlugin={share}
-          telemetryId="console_tutorials_semantic_search"
-          data-test-subj="console_tutorials_semantic_search"
+          telemetryId="console_tutorials_semantic_search_console_btn"
+          data-test-subj="console_tutorials_semantic_search_console_btn"
         />
       ),
       badgeText: i18n.translate('xpack.searchHomepage.getStarted.newBadge', {
@@ -269,8 +269,34 @@ export const GetStartedWithElasticsearch = () => {
           application={application}
           consolePlugin={consolePlugin}
           sharePlugin={share}
-          telemetryId="console_tutorials_esql"
-          data-test-subj="console_tutorials_esql"
+          telemetryId="console_tutorials_esql_console_btn"
+          data-test-subj="console_tutorials_esql_console_btn"
+        />
+      ),
+      badgeText: i18n.translate('xpack.searchHomepage.getStarted.newBadge', {
+        defaultMessage: 'NEW',
+      }),
+    },
+    {
+      _id: 'console_tutorials_tsds',
+      title: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsTitle', {
+        defaultMessage: 'TSDS',
+      }),
+      dataTestSubj: 'console_tutorials_tsds',
+      description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
+        defaultMessage:
+          'Learn how to use time series data stream (TSDS) to store timestamped metrics data.',
+      }),
+      buttonComponent: (
+        <TryInConsoleButton
+          request={consoleTutorials.timeSeriesDataStreams}
+          color="text"
+          type="button"
+          application={application}
+          consolePlugin={consolePlugin}
+          sharePlugin={share}
+          telemetryId="console_tutorials_tsds_console_btn"
+          data-test-subj="console_tutorials_tsds_console_btn"
         />
       ),
       badgeText: i18n.translate('xpack.searchHomepage.getStarted.newBadge', {
