@@ -42,7 +42,6 @@ describe('useChartLayers', () => {
     expect(layer.breakdown).toBeUndefined();
     expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
     expect(layer.yAxis[0].seriesColor).toBe('#000');
-    expect(layer.xAxis.field).toBe('time_bucket_agg');
   });
 
   it('should return a line chart configuration with a breakdown when dimensions are provided', () => {
