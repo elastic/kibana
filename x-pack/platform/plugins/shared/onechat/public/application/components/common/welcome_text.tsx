@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
+import { TechPreviewBadge } from './tech_preview';
 
 export const WelcomeText: React.FC<{}> = () => {
   const labels = {
@@ -50,6 +51,9 @@ export const WelcomeText: React.FC<{}> = () => {
     >
       <EuiFlexItem grow={false}>
         <EuiIcon color="primary" size="xxl" type="logoElastic" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <TechPreviewBadge />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiTitle>
