@@ -119,6 +119,26 @@ export interface FeatureKibanaPrivileges {
        * ```
        */
       read?: AlertingKibanaPrivilege;
+      /**
+       * List of rule types and consumers for which users should have the ability to enable and disable rules when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    read: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
+       *  }
+       * ```
+       */
+      enable?: AlertingKibanaPrivilege;
+      /**
+       * List of rule types and consumers for which users should have the ability to run rules on-demand when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    read: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
+       *  }
+       * ```
+       */
+      run?: AlertingKibanaPrivilege;
     };
     alert?: {
       /**

@@ -98,6 +98,7 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
+              enable: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
@@ -174,6 +175,7 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
+              enable: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
@@ -394,6 +396,9 @@ describe('featurePrivilegeIterator', () => {
                     read: ['read-sub-type'],
                   },
                   alerting: {
+                    rule: {
+                      run: [{ ruleTypeId: 'alerting-run-sub-type', consumers: ['foo'] }],
+                    },
                     alert: {
                       all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
                     },
@@ -580,6 +585,9 @@ describe('featurePrivilegeIterator', () => {
                     read: ['read-sub-type'],
                   },
                   alerting: {
+                    rule: {
+                      run: [{ ruleTypeId: 'alerting-run-sub-type', consumers: ['foo'] }],
+                    },
                     alert: {
                       all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
                     },
@@ -767,6 +775,9 @@ describe('featurePrivilegeIterator', () => {
                     read: ['read-sub-type'],
                   },
                   alerting: {
+                    rule: {
+                      run: [{ ruleTypeId: 'alerting-run-sub-type', consumers: ['foo'] }],
+                    },
                     alert: {
                       all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
                     },
@@ -817,6 +828,8 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
+              enable: [],
+              run: [{ ruleTypeId: 'alerting-run-sub-type', consumers: ['foo'] }],
               read: [],
             },
             alert: {
@@ -856,7 +869,9 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [],
+              enable: [],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
+              run: [{ ruleTypeId: 'alerting-run-sub-type', consumers: ['foo'] }],
             },
             alert: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
@@ -936,6 +951,7 @@ describe('featurePrivilegeIterator', () => {
           },
           alerting: {
             rule: {
+              run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
@@ -970,6 +986,9 @@ describe('featurePrivilegeIterator', () => {
                     read: ['read-type'],
                   },
                   alerting: {
+                    rule: {
+                      run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
+                    },
                     alert: {
                       all: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
                     },
@@ -1010,6 +1029,8 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
+              enable: [],
+              run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
@@ -1048,6 +1069,8 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [],
+              enable: [],
+              run: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {
@@ -1211,6 +1234,8 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
+              enable: [],
+              run: [],
               read: [],
             },
             alert: {
@@ -1459,6 +1484,8 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
+              enable: [],
+              run: [],
               read: [{ ruleTypeId: 'alerting-read-sub-type', consumers: ['foo'] }],
             },
             alert: {
@@ -1498,6 +1525,8 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-sub-type', consumers: ['foo'] }],
+              enable: [],
+              run: [],
               read: [{ ruleTypeId: 'alerting-read-sub-type', consumers: ['foo'] }],
             },
             alert: {
@@ -1635,6 +1664,8 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [{ ruleTypeId: 'alerting-all-type', consumers: ['foo'] }],
+              enable: [],
+              run: [],
               read: [],
             },
             alert: {
@@ -1673,6 +1704,8 @@ describe('featurePrivilegeIterator', () => {
           alerting: {
             rule: {
               all: [],
+              enable: [],
+              run: [],
               read: [{ ruleTypeId: 'alerting-read-type', consumers: ['foo'] }],
             },
             alert: {

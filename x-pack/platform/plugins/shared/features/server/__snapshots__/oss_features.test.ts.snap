@@ -1087,7 +1087,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [
@@ -1261,7 +1263,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [
@@ -1423,7 +1427,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [
@@ -1577,7 +1583,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [
@@ -1928,7 +1936,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [
@@ -2083,7 +2093,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [],
@@ -2224,7 +2236,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [
@@ -2398,7 +2412,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [
@@ -2560,7 +2576,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [
@@ -2714,7 +2732,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [
@@ -3065,7 +3085,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [
@@ -3220,7 +3242,9 @@ Array [
         },
         "rule": Object {
           "all": Array [],
+          "enable": Array [],
           "read": Array [],
+          "run": Array [],
         },
       },
       "api": Array [],
