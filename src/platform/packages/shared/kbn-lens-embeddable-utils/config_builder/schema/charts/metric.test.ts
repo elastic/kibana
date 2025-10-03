@@ -78,8 +78,6 @@ describe('Metric Schema', () => {
           alignments: { labels: 'left', value: 'left' },
           color: {
             type: 'dynamic' as const,
-            min: 0,
-            max: 100,
             range: 'absolute' as const,
             steps: [
               { type: 'from' as const, from: 0, color: '#blue' },
@@ -114,6 +112,28 @@ describe('Metric Schema', () => {
 
       const validated = metricStateSchema.validate(input);
       expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('should throw for invalid color by value configuration', () => {
+      const input = {
+        ...baseMetricConfig,
+        metric: {
+          operation: 'average' as const,
+          field: 'temperature',
+          color: {
+            type: 'dynamic' as const,
+            range: 'percentage' as const,
+            steps: [
+              { type: 'from' as const, from: 0, color: '#blue' },
+              { type: 'to' as const, to: 100, color: '#red' },
+            ],
+          },
+          fit: false,
+          alignments: { labels: 'left', value: 'left' },
+        },
+      };
+
+      expect(() => metricStateSchema.validate(input)).toThrow();
     });
   });
 
@@ -290,8 +310,6 @@ describe('Metric Schema', () => {
           },
           color: {
             type: 'dynamic' as const,
-            min: 0,
-            max: 1000,
             range: 'absolute' as const,
             steps: [
               { type: 'from' as const, from: 0, color: '#red' },
