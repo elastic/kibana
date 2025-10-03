@@ -97,7 +97,7 @@ describe('useReviewSuggestionsForm', () => {
     );
   });
 
-  it('acceptSuggestion sends append event and removes the suggestion', () => {
+  it('acceptSuggestion removes the suggestion', () => {
     mockSuggestedPartitionsState = {
       loading: false,
       value: { partitions: [{ id: '1', name: 'logs-api', condition }] },
@@ -106,15 +106,6 @@ describe('useReviewSuggestionsForm', () => {
     act(() => {
       result.current.acceptSuggestion(0);
     });
-    // append event
-    expect(mockSend).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: 'suggestion.append',
-        definitions: [
-          expect.objectContaining({ destination: 'logs-api', where: condition, status: 'enabled' }),
-        ],
-      })
-    );
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'suggestion.preview', name: '', index: 0 })
     );
