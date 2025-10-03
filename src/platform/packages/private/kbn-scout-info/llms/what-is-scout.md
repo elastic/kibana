@@ -44,7 +44,7 @@ Scout makes it easy to run tests your way – sequentially, in parallel, and mor
 
 ## Fixtures
 
-Fixtures offer essential context to your tests. The `@kbn/scout` package includes a collection of fixtures specifically designed for Scout tests. These fixtures provide reusable, scoped resources to ensure that tests have consistent and isolated access to critical services such as logging, configuration, and Kibana and Elasticsearch clients.
+Fixtures offer essential context to your tests. The `@kbn/scout` package includes a collection of fixtures specifically designed for Scout tests. These fixtures provide reusable, scoped resources to ensure that tests have consistent and isolated access to criticial services such as logging, configuration, and Kibana and Elasticsearch clients.
 
 ### Usage
 
@@ -143,13 +143,10 @@ apiTest.describe(
 );
 ```
 
-**[1]** Import from `@kbn/scout-oblt` or from `@kbn/scout-security` if your plugin belongs to a specific solution.
-
-**[2]** We request an API key for the `admin` role using the `requestAuth` fixture.
-
-**[3]** We send a POST request to our plugin endpoint using the `apiClient` fixture.
-
-**[4]** We finally check that the response status code and body are as expected.
+- **[1]** Import from `@kbn/scout-oblt` or from `@kbn/scout-security` if your plugin belongs to a specific solution.
+- **[2]** We request an API key for the `admin` role using the `requestAuth` fixture.
+- **[3]** We send a POST request to our plugin endpoint using the `apiClient` fixture.
+- **[4]** We finally check that the response status code and body are as expected.
 
 In the example above, note the following:
 
@@ -207,8 +204,9 @@ test.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
 });
 ```
 
-- **[1]**: Import from `@kbn/scout-oblt` or from `@kbn/scout-security` if your plugin belongs to a specific solution.
-- **[2]**: The `browserAuth` and `pageObjects` fixtures are used to log into and interact with Kibana.
+**[1]**: Import from `@kbn/scout-oblt` or from `@kbn/scout-security` if your plugin belongs to a specific solution.
+
+**[2]**: The `browserAuth` and `pageObjects` fixtures are used to log into and interact with Kibana.
 
 In the example above, note the following:
 

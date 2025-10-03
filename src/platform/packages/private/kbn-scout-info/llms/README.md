@@ -1,15 +1,17 @@
 # FTR to Scout Test AI Migration Utilities
 
-These AI prompts help automate the conversion of existing FTR tests to Scout format, reducing manual effort and ensuring consistency during migration.
+These AI prompts help automate the conversion of existing FTR tests to the [Scout](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-scout) framework, reducing manual effort and ensuring consistency and correctness during migration.
 
 ## What's included
 
 - `ftr-to-scout-skeleton-guide.md` - A prompt you can use to convert an FTR test to a Scout skeleton test
-- `what-is-scout.md` - Overview of Scout framework, its features, fixtures, and how to write API and UI tests
+- `what-is-scout.md` - Overview of the Scout framework, its features, fixtures, and how to write API and UI tests
 
 ### Requirements
 
 These prompts have been tested with **Claude Sonnet 4.5** and the [**Claude VS Code extension**](https://docs.claude.com/en/docs/claude-code/vs-code), but should work with your LLM of choice. Adjust the prompt syntax as needed for your preferred AI assistant (e.g., GitHub Copilot, ChatGPT, or other code assistants).
+
+# Prompts
 
 ## Generate a Scout boilerplate file from an existing FTR test
 

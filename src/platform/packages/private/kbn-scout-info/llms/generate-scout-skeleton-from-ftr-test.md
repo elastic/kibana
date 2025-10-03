@@ -16,9 +16,9 @@ Migrate existing FTR tests to Scout by creating empty test skeletons. Generate t
 
 Import from one of these Scout packages:
 
-- @kbn/scout: Platform tests (generally tests in "x-pack/platform/test/functional")
-- @kbn/scout-security: Security solution tests (generally tests in "x-pack/solutions/security/test/functional)
-- @kbn/scout-oblt: Observability solution tests (generally tests in "x-pack/solutions/observability/test/functional")
+- `@kbn/scout`: Platform tests (generally tests in `x-pack/platform/test/functional`)
+- `@kbn/scout-security`: Security solution tests (generally tests in `x-pack/solutions/security/test/functional`)
+- `@kbn/scout-oblt`: Observability solution tests (generally tests in `x-pack/solutions/observability/test/functional`)
 
 For API tests, import `apiTest` instead of `test`. If the path is ambiguous, infer from test content.
 
