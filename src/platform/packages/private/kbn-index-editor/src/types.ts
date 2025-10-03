@@ -60,6 +60,7 @@ export interface KibanaContextExtra {
   /** Custom service for indexing documents */
   indexUpdateService: IndexUpdateService;
   fileUploadManager: FileUploadManager;
+  indexEditorTelemetryService: IndexEditorTelemetryService;
   // Required services
   theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;

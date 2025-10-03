@@ -495,6 +495,8 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       onDecorationHoverShown: (hoverMessage: string) =>
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
+      onSuggestionsWithCustomCommandShown: (commandIds: string[]) =>
+        telemetryService.trackSuggestionsWithCustomCommandShown(commandIds),
     }),
     [telemetryService]
   );
@@ -790,8 +792,8 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const suggestionProvider = useMemo(
-    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks),
-    [esqlCallbacks]
+    () => ESQLLang.getSuggestionProvider?.({ ...esqlCallbacks, telemetry: telemetryCallbacks }),
+    [esqlCallbacks, telemetryCallbacks]
   );
 
   const hoverProvider = useMemo(
