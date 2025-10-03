@@ -29,7 +29,7 @@ export function AppearanceSettingsPopover({
       title={i18n.translate('xpack.lens.metric.appearancePopover.title', {
         defaultMessage: 'Appearance',
       })}
-      type="titlesAndText"
+      type="visualOptions"
       groupPosition={groupPosition}
       buttonDataTestSubj="lnsTextOptionsButton"
     >
