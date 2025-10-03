@@ -40,6 +40,7 @@ export const SnapshotPage = () => {
             <InventoryTimeRangeMetadataProvider>
               <div className={APP_WRAPPER_CLASS}>
                 <InfraPageTemplate
+                  dataSourceAvailability="host"
                   onboardingFlow={OnboardingFlow.Infra}
                   pageHeader={{
                     pageTitle: inventoryTitle,
