@@ -43,7 +43,7 @@ export class ControlsExamplePlugin
     developerExamples.register({
       appId: 'controlsExamples',
       title: 'Controls',
-      description: `Learn how to create new control types and use controls in your application`,
+      description: `Learn how to use controls in your application`,
       image: img,
     });
   }
