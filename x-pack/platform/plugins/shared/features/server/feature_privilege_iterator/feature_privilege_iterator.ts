@@ -139,9 +139,9 @@ function mergeWithSubFeatures(
           ...(mergedConfig.alerting?.rule?.enable ?? []),
           ...(subFeaturePrivilege.alerting?.rule?.enable ?? []),
         ]),
-        run: mergeAlertingEntries([
-          ...(mergedConfig.alerting?.rule?.run ?? []),
-          ...(subFeaturePrivilege.alerting?.rule?.run ?? []),
+        manual_run: mergeAlertingEntries([
+          ...(mergedConfig.alerting?.rule?.manual_run ?? []),
+          ...(subFeaturePrivilege.alerting?.rule?.manual_run ?? []),
         ]),
         read: mergeAlertingEntries([
           ...(mergedConfig.alerting?.rule?.read ?? []),

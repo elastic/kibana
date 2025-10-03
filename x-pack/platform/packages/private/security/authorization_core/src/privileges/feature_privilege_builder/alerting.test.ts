@@ -191,7 +191,7 @@ describe(`feature_privilege_builder`, () => {
         `);
       });
 
-      test('grants `run` privileges to rules under feature consumer', () => {
+      test('grants `manual_run` privileges to rules under feature consumer', () => {
         const actions = new Actions();
         const alertingFeaturePrivileges = new FeaturePrivilegeAlertingBuilder(actions);
 
@@ -199,7 +199,7 @@ describe(`feature_privilege_builder`, () => {
           alerting: {
             rule: {
               all: [],
-              run: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              manual_run: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
             },
           },
           savedObject: {
@@ -538,7 +538,7 @@ describe(`feature_privilege_builder`, () => {
             rule: {
               all: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
               enable: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
-              run: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              manual_run: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
               read: [{ ruleTypeId: 'readonly-alert-type', consumers: ['my-consumer'] }],
             },
           },
@@ -757,7 +757,7 @@ describe(`feature_privilege_builder`, () => {
             rule: {
               all: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
               enable: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
-              run: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              manual_run: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
               read: [{ ruleTypeId: 'readonly-alert-type', consumers: ['my-consumer'] }],
             },
             alert: {
@@ -855,13 +855,13 @@ describe(`feature_privilege_builder`, () => {
                 { ruleTypeId: 'alert-type-2', consumers: ['my-consumer-3'] },
               ],
               enable: [{ ruleTypeId: 'enable-alert-type-1', consumers: ['my-consumer-1'] }],
-              run: [
+              manual_run: [
                 {
-                  ruleTypeId: 'run-alert-type-1',
+                  ruleTypeId: 'manual_run-alert-type-1',
                   consumers: ['my-read-consumer-2'],
                 },
                 {
-                  ruleTypeId: 'run-alert-type-2',
+                  ruleTypeId: 'manual_run-alert-type-2',
                   consumers: ['my-read-consumer-3', 'my-read-consumer-4'],
                 },
               ],
@@ -1068,9 +1068,9 @@ describe(`feature_privilege_builder`, () => {
             "alerting:enable-alert-type-1/my-consumer-1/rule/disable",
             "alerting:enable-alert-type-1/my-consumer-1/rule/bulkEnable",
             "alerting:enable-alert-type-1/my-consumer-1/rule/bulkDisable",
-            "alerting:run-alert-type-1/my-read-consumer-2/rule/scheduleBackfill",
-            "alerting:run-alert-type-2/my-read-consumer-3/rule/scheduleBackfill",
-            "alerting:run-alert-type-2/my-read-consumer-4/rule/scheduleBackfill",
+            "alerting:manual_run-alert-type-1/my-read-consumer-2/rule/scheduleBackfill",
+            "alerting:manual_run-alert-type-2/my-read-consumer-3/rule/scheduleBackfill",
+            "alerting:manual_run-alert-type-2/my-read-consumer-4/rule/scheduleBackfill",
             "alerting:another-alert-type-1/my-consumer-another-1/alert/get",
             "alerting:another-alert-type-1/my-consumer-another-1/alert/find",
             "alerting:another-alert-type-1/my-consumer-another-1/alert/getAuthorizedAlertsIndices",

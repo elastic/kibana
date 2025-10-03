@@ -1088,8 +1088,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [
@@ -1264,8 +1264,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [
@@ -1428,8 +1428,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [
@@ -1584,8 +1584,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [
@@ -1937,8 +1937,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [
@@ -2094,8 +2094,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [],
@@ -2237,8 +2237,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [
@@ -2413,8 +2413,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [
@@ -2577,8 +2577,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [
@@ -2733,8 +2733,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [
@@ -3086,8 +3086,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [
@@ -3243,8 +3243,8 @@ Array [
         "rule": Object {
           "all": Array [],
           "enable": Array [],
+          "manual_run": Array [],
           "read": Array [],
-          "run": Array [],
         },
       },
       "api": Array [],

@@ -155,7 +155,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                   id: 'run_backfill',
                   includeIn: 'all',
                   savedObject: { all: [], read: [] },
-                  alerting: { rule: { run: testAlertingFeatures } },
+                  alerting: { rule: { manual_run: testAlertingFeatures } },
                   ui: [],
                 },
               ],

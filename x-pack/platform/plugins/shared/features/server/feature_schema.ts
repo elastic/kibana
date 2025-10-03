@@ -110,7 +110,7 @@ const kibanaPrivilegeSchema = schema.object({
         schema.object({
           all: schema.maybe(alertingSchema),
           enable: schema.maybe(alertingSchema),
-          run: schema.maybe(alertingSchema),
+          manual_run: schema.maybe(alertingSchema),
           read: schema.maybe(alertingSchema),
         })
       ),
@@ -165,7 +165,7 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
           all: schema.maybe(alertingSchema),
           enable: schema.maybe(alertingSchema),
           read: schema.maybe(alertingSchema),
-          run: schema.maybe(alertingSchema),
+          manual_run: schema.maybe(alertingSchema),
         })
       ),
       alert: schema.maybe(

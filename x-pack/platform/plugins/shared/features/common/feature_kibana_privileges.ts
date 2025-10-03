@@ -130,7 +130,7 @@ export interface FeatureKibanaPrivileges {
        */
       enable?: AlertingKibanaPrivilege;
       /**
-       * List of rule types and consumers for which users should have the ability to run rules on-demand when granted this privilege.
+       * List of rule types and consumers for which users should have the ability to manually run backfills when granted this privilege.
        * @example
        * ```ts
        *  {
@@ -138,7 +138,7 @@ export interface FeatureKibanaPrivileges {
        *  }
        * ```
        */
-      run?: AlertingKibanaPrivilege;
+      manual_run?: AlertingKibanaPrivilege;
     };
     alert?: {
       /**
