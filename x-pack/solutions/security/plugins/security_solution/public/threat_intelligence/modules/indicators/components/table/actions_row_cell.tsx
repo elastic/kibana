@@ -17,9 +17,7 @@ import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 import { INVESTIGATE_IN_TIMELINE_TEST_ID } from './test_ids';
 
 export const ActionsRowCell: FC<{ indicator: Indicator }> = ({ indicator }) => {
-  const indicatorTableContext = useIndicatorsTableContext();
-
-  const { setExpanded } = indicatorTableContext;
+  const { setExpanded } = useIndicatorsTableContext();
 
   return (
     <EuiFlexGroup justifyContent="center" gutterSize="none">

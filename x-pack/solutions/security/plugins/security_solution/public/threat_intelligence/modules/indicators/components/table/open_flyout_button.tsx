@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { BUTTON_TEST_ID } from './test_ids';
@@ -30,6 +30,8 @@ export const OpenIndicatorFlyoutButton: FC<OpenIndicatorFlyoutButtonProps> = ({
   indicator,
   onOpen,
 }) => {
+  const open = useCallback(() => onOpen(indicator), [indicator, onOpen]);
+
   return (
     <EuiToolTip content={VIEW_DETAILS_BUTTON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
@@ -37,7 +39,7 @@ export const OpenIndicatorFlyoutButton: FC<OpenIndicatorFlyoutButtonProps> = ({
         color="text"
         data-test-subj={BUTTON_TEST_ID}
         iconType="expand"
-        onClick={() => onOpen(indicator)}
+        onClick={open}
         size="s"
       />
     </EuiToolTip>
