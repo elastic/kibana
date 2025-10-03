@@ -9,10 +9,12 @@
 
 import type { Observable } from 'rxjs';
 
-export interface PublishesReload {
-  reload$: Observable<void>;
+export interface PublishesPauseFetch {
+  isFetchPaused$: Observable<boolean>;
 }
 
-export const apiPublishesReload = (unknownApi: null | unknown): unknownApi is PublishesReload => {
-  return Boolean(unknownApi && (unknownApi as PublishesReload)?.reload$ !== undefined);
+export const apiPublishesPauseFetch = (
+  unknownApi: null | unknown
+): unknownApi is PublishesPauseFetch => {
+  return Boolean(unknownApi && (unknownApi as PublishesPauseFetch)?.isFetchPaused$ !== undefined);
 };
