@@ -25,7 +25,7 @@ import type { OperationMetadata, Visualization } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
 import { getSuggestions } from './suggestions';
-import { TagcloudToolbar } from './tagcloud_toolbar';
+import { TagcloudFlyoutToolbar, TagcloudToolbar } from './toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
@@ -327,6 +327,11 @@ export const getTagcloudVisualization = ({
   ToolbarComponent(props) {
     return <TagcloudToolbar {...props} />;
   },
+
+  FlyoutToolbarComponent(props) {
+    return <TagcloudFlyoutToolbar {...props} />;
+  },
+
   getTelemetryEventsOnSave(state, prevState) {
     return getColorMappingTelemetryEvents(state?.colorMapping, prevState?.colorMapping);
   },
