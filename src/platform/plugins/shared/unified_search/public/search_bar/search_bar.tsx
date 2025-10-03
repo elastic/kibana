@@ -80,6 +80,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   showDatePicker?: boolean;
+  showProjectPicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
   additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
@@ -192,6 +193,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     showAutoRefreshOnly: false,
     filtersForSuggestions: [],
     additionalQueryBarMenuItems: [],
+    showProjectPicker: true,
   };
 
   private services = this.props.kibana.services;
@@ -782,6 +784,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
+          showProjectPicker={this.props.showProjectPicker}
         />
       </div>
     );
