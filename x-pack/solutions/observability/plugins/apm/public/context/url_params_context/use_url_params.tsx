@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { Assign } from '@kbn/utility-types';
-import { omit } from 'lodash';
 import { useMemo, useContext } from 'react';
 import type { ApmUrlParams } from './types';
 import { UrlParamsContext } from './url_params_context';
@@ -15,10 +14,15 @@ export function useLegacyUrlParams(): Assign<
   { urlParams: ApmUrlParams }
 > {
   const context = useContext(UrlParamsContext);
-  return useMemo(() => {
-    return {
+
+  // Omit environment and kuery from urlParams
+  const { environment, kuery, ...urlParams } = context.urlParams;
+
+  return useMemo(
+    () => ({
       ...context,
-      urlParams: omit(context.urlParams, ['environment', 'kuery']),
-    };
-  }, [context]);
+      urlParams,
+    }),
+    [context, urlParams]
+  );
 }

@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -60,7 +59,12 @@ export interface TableSearchBar<T> {
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 function defaultSortFn<T>(items: T[], sortField: keyof T, sortDirection: SortDirection) {
-  return orderBy(items, sortField, sortDirection) as T[];
+  // Reduce branching overhead per loop by returning the appropriate sort function for asc/desc
+  const sortFn =
+    sortDirection === 'asc'
+      ? (a: T, b: T) => (a[sortField] < b[sortField] ? -1 : 1)
+      : (a: T, b: T) => (a[sortField] < b[sortField] ? 1 : -1);
+  return items.slice().sort(sortFn);
 }
 
 export type SortFunction<T> = (items: T[], sortField: keyof T, sortDirection: SortDirection) => T[];
@@ -170,7 +174,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   );
 
   // initialise table options state from url params
-  const [tableOptions, setTableOptions] = useState(getStateFromUrl());
+  const [tableOptions, setTableOptions] = useState(getStateFromUrl);
 
   // update table options state when url params change
   useEffect(() => {
@@ -193,7 +197,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // update table options state when `onTableChange` is invoked and persist to url
   const onTableChange = useCallback(
     (newTableOptions: Partial<TableOptions<T>>) => {
-      setTableOptions((oldTableOptions) => merge({}, oldTableOptions, newTableOptions));
+      setTableOptions((oldTableOptions) => ({
+        page: { ...oldTableOptions.page, ...newTableOptions.page },
+        sort: { ...oldTableOptions.sort, ...newTableOptions.sort },
+      }));
 
       if (
         saveTableOptionsToUrl &&
@@ -214,15 +221,24 @@ function UnoptimizedManagedTable<T extends object>(props: {
     [history, saveTableOptionsToUrl, setTableOptions, progressiveLoadingQuality, isLoading]
   );
 
+  // Sorting is pretty heavy, so do it once before we start filtering/slicing
+  const sortedItems = useMemo(
+    () =>
+      sortItems
+        ? sortFn(items, tableOptions.sort.field as keyof T, tableOptions.sort.direction)
+        : items,
+    [items, sortItems, tableOptions.sort.field, tableOptions.sort.direction, sortFn]
+  );
+
   const filteredItems = useMemo(() => {
-    return isEmpty(searchQuery)
-      ? items
+    return searchQuery === ''
+      ? sortedItems
       : getItemsFilteredBySearchQuery({
-          items,
+          items: sortedItems,
           fieldsToSearch: tableSearchBar.fieldsToSearch,
           searchQuery,
         });
-  }, [items, searchQuery, tableSearchBar.fieldsToSearch]);
+  }, [sortedItems, searchQuery, tableSearchBar.fieldsToSearch]);
 
   const renderedIndices = useMemo<VisibleItemsStartEnd>(
     () => [
@@ -232,20 +248,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
     [tableOptions.page.index, tableOptions.page.size]
   );
 
-  const renderedItems = useMemo(() => {
-    const sortedItems = sortItems
-      ? sortFn(filteredItems, tableOptions.sort.field as keyof T, tableOptions.sort.direction)
-      : filteredItems;
-
-    return sortedItems.slice(...renderedIndices);
-  }, [
-    sortItems,
-    sortFn,
-    filteredItems,
-    tableOptions.sort.field,
-    tableOptions.sort.direction,
-    renderedIndices,
-  ]);
+  const renderedItems = useMemo(
+    () => filteredItems.slice(...renderedIndices),
+    [filteredItems, renderedIndices]
+  );
 
   useEffect(() => {
     onChangeRenderedItems?.(renderedItems);
@@ -333,7 +339,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
           rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
           sorting={sorting}
           onChange={onTableChange}
-          {...(paginationProps ? { pagination: paginationProps } : {})}
+          pagination={paginationProps}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
