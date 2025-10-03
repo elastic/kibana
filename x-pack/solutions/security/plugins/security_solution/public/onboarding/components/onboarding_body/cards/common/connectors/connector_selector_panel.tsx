@@ -9,11 +9,7 @@ import React, { useMemo, useEffect, useCallback } from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
-import {
-  getActionTypeTitle,
-  getGenAiConfig,
-  isElasticManagedLlmConnector,
-} from '@kbn/elastic-assistant/impl/connectorland/helpers';
+import { isElasticManagedLlmConnector } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import type { AIConnector } from './types';
 import * as i18n from './translations';
@@ -26,7 +22,10 @@ interface ConnectorSelectorPanelProps {
 
 export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
   ({ connectors, selectedConnectorId, onConnectorSelected }) => {
-    const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
+    const {
+      triggersActionsUi: { actionTypeRegistry },
+      settings,
+    } = useKibana().services;
     const { euiTheme } = useEuiTheme();
     const selectedConnector = useMemo(
       () => connectors.find((connector) => connector.id === selectedConnectorId),
@@ -46,22 +45,6 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
         onConnectorSelected(connectors[0]);
       }
     }, [selectedConnectorId, connectors, onConnectorSelected]);
-
-    const connectorOptions = useMemo(
-      () =>
-        connectors.map((connector) => {
-          let description: string;
-          if (connector.isPreconfigured) {
-            description = i18n.PRECONFIGURED_CONNECTOR;
-          } else {
-            description =
-              getGenAiConfig(connector)?.apiProvider ??
-              getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
-          }
-          return { id: connector.id, name: connector.name, description };
-        }),
-      [actionTypeRegistry, connectors]
-    );
 
     const onConnectorSelectionChange = useCallback(
       (connectorId: string) => {
@@ -140,9 +123,10 @@ export const ConnectorSelectorPanel = React.memo<ConnectorSelectorPanelProps>(
                 )}
                 <EuiFlexItem grow={false}>
                   <ConnectorSelector
-                    connectors={connectorOptions}
+                    connectors={connectors}
                     selectedId={selectedConnectorId}
                     onChange={onConnectorSelectionChange}
+                    settings={settings}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
