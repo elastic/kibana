@@ -444,6 +444,7 @@ const ESQLEditorInternal = function ESQLEditor({
             search: any;
             timeRange: TimeRange;
             signal?: AbortSignal;
+            dropNullColumns?: boolean;
             variables?: ESQLControlVariable[];
           }
         ]
@@ -523,6 +524,7 @@ const ESQLEditorInternal = function ESQLEditor({
               timeRange,
               signal: abortController.signal,
               variables: variablesService?.esqlVariables,
+              dropNullColumns: true,
             }).result;
             const columnsWithMetadata: ESQLFieldWithMetadata[] =
               columns.map((c) => {
