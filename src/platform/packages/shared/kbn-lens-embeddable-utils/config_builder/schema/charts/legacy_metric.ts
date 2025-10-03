@@ -36,46 +36,41 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
    * - 'xl': Extra large
    * - 'xxl': Double extra large
    */
-  size: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal('xs'),
-        schema.literal('s'),
-        schema.literal('m'),
-        schema.literal('l'),
-        schema.literal('xl'),
-        schema.literal('xxl'),
-      ],
-      { defaultValue: 'm' }
-    )
+  size: schema.oneOf(
+    [
+      schema.literal('xs'),
+      schema.literal('s'),
+      schema.literal('m'),
+      schema.literal('l'),
+      schema.literal('xl'),
+      schema.literal('xxl'),
+    ],
+    { defaultValue: 'm' }
   ),
   /**
    * Alignments of the label and value for the legacy metric.
    * For example, align the labels to the left and the values to the right.
    */
-  alignment: schema.maybe(
-    schema.object({
-      /**
-       * Alignments for label. Possible values:
-       * - 'top': Align label to the top of the value (default)
-       * - 'bottom': Align label to the bottom of the value
-       */
-      label: schema.maybe(
-        schema.oneOf([schema.literal('top'), schema.literal('bottom')], { defaultValue: 'top' })
-      ),
-      /**
-       * Alignments for value. Possible values:
-       * - 'left': Align value to the left (default)
-       * - 'center': Align value to the center
-       * - 'right': Align value to the right
-       */
-      value: schema.maybe(
-        schema.oneOf([schema.literal('left'), schema.literal('center'), schema.literal('right')], {
-          defaultValue: 'left',
-        })
-      ),
-    })
-  ),
+  alignment: schema.object({
+    /**
+     * Alignments for label. Possible values:
+     * - 'top': Align label to the top of the value (default)
+     * - 'bottom': Align label to the bottom of the value
+     */
+    label: schema.oneOf([schema.literal('top'), schema.literal('bottom')], { defaultValue: 'top' }),
+    /**
+     * Alignments for value. Possible values:
+     * - 'left': Align value to the left (default)
+     * - 'center': Align value to the center
+     * - 'right': Align value to the right
+     */
+    value: schema.oneOf(
+      [schema.literal('left'), schema.literal('center'), schema.literal('right')],
+      {
+        defaultValue: 'left',
+      }
+    ),
+  }),
   /**
    * Color configuration
    */
@@ -122,7 +117,7 @@ export const legacyMetricStateSchemaNoESQL = schema.object({
 });
 
 const esqlLegacyMetricState = schema.object({
-  type: schema.literal('metric'),
+  type: schema.literal('legacy_metric'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
   ...datasetEsqlTableSchema,
