@@ -26,6 +26,7 @@ interface Props {
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation) => void;
   stats?: AttackDiscoveryStats | null;
+  fullWidth?: boolean;
 }
 
 const inputContainerClassName = css`
@@ -61,6 +62,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     onConnectorIdSelected,
     onConnectorSelected,
     stats = null,
+    fullWidth = false,
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { assistantAvailability } = useAssistantContext();
