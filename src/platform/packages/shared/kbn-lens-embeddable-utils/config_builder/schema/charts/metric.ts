@@ -134,6 +134,14 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
    */
   color: schema.maybe(coloringTypeSchema),
   /**
+   * Where to apply the color (background or value)
+   */
+  apply_color_to: schema.maybe(
+    schema.oneOf([schema.literal('background'), schema.literal('value')], {
+      meta: { description: 'Apply color to' },
+    })
+  ),
+  /**
    * Complementary visualization
    */
   background_chart: schema.maybe(complementaryVizSchema),

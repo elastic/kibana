@@ -86,6 +86,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
     ...(layer.metric.color?.type === 'gradient'
       ? { palette: { type: 'palette', name: layer.metric.color.palette! } }
       : {}),
+    ...(layer.metric.apply_color_to ? { applyColorTo: layer.metric.apply_color_to } : {}),
     subtitle: layer.metric.sub_label ?? '',
     showBar: false,
     valueFontMode: layer.metric.fit ? 'fit' : 'default',
@@ -295,8 +296,9 @@ function reverseBuildVisualizationState(
       };
     }
 
-    // todo: what to do with this ?
-    // if (visualization.applyColorTo) {}
+    if (visualization.applyColorTo) {
+      props.metric.apply_color_to = visualization.applyColorTo;
+    }
 
     if (visualization.icon) {
       props.metric.icon = {
