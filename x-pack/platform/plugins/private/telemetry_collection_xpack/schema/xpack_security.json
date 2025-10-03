@@ -358,16 +358,10 @@
                 "type": "keyword"
               },
               "supports_cloud_connector": {
-                "type": "boolean",
-                "_meta": {
-                  "description": "Whether the installation supports cloud connector functionality"
-                }
+                "type": "boolean"
               },
               "cloud_connector_id": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The unique identifier of the cloud connector associated with this installation"
-                }
+                "type": "keyword"
               }
             }
           }
@@ -518,54 +512,30 @@
           "items": {
             "properties": {
               "id": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The unique identifier of the cloud connector"
-                }
+                "type": "keyword"
               },
               "created_at": {
-                "type": "date",
-                "_meta": {
-                  "description": "The date and time the cloud connector was created"
-                }
+                "type": "date"
               },
               "updated_at": {
-                "type": "date",
-                "_meta": {
-                  "description": "The date and time the cloud connector was updated"
-                }
+                "type": "date"
               },
               "hasCredentials": {
-                "type": "boolean",
-                "_meta": {
-                  "description": "Whether the cloud connector has credentials"
-                }
+                "type": "boolean"
               },
               "cloud_provider": {
-                "type": "keyword",
-                "_meta": {
-                  "description": "The cloud provider associated with the cloud connector"
-                }
+                "type": "keyword"
               },
               "packagePolicyIds": {
                 "type": "array",
                 "items": {
-                  "type": "keyword",
-                  "_meta": {
-                    "description": "List of package policy IDs associated with the cloud connector"
-                  }
+                  "type": "keyword"
                 }
               },
               "packagePolicyCount": {
-                "type": "long",
-                "_meta": {
-                  "description": "Number of package policies associated with the cloud connector"
-                }
+                "type": "long"
               }
             }
-          },
-          "_meta": {
-            "description": "Statistics about CSPM cloud connector usage"
           }
         }
       }
