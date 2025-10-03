@@ -277,9 +277,7 @@ describe('CostSavingsKeyInsight', () => {
       },
     };
 
-    rerender(<CostSavingsKeyInsight isLoading={false} lensResponse={newLensResponse} />, {
-      wrapper,
-    });
+    rerender(<CostSavingsKeyInsight isLoading={false} lensResponse={newLensResponse} />);
 
     await waitFor(() => {
       expect(mockChatComplete).toHaveBeenCalledTimes(2);
