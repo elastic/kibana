@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
 import type { EsqlResponse } from './utils/esql';
-import { generateEsql } from './nl_to_esql';
+import { generateEsql } from './generate_esql';
 
 export interface NaturalLanguageSearchResponse {
   /**

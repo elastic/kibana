@@ -28,28 +28,13 @@ import { isGenerateQueryAction, isAutocorrectQueryAction, isExecuteQueryAction }
 
 const StateAnnotation = Annotation.Root({
   // inputs
-  /**
-   * The natural language query to generate ES|QL from
-   */
   nlQuery: Annotation<string>(),
-  /**
-   * The resource to target
-   */
   target: Annotation<string>(),
-  /**
-   * If true, will attempt to execute the query and will return the results.
-   */
   executeQuery: Annotation<boolean>(),
-  /**
-   * Maximum number of retries to attempt if the query fails to execute.
-   * Note: this is only relevant if `executeQuery` is `true`
-   * */
   maxRetries: Annotation<number>(),
-  /**
-   * Additional instructions to provide to the model.
-   */
   additionalInstructions: Annotation<string | undefined>(),
-  // inner
+  additionalContext: Annotation<string | undefined>(),
+  // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
   currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 1 }),
   actions: Annotation<Action[]>({
@@ -75,7 +60,7 @@ export const createNlToEsqlGraph = ({
   model: ScopedModel;
   esClient: ElasticsearchClient;
   docBase: EsqlDocumentBase;
-  logger: Logger;
+  logger?: Logger;
   events?: ToolEventEmitter;
 }) => {
   const resolveTarget = async (state: StateType) => {
