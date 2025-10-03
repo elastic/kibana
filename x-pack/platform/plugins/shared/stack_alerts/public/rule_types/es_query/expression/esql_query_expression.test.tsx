@@ -205,13 +205,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
           { name: 'ecs.version', type: 'string' },
           { name: 'error.code', type: 'string' },
         ],
-        values: [
-          {
-            '@timestamp': '2023-07-12T13:32:04.174Z',
-            'ecs.version': '1.8.0',
-            'error.code': null,
-          },
-        ],
+        values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
       },
     });
     getFields.mockResolvedValue([]);
@@ -257,13 +251,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
           { name: 'ecs.version', type: 'string' },
           { name: 'error.code', type: 'string' },
         ],
-        values: [
-          {
-            '@timestamp': '2023-07-12T13:32:04.174Z',
-            'ecs.version': '1.8.0',
-            'error.code': null,
-          },
-        ],
+        values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
       },
     });
     getFields.mockResolvedValue([]);
