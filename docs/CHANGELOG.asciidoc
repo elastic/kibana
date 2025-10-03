@@ -122,7 +122,7 @@ Dashboards and Visualizations::
 * Fixes a bug where the dashboard title would not get updated in the breadcrumbs when edited from the list of dashboards ({kibana-pull}236561[#236561]).
 Data ingestion and Fleet::
 * Adds a unique count to improve accuracy of the number of transforms on the integrations overview page ({kibana-pull}236177[#236177]).
-* Validates the Logstash pipeline ID at the {{kib}} API level ({kibana-pull}236347[#236347]).
+* Validates the Logstash pipeline ID at the {kib} API level ({kibana-pull}236347[#236347]).
 Discover::
 * Clears sort by `timestamp` when navigating from classic to ES|QL mode ({kibana-pull}235338[#235338]).
 Elastic Observability solution::
