@@ -33,6 +33,9 @@ import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT } from '../../../../telemetry/event_based/events';
 import { entityStoreTaskDebugLogFactory, entityStoreTaskLogFactory } from '../utils';
 import type { AppClientFactory } from '../../../../../client';
+import { PrivilegeMonitoringDataClient } from '../../../privilege_monitoring/engine/data_client';
+import { createPrivmonIndexService } from '../../../privilege_monitoring/engine/elasticsearch/indices';
+import { checkandInitPrivilegeMonitoringResourcesNoContext } from '../../../privilege_monitoring/check_and_init_privmon_resources';
 
 const getTaskName = (): string => TYPE;
 
@@ -117,6 +120,22 @@ export const registerEntityStoreDataViewRefreshTask = ({
       uiSettingsClient: core.uiSettings.asScopedToClient(soClient),
       isServerless,
     });
+
+    // as we have added the privmon index to the list of indices
+    // for existing customers, this index may not exist so we need to create it
+    const privmonDataClient = new PrivilegeMonitoringDataClient({
+      logger,
+      clusterClient,
+      namespace,
+      savedObjects: core.savedObjects,
+      taskManager: taskManagerStart,
+      auditLogger,
+      kibanaVersion,
+      telemetry,
+      experimentalFeatures,
+    });
+    const privmonIndexService = createPrivmonIndexService(privmonDataClient);
+    await checkandInitPrivilegeMonitoringResourcesNoContext(privmonIndexService, logger);
 
     const { errors } = await entityStoreClient.applyDataViewIndices();
 
