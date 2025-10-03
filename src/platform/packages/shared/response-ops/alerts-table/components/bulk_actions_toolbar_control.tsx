@@ -43,13 +43,13 @@ const selectedIdsToTimelineItemMapper = (
   return Array.from(rowSelection.keys()).map((rowIndex: number) => {
     const alert = alerts[rowIndex];
     const data = Object.entries({
-      [ALERT_CASE_IDS]: [],
-      [ALERT_WORKFLOW_TAGS]: [],
-      [ALERT_WORKFLOW_ASSIGNEE_IDS]: [],
+      [ALERT_CASE_IDS]: null,
+      [ALERT_WORKFLOW_TAGS]: null,
+      [ALERT_WORKFLOW_ASSIGNEE_IDS]: null,
       ...alert,
     }).map(([key, value]) => ({
       field: key,
-      value: value && value.length > 0 ? (value as string[]) : [],
+      value: value ? (value as string[]) : [],
     }));
     return {
       _id: alert._id,
