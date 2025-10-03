@@ -1493,9 +1493,11 @@ export class CstToAstConverter {
     configCtx: cst.FuseConfigurationContext,
     command: ast.ESQLCommand<'fuse'>
   ) {
+    const byContext = configCtx.BY();
+
     // SCORE BY <score_column>
     const scoreCtx = configCtx.SCORE();
-    if (scoreCtx) {
+    if (scoreCtx && byContext) {
       const option = this.toOption(scoreCtx.getText().toLowerCase(), configCtx);
       const scoreColumnCtx = configCtx.qualifiedName();
 
@@ -1513,7 +1515,7 @@ export class CstToAstConverter {
 
     // KEY BY <key_columns>
     const keyByCtx = configCtx.KEY();
-    if (keyByCtx) {
+    if (keyByCtx && byContext) {
       const option = this.toOption(keyByCtx.getText().toLowerCase(), configCtx);
       const fields = this.fromFields(configCtx.fields());
 
@@ -1530,7 +1532,6 @@ export class CstToAstConverter {
 
     // GROUP BY <group_column>
     const groupByCtx = configCtx.GROUP();
-    const byContext = configCtx.BY();
     if (groupByCtx && byContext) {
       const option = this.toOption(groupByCtx.getText().toLowerCase(), configCtx);
 
