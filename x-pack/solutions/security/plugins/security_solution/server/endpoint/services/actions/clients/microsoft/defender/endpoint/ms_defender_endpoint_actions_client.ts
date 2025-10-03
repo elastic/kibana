@@ -777,7 +777,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           const mdeActionValidation = await this.fetchAndValidateRunscriptActionDetails(
             machineActionId,
             scriptName,
-            reqIndexOptions.actionId
+            // actionId is guaranteed to be set by buildExternalComment() above
+            reqIndexOptions.actionId as string
           );
 
           if (!mdeActionValidation.isValid) {
