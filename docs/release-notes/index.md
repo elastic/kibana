@@ -413,7 +413,7 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Fixes an issue with the Lens table's column sort order being different in the dashboard and the exported CSV [#236673]({{kib-pull}}236673).
 
 **Data ingestion and Fleet**:
-* Validates the Logstash pipeline ID at the {kib} API level [#236347]({{kib-pull}}236347).
+* Validates the Logstash pipeline ID at the {{kib}} API level [#236347]({{kib-pull}}236347).
 * Adds a unique count to improve accuracy of the number of transforms on the integrations overview page [#236177]({{kib-pull}}236177).
 
 **Discover**:
