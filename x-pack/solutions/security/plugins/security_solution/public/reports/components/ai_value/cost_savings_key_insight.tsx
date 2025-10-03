@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { MessageRole } from '@kbn/inference-common';
+import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -25,7 +26,6 @@ import { licenseService } from '../../../common/hooks/use_license';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
 import { useAIConnectors } from '../../../common/hooks/use_ai_connectors';
-import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 
 interface Props {
   isLoading: boolean;
@@ -47,7 +47,6 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
       setConnectorId(getDefaultConnector(connectors, settings)?.id);
     }
   }, [connectors, settings]);
-
 
   const hasEnterpriseLicence = licenseService.isEnterprise();
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();

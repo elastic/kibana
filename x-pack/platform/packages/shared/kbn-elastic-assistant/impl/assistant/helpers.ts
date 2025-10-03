@@ -66,7 +66,7 @@ export const getDefaultConnector = (
   if (validConnectors?.length) {
     // In case the default connector is not set or is invalid, return the prioritized connector
     const prioritizedConnectors = [...validConnectors].sort((a, b) => {
-      const priority = (connector: typeof validConnectors[number]) => {
+      const priority = (connector: (typeof validConnectors)[number]) => {
         if (connector.id === ELASTIC_LLM_CONNECTOR_ID) return 0;
         if (
           connector.apiProvider === OpenAiProviderType.OpenAi ||
@@ -76,7 +76,7 @@ export const getDefaultConnector = (
         }
         return 2;
       };
-    
+
       return priority(a) - priority(b);
     });
 

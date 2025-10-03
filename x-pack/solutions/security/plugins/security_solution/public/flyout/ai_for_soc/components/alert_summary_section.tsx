@@ -9,12 +9,12 @@ import React, { memo, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { type PromptContext } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
+import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 import { AlertSummary } from './alert_summary';
 import { AlertSummaryOptionsMenu } from './settings_menu';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAIForSOCDetailsContext } from '../context';
 import { useAIConnectors } from '../../../common/hooks/use_ai_connectors';
-import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 export const ALERT_SUMMARY_SECTION_TEST_ID = 'ai-for-soc-alert-flyout-alert-summary-section';
 
 const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummarySection.title', {
@@ -45,7 +45,7 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
   const [defaultConnectorId, setDefaultConnectorId] = useState<string | undefined>(undefined);
 
   const canSeeAdvancedSettings = capabilities.management.kibana.settings ?? false;
-  
+
   useEffect(() => {
     if (connectors) {
       setDefaultConnectorId(getDefaultConnector(connectors, settings)?.id);
