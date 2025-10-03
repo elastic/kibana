@@ -10,6 +10,7 @@ import {
   AWS_PROVIDER_TEST_SUBJ,
   AWS_SINGLE_ACCOUNT_TEST_SUBJ,
   AWS_INPUT_TEST_SUBJECTS,
+  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
 } from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -43,9 +44,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.selectSetupTechnology('agentless');
-      await cisIntegration.selectAwsCredentials('direct');
+
+      try {
+        const credentialsSelector = await testSubjects.find(
+          AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ
+        );
+        const currentValue = await credentialsSelector.getAttribute('value');
+
+        if (currentValue !== 'direct_access_keys') {
+          await cisIntegration.selectAwsCredentials('direct');
+        }
+      } catch (error) {
+        // Fallback: try to select direct credentials anyway
+        await cisIntegration.selectAwsCredentials('direct');
+      }
 
       await pageObjects.header.waitUntilLoadingHasFinished();
+
+      expect(
+        (await cisIntegration.cisAws.showLaunchCloudFormationAgentlessButton()) !== undefined
+      ).to.be(true);
 
       if (process.env.CSPM_AWS_ACCOUNT_ID && process.env.CSPM_AWS_SECRET_KEY) {
         await cisIntegration.fillInTextField(
