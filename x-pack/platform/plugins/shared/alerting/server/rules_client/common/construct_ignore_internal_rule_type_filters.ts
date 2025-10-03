@@ -10,7 +10,7 @@ import { fromKueryExpression, nodeBuilder, toKqlExpression } from '@kbn/es-query
 import type { RegistryRuleType } from '../../rule_type_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
-export const constructInternalRuleTypesFilter = ({
+export const constructIgnoreInternalRuleTypesFilter = ({
   ruleTypes,
 }: {
   ruleTypes: Map<string, RegistryRuleType>;

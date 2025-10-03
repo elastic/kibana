@@ -43,8 +43,8 @@ import type {
 } from './types';
 import {
   combineFiltersWithInternalRuleTypeFilter,
-  constructInternalRuleTypesFilter,
-} from '../construct_internal_rule_type_filters';
+  constructIgnoreInternalRuleTypesFilter,
+} from '../construct_ignore_internal_rule_type_filters';
 
 export interface BulkEditOptions<Params extends RuleParams> {
   filter?: string | KueryNode;
@@ -78,7 +78,7 @@ export async function bulkEditRules<Params extends RuleParams>(
 
   const qNodeQueryFilter = buildKueryNodeFilter(queryFilter);
   const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : qNodeQueryFilter;
-  const internalRuleTypeFilter = constructInternalRuleTypesFilter({
+  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
     ruleTypes: context.ruleTypeRegistry.list(),
   });
 

@@ -9,10 +9,10 @@ import type { RegistryRuleType } from '../../rule_type_registry';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import {
   combineFiltersWithInternalRuleTypeFilter,
-  constructInternalRuleTypesFilter,
-} from './construct_internal_rule_type_filters';
+  constructIgnoreInternalRuleTypesFilter,
+} from './construct_ignore_internal_rule_type_filters';
 
-describe('constructInternalRuleTypesFilter', () => {
+describe('constructIgnoreInternalRuleTypesFilter', () => {
   // @ts-expect-error: not all properties are needed for this test
   const ruleTypes: Map<string, RegistryRuleType> = new Map([
     ['internal-type', { id: 'internal-type', name: 'Internal Type', internallyManaged: true }],
@@ -27,7 +27,7 @@ describe('constructInternalRuleTypesFilter', () => {
   ]);
 
   test('should construct a KQL filter for internal rule types ignoring non-internal types', () => {
-    const filter = constructInternalRuleTypesFilter({ ruleTypes })!;
+    const filter = constructIgnoreInternalRuleTypesFilter({ ruleTypes })!;
 
     expect(toKqlExpression(filter)).toMatchInlineSnapshot(
       `"NOT (alert.attributes.alertTypeId: internal-type OR alert.attributes.alertTypeId: internal-type-2)"`
@@ -35,7 +35,7 @@ describe('constructInternalRuleTypesFilter', () => {
   });
 
   test('returns null if the ruleTypes map is empty', () => {
-    expect(constructInternalRuleTypesFilter({ ruleTypes: new Map() })).toBeNull();
+    expect(constructIgnoreInternalRuleTypesFilter({ ruleTypes: new Map() })).toBeNull();
   });
 });
 

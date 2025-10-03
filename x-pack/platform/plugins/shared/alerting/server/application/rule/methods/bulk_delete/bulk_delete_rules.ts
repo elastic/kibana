@@ -12,8 +12,8 @@ import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import {
   combineFiltersWithInternalRuleTypeFilter,
-  constructInternalRuleTypesFilter,
-} from '../../../../rules_client/common/construct_internal_rule_type_filters';
+  constructIgnoreInternalRuleTypesFilter,
+} from '../../../../rules_client/common/construct_ignore_internal_rule_type_filters';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
@@ -59,7 +59,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DELETE' });
-  const internalRuleTypeFilter = constructInternalRuleTypesFilter({
+  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
     ruleTypes: context.ruleTypeRegistry.list(),
   });
 

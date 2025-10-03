@@ -92,7 +92,8 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
     objectRemover.add(spaceIdToBeCreatedIn, ruleId, 'rule', 'alerting');
     return ruleId;
   }
-  describe.only('bulkEditRuleParamsWithReadAuth', () => {
+
+  describe('bulkEditRuleParamsWithReadAuth', () => {
     afterEach(async () => {
       await objectRemover.removeAll();
     });
