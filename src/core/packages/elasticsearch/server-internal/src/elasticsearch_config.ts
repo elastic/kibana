@@ -115,10 +115,8 @@ export const configSchema = schema.object({
       }
     },
   }),
-  // shardTimeout: schema.duration({ defaultValue: '30s' }),
-  // requestTimeout: schema.duration({ defaultValue: '30s' }),
   shardTimeout: schema.duration({ defaultValue: '30s' }),
-  requestTimeout: schema.duration({ defaultValue: '60s' }),
+  requestTimeout: schema.duration({ defaultValue: '120s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
   logQueries: schema.boolean({ defaultValue: false }),
   ssl: schema.object(
