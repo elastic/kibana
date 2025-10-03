@@ -8,11 +8,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, useEuiTheme, EuiText } from '@elastic/eui';
-import { buildEsQuery } from '@kbn/es-query';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import { type DataPublicPluginStart, getEsQueryConfig } from '@kbn/data-plugin/public';
-import { getTime } from '@kbn/data-plugin/common';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { NameInput } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
@@ -23,26 +19,12 @@ import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import type { TextBasedPrivateState } from '../types';
 import { isNotNumeric, isNumeric } from '../utils';
 import type { TextBasedLayer } from '../types';
+import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
 
 export type TextBasedDimensionEditorProps =
   DatasourceDimensionEditorProps<TextBasedPrivateState> & {
-    data: DataPublicPluginStart;
+    expressions: ExpressionsStart;
   };
-
-const getTimeFilter = (
-  queryService: DataPublicPluginStart['query'],
-  uiSettings: IUiSettingsClient,
-  timeFieldName?: string
-) => {
-  const esQueryConfigs = getEsQueryConfig(uiSettings);
-  const timeFilter =
-    queryService.timefilter.timefilter.getTime() &&
-    getTime(undefined, queryService.timefilter.timefilter.getTime(), {
-      fieldName: timeFieldName,
-    });
-
-  return buildEsQuery(undefined, [], [...(timeFilter ? [timeFilter] : [])], esQueryConfigs);
-};
 
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
@@ -56,35 +38,28 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     setState,
     indexPatterns,
     dateRange,
-    data,
+    expressions,
     esqlVariables,
-    core,
   } = props;
 
   useEffect(() => {
     // in case the columns are not in the cache, I refetch them
     async function fetchColumns() {
       if (query) {
-        const abortController = new AbortController();
-        const timeFilter = Object.values(indexPatterns).length
-          ? getTimeFilter(
-              data.query,
-              core.uiSettings,
-              Object.values(indexPatterns)[0].timeFieldName
-            )
-          : undefined;
-        const columnsFromQuery = await getESQLQueryColumns({
-          esqlQuery: query.esql,
-          search: data.search.search,
-          timeRange: { from: dateRange.fromDate, to: dateRange.toDate },
-          filter: timeFilter,
-          variables: esqlVariables,
-          dropNullColumns: true,
-          signal: abortController.signal,
-        });
-        if (columnsFromQuery.length) {
-          const hasNumberTypeColumns = columnsFromQuery?.some(isNumeric);
-          const columns = columnsFromQuery.map((col) => {
+        const table = await fetchFieldsFromESQLExpression(
+          { esql: `${query.esql} | limit 0` },
+          expressions,
+          { from: dateRange.fromDate, to: dateRange.toDate },
+          undefined,
+          Object.values(indexPatterns).length
+            ? Object.values(indexPatterns)[0].timeFieldName
+            : undefined,
+          esqlVariables
+        );
+
+        if (table) {
+          const hasNumberTypeColumns = table.columns?.some(isNumeric);
+          const columns = table.columns.map((col) => {
             return {
               id: col.variable ?? col.id,
               name: col.variable ? `??${col.variable}` : col.name,
@@ -106,12 +81,10 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     }
     fetchColumns();
   }, [
-    core.uiSettings,
-    data.query,
-    data.search.search,
     dateRange.fromDate,
     dateRange.toDate,
     esqlVariables,
+    expressions,
     indexPatterns,
     props,
     query,

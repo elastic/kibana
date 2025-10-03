@@ -509,7 +509,7 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
-      return <TextBasedDimensionEditor {...props} data={data} />;
+      return <TextBasedDimensionEditor {...props} expressions={expressions} />;
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {

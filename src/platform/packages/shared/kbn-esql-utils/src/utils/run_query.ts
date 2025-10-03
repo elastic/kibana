@@ -102,7 +102,20 @@ export async function getESQLQueryColumnsRaw({
       )
     );
 
-    return (response.rawResponse as unknown as ESQLSearchResponse).columns ?? [];
+    const table = response.rawResponse as unknown as ESQLSearchResponse;
+    const hasEmptyColumns = table.all_columns && table.all_columns?.length > table.columns.length;
+    const lookup = new Set(hasEmptyColumns ? table.columns?.map(({ name }) => name) || [] : []);
+
+    const allColumns =
+      (table.all_columns ?? table.columns)?.map(({ name, type }) => {
+        return {
+          name,
+          type,
+          isNull: hasEmptyColumns ? !lookup.has(name) : false,
+        };
+      }) ?? [];
+
+    return allColumns ?? [];
   } catch (error) {
     throw new Error(
       i18n.translate('esqlUtils.columnsErrorMsg', {

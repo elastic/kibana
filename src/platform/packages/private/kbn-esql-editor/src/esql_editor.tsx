@@ -510,16 +510,12 @@ const ESQLEditorInternal = function ESQLEditor({
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
-          // ES|QL with limit 0 returns only the columns and is more performant
-          const esqlQuery = {
-            esql: `${queryToExecute} | limit 0`,
-          };
           // Check if there's a stale entry and clear it
-          clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
+          clearCacheWhenOld(esqlFieldsCache, `${queryToExecute} | limit 0`);
           const timeRange = data.query.timefilter.timefilter.getTime();
           try {
             const columns = await memoizedFieldsFromESQL({
-              esqlQuery: esqlQuery.esql,
+              esqlQuery: queryToExecute,
               search: data.search.search,
               timeRange,
               signal: abortController.signal,
