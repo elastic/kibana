@@ -9,11 +9,11 @@
 
 import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import useAsync from 'react-use/lib/useAsync';
 import { useMemo } from 'react';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
+import { useQuery } from '@tanstack/react-query';
 import { DIMENSIONS_COLUMN, getLensMetricFormat } from '../../../common/utils';
 import { useEsqlQueryInfo } from '../../../hooks';
 
@@ -39,17 +39,17 @@ export const useChartLayers = ({
 } => {
   const queryInfo = useEsqlQueryInfo({ query });
 
-  const { value: columns = [], loading } = useAsync(
-    () =>
+  const { data: columns = [], isLoading: loading } = useQuery({
+    queryKey: ['query', query, getTimeRange()],
+    queryFn: () =>
       getESQLQueryColumns({
         esqlQuery: query,
         search: services.data.search.search,
         signal: abortController?.signal,
         timeRange: getTimeRange(),
       }),
-
-    [query, services.data.search, abortController, getTimeRange]
-  );
+    keepPreviousData: true,
+  });
 
   const layers = useMemo<LensSeriesLayer[]>(() => {
     if (columns.length === 0) {

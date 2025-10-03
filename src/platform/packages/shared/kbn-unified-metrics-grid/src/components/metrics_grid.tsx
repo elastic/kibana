@@ -121,13 +121,14 @@ export const MetricsGrid = ({
         }}
       >
         <EuiFlexGrid columns={columns} gutterSize="s">
-          {rows.map(({ key, metric }, index) => {
+          {rows.map(({ metric }, index) => {
             const { rowIndex, colIndex } = getRowColFromIndex(index);
             const isFocused =
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
 
             return (
-              <EuiFlexItem key={key}>
+              // Use the index as a key to prevent the charts from unmounting
+              <EuiFlexItem key={index}>
                 <div
                   role="gridcell"
                   aria-rowindex={rowIndex + 1} // 1-based for ARIA
