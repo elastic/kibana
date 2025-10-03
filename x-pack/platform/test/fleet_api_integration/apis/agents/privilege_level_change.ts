@@ -346,7 +346,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it.only('should work for multiple agents by kuery in batches async', async () => {
+      it('should work for multiple agents by kuery in batches async', async () => {
         const { body } = await supertest
           .post(`/api/fleet/agents/bulk_privilege_level_change`)
           .set('kbn-xsrf', 'xxx')
