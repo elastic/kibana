@@ -102,7 +102,7 @@ export default function (providerContext: FtrProviderContext) {
               apiClient.createAgentPolicy(TEST_SPACE_1, {
                 namespace: 'default',
               }),
-            /400 Bad Request Invalid namespace, supported namespace prefixes: test/
+            /400 "Bad Request" Invalid namespace, supported namespace prefixes: test/
           );
         });
         it('should allow authorized agent policy namespace', async () => {
