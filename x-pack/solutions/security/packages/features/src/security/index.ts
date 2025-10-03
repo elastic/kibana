@@ -78,4 +78,5 @@ export const getSecurityV5Feature = (
   baseKibanaFeature: getSecurityV5BaseKibanaFeature(params),
   baseKibanaSubFeatureIds: getSecurityV5BaseKibanaSubFeatureIds(params),
   subFeaturesMap: getSecurityV5SubFeaturesMap(params),
+  productFeatureConfig: securityDefaultProductFeaturesConfig,
 });
