@@ -22,7 +22,6 @@ export default function (providerContext: FtrProviderContext) {
   async function verifyActionResult(agentCount: number) {
     const { body } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
     const actionStatus = body.items[0];
-    console.log('## actionStatus', actionStatus);
     expect(actionStatus.nbAgentsActioned).to.eql(agentCount);
   }
 
