@@ -29,6 +29,7 @@ import {
   type ControlStateTransform,
   ControlGroupRenderer,
 } from '@kbn/control-group-renderer';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
@@ -39,7 +40,11 @@ const ACTION_DELETE_CONTROL = 'deletePanel';
 
 type StoredState = ControlGroupRuntimeState & { disabledActions: string[] };
 
-export const EditExample = () => {
+interface Props {
+  dataView: DataView;
+}
+
+export const EditExample = ({ dataView }: Props) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [controlGroupAPI, setControlGroupAPI] = useState<ControlGroupRendererApi | undefined>();
@@ -204,6 +209,9 @@ export const EditExample = () => {
             return {
               initialState: {
                 ...persistedState,
+              },
+              editorConfig: {
+                defaultDataViewId: dataView?.id,
               },
             };
           }}
