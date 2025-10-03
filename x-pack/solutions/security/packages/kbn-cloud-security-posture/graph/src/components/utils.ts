@@ -88,11 +88,19 @@ export const getSingleDocumentData = (
   node: NodeViewModel
 ): NodeDocumentDataViewModel | undefined => {
   const mode = getNodeDocumentMode(node);
-  if (!hasNodeDocumentsData(node) || (mode !== 'single-alert' && mode !== 'single-event')) {
+  if (
+    !hasNodeDocumentsData(node) ||
+    (mode !== 'single-alert' && mode !== 'single-event' && mode !== 'single-entity')
+  ) {
     return undefined;
   }
 
-  // For single-alert we might have both event and alert documents. We prefer to return the alert document if it exists.
+  // For single-entity mode, prioritize finding the entity document
+  if (mode === 'single-entity') {
+    return node.documentsData.find((doc) => doc.type === 'entity');
+  }
+
+  // For single-alert and single-event modes, prefer alert document over event document
   const documentData =
     node.documentsData.find((doc) => doc.type === 'alert') ??
     node.documentsData.find((doc) => doc.type === 'event');
@@ -107,6 +115,13 @@ const FETCH_GRAPH_FAILED_TEXT = i18n.translate(
   }
 );
 
+const FETCH_GROUP_DETAILS_FAILED_TEXT = i18n.translate(
+  'securitySolutionPackages.csp.graph.investigation.errorFetchingGroupDetails',
+  {
+    defaultMessage: 'Error fetching group details',
+  }
+);
+
 export const showErrorToast = (
   toasts: CoreStart['notifications']['toasts'],
   error: unknown
@@ -115,6 +130,17 @@ export const showErrorToast = (
     toasts.addError(error, { title: FETCH_GRAPH_FAILED_TEXT });
   } else {
     toasts.addDanger(extractErrorMessage(error, FETCH_GRAPH_FAILED_TEXT));
+  }
+};
+
+export const showDetailsErrorToast = (
+  toasts: CoreStart['notifications']['toasts'],
+  error: unknown
+): void => {
+  if (error instanceof Error) {
+    toasts.addError(error, { title: FETCH_GROUP_DETAILS_FAILED_TEXT });
+  } else {
+    toasts.addDanger(extractErrorMessage(error, FETCH_GROUP_DETAILS_FAILED_TEXT));
   }
 };
 

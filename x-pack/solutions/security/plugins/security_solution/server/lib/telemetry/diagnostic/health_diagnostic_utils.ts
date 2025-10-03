@@ -13,6 +13,8 @@ import {
   type HealthDiagnosticQuery,
   type HealthDiagnosticQueryStats,
 } from './health_diagnostic_service.types';
+import { unflatten } from '../helpers';
+import type { AnyObject } from '../types';
 
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
   const nextDate = intervalFromDate(startDate, interval);
@@ -131,7 +133,8 @@ export async function applyFilterlist(
     }
   };
 
-  for (const doc of data) {
+  for (const rawDoc of data) {
+    const doc = unflatten(rawDoc as AnyObject);
     if (Array.isArray(doc)) {
       const docs = doc as unknown[];
       const result = await Promise.all(

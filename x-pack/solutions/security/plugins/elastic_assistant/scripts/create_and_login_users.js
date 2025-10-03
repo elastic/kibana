@@ -15,6 +15,7 @@
 const axios = require('axios');
 const puppeteer = require('puppeteer');
 const { faker } = require('@faker-js/faker');
+const { SECURITY_FEATURE_ID } = require('../common/constants');
 
 // CLI args: number of users to create and optional --no-assistant flag
 const args = process.argv.slice(2);
@@ -96,7 +97,7 @@ const createRestrictedRole = async (roleName) => {
               onechat: ['all'],
               uptime: ['all'],
               observabilityCasesV3: ['all'],
-              siemV3: ['all'],
+              [SECURITY_FEATURE_ID]: ['all'],
               securitySolutionCasesV3: ['all'],
               securitySolutionTimeline: ['all'],
               securitySolutionNotes: ['all'],

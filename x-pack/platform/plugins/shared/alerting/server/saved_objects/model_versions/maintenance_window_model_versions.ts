@@ -42,4 +42,19 @@ export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
       forwardCompatibility: rawMaintenanceWindowSchemaV1.extends({}, { unknowns: 'ignore' }),
     },
   },
+  '3': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          createdBy: {
+            type: 'keyword',
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawMaintenanceWindowSchemaV1.extends({}, { unknowns: 'ignore' }),
+    },
+  },
 };

@@ -116,8 +116,8 @@ import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constan
 import type { ListingViewRegistry } from './types';
 import type { VisualizationSavedObjectAttributes } from '../common/content_management';
 import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
-import type { VisualizeSavedObjectInputState } from './embeddable/types';
 import { registerActions } from './actions/register_actions';
+import type { VisualizeByReferenceState } from '../common/embeddable/types';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -461,25 +461,19 @@ export class VisualizationsPlugin
         plugins: { embeddable: embeddableStart, embeddableEnhanced: embeddableEnhancedStart },
       } = start();
 
-      const { getVisualizeEmbeddableFactory } = await import('./embeddable/visualize_embeddable');
+      const { getVisualizeEmbeddableFactory } = await import('./embeddable/embeddable_module');
       return getVisualizeEmbeddableFactory({ embeddableStart, embeddableEnhancedStart });
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
-        const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
-        container.addNewPanel<VisualizeSavedObjectInputState>(
+        container.addNewPanel<VisualizeByReferenceState>(
           {
             panelType: VISUALIZE_EMBEDDABLE_TYPE,
             serializedState: {
-              rawState: {},
-              references: [
-                ...savedObject.references,
-                {
-                  name: SAVED_OBJECT_REF_NAME,
-                  type: VISUALIZE_EMBEDDABLE_TYPE,
-                  id: savedObject.id,
-                },
-              ],
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+              references: [],
             },
           },
           true
@@ -493,6 +487,10 @@ export class VisualizationsPlugin
         const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
         return getTypes().get(visState.type)?.icon ?? '';
       },
+    });
+    embeddable.registerTransforms(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const { getTransforms } = await import('./embeddable/embeddable_module');
+      return getTransforms(embeddable.transformEnhancementsIn, embeddable.transformEnhancementsOut);
     });
 
     contentManagement.registry.register({

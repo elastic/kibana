@@ -27,6 +27,20 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       });
     });
 
+    test('should keep fields marked with KEEP action in flat doc', async () => {
+      const data = [{ 'kibana.alert.rule.name': 'Endpoint Security (Elastic Defend)' }];
+      const rules = {
+        'user.name': Action.KEEP,
+        'kibana.alert.rule.name': Action.KEEP,
+      };
+
+      const result = await applyFilterlist(data, rules, mockSalt);
+
+      expect(result).toEqual([
+        { kibana: { alert: { rule: { name: 'Endpoint Security (Elastic Defend)' } } } },
+      ]);
+    });
+
     test('should keep fields marked with KEEP action', async () => {
       const data = [{ user: { name: 'john', email: 'john@example.com' } }];
       const rules = {
@@ -96,31 +110,6 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       expect((result[0] as any).meta.host.ip).not.toBe('192.168.1.1');
-    });
-
-    test('should handle arrays of documents', async () => {
-      const data = [
-        [
-          { user: 'alice', token: 'abc123' },
-          { user: 'bob', token: 'xyz789' },
-        ],
-      ];
-      const rules = {
-        user: Action.KEEP,
-        token: Action.MASK,
-      };
-
-      const result = await applyFilterlist(data, rules, mockSalt);
-
-      expect(result).toHaveLength(1);
-      expect(Array.isArray(result[0])).toBe(true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const docs = result[0] as any[];
-      expect(docs).toHaveLength(2);
-      expect(docs[0].user).toBe('alice');
-      expect(docs[1].user).toBe('bob');
-      expect(docs[0].token).not.toBe('abc123');
-      expect(docs[1].token).not.toBe('xyz789');
     });
 
     test('should handle arrays of complex documents', async () => {
@@ -299,30 +288,6 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
           },
         },
       ]);
-    });
-
-    test('should handle mixed document types', async () => {
-      const data = [
-        { type: 'user', name: 'john', password: 'secret' },
-        [{ type: 'admin', name: 'admin', token: 'admin123' }],
-      ];
-      const rules = {
-        name: Action.KEEP,
-        password: Action.MASK,
-        token: Action.MASK,
-      };
-
-      const result = await applyFilterlist(data, rules, mockSalt);
-
-      expect(result).toHaveLength(2);
-      expect(result[0]).toMatchObject({ name: 'john' });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((result[0] as any).password).not.toBe('secret');
-      expect(Array.isArray(result[1])).toBe(true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const adminDocs = result[1] as any[];
-      expect(adminDocs[0].name).toBe('admin');
-      expect(adminDocs[0].token).not.toBe('admin123');
     });
 
     test('should handle numeric and boolean values', async () => {

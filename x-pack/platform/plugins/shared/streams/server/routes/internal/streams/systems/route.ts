@@ -13,6 +13,7 @@ import type {
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
 import { conditionSchema } from '@kbn/streamlang';
+import { generateStreamDescription } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
 import { createServerRoute } from '../../../create_server_route';
@@ -21,7 +22,7 @@ import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { runSystemIdentification } from '../../../../lib/streams/system/run_system_identification';
-import type { IdentifiedSystemsEvent } from './types';
+import type { IdentifiedSystemsEvent, StreamDescriptionEvent } from './types';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -284,7 +285,7 @@ export const identifySystemsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<Observable<IdentifiedSystemsEvent>> => {
+  }): Promise<IdentifiedSystemsEvent> => {
     const {
       systemClient,
       scopedClusterClient,
@@ -314,21 +315,84 @@ export const identifySystemsRoute = createServerRoute({
       streamsClient.getStream(name),
     ]);
 
+    const { systems } = await runSystemIdentification({
+      start: start.getTime(),
+      end: end.getTime(),
+      esClient: scopedClusterClient.asCurrentUser,
+      inferenceClient: inferenceClient.bindTo({ connectorId }),
+      logger,
+      stream,
+      systems: hits,
+    });
+
+    return {
+      type: 'identified_systems',
+      systems,
+    };
+  },
+});
+
+export const describeStreamRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/_describe_stream',
+  options: {
+    access: 'internal',
+    summary: 'Generate a stream description',
+    description: 'Generate a stream description based on data in the stream',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+    query: z.object({
+      connectorId: z.string(),
+      from: dateFromString,
+      to: dateFromString,
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<Observable<StreamDescriptionEvent>> => {
+    const { scopedClusterClient, licensing, uiSettingsClient, streamsClient, inferenceClient } =
+      await getScopedClients({
+        request,
+      });
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const {
+      path: { name },
+      query: { connectorId, from: start, to: end },
+    } = params;
+
+    const { read } = await checkAccess({ name, scopedClusterClient });
+
+    if (!read) {
+      throw new SecurityError(
+        `Cannot generate stream description for ${name}, insufficient privileges`
+      );
+    }
+
+    const stream = await streamsClient.getStream(name);
+
     return from(
-      runSystemIdentification({
-        start: start.getTime(),
-        end: end.getTime(),
+      generateStreamDescription({
+        stream,
         esClient: scopedClusterClient.asCurrentUser,
         inferenceClient: inferenceClient.bindTo({ connectorId }),
-        logger,
-        stream,
-        systems: hits,
+        start: start.valueOf(),
+        end: end.valueOf(),
       })
     ).pipe(
-      map(({ systems }): IdentifiedSystemsEvent => {
+      map((description) => {
         return {
-          type: 'identified_systems',
-          systems,
+          type: 'stream_description',
+          description,
         };
       })
     );
@@ -342,4 +406,5 @@ export const systemRoutes = {
   ...listSystemsRoute,
   ...bulkSystemsRoute,
   ...identifySystemsRoute,
+  ...describeStreamRoute,
 };

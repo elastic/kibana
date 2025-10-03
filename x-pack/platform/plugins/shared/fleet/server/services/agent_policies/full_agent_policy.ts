@@ -38,7 +38,6 @@ import type {
 import { agentPolicyService } from '../agent_policy';
 import {
   dataTypes,
-  DEFAULT_OUTPUT,
   kafkaCompressionType,
   OTEL_COLLECTOR_INPUT_TYPE,
   outputType,
@@ -54,6 +53,8 @@ import {
   getOutputSecretReferences,
   getDownloadSourceSecretReferences,
 } from '../secrets';
+
+import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -344,7 +345,7 @@ export async function getFullAgentPolicy(
 
   // only add fleet server hosts if not in standalone
   if (!standalone && fleetServerHost) {
-    fullAgentPolicy.fleet = generateFleetConfig(agentPolicy, fleetServerHost, proxies, outputs);
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -410,46 +411,38 @@ export async function getFullAgentPolicy(
 }
 
 export function generateFleetConfig(
-  agentPolicy: AgentPolicy,
   fleetServerHost: FleetServerHost,
-  proxies: FleetProxy[],
-  outputs: Output[]
+  proxies: FleetProxy[]
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
     hosts: fleetServerHost.host_urls,
   };
 
   // generating the ssl configs for checking into Fleet
-  // These are set in ES or remote ES outputs and correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
-  const output =
-    agentPolicy?.data_output_id || agentPolicy?.monitoring_output_id
-      ? outputs.find((o) => o.id === agentPolicy.data_output_id)
-      : outputs.find((o) => o.is_default);
-
+  // These correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
   if (
-    output &&
-    (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
+    fleetServerHost.ssl?.agent_certificate_authorities ||
+    fleetServerHost.ssl?.agent_certificate ||
+    fleetServerHost.ssl?.agent_key
   ) {
-    if (output?.ssl) {
-      config.ssl = {
-        ...(output.ssl?.certificate_authorities && {
-          certificate_authorities: output.ssl.certificate_authorities,
+    config.ssl = {
+      ...(fleetServerHost.ssl.agent_certificate_authorities && {
+        certificate_authorities: fleetServerHost.ssl.agent_certificate_authorities,
+      }),
+      ...(fleetServerHost.ssl?.agent_certificate && {
+        certificate: fleetServerHost.ssl.agent_certificate,
+      }),
+      ...(fleetServerHost.ssl?.agent_key &&
+        !fleetServerHost.secrets?.ssl?.agent_key && {
+          key: fleetServerHost.ssl.agent_key,
         }),
-        ...(output.ssl?.certificate && {
-          certificate: output.ssl.certificate,
-        }),
-        ...(output.ssl?.key &&
-          !output?.secrets?.ssl?.key && {
-            key: output.ssl.key,
-          }),
-      };
-    }
-    // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-    if (output?.secrets) {
-      config.secrets = {
-        ...output?.secrets,
-      };
-    }
+    };
+  }
+  // if both ssl.agent_key and secrets.ssl.agent_key are present, prefer the secrets'
+  if (fleetServerHost.secrets?.ssl?.agent_key) {
+    config.secrets = {
+      ssl: { key: fleetServerHost.secrets?.ssl?.agent_key },
+    };
   }
 
   const fleetServerHostproxy = fleetServerHost.proxy_id
@@ -717,11 +710,9 @@ export function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerH
     };
   }
   // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-  if (fleetServerHost?.secrets) {
+  if (fleetServerHost?.secrets?.ssl?.es_key) {
     outputConfig.secrets = {
-      ...(fleetServerHost?.secrets?.ssl?.es_key && {
-        ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
-      }),
+      ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
     };
   }
 
@@ -819,17 +810,6 @@ export function getFullMonitoringSettings(
   }
 
   return monitoring;
-}
-
-/**
- * Get id used in full agent policy (sent to the agents)
- * we use "default" for the default policy to avoid breaking changes
- */
-function getOutputIdForAgentPolicy(output: Pick<Output, 'id' | 'is_default' | 'type'>) {
-  if (output.is_default && output.type === outputType.Elasticsearch) {
-    return DEFAULT_OUTPUT.name;
-  }
-  return output.id;
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */
