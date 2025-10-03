@@ -36,7 +36,12 @@ import {
   bucketRangesOperationSchema,
   bucketFiltersOperationSchema,
 } from '../bucket_ops';
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  sharedPanelInfoSchema,
+} from '../shared';
 
 const compareToSchemaShared = schema.object({
   palette: schema.maybe(schema.string({ meta: { description: 'Palette' } })),
@@ -134,6 +139,14 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
    */
   color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
   /**
+   * Where to apply the color (background or value)
+   */
+  apply_color_to: schema.maybe(
+    schema.oneOf([schema.literal('background'), schema.literal('value')], {
+      meta: { description: 'Apply color to' },
+    })
+  ),
+  /**
    * Complementary visualization
    */
   background_chart: schema.maybe(complementaryVizSchema),
@@ -196,6 +209,7 @@ export const metricStateSchemaNoESQL = schema.object({
   id: schema.maybe(schema.string()),
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
+  ...dslOnlyPanelInfoSchema,
   ...layerSettingsSchema,
   ...datasetSchema,
   /**
