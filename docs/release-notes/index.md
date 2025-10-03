@@ -24,6 +24,54 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+## 9.1.5 [kibana-9.1.5-release-notes]
+
+% ::::{NOTE}
+% ::::
+
+
+### Features and enhancements [kibana-9.1.5-features-enhancements]
+
+**Data ingestion and Fleet**:
+* Renames Fleet Server SSL options for clarity in the **Add a Fleet Server** flyout [#236887]({{kib-pull}}236887).
+
+**Elastic Security solution**:
+For the Elastic Security 9.1.5 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+### Fixes [kibana-9.1.5-fixes]
+
+**Alerting**:
+* Fixes text kerning issues in PDF/PNG exports of dashboards and visualizations [#235516]({{kib-pull}}235516).
+* Rolls over the reporting data stream if its template version is newer than the version in the data stream's mappings [#234119]({{kib-pull}}234119).
+
+**Dashboards and Visualizations**:
+* Fixes a bug where the dashboard title would not get updated in the breadcrumbs when edited from the list of dashboards [#236561]({{kib-pull}}236561).
+
+**Data ingestion and Fleet**:
+* Fixes incorrect copying of SSL settings to the Fleet Hosts section of generated Agent policies [#236788]({{kib-pull}}236788).
+* Validates the Logstash pipeline ID at the {{kib}} API level [#236347]({{kib-pull}}236347).
+* Adds a unique count to improve accuracy of the number of transforms on the integrations overview page [#236177]({{kib-pull}}236177).
+
+**Discover**:
+* Clears sort by `timestamp` when navigating from classic to ES|QL mode [#235338]({{kib-pull}}235338).
+* Fixes sizing issues with the **Actions** column header [#235227]({{kib-pull}}235227).
+
+**Machine Learning**:
+* Omits fields that should not be included in datafeed preview requests when testing custom URLs in anomaly detection jobs [#234709]({{kib-pull}}234709).
+* Improves trained model by adding filters to the request to fetch all index settings [#237072]({{kib-pull}}237072).
+* Hides the show forecast checkbox when selecting a new job in the Single Metric Viewer [#236724]({{kib-pull}}236724).
+* Makes alerts visible in Anomaly Explorer to all Machine Learning-only users regardless of where they create rules [#236289]({{kib-pull}}236289).
+* Fixes the **Job details** flyout on the **Analytics Map** page [#236131]({{kib-pull}}236131).
+* Fixes rendering of dashboard panel in PDF reporting for the Anomaly Swim Lane [#235475]({{kib-pull}}235475).
+
+**Management**:
+* Adds the `managed` field to the data views response schema to prevent the public API call from failing [#236237]({{kib-pull}}236237).
+* Adds the `timeFieldName` field to the data views response schema to prevent the public API call from failing [#235975]({{kib-pull}}235975).
+* Fixes privilege requirements when reindexing indices through Upgrade Assistant. Previously, the `superuser` role was required, but now the `cluster: manage` and `all` privileges are sufficient [#237055]({{kib-pull}}237055).
+
+**Search solution**:
+* Adds search functionality to the **Query rules** details page [#232579]({{kib-pull}}232579).
+
 ## 9.1.4 [kibana-9.1.4-release-notes]
 
 % ::::{NOTE}
