@@ -289,7 +289,7 @@ export default ({ getService }: FtrProviderContext): void => {
           isDeprecated: false,
           name: 'preconfigured-servicenow',
           referencedByCount: 0,
-          is_connector_type_deprecated: false,
+          isConnectorTypeDeprecated: false,
         },
       ]);
     });
