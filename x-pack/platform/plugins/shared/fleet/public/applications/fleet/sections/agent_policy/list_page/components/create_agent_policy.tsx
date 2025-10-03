@@ -200,7 +200,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <FlyoutWithHigherZIndex onClose={() => onClose()} {...restOfProps} maxWidth={MAX_FLYOUT_WIDTH}>
+    <FlyoutWithHigherZIndex onClose={() => onClose()} {...restOfProps} maxWidth={MAX_FLYOUT_WIDTH} aria-label="Create agent policy">
       {header}
       {body}
       {footer}

@@ -212,6 +212,7 @@ export const ExportJobsFlyoutContent = ({
         hideCloseButton
         size="s"
         data-test-subj="mlJobMgmtExportJobsFlyout"
+        aria-label="Export jobs"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">

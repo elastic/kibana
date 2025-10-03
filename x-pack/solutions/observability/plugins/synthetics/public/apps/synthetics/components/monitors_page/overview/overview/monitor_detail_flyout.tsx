@@ -289,6 +289,7 @@ export function MonitorDetailFlyout(props: Props) {
       type={isOverlay ? 'overlay' : 'push'}
       onClose={props.onClose}
       paddingSize="none"
+      aria-label="Monitor details"
     >
       {error && !isLoading && <ErrorCallout {...error} />}
       {isLoading && <LoadingState />}

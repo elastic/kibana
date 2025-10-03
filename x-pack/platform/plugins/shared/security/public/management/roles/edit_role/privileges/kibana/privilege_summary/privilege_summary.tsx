@@ -49,6 +49,7 @@ export const PrivilegeSummary = (props: Props) => {
           onClose={() => setIsOpen(false)}
           size={flyoutSize}
           maskProps={{ headerZindexLocation: 'below' }}
+          aria-label="Privilege summary"
         >
           <EuiFlyoutHeader>
             <EuiTitle size="m">

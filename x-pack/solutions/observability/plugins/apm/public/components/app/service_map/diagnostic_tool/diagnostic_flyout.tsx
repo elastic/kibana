@@ -137,6 +137,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       style={{ zIndex: 1001 }}
       maxWidth={1000}
       data-test-subj="diagnosticFlyout"
+      aria-label="Service map diagnostics"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">

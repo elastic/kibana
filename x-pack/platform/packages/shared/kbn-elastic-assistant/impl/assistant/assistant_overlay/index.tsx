@@ -161,6 +161,7 @@ export const AssistantOverlay = React.memo(() => {
         `}
         onClose={handleCloseModal}
         data-test-subj="ai-assistant-flyout"
+        aria-label="AI Assistant"
         paddingSize="none"
         hideCloseButton
       >

@@ -205,7 +205,7 @@ export const TakeActionButton: FC = () => {
 
       {isHostIsolationPanelOpen && (
         // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-        <EuiFlyout onClose={showAlertDetails} size="m" maskProps={maskProps}>
+        <EuiFlyout onClose={showAlertDetails} size="m" maskProps={maskProps} aria-label="Host isolation">
           <IsolateHostPanelHeader
             isolateAction={isolateAction}
             data={dataFormattedForFieldBrowser}
