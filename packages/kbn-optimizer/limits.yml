@@ -47,7 +47,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
-  esql: 14000
+  esql: 18000
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -121,7 +121,7 @@ pageLoadAssetSize:
   painlessLab: 6299
   presentationPanel: 11484
   presentationUtil: 9000
-  productDocBase: 3074
+  productDocBase: 3083
   productIntercept: 9860
   profiling: 20716
   reindexService: 3601
@@ -162,7 +162,7 @@ pageLoadAssetSize:
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 67975
+  stackConnectors: 68838
   streams: 9000
   streamsApp: 17000
   synthetics: 31571

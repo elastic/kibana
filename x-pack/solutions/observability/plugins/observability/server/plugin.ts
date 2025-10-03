@@ -6,9 +6,9 @@
  */
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
@@ -24,10 +24,6 @@ import type {
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
-  ObservabilitySharedPluginSetup,
-  ObservabilitySharedPluginStart,
-} from '@kbn/observability-shared-plugin/server';
-import type {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
@@ -36,7 +32,6 @@ import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/se
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
-import { PAGE_ATTACHMENT_TYPE } from '@kbn/page-attachment-schema';
 import { getLogsFeature } from './features/logs_feature';
 import type { ObservabilityConfig } from '.';
 import { OBSERVABILITY_TIERED_FEATURES, observabilityFeatureId } from '../common';
@@ -70,7 +65,6 @@ interface PluginSetup {
   cloud?: CloudSetup;
   contentManagement: ContentManagementServerSetup;
   esql: ESQLSetup;
-  observabilityShared: ObservabilitySharedPluginSetup;
 }
 
 interface PluginStart {
@@ -79,7 +73,6 @@ interface PluginStart {
   dataViews: DataViewsServerPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dashboard: DashboardPluginStart;
-  observabilityShared: ObservabilitySharedPluginStart;
 }
 export class ObservabilityPlugin
   implements Plugin<ObservabilityPluginSetup, void, PluginSetup, PluginStart>
@@ -109,14 +102,7 @@ export class ObservabilityPlugin
       plugins.features.registerKibanaFeature(getCasesFeatureV2(casesCapabilities, casesApiTags));
       plugins.features.registerKibanaFeature(getCasesFeatureV3(casesCapabilities, casesApiTags));
     }
-    if (
-      plugins.cases?.config.enabled &&
-      plugins.observabilityShared.config.unsafe?.investigativeExperienceEnabled
-    ) {
-      plugins.cases.attachmentFramework.registerPersistableState({
-        id: PAGE_ATTACHMENT_TYPE,
-      });
-    }
+
     plugins.features.registerKibanaFeature(getLogsFeature());
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
