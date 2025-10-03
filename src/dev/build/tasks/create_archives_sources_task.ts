@@ -73,9 +73,9 @@ export const CreateArchivesSources: Task = {
         if (platform.isServerless()) {
           // Remove chromium assets
           await deleteAll(
-            [
-              'node_modules/@kbn/screenshotting-plugin/server/assets',
-            ].map((path) => build.resolvePathForPlatform(platform, path)),
+            ['node_modules/@kbn/screenshotting-plugin/server/assets'].map((path) =>
+              build.resolvePathForPlatform(platform, path)
+            ),
             log
           );
 
