@@ -481,6 +481,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               });
 
               const expectedAttachment = {
+                id: '',
                 swimlaneType: 'viewBy',
                 viewBy: 'airline',
                 jobIds: [testData.jobConfig.job_id],
@@ -488,7 +489,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   from: '2016-02-07T00:00:00.000Z',
                   to: '2016-02-11T23:59:54.000Z',
                 },
-              } as AnomalySwimLaneEmbeddableState;
+              };
 
               expectedAttachment.id = stringHash(JSON.stringify(expectedAttachment)).toString();
 
@@ -499,7 +500,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   tag: 'ml_swim_lane_case',
                   reporter: USER.ML_POWERUSER,
                 },
-                expectedAttachment,
+                expectedAttachment as AnomalySwimLaneEmbeddableState,
                 {
                   yAxisLabelCount: 10,
                 }
