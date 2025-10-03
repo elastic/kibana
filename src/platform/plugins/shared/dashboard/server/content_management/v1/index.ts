@@ -34,7 +34,6 @@ export { serviceDefinition } from './cm_services';
 export {
   dashboardAPIGetResultSchema,
   dashboardSearchResultsSchema,
-  referenceSchema,
 } from './schema';
 export { savedObjectToItem } from './transform_utils';
 export { transformDashboardIn } from './transforms';
