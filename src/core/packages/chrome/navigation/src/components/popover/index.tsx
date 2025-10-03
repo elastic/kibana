@@ -18,25 +18,36 @@ import type {
   KeyboardEvent,
   Ref,
 } from 'react';
-import React, { useRef, useMemo, useCallback, cloneElement, useEffect } from 'react';
+import React, { useRef, useMemo, useCallback, cloneElement, useEffect, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 
+import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
+import { focusAdjacentTrigger } from '../../utils/focus_adjacent_trigger';
 import { focusFirstElement } from '../../utils/focus_first_element';
-import { usePopoverOpen } from './use_popover_open';
-import { usePopoverHover } from './use_popover_hover';
-import { usePersistentPopover } from './use_persistent_popover';
+import { getFocusableElements } from '../../utils/get_focusable_elements';
+import { handleRovingIndex } from '../../utils/handle_roving_index';
+import { updateTabIndices } from '../../utils/update_tab_indices';
+import { useHoverTimeout } from '../../hooks/use_hover_timeout';
+import { useScroll } from '../../hooks/use_scroll';
 import {
   BOTTOM_POPOVER_GAP,
+  POPOVER_HOVER_DELAY,
   POPOVER_OFFSET,
   TOP_BAR_HEIGHT,
   TOP_BAR_POPOVER_GAP,
 } from '../../constants';
-import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
-import { focusAdjacentTrigger } from '../../utils/focus_adjacent_trigger';
-import { getFocusableElements } from '../../utils/get_focusable_elements';
-import { handleRovingIndex } from '../../utils/handle_roving_index';
-import { updateTabIndices } from '../../utils/update_tab_indices';
-import { useScroll } from '../../hooks/use_scroll';
+
+/**
+ * Flag for tracking if any popover is open.
+ */
+let anyPopoverOpen: boolean = false;
+
+/**
+ * Utility function to check if any popover is open.
+ *
+ * @returns true if any popover is open
+ */
+export const getIsAnyPopoverOpenNow = () => anyPopoverOpen;
 
 export interface SideNavPopoverProps {
   container?: HTMLElement;
@@ -65,37 +76,71 @@ export const SideNavPopover = ({
   trigger,
 }: SideNavPopoverProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const { setTimeout, clearTimeout } = useHoverTimeout();
 
   const popoverRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLElement>(null);
 
-  const { isOpen, open, close } = usePopoverOpen();
-  const { isPersistent, setPersistent, clearPersistent } = usePersistentPopover();
-  const scrollStyles = useScroll(true);
+  const [isOpenedByClick, setIsOpenedByClick] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const setOpenedByClick = useCallback(() => setIsOpenedByClick(true), []);
+
+  const clearOpenedByClick = useCallback(() => setIsOpenedByClick(false), []);
+
+  const open = useCallback(() => {
+    setIsOpen(true);
+    anyPopoverOpen = true;
+  }, []);
+
+  const close = useCallback(() => {
+    setIsOpen(false);
+    clearOpenedByClick();
+    clearTimeout();
+    anyPopoverOpen = false;
+  }, [clearOpenedByClick, clearTimeout]);
 
   const handleClose = useCallback(() => {
+    clearTimeout();
     close();
-    clearPersistent();
-  }, [close, clearPersistent]);
+  }, [clearTimeout, close]);
 
-  const { handleMouseEnter, handleMouseLeave, clearTimeout } = usePopoverHover(
-    persistent,
-    isPersistent,
-    isSidePanelOpen,
-    { open, close: handleClose }
-  );
+  const tryOpen = useCallback(() => {
+    if (!isSidePanelOpen && !getIsAnyPopoverOpenNow()) {
+      open();
+    }
+  }, [isSidePanelOpen, open]);
+
+  const handleMouseEnter = useCallback(() => {
+    if (!persistent || !isOpenedByClick) {
+      clearTimeout();
+      if (getIsAnyPopoverOpenNow()) {
+        setTimeout(tryOpen, POPOVER_HOVER_DELAY);
+      } else if (!isSidePanelOpen) {
+        setTimeout(open, POPOVER_HOVER_DELAY);
+      }
+    }
+  }, [persistent, isOpenedByClick, isSidePanelOpen, clearTimeout, open, setTimeout, tryOpen]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!persistent || !isOpenedByClick) {
+      setTimeout(handleClose, POPOVER_HOVER_DELAY);
+    }
+  }, [persistent, isOpenedByClick, setTimeout, handleClose]);
+
+  const scrollStyles = useScroll(true);
 
   const handleTriggerClick = useCallback(() => {
     if (persistent) {
-      if (isOpen && isPersistent) {
+      if (isOpen && isOpenedByClick) {
         handleClose();
       } else {
         clearTimeout();
         open();
-        setPersistent();
+        setOpenedByClick();
       }
     }
-  }, [persistent, isOpen, isPersistent, handleClose, clearTimeout, open, setPersistent]);
+  }, [persistent, isOpen, isOpenedByClick, handleClose, clearTimeout, open, setOpenedByClick]);
 
   const handleTriggerKeyDown: KeyboardEventHandler = useCallback(
     (e) => {
@@ -230,7 +275,7 @@ export const SideNavPopover = ({
           {typeof children === 'function' ? children(handleClose) : children}
         </div>
       </EuiPopover>
-      {persistent && isPersistent && isOpen && (
+      {persistent && isOpenedByClick && isOpen && (
         // The persistent popover does not affect keyboard navigation users
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events
         <div onClick={handleClose} css={maskStyles} />

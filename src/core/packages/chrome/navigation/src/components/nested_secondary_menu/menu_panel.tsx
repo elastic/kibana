@@ -52,11 +52,20 @@ export const Panel: FC<PanelProps> = ({ children, id, title }) => {
 
   if (title) {
     return (
-      <SecondaryMenu ref={panelRef} title={title} isPanel={false}>
+      <SecondaryMenu
+        data-test-subj={`nestedSecondaryMenuPanel-${id}`}
+        ref={panelRef}
+        title={title}
+        isPanel={false}
+      >
         {children}
       </SecondaryMenu>
     );
   }
 
-  return <div ref={panelRef}>{children}</div>;
+  return (
+    <div data-test-subj={`nestedSecondaryMenuPanel-${id}`} ref={panelRef}>
+      {children}
+    </div>
+  );
 };

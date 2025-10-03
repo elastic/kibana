@@ -47,7 +47,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     ref
   ): JSX.Element => {
     const euiThemeContext = useEuiTheme();
-    const { euiTheme, highContrastMode } = euiThemeContext;
+    const { euiTheme } = euiThemeContext;
 
     const isSingleWord = typeof children === 'string' && !children.includes(' ');
 

@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useState } from 'react';
+import { act } from '@testing-library/react';
 
-/**
- * Hook for persisting popover on trigger click.
- */
-export const usePersistentPopover = () => {
-  const [isPersistent, setIsPersistent] = useState(false);
+import { POPOVER_HOVER_DELAY } from '../constants';
 
-  const setPersistent = useCallback(() => setIsPersistent(true), []);
-  const clearPersistent = useCallback(() => setIsPersistent(false), []);
-
-  return { isPersistent, setPersistent, clearPersistent };
+export const flushPopoverTimers = () => {
+  act(() => {
+    jest.advanceTimersByTime(POPOVER_HOVER_DELAY);
+    jest.runOnlyPendingTimers();
+  });
 };

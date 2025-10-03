@@ -19,9 +19,16 @@ export const focusAdjacentTrigger = (ref: RefObject<HTMLElement>, direction: -1 
 
   const container = document.querySelector<HTMLElement>('#navigation-root');
   const triggers = container
-    ? Array.from<HTMLElement>(container.querySelectorAll('[data-menu-item]')).filter(
-        (el) => !el.hasAttribute('disabled') && el.offsetParent !== null
-      )
+    ? Array.from<HTMLElement>(container.querySelectorAll('[data-menu-item]')).filter((el) => {
+        if (el.hasAttribute('disabled')) return false;
+        if (el.getAttribute('aria-hidden') === 'true') return false;
+
+        const style = window.getComputedStyle?.(el);
+
+        if (style) return style.display !== 'none' && style.visibility !== 'hidden';
+
+        return true;
+      })
     : [];
 
   const currentIdx = triggers.indexOf(ref.current);
