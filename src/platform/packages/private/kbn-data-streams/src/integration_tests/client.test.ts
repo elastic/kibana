@@ -290,20 +290,24 @@ describe('DataStreamClient', () => {
       const createDataStreamSpy = jest.spyOn(elasticsearchClient.indices, 'createDataStream');
       const putMappingSpy = jest.spyOn(elasticsearchClient.indices, 'putMapping');
 
-      for (const _ of [1, 2]) {
-        await DataStreamClient.initialize({
-          logger,
-          elasticsearchClient,
-          dataStreams: {
-            ...testDataStream,
-            template: {
-              ...testDataStream.template,
-              version: 1,
-              mappings: { properties: { somethingElse: mappings.text() } as any },
-            },
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStreams: testDataStream,
+      });
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStreams: {
+          ...testDataStream,
+          template: {
+            ...testDataStream.template,
+            version: 1, // same version as initial deployment
+            mappings: { properties: { somethingElse: mappings.text() } as any }, // some new mappings
           },
-        });
-      }
+        },
+      });
 
       expect(getIndexTemplateSpy).toHaveBeenCalledTimes(2);
       expect(putIndexTemplateSpy).toHaveBeenCalledTimes(1);
