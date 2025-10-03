@@ -14,12 +14,12 @@ import type { Meta, StoryObj } from '@storybook/react';
 import type { SafeParseReturnType } from '@kbn/zod';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
-import { WorkflowStepExecutionList } from './workflow_step_execution_list';
+import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 
-const meta: Meta<typeof WorkflowStepExecutionList> = {
-  component: WorkflowStepExecutionList,
-  title: 'Workflows Management/Step Execution List',
+const meta: Meta<typeof WorkflowStepExecutionTree> = {
+  component: WorkflowStepExecutionTree,
+  title: 'Workflows Management/Step Execution Tree',
   decorators: [
     kibanaReactDecorator,
     (story) => (
@@ -113,7 +113,7 @@ const definition = (result as SafeParseReturnType<WorkflowYaml, WorkflowYaml>).d
 //   yaml: string;
 // }
 
-export const Default: StoryObj<typeof WorkflowStepExecutionList> = {
+export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
     execution: {
       id: 'db38b255-ec34-4048-8b77-776081cb3a97',
@@ -474,7 +474,7 @@ export const Empty = {
   },
 };
 
-export const Loading: StoryObj<typeof WorkflowStepExecutionList> = {
+export const Loading: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
     isLoading: true,
     error: null,
@@ -482,7 +482,7 @@ export const Loading: StoryObj<typeof WorkflowStepExecutionList> = {
   },
 };
 
-export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionList> = {
+export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
     isLoading: false,
     error: null,
@@ -503,7 +503,7 @@ export const NoStepExecutionsExecuting: StoryObj<typeof WorkflowStepExecutionLis
   },
 };
 
-export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionList> = {
+export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
     isLoading: false,
     error: null,
@@ -523,7 +523,7 @@ export const NoStepExecutions: StoryObj<typeof WorkflowStepExecutionList> = {
   },
 };
 
-export const ErrorStory: StoryObj<typeof WorkflowStepExecutionList> = {
+export const ErrorStory: StoryObj<typeof WorkflowStepExecutionTree> = {
   args: {
     isLoading: false,
     error: new Error('Internal server error'),

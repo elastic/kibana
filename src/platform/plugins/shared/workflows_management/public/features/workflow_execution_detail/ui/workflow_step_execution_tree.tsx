@@ -10,15 +10,13 @@
 import type { EuiThemeComputed, EuiTreeViewProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
-  type EuiEmptyPromptProps,
-  EuiFlexGroup,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
-  EuiFlexItem,
   useEuiTheme,
   EuiTreeView,
   logicalCSS,
+  type EuiEmptyPromptProps,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -119,41 +117,37 @@ function convertTreeToEuiTreeViewItems(
   });
 }
 
-export interface WorkflowStepExecutionListProps {
+export interface WorkflowStepExecutionTreeProps {
   execution: WorkflowExecutionDto | null;
   definition: WorkflowYaml | null;
   isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
-  onClose: () => void;
   selectedId: string | null;
 }
 
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 's' };
 
-export const WorkflowStepExecutionList = ({
+export const WorkflowStepExecutionTree = ({
   isLoading,
   error,
   execution,
   definition,
   onStepExecutionClick,
   selectedId,
-  onClose,
-}: WorkflowStepExecutionListProps) => {
+}: WorkflowStepExecutionTreeProps) => {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
 
-  let content: React.ReactNode = null;
-
   if (isLoading || !execution) {
-    content = (
+    return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
         icon={<EuiLoadingSpinner size="l" />}
         title={
           <h2>
             <FormattedMessage
-              id="workflows.workflowStepExecutionList.loadingStepExecutions"
+              id="workflows.WorkflowStepExecutionTree.loadingStepExecutions"
               defaultMessage="Loading step executions..."
             />
           </h2>
@@ -161,14 +155,14 @@ export const WorkflowStepExecutionList = ({
       />
     );
   } else if (error) {
-    content = (
+    return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
         icon={<EuiIcon type="error" size="l" />}
         title={
           <h2>
             <FormattedMessage
-              id="workflows.workflowStepExecutionList.errorLoadingStepExecutions"
+              id="workflows.WorkflowStepExecutionTree.errorLoadingStepExecutions"
               defaultMessage="Error loading step executions"
             />
           </h2>
@@ -177,14 +171,14 @@ export const WorkflowStepExecutionList = ({
       />
     );
   } else if (execution?.stepExecutions?.length === 0 && !isInProgressStatus(execution?.status)) {
-    content = (
+    return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
         icon={<EuiIcon type="list" size="l" />}
         title={
           <h2>
             <FormattedMessage
-              id="workflows.workflowStepExecutionList.noExecutionFound"
+              id="workflows.WorkflowStepExecutionTree.noExecutionFound"
               defaultMessage="No step executions found"
             />
           </h2>
@@ -228,7 +222,7 @@ export const WorkflowStepExecutionList = ({
       selectedId,
       onStepExecutionClick
     );
-    content = (
+    return (
       <>
         <div css={styles.treeViewContainer}>
           <EuiTreeView
@@ -236,7 +230,7 @@ export const WorkflowStepExecutionList = ({
             expandByDefault
             items={items}
             aria-label={i18n.translate(
-              'workflows.workflowStepExecutionList.workflowStepExecutionTreeAriaLabel',
+              'workflows.WorkflowStepExecutionTree.workflowStepExecutionTreeAriaLabel',
               {
                 defaultMessage: 'Workflow step execution tree',
               }
@@ -245,43 +239,25 @@ export const WorkflowStepExecutionList = ({
         </div>
       </>
     );
-  } else {
-    content = (
-      <EuiEmptyPrompt
-        {...emptyPromptCommonProps}
-        icon={<EuiIcon type="error" size="l" />}
-        title={
-          <h2>
-            <FormattedMessage
-              id="workflows.workflowStepExecutionList.errorLoadingStepExecutions"
-              defaultMessage="Error loading execution graph"
-            />
-          </h2>
-        }
-      />
-    );
   }
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      justifyContent="flexStart"
-      css={styles.container}
-    >
-      <EuiFlexItem grow={false}>{/* TODO: step execution filters */}</EuiFlexItem>
-      <EuiFlexItem css={styles.content}>{content}</EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiEmptyPrompt
+      {...emptyPromptCommonProps}
+      icon={<EuiIcon type="error" size="l" />}
+      title={
+        <h2>
+          <FormattedMessage
+            id="workflows.WorkflowStepExecutionTree.errorLoadingStepExecutions"
+            defaultMessage="Error loading execution graph"
+          />
+        </h2>
+      }
+    />
   );
 };
 
 const componentStyles = {
-  container: css({
-    overflow: 'hidden',
-  }),
-  content: css({
-    overflow: 'hidden',
-  }),
   treeViewContainer: ({ euiTheme }: UseEuiTheme) => css`
     overflow-y: auto;
 
@@ -303,10 +279,6 @@ const componentStyles = {
         ${logicalCSS('width', euiTheme.size.s)}
         ${logicalCSS('border-bottom', euiTheme.border.thin)}
       }
-    }
-    & .euiTreeView {
-      // TODO: reduce padding to fit more nested levels in 300px sidebar?
-      padding-inline-start: ${euiTheme.size.m} !important;
     }
 
     & .euiTreeView__node {
