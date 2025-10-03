@@ -297,7 +297,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange, isDisable
       {field?.parentName && (
         <>
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             iconType="info"
             title={i18n.translate('indexPatternFieldEditor.editor.form.subFieldParentInfo', {
               defaultMessage: "Field value is defined by ''{parentName}''",
