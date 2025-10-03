@@ -134,6 +134,7 @@ export const LabsFlyout = (props: Props) => {
       onClose={onClose}
       hideCloseButton={true}
       maskProps={{ headerZindexLocation: 'below' }}
+      aria-label="Labs"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

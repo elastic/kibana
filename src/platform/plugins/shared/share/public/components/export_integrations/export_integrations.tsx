@@ -397,6 +397,7 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           data-test-subj="exportItemDetailsFlyout"
           size="s"
           onClose={flyoutOnCloseHandler}
+          aria-label="Export item details"
           css={() => ({
             ['--euiFixedHeadersOffset']: 0,
             isolation: 'isolate', // ensures that tooltips within this flyout render as should

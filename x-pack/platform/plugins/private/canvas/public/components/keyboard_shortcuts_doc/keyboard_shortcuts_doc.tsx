@@ -85,6 +85,7 @@ export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => (
     closeButtonProps={{ 'aria-label': strings.getFlyoutCloseButtonAriaLabel() }}
     size="s"
     onClose={onClose}
+    aria-label="Keyboard shortcuts"
   >
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="s">

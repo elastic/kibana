@@ -628,7 +628,7 @@ export class FlyoutClass extends Component<
     }
 
     return (
-      <EuiFlyout onClose={close} size="s" data-test-subj="importSavedObjectsFlyout">
+      <EuiFlyout onClose={close} size="s" data-test-subj="importSavedObjectsFlyout" aria-label="Import saved objects">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h2>

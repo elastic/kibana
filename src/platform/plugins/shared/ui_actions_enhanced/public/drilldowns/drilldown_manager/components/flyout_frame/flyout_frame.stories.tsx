@@ -64,7 +64,7 @@ export const CustomFooter = {
 export const OpenInFlyout = {
   render: () => {
     return (
-      <EuiFlyout onClose={() => {}}>
+      <EuiFlyout onClose={() => {}} aria-label="Drilldown manager">
         <FlyoutFrame
           title="Create drilldown"
           footer={<EuiButton>Save</EuiButton>}

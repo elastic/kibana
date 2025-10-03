@@ -44,6 +44,7 @@ export function MultiPaneFlyout({
       size={inlineEditingContent && inlineEditingContent?.visible ? 'l' : 'm'}
       ownFocus={false}
       outsideClickCloses
+      aria-label="Lens embeddable editor"
     >
       <EuiFlexGroup direction="row" gutterSize={'none'} style={{ height: '100%' }}>
         <EuiFlexItem
