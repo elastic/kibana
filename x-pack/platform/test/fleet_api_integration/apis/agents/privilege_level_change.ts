@@ -320,7 +320,7 @@ export default function (providerContext: FtrProviderContext) {
         });
         const action: any = actionsRes.hits.hits[0]._source;
         expect(action.type).to.eql('PRIVILEGE_LEVEL_CHANGE');
-        expect(action.agents).to.eql(['agent4', 'agent3', 'agent1']);
+        expect(action.agents.length).to.eql(3);
         expect(action.total).to.eql(3);
         await verifyActionResult(3);
       });

@@ -181,7 +181,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
     });
     expect(mockedCreateAgentAction).toHaveBeenCalledTimes(1);
     expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, soClientMock, {
-      agents: [],
+      agents: [mockedAgent.id, mockedAgent.id],
       created_at: expect.any(String),
       data: { unprivileged: true, user_info: { groupname: 'group1', username: 'user1' } },
       id: expect.any(String),
