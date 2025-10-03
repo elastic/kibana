@@ -119,9 +119,7 @@ export const useChildrenApi = (
           const allOutputFilters = values.filter(
             (childOutputFilters) => childOutputFilters && childOutputFilters.length > 0
           ) as Filter[][];
-          return allOutputFilters && allOutputFilters.length > 0
-            ? allOutputFilters.flat()
-            : undefined;
+          return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : [];
         }
       ).pipe(distinctUntilChanged(deepEqual)),
       esqlVariables$: combineCompatibleChildrenApis<PublishesESQLVariable, ESQLControlVariable[]>(
