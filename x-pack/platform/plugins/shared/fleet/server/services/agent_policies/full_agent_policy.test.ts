@@ -1809,6 +1809,37 @@ describe('generateFleetConfig', () => {
     }
   `);
   });
+
+  it('should generate ssl config when a default ES output has ssl options', () => {
+    const res = generateFleetConfig(
+      {
+        host_urls: ['https://test.fr'],
+        ssl: {
+          agent_certificate_authorities: ['/tmp/ssl/ca.crt'],
+          agent_certificate: 'my-cert',
+        },
+        secrets: {
+          ssl: {
+            agent_key: 'my-key',
+          },
+        },
+      } as any,
+      []
+    );
+
+    expect(res).toEqual({
+      hosts: ['https://test.fr'],
+      ssl: {
+        certificate: 'my-cert',
+        certificate_authorities: ['/tmp/ssl/ca.crt'],
+      },
+      secrets: {
+        ssl: {
+          key: 'my-key',
+        },
+      },
+    });
+  });
 });
 
 describe('generateFleetServerOutputSSLConfig', () => {
