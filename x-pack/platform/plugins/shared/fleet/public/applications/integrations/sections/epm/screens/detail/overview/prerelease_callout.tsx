@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackageInfo } from '../../../../../types';
 
 import { useLink, useStartServices } from '../../../../../hooks';
-import { isOtelInputPackage } from '../utils/otelcol_utils';
+import { packageInfoHasOtelInputs } from '../utils/otelcol_utils';
 import { isPackagePrerelease } from '../../../../../../../../common/services';
 
 export const PrereleaseCallout: React.FC<{
@@ -28,7 +28,7 @@ export const PrereleaseCallout: React.FC<{
   });
   const isPrerelease = isPackagePrerelease(packageInfo.version);
   if (isPrerelease) {
-    if (isOtelInputPackage(packageInfo)) {
+    if (packageInfoHasOtelInputs(packageInfo)) {
       return <OtelPackageCallout packageInfo={packageInfo} />;
     }
     return (

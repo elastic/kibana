@@ -40,6 +40,7 @@ import {
 import { pkgKeyFromPackageInfo } from '../../../../../services';
 
 import { AddIntegrationFlyout } from './add_integration_flyout';
+import { packagePolicyHasOtelInputs } from '../../../../../../integrations/sections/epm/screens/detail/utils/otelcol_utils';
 
 interface Props {
   packagePolicies: PackagePolicy[];
@@ -152,6 +153,22 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 ) : null}
               </EuiLink>
             </EuiFlexItem>
+            { packagePolicyHasOtelInputs(packagePolicy?.inputs) && <EuiFlexItem grow={false}>
+              <EuiIconTip
+                type="warning"
+                color="warning"
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.policyDetails.packagePoliciesTabl.containsOtelPackages"
+                    defaultMessage="The {integrationTitle} integration collects OpenTelemetry data adhering to semantic conventions and is available in technical preview."
+                    values={{
+                      integrationTitle: packagePolicy.packageTitle,
+                    }}
+                  />
+                }
+              />
+            </EuiFlexItem>
+            }
             {canUseMultipleAgentPolicies &&
               canReadAgentPolicies &&
               canReadIntegrationPolicies &&

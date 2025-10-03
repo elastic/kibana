@@ -5,14 +5,25 @@
  * 2.0.
  */
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../../../../../common/constants';
+import { isInputOnlyPolicyTemplate } from '../../../../../../../../common/services';
 import { ExperimentalFeaturesService } from '../../../../../services';
-import type { PackageInfo } from '../../../../../types';
+import type { PackageInfo, PackagePolicyInput } from '../../../../../types';
 
-export const isOtelInputPackage = (packageInfo: PackageInfo | undefined) => {
+export const packageInfoHasOtelInputs = (packageInfo: PackageInfo | undefined) => {
   const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
 
   const isOtelInput = (packageInfo?.policy_templates || []).some(
-    (template) => template.input === OTEL_COLLECTOR_INPUT_TYPE
+    (template) => isInputOnlyPolicyTemplate(template) && template.input === OTEL_COLLECTOR_INPUT_TYPE
+  );
+  return enableOtelIntegrations && isOtelInput;
+};
+
+export const packagePolicyHasOtelInputs = (
+  packagePolicyInputs: PackagePolicyInput[] | undefined
+) => {
+  const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
+  const isOtelInput = (packagePolicyInputs || []).some(
+    (input) => input.type === OTEL_COLLECTOR_INPUT_TYPE
   );
   return enableOtelIntegrations && isOtelInput;
 };
