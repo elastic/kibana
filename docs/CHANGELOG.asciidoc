@@ -126,7 +126,7 @@ Data ingestion and Fleet::
 Discover::
 * Fixes sizing issues with the **Actions** column header ({kibana-pull}235227[#235227]).
 Elastic Observability solution::
-* Prevents synthetics package policies from becoming malformed and reporting elastic-agents as unhealthy ({kibana-pull}236104[#236104]).
+* Prevents synthetics package policies from becoming malformed and reporting {agents} as unhealthy ({kibana-pull}236104[#236104]).
 * Cleans up extra synthetics package policies ({kibana-pull}235200[#235200]).
 Elastic Security solution::
 For the Elastic Security 8.19.5 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
