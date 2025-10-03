@@ -29,19 +29,6 @@ import { getDefaultVisualValuesForLayer } from '../../../shared_components/datas
 import { getDataLayers } from '../visualization_helpers';
 import type { AxesSettingsConfigKeys } from '../../../shared_components';
 
-type UnwrapArray<T> = T extends Array<infer P> ? P : T;
-
-export function updateLayer(
-  state: State,
-  layer: UnwrapArray<State['layers']>,
-  index: number
-): State {
-  return {
-    ...state,
-    layers: state.layers.map((l, i) => (i === index ? layer : l)),
-  };
-}
-
 const legendOptions: Array<{
   id: string;
   value: 'auto' | 'show' | 'hide';
