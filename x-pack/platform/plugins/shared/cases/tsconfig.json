@@ -94,11 +94,9 @@
     "@kbn/test",
     "@kbn/dev-utils",
     "@kbn/tooling-log",
-    "@kbn/page-attachment-schema",
-    "@kbn/core-notifications-browser-mocks",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
-    "@kbn/securitysolution-ecs"
+    "@kbn/core-notifications-browser-mocks",
   ],
   "exclude": [
     "target/**/*"
