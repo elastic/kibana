@@ -234,10 +234,7 @@ const StepsEditor = React.memo(() => {
                   <strong>
                     {i18n.translate(
                       'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
-                      {
-                        defaultMessage:
-                          'Some fields were ignored during the ingestion simulation because their values were incompatible with the field\'s mapping. Common causes include data type mismatches (e.g., an invalid format for a date field) or exceeding configured field limits. Review your mappings or use other processors such as the "date" processor to normalize the format, and consider removing the conflicting field entirely.',
-                      }
+                      { defaultMessage: 'Some fields were ignored during the simulation.' }
                     )}
                   </strong>
                 }
@@ -248,7 +245,7 @@ const StepsEditor = React.memo(() => {
                       'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
                       {
                         defaultMessage:
-                          'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
+                          'Some fields were ignored during the ingestion simulation because their values were incompatible with the field\'s mapping. Common causes include data type mismatches (e.g., an invalid format for a date field) or exceeding configured field limits. Review your mappings or use other processors such as the "date" processor to normalize the format, and consider removing the conflicting field entirely.',
                       }
                     )}
                   </p>
