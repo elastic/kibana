@@ -135,7 +135,7 @@ export const mapProcessorTypeToDescriptor = () => {
       }),
       getDefaultDescription: ({ field, value }) =>
         i18n.translate('xpack.ingestPipelines.processors.defaultDescription.append', {
-          defaultMessage: 'Appends "{value}" to the "{field}" field',
+          defaultMessage: 'Appends {value} to the "{field}" field',
           values: {
             field,
             value: stringifyValueDescription(value),
