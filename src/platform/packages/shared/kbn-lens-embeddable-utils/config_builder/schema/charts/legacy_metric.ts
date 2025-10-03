@@ -94,58 +94,6 @@ const legacyMetricStateValueOptionsSchema = schema.object({
   ),
 });
 
-//   /**
-//    * Prefix
-//    */
-//   prefix: schema.maybe(schema.string({ meta: { description: 'Prefix' } })),
-//   /**
-//    * Compare to
-//    */
-//   compare: schema.maybe(
-//     schema.oneOf([
-//       schema.allOf([
-//         compareToSchemaShared,
-//         schema.object({
-//           to: schema.literal('baseline'),
-//           baseline: schema.number({ meta: { description: 'Baseline value' }, defaultValue: 0 }),
-//         }),
-//       ]),
-//       schema.allOf([
-//         compareToSchemaShared,
-//         schema.object({
-//           to: schema.literal('primary'),
-//         }),
-//       ]),
-//     ])
-//   ),
-//   /**
-//    * Color configuration
-//    */
-//   color: schema.maybe(coloringTypeSchema),
-// });
-
-// const metricStateBreakdownByOptionsSchema = schema.object({
-//   /**
-//    * Number of columns
-//    */
-//   columns: schema.number({
-//     defaultValue: 5,
-//     meta: { description: 'Number of columns' },
-//   }),
-//   /**
-//    * Collapse by function. This parameter is used to collapse the
-//    * metric chart when the number of columns is bigger than the
-//    * number of columns specified in the columns parameter.
-//    * Possible values:
-//    * - 'avg': Collapse by average
-//    * - 'sum': Collapse by sum
-//    * - 'max': Collapse by max
-//    * - 'min': Collapse by min
-//    * - 'none': Do not collapse
-//    */
-//   collapse_by: schema.maybe(collapseBySchema),
-// });
-
 export const legacyMetricStateSchemaNoESQL = schema.object({
   type: schema.literal('legacy_metric'),
   ...sharedPanelInfoSchema,
