@@ -23,7 +23,7 @@ import {
   genericOperationOptionsSchema,
 } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import { layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import { colorByValueSchema } from '../color';
 
 const legacyMetricStateMetricOptionsSchema = schema.object({
@@ -92,14 +92,14 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
 export const legacyMetricStateSchemaNoESQL = schema.object({
   type: schema.literal('legacy_metric'),
   ...sharedPanelInfoSchema,
+  ...dslOnlyPanelInfoSchema,
   ...layerSettingsSchema,
   ...datasetSchema,
   /**
    * Metric configuration, must define operation.
    */
   metric: schema.oneOf([
-    // oneOf allows only 12 items
-    // so break down metrics based on the type: field-based, formula-like
+    // no reference-based metrics for legacy metric
     schema.oneOf([
       schema.allOf([legacyMetricStateMetricOptionsSchema, countMetricOperationSchema]),
       schema.allOf([legacyMetricStateMetricOptionsSchema, uniqueCountMetricOperationSchema]),
