@@ -26,7 +26,7 @@ import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { colorByValueSchema } from '../color';
 
-const legacyMetricStateValueOptionsSchema = schema.object({
+const legacyMetricStateMetricOptionsSchema = schema.object({
   /**
    * Size of the legacy metric label and value. Possible values:
    * - 'xs': Extra small
@@ -100,23 +100,23 @@ export const legacyMetricStateSchemaNoESQL = schema.object({
   ...layerSettingsSchema,
   ...datasetSchema,
   /**
-   * Value configuration, must define operation.
+   * Metric configuration, must define operation.
    */
-  value: schema.oneOf([
+  metric: schema.oneOf([
     // oneOf allows only 12 items
     // so break down metrics based on the type: field-based, formula-like
     schema.oneOf([
-      schema.allOf([legacyMetricStateValueOptionsSchema, countMetricOperationSchema]),
-      schema.allOf([legacyMetricStateValueOptionsSchema, uniqueCountMetricOperationSchema]),
-      schema.allOf([legacyMetricStateValueOptionsSchema, metricOperationSchema]),
-      schema.allOf([legacyMetricStateValueOptionsSchema, sumMetricOperationSchema]),
-      schema.allOf([legacyMetricStateValueOptionsSchema, lastValueOperationSchema]),
-      schema.allOf([legacyMetricStateValueOptionsSchema, percentileOperationSchema]),
-      schema.allOf([legacyMetricStateValueOptionsSchema, percentileRanksOperationSchema]),
+      schema.allOf([legacyMetricStateMetricOptionsSchema, countMetricOperationSchema]),
+      schema.allOf([legacyMetricStateMetricOptionsSchema, uniqueCountMetricOperationSchema]),
+      schema.allOf([legacyMetricStateMetricOptionsSchema, metricOperationSchema]),
+      schema.allOf([legacyMetricStateMetricOptionsSchema, sumMetricOperationSchema]),
+      schema.allOf([legacyMetricStateMetricOptionsSchema, lastValueOperationSchema]),
+      schema.allOf([legacyMetricStateMetricOptionsSchema, percentileOperationSchema]),
+      schema.allOf([legacyMetricStateMetricOptionsSchema, percentileRanksOperationSchema]),
     ]),
     schema.oneOf([
-      schema.allOf([legacyMetricStateValueOptionsSchema, staticOperationDefinitionSchema]),
-      schema.allOf([legacyMetricStateValueOptionsSchema, formulaOperationDefinitionSchema]),
+      schema.allOf([legacyMetricStateMetricOptionsSchema, staticOperationDefinitionSchema]),
+      schema.allOf([legacyMetricStateMetricOptionsSchema, formulaOperationDefinitionSchema]),
     ]),
   ]),
 });
@@ -127,11 +127,11 @@ const esqlLegacyMetricState = schema.object({
   ...layerSettingsSchema,
   ...datasetEsqlTableSchema,
   /**
-   * Value configuration, must define operation.
+   * Metric configuration, must define operation.
    */
-  value: schema.allOf([
+  metric: schema.allOf([
     schema.object(genericOperationOptionsSchema),
-    legacyMetricStateValueOptionsSchema,
+    legacyMetricStateMetricOptionsSchema,
     esqlColumnSchema,
   ]),
 });
