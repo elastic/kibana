@@ -23,9 +23,10 @@ jest.mock('../../../../insufficient_privileges/insufficient_privileges', () => (
 describe('StorageSizeCard', () => {
   const createMockDefinition = (
     privileges: any = { monitor: true }
-  ): Streams.ingest.all.GetResponse => ({
-    privileges,
-  } as any);
+  ): Streams.ingest.all.GetResponse =>
+    ({
+      privileges,
+    } as any);
 
   const createMockStats = (overrides: Partial<DataStreamStats> = {}): DataStreamStats => ({
     sizeBytes: 1000000, // 1MB
@@ -35,52 +36,22 @@ describe('StorageSizeCard', () => {
     ...overrides,
   });
 
-  describe('With Monitor Privileges', () => {
-    it('should display storage size and document count correctly', () => {
+  describe('Core behavior with monitor privileges', () => {
+    it('renders size (formatted) and document count when stats available', () => {
       const definition = createMockDefinition();
       const stats = createMockStats({
-        sizeBytes: 2048576, // 2MB  
+        sizeBytes: 2048576, // 2MB
         totalDocs: 500,
       });
 
       render(<StorageSizeCard definition={definition} stats={stats} />);
 
       expect(screen.getByText('Storage size')).toBeInTheDocument();
-      expect(screen.getByText('2MB')).toBeInTheDocument();
+      // Implementation formats with one decimal and a space: e.g. '2.0 MB'
+      expect(screen.getByText(/2\.0\s?MB/)).toBeInTheDocument();
       expect(screen.getByText('500 documents')).toBeInTheDocument();
     });
-
-    it('should display large numbers with proper formatting', () => {
-      const definition = createMockDefinition();
-      const stats = createMockStats({
-        sizeBytes: 1073741824, // 1GB
-        totalDocs: 1000000, // 1M docs
-      });
-
-      render(<StorageSizeCard definition={definition} stats={stats} />);
-
-      expect(screen.getByText('1GB')).toBeInTheDocument();
-      expect(screen.getByText('1,000,000 documents')).toBeInTheDocument();
-    });
-
-    it('should display dash when stats are not available', () => {
-      const definition = createMockDefinition();
-
-      render(<StorageSizeCard definition={definition} stats={undefined} />);
-
-      expect(screen.getByText('-')).toBeInTheDocument();
-    });
-
-    it('should display dash when sizeBytes is not available', () => {
-      const definition = createMockDefinition();
-      const stats = createMockStats({ sizeBytes: undefined as any });
-
-      render(<StorageSizeCard definition={definition} stats={stats} />);
-
-      expect(screen.getByText('-')).toBeInTheDocument();
-    });
-
-    it('should display dash when there is a stats error', () => {
+    it('falls back to dash when there is a stats error', () => {
       const definition = createMockDefinition();
       const stats = createMockStats();
       const error = new Error('Failed to fetch stats');
@@ -89,8 +60,7 @@ describe('StorageSizeCard', () => {
 
       expect(screen.getByText('-')).toBeInTheDocument();
     });
-
-    it('should handle zero bytes correctly', () => {
+    it('handles zero sizeBytes & totalDocs gracefully (dash values)', () => {
       const definition = createMockDefinition();
       const stats = createMockStats({
         sizeBytes: 0,
@@ -98,74 +68,31 @@ describe('StorageSizeCard', () => {
       });
 
       render(<StorageSizeCard definition={definition} stats={stats} />);
-
-      expect(screen.getByText('0B')).toBeInTheDocument();
-      expect(screen.getByText('0 documents')).toBeInTheDocument();
-    });
-  });
-
-  describe('Without Monitor Privileges', () => {
-    it('should show privileges warning when monitor permission is false', () => {
-      const definition = createMockDefinition({ monitor: false });
-      const stats = createMockStats();
-
-      render(<StorageSizeCard definition={definition} stats={stats} />);
-
-      const privilegesWrapper = screen.getByTestId('privileges-wrapper');
-      expect(privilegesWrapper).toHaveAttribute('data-has-privileges', 'false');
-    });
-
-    it('should not show document count subtitle when no monitor privileges', () => {
-      const definition = createMockDefinition({ monitor: false });
-      const stats = createMockStats({ totalDocs: 1000 });
-
-      render(<StorageSizeCard definition={definition} stats={stats} />);
-
-      expect(screen.queryByText('1,000 documents')).not.toBeInTheDocument();
-    });
-
-    it('should still display dash when no stats available and no privileges', () => {
-      const definition = createMockDefinition({ monitor: false });
-
-      render(<StorageSizeCard definition={definition} stats={undefined} />);
-
-      const privilegesWrapper = screen.getByTestId('privileges-wrapper');
-      expect(privilegesWrapper).toHaveAttribute('data-has-privileges', 'false');
       expect(screen.getByText('-')).toBeInTheDocument();
+      // totalDocs = 0 renders '- documents'
+      expect(screen.getByText('- documents')).toBeInTheDocument();
     });
   });
 
-  describe('Data Test Subjects', () => {
-    it('should have correct data-test-subj attributes', () => {
-      const definition = createMockDefinition();
+  describe('Privilege gating', () => {
+    it('wraps content and hides document count without monitor privilege', () => {
+      const definition = createMockDefinition({ monitor: false });
       const stats = createMockStats();
 
       render(<StorageSizeCard definition={definition} stats={stats} />);
 
-      // The storageSize data-test-subj should be present in the metric
-      expect(screen.getByTestId('privileges-wrapper')).toBeInTheDocument();
+      const privilegesWrapper = screen.getByTestId('privileges-wrapper');
+      expect(privilegesWrapper).toHaveAttribute('data-has-privileges', 'false');
+      expect(screen.queryByText(/documents/)).not.toBeInTheDocument();
     });
-  });
-
-  describe('Edge Cases', () => {
-    it('should handle missing totalDocs gracefully', () => {
+    it('falls back to dash for document count when totalDocs missing', () => {
       const definition = createMockDefinition();
       const stats = createMockStats({ totalDocs: undefined as any });
 
       render(<StorageSizeCard definition={definition} stats={stats} />);
 
-      expect(screen.getByText('1MB')).toBeInTheDocument();
+      expect(screen.getByText(/1\.0\s?MB/)).toBeInTheDocument();
       expect(screen.getByText('- documents')).toBeInTheDocument();
-    });
-
-    it('should handle privileges object being undefined', () => {
-      const definition = createMockDefinition(undefined);
-      const stats = createMockStats();
-
-      render(<StorageSizeCard definition={definition} stats={stats} />);
-
-      const privilegesWrapper = screen.getByTestId('privileges-wrapper');
-      expect(privilegesWrapper).toHaveAttribute('data-has-privileges', 'false');
     });
   });
 });

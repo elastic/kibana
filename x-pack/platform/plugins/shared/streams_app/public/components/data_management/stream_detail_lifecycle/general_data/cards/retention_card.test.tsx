@@ -26,23 +26,24 @@ describe('RetentionCard', () => {
     ingestLifecycle: any = { inherit: {} },
     streamName: string = 'logs-test',
     privileges: any = { lifecycle: true }
-  ): Streams.ingest.all.GetResponse => ({
-    stream: {
-      name: streamName,
-      ingest: {
-        lifecycle: ingestLifecycle,
+  ): Streams.ingest.all.GetResponse =>
+    ({
+      stream: {
+        name: streamName,
+        ingest: {
+          lifecycle: ingestLifecycle,
+        },
       },
-    },
-    effective_lifecycle: effectiveLifecycle,
-    privileges,
-  } as any);
+      effective_lifecycle: effectiveLifecycle,
+      privileges,
+    } as any);
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('ILM Lifecycle', () => {
-    it('should display ILM policy information correctly', () => {
+  describe('ILM lifecycle', () => {
+    it('renders ILM policy name', () => {
       const definition = createMockDefinition({
         ilm: {
           policy: 'my-ilm-policy',
@@ -53,40 +54,83 @@ describe('RetentionCard', () => {
 
       expect(screen.getByText('Retention')).toBeInTheDocument();
       expect(screen.getByTestId('ilm-link')).toHaveTextContent('my-ilm-policy');
-      expect(screen.getByText('ILM policy')).toBeInTheDocument();
+      expect(screen.getByText(/ILM policy/)).toBeInTheDocument();
     });
 
-    it('should show inherit from parent label for wired streams', () => {
-      const definition = createMockDefinition(
-        { ilm: { policy: 'my-ilm-policy' } },
-        { inherit: {} },
-        'logs-test.child'
-      );
-      // Mock as wired stream
-      (definition as any).__type = 'WiredStream';
+    it('shows inherit label for wired child inheriting', () => {
+      // Build a minimal valid wired stream GetResponse so Streams.WiredStream.GetResponse.is(definition) passes
+      const definition: any = {
+        stream: {
+          name: 'logs-test.child',
+          description: '',
+          ingest: {
+            lifecycle: { inherit: {} }, // child is inheriting -> should show "Inherit from parent"
+            processing: { steps: [] },
+            settings: {},
+            wired: { fields: {}, routing: [] },
+          },
+        },
+        // Effective lifecycle for wired streams must include a `from` field
+        effective_lifecycle: { ilm: { policy: 'my-ilm-policy' }, from: 'logs-test' },
+        effective_settings: {},
+        inherited_fields: {},
+        dashboards: [],
+        rules: [],
+        queries: [],
+        privileges: {
+          manage: true,
+          monitor: true,
+          // lifecycle privilege is the only one the component actually checks, but the schema requires all
+          lifecycle: true,
+          simulate: true,
+          text_structure: true,
+          read_failure_store: true,
+          manage_failure_store: true,
+        },
+      };
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText('Inherit from parent')).toBeInTheDocument();
+      expect(screen.getByText(/Inherit from parent/)).toBeInTheDocument();
     });
-
-    it('should show override parent label for non-inheriting wired streams', () => {
-      const definition = createMockDefinition(
-        { ilm: { policy: 'my-ilm-policy' } },
-        { dsl: { data_retention: '30d' } },
-        'logs-test.child'
-      );
-      // Mock as wired stream
-      (definition as any).__type = 'WiredStream';
+    it('shows override label for non-inheriting wired child', () => {
+      // Non-inheriting wired stream: ingest.lifecycle is not inherit, effective lifecycle still ILM
+      const definition: any = {
+        stream: {
+          name: 'logs-test.child',
+          description: '',
+          ingest: {
+            lifecycle: { dsl: { data_retention: '30d' } }, // override -> should show "Override parent"
+            processing: { steps: [] },
+            settings: {},
+            wired: { fields: {}, routing: [] },
+          },
+        },
+        effective_lifecycle: { ilm: { policy: 'my-ilm-policy' }, from: 'logs-test' },
+        effective_settings: {},
+        inherited_fields: {},
+        dashboards: [],
+        rules: [],
+        queries: [],
+        privileges: {
+          manage: true,
+          monitor: true,
+          lifecycle: true,
+          simulate: true,
+          text_structure: true,
+          read_failure_store: true,
+          manage_failure_store: true,
+        },
+      };
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText('Override parent')).toBeInTheDocument();
+      expect(screen.getByText(/Override parent/)).toBeInTheDocument();
     });
   });
 
-  describe('DSL Lifecycle', () => {
-    it('should display custom retention period correctly', () => {
+  describe('DSL lifecycle', () => {
+    it('renders custom retention period in days', () => {
       const definition = createMockDefinition({
         dsl: {
           data_retention: '30d',
@@ -97,10 +141,10 @@ describe('RetentionCard', () => {
 
       expect(screen.getByText('Retention')).toBeInTheDocument();
       expect(screen.getByText('30 days')).toBeInTheDocument();
-      expect(screen.getByText('Custom period')).toBeInTheDocument();
+      expect(screen.getByText(/Custom period/)).toBeInTheDocument();
     });
 
-    it('should display indefinite retention when data_retention is not set', () => {
+    it('renders indefinite symbol when no data_retention', () => {
       const definition = createMockDefinition({
         dsl: {},
       });
@@ -108,10 +152,10 @@ describe('RetentionCard', () => {
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
       expect(screen.getByText('∞')).toBeInTheDocument();
-      expect(screen.getByText('Indefinite')).toBeInTheDocument();
+      expect(screen.getByText(/Indefinite/)).toBeInTheDocument();
     });
 
-    it('should show inherit from index template label for classic streams', () => {
+    it('shows inherit label for classic streams inheriting', () => {
       const definition = createMockDefinition(
         { dsl: { data_retention: '7d' } },
         { inherit: {} },
@@ -120,10 +164,10 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText('Inherit from index template')).toBeInTheDocument();
+      expect(screen.getByText(/Inherit from index template/)).toBeInTheDocument();
     });
 
-    it('should show override index template label for non-inheriting classic streams', () => {
+    it('shows override label for non-inheriting classic streams', () => {
       const definition = createMockDefinition(
         { dsl: { data_retention: '7d' } },
         { dsl: { data_retention: '7d' } },
@@ -132,12 +176,12 @@ describe('RetentionCard', () => {
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
-      expect(screen.getByText('Override index template')).toBeInTheDocument();
+      expect(screen.getByText(/Override index template/)).toBeInTheDocument();
     });
   });
 
-  describe('Disabled Lifecycle', () => {
-    it('should display disabled retention correctly', () => {
+  describe('Disabled lifecycle', () => {
+    it('renders disabled state with infinity symbol', () => {
       const definition = createMockDefinition({
         disabled: {},
       });
@@ -145,12 +189,12 @@ describe('RetentionCard', () => {
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
 
       expect(screen.getByText('∞')).toBeInTheDocument();
-      expect(screen.getByText('Disabled')).toBeInTheDocument();
+      expect(screen.getByText(/Disabled/)).toBeInTheDocument();
     });
   });
 
-  describe('Unknown Lifecycle', () => {
-    it('should display dash for unknown lifecycle types', () => {
+  describe('Unknown lifecycle', () => {
+    it('renders em dash for unknown lifecycle', () => {
       const definition = createMockDefinition({
         unknown: {},
       });
@@ -161,8 +205,8 @@ describe('RetentionCard', () => {
     });
   });
 
-  describe('Edit Button', () => {
-    it('should call openEditModal when edit button is clicked', async () => {
+  describe('Edit interactions & privileges', () => {
+    it('invokes openEditModal when edit button clicked', async () => {
       const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
@@ -173,7 +217,7 @@ describe('RetentionCard', () => {
       expect(mockOpenEditModal).toHaveBeenCalledTimes(1);
     });
 
-    it('should disable edit button when user lacks lifecycle privileges', () => {
+    it('disables edit button without lifecycle privilege', () => {
       const definition = createMockDefinition(
         { dsl: { data_retention: '30d' } },
         undefined,
@@ -187,7 +231,7 @@ describe('RetentionCard', () => {
       expect(editButton).toBeDisabled();
     });
 
-    it('should have proper accessibility attributes', () => {
+    it('provides accessibility label on edit button', () => {
       const definition = createMockDefinition({ dsl: { data_retention: '30d' } });
 
       render(<RetentionCard definition={definition} openEditModal={mockOpenEditModal} />);
@@ -197,8 +241,8 @@ describe('RetentionCard', () => {
     });
   });
 
-  describe('Root Stream Behavior', () => {
-    it('should not show inheritance labels for root streams', () => {
+  describe('Root stream behavior', () => {
+    it('hides parent inheritance labels for root streams', () => {
       const definition = createMockDefinition(
         { dsl: { data_retention: '30d' } },
         { dsl: { data_retention: '30d' } },

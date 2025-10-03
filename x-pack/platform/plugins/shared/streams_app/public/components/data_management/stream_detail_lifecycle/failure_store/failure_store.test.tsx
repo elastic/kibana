@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Streams } from '@kbn/streams-schema';
-import { StreamDetailFailureStore } from './index';
+import { StreamDetailFailureStore } from '.';
 
 // Mock the dependencies
 jest.mock('../../../../hooks/use_update_failure_store');
@@ -24,7 +24,9 @@ jest.mock('@kbn/failure-store-modal', () => ({
       <div>Failure Store Modal</div>
       <div>Enabled: {failureStoreProps.failureStoreEnabled.toString()}</div>
       <div>Default Retention: {failureStoreProps.defaultRetentionPeriod}</div>
-      <button onClick={() => onSaveModal({ failureStoreEnabled: true, customRetentionPeriod: '7d' })}>
+      <button
+        onClick={() => onSaveModal({ failureStoreEnabled: true, customRetentionPeriod: '7d' })}
+      >
         Save
       </button>
       <button onClick={onCloseModal}>Close</button>
@@ -39,12 +41,33 @@ import { NoFailureStorePanel } from './no_failure_store_panel';
 import { FailureStoreInfo } from './failure_store_info';
 import { NoPermissionBanner } from './no_permission_banner';
 
-const mockUseUpdateFailureStore = useUpdateFailureStore as jest.MockedFunction<typeof useUpdateFailureStore>;
+const mockUseUpdateFailureStore = useUpdateFailureStore as jest.MockedFunction<
+  typeof useUpdateFailureStore
+>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
-const mockUseFailureStoreStats = useFailureStoreStats as jest.MockedFunction<typeof useFailureStoreStats>;
-const mockNoFailureStorePanel = NoFailureStorePanel as jest.MockedFunction<typeof NoFailureStorePanel>;
+const mockUseFailureStoreStats = useFailureStoreStats as jest.MockedFunction<
+  typeof useFailureStoreStats
+>;
+const mockNoFailureStorePanel = NoFailureStorePanel as jest.MockedFunction<
+  typeof NoFailureStorePanel
+>;
 const mockFailureStoreInfo = FailureStoreInfo as jest.MockedFunction<typeof FailureStoreInfo>;
 const mockNoPermissionBanner = NoPermissionBanner as jest.MockedFunction<typeof NoPermissionBanner>;
+
+const MOCK_STATS = {
+  count: 1000,
+  size: 5000000,
+  bytesPerDay: 250000,
+  bytesPerDoc: 5000,
+};
+
+const MOCK_CONFIG = {
+  enabled: true,
+  retentionPeriod: {
+    default: '30d',
+    custom: '7d',
+  },
+};
 
 describe('StreamDetailFailureStore', () => {
   const mockUpdateFailureStore = jest.fn();
@@ -52,13 +75,16 @@ describe('StreamDetailFailureStore', () => {
   const mockAddDanger = jest.fn();
   const mockRefresh = jest.fn();
 
-  const createMockDefinition = (privileges: any = {
-    read_failure_store: true,
-    manage_failure_store: true,
-  }): Streams.ingest.all.GetResponse => ({
-    stream: { name: 'logs-test' },
-    privileges,
-  } as any);
+  const createMockDefinition = (
+    privileges: any = {
+      read_failure_store: true,
+      manage_failure_store: true,
+    }
+  ): Streams.ingest.all.GetResponse =>
+    ({
+      stream: { name: 'logs-test' },
+      privileges,
+    } as any);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -80,20 +106,11 @@ describe('StreamDetailFailureStore', () => {
 
     mockUseFailureStoreStats.mockReturnValue({
       data: {
-        config: {
-          enabled: true,
-          retentionPeriod: {
-            default: '30d',
-            custom: '7d',
-          },
-        },
-        stats: {
-          totalDocs: 1000,
-          sizeBytes: 5000000,
-        },
+        config: MOCK_CONFIG,
+        stats: MOCK_STATS,
       },
       isLoading: false,
-      error: null,
+      error: undefined,
       refresh: mockRefresh,
     });
 
@@ -140,11 +157,11 @@ describe('StreamDetailFailureStore', () => {
     it('should show NoFailureStorePanel when failure store is not enabled', () => {
       mockUseFailureStoreStats.mockReturnValue({
         data: {
-          config: { enabled: false },
-          stats: null,
+          config: { enabled: false, retentionPeriod: {} },
+          stats: undefined,
         },
         isLoading: false,
-        error: null,
+        error: undefined,
         refresh: mockRefresh,
       });
 
@@ -165,9 +182,12 @@ describe('StreamDetailFailureStore', () => {
 
     it('should show FailureStoreInfo when loading stats', () => {
       mockUseFailureStoreStats.mockReturnValue({
-        data: null,
+        data: {
+          config: { enabled: true, retentionPeriod: {} },
+          stats: undefined,
+        },
         isLoading: true,
-        error: null,
+        error: undefined,
         refresh: mockRefresh,
       });
 
@@ -234,7 +254,7 @@ describe('StreamDetailFailureStore', () => {
   describe('Save Functionality', () => {
     it('should call updateFailureStore and show success toast on successful save', async () => {
       mockUpdateFailureStore.mockResolvedValue(undefined);
-      
+
       const definition = createMockDefinition();
       render(<StreamDetailFailureStore definition={definition} />);
 
@@ -262,7 +282,7 @@ describe('StreamDetailFailureStore', () => {
     it('should show error toast on failed save', async () => {
       const error = new Error('Update failed');
       mockUpdateFailureStore.mockRejectedValue(error);
-      
+
       const definition = createMockDefinition();
       render(<StreamDetailFailureStore definition={definition} />);
 
@@ -293,10 +313,10 @@ describe('StreamDetailFailureStore', () => {
         expect.objectContaining({
           openModal: expect.any(Function),
           definition,
-          statsError: null,
+          statsError: undefined,
           isLoadingStats: false,
-          stats: expect.any(Object),
-          config: expect.any(Object),
+          stats: MOCK_STATS,
+          config: MOCK_CONFIG,
         }),
         {}
       );
@@ -305,11 +325,11 @@ describe('StreamDetailFailureStore', () => {
     it('should pass correct props to NoFailureStorePanel', () => {
       mockUseFailureStoreStats.mockReturnValue({
         data: {
-          config: { enabled: false },
-          stats: null,
+          config: { enabled: false, retentionPeriod: {} },
+          stats: undefined,
         },
         isLoading: false,
-        error: null,
+        error: undefined,
         refresh: mockRefresh,
       });
 
@@ -331,8 +351,8 @@ describe('StreamDetailFailureStore', () => {
       const statsError = new Error('Stats fetch failed');
       mockUseFailureStoreStats.mockReturnValue({
         data: {
-          config: { enabled: true },
-          stats: null,
+          config: { enabled: true, retentionPeriod: {} },
+          stats: undefined,
         },
         isLoading: false,
         error: statsError,

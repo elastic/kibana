@@ -25,15 +25,20 @@ import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 const mockUseTimefilter = useTimefilter as jest.MockedFunction<typeof useTimefilter>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockChartBarSeries = ChartBarSeries as jest.MockedFunction<typeof ChartBarSeries>;
-const mockChartBarPhasesSeries = ChartBarPhasesSeries as jest.MockedFunction<typeof ChartBarPhasesSeries>;
-const mockStreamsAppSearchBar = StreamsAppSearchBar as jest.MockedFunction<typeof StreamsAppSearchBar>;
+const mockChartBarPhasesSeries = ChartBarPhasesSeries as jest.MockedFunction<
+  typeof ChartBarPhasesSeries
+>;
+const mockStreamsAppSearchBar = StreamsAppSearchBar as jest.MockedFunction<
+  typeof StreamsAppSearchBar
+>;
 
 describe('IngestionRate', () => {
-  const createMockDefinition = (): Streams.ingest.all.GetResponse => ({
-    stream: {
-      name: 'logs-test',
-    },
-  } as any);
+  const createMockDefinition = (): Streams.ingest.all.GetResponse =>
+    ({
+      stream: {
+        name: 'logs-test',
+      },
+    } as any);
 
   const createMockStats = (): DataStreamStats => ({
     sizeBytes: 1000000,
@@ -88,7 +93,7 @@ describe('IngestionRate', () => {
   describe('Component Structure', () => {
     it('should render the ingestion rate panel with correct title', () => {
       mockUseKibana.mockReturnValue({ isServerless: false } as any);
-      
+
       const definition = createMockDefinition();
       render(<IngestionRate definition={definition} isLoadingStats={false} />);
 
@@ -97,7 +102,7 @@ describe('IngestionRate', () => {
 
     it('should render the search bar with date picker enabled', () => {
       mockUseKibana.mockReturnValue({ isServerless: false } as any);
-      
+
       const definition = createMockDefinition();
       render(<IngestionRate definition={definition} isLoadingStats={false} />);
 
@@ -109,7 +114,7 @@ describe('IngestionRate', () => {
   describe('Serverless vs On-Premise Charts', () => {
     it('should render ChartBarSeries for serverless environments', () => {
       mockUseKibana.mockReturnValue({ isServerless: true } as any);
-      
+
       const definition = createMockDefinition();
       const stats = createMockStats();
 
@@ -122,7 +127,7 @@ describe('IngestionRate', () => {
 
     it('should render ChartBarPhasesSeries for on-premise environments', () => {
       mockUseKibana.mockReturnValue({ isServerless: false } as any);
-      
+
       const definition = createMockDefinition();
       const stats = createMockStats();
 
@@ -137,18 +142,21 @@ describe('IngestionRate', () => {
   describe('Props Passing', () => {
     it('should pass correct props to chart components in serverless mode', () => {
       mockUseKibana.mockReturnValue({ isServerless: true } as any);
-      
+
       const definition = createMockDefinition();
       const stats = createMockStats();
 
       render(<IngestionRate definition={definition} stats={stats} isLoadingStats={true} />);
 
-      expect(mockChartBarSeries).toHaveBeenCalledWith({
-        definition,
-        stats,
-        timeState: mockTimeState,
-        isLoadingStats: true,
-      }, {});
+      expect(mockChartBarSeries).toHaveBeenCalledWith(
+        {
+          definition,
+          stats,
+          timeState: mockTimeState,
+          isLoadingStats: true,
+        },
+        {}
+      );
 
       expect(screen.getByText('Definition: logs-test')).toBeInTheDocument();
       expect(screen.getByText('Loading: true')).toBeInTheDocument();
@@ -157,18 +165,21 @@ describe('IngestionRate', () => {
 
     it('should pass correct props to chart components in on-premise mode', () => {
       mockUseKibana.mockReturnValue({ isServerless: false } as any);
-      
+
       const definition = createMockDefinition();
       const stats = createMockStats();
 
       render(<IngestionRate definition={definition} stats={stats} isLoadingStats={false} />);
 
-      expect(mockChartBarPhasesSeries).toHaveBeenCalledWith({
-        definition,
-        stats,
-        timeState: mockTimeState,
-        isLoadingStats: false,
-      }, {});
+      expect(mockChartBarPhasesSeries).toHaveBeenCalledWith(
+        {
+          definition,
+          stats,
+          timeState: mockTimeState,
+          isLoadingStats: false,
+        },
+        {}
+      );
 
       expect(screen.getByText('Definition: logs-test')).toBeInTheDocument();
       expect(screen.getByText('Loading: false')).toBeInTheDocument();
@@ -177,17 +188,20 @@ describe('IngestionRate', () => {
 
     it('should handle undefined stats', () => {
       mockUseKibana.mockReturnValue({ isServerless: true } as any);
-      
+
       const definition = createMockDefinition();
 
       render(<IngestionRate definition={definition} stats={undefined} isLoadingStats={false} />);
 
-      expect(mockChartBarSeries).toHaveBeenCalledWith({
-        definition,
-        stats: undefined,
-        timeState: mockTimeState,
-        isLoadingStats: false,
-      }, {});
+      expect(mockChartBarSeries).toHaveBeenCalledWith(
+        {
+          definition,
+          stats: undefined,
+          timeState: mockTimeState,
+          isLoadingStats: false,
+        },
+        {}
+      );
 
       expect(screen.getByText('Definition: logs-test')).toBeInTheDocument();
       expect(screen.getByText('Loading: false')).toBeInTheDocument();
@@ -198,7 +212,7 @@ describe('IngestionRate', () => {
   describe('Loading States', () => {
     it('should pass loading state correctly to serverless chart', () => {
       mockUseKibana.mockReturnValue({ isServerless: true } as any);
-      
+
       const definition = createMockDefinition();
 
       render(<IngestionRate definition={definition} isLoadingStats={true} />);
@@ -208,7 +222,7 @@ describe('IngestionRate', () => {
 
     it('should pass loading state correctly to on-premise chart', () => {
       mockUseKibana.mockReturnValue({ isServerless: false } as any);
-      
+
       const definition = createMockDefinition();
 
       render(<IngestionRate definition={definition} isLoadingStats={false} />);
@@ -233,26 +247,31 @@ describe('IngestionRate', () => {
       });
 
       mockUseKibana.mockReturnValue({ isServerless: true } as any);
-      
+
       const definition = createMockDefinition();
 
       render(<IngestionRate definition={definition} isLoadingStats={false} />);
 
-      expect(mockChartBarSeries).toHaveBeenCalledWith({
-        definition,
-        stats: undefined,
-        timeState: customTimeState,
-        isLoadingStats: false,
-      }, {});
+      expect(mockChartBarSeries).toHaveBeenCalledWith(
+        {
+          definition,
+          stats: undefined,
+          timeState: customTimeState,
+          isLoadingStats: false,
+        },
+        {}
+      );
     });
   });
 
   describe('Layout and Styling', () => {
     it('should have proper flex layout classes', () => {
       mockUseKibana.mockReturnValue({ isServerless: false } as any);
-      
+
       const definition = createMockDefinition();
-      const { container } = render(<IngestionRate definition={definition} isLoadingStats={false} />);
+      const { container } = render(
+        <IngestionRate definition={definition} isLoadingStats={false} />
+      );
 
       // Check that the chart container has the expected structure
       const chartContainer = container.querySelector('[class*="euiFlexGroup"]');
@@ -263,7 +282,7 @@ describe('IngestionRate', () => {
   describe('Error Scenarios', () => {
     it('should handle when useKibana returns undefined isServerless', () => {
       mockUseKibana.mockReturnValue({} as any);
-      
+
       const definition = createMockDefinition();
       render(<IngestionRate definition={definition} isLoadingStats={false} />);
 
@@ -274,16 +293,19 @@ describe('IngestionRate', () => {
     it('should handle when useTimefilter returns undefined timeState', () => {
       mockUseTimefilter.mockReturnValue({} as any);
       mockUseKibana.mockReturnValue({ isServerless: true } as any);
-      
+
       const definition = createMockDefinition();
       render(<IngestionRate definition={definition} isLoadingStats={false} />);
 
-      expect(mockChartBarSeries).toHaveBeenCalledWith({
-        definition,
-        stats: undefined,
-        timeState: undefined,
-        isLoadingStats: false,
-      }, {});
+      expect(mockChartBarSeries).toHaveBeenCalledWith(
+        {
+          definition,
+          stats: undefined,
+          timeState: undefined,
+          isLoadingStats: false,
+        },
+        {}
+      );
     });
   });
 });
