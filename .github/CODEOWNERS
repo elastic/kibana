@@ -1228,6 +1228,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /docs/setup/configuring-reporting.asciidoc @elastic/appex-sharedux
 /x-pack/test_serverless/**/test_suites/common/reporting/ @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/group3/reporting.ts @elastic/appex-sharedux
+/x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture @elastic/response-ops
+/x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
 
 ### Global Experience Tagging
 /x-pack/platform/test/saved_object_tagging/ @elastic/appex-sharedux
