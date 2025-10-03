@@ -100,8 +100,6 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
     </EuiButtonEmpty>
   );
 
-  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={onFlyoutClose} /> : null;
-
   return (
     <div>
       <Popover button={shareControl} panelPaddingSize="none" anchorPosition="downLeft">
@@ -112,7 +110,6 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
           />
         )}
       </Popover>
-      {flyout}
     </div>
   );
 };
