@@ -100,6 +100,16 @@ export class WorkflowScopeStack {
    */
   public enterScope(enterScopeData: ScopeData): WorkflowScopeStack {
     if (this._stackFrames.length && this._stackFrames.at(-1)!.stepId === enterScopeData.stepId) {
+      if (
+        this._stackFrames.at(-1)?.nestedScopes?.length &&
+        this._stackFrames.at(-1)!.nestedScopes.at(-1)?.nodeId === enterScopeData.nodeId
+      ) {
+        const clonedFrames = this.cloneFrames(this.stackFrames);
+        const stackFrame = clonedFrames.at(-1)!;
+        stackFrame.nestedScopes.at(-1)!.scopeId = enterScopeData.scopeId;
+        return WorkflowScopeStack.fromStackFrames(clonedFrames);
+      }
+
       const clonedFrames = this.cloneFrames(this.stackFrames);
       const stackFrame = clonedFrames.at(-1)!;
       return WorkflowScopeStack.fromStackFrames(
