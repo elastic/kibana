@@ -6,7 +6,8 @@
  */
 
 import { AUTHENTICATION } from '../../../common/lib/authentication';
-import { SPACE_1, SPACE_2, SPACE_3, SPACES } from '../../../common/lib/spaces';
+import { createSpaces, deleteSpaces } from '../../../common/lib/space_test_utils';
+import { SPACES } from '../../../common/lib/spaces';
 import { createTestSuiteFactory } from '../../../common/suites/create.agnostic';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
@@ -23,25 +24,13 @@ export default function createSpacesOnlySuite(context: DeploymentAgnosticFtrProv
   const spacesService = context.getService('spaces');
   const isServerless = context.getService('config').get('serverless');
 
-  const createSpaces = async () => {
-    await spacesService.create(SPACE_1);
-    await spacesService.create(SPACE_2);
-    await spacesService.create({ ...SPACE_3, ...(isServerless ? {} : { solution: 'es' }) });
-  };
-
-  const deleteSpaces = async () => {
-    await spacesService.delete(SPACE_1.id);
-    await spacesService.delete(SPACE_2.id);
-    await spacesService.delete(SPACE_3.id);
-  };
-
   describe('create', () => {
     before(async () => {
-      await createSpaces();
+      await createSpaces(spacesService, isServerless);
     });
 
     after(async () => {
-      await deleteSpaces();
+      await deleteSpaces(spacesService);
     });
 
     [
