@@ -35,35 +35,34 @@ export const createInitialisationSourcesService = (deps: {
 }) => {
   return async function upsertSources(namespace: string) {
     const logger = createPrivMonLogger(deps.logger, namespace);
-    const auditLogger = createPrivMonAuditLogger(deps.auditLogger); // I am here
+    const auditLogger = createPrivMonAuditLogger(deps.auditLogger);
+    const index = getPrivilegedMonitorUsersIndex(namespace);
+
     try {
       // required sources to initialize privileged monitoring engine
-      const index = getPrivilegedMonitorUsersIndex(namespace);
-      const requiredSources = buildRequiredSources(namespace, index);
+      const requiredInitSources = buildRequiredSources(namespace, index);
       const existing = await deps.descriptorClient.findAll({});
 
       // create all sources, if none exist already
       if (existing.length === 0) {
-        await deps.descriptorClient.bulkCreate(requiredSources);
+        await deps.descriptorClient.bulkCreate(requiredInitSources);
+        logger.log('debug', `Created all ${requiredInitSources.length} default sources`);
+        return;
+      }
+      const requiredIntegrationNames = requiredInitSources.map(({ name }) => name).sort();
+      const installedIntegrationNames = await deps.descriptorClient.findByQuery(
+        buildFilterByIntegrationNames(requiredIntegrationNames)
+      );
+      const existingIntegrationsNames = installedIntegrationNames.map(({ name }) => name).sort();
 
-        logger.log('debug', `Created all ${requiredSources.length} default sources`);
-      } else {
-        // create uninstalled integration sources
-        const requiredIntegrationNames = requiredSources.map(({ name }) => name).sort();
-        const installedIntegrationNames = await deps.descriptorClient.findByQuery(
-          buildFilterByIntegrationNames(requiredIntegrationNames)
+      if (!isEqual(requiredIntegrationNames, existingIntegrationsNames)) {
+        const { created, updated, results } = await deps.descriptorClient.bulkUpsert(
+          requiredInitSources
         );
-        const existingIntegrationsNames = installedIntegrationNames.map(({ name }) => name).sort();
-
-        if (!isEqual(requiredIntegrationNames, existingIntegrationsNames)) {
-          const { created, updated, results } = await deps.descriptorClient.bulkUpsert(
-            requiredSources
-          );
-          logger.log(
-            'debug',
-            `Privilege Monitoring sources upsert - created: ${created}, updated: ${updated}, processed: ${results.length}.`
-          );
-        }
+        logger.log(
+          'debug',
+          `Privilege Monitoring sources upsert - created: ${created}, updated: ${updated}, processed: ${results.length}.`
+        );
       }
     } catch (error) {
       logger.log(
