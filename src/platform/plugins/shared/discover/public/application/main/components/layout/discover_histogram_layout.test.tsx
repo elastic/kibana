@@ -75,6 +75,7 @@ function getStateContainer({
           to: '2020-05-14T11:20:13.590',
         },
         searchSessionId,
+        isSearchSessionRestored: false,
       },
     })
   );
