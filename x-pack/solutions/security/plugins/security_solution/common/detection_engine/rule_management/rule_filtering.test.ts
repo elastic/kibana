@@ -25,7 +25,7 @@ describe('convertRulesFilterToKQL', () => {
     const kql = convertRulesFilterToKQL({ ...filterOptions, filter: 'foo' });
 
     expect(kql).toBe(
-      '(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo")'
+      '(alert.attributes.name: *foo* OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo")'
     );
   });
 
@@ -33,7 +33,7 @@ describe('convertRulesFilterToKQL', () => {
     const kql = convertRulesFilterToKQL({ ...filterOptions, filter: '" OR (foo: bar)' });
 
     expect(kql).toBe(
-      '(alert.attributes.name: "\\" OR (foo: bar)" OR alert.attributes.params.index: "\\" OR (foo: bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo: bar)")'
+      '(alert.attributes.name: *\\" OR (foo: bar)* OR alert.attributes.params.index: "\\" OR (foo: bar)" OR alert.attributes.params.threat.tactic.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.tactic.name: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.name: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.subtechnique.id: "\\" OR (foo: bar)" OR alert.attributes.params.threat.technique.subtechnique.name: "\\" OR (foo: bar)")'
     );
   });
 
@@ -74,7 +74,7 @@ describe('convertRulesFilterToKQL', () => {
     });
 
     expect(kql).toBe(
-      `(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo") AND alert.attributes.params.immutable: true AND alert.attributes.tags:(\"tag1\" AND \"tag2\")`
+      `(alert.attributes.name: *foo* OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo") AND alert.attributes.params.immutable: true AND alert.attributes.tags:(\"tag1\" AND \"tag2\")`
     );
   });
 
