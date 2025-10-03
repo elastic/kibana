@@ -52,7 +52,6 @@
     "@kbn/alerting-rule-utils",
     "@kbn/response-ops-rule-params",
     "@kbn/object-utils",
-    "@kbn/expressions-plugin",
     "@kbn/esql-ast",
   ],
   "exclude": ["target/**/*"]
