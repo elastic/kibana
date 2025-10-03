@@ -342,7 +342,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should store secrets if fleet server meets minimum version', async function () {
         await clearAgents();
-        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.3.0');
         const res = await supertest
           .post(`/api/fleet/agent_download_sources`)
           .set('kbn-xsrf', 'xxxx')
@@ -403,7 +403,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should store secrets if fleet server meets minimum version', async function () {
         await clearAgents();
-        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.3.0');
         const res = await supertest
           .put(`/api/fleet/agent_download_sources/${defaultDownloadSourceId}`)
           .set('kbn-xsrf', 'xxxx')

@@ -337,7 +337,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should store secrets if fleet server meets minimum version', async function () {
         await clearAgents();
-        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '8.12.0');
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.3.0');
         const res = await supertest
           .post(`/api/fleet/fleet_server_hosts`)
           .set('kbn-xsrf', 'xxxx')
