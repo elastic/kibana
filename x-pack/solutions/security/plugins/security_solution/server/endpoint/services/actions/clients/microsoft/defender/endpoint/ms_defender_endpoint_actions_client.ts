@@ -24,6 +24,7 @@ import type {
 import { groupBy } from 'lodash';
 import type { Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import pRetry from 'p-retry';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
@@ -69,12 +70,18 @@ import {
 import type {
   CommonResponseActionMethodOptions,
   GetFileDownloadMethodResponse,
+  OmitUnsupportedAttributes,
   ProcessPendingActionsMethodOptions,
 } from '../../../lib/types';
 import { catchAndWrapError } from '../../../../../../utils';
-import pRetry from 'p-retry';
-import type { ActionValidationResult } from './utils';
-import { checkActionMatches } from './utils';
+
+/**
+ * Validation result for MDE action details
+ */
+export interface ActionValidationResult {
+  isValid: boolean;
+  error?: string;
+}
 
 export type MicrosoftDefenderActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -382,17 +389,80 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   }
 
   /**
-   * Fetches and validates the details of a specific action from Microsoft Defender for Endpoint.
+   * Validates that an MDE runscript action matches the expected script name and action ID.
+   * This detects when MDE throttles/replaces our action with an existing one.
+   *
+   * @param actionDetails The action details returned by MDE
+   * @param expectedScriptName The script name we requested
+   * @param expectedActionId The Kibana action ID we included in the comment
+   * @returns Validation result with isValid flag and error message if validation fails
+   * @internal
+   */
+  private checkRunscriptActionMatches(
+    actionDetails: MicrosoftDefenderEndpointMachineAction,
+    expectedScriptName: string,
+    expectedActionId: string
+  ): ActionValidationResult {
+    // Validate inputs
+    if (!expectedScriptName || !expectedActionId) {
+      return {
+        isValid: false,
+        error: 'Unable to validate action. Missing required parameters.',
+      };
+    }
+
+    const commandEntry = actionDetails.commands?.[0];
+    if (!commandEntry || !commandEntry.command?.params) {
+      return {
+        isValid: false,
+        error: 'Unable to verify action details. The action information is incomplete.',
+      };
+    }
+
+    const scriptNameParam = commandEntry.command.params.find((p) => p.key === 'ScriptName');
+    const actualScriptName = scriptNameParam?.value;
+    // Validate script name exists
+    if (!actualScriptName) {
+      return {
+        isValid: false,
+        error: 'Unable to verify which script is running. The action information is incomplete.',
+      };
+    }
+
+    // Validate action ID is in comment
+    if (!actionDetails.requestorComment?.includes(expectedActionId)) {
+      return {
+        isValid: false,
+        error: `Cannot run script '${actualScriptName}' because an identical script is already in progress on this host. Please wait for the current script to complete or cancel it before trying again.`,
+      };
+    }
+
+    // Validate script name matches
+    if (actualScriptName !== expectedScriptName) {
+      return {
+        isValid: false,
+        error: `Cannot run script '${expectedScriptName}' because another script ('${actualScriptName}') is already in progress on this host. Please wait for the current script to complete or cancel it before trying again.`,
+      };
+    }
+
+    // All validations passed - this is our action
+    return {
+      isValid: true,
+    };
+  }
+
+  /**
+   * Fetches and validates the details of a specific runscript action from Microsoft Defender for Endpoint.
    * This method ensures that the action returned by MDE matches our expected script name and action ID,
    * detecting when MDE throttles/replaces our action with an existing one.
    *
    * @param machineActionId - The Microsoft Defender machine action ID returned from sendAction
    * @param expectedScriptName - The script name we requested to run
    * @param expectedActionId - The Kibana action ID we included in the comment
-   * @returns Validation result with isValid flag, action details, and error message if validation fails
+   * @returns Validation result with isValid flag and error message if validation fails
    * @internal
    */
-  private async fetchAndValidateActionDetails(
+  private async fetchAndValidateRunscriptActionDetails(
     machineActionId: string,
     expectedScriptName: string,
     expectedActionId: string
@@ -446,7 +516,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       );
 
       // Validate if the response action matches the MDE action
-      return checkActionMatches(actionDetails, expectedScriptName, expectedActionId);
+      return this.checkRunscriptActionMatches(actionDetails, expectedScriptName, expectedActionId);
     } catch (error) {
       this.log.error(
         `Failed to fetch action details from MDE API for machineActionId [${machineActionId}]: ${error.message}`
@@ -663,23 +733,23 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   }
 
   public async runscript(
-    actionRequest: RunScriptActionRequestBody,
+    actionRequest: OmitUnsupportedAttributes<RunScriptActionRequestBody>,
     options?: CommonResponseActionMethodOptions
   ): Promise<
     ActionDetails<ResponseActionRunScriptOutputContent, ResponseActionRunScriptParameters>
   > {
-    const scriptName = (actionRequest.parameters as MSDefenderRunScriptActionRequestParams)
-      .scriptName;
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      RunScriptActionRequestBody['parameters'],
+      MSDefenderRunScriptActionRequestParams,
       {},
       MicrosoftDefenderEndpointActionRequestCommonMeta
-    > = {
+    > & { parameters: MSDefenderRunScriptActionRequestParams } = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: actionRequest.parameters as MSDefenderRunScriptActionRequestParams,
       command: 'runscript',
     };
+    const { scriptName, args } = reqIndexOptions.parameters;
+
     if (!reqIndexOptions.error) {
       let error = (await this.validateRequest(reqIndexOptions)).error;
 
@@ -693,7 +763,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             comment: this.buildExternalComment(reqIndexOptions),
             parameters: {
               scriptName,
-              args: (reqIndexOptions.parameters as MSDefenderRunScriptActionRequestParams).args,
+              args,
             },
           });
 
@@ -704,22 +774,15 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             );
           }
 
-          // Fetch and validate the action details to detect MDE throttling
-          if (!reqIndexOptions.actionId) {
-            throw new ResponseActionsClientError(
-              'Action ID is required to validate MDE action details.'
-            );
-          }
-
-          const mdeActionValidation = await this.fetchAndValidateActionDetails(
+          const mdeActionValidation = await this.fetchAndValidateRunscriptActionDetails(
             machineActionId,
             scriptName,
-            reqIndexOptions.actionId
+            reqIndexOptions.actionId ?? ''
           );
 
           if (!mdeActionValidation.isValid) {
             throw new ResponseActionsClientError(
-              mdeActionValidation.error ?? 'Action validation failed.',
+              mdeActionValidation.error ?? 'A runscript action is already pending in MS Defender.',
               409,
               {
                 machineActionId,
