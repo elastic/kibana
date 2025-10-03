@@ -152,6 +152,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   selectedApiKeyId,
   setSelectedAPIKeyId,
   fleetServerHost,
+  fleetServerHostConfig,
   fleetProxy,
   downloadSource,
   downloadSourceProxy,
@@ -185,6 +186,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
     fleetServerHost,
+    fleetServerHostConfig,
     fleetProxy,
     downloadSource,
     downloadSourceProxy,
