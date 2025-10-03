@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CONTROL_HOVER_TRIGGER_ID } from '@kbn/controls-constants';
+import { CONTROL_HOVER_TRIGGER_ID, CONTROL_MENU_TRIGGER } from '@kbn/controls-constants';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ACTION_EDIT_PANEL, ACTION_REMOVE_PANEL } from '@kbn/presentation-panel-plugin/public';
 import { ADD_PANEL_TRIGGER, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -18,7 +18,6 @@ import {
   OPTIONS_LIST_ACTION,
   RANGE_SLIDER_ACTION,
 } from './constants';
-import { CONTROL_MENU_TRIGGER } from './control_panel_actions';
 import { controlHoverTrigger } from './controls_hover_trigger';
 
 export function registerActions(uiActions: UiActionsStart) {

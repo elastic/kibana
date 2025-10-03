@@ -107,7 +107,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         const newActions: FloatingActionItem[] = currentActions?.filter(
           (current) => current.id !== action.id
         );
-        if (isCompatible) {
+        if (isCompatible && (disabledActions ?? []).indexOf(action.id) === -1) {
           return [getFloatingActionItem(uuid, action, context), ...newActions].sort(sortByOrder);
         }
         return newActions;

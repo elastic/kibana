@@ -12,6 +12,7 @@ import { omit } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 
+import type { StickyControlState } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import {

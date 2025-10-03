@@ -30,6 +30,9 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import type { ControlGroupEditorConfig } from '@kbn/control-group-renderer';
+import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
+import { CONTROL_MENU_TRIGGER } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
@@ -40,11 +43,8 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { asyncForEach } from '@kbn/std';
-import type { ControlGroupEditorConfig } from '@kbn/control-group-renderer';
-import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
 
 import {
-  CONTROL_MENU_TRIGGER,
   addControlMenuTrigger,
   type CreateControlTypeAction,
 } from '../../actions/control_panel_actions';

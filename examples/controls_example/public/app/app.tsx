@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ControlsExampleStartDeps } from '../plugin';
 import { ControlGroupRendererExamples } from './control_group_renderer_examples';
@@ -32,7 +32,8 @@ const App = ({
   core,
   data,
   navigation,
-}: { core: CoreStart } & Pick<ControlsExampleStartDeps, 'data' | 'navigation'>) => {
+  uiActions,
+}: { core: CoreStart } & ControlsExampleStartDeps) => {
   const [selectedTabId, setSelectedTabId] = useState(CONTROLS_REFACTOR_TEST); // TODO: Make this the first tab
 
   function onSelectedTabChanged(tabId: string) {
@@ -47,8 +48,8 @@ const App = ({
     return <ControlGroupRendererExamples data={data} navigation={navigation} />;
   }
 
-  return (
-    <KibanaRenderContextProvider {...core}>
+  return core.rendering.addContext(
+    <KibanaContextProvider services={{ ...core, data, navigation, uiActions }}>
       <EuiPage>
         <EuiPageBody>
           <EuiPageSection>
@@ -78,16 +79,16 @@ const App = ({
           </EuiPageTemplate.Section>
         </EuiPageBody>
       </EuiPage>
-    </KibanaRenderContextProvider>
+    </KibanaContextProvider>
   );
 };
 
 export const renderApp = (
   core: CoreStart,
-  { data, navigation }: Pick<ControlsExampleStartDeps, 'data' | 'navigation'>,
+  deps: ControlsExampleStartDeps,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(<App core={core} data={data} navigation={navigation} />, element);
+  ReactDOM.render(<App core={core} {...deps} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

@@ -106,6 +106,6 @@ export interface ControlPanelsState<State extends StickyControlState = StickyCon
 
 export type ControlPanelState<ControlState extends StickyControlState = StickyControlState> =
   ControlState & {
-    type: string;
+    type: string; // prevents having to cast to the literal type
     order: number;
   };

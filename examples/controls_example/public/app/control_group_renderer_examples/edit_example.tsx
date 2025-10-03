@@ -23,15 +23,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type {
-  ControlGroupRuntimeState,
-  ControlGroupRendererApi,
-  ControlStateTransform,
+import {
+  type ControlGroupRuntimeState,
+  type ControlGroupRendererApi,
+  type ControlStateTransform,
+  ControlGroupRenderer,
 } from '@kbn/control-group-renderer';
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
 const WITH_CUSTOM_PLACEHOLDER = 'Custom Placeholder';
+
+const ACTION_EDIT_CONTROL = 'editPanel';
+const ACTION_DELETE_CONTROL = 'deletePanel';
 
 type StoredState = ControlGroupRuntimeState & { disabledActions: string[] };
 
@@ -131,6 +135,7 @@ export const EditExample = () => {
             <EuiButtonEmpty
               color="primary"
               iconType="plusInCircle"
+              aria-label={'Add control'}
               isDisabled={controlGroupAPI === undefined}
               onClick={() => {
                 if (!controlGroupAPI) return;
@@ -194,11 +199,10 @@ export const EditExample = () => {
         ) : null}
         <ControlGroupRenderer
           onApiAvailable={setControlGroupAPI}
-          getCreationOptions={async (initialState, builder) => {
+          getCreationOptions={async (builder) => {
             const persistedState = await onLoad();
             return {
               initialState: {
-                ...initialState,
                 ...persistedState,
               },
             };

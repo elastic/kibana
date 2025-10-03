@@ -10,48 +10,51 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  CONTROL_MENU_TRIGGER,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type {
-  // ControlsGroupState,
+  DataControlState,
   OptionsListDSLControlState,
   RangeSliderControlState,
   StickyControlState,
 } from '@kbn/controls-schemas';
+import { type CreateControlTypeAction } from '@kbn/controls-plugin/public/actions/control_panel_actions';
 import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
-import type { ControlGroupRuntimeState } from './types';
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-// import {
-//   CONTROL_MENU_TRIGGER,
-//   addControlMenuTrigger,
-//   type CreateControlTypeAction,
-// } from '@kbn/controls-plugin/public/actions/control_panel_actions';
+import type { ControlGroupRuntimeState } from './types';
 
 export const controlGroupStateBuilder = {
-  // addDataControlFromField: async (
-  //   controlGroupState: Partial<ControlGroupRuntimeState>,,
-  //   controlState: Omit<ControlsGroupState['controls'][number], 'type'>,
-  //   controlId?: string
-  // ) => {
-  //   const type = await getCompatibleControlType(controlState.dataViewId, controlState.fieldName);
-  //   if (!type)
-  //     throw new Error(
-  //       i18n.translate('controls.controlGroupRenderer.addDataControlFromField.error', {
-  //         defaultMessage: 'No control type is compatible with this field.',
-  //       })
-  //     );
-  //   controlGroupState.initialChildControlState = {
-  //     ...(controlGroupState.initialChildControlState ?? {}),
-  //     [controlId ?? uuidv4()]: {
-  //       type,
-  //       order: getNextControlOrder(controlGroupState.initialChildControlState),
-  //       ...controlState,
-  //     },
-  //   };
-  // },
+  addDataControlFromField: async (
+    controlGroupState: Partial<ControlGroupRuntimeState>,
+    controlState: Omit<DataControlState & StickyControlState, 'type'>,
+    uiActionsService: UiActionsStart,
+    controlId?: string
+  ) => {
+    const type = await getCompatibleControlType(
+      controlState.dataViewId,
+      controlState.fieldName,
+      uiActionsService
+    );
+    if (!type)
+      throw new Error(
+        i18n.translate('controls.controlGroupRenderer.addDataControlFromField.error', {
+          defaultMessage: 'No control type is compatible with this field.',
+        })
+      );
+    controlGroupState.initialChildControlState = {
+      ...(controlGroupState.initialChildControlState ?? {}),
+      [controlId ?? uuidv4()]: {
+        type,
+        order: getNextControlOrder(controlGroupState.initialChildControlState),
+        ...controlState,
+      },
+    };
+  },
   addOptionsListControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Omit<
@@ -101,24 +104,27 @@ export const controlGroupStateBuilder = {
   },
 };
 
-// async function getCompatibleControlType(
-//   dataViewId: string,
-//   fieldName: string
-// ): Promise<ControlsGroupState['controls'][number]['type'] | undefined> {
-//   const controlTypes = (await uiActionsService.getTriggerActions(
-//     CONTROL_MENU_TRIGGER
-//   )) as CreateControlTypeAction[];
+async function getCompatibleControlType(
+  dataViewId: string,
+  fieldName: string,
+  uiActionsService: UiActionsStart
+): Promise<StickyControlState['type'] | undefined> {
+  console.log({ uiActionsService });
+  const controlTypes = (await uiActionsService.getTriggerActions(
+    CONTROL_MENU_TRIGGER
+  )) as CreateControlTypeAction[];
 
-//   for (const action of controlTypes) {
-//     const compatible = await action.isCompatible({
-//       trigger: addControlMenuTrigger,
-//       embeddable: undefined, // parentApi isn't necessary for this
-//       state: { dataViewId, fieldName },
-//     });
-//     if (compatible) return action.type as ControlsGroupState['controls'][number]['type'];
-//   }
-//   return undefined;
-// }
+  for (const action of controlTypes) {
+    const trigger = uiActionsService.getTrigger(CONTROL_MENU_TRIGGER);
+    const compatible = await action.isCompatible({
+      trigger,
+      embeddable: undefined, // parentApi isn't necessary for this
+      state: { dataViewId, fieldName },
+    });
+    if (compatible) return action.type as StickyControlState['type'];
+  }
+  return undefined;
+}
 
 function getNextControlOrder(controlPanelsState?: DashboardLayout['controls']) {
   if (!controlPanelsState) {

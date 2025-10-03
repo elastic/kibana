@@ -24,7 +24,6 @@ import {
   EuiSuperDatePicker,
 } from '@elastic/eui';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
@@ -403,7 +402,7 @@ export const ReactControlExample = ({
         }}
       />
       {hasControls && <EuiSpacer size="m" />}
-      <EmbeddableRenderer
+      {/* <EmbeddableRenderer
         type={CONTROLS_GROUP_TYPE}
         maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
         onApiAvailable={(api) => {
@@ -412,17 +411,16 @@ export const ReactControlExample = ({
         hidePanelChrome={true}
         getParentApi={() => parentApi}
         panelProps={{ hideLoader: true }}
-      />
+      /> */}
       <EuiSpacer size="l" />
-      {isControlGroupInitialized && (
-        <div style={{ height: '400px' }}>
-          <EmbeddableRenderer
-            type={'search_embeddable'}
-            getParentApi={() => parentApi}
-            hidePanelChrome={false}
-          />
-        </div>
-      )}
+
+      <div style={{ height: '400px' }}>
+        <EmbeddableRenderer
+          type={'search_embeddable'}
+          getParentApi={() => parentApi}
+          hidePanelChrome={false}
+        />
+      </div>
     </>
   );
 };

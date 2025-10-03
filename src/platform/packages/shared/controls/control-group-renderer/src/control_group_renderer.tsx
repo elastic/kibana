@@ -85,11 +85,17 @@ export const ControlGroupRenderer = ({
 
   const parentApi = useMemo(() => {
     if (!childrenApi || !layoutApi) return;
+
+    const disabledActionIds$ = new BehaviorSubject<string[] | undefined>(undefined);
     return {
       ...childrenApi,
       ...layoutApi,
       ...searchApi,
       ...propsApi,
+      disabledActionIds$,
+      setDisabledActionIds: (ids: string[] | undefined) => {
+        disabledActionIds$.next(ids);
+      },
     };
   }, [childrenApi, layoutApi, searchApi, propsApi]);
 

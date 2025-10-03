@@ -15,6 +15,7 @@
       "presentationUtil",
       "uiActions",
       "dataViews"
-    ]
+    ],
+    "requiredBundles": ["kibanaReact"]
   }
 }
