@@ -60,7 +60,6 @@ export const CspNoDataPage = ({
 }: CspNoDataPageProps) => {
   return (
     <NoDataPage
-      data-test-subj={dataTestSubj}
       action={{
         elasticAgent: {
           docsLink,
