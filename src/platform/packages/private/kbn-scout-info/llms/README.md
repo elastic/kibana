@@ -19,7 +19,7 @@ A “boilerplate” Scout test file refers to a test file containing test case(s
 
 ### How to Use
 
-**Sample prompt** (using Claude's `@path/to/import` syntax):
+**Sample prompt** (replace the FTR file path):
 
 ```
 Generate an empty Scout skeleton from this file:
@@ -30,5 +30,8 @@ Instructions:
 @src/platform/packages/private/kbn-scout-info/llms/generate-scout-skeleton-from-ftr-test.md contains instructions on how to convert a test
 @src/platform/packages/private/kbn-scout-info/llms/what-is-scout.md contains a high-level description of the Scout framework
 ```
+
+> [!NOTE]
+> This prompt uses Claude's `@path/to/import` [syntax](https://docs.claude.com/en/docs/claude-code/memory).
 
 **Sample output**: available [here](https://gist.github.com/csr/71e635d856154df64f7d1ccb7e8333df).
