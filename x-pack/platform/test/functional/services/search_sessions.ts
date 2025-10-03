@@ -16,14 +16,10 @@ const BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT = 'openBackgroundSearchFlyoutButton';
 const BACKGROUND_SEARCH_SUBMIT_BUTTON = 'querySubmitButton-secondary-button';
 const BACKGROUND_SEARCH_CANCEL_BUTTON = 'queryCancelButton-secondary-button';
 
-export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;
-export const TOUR_RESTORE_STEP_KEY = `data.searchSession.tour.restore`;
-
 export class SearchSessionsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
-  private readonly browser = this.ctx.getService('browser');
   private readonly security = this.ctx.getService('security');
   private readonly toasts = this.ctx.getService('toasts');
   private readonly es = this.ctx.getService('es');
@@ -130,20 +126,6 @@ export class SearchSessionsService extends FtrService {
         })
       );
     });
-  }
-
-  public async markTourDone() {
-    await Promise.all([
-      this.browser.setLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY, 'true'),
-      this.browser.setLocalStorageItem(TOUR_RESTORE_STEP_KEY, 'true'),
-    ]);
-  }
-
-  public async markTourUndone() {
-    await Promise.all([
-      this.browser.removeLocalStorageItem(TOUR_TAKING_TOO_LONG_STEP_KEY),
-      this.browser.removeLocalStorageItem(TOUR_RESTORE_STEP_KEY),
-    ]);
   }
 
   public async getAsyncSearchStatus(asyncSearchId: string) {

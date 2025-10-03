@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('dashboard');
         log.debug('wait for dashboard landing page');
         await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
-        await searchSessions.markTourDone();
       });
 
       after(async () => {
