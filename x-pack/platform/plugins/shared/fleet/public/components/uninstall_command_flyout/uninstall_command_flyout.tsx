@@ -190,6 +190,7 @@ export const UninstallCommandFlyout: React.FunctionComponent<UninstallCommandFly
       onClose={onClose}
       data-test-subj="uninstall-command-flyout"
       maxWidth={MAX_FLYOUT_WIDTH}
+      aria-label="Uninstall agent"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

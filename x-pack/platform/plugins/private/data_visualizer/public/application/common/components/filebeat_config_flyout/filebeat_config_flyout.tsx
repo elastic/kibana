@@ -56,7 +56,7 @@ export const FilebeatConfigFlyout: FC<Props> = ({ index, results, pipelineId, cl
   }, [username, index, pipelineId, results]);
 
   return (
-    <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'} ownFocus={false}>
+    <EuiFlyout onClose={closeFlyout} hideCloseButton size={'m'} ownFocus={false} aria-label="Filebeat configuration">
       <EuiFlyoutBody>
         <EuiFlexGroup>
           <Contents value={fileBeatConfig} username={username} index={index} />

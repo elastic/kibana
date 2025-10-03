@@ -32,6 +32,7 @@ export const ScheduledReportFlyout = ({
       ownFocus={true}
       onClose={onClose}
       data-test-subj="scheduledReportFlyout"
+      aria-label="Scheduled report"
     >
       <ScheduledReportFlyoutContent
         apiClient={apiClient}
