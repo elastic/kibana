@@ -173,7 +173,15 @@
                 "section": "def-common.ToolDefinitionWithSchema",
                 "text": "ToolDefinitionWithSchema"
               },
-              "<Record<string, unknown>>>"
+              "<",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ToolType",
+                "text": "ToolType"
+              },
+              ", Record<string, unknown>>>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-browser/tools/contract.ts",
             "deprecated": false,
@@ -215,7 +223,15 @@
                 "section": "def-common.ToolDefinition",
                 "text": "ToolDefinition"
               },
-              "<Record<string, unknown>>[]>"
+              "<",
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.ToolType",
+                "text": "ToolType"
+              },
+              ", Record<string, unknown>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-browser/tools/contract.ts",
             "deprecated": false,
