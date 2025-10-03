@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { updatePrivilegedMonitoringEntitySource, MAX_PER_PAGE } from './update_entity_source';
+import { updatePrivilegedMonitoringEntitySource, MAX_PER_PAGE } from './update_source_index';
 import { monitoringEntitySourceTypeName } from '../saved_objects/monitoring_entity_source_type';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 
