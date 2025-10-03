@@ -494,6 +494,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         const kathryneBefore = privMonUtils.findUser(usersBefore, 'Kathryne.Ziemann');
         expect(kathryneBefore).toBeDefined();
+        privMonUtils.assertIsPrivileged(kathryneBefore, true);
+        expect(kathryneBefore?.labels?.source_ids).toContain(monitoringSource?.id);
+        expect(kathryneBefore?.labels?.sources).toContain('entity_analytics_integration');
         expect(kathryneBefore?.entity_analytics_monitoring?.labels).toEqual([
           {
             field: 'user.roles',
