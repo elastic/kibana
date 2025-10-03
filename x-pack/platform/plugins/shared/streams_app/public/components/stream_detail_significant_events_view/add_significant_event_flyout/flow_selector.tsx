@@ -50,7 +50,7 @@ export function FlowSelector({ selected, updateSelected, isSubmitting }: Props) 
                 'xpack.streams.streamDetailView.addSignificantEventFlyout.aiOptionDescription',
                 {
                   defaultMessage:
-                    'Let the system suggest important queries based on patterns in your data. You can review the suggestions.',
+                    'Let AI suggest queries for significant events based on your data patterns, and select from the suggestions.',
                 }
               )}
             </EuiText>
@@ -78,8 +78,7 @@ export function FlowSelector({ selected, updateSelected, isSubmitting }: Props) 
               {i18n.translate(
                 'xpack.streams.streamDetailView.addSignificantEventFlyout.manualOptionDescription',
                 {
-                  defaultMessage:
-                    "Write a query to detect a meaningful change or anomaly. Give it a title so it's easy to spot.",
+                  defaultMessage: 'Write a query to find and add a known significant event.',
                 }
               )}
             </EuiText>
