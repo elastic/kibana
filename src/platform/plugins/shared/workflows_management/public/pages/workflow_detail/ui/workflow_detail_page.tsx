@@ -11,10 +11,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { StepContext, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -23,8 +22,6 @@ import { WorkflowExecutionDetail } from '../../../features/workflow_execution_de
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
-import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
 import { WorkflowEditor } from './workflow_editor';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
@@ -44,12 +41,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
   const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
+  const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
   const [highlightDiff, setHighlightDiff] = useState(false);
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
-  const { updateWorkflow, runWorkflow, runIndividualStep, testWorkflow } = useWorkflowActions();
+  const { updateWorkflow, runWorkflow, testWorkflow } = useWorkflowActions();
 
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
@@ -106,9 +104,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     }
     return parsingResult.data as WorkflowYaml;
   }, [workflowYaml]);
-
-  const [testStepId, setTestStepId] = useState<string | null>(null);
-  const [contextOverride, setcontextOverride] = useState<ContextOverrideData | null>(null);
 
   const handleRunClick = ({ test = false }: { test: boolean }) => {
     const def = test ? definitionFromCurrentYaml : workflow?.definition;
@@ -231,29 +226,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     setHasChanges(false);
   }, [workflow]);
 
-  const handleStepRun = async (params: { stepId: string; actionType: string }) => {
-    if (params.actionType === 'run') {
-      const contextOverrideData = buildContextOverrideForStep(workflowYaml, params.stepId);
-
-      if (!Object.keys(contextOverrideData.stepContext).length) {
-        submitStepRun(params.stepId, {});
-        return;
-      }
-
-      setcontextOverride(contextOverrideData);
-      setTestStepId(params.stepId);
-    }
-  };
-
-  const submitStepRun = async (stepId: string, mock: Partial<StepContext>) => {
-    const response = await runIndividualStep.mutateAsync({
-      stepId,
-      workflowYaml,
-      contextOverride: mock,
-    });
-    setSelectedExecution(response.workflowExecutionId);
-    setTestStepId(null);
-    setcontextOverride(null);
+  const handleChange = (wfString: string = '') => {
+    setWorkflowYaml(wfString);
+    setHasChanges(originalWorkflowYaml !== wfString);
   };
 
   if (workflowError) {
@@ -284,9 +259,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           handleToggleWorkflow={handleToggleWorkflow}
           canTestWorkflow={canTestWorkflow}
           handleTestClick={() => handleRunClick({ test: true })}
-          handleTabChange={(tab) => {
-            setActiveTab(tab);
-          }}
+          handleTabChange={setActiveTab}
           hasUnsavedChanges={hasChanges}
           highlightDiff={highlightDiff}
           setHighlightDiff={setHighlightDiff}
@@ -296,12 +269,15 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           editor={
             <WorkflowEditor
               workflow={workflow}
+              workflowYaml={yamlValue}
+              onWorkflowYamlChange={handleChange}
+              hasChanges={hasChanges}
               execution={execution}
               activeTab={activeTab}
               selectedExecutionId={selectedExecutionId}
               selectedStepId={selectedStepId}
               highlightDiff={highlightDiff}
-              handleStepRun={handleStepRun}
+              setSelectedExecution={setSelectedExecution}
             />
           }
           executionList={
@@ -334,16 +310,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           definition={definitionFromCurrentYaml}
           onClose={() => setTestWorkflowModalOpen(false)}
           onSubmit={handleTestRunWorkflow}
-        />
-      )}
-      {testStepId && contextOverride && (
-        <TestStepModal
-          initialcontextOverride={contextOverride}
-          onSubmit={({ stepInputs }) => submitStepRun(testStepId, stepInputs)}
-          onClose={() => {
-            setTestStepId(null);
-            setcontextOverride(null);
-          }}
         />
       )}
     </EuiFlexGroup>
