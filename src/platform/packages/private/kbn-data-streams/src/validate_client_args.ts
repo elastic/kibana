@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type YamlValidationErrorSeverity = 'error' | 'warning' | 'info';
+import type { DataStreamClientArgs } from './client';
 
-export interface YamlValidationError {
-  message: string;
-  severity: YamlValidationErrorSeverity;
-  lineNumber: number;
-  column: number;
-  owner: string;
+export function validateClientArgs(args: DataStreamClientArgs<any, any>) {
+  if (args.dataStreams.version <= 0) {
+    throw new Error('Template version must be greater than 0');
+  }
 }
