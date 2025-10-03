@@ -623,6 +623,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
           </TooltipWrapper>
         </EuiFlexGroup>
       </EuiFlexItem>
+
+      {/* Legend settings */}
       <EuiFlexItem grow={false}>
         <LegendSettingsPopover
           legendOptions={legendOptions}

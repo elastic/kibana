@@ -6,3 +6,4 @@
  */
 
 export { XyToolbar } from './toolbar';
+export { XyFlyoutToolbar } from './flyout_toolbar';
