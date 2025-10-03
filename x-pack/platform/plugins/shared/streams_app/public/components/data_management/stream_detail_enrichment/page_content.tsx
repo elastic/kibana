@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiCode,
-  EuiFlexGroup,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
@@ -234,40 +233,42 @@ const StepsEditor = React.memo(() => {
                   <strong>
                     {i18n.translate(
                       'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
-                      { defaultMessage: 'Some fields were ignored during the simulation.' }
+                      { defaultMessage: 'Malformed fields detected.' }
                     )}
                   </strong>
                 }
               >
                 <EuiText component="p" size="s">
                   <p>
+                    <FormattedMessage
+                      id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
+                      defaultMessage="The following fields are malformed and won't be stored correctly: {fields}"
+                      values={{
+                        fields: errors.ignoredFields.map((field) => (
+                          <>
+                            <EuiCode key={field}>{field}</EuiCode>{' '}
+                          </>
+                        )),
+                      }}
+                    />
+                  </p>
+                  <p>
                     {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
+                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.causesLabel',
                       {
                         defaultMessage:
-                          'Some fields were ignored during the ingestion simulation because their values were incompatible with the field\'s mapping. Common causes include data type mismatches (e.g., an invalid format for a date field) or exceeding configured field limits. Review your mappings or use other processors such as the "date" processor to normalize the format, and consider removing the conflicting field entirely.',
+                          'Common causes include data type mismatches (e.g. an invalid format for a date field) or exceeding configured field limits.',
                       }
                     )}
                   </p>
                   <p>
-                    <FormattedMessage
-                      id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
-                      defaultMessage="The ignored fields are: {fields}"
-                      values={{
-                        fields: (
-                          <EuiFlexGroup
-                            gutterSize="s"
-                            css={css`
-                              margin-top: ${euiTheme.size.s};
-                            `}
-                          >
-                            {errors.ignoredFields.map((field) => (
-                              <EuiCode key={field}>{field}</EuiCode>
-                            ))}
-                          </EuiFlexGroup>
-                        ),
-                      }}
-                    />
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.suggestionsLabel',
+                      {
+                        defaultMessage:
+                          'Review your field mappings, add processors to normalize these fields into the correct format, or consider removing the conflicting fields entirely.',
+                      }
+                    )}
                   </p>
                 </EuiText>
               </EuiAccordion>
