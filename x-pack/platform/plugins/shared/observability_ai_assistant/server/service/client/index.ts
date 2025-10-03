@@ -35,6 +35,7 @@ import type {
   InferenceClient,
 } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { CONTEXT_FUNCTION_NAME } from '../../../common';
 import { resourceNames } from '..';
 import type {
@@ -100,6 +101,7 @@ export class ObservabilityAIAssistantClient {
       };
       knowledgeBaseService: KnowledgeBaseService;
       scopes: AssistantScope[];
+      analytics: AnalyticsServiceStart;
     }
   ) {}
 
@@ -250,10 +252,27 @@ export class ObservabilityAIAssistantClient {
         shareReplay()
       );
 
+      const connector$ = defer(() =>
+        from(
+          this.dependencies.actionsClient.get({
+            id: connectorId,
+            throwIfSystemAction: true,
+          })
+        ).pipe(
+          catchError((error) => {
+            this.dependencies.logger.debug(
+              `Failed to fetch connector for analytics: ${error.message}`
+            );
+            return of(undefined);
+          }),
+          shareReplay()
+        )
+      );
+
       // we continue the conversation here, after resolving both the materialized
       // messages and the knowledge base instructions
-      const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$]).pipe(
-        switchMap(([systemMessage, kbUserInstructions]) => {
+      const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$, connector$]).pipe(
+        switchMap(([systemMessage, kbUserInstructions, connector]) => {
           // if needed, inject a context function request here
           const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
             ? getContextFunctionRequestIfNeeded(initialMessages)
@@ -288,6 +307,9 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 connectorId,
                 simulateFunctionCalling,
+                analytics: this.dependencies.analytics,
+                connector,
+                scopes: this.dependencies.scopes,
               })
             )
           );

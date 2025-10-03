@@ -5,7 +5,13 @@
  * 2.0.
  */
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import type { CoreSetup, ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type {
+  AnalyticsServiceStart,
+  CoreSetup,
+  ElasticsearchClient,
+  IUiSettingsClient,
+  Logger,
+} from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { waitFor } from '@testing-library/react';
 import { isEmpty, last, merge, repeat, size } from 'lodash';
@@ -192,6 +198,7 @@ describe('Observability AI Assistant client', () => {
         name: 'johndoe',
       },
       scopes: ['observability'],
+      analytics: {} as AnalyticsServiceStart,
     });
   }
 
