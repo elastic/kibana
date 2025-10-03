@@ -64,6 +64,12 @@ describe('AgentBulkActions', () => {
     jest.mocked(AgentReassignAgentPolicyModal).mockReturnValue(null);
   });
 
+  afterEach(() => {
+    mockedUseLicence.mockReturnValue({
+      hasAtLeast: () => false,
+    } as unknown as LicenseService);
+  });
+
   function render(props: any) {
     const renderer = createFleetTestRendererMock();
     return renderer.render(<AgentBulkActions {...props} />);
@@ -71,6 +77,10 @@ describe('AgentBulkActions', () => {
 
   describe('When in manual selection mode', () => {
     it('should show the available actions for the selected agents', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
       const results = render({
         ...defaultProps,
         selectedAgents: [{ id: 'agent1', tags: ['oldTag'] }, { id: 'agent2' }] as Agent[],
@@ -114,6 +124,10 @@ describe('AgentBulkActions', () => {
 
   describe('When in query selection mode', () => {
     it('should show the available actions for all agents when no managed agents are listed', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
       const results = render({
         ...defaultProps,
         selectionMode: 'query',
@@ -137,6 +151,10 @@ describe('AgentBulkActions', () => {
     });
 
     it('should show the available actions for all agents except managed agents', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
       const results = render({
         ...defaultProps,
         totalManagedAgentIds: ['agentId1', 'agentId2'],
