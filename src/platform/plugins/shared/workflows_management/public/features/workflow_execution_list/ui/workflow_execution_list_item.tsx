@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiPanel,
   EuiToolTip,
   euiFontSize,
   useEuiTheme,
@@ -53,79 +54,78 @@ export const WorkflowExecutionListItem = ({
   }, [duration]);
 
   return (
-    <EuiFlexGroup
-      component="a"
+    <EuiPanel
+      color="plain"
+      hasShadow={false}
+      paddingSize="m"
+      hasBorder
       css={[
-        styles.baseContainer,
         selected && styles.selectedContainer,
         !selected && onClick && styles.selectableContainer,
       ]}
-      alignItems="center"
-      justifyContent="flexStart"
-      onClick={onClick ?? undefined}
-      responsive={false}
     >
-      <EuiFlexItem css={styles.iconContainer}>
-        {getExecutionStatusIcon(euiTheme, status)}
-      </EuiFlexItem>
-      <EuiFlexItem css={styles.contentContainer}>
-        <EuiFlexGroup direction="column" css={styles.content} gutterSize="xs">
-          <EuiFlexItem>
-            <p
-              css={[
-                styles.header,
-                (status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED) && {
-                  color: getExecutionStatusColors(euiTheme, status).color,
-                },
-              ]}
-            >
-              {getStatusLabel(status)}
-            </p>
-          </EuiFlexItem>
-          <EuiFlexItem css={styles.timestamp}>
-            {startedAt ? (
-              <EuiToolTip position="right" content={formattedDate}>
-                <FormattedRelative value={startedAt} />
-              </EuiToolTip>
-            ) : (
-              <FormattedMessage
-                id="workflows.workflowExecutionListItem.notStarted"
-                defaultMessage="Not started"
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="flexEnd"
-          gutterSize="xs"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <span css={styles.duration}>{formattedDuration}</span>
-          </EuiFlexItem>
-          {onClick ? (
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="arrowRight" color={euiTheme.colors.backgroundFilledText} />
+      <EuiFlexGroup
+        gutterSize="m"
+        alignItems="center"
+        justifyContent="flexStart"
+        onClick={onClick ?? undefined}
+        responsive={false}
+        color="plain"
+      >
+        <EuiFlexItem css={styles.iconContainer}>
+          {getExecutionStatusIcon(euiTheme, status)}
+        </EuiFlexItem>
+        <EuiFlexItem css={styles.contentContainer}>
+          <EuiFlexGroup direction="column" css={styles.content} gutterSize="xs">
+            <EuiFlexItem>
+              <p
+                css={[
+                  styles.header,
+                  (status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED) && {
+                    color: getExecutionStatusColors(euiTheme, status).color,
+                  },
+                ]}
+              >
+                {getStatusLabel(status)}
+              </p>
             </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            <EuiFlexItem css={styles.timestamp}>
+              {startedAt ? (
+                <EuiToolTip position="right" content={formattedDate}>
+                  <FormattedRelative value={startedAt} />
+                </EuiToolTip>
+              ) : (
+                <FormattedMessage
+                  id="workflows.workflowExecutionListItem.notStarted"
+                  defaultMessage="Not started"
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexEnd"
+            gutterSize="xs"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <span css={styles.duration}>{formattedDuration}</span>
+            </EuiFlexItem>
+            {onClick ? (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="arrowRight" color={euiTheme.colors.backgroundFilledText} />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
 
 const componentStyles = {
-  baseContainer: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      padding: euiTheme.size.m,
-      borderRadius: euiTheme.border.radius.medium,
-      gap: euiTheme.size.m,
-      flexGrow: 0,
-      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
   selectedContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
       backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
