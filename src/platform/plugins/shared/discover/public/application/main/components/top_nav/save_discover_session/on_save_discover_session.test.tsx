@@ -312,7 +312,12 @@ describe('onSaveDiscoverSession', () => {
       services,
     }));
     await saveModal?.props.onSave(getOnSaveProps());
-    expect(navigateSpy).toHaveBeenCalledWith({ savedSearchId: 'new-session' });
+    expect(navigateSpy).toHaveBeenCalledWith({
+      savedSearchId: 'new-session',
+      tab: {
+        id: 'stable-test-initial-tab-id',
+      },
+    });
   });
 
   it('should show a success toast on save', async () => {

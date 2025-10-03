@@ -16,6 +16,7 @@ import { AgentsList } from './agents_list';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { DeleteAgentProvider } from '../../../context/delete_agent_context';
+import { TechPreviewTitle } from '../../common/tech_preview';
 
 export const OnechatAgents = () => {
   const { euiTheme } = useEuiTheme();
@@ -42,9 +43,13 @@ export const OnechatAgents = () => {
       <KibanaPageTemplate>
         <KibanaPageTemplate.Header
           css={headerStyles}
-          pageTitle={i18n.translate('xpack.onechat.agents.title', {
-            defaultMessage: 'Agents',
-          })}
+          pageTitle={
+            <TechPreviewTitle
+              title={i18n.translate('xpack.onechat.agents.title', {
+                defaultMessage: 'Agents',
+              })}
+            />
+          }
           description={
             <FormattedMessage
               id="xpack.onechat.agents.description"
