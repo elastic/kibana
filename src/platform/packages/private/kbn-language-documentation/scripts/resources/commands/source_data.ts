@@ -123,7 +123,7 @@ FUSE <fuse_method> SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_c
 :   Defaults to \`60\`. Represents the \`rank_constant\` used in the RRF formula.
 
 \`weights\`
-:   Defaults to \`{}\`. Allows you to set different weights based on \`group_column\` values.
+:   Defaults to \'\{\}\' (empty object). Allows you to set different weights based on \`group_column\` values.
 
 \`normalizer\`
 :   Defaults to \`none\`. Can be one of \`none\` or \`minmax\`. Specifies which score normalization method to apply.
