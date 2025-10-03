@@ -244,13 +244,11 @@ export class StatusRuleExecutor {
   }
 
   getRange = (maxPeriod: number) => {
-    const { isDefaultRule, numberOfChecks, useLatestChecks, timeWindow } = getConditionType(
-      this.params.condition
-    );
+    const { numberOfChecks, useLatestChecks, timeWindow } = getConditionType(this.params.condition);
 
     let from: string;
 
-    if (isDefaultRule || useLatestChecks) {
+    if (useLatestChecks) {
       from = moment()
         .subtract(maxPeriod * numberOfChecks, 'milliseconds')
         .subtract(5, 'minutes')
