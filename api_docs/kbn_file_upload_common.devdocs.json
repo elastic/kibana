@@ -491,7 +491,59 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.updatePipelineTimezone",
+        "type": "Function",
+        "tags": [],
+        "label": "updatePipelineTimezone",
+        "description": [],
+        "signature": [
+          "(ingestPipeline: ",
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.IngestPipeline",
+            "text": "IngestPipeline"
+          },
+          " | ",
+          "IngestPipelineConfig",
+          ") => void"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.updatePipelineTimezone.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ingestPipeline",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.IngestPipeline",
+                "text": "IngestPipeline"
+              },
+              " | ",
+              "IngestPipelineConfig"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/file-upload-common",

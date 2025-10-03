@@ -23,12 +23,6 @@ export function SvlSearchNavigationServiceProvider({
         await testSubjects.existOrFail('~svlSearchSideNav', { timeout: 2000 });
       });
     },
-    async navigateToGettingStartedPage() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('serverlessElasticsearch');
-        await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
-      });
-    },
     async navigateToElasticsearchHome(expectRedirect: boolean = false) {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('searchHomepage', {

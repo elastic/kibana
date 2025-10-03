@@ -316,6 +316,7 @@ export class SavedObjectsService
       const migrationStartTime = performance.now();
       await migrator.runMigrations();
       migrationDuration = Math.round(performance.now() - migrationStartTime);
+      this.logger.info(`Completed all migrations in ${migrationDuration}ms`);
     }
 
     const createRepository = (
