@@ -13,6 +13,7 @@ const mockLog = {
   error: jest.fn(),
   warning: jest.fn(),
   write: jest.fn(),
+  debug: jest.fn(),
 };
 
 jest.mock('getopts', () => jest.fn());
@@ -298,10 +299,12 @@ describe('run_all.ts', () => {
           '--coverage=false',
           '--passWithNoTests',
         ],
-        {
-          env: process.env,
+        expect.objectContaining({
           stdio: ['ignore', 'pipe', 'pipe'],
-        }
+          env: expect.objectContaining({
+            SLOW_TESTS_OUTPUT_PATH: expect.stringMatching(/slow-tests-.*\.json$/),
+          }),
+        })
       );
     });
 
@@ -432,7 +435,7 @@ describe('run_all.ts', () => {
         await runPromise;
 
         expect(mockLog.info).toHaveBeenCalledWith(
-          expect.stringMatching(/Output for .*config.*\.js \(exit 0, \d+s\)/)
+          expect.stringMatching(/Output for .*config.*\.js \(exit 0 - success, \d+s\)/)
         );
       });
 
@@ -453,7 +456,9 @@ describe('run_all.ts', () => {
         await runPromise;
 
         expect(mockLog.write).toHaveBeenCalledWith('--- Combined Jest run summary');
-        expect(mockLog.info).toHaveBeenCalledWith(expect.stringMatching(/Total duration: \d+s/));
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringMatching(/Total duration \(wall to wall\): \d+s/)
+        );
       });
 
       it('should call time reporter with correct parameters', async () => {
@@ -576,7 +581,9 @@ describe('run_all.ts', () => {
         await runPromise;
 
         // Should log duration in seconds
-        expect(mockLog.info).toHaveBeenCalledWith(expect.stringMatching(/exit 0 \(\d+s\)/));
+        expect(mockLog.info).toHaveBeenCalledWith(
+          expect.stringMatching(/exit 0 - success, \d+s\)/)
+        );
       });
     });
 
