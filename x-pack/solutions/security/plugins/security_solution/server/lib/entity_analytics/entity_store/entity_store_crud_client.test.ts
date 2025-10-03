@@ -10,9 +10,9 @@ import { entityStoreDataClientMock } from './entity_store_data_client.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   BadCRUDRequestError,
-  DocumentNotFoundError,
   EngineNotRunningError,
   CapabilityNotEnabledError,
+  DocumentVersionConflictError,
 } from './errors';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store';
 import * as uuid from 'uuid';
@@ -76,7 +76,6 @@ describe('EntityStoreCrudClient', () => {
       const doc: Entity = {
         user: {
           name: 'not-allowed',
-          id: ['123'],
         },
         entity: {
           id: 'host-1',
@@ -88,18 +87,18 @@ describe('EntityStoreCrudClient', () => {
         },
       };
 
-      await expect(async () => client.upsertEntity('host', doc)).rejects.toThrow(
+      await expect(async () => client.upsertEntity('user', doc)).rejects.toThrow(
         new BadCRUDRequestError(
           `The following attributes are not allowed to be ` +
-            `updated without forcing it (?force=true): user.name, user.id, entity.type, entity.sub_type`
+            `updated without forcing it (?force=true): entity.type, entity.sub_type`
         )
       );
     });
 
-    it('when entity not found throw', async () => {
+    it('when conflicts throw', async () => {
       dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
       dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
-      esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
+      esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ version_conflicts: 1 }));
 
       const doc: Entity = {
         entity: {
@@ -107,14 +106,11 @@ describe('EntityStoreCrudClient', () => {
           attributes: {
             privileged: true,
           },
-          lifecycle: {
-            first_seen: new Date().toISOString(),
-          },
         },
       };
 
       await expect(async () => client.upsertEntity('host', doc)).rejects.toThrow(
-        new DocumentNotFoundError()
+        new DocumentVersionConflictError()
       );
     });
 
@@ -137,9 +133,6 @@ describe('EntityStoreCrudClient', () => {
           attributes: {
             privileged: true,
           },
-          lifecycle: {
-            first_seen: '1995-12-17T03:24:00',
-          },
         },
       };
 
@@ -151,6 +144,7 @@ describe('EntityStoreCrudClient', () => {
         EntityStoreCapability.CRUD_API
       );
       expect(esClientMock.updateByQuery).toBeCalledWith({
+        conflicts: 'proceed',
         index: '.entities.v1.latest.security_host_default',
         query: {
           term: {
@@ -162,9 +156,7 @@ describe('EntityStoreCrudClient', () => {
           source:
             `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
-            `ctx._source['entity']['attributes']['Privileged'] = true;` +
-            `ctx._source['entity']['lifecycle'] = ctx._source['entity']['lifecycle'] == null ? [:] : ctx._source['entity']['lifecycle'];` +
-            `ctx._source['entity']['lifecycle']['First_seen'] = '1995-12-17T03:24:00';`,
+            `ctx._source['entity']['attributes']['Privileged'] = true;`,
         },
       });
 
@@ -179,10 +171,6 @@ describe('EntityStoreCrudClient', () => {
               id: 'host-1',
               attributes: {
                 Privileged: true,
-              },
-              lifecycle: {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                First_seen: '1995-12-17T03:24:00',
               },
             },
           },
@@ -226,6 +214,7 @@ describe('EntityStoreCrudClient', () => {
         EntityStoreCapability.CRUD_API
       );
       expect(esClientMock.updateByQuery).toBeCalledWith({
+        conflicts: 'proceed',
         index: '.entities.v1.latest.security_generic_default',
         query: {
           term: {
@@ -281,7 +270,7 @@ describe('EntityStoreCrudClient', () => {
 
       const doc: Entity = {
         host: {
-          name: 'not-allowed',
+          name: 'should not be there',
           id: ['123'],
         },
         entity: {
@@ -303,6 +292,7 @@ describe('EntityStoreCrudClient', () => {
         EntityStoreCapability.CRUD_API
       );
       expect(esClientMock.updateByQuery).toBeCalledWith({
+        conflicts: 'proceed',
         index: '.entities.v1.latest.security_host_default',
         query: {
           term: {
@@ -313,8 +303,17 @@ describe('EntityStoreCrudClient', () => {
           lang: 'painless',
           source:
             `ctx._source['host'] = ctx._source['host'] == null ? [:] : ctx._source['host'];` +
-            `ctx._source['host']['name'] = 'not-allowed';` +
-            `ctx._source['host']['id'] = ['123'];` +
+            `def collectMap = [:];` +
+            `collectMap['host.id'] = new HashSet();` +
+            `collectMap['host.id'].addAll(['123']);` +
+            `if (!(ctx?._source['host']['id'] == null || ((ctx._source['host']['id'] instanceof Collection || ctx._source['host']['id'] instanceof String || ctx._source['host']['id'] instanceof Map) && ctx._source['host']['id'].isEmpty()))) {` +
+            `  if(ctx._source['host']['id'] instanceof Collection) {` +
+            `    collectMap['host.id'].addAll(ctx._source['host']['id']);` +
+            `  } else {` +
+            `    collectMap['host.id'].add(ctx._source['host']['id']);` +
+            `  }` +
+            `}` +
+            `ctx._source['host']['id'] = new ArrayList(collectMap['host.id']).subList(0, (int) Math.min(10, collectMap['host.id'].size()));` +
             `ctx._source['entity'] = ctx._source['entity'] == null ? [:] : ctx._source['entity'];` +
             `ctx._source['entity']['attributes'] = ctx._source['entity']['attributes'] == null ? [:] : ctx._source['entity']['attributes'];` +
             `ctx._source['entity']['attributes']['Privileged'] = true;` +
@@ -339,6 +338,61 @@ describe('EntityStoreCrudClient', () => {
               lifecycle: {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 First_seen: '1995-12-17T03:24:00',
+              },
+            },
+          },
+        },
+      });
+
+      expect(v4Spy).toBeCalledTimes(1);
+    });
+
+    it('when valid update entity, but no entity found, just create', async () => {
+      dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(true));
+      dataClientMock.isEngineRunning.mockReturnValueOnce(Promise.resolve(true));
+      esClientMock.updateByQuery.mockReturnValueOnce(Promise.resolve({ updated: 0 }));
+
+      const mockedDate = new Date(Date.parse('2025-09-03T07:56:22.038Z'));
+      jest.useFakeTimers();
+      jest.setSystemTime(mockedDate);
+
+      const v4Spy = jest.spyOn(uuid, 'v4').mockImplementationOnce((() => '123') as typeof uuid.v4);
+
+      const doc: Entity = {
+        entity: {
+          id: 'host-1',
+          attributes: {
+            privileged: true,
+          },
+          behaviors: {
+            new_country_login: false,
+          },
+        },
+      };
+
+      await client.upsertEntity('host', doc);
+
+      expect(dataClientMock.isEngineRunning).toBeCalledWith('host');
+      expect(dataClientMock.isCapabilityEnabled).toBeCalledWith(
+        'host',
+        EntityStoreCapability.CRUD_API
+      );
+      expect(esClientMock.updateByQuery).toBeCalledTimes(1);
+      expect(esClientMock.create).toBeCalledWith({
+        index: '.entities.v1.updates.security_host_default',
+        id: '123',
+        document: {
+          '@timestamp': mockedDate.toISOString(),
+          host: {
+            name: 'host-1',
+            entity: {
+              id: 'host-1',
+              attributes: {
+                Privileged: true,
+              },
+              behaviors: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                New_country_login: false,
               },
             },
           },

@@ -17,6 +17,7 @@ import type {
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowExecution,
   EsWorkflowStepExecution,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
@@ -596,10 +597,21 @@ export class WorkflowsService {
           ...workflow,
           description: workflow.description || '',
           definition: workflow.definition,
-          history: [], // History is loaded separately when needed for performance
+          history: [] as WorkflowExecutionHistoryModel[], // Will be populated below
         };
       })
       .filter((workflow): workflow is NonNullable<typeof workflow> => workflow !== null);
+
+    // Fetch recent execution history for all workflows
+    if (workflows.length > 0) {
+      const workflowIds = workflows.map((w) => w.id);
+      const executionHistory = await this.getRecentExecutionsForWorkflows(workflowIds, spaceId);
+
+      // Populate history for each workflow
+      workflows.forEach((workflow) => {
+        workflow.history = executionHistory[workflow.id] || [];
+      });
+    }
 
     return {
       _pagination: {
@@ -857,6 +869,102 @@ export class WorkflowsService {
         duration,
       };
     });
+  }
+
+  /**
+   * Efficiently fetch the most recent execution for multiple workflows
+   */
+  private async getRecentExecutionsForWorkflows(
+    workflowIds: string[],
+    spaceId: string
+  ): Promise<Record<string, WorkflowExecutionHistoryModel[]>> {
+    if (!this.esClient || workflowIds.length === 0) {
+      return {};
+    }
+
+    try {
+      const response = await this.esClient.search<EsWorkflowExecution>({
+        index: this.workflowsExecutionIndex,
+        size: 0, // We only want aggregations
+        query: {
+          bool: {
+            must: [
+              { terms: { workflowId: workflowIds } },
+              {
+                bool: {
+                  should: [
+                    { term: { spaceId } },
+                    // Backward compatibility for objects without spaceId
+                    { bool: { must_not: { exists: { field: 'spaceId' } } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          workflows: {
+            terms: {
+              field: 'workflowId',
+              size: workflowIds.length,
+            },
+            aggs: {
+              recent_executions: {
+                top_hits: {
+                  size: 1, // Get only the most recent execution per workflow
+                  sort: [{ finishedAt: { order: 'desc' } }],
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const result: Record<string, WorkflowExecutionHistoryModel[]> = {};
+
+      if (response.aggregations?.workflows && 'buckets' in response.aggregations.workflows) {
+        const buckets = response.aggregations.workflows.buckets as Array<{
+          key: string;
+          recent_executions: {
+            hits: {
+              hits: Array<{
+                _source: EsWorkflowExecution;
+              }>;
+            };
+          };
+        }>;
+
+        buckets.forEach((bucket) => {
+          const workflowId = bucket.key;
+          const hits = bucket.recent_executions.hits.hits;
+
+          if (hits.length > 0) {
+            const execution = hits[0]._source;
+            result[workflowId] = [
+              {
+                id: execution.id,
+                workflowId: execution.workflowId,
+                workflowName: execution.workflowDefinition?.name || 'Unknown Workflow',
+                status: execution.status,
+                startedAt: execution.startedAt,
+                finishedAt: execution.finishedAt || execution.startedAt,
+                duration:
+                  execution.finishedAt && execution.startedAt
+                    ? new Date(execution.finishedAt).getTime() -
+                      new Date(execution.startedAt).getTime()
+                    : null,
+              },
+            ];
+          }
+        });
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to fetch recent executions for workflows: ${error}`);
+      return {};
+    }
   }
 
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {

@@ -18,12 +18,6 @@ import { MigrationDataInputContextProvider } from '../../../common/components';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
-jest.mock('../data_input_flyout/context', () => ({
-  useRuleMigrationDataInputContext: () => ({
-    openFlyout: jest.fn(),
-  }),
-}));
-
 jest.mock('../../logic/use_start_migration');
 const useStartMigrationMock = useStartMigration as jest.Mock;
 const mockStartMigration = jest.fn();

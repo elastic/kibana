@@ -141,7 +141,9 @@ cd elastic-agent-${agentVersion}-windows-x86_64
 
   const windowsMSICommand = `$ProgressPreference = 'SilentlyContinue'
 Invoke-WebRequest -Uri ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-windows-x86_64.msi -OutFile elastic-agent-${agentVersion}-windows-x86_64.msi ${windowsDownloadSourceProxyArgs}
-.\\elastic-agent.msi --% INSTALLARGS="${getEnrollArgsByPlatForm('windows_msi')}"`;
+.\\elastic-agent-${agentVersion}-windows-x86_64.msi --% INSTALLARGS="${getEnrollArgsByPlatForm(
+    'windows_msi'
+  )}"`;
 
   const linuxDebAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-arm64.deb ${curlDownloadSourceProxyArgs}
 sudo ${debOrRpmWithInstallServers}dpkg -i elastic-agent-${agentVersion}-arm64.deb

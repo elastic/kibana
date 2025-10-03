@@ -150,6 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
         'apm-source-map-migration-task',
         'apm-telemetry-task',
         'cai:cases_analytics_index_backfill',
+        'cai:cases_analytics_index_scheduler',
         'cai:cases_analytics_index_synchronization',
         'cases-telemetry-task',
         'cloud_security_posture-stats_task',

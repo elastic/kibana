@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CreateCaseParams } from '../../../src/playwright/fixtures/scope/worker/apis/cases';
+import type { CaseCreateRequest } from '../../../src/playwright/fixtures/scope/worker/apis/cases/types';
 
 export const createAlertRuleParams = {
   aggType: 'count',
@@ -21,7 +21,7 @@ export const createAlertRuleParams = {
   timeField: '@timestamp',
 };
 
-export const createCasePayload: CreateCaseParams = {
+export const createCasePayload: CaseCreateRequest = {
   title: 'test',
   tags: ['scout'],
   category: null,
@@ -35,6 +35,7 @@ export const createCasePayload: CreateCaseParams = {
   },
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
   owner: '',
   customFields: [],

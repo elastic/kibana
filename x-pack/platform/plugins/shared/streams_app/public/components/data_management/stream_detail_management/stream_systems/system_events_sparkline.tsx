@@ -5,23 +5,38 @@
  * 2.0.
  */
 
-import type { System } from '@kbn/streams-schema';
+import type { Streams, System } from '@kbn/streams-schema';
 
-import React from 'react';
-import { Chart, BarSeries, Settings, Tooltip } from '@elastic/charts';
-import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { useStreamSystemEventsData } from './hooks/use_stream_system_events_data';
+import React, { useMemo } from 'react';
+import { PreviewDataSparkPlot } from '../../../stream_detail_significant_events_view/add_significant_event_flyout/common/preview_data_spark_plot';
 
-export const SystemEventsSparkline = ({ system }: { system: System }) => {
-  const chartBaseTheme = useElasticChartsTheme();
-
-  const events = useStreamSystemEventsData(system);
-
+export const SystemEventsSparkline = ({
+  system,
+  definition,
+}: {
+  system: System;
+  definition: Streams.all.Definition;
+}) => {
+  const query = useMemo(
+    () => ({
+      system: {
+        name: system.name,
+        filter: system.filter,
+      },
+      kql: { query: '' },
+      id: 'system-events-sparkline',
+      title: system.name,
+    }),
+    [system]
+  );
   return (
-    <Chart size={{ height: 64 }}>
-      <Settings baseTheme={chartBaseTheme} showLegend={false} />
-      <Tooltip type="none" />
-      <BarSeries id="numbers" data={events} xAccessor={0} yAccessors={[1]} />
-    </Chart>
+    <PreviewDataSparkPlot
+      showTitle={false}
+      definition={definition}
+      isQueryValid={true}
+      query={query}
+      hideAxis={true}
+      height={100}
+    />
   );
 };

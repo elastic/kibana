@@ -22,27 +22,37 @@ export const createPersistedProviderFn =
     toolsService: ToolsServiceStart;
     logger: Logger;
   }): AgentProviderFn<false> =>
-  ({ request }) => {
+  ({ request, space }) => {
     return createPersistedProvider({
       ...opts,
       request,
+      space,
     });
   };
 
 const createPersistedProvider = async ({
+  space,
   request,
   security,
   elasticsearch,
   toolsService,
   logger,
 }: {
+  space: string;
   request: KibanaRequest;
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
   toolsService: ToolsServiceStart;
   logger: Logger;
 }): Promise<WritableAgentProvider> => {
-  const client = await createClient({ elasticsearch, logger, request, security, toolsService });
+  const client = await createClient({
+    elasticsearch,
+    logger,
+    request,
+    security,
+    toolsService,
+    space,
+  });
 
   return {
     id: 'persisted',
