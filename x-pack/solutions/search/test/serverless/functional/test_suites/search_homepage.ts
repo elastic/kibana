@@ -107,7 +107,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await testSubjects.existOrFail('consoleEditorContainer');
         });
       });
-      });
+
       describe('Alternate Solutions', function () {
         it('renders Observability content', async () => {
           await testSubjects.existOrFail('observabilitySection');
