@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useState } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { PromptContext } from '@kbn/elastic-assistant';
+import { type PromptContext } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
 import { AlertSummary } from './alert_summary';
 import { AlertSummaryOptionsMenu } from './settings_menu';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAIForSOCDetailsContext } from '../context';
-import { DEFAULT_AI_CONNECTOR } from '../../../../common/constants';
-
+import { useAIConnectors } from '../../../common/hooks/use_ai_connectors';
+import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
 export const ALERT_SUMMARY_SECTION_TEST_ID = 'ai-for-soc-alert-flyout-alert-summary-section';
 
 const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummarySection.title', {
@@ -37,13 +37,20 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
 
   const {
     application: { capabilities },
-    uiSettings,
+    settings,
   } = useKibana().services;
 
   const { eventId, showAnonymizedValues } = useAIForSOCDetailsContext();
+  const { aiConnectors: connectors } = useAIConnectors();
+  const [defaultConnectorId, setDefaultConnectorId] = useState<string | undefined>(undefined);
 
   const canSeeAdvancedSettings = capabilities.management.kibana.settings ?? false;
-  const defaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
+  
+  useEffect(() => {
+    if (connectors) {
+      setDefaultConnectorId(getDefaultConnector(connectors, settings)?.id);
+    }
+  }, [connectors, settings]);
 
   const promptContext: PromptContext = useMemo(
     () => ({
@@ -55,6 +62,10 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
     }),
     [eventId, getPromptContext]
   );
+
+  if (!defaultConnectorId) {
+    return null;
+  }
 
   return (
     <>
