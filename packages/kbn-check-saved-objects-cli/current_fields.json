@@ -779,6 +779,7 @@
     "output_secret_storage_requirements_met",
     "prerelease_integrations_enabled",
     "secret_storage_requirements_met",
+    "ssl_secret_storage_requirements_met",
     "use_space_awareness_migration_started_at",
     "use_space_awareness_migration_status"
   ],

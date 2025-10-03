@@ -2596,6 +2596,9 @@
       "secret_storage_requirements_met": {
         "type": "boolean"
       },
+      "ssl_secret_storage_requirements_met": {
+        "type": "boolean"
+      },
       "use_space_awareness_migration_started_at": {
         "index": false,
         "type": "date"
