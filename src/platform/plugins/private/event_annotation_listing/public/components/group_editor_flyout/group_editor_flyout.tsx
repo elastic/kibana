@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   htmlIdGenerator,
+  useGeneratedHtmlId,
   useIsWithinBreakpoints,
   EuiButtonIcon,
 } from '@elastic/eui';
@@ -64,7 +65,7 @@ export const GroupEditorFlyout = ({
   refreshSearchSession: () => void;
   timePickerQuickRanges: Array<{ from: string; to: string; display: string }> | undefined;
 }) => {
-  const flyoutHeadingId = useMemo(() => htmlIdGenerator()(), []);
+  const flyoutHeadingId = useGeneratedHtmlId({ prefix: 'groupEditorFlyout' });
   const flyoutBodyOverflowRef = useRef<Element | null>(null);
   useEffect(() => {
     if (!flyoutBodyOverflowRef.current) {
@@ -116,6 +117,7 @@ export const GroupEditorFlyout = ({
       size="l"
       hideCloseButton
       outsideClickCloses={false}
+      aria-labelledby={flyoutHeadingId}
     >
       <EuiFlexGroup
         css={css`

@@ -37,6 +37,7 @@ const FlyoutMultiContentContext = createContext<Context | undefined>(undefined);
 
 const DEFAULT_FLYOUT_PROPS = {
   'data-test-subj': 'flyout',
+  'aria-label': 'Flyout',
   size: 'm' as 'm',
   maxWidth: 500,
 };

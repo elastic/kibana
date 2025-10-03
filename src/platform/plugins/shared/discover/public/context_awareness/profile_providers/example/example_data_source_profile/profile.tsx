@@ -166,7 +166,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
                 // This is an example of a custom action that opens a flyout or any other custom modal.
                 // To do so, simply return a React element and call onFinishAction when you're done.
                 return (
-                  <EuiFlyout onClose={onFinishAction}>
+                  <EuiFlyout onClose={onFinishAction} aria-label="Create SLO">
                     <div>Example custom action clicked</div>
                   </EuiFlyout>
                 );

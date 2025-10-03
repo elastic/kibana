@@ -87,6 +87,7 @@ export const createExampleRootProfileProvider = (): RootProfileProvider => ({
                       <EuiFlyout
                         onClose={onFinishAction}
                         data-test-subj="example-custom-root-action12-flyout"
+                        aria-label="Custom action example"
                       >
                         <div>Example custom action clicked</div>
                       </EuiFlyout>
@@ -136,6 +137,7 @@ const getRenderAppWrapper: RootProfileProvider['profile']['getRenderAppWrapper']
               maxWidth={500}
               onClose={() => setCurrentMessage(undefined)}
               data-test-subj="exampleRootProfileFlyout"
+              aria-label="Inspect message"
             >
               <EuiFlyoutHeader hasBorder>
                 <EuiTitle size="m">
