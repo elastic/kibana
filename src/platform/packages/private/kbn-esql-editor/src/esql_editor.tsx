@@ -128,6 +128,7 @@ const ESQLEditorInternal = function ESQLEditor({
   expandToFitQueryOnMount,
   dataErrorsControl,
   formLabel,
+  mergeExternalMessages,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -494,6 +495,8 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       onDecorationHoverShown: (hoverMessage: string) =>
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
+      onSuggestionsWithCustomCommandShown: (commandIds: string[]) =>
+        telemetryService.trackSuggestionsWithCustomCommandShown(commandIds),
     }),
     [telemetryService]
   );
@@ -693,17 +696,31 @@ const ESQLEditorInternal = function ESQLEditor({
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
       const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
+
+      let allErrors = parserErrors;
+      let allWarnings = parserWarnings;
+
+      // Only merge external messages if the flag is enabled
+      if (mergeExternalMessages) {
+        const externalErrorsParsedErrors = serverErrors ? parseErrors(serverErrors, code) : [];
+        const externalErrorsParsedWarnings = serverWarning ? parseWarning(serverWarning) : [];
+
+        allErrors = [...parserErrors, ...externalErrorsParsedErrors];
+        allWarnings = [...parserWarnings, ...externalErrorsParsedWarnings];
+      }
+
       const markers = [];
 
-      if (parserErrors.length) {
+      if (allErrors.length) {
         if (dataErrorsControl?.enabled === false) {
-          markers.push(...filterDataErrors(parserErrors));
+          markers.push(...filterDataErrors(allErrors));
         } else {
-          markers.push(...parserErrors);
+          markers.push(...allErrors);
         }
       }
+
       if (active) {
-        setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
+        setEditorMessages({ errors: allErrors, warnings: allWarnings });
         monaco.editor.setModelMarkers(
           editorModel.current,
           'Unified search',
@@ -714,7 +731,14 @@ const ESQLEditorInternal = function ESQLEditor({
         return;
       }
     },
-    [parseMessages, dataErrorsControl?.enabled]
+    [
+      parseMessages,
+      serverErrors,
+      code,
+      serverWarning,
+      dataErrorsControl?.enabled,
+      mergeExternalMessages,
+    ]
   );
 
   const onLookupIndexCreate = useCallback(
@@ -732,12 +756,18 @@ const ESQLEditorInternal = function ESQLEditor({
     [dataSourcesCache, getJoinIndices, onQueryUpdate, queryValidation]
   );
 
+  // Refresh the fields cache when a new field has been added to the lookup index
+  const onNewFieldsAddedToLookupIndex = useCallback(() => {
+    esqlFieldsCache.clear?.();
+  }, [esqlFieldsCache]);
+
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editor1,
     editorModel,
     getJoinIndices,
     query,
-    onLookupIndexCreate
+    onLookupIndexCreate,
+    onNewFieldsAddedToLookupIndex
   );
 
   useDebounceWithOptions(
@@ -768,8 +798,8 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const suggestionProvider = useMemo(
-    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks),
-    [esqlCallbacks]
+    () => ESQLLang.getSuggestionProvider?.({ ...esqlCallbacks, telemetry: telemetryCallbacks }),
+    [esqlCallbacks, telemetryCallbacks]
   );
 
   const hoverProvider = useMemo(
