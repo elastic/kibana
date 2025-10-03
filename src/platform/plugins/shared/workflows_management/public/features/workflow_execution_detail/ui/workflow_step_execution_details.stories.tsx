@@ -12,17 +12,17 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { MemoryRouter } from 'react-router-dom';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
-import { WorkflowStepExecutionFlyout } from './workflow_step_execution_flyout';
+import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 
-const meta: Meta<typeof WorkflowStepExecutionFlyout> = {
-  component: WorkflowStepExecutionFlyout,
-  title: 'Workflows Management/Step Execution Flyout',
+const meta: Meta<typeof WorkflowStepExecutionDetails> = {
+  component: WorkflowStepExecutionDetails,
+  title: 'Workflows Management/Step Execution Details',
   decorators: [kibanaReactDecorator, (story) => <MemoryRouter>{story()}</MemoryRouter>],
 };
 
 export default meta;
 
-export const Default: StoryObj<typeof WorkflowStepExecutionFlyout> = {
+export const Default: StoryObj<typeof WorkflowStepExecutionDetails> = {
   args: {
     stepExecution: {
       stepId: 'check_ip',
@@ -47,12 +47,8 @@ export const Default: StoryObj<typeof WorkflowStepExecutionFlyout> = {
       executionTimeMs: 423,
       error: 'HTTP Error: 422 Unprocessable Entity',
     },
-    closeFlyout: () => {},
-    goNext: () => {},
-    goPrevious: () => {},
     setSelectedStepId: () => {},
     isLoading: false,
     workflowExecutionId: 'e2387d33-d626-42f0-a402-c379d4d30d42',
-    stepExecutionId: 'd5c942d5-c788-46ce-961d-5dbab6cf1246',
   },
 };
