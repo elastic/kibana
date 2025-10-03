@@ -61,7 +61,6 @@ For the Elastic Security 9.1.5 release information, refer to [Elastic Security S
 
 **Kibana security**:
 * Allows `xpack.spaces.defaultSolution` to be configured through environment variables for Docker deployments [#236570]({{kib-pull}}236570).
-* Adds the ability to do partial matches and searches in the **API keys** section of Stack Management [#221959]({{kib-pull}}221959).
 
 **Machine Learning**:
 * Omits fields that should not be included in datafeed preview requests when testing custom URLs in anomaly detection jobs [#234709]({{kib-pull}}234709).
@@ -76,6 +75,9 @@ For the Elastic Security 9.1.5 release information, refer to [Elastic Security S
 * Adds the `managed` field to the data views response schema to prevent the public API call from failing [#236237]({{kib-pull}}236237).
 * Adds the `timeFieldName` field to the data views response schema to prevent the public API call from failing [#235975]({{kib-pull}}235975).
 * Fixes privilege requirements when reindexing indices through Upgrade Assistant. Previously, the `superuser` role was required, but now the `cluster: manage` and `all` privileges are sufficient [#237055]({{kib-pull}}237055).
+
+**Stack Management**:
+* Adds the ability to do partial matches and searches in the **API keys** section [#221959]({{kib-pull}}221959).
 
 **Search solution**:
 * Adds search functionality to the **Query rules** details page [#232579]({{kib-pull}}232579).
