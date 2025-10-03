@@ -79,7 +79,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...sett
           disabled={disabled}
           onChange={handleChange}
           aria-label={
-            settingsConfig.label ??
+            settingsConfig.title ??
             i18n.translate('xpack.fleet.configuredSettings.selectOptionsAriaLabel', {
               defaultMessage: 'Setting options',
             })
