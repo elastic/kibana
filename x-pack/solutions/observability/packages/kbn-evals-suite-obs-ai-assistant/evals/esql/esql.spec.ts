@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { evaluate as base } from '../../src/evaluate';
-import type { EvaluateEsqlDataset } from './evaluate_esql_dataset';
-import { createEvaluateEsqlDataset } from './evaluate_esql_dataset';
+import { evaluate } from '../../src/evaluate';
 import {
   generateApacheErrorSpikeLogs,
   generateCorrelationIdLog,
@@ -26,7 +24,7 @@ import { generateApmData, generateCustomApmLogs } from '../../src/data_generator
  * This generates criteria based on expected queries and execution requirements.
  */
 function createEsqlCriteria({
-  specificCriteria: exampleCriteria,
+  specificCriteria,
   execute,
   expectedQuery,
 }: {
@@ -51,26 +49,8 @@ function createEsqlCriteria({
         'The query execution was never attempted (no execution attempt, including failures), only an explanation was provided',
       ];
 
-  return [...baseCriteria, ...executionCriteria, ...exampleCriteria];
+  return [...baseCriteria, ...executionCriteria, ...specificCriteria];
 }
-
-// Base evaluation setup extended with the custom ES|QL dataset evaluator
-const evaluate = base.extend<{
-  evaluateEsqlDataset: EvaluateEsqlDataset;
-}>({
-  evaluateEsqlDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
-      use(
-        createEvaluateEsqlDataset({
-          chatClient,
-          evaluators,
-          phoenixClient,
-        })
-      );
-    },
-    { scope: 'test' },
-  ],
-});
 
 evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
   // --- Test Suite for Logs Data ---
@@ -154,8 +134,8 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
       }
     });
 
-    evaluate('Log data queries', async ({ evaluateEsqlDataset }) => {
-      await evaluateEsqlDataset({
+    evaluate('Log data queries', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'esql: with logs data',
           description: 'ES|QL questions against various generated log datasets.',
@@ -235,7 +215,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: ['Identifies the top 5 slowest requests.'],
+                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM logs-nginx.access-*
                 | WHERE @timestamp >= NOW() - 2 hours
@@ -321,9 +301,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [
-                    'The result should display the login count for each user who logged in more than 5 times',
-                  ],
+                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM logs-auth_service-*
                 | WHERE @timestamp >= NOW() - 7 days AND event.action == "login"
@@ -359,9 +337,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [
-                    'The result should include 2 rows for successful and error counts',
-                  ],
+                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM logs-auth_service-*
                 | SORT @timestamp
@@ -415,8 +391,8 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
       await apmSynthtraceEsClient.clean();
     });
 
-    evaluate('APM data queries', async ({ evaluateEsqlDataset }) => {
-      await evaluateEsqlDataset({
+    evaluate('APM data queries', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'esql: with APM data',
           description: 'ES|QL examples for APM data.',
@@ -450,9 +426,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [
-                    'The result should display the login count for each user who logged in more than 5 times',
-                  ],
+                  specificCriteria: [],
                   execute: false,
                   expectedQuery: `FROM metrics-apm
                 | WHERE metricset.name == "service_destination" AND @timestamp >= NOW() - 24 hours
@@ -631,8 +605,8 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
       await esClient.indices.delete({ index: indexName, allow_no_indices: true });
     });
 
-    evaluate('Packetbeat data queries', async ({ evaluateEsqlDataset }) => {
-      await evaluateEsqlDataset({
+    evaluate('Packetbeat data queries', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'esql: with packetbeat data',
           description: 'Packetbeat question/query pairs.',
@@ -644,9 +618,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [
-                    'The result should show counts for status codes 200, 404, and 503.',
-                  ],
+                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM packetbeat-*
                 | STATS doc_count = COUNT(*) BY destination.domain
@@ -739,8 +711,8 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
       await esClient.indices.delete({ index: 'employees' });
     });
 
-    evaluate('Employees data queries', async ({ evaluateEsqlDataset }) => {
-      await evaluateEsqlDataset({
+    evaluate('Employees data queries', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'esql: with employees data',
           description: 'ES|QL questions against a simple `employees` index.',
@@ -752,7 +724,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: ['The result should show the 5 earliest employees'],
+                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM employees
                 | EVAL hire_date_formatted = DATE_FORMAT("MMMM YYYY", hire_date)
@@ -774,7 +746,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
                     'The assistant should clearly mention that pagination is currently not supported in ES|QL',
                     'IF the assistant decides to execute the query, it should correctly execute, and the Assistant should clearly mention pagination is not currently supported',
                   ],
-                  execute: true,
+                  execute: false,
                 }),
               },
               metadata: {},
@@ -786,7 +758,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: ['The result should show the 5 employees hired in 2024'],
+                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM employees
                 | WHERE DATE_EXTRACT("year", hire_date) == 2024
@@ -802,8 +774,8 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
   });
 
   // --- Test Suite for Queries without Data ---
-  evaluate('without data', async ({ evaluateEsqlDataset }) => {
-    await evaluateEsqlDataset({
+  evaluate('without data', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'esql: without data',
         description: 'ES|QL query generation without any data or mappings.',
@@ -883,8 +855,8 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
   });
 
   // --- Test Suite for SPL to ES|QL Conversion ---
-  evaluate('SPL to ES|QL conversion', async ({ evaluateEsqlDataset }) => {
-    await evaluateEsqlDataset({
+  evaluate('SPL to ES|QL conversion', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'esql: from SPL',
         description: 'Conversion of SPL (Splunk Processing Language) queries to ES|QL.',

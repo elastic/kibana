@@ -5,16 +5,14 @@
  * 2.0.
  */
 
+import type { DefaultEvaluators, EvaluationDataset, KibanaPhoenixClient } from '@kbn/evals';
 import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import type { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
-import type { EvaluationDataset } from '@kbn/evals/src/types';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type { ObservabilityAIAssistantEvaluationChatClient } from '../../src/chat_client';
-import { createCriteriaEvaluator } from '../../src/common_evaluators';
+import type { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
 
-interface DocumentationExample extends Example {
+interface ObservabilityAIAssistantDatasetExample extends Example {
   input: {
-    prompt: string;
+    question: string;
     scope?: AssistantScope;
   };
   output: {
@@ -22,17 +20,17 @@ interface DocumentationExample extends Example {
   };
 }
 
-export type EvaluateDocumentationDataset = ({
+export type EvaluateObservabilityAIAssistantDataset = ({
   dataset: { name, description, examples },
 }: {
   dataset: {
     name: string;
     description: string;
-    examples: DocumentationExample[];
+    examples: ObservabilityAIAssistantDatasetExample[];
   };
 }) => Promise<void>;
 
-export function createEvaluateDocumentationDataset({
+export function createEvaluateObservabilityAIAssistantDataset({
   evaluators,
   phoenixClient,
   chatClient,
@@ -40,14 +38,14 @@ export function createEvaluateDocumentationDataset({
   evaluators: DefaultEvaluators;
   phoenixClient: KibanaPhoenixClient;
   chatClient: ObservabilityAIAssistantEvaluationChatClient;
-}): EvaluateDocumentationDataset {
-  return async function evaluateDocumentationDataset({
+}): EvaluateObservabilityAIAssistantDataset {
+  return async function evaluateObservabilityAIAssistantDataset({
     dataset: { name, description, examples },
   }: {
     dataset: {
       name: string;
       description: string;
-      examples: DocumentationExample[];
+      examples: ObservabilityAIAssistantDatasetExample[];
     };
   }) {
     const dataset = {
@@ -61,7 +59,7 @@ export function createEvaluateDocumentationDataset({
         dataset,
         task: async ({ input }) => {
           const response = await chatClient.complete({
-            messages: input.prompt,
+            messages: input.question,
             scope: input.scope,
           });
 
@@ -77,5 +75,25 @@ export function createEvaluateDocumentationDataset({
         }),
       ]
     );
+  };
+}
+
+/**
+ * Common criteria evaluator that can be used across all evaluation scenarios.
+ * This provides a standardized evaluator with a consistent name "Criteria".
+ * All evaluators simply extract criteria from expected.criteria.
+ */
+export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEvaluators }) {
+  return {
+    name: 'Criteria',
+    kind: 'LLM' as const,
+    evaluate: async ({ input, output, expected, metadata }: any) => {
+      const criteria = expected.criteria ?? [];
+      const result = await evaluators
+        .criteria(criteria)
+        .evaluate({ input, expected, output, metadata });
+
+      return result;
+    },
   };
 }

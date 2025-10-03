@@ -9,6 +9,8 @@ import { evaluate as base } from '@kbn/evals';
 import { KnowledgeBaseClient } from './clients/knowledge_base_client';
 import { ConversationsClient } from './clients/conversations_client';
 import { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
+import type { EvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
+import { createEvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
 
 export const evaluate = base.extend<
   {},
@@ -16,6 +18,7 @@ export const evaluate = base.extend<
     knowledgeBaseClient: KnowledgeBaseClient;
     conversationsClient: ConversationsClient;
     chatClient: ObservabilityAIAssistantEvaluationChatClient;
+    evaluateDataset: EvaluateObservabilityAIAssistantDataset;
   }
 >({
   knowledgeBaseClient: [
@@ -49,5 +52,17 @@ export const evaluate = base.extend<
     {
       scope: 'worker',
     },
+  ],
+  evaluateDataset: [
+    ({ chatClient, evaluators, phoenixClient }, use) => {
+      use(
+        createEvaluateObservabilityAIAssistantDataset({
+          chatClient,
+          evaluators,
+          phoenixClient,
+        })
+      );
+    },
+    { scope: 'worker' },
   ],
 });
