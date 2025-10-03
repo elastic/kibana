@@ -25,6 +25,8 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { aiAssistantCapabilities } from '../common/capabilities';
 import { runStartupMigrations } from './service/startup_migrations/run_startup_migrations';
+import { registerUsageCollector } from './collectors/usage';
+
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
@@ -137,7 +139,9 @@ export class ObservabilityAIAssistantPlugin
       isDev: this.isDev,
     });
 
+    // Register telemetry
     core.analytics.registerEventType(recallRankingEvent);
+    registerUsageCollector(plugins.usageCollection, core);
 
     return {
       service,
