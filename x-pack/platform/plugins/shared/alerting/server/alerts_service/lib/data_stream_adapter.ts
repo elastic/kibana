@@ -124,6 +124,7 @@ async function createDataStream(opts: CreateConcreteWriteIndexOpts): Promise<voi
             alias: indexPatterns.alias,
             index: indexPatterns.alias,
             isWriteIndex: true,
+            isHidden: true,
           },
         ],
         simulatedMapping,
@@ -144,6 +145,7 @@ async function createDataStream(opts: CreateConcreteWriteIndexOpts): Promise<voi
               alias: indexPatterns.alias,
               index: dataStream.indices[dataStream.indices.length - 1].index_name,
               isWriteIndex: true,
+              isHidden: true,
             },
           ],
           simulatedMapping,
@@ -207,6 +209,7 @@ async function getValidConcreteIndices({
         index,
         alias: aliasName,
         isWriteIndex: aliasProperties.is_write_index ?? false,
+        isHidden: aliasProperties.is_hidden ?? false,
       }))
     );
 
@@ -347,6 +350,7 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
             aliases: {
               [indexPatterns.alias]: {
                 is_write_index: true,
+                is_hidden: true,
               },
             },
           }),
