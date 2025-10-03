@@ -445,9 +445,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
               {
-                id: 'indicesDataStreamsAndRollups',
-                title: i18n.translate('xpack.observability.obltNav.indicesDataStreamsAndRollups', {
-                  defaultMessage: 'Indices, data streams and roll ups',
+                id: 'indicesAndDataStreams',
+                title: i18n.translate('xpack.observability.obltNav.indicesAndDataStreams', {
+                  defaultMessage: 'Indices and data streams',
                   description:
                     'Heading in a nav tree dedicated to UIs for leveraging various Elasticsearch features for data management',
                 }),
