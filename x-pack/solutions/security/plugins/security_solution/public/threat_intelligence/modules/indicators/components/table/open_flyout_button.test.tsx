@@ -15,25 +15,13 @@ import { BUTTON_TEST_ID } from './test_ids';
 const mockIndicator = generateMockIndicator();
 
 describe('<IndicatorsFlyout />', () => {
-  it('should render expand button if flyout is closed', () => {
+  it('should render expand button', () => {
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <OpenIndicatorFlyoutButton indicator={mockIndicator} isOpen={false} onOpen={jest.fn()} />
+        <OpenIndicatorFlyoutButton indicator={mockIndicator} onOpen={jest.fn()} />
       </TestProvidersComponent>
     );
 
     expect(getByTestId(BUTTON_TEST_ID).innerHTML).toContain('expand');
-  });
-
-  it(`should render minimize button if flyout is open`, () => {
-    const { getByTestId } = render(
-      <TestProvidersComponent>
-        <OpenIndicatorFlyoutButton indicator={mockIndicator} isOpen={true} onOpen={jest.fn()} />
-      </TestProvidersComponent>
-    );
-
-    const button = getByTestId(BUTTON_TEST_ID);
-    button.click();
-    expect(button.innerHTML).toContain('minimize');
   });
 });

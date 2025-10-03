@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type YamlValidationErrorSeverity = 'error' | 'warning' | 'info';
+import type { Observable } from 'rxjs';
 
-export interface YamlValidationError {
-  message: string;
-  severity: YamlValidationErrorSeverity;
-  lineNumber: number;
-  column: number;
-  owner: string;
+export interface PublishesPauseFetch {
+  isFetchPaused$: Observable<boolean>;
 }
+
+export const apiPublishesPauseFetch = (
+  unknownApi: null | unknown
+): unknownApi is PublishesPauseFetch => {
+  return Boolean(unknownApi && (unknownApi as PublishesPauseFetch)?.isFetchPaused$ !== undefined);
+};
