@@ -47,6 +47,7 @@ For the Elastic Security 9.1.5 release information, refer to [Elastic Security S
 **Dashboards and Visualizations**:
 * Fixes a bug where the dashboard title would not get updated in the breadcrumbs when edited from the list of dashboards [#236561]({{kib-pull}}236561).
 * Updates dashboards to wait until controls are ready before rendering panels to prevent a double fetch of data [#237169]({{kib-pull}}237169).
+* Fixes an issue with the Lens table's column sort order being different in the dashboard and the exported CSV [#236673]({{kib-pull}}236673).
 
 **Data ingestion and Fleet**:
 * Fixes incorrect copying of SSL settings to the Fleet Hosts section of generated Agent policies [#236788]({{kib-pull}}236788).
@@ -58,13 +59,18 @@ For the Elastic Security 9.1.5 release information, refer to [Elastic Security S
 * Clears sort by `timestamp` when navigating from classic to ES|QL mode [#235338]({{kib-pull}}235338).
 * Fixes sizing issues with the **Actions** column header [#235227]({{kib-pull}}235227).
 
+**Kibana security**:
+* Allows `xpack.spaces.defaultSolution` to be configured through environment variables for Docker deployments [#236570]({{kib-pull}}236570).
+* Adds the ability to do partial matches and searches in the **API keys** section of Stack Management [#221959]({{kib-pull}}221959).
+
 **Machine Learning**:
 * Omits fields that should not be included in datafeed preview requests when testing custom URLs in anomaly detection jobs [#234709]({{kib-pull}}234709).
 * Improves trained model performance by adding filters to the request to fetch all index settings [#237072]({{kib-pull}}237072).
 * Hides the show forecast checkbox when selecting a new job in the Single Metric Viewer [#236724]({{kib-pull}}236724).
 * Makes alerts visible in Anomaly Explorer to all Machine Learning-only users regardless of where they create rules [#236289]({{kib-pull}}236289).
 * Fixes the **Job details** flyout on the **Analytics Map** page [#236131]({{kib-pull}}236131).
-* Fixes rendering of dashboard panel in PDF reporting for the Anomaly Swim Lane [#235475]({{kib-pull}}235475).
+* Fixes rendering of the dashboard panel in PDF reporting for the Anomaly Swim Lane [#235475]({{kib-pull}}235475).
+* Limits log rate analysis category requests to reduce `msearch` usage [#235611]({{kib-pull}}235611).
 
 **Management**:
 * Adds the `managed` field to the data views response schema to prevent the public API call from failing [#236237]({{kib-pull}}236237).
