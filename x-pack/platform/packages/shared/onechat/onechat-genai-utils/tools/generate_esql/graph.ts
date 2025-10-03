@@ -119,26 +119,44 @@ export const createNlToEsqlGraph = ({
         resource: state.resource,
         previousActions: state.actions,
         additionalInstructions: state.additionalInstructions,
+        additionalContext: state.additionalContext,
       })
     );
 
     const responseText = extractTextContent(response);
     const queries = extractEsqlQueries(responseText);
+    const success = queries.length > 0;
 
     const action: GenerateQueryAction = {
       type: 'generate_query',
-      query: queries[0],
+      success,
+      query: success ? queries[0] : undefined,
       response: responseText,
     };
 
     return {
       actions: [action],
+      currentTry: success ? state.currentTry : state.currentTry + 1,
     };
+  };
+
+  const branchAfterGenerate = async (state: StateType) => {
+    const lastAction = state.actions[state.actions.length - 1];
+    if (!isGenerateQueryAction(lastAction)) {
+      throw new Error(`Last action is not a generate_query action`);
+    }
+    if (lastAction.success) {
+      return 'autocorrect_query';
+    } else if (state.currentTry >= state.maxRetries) {
+      return 'finalize';
+    } else {
+      return 'generate_esql';
+    }
   };
 
   const autocorrectQuery = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
-    if (!isGenerateQueryAction(lastAction)) {
+    if (!isGenerateQueryAction(lastAction) || !lastAction.query) {
       throw new Error(`Last action is not a generate_query action`);
     }
 
@@ -156,10 +174,18 @@ export const createNlToEsqlGraph = ({
     };
   };
 
+  const branchAfterAutocorrect = async (state: StateType) => {
+    if (state.executeQuery) {
+      return 'execute_query';
+    } else {
+      return 'finalize';
+    }
+  };
+
   const executeQuery = async (state: StateType) => {
     let query;
     const lastAction = state.actions[state.actions.length - 1];
-    if (isGenerateQueryAction(lastAction)) {
+    if (isGenerateQueryAction(lastAction) && lastAction.query) {
       query = lastAction.query;
     } else if (isAutocorrectQueryAction(lastAction)) {
       query = lastAction.output;
@@ -197,7 +223,7 @@ export const createNlToEsqlGraph = ({
     if (!isExecuteQueryAction(lastAction)) {
       throw new Error(`Last action is not an execute_query action`);
     }
-    if (lastAction.success) {
+    if (lastAction.success || state.currentTry >= state.maxRetries) {
       return 'finalize';
     } else {
       return 'generate_esql';
@@ -206,10 +232,10 @@ export const createNlToEsqlGraph = ({
 
   const finalize = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
+    const generateActions = state.actions.filter(isGenerateQueryAction);
 
+    // ended via query execution - either successful or failure hitting max retries
     if (isExecuteQueryAction(lastAction)) {
-      const generateActions = state.actions.filter(isGenerateQueryAction);
-
       return {
         answer: generateActions[generateActions.length - 1].response,
         query: lastAction.query,
@@ -217,8 +243,23 @@ export const createNlToEsqlGraph = ({
         error: lastAction.error,
       };
     }
-    // TODO: handle case where executeQuery is false.
+    // ended via autocorrect - if executeQuery=false
+    if (isAutocorrectQueryAction(lastAction)) {
+      return {
+        answer: generateActions[generateActions.length - 1].response,
+        query: lastAction.output,
+      };
+    }
+    // ended via query generation - because the LLM didn't generate a query for some reason
+    if (isGenerateQueryAction(lastAction)) {
+      return {
+        error: 'No query was generated',
+        answer: lastAction.response,
+        query: lastAction.query,
+      };
+    }
 
+    // can't really happen, but just to make TS happy
     return {};
   };
 
@@ -234,8 +275,15 @@ export const createNlToEsqlGraph = ({
     .addEdge('__start__', 'resolve_target')
     .addEdge('resolve_target', 'request_documentation')
     .addEdge('request_documentation', 'generate_esql')
-    .addEdge('generate_esql', 'autocorrect_query')
-    .addEdge('autocorrect_query', 'execute_query')
+    .addConditionalEdges('generate_esql', branchAfterGenerate, {
+      generate_esql: 'generate_esql',
+      autocorrect_query: 'autocorrect_query',
+      finalize: 'finalize',
+    })
+    .addConditionalEdges('autocorrect_query', branchAfterAutocorrect, {
+      execute_query: 'execute_query',
+      finalize: 'finalize',
+    })
     .addConditionalEdges('execute_query', branchAfterQueryExecution, {
       generate_esql: 'generate_esql',
       finalize: 'finalize',

@@ -23,7 +23,8 @@ export interface RequestDocumentationAction {
 
 export interface GenerateQueryAction {
   type: 'generate_query';
-  query: string;
+  success: boolean;
+  query?: string;
   response: string;
 }
 
@@ -73,7 +74,11 @@ export const formatAction = (action: Action): BaseMessageLike[] => {
     case 'generate_query':
       return [
         createAIMessage(action.response),
-        createUserMessage(`Now run it through autocorrect and then execute it`),
+        createUserMessage(
+          action.success
+            ? `Now run it through autocorrect and then execute it`
+            : `No query generated, please try again.`
+        ),
       ];
     case 'autocorrect_query':
       return [

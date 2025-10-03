@@ -46,7 +46,7 @@ ${nlQuery}
 
 ${formatResourceWithSampledValues({ resource, indentLevel: 0 })}
 
-Now, based on those information, request documentation from the ES|QL handbook
+Now, based on that information, request documentation from the ES|QL handbook
 to help you get the right information needed to generate a query.`,
     ],
   ];
@@ -58,12 +58,14 @@ export const createGenerateEsqlPrompt = ({
   previousActions,
   prompts,
   additionalInstructions,
+  additionalContext,
 }: {
   nlQuery: string;
   resource: ResolvedResourceWithSampling;
   prompts: EsqlPrompts;
   previousActions: Action[];
   additionalInstructions?: string;
+  additionalContext?: string;
 }): BaseMessageLike[] => {
   return [
     [
@@ -107,9 +109,11 @@ Format any ES|QL query as follows:
 ${nlQuery}
 </user_query>
 
+${additionalContext ? `<additional_context>\n${additionalContext}\n</<additional_context>` : ''}
+
 ${formatResourceWithSampledValues({ resource, indentLevel: 0 })}
 
-Now, based on those information, please generate the ES|QL query`,
+Now, based on that information, please generate the ES|QL query.`,
     ],
     ...previousActions.flatMap(formatAction),
   ];
