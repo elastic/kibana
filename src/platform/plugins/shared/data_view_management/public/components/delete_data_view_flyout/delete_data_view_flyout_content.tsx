@@ -217,7 +217,7 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
           />
         </>
       ) : (
-        <EuiCallOut announceOnMount color="warning" iconType="warning" title={spacesWarningText} />
+        <EuiCallOut announceOnMount={false} color="warning" iconType="warning" title={spacesWarningText} />
       )}
       <EuiSpacer size="m" />
       <div>
