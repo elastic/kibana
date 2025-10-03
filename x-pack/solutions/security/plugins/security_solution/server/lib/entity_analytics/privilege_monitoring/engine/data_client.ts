@@ -31,7 +31,7 @@ export interface PrivilegeMonitoringGlobalDependencies {
   kibanaVersion: string;
 
   logger: Logger;
-  auditLogger: AuditLogger;
+  auditLogger?: AuditLogger;
   telemetry: AnalyticsServiceSetup;
 
   clusterClient: IScopedClusterClient;

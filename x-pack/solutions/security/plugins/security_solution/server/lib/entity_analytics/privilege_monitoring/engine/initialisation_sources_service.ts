@@ -31,7 +31,7 @@ export type InitialisationSourcesService = ReturnType<typeof createInitialisatio
 export const createInitialisationSourcesService = (deps: {
   descriptorClient: MonitoringEntitySourceDescriptorClient;
   logger: Logger;
-  auditLogger: AuditLogger;
+  auditLogger?: AuditLogger;
 }) => {
   return async function upsertSources(namespace: string) {
     const logger = createPrivMonLogger(deps.logger, namespace);

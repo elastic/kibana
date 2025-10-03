@@ -66,12 +66,13 @@ export const createInitialisationService = (
     dataClient.log('info', `Initialized privileged monitoring engine saved object`);
 
     // upsert index AND integration sources
-    await upsertSources(deps.namespace);
 
     try {
+      dataClient.log('debug', 'Upserting privilege monitoring sources');
+      await upsertSources(deps.namespace);
+
       dataClient.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
-      await IndexService.createIngestPipelineIfDoesNotExist();
-      await IndexService.upsertIndex();
+      await IndexService.initialisePrivmonIndex();
 
       if (deps.apiKeyManager) {
         await deps.apiKeyManager.generate();

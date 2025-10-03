@@ -19,7 +19,7 @@ export interface PrivMonAuditLogger {
   ) => void;
 }
 
-export const createPrivMonAuditLogger = (auditLogger: AuditLogger) => {
+export const createPrivMonAuditLogger = (auditLogger?: AuditLogger) => {
   return {
     log: (
       action: PrivilegeMonitoringEngineActions,
