@@ -192,7 +192,7 @@ describe('DataStreamClient', () => {
       await assertStateOfIndexTemplate();
     });
 
-    test('updates mappings and settings as expected whena new version is deployed', async () => {
+    test('updates mappings and settings as expected when a new version is deployed', async () => {
       const elasticsearchClient = esServer.getClient();
       await DataStreamClient.initialize({
         logger,
