@@ -65,14 +65,16 @@ describe('AzureSelectedCredentialsGuide', () => {
       // Check for key text content
       expect(screen.getByText(/Log in to/)).toBeInTheDocument();
       expect(screen.getByText('Deploy in Azure')).toBeInTheDocument();
-      expect(screen.getByText(/Change the.*region/)).toBeInTheDocument();
+      expect(screen.getByText(/Optional.*Set.*where.*deploy.*ARM template/)).toBeInTheDocument();
       expect(screen.getByText('Review + Create')).toBeInTheDocument();
       expect(screen.getByText(/Once the deployment is complete/)).toBeInTheDocument();
 
       // Sub-steps and emphasized text
-      expect(screen.getByText('ClientID')).toBeInTheDocument();
-      expect(screen.getByText('TenantID')).toBeInTheDocument();
-      expect(screen.getByText('Elastic Cloud Connector Id')).toBeInTheDocument();
+      expect(
+        screen.getByText(/ClientID, TenantID, and Elastic Cloud Connector ID/)
+      ).toBeInTheDocument();
+      expect(screen.getByText('Outputs')).toBeInTheDocument();
+      expect(screen.getByText('Save & Continue')).toBeInTheDocument();
 
       const codeBlock = screen.getByText('test-elastic-stack-id-12345');
       expect(codeBlock).toBeInTheDocument();

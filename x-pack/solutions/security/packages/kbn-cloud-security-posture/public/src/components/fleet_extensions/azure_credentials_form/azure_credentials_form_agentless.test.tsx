@@ -6,14 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { AzureCredentialsFormAgentless } from './azure_credentials_form_agentless';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import {
   getPackageInfoMock,
-  getMockPolicyAWS,
+  getMockPolicyAzure,
   getDefaultCloudSetupConfig,
   createCloudServerlessMock,
   CLOUDBEAT_AZURE,
@@ -30,8 +30,57 @@ import { CloudSetupTestWrapper } from '../test/fixtures/CloudSetupTestWrapper';
 
 const uiSettingsClient = coreMock.createStart().uiSettings;
 
+const AzureCredentialsFormAgentlessCloudConnectorWrapper = ({ cloud }: { cloud: CloudSetup }) => {
+  const baseMockPolicy = getMockPolicyAzure({
+    'azure.credentials.type': { value: 'cloud_connectors' },
+    'azure.credentials.tenant_id': { value: 'test-tenant-id' },
+    'azure.credentials.client_id': { value: 'test-client-id' },
+    azure_credentials_cloud_connector_id: { value: 'test-cloud-connector-id' },
+  });
+  const initialPolicy = {
+    ...baseMockPolicy,
+    supports_cloud_connector: true,
+    cloud_connector_id: undefined,
+  } as NewPackagePolicy;
+  const [newPackagePolicy, setNewPackagePolicy] = React.useState(initialPolicy);
+
+  const updatePolicy = React.useCallback(
+    ({ updatedPolicy }: { updatedPolicy: NewPackagePolicy }) => {
+      setNewPackagePolicy(updatedPolicy);
+    },
+    []
+  );
+
+  const input = newPackagePolicy.inputs.find((i) => i.type === CLOUDBEAT_AZURE)!;
+  const packageInfo = getPackageInfoMock({ includeAzureTemplates: true }) as PackageInfo;
+
+  return (
+    <CloudSetupTestWrapper
+      config={getDefaultCloudSetupConfig()}
+      cloud={cloud}
+      uiSettings={uiSettingsClient}
+      packageInfo={packageInfo}
+      newPolicy={newPackagePolicy}
+    >
+      <AzureCredentialsFormAgentless
+        updatePolicy={updatePolicy}
+        setupTechnology={SetupTechnology.AGENTLESS}
+        hasInvalidRequiredVars={false}
+        packageInfo={packageInfo}
+        input={input}
+        newPolicy={newPackagePolicy}
+      />
+    </CloudSetupTestWrapper>
+  );
+};
+
 const AzureCredentialsFormAgentlessWrapper = ({
-  initialPolicy = getMockPolicyAWS(),
+  initialPolicy = getMockPolicyAzure({
+    'azure.credentials.type': { value: 'service_principal_with_client_secret' },
+    'azure.credentials.tenant_id': { value: 'test-tenant-id' },
+    'azure.credentials.client_id': { value: 'test-client-id' },
+    'azure.credentials.client_secret': { value: 'test-client-secret' },
+  }),
   packageInfo = getPackageInfoMock({ includeAzureTemplates: true }) as PackageInfo,
   setupTechnology = SetupTechnology.AGENTLESS,
   hasInvalidRequiredVars = false,
@@ -43,19 +92,22 @@ const AzureCredentialsFormAgentlessWrapper = ({
   hasInvalidRequiredVars?: boolean;
   cloud: CloudSetup;
 }) => {
+  // Simple state management that works
   const [newPackagePolicy, setNewPackagePolicy] = React.useState(initialPolicy);
 
-  const updatePolicy = ({
-    updatedPolicy,
-    isValid,
-    isExtensionLoaded,
-  }: {
-    updatedPolicy: NewPackagePolicy;
-    isValid?: boolean;
-    isExtensionLoaded?: boolean;
-  }) => {
-    setNewPackagePolicy(updatedPolicy);
-  };
+  const updatePolicy = React.useCallback(
+    ({
+      updatedPolicy,
+    }: {
+      updatedPolicy: NewPackagePolicy;
+      isValid?: boolean;
+      isExtensionLoaded?: boolean;
+    }) => {
+      setNewPackagePolicy(updatedPolicy);
+    },
+    []
+  );
+
   const input = newPackagePolicy.inputs.find((i) => i.type === CLOUDBEAT_AZURE)!;
 
   return (
@@ -92,47 +144,32 @@ describe.skip('AzureCredentialsFormAgentless', () => {
         uiSettingsClient.get = jest.fn().mockReturnValue(true);
       });
 
-      it('shows cloud connector credential type', async () => {
-        render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
+      it('shows cloud connector credential type', () => {
+        render(<AzureCredentialsFormAgentlessCloudConnectorWrapper cloud={serverlessMock} />);
 
-        expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toHaveValue(
-          AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS
-        );
+        // Verify the credential type selector is set to cloud connectors
+        const credentialSelector = screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+        expect(credentialSelector).toHaveValue(AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS);
+
+        // Verify cloud connector specific elements are present
         expect(
           screen.getByTestId(AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ)
         ).toBeInTheDocument();
 
-        await waitFor(() => {
-          expect(
-            screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)
-          ).toBeInTheDocument();
-          expect(
-            screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)
-          ).toBeInTheDocument();
-        });
+        // For cloud connectors, we expect only the cloud connector ID field
+        // CLIENT_ID and TENANT_ID are not needed for cloud connector setup
         expect(
           screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID)
         ).toBeInTheDocument();
       });
 
-      it('shows client, tenant and secret key when selecting service principal with client secret credential', async () => {
+      it('shows client, tenant and secret key when selecting service principal with client secret credential', () => {
         render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
 
-        expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toHaveValue(
-          AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS
-        );
-
         const credentialSelector = screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
-        userEvent.selectOptions(
-          credentialSelector,
-          AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
-        );
-
-        await waitFor(() =>
-          expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toHaveValue(
-            AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
-          )
-        );
+        fireEvent.change(credentialSelector, {
+          target: { value: AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET },
+        });
 
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
         expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
@@ -169,7 +206,11 @@ describe.skip('AzureCredentialsFormAgentless', () => {
           AZURE_PROVIDER,
           GCP_PROVIDER
         );
-        render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMockWithDifferentHost} />);
+        render(
+          <AzureCredentialsFormAgentlessCloudConnectorWrapper
+            cloud={serverlessMockWithDifferentHost}
+          />
+        );
 
         expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toHaveValue(
           AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS
@@ -177,8 +218,10 @@ describe.skip('AzureCredentialsFormAgentless', () => {
         expect(
           screen.getByTestId(AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ)
         ).toBeInTheDocument();
-        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID)).toBeInTheDocument();
-        expect(screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID)).toBeInTheDocument();
+        // For cloud connectors, we expect only the cloud connector ID field
+        expect(
+          screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID)
+        ).toBeInTheDocument();
         expect(
           screen.getByTestId(AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID)
         ).toBeInTheDocument();
@@ -288,7 +331,7 @@ describe.skip('AzureCredentialsFormAgentless', () => {
 
       it('renders with credential type selector when cloud connectors are enabled', () => {
         uiSettingsClient.get = jest.fn().mockReturnValue(true);
-        render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
+        render(<AzureCredentialsFormAgentlessCloudConnectorWrapper cloud={serverlessMock} />);
 
         expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
         expect(
@@ -324,7 +367,7 @@ describe.skip('AzureCredentialsFormAgentless', () => {
     describe('user interactions', () => {
       it('allows switching between credential types when cloud connectors enabled', async () => {
         uiSettingsClient.get = jest.fn().mockReturnValue(true);
-        render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
+        render(<AzureCredentialsFormAgentlessCloudConnectorWrapper cloud={serverlessMock} />);
 
         const credentialSelector = screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
 

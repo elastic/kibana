@@ -21,7 +21,7 @@ import {
   AWS_ORGANIZATION_ACCOUNT,
 } from '@kbn/cloud-security-posture-common';
 import { getMockPolicyAWS } from '../test/mock';
-import type { CloudSetupConfig, UpdatePolicy } from '../types';
+import type { UpdatePolicy } from '../types';
 
 // Mock dependencies
 jest.mock('../hooks/use_cloud_setup_context');
@@ -77,40 +77,21 @@ describe('AwsCredentialsForm', () => {
     isValid: true,
   };
 
-  const defaultCloudSetupReturn: CloudSetupContextValue = {
+  // Minimal mock setup for better performance
+  const defaultCloudSetupReturn = {
     awsPolicyType: 'cloudbeat/cis_aws',
     shortName: 'CSPM',
-    awsOverviewPath: 'https://docs.elastic.co/aws',
     templateName: 'cspm',
     getCloudSetupProviderByInputType: jest.fn(),
-    config: {} as CloudSetupConfig,
+    config: {},
     showCloudTemplates: false,
     defaultProvider: 'aws',
     defaultProviderType: 'aws',
     awsInputFieldMapping: {},
     isAwsCloudConnectorEnabled: false,
     awsOrganizationEnabled: false,
-
-    // Required Azure and GCP fields (minimal, unused in AWS tests)
-    azureEnabled: false,
-    isAzureCloudConnectorEnabled: false,
-    azureOrganizationEnabled: false,
-    azureOverviewPath: '',
-    azurePolicyType: '',
-    azureCloudConnectorRemoteRoleTemplate: undefined,
-    azureManualFieldsEnabled: false,
-
-    gcpEnabled: false,
-    isGcpCloudConnectorEnabled: false,
-    gcpOrganizationEnabled: false,
-    gcpOverviewPath: '',
-    gcpPolicyType: '',
-    gcpCloudConnectorRemoteRoleTemplate: undefined,
-
-    // Other required fields
     templateInputOptions: [],
-    elasticStackId: undefined,
-  };
+  } as CloudSetupContextValue;
 
   interface AwsCredentialsFormTestProps {
     newPolicy: NewPackagePolicy;
