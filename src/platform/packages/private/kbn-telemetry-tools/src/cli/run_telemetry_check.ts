@@ -15,7 +15,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { prAutomatedChecks } from '../tools/tasks/pr_automated_checks';
 import type { TaskContext } from '../tools/tasks';
 import {
-  createTaskContext,
+  createCheckTaskContext,
   ErrorReporter,
   parseConfigsTask,
   extractCollectorsTask,
@@ -27,7 +27,7 @@ import {
 
 export function runTelemetryCheck() {
   run(
-    async ({ flags: { baselineSha, fix, ignoreStoredJson, path }, log }) => {
+    async ({ flags: { baselineSha, fix, 'ignore-stored-json': ignoreStoredJson, path }, log }) => {
       if (typeof baselineSha !== 'string' || !baselineSha.trim()) {
         throw createFailError(
           `${chalk.white.bgRed(
@@ -130,7 +130,7 @@ export function runTelemetryCheck() {
       );
 
       try {
-        const context = createTaskContext({ baselineSha });
+        const context = createCheckTaskContext({ baselineSha });
         await list.run(context);
       } catch (error) {
         process.exitCode = 1;
@@ -147,9 +147,8 @@ export function runTelemetryCheck() {
       flags: {
         alias: {
           baseline: 'baselineSha',
-          'ignore-stored-json': 'ignoreStoredJson',
         },
-        boolean: ['fix', 'ignoreStoredJson'],
+        boolean: ['fix'],
         string: ['baselineSha'],
         default: {
           fix: false,
