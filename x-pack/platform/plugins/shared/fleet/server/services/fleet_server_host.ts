@@ -45,8 +45,8 @@ import {
   deleteSecrets,
   extractAndUpdateFleetServerHostsSecrets,
   extractAndWriteFleetServerHostsSecrets,
-  isSecretStorageEnabled,
 } from './secrets';
+import { isSSLSecretStorageEnabled } from './secrets/ssl';
 
 function savedObjectToFleetServerHost(
   so: SavedObject<FleetServerHostSOAttributes>
@@ -122,7 +122,7 @@ class FleetServerHostService {
     }
 
     // Store secret values if enabled; if not, store plain text values
-    if (await isSecretStorageEnabled(esClient, soClient)) {
+    if (await isSSLSecretStorageEnabled(esClient, soClient)) {
       const { fleetServerHost: fleetServerHostWithSecrets } =
         await extractAndWriteFleetServerHostsSecrets({
           fleetServerHost,
@@ -277,7 +277,7 @@ class FleetServerHostService {
     }
 
     // Store secret values if enabled; if not, store plain text values
-    if (await isSecretStorageEnabled(esClient, soClient)) {
+    if (await isSSLSecretStorageEnabled(esClient, soClient)) {
       const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
         oldFleetServerHost: originalItem,
         fleetServerHostUpdate: data,

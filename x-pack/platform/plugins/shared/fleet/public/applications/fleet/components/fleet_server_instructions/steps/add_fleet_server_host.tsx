@@ -78,13 +78,14 @@ export const AddFleetServerHostStepContent = ({
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     sslKey: false,
     sslESKey: false,
+    sslAgentKey: false,
   });
   const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(true);
   const useSecretsStorage = secretsToggleState === true;
 
   const fleetStatus = useFleetStatus();
-  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
-    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
+  if (fleetStatus.isSSLSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
+    setSecretsToggleState(fleetStatus.isSSLSecretsStorageEnabled);
   }
 
   const onToggleSecretStorage = (secretEnabled: boolean) => {
@@ -110,6 +111,11 @@ export const AddFleetServerHostStepContent = ({
         inputs.sslESKeyInput.clear();
         setIsConvertedToSecret({ ...isConvertedToSecret, sslESKey: true });
       }
+      if (inputs.sslAgentKeyInput.value && !inputs.sslAgentKeySecretInput.value) {
+        inputs.sslAgentKeySecretInput.setValue(inputs.sslAgentKeyInput.value);
+        inputs.sslAgentKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslAgentKey: true });
+      }
     }
   }, [
     inputs.sslKeyInput,
@@ -119,6 +125,8 @@ export const AddFleetServerHostStepContent = ({
     isConvertedToSecret,
     inputs.sslESKeyInput,
     inputs.sslESKeySecretInput,
+    inputs.sslAgentKeyInput,
+    inputs.sslAgentKeySecretInput,
     secretsToggleState,
     useSecretsStorage,
     enableSSLSecrets,
@@ -128,11 +136,18 @@ export const AddFleetServerHostStepContent = ({
     if (secretEnabled) {
       inputs.sslKeyInput.clear();
       inputs.sslESKeyInput.clear();
+      inputs.sslAgentKeyInput.clear();
     } else {
       inputs.sslKeySecretInput.setValue('');
       inputs.sslESKeySecretInput.setValue('');
+      inputs.sslAgentKeySecretInput.setValue('');
     }
-    setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: false, sslESKey: false });
+    setIsConvertedToSecret({
+      ...isConvertedToSecret,
+      sslKey: false,
+      sslESKey: false,
+      sslAgentKey: false,
+    });
     onToggleSecretStorage(secretEnabled);
   };
 
@@ -274,6 +289,7 @@ export const AddFleetServerHostStepContent = ({
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             iconType="check"
             color="success"
             title={

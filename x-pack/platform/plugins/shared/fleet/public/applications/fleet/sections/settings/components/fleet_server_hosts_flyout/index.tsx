@@ -71,6 +71,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     sslKey: false,
     sslESKey: false,
+    sslAgentKey: false,
   });
   const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(true);
 
@@ -104,6 +105,11 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
         inputs.sslESKeyInput.clear();
         setIsConvertedToSecret({ ...isConvertedToSecret, sslESKey: true });
       }
+      if (inputs.sslAgentKeyInput.value && !inputs.sslAgentKeySecretInput.value) {
+        inputs.sslAgentKeySecretInput.setValue(inputs.sslAgentKeyInput.value);
+        inputs.sslAgentKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslAgentKey: true });
+      }
     }
   }, [
     inputs.sslKeyInput,
@@ -113,6 +119,8 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
     isConvertedToSecret,
     inputs.sslESKeyInput,
     inputs.sslESKeySecretInput,
+    inputs.sslAgentKeyInput,
+    inputs.sslAgentKeySecretInput,
     secretsToggleState,
     useSecretsStorage,
     enableSSLSecrets,
@@ -122,11 +130,18 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
     if (secretEnabled) {
       inputs.sslKeyInput.clear();
       inputs.sslESKeyInput.clear();
+      inputs.sslAgentKeyInput.clear();
     } else {
       inputs.sslKeySecretInput.setValue('');
       inputs.sslESKeySecretInput.setValue('');
+      inputs.sslAgentKeySecretInput.setValue('');
     }
-    setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: false, sslESKey: false });
+    setIsConvertedToSecret({
+      ...isConvertedToSecret,
+      sslKey: false,
+      sslESKey: false,
+      sslAgentKey: false,
+    });
     onToggleSecretStorage(secretEnabled);
   };
 
@@ -165,6 +180,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
       <EuiFlyoutBody>
         {fleetServerHost && (
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             iconType="warning"

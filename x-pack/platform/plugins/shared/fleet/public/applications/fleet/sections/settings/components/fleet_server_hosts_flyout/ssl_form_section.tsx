@@ -143,6 +143,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               useSecretsStorage={useSecretsStorage}
               onToggleSecretStorage={onToggleSecretAndClearValue}
               disabled={!useSecretsStorage}
+              secretType="ssl"
             >
               <EuiTextArea
                 fullWidth
@@ -171,6 +172,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               isConvertedToSecret={isConvertedToSecret.sslKey}
               onToggleSecretStorage={onToggleSecretAndClearValue}
               cancelEdit={inputs.sslKeySecretInput.cancelEdit}
+              secretType="ssl"
             >
               <EuiTextArea
                 fullWidth
@@ -241,6 +243,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               useSecretsStorage={useSecretsStorage}
               onToggleSecretStorage={onToggleSecretAndClearValue}
               disabled={!useSecretsStorage}
+              secretType="ssl"
             >
               <EuiTextArea
                 fullWidth
@@ -269,6 +272,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               isConvertedToSecret={isConvertedToSecret.sslKey}
               onToggleSecretStorage={onToggleSecretAndClearValue}
               cancelEdit={inputs.sslESKeySecretInput.cancelEdit}
+              secretType="ssl"
             >
               <EuiTextArea
                 fullWidth
@@ -339,6 +343,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               useSecretsStorage={useSecretsStorage}
               onToggleSecretStorage={onToggleSecretAndClearValue}
               disabled={!useSecretsStorage}
+              secretType="ssl"
             >
               <EuiTextArea
                 fullWidth
@@ -367,6 +372,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               isConvertedToSecret={isConvertedToSecret.sslKey}
               onToggleSecretStorage={onToggleSecretAndClearValue}
               cancelEdit={inputs.sslAgentKeySecretInput.cancelEdit}
+              secretType="ssl"
             >
               <EuiTextArea
                 fullWidth

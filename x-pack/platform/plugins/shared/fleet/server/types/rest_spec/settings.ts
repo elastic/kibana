@@ -60,6 +60,7 @@ export const SettingsResponseSchema = schema.object({
     secret_storage_requirements_met: schema.maybe(schema.boolean()),
     output_secret_storage_requirements_met: schema.maybe(schema.boolean()),
     action_secret_storage_requirements_met: schema.maybe(schema.boolean()),
+    ssl_secret_storage_requirements_met: schema.maybe(schema.boolean()),
     use_space_awareness_migration_status: schema.maybe(
       schema.oneOf([schema.literal('pending'), schema.literal('success'), schema.literal('error')])
     ),

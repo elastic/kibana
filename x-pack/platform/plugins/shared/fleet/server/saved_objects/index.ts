@@ -173,6 +173,7 @@ export const getSavedObjectTypes = (
             },
           },
           action_secret_storage_requirements_met: { type: 'boolean' },
+          ssl_secret_storage_requirements_met: { type: 'boolean' },
         },
       },
       migrations: {
@@ -214,6 +215,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 action_secret_storage_requirements_met: { type: 'boolean' },
+              },
+            },
+          ],
+        },
+        5: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                ssl_secret_storage_requirements_met: { type: 'boolean' },
               },
             },
           ],

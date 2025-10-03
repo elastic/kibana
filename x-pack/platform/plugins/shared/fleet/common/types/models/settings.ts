@@ -14,6 +14,7 @@ export interface BaseSettings {
   secret_storage_requirements_met?: boolean;
   output_secret_storage_requirements_met?: boolean;
   action_secret_storage_requirements_met?: boolean;
+  ssl_secret_storage_requirements_met?: boolean;
   delete_unenrolled_agents?: {
     enabled: boolean;
     is_preconfigured: boolean;
