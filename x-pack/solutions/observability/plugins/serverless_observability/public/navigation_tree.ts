@@ -495,20 +495,17 @@ export const createNavigationTree = ({
                   { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
                 ],
               },
-              ...filterForFeatureAvailability(
-                {
-                  id: 'machine_learning',
-                  title: i18n.translate(
-                    'xpack.serverlessObservability.nav.projectSettings.machineLearning',
-                    {
-                      defaultMessage: 'Machine Learning',
-                    }
-                  ),
-                  breadcrumbStatus: 'hidden',
-                  children: [{ link: 'management:trained_models' }],
-                },
-                overviewAvailable
-              ),
+              {
+                id: 'machine_learning',
+                title: i18n.translate(
+                  'xpack.serverlessObservability.nav.projectSettings.machineLearning',
+                  {
+                    defaultMessage: 'Machine Learning',
+                  }
+                ),
+                breadcrumbStatus: 'hidden',
+                children: [{ link: 'management:trained_models' }],
+              },
               ...filterForFeatureAvailability(
                 {
                   title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.ai', {
