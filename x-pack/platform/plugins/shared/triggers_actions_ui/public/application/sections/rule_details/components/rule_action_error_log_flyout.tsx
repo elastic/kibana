@@ -58,6 +58,7 @@ export const RuleActionErrorLogFlyout = (props: RuleActionErrorLogFlyoutProps) =
       onClose={onClose}
       size={isFlyoutPush ? 'm' : 'l'}
       data-test-subj="ruleActionErrorLogFlyout"
+      aria-label="Rule action error log"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

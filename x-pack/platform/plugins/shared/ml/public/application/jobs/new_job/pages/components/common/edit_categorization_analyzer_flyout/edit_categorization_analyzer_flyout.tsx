@@ -73,7 +73,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
       <FlyoutButton onClick={toggleJsonFlyout} />
 
       {showJsonFlyout === true && (
-        <EuiFlyout onClose={() => setShowJsonFlyout(false)} hideCloseButton size="m">
+        <EuiFlyout onClose={() => setShowJsonFlyout(false)} hideCloseButton size="m" aria-label="Edit categorization analyzer JSON">
           <EuiFlyoutBody>
             <Contents
               onChange={onJSONChange}

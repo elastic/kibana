@@ -375,6 +375,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
           hideCloseButton
           size="m"
           data-test-subj="mlJobMgmtImportJobsFlyout"
+          aria-label="Import jobs"
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">

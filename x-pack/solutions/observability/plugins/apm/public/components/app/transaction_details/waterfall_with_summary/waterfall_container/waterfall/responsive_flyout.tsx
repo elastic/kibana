@@ -16,10 +16,11 @@ import styled, { type StyledComponent } from '@emotion/styled';
 export const ResponsiveFlyout: StyledComponent<EuiFlyoutProps> = styled(
   ({
     className,
+    'aria-label': ariaLabel = 'Details',
     ...flyoutProps
   }: {
     className?: string;
-  } & EuiFlyoutProps) => <EuiFlyout {...flyoutProps} className={className} />
+  } & EuiFlyoutProps) => <EuiFlyout {...flyoutProps} aria-label={ariaLabel} className={className} />
 )`
   width: 100%;
 

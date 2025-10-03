@@ -99,6 +99,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         size="m"
         maxWidth={true}
         maskProps={{ headerZindexLocation: 'below' }}
+        aria-label="Space privileges"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">

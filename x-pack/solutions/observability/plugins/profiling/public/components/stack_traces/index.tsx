@@ -169,6 +169,7 @@ export function StackTraces({
           onClose={() => {
             setSelectedSubchart(undefined);
           }}
+          aria-label="Subchart details"
         >
           <SubChart
             style={{ overflow: 'auto' }}

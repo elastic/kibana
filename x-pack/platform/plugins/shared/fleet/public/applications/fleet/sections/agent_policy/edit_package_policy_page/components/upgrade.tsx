@@ -171,6 +171,7 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
           <EuiFlyout
             onClose={() => setIsPreviousVersionFlyoutOpen(false)}
             maxWidth={MAX_FLYOUT_WIDTH}
+            aria-labelledby="FleetPackagePolicyPreviousVersionFlyoutTitle"
           >
             <EuiFlyoutHeader hasBorder>
               <EuiTitle size="m">

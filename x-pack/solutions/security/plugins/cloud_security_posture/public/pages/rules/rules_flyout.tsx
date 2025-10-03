@@ -87,6 +87,7 @@ export const RuleFlyout = ({ onClose, rule }: RuleFlyoutProps) => {
       onClose={onClose}
       data-test-subj={TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER}
       outsideClickCloses
+      aria-label="Rule details"
     >
       <EuiFlyoutHeader>
         <EuiTitle size="l">

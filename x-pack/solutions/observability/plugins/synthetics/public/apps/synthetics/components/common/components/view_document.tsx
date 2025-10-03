@@ -44,6 +44,7 @@ export const ViewDocument = ({ ping }: { ping: Ping }) => {
             // needed to prevent propagation to the table row click
             evt.stopPropagation();
           }}
+          aria-label="View document"
         >
           <EuiFlyoutHeader>
             <EuiTitle size="m">

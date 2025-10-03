@@ -85,7 +85,7 @@ export const IndexTemplateFlyoutWithContext: React.FC<IndexTemplateFlyoutWithCon
   );
   return (
     <IndexManagementAppContext core={core} dependencies={newDependencies}>
-      <EuiFlyout onClose={onClose}>
+      <EuiFlyout onClose={onClose} aria-label="Index template details">
         <TemplateDetailsContent
           template={indexTemplate}
           onClose={onClose}

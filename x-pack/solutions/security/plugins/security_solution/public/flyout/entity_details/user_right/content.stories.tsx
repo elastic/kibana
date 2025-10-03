@@ -23,7 +23,7 @@ export default {
     (storyFn) => (
       <StorybookProviders>
         <TestProvider>
-          <EuiFlyout size="m" onClose={() => {}}>
+          <EuiFlyout size="m" onClose={() => {}} aria-label="User panel">
             {storyFn()}
           </EuiFlyout>
         </TestProvider>

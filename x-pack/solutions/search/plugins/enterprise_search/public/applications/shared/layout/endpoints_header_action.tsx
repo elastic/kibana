@@ -38,7 +38,7 @@ export const EndpointsHeaderAction: React.FC<React.PropsWithChildren<{}>> = ({ c
         </EuiFlexGroup>
       </EuiHeaderLinks>
       {open && (
-        <EuiFlyout onClose={() => setOpen(false)} size={'s'}>
+        <EuiFlyout onClose={() => setOpen(false)} size={'s'} aria-label="Endpoints & API keys">
           <KibanaWiredConnectionDetailsProvider>
             <ConnectionDetailsFlyoutContent />
           </KibanaWiredConnectionDetailsProvider>
