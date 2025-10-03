@@ -8,7 +8,7 @@
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RuleExecutionStatus } from '../../api/detection_engine';
 import { RuleCustomizationStatus, RuleExecutionStatusEnum } from '../../api/detection_engine';
-import { prepareKQLStringParam } from '../../utils/kql';
+import { escapeKQLStringParam, prepareKQLStringParam } from '../../utils/kql';
 import {
   ENABLED_FIELD,
   IS_CUSTOMIZED_FIELD,
@@ -105,8 +105,7 @@ export function convertRulesFilterToKQL({
   return kql.join(' AND ');
 }
 
-const SEARCHABLE_RULE_ATTRIBUTES = [
-  RULE_NAME_FIELD,
+const SEARCHABLE_RULE_PARAMS = [
   RULE_PARAMS_FIELDS.INDEX,
   RULE_PARAMS_FIELDS.TACTIC_ID,
   RULE_PARAMS_FIELDS.TACTIC_NAME,
@@ -116,11 +115,22 @@ const SEARCHABLE_RULE_ATTRIBUTES = [
   RULE_PARAMS_FIELDS.SUBTECHNIQUE_NAME,
 ];
 
-export function convertRuleSearchTermToKQL(
-  searchTerm: string,
-  attributes = SEARCHABLE_RULE_ATTRIBUTES
-): string {
-  return attributes.map((param) => `${param}: ${prepareKQLStringParam(searchTerm)}`).join(' OR ');
+/**
+ * Build KQL search terms.
+ *
+ * Note that RULE_NAME_FIELD is special, it includes partial matches.
+ * Ie "win" => "match: *win*" -> Windows, winter, Darwin.
+ * Whereas the rest of the fields, we use exact match.
+ *
+ * @param searchTerm search term (ie from the search bar)
+ * @returns KQL String
+ */
+export function convertRuleSearchTermToKQL(searchTerm: string): string {
+  const ruleNameCondition = `${RULE_NAME_FIELD}: *${escapeKQLStringParam(searchTerm)}*`;
+  const remainingConditions = SEARCHABLE_RULE_PARAMS.map(
+    (param) => `${param}: ${prepareKQLStringParam(searchTerm)}`
+  );
+  return [ruleNameCondition].concat(remainingConditions).join(' OR ');
 }
 
 export function convertRuleTagsToKQL(tags: string[]): string {
