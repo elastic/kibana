@@ -147,6 +147,7 @@ Refer to the [reference documentation](https://www.elastic.co/docs/reference/que
       ignoreTag: true,
     },
     openLinksInNewTab: true,
+    preview: true,
   },
   {
     name: 'row',

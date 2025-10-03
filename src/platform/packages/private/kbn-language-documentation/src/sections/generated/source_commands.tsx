@@ -91,6 +91,7 @@ FROM employees METADATA _index, _id
       label: i18n.translate('languageDocumentation.documentationESQL.fuse', {
         defaultMessage: 'FUSE',
       }),
+      preview: true,
       description: (
         <Markdown
           openLinksInNewTab={true}
