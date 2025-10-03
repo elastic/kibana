@@ -12,8 +12,8 @@ import { isEmpty } from 'lodash';
 function splitFilters(value: string) {
   return value
     .split(/\bwhere\b/i)
-    .filter((item2) => !isEmpty(item2))
-    .map((item3) => item3.trim());
+    .filter((item) => !isEmpty(item))
+    .map((item) => item.trim());
 }
 
 export function extractFilters(query: string) {
