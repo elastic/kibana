@@ -29,6 +29,13 @@ jest.mock('react-router-dom', () => ({
   withRouter: jest.fn(),
 }));
 
+const mockUseKibanaFeatureFlags = jest
+  .fn()
+  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
+jest.mock('../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
+}));
+
 const mockFilter = {
   meta: {
     disabled: false,
