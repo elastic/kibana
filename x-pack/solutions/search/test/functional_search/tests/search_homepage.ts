@@ -160,7 +160,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             });
           });
         });
-
+        describe('Get started with API', function () {
+          it('clicking on search basics tutorial open console', async () => {
+            await testSubjects.existOrFail('console_tutorials_search_basics');
+            await testSubjects.click('console_tutorials_search_basics');
+            await testSubjects.existOrFail('consoleEditorContainer');
+          });
+          it('clicking on semantic search tutorial open console', async () => {
+            await testSubjects.existOrFail('console_tutorials_semantic_search');
+            await testSubjects.click('console_tutorials_semantic_search');
+            await testSubjects.existOrFail('consoleEditorContainer');
+          });
+          it('clicking on esql tutorial open console', async () => {
+            await testSubjects.existOrFail('console_tutorials_esql');
+            await testSubjects.click('console_tutorials_esql');
+            await testSubjects.existOrFail('consoleEditorContainer');
+          });
+          it('clicking on tsds tutorial open console', async () => {
+            await testSubjects.existOrFail('console_tutorials_tsds');
+            await testSubjects.click('console_tutorials_tsds');
+            await testSubjects.existOrFail('consoleEditorContainer');
+          });
+        });
         describe('AI search capabilities', function () {
           it('renders Semantic Search content', async () => {
             await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
