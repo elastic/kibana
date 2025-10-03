@@ -173,4 +173,5 @@ export interface DashboardInternalApi {
     controlGroupInput: ControlsGroupState | undefined;
     controlGroupReferences: Reference[];
   };
+  untilControlsInitialized: () => Promise<void>;
 }
