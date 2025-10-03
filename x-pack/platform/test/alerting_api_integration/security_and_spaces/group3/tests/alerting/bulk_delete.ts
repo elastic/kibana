@@ -699,7 +699,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(response.status).to.eql(400);
 
-        deleteRuleById(es, createdRule.id);
+        await deleteRuleById(es, createdRule.id);
       });
 
       it('should ignore internal rule types when trying to bulk delete using the filter param', async () => {
@@ -733,7 +733,7 @@ export default ({ getService }: FtrProviderContext) => {
           .set('kbn-xsrf', 'foo')
           .expect(404);
 
-        deleteRuleById(es, internalRuleType.id);
+        await deleteRuleById(es, internalRuleType.id);
       });
     });
   });

@@ -613,7 +613,7 @@ export default function createBulkEditRuleParamsWithReadAuthTests({
           { id: 'new', list_id: 'foo', namespace_type: 'single', type: 'rule_default' },
         ]);
 
-        deleteRuleById(es, internalRuleType.id);
+        await deleteRuleById(es, internalRuleType.id);
       });
     });
   });

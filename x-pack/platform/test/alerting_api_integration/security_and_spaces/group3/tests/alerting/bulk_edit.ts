@@ -1086,7 +1086,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
 
-        deleteRuleById(es, createdRule.id);
+        await deleteRuleById(es, createdRule.id);
       });
 
       it('should ignore internal rule types when trying to bulk update using the filter param', async () => {
@@ -1123,7 +1123,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(updatedInternalRuleType.tags).to.eql(['internally-managed']);
         expect(updatedNonInternalRuleType.tags).to.eql(['internally-managed', 'tag-A']);
 
-        deleteRuleById(es, internalRuleType.id);
+        await deleteRuleById(es, internalRuleType.id);
       });
     });
   });
