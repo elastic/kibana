@@ -260,8 +260,9 @@
     "@kbn/licensing-types",
     "@kbn/core-metrics-server",
     "@kbn/rrule",
-    "@kbn/core-analytics-server-mocks",
     "@kbn/onechat-genai-utils",
-    "@kbn/onechat-server"
+    "@kbn/onechat-server",
+    "@kbn/core-analytics-server-mocks",
+    "@kbn/object-utils"
   ]
 }
