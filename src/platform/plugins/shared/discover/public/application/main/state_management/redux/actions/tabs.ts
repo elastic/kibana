@@ -8,13 +8,14 @@
  */
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
-import type { QueryState } from '@kbn/data-plugin/common';
+import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
 import { type TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
@@ -39,6 +40,8 @@ import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
+import type { DiscoverAppLocatorParams } from '../../../../../../common';
+import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -122,12 +125,13 @@ export const updateTabs: InternalStateThunkActionCreator<
     void
   ],
   Promise<void>
-> = ({ items, selectedItem, updatedDiscoverSession }) =>
-  async function updateTabsThunkFn(
+> =
+  ({ items, selectedItem, updatedDiscoverSession }) =>
+  async (
     dispatch,
     getState,
-    { services, runtimeStateManager, tabsStorageManager, urlStateStorage }
-  ) {
+    { services, runtimeStateManager, tabsStorageManager, urlStateStorage, searchSessionManager }
+  ) => {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
     const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
@@ -252,8 +256,17 @@ export const updateTabs: InternalStateThunkActionCreator<
 
         if (nextTab.dataRequestParams.searchSessionId) {
           services.data.search.session.continue(nextTab.dataRequestParams.searchSessionId, true);
-        } else {
-          services.data.search.session.start();
+
+          if (nextTab.dataRequestParams.isSearchSessionRestored) {
+            searchSessionManager.pushSearchSessionIdToURL(
+              nextTab.dataRequestParams.searchSessionId,
+              { replace: true }
+            );
+          }
+        }
+
+        if (!nextTab.dataRequestParams.isSearchSessionRestored) {
+          searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         }
 
         nextTabStateContainer.actions.initializeAndSync();
@@ -265,6 +278,8 @@ export const updateTabs: InternalStateThunkActionCreator<
       } else {
         await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null, { replace: true });
         await urlStateStorage.set(APP_STATE_URL_KEY, null, { replace: true });
+        searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
+        services.data.search.session.reset();
       }
 
       dispatch(internalStateSlice.actions.discardFlyoutsOnTabChange());
@@ -409,9 +424,10 @@ export const openInNewTab: InternalStateThunkActionCreator<
       appState?: TabState['initialAppState'];
       globalState?: TabState['globalState'];
       searchSessionId?: string;
+      dataViewSpec?: DataViewSpec;
     }
   ]
-> = ({ tabLabel, appState, globalState, searchSessionId }) =>
+> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec }) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : undefined;
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
@@ -430,14 +446,63 @@ export const openInNewTab: InternalStateThunkActionCreator<
     }
 
     if (searchSessionId) {
-      newDefaultTab.dataRequestParams = {
-        ...newDefaultTab.dataRequestParams,
+      newDefaultTab.initialInternalState = {
+        ...newDefaultTab.initialInternalState,
         searchSessionId,
+      };
+    }
+
+    if (dataViewSpec) {
+      newDefaultTab.initialInternalState = {
+        ...newDefaultTab.initialInternalState,
+        serializedSearchSource: { index: dataViewSpec },
       };
     }
 
     return dispatch(
       updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
+    );
+  };
+
+export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
+  [
+    {
+      searchSession: UISession;
+    }
+  ]
+> = ({ searchSession }) =>
+  async function openSearchSessionInNewTabThunkFn(dispatch, getState, { services }) {
+    const restoreState = searchSession.restoreState as DiscoverAppLocatorParams;
+
+    if (!restoreState.searchSessionId) {
+      return;
+    }
+
+    const {
+      appState,
+      globalState: originalGlobalState,
+      state: { dataViewSpec },
+    } = parseAppLocatorParams(restoreState);
+
+    const globalState: TabState['globalState'] = {};
+    if (originalGlobalState?.time) {
+      globalState.timeRange = originalGlobalState.time;
+    }
+    if (originalGlobalState?.refreshInterval) {
+      globalState.refreshInterval = originalGlobalState.refreshInterval;
+    }
+    if (originalGlobalState?.filters) {
+      globalState.filters = originalGlobalState.filters;
+    }
+
+    return dispatch(
+      openInNewTab({
+        tabLabel: searchSession.name,
+        searchSessionId: restoreState.searchSessionId,
+        appState,
+        globalState,
+        dataViewSpec,
+      })
     );
   };
 

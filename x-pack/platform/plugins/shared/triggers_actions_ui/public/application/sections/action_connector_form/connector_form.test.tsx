@@ -6,7 +6,7 @@
  */
 
 import React, { lazy } from 'react';
-import { ConnectorForm } from './connector_form';
+import { ConnectorForm, formDeserializer, formSerializer } from './connector_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
@@ -143,6 +143,103 @@ describe('ConnectorForm', () => {
         isValid: undefined,
         preSubmitValidator: expect.anything(),
         submit: expect.anything(),
+      });
+    });
+  });
+
+  describe('serializers', () => {
+    it('formSerializer works as expected for .gen-ai', () => {
+      const formData = {
+        actionTypeId: '.gen-ai',
+        isDeprecated: false,
+        config: {
+          headers: [
+            { key: 'foo', value: 'bar' },
+            { key: 'an', value: 'tonio' },
+          ],
+        },
+        secrets: {
+          secretHeaders: [
+            {
+              key: 'foo',
+              value: 'bar',
+            },
+          ],
+        },
+        isMissingSecrets: false,
+      };
+
+      expect(formSerializer(formData)).toEqual({
+        actionTypeId: '.gen-ai',
+        config: {
+          headers: {
+            foo: 'bar',
+            an: 'tonio',
+          },
+        },
+        isDeprecated: false,
+        isMissingSecrets: false,
+        secrets: {
+          secretHeaders: undefined,
+        },
+      });
+    });
+
+    it('formDeserializer works as expected for .gen-ai', () => {
+      const formData = {
+        actionTypeId: '.gen-ai',
+        isDeprecated: false,
+        config: {
+          headers: {
+            foo: 'bar',
+            an: 'tonio',
+          },
+        },
+        secrets: {
+          secretHeaders: {
+            not: 'relevant',
+          },
+        },
+        isMissingSecrets: false,
+      };
+
+      expect(formDeserializer(formData)).toEqual({
+        actionTypeId: '.gen-ai',
+        config: {
+          headers: [
+            {
+              key: 'foo',
+              type: 'config',
+              value: 'bar',
+            },
+            {
+              key: 'an',
+              type: 'config',
+              value: 'tonio',
+            },
+          ],
+        },
+        __internal__: {
+          headers: [
+            {
+              key: 'foo',
+              type: 'config',
+              value: 'bar',
+            },
+            {
+              key: 'an',
+              type: 'config',
+              value: 'tonio',
+            },
+          ],
+        },
+        isDeprecated: false,
+        isMissingSecrets: false,
+        secrets: {
+          secretHeaders: {
+            not: 'relevant',
+          },
+        },
       });
     });
   });
