@@ -12,24 +12,12 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
-const SEARCH_SESSION_INDICATOR_TEST_SUBJ = 'searchSessionIndicator';
-const SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ = 'searchSessionIndicatorPopoverContainer';
-
 const BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT = 'openBackgroundSearchFlyoutButton';
 const BACKGROUND_SEARCH_SUBMIT_BUTTON = 'querySubmitButton-secondary-button';
 const BACKGROUND_SEARCH_CANCEL_BUTTON = 'queryCancelButton-secondary-button';
 
 export const TOUR_TAKING_TOO_LONG_STEP_KEY = `data.searchSession.tour.takingTooLong`;
 export const TOUR_RESTORE_STEP_KEY = `data.searchSession.tour.restore`;
-
-type SessionStateType =
-  | 'none'
-  | 'loading'
-  | 'completed'
-  | 'backgroundLoading'
-  | 'backgroundCompleted'
-  | 'restored'
-  | 'canceled';
 
 export class SearchSessionsService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -60,34 +48,7 @@ export class SearchSessionsService extends FtrService {
     expect(isDisabled).to.be('true');
   }
 
-  /**
-   * @deprecated
-   */
-  public async expectState(state: SessionStateType, timeout = 10000) {
-    return this.retry.waitForWithTimeout(
-      `searchSessions indicator to get into state = ${state}`,
-      timeout,
-      async () => {
-        const currentState = await (
-          await this.testSubjects.find(SEARCH_SESSION_INDICATOR_TEST_SUBJ)
-        ).getAttribute('data-state');
-        this.log.info(`searchSessions state current: ${currentState} expected: ${state}`);
-        return currentState === state;
-      }
-    );
-  }
-
-  /**
-   * @deprecated
-   */
-  public async viewSearchSessions() {
-    this.log.debug('viewSearchSessions');
-    // await this.ensurePopoverOpened();
-    await this.testSubjects.click('searchSessionIndicatorViewSearchSessionsLink');
-  }
-
   public async save({
-    searchSessionName,
     // Dashboards don't put the split button in the loading state so the selector is different
     withRefresh = false,
     isSubmitButton = false,
@@ -101,15 +62,6 @@ export class SearchSessionsService extends FtrService {
       isSubmitButton ? BACKGROUND_SEARCH_SUBMIT_BUTTON : BACKGROUND_SEARCH_CANCEL_BUTTON
     );
     await this.expectSearchSavedToast();
-
-    if (searchSessionName) {
-      await this.openFlyoutFromToast();
-      // await this.testSubjects.click('searchSessionNameEdit');
-      // await this.testSubjects.setValue('searchSessionNameInput', searchSessionName, {
-      //   clearWithKeyboard: true,
-      // });
-      // await this.testSubjects.click('searchSessionNameSave');
-    }
   }
 
   public async expectSearchSavedToast() {
@@ -134,41 +86,6 @@ export class SearchSessionsService extends FtrService {
 
   public async expectManagementTable() {
     await this.testSubjects.existOrFail('searchSessionsMgmtUiTable');
-  }
-
-  /**
-   * @deprecated
-   */
-  public async cancel() {
-    this.log.debug('cancel the search session');
-    // await this.ensurePopoverOpened();
-    await this.testSubjects.click('searchSessionIndicatorCancelBtn');
-    // await this.ensurePopoverClosed();
-  }
-
-  /**
-   * @deprecated
-   */
-  public async openPopover() {
-    // await this.ensurePopoverOpened();
-  }
-
-  /**
-   * @deprecated
-   */
-  public async openedOrFail() {
-    return this.testSubjects.existOrFail(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ, {
-      timeout: 15000, // because popover auto opens after search takes 10s
-    });
-  }
-
-  /**
-   * @deprecated
-   */
-  public async closedOrFail() {
-    return this.testSubjects.missingOrFail(SEARCH_SESSIONS_POPOVER_CONTENT_TEST_SUBJ, {
-      timeout: 15000, // because popover auto opens after search takes 10s
-    });
   }
 
   /*
