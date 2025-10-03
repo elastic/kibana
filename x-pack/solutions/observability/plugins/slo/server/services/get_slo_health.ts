@@ -59,12 +59,15 @@ export class GetSLOHealth {
                 {
                   sloRevision: { terms: { field: 'slo.revision' } },
                 },
+                {
+                  sloName: { terms: { field: 'slo.name' } },
+                },
               ],
             },
           },
         },
         index: '.slo-observability.summary-*',
-        _source: ['slo.id', 'slo.instanceId', 'slo.revision'],
+        _source: ['slo.id', 'slo.instanceId', 'slo.revision', 'slo.name'],
         ...(params.list?.length && {
           query: {
             bool: {
@@ -119,15 +122,17 @@ export class GetSLOHealth {
 
       return {
         sloId: item.sloId,
-        sloInstanceId: item.sloInstanceId,
         sloRevision: item.sloRevision,
+        sloName: item.sloName,
         state,
         health,
       };
     });
 
     // REVERT FROM TESTING
-    const mappedResults = results; // Array.from(new Map(results.map((item) => [item.sloId, item])).values());
+    const mappedResults = results; /* Array.from(
+      new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
+    ); */
 
     // If a statusFilter is provided, we need to filter the results accordingly.
     // We also need to ensure that we return only unique SLO IDs, as there might be multiple instances.

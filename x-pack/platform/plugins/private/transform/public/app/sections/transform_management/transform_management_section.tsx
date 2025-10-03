@@ -26,7 +26,6 @@ import {
   UrlStateProvider,
   type ListingPageUrlState,
   type PageUrlState,
-  useUrlState,
 } from '@kbn/ml-url-state';
 
 import { useAppDependencies } from '../../app_dependencies';
@@ -108,7 +107,7 @@ export const TransformManagement: FC = () => {
   const styles = useStyles();
   const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
     'transform',
-    useUrlState('_a')?.[0] || getDefaultTransformListState()
+    getDefaultTransformListState()
   );
 
   const {

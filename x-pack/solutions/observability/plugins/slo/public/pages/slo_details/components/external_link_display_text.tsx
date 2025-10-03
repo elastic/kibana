@@ -6,39 +6,31 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
-import kbnRison from '@kbn/rison';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useKibana } from '../../../hooks/use_kibana';
 
-const getTransformUrlQueryState = (transformId: string) => {
-  return kbnRison.encode({
-    queryText: transformId,
-  });
-};
-
-export function TransformDisplayText({
+export function ExternalLinkDisplayText({
   textSize,
-  transformId,
+  content,
+  url,
 }: {
   textSize: 's' | 'xs';
-  transformId: string;
+  content: string;
+  url: string;
 }) {
-  const { http } = useKibana().services;
-
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size={textSize}>{transformId}</EuiText>
+        <EuiText size={textSize}>{content}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink
-          data-test-subj="sloHealthCalloutInspectTransformLink"
-          href={http?.basePath.prepend(
-            `/app/management/data/transform/?_a=${getTransformUrlQueryState(transformId)}`
-          )}
-        >
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiLink data-test-subj="sloHealthCalloutInspectTransformLink" href={url}>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            gutterSize="xs"
+            responsive={false}
+          >
             <EuiFlexItem grow={false}>
               <EuiIcon type="inspect" color="danger" />
             </EuiFlexItem>
@@ -46,7 +38,7 @@ export function TransformDisplayText({
               <EuiText size={textSize} color="danger">
                 <FormattedMessage
                   id="xpack.slo.sloDetails.healthCallout.buttonTransformLabel"
-                  defaultMessage="Inspect transform"
+                  defaultMessage="Inspect"
                 />
               </EuiText>
             </EuiFlexItem>
