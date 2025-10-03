@@ -10,5 +10,4 @@
 export interface ESQLTelemetryCallbacks {
   onDecorationHoverShown?: (hoverMessage: string) => void;
   onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
-  onQueryHistoryOpened: (isOpen: boolean) => void;
 }

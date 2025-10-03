@@ -9,6 +9,7 @@
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
+  ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
 } from './events_registration';
@@ -86,5 +87,9 @@ export class ESQLEditorTelemetryService {
     if (isOpen) {
       this._reportEvent(ESQL_QUERY_HISTORY_OPENED, {});
     }
+  }
+
+  public trackQueryHistoryClicked() {
+    this._reportEvent(ESQL_QUERY_HISTORY_CLICKED, {});
   }
 }
