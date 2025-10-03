@@ -12,7 +12,7 @@ import type {
   ToolEventEmitter,
   ToolEventHandlerFn,
 } from '@kbn/onechat-server';
-import type { InternalToolProgressEvent } from '@kbn/onechat-server/src/events';
+import type { InternalToolProgressEvent } from '@kbn/onechat-server/runner';
 import { ChatEventType } from '@kbn/onechat-common';
 
 /**

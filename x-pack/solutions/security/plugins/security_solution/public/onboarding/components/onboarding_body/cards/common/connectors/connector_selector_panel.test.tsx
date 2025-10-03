@@ -31,7 +31,12 @@ const mockActionTypeRegistry = {
 
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
-    services: { triggersActionsUi: { actionTypeRegistry: mockActionTypeRegistry } },
+    services: {
+      triggersActionsUi: { actionTypeRegistry: mockActionTypeRegistry },
+      settings: {
+        client: { get: jest.fn() },
+      },
+    },
   }),
 }));
 
@@ -60,7 +65,7 @@ describe('ConnectorSelectorPanel', () => {
         onConnectorSelected={onConnectorSelected}
       />
     );
-    await userEvent.click(screen.getByRole('button', { name: /Connector Selector/i }));
+    await userEvent.click(screen.getByTestId('connector-selector'));
     await userEvent.click(screen.getByText('Connector 2'));
     expect(onConnectorSelected).toHaveBeenCalledWith(mockConnectors[1]);
   });

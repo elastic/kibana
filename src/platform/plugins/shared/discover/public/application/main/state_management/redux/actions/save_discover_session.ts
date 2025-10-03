@@ -221,6 +221,6 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       ).unwrap();
     }
 
-    return { discoverSession };
+    return { discoverSession, nextSelectedTabId };
   }
 );
