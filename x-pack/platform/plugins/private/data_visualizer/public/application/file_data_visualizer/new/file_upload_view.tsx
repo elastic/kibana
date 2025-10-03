@@ -124,7 +124,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
             <EuiButton
               disabled={canImport === false}
               onClick={onImportClick}
-              data-test-subj="dataVisualizerImportButton"
+              data-test-subj="fileUploadImportButton"
             >
               <FormattedMessage
                 id="xpack.dataVisualizer.file.uploadView.importButton"

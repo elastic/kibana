@@ -7,11 +7,11 @@
 
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
-import type { MapAttributes } from '../../common/content_management';
 import { extractReferences, injectReferences } from '../../common/migrations/references';
+import type { StoredMapAttributes } from '../saved_objects/types';
 
 export function inject(
-  state: EmbeddableStateWithType & { attributes?: MapAttributes },
+  state: EmbeddableStateWithType & { attributes?: StoredMapAttributes },
   references: Reference[]
 ) {
   // by-reference embeddable
