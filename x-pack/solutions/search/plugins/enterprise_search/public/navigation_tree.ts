@@ -125,8 +125,10 @@ export const getNavigationTreeDefinition = ({
                   link: 'dashboards',
                 },
                 {
+                  badgeTypeV2: 'techPreview',
                   iconV2: agentsIcon,
                   link: 'agent_builder',
+                  withBadge: true,
                 },
                 {
                   badgeOptions: {
