@@ -101,7 +101,9 @@ describe('extractPanelsState', () => {
         },
       ]);
     });
+  });
 
+  describe('8.19', () => {
     test('should migrate panels in sections', () => {
       const { panels } = extractPanelsState({
         panels: [
