@@ -498,8 +498,19 @@ const ESQLEditorInternal = function ESQLEditor({
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
       onSuggestionsWithCustomCommandShown: (commandIds: string[]) =>
         telemetryService.trackSuggestionsWithCustomCommandShown(commandIds),
+      onQueryHistoryOpened: (isOpen: boolean) => {
+        telemetryService.trackQueryHistoryOpened(isOpen);
+      },
     }),
     [telemetryService]
+  );
+
+  const onClickQueryHistory = useCallback(
+    (isOpen: boolean) => {
+      telemetryCallbacks.onQueryHistoryOpened(isOpen);
+      setIsHistoryOpen(isOpen);
+    },
+    [telemetryCallbacks]
   );
 
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
@@ -1105,7 +1116,7 @@ const ESQLEditorInternal = function ESQLEditor({
         hideTimeFilterInfo={hideTimeFilterInfo}
         {...editorMessages}
         isHistoryOpen={isHistoryOpen}
-        setIsHistoryOpen={setIsHistoryOpen}
+        setIsHistoryOpen={onClickQueryHistory}
         isLanguageComponentOpen={isLanguageComponentOpen}
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
