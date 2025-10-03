@@ -16,6 +16,7 @@ import { once } from 'lodash';
 export const ESQL_LOOKUP_JOIN_ACTION_SHOWN = 'esql.lookup_action_shown';
 export const ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN =
   'esql.suggestions_with_custom_command_shown';
+export const ESQL_QUERY_HISTORY_OPENED = 'esql.query_history_opened';
 
 /**
  * Registers the esql editor analytics events.
@@ -65,5 +66,10 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         },
       },
     },
+  });
+
+  analytics.registerEventType({
+    eventType: ESQL_QUERY_HISTORY_OPENED,
+    schema: {},
   });
 });

@@ -9,6 +9,7 @@
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import {
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
+  ESQL_QUERY_HISTORY_OPENED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../custom_commands/use_lookup_index_editor';
@@ -79,5 +80,11 @@ export class ESQLEditorTelemetryService {
       return 'create';
     }
     return commandData.canEditIndex ? 'edit' : 'read';
+  }
+
+  public trackQueryHistoryOpened(isOpen: boolean) {
+    if (isOpen) {
+      this._reportEvent(ESQL_QUERY_HISTORY_OPENED, {});
+    }
   }
 }
