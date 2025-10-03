@@ -64,7 +64,7 @@ export const useLayoutApi = (
 
     return {
       layout$: layout$Ref.current,
-      addNewPanel: <State extends StickyControlState = StickyControlState>(
+      addNewPanel: async <State extends StickyControlState = StickyControlState>(
         panelPackage: PanelPackage<State>
       ) => {
         const { panelType: type, serializedState, maybePanelId } = panelPackage;
@@ -94,7 +94,7 @@ export const useLayoutApi = (
         });
         // return (await getChildApi(uuid)) as ApiType;
       },
-      replacePanel: <State extends StickyControlState = StickyControlState>(
+      replacePanel: async <State extends StickyControlState = StickyControlState>(
         idToRemove: string,
         newPanel: PanelPackage<State>
       ) => {

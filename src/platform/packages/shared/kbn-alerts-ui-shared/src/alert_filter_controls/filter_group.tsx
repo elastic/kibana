@@ -315,12 +315,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
       return {
         initialState,
-        editorConfig: {
-          defaultDataViewId: dataViewId,
-          hideDataViewSelector: true,
-          hideAdditionalSettings: true,
-          fieldFilterPredicate: (f) => f.type !== 'number',
-        },
       } as ControlGroupCreationOptions;
     },
     [dataViewId, selectControlsWithPriority]
@@ -407,8 +401,14 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const addControlsHandler = useCallback(async () => {
     controlGroup?.openAddDataControlFlyout({
       controlStateTransform: newControlStateTransform,
+      editorConfig: {
+        defaultDataViewId: dataViewId ?? undefined,
+        hideDataViewSelector: true,
+        hideAdditionalSettings: true,
+        fieldFilterPredicate: (f) => f.type !== 'number',
+      },
     });
-  }, [controlGroup, newControlStateTransform]);
+  }, [controlGroup, dataViewId, newControlStateTransform]);
 
   if (!spaceId) {
     return <FilterGroupLoading />;

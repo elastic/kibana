@@ -48,7 +48,10 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
 
     timeslice$: PublishingSubject<TimeSlice | undefined>;
 
-    openAddDataControlFlyout: (options?: { controlStateTransform?: ControlStateTransform }) => void;
+    openAddDataControlFlyout: (options?: {
+      controlStateTransform?: ControlStateTransform;
+      editorConfig?: ControlGroupEditorConfig;
+    }) => void;
   };
 
 interface HasEditorConfig {
@@ -89,7 +92,7 @@ export interface ControlGroupRuntimeState<State extends StickyControlState = Sti
 
 export interface ControlGroupCreationOptions {
   initialState?: Partial<ControlGroupRuntimeState>;
-  editorConfig?: ControlGroupEditorConfig;
+  // editorConfig?: ControlGroupEditorConfig;
 }
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;

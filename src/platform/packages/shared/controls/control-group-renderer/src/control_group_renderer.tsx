@@ -11,23 +11,25 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject, combineLatest, map } from 'rxjs';
 
 import { ControlsRenderer } from '@kbn/controls-renderer';
+import type { ControlsRendererParentApi } from '@kbn/controls-renderer/src/types';
 import type { StickyControlState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   apiPublishesUnsavedChanges,
   useSearchApi,
+  type EmbeddableApiContext,
   type ViewMode,
 } from '@kbn/presentation-publishing';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionMeta, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type {
   ControlGroupCreationOptions,
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
   ControlGroupStateBuilder,
+  ControlPanelState,
   ControlPanelsState,
-  ControlStateTransform,
 } from './types';
 import { useChildrenApi } from './use_children_api';
 import { useInitialControlGroupState } from './use_initial_control_group_state';
@@ -112,7 +114,7 @@ export const ControlGroupRenderer = ({
             combinedState[id] = {
               ...currentChildState[id].rawState,
               ...currentLayout.controls[id],
-            };
+            } as ControlPanelState;
           });
           return { initialChildControlState: combinedState };
         })
@@ -151,27 +153,31 @@ export const ControlGroupRenderer = ({
       },
     };
 
+    const openAddDataControlFlyout: ControlGroupRendererApi['openAddDataControlFlyout'] = async (
+      options
+    ) => {
+      const action = await uiActions.getAction('createControl');
+      action.execute({
+        embeddable: {
+          ...publicApi,
+          getEditorConfig: () => {
+            return {
+              ...(options?.editorConfig ?? {}),
+              controlStateTransform: options?.controlStateTransform,
+            };
+          },
+        },
+      } as EmbeddableApiContext & ActionExecutionMeta); // casting because we don't need a trigger for this action
+    };
+
     onApiAvailable({
       ...publicApi,
-      openAddDataControlFlyout: async (options?: {
-        controlStateTransform?: ControlStateTransform;
-      }) => {
-        const action = await uiActions.getAction('createControl');
-        action.execute({
-          embeddable: {
-            ...publicApi,
-            getEditorConfig: () => {
-              return {
-                ...(initialState?.editorConfig ?? {}),
-                controlStateTransform: options?.controlStateTransform,
-              };
-            },
-          },
-        });
-      },
+      openAddDataControlFlyout,
     } as unknown as ControlGroupRendererApi);
-  }, [initialState?.editorConfig, parentApi, onApiAvailable, input$, uiActions]);
+  }, [parentApi, onApiAvailable, input$, uiActions]);
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
-  return !parentApi ? null : <ControlsRenderer parentApi={parentApi} />;
+  return !parentApi ? null : (
+    <ControlsRenderer parentApi={parentApi as ControlsRendererParentApi} />
+  );
 };

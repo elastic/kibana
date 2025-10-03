@@ -26,6 +26,8 @@ import {
 } from '@kbn/presentation-containers';
 import {
   apiAppliesFilters,
+  apiHasSerializableState,
+  apiHasUniqueId,
   type AppliesFilters,
   type SerializedPanelState,
 } from '@kbn/presentation-publishing';
@@ -36,18 +38,18 @@ export const useChildrenApi = (
   state: ControlGroupCreationOptions | undefined,
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
 ) => {
-  const children$Ref = useRef(new BehaviorSubject<{ [id: string]: DefaultEmbeddableApi }>({}));
+  const children$Ref = useRef(new BehaviorSubject<{ [id: string]: unknown }>({}));
   const currentChildState$Ref = useRef(
-    new BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>({})
+    new BehaviorSubject<{ [id: string]: SerializedPanelState }>({})
   );
   const lastSavedChildState$Ref = useRef(
-    new BehaviorSubject<{ [id: string]: SerializedPanelState<object> }>({}) // derived from lastSavedState$Ref
+    new BehaviorSubject<{ [id: string]: SerializedPanelState }>({}) // derived from lastSavedState$Ref
   );
 
   useEffect(() => {
     /** Derive `lastSavedChildState$Ref` from `lastSavedState$Ref` */
     const lastSavedStateSubscription = lastSavedState$Ref.current.subscribe((lastSavedState) => {
-      const serializedState: { [id: string]: SerializedPanelState<object> } = {};
+      const serializedState: { [id: string]: SerializedPanelState } = {};
       Object.entries(lastSavedState).forEach(([id, control]) => {
         serializedState[id] = { rawState: omit(control, ['grow', 'width', 'order']) };
       });
@@ -66,12 +68,12 @@ export const useChildrenApi = (
       .pipe(map((children) => children.some(({ hasUnsavedChanges }) => hasUnsavedChanges)))
       .subscribe((hasUnsavedChanges) => {
         if (hasUnsavedChanges) {
-          const result = Object.values(children$Ref.current.getValue()).reduce((prev, child) => {
-            return {
-              ...prev,
-              [child.uuid]: child.serializeState(),
-            };
-          }, {});
+          const result: { [id: string]: SerializedPanelState } = {};
+          Object.values(children$Ref.current.getValue()).forEach((child) => {
+            if (apiHasSerializableState(child) && apiHasUniqueId(child)) {
+              result[child.uuid] = child.serializeState();
+            }
+          });
           currentChildState$Ref.current.next(result);
         }
       });

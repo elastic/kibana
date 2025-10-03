@@ -110,7 +110,7 @@ export function initializeLayoutManager(
       // filter out panels that are in collapsed sections, since the APIs will never be available
       const expectedChildCount =
         Object.values(layout.panels).filter((panel) => {
-          return panel.gridData.sectionId ? !isSectionCollapsed(panel.gridData.sectionId) : true;
+          return panel.grid.sectionId ? !isSectionCollapsed(panel.grid.sectionId) : true;
         }).length + Object.values(layout.controls).length;
 
       const currentChildCount = Object.keys(children).length;
