@@ -79,6 +79,11 @@ const createMsDefenderClientConstructorOptionsMock = () => {
 const createMsConnectorActionsClientMock = (): ActionsClientMock => {
   const client = responseActionsClientMock.createConnectorActionsClient();
 
+  /**
+   * Tracks the last runscript action to enable dynamic mock responses.
+   * When GET_ACTIONS is called with a matching action ID, the mock returns
+   * the captured script details to simulate MDE's behavior.
+   */
   const lastAction = {
     lastRunScriptActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e',
     lastRunScriptScriptName: 'test-script.ps1',

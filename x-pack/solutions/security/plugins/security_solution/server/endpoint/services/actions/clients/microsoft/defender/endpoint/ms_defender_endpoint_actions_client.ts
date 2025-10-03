@@ -25,6 +25,7 @@ import { groupBy } from 'lodash';
 import type { Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import pRetry from 'p-retry';
+import { v4 as uuidv4 } from 'uuid';
 import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
@@ -85,6 +86,13 @@ export interface ActionValidationResult {
 
 export type MicrosoftDefenderActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
+};
+
+const MDE_ACTION_FETCH_RETRY_CONFIG = {
+  retries: 5,
+  minTimeout: 300,
+  maxTimeout: 1500,
+  factor: 1.5,
 };
 
 export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClientImpl {
@@ -433,7 +441,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     if (!actionDetails.requestorComment?.includes(expectedActionId)) {
       return {
         isValid: false,
-        error: `Cannot run script '${actualScriptName}' because an identical script is already in progress on this host. Please wait for the current script to complete or cancel it before trying again.`,
+        error: `Cannot run script '${actualScriptName}' because an identical script is already in progress on this host (MDE action ID: ${actionDetails.id}). Please wait for the current script to complete or cancel it before trying again.`,
       };
     }
 
@@ -441,7 +449,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     if (actualScriptName !== expectedScriptName) {
       return {
         isValid: false,
-        error: `Cannot run script '${expectedScriptName}' because another script ('${actualScriptName}') is already in progress on this host. Please wait for the current script to complete or cancel it before trying again.`,
+        error: `Cannot run script '${expectedScriptName}' because another script ('${actualScriptName}') is already in progress on this host (MDE action ID: ${actionDetails.id}). Please wait for the current script to complete or cancel it before trying again.`,
       };
     }
 
@@ -499,10 +507,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           return action;
         },
         {
-          retries: 5,
-          minTimeout: 300,
-          maxTimeout: 1500,
-          factor: 1.5,
+          ...MDE_ACTION_FETCH_RETRY_CONFIG,
           onFailedAttempt: (error) => {
             this.log.debug(
               `Attempt ${error.attemptNumber} to fetch MDE action [${machineActionId}] failed. ${error.retriesLeft} retries left. [ERROR: ${error.message}]`
@@ -774,11 +779,17 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
             );
           }
 
+          // Ensure actionId is set for validation. While buildExternalComment() should have already
+          // set it via side effect, TypeScript doesn't track this, and defensive programming dictates
+          // we guarantee it exists.
+          if (!reqIndexOptions.actionId) {
+            reqIndexOptions.actionId = uuidv4();
+          }
+
           const mdeActionValidation = await this.fetchAndValidateRunscriptActionDetails(
             machineActionId,
             scriptName,
-            // actionId is guaranteed to be set by buildExternalComment() above
-            reqIndexOptions.actionId as string
+            reqIndexOptions.actionId
           );
 
           if (!mdeActionValidation.isValid) {
