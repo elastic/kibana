@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { AnalyticsServiceStart } from '@kbn/core/server';
-import { ESQL_LOOKUP_JOIN_ACTION_SHOWN } from './events_registration';
+import {
+  ESQL_LOOKUP_JOIN_ACTION_SHOWN,
+  ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
+} from './events_registration';
 import type { IndexEditorCommandArgs } from '../custom_commands/use_lookup_index_editor';
 import { COMMAND_ID as LOOKUP_INDEX_EDITOR_COMMAND } from '../custom_commands/use_lookup_index_editor';
 
@@ -63,6 +66,12 @@ export class ESQLEditorTelemetryService {
         highest_privilege: commandData.highestPrivilege,
       });
     }
+  }
+
+  public trackSuggestionsWithCustomCommandShown(commandIds: string[]) {
+    this._reportEvent(ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN, {
+      command_ids: commandIds,
+    });
   }
 
   private _determineTriggerAction(commandData: IndexEditorCommandArgs): string {
