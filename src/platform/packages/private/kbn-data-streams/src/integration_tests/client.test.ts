@@ -25,8 +25,8 @@ describe('DataStreamClient', () => {
   }
   const testDataStream: DataStreamDefinition<MyTestDoc> = {
     name: 'test-data-stream',
+    version: 1,
     template: {
-      version: 1,
       mappings: {
         properties: {
           '@timestamp': mappings.date(),
@@ -144,7 +144,7 @@ describe('DataStreamClient', () => {
         DataStreamClient.initialize({
           logger,
           elasticsearchClient: esServer.getClient(),
-          dataStreams: { ...testDataStream, template: { ...testDataStream.template, version: 0 } },
+          dataStreams: { ...testDataStream, version: 0 },
         })
       ).rejects.toThrow('Template version must be greater than 0');
     });
@@ -221,8 +221,8 @@ describe('DataStreamClient', () => {
 
       const nextDefinition: DataStreamDefinition<MyTestDoc & { newField: string }> = {
         ...testDataStream,
+        version: 2,
         template: {
-          version: 2,
           mappings: {
             ...testDataStream.template.mappings,
             properties: {
@@ -301,9 +301,9 @@ describe('DataStreamClient', () => {
         elasticsearchClient,
         dataStreams: {
           ...testDataStream,
+          version: 1, // same version as initial deployment
           template: {
             ...testDataStream.template,
-            version: 1, // same version as initial deployment
             mappings: { properties: { somethingElse: mappings.text() } as any }, // some new mappings
           },
         },

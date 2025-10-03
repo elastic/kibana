@@ -93,6 +93,12 @@ export interface DataStreamDefinition<
   hidden?: boolean;
 
   /**
+   * @remark Must be **incremented** in order to release a new version of the template definition.
+   * @remark Must be greater than 0
+   */
+  version: number;
+
+  /**
    * The index template definition for the data stream.
    *
    * This template definition corresponds to types from ES:
@@ -101,12 +107,6 @@ export interface DataStreamDefinition<
    *  - api.IndicesIndexTemplateSummary
    */
   template: Pick<api.IndicesIndexTemplateSummary, 'aliases'> & {
-    /**
-     * @remark Must be **incremented** in order to release a new version of the template definition.
-     * @remark Must be greater than 0
-     */
-    version: number;
-
     /** @default 100 */
     priority?: number;
 

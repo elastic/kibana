@@ -50,7 +50,7 @@ export async function initialize({
     }
   }
 
-  const version = dataStreams.template.version;
+  const version = dataStreams.version;
   const previousVersions: number[] = [];
   dataStreams = applyDefaults(dataStreams);
 
@@ -58,7 +58,7 @@ export async function initialize({
     const deployedVersion = existingIndexTemplate.index_template?._meta?.version;
     invariant(
       typeof deployedVersion === 'number' && deployedVersion > 0,
-      `Datastream metadata is in an unexpected state, expected version to be a number but got ${typeof deployedVersion}`
+      `Datastream metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
     );
 
     if (deployedVersion >= version) {

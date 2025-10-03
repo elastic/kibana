@@ -10,7 +10,7 @@
 import type { DataStreamClientArgs } from './client';
 
 export function validateClientArgs(args: DataStreamClientArgs<any, any>) {
-  if (args.dataStreams.template.version <= 0) {
+  if (args.dataStreams.version <= 0) {
     throw new Error('Template version must be greater than 0');
   }
 }
