@@ -536,4 +536,32 @@ describe('ManualInstructions', () => {
       );
     });
   });
+
+  describe('With fleetServerHost SSL config', () => {
+    const result = ManualInstructions({
+      apiKey: 'APIKEY',
+      fleetServerHost: 'https://testhost',
+      agentVersion: '9.0.0',
+      fleetServerHostConfig: {
+        id: 'fleet-server',
+        name: 'fleet-server',
+        is_preconfigured: false,
+        is_default: true,
+        host_urls: ['https://testhost'],
+        ssl: {
+          agent_certificate_authorities: ['ca.crt'],
+          agent_certificate: 'agent.crt',
+        },
+      },
+    });
+
+    it('should return instructions for linux_aarch64', async () => {
+      expect(result.linux_aarch64.split('\n')).toEqual([
+        'curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-linux-arm64.tar.gz ',
+        '  tar xzvf elastic-agent-9.0.0-linux-arm64.tar.gz',
+        '  cd elastic-agent-9.0.0-linux-arm64',
+        '  sudo ./elastic-agent install --url=https://testhost --enrollment-token=APIKEY --certificate-authorities=ca.crt --elastic-agent-cert=agent.crt --elastic-agent-cert-key=PATH_TO_ELASTIC_AGENT_CERT_KEY',
+      ]);
+    });
+  });
 });
