@@ -70,12 +70,16 @@ export async function getESQLQueryColumnsRaw({
   esqlQuery,
   search,
   signal,
+  filter,
+  dropNullColumns,
   timeRange,
   variables,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
+  dropNullColumns?: boolean;
+  filter?: unknown;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
 }): Promise<ESQLColumn[]> {
@@ -85,7 +89,9 @@ export async function getESQLQueryColumnsRaw({
       search(
         {
           params: {
+            ...(filter ? { filter } : {}),
             query: `${esqlQuery} | limit 0`,
+            ...(dropNullColumns ? { dropNullColumns: true } : {}),
             ...(namedParams.length ? { params: namedParams } : {}),
           },
         },
@@ -113,12 +119,16 @@ export async function getESQLQueryColumns({
   esqlQuery,
   search,
   signal,
+  filter,
+  dropNullColumns,
   timeRange,
   variables,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
   signal?: AbortSignal;
+  filter?: unknown;
+  dropNullColumns?: boolean;
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
 }): Promise<DatatableColumn[]> {
@@ -126,6 +136,8 @@ export async function getESQLQueryColumns({
     const rawColumns = await getESQLQueryColumnsRaw({
       esqlQuery,
       search,
+      filter,
+      dropNullColumns,
       signal,
       timeRange,
       variables,

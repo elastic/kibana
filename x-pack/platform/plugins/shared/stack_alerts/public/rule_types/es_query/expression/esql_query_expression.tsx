@@ -19,10 +19,12 @@ import {
 } from '@elastic/eui';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
+import { type DataPublicPluginStart, getEsQueryConfig } from '@kbn/data-plugin/public';
+import { getTime } from '@kbn/data-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import { fetchFieldsFromESQL } from '@kbn/esql-editor';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import type { AggregateQuery } from '@kbn/es-query';
+import { getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
+import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   firstFieldOption,
@@ -44,6 +46,21 @@ import {
   getEsqlQueryHits,
   ALERT_ID_SUGGESTED_MAX,
 } from '../../../../common';
+
+const getTimeFilter = (
+  queryService: DataPublicPluginStart['query'],
+  uiSettings: IUiSettingsClient,
+  timeFieldName?: string
+) => {
+  const esQueryConfigs = getEsQueryConfig(uiSettings);
+  const timeFilter =
+    queryService.timefilter.timefilter.getTime() &&
+    getTime(undefined, queryService.timefilter.timefilter.getTime(), {
+      fieldName: timeFieldName,
+    });
+
+  return buildEsQuery(undefined, [], [...(timeFilter ? [timeFilter] : [])], esQueryConfigs);
+};
 
 const ALL_DOCUMENTS = 'all';
 const alertingOptions = [
@@ -88,8 +105,8 @@ const keepRecommendedWarning = i18n.translate(
 
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors }) => {
-  const { expressions, http, isServerless, dataViews } = useTriggerUiActionServices();
+> = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
+  const { http, isServerless, dataViews, uiSettings } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
 
@@ -191,19 +208,19 @@ export const EsqlQueryExpression: React.FC<
     setIsLoading(true);
     const timeWindow = parseDuration(window);
     const now = Date.now();
-    const table = await fetchFieldsFromESQL(
-      esqlQuery,
-      expressions,
-      {
+    const timeFilter = getTimeFilter(data.query, uiSettings, timeField);
+    const table = await getESQLResults({
+      esqlQuery: esqlQuery.esql,
+      search: data.search.search,
+      dropNullColumns: true,
+      timeRange: {
         from: new Date(now - timeWindow).toISOString(),
         to: new Date(now).toISOString(),
       },
-      undefined,
-      // create a data view with the timefield to pass into the query
-      timeField
-    );
-    if (table) {
-      const esqlTable = transformDatatableToEsqlTable(table);
+      filter: timeFilter,
+    });
+    if (table.response) {
+      const esqlTable = transformDatatableToEsqlTable(table.response);
       const { results, duplicateAlertIds, longAlertIds, rows, cols } = await getEsqlQueryHits(
         esqlTable,
         esqlQuery.esql,
@@ -236,7 +253,9 @@ export const EsqlQueryExpression: React.FC<
     timeWindowUnit,
     currentRuleParams,
     esqlQuery,
-    expressions,
+    data.query,
+    uiSettings,
+    data.search.search,
     timeField,
     isServerless,
     groupBy,

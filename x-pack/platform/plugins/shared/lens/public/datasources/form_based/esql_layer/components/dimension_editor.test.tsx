@@ -6,15 +6,16 @@
  */
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TextBasedDimensionEditorProps } from './dimension_editor';
 import { TextBasedDimensionEditor } from './dimension_editor';
 
-// Mock fetchFieldsFromESQL
-jest.mock('@kbn/esql-editor', () => ({
-  fetchFieldsFromESQL: jest.fn(),
+// Mock getESQLQueryColumns
+jest.mock('@kbn/esql-utils', () => ({
+  getESQLQueryColumns: jest.fn(),
 }));
 
-const { fetchFieldsFromESQL } = jest.requireMock('@kbn/esql-editor');
+const { getESQLQueryColumns } = jest.requireMock('@kbn/esql-utils');
 
 describe('TextBasedDimensionEditor', () => {
   const defaultProps = {
@@ -34,7 +35,7 @@ describe('TextBasedDimensionEditor', () => {
     setState: jest.fn(),
     indexPatterns: {},
     dateRange: { fromDate: '2023-01-01', toDate: '2023-01-31' },
-    expressions: {},
+    data: dataPluginMock.createStartContract(),
     esqlVariables: [
       {
         key: 'agent_keyword',
@@ -51,28 +52,27 @@ describe('TextBasedDimensionEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    fetchFieldsFromESQL.mockResolvedValue({
-      columns: [
-        { id: 'field1', name: 'Field One', meta: { type: 'string' } },
-        { id: 'field2', name: 'Field Two', meta: { type: 'number' } },
-      ],
-    });
+    getESQLQueryColumns.mockResolvedValue([
+      { id: 'field1', name: 'Field One', meta: { type: 'string' } },
+      { id: 'field2', name: 'Field Two', meta: { type: 'number' } },
+    ]);
   });
 
   it('renders correctly and fetches columns on mount', async () => {
     render(<TextBasedDimensionEditor {...defaultProps} />);
 
-    // Check if fetchFieldsFromESQL was called
+    // Check if getESQLQueryColumns was called
     await waitFor(() => {
-      expect(fetchFieldsFromESQL).toHaveBeenCalledTimes(1);
-      expect(fetchFieldsFromESQL).toHaveBeenCalledWith(
-        { esql: 'FROM my_data | limit 0' },
-        {},
-        { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },
-        undefined,
-        undefined, // No index patterns
-        defaultProps.esqlVariables
-      );
+      expect(getESQLQueryColumns).toHaveBeenCalledTimes(1);
+      expect(getESQLQueryColumns).toHaveBeenCalledWith({
+        esqlQuery: 'FROM my_data',
+        search: defaultProps.data.search.search,
+        timeRange: { from: defaultProps.dateRange.fromDate, to: defaultProps.dateRange.toDate },
+        signal: expect.any(AbortSignal),
+        variables: defaultProps.esqlVariables,
+        dropNullColumns: true,
+        filter: undefined,
+      });
     });
 
     expect(screen.getByTestId('text-based-dimension-field')).toBeInTheDocument();
