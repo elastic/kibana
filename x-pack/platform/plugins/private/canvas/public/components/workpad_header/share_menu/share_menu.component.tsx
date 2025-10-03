@@ -13,7 +13,6 @@ import { PDF, JSON } from '../../../../i18n/constants';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import type { ClosePopoverFn } from '../../popover';
 import { Popover } from '../../popover';
-import { ShareWebsiteFlyout } from './flyout';
 
 const strings = {
   getShareDownloadJSONTitle: () =>
