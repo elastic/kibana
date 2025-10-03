@@ -7060,10 +7060,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/page-attachment-schema@link:x-pack/platform/packages/shared/kbn-page-attachment-schema":
-  version "0.0.0"
-  uid ""
-
 "@kbn/painless-lab-plugin@link:x-pack/platform/plugins/private/painless_lab":
   version "0.0.0"
   uid ""
@@ -8689,10 +8685,6 @@
   uid ""
 
 "@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
-  version "0.0.0"
-  uid ""
-
-"@kbn/workflows-plugin-example@link:examples/workflows":
   version "0.0.0"
   uid ""
 
