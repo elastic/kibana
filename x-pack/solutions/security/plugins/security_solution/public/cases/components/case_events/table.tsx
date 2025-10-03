@@ -109,6 +109,11 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
     itemsPerPage,
   });
 
+  // NOTE: sorting change resets pagination
+  useEffect(() => {
+    setCurrentPageIndex(0);
+  }, [sort]);
+
   const leadingControlColumns = useMemo(
     () =>
       getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT).map((column, i) => ({
@@ -134,6 +139,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
           return (
             <RowAction
+              key={column.id}
               columnId={column.id ?? ''}
               columnHeaders={defaultHeaders}
               controlColumn={controlColumns[i]}
