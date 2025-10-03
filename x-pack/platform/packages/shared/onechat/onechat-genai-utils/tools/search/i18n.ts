@@ -36,7 +36,7 @@ export const progressMessages = {
   },
   performingNlSearch: ({ query }: { query: string }) => {
     return i18n.translate('xpack.onechat.tools.search.progress.performingTextSearch', {
-      defaultMessage: 'Generating an ES|QL for "{query}"',
+      defaultMessage: 'Generating an ES|QL query for "{query}"',
       values: {
         query,
       },

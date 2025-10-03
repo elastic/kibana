@@ -8,32 +8,15 @@
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorFieldLabel } from '../common/field_label';
-import { IndicatorValueActions } from './indicator_value_actions';
-
-/**
- * Show actions wrapper on hover. This is a helper component, limited only to Block
- */
-const VisibleOnHover = euiStyled.div`
-  ${({ theme }) => css`
-    & {
-      height: 100%;
-    }
-
-    & .actionsWrapper {
-      visibility: hidden;
-      display: inline-block;
-      margin-inline-start: ${theme.eui.euiSizeS};
-    }
-
-    &:hover .actionsWrapper {
-      visibility: visible;
-    }
-  `}
-`;
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+} from '../../../../../common/components/cell_actions';
+import { getIndicatorFieldAndValue } from '../../utils/field_value';
 
 const panelProps = {
   color: 'subdued' as const,
@@ -56,24 +39,23 @@ export const IndicatorBlock: FC<IndicatorBlockProps> = ({
   indicator,
   'data-test-subj': dataTestSubj,
 }) => {
+  const { key, value } = getIndicatorFieldAndValue(indicator, field);
+
   return (
-    <EuiPanel {...panelProps}>
-      <VisibleOnHover data-test-subj={`${dataTestSubj}Item`}>
+    <EuiPanel {...panelProps} data-test-subj={`${dataTestSubj}Item`}>
+      <SecurityCellActions
+        data={{ field: key, value }}
+        mode={CellActionsMode.HOVER_DOWN}
+        triggerId={SecurityCellActionsTrigger.DEFAULT}
+      >
         <EuiText>
           <IndicatorFieldLabel field={field} />
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText size="s">
           <IndicatorFieldValue indicator={indicator} field={field} />
-          <span className="actionsWrapper">
-            <IndicatorValueActions
-              indicator={indicator}
-              field={field}
-              data-test-subj={dataTestSubj}
-            />
-          </span>
         </EuiText>
-      </VisibleOnHover>
+      </SecurityCellActions>
     </EuiPanel>
   );
 };

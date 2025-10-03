@@ -18,6 +18,7 @@ export const getEndpointSecurityPolicyManager: () => Omit<Role, 'name'> = () => 
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
+          // Why was this changed to siemV3?
           [SECURITY_FEATURE_ID]: [
             'all',
 
@@ -50,7 +51,7 @@ export const getEndpointSecurityPolicyManagementReadRole: () => Omit<Role, 'name
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          [SECURITY_FEATURE_ID]: ['all', 'policy_management_read'],
+          [SECURITY_FEATURE_ID]: ['all', 'policy_management_read'], // Why was this changed to siemV3?
           securitySolutionTimeline: ['all'],
           securitySolutionNotes: ['all'],
         },

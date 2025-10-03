@@ -18,6 +18,7 @@ import { generateHistoryMock } from '../../../common/utils/route/mocks';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../common/components/user_privileges/user_privileges_context';
+import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
 
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../common/utils/route/mocks');
@@ -48,6 +49,8 @@ jest.mock('@kbn/i18n-react', () => {
 jest.mock('../../../detections/containers/detection_engine/lists/use_lists_config', () => ({
   useListsConfig: jest.fn().mockReturnValue({ loading: false }),
 }));
+
+jest.mock('../../hooks/use_endpoint_exceptions_capability');
 
 describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();
@@ -90,6 +93,8 @@ describe('SharedLists', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
     });
+
+    (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(true);
   });
 
   it('renders empty view if no lists exist', async () => {
@@ -196,6 +201,18 @@ describe('SharedLists', () => {
     });
   });
 
+  it('disables the "endpoint_list" overflow card button when user is restricted to only READ Endpoint Exceptions', async () => {
+    (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(false);
+
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+    const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    expect(allMenuActions[0]).toBeDisabled();
+  });
+
   it('renders delete option as disabled if list is "endpoint_list"', async () => {
     const wrapper = render(
       <TestProviders>
@@ -211,7 +228,7 @@ describe('SharedLists', () => {
     });
   });
 
-  it('renders delete option as disabled if user is read only', async () => {
+  it('renders overflow card button as disabled if user is read only', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: { read: true, edit: false },
@@ -223,13 +240,6 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
-    fireEvent.click(allMenuActions[1]);
-
-    await waitFor(() => {
-      const allDeleteActions = wrapper.queryAllByTestId('sharedListOverflowCardActionItemDelete');
-      expect(allDeleteActions).toEqual([]);
-      const allExportActions = wrapper.queryAllByTestId('sharedListOverflowCardActionItemExport');
-      expect(allExportActions).toEqual([]);
-    });
+    expect(allMenuActions[1]).toBeDisabled();
   });
 });

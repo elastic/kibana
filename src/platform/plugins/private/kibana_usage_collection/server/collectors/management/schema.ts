@@ -110,6 +110,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableEsqlRiskScoring': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:defaultAnomalyScore': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
@@ -660,6 +664,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable the new logs overview component.',
     },
   },
+  'cases:incrementalIdDisplay:enabled': {
+    type: 'boolean',
+    _meta: {
+      description: 'Display the incremental id of a case in the relevant pages',
+    },
+  },
   'observability:streamsEnableSignificantEvents': {
     type: 'boolean',
     _meta: {
@@ -670,6 +680,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable Group streams in Streams',
+    },
+  },
+  'observability:streamsEnableContentPacks': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Content packs in Streams',
     },
   },
   'observability:enableDiagnosticMode': {

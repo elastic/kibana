@@ -143,7 +143,20 @@
     ],
     "functions": [],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-common",
+        "id": "def-common.ReindexStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "ReindexStatus",
+        "description": [],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/upgrade-assistant-pkg-common",

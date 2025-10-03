@@ -98,6 +98,7 @@ export async function getDataStreamDetails({
         canManageFailureStore: dataStreamPrivileges[MANAGE_FAILURE_STORE_PRIVILEGE],
       },
       customRetentionPeriod: esDataStream?.customRetentionPeriod,
+      defaultRetentionPeriod: esDataStream?.defaultRetentionPeriod,
     };
   } catch (e) {
     // Respond with empty object if data stream does not exist

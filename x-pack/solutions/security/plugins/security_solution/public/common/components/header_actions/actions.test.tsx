@@ -128,49 +128,6 @@ describe('Actions', () => {
         rulesPrivileges: { read: true, edit: true },
       });
     });
-    test('it disables for eventType=raw', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
-      ).toBe(true);
-    });
-
-    test('it enables for eventType=signal', () => {
-      const ecsData = {
-        ...mockTimelineData[0].ecs,
-        kibana: { alert: { rule: { uuid: ['123'], parameters: {} } } },
-      };
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} ecsData={ecsData} />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
-      ).toBe(false);
-    });
-
-    test('it disables for event.kind: undefined and agent.type: endpoint', () => {
-      const ecsData = {
-        ...mockTimelineData[0].ecs,
-        agent: { type: ['endpoint'] },
-      };
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} ecsData={ecsData} />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
-      ).toBe(true);
-    });
 
     test('it enables for event.kind: event and agent.type: endpoint', () => {
       const ecsData = {
@@ -187,23 +144,6 @@ describe('Actions', () => {
       expect(
         wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
       ).toBe(false);
-    });
-
-    test('it disables for event.kind: alert and agent.type: endpoint', () => {
-      const ecsData = {
-        ...mockTimelineData[0].ecs,
-        event: { kind: ['alert'] },
-        agent: { type: ['endpoint'] },
-      };
-      const wrapper = mount(
-        <TestProviders>
-          <Actions {...defaultProps} ecsData={ecsData} />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find('[data-test-subj="timeline-context-menu-button"]').first().prop('isDisabled')
-      ).toBe(true);
     });
 
     test('it shows the analyze event button when the event is from an endpoint', () => {

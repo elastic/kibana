@@ -33,13 +33,13 @@ import { addSubFeatureReplacements } from '../../utils';
 const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
   [SecuritySubFeatureId.endpointList]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.workflowInsights]: [{ feature: SECURITY_FEATURE_ID_V5 }],
-  [SecuritySubFeatureId.endpointExceptions]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.globalArtifactManagement]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.trustedApplications]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.trustedDevices]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.hostIsolationExceptionsBasic]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.blocklist]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.eventFilters]: [{ feature: SECURITY_FEATURE_ID_V5 }],
+  [SecuritySubFeatureId.endpointExceptions]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.policyManagement]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.responseActionsHistory]: [{ feature: SECURITY_FEATURE_ID_V5 }],
   [SecuritySubFeatureId.hostIsolation]: [{ feature: SECURITY_FEATURE_ID_V5 }],
@@ -67,7 +67,6 @@ export const getSecurityV3SubFeaturesMap = ({
   const securitySubFeaturesList: Array<[SecuritySubFeatureId, SubFeatureConfig]> = [
     [SecuritySubFeatureId.endpointList, endpointListSubFeature()],
     [SecuritySubFeatureId.workflowInsights, workflowInsightsSubFeature()],
-    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [
       SecuritySubFeatureId.globalArtifactManagement,
       globalArtifactManagementSubFeature(experimentalFeatures),
@@ -77,6 +76,7 @@ export const getSecurityV3SubFeaturesMap = ({
     [SecuritySubFeatureId.hostIsolationExceptionsBasic, hostIsolationExceptionsBasicSubFeature()],
     [SecuritySubFeatureId.blocklist, blocklistSubFeature()],
     [SecuritySubFeatureId.eventFilters, eventFiltersSubFeature()],
+    [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [SecuritySubFeatureId.policyManagement, policyManagementSubFeature()],
     [SecuritySubFeatureId.responseActionsHistory, responseActionsHistorySubFeature()],
     [SecuritySubFeatureId.hostIsolation, hostIsolationSubFeature()],
@@ -105,9 +105,6 @@ export const getSecurityV3SubFeaturesMap = ({
   );
 
   // Remove disabled experimental features
-  if (!experimentalFeatures.defendInsights) {
-    securitySubFeaturesMap.delete(SecuritySubFeatureId.workflowInsights);
-  }
   if (!experimentalFeatures.trustedDevices) {
     securitySubFeaturesMap.delete(SecuritySubFeatureId.trustedDevices);
   }

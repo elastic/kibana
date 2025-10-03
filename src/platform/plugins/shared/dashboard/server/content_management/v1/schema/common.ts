@@ -10,7 +10,8 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { SortDirection } from '@kbn/data-plugin/common/search';
-import { FilterStateStore } from '@kbn/es-query';
+import { referenceSchema } from '@kbn/content-management-utils';
+import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -25,15 +26,6 @@ const apiError = schema.object({
   statusCode: schema.number(),
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
-
-export const referenceSchema = schema.object(
-  {
-    name: schema.string(),
-    type: schema.string(),
-    id: schema.string(),
-  },
-  { unknowns: 'forbid' }
-);
 
 export const panelGridDataSchema = schema.object({
   x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
@@ -57,15 +49,20 @@ export const panelGridDataSchema = schema.object({
 });
 
 export const panelSchema = schema.object({
-  panelConfig: schema.object(
+  config: schema.object(
     {},
     {
       unknowns: 'allow',
     }
   ),
   type: schema.string({ meta: { description: 'The embeddable type' } }),
-  gridData: panelGridDataSchema,
-  panelIndex: schema.maybe(
+  grid: panelGridDataSchema,
+  /**
+   * `uid` was chosen as a name instead of `id` to avoid bwc issues with legacy dashboard URL state that used `id` to
+   * represent ids of library items in by-reference panels. This was previously called `panelIndex` in DashboardPanelState.
+   * In the stored object, `uid` continues to map to `panelIndex`.
+   */
+  uid: schema.maybe(
     schema.string({
       meta: { description: 'The unique ID of the panel.' },
     })
@@ -74,7 +71,7 @@ export const panelSchema = schema.object({
     schema.string({
       meta: {
         description:
-          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (panelConfig in this type).",
+          "The version was used to store Kibana version information from versions 7.3.0 -> 8.11.0. As of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the embeddable's input. (config in this type).",
         deprecated: true,
       },
     })
@@ -100,7 +97,7 @@ export const sectionSchema = schema.object({
       defaultValue: false,
     })
   ),
-  gridData: sectionGridDataSchema,
+  grid: sectionGridDataSchema,
   panels: schema.arrayOf(panelSchema, {
     meta: { description: 'The panels that belong to the section.' },
     defaultValue: [],
@@ -108,23 +105,23 @@ export const sectionSchema = schema.object({
 });
 
 const dashboardPanels = {
-  // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
+  // Responses always include the panel index (for panels) and grid.i (for panels + sections)
   panels: schema.arrayOf(
     schema.oneOf([
       panelSchema.extends({
-        panelIndex: schema.string(),
-        gridData: panelGridDataSchema.extends({
+        uid: schema.string(),
+        grid: panelGridDataSchema.extends({
           i: schema.string(),
         }),
       }),
       sectionSchema.extends({
-        gridData: sectionGridDataSchema.extends({
+        grid: sectionGridDataSchema.extends({
           i: schema.string(),
         }),
         panels: schema.arrayOf(
           panelSchema.extends({
-            panelIndex: schema.string(),
-            gridData: panelGridDataSchema.extends({
+            uid: schema.string(),
+            grid: panelGridDataSchema.extends({
               i: schema.string(),
             }),
           })
@@ -167,60 +164,6 @@ export const optionsSchema = schema.object({
     meta: {
       description: 'Synchronize cursor position between related panels in the dashboard.',
     },
-  }),
-});
-
-export const filterSchema = schema.object(
-  {
-    meta: schema.object(
-      {
-        alias: schema.maybe(schema.nullable(schema.string())),
-        disabled: schema.maybe(schema.boolean()),
-        negate: schema.maybe(schema.boolean()),
-        controlledBy: schema.maybe(schema.string()),
-        group: schema.maybe(schema.string()),
-        index: schema.maybe(schema.string()),
-        isMultiIndex: schema.maybe(schema.boolean()),
-        type: schema.maybe(schema.string()),
-        key: schema.maybe(schema.string()),
-        params: schema.maybe(schema.any()),
-        field: schema.maybe(schema.string()),
-      },
-      { unknowns: 'allow' }
-    ),
-    query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-    $state: schema.maybe(
-      schema.object({
-        store: schema.oneOf(
-          [
-            schema.literal(FilterStateStore.APP_STATE),
-            schema.literal(FilterStateStore.GLOBAL_STATE),
-          ],
-          {
-            meta: {
-              description:
-                "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-            },
-          }
-        ),
-      })
-    ),
-  },
-  { meta: { description: 'A filter for the search source.' } }
-);
-
-export const querySchema = schema.object({
-  query: schema.oneOf([
-    schema.string({
-      meta: {
-        description:
-          'A text-based query such as Kibana Query Language (KQL) or Lucene query language.',
-      },
-    }),
-    schema.recordOf(schema.string(), schema.any()),
-  ]),
-  language: schema.string({
-    meta: { description: 'The query language such as KQL or Lucene.' },
   }),
 });
 
@@ -268,8 +211,9 @@ export const searchSourceSchema = schema.object(
   { defaultValue: {}, unknowns: 'allow' }
 );
 
-export const dashboardAdditionalAttributes = {
-  // Search
+export const dashboardState = {
+  controlGroupInput: schema.maybe(controlsGroupSchema),
+  description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
   kibanaSavedObjectMeta: schema.object(
     {
       searchSource: schema.maybe(searchSourceSchema),
@@ -281,39 +225,26 @@ export const dashboardAdditionalAttributes = {
       defaultValue: {},
     }
   ),
-  // Time
-  timeFrom: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
-  timeTo: schema.maybe(
-    schema.string({ meta: { description: 'An ISO string indicating when to restore time from' } })
-  ),
-  refreshInterval: schema.maybe(refreshIntervalSchema),
-
-  // Dashboard Content
-  controlGroupInput: schema.maybe(controlsGroupSchema),
-  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
   options: optionsSchema,
-  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
-};
-
-export const searchResultsAttributes = {
-  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-  description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
+  panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
+  refreshInterval: schema.maybe(refreshIntervalSchema),
+  tags: schema.maybe(
+    schema.arrayOf(
+      schema.string({ meta: { description: 'An array of tags ids applied to this dashboard' } })
+    )
+  ),
+  timeRange: schema.maybe(timeRangeSchema),
   timeRestore: schema.boolean({
     defaultValue: false,
     meta: { description: 'Whether to restore time upon viewing this dashboard' },
   }),
-  tags: schema.maybe(
-    schema.arrayOf(
-      schema.string({ meta: { description: 'An array of tags applied to this dashboard' } })
-    )
-  ),
+  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+  version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 };
 
+//
 export const dashboardAttributesSchema = schema.object({
-  ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
@@ -339,30 +270,29 @@ export const dashboardAPICreateResultSchema = schema.object(
 );
 
 export const dashboardResponseAttributesSchema = schema.object({
-  ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const dashboardStorageAttributesSchemaResponse = dashboardAttributesSchema.extends({
-  // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
+  // Responses always include the panel index (for panels) and grid.i (for panels + sections)
   panels: schema.arrayOf(
     schema.oneOf([
       panelSchema.extends({
-        panelIndex: schema.string(),
-        gridData: panelGridDataSchema.extends({
+        uid: schema.string(),
+        grid: panelGridDataSchema.extends({
           i: schema.string(),
         }),
       }),
       sectionSchema.extends({
-        gridData: sectionGridDataSchema.extends({
+        grid: sectionGridDataSchema.extends({
           i: schema.string(),
         }),
         panels: schema.arrayOf(
           panelSchema.extends({
-            panelIndex: schema.string(),
-            gridData: panelGridDataSchema.extends({
+            uid: schema.string(),
+            grid: panelGridDataSchema.extends({
               i: schema.string(),
             }),
           })
@@ -405,8 +335,7 @@ export const dashboardResolveMetaSchema = {
 };
 
 export const dashboardCreateRequestAttributesSchema = schema.object({
-  ...searchResultsAttributes,
-  ...dashboardAdditionalAttributes,
+  ...dashboardState,
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
 });

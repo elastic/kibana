@@ -29,6 +29,7 @@ export type LogDocument = Fields &
     'log.file.path'?: string;
     'service.name'?: string;
     'service.environment'?: string;
+    'service.version'?: string;
     'data_stream.namespace': string;
     'data_stream.type': string;
     'data_stream.dataset': string;
@@ -93,6 +94,25 @@ export type LogDocument = Fields &
     'orchestrator.resource.name'?: string;
     tags?: string | string[];
     'user_agent.name'?: string;
+    'orchestrator.type'?: string;
+    'orchestrator.resource.type'?: string;
+    'container.image.name'?: string;
+    'container.image.tag'?: string;
+    'container.runtime'?: string;
+    'host.os.platform'?: string;
+    'host.os.name'?: string;
+    'host.os.version'?: string;
+    'host.architecture'?: string;
+    'cloud.instance.name'?: string;
+    'kubernetes.container.image'?: string;
+    'kubernetes.container.image_id'?: string;
+    'kubernetes.node.name'?: string;
+    'kubernetes.node.uid'?: string;
+    'kubernetes.labels.app'?: string;
+    'kubernetes.labels.version'?: string;
+    'kubernetes.labels.tier'?: string;
+    'kubernetes.annotations.deployment'?: string;
+    'process.pid'?: number;
   }>;
 
 class Log extends Serializable<LogDocument> {

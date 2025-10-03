@@ -159,8 +159,7 @@ async function doUpgrade(
     packageInfo,
     updatePackagePolicy.vars || {},
     updatePackagePolicy.inputs as PackagePolicyInput[],
-    assetsMap,
-    { otelcolSuffixId: packagePolicy.id }
+    assetsMap
   );
   updatePackagePolicy.elasticsearch = packageInfo.elasticsearch;
 
@@ -312,8 +311,7 @@ async function calculateDiff(
     packageInfo,
     updatedPackagePolicy.vars || {},
     updatedPackagePolicy.inputs as PackagePolicyInput[],
-    assetsMap,
-    { otelcolSuffixId: packagePolicy.id }
+    assetsMap
   );
   updatedPackagePolicy.elasticsearch = packageInfo.elasticsearch;
 

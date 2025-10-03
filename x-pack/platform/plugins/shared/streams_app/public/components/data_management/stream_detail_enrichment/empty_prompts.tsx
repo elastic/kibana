@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AssetImage } from '../../asset_image';
+import { CreateStepButton } from './create_step_button';
 
 export const RootStreamEmptyPrompt = () => {
   return (
@@ -20,7 +21,7 @@ export const RootStreamEmptyPrompt = () => {
         <h2>
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.title',
-            { defaultMessage: 'Processing data is not allowed for root streams.' }
+            { defaultMessage: 'Processors cannot be added to root streams' }
           )}
         </h2>
       }
@@ -30,7 +31,7 @@ export const RootStreamEmptyPrompt = () => {
             'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.body',
             {
               defaultMessage:
-                'Root streams are selectively immutable and cannot be enriched with processors. To enrich data, reroute a new child stream and add processors to it.',
+                'To transform your data with processors, partition a new child stream.',
             }
           )}
         </p>
@@ -39,7 +40,7 @@ export const RootStreamEmptyPrompt = () => {
   );
 };
 
-export const NoProcessorsEmptyPrompt = () => {
+export const NoStepsEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
       aria-live="polite"
@@ -47,22 +48,39 @@ export const NoProcessorsEmptyPrompt = () => {
       icon={<AssetImage type="extractFields" />}
       title={
         <h2>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.noProcessorsEmptyPrompt.title',
-            { defaultMessage: 'Extract useful fields from your data' }
-          )}
+          {i18n.translate('xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.title', {
+            defaultMessage: 'Transform your data before indexing by:',
+          })}
         </h2>
       }
       body={
-        <p>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.noProcessorsEmptyPrompt.body',
-            {
-              defaultMessage:
-                'Transform your data before indexing with processors. You can start from scratch or let AI generate a set of processors based on your data.',
-            }
-          )}
-        </p>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <EuiText size="s">
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.body',
+                {
+                  defaultMessage: 'Create conditions to focus on specific data in your stream.',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.body',
+                {
+                  defaultMessage:
+                    'Create processors to extract meaningful fields so you can filter and analyze your data effectively.',
+                }
+              )}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+          <EuiFlexItem>
+            <CreateStepButton mode="prominent" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     />
   );

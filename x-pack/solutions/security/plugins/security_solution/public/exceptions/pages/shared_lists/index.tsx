@@ -92,6 +92,7 @@ export const SharedLists = React.memo(() => {
   const loading = listsConfigLoading;
 
   const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const {
     services: {
       http,
@@ -494,9 +495,11 @@ export const SharedLists = React.memo(() => {
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
             button={
-              <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
-                {i18n.CREATE_BUTTON}
-              </EuiButton>
+              !isReadOnly && (
+                <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
+                  {i18n.CREATE_BUTTON}
+                </EuiButton>
+              )
             }
             isOpen={isCreatePopoverOpen}
             closePopover={onCloseCreatePopover}
@@ -526,13 +529,15 @@ export const SharedLists = React.memo(() => {
               ]}
             />
           </EuiPopover>,
-          <EuiButton
-            data-test-subj="importSharedExceptionList"
-            iconType={'importAction'}
-            onClick={() => setDisplayImportListFlyout(true)}
-          >
-            {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
-          </EuiButton>,
+          (!isReadOnly || canWriteEndpointExceptions) && (
+            <EuiButton
+              data-test-subj="importSharedExceptionList"
+              iconType={'importAction'}
+              onClick={() => setDisplayImportListFlyout(true)}
+            >
+              {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
+            </EuiButton>
+          ),
         ]}
       />
 
@@ -598,7 +603,11 @@ export const SharedLists = React.memo(() => {
                   <EuiFlexItem key={excList.list_id}>
                     <ExceptionsListCard
                       data-test-subj="exceptionsListCard"
-                      readOnly={isReadOnly}
+                      readOnly={
+                        excList.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+                          ? !canWriteEndpointExceptions
+                          : isReadOnly
+                      }
                       exceptionsList={excList}
                       handleDelete={handleDelete}
                       handleExport={handleExport}

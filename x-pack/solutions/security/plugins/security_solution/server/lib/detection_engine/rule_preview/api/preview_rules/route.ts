@@ -19,6 +19,7 @@ import type {
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { wrapAsyncSearchClient } from '@kbn/alerting-plugin/server/lib';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
@@ -287,6 +288,21 @@ export const previewRulesRoute = (
                   uiSettingsClient: coreContext.uiSettings.client,
                   getDataViews: async () => dataViewsService,
                   share,
+                  getAsyncSearchClient: (strategy) => {
+                    const client = data.search.asScoped(request);
+                    return wrapAsyncSearchClient({
+                      rule: {
+                        name: rule.name,
+                        id: rule.id,
+                        alertTypeId: rule.ruleTypeId,
+                        spaceId,
+                      },
+                      logger,
+                      strategy,
+                      client,
+                      abortController,
+                    });
+                  },
                 },
                 spaceId,
                 startedAt: startedAt.toDate(),

@@ -18,6 +18,7 @@ export const getT1Analyst: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
+          // TODO: why was this changed to siemV3?
           [SECURITY_FEATURE_ID]: ['all'],
           [RULES_FEATURE_ID]: ['all'],
           securitySolutionTimeline: ['all'],
