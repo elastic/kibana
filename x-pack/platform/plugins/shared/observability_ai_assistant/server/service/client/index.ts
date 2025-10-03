@@ -78,6 +78,12 @@ import type { ObservabilityAIAssistantConfig } from '../../config';
 import { warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 import { addAnonymizationData } from './operators/add_anonymization_data';
+import {
+  conversationDeleteEvent,
+  type ConversationDeleteEvent,
+} from '../../analytics/conversation_delete';
+import type { ConversationDuplicateEvent } from '../../analytics/conversation_duplicate';
+import { conversationDuplicateEvent } from '../../analytics/conversation_duplicate';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -174,6 +180,10 @@ export class ObservabilityAIAssistantClient {
       index: conversation._index,
       refresh: true,
     });
+    this.dependencies.analytics.reportEvent<ConversationDeleteEvent>(
+      conversationDeleteEvent.eventType,
+      {}
+    );
   };
 
   complete = ({
@@ -651,7 +661,7 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
     const _source = conversation._source!;
-    return this.create({
+    const duplicatedConversation = await this.create({
       ..._source,
       conversation: {
         ..._source.conversation,
@@ -660,6 +670,11 @@ export class ObservabilityAIAssistantClient {
       public: false,
       archived: false,
     });
+    this.dependencies.analytics.reportEvent<ConversationDuplicateEvent>(
+      conversationDuplicateEvent.eventType,
+      {}
+    );
+    return duplicatedConversation;
   };
 
   recall = async ({

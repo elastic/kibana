@@ -102,7 +102,7 @@ export function executeFunctionAndCatchError({
 
     return executeFunctionResponse$.pipe(
       tap(() => {
-        analytics?.reportEvent<ToolCallEvent>(toolCallEventType, {
+        analytics.reportEvent<ToolCallEvent>(toolCallEventType, {
           toolName: name,
           connector: getInferenceConnectorInfo(connector),
           scopes,

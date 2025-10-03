@@ -16,7 +16,7 @@ const schema: RootSchema<ToolCallEvent> = {
   toolName: {
     type: 'text',
     _meta: {
-      description: 'The name of the tool/function that was called',
+      description: 'The name of the tool that was called',
     },
   },
   connector: {

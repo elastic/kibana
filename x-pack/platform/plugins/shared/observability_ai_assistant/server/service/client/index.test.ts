@@ -111,6 +111,7 @@ describe('Observability AI Assistant client', () => {
     search: jest.fn(),
     index: jest.fn(),
     update: jest.fn(),
+    delete: jest.fn(),
   } as any;
 
   const currentUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
@@ -134,6 +135,8 @@ describe('Observability AI Assistant client', () => {
     validate: jest.fn(),
     getInstructions: jest.fn(),
   } as any;
+
+  const analyticsMock = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
 
   let llmSimulator: LlmSimulator;
 
@@ -181,6 +184,16 @@ describe('Observability AI Assistant client', () => {
 
     functionClientMock.getInstructions.mockReturnValue([EXPECTED_STORED_SYSTEM_MESSAGE]);
 
+    actionsClientMock.get.mockResolvedValue({
+      id: 'test-connector-id',
+      name: 'Test Connector',
+      actionTypeId: '.gen-ai',
+      config: { apiProvider: 'OpenAI' },
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: false,
+    } as any);
+
     return new ObservabilityAIAssistantClient({
       config: {} as ObservabilityAIAssistantConfig,
       core: {} as CoreSetup<ObservabilityAIAssistantPluginStartDependencies>,
@@ -198,7 +211,7 @@ describe('Observability AI Assistant client', () => {
         name: 'johndoe',
       },
       scopes: ['observability'],
-      analytics: {} as AnalyticsServiceStart,
+      analytics: analyticsMock,
     });
   }
 
@@ -1651,6 +1664,74 @@ describe('Observability AI Assistant client', () => {
 
         expect(messages[2].message.content).toBe('Looks like the function call failed');
       });
+    });
+  });
+  describe('when deleting a conversation', () => {
+    beforeEach(async () => {
+      client = createClient();
+
+      internalUserEsClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'conversation-1',
+              _index: 'conversations',
+              _source: {
+                '@timestamp': new Date().toISOString(),
+                conversation: { id: 'conversation-1', title: 'Test' },
+                user: { name: 'johndoe' },
+                messages: [],
+              },
+            },
+          ],
+        },
+      } as any);
+
+      internalUserEsClientMock.delete.mockResolvedValue({} as any);
+
+      await client.delete('conversation-1');
+    });
+
+    it('reports analytics event', () => {
+      expect(analyticsMock.reportEvent).toHaveBeenCalledWith(
+        'observability_ai_assistant_conversation_delete',
+        expect.objectContaining({})
+      );
+    });
+  });
+  describe('when duplicating a conversation', () => {
+    beforeEach(async () => {
+      client = createClient();
+
+      internalUserEsClientMock.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'conversation-1',
+              _index: 'conversations',
+              _source: {
+                '@timestamp': new Date().toISOString(),
+                conversation: { id: 'conversation-1', title: 'Test Conversation' },
+                user: { name: 'johndoe' },
+                messages: [],
+                public: false,
+                archived: false,
+              },
+            },
+          ],
+        },
+      } as any);
+
+      internalUserEsClientMock.index.mockResolvedValue({ _id: 'new-conversation-id' } as any);
+
+      await client.duplicateConversation('conversation-1');
+    });
+
+    it('reports analytics event', () => {
+      expect(analyticsMock.reportEvent).toHaveBeenCalledWith(
+        'observability_ai_assistant_conversation_duplicate',
+        expect.objectContaining({})
+      );
     });
   });
 });
