@@ -22,6 +22,7 @@ export default function (providerContext: FtrProviderContext) {
   async function verifyActionResult(agentCount: number) {
     const { body } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
     const actionStatus = body.items[0];
+    console.log('## actionStatus', actionStatus);
     expect(actionStatus.nbAgentsActioned).to.eql(agentCount);
   }
 
@@ -320,6 +321,8 @@ export default function (providerContext: FtrProviderContext) {
         });
         const action: any = actionsRes.hits.hits[0]._source;
         expect(action.type).to.eql('PRIVILEGE_LEVEL_CHANGE');
+        expect(action.agents).to.eql(['agent4', 'agent3', 'agent1']);
+        expect(action.total).to.eql(3);
         await verifyActionResult(3);
       });
 
@@ -360,7 +363,6 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
-
         const actionId = body.actionId;
         await checkBulkAgentAction(supertest, actionId);
       });

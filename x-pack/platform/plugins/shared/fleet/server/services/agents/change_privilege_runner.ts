@@ -68,7 +68,6 @@ export async function bulkChangePrivilegeAgentsBatch(
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? agents.length;
-  const agentIds = agentsToAction.map((agent) => agent.id);
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 
@@ -89,11 +88,16 @@ export async function bulkChangePrivilegeAgentsBatch(
               .map((pkg) => pkg?.name)
               .join(', ')}`
           );
+        } else {
+          agentsToAction.push(agent);
         }
+      } else {
+        agentsToAction.push(agent);
       }
     },
     { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
   );
+  const agentIds = agentsToAction.map((agent) => agent.id);
 
   // Extract password from options if provided and pass it as a secret.
   await createAgentAction(esClient, soClient, {
