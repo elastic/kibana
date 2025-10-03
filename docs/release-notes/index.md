@@ -41,15 +41,15 @@ For the Elastic Security 9.1.5 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.1.5-fixes]
 
 **Alerting**:
-* Fixes text kerning issues in PDF/PNG exports of dashboards and visualizations [#235516]({{kib-pull}}235516).
 * Rolls over the reporting data stream if its template version is newer than the version in the data stream's mappings [#234119]({{kib-pull}}234119).
 
 **Dashboards and Visualizations**:
-* Fixes a bug where the dashboard title would not get updated in the breadcrumbs when edited from the list of dashboards [#236561]({{kib-pull}}236561).
+* Fixes an issue where the dashboard title would not get updated in the breadcrumbs when edited from the list of dashboards [#236561]({{kib-pull}}236561).
 * Updates dashboards to wait until controls are ready before rendering panels to prevent a double fetch of data [#237169]({{kib-pull}}237169).
 * Fixes an issue with the Lens table's column sort order being different in the dashboard and the exported CSV [#236673]({{kib-pull}}236673).
 
 **Data ingestion and Fleet**:
+* Fixes text kerning issues in PDF/PNG exports of dashboards and visualizations [#235516]({{kib-pull}}235516).
 * Fixes incorrect copying of SSL settings to the Fleet Hosts section of generated Agent policies [#236788]({{kib-pull}}236788).
 * Validates the Logstash pipeline ID at the {{kib}} API level [#236347]({{kib-pull}}236347).
 * Adds a unique count to improve accuracy of the number of transforms on the integrations overview page [#236177]({{kib-pull}}236177).
