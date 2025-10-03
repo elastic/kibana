@@ -51,6 +51,13 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
   const standardizedPanels = panels.map((legacyPanel) => {
     const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
 
+    if (panel.panels) {
+      const { panels: sectionPanels, savedObjectReferences: sectionPanelReferences } =
+        extractPanelsState({ panels: panel.panels });
+      savedObjectReferences.push(...(sectionPanelReferences ?? []));
+      panel.panels = sectionPanels;
+    }
+
     // < 8.17 panels state stored panelConfig as embeddableConfig
     if (panel?.embeddableConfig) {
       panel.panelConfig = panel.embeddableConfig;
