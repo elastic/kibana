@@ -7,10 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { timeseries, stats } from '@kbn/esql-composer';
+import {
+  Parser,
+  BasicPrettyPrinter,
+  isCommand,
+  isFunctionExpression,
+  type ESQLAstQueryExpression,
+} from '@kbn/esql-ast';
+import { replaceParameters } from '@kbn/esql-composer';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 
 type Params = Record<string, string | number | boolean | null>;
+
+// Helper function to safely extract the target AST node
+function getFunctionNodeFromAst(ast: ESQLAstQueryExpression) {
+  const statsCommand = ast.commands?.find((c) => isCommand(c) && c.name.toLowerCase() === 'stats');
+  if (statsCommand && isCommand(statsCommand)) {
+    const functionNode = statsCommand.args?.[0];
+    if (functionNode && isFunctionExpression(functionNode)) {
+      return functionNode;
+    }
+  }
+  return null;
+}
 
 /**
  * Takes an ES|QL function string with placeholders and a parameters object,
@@ -24,21 +43,28 @@ type Params = Record<string, string | number | boolean | null>;
  * @returns The transformed function string (e.g., "AVG(system.load.`1m`)").
  */
 export function replaceFunctionParams(functionString: string, params: Params): string {
-  // 1. Use the esql-composer to build a query. This handles all the AST work internally.
-  const fullQueryString = timeseries('metrics-*').pipe(stats(functionString, params)).toString();
+  try {
+    // 1. To parse the function string fragment, wrap it in a minimal, valid query.
+    const tempQuery = `TS metrics-* | STATS ${functionString}`;
+    const { root: ast } = Parser.parse(tempQuery);
 
-  // 2. Extract the function part from the generated query string.
-  // The output will be "TS metrics-*\n  | STATS AVG(system.load.`1m`)"
-  const statsPrefix = '| STATS ';
-  const lines = fullQueryString.split('\n');
-  const statsLine = lines.find((line) => line.trim().startsWith(statsPrefix));
+    // 2. Use the exported `replaceParameters` function to perform the substitution.
+    replaceParameters(ast, params);
 
-  if (statsLine) {
-    return statsLine.trim().substring(statsPrefix.length);
+    // 3. Extract the modified function node from the temporary AST.
+    const functionNode = getFunctionNodeFromAst(ast);
+
+    if (functionNode) {
+      // 4. Print only the function node back to a string.
+      return BasicPrettyPrinter.print(functionNode).trim();
+    }
+
+    // Fallback if the AST structure isn't what we expect.
+    return functionString;
+  } catch (e) {
+    // If parsing or any other step fails, return the original string as a safe fallback.
+    return functionString;
   }
-
-  // Fallback in case the output format changes unexpectedly.
-  return functionString;
 }
 
 /**

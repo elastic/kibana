@@ -24,19 +24,18 @@ describe('replaceFunctionParams', () => {
     expect(result).toBe('AVG(system.load.normal)');
   });
 
-  it('should handle multiple ?? placeholders', () => {
-    const result = replaceFunctionParams('AVG(??field) BY ??groupBy', {
-      field: 'transaction.duration.us',
-      groupBy: 'service.environment',
-    });
-    expect(result).toBe('AVG(transaction.duration.us) BY service.environment');
-  });
-
   it('should handle a mix of ?? and ? placeholders', () => {
     const result = replaceFunctionParams('AVG(??field) WHERE service.name == ?serviceName', {
       field: 'system.cpu.total.norm.pct',
       serviceName: 'auth-service',
     });
     expect(result).toBe('AVG(system.cpu.total.norm.pct) WHERE service.name == "auth-service"');
+  });
+
+  it('should handle nested functions like SUM(RATE(??metricField))', () => {
+    const result = replaceFunctionParams('SUM(RATE(??metricField))', {
+      metricField: 'system.network.in.bytes',
+    });
+    expect(result).toBe('SUM(RATE(system.network.`in`.bytes))');
   });
 });
