@@ -50,6 +50,7 @@ export class WorkflowExecutionRuntimeManager {
   private entryTransactionId?: string;
   private workflowTransaction?: any; // APM transaction instance
   private workflowGraph: WorkflowGraph;
+  private currentNodeId: string | undefined;
 
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
@@ -110,24 +111,27 @@ export class WorkflowExecutionRuntimeManager {
       throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
     }
 
-    this.workflowExecutionState.updateWorkflowExecution({
-      currentNodeId: nodeId,
-    });
+    this.currentNodeId = nodeId;
+
+    // this.workflowExecutionState.updateWorkflowExecution({
+    //   currentNodeId: nodeId,
+    // });
   }
 
   public navigateToNextNode(): void {
     const currentNodeId = this.workflowExecution.currentNodeId;
     const currentNodeIndex = this.topologicalOrder.findIndex((nodeId) => nodeId === currentNodeId);
     if (currentNodeIndex < this.topologicalOrder.length - 1) {
-      this.workflowExecutionState.updateWorkflowExecution({
-        currentNodeId: this.topologicalOrder[currentNodeIndex + 1],
-      });
+      // this.workflowExecutionState.updateWorkflowExecution({
+      //   currentNodeId: this.topologicalOrder[currentNodeIndex + 1],
+      // });
+      this.currentNodeId = this.topologicalOrder[currentNodeIndex + 1];
       return;
     }
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      currentNodeId: undefined,
-    });
+    this.currentNodeId = undefined;
+    // this.workflowExecutionState.updateWorkflowExecution({
+    //   currentNodeId: undefined,
+    // });
   }
 
   public getCurrentNodeScope(): StackFrame[] {
@@ -136,6 +140,11 @@ export class WorkflowExecutionRuntimeManager {
 
   public enterScope(subScopeId?: string): void {
     const currentNode = this.getCurrentNode()!;
+
+    // if (currentNode.type === 'atomic') {
+    //   console.log();
+    // }
+
     this.workflowExecutionState.updateWorkflowExecution({
       scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).enterScope({
         nodeId: currentNode.id,
@@ -337,8 +346,9 @@ export class WorkflowExecutionRuntimeManager {
       );
     }
 
+    this.currentNodeId = this.topologicalOrder[0];
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
-      currentNodeId: this.topologicalOrder[0],
+      currentNodeId: this.currentNodeId,
       scopeStack: [],
       status: ExecutionStatus.RUNNING,
       startedAt: new Date().toISOString(),
@@ -350,6 +360,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public async resume(): Promise<void> {
     await this.workflowExecutionState.load();
+    this.currentNodeId = this.workflowExecution.currentNodeId;
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };
@@ -358,8 +369,10 @@ export class WorkflowExecutionRuntimeManager {
 
   public async saveState(): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {};
-    if (!workflowExecution.currentNodeId) {
+    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
+      currentNodeId: this.currentNodeId,
+    };
+    if (!this.currentNodeId) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
 

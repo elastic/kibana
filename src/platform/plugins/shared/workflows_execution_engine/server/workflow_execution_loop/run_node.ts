@@ -47,16 +47,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   // It should be done before creating StepExecutionRuntime to ensure the scope stack for the node is correct
   // e.g. the same as for enter-* nodes
   if (currentNode?.type.startsWith('exit')) {
-    const scopeStack = WorkflowScopeStack.fromStackFrames(
-      params.workflowExecutionState.getWorkflowExecution().scopeStack
-    );
-    const replacedType = currentNode?.type.replace('exit', 'enter');
-
-    if (scopeStack.getCurrentScope()?.nodeType === replacedType) {
-      params.workflowRuntime.exitScope();
-    } else {
-      console.log();
-    }
+    params.workflowRuntime.exitScope();
   }
 
   const stepExecutionRuntime = createStepExecutionRuntime({
@@ -69,9 +60,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     node: currentNode as GraphNodeUnion,
     stackFrames: params.workflowRuntime.getCurrentNodeScope(),
   });
-  if (currentNode?.type.startsWith('enter')) {
-    params.workflowRuntime.enterScope();
-  }
+
   const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
   const monitorAbortController = new AbortController();
 
@@ -86,6 +75,13 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
   try {
     await Promise.race([runMonitorPromise, runStepPromise]);
+    if (currentNode?.type.startsWith('enter')) {
+      if (currentNode.type === 'atomic') {
+        console.log();
+      }
+
+      params.workflowRuntime.enterScope();
+    }
     monitorAbortController.abort();
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error);

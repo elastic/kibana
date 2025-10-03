@@ -106,7 +106,11 @@ export class WorkflowScopeStack {
       ) {
         const clonedFrames = this.cloneFrames(this.stackFrames);
         const stackFrame = clonedFrames.at(-1)!;
-        stackFrame.nestedScopes.at(-1)!.scopeId = enterScopeData.scopeId;
+
+        if (enterScopeData.scopeId) {
+          stackFrame.nestedScopes.at(-1)!.scopeId = enterScopeData.scopeId;
+        }
+
         return WorkflowScopeStack.fromStackFrames(clonedFrames);
       }
 
