@@ -12,6 +12,7 @@ const mockLog = {
   info: jest.fn(),
   error: jest.fn(),
   warning: jest.fn(),
+  write: jest.fn(),
 };
 
 jest.mock('getopts', () => jest.fn());
@@ -451,7 +452,7 @@ describe('run_all.ts', () => {
 
         await runPromise;
 
-        expect(mockLog.info).toHaveBeenCalledWith('--- Combined Jest run summary');
+        expect(mockLog.write).toHaveBeenCalledWith('--- Combined Jest run summary');
         expect(mockLog.info).toHaveBeenCalledWith(expect.stringMatching(/Total duration: \d+s/));
       });
 

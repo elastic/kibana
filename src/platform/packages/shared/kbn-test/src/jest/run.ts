@@ -88,12 +88,19 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   }
 
   // Resolve Jest configuration
-  const baseConfig = await resolveJestConfig(parsedArguments, resolvedConfigPath);
+  const { config: baseConfig, configPath } = await resolveJestConfig(
+    parsedArguments,
+    resolvedConfigPath
+  );
 
   // Scout reporter relies on the JEST_CONFIG_PATH environment variable to be set
   // to build its complete output
   if (SCOUT_REPORTER_ENABLED) {
-    process.env.JEST_CONFIG_PATH = relative(currentWorkingDirectory, resolvedConfigPath);
+    if (configPath) {
+      process.env.JEST_CONFIG_PATH = configPath;
+    } else {
+      log.warning('JEST_CONFIG_PATH not set because the Jest config path could not be determined');
+    }
   }
 
   log.debug('Setting up Jest with shared cache directory...');
@@ -226,17 +233,27 @@ export function discoverJestConfig(
 }
 
 /**
- * Resolves Jest configuration from either inline JSON or config file path.
+ * Resolve the Jest configuration from either an inline JSON value (via `--config`)
+ * or from a filesystem config file path.
  *
- * @param parsedArguments - Parsed command line arguments
- * @param resolvedConfigPath - Path to config file (optional)
- * @returns Promise resolving to Jest initial options
- * @throws Error if config cannot be resolved or file doesn't exist
+ * Resolution rules:
+ * - If `parsedArguments.config` is present and valid JSON, that object is used as the config.
+ * - Otherwise, `parsedArguments.config` (or `resolvedConfigPath`) is treated as a path to a Jest
+ *   config file and loaded via `readInitialOptions(...)`.
+ *
+ * @param parsedArguments - CLI args as parsed by `getopts`; may include `config`.
+ * @param resolvedConfigPath - Absolute path to a Jest config file, when already discovered.
+ * @returns Promise resolving to an object with:
+ *   - `config`: the resolved Jest `Config.InitialOptions`.
+ *   - `configPath`: the path used to load the config when loaded from file, or `undefined` when
+ *     the config was provided inline via JSON.
+ * @throws If neither a valid inline config nor a readable config file path can be determined,
+ *   or if the supplied file path does not exist.
  */
 export async function resolveJestConfig(
   parsedArguments: any,
   resolvedConfigPath?: string
-): Promise<Config.InitialOptions> {
+): Promise<{ config: Config.InitialOptions; configPath: string | undefined }> {
   let initialOptions: Config.InitialOptions | undefined;
 
   // If a config path was provided via argv, try to parse it as JSON first
@@ -271,7 +288,7 @@ export async function resolveJestConfig(
     initialOptions = (await readInitialOptions(resolvedConfigPath!)).config;
   }
 
-  return initialOptions;
+  return { config: initialOptions, configPath: resolvedConfigPath };
 }
 
 interface JestExecutionContext {

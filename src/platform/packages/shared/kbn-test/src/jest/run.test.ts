@@ -26,6 +26,7 @@ jest.mock('@kbn/tooling-log', () => ({
     info: jest.fn(),
     debug: jest.fn(),
     error: jest.fn(),
+    warning: jest.fn(),
   })),
 }));
 
@@ -455,7 +456,7 @@ describe('run.ts', () => {
 
       const result = await resolveJestConfig(parsedArguments, configPath);
 
-      expect(result).toEqual(mockConfig);
+      expect(result).toEqual({ config: mockConfig, configPath });
       expect(mockReadInitialOptions).toHaveBeenCalledWith(configPath);
     });
 
@@ -465,7 +466,7 @@ describe('run.ts', () => {
 
       const result = await resolveJestConfig(parsedArguments, configJson);
 
-      expect(result).toEqual({ testMatch: ['**/*.test.js'] });
+      expect(result).toEqual({ config: { testMatch: ['**/*.test.js'] }, configPath: configJson });
     });
 
     it('should handle invalid JSON config as file path', async () => {
@@ -479,7 +480,7 @@ describe('run.ts', () => {
 
       const result = await resolveJestConfig(parsedArguments, invalidJson);
 
-      expect(result).toEqual(mockConfig);
+      expect(result).toEqual({ config: mockConfig, configPath: invalidJson });
       expect(mockReadInitialOptions).toHaveBeenCalledWith(invalidJson);
     });
   });
