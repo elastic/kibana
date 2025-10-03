@@ -885,7 +885,7 @@
         "signature": [
           "(toolName: string) => boolean"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -899,7 +899,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3163,7 +3163,7 @@
             "section": "def-common.ToolDefinition",
             "text": "ToolDefinition"
           },
-          "<TConfig>"
+          "<TType, TConfig>"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
         "deprecated": false,
@@ -3185,20 +3185,14 @@
           {
             "parentPluginId": "@kbn/onechat-common",
             "id": "def-common.ToolDefinition.type",
-            "type": "Enum",
+            "type": "Uncategorized",
             "tags": [],
             "label": "type",
             "description": [
               "\nThe type of the tool"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/onechat-common",
-                "scope": "common",
-                "docId": "kibKbnOnechatCommonPluginApi",
-                "section": "def-common.ToolType",
-                "text": "ToolType"
-              }
+              "TType"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
             "deprecated": false,
@@ -3280,7 +3274,7 @@
             "section": "def-common.ToolDefinitionWithSchema",
             "text": "ToolDefinitionWithSchema"
           },
-          "<TConfig> extends ",
+          "<TType, TConfig> extends ",
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
@@ -3288,7 +3282,7 @@
             "section": "def-common.ToolDefinition",
             "text": "ToolDefinition"
           },
-          "<TConfig>"
+          "<TType, TConfig>"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/definition.ts",
         "deprecated": false,
@@ -4004,6 +3998,14 @@
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
             "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolType",
+            "text": "ToolType"
+          },
+          ".esql, ",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
             "section": "def-common.EsqlToolConfig",
             "text": "EsqlToolConfig"
           },
@@ -4030,6 +4032,14 @@
             "text": "ToolDefinitionWithSchema"
           },
           "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolType",
+            "text": "ToolType"
+          },
+          ".esql, ",
           {
             "pluginId": "@kbn/onechat-common",
             "scope": "common",
@@ -4075,6 +4085,14 @@
             "text": "ToolDefinitionWithSchema"
           },
           "<",
+          {
+            "pluginId": "@kbn/onechat-common",
+            "scope": "common",
+            "docId": "kibKbnOnechatCommonPluginApi",
+            "section": "def-common.ToolType",
+            "text": "ToolType"
+          },
+          ".index_search, ",
           "IndexSearchToolConfig",
           ">"
         ],
@@ -4404,7 +4422,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4826,7 +4844,7 @@
         "signature": [
           "{ readonly platformCore: \"platform.core\"; }"
         ],
-        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/namespaces.ts",
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

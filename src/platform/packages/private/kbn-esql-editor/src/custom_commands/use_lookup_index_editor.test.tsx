@@ -68,31 +68,41 @@ describe('getMonacoCommandString', () => {
     const result = getMonacoCommandString('test-index', false, {
       canCreateIndex: true,
       canEditIndex: true,
+      canReadIndex: true,
     });
     expect(result).toBe(
-      '[Create lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Afalse%2C%22canEditIndex%22%3Atrue%2C%22triggerSource%22%3A%22esql_hover%22%7D)'
+      '[Create lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Afalse%2C%22canEditIndex%22%3Atrue%2C%22triggerSource%22%3A%22esql_hover%22%2C%22highestPrivilege%22%3A%22create%22%7D)'
     );
   });
 
   it('should return edit command for existing index with edit permissions', () => {
-    const result = getMonacoCommandString('test-index', true, { canEditIndex: true });
+    const result = getMonacoCommandString('test-index', true, {
+      canCreateIndex: false,
+      canEditIndex: true,
+      canReadIndex: true,
+    });
     expect(result).toBe(
-      '[Edit lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Atrue%2C%22canEditIndex%22%3Atrue%2C%22triggerSource%22%3A%22esql_hover%22%7D)'
+      '[Edit lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Atrue%2C%22canEditIndex%22%3Atrue%2C%22triggerSource%22%3A%22esql_hover%22%2C%22highestPrivilege%22%3A%22edit%22%7D)'
     );
   });
 
   it('should return view command for existing index with read permissions only', () => {
     const result = getMonacoCommandString('test-index', true, {
+      canCreateIndex: false,
       canReadIndex: true,
       canEditIndex: false,
     });
     expect(result).toBe(
-      '[View lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Atrue%2C%22canEditIndex%22%3Afalse%2C%22triggerSource%22%3A%22esql_hover%22%7D)'
+      '[View lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Atrue%2C%22canEditIndex%22%3Afalse%2C%22triggerSource%22%3A%22esql_hover%22%2C%22highestPrivilege%22%3A%22read%22%7D)'
     );
   });
 
   it('should return undefined when no permissions', () => {
-    const result = getMonacoCommandString('test-index', false, { canCreateIndex: false });
+    const result = getMonacoCommandString('test-index', false, {
+      canCreateIndex: false,
+      canReadIndex: false,
+      canEditIndex: false,
+    });
     expect(result).toBeUndefined();
   });
 });
@@ -164,7 +174,7 @@ describe('useLookupIndexCommand', () => {
     createDecorationsCollection: jest.fn(),
     getLineDecorations: jest.fn(() => []),
     removeDecorations: jest.fn(),
-  } as any;
+  } as unknown as monaco.editor.IStandaloneCodeEditor;
 
   const mockModel = {
     getLineCount: jest.fn(() => 5),
@@ -172,7 +182,7 @@ describe('useLookupIndexCommand', () => {
       { range: { startLineNumber: 1, endLineNumber: 1, startColumn: 1, endColumn: 10 } },
     ]),
     deltaDecorations: jest.fn(() => ['decoration-1']),
-  } as any;
+  } as unknown as monaco.editor.ITextModel;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -252,7 +262,7 @@ describe('useLookupIndexCommand', () => {
           options: expect.objectContaining({
             hoverMessage: expect.objectContaining({
               value:
-                '[Create lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Afalse%2C%22canEditIndex%22%3Afalse%2C%22triggerSource%22%3A%22esql_hover%22%7D)',
+                '[Create lookup index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22test-index%22%2C%22doesIndexExist%22%3Afalse%2C%22canEditIndex%22%3Afalse%2C%22triggerSource%22%3A%22esql_hover%22%2C%22highestPrivilege%22%3A%22create%22%7D)',
             }),
           }),
         }),
@@ -304,7 +314,10 @@ describe('useLookupIndexCommand', () => {
       'FROM logs | LOOKUP JOIN cursor-index ON field'
     );
 
-    mockEditor.getPosition.mockReturnValue({ lineNumber: 1, column: 15 });
+    (mockEditor.getPosition as jest.Mock).mockReturnValue({
+      lineNumber: 1,
+      column: 15,
+    } as monaco.Position);
 
     renderHook(
       () =>
@@ -343,7 +356,7 @@ describe('useLookupIndexCommand', () => {
   });
 
   it('should throw error when no cursor position and no index name', async () => {
-    mockEditor.getPosition.mockReturnValue(null);
+    (mockEditor.getPosition as jest.Mock).mockReturnValue(null);
 
     renderHook(
       () =>

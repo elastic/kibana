@@ -91,6 +91,7 @@ import type { TopValuesPopoverService } from './app/components/top_values_popove
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
+import type { SecuritySolutionUiConfigType } from './common/types';
 import type { OnboardingService } from './onboarding/service';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
@@ -173,6 +174,7 @@ export interface ContractStartServices {
 export type StartServices = CoreStart &
   StartPlugins &
   ContractStartServices & {
+    config: SecuritySolutionUiConfigType;
     configSettings: ConfigSettings;
     storage: Storage;
     sessionStorage: Storage;

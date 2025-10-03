@@ -850,6 +850,8 @@ export class IndexUpdateService {
   public addEmptyRow() {
     const newDocId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
     this.addAction('add-doc', { id: newDocId, value: {} });
+
+    this.telemetry.trackEditInteraction({ actionType: 'add_row' });
   }
 
   /* Partial doc update */
@@ -862,11 +864,15 @@ export class IndexUpdateService {
       {}
     );
     this.addAction('add-doc', { id, value: parsedUpdate });
+
+    this.telemetry.trackEditInteraction({ actionType: 'edit_cell' });
   }
 
   /** Schedules documents for deletion */
   public deleteDoc(ids: string[]) {
     this.addAction('delete-doc', { ids });
+
+    this.telemetry.trackEditInteraction({ actionType: 'delete_row' });
   }
 
   /**
@@ -943,14 +949,20 @@ export class IndexUpdateService {
 
   public addNewColumn() {
     this.addAction('add-column');
+
+    this.telemetry.trackEditInteraction({ actionType: 'add_column' });
   }
 
   public editColumn(name: string, previousName: string) {
     this.addAction('edit-column', { name, previousName });
+
+    this.telemetry.trackEditInteraction({ actionType: 'edit_column' });
   }
 
   public deleteColumn(name: string) {
     this.addAction('delete-column', { name });
+
+    this.telemetry.trackEditInteraction({ actionType: 'delete_column' });
   }
 
   public setExitAttemptWithUnsavedChanges(value: boolean) {
