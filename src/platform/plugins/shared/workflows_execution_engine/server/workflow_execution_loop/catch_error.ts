@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
 import type { WorkflowExecutionLoopParams } from './types';
 import { createStepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
 /**
  * Handles workflow execution errors by bubbling them up through the scope hierarchy
@@ -71,59 +71,56 @@ export async function catchError(
       return;
     }
 
-    if (
-      params.workflowExecutionState.getStepExecution(failedStepExecutionRuntime.stepExecutionId)
-    ) {
-      await params.workflowExecutionState.upsertStep({
-        id: failedStepExecutionRuntime.stepExecutionId,
-        status: ExecutionStatus.FAILED,
-        error: params.workflowRuntime.getWorkflowExecution().error,
-      });
+    if (failedStepExecutionRuntime.stepExecutionExists()) {
+      failedStepExecutionRuntime.failStep(params.workflowRuntime.getWorkflowExecution().error!);
     }
 
     while (
       params.workflowRuntime.getWorkflowExecution().error &&
       params.workflowRuntime.getWorkflowExecution().scopeStack.length
     ) {
+      const workflowScopeStack = WorkflowScopeStack.fromStackFrames(
+        params.workflowRuntime.getCurrentNodeScope()
+      );
+
       // exit the whole node scope
-      const scopeEntry = params.workflowRuntime
-        .getWorkflowExecution()
-        .scopeStack.at(-1)!
-        .nestedScopes.at(-1)!;
-      params.workflowRuntime.navigateToNode(scopeEntry.nodeId);
+      const scopeEntry = workflowScopeStack.getCurrentScope()!;
       params.workflowRuntime.exitScope();
 
       const node = params.workflowExecutionGraph.getNode(scopeEntry.nodeId);
 
-      if (node) {
-        params.workflowRuntime.navigateToNode(node.id);
-        const stepContext = createStepExecutionRuntime({
-          workflowExecutionGraph: params.workflowExecutionGraph,
-          workflowExecutionState: params.workflowExecutionState,
-          workflowLogger: params.workflowLogger,
-          esClient: params.esClient,
-          fakeRequest: params.fakeRequest,
-          coreStart: params.coreStart,
-          node: node as GraphNodeUnion,
-          stackFrames: params.workflowRuntime.getCurrentNodeScope(),
-        });
-        const stepImplementation = params.nodesFactory.create(stepContext);
+      params.workflowRuntime.navigateToNode(node.id);
+      const stepExecutionRuntime = createStepExecutionRuntime({
+        workflowExecutionGraph: params.workflowExecutionGraph,
+        workflowExecutionState: params.workflowExecutionState,
+        workflowLogger: params.workflowLogger,
+        esClient: params.esClient,
+        fakeRequest: params.fakeRequest,
+        coreStart: params.coreStart,
+        node: node as GraphNodeUnion,
+        stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+      });
+      const stepImplementation = params.nodesFactory.create(stepExecutionRuntime);
 
-        if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
-          const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
+      if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
+        const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
 
-          try {
-            await stepErrorCatcher.catchError();
-          } catch (error) {
-            params.workflowRuntime.setWorkflowError(error);
-          }
+        try {
+          await stepErrorCatcher.catchError();
+        } catch (error) {
+          params.workflowRuntime.setWorkflowError(error);
         }
+      }
 
+      if (
+        params.workflowRuntime.getWorkflowExecution().error &&
+        stepExecutionRuntime.stepExecutionExists()
+      ) {
         if (
           params.workflowRuntime.getWorkflowExecution().error &&
-          params.workflowExecutionState.getStepExecution(stepContext.stepExecutionId)
+          stepExecutionRuntime.stepExecutionExists()
         ) {
-          await stepContext.failStep(params.workflowRuntime.getWorkflowExecution().error!);
+          await stepExecutionRuntime.failStep(params.workflowRuntime.getWorkflowExecution().error!);
         }
       }
     }
@@ -133,4 +130,6 @@ export async function catchError(
       `Error in catchError: ${error.message}. Workflow execution may be in an inconsistent state.`
     );
   }
+
+  console.log();
 }

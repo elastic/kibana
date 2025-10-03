@@ -80,6 +80,10 @@ export class StepExecutionRuntime {
     return this.workflowExecutionState.getWorkflowExecution();
   }
 
+  public stepExecutionExists(): boolean {
+    return !!this.workflowExecutionState.getStepExecution(this.stepExecutionId);
+  }
+
   public getCurrentStepResult(): RunStepResult | undefined {
     const stepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
 

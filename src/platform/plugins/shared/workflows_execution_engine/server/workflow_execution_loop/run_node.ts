@@ -12,6 +12,7 @@ import type { WorkflowExecutionLoopParams } from './types';
 import { runStackMonitor } from './run_stack_monitor';
 import { catchError } from './catch_error';
 import { createStepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime_factory';
+import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
 /**
  * Executes a single step in the workflow execution process.
@@ -46,7 +47,16 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   // It should be done before creating StepExecutionRuntime to ensure the scope stack for the node is correct
   // e.g. the same as for enter-* nodes
   if (currentNode?.type.startsWith('exit')) {
-    params.workflowRuntime.exitScope();
+    const scopeStack = WorkflowScopeStack.fromStackFrames(
+      params.workflowExecutionState.getWorkflowExecution().scopeStack
+    );
+    const replacedType = currentNode?.type.replace('exit', 'enter');
+
+    if (scopeStack.getCurrentScope()?.nodeType === replacedType) {
+      params.workflowRuntime.exitScope();
+    } else {
+      console.log();
+    }
   }
 
   const stepExecutionRuntime = createStepExecutionRuntime({
