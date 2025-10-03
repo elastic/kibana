@@ -84,6 +84,13 @@ describe('useFleetServerHostsForPolicy', () => {
     expect(result.current).toEqual({
       isLoadingInitialRequest: false,
       fleetServerHost: 'https://defaultfleetserver:8220',
+      fleetServerHostConfig: {
+        id: 'fleet-server',
+        name: 'fleet-server',
+        is_preconfigured: false,
+        is_default: true,
+        host_urls: ['https://defaultfleetserver:8220'],
+      },
       fleetProxy: {
         id: 'default-proxy',
         name: 'default-proxy',

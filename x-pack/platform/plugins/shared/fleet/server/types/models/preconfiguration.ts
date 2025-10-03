@@ -118,7 +118,13 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
     proxy_id: schema.nullable(schema.string()),
     secrets: schema.maybe(
       schema.object({
-        ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+        ssl: schema.maybe(
+          schema.object({
+            key: schema.maybe(secretRefSchema),
+            es_key: schema.maybe(secretRefSchema),
+            agent_key: schema.maybe(secretRefSchema),
+          })
+        ),
       })
     ),
     ssl: schema.maybe(
@@ -131,6 +137,9 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
           es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
           es_certificate: schema.maybe(schema.string()),
           es_key: schema.maybe(schema.string()),
+          agent_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+          agent_certificate: schema.maybe(schema.string()),
+          agent_key: schema.maybe(schema.string()),
           client_auth: schema.maybe(
             schema.oneOf([
               schema.literal(clientAuth.Optional),

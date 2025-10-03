@@ -383,6 +383,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
           ssl: {
             key: 'unsecureKey1',
             es_key: 'unsecureKey2',
+            agent_key: 'unsecureKey3',
           },
         },
       },
@@ -396,6 +397,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
           ssl: {
             key: 'unsecureKey1',
             es_key: 'unsecureKey2',
+            agent_key: 'unsecureKey3',
           },
         },
       }),
@@ -501,6 +503,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         ssl: {
           key: 'unsecureKey1',
           es_key: 'unsecureKey2',
+          agent_key: 'unsecureKey3',
         },
       },
     ]);
@@ -514,6 +517,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         ssl: {
           key: 'unsecureKey1',
           es_key: 'unsecureKey2',
+          agent_key: 'unsecureKey3',
         },
       }),
       expect.anything()
@@ -536,6 +540,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
           ssl: {
             key: 'unsecureKey1',
             es_key: 'unsecureKey2',
+            agent_key: 'unsecureKey3',
           },
         },
       },
@@ -551,6 +556,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
           ssl: {
             key: 'unsecureKey1',
             es_key: 'unsecureKey2',
+            agent_key: 'unsecureKey3',
           },
         },
       }),
@@ -573,6 +579,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
           ssl: {
             key: 'secretKey',
             es_key: 'secretKey2',
+            agent_key: 'secretKey3',
           },
         },
       },
@@ -588,6 +595,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
           ssl: {
             key: 'secretKey',
             es_key: 'secretKey2',
+            agent_key: 'secretKey3',
           },
         },
       }),
