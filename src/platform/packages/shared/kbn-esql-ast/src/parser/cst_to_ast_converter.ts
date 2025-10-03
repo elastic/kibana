@@ -10,7 +10,7 @@
 import * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
 import type * as ast from '../types';
-import { isCommand } from '../ast/is';
+import { isCommand, isOptionNode } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import { getPosition } from './tokens';
 import { nonNullable } from './helpers';
@@ -1466,8 +1466,105 @@ export class CstToAstConverter {
 
   private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLCommand<'fuse'> {
     const command = this.createCommand('fuse', ctx);
+    const fuseTypeCtx = ctx.identifier();
+
+    // FUSE <fuse_method>
+    if (fuseTypeCtx) {
+      const name = this.sanitizeIdentifierString(fuseTypeCtx);
+      const fuseType = Builder.identifier({ name }, this.getParserFields(fuseTypeCtx));
+      command.args.push(fuseType);
+    }
+
+    for (const config of ctx.fuseConfiguration_list()) {
+      this.processFuseConfigurationItem(config, command);
+    }
+
+    const hasIncompleteConfigs = command.args.some((arg) => {
+      return isOptionNode(arg) && arg.incomplete;
+    });
+    if (hasIncompleteConfigs) {
+      command.incomplete = true;
+    }
 
     return command;
+  }
+
+  private processFuseConfigurationItem(
+    configCtx: cst.FuseConfigurationContext,
+    command: ast.ESQLCommand<'fuse'>
+  ) {
+    // SCORE BY <score_column>
+    const scoreCtx = configCtx.SCORE();
+    if (scoreCtx) {
+      const option = this.toOption(scoreCtx.getText().toLowerCase(), configCtx);
+      const scoreColumnCtx = configCtx.qualifiedName();
+
+      if (textExistsAndIsValid(scoreColumnCtx.getText())) {
+        const scoreColumn = this.toColumn(scoreColumnCtx);
+        option.args.push(scoreColumn);
+        option.incomplete = false;
+      } else {
+        option.incomplete = true;
+      }
+
+      command.args.push(option);
+      return;
+    }
+
+    // KEY BY <key_columns>
+    const keyByCtx = configCtx.KEY();
+    if (keyByCtx) {
+      const option = this.toOption(keyByCtx.getText().toLowerCase(), configCtx);
+      const fields = this.fromFields(configCtx.fields());
+
+      if (fields.length > 0) {
+        option.incomplete = false;
+        option.args.push(...fields);
+      } else {
+        option.incomplete = true;
+      }
+
+      command.args.push(option);
+      return;
+    }
+
+    // GROUP BY <group_column>
+    const groupByCtx = configCtx.GROUP();
+    const byContext = configCtx.BY();
+    if (groupByCtx && byContext) {
+      const option = this.toOption(groupByCtx.getText().toLowerCase(), configCtx);
+
+      const groupColumnCtx = configCtx.qualifiedName();
+
+      if (textExistsAndIsValid(groupColumnCtx.getText())) {
+        const groupColumn = this.toColumn(groupColumnCtx);
+        option.args.push(groupColumn);
+        option.incomplete = false;
+      } else {
+        option.incomplete = true;
+      }
+
+      command.args.push(option);
+      return;
+    }
+
+    // WITH <map_expression>
+    const withCtx = configCtx.WITH();
+    if (withCtx) {
+      const mapExpressionCtx = configCtx.mapExpression();
+      const withOption = this.toOption(withCtx.getText().toLowerCase(), configCtx);
+
+      const map = this.fromMapExpression(mapExpressionCtx);
+      if (map && textExistsAndIsValid(map.text)) {
+        withOption.args.push(map);
+        withOption.incomplete = map.incomplete;
+      } else {
+        withOption.incomplete = true;
+      }
+
+      command.args.push(withOption);
+      return;
+    }
   }
 
   // --------------------------------------------------------------------- FORK
