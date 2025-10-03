@@ -628,10 +628,15 @@ export class FlyoutClass extends Component<
     }
 
     return (
-      <EuiFlyout onClose={close} size="s" data-test-subj="importSavedObjectsFlyout">
+      <EuiFlyout
+        onClose={close}
+        size="s"
+        data-test-subj="importSavedObjectsFlyout"
+        aria-labelledby="importSavedObjectsFlyoutTitle"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id="importSavedObjectsFlyoutTitle">
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
                 defaultMessage="Import saved objects"

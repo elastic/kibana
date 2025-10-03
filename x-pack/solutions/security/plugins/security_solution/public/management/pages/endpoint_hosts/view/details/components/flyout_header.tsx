@@ -29,6 +29,7 @@ export const EndpointDetailsFlyoutHeader = memo<EndpointDetailsFlyoutHeaderProps
           <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
             <EuiTitle size="s">
               <h2
+                id="endpointDetailsFlyoutTitle"
                 css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                 data-test-subj="endpointDetailsFlyoutTitle"
               >

@@ -27,7 +27,8 @@ export const PanelHeader: FC = () => {
 export const IsolateHostPanelHeader: FC<{
   isolateAction: string;
   data: TimelineEventsDetailsItem[];
-}> = ({ isolateAction, data }) => {
+  titleId?: string;
+}> = ({ isolateAction, data, titleId }) => {
   const {
     details: { agentType },
   } = useAlertResponseActionsSupport(data);
@@ -49,7 +50,9 @@ export const IsolateHostPanelHeader: FC<{
   return (
     <FlyoutHeader>
       <EuiTitle size="s">
-        <h4 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>{title}</h4>
+        <h4 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID} id={titleId}>
+          {title}
+        </h4>
       </EuiTitle>
     </FlyoutHeader>
   );

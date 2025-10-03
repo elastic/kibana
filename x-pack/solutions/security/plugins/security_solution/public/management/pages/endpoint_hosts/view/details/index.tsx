@@ -35,6 +35,7 @@ export const EndpointDetailsFlyout = memo(() => {
       size="m"
       paddingSize="l"
       ownFocus={false}
+      aria-labelledby="endpointDetailsFlyoutTitle"
     >
       <EndpointDetails />
     </EuiFlyout>

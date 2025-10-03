@@ -15,6 +15,7 @@ import {
   EuiCodeBlock,
   EuiSpacer,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,6 +30,7 @@ interface QueryDetailsFlyoutProps {
 
 const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action, onClose }) => {
   const { euiTheme } = useEuiTheme();
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'queryDetailsFlyoutTitle' });
 
   // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
   const maskProps = useMemo(
@@ -42,13 +44,13 @@ const QueryDetailsFlyoutComponent: React.FC<QueryDetailsFlyoutProps> = ({ action
         size="m"
         ownFocus
         onClose={onClose}
-        aria-labelledby="flyoutTitle"
+        aria-labelledby={flyoutTitleId}
         // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
         maskProps={maskProps}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h2 id="flyoutTitle">
+            <h2 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.osquery.liveQueryActions.details.title"
                 defaultMessage="Query Details"

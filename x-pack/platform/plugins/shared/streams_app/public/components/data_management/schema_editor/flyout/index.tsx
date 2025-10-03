@@ -72,7 +72,7 @@ export const SchemaEditorFlyout = ({
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby={flyoutId} maxWidth={500}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{field.name}</h2>
+          <h2 id={flyoutId}>{field.name}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 

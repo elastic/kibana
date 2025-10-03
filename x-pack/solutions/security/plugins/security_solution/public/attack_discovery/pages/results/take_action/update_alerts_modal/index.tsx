@@ -109,7 +109,7 @@ const UpdateAlertsModalComponent: React.FC<Props> = ({
       onClose={onClose}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle title={titleId}>{i18n.UPDATE_ALERTS}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={titleId}>{i18n.UPDATE_ALERTS}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>

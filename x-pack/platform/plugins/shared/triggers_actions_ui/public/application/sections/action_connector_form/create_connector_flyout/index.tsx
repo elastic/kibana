@@ -16,6 +16,7 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -56,6 +57,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   onConnectorCreated,
   onTestConnector,
 }) => {
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'createConnectorFlyoutTitle' });
   const {
     application: { capabilities },
   } = useKibana().services;
@@ -219,6 +221,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     <EuiFlyout
       onClose={onClose}
       data-test-subj="create-connector-flyout"
+      aria-labelledby={flyoutTitleId}
       aria-label={i18n.translate('xpack.triggersActionsUI.createConnectorFlyout', {
         defaultMessage: 'create connector flyout',
       })}
@@ -229,6 +232,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
+        titleId={flyoutTitleId}
       />
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}

@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   EuiFlexItem,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -67,13 +68,14 @@ const Header: React.FunctionComponent<{
   currentTab: string;
   tabs: Array<{ id: string; label: string; content: React.ReactNode }>;
   onTabClick: (id: string) => void;
-}> = ({ isFlyout = false, currentTab: currentTabId, tabs, onTabClick }) => {
+  titleId?: string;
+}> = ({ isFlyout = false, currentTab: currentTabId, tabs, onTabClick, titleId }) => {
   const { docLinks } = useStartServices();
 
   return (
     <>
       <EuiTitle size="m">
-        <h2 data-test-subj="addFleetServerHeader">
+        <h2 data-test-subj="addFleetServerHeader" id={titleId}>
           <FormattedMessage
             id="xpack.fleet.fleetServerFlyout.title"
             defaultMessage="Add a Fleet Server"
@@ -120,6 +122,7 @@ const Header: React.FunctionComponent<{
 
 // Renders instructions inside of a flyout
 export const FleetServerFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'fleetServerFlyoutTitle' });
   const { tabs, currentTab, setCurrentTab, currentTabContent } = useFleetServerTabs(onClose);
 
   const { permissionsError, isPermissionsLoading } = useCheckPermissions();
@@ -134,13 +137,19 @@ export const FleetServerFlyout: React.FunctionComponent<Props> = ({ onClose }) =
   }
 
   return (
-    <EuiFlyout data-test-subj="fleetServerFlyout" onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
-      <EuiFlyoutHeader hasBorder aria-labelledby="FleetAddFleetServerFlyoutTitle">
+    <EuiFlyout
+      data-test-subj="fleetServerFlyout"
+      onClose={onClose}
+      maxWidth={MAX_FLYOUT_WIDTH}
+      aria-labelledby={flyoutTitleId}
+    >
+      <EuiFlyoutHeader hasBorder>
         <Header
           tabs={tabs}
           currentTab={currentTab}
           onTabClick={(id) => setCurrentTab(id)}
           isFlyout
+          titleId={flyoutTitleId}
         />
       </EuiFlyoutHeader>
 

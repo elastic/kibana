@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
@@ -60,6 +61,7 @@ export function AddSignificantEventFlyout({
   initialSelectedSystems = [],
   systems,
 }: Props) {
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'addSignificantEventFlyoutTitle' });
   const { euiTheme } = useEuiTheme();
   const {
     core: { notifications },
@@ -190,14 +192,14 @@ export function AddSignificantEventFlyout({
 
   return (
     <EuiFlyout
-      aria-labelledby="addSignificantEventFlyout"
+      aria-labelledby={flyoutTitleId}
       onClose={() => onClose()}
       size={isEditMode ? 's' : 'l'}
       type={isEditMode ? 'push' : 'overlay'}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2>
+          <h2 id={flyoutTitleId}>
             {isEditMode
               ? i18n.translate(
                   'xpack.streams.streamDetailView.addSignificantEventFlyout.editTitle',

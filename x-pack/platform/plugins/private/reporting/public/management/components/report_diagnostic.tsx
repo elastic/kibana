@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ClientConfigType, ReportingAPIClient } from '@kbn/reporting-public';
 import type { DiagnoseResponse } from '@kbn/reporting-public/reporting_api_client';
@@ -53,6 +54,7 @@ const initialState: State = {
 
 export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
   const [state, setStateBase] = useState(initialState);
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'reportDiagnosticFlyoutTitle' });
   const setState = (s: Partial<typeof state>) =>
     setStateBase({
       ...state,
@@ -123,12 +125,12 @@ export const ReportDiagnostic = ({ apiClient, clientConfig }: Props) => {
       <EuiFlyout
         onClose={closeFlyout}
         data-test-subj="reportDiagnosisFlyout"
-        aria-labelledby="reportingHelperTitle"
+        aria-labelledby={flyoutTitleId}
         size="m"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.reporting.listing.diagnosticTitle"
                 defaultMessage="Screenshotting Diagnostics"

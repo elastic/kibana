@@ -27,6 +27,7 @@ interface Props {
   actionTypeMessage?: string | null;
   compatibility?: string[] | null;
   isExperimental?: boolean;
+  titleId?: string;
 }
 
 const FlyoutHeaderComponent: React.FC<Props> = ({
@@ -35,6 +36,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
   actionTypeMessage,
   compatibility,
   isExperimental,
+  titleId,
 }) => {
   return (
     <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
@@ -50,7 +52,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
               <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
-                    <h3 id="flyoutTitle">
+                    <h3 id={titleId}>
                       {actionTypeName && actionTypeName.toLowerCase().includes('connector') ? (
                         actionTypeName
                       ) : (
@@ -106,7 +108,7 @@ const FlyoutHeaderComponent: React.FC<Props> = ({
             </>
           ) : (
             <EuiTitle size="s">
-              <h3 id="selectConnectorFlyoutTitle">
+              <h3 id={titleId}>
                 <FormattedMessage
                   defaultMessage="Select a connector"
                   id="xpack.triggersActionsUI.sections.addConnectorForm.selectConnectorFlyoutTitle"

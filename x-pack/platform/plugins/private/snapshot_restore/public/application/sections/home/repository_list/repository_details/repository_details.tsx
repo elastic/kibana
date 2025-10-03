@@ -23,6 +23,7 @@ import {
   EuiTitle,
   EuiCodeBlock,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -72,6 +73,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   const [cleanup, setCleanup] = useState<RepositoryCleanup | undefined>(undefined);
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false);
   const [isLoadingCleanup, setIsLoadingCleanup] = useState<boolean>(false);
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'repositoryDetailsFlyoutTitle' });
 
   const verifyRepository = async () => {
     setIsLoadingVerification(true);
@@ -458,13 +460,13 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
     <EuiFlyout
       onClose={onClose}
       data-test-subj="repositoryDetail"
-      aria-labelledby="srRepositoryDetailsFlyoutTitle"
+      aria-labelledby={flyoutTitleId}
       size="m"
       maxWidth={550}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2 id="srRepositoryDetailsFlyoutTitle" data-test-subj="title">
+          <h2 id={flyoutTitleId} data-test-subj="title">
             {repositoryName}
           </h2>
         </EuiTitle>

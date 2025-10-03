@@ -94,6 +94,9 @@ const INVALID_JSON_ERROR: string = i18n.translate('xpack.enterpriseSearch.invali
 });
 
 export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose }) => {
+  const createApiKeyFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'createApiKeyFlyoutTitle',
+  });
   const { euiTheme } = useEuiTheme();
   const [name, setName] = useState('');
   const [expires, setExpires] = useState<string | null>(DEFAULT_EXPIRES_VALUE);
@@ -183,11 +186,11 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose 
       css={css`
         max-width: calc(${euiTheme.size.xxxxl} * 10);
       `}
-      aria-labelledby={`${uniqueId}-header`}
+      aria-labelledby={createApiKeyFlyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={`${uniqueId}-header`}>
+          <h2 id={createApiKeyFlyoutTitleId}>
             {i18n.translate('xpack.enterpriseSearch.apiKey.flyoutTitle', {
               defaultMessage: 'Create an API key',
             })}
