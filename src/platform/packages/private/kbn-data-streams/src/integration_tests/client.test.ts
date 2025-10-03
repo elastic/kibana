@@ -25,6 +25,7 @@ describe('DataStreamClient', () => {
   }
   const testDataStream: DataStreamDefinition<MyTestDoc> = {
     name: 'test-data-stream',
+    version: 1,
     template: {
       mappings: {
         properties: {
@@ -110,7 +111,7 @@ describe('DataStreamClient', () => {
       expect(indexTemplate.index_template._meta).toEqual({
         previousVersions: [],
         userAgent: '@kbn/data-streams',
-        version: '057071d3cd930dc4ebaa1aaa5c18360b8d7912cc',
+        version: 1,
         managed: true,
       });
       expect(indexTemplate.index_template.data_stream).toEqual({
@@ -137,6 +138,16 @@ describe('DataStreamClient', () => {
         },
       });
     }
+
+    it('does not accept version numbers less than 1', async () => {
+      await expect(
+        DataStreamClient.initialize({
+          logger,
+          elasticsearchClient: esServer.getClient(),
+          dataStreams: { ...testDataStream, version: 0 },
+        })
+      ).rejects.toThrow('Template version must be greater than 0');
+    });
 
     it('sets up a data stream as expected', async () => {
       const elasticsearchClient = esServer.getClient();
@@ -181,7 +192,7 @@ describe('DataStreamClient', () => {
       await assertStateOfIndexTemplate();
     });
 
-    test('(basic) updates mappings and settings as expected', async () => {
+    test('updates mappings and settings as expected when a new version is deployed', async () => {
       const elasticsearchClient = esServer.getClient();
       await DataStreamClient.initialize({
         logger,
@@ -210,6 +221,7 @@ describe('DataStreamClient', () => {
 
       const nextDefinition: DataStreamDefinition<MyTestDoc & { newField: string }> = {
         ...testDataStream,
+        version: 2,
         template: {
           mappings: {
             ...testDataStream.template.mappings,
@@ -234,9 +246,9 @@ describe('DataStreamClient', () => {
       });
 
       expect(indexTemplate.index_template._meta).toEqual({
-        previousVersions: ['057071d3cd930dc4ebaa1aaa5c18360b8d7912cc'],
+        previousVersions: [1],
         userAgent: '@kbn/data-streams',
-        version: '2a84370ea6cfb20521959213e604ebcd1314dede',
+        version: 2,
         managed: true,
       });
 
@@ -268,6 +280,39 @@ describe('DataStreamClient', () => {
         ...nextDefinition.template.mappings,
         dynamic: 'false',
       });
+    });
+
+    test('does not update if the version remains the same', async () => {
+      const elasticsearchClient = esServer.getClient();
+
+      const getIndexTemplateSpy = jest.spyOn(elasticsearchClient.indices, 'getIndexTemplate');
+      const putIndexTemplateSpy = jest.spyOn(elasticsearchClient.indices, 'putIndexTemplate');
+      const createDataStreamSpy = jest.spyOn(elasticsearchClient.indices, 'createDataStream');
+      const putMappingSpy = jest.spyOn(elasticsearchClient.indices, 'putMapping');
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStreams: testDataStream,
+      });
+
+      await DataStreamClient.initialize({
+        logger,
+        elasticsearchClient,
+        dataStreams: {
+          ...testDataStream,
+          version: 1, // same version as initial deployment
+          template: {
+            ...testDataStream.template,
+            mappings: { properties: { somethingElse: mappings.text() } as any }, // some new mappings
+          },
+        },
+      });
+
+      expect(getIndexTemplateSpy).toHaveBeenCalledTimes(2);
+      expect(putIndexTemplateSpy).toHaveBeenCalledTimes(1);
+      expect(createDataStreamSpy).toHaveBeenCalledTimes(1);
+      expect(putMappingSpy).toHaveBeenCalledTimes(0); // No mapping updates were made
     });
   });
 });
