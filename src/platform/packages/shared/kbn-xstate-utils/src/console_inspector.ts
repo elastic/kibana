@@ -27,17 +27,26 @@ declare global {
 }
 
 let isHelpMessageLogged = false;
-const logHelpMessage = () => {
+const setupDevToolsInspector = () => {
   if (!isHelpMessageLogged) {
     console.info(
       `ℹ️ To toggle the XState inspector, for advanced debugging, run toggleXstateInspector() on your browser console.`
     );
     isHelpMessageLogged = true;
+
+    const isEnabled = localStorage.getItem('__XSTATE_LOGGER_ENABLED__') === 'true';
+
+    globalThis.__XSTATE_LOGGER_ENABLED__ = isEnabled;
+    globalThis.toggleXstateInspector = toggleXstateInspector;
   }
 };
 
 const toggleXstateInspector = () => {
   globalThis.__XSTATE_LOGGER_ENABLED__ = !globalThis.__XSTATE_LOGGER_ENABLED__;
+  localStorage.setItem(
+    '__XSTATE_LOGGER_ENABLED__',
+    globalThis.__XSTATE_LOGGER_ENABLED__.toString()
+  );
 
   console.info(
     `ℹ️ XState inspector ${globalThis.__XSTATE_LOGGER_ENABLED__ ? 'enabled' : 'disabled'}`
@@ -49,9 +58,7 @@ export const createConsoleInspector = () => {
     return () => {};
   }
 
-  globalThis.__XSTATE_LOGGER_ENABLED__ = false;
-  globalThis.toggleXstateInspector = toggleXstateInspector;
-  logHelpMessage();
+  setupDevToolsInspector();
 
   const log = (...args: Parameters<typeof console.info>) =>
     globalThis.__XSTATE_LOGGER_ENABLED__ ? console.info(...args) : undefined;
