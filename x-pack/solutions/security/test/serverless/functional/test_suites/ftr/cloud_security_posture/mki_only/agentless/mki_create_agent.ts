@@ -25,8 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   // This test suite is only running in the Serverless Quality Gates environment
   describe('Agentless API Serverless MKI only', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/236699
-    this.tags(['cloud_security_posture_agentless', 'failsOnMKI']);
+    this.tags(['cloud_security_posture_agentless']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
