@@ -18,6 +18,7 @@ interface MyDocument {
 const dataStream: DataStreamDefinition<MyDocument> = {
   name: '.kibana-my-data-stream',
   template: {
+    version: 1,
     mappings: {
       dynamic: false,
       properties: {
