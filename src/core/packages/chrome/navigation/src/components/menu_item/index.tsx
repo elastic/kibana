@@ -13,6 +13,8 @@ import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiIcon, EuiScreenReaderOnly, EuiText, euiFontSize, useEuiTheme } from '@elastic/eui';
 
+import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
+
 export interface MenuItemProps extends HTMLAttributes<HTMLAnchorElement | HTMLButtonElement> {
   as?: 'a' | 'button';
   children: ReactNode;
@@ -45,13 +47,21 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     ref
   ): JSX.Element => {
     const euiThemeContext = useEuiTheme();
-    const { euiTheme } = euiThemeContext;
+    const { euiTheme, highContrastMode } = euiThemeContext;
 
     const isSingleWord = typeof children === 'string' && !children.includes(' ');
 
     const buttonStyles = css`
+      --menu-item-text-color: ${
+        isHighlighted
+          ? euiTheme.components.buttons.textColorPrimary
+          : euiTheme.components.buttons.textColorText
+      };
+      --high-contrast-hover-indicator-color: var(--menu-item-text-color);
+      ${useHighContrastModeStyles('.iconWrapper')};
+
       width: 100%;
-      position: relative;
+      position: relative;nvm use
       overflow: hidden;
       align-items: center;
       justify-content: ${isHorizontal ? 'initial' : 'center'};
@@ -59,10 +69,9 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       flex-direction: ${isHorizontal ? 'row' : 'column'};
       // 3px is from Figma; there is no token
       gap: ${isHorizontal ? euiTheme.size.s : '3px'};
+      color: var(--menu-item-text-color);
+      // Focus affordance with border on the iconWrapper instead
       outline: none !important;
-      color: ${isHighlighted
-        ? euiTheme.components.buttons.textColorPrimary
-        : euiTheme.components.buttons.textColorText};
 
       .iconWrapper {
         position: relative;
@@ -72,11 +81,13 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         height: ${euiTheme.size.xl};
         width: ${euiTheme.size.xl};
         border-radius: ${euiTheme.border.radius.medium};
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimary
-          : isHorizontal
-          ? euiTheme.colors.backgroundBaseSubdued
-          : euiTheme.components.buttons.backgroundText};
+        background-color: ${
+          isHighlighted
+            ? euiTheme.components.buttons.backgroundPrimary
+            : isHorizontal
+            ? euiTheme.colors.backgroundBaseSubdued
+            : euiTheme.components.buttons.backgroundText
+        };
         z-index: 1;
       }
 
@@ -97,22 +108,19 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       }
 
       &:hover .iconWrapper::before {
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimaryHover
-          : euiTheme.components.buttons.backgroundTextHover};
+        background-color: ${
+          isHighlighted
+            ? euiTheme.components.buttons.backgroundPrimaryHover
+            : euiTheme.components.buttons.backgroundTextHover
+        };
       }
 
       &:active .iconWrapper::before {
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundPrimaryActive
-          : euiTheme.components.buttons.backgroundTextActive};
-      }
-
-      &:hover,
-      &:active {
-        color: ${isHighlighted
-          ? euiTheme.components.buttons.textColorPrimary
-          : euiTheme.components.buttons.textColorText};
+        background-color: ${
+          isHighlighted
+            ? euiTheme.components.buttons.backgroundPrimaryActive
+            : euiTheme.components.buttons.backgroundTextActive
+        };
       }
     `;
 
@@ -141,25 +149,23 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
     `;
 
+    const labelStyles = css`
+      ${truncatedStyles}
+      ${isHorizontal ? horizontalStyles : verticalStyles}
+      overflow: hidden;
+      max-width: 100%;
+      padding: 0 ${euiTheme.size.s};
+    `;
+
     const content = (
       <>
         <div className="iconWrapper">
-          <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type={'empty'} />}>
+          <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type="empty" />}>
             <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
           </Suspense>
         </div>
         {isLabelVisible ? (
-          <EuiText
-            size={isHorizontal ? 's' : 'xs'}
-            textAlign="center"
-            css={css`
-              ${truncatedStyles}
-              ${isHorizontal ? horizontalStyles : verticalStyles}
-              overflow: hidden;
-              max-width: 100%;
-              padding: 0 ${euiTheme.size.s};
-            `}
-          >
+          <EuiText size={isHorizontal ? 's' : 'xs'} textAlign="center" css={labelStyles}>
             {children}
           </EuiText>
         ) : (

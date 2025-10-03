@@ -37,8 +37,8 @@ export const SideNavPanel = ({ children, footer, openerNode }: SideNavPanelProps
   const wrapperStyles = css`
     // > For instance, only plain or transparent panels can have a border and/or shadow.
     // source: https://eui.elastic.co/docs/components/containers/panel/
-    border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
     box-sizing: border-box;
+    border-right: ${euiTheme.border.width.thin} ${euiTheme.colors.borderBaseSubdued} solid;
     display: flex;
     flex-direction: column;
     width: ${SIDE_PANEL_WIDTH}px;

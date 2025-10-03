@@ -18,6 +18,7 @@ import { BetaBadge } from '../beta_badge';
 import { TOOLTIP_OFFSET } from '../../constants';
 import { focusMainContent } from '../../utils/focus_main_content';
 import { useTooltip } from '../../hooks/use_tooltip';
+import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 
 export interface SideNavFooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
@@ -39,6 +40,8 @@ export const SideNavFooterItem = forwardRef<HTMLAnchorElement, SideNavFooterItem
   ) => {
     const { euiTheme } = useEuiTheme();
     const { tooltipRef, handleMouseOut } = useTooltip();
+    // TODO: remove once the fix is available on EUI side
+    const highContrastModeStyles = useHighContrastModeStyles();
 
     const handleFooterItemKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -53,6 +56,13 @@ export const SideNavFooterItem = forwardRef<HTMLAnchorElement, SideNavFooterItem
       display: flex;
       justify-content: center;
       width: 100%;
+    `;
+
+    const buttonStyles = css`
+      --high-contrast-hover-indicator-color: ${isHighlighted
+        ? euiTheme.colors.textPrimary
+        : euiTheme.colors.textParagraph};
+      ${highContrastModeStyles}
     `;
 
     const buttonProps: ComponentProps<typeof EuiButtonIcon> & {
@@ -70,6 +80,7 @@ export const SideNavFooterItem = forwardRef<HTMLAnchorElement, SideNavFooterItem
       iconType: 'empty', // `iconType` is passed in Suspense below
       onKeyDown: handleFooterItemKeyDown,
       size: 's',
+      css: buttonStyles,
       ...props,
     };
 
@@ -96,7 +107,6 @@ export const SideNavFooterItem = forwardRef<HTMLAnchorElement, SideNavFooterItem
 
       return (
         <EuiToolTip
-          ref={tooltipRef}
           anchorProps={{
             css: wrapperStyles,
           }}
@@ -104,6 +114,7 @@ export const SideNavFooterItem = forwardRef<HTMLAnchorElement, SideNavFooterItem
           disableScreenReaderOutput
           onMouseOut={handleMouseOut}
           position="right"
+          ref={tooltipRef}
           repositionOnScroll
           offset={TOOLTIP_OFFSET}
         >

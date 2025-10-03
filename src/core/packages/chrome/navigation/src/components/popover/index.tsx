@@ -31,6 +31,7 @@ import {
   TOP_BAR_HEIGHT,
   TOP_BAR_POPOVER_GAP,
 } from '../../constants';
+import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 import { focusAdjacentTrigger } from '../../utils/focus_adjacent_trigger';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
@@ -180,6 +181,7 @@ export const SideNavPopover = ({
 
   const popoverContentStyles = css`
     --popover-max-height: 37.5rem;
+    width: ${SIDE_PANEL_WIDTH}px;
     max-height: var(--popover-max-height);
     ${scrollStyles};
   `;
