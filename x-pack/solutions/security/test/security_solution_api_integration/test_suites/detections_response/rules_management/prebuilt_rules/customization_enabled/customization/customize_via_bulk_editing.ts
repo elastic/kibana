@@ -338,7 +338,7 @@ export default ({ getService }: FtrProviderContext): void => {
     };
 
     describe('when base version is available', () => {
-      testCustomizationViaBulkEditing({ hasBaseVersion: false });
+      testCustomizationViaBulkEditing({ hasBaseVersion: true });
     });
 
     describe('when base version is missing', () => {
