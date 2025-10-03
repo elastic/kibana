@@ -59,7 +59,7 @@ const getTimeFilter = (
       fieldName: timeFieldName,
     });
 
-  return buildEsQuery(undefined, [], [...(timeFilter ? [timeFilter] : [])], esQueryConfigs);
+  return buildEsQuery(undefined, [], timeFilter ? [timeFilter] : [], esQueryConfigs);
 };
 
 const ALL_DOCUMENTS = 'all';
