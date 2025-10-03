@@ -1514,9 +1514,9 @@ export class CstToAstConverter {
     }
 
     // KEY BY <key_columns>
-    const keyByCtx = configCtx.KEY();
-    if (keyByCtx && byContext) {
-      const option = this.toOption(keyByCtx.getText().toLowerCase(), configCtx);
+    const keyCtx = configCtx.KEY();
+    if (keyCtx && byContext) {
+      const option = this.toOption(keyCtx.getText().toLowerCase(), configCtx);
       const fields = this.fromFields(configCtx.fields());
 
       if (fields.length > 0) {
@@ -1531,9 +1531,9 @@ export class CstToAstConverter {
     }
 
     // GROUP BY <group_column>
-    const groupByCtx = configCtx.GROUP();
-    if (groupByCtx && byContext) {
-      const option = this.toOption(groupByCtx.getText().toLowerCase(), configCtx);
+    const groupCtx = configCtx.GROUP();
+    if (groupCtx && byContext) {
+      const option = this.toOption(groupCtx.getText().toLowerCase(), configCtx);
 
       const groupColumnCtx = configCtx.qualifiedName();
 
