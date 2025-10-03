@@ -664,6 +664,7 @@
     "@kbn/kibana-api-cli": "link:x-pack/platform/packages/shared/kbn-kibana-api-cli",
     "@kbn/kibana-cors-test-plugin": "link:x-pack/platform/test/functional_cors/plugins/kibana_cors_test",
     "@kbn/kibana-overview-plugin": "link:src/platform/plugins/private/kibana_overview",
+    "@kbn/kibana-plugin-graph": "link:packages/kbn-kibana-plugin-graph",
     "@kbn/kibana-react-plugin": "link:src/platform/plugins/shared/kibana_react",
     "@kbn/kibana-usage-collection-plugin": "link:src/platform/plugins/private/kibana_usage_collection",
     "@kbn/kibana-utils-plugin": "link:src/platform/plugins/shared/kibana_utils",

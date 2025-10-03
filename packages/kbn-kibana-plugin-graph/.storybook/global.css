@@ -1,0 +1,8 @@
+body {
+  display: flex !important;
+  height: 100%;
+}
+
+#root {
+  width: 100%;
+}

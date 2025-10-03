@@ -1266,6 +1266,8 @@
       "@kbn/kibana-manifest-schema/*": ["packages/kbn-kibana-manifest-schema/*"],
       "@kbn/kibana-overview-plugin": ["src/platform/plugins/private/kibana_overview"],
       "@kbn/kibana-overview-plugin/*": ["src/platform/plugins/private/kibana_overview/*"],
+      "@kbn/kibana-plugin-graph": ["packages/kbn-kibana-plugin-graph"],
+      "@kbn/kibana-plugin-graph/*": ["packages/kbn-kibana-plugin-graph/*"],
       "@kbn/kibana-react-plugin": ["src/platform/plugins/shared/kibana_react"],
       "@kbn/kibana-react-plugin/*": ["src/platform/plugins/shared/kibana_react/*"],
       "@kbn/kibana-usage-collection-plugin": ["src/platform/plugins/private/kibana_usage_collection"],
