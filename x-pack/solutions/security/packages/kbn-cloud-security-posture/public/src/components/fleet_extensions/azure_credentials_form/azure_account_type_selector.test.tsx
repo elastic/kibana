@@ -139,15 +139,17 @@ describe('AzureAccountTypeSelect', () => {
     });
 
     it('renders organization option disabled when azure organization is disabled', () => {
-      mockUseCloudSetup.mockReturnValue({
-        ...defaultMockCloudSetup,
+      // Use minimal mock setup for better performance
+      mockUseCloudSetup.mockReturnValueOnce({
         azureOrganizationEnabled: false,
+        packageInfo: { name: 'cloud_security_posture' },
+        shortName: 'CSPM',
       });
 
       renderWithIntl(<AzureAccountTypeSelect {...defaultProps} />);
 
-      const organizationRadio = screen.getByRole('radio', { name: 'Azure Organization' });
-      expect(organizationRadio).toBeDisabled();
+      // Use more specific query to reduce DOM traversal time
+      expect(screen.getByLabelText('Azure Organization')).toBeDisabled();
     });
 
     it('renders organization option enabled when azure organization is enabled', () => {
