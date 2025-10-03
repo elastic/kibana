@@ -41,6 +41,14 @@ import { createStepExecutionRuntime } from '../workflow_context_manager/step_exe
  */
 export async function runNode(params: WorkflowExecutionLoopParams): Promise<void> {
   const currentNode = params.workflowRuntime.getCurrentNode();
+
+  // Exit the scope of the current node if it's an exit node
+  // It should be done before creating StepExecutionRuntime to ensure the scope stack for the node is correct
+  // e.g. the same as for enter-* nodes
+  if (currentNode?.type.startsWith('exit')) {
+    params.workflowRuntime.exitScope();
+  }
+
   const stepExecutionRuntime = createStepExecutionRuntime({
     workflowExecutionGraph: params.workflowExecutionGraph,
     workflowExecutionState: params.workflowExecutionState,
@@ -51,6 +59,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     node: currentNode as GraphNodeUnion,
     stackFrames: params.workflowRuntime.getCurrentNodeScope(),
   });
+  if (currentNode?.type.startsWith('enter')) {
+    params.workflowRuntime.enterScope();
+  }
   const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
   const monitorAbortController = new AbortController();
 
