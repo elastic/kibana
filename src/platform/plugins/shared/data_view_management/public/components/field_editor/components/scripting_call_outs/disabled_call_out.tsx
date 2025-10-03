@@ -17,7 +17,7 @@ export const ScriptingDisabledCallOut = ({ isVisible = false }) => {
   return isVisible ? (
     <Fragment>
       <EuiCallOut
-        announceOnMount
+        announceOnMount={false}
         title={
           <FormattedMessage
             id="indexPatternManagement.disabledCallOutHeader"
