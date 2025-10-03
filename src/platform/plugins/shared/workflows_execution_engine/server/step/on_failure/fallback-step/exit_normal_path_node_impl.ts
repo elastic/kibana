@@ -18,7 +18,6 @@ export class ExitNormalPathNodeImpl implements NodeImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.exitScope();
     this.wfExecutionRuntimeManager.navigateToNode(this.node.exitOnFailureZoneNodeId);
   }
 }

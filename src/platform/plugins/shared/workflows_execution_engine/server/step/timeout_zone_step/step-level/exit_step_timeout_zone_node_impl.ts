@@ -18,7 +18,6 @@ export class ExitStepTimeoutZoneNodeImpl implements NodeImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.exitScope();
     await this.stepExecutionRuntime.finishStep();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
