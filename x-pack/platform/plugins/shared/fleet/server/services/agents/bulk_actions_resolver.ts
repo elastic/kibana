@@ -33,11 +33,7 @@ import { ChangePrivilegeActionRunner } from './change_privilege_runner';
 export class BulkActionsResolver {
   private taskManager?: TaskManagerStartContract;
 
-  createTaskRunner(
-    core: CoreSetup,
-    taskType: BulkActionTaskType,
-    abortController?: AbortController
-  ) {
+  createTaskRunner(core: CoreSetup, taskType: BulkActionTaskType) {
     return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
       const getDeps = async () => {
         const [coreStart] = await core.getStartServices();
@@ -71,17 +67,12 @@ export class BulkActionsResolver {
             soClient,
             actionParams,
             retryParams
-          ).runActionAsyncWithRetry(),
-        abortController
+          ).runActionAsyncWithRetry()
       );
     };
   }
 
-  constructor(
-    taskManager: TaskManagerSetupContract,
-    core: CoreSetup,
-    abortController?: AbortController
-  ) {
+  constructor(taskManager: TaskManagerSetupContract, core: CoreSetup) {
     const definitions = Object.values(BulkActionTaskType)
       .map((type) => {
         return [
@@ -90,7 +81,7 @@ export class BulkActionsResolver {
             title: 'Bulk Action Retry',
             timeout: '1m',
             maxAttempts: 1,
-            createTaskRunner: this.createTaskRunner(core, type, abortController),
+            createTaskRunner: this.createTaskRunner(core, type),
           },
         ];
       })
@@ -142,8 +133,7 @@ export function createRetryTask(
     soClient: SavedObjectsClient,
     actionParams: ActionParams,
     retryParams: RetryParams
-  ) => void,
-  abortController?: AbortController
+  ) => void
 ) {
   return {
     async run() {
@@ -155,11 +145,6 @@ export function createRetryTask(
         taskInstance.taskType,
         taskInstance.params.retryParams
       );
-
-      if (abortController?.signal.aborted) {
-        appContextService.getLogger().info(`Task id ${taskInstance.id} canceled!`);
-        abortController.signal.throwIfAborted();
-      }
       appContextService
         .getLogger()
         .debug(
