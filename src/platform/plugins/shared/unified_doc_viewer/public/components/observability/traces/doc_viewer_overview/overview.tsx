@@ -141,20 +141,13 @@ export const Overview = forwardRef<OverviewApi, OverviewProps>(
                 docId={docId}
               />
             ) : null}
-            <EuiSpacer size="m" />
             <ErrorsTable ref={setErrorsTableSectionRef} traceId={traceId} docId={docId} />
-            <EuiSpacer size="m" />
             <TraceContextLogEvents
               traceId={traceId}
               spanId={spanId}
               transactionId={transactionId}
             />
-            {docId ? (
-              <>
-                <EuiSpacer size="m" />
-                <SpanLinks traceId={traceId} docId={docId} />
-              </>
-            ) : null}
+            {docId ? <SpanLinks traceId={traceId} docId={docId} /> : null}
           </div>
         </TraceRootItemProvider>
       </DataSourcesProvider>
