@@ -14,5 +14,5 @@ export const getRulesFeature = (params: SecurityFeatureParams): ProductFeaturePa
   baseKibanaFeature: getRulesBaseKibanaFeature(params),
   baseKibanaSubFeatureIds: [],
   subFeaturesMap: new Map(),
-  productFeatureConfig: rulesDefaultProductFeaturesConfig
+  productFeatureConfig: rulesDefaultProductFeaturesConfig,
 });
