@@ -19,7 +19,7 @@ A “boilerplate” Scout test file refers to a test file containing test case(s
 
 ### How to Use
 
-**Sample prompt** (replace the FTR file path):
+**Sample prompt** (replace the FTR test file path as needed):
 
 ```
 Generate an empty Scout skeleton from this file:
