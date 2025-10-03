@@ -494,6 +494,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      {/* Appearance popover */}
       <EuiFlexItem grow={false}>
         <VisualOptionsPopover
           state={state}
@@ -501,6 +502,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
           datasourceLayers={frame.datasourceLayers}
         />
       </EuiFlexItem>
+
+      {/* Titles and text popover */}
       {hasBarSeries(state.layers) && (
         <EuiFlexItem grow={false}>
           <TextPopover
@@ -511,6 +514,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
         </EuiFlexItem>
       )}
 
+      {/* Axis settings */}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <TooltipWrapper
@@ -619,7 +623,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
           </TooltipWrapper>
         </EuiFlexGroup>
       </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
         <LegendSettingsPopover
           legendOptions={legendOptions}
