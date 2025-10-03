@@ -11,14 +11,12 @@ import React, { useCallback, useMemo } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
 import styled from '@emotion/styled';
 import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { SwitchSchemaMessage } from '../../../../components/shared/switch_schema_message';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 import type {
   InfraWaffleMapBounds,
   InfraWaffleMapOptions,
   InfraFormatter,
 } from '../../../../common/inventory/types';
-import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { Map } from './waffle/map';
 import { TableView } from './table_view';
@@ -104,16 +102,6 @@ export const NodesOverview = ({
   const noData = !loading && nodes && nodes.length === 0;
 
   const hasDataOnAnotherSchema = schemas.length === 1 && preferredSchema !== schemas[0];
-  const refetchProps = hasDataOnAnotherSchema
-    ? {}
-    : {
-        refetchText: i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
-          defaultMessage: 'Check for new data',
-        }),
-        onRefetch: () => {
-          reload();
-        },
-      };
 
   if (loading && showLoading) {
     // Don't show loading screen when we're auto-reloading
@@ -126,25 +114,9 @@ export const NodesOverview = ({
         })}
       />
     );
-  } else if (noData) {
-    return (
-      <NoData
-        titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
-          defaultMessage: 'There is no data to display.',
-        })}
-        bodyText={
-          hasDataOnAnotherSchema ? (
-            <SwitchSchemaMessage dataTestSubj="infraInventoryViewNoDataInSelectedSchema" />
-          ) : (
-            i18n.translate('xpack.infra.waffle.noDataDescription', {
-              defaultMessage: 'Try adjusting your time or filter.',
-            })
-          )
-        }
-        {...refetchProps}
-        testString="noMetricsDataPrompt"
-      />
-    );
+  } else if (noData && !hasDataOnAnotherSchema) {
+    // Don't render anything when there's no data at all - let the page template handle it
+    return null;
   }
   const dataBounds = calculateBoundsFromNodes(nodes);
   const bounds = autoBounds ? dataBounds : boundsOverride;
