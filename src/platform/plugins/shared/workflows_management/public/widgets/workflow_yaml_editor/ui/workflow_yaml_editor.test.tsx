@@ -13,6 +13,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
+import { WorkflowEditorStoreProvider } from '../lib/store';
 
 // Mock the YamlEditor component to avoid Monaco complexity in tests
 jest.mock('../../../shared/ui/yaml_editor', () => ({
@@ -61,7 +62,9 @@ describe('WorkflowYAMLEditor', () => {
   const renderWithI18n = (component: React.ReactElement) => {
     return render(
       <MemoryRouter>
-        <I18nProviderMock>{component}</I18nProviderMock>
+        <I18nProviderMock>
+          <WorkflowEditorStoreProvider>{component}</WorkflowEditorStoreProvider>
+        </I18nProviderMock>
       </MemoryRouter>
     );
   };
