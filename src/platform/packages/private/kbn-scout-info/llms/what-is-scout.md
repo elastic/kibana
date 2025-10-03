@@ -44,7 +44,7 @@ Scout makes it easy to run tests your way – sequentially, in parallel, and mor
 
 ## Fixtures
 
-Fixtures offer essential context to your tests. The `@kbn/scout` package includes a collection of fixtures specifically designed for Scout tests. These fixtures provide reusable, scoped resources to ensure that tests have consistent and isolated access to criticial services such as logging, configuration, and Kibana and Elasticsearch clients.
+Fixtures offer essential context to your tests. The `@kbn/scout` package includes a collection of fixtures specifically designed for Scout tests. These fixtures provide reusable, scoped resources to ensure that tests have consistent and isolated access to critical services such as logging, configuration, and Kibana and Elasticsearch clients.
 
 ### Usage
 
