@@ -27,7 +27,6 @@ export class EnterIfNodeImpl implements NodeImplementation {
 
   public async run(): Promise<void> {
     await this.stepExecutionRuntime.startStep();
-    this.wfExecutionRuntimeManager.enterScope();
     const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
 
     if (

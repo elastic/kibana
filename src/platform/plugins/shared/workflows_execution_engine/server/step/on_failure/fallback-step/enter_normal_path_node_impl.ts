@@ -22,7 +22,6 @@ export class EnterNormalPathNodeImpl implements NodeImplementation, NodeWithErro
   ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.enterScope();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 

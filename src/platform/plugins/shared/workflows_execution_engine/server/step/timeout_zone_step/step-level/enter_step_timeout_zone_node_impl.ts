@@ -25,7 +25,6 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
 
   public async run(): Promise<void> {
     await this.stepExecutionRuntime.startStep();
-    this.wfExecutionRuntimeManager.enterScope();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 

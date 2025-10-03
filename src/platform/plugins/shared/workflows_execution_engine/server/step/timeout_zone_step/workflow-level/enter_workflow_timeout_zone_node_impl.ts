@@ -26,7 +26,6 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
 
   public async run(): Promise<void> {
     await this.stepExecutionRuntime.startStep();
-    this.wfExecutionRuntimeManager.enterScope();
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
