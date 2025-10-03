@@ -23,7 +23,7 @@ export default {
 
 export const Default = () => {
   return (
-    <EuiFlyout size="s" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}} aria-label="Connection details">
       <StoriesProvider onTelemetryEvent={action('onTelemetryEvent')}>
         <ConnectionDetailsFlyoutContent />
       </StoriesProvider>
@@ -33,7 +33,7 @@ export const Default = () => {
 
 export const CreationError = () => {
   return (
-    <EuiFlyout size="s" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}} aria-label="Connection details - Creation error">
       <StoriesProviderKeyCreationError>
         <ConnectionDetailsFlyoutContent />
       </StoriesProviderKeyCreationError>
@@ -43,7 +43,7 @@ export const CreationError = () => {
 
 export const MissingPermissions = () => {
   return (
-    <EuiFlyout size="s" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}} aria-label="Connection details - Missing permissions">
       <StoriesProviderNoKeyPermissions>
         <ConnectionDetailsFlyoutContent />
       </StoriesProviderNoKeyPermissions>

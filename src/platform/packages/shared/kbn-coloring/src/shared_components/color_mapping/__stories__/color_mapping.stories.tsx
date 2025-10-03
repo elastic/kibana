@@ -74,6 +74,7 @@ const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
         onClose={() => {}}
         hideCloseButton
         ownFocus={false}
+        aria-label="Color mapping configuration"
       >
         <EuiForm>
           <CategoricalColorMapping {...args} palettes={palettes} onModelUpdate={setUpdateModel} />

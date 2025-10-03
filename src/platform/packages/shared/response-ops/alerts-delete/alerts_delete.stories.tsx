@@ -66,7 +66,7 @@ const DefaultStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
   const showFlyout = () => setIsFlyoutVisible(true);
 
   return isFlyoutVisible ? (
-    <EuiFlyout type="push" onClose={closeFlyout} maxWidth={440}>
+    <EuiFlyout type="push" onClose={closeFlyout} maxWidth={440} aria-label="Delete alerts">
       <EuiFlyoutBody>
         <AlertDeleteDescriptiveFormGroup
           services={{ http, notifications }}

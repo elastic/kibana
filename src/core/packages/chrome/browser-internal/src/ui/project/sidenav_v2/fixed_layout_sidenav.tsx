@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyout } from '@elastic/eui';
+import { EuiFlyout, useGeneratedHtmlId } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -50,6 +50,7 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
   children: (props: { setWidth: (width: number) => void }) => React.ReactNode;
 }> = ({ children, side = 'left' }) => {
   const [width, setWidth] = React.useState<number>(0);
+  const sideNavFlyoutId = useGeneratedHtmlId({ prefix: 'sideNavFlyout' });
 
   const childrenProps = React.useMemo(() => ({ setWidth }), [setWidth]);
 
@@ -72,6 +73,7 @@ const CollapsibleNavigationFlyout: FunctionComponent<{
         hideCloseButton={true}
         onClose={() => {}}
         className="hide-for-sharing"
+        aria-label="Side navigation"
         css={css`
           border-inline-end: none; // Remove default euiFlyout border when used as a sidenav
         `}
