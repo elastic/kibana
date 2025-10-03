@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEmpty } from 'lodash';
-
 function splitFilters(value: string) {
   return value
     .split(/\bwhere\b/i)
-    .filter((item) => !isEmpty(item))
+    .filter((item) => item !== '')
     .map((item) => item.trim());
 }
 
