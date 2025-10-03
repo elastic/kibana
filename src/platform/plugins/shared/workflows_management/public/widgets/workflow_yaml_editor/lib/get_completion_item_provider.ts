@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Scalar } from 'yaml';
-import { YAMLParseError, isScalar, parseDocument } from 'yaml';
+import type { Scalar, Document, Pair, Node } from 'yaml';
+import { YAMLParseError, isPair, isScalar, parseDocument, visit } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
 import type { BuiltInStepType, TriggerType } from '@kbn/workflows';
@@ -177,40 +177,35 @@ function isInTriggersContext(path: any[]): boolean {
 /**
  * Detect if we're in a scheduled trigger's with block
  */
-function isInScheduledTriggerWithBlock(
-  yamlDocument: any,
-  path: any[],
-  model: any,
-  position: any
-): boolean {
-  // First check if we're in a triggers context
-  if (!isInTriggersContext(path)) {
-    return false;
-  }
+function isInScheduledTriggerWithBlock(yamlDocument: Document, absolutePosition: number): boolean {
+  let result = false;
 
-  // Check if we're in a with block
-  const isInWithBlock = detectIfInWithBlock(model, position.lineNumber);
-  if (!isInWithBlock) {
-    return false;
-  }
+  visit(yamlDocument, {
+    Map(key, node, ancestors) {
+      if (!node.range || node.get('type') !== 'scheduled') return;
 
-  // Find the trigger type by looking backwards from the with block
-  const currentLineNumber = position.lineNumber;
-  for (let lineNumber = currentLineNumber; lineNumber >= 1; lineNumber--) {
-    const line = model.getLineContent(lineNumber);
+      // Check if we're inside this trigger's range
+      if (absolutePosition < node.range[0] || absolutePosition > node.range[2]) return;
 
-    // Look for type: scheduled
-    if (line.includes('type:') && line.includes('scheduled')) {
-      return true;
-    }
+      // Find the 'with' property node within this trigger
+      const withPair = node.items.find(
+        (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'with'
+      ) as Pair<Scalar, Node> | undefined;
 
-    // Stop if we hit a trigger boundary
-    if (line.match(/^\s*-\s*type:/) || line.match(/^\s*triggers:/)) {
-      break;
-    }
-  }
+      if (withPair?.value?.range) {
+        // Check if the current position is within the with block's range
+        if (
+          absolutePosition >= withPair.value.range[0] &&
+          absolutePosition <= withPair.value.range[2]
+        ) {
+          result = true;
+          return visit.BREAK;
+        }
+      }
+    },
+  });
 
-  return false;
+  return result;
 }
 
 export interface LineParseResult {
@@ -1243,7 +1238,7 @@ export function getCompletionItemProvider(
         // Detected connector type
 
         // Check if we're in a scheduled trigger's with block for RRule suggestions
-        if (isInScheduledTriggerWithBlock(yamlDocument, path, model, position)) {
+        if (isInScheduledTriggerWithBlock(yamlDocument, absolutePosition)) {
           // We're in a scheduled trigger's with block - provide RRule suggestions
           const rruleSuggestions = getRRuleSchedulingSuggestions(range);
 
