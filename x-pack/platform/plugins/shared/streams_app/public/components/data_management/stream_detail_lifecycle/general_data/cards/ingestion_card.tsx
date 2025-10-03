@@ -59,7 +59,7 @@ export const IngestionCard = ({
       subtitle: i18n.translate(
         'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.dailyAverage',
         {
-          defaultMessage: 'Daily Average',
+          defaultMessage: 'Daily average',
         }
       ),
       'data-test-subj': 'ingestion-daily',
@@ -79,7 +79,7 @@ export const IngestionCard = ({
       subtitle: i18n.translate(
         'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.monthlyAverage',
         {
-          defaultMessage: 'Monthly Average',
+          defaultMessage: 'Monthly average',
         }
       ),
       'data-test-subj': 'ingestion-monthly',
