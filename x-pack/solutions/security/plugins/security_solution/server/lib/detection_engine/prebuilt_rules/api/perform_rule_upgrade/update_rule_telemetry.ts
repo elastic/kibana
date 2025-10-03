@@ -9,7 +9,10 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayDiffConflict,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
-import { DETECTION_RULE_UPGRADE_EVENT } from '../../../../telemetry/event_based/events';
+import {
+  DETECTION_RULE_UPGRADE_EVENT,
+  DETECTION_RULE_BULK_UPGRADE_EVENT,
+} from '../../../../telemetry/event_based/events';
 
 interface BasicDiffInfo {
   conflict: ThreeWayDiffConflict;
@@ -24,6 +27,7 @@ export interface RuleUpgradeContext {
   ruleId: string;
   ruleName: string;
   hasBaseVersion: boolean;
+  isCustomized: boolean;
   fieldsDiff: BasicRuleFieldsDiff;
 }
 
@@ -42,6 +46,20 @@ export interface RuleUpgradeTelemetry {
   updatedFieldsWithSolvableConflicts: string[];
   updatedFieldsWithNoConflicts: string[];
   finalResult: UpdateRuleFinalResult;
+}
+
+interface BulkUpdateSummary {
+  totalNumberOfRules: number;
+  noOfCustomizedRules: number;
+  noOfNonCustomizedRules: number;
+  noOfNonSolvableConflicts: number;
+  noOfSolvableConflicts: number;
+  noOfNoConflicts: number;
+}
+export interface RuleBulkUpgradeTelemetry {
+  successfulUpdates: BulkUpdateSummary;
+  errorUpdates: BulkUpdateSummary;
+  skippedUpdates: BulkUpdateSummary;
 }
 
 interface BasicRuleResponse {
@@ -112,6 +130,97 @@ export function sendRuleUpdateTelemetryEvents(
     // eslint-disable-next-line no-console
     console.error('Failed to send detection rule update telemetry', e);
   }
+}
+
+export function sendRuleBulkUpgradeTelemetryEvent(
+  analytics: AnalyticsServiceStart,
+  ruleUpgradeContextsMap: Map<string, RuleUpgradeContext>,
+  updatedRules: BasicRuleResponse[],
+  ruleErrors: BasicInstallationError[],
+  skippedRules: BasicSkippedRule[]
+) {
+  try {
+    const successfulUpdates = calculateBulkUpdateSummary(
+      ruleUpgradeContextsMap,
+      updatedRules.map((rule) => rule.rule_id)
+    );
+
+    const errorUpdates = calculateBulkUpdateSummary(
+      ruleUpgradeContextsMap,
+      ruleErrors.map((error) => error.item.rule_id)
+    );
+
+    const skippedUpdates = calculateBulkUpdateSummary(
+      ruleUpgradeContextsMap,
+      skippedRules.map((rule) => rule.rule_id)
+    );
+
+    const event: RuleBulkUpgradeTelemetry = {
+      successfulUpdates,
+      errorUpdates,
+      skippedUpdates,
+    };
+
+    analytics.reportEvent(DETECTION_RULE_BULK_UPGRADE_EVENT.eventType, event);
+  } catch (e) {
+    // we don't want telemetry errors to impact the main flow
+    // eslint-disable-next-line no-console
+    console.error('Failed to send detection rule bulk upgrade telemetry', e);
+  }
+}
+
+function calculateBulkUpdateSummary(
+  ruleUpgradeContextsMap: Map<string, RuleUpgradeContext>,
+  ruleIds: string[]
+): BulkUpdateSummary {
+  let totalNumberOfRules = 0;
+  let noOfNonSolvableConflicts = 0;
+  let noOfSolvableConflicts = 0;
+  let noOfNoConflicts = 0;
+  let noOfCustomizedRules = 0;
+  let noOfNonCustomizedRules = 0;
+
+  ruleIds.forEach((ruleId) => {
+    const ruleUpgradeContext = ruleUpgradeContextsMap.get(ruleId);
+
+    if (!ruleUpgradeContext) {
+      // eslint-disable-next-line no-console
+      console.warn(`Rule ${ruleId} not found in context map`);
+      return;
+    }
+
+    totalNumberOfRules++;
+
+    const { fieldsDiff, isCustomized } = ruleUpgradeContext;
+    const diffs = Object.values(fieldsDiff) as BasicDiffInfo[];
+
+    if (isCustomized) {
+      noOfCustomizedRules++;
+    } else {
+      noOfNonCustomizedRules++;
+    }
+
+    if (diffs.some((d) => d.conflict === ThreeWayDiffConflict.NON_SOLVABLE)) {
+      noOfNonSolvableConflicts++;
+      return;
+    }
+
+    if (diffs.some((d) => d.conflict === ThreeWayDiffConflict.SOLVABLE)) {
+      noOfSolvableConflicts++;
+      return;
+    }
+
+    noOfNoConflicts++;
+  });
+
+  return {
+    totalNumberOfRules,
+    noOfCustomizedRules,
+    noOfNonCustomizedRules,
+    noOfNonSolvableConflicts,
+    noOfSolvableConflicts,
+    noOfNoConflicts,
+  };
 }
 
 interface CreateRuleUpdateTelemetryEventParams {

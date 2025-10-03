@@ -7,6 +7,7 @@
 
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import type {
   FullThreeWayRuleDiff,
   PerformRuleUpgradeRequestBody,
@@ -43,7 +44,10 @@ import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 import { getPossibleUpgrades } from '../../logic/utils';
 import type { RuleUpgradeContext } from './update_rule_telemetry';
-import { sendRuleUpdateTelemetryEvents } from './update_rule_telemetry';
+import {
+  sendRuleBulkUpgradeTelemetryEvent,
+  sendRuleUpdateTelemetryEvents,
+} from './update_rule_telemetry';
 
 export const performRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
@@ -183,6 +187,7 @@ export const performRuleUpgradeHandler = async (
               ruleId: targetRule.rule_id,
               ruleName: currentVersion.name,
               hasBaseVersion: !!baseVersion,
+              isCustomized: isRuleCustomized(currentVersion),
               fieldsDiff: ruleDiff.fields,
             });
             return;
@@ -245,6 +250,16 @@ export const performRuleUpgradeHandler = async (
         ruleErrors,
         skippedRules
       );
+
+      if (mode === ModeEnum.ALL_RULES) {
+        sendRuleBulkUpgradeTelemetryEvent(
+          analytics,
+          ruleUpgradeContextsMap,
+          updatedRules,
+          ruleErrors,
+          skippedRules
+        );
+      }
     }
 
     const body: PerformRuleUpgradeResponseBody = {
