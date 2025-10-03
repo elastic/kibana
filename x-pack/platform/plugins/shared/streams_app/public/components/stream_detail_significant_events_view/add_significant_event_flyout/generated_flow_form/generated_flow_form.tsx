@@ -5,43 +5,41 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQueryKql, System } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
-import { v4 } from 'uuid';
-import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useSignificantEventsApi } from '../../../../hooks/use_significant_events_api';
-import { validateQuery } from '../common/validate_query';
-import { AIConnectorSelector } from './ai_connector_selector';
-import { AIFeaturesDisabledCallout } from './ai_features_disabled_callout';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
-import { useAIFeatures } from './use_ai_features';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { AiFlowEmptyState } from './empty_state';
+import { AiFlowWaitingForGeneration } from './waiting_for_generation';
 
 interface Props {
+  isGenerating: boolean;
+  generatedQueries: StreamQueryKql[];
+  onEditQuery: (query: StreamQueryKql) => void;
+  stopGeneration: () => void;
   definition: Streams.all.Definition;
   isSubmitting: boolean;
   setQueries: (queries: StreamQueryKql[]) => void;
   setCanSave: (canSave: boolean) => void;
+  systems: Omit<System, 'description'>[];
+  dataViews: DataView[];
 }
 
-export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmitting }: Props) {
-  const {
-    core: { notifications },
-    services: { telemetryClient },
-  } = useKibana();
-  const {
-    timeState: { start, end },
-  } = useTimefilter();
-  const aiFeatures = useAIFeatures();
-  const { generate } = useSignificantEventsApi({ name: definition.name, start, end });
-
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
+export function GeneratedFlowForm({
+  isGenerating,
+  generatedQueries,
+  onEditQuery,
+  stopGeneration,
+  setQueries,
+  definition,
+  setCanSave,
+  isSubmitting,
+  systems,
+  dataViews,
+}: Props) {
   const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
+  const [isEditingQueries, setIsEditingQueries] = useState(false);
 
   const onSelectionChange = (selectedItems: StreamQueryKql[]) => {
     setSelectedQueries(selectedItems);
@@ -49,119 +47,41 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
   };
 
   useEffect(() => {
-    setCanSave(selectedQueries.length > 0);
-  }, [selectedQueries, setCanSave]);
+    setCanSave(!isEditingQueries && selectedQueries.length > 0);
+  }, [selectedQueries, isEditingQueries, setCanSave]);
+
+  if (!isGenerating && generatedQueries.length === 0) {
+    return <AiFlowEmptyState />;
+  }
+
+  if (isGenerating && generatedQueries.length === 0) {
+    return <AiFlowWaitingForGeneration stopGeneration={stopGeneration} />;
+  }
+
+  if (!isGenerating && generatedQueries.length === 0) {
+    return <AiFlowEmptyState />;
+  }
+
+  if (isGenerating && generatedQueries.length === 0) {
+    return <AiFlowWaitingForGeneration stopGeneration={stopGeneration} />;
+  }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.generatedFlowFormTitle', {
-            defaultMessage: 'Suggested significant events',
-          })}
-        </h3>
-      </EuiTitle>
-
-      {aiFeatures && !aiFeatures.enabled && !aiFeatures.genAiConnectors.loading && (
-        <AIFeaturesDisabledCallout couldBeEnabled={aiFeatures?.couldBeEnabled ?? false} />
+    <>
+      <SignificantEventsGeneratedTable
+        setIsEditingQueries={setIsEditingQueries}
+        isSubmitting={isSubmitting}
+        generatedQueries={generatedQueries}
+        onEditQuery={onEditQuery}
+        selectedQueries={selectedQueries}
+        onSelectionChange={onSelectionChange}
+        definition={definition}
+        systems={systems}
+        dataViews={dataViews}
+      />
+      {isGenerating && (
+        <AiFlowWaitingForGeneration stopGeneration={stopGeneration} hasInitialResults={true} />
       )}
-
-      {aiFeatures && aiFeatures.enabled && (
-        <>
-          <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                isLoading={isGenerating}
-                size="s"
-                disabled={
-                  isSubmitting || isGenerating || !aiFeatures.genAiConnectors.selectedConnector
-                }
-                iconType="sparkles"
-                onClick={() => {
-                  const startTime = Date.now();
-
-                  setIsGenerating(true);
-                  setGeneratedQueries([]);
-                  setSelectedQueries([]);
-
-                  const generation$ = generate(aiFeatures.genAiConnectors.selectedConnector!);
-                  generation$.subscribe({
-                    next: (result) => {
-                      const validation = validateQuery({
-                        title: result.query.title,
-                        kql: { query: result.query.kql },
-                      });
-
-                      if (!validation.kql.isInvalid) {
-                        setGeneratedQueries((prev) => [
-                          ...prev,
-                          {
-                            id: v4(),
-                            kql: { query: result.query.kql },
-                            title: result.query.title,
-                            system: result.query.system,
-                          },
-                        ]);
-                      }
-                    },
-                    error: (error) => {
-                      setIsGenerating(false);
-                      if (error.name === 'AbortError') {
-                        return;
-                      }
-
-                      notifications.showErrorDialog({
-                        title: i18n.translate(
-                          'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
-                          { defaultMessage: `Could not generate significant events queries` }
-                        ),
-                        error,
-                      });
-                    },
-                    complete: () => {
-                      notifications.toasts.addSuccess({
-                        title: i18n.translate(
-                          'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
-                          { defaultMessage: `Generated significant events queries successfully` }
-                        ),
-                      });
-                      telemetryClient.trackSignificantEventsSuggestionsGenerate({
-                        duration_ms: Date.now() - startTime,
-                        stream_type: getStreamTypeFromDefinition(definition),
-                      });
-                      setIsGenerating(false);
-                    },
-                  });
-                }}
-              >
-                {isGenerating
-                  ? i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
-                      { defaultMessage: 'Generating...' }
-                    )
-                  : i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
-                      {
-                        defaultMessage: 'Generate',
-                      }
-                    )}
-              </EuiButton>
-            </EuiFlexItem>
-            <AIConnectorSelector
-              genAiConnectors={aiFeatures.genAiConnectors}
-              disabled={isSubmitting || isGenerating}
-            />
-          </EuiFlexGroup>
-
-          <SignificantEventsGeneratedTable
-            isSubmitting={isSubmitting}
-            generatedQueries={generatedQueries}
-            selectedQueries={selectedQueries}
-            onSelectionChange={onSelectionChange}
-            definition={definition}
-          />
-        </>
-      )}
-    </EuiFlexGroup>
+    </>
   );
 }

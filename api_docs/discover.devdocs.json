@@ -968,6 +968,20 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.discoverFeatureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "discoverFeatureFlags",
+            "description": [],
+            "signature": [
+              "DiscoverFeatureFlags"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.DiscoverServices.docLinks",
             "type": "Object",
             "tags": [],
@@ -2347,7 +2361,15 @@
               "TabState",
               "[]; selectedTabId: string; recentlyClosedTabs: ",
               "RecentlyClosedTabState",
-              "[]; }], void>; updateTabs: ",
+              "[]; updatedDiscoverSession?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; }], void>; updateTabs: ",
               "InternalStateThunkActionCreator",
               "<[{ items: ",
               "TabState",
@@ -2369,7 +2391,15 @@
                 "section": "def-public.TabItem",
                 "text": "TabItem"
               },
-              " | null; }], Promise<void>>; disconnectTab: ",
+              " | null; updatedDiscoverSession?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; }, void], Promise<void>>; disconnectTab: ",
               "InternalStateThunkActionCreator",
               "<[{ tabId: string; }], void>; setDataView: ",
               "InternalStateThunkActionCreator",
@@ -2453,7 +2483,19 @@
               },
               " | undefined; globalState?: ",
               "TabStateGlobalState",
-              " | undefined; searchSessionId?: string | undefined; }], void>; clearAllTabs: ",
+              " | undefined; searchSessionId?: string | undefined; dataViewSpec?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              " | undefined; }], void>; openSearchSessionInNewTab: ",
+              "InternalStateThunkActionCreator",
+              "<[{ searchSession: ",
+              "UISession",
+              "; }], void>; clearRecentlyClosedTabs: ",
               "InternalStateThunkActionCreator",
               "<[], void>; initializeTabs: ",
               "AsyncThunk",
@@ -2527,7 +2569,7 @@
                 "section": "def-common.DiscoverSession",
                 "text": "DiscoverSession"
               },
-              " | undefined; } | undefined, { state: ",
+              " | undefined; nextSelectedTabId?: string | undefined; } | undefined, { state: ",
               "DiscoverInternalState",
               "; dispatch: ((action: ",
               "Action",
