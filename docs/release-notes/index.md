@@ -398,8 +398,43 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Adjusts the `z-index` of the app menu header to not conflict with the Persistent Console [#224708]({{kib-pull}}224708).
 * Fixes an issue preventing solution navigation submenu items from being displayed when the navigation is collapsed [#227705]({{kib-pull}}227705).
 
+## 9.0.8 [kibana-9.1.4-release-notes]
 
-## 9.0.7 [kibana-9.0.7-release-notes]
+% ::::{NOTE}
+% ::::
+
+### Fixes [kibana-9.0.8-fixes]
+
+**Alerting**:
+* Fixes text kerning issues in PDF/PNG exports of dashboards and visualizations [#235516]({{kib-pull}}235516).
+
+**Dashboards and Visualizations**:
+* Fixes a bug where the dashboard title would not get updated in the breadcrumbs when edited from the list of dashboards [#236561]({{kib-pull}}236561).
+* Fixes an issue with the Lens table's column sort order being different in the dashboard and the exported CSV [#236673]({{kib-pull}}236673).
+
+**Data ingestion and Fleet**:
+* Validates the Logstash pipeline ID at the {{kib}} API level [#236347]({{kib-pull}}236347).
+* Adds a unique count to improve accuracy of the number of transforms on the integrations overview page [#236177]({{kib-pull}}236177).
+
+**Discover**:
+* Clears sort by `timestamp` when navigating from classic to ES|QL mode [#235338]({{kib-pull}}235338).
+
+**Machine Learning**:
+* Hides the show forecast checkbox when selecting a new job in the Single Metric Viewer [#236724]({{kib-pull}}236724).
+* Improves trained model performance by adding filters to the request to fetch all index settings [#237072]({{kib-pull}}237072).
+* Makes alerts visible in Anomaly Explorer to all Machine Learning-only users regardless of where they create rules [#236289]({{kib-pull}}236289).
+* Fixes the **Job details** flyout on the **Analytics Map** page [#236131]({{kib-pull}}236131).
+* Limits log rate analysis category requests to reduce `msearch` usage [#235611]({{kib-pull}}235611).
+* Fixes rendering of the dashboard panel in PDF reporting for the Anomaly Swim Lane [#235475]({{kib-pull}}235475).
+
+**Management**:
+* Fixes handling of special characters when creating, editing, and cloning ingest pipelines [#233651]({{kib-pull}}233651).
+
+**Stack Management**:
+* Adds the ability to do partial matches and searches in the **API keys** section [#221959]({{kib-pull}}221959).
+
+
+## 9.0.7 [kibana-9.0.8-release-notes]
 
 ### Fixes [kibana-9.0.7-fixes]
 
