@@ -264,7 +264,7 @@ export async function findOrSetConcreteWriteIndex(
     await retryTransientEsErrors(
       () =>
         esClient.indices.updateAliases({
-          actions: actions,
+          actions,
         }),
       { logger }
     );
