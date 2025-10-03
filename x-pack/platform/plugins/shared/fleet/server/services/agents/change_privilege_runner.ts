@@ -96,7 +96,7 @@ export async function bulkChangePrivilegeAgentsBatch(
   );
 
   // Extract password from options if provided and pass it as a secret.
-  const res = await createAgentAction(esClient, soClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     agents: agentIds,
     created_at: now,
@@ -119,5 +119,5 @@ export async function bulkChangePrivilegeAgentsBatch(
     'agent does not support privilege change action'
   );
 
-  return { actionId: res.id };
+  return { actionId };
 }

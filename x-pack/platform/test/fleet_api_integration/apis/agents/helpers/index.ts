@@ -29,7 +29,10 @@ export async function checkBulkAgentAction(
         .get(`${getBaseUrl(spaceId)}/api/fleet/agents/action_status`)
         .set('kbn-xsrf', 'xxx');
       const action = actionStatuses?.find((a: any) => a.actionId === actionId);
-      if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+      if (
+        action &&
+        action.nbAgentsActioned === action.nbAgentsActionCreated + action.nbAgentsFailed
+      ) {
         clearInterval(intervalId);
         if (verifyActionResult) {
           await verifyActionResult();
