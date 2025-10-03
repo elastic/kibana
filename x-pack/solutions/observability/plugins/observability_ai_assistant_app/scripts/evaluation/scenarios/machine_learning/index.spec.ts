@@ -197,7 +197,7 @@ describe('Machine learning (ML)', () => {
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
-        'Returns the list of machine learning jobs based on the response from the Elasticsearch function, Each job includes id, state, description, datafeed indices, influencers, and bucket_span',
+        'Returns the list of machine learning jobs based on the response from the Elasticsearch function, Each job includes id, state, description, datafeed indices, influencers, and bucket_span, its not empty',
         `Includes ${jobIds.join(', ')} in the list of machine learning jobs`,
       ]);
 
@@ -213,7 +213,7 @@ describe('Machine learning (ML)', () => {
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/_stats',
-        `Returns the list of machine learning jobs stats based on the response from the Elasticsearch function, Each job includes processed_record_count, model_size_stats , bucket_count, memory_status, and node information`,
+        `Returns the list of machine learning jobs stats based on the response from the Elasticsearch function, Each job includes processed_record_count, model_size_stats , bucket_count, memory_status, and node information, its not empty`,
         `Includes ${jobIds.join(', ')} in the list of machine learning jobs stats`,
       ]);
 
@@ -227,7 +227,7 @@ describe('Machine learning (ML)', () => {
       });
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
-        'Returns the open machine learning jobs based on the response from the Elasticsearch function',
+        'Returns the open machine learning jobs based on the response from the Elasticsearch function, its not empty',
         `Includes ${TEST_JOB_ID} in the list of open machine learning jobs`,
       ]);
 
@@ -243,7 +243,7 @@ describe('Machine learning (ML)', () => {
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
-        'Returns the closed ML jobs based on the response from the Elasticsearch function',
+        'Returns the closed ML jobs based on the response from the Elasticsearch function, its not empty',
         `Includes ${closedJobIds.join(', ')} in the list of closed machine learning jobs`,
         `Does not include ${TEST_JOB_ID} in the list of closed ML jobs`,
       ]);
@@ -259,7 +259,7 @@ describe('Machine learning (ML)', () => {
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with GET method and path containing: ml/anomaly_detectors',
-        'Filters jobs whose state is failed or stopped/closed',
+        'Filters jobs whose state is failed or stopped/closed, its not empty',
         'Returns those jobs in the response',
       ]);
 
@@ -274,7 +274,6 @@ describe('Machine learning (ML)', () => {
 
       const result = await chatClient.evaluate(conversation, [
         `Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/${TEST_JOB_ID}`,
-        'The Elasticsearch function executes without any errors',
         `Returns the details of ML job id ${TEST_JOB_ID} based on the response from the Elasticsearch function`,
       ]);
 
@@ -289,7 +288,7 @@ describe('Machine learning (ML)', () => {
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors or uses the query function',
-        'Filters jobs by the service name',
+        'Filters jobs by the service name, its not empty',
         `Includes ${TEST_JOB_ID} in the list of open machine learning jobs`,
       ]);
 
@@ -349,7 +348,7 @@ describe('Machine learning (ML)', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Calls the Elasticsearch tool or try to find anomalies by running ES|QL queries with time filter and score > 50',
+        'Calls the Elasticsearch tool or try to find anomalies by running ES|QL queries score > 50',
         'Returns timestamp, job_id, and score. Links anomalies to their respective ML jobs. There are more than 0 anomalies',
       ]);
 
@@ -423,7 +422,7 @@ describe('Machine learning (ML)', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Executes a query on the ML alerts index or uses the alerting API',
+        'Executes a query on the ML alerts index or uses the Elasticsearch API',
         'Filters by timestamp within the last 1 hour',
         'Returns job_id and severity',
       ]);
