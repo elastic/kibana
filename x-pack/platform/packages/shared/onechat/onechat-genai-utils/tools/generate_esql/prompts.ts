@@ -115,6 +115,6 @@ ${formatResourceWithSampledValues({ resource, indentLevel: 0 })}
 
 Now, based on that information, please generate the ES|QL query.`,
     ],
-    ...previousActions.flatMap(formatAction),
+    ...previousActions.flatMap((a) => formatAction(a)),
   ];
 };

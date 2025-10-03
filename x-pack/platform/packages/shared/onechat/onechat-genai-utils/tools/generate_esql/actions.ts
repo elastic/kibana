@@ -68,7 +68,13 @@ export function isExecuteQueryAction(action: Action): action is ExecuteQueryActi
 /**
  * Format an action into a couple of [ai, user] messages to be used in prompts.
  */
-export const formatAction = (action: Action): BaseMessageLike[] => {
+export const formatAction = (action: Action, toolCallAgnostic = true): BaseMessageLike[] => {
+  // Important notice: Claude is *very* stupid with tool configuration
+  // and will be fine calling tools that are not available, just based on previous tool calls
+  // which means we can't represent the action history as a tool call list
+  // and are forced to similar a conversation instead.
+  // yes, this is sub-optimal, but this is how Claude behaves.
+
   const toolCallId = generateFakeToolCallId();
   switch (action.type) {
     case 'generate_query':
@@ -76,40 +82,73 @@ export const formatAction = (action: Action): BaseMessageLike[] => {
         createAIMessage(action.response),
         createUserMessage(
           action.success
-            ? `Now run it through autocorrect and then execute it`
-            : `No query generated, please try again.`
+            ? `Thank you`
+            : `I don't see any query in your response, can you please try again? Don't forget to wrap your query with \`\`\`esql[query]\`\`\``
         ),
       ];
     case 'autocorrect_query':
-      return [
-        createToolCallMessage({
-          toolCallId,
-          toolName: 'correct_query',
-          args: { query: action.input },
-        }),
-        createToolResultMessage({
-          toolCallId,
-          content: {
-            hasMistakes: action.wasCorrected,
-            output: action.output,
-          },
-        }),
-      ];
+      if (!action.wasCorrected) {
+        return [];
+      }
+      return toolCallAgnostic
+        ? [
+            createAIMessage('Now you can execute the query'),
+            createUserMessage(
+              `I ran the query through autocorrect and the output was
+
+ \`\`\`esql
+ "${action.output}"
+ \`\`\``
+            ),
+          ]
+        : [
+            createToolCallMessage({
+              toolCallId,
+              toolName: 'correct_query',
+              args: { query: action.input },
+            }),
+            createToolResultMessage({
+              toolCallId,
+              content: {
+                hasMistakes: action.wasCorrected,
+                output: action.output,
+              },
+            }),
+          ];
     case 'execute_query':
-      return [
-        createToolCallMessage({
-          toolCallId,
-          toolName: 'execute_query',
-          args: { query: action.query },
-        }),
-        createToolResultMessage({
-          toolCallId,
-          content: {
-            success: action.success,
-            error: action.error,
-          },
-        }),
-      ];
+      if (action.success) {
+        return [];
+      }
+      return toolCallAgnostic
+        ? [
+            createAIMessage('Now you can execute the query'),
+            createUserMessage(
+              action.success
+                ? `Done`
+                : `I tried executing it and I got the following error:
+
+\`\`\`
+${action.error}
+\`\`\`
+
+Can you fix the query?`
+            ),
+          ]
+        : [
+            createToolCallMessage({
+              toolCallId,
+              toolName: 'execute_query',
+              args: { query: action.query },
+            }),
+            createToolResultMessage({
+              toolCallId,
+              content: {
+                success: action.success,
+                error: action.error,
+                instructions: action.error ? 'Please generate a query again' : undefined,
+              },
+            }),
+          ];
     case 'request_documentation':
       return [
         createToolCallMessage({

@@ -36,7 +36,7 @@ const StateAnnotation = Annotation.Root({
   additionalContext: Annotation<string | undefined>(),
   // internal
   resource: Annotation<ResolvedResourceWithSampling>(),
-  currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 1 }),
+  currentTry: Annotation<number>({ reducer: (a, b) => b, default: () => 0 }),
   actions: Annotation<Action[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
@@ -125,18 +125,17 @@ export const createNlToEsqlGraph = ({
 
     const responseText = extractTextContent(response);
     const queries = extractEsqlQueries(responseText);
-    const success = queries.length > 0;
 
     const action: GenerateQueryAction = {
       type: 'generate_query',
-      success,
-      query: success ? queries[0] : undefined,
+      success: queries.length > 0,
+      query: queries[0],
       response: responseText,
     };
 
     return {
       actions: [action],
-      currentTry: success ? state.currentTry : state.currentTry + 1,
+      currentTry: state.currentTry + 1,
     };
   };
 
@@ -207,14 +206,12 @@ export const createNlToEsqlGraph = ({
         type: 'execute_query',
         success: false,
         query,
-        // TODO: check what this actually looks like - maybe stacktrace or root_cause instead?
         error: e.message,
       };
     }
 
     return {
       actions: [action],
-      currentTry: state.currentTry + 1,
     };
   };
 
