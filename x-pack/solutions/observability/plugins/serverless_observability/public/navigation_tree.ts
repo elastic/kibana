@@ -26,6 +26,16 @@ const LazyIconProductCloudInfra = lazy(() =>
   }))
 );
 
+export function filterForFeatureAvailability(
+  node: NodeDefinition,
+  featureFlag: boolean = false
+): NodeDefinition[] {
+  if (!featureFlag) {
+    return [];
+  }
+  return [node];
+}
+
 export const createNavigationTree = ({
   streamsAvailable,
   overviewAvailable = true,
@@ -55,17 +65,16 @@ export const createNavigationTree = ({
             icon: 'logoObservability',
             sideNavVersion: 'v2',
           },
-          ...(overviewAvailable
-            ? ([
-                {
-                  title: i18n.translate('xpack.serverlessObservability.nav.overview', {
-                    defaultMessage: 'Overview',
-                  }),
-                  link: 'observability-overview' as const,
-                  sideNavVersion: 'v1',
-                },
-              ] as NodeDefinition[])
-            : []),
+          ...filterForFeatureAvailability(
+            {
+              title: i18n.translate('xpack.serverlessObservability.nav.overview', {
+                defaultMessage: 'Overview',
+              }),
+              link: 'observability-overview' as const,
+              sideNavVersion: 'v1',
+            },
+            overviewAvailable
+          ),
           {
             title: i18n.translate('xpack.serverlessObservability.nav.discover', {
               defaultMessage: 'Discover',
@@ -97,23 +106,22 @@ export const createNavigationTree = ({
             link: 'observability-overview:alerts',
             iconV2: 'warning',
           },
-          ...(isCasesAvailable
-            ? [
+          ...filterForFeatureAvailability(
+            {
+              link: 'observability-overview:cases' as const,
+              renderAs: 'item' as const,
+              iconV2: LazyIconBriefcase,
+              children: [
                 {
-                  link: 'observability-overview:cases' as const,
-                  renderAs: 'item' as const,
-                  iconV2: LazyIconBriefcase,
-                  children: [
-                    {
-                      link: 'observability-overview:cases_configure' as const,
-                    },
-                    {
-                      link: 'observability-overview:cases_create' as const,
-                    },
-                  ],
+                  link: 'observability-overview:cases_configure' as const,
                 },
-              ]
-            : []),
+                {
+                  link: 'observability-overview:cases_create' as const,
+                },
+              ],
+            },
+            isCasesAvailable
+          ),
           {
             title: i18n.translate('xpack.serverlessObservability.nav.slo', {
               defaultMessage: 'SLOs',
@@ -128,25 +136,21 @@ export const createNavigationTree = ({
             }),
             sideNavVersion: 'v1',
           },
-          ...(streamsAvailable
-            ? [
-                {
-                  link: 'streams' as const,
-                  withBadge: true,
-                  iconV2: LazyIconProductStreamsWired,
-                  badgeOptions: {
-                    icon: 'beaker',
-                    tooltip: i18n.translate(
-                      'xpack.serverlessObservability.nav.streamsBadgeTooltip',
-                      {
-                        defaultMessage:
-                          'This functionality is experimental and not supported. It may change or be removed at any time.',
-                      }
-                    ),
-                  },
-                },
-              ]
-            : []),
+          ...filterForFeatureAvailability(
+            {
+              link: 'streams' as const,
+              withBadge: true,
+              iconV2: LazyIconProductStreamsWired,
+              badgeOptions: {
+                icon: 'beaker',
+                tooltip: i18n.translate('xpack.serverlessObservability.nav.streamsBadgeTooltip', {
+                  defaultMessage:
+                    'This functionality is experimental and not supported. It may change or be removed at any time.',
+                }),
+              },
+            },
+            streamsAvailable
+          ),
           {
             id: 'applications',
             title: i18n.translate('xpack.serverlessObservability.nav.applications', {
@@ -242,94 +246,100 @@ export const createNavigationTree = ({
             iconV2: 'sparkles',
             sideNavVersion: 'v2',
           },
-          {
-            id: 'machine_learning-landing',
-            renderAs: 'panelOpener',
-            title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
-              defaultMessage: 'Machine Learning',
-            }),
-            iconV2: LazyIconMl,
-            children: [
-              {
-                id: 'category-ml_overview',
-                title: '',
-                children: [
-                  {
-                    link: 'ml:overview',
-                  },
-                  {
-                    link: 'ml:dataVisualizer',
-                  },
-                ],
-              },
-              {
-                id: 'category-anomaly_detection',
-                title: i18n.translate('xpack.serverlessObservability.nav.ml.anomaly_detection', {
-                  defaultMessage: 'Anomaly detection',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:anomalyExplorer',
-                  },
-                  {
-                    link: 'ml:singleMetricViewer',
-                  },
-                ],
-              },
-              {
-                id: 'category-data_frame analytics',
-                title: i18n.translate('xpack.serverlessObservability.nav.ml.data_frame_analytics', {
-                  defaultMessage: 'Data frame analytics',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:resultExplorer',
-                  },
-                  {
-                    link: 'ml:analyticsMap',
-                  },
-                ],
-              },
-              {
-                id: 'category-aiops_labs',
-                title: i18n.translate('xpack.serverlessObservability.nav.ml.aiops_labs', {
-                  defaultMessage: 'AIOps labs',
-                }),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'ml:logRateAnalysis',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.aiops_labs.log_rate_analysis',
-                      {
-                        defaultMessage: 'Log rate analysis',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:logPatternAnalysis',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.aiops_labs.log_pattern_analysis',
-                      {
-                        defaultMessage: 'Log pattern analysis',
-                      }
-                    ),
-                  },
-                  {
-                    link: 'ml:changePointDetections',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.ml.aiops_labs.change_point_detection',
-                      {
-                        defaultMessage: 'Change point detection',
-                      }
-                    ),
-                  },
-                ],
-              },
-            ],
-          },
+          ...filterForFeatureAvailability(
+            {
+              id: 'machine_learning-landing',
+              renderAs: 'panelOpener',
+              title: i18n.translate('xpack.serverlessObservability.nav.machineLearning', {
+                defaultMessage: 'Machine Learning',
+              }),
+              iconV2: LazyIconMl,
+              children: [
+                {
+                  id: 'category-ml_overview',
+                  title: '',
+                  children: [
+                    {
+                      link: 'ml:overview',
+                    },
+                    {
+                      link: 'ml:dataVisualizer',
+                    },
+                  ],
+                },
+                {
+                  id: 'category-anomaly_detection',
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.anomaly_detection', {
+                    defaultMessage: 'Anomaly detection',
+                  }),
+                  breadcrumbStatus: 'hidden',
+                  children: [
+                    {
+                      link: 'ml:anomalyExplorer',
+                    },
+                    {
+                      link: 'ml:singleMetricViewer',
+                    },
+                  ],
+                },
+                {
+                  id: 'category-data_frame analytics',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.ml.data_frame_analytics',
+                    {
+                      defaultMessage: 'Data frame analytics',
+                    }
+                  ),
+                  breadcrumbStatus: 'hidden',
+                  children: [
+                    {
+                      link: 'ml:resultExplorer',
+                    },
+                    {
+                      link: 'ml:analyticsMap',
+                    },
+                  ],
+                },
+                {
+                  id: 'category-aiops_labs',
+                  title: i18n.translate('xpack.serverlessObservability.nav.ml.aiops_labs', {
+                    defaultMessage: 'AIOps labs',
+                  }),
+                  breadcrumbStatus: 'hidden',
+                  children: [
+                    {
+                      link: 'ml:logRateAnalysis',
+                      title: i18n.translate(
+                        'xpack.serverlessObservability.nav.ml.aiops_labs.log_rate_analysis',
+                        {
+                          defaultMessage: 'Log rate analysis',
+                        }
+                      ),
+                    },
+                    {
+                      link: 'ml:logPatternAnalysis',
+                      title: i18n.translate(
+                        'xpack.serverlessObservability.nav.ml.aiops_labs.log_pattern_analysis',
+                        {
+                          defaultMessage: 'Log pattern analysis',
+                        }
+                      ),
+                    },
+                    {
+                      link: 'ml:changePointDetections',
+                      title: i18n.translate(
+                        'xpack.serverlessObservability.nav.ml.aiops_labs.change_point_detection',
+                        {
+                          defaultMessage: 'Change point detection',
+                        }
+                      ),
+                    },
+                  ],
+                },
+              ],
+            },
+            overviewAvailable
+          ),
           {
             id: 'otherTools',
             title: i18n.translate('xpack.serverlessObservability.nav.otherTools', {
@@ -477,23 +487,26 @@ export const createNavigationTree = ({
                   { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
                 ],
               },
-              {
-                id: 'machine_learning',
-                title: i18n.translate(
-                  'xpack.serverlessObservability.nav.projectSettings.machineLearning',
-                  {
-                    defaultMessage: 'Machine Learning',
-                  }
-                ),
-                breadcrumbStatus: 'hidden',
-                children: [
-                  { link: 'management:overview' },
-                  { link: 'management:anomaly_detection' },
-                  { link: 'management:analytics' },
-                  { link: 'management:trained_models' },
-                  { link: 'management:supplied_configurations' },
-                ],
-              },
+              ...filterForFeatureAvailability(
+                {
+                  id: 'machine_learning',
+                  title: i18n.translate(
+                    'xpack.serverlessObservability.nav.projectSettings.machineLearning',
+                    {
+                      defaultMessage: 'Machine Learning',
+                    }
+                  ),
+                  breadcrumbStatus: 'hidden',
+                  children: [
+                    { link: 'management:overview' },
+                    { link: 'management:anomaly_detection' },
+                    { link: 'management:analytics' },
+                    { link: 'management:trained_models' },
+                    { link: 'management:supplied_configurations' },
+                  ],
+                },
+                overviewAvailable
+              ),
               {
                 id: 'data',
                 title: i18n.translate('xpack.serverlessObservability.nav.projectSettings.data', {
@@ -509,12 +522,12 @@ export const createNavigationTree = ({
                 }),
                 breadcrumbStatus: 'hidden',
                 children: [
-                  { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
                   { link: 'management:spaces', breadcrumbStatus: 'hidden' },
                   { link: 'management:objects', breadcrumbStatus: 'hidden' },
                   { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
                   { link: 'management:reporting', breadcrumbStatus: 'hidden' },
                   { link: 'management:tags', breadcrumbStatus: 'hidden' },
+                  { link: 'management:dataViews', breadcrumbStatus: 'hidden' },
                 ],
               },
               {
@@ -596,29 +609,35 @@ export const createNavigationTree = ({
                       { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
                     ],
                   },
-                  {
-                    title: 'Machine Learning',
-                    children: [
-                      { link: 'management:overview' },
-                      { link: 'management:anomaly_detection' },
-                      { link: 'management:analytics' },
-                      { link: 'management:trained_models' },
-                      { link: 'management:supplied_configurations' },
-                    ],
-                  },
-                  {
-                    title: 'AI',
-                    children: [
-                      {
-                        link: 'management:genAiSettings',
-                        breadcrumbStatus: 'hidden',
-                      },
-                      {
-                        link: 'management:observabilityAiAssistantManagement',
-                        breadcrumbStatus: 'hidden',
-                      },
-                    ],
-                  },
+                  ...filterForFeatureAvailability(
+                    {
+                      title: 'Machine Learning',
+                      children: [
+                        { link: 'management:overview' },
+                        { link: 'management:anomaly_detection' },
+                        { link: 'management:analytics' },
+                        { link: 'management:trained_models' },
+                        { link: 'management:supplied_configurations' },
+                      ],
+                    },
+                    overviewAvailable
+                  ),
+                  ...filterForFeatureAvailability(
+                    {
+                      title: 'AI',
+                      children: [
+                        {
+                          link: 'management:genAiSettings',
+                          breadcrumbStatus: 'hidden',
+                        },
+                        {
+                          link: 'management:observabilityAiAssistantManagement',
+                          breadcrumbStatus: 'hidden',
+                        },
+                      ],
+                    },
+                    overviewAvailable
+                  ),
                   {
                     title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
                       defaultMessage: 'Content',

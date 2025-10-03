@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createNavigationTree } from './navigation_tree';
+import { createNavigationTree, filterForFeatureAvailability } from './navigation_tree';
+import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import type { GroupDefinition, AppDeepLinkId } from '@kbn/core-chrome-browser';
 
 describe('Navigation Tree', () => {
@@ -32,5 +33,23 @@ describe('Navigation Tree', () => {
         },
       ])
     );
+  });
+
+  describe('filterForFeatureAvailability', () => {
+    it('should return empty array if feature flag is false', () => {
+      const node = {
+        title: 'Test',
+        link: 'test',
+      };
+      expect(filterForFeatureAvailability(node as NodeDefinition, false)).toEqual([]);
+    });
+
+    it('should return node in array if feature flag is true', () => {
+      const node = {
+        title: 'Test',
+        link: 'test',
+      };
+      expect(filterForFeatureAvailability(node as NodeDefinition, true)).toEqual([node]);
+    });
   });
 });
