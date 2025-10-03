@@ -22,7 +22,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../../util/errors';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useUpdateStreams } from '../../../hooks/use_update_streams';
-import { ConnectorListButton } from '../../connector_list_button/connector_list_button';
+import { GenerateSuggestionButton } from '../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
 
 export interface AISummaryProps {
@@ -130,8 +130,9 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
     [definition, updateStream, notifications.toasts]
   );
 
-  const generate = useCallback(() => {
-    if (!aiFeatures?.genAiConnectors.selectedConnector) {
+  const generate = useCallback((connectorId?: string) => {
+    const connector = connectorId || aiFeatures?.genAiConnectors.selectedConnector;
+    if (!connector) {
       return;
     }
 
@@ -145,7 +146,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
             name: definition.stream.name,
           },
           query: {
-            connectorId: aiFeatures.genAiConnectors.selectedConnector,
+            connectorId: connector,
             from: timeState.asAbsoluteTimeRange.from,
             to: timeState.asAbsoluteTimeRange.to,
           },
@@ -211,18 +212,16 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
                   alignItems="center"
                 >
                   <EuiFlexItem grow={false}>
-                    <ConnectorListButton
-                      buttonProps={{
-                        size: 's',
-                        iconType: 'sparkles',
-                        children: GENERATE_DESCRIPTION_BUTTON_LABEL,
-                        onClick() {
-                          generate();
-                        },
-                        isDisabled: isGenerating || isUpdating,
-                        isLoading: isGenerating,
-                      }}
-                    />
+                    <GenerateSuggestionButton
+                      aiFeatures={aiFeatures!}
+                      onClick={generate}
+                      size="s"
+                      iconType="sparkles"
+                      isDisabled={isGenerating || isUpdating}
+                      isLoading={isGenerating}
+                    >
+                      {GENERATE_DESCRIPTION_BUTTON_LABEL}
+                    </GenerateSuggestionButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
