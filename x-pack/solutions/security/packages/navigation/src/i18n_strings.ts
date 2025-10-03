@@ -260,11 +260,11 @@ export const i18nStrings = {
         }
       ),
     },
-    indicesDsAndRollups: {
+    indicesAndDataStreams: {
       title: i18n.translate(
-        'securitySolutionPackages.navLinks.ingestAndManageData.indicesDsAndRollups',
+        'securitySolutionPackages.navLinks.ingestAndManageData.indicesAndDataStreams',
         {
-          defaultMessage: 'Indices, Data Streams, and roll ups',
+          defaultMessage: 'Indices and data streams',
         }
       ),
     },

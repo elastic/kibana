@@ -8,7 +8,7 @@
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import type { MapCenterAndZoom, MapExtent, MapSettings } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
+import type { MapAttributes } from '../../server';
 
 export type MapEmbeddableBaseState = SerializedTimeRange &
   SerializedTitles &
