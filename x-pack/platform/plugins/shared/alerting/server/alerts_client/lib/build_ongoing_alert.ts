@@ -33,7 +33,11 @@ import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '..
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
-import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
+import {
+  removeUnflattenedFieldsFromAlert,
+  replaceRefreshableAlertFields,
+  replaceEmptyAlertFields,
+} from './format_alert';
 
 interface BuildOngoingAlertOpts<
   AlertData extends RuleAlertData,
@@ -81,6 +85,9 @@ export const buildOngoingAlert = <
   ActionGroupIds,
   RecoveryActionGroupId
 >): Alert & AlertData => {
+  // Sets array fields to empty arrays if previously reported in the existing alert
+  // but not present in the payload
+  replaceEmptyAlertFields(alert, payload);
   const cleanedPayload = stripFrameworkFields(payload);
 
   // Make sure that any alert fields that are updateable are flattened.
