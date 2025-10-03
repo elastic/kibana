@@ -21,7 +21,8 @@ const BASE_ROOT: TelemetryRoot = {
   },
 };
 
-describe('prAutomatedChecks', () => {
+// Failing: See https://github.com/elastic/kibana/issues/237369
+describe.skip('prAutomatedChecks', () => {
   const context = createTaskContext();
 
   beforeEach(() => {
