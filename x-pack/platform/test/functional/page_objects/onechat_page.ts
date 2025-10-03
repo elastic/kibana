@@ -68,7 +68,8 @@ export class OneChatPageObject extends FtrService {
     title: string,
     userMessage: string,
     expectedResponse: string,
-    llmProxy: LlmProxy
+    llmProxy: LlmProxy,
+    useToolCalls: boolean = false
   ): Promise<string> {
     // Navigate to new conversation
     await this.navigateToApp('conversations/new');
@@ -79,14 +80,37 @@ export class OneChatPageObject extends FtrService {
       response: toolCallMock('set_title', { title }),
     });
 
-    // Set up LLM proxy to return the expected response
-    void llmProxy.interceptors.userMessage({
-      when: ({ messages }) => {
-        const lastMessage = last(messages)?.content as string;
-        return lastMessage?.includes(userMessage);
-      },
-      response: expectedResponse,
-    });
+    if (useToolCalls) {
+      // First interceptor: respond to user message with tool call
+      void llmProxy.interceptors.userMessage({
+        when: ({ messages }) => {
+          const lastMessage = last(messages)?.content as string;
+          return lastMessage?.includes(userMessage);
+        },
+        response: toolCallMock('platform_core_search', {
+          query: 'test data',
+        }),
+      });
+
+      // Second interceptor: respond to tool message with final response
+      void llmProxy.interceptors.toolMessage({
+        when: ({ messages }) => {
+          const lastMessage = last(messages);
+          const contentParsed = JSON.parse(lastMessage?.content as string);
+          return contentParsed?.results;
+        },
+        response: expectedResponse,
+      });
+    } else {
+      // Simple response without tool calls
+      void llmProxy.interceptors.userMessage({
+        when: ({ messages }) => {
+          const lastMessage = last(messages)?.content as string;
+          return lastMessage?.includes(userMessage);
+        },
+        response: expectedResponse,
+      });
+    }
 
     // Type and send the message
     await this.typeMessage(userMessage);
@@ -185,5 +209,29 @@ export class OneChatPageObject extends FtrService {
     } catch (error) {
       return false;
     }
+  }
+
+  /**
+   * Click the thinking toggle to expand thinking details
+   */
+  async clickThinkingToggle() {
+    const thinkingToggle = await this.testSubjects.find('agentBuilderThinkingToggle');
+    await thinkingToggle.click();
+  }
+
+  /**
+   * Click the new conversation button
+   */
+  async clickNewConversationButton() {
+    const newButton = await this.testSubjects.find('agentBuilderNewConversationButton');
+    await newButton.click();
+  }
+
+  /**
+   * Get the thinking details text
+   */
+  async getThinkingDetails() {
+    const responseElement = await this.testSubjects.find('agentBuilderRoundResponse');
+    return await responseElement.getVisibleText();
   }
 }

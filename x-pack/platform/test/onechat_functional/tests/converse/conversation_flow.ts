@@ -6,17 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { last } from 'lodash';
 import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
-import { toolCallMock } from '../../../onechat_api_integration/utils/llm_proxy/mocks';
 import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
-const APP_ID = 'agent_builder';
-
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { common } = getPageObjects(['common']);
+  const { onechat } = getPageObjects(['onechat']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
   const supertest = getService('supertest');
@@ -45,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigates to new conversation page and shows initial state', async () => {
-      await common.navigateToApp(APP_ID, { path: 'conversations/new' });
+      await onechat.navigateToApp('conversations/new');
 
       // Assert the conversation list is empty and shows the no conversations message
       const dataTestSubj = 'agentBuilderNoConversationsMessage';
@@ -72,45 +68,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const MOCKED_RESPONSE = 'I found test data using the search tool';
       const MOCKED_TITLE = 'Test Search Conversation';
 
-      await common.navigateToApp(APP_ID, { path: 'conversations/new' });
-
-      const inputField = await testSubjects.find('onechatAppConversationInputFormTextArea');
-      await inputField.click();
-      await inputField.type(MOCKED_INPUT);
-
-      // Set up title tool call
-      void llmProxy.interceptors.toolChoice({
-        name: 'set_title',
-        response: toolCallMock('set_title', { title: MOCKED_TITLE }),
-      });
-
-      // First interceptor: respond to user message with tool call
-      void llmProxy.interceptors.userMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages)?.content as string;
-          return lastMessage.includes(MOCKED_INPUT);
-        },
-        response: toolCallMock('platform_core_search', {
-          query: 'test data',
-        }),
-      });
-
-      // Second interceptor: respond to tool message with final response
-      void llmProxy.interceptors.toolMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages);
-          const contentParsed = JSON.parse(lastMessage?.content as string);
-          return contentParsed?.results;
-        },
-        response: MOCKED_RESPONSE,
-      });
-
-      const submitTextButton = await testSubjects.find(
-        'onechatAppConversationInputFormSubmitButton'
+      // Create conversation with tool calls
+      const conversationId = await onechat.createConversationViaUI(
+        MOCKED_TITLE,
+        MOCKED_INPUT,
+        MOCKED_RESPONSE,
+        llmProxy,
+        true
       );
-      await submitTextButton.click();
-
-      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
       // Wait for UI to include the response, title, and updated conversation list
       await retry.try(async () => {
@@ -127,9 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(conversationText).to.contain(MOCKED_TITLE);
       });
 
-      // Click on "Thinking completed" accordion to expand the thinking details
-      const thinkingToggle = await testSubjects.find('agentBuilderThinkingToggle');
-      await thinkingToggle.click();
+      await onechat.clickThinkingToggle();
 
       // Wait for the expanded thinking details to appear
       await retry.try(async () => {
@@ -141,16 +104,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(responseText).to.contain('Selecting the best target for this query');
       });
 
-      // Now test clicking the "new" button
-      const newButton = await testSubjects.find('agentBuilderNewConversationButton');
-      await newButton.click();
+      // Click the "new" button
+      await onechat.clickNewConversationButton();
 
       // Wait for navigation to complete and assert we're back to the initial state with a populated conversation list
       await retry.try(async () => {
         // The conversation list should still contain our previous conversation
-        const conversationList = await testSubjects.find('agentBuilderConversationList');
-        const conversationText = await conversationList.getVisibleText();
-        expect(conversationText).to.contain(MOCKED_TITLE);
+        const isConversationInHistory = await onechat.isConversationInHistory(conversationId);
+        expect(isConversationInHistory).to.be(true);
 
         // Assert the welcome page is displayed
         await testSubjects.existOrFail('agentBuilderWelcomePage');
