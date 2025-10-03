@@ -50,12 +50,12 @@ export const createInitialisationSourcesService = (deps: {
         return;
       }
       const requiredIntegrationNames = requiredInitSources.map(({ name }) => name).sort();
-      const installedIntegrationNames = await deps.descriptorClient.findByQuery(
+      const installedIntegration = await deps.descriptorClient.findByQuery(
         buildFilterByIntegrationNames(requiredIntegrationNames)
       );
-      const existingIntegrationsNames = installedIntegrationNames.map(({ name }) => name).sort();
+      const installedIntegrationsNames = installedIntegration.map(({ name }) => name).sort();
 
-      if (!isEqual(requiredIntegrationNames, existingIntegrationsNames)) {
+      if (!isEqual(requiredIntegrationNames, installedIntegrationsNames)) {
         const { created, updated, results } = await deps.descriptorClient.bulkUpsert(
           requiredInitSources
         );
