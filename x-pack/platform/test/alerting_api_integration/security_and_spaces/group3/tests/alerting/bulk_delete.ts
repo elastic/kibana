@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { deleteRuleById } from '../../../../common/lib/rules';
 import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
 import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -685,20 +686,20 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should throw 400 error when trying to bulk delete an internally managed rule type using the ids param', async () => {
-        const { body: createdRule1 } = await supertest
+        const { body: createdRule } = await supertest
           .post('/api/alerts_fixture/rule/internally_managed')
           .set('kbn-xsrf', 'foo')
           .send({ ...rulePayload, tags: ['internally-managed'] })
           .expect(200);
 
-        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
-
         const response = await supertest
           .patch('/internal/alerting/rules/_bulk_delete')
           .set('kbn-xsrf', 'foo')
-          .send(getPayloadWithIds([createdRule1.id]));
+          .send(getPayloadWithIds([createdRule.id]));
 
         expect(response.status).to.eql(400);
+
+        deleteRuleById(es, createdRule.id);
       });
 
       it('should ignore internal rule types when trying to bulk delete using the filter param', async () => {
@@ -714,7 +715,6 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getTestRuleData({ tags: ['internally-managed'] }))
           .expect(200);
 
-        objectRemover.add('default', internalRuleType.id, 'rule', 'alerting');
         objectRemover.add('default', nonInternalRuleType.id, 'rule', 'alerting');
 
         await supertest
@@ -732,6 +732,8 @@ export default ({ getService }: FtrProviderContext) => {
           .get(`/api/alerting/rule/${nonInternalRuleType.id}`)
           .set('kbn-xsrf', 'foo')
           .expect(404);
+
+        deleteRuleById(es, internalRuleType.id);
       });
     });
   });
