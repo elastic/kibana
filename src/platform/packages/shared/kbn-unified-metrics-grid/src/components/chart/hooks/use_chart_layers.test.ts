@@ -15,6 +15,9 @@ import type { ChartSectionProps, UnifiedHistogramServices } from '@kbn/unified-h
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { DIMENSIONS_COLUMN } from '../../../common/utils';
+import { QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
@@ -35,6 +38,11 @@ const servicesMock: Partial<UnifiedHistogramServices> = {
   data: dataPluginMock.createStartContract(),
 };
 
+let queryClient: QueryClient;
+function wrapper(props: { children: React.ReactNode }) {
+  return React.createElement(QueryClientProvider, { client: queryClient }, props.children);
+}
+
 describe('useChartLayers', () => {
   const mockServices: Pick<ChartSectionProps, 'services'> = {
     services: servicesMock as UnifiedHistogramServices,
@@ -44,6 +52,8 @@ describe('useChartLayers', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    queryClient = new QueryClient();
   });
 
   it('returns empty yAxis if no columns', async () => {
@@ -55,14 +65,16 @@ describe('useChartLayers', () => {
       indices: [],
     });
 
-    const { result } = renderHook(() =>
-      useChartLayers({
-        query: 'FROM metrics-*',
-        getTimeRange,
-        seriesType: 'line',
-        color: 'red',
-        services: mockServices.services,
-      })
+    const { result } = renderHook(
+      () =>
+        useChartLayers({
+          query: 'FROM metrics-*',
+          getTimeRange,
+          seriesType: 'line',
+          color: 'red',
+          services: mockServices.services,
+        }),
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -83,14 +95,16 @@ describe('useChartLayers', () => {
       indices: [],
     });
 
-    const { result } = renderHook(() =>
-      useChartLayers({
-        query: 'FROM metrics-*',
-        getTimeRange,
-        seriesType: 'area',
-        color: 'blue',
-        services: mockServices.services,
-      })
+    const { result } = renderHook(
+      () =>
+        useChartLayers({
+          query: 'FROM metrics-*',
+          getTimeRange,
+          seriesType: 'area',
+          color: 'blue',
+          services: mockServices.services,
+        }),
+      { wrapper }
     );
 
     await waitFor(() => {
@@ -119,13 +133,15 @@ describe('useChartLayers', () => {
       indices: [],
     });
 
-    const { result } = renderHook(() =>
-      useChartLayers({
-        query: 'FROM metrics-*',
-        getTimeRange,
-        seriesType: 'bar',
-        services: mockServices.services,
-      })
+    const { result } = renderHook(
+      () =>
+        useChartLayers({
+          query: 'FROM metrics-*',
+          getTimeRange,
+          seriesType: 'bar',
+          services: mockServices.services,
+        }),
+      { wrapper }
     );
 
     await waitFor(() => {
