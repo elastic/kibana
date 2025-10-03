@@ -27,7 +27,7 @@ import {
   esqlColumnSchema,
   genericOperationOptionsSchema,
 } from '../metric_ops';
-import { coloringTypeSchema } from '../color';
+import { colorByValueAbsolute, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import {
   bucketDateHistogramOperationSchema,
@@ -132,7 +132,7 @@ const metricStatePrimaryMetricOptionsSchema = schema.object({
   /**
    * Color configuration
    */
-  color: schema.maybe(coloringTypeSchema),
+  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
   /**
    * Complementary visualization
    */
@@ -167,7 +167,7 @@ const metricStateSecondaryMetricOptionsSchema = schema.object({
   /**
    * Color configuration
    */
-  color: schema.maybe(coloringTypeSchema),
+  color: schema.maybe(schema.oneOf([colorByValueAbsolute, staticColorSchema])),
 });
 
 const metricStateBreakdownByOptionsSchema = schema.object({
@@ -193,6 +193,7 @@ const metricStateBreakdownByOptionsSchema = schema.object({
 });
 
 export const metricStateSchemaNoESQL = schema.object({
+  id: schema.maybe(schema.string()),
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
@@ -266,6 +267,7 @@ export const metricStateSchemaNoESQL = schema.object({
 });
 
 const esqlMetricState = schema.object({
+  id: schema.maybe(schema.string()),
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
