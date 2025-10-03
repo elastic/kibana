@@ -38,11 +38,7 @@ export function createStepExecutionRuntime({
   coreStart?: CoreStart; // For using Kibana's internal HTTP client
 }): StepExecutionRuntime {
   const workflowExecution = workflowExecutionState.getWorkflowExecution();
-  const stepExecutionId = buildStepExecutionId(
-    workflowExecution.id,
-    node.stepId,
-    workflowExecution.scopeStack
-  );
+  const stepExecutionId = buildStepExecutionId(workflowExecution.id, node.stepId, stackFrames);
 
   const stepLogger = workflowLogger.createStepLogger(
     stepExecutionId,
@@ -54,7 +50,7 @@ export function createStepExecutionRuntime({
     workflowExecutionGraph,
     workflowExecutionState,
     node,
-    stackFrames: workflowExecution.scopeStack,
+    stackFrames,
     esClient,
     fakeRequest,
     coreStart,

@@ -162,6 +162,7 @@ export class StepExecutionRuntime {
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
       status: ExecutionStatus.FAILED,
+      scopeStack: this.stackFrames,
       completedAt: new Date().toISOString(),
       output: null,
       error: String(error),
