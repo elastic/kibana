@@ -148,7 +148,8 @@ export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServ
       search_query_length_bucket: {
         type: 'keyword',
         _meta: {
-          description: 'The bucket in which the length of the query in the search bar falls into.',
+          description:
+            'The bucket in which the length of the query in the search bar falls into. Possible values are: 0|1-50|51-100|101-200|200+',
         },
       },
     },
