@@ -30,6 +30,7 @@ import {
 } from '../../../common/runtime_types';
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import { PackagePolicyService } from './package_policy_service';
 
 export interface PrivateConfig {
   config: HeartbeatConfig;
@@ -44,21 +45,15 @@ export interface FailedPolicyUpdate {
 
 export class SyntheticsPrivateLocation {
   private readonly server: SyntheticsServerSetup;
+  private readonly packagePolicyService: PackagePolicyService;
 
   constructor(_server: SyntheticsServerSetup) {
     this.server = _server;
+    this.packagePolicyService = new PackagePolicyService(_server);
   }
 
   async buildNewPolicy(spaceId: string): Promise<NewPackagePolicy> {
-    const soClient = this.server.coreStart.savedObjects
-      .getUnsafeInternalClient()
-      .asScopedToNamespace(spaceId);
-
-    const newPolicy = await this.server.fleet.packagePolicyService.buildPackagePolicyFromPackage(
-      soClient,
-      'synthetics',
-      { logger: this.server.logger, installMissingPackage: true }
-    );
+    const newPolicy = await this.packagePolicyService.buildPackagePolicyFromPackage({ spaceId });
 
     if (!newPolicy) {
       throw new Error(`Unable to create Synthetics package policy template for private location`);
@@ -207,7 +202,10 @@ export class SyntheticsPrivateLocation {
     }
 
     try {
-      const result = await this.createPolicyBulk(newPolicies, spaceId);
+      const result = await this.packagePolicyService.bulkCreate({
+        newPolicies,
+        spaceId,
+      });
       if (result?.created && result?.created?.length > 0 && testRunId) {
         // ignore await here, we don't want to wait for this to finish
         void scheduleCleanUpTask(this.server);
@@ -234,9 +232,6 @@ export class SyntheticsPrivateLocation {
       return null;
     }
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
-    const soClient = this.server.coreStart.savedObjects
-      .getUnsafeInternalClient()
-      .asScopedToNamespace(spaceId);
 
     const { config, globalParams } = privateConfig;
     try {
@@ -260,7 +255,10 @@ export class SyntheticsPrivateLocation {
         id: this.getPolicyId(config, location.id, spaceId),
       } as NewPackagePolicyWithId;
 
-      return await this.server.fleet.packagePolicyService.inspect(soClient, pkgPolicy);
+      return await this.packagePolicyService.inspect({
+        spaceId,
+        packagePolicy: pkgPolicy,
+      });
     } catch (e) {
       this.server.logger.error(e);
       return null;
@@ -334,9 +332,18 @@ export class SyntheticsPrivateLocation {
     );
 
     const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
-      this.createPolicyBulk(policiesToCreate, spaceId),
-      this.updatePolicyBulk(policiesToUpdate, spaceId),
-      this.deletePolicyBulk(policiesToDelete, spaceId),
+      this.packagePolicyService.bulkCreate({
+        newPolicies: policiesToCreate,
+        spaceId,
+      }),
+      this.packagePolicyService.bulkUpdate({
+        policiesToUpdate,
+        spaceId,
+      }),
+      this.packagePolicyService.bulkDelete({
+        policyIdsToDelete: policiesToDelete,
+        spaceId,
+      }),
     ]);
 
     const failedUpdates = failedUpdatesRes?.map(({ packagePolicy, error }) => {
@@ -366,10 +373,6 @@ export class SyntheticsPrivateLocation {
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
-    const soClient = this.server.coreStart.savedObjects
-      .getUnsafeInternalClient()
-      .asScopedToNamespace(spaceId);
-
     const listOfPolicies: string[] = [];
     for (const config of configs) {
       for (const privateLocation of allPrivateLocations) {
@@ -377,77 +380,14 @@ export class SyntheticsPrivateLocation {
         listOfPolicies.push(currId);
       }
     }
-    return (
-      (await this.server.fleet.packagePolicyService.getByIDs(soClient, listOfPolicies, {
-        ignoreMissing: true,
-      })) ?? []
-    );
-  }
 
-  async createPolicyBulk(newPolicies: NewPackagePolicyWithId[], spaceId: string) {
-    const soClient = this.server.coreStart.savedObjects
-      .getUnsafeInternalClient()
-      .asScopedToNamespace(spaceId);
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    if (esClient && newPolicies.length > 0) {
-      return await this.server.fleet.packagePolicyService.bulkCreate(
-        soClient,
-        esClient,
-        newPolicies,
-        {
-          asyncDeploy: true,
-        }
-      );
-    }
-  }
-
-  async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[], spaceId: string) {
-    const soClient = this.server.coreStart.savedObjects
-      .getUnsafeInternalClient()
-      .asScopedToNamespace(spaceId);
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    if (policiesToUpdate.length > 0) {
-      const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
-        soClient,
-        esClient,
-        policiesToUpdate,
-        {
-          force: true,
-          asyncDeploy: true,
-        }
-      );
-      return failedPolicies;
-    }
-  }
-
-  async deletePolicyBulk(policyIdsToDelete: string[], spaceId: string) {
-    const soClient = this.server.coreStart.savedObjects
-      .getUnsafeInternalClient()
-      .asScopedToNamespace(spaceId);
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-    if (policyIdsToDelete.length > 0) {
-      try {
-        return await this.server.fleet.packagePolicyService.delete(
-          soClient,
-          esClient,
-          policyIdsToDelete,
-          {
-            force: true,
-            asyncDeploy: true,
-          }
-        );
-      } catch (e) {
-        this.server.logger.error(e);
-      }
-    }
+    return this.packagePolicyService.getByIds({
+      spaceId,
+      listOfPolicies,
+    });
   }
 
   async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
-    const soClient = this.server.coreStart.savedObjects
-      .getUnsafeInternalClient()
-      .asScopedToNamespace(spaceId);
-    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
-
     const policyIdsToDelete = [];
     for (const config of configs) {
       const { locations } = config;
@@ -459,15 +399,10 @@ export class SyntheticsPrivateLocation {
       }
     }
     if (policyIdsToDelete.length > 0) {
-      const result = await this.server.fleet.packagePolicyService.delete(
-        soClient,
-        esClient,
+      const result = await this.packagePolicyService.bulkDelete({
         policyIdsToDelete,
-        {
-          force: true,
-          asyncDeploy: true,
-        }
-      );
+        spaceId,
+      });
       const failedPolicies = result?.filter((policy) => {
         return !policy.success && policy?.statusCode !== 404;
       });
