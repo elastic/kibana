@@ -157,9 +157,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           response: {
             200: {
               body: () => MigrateSingleAgentResponseSchema,
+              description: 'OK',
             },
             400: {
               body: genericErrorResponse,
+              description: 'Bad Request',
             },
           },
         },
@@ -191,9 +193,11 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           response: {
             200: {
               body: () => BulkMigrateAgentsResponseSchema,
+              description: 'OK',
             },
             400: {
               body: genericErrorResponse,
+              description: 'Bad Request',
             },
           },
         },
