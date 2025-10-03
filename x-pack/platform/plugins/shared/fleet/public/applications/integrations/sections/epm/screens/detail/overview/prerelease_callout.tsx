@@ -13,22 +13,26 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackageInfo } from '../../../../../types';
 
 import { useLink, useStartServices } from '../../../../../hooks';
-import { packageInfoHasOtelInputs } from '../utils/otelcol_utils';
 import { isPackagePrerelease } from '../../../../../../../../common/services';
+import {
+  OTEL_INPUTS_MINIMUM_FLEET_SERVER_VERSION,
+  packageInfoHasOtelInputs,
+} from '../../../../../../../../common/services/otelcol_helpers';
+import { ExperimentalFeaturesService } from '../../../../../services';
 
 export const PrereleaseCallout: React.FC<{
   packageInfo: PackageInfo;
   latestGAVersion?: string;
 }> = ({ packageInfo, latestGAVersion }) => {
   const { getHref } = useLink();
-
+  const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
   const { name, title } = packageInfo;
   const overviewPathLatestGA = getHref('integration_details_overview', {
     pkgkey: `${name}-${latestGAVersion}`,
   });
   const isPrerelease = isPackagePrerelease(packageInfo.version);
   if (isPrerelease) {
-    if (packageInfoHasOtelInputs(packageInfo)) {
+    if (enableOtelIntegrations && packageInfoHasOtelInputs(packageInfo)) {
       return <OtelPackageCallout packageInfo={packageInfo} />;
     }
     return (
@@ -86,7 +90,7 @@ export const OtelPackageCallout: React.FC<{
         <p>
           <FormattedMessage
             id="xpack.fleet.epm.otelPackageWarningMessage"
-            defaultMessage="The {packageTitle} integration collects {OTelExternalLink} data adhering to {semanticConventionsLink}, and is available in technical preview. You must be running the EDOT Collector in agent mode to use this integration. For more information, see the {fleetUserGuide}."
+            defaultMessage="The {packageTitle} integration collects {OTelExternalLink} data adhering to {semanticConventionsLink}, and is available in technical preview. To use this integration, your Fleet Servers and assigned Elastic Agents need to be be at least on version {minVersion} and you must be running the EDOT Collector in agent mode. For more information, see the {fleetUserGuide}."
             values={{
               packageTitle,
               OTelExternalLink: (
@@ -117,6 +121,7 @@ export const OtelPackageCallout: React.FC<{
                   })}
                 </EuiLink>
               ),
+              minVersion: OTEL_INPUTS_MINIMUM_FLEET_SERVER_VERSION,
             }}
           />
         </p>

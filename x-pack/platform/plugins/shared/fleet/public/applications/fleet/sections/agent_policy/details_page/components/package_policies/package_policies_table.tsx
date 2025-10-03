@@ -37,10 +37,10 @@ import {
   useGetOutputs,
   useDefaultOutput,
 } from '../../../../../hooks';
-import { pkgKeyFromPackageInfo } from '../../../../../services';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../../services';
 
 import { AddIntegrationFlyout } from './add_integration_flyout';
-import { packagePolicyHasOtelInputs } from '../../../../../../integrations/sections/epm/screens/detail/utils/otelcol_utils';
+import { OTEL_INPUTS_MINIMUM_FLEET_SERVER_VERSION, packagePolicyHasOtelInputs } from '../../../../../../../../common/services/otelcol_helpers';
 
 interface Props {
   packagePolicies: PackagePolicy[];
@@ -73,6 +73,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
+  const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
 
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
@@ -153,16 +154,17 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 ) : null}
               </EuiLink>
             </EuiFlexItem>
-            { packagePolicyHasOtelInputs(packagePolicy?.inputs) && <EuiFlexItem grow={false}>
+            { enableOtelIntegrations && packagePolicyHasOtelInputs(packagePolicy?.inputs) && <EuiFlexItem grow={false}>
               <EuiIconTip
                 type="warning"
                 color="warning"
                 content={
                   <FormattedMessage
                     id="xpack.fleet.policyDetails.packagePoliciesTabl.containsOtelPackages"
-                    defaultMessage="The {integrationTitle} integration collects OpenTelemetry data adhering to semantic conventions and is available in technical preview."
+                    defaultMessage="The {integrationTitle} integration collects OpenTelemetry data adhering to semantic conventions and is available in technical preview. To use this integration, your Fleet Servers and assigned Elastic Agents need to be be at least on version {minVersion}."
                     values={{
                       integrationTitle: packagePolicy.packageTitle,
+                      minVersion: OTEL_INPUTS_MINIMUM_FLEET_SERVER_VERSION
                     }}
                   />
                 }
