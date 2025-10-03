@@ -243,7 +243,7 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
           <p>
             <FormattedMessage
               id="xpack.fleet.settings.showAgentlessResourcesDescription"
-              defaultMessage="Enable this toggle to display agentless agents and policies in the Fleet UI for debugging and diagnostics purposes. This setting is stored locally and is only visible to you."
+              defaultMessage="Enable this toggle to display agentless agents and policies in Fleet for debugging and diagnostics purposes. This setting is stored locally and is only visible to you."
             />
           </p>
         }
