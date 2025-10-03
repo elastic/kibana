@@ -187,7 +187,7 @@ describe('Machine learning (ML)', () => {
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
   });
 
-  describe.skip('Machine learning (ML) jobs', () => {
+  describe('Machine learning (ML) jobs', () => {
     it('returns the ML jobs configuration', async () => {
       const conversation = await chatClient.complete({
         messages:
@@ -303,8 +303,7 @@ describe('Machine learning (ML)', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        `Checks ml/anomaly_detectors/${TEST_JOB_ID}/_stats for state=open/closed`,
-        `Checks ml/anomaly_detectors/${TEST_JOB_ID_2}/_stats for state=open/closed`,
+        `Checks ml/anomaly_detectors/${TEST_JOB_ID}/_stats and ml/anomaly_detectors/${TEST_JOB_ID_2}/_stats for state=open/closed`,
         'Returns the last time the job ran by reading data_counts.latest_record_timestamp or timing stats for last run time',
       ]);
 
@@ -321,7 +320,6 @@ describe('Machine learning (ML)', () => {
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function or try to find anomalies by running ES|QL queries',
-        'The Elasticsearch or query function executes without any errors',
         'Returns a list of anomalies found based on the response from the Elasticsearch function, there are more than 0 anomalies',
         `Includes job with ID ${jobIds.join(', ')} in the anomalies`,
       ]);
@@ -338,7 +336,6 @@ describe('Machine learning (ML)', () => {
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function or try to find anomalies by running ES|QL queries',
-        'The Elasticsearch or query function executes without any errors',
         `Returns a list of anomalies found based on the response from the Elasticsearch function. Includes job with ID ${listJobIds} in the anomalies, there are more than 0 anomalies`,
       ]);
 
@@ -380,7 +377,7 @@ describe('Machine learning (ML)', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Fetches recent anomalies for the given service/application',
+        'Fetches anomalies for the given service/application',
         'Analyzes influencer fields to infer probable cause',
         'Returns a summary of anomalies with likely causes',
       ]);
@@ -404,7 +401,7 @@ describe('Machine learning (ML)', () => {
     });
   });
 
-  describe('Alerts AND summaries', () => {
+  describe('ML jobs Alerts', () => {
     it('summarizes ML jobs alerts', async () => {
       const conversation = await chatClient.complete({
         messages: 'Summarize machine learning jobs alerts',
@@ -412,7 +409,7 @@ describe('Machine learning (ML)', () => {
       });
 
       const result = await chatClient.evaluate(conversation, [
-        'Executes a query on the ML jobs alerts',
+        'Calls the Elasticsearch tool or executes a query on the ML jobs alerts',
         'Provides a summary of the alerts including job_id, severity, and timestamp',
       ]);
 
