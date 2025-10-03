@@ -49,7 +49,7 @@ export function Breadcrumbs({ breadcrumbs$ }: Props) {
     <EuiBreadcrumbs
       breadcrumbs={crumbs}
       data-test-subj="breadcrumbs"
-      aria-label={i18n.translate('chromeBreadcrumbs.breadcrumbs.ariaLabel', {
+      aria-label={i18n.translate('core.ui.breadcrumbs.ariaLabel', {
         defaultMessage: 'Breadcrumbs',
       })}
       // reduce number of visible breadcrumbs due to increased max-width of the root breadcrumbs
