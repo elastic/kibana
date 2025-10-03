@@ -72,7 +72,7 @@ function setStorageState(storageTableState: Record<string, unknown>): void {
 function changeRulesTableState(): void {
   filterBySearchTerm('rule');
   filterByTags(['tag-b']);
-  filterByCustomRules(); //
+  filterByCustomRules();
   filterByDisabledRules();
   sortByTableColumn('Rule', 'asc');
   setRowsPerPageTo(5);

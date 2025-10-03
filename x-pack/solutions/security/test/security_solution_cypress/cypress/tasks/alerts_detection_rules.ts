@@ -15,6 +15,8 @@ import {
   RULE_SWITCH,
   RULE_SWITCH_LOADER,
   RULES_MANAGEMENT_TABLE,
+  RULES_MONITORING_TABLE,
+  RULES_UPDATES_TABLE,
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
   DUPLICATE_RULE_ACTION_BTN,
@@ -59,10 +61,6 @@ import {
   MANUAL_RULE_RUN_ACTION_BTN,
   RULE_DETAILS_REVERT_RULE_BTN,
   TOASTER_BODY,
-} from '../screens/alerts_detection_rules';
-import type {
-  RULES_MONITORING_TABLE,
-  RULES_UPDATES_TABLE,
 } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import {
@@ -212,31 +210,39 @@ export const waitForRuleExecution = (name: string) => {
   });
 };
 
-export const withRulesTableRefresh = (action: () => void, timeout: number = 30000) => {
-  let initialTimestamp: number;
+/**
+ * Executes an action in the rules table and waits for the table to refresh.
+ *
+ * This helper ensures that actions which trigger a table refresh (such as filtering, toggling enabled/disabled rules,
+ * etc.) complete successfully by verifying that the table's `data-last-updated` timestamp has been updated.
+ * This helps prevent flaky tests by ensuring the table has fully refreshed before subsequent
+ * assertions or actions are performed.
+ *
+ * @param action – A callback function that triggers the table refresh (e.g., clicking a filter button)
+ *
+ * @example
+ * withRulesTableRefresh(() => cy.get(ELASTIC_RULES_BTN).click());
+ */
+export const withRulesTableRefresh = (action: () => void) => {
+  cy.get(`${RULES_MANAGEMENT_TABLE}, ${RULES_MONITORING_TABLE}, ${RULES_UPDATES_TABLE}`)
+    .first()
+    .as('currentRulesTable');
 
-  cy.get(RULES_MANAGEMENT_TABLE)
+  cy.get('@currentRulesTable')
+    // Grab the timestamp before the action
     .invoke('attr', 'data-last-updated')
-    .then((timestamp) => {
-      initialTimestamp = parseInt(timestamp as string, 10);
-      cy.log(`Initial timestamp: ${initialTimestamp}`);
-    })
-    .then(() => {
-      // Execute the action that triggers refresh
+    .then((timestampBeforeAction) => {
+      // Execute the action that triggers table refresh
       action();
 
-      // Wait for the timestamp to be GREATER than initial (this will retry!)
-      cy.get(RULES_MANAGEMENT_TABLE, { timeout })
-        .should(($table) => {
-          const currentTimestampString = $table.attr('data-last-updated');
-          const currentTimestamp = parseInt(currentTimestampString || '0', 10);
-
-          // This assertion will retry until it passes or times out
-          expect(currentTimestamp).to.be.greaterThan(initialTimestamp);
-        })
-        .then(($table) => {
-          const newTimestamp = parseInt($table.attr('data-last-updated') || '0', 10);
-          cy.log(`Table refreshed. New timestamp: ${newTimestamp} (was: ${initialTimestamp})`);
+      // Wait for the timestamp to be GREATER than initial (this will retry until it passes or times out)
+      cy.get('@currentRulesTable')
+        .invoke('attr', 'data-last-updated')
+        .should((timestampAfterAction) => {
+          expect(Number(timestampAfterAction)).to.be.greaterThan(
+            Number(timestampBeforeAction),
+            `Expected timestamp after action to be greater than timestamp before action. Timestamp before action: ${timestampBeforeAction}, timestamp after action: ${timestampAfterAction}.`
+          );
         });
     });
 };
@@ -250,11 +256,11 @@ export const filterByCustomRules = () => {
 };
 
 export const filterByEnabledRules = () => {
-  cy.get(ENABLED_RULES_BTN).click();
+  withRulesTableRefresh(() => cy.get(ENABLED_RULES_BTN).click());
 };
 
 export const filterByDisabledRules = () => {
-  cy.get(DISABLED_RULES_BTN).click();
+  withRulesTableRefresh(() => cy.get(DISABLED_RULES_BTN).click());
 };
 
 export const goToRuleDetailsOf = (ruleName: string) => {
