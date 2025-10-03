@@ -72,19 +72,14 @@ export function createMetricAggregation({
  *
  * @param targetBuckets - The desired number of buckets for the time series.
  * @param timestampField - The name of the timestamp field.
- * @param escapePlaceHolders - Whether to use escaped placeholders for start and end times.
  * @returns The ES|QL BUCKET function string.
  */
 export function createTimeBucketAggregation({
   targetBuckets = 100,
   timestampField = '@timestamp',
-  escapePlaceHolders = true,
 }: {
   targetBuckets?: number;
   timestampField?: string;
-  escapePlaceHolders?: boolean;
 }) {
-  const startPlaceholder = escapePlaceHolders ? '?_tstart' : '?_tstart';
-  const endPlaceholder = escapePlaceHolders ? '?_tend' : '?_tend';
-  return `BUCKET(${timestampField}, ${targetBuckets}, ${startPlaceholder}, ${endPlaceholder})`;
+  return `BUCKET(${timestampField}, ${targetBuckets}, ?_tstart, ?_tend)`;
 }

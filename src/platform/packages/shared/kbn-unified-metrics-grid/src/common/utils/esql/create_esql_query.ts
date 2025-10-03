@@ -47,7 +47,7 @@ function needsStringCasting(fieldType: ES_FIELD_TYPES): boolean {
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQLQueryParams) {
-  const { name: metricField, index, dimensions: metricDimensions } = metric;
+  const { name: metricField, instrument, index, dimensions: metricDimensions } = metric;
   const source = timeseries(index);
 
   const whereConditions: QueryOperator[] = [];
@@ -83,11 +83,11 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
       : (query) => query,
     stats(
       `${createMetricAggregation({
-        instrument: metric.instrument,
+        instrument,
         placeholderName: 'metricField',
-      })} BY ${createTimeBucketAggregation({
-        escapePlaceHolders: true,
-      })}${dimensions.length > 0 ? `, ${dimensions.join(',')}` : ''}`,
+      })} BY ${createTimeBucketAggregation({})}${
+        dimensions.length > 0 ? `, ${dimensions.join(',')}` : ''
+      }`,
       {
         metricField,
       }
