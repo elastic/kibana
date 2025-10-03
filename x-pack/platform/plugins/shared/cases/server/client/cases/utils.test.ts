@@ -226,6 +226,7 @@ describe('utils', () => {
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
           externalId: null,
+          additionalFields: null,
         },
         comments: [],
       });

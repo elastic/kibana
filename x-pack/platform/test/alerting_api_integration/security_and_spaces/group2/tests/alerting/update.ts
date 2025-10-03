@@ -12,6 +12,7 @@ import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { deleteRuleById } from '../../../../common/lib/rules';
 import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
 import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import {
@@ -1503,13 +1504,13 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .send(rulePayload)
           .expect(200);
 
-        objectRemover.add('default', createdRule.id, 'rule', 'alerting');
-
         await supertest
           .put(`/api/alerting/rule/${createdRule.id}`)
           .set('kbn-xsrf', 'foo')
           .send({ name: 'test.internal-rule-type-update', schedule: { interval: '5m' } })
           .expect(400);
+
+        await deleteRuleById(es, createdRule.id);
       });
     });
   });
