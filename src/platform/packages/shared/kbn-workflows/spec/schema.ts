@@ -124,7 +124,6 @@ export const ScheduledTriggerSchema = z.object({
         .string()
         .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
     }),
-    z.object({ cron: z.string().min(1) }),
     z.object({
       rrule: z
         .object({
