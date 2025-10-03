@@ -207,6 +207,7 @@ const ESQLEditorInternal = function ESQLEditor({
       if (currentValue != null) {
         setCodeStateOnSubmission(currentValue);
       }
+      telemetryService.trackQueryHistoryClicked();
       onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
     }
   }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
@@ -498,19 +499,16 @@ const ESQLEditorInternal = function ESQLEditor({
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
       onSuggestionsWithCustomCommandShown: (commandIds: string[]) =>
         telemetryService.trackSuggestionsWithCustomCommandShown(commandIds),
-      onQueryHistoryOpened: (isOpen: boolean) => {
-        telemetryService.trackQueryHistoryOpened(isOpen);
-      },
     }),
     [telemetryService]
   );
 
   const onClickQueryHistory = useCallback(
     (isOpen: boolean) => {
-      telemetryCallbacks.onQueryHistoryOpened(isOpen);
+      telemetryService.trackQueryHistoryOpened(isOpen);
       setIsHistoryOpen(isOpen);
     },
-    [telemetryCallbacks]
+    [telemetryService]
   );
 
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
