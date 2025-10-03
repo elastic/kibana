@@ -210,7 +210,7 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
       {showRelationshipsCallout ? (
         <>
           <EuiCallOut
-            announceOnMount
+            announceOnMount={false}
             color="danger"
             iconType="warning"
             title={relationshipCalloutText}
