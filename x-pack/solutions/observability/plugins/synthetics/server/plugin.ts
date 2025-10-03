@@ -31,6 +31,7 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import { SyntheticsDataMigrationTask } from './tasks/synthetics_data_migration_task';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -40,6 +41,7 @@ export class Plugin implements PluginType {
   private syntheticsMonitorClient?: SyntheticsMonitorClient;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private syncPrivateLocationMonitorsTask?: SyncPrivateLocationMonitorsTask;
+  private dataMigrationTask?: SyntheticsDataMigrationTask;
 
   constructor(private readonly initContext: PluginInitializerContext<UptimeConfig>) {
     this.logger = initContext.logger.get();
@@ -97,6 +99,8 @@ export class Plugin implements PluginType {
       this.syntheticsMonitorClient
     );
 
+    this.dataMigrationTask = new SyntheticsDataMigrationTask(this.server, plugins.taskManager);
+
     return {};
   }
 
@@ -117,6 +121,10 @@ export class Plugin implements PluginType {
     }
     this.syncPrivateLocationMonitorsTask?.start().catch((e) => {
       this.logger.error('Failed to start sync private location monitors task', { error: e });
+    });
+
+    this.dataMigrationTask?.start().catch((e) => {
+      this.logger.error('Failed to start data migration task', { error: e });
     });
 
     this.syntheticsService?.start(pluginsStart.taskManager);
