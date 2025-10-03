@@ -64,7 +64,6 @@
     "@kbn/tooling-log",
     "@kbn/ci-stats-reporter",
     "@kbn/optimizer-webpack-helpers",
-    "@kbn/storybook",
     "@kbn/core-apps-server-internal",
     "@kbn/flot-charts",
     "@kbn/shared-ux-router",

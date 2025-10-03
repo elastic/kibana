@@ -48,12 +48,19 @@ export const DATE_ADDED = i18n.translate('xpack.cases.caseView.observables.dateA
 });
 
 export const OBSERVABLE_TYPE = i18n.translate('xpack.cases.caseView.observables.type', {
-  defaultMessage: 'Observable type',
+  defaultMessage: 'Type',
 });
 
 export const OBSERVABLE_VALUE = i18n.translate('xpack.cases.caseView.observables.value', {
-  defaultMessage: 'Observable value',
+  defaultMessage: 'Name',
 });
+
+export const OBSERVABLE_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.observables.description',
+  {
+    defaultMessage: 'Description',
+  }
+);
 
 export const OBSERVABLE_ACTIONS = i18n.translate('xpack.cases.caseView.observables.actions', {
   defaultMessage: 'Actions',
@@ -67,10 +74,24 @@ export const CANCEL = i18n.translate('xpack.cases.caseView.observables.cancel', 
   defaultMessage: 'Cancel',
 });
 
-export const VALUE_PLACEHOLDER = i18n.translate(
-  'xpack.cases.caseView.observables.valuePlaceholder',
+export const SELECT_OBSERVABLE_VALUE_PLACEHOLDER = i18n.translate(
+  'xpack.cases.caseView.observables.addObservableModal.selectValue',
   {
-    defaultMessage: 'Observable value',
+    defaultMessage: 'Name',
+  }
+);
+
+export const SELECT_OBSERVABLE_TYPE_PLACEHOLDER = i18n.translate(
+  'xpack.cases.caseView.observables.addObservableModal.selectType',
+  {
+    defaultMessage: 'Select type',
+  }
+);
+
+export const SELECT_OBSERVABLE_DESCRIPTION_PLACEHOLDER = i18n.translate(
+  'xpack.cases.caseView.observables.addObservableModal.selectDescription',
+  {
+    defaultMessage: 'Describe what was observed',
   }
 );
 
@@ -122,3 +143,37 @@ export const FIELD_LABEL_DESCRIPTION = i18n.translate(
 export const FIELD_LABEL_TYPE = i18n.translate('xpack.cases.caseView.observables.labelType', {
   defaultMessage: 'Type',
 });
+
+export const EXTRACT_OBSERVABLES_LABEL = i18n.translate(
+  'xpack.cases.caseView.observables.extractObservablesLabel',
+  {
+    defaultMessage: 'Auto-extract observables',
+  }
+);
+
+export const HOST_NAME = i18n.translate('xpack.cases.caseView.observables.hostName', {
+  defaultMessage: 'Host name',
+});
+
+export const IP = i18n.translate('xpack.cases.caseView.observables.ip', {
+  defaultMessage: 'IP',
+});
+
+export const FILE_PATH = i18n.translate('xpack.cases.caseView.observables.filePath', {
+  defaultMessage: 'File path',
+});
+
+export const FILE_HASH = i18n.translate('xpack.cases.caseView.observables.fileHash', {
+  defaultMessage: 'File hash',
+});
+
+export const DOMAIN = i18n.translate('xpack.cases.caseView.observables.domain', {
+  defaultMessage: 'Domain',
+});
+
+export const DEFAULT_OBSERVABLE_TYPES_MODAL_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.cases.caseView.observables.defaultObservableTypesModalButtonAriaLabel',
+  {
+    defaultMessage: 'Default observable types modal button',
+  }
+);

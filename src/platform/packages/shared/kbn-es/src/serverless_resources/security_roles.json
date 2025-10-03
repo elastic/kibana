@@ -21,7 +21,8 @@
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
             ".fleet-actions*",
-            ".asset-criticality.asset-criticality-*"
+            ".asset-criticality.asset-criticality-*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["read"]
         }
@@ -71,7 +72,8 @@
             "metrics-endpoint.metadata_current_*",
             ".fleet-agents*",
             ".fleet-actions*",
-            ".asset-criticality.asset-criticality-*"
+            ".asset-criticality.asset-criticality-*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["read"]
         }
@@ -131,7 +133,11 @@
             ".fleet-agents*",
             ".fleet-actions*",
             "risk-score.risk-score-*",
-            ".entities.v1.latest.security_*"
+            ".entities.v1.latest.security_*",
+            ".entities.v1.history.*.security_*",
+            ".entities.v1.reset*",
+            ".entities.v1.updates.security_*",
+            ".entity_analytics.monitoring*"
           ],
           "privileges": ["read"]
         }
@@ -210,7 +216,12 @@
           "privileges": ["read", "write", "maintenance", "view_index_metadata"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": [
+            "metrics-endpoint.metadata_current_*",
+            ".fleet-agents*",
+            ".fleet-actions*",
+            ".entity_analytics.monitoring*"
+          ],
           "privileges": ["read"]
         }
       ],
@@ -268,7 +279,12 @@
           "privileges": ["read", "write", "manage"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": [
+            "metrics-endpoint.metadata_current_*",
+            ".fleet-agents*",
+            ".fleet-actions*",
+            ".entity_analytics.monitoring*"
+          ],
           "privileges": ["read"]
         }
       ],
@@ -321,7 +337,12 @@
           "privileges": ["manage", "write", "read"]
         },
         {
-          "names": ["metrics-endpoint.metadata_current_*", ".fleet-agents*", ".fleet-actions*"],
+          "names": [
+            "metrics-endpoint.metadata_current_*",
+            ".fleet-agents*",
+            ".fleet-actions*",
+            ".entity_analytics.monitoring*"
+          ],
           "privileges": ["read"]
         }
       ],
@@ -383,6 +404,10 @@
             ".siem-signals-*"
           ],
           "privileges": ["all"]
+        },
+        {
+          "names": [".entity_analytics.monitoring*"],
+          "privileges": ["read"]
         }
       ],
       "run_as": []

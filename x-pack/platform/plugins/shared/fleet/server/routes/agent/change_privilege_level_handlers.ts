@@ -18,8 +18,11 @@ export const changeAgentPrivilegeLevelHandler: FleetRequestHandler<
   const [coreContext] = await Promise.all([context.core, context.fleet]);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
-  const options = request.body?.user_info ? { userInfo: request.body.user_info } : {};
-
-  const body = await changeAgentPrivilegeLevel(esClient, soClient, request.params.agentId, options);
+  const body = await changeAgentPrivilegeLevel(
+    esClient,
+    soClient,
+    request.params.agentId,
+    request.body
+  );
   return response.ok({ body });
 };

@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { i18n } from '@kbn/i18n';
 
 import type {
   IndicesAlias,
@@ -16,7 +17,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus, ReindexStep } from '../../../common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStep } from '../../../common';
 import type { IndexSettings, IndexWarning, ReindexArgs } from '../../../common';
 import type { ReindexSavedObject } from './types';
 import type { CreateReindexOpArgs } from './reindex_actions';
@@ -541,10 +543,6 @@ export const reindexServiceFactory = (
             allow_restricted_indices: true,
             privileges: ['all'],
           },
-          {
-            names: ['.tasks'],
-            privileges: ['read'],
-          },
         ],
       });
 
@@ -586,7 +584,22 @@ export const reindexServiceFactory = (
     }) {
       const indexExists = await esClient.indices.exists({ index: indexName });
       if (!indexExists) {
-        throw error.indexNotFound(`Index ${indexName} does not exist in this cluster.`);
+        throw error.indexNotFound(
+          i18n.translate('xpack.reindexService.error.indexNotFound', {
+            defaultMessage: 'Index {indexName} does not exist in this cluster.',
+            values: { indexName },
+          })
+        );
+      }
+
+      const newIndexExists = await esClient.indices.exists({ index: newIndexName });
+      if (newIndexExists) {
+        throw error.indexAlreadyExists(
+          i18n.translate('xpack.reindexService.error.indexAlreadyExists', {
+            defaultMessage: 'The index {newIndexName} already exists. Please try again.',
+            values: { newIndexName },
+          })
+        );
       }
 
       const existingReindexOps = await actions.findReindexOperations(indexName);

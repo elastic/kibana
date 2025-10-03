@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterTryBlockNode } from '@kbn/workflows';
-import type { StepImplementation } from '../../step_base';
+import type { EnterTryBlockNode } from '@kbn/workflows/graph';
+import type { NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
-export class EnterTryBlockNodeImpl implements StepImplementation {
+export class EnterTryBlockNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterTryBlockNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
   public async run(): Promise<void> {
-    await this.wfExecutionRuntimeManager.startStep(this.node.id);
-    this.wfExecutionRuntimeManager.enterScope();
-    this.wfExecutionRuntimeManager.goToStep(this.node.enterNormalPathNodeId);
+    await this.wfExecutionRuntimeManager.startStep();
+    this.wfExecutionRuntimeManager.navigateToNode(this.node.enterNormalPathNodeId);
   }
 }

@@ -13,6 +13,8 @@ import type {
 } from '@kbn/data-views-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { ToolServiceStartContract } from '@kbn/onechat-browser';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -23,6 +25,7 @@ export interface OnechatSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   management: ManagementSetup;
   share: SharePluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface OnechatStartDependencies {
@@ -30,8 +33,17 @@ export interface OnechatStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  uiActions: UiActionsStart;
 }
 
 export interface OnechatPluginSetup {}
 
-export interface OnechatPluginStart {}
+/**
+ * Public start contract for the browser-side onechat plugin.
+ */
+export interface OnechatPluginStart {
+  /**
+   * Tool service contract, can be used to list or execute tools.
+   */
+  tools: ToolServiceStartContract;
+}

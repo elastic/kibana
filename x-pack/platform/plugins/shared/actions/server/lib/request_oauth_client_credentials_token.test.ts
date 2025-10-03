@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 jest.mock('axios', () => ({
   create: jest.fn(),
 }));
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { URLSearchParams } from 'url';
 import { actionsConfigMock } from '../actions_config.mock';
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
@@ -19,12 +19,21 @@ const axiosInstanceMock = jest.fn();
 
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
+const paramsToObject = (params: URLSearchParams): Record<string, string> => {
+  const obj: Record<string, string> = {};
+  for (const [key, value] of params.entries()) {
+    obj[key] = value;
+  }
+  return obj;
+};
+
 describe('requestOAuthClientCredentialsToken', () => {
   beforeEach(() => {
+    jest.resetAllMocks();
     createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
   });
 
-  test('making a token request with the required options', async () => {
+  test('making a token request with required options only', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
@@ -44,6 +53,15 @@ describe('requestOAuthClientCredentialsToken', () => {
       },
       configurationUtilities
     );
+
+    const receivedDataString = axiosInstanceMock.mock.calls[0][1].data;
+    const receivedParams = new URLSearchParams(receivedDataString);
+    expect(paramsToObject(receivedParams)).toEqual({
+      client_id: '123456',
+      client_secret: 'secrert123',
+      grant_type: 'client_credentials',
+      scope: 'test',
+    });
 
     expect(axiosInstanceMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -94,6 +112,55 @@ describe('requestOAuthClientCredentialsToken', () => {
         },
       ]
     `);
+  });
+
+  test('making a token request with additional fields', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        tokenType: 'Bearer',
+        accessToken: 'tokenwithfields',
+        expiresIn: 456,
+      },
+    });
+
+    const additionalFields = {
+      custom_param: 'value1',
+      another_field: 'value 2 with spaces',
+      numeric_field: 123,
+    };
+
+    await requestOAuthClientCredentialsToken(
+      'https://test-additional',
+      mockLogger,
+      {
+        scope: 'test-scope',
+        clientId: 'client-abc',
+        clientSecret: 'secret-xyz',
+        ...additionalFields,
+      },
+      configurationUtilities
+    );
+
+    const receivedDataString = axiosInstanceMock.mock.calls[0][1].data;
+    const receivedParams = new URLSearchParams(receivedDataString);
+
+    const expectedParamsObject = {
+      another_field: 'value 2 with spaces',
+      client_id: 'client-abc',
+      client_secret: 'secret-xyz',
+      custom_param: 'value1',
+      grant_type: 'client_credentials',
+      numeric_field: '123',
+      scope: 'test-scope',
+    };
+
+    expect(paramsToObject(receivedParams)).toEqual(expectedParamsObject);
+
+    expect(axiosInstanceMock.mock.calls[0][1].data).toMatchInlineSnapshot(
+      `"another_field=value%202%20with%20spaces&client_id=client-abc&client_secret=secret-xyz&custom_param=value1&grant_type=client_credentials&numeric_field=123&scope=test-scope"`
+    );
   });
 
   test('throw the exception and log the proper error if token was not get successfuly', async () => {

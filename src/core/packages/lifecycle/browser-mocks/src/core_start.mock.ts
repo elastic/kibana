@@ -18,7 +18,6 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { uiSettingsServiceMock, settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
@@ -28,9 +27,10 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 export function createCoreStartMock({ basePath = '' } = {}) {
-  const mock = {
+  const mock = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
@@ -45,7 +45,6 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     overlays: overlayServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     settings: settingsServiceMock.createStartContract(),
-    savedObjects: savedObjectsServiceMock.createStartContract(),
     deprecations: deprecationsServiceMock.createStartContract(),
     theme: themeServiceMock.createStartContract(),
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
@@ -53,10 +52,10 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     userProfile: userProfileServiceMock.createStart(),
     rendering: renderingServiceMock.create(),
     pricing: pricingServiceMock.createStartContract(),
-    plugins: {
+    plugins: lazyObject({
       onStart: jest.fn(),
-    },
-  };
+    }),
+  });
 
   return mock;
 }

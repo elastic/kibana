@@ -10,13 +10,33 @@
 import { useState, useCallback } from 'react';
 
 /**
+ * Flag for tracking if any popover is open.
+ */
+let anyPopoverOpen: boolean = false;
+
+/**
+ * Utility function to check if any popover is open.
+ *
+ * @returns true if any popover is open
+ */
+export const getIsAnyPopoverOpenNow = () => anyPopoverOpen;
+
+/**
  * Hook for managing popover open state
  */
 export const usePopoverOpen = (initialState = false) => {
   const [isOpen, setIsOpen] = useState(initialState);
 
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
+  const open = useCallback(() => {
+    setIsOpen(true);
+    anyPopoverOpen = true;
+  }, []);
+
+  const close = useCallback(() => {
+    setIsOpen(false);
+    anyPopoverOpen = false;
+  }, []);
+
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
   return { isOpen, open, close, toggle };

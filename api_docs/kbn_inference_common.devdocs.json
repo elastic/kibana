@@ -623,7 +623,7 @@
         "label": "createPrompt",
         "description": [],
         "signature": [
-          "(init: { name: string; description: string; input: Zod.ZodType<TInput, Zod.ZodTypeDef, TInput>; }) => ",
+          "(init: { name: string; description?: string | undefined; input: Zod.ZodType<TInput, Zod.ZodTypeDef, TInput>; }) => ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -666,6 +666,9 @@
                 "tags": [],
                 "label": "description",
                 "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/create_prompt.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4135,6 +4138,9 @@
             "description": [
               "\nA human-readable description of what the prompt does. Used for evaluations."
             ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4611,6 +4617,50 @@
             "description": [],
             "signature": [
               "[x: string]:  unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.ToolCallbackResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolCallbackResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ToolCallbackResult.response",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "string | ",
+              "ToolResponseStructured"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.ToolCallbackResult.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              "ToolData",
+              " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools.ts",
             "deprecated": false,
@@ -6920,7 +6970,13 @@
             "text": "ToolCallArgumentsOfToolDefinition"
           },
           "<TToolOptions[\"tools\"][TName]>>, ",
-          "ToolCallbackResult",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallbackResult",
+            "text": "ToolCallbackResult"
+          },
           ">; } : never"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/tools_of.ts",
@@ -7327,9 +7383,7 @@
           },
           "<",
           "ToolDefinitions",
-          " | undefined> ? TPromptVersion extends { tools?: ",
-          "ToolDefinitions",
-          " | undefined; } ? Pick<TPromptVersion, \"tools\"> : {} : {} : {}"
+          " | undefined> ? Pick<TPromptVersion, \"tools\"> : {} : {}"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/prompt/types.ts",
         "deprecated": false,

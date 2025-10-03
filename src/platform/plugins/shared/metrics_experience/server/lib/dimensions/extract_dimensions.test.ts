@@ -8,11 +8,6 @@
  */
 
 import { extractDimensions } from './extract_dimensions';
-import { getEcsFieldDescriptions } from '../fields/get_ecs_field_descriptions';
-
-jest.mock('../fields/get_ecs_field_descriptions', () => ({
-  getEcsFieldDescriptions: jest.fn(),
-}));
 
 describe('extractDimensions', () => {
   const mockFields = {
@@ -30,9 +25,6 @@ describe('extractDimensions', () => {
         searchable: true,
         type: 'keyword',
         time_series_dimension: true,
-        meta: {
-          description: ['The cloud provider'],
-        },
       },
     },
     'service.name': {
@@ -51,6 +43,14 @@ describe('extractDimensions', () => {
         time_series_dimension: false,
       },
     },
+    'host.ip': {
+      ip: {
+        aggregatable: true,
+        searchable: true,
+        type: 'ip',
+        time_series_dimension: true,
+      },
+    },
     _metric_names_hash: {
       keyword: {
         aggregatable: true,
@@ -61,29 +61,24 @@ describe('extractDimensions', () => {
     },
   };
 
-  beforeEach(() => {
-    (getEcsFieldDescriptions as jest.Mock).mockReturnValue(
-      new Map([['service.name', 'The service name']])
-    );
-  });
-
   it('should extract all dimensions when no filter is provided', () => {
     const result = extractDimensions(mockFields);
     expect(result).toEqual([
       {
         name: 'host.name',
         type: 'keyword',
-        description: undefined,
       },
       {
         name: 'cloud.provider',
         type: 'keyword',
-        description: 'The cloud provider',
       },
       {
         name: 'service.name',
         type: 'keyword',
-        description: 'The service name',
+      },
+      {
+        name: 'host.ip',
+        type: 'ip',
       },
     ]);
   });
@@ -94,12 +89,10 @@ describe('extractDimensions', () => {
       {
         name: 'host.name',
         type: 'keyword',
-        description: undefined,
       },
       {
         name: 'service.name',
         type: 'keyword',
-        description: 'The service name',
       },
     ]);
   });
@@ -145,7 +138,6 @@ describe('extractDimensions', () => {
       {
         name: 'host.name',
         type: 'keyword',
-        description: undefined,
       },
     ]);
   });

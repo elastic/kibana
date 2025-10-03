@@ -19,9 +19,10 @@ import {
 import type { FilesRouter } from '../types';
 import type { CreateRouteDefinition } from '../api_routes';
 import { FILES_API_ROUTES } from '../api_routes';
-import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
+import { getFileHttpResponseOptions, getDownloadedFileName } from '../common';
 import { fileNameWithExt } from '../common_schemas';
 import type { CreateHandler } from '../types';
+import { validateFileNameExtension } from '../file_kind/helpers';
 
 const method = 'get' as const;
 
@@ -45,11 +46,19 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
 
   try {
     const file = await fileService.asInternalUser().getByToken(token);
+
+    const invalidExtensionResponse = validateFileNameExtension(fileName, file);
+    if (invalidExtensionResponse) {
+      return invalidExtensionResponse;
+    }
+
     const body: Readable = await file.downloadContent();
+    const fileHttpResponseOptions = getFileHttpResponseOptions(file);
+
     return res.file({
       body,
       filename: fileName ?? getDownloadedFileName(file),
-      headers: getDownloadHeadersForFile({ file, fileName }),
+      ...fileHttpResponseOptions,
     });
   } catch (e) {
     if (

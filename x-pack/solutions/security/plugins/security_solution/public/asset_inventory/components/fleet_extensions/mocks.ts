@@ -136,6 +136,7 @@ const getPolicyMock = (
     'azure.credentials.client_certificate_password': { type: 'text' },
     'azure.credentials.client_username': { type: 'text' },
     'azure.credentials.client_password': { type: 'text' },
+    'azure.credentials.cloud_connector_id': { type: 'text' },
   };
 
   const dataStream = { type: 'logs', dataset: 'cloud_asset_inventory.asset_inventory' };
@@ -277,6 +278,24 @@ export const getPackageInfoMock = () => {
                 show_user: true,
                 title: 'Client Certificate Password',
                 type: 'text' as RegistryVarType,
+              },
+              {
+                name: 'azure.credentials.client_id',
+                type: 'text',
+                secret: true,
+                title: 'Client ID',
+                multi: false,
+                required: false,
+                show_user: true,
+              },
+              {
+                name: 'azure.credentials.tenant_id',
+                type: 'text',
+                secret: true,
+                title: 'Tenant ID',
+                multi: false,
+                required: false,
+                show_user: true,
               },
             ],
           },

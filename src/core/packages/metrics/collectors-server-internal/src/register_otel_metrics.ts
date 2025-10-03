@@ -212,7 +212,7 @@ function registerOtelEventLoopUtilizationMetrics(meter: Meter) {
     time: meter.createObservableCounter('nodejs.eventloop.time', {
       description:
         'Process Event Loop Utilization: Cumulative duration of time the event loop has been in each state.',
-      unit: '1',
+      unit: 'ms',
       valueType: ValueType.DOUBLE,
     }),
   };

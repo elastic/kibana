@@ -56,5 +56,8 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     // Uninstall tokens
     loadTestFile(require.resolve('./fleet_settings_privileges')); // ~ 1m
+
+    // Cloud connectors
+    loadTestFile(require.resolve('./cloud_connector'));
   });
 }

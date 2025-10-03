@@ -25,7 +25,8 @@
     "@kbn/deeplinks-fleet",
     "@kbn/deeplinks-shared",
     "@kbn/deeplinks-chat",
-    "@kbn/projects-solutions-groups"
+    "@kbn/projects-solutions-groups",
+    "@kbn/deeplinks-workflows"
   ],
   "exclude": [
     "target/**/*",

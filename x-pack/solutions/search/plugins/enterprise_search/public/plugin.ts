@@ -42,7 +42,6 @@ import {
   APPLICATIONS_PLUGIN,
   ENTERPRISE_SEARCH_DATA_PLUGIN,
   ENTERPRISE_SEARCH_HOME_PLUGIN,
-  SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
   SEARCH_HOMEPAGE,
   SEARCH_APPS_TITLE,
@@ -128,76 +127,18 @@ const applicationsLinks: AppDeepLink[] = [
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
+  private data: ClientData = {};
   private enterpriseLicenseAppUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private esConfig: ESConfig;
+  private hasInitialized: boolean = false;
+  private isSidebarEnabled = true;
   private licenseSubscription: Subscription | undefined;
+  private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
     this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
   }
-
-  private data: ClientData = {};
-  private esConfig: ESConfig;
-
-  private async getInitialData(http: HttpSetup) {
-    try {
-      this.esConfig = await http.get('/internal/enterprise_search/es_config');
-    } catch {
-      this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
-    }
-
-    if (this.hasInitialized) return; // We've already made an initial call
-
-    try {
-      this.data = await http.get('/internal/enterprise_search/config_data');
-      this.hasInitialized = true;
-    } catch (e) {
-      this.data.errorConnectingMessage = `${e.response.status} ${e.message}`;
-    }
-  }
-
-  private async getKibanaDeps(
-    core: CoreSetup,
-    params: AppMountParameters,
-    cloudSetup?: CloudSetup
-  ) {
-    // Helper for using start dependencies on mount (instead of setup dependencies)
-    // and for grouping Kibana-related args together (vs. plugin-specific args)
-    const [coreStart, pluginsStart] = await core.getStartServices();
-    const cloud =
-      cloudSetup && (pluginsStart as PluginsStart).cloud
-        ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
-        : undefined;
-    const plugins = { ...pluginsStart, cloud } as PluginsStart;
-
-    const chromeStyle = await firstValueFrom(coreStart.chrome.getChromeStyle$());
-    this.isSidebarEnabled = chromeStyle === 'classic';
-
-    coreStart.chrome.getChromeStyle$().subscribe((style) => {
-      this.isSidebarEnabled = style === 'classic';
-    });
-
-    return {
-      core: coreStart,
-      isSidebarEnabled: this.isSidebarEnabled,
-      params,
-      plugins,
-      updateSideNavDefinition: this.updateSideNavDefinition.bind(this),
-    };
-  }
-
-  private getPluginData() {
-    // Small helper for grouping plugin data related args together
-    return {
-      config: this.config,
-      data: this.data,
-      esConfig: this.esConfig,
-      isSidebarEnabled: this.isSidebarEnabled,
-    };
-  }
-
-  private hasInitialized: boolean = false;
-  private isSidebarEnabled = true;
 
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     const { cloud, share } = plugins;
@@ -288,28 +229,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       visibleIn: [],
     });
 
-    core.application.register({
-      appRoute: SEARCH_EXPERIENCES_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
-      id: SEARCH_EXPERIENCES_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(SEARCH_EXPERIENCES_PLUGIN.NAME);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { SearchExperiences } = await import('./applications/search_experiences');
-
-        return renderApp(SearchExperiences, kibanaDeps, pluginData);
-      },
-      title: SEARCH_EXPERIENCES_PLUGIN.NAME,
-      visibleIn: [],
-    });
-
     registerLocators(share!);
 
     core.application.register({
@@ -348,20 +267,8 @@ export class EnterpriseSearchPlugin implements Plugin {
         showOnHomePage: false,
         title: ANALYTICS_PLUGIN.NAME,
       });
-
-      plugins.home.featureCatalogue.register({
-        category: 'data',
-        description: SEARCH_EXPERIENCES_PLUGIN.DESCRIPTION,
-        icon: 'logoElasticsearch',
-        id: SEARCH_EXPERIENCES_PLUGIN.ID,
-        path: SEARCH_EXPERIENCES_PLUGIN.URL,
-        showOnHomePage: false,
-        title: SEARCH_EXPERIENCES_PLUGIN.NAME,
-      });
     }
   }
-
-  private readonly sideNavDynamicItems$ = new BehaviorSubject<DynamicSideNavItems>({});
 
   public start(core: CoreStart, plugins: PluginsStart) {
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
@@ -398,6 +305,63 @@ export class EnterpriseSearchPlugin implements Plugin {
       this.licenseSubscription.unsubscribe();
       this.licenseSubscription = undefined;
     }
+  }
+
+  private async getInitialData(http: HttpSetup) {
+    try {
+      this.esConfig = await http.get('/internal/enterprise_search/es_config');
+    } catch {
+      this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
+    }
+
+    if (this.hasInitialized) return; // We've already made an initial call
+
+    try {
+      this.data = await http.get('/internal/enterprise_search/config_data');
+      this.hasInitialized = true;
+    } catch (e) {
+      this.data.errorConnectingMessage = `${e.response.status} ${e.message}`;
+    }
+  }
+
+  private async getKibanaDeps(
+    core: CoreSetup,
+    params: AppMountParameters,
+    cloudSetup?: CloudSetup
+  ) {
+    // Helper for using start dependencies on mount (instead of setup dependencies)
+    // and for grouping Kibana-related args together (vs. plugin-specific args)
+    const [coreStart, pluginsStart] = await core.getStartServices();
+    const cloud =
+      cloudSetup && (pluginsStart as PluginsStart).cloud
+        ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
+        : undefined;
+    const plugins = { ...pluginsStart, cloud } as PluginsStart;
+
+    const chromeStyle = await firstValueFrom(coreStart.chrome.getChromeStyle$());
+    this.isSidebarEnabled = chromeStyle === 'classic';
+
+    coreStart.chrome.getChromeStyle$().subscribe((style) => {
+      this.isSidebarEnabled = style === 'classic';
+    });
+
+    return {
+      core: coreStart,
+      isSidebarEnabled: this.isSidebarEnabled,
+      params,
+      plugins,
+      updateSideNavDefinition: this.updateSideNavDefinition.bind(this),
+    };
+  }
+
+  private getPluginData() {
+    // Small helper for grouping plugin data related args together
+    return {
+      config: this.config,
+      data: this.data,
+      esConfig: this.esConfig,
+      isSidebarEnabled: this.isSidebarEnabled,
+    };
   }
 
   private updateSideNavDefinition = (items: Partial<DynamicSideNavItems>) => {

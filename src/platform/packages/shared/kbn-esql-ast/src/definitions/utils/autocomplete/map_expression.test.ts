@@ -8,7 +8,7 @@
  */
 
 import type { ISuggestionItem } from '../../../commands_registry/types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../../..';
+import { withAutoSuggest } from './helpers';
 import { getCommandMapExpressionSuggestions } from './map_expression';
 
 describe('getCommandMapExpressionSuggestions', () => {
@@ -25,24 +25,22 @@ describe('getCommandMapExpressionSuggestions', () => {
       const query = '{';
       const suggestions = getCommandMapExpressionSuggestions(query, availableParameters);
       expect(suggestions).toEqual([
-        {
+        withAutoSuggest({
           label: 'param1',
           kind: 'Constant',
           asSnippet: true,
           text: '"param1": "$0"',
           detail: 'param1',
           sortText: '1',
-          command: TRIGGER_SUGGESTION_COMMAND,
-        },
-        {
+        }),
+        withAutoSuggest({
           label: 'param2',
           kind: 'Constant',
           asSnippet: true,
           text: '"param2": "$0"',
           detail: 'param2',
           sortText: '1',
-          command: TRIGGER_SUGGESTION_COMMAND,
-        },
+        }),
       ]);
     });
 

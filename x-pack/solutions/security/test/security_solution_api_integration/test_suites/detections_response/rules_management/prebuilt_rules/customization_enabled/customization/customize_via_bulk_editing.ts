@@ -27,7 +27,7 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerless Customize via bulk editing', () => {
@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext): void => {
     ): Promise<BulkEditActionResponse> => {
       const {
         body: { data: prebuiltRules },
-      } = await securitySolutionApi
+      } = await detectionsApi
         .findRules({
           query: {
             filter: 'alert.attributes.params.immutable: true',
@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext): void => {
         })
         .expect(200);
 
-      const { body: bulkEditResponse } = await securitySolutionApi
+      const { body: bulkEditResponse } = await detectionsApi
         .performRulesBulkAction({
           query: {},
           body: {

@@ -7,15 +7,17 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Owner } from '../../../common/constants/types';
 import { AnalyticsIndex } from '../analytics_index';
 import {
-  CAI_ACTIVITY_INDEX_NAME,
-  CAI_ACTIVITY_INDEX_ALIAS,
+  getActivityDestinationIndexName,
+  getActivityDestinationIndexAlias,
   CAI_ACTIVITY_INDEX_VERSION,
   CAI_ACTIVITY_SOURCE_INDEX,
-  CAI_ACTIVITY_SOURCE_QUERY,
-  CAI_ACTIVITY_BACKFILL_TASK_ID,
-  CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID,
+  getActivitySourceQuery,
+  getCAIActivitySynchronizationTaskId,
+  getCAIActivityBackfillTaskId,
+  CAI_ACTIVITY_SYNC_TYPE,
 } from './constants';
 import { CAI_ACTIVITY_INDEX_MAPPINGS } from './mappings';
 import { CAI_ACTIVITY_INDEX_SCRIPT, CAI_ACTIVITY_INDEX_SCRIPT_ID } from './painless_scripts';
@@ -26,44 +28,54 @@ export const createActivityAnalyticsIndex = ({
   logger,
   isServerless,
   taskManager,
+  spaceId,
+  owner,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  spaceId: string;
+  owner: Owner;
 }): AnalyticsIndex =>
   new AnalyticsIndex({
     logger,
     esClient,
     isServerless,
     taskManager,
-    indexName: CAI_ACTIVITY_INDEX_NAME,
-    indexAlias: CAI_ACTIVITY_INDEX_ALIAS,
+    indexName: getActivityDestinationIndexName(spaceId, owner),
+    indexAlias: getActivityDestinationIndexAlias(spaceId, owner),
     indexVersion: CAI_ACTIVITY_INDEX_VERSION,
     mappings: CAI_ACTIVITY_INDEX_MAPPINGS,
     painlessScriptId: CAI_ACTIVITY_INDEX_SCRIPT_ID,
     painlessScript: CAI_ACTIVITY_INDEX_SCRIPT,
-    taskId: CAI_ACTIVITY_BACKFILL_TASK_ID,
+    taskId: getCAIActivityBackfillTaskId(spaceId, owner),
     sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
-    sourceQuery: CAI_ACTIVITY_SOURCE_QUERY,
+    sourceQuery: getActivitySourceQuery(spaceId, owner),
   });
 
 export const scheduleActivityAnalyticsSyncTask = ({
   taskManager,
   logger,
+  spaceId,
+  owner,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  spaceId: string;
+  owner: Owner;
 }) => {
+  const taskId = getCAIActivitySynchronizationTaskId(spaceId, owner);
   scheduleCAISynchronizationTask({
-    taskId: CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID,
+    taskId,
     sourceIndex: CAI_ACTIVITY_SOURCE_INDEX,
-    destIndex: CAI_ACTIVITY_INDEX_NAME,
+    destIndex: getActivityDestinationIndexName(spaceId, owner),
+    spaceId,
+    owner,
+    syncType: CAI_ACTIVITY_SYNC_TYPE,
     taskManager,
     logger,
   }).catch((e) => {
-    logger.error(
-      `Error scheduling ${CAI_ACTIVITY_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
-    );
+    logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
   });
 };

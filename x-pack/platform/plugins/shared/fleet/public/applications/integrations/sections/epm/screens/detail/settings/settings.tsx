@@ -41,6 +41,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
 import { SideBarColumn } from '../../../components/side_bar_column';
+import { BulkActionContextProvider } from '../../installed_integrations/hooks/use_bulk_actions_context';
 import { KeepPoliciesUpToDateSwitch } from '../components';
 import { useChangelog } from '../hooks';
 
@@ -51,6 +52,7 @@ import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
 import { UpdateAvailableCallout } from './update_available_callout';
 import { BreakingChangesFlyout } from './breaking_changes_flyout';
+import { RollbackButton } from './rollback_button';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};
@@ -447,6 +449,36 @@ export const SettingsPage: React.FC<Props> = memo(
                           </div>
                         </EuiFlexItem>
                       </EuiFlexGroup>
+                      <EuiSpacer size="l" />
+                      <EuiFlexGroup direction="column" gutterSize="m">
+                        <EuiFlexItem>
+                          <EuiTitle>
+                            <h4>
+                              <FormattedMessage
+                                id="xpack.fleet.integrations.settings.packageRollbackTitle"
+                                defaultMessage="Rollback"
+                              />
+                            </h4>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageRollbackDescription"
+                            defaultMessage="Rollback integration to the previous version."
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <div>
+                            <BulkActionContextProvider>
+                              <RollbackButton
+                                packageInfo={packageInfo}
+                                isCustomPackage={isCustomPackage}
+                              />
+                            </BulkActionContextProvider>
+                          </div>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="l" />
                     </>
                   )}
                 </div>

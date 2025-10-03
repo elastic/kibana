@@ -8,7 +8,7 @@
 export { DEFEND_INSIGHTS } from './defend_insight_prompts';
 
 export const KNOWLEDGE_HISTORY =
-  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.\n\n{knowledgeHistory}';
+  'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.';
 export const INCLUDE_CITATIONS = `\n\nAnnotate your answer with the provided citations. Here are some example responses with citations: \n1. "Machine learning is increasingly used in cyber threat detection. {reference(prSit)}" \n2. "The alert has a risk score of 72. {reference(OdRs2)}"\n\nOnly use the citations returned by tools\n\n`;
 export const DEFAULT_SYSTEM_PROMPT = `You are a security analyst and expert in resolving security incidents. Your role is to assist by answering questions about Elastic Security. Do not answer questions unrelated to Elastic Security. ${KNOWLEDGE_HISTORY} {citations_prompt} \n{formattedTime}`;
 // system prompt from @afirstenberg
@@ -16,7 +16,7 @@ const BASE_GEMINI_PROMPT =
   'You are an assistant that is an expert at using tools and Elastic Security, doing your best to use these tools to answer questions or follow instructions. It is very important to use tools to answer the question or follow the instructions rather than coming up with your own answer. Tool calls are good. Sometimes you may need to make several tool calls to accomplish the task or get an answer to the question that was asked. Use as many tool calls as necessary.';
 const KB_CATCH =
   'If the knowledge base tool gives empty results, do your best to answer the question from the perspective of an expert security analyst.';
-export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt}{knowledgeHistory}\n\n${KB_CATCH}\n\n{formattedTime}`;
+export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt}\n\n${KB_CATCH}\n\n{formattedTime}`;
 export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.\n\n Ensure that the final response always includes all instructions from the tool responses. Never omit earlier parts of the response.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
@@ -218,6 +218,24 @@ Formatting Requirements:
   - Use concise, actionable language.
   - Include relevant emojis in section headers for visual clarity (e.g., 📝, 🛡️, 🔍, 📚).
 `;
+
+export const ENTITY_ANALYSIS = `Your primary function is to analyze asset and entity data to provide security insights. You will be provided with a JSON object containing the context of a specific asset (e.g., a host, user, service or cloud resource). Your response must be structured, contextual, and directly address the user's query if one is provided. If no specific query is given, provide a general analysis based on the structure below.
+Your response must be in markdown format and include the following sections:
+**1. 🔍 Asset Overview**
+   - Begin by acknowledging the asset you are analyzing using its primary identifiers (e.g., "Analyzing host \`[host.name]\` with IP \`[host.ip]\`").
+   - Provide a concise summary of the asset's most critical attributes from the provided context.
+   - Describe its key relationships and dependencies (e.g., "This asset is part of the \`[cloud.project.name]\` project and is located in the \`[cloud.availability_zone]\` zone.").
+**2. 💡 Investigation & Analytics**
+   - Based on the asset's type and attributes, suggest potential investigation paths or common attack vectors.
+   - **Generate contextual ES|QL queries** to help the user investigate further. Format all queries as code blocks. Your generated queries should address common analytical questions, such as:
+     - Finding related security events (e.g., login attempts, network traffic, process executions).
+     - Identifying other assets with similar attributes.
+     - Searching for Indicators of Compromise (IoCs) relevant to the asset type.
+   - If the user asks a question that can be answered with a query, provide the query as the primary answer.
+**General Instructions:**
+- **Context Awareness:** Your entire analysis must be derived from the provided asset context. If a piece of information is not available in the context (or appears to be anonymized), state that and proceed with the available data.
+- **Query Generation:** When asked to "write a query" or a similar request, your primary output for that section should be a valid, ready-to-use ES|QL query based on the entity's schema.
+- **Formatting:** Use markdown headers, tables, code blocks, and bullet points to ensure the output is clear, organized, and easily readable. Use concise, actionable language.`;
 
 export const starterPromptTitle1 = 'Alerts';
 export const starterPromptDescription1 = 'Most important alerts from the last 24 hrs';

@@ -383,8 +383,8 @@ export function useGetAgentStatusRuntimeFieldQuery(options: Partial<{ enabled: b
     enabled: options.enabled,
   });
 }
-export function useMigrateSingleAgent(options: MigrateSingleAgentRequest['body']) {
-  return sendRequest<MigrateSingleAgentResponse>({
+export function sendMigrateSingleAgent(options: MigrateSingleAgentRequest['body']) {
+  return sendRequestForRq<MigrateSingleAgentResponse>({
     path: agentRouteService.postMigrateSingleAgent(options.id),
     method: 'post',
     version: API_VERSIONS.public.v1,
@@ -396,8 +396,8 @@ export function useMigrateSingleAgent(options: MigrateSingleAgentRequest['body']
   });
 }
 
-export function useBulkMigrateAgents(options: BulkMigrateAgentsRequest['body']) {
-  return sendRequest<BulkMigrateAgentsResponse>({
+export function sendBulkMigrateAgents(options: BulkMigrateAgentsRequest['body']) {
+  return sendRequestForRq<BulkMigrateAgentsResponse>({
     path: agentRouteService.postBulkMigrateAgents(),
     method: 'post',
     version: API_VERSIONS.public.v1,

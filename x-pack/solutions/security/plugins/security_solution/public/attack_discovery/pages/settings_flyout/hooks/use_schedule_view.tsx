@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonLoading,
@@ -15,10 +14,10 @@ import {
 } from '@elastic/eui';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import * as i18n from './translations';
 
 import { useFindAttackDiscoverySchedules } from '../schedule/logic/use_find_schedules';
 import { EmptyPage } from '../schedule/empty_page';
+import { CreateButton } from '../schedule/create_button';
 import { SchedulesTable } from '../schedule/schedules_table';
 import { CreateFlyout } from '../schedule/create_flyout';
 
@@ -59,15 +58,7 @@ export const useScheduleView = (): UseScheduleView => {
     return total ? (
       <EuiFlexGroup alignItems="center" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="createNewSchedule"
-            fill
-            onClick={openFlyout}
-            size="m"
-            iconType="plusInCircle"
-          >
-            {i18n.CREATE_NEW_SCHEDULE}
-          </EuiButton>
+          <CreateButton onClick={openFlyout} />
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : null;

@@ -14,17 +14,18 @@ import { ACTION_ADD_ENDPOINT_EXCEPTION, ACTION_ADD_EXCEPTION } from '../translat
 import type { AlertTableContextMenuItem } from '../types';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-interface UseExceptionActionProps {
+export interface UseExceptionActionProps {
   isEndpointAlert: boolean;
   onAddExceptionTypeClick: (type?: ExceptionListTypeEnum) => void;
 }
 
-export const useExceptionActions = ({
+export const useAlertExceptionActions = ({
   isEndpointAlert,
   onAddExceptionTypeClick,
 }: UseExceptionActionProps) => {
   const canEditRules = useUserPrivileges().rulesPrivileges.edit;
   const [{ hasIndexWrite }] = useUserData();
+  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const handleDetectionExceptionModal = useCallback(() => {
     onAddExceptionTypeClick();
@@ -34,12 +35,13 @@ export const useExceptionActions = ({
     onAddExceptionTypeClick(ExceptionListTypeEnum.ENDPOINT);
   }, [onAddExceptionTypeClick]);
 
-  const disabledAddEndpointException = !canEditRules || !hasIndexWrite || !isEndpointAlert;
+  const disabledAddEndpointException =
+    !canEditRules || !canWriteEndpointExceptions || !isEndpointAlert; // TODO: verify canEditRules is needed here
   const disabledAddException = !canEditRules || !hasIndexWrite;
 
   const exceptionActionItems: AlertTableContextMenuItem[] = useMemo(
     () =>
-      disabledAddException
+      disabledAddException && disabledAddEndpointException
         ? []
         : [
             {
@@ -65,28 +67,5 @@ export const useExceptionActions = ({
     ]
   );
 
-  return { exceptionActionItems };
-};
-
-export const useAlertExceptionActions = ({
-  isEndpointAlert,
-  onAddExceptionTypeClick,
-}: UseExceptionActionProps) => {
-  const { exceptionActionItems } = useExceptionActions({
-    isEndpointAlert,
-    onAddExceptionTypeClick,
-  });
-
-  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
-  // Endpoint exceptions are available for:
-  // Serverless Endpoint Essentials/Complete PLI and
-  // on ESS Security Kibana sub-feature Endpoint Exceptions (enabled when Security feature is enabled)
-  if (!canWriteEndpointExceptions) {
-    return {
-      exceptionActionItems: exceptionActionItems.map((item) => {
-        return { ...item, disabled: item.name === ACTION_ADD_ENDPOINT_EXCEPTION };
-      }),
-    };
-  }
   return { exceptionActionItems };
 };

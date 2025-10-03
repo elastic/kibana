@@ -28,6 +28,9 @@
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/core-chrome-browser",
+    "@kbn/try-in-console",
+    "@kbn/cloud-plugin",
+    "@kbn/share-plugin",
   ],
   "exclude": [
     "target/**/*",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { esqlResponseToJson, extractEsqlQueries, executeEsql } from './esql';
+export { esqlResponseToJson, extractEsqlQueries, executeEsql, interpolateEsqlQuery } from './esql';
 export {
   flattenMapping,
   cleanupMapping,

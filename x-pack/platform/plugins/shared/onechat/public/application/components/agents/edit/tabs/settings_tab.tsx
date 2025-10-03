@@ -20,7 +20,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
-  EuiLink,
   EuiMarkdownEditor,
   EuiHorizontalRule,
 } from '@elastic/eui';
@@ -110,23 +109,6 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 </EuiText>
               </EuiFlexGroup>
             </EuiPanel>
-            <EuiSpacer size="s" />
-            <EuiLink
-              href="#"
-              aria-label={i18n.translate(
-                'xpack.onechat.agents.form.settings.systemReferencesLearnMoreAriaLabel',
-                {
-                  defaultMessage: 'Learn more about agent basics in documentation',
-                }
-              )}
-            >
-              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-                {i18n.translate('xpack.onechat.agents.form.settings.systemReferencesLearnMore', {
-                  defaultMessage: 'Documentation - Agent basics',
-                })}
-                <EuiIcon type="popout" />
-              </EuiFlexGroup>
-            </EuiLink>
           </EuiFlexGroup>
         </EuiFlexItem>
 
@@ -168,7 +150,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             })}
             labelAppend={
               <EuiText size="xs" color="subdued">
-                {labels.agents.settings.optionalLabel}
+                {labels.common.optional}
               </EuiText>
             }
             isInvalid={!!formState.errors.configuration?.instructions}
@@ -230,7 +212,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             })}
             labelAppend={
               <EuiText size="xs" color="subdued">
-                {labels.agents.settings.optionalLabel}
+                {labels.common.optional}
               </EuiText>
             }
             isInvalid={!!formState.errors.labels}
@@ -397,7 +379,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 })}
                 labelAppend={
                   <EuiText size="xs" color="subdued">
-                    {labels.agents.settings.optionalLabel}
+                    {labels.common.optional}
                   </EuiText>
                 }
                 isInvalid={!!formState.errors.avatar_color}
@@ -427,7 +409,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 })}
                 labelAppend={
                   <EuiText size="xs" color="subdued">
-                    {labels.agents.settings.optionalLabel}
+                    {labels.common.optional}
                   </EuiText>
                 }
                 isInvalid={!!formState.errors.avatar_symbol}

@@ -31,6 +31,7 @@ export interface FormatSelectEditorProps {
   onChange: (change?: SerializedFieldFormat) => void;
   onError: (error?: string) => void;
   value?: SerializedFieldFormat;
+  disabled?: boolean;
 }
 
 interface FieldTypeFormat {
@@ -104,7 +105,7 @@ export class FormatSelectEditor extends PureComponent<
   };
 
   render() {
-    const { fieldFormatEditors, onError, value, fieldFormats, esTypes } = this.props;
+    const { fieldFormatEditors, onError, value, fieldFormats, esTypes, disabled } = this.props;
     const fieldFormatId = value?.id;
     const { kbnType } = this.state;
 
@@ -142,6 +143,7 @@ export class FormatSelectEditor extends PureComponent<
             onChange={(e) => {
               this.onFormatChange(e.target.value);
             }}
+            disabled={disabled}
           />
         </EuiFormRow>
         {fieldFormatId ? (

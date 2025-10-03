@@ -51,12 +51,12 @@ export function placeClonePanel({
   if (!panelToPlaceBeside) {
     throw new PanelNotFoundError();
   }
-  const beside = panelToPlaceBeside.gridData;
+  const beside = panelToPlaceBeside.grid;
   const otherPanelGridData: GridData[] = [];
   forOwn(currentPanels, (panel: DashboardLayoutPanel) => {
-    if (panel.gridData.sectionId === sectionId) {
+    if (panel.grid.sectionId === sectionId) {
       // only check against panels that are in the same section as the cloned panel
-      otherPanelGridData.push(panel.gridData);
+      otherPanelGridData.push(panel.grid);
     }
   });
 
@@ -95,29 +95,27 @@ export function placeClonePanel({
    * 3. reposition the panels after the cloned panel in the grid
    */
   const otherPanels = { ...currentPanels };
-  const grid = otherPanelGridData.sort(comparePanels);
+  const sortedGrid = otherPanelGridData.sort(comparePanels);
 
   let position = 0;
-  for (position; position < grid.length; position++) {
-    if (beside.i === grid[position].i) {
+  for (position; position < sortedGrid.length; position++) {
+    if (beside.i === sortedGrid[position].i) {
       break;
     }
   }
   const bottomPlacement = possiblePlacementDirections[2];
   // place to the bottom and move all other panels
-  let originalPositionInTheGrid = grid[position + 1].i;
+  let originalPositionInTheGrid = sortedGrid[position + 1].i;
   const diff =
-    bottomPlacement.grid.y +
-    bottomPlacement.grid.h -
-    otherPanels[originalPositionInTheGrid].gridData.y;
+    bottomPlacement.grid.y + bottomPlacement.grid.h - otherPanels[originalPositionInTheGrid].grid.y;
 
-  for (let j = position + 1; j < grid.length; j++) {
-    originalPositionInTheGrid = grid[j].i;
-    const { gridData, ...movedPanel } = cloneDeep(otherPanels[originalPositionInTheGrid]);
-    if (gridData.sectionId === sectionId) {
+  for (let j = position + 1; j < sortedGrid.length; j++) {
+    originalPositionInTheGrid = sortedGrid[j].i;
+    const { grid, ...movedPanel } = cloneDeep(otherPanels[originalPositionInTheGrid]);
+    if (grid.sectionId === sectionId) {
       // only move panels in the cloned panel's section
-      const newGridData = { ...gridData, y: gridData.y + diff };
-      otherPanels[originalPositionInTheGrid] = { ...movedPanel, gridData: newGridData };
+      const newGridData = { ...grid, y: grid.y + diff };
+      otherPanels[originalPositionInTheGrid] = { ...movedPanel, grid: newGridData };
     }
   }
   return { newPanelPlacement: bottomPlacement.grid, otherPanels };

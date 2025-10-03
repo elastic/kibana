@@ -597,6 +597,7 @@ export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProp
 
 export const fillDefineEqlRule = (rule: EqlRuleCreateProps) => {
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
+  cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).scrollIntoView();
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).type(rule.query);
   cy.get(RULES_CREATION_FORM).find(EQL_QUERY_VALIDATION_SPINNER).should('not.exist');

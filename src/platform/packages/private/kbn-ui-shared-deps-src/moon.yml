@@ -36,7 +36,6 @@ tasks:
     inputs:
       - '@group(src)'
       - 'webpack.config.js'
-      - '@group(src)'
       - '/src/platform/packages/shared/kbn-repo-info/**/*.{js,ts,tsx}'
       - '/src/platform/packages/shared/kbn-ui-theme/**/*.{js,ts,tsx}'
       - '/src/platform/packages/shared/kbn-i18n/**/*.{js,ts,tsx}'

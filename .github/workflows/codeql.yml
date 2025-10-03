@@ -81,6 +81,7 @@ jobs:
       working-directory: ./kibana-operations/triage
       env:
         GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
+        GITHUB_REPO: kibana
         SLACK_TOKEN: ${{secrets.CODE_SCANNING_SLACK_TOKEN}}
         SLACK_CHANNEL: ${{secrets.CODE_SCANNING_SLACK_CHANNEL_ID}}
         CODE_SCANNING_ES_HOST: ${{secrets.CODE_SCANNING_ES_HOST}}

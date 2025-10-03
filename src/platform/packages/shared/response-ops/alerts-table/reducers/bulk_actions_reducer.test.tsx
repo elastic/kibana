@@ -282,8 +282,20 @@ describe('AlertsDataGrid bulk actions', () => {
           _index: 'idx0',
           data: [
             {
+              field: '_id',
+              value: 'alert0',
+            },
+            {
+              field: '_index',
+              value: 'idx0',
+            },
+            {
               field: 'kibana.alert.rule.name',
               value: ['one'],
+            },
+            {
+              field: 'kibana.alert.reason',
+              value: ['two'],
             },
             {
               field: 'kibana.alert.rule.uuid',
@@ -526,9 +538,15 @@ describe('AlertsDataGrid bulk actions', () => {
               _id: 'alert1',
               _index: 'idx1',
               data: [
+                { field: '_id', value: 'alert1' },
+                { field: '_index', value: 'idx1' },
                 {
                   field: 'kibana.alert.rule.name',
                   value: ['three'],
+                },
+                {
+                  field: 'kibana.alert.reason',
+                  value: ['four'],
                 },
                 {
                   field: 'kibana.alert.rule.uuid',
@@ -741,8 +759,20 @@ describe('AlertsDataGrid bulk actions', () => {
                 _index: 'idx0',
                 data: [
                   {
+                    field: '_id',
+                    value: 'alert0',
+                  },
+                  {
+                    field: '_index',
+                    value: 'idx0',
+                  },
+                  {
                     field: 'kibana.alert.rule.name',
                     value: ['one'],
+                  },
+                  {
+                    field: 'kibana.alert.reason',
+                    value: ['two'],
                   },
                   {
                     field: 'kibana.alert.rule.uuid',
@@ -770,9 +800,15 @@ describe('AlertsDataGrid bulk actions', () => {
                 _id: 'alert1',
                 _index: 'idx1',
                 data: [
+                  { field: '_id', value: 'alert1' },
+                  { field: '_index', value: 'idx1' },
                   {
                     field: 'kibana.alert.rule.name',
                     value: ['three'],
+                  },
+                  {
+                    field: 'kibana.alert.reason',
+                    value: ['four'],
                   },
                   {
                     field: 'kibana.alert.rule.uuid',

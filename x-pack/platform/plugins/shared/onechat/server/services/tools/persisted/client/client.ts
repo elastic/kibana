@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
+import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { ToolCreateParams, ToolTypeUpdateParams } from '../../tool_provider';
 import type { ToolStorage } from './storage';
 import { createStorage } from './storage';
@@ -26,20 +27,24 @@ export interface ToolClient {
 }
 
 export const createClient = ({
+  space,
   logger,
   esClient,
 }: {
+  space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
 }): ToolClient => {
   const storage = createStorage({ logger, esClient });
-  return new ToolClientImpl({ storage });
+  return new ToolClientImpl({ space, storage });
 };
 
 class ToolClientImpl {
+  private readonly space: string;
   private readonly storage: ToolStorage;
 
-  constructor({ storage }: { storage: ToolStorage }) {
+  constructor({ space, storage }: { space: string; storage: ToolStorage }) {
+    this.space = space;
     this.storage = storage;
   }
 
@@ -56,7 +61,9 @@ class ToolClientImpl {
   async list(): Promise<ToolPersistedDefinition[]> {
     const document = await this.storage.getClient().search({
       query: {
-        match_all: {},
+        bool: {
+          filter: [createSpaceDslFilter(this.space)],
+        },
       },
       size: 1000,
       track_total_hits: false,
@@ -73,7 +80,7 @@ class ToolClientImpl {
       throw createBadRequestError(`Tool with id '${id}' already exists.`);
     }
 
-    const attributes = createAttributes({ createRequest });
+    const attributes = createAttributes({ createRequest, space: this.space });
 
     await this.storage.getClient().index({
       document: attributes,
@@ -125,7 +132,7 @@ class ToolClientImpl {
       terminate_after: 1,
       query: {
         bool: {
-          filter: [{ term: { id } }],
+          filter: [createSpaceDslFilter(this.space), { term: { id } }],
         },
       },
     });

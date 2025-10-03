@@ -19,6 +19,8 @@ import {
   getCasesV3Feature,
   getSecurityV2Feature,
   getSecurityV3Feature,
+  getSecurityV4Feature,
+  getSecurityV5Feature,
   getTimelineFeature,
   getNotesFeature,
   getSiemMigrationsFeature,
@@ -35,6 +37,7 @@ import {
   securityV1SavedObjects,
   securityV2SavedObjects,
   securityV3SavedObjects,
+  securityV4SavedObjects,
   securityV5SavedObjects,
 } from './security_saved_objects';
 import { registerApiAccessControl } from './product_features_api_access_control';
@@ -57,6 +60,7 @@ export class ProductFeaturesService {
       getSecurityFeature({ ...securityFeatureParams, savedObjects: securityV1SavedObjects }),
       getSecurityV2Feature({ ...securityFeatureParams, savedObjects: securityV2SavedObjects }),
       getSecurityV3Feature({ ...securityFeatureParams, savedObjects: securityV3SavedObjects }),
+      getSecurityV4Feature({ ...securityFeatureParams, savedObjects: securityV4SavedObjects }),
       getSecurityV5Feature({ ...securityFeatureParams, savedObjects: securityV5SavedObjects }),
     ]);
     this.productFeaturesRegistry.create('cases', [
@@ -67,7 +71,9 @@ export class ProductFeaturesService {
     this.productFeaturesRegistry.create('securityAssistant', [
       getAssistantFeature(experimentalFeatures),
     ]);
-    this.productFeaturesRegistry.create('attackDiscovery', [getAttackDiscoveryFeature()]);
+    this.productFeaturesRegistry.create('attackDiscovery', [
+      getAttackDiscoveryFeature(experimentalFeatures),
+    ]);
     this.productFeaturesRegistry.create('timeline', [
       getTimelineFeature({ ...securityFeatureParams, savedObjects: securityTimelineSavedObjects }),
     ]);

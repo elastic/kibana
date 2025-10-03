@@ -12,7 +12,7 @@ import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 import { SurveyKubernetes } from './survey_kubernetes';
 
-const INVENTORY_FEEDBACK_LINK = 'https://ela.st/survey-infra-inventory?usp=pp_url';
+const INVENTORY_FEEDBACK_LINK = 'https://ela.st/survey-infra-inventory';
 
 export const SurveySection = () => {
   const { search } = useLocation();

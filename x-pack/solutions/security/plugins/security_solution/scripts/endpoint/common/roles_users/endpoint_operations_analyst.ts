@@ -60,6 +60,7 @@ export const getEndpointOperationsAnalyst: () => Omit<Role, 'name'> = () => {
           osquery: ['all'],
           securitySolutionCasesV3: ['all'],
           builtinAlerts: ['all'],
+          // TODO: why was this changed to siemV3?
           [SECURITY_FEATURE_ID]: [
             'all',
             'read_alerts',

@@ -43,7 +43,7 @@ describe('useHostIsolationAction', () => {
       name: ISOLATE_HOST,
       onClick: expect.any(Function),
       ...overrides,
-    };
+    } as AlertTableContextMenuItem;
   };
 
   const render = () => {
@@ -103,7 +103,7 @@ describe('useHostIsolationAction', () => {
     const { result } = render();
     await appContextMock.waitFor(() => expect(result.current[0].onClick).toBeDefined());
 
-    result.current[0].onClick!({} as unknown as React.MouseEvent);
+    result.current[0].onClick!({} as unknown as React.MouseEvent<HTMLHRElement>);
 
     expect(hookProps.closePopover).toHaveBeenCalled();
   });
@@ -178,7 +178,7 @@ describe('useHostIsolationAction', () => {
   it('should call isolate API when agent is currently NOT isolated', async () => {
     const { result } = render();
     await appContextMock.waitFor(() => expect(result.current[0].onClick).toBeDefined());
-    result.current[0].onClick!({} as unknown as React.MouseEvent);
+    result.current[0].onClick!({} as unknown as React.MouseEvent<HTMLHRElement>);
 
     expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('isolateHost');
   });
@@ -200,7 +200,7 @@ describe('useHostIsolationAction', () => {
     });
 
     act(() => {
-      result.current[0].onClick!({} as unknown as React.MouseEvent);
+      result.current[0].onClick!({} as unknown as React.MouseEvent<HTMLHRElement>);
     });
 
     await appContextMock.waitFor(() =>

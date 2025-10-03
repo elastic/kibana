@@ -27,6 +27,7 @@ xpack.features.overrides:
   siem.description: null
   siemV2.description: null
   siemV3.description: null
+  siemV4.description: null
   siemV5.description: null
   securitySolutionSiemMigrations.hidden: true
 
@@ -36,6 +37,21 @@ xpack.features.overrides:
       all.composedOf:
         ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
         ## We do not need to compose 4 from maps and visualizations because these functionalities are disabled in this tier
+        - feature: 'discover_v2'
+          privileges: ['all']
+          ## We need limited access to fleet (v1) in order to use integrations
+        - feature: 'fleet'
+          privileges: ['all']
+      read.composedOf:
+        - feature: 'discover_v2'
+          privileges: ['read']
+        - feature: 'fleet'
+          privileges: ['read']
+  siemV4:
+    privileges:
+      all.composedOf:
+        ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        ## We do not need to compose siemV4 from maps and visualizations because these functionalities are disabled in this tier
         - feature: 'discover_v2'
           privileges: ['all']
           ## We need limited access to fleet (v1) in order to use integrations

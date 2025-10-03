@@ -36,7 +36,6 @@ export {
   dashboardAttributesSchema,
   dashboardAPIGetResultSchema,
   dashboardSearchResultsSchema,
-  referenceSchema,
 } from './schema';
 export { savedObjectToItem } from './transform_utils';
 export { transformDashboardIn } from './transforms';

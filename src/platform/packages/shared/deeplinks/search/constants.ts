@@ -13,7 +13,6 @@ export const ENTERPRISE_SEARCH_CONNECTORS_ID = `${ENTERPRISE_SEARCH_CONTENT_APP_
 export const ENTERPRISE_SEARCH_WEB_CRAWLERS_ID = `${ENTERPRISE_SEARCH_CONTENT_APP_ID}:webCrawlers`;
 export const ENTERPRISE_SEARCH_APPLICATIONS_APP_ID = 'enterpriseSearchApplications';
 export const ENTERPRISE_SEARCH_ANALYTICS_APP_ID = 'enterpriseSearchAnalytics';
-export const SERVERLESS_ES_APP_ID = 'serverlessElasticsearch';
 export const SERVERLESS_ES_CONNECTORS_ID = 'serverlessConnectors';
 export const SERVERLESS_ES_WEB_CRAWLERS_ID = 'serverlessWebCrawlers';
 export const ES_SEARCH_PLAYGROUND_ID = 'searchPlayground';

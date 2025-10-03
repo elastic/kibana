@@ -97,13 +97,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
   const eventType = getEventType(ecsData);
 
-  const isContextMenuDisabled = useMemo(() => {
-    return (
-      eventType !== 'signal' &&
-      !(ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'))
-    );
-  }, [ecsData, eventType]);
-
   const { navigateToAnalyzer } = useNavigateToAnalyzer({
     isFlyoutOpen: false,
     eventId,
@@ -263,7 +256,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}
-          disabled={isContextMenuDisabled}
+          disabled={false}
           onRuleChange={onRuleChange}
           refetch={refetch}
         />

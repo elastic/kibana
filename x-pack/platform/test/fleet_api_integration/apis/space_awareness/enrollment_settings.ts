@@ -19,7 +19,8 @@ export default function (providerContext: FtrProviderContext) {
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
 
-  describe('enrollment_settings', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/236125
+  describe.skip('enrollment_settings', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 

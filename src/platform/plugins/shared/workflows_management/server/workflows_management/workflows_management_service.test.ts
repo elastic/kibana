@@ -8,15 +8,16 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, SecurityServiceStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { WorkflowsService } from './workflows_management_service';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
+import { WorkflowsService } from './workflows_management_service';
 
 describe('WorkflowsService', () => {
   let service: WorkflowsService;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockLogger: ReturnType<typeof loggerMock.create>;
+  let mockSecurity: jest.Mocked<SecurityServiceStart>;
 
   const mockWorkflowDocument = {
     _id: 'test-workflow-id',
@@ -91,6 +92,14 @@ describe('WorkflowsService', () => {
       'workflows-logs',
       false
     );
+
+    mockSecurity = {
+      authc: {
+        getCurrentUser: jest.fn((request) => ({ username: request.auth.credentials.username })),
+      },
+    } as any;
+
+    service.setSecurityService(mockSecurity);
 
     // Wait for initialization to complete
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -349,6 +358,272 @@ describe('WorkflowsService', () => {
         track_total_hits: true,
       });
     });
+
+    describe('with execution history', () => {
+      const mockExecutionResponse = {
+        aggregations: {
+          workflows: {
+            buckets: [
+              {
+                key: 'test-workflow-id',
+                recent_executions: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          id: 'execution-1',
+                          workflowId: 'test-workflow-id',
+                          status: 'completed',
+                          startedAt: '2023-01-01T10:00:00.000Z',
+                          finishedAt: '2023-01-01T10:05:00.000Z',
+                          workflowDefinition: { name: 'Test Workflow' },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      it('should include execution history when workflows have executions', async () => {
+        const mockSearchResponse = {
+          hits: {
+            hits: [mockWorkflowDocument],
+            total: { value: 1 },
+          },
+        };
+
+        // First call for workflows, second call for execution history
+        mockEsClient.search
+          .mockResolvedValueOnce(mockSearchResponse as any)
+          .mockResolvedValueOnce(mockExecutionResponse as any);
+
+        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+
+        expect(result.results[0].history).toHaveLength(1);
+        expect(result.results[0].history[0]).toEqual({
+          id: 'execution-1',
+          workflowId: 'test-workflow-id',
+          workflowName: 'Test Workflow',
+          status: 'completed',
+          startedAt: '2023-01-01T10:00:00.000Z',
+          finishedAt: '2023-01-01T10:05:00.000Z',
+          duration: 300000, // 5 minutes in milliseconds
+        });
+
+        // Verify execution history query
+        expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+        expect(mockEsClient.search).toHaveBeenNthCalledWith(2, {
+          index: 'workflows-executions',
+          size: 0,
+          query: {
+            bool: {
+              must: [
+                { terms: { workflowId: ['test-workflow-id'] } },
+                {
+                  bool: {
+                    should: [
+                      { term: { spaceId: 'default' } },
+                      { bool: { must_not: { exists: { field: 'spaceId' } } } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            workflows: {
+              terms: {
+                field: 'workflowId',
+                size: 1,
+              },
+              aggs: {
+                recent_executions: {
+                  top_hits: {
+                    size: 1,
+                    sort: [{ finishedAt: { order: 'desc' } }],
+                  },
+                },
+              },
+            },
+          },
+        });
+      });
+
+      it('should handle workflows without execution history', async () => {
+        const mockSearchResponse = {
+          hits: {
+            hits: [mockWorkflowDocument],
+            total: { value: 1 },
+          },
+        };
+
+        const mockEmptyExecutionResponse = {
+          aggregations: {
+            workflows: {
+              buckets: [],
+            },
+          },
+        };
+
+        mockEsClient.search
+          .mockResolvedValueOnce(mockSearchResponse as any)
+          .mockResolvedValueOnce(mockEmptyExecutionResponse as any);
+
+        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+
+        expect(result.results[0].history).toEqual([]);
+      });
+
+      it('should handle execution history with missing finishedAt', async () => {
+        const mockExecutionResponseWithoutFinishedAt = {
+          aggregations: {
+            workflows: {
+              buckets: [
+                {
+                  key: 'test-workflow-id',
+                  recent_executions: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            id: 'execution-1',
+                            workflowId: 'test-workflow-id',
+                            status: 'running',
+                            startedAt: '2023-01-01T10:00:00.000Z',
+                            finishedAt: null,
+                            workflowDefinition: { name: 'Test Workflow' },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        };
+
+        const mockSearchResponse = {
+          hits: {
+            hits: [mockWorkflowDocument],
+            total: { value: 1 },
+          },
+        };
+
+        mockEsClient.search
+          .mockResolvedValueOnce(mockSearchResponse as any)
+          .mockResolvedValueOnce(mockExecutionResponseWithoutFinishedAt as any);
+
+        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+
+        expect(result.results[0].history[0]).toEqual({
+          id: 'execution-1',
+          workflowId: 'test-workflow-id',
+          workflowName: 'Test Workflow',
+          status: 'running',
+          startedAt: '2023-01-01T10:00:00.000Z',
+          finishedAt: '2023-01-01T10:00:00.000Z', // Falls back to startedAt
+          duration: null,
+        });
+      });
+
+      it('should handle multiple workflows with mixed execution history', async () => {
+        const mockWorkflowDocument2 = {
+          _id: 'test-workflow-id-2',
+          _source: {
+            ...mockWorkflowDocument._source,
+            name: 'Test Workflow 2',
+          },
+        };
+
+        const mockSearchResponse = {
+          hits: {
+            hits: [mockWorkflowDocument, mockWorkflowDocument2],
+            total: { value: 2 },
+          },
+        };
+
+        const mockMixedExecutionResponse = {
+          aggregations: {
+            workflows: {
+              buckets: [
+                {
+                  key: 'test-workflow-id',
+                  recent_executions: {
+                    hits: {
+                      hits: [
+                        {
+                          _source: {
+                            id: 'execution-1',
+                            workflowId: 'test-workflow-id',
+                            status: 'completed',
+                            startedAt: '2023-01-01T10:00:00.000Z',
+                            finishedAt: '2023-01-01T10:05:00.000Z',
+                            workflowDefinition: { name: 'Test Workflow' },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+                // test-workflow-id-2 has no executions (not in buckets)
+              ],
+            },
+          },
+        };
+
+        mockEsClient.search
+          .mockResolvedValueOnce(mockSearchResponse as any)
+          .mockResolvedValueOnce(mockMixedExecutionResponse as any);
+
+        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+
+        expect(result.results).toHaveLength(2);
+        expect(result.results[0].history).toHaveLength(1);
+        expect(result.results[1].history).toEqual([]);
+      });
+
+      it('should handle execution history fetch errors gracefully', async () => {
+        const mockSearchResponse = {
+          hits: {
+            hits: [mockWorkflowDocument],
+            total: { value: 1 },
+          },
+        };
+
+        mockEsClient.search
+          .mockResolvedValueOnce(mockSearchResponse as any)
+          .mockRejectedValueOnce(new Error('Execution search failed'));
+
+        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+
+        expect(result.results[0].history).toEqual([]);
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          'Failed to fetch recent executions for workflows: Error: Execution search failed'
+        );
+      });
+
+      it('should not fetch execution history for empty workflow list', async () => {
+        const mockSearchResponse = {
+          hits: {
+            hits: [],
+            total: { value: 0 },
+          },
+        };
+
+        mockEsClient.search.mockResolvedValueOnce(mockSearchResponse as any);
+
+        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+
+        expect(result.results).toEqual([]);
+        expect(mockEsClient.search).toHaveBeenCalledTimes(1); // Only workflows search, no execution search
+      });
+    });
   });
 
   describe('createWorkflow', () => {
@@ -379,9 +654,218 @@ describe('WorkflowsService', () => {
             name: 'New Workflow',
             enabled: true,
             yaml: 'name: New Workflow\nenabled: true\ndefinition:\n  triggers: []',
-            createdBy: 'system',
-            lastUpdatedBy: 'system',
+            createdBy: 'test-user',
+            lastUpdatedBy: 'test-user',
             spaceId: 'default',
+          }),
+          refresh: 'wait_for',
+          require_alias: true,
+        })
+      );
+    });
+  });
+
+  describe('updateWorkflow', () => {
+    it('should update workflow successfully', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: {
+            username: 'test-user',
+          },
+        },
+      } as any;
+
+      const command = {
+        yaml: 'name: Updated Workflow\nenabled: true\ntriggers:\n  - type: manual\nsteps:\n  - type: console\n    name: first-step\n    with:\n      message: "Hello, world!"',
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [mockWorkflowDocument] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.id).toBe('test-workflow-id');
+      expect(result.validationErrors).toEqual([]);
+      expect(result.enabled).toBe(true);
+      expect(result.valid).toBe(true);
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          index: '.workflows-workflows',
+          document: expect.objectContaining({
+            name: 'Updated Workflow',
+            enabled: true,
+            valid: true,
+            yaml: command.yaml,
+            lastUpdatedBy: 'test-user',
+            spaceId: 'default',
+          }),
+          refresh: 'wait_for',
+          require_alias: true,
+        })
+      );
+    });
+
+    it('should throw error when workflow not found', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
+      const command = {
+        yaml: 'name: Updated Workflow\nenabled: true\ntriggers: []',
+      };
+
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      await expect(
+        service.updateWorkflow('non-existent-id', command, 'default', mockRequest)
+      ).rejects.toThrow('Workflow with id non-existent-id not found in space default');
+    });
+
+    it('should save yaml not conforming to the schema, but set "enabled" and "valid" to false', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const command = {
+        yaml: 'name: Updated Workflow\nenabled: true\ntriggers:\n  - type: invalid-trigger-type',
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [mockWorkflowDocument] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.id).toBe('test-workflow-id');
+      expect(result.enabled).toBe(false);
+      expect(result.valid).toBe(false);
+      expect(result.validationErrors).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('Invalid trigger type. Available: manual, alert, scheduled'),
+          expect.stringContaining('No steps found. Add at least one step.'),
+        ])
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          index: '.workflows-workflows',
+          document: expect.objectContaining({
+            name: 'Test Workflow',
+            enabled: false,
+            valid: false,
+            yaml: 'name: Updated Workflow\nenabled: true\ntriggers:\n  - type: invalid-trigger-type',
+            lastUpdatedBy: 'test-user',
+            spaceId: 'default',
+            definition: undefined,
+          }),
+          refresh: 'wait_for',
+          require_alias: true,
+        })
+      );
+    });
+
+    it('should save incomplete yaml, but set "enabled" and "valid" to false', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const command = {
+        yaml: 'name: Updated Workflow',
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [mockWorkflowDocument] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.id).toBe('test-workflow-id');
+      expect(result.enabled).toBe(false);
+      expect(result.valid).toBe(false);
+      expect(result.validationErrors).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('No triggers found. Add at least one trigger.'),
+          expect.stringContaining('No steps found. Add at least one step.'),
+        ])
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          index: '.workflows-workflows',
+          document: expect.objectContaining({
+            name: 'Test Workflow',
+            enabled: false,
+            valid: false,
+            yaml: command.yaml,
+            lastUpdatedBy: 'test-user',
+            spaceId: 'default',
+            definition: undefined,
+          }),
+          refresh: 'wait_for',
+          require_alias: true,
+        })
+      );
+    });
+
+    it('should save invalid yaml, but do not update definition fields and update enabled, valid to false', async () => {
+      const mockRequest = {
+        auth: {
+          credentials: { username: 'test-user' },
+        },
+      } as any;
+
+      const command = {
+        yaml: '  name: Test Workflow\nenabled: true\n  triggers:\n  - type: alert',
+      };
+
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [mockWorkflowDocument] } } as any);
+
+      const result = await service.updateWorkflow(
+        'test-workflow-id',
+        command,
+        'default',
+        mockRequest
+      );
+
+      expect(result.id).toBe('test-workflow-id');
+      expect(result.enabled).toBe(false);
+      expect(result.valid).toBe(false);
+      expect(result.validationErrors[0]).toEqual(
+        expect.stringContaining('Unexpected scalar at node end at line 2')
+      );
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-workflow-id',
+          index: '.workflows-workflows',
+          document: expect.objectContaining({
+            name: 'Test Workflow',
+            enabled: false,
+            valid: false,
+            yaml: command.yaml,
+            lastUpdatedBy: 'test-user',
+            spaceId: 'default',
+            definition: undefined,
           }),
           refresh: 'wait_for',
           require_alias: true,

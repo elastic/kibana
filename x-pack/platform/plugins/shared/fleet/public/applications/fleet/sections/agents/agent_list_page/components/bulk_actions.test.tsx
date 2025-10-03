@@ -138,6 +138,7 @@ describe('AgentBulkActions', () => {
         results.getByText('Request diagnostics for 10 agents').closest('button')!
       ).toBeEnabled();
       expect(results.getByText('Restart upgrade 10 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Migrate 10 agents').closest('button')!).toBeEnabled();
     });
 
     it('should show the available actions for all agents except managed agents', async () => {
@@ -161,6 +162,7 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Upgrade 8 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Schedule upgrade for 8 agents').closest('button')!).toBeDisabled();
       expect(results.getByText('Restart upgrade 8 agents').closest('button')!).toBeEnabled();
+      expect(results.getByText('Migrate 8 agents').closest('button')!).toBeEnabled();
     });
 
     it('should generate a correct kuery to select agents when no managed agents are listed', async () => {

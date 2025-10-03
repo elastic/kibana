@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useSampleDataStatus } from '../../hooks/use_sample_data_status';
 import { useKibana } from '../../hooks/use_kibana';
 import { navigateToIndexDetails } from '../utils';
@@ -32,6 +33,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
   const { application, http, share, uiSettings } = useKibana().services;
   const { isInstalled, indexName, dashboardId, isLoading: isStatusLoading } = useSampleDataStatus();
   const [isShowViewDataOptions, setShowViewDataOptions] = useState(false);
+  const isAgentBuilderAvailable = uiSettings.get<boolean>(AGENT_BUILDER_ENABLED_SETTING_ID, false);
 
   const onViewButtonClick = useCallback(() => {
     setShowViewDataOptions(true);
@@ -55,6 +57,13 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
 
   const navigateToDiscover = useNavigateToDiscover(indexName || '');
   const navigateToDashboard = useNavigateToDashboard(dashboardId);
+
+  const navigateToAgentBuilder = useCallback(async () => {
+    if (isAgentBuilderAvailable) {
+      const agentBuilderLocator = share.url.locators.get('AGENT_BUILDER_LOCATOR_ID');
+      await agentBuilderLocator?.navigate({});
+    }
+  }, [share, isAgentBuilderAvailable]);
 
   if (isStatusLoading) {
     return null;
@@ -88,6 +97,20 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
           <EuiContextMenuPanel
             css={{ minWidth: 250 }}
             items={[
+              ...(isAgentBuilderAvailable
+                ? [
+                    <EuiContextMenuItem
+                      key="agentBuilder"
+                      onClick={navigateToAgentBuilder}
+                      icon="comment"
+                    >
+                      <FormattedMessage
+                        id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToAgentBuilder"
+                        defaultMessage="Agents"
+                      />
+                    </EuiContextMenuItem>,
+                  ]
+                : []),
               <EuiContextMenuItem key="discover" onClick={navigateToDiscover} icon="discoverApp">
                 <FormattedMessage
                   id="xpack.searchIndices.shared.createIndex.ingestSampleData.linkToDiscover"

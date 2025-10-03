@@ -49,6 +49,28 @@ export const ENTITY_RISK_SCORING = i18n.translate(
   }
 );
 
+export const RISK_SCORE_GENERAL_SECTION = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.generalSection',
+  {
+    defaultMessage: 'General',
+  }
+);
+
+export const RISK_SCORE_RETAINMENT_CHECKBOX = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.generalSection.retainmentCheckbox',
+  {
+    defaultMessage: 'Retain previously calculated risk scores',
+  }
+);
+
+export const RISK_SCORE_RETAINMENT_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.generalSection.retainmentTooltip',
+  {
+    defaultMessage:
+      'When checked, entities will retain their most recently computed risk score indefinitely until a new input (e.g., alert) causes the score to be recalculated. If unchecked, risk scores are reset to zero when no inputs are found.',
+  }
+);
+
 export const USEFUL_LINKS = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.usefulLinks',
   {
@@ -177,6 +199,13 @@ export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.riskScore.savedObject.configurationSuccess',
   {
     defaultMessage: 'Your configuration was updated.',
+  }
+);
+
+export const RISK_SCORE_ALERT_CONFIG = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.alertConfig',
+  {
+    defaultMessage: 'Alert configuration',
   }
 );
 

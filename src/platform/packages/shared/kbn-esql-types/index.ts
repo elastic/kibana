@@ -35,3 +35,5 @@ export {
 } from './src/inference_endpoint_autocomplete_types';
 
 export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';
+
+export { type ESQLTelemetryCallbacks } from './src/esql_telemetry_types';

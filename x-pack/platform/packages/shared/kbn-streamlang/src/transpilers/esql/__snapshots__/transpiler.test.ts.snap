@@ -1,45 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`transpile - Streamlang DSL to ES|QL) should handle not conditions 1`] = `
-"
-| EVAL attributes.not_flag = CASE(
-    NOT(attributes.status == \\"active\\"), \\"not-active\\"
-  )
-| EVAL attributes.not_nested = CASE(
-    NOT((attributes.a == 1 OR attributes.b == 2)), \\"not-a-or-b\\"
-  )"
+"  | EVAL \`attributes.not_flag\` = CASE(NOT \`attributes.status\` == \\"active\\", \\"not-active\\", \`attributes.not_flag\`)
+  | EVAL \`attributes.not_nested\` = CASE(NOT (\`attributes.a\` == 1 OR \`attributes.b\` == 2), \\"not-a-or-b\\", \`attributes.not_nested\`)"
 `;
 
 exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of processor steps and where blocks 1`] = `
-"
-| RENAME attributes.old_name AS attributes.new_name
-| EVAL attributes.status = \\"active\\"
-| GROK body.message \\"\\"\\"%{IP:attributes.client_ip} - %{WORD:attributes.method}\\"\\"\\"
-| EVAL attributes.parsed_time = DATE_FORMAT(\\"yyyy-MM-dd\\", COALESCE(
-    DATE_PARSE(\\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\\", attributes.timestamp),
-    DATE_PARSE(\\"yyyy-MM-dd HH:mm:ss\\", attributes.timestamp)
-  ))
-| DISSECT body.log \\"\\"\\"%{attributes.client} %{attributes.method} %{attributes.path}\\"\\"\\"
-| EVAL attributes.tags = MV_APPEND(attributes.tags, [\\"new_tag\\"])
-| EVAL attributes.flag = CASE(
-    attributes.status == \\"active\\", \\"yes\\"
-  )
-| EVAL attributes.prod_flag = CASE(
-    attributes.env == \\"prod\\", \\"prod-env\\"
-  )
-| EVAL attributes.prod_flag = CASE(
-    (attributes.a == 1 OR attributes.b == 2), \\"prod-env\\"
-  )
-| EVAL attributes.department_flag = CASE(
-    ((attributes.a == 1 OR attributes.b == 2) AND attributes.department == \\"legal\\"), \\"legal-department\\"
-  )
-| EVAL attributes.test = CASE(
-    (attributes.status == \\"active\\" OR (attributes.status == \\"inactive\\" AND attributes.read_only == false)), \\"yes\\"
-  )
-| // Manual ingest pipeline processors not supported in ES|QL"
+"  | WHERE NOT(\`attributes.old_name\` IS NULL)
+  | WHERE \`attributes.new_name\` IS NULL
+  | EVAL \`attributes.new_name\` = \`attributes.old_name\`
+  | DROP \`attributes.old_name\`
+  | EVAL \`attributes.status\` = \\"active\\"
+  | WHERE NOT(\`body.message\` IS NULL)
+  | GROK \`body.message\` \\"%{IP:attributes.client_ip} - %{WORD:attributes.method}\\"
+  | EVAL \`attributes.parsed_time\` = DATE_FORMAT(\\"yyyy-MM-dd\\", COALESCE(DATE_PARSE(\\"yyyy-MM-dd'T'HH:mm:ss.SSSZ\\", TO_STRING(\`attributes.timestamp\`)), DATE_PARSE(\\"yyyy-MM-dd HH:mm:ss\\", TO_STRING(\`attributes.timestamp\`))))
+  | WHERE NOT(\`body.log\` IS NULL)
+  | DISSECT \`body.log\` \\"%{attributes.client} %{attributes.method} %{attributes.path}\\"
+  | EVAL \`attributes.tags\` = CASE(\`attributes.tags\` IS NULL, [\\"new_tag\\"], MV_APPEND(\`attributes.tags\`, [\\"new_tag\\"]))
+  | EVAL \`attributes.flag\` = CASE(\`attributes.status\` == \\"active\\", \\"yes\\", \`attributes.flag\`)
+  | EVAL \`attributes.prod_flag\` = CASE(\`attributes.env\` == \\"prod\\", \\"prod-env\\", \`attributes.prod_flag\`)
+  | EVAL \`attributes.prod_flag\` = CASE(\`attributes.a\` == 1 OR \`attributes.b\` == 2, \\"prod-env\\", \`attributes.prod_flag\`)
+  | EVAL \`attributes.department_flag\` = CASE((\`attributes.a\` == 1 OR \`attributes.b\` == 2) AND \`attributes.department\` == \\"legal\\", \\"legal-department\\", \`attributes.department_flag\`)
+  | EVAL \`attributes.test\` = CASE(\`attributes.status\` == \\"active\\" OR \`attributes.status\` == \\"inactive\\" AND \`attributes.read_only\` == FALSE, \\"yes\\", \`attributes.test\`)
+  | EVAL \\"WARNING: Manual ingest pipeline not supported in ES|QL\\""
 `;
 
-exports[`transpile - Streamlang DSL to ES|QL) should warn when manual_ingest_pipeline is used 1`] = `
-"
-| // Manual ingest pipeline processors not supported in ES|QL"
-`;
+exports[`transpile - Streamlang DSL to ES|QL) should warn when manual_ingest_pipeline is used 1`] = `"  | EVAL \\"WARNING: Manual ingest pipeline not supported in ES|QL\\""`;

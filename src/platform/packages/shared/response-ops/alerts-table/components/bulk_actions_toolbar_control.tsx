@@ -12,8 +12,6 @@ import { EuiPopover, EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import {
   ALERT_CASE_IDS,
-  ALERT_RULE_NAME,
-  ALERT_RULE_UUID,
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
@@ -44,19 +42,24 @@ const selectedIdsToTimelineItemMapper = (
 ): TimelineItem[] => {
   return Array.from(rowSelection.keys()).map((rowIndex: number) => {
     const alert = alerts[rowIndex];
+    const data = Object.entries(alert).map(([key, value]) => ({
+      field: key,
+      value: value ? (value as string[]) : [],
+    }));
+    if (!data.some((item) => item.field === ALERT_CASE_IDS)) {
+      data.push({ field: ALERT_CASE_IDS, value: [] });
+    }
+    if (!data.some((item) => item.field === ALERT_WORKFLOW_TAGS)) {
+      data.push({ field: ALERT_WORKFLOW_TAGS, value: [] });
+    }
+    if (!data.some((item) => item.field === ALERT_WORKFLOW_ASSIGNEE_IDS)) {
+      data.push({ field: ALERT_WORKFLOW_ASSIGNEE_IDS, value: [] });
+    }
+
     return {
       _id: alert._id,
       _index: alert._index,
-      data: [
-        { field: ALERT_RULE_NAME, value: alert[ALERT_RULE_NAME] as string[] },
-        { field: ALERT_RULE_UUID, value: alert[ALERT_RULE_UUID] as string[] },
-        { field: ALERT_CASE_IDS, value: (alert[ALERT_CASE_IDS] ?? []) as string[] },
-        { field: ALERT_WORKFLOW_TAGS, value: (alert[ALERT_WORKFLOW_TAGS] ?? []) as string[] },
-        {
-          field: ALERT_WORKFLOW_ASSIGNEE_IDS,
-          value: (alert[ALERT_WORKFLOW_ASSIGNEE_IDS] ?? []) as string[],
-        },
-      ],
+      data,
       ecs: {
         _id: alert._id,
         _index: alert._index,

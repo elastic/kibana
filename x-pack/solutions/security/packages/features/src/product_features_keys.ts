@@ -221,3 +221,8 @@ export enum AssistantSubFeatureId {
   updateAnonymization = 'updateAnonymizationSubFeature',
   manageGlobalKnowledgeBase = 'manageGlobalKnowledgeBaseSubFeature',
 }
+
+/** Sub-features IDs for Security Attack Discovery */
+export enum AttackDiscoverySubFeatureId {
+  updateSchedule = 'updateScheduleSubFeature',
+}

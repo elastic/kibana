@@ -51,6 +51,12 @@ export const SYNC_CASE = (caseTitle: string) =>
     defaultMessage: 'Alerts in "{caseTitle}" have been synced',
   });
 
+export const EXTRACT_OBSERVABLES = (caseTitle: string) =>
+  i18n.translate('xpack.cases.containers.extractObservables', {
+    values: { caseTitle },
+    defaultMessage: 'Auto-extract observables in "{caseTitle}" have been updated',
+  });
+
 export const STATUS_CHANGED_TOASTER_TEXT = i18n.translate(
   'xpack.cases.containers.statusChangeToasterText',
   {
@@ -80,3 +86,17 @@ export const OBSERVABLE_REMOVED = i18n.translate('xpack.cases.caseView.observabl
 export const OBSERVABLE_UPDATED = i18n.translate('xpack.cases.caseView.observables.updated', {
   defaultMessage: 'Observable updated',
 });
+
+export const OBSERVABLE_BULK_CREATED = i18n.translate(
+  'xpack.cases.caseView.observables.bulkCreated',
+  {
+    defaultMessage: 'Observables added',
+  }
+);
+
+export const OBSERVABLE_MAX_REACHED = (maxObservables: number) =>
+  i18n.translate('xpack.cases.caseView.observables.maxReached', {
+    values: { maxObservables },
+    defaultMessage:
+      'The maximum number of observables is {maxObservables}. Some observables were not added.',
+  });

@@ -1138,9 +1138,7 @@
               "AppUpdater",
               ">; pricing: ",
               "PricingServiceStart",
-              "; }) => void; config: ",
-              "ObservabilitySharedBrowserConfig",
-              "; }"
+              "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/exploratory_view/public/plugin.ts",
             "deprecated": false,

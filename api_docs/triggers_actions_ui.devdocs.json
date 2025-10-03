@@ -734,7 +734,7 @@
         "label": "JsonEditorWithMessageVariables",
         "description": [],
         "signature": [
-          "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, ariaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, dataTestSubj, euiCodeEditorProps, isOptionalField, }: Props) => React.JSX.Element"
+          "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, ariaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, dataTestSubj, euiCodeEditorProps, isOptionalField, readOnly, }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/json_editor_with_message_variables.tsx",
         "deprecated": false,
@@ -745,7 +745,7 @@
             "id": "def-public.JsonEditorWithMessageVariables.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  ariaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  dataTestSubj,\n  euiCodeEditorProps = {},\n  isOptionalField = false,\n}",
+            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  ariaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  dataTestSubj,\n  euiCodeEditorProps = {},\n  isOptionalField = false,\n  readOnly = false,\n}",
             "description": [],
             "signature": [
               "Props"
@@ -3616,6 +3616,17 @@
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTableItem.isInternallyManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3698,6 +3709,17 @@
             "signature": [
               "boolean | undefined"
             ],
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleType.isInternallyManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3930,6 +3952,20 @@
             "description": [],
             "signature": [
               "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<any>> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.isInternallyManaged",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -7439,7 +7475,7 @@
         "label": "buildAggregation",
         "description": [],
         "signature": [
-          "({ timeSeries, aggType, aggField, termField, termSize, sourceFieldsParams, condition, topHitsSize, loggerCb, }: ",
+          "({ timeSeries, aggType, aggField, termField, termSize, condition, topHitsSize, loggerCb, }: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "common",
@@ -7460,7 +7496,7 @@
             "id": "def-common.buildAggregation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  timeSeries,\n  aggType,\n  aggField,\n  termField,\n  termSize,\n  sourceFieldsParams,\n  condition,\n  topHitsSize,\n  loggerCb,\n}",
+            "label": "{\n  timeSeries,\n  aggType,\n  aggField,\n  termField,\n  termSize,\n  condition,\n  topHitsSize,\n  loggerCb,\n}",
             "description": [],
             "signature": [
               {
@@ -7708,20 +7744,6 @@
             "description": [],
             "signature": [
               "string | string[] | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-common.BuildAggregationOpts.sourceFieldsParams",
-            "type": "Array",
-            "tags": [],
-            "label": "sourceFieldsParams",
-            "description": [],
-            "signature": [
-              "{ label: string; searchPath: string; }[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,

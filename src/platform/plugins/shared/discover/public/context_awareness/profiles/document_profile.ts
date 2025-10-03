@@ -20,6 +20,7 @@ import type { DataSourceContext } from './data_source_profile';
 export enum DocumentType {
   Log = 'log',
   Trace = 'trace',
+  Generic = 'generic',
   Default = 'default',
 }
 

@@ -35,6 +35,7 @@ export class SavedSearchStorage extends SOContentStorage<SavedSearchCrudTypes> {
         'hideChart',
         'isTextBasedQuery',
         'usesAdHocDataView',
+        'controlGroupJson',
         'kibanaSavedObjectMeta',
         'viewMode',
         'hideAggregatedPreview',

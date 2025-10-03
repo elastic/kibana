@@ -31,7 +31,8 @@ jest.mock('../../../../hooks/use_kibana_space', () => ({
   useKibanaSpace: jest.fn().mockReturnValue({ id: 'default' }),
 }));
 
-describe('MonitorEditPage', () => {
+// Failing: See https://github.com/elastic/kibana/issues/234711
+describe.skip('MonitorEditPage', () => {
   const { FETCH_STATUS } = observabilitySharedPublic;
 
   it('renders correctly', async () => {

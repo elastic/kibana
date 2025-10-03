@@ -6,16 +6,30 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { Phases, PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiHighlight, EuiPanel, EuiSelectable, EuiText } from '@elastic/eui';
-import { rolloverCondition } from '../../helpers/rollover_condition';
+import {
+  EuiHighlight,
+  EuiPanel,
+  EuiSelectable,
+  EuiText,
+  EuiHealth,
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { getFormattedError } from '../../../../../util/errors';
 
+interface PhaseProps {
+  description: string;
+  color: string;
+}
+
 interface IlmOptionData {
-  phases?: string;
+  phases?: PhaseProps[];
 }
 
 interface ModalOptions {
@@ -33,6 +47,7 @@ export function IlmField({
   setSaveButtonDisabled,
   readOnly,
 }: ModalOptions) {
+  const { euiTheme } = useEuiTheme();
   const [selectedPolicy, setSelectedPolicy] = useState(
     isIlmLifecycle(initialValue) ? initialValue.ilm?.policy : undefined
   );
@@ -44,31 +59,67 @@ export function IlmField({
     setSelectedPolicy(isIlmLifecycle(initialValue) ? initialValue.ilm?.policy : undefined);
   }, [initialValue]);
 
+  const isBorealis = euiTheme.themeName === 'EUI_THEME_BOREALIS';
+  const phaseToIndicatorColors = {
+    hot: isBorealis ? euiTheme.colors.vis.euiColorVis6 : euiTheme.colors.vis.euiColorVis9,
+    warm: isBorealis ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis5,
+    cold: isBorealis ? euiTheme.colors.vis.euiColorVis2 : euiTheme.colors.vis.euiColorVis1,
+    frozen: euiTheme.colors.vis.euiColorVis4,
+  };
+
   useEffect(() => {
     const phasesDescription = (phases: Phases) => {
-      const desc: string[] = [];
-      if (phases.hot) {
-        const rolloverConditions = rolloverCondition(phases.hot.actions.rollover);
-        desc.push(
-          `Hot (${rolloverConditions ? 'rollover when ' + rolloverConditions : 'no rollover'})`
-        );
-      }
-      if (phases.warm) {
-        desc.push(`Warm after ${phases.warm.min_age}`);
-      }
-      if (phases.cold) {
-        desc.push(`Cold after ${phases.cold.min_age}`);
+      const desc: PhaseProps[] = [];
+      let previosStartAge: string | undefined;
+      if (phases.delete) {
+        previosStartAge = phases.delete.min_age;
       }
       if (phases.frozen) {
-        desc.push(`Frozen after ${phases.frozen.min_age}`);
+        desc.push({
+          description: i18n.translate('xpack.streams.phases.frozen', {
+            defaultMessage:
+              'Frozen {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
+            values: { previosStartAge },
+          }),
+          color: phaseToIndicatorColors.frozen,
+        });
+        previosStartAge = phases.frozen.min_age ?? previosStartAge;
       }
-      if (phases.delete) {
-        desc.push(`Delete after ${phases.delete.min_age}`);
-      } else {
-        desc.push('Keep data indefinitely');
+      if (phases.cold) {
+        desc.push({
+          description: i18n.translate('xpack.streams.phases.cold', {
+            defaultMessage:
+              'Cold {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
+            values: { previosStartAge },
+          }),
+          color: phaseToIndicatorColors.cold,
+        });
+        previosStartAge = phases.cold.min_age ?? previosStartAge;
+      }
+      if (phases.warm) {
+        desc.push({
+          description: i18n.translate('xpack.streams.phases.warm', {
+            defaultMessage:
+              'Warm {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
+            values: { previosStartAge },
+          }),
+          color: phaseToIndicatorColors.warm,
+        });
+        previosStartAge = phases.warm.min_age ?? previosStartAge;
+      }
+      if (phases.hot) {
+        desc.push({
+          description: i18n.translate('xpack.streams.phases.hot', {
+            defaultMessage:
+              'Hot {previosStartAge, select, undefined {indefinitely} other {for {previosStartAge}}}',
+            values: { previosStartAge },
+          }),
+          color: phaseToIndicatorColors.hot,
+        });
+        previosStartAge = phases.hot.min_age ?? previosStartAge;
       }
 
-      return desc.join(', ');
+      return desc.reverse();
     };
 
     setIsLoading(true);
@@ -84,7 +135,6 @@ export function IlmField({
             },
           })
         );
-
         setPolicies(policyOptions);
       })
       .catch((error) => {
@@ -106,7 +156,15 @@ export function IlmField({
           <>
             {initialPolicyOption.label}
             <EuiText size="xs" color="subdued" className="eui-displayBlock">
-              <small>{initialPolicyOption.data?.phases || ''}</small>
+              <EuiFlexGroup gutterSize="s" alignItems="center" direction="row" responsive={false}>
+                {initialPolicyOption.data?.phases?.map((phase: PhaseProps, idx: number) => (
+                  <EuiFlexItem key={idx} grow={false}>
+                    <EuiHealth textSize="xs" color={phase.color}>
+                      {phase.description}
+                    </EuiHealth>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
             </EuiText>
           </>
         </EuiPanel>
@@ -140,9 +198,15 @@ export function IlmField({
           <>
             <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
             <EuiText size="xs" color="subdued" className="eui-displayBlock">
-              <small>
-                <EuiHighlight search={searchValue}>{option.phases || ''}</EuiHighlight>
-              </small>
+              <EuiFlexGroup gutterSize="s" alignItems="center" direction="row" responsive={false}>
+                {option.phases?.map((phase: PhaseProps, idx: number) => (
+                  <EuiFlexItem key={idx} grow={false}>
+                    <EuiHealth textSize="xs" color={phase.color}>
+                      {phase.description}
+                    </EuiHealth>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
             </EuiText>
           </>
         )}

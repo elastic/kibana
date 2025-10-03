@@ -22,6 +22,9 @@
       "spaces",
       "embeddable"
     ],
-    "optionalPlugins": ["alerting"]
+    "optionalPlugins": [
+      "alerting",
+      "serverless"
+    ]
   }
 }

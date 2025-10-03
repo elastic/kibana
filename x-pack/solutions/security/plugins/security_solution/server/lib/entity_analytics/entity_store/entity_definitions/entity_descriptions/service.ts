@@ -6,12 +6,13 @@
  */
 
 import type { EntityDescription } from '../types';
-import { getCommonFieldDescriptions } from './common';
+import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common';
 import { collectValues as collect, newestValue } from './field_utils';
 
 export const SERVICE_DEFINITION_VERSION = '1.0.0';
 export const SERVICE_IDENTITY_FIELD = 'service.name';
 
+const SERVICE_ENTITY_TYPE = 'Service';
 export const serviceEntityEngineDescription: EntityDescription = {
   entityType: 'service',
   version: SERVICE_DEFINITION_VERSION,
@@ -20,6 +21,15 @@ export const serviceEntityEngineDescription: EntityDescription = {
   settings: {
     timestampField: '@timestamp',
   },
+  pipeline: [
+    {
+      set: {
+        field: 'entity.type',
+        value: SERVICE_ENTITY_TYPE,
+        override: false,
+      },
+    },
+  ],
   fields: [
     collect({ source: 'service.address' }),
     collect({ source: 'service.environment' }),
@@ -32,5 +42,25 @@ export const serviceEntityEngineDescription: EntityDescription = {
     collect({ source: 'service.type' }),
     newestValue({ source: 'service.version' }),
     ...getCommonFieldDescriptions('service'),
+    ...getEntityFieldsDescriptions('service'),
+
+    collect({
+      source: `service.entity.relationships.Communicates_with`,
+      destination: 'entity.relationships.Communicates_with',
+      mapping: { type: 'date' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: `service.entity.relationships.Depends_on`,
+      destination: 'entity.relationships.Depends_on',
+      mapping: { type: 'date' },
+      allowAPIUpdate: true,
+    }),
+    collect({
+      source: `service.entity.relationships.Dependent_of`,
+      destination: 'entity.relationships.Dependent_of',
+      mapping: { type: 'date' },
+      allowAPIUpdate: true,
+    }),
   ],
 };

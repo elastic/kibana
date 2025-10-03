@@ -10,10 +10,16 @@ import { SecurityPageName, SecurityGroupName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
-export const createExploreNavigationTree = (): NodeDefinition => ({
+export const createExploreNavigationTree = (
+  { sideNavVersion }: { sideNavVersion?: NodeDefinition['sideNavVersion'] } = {
+    sideNavVersion: 'v1',
+  }
+): NodeDefinition => ({
   id: SecurityGroupName.explore,
   title: SecurityLinkGroup[SecurityGroupName.explore].title,
   renderAs: 'panelOpener',
+  iconV2: 'aggregate',
+  sideNavVersion,
   children: [
     {
       id: SecurityPageName.hosts,

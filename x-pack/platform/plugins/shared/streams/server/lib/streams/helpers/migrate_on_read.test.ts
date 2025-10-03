@@ -39,6 +39,7 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
     ingest: {
       lifecycle: { dsl: {} },
       processing: { steps: [] },
+      settings: {},
       wired: {
         fields: {},
         routing: [],
@@ -173,6 +174,7 @@ describe('migrateOnRead', () => {
         description: 'Test stream',
         ingest: {
           lifecycle: { dsl: {} },
+          settings: {},
           processing: { steps: [] },
           classic: { someConfig: 'value' },
         },
@@ -200,6 +202,26 @@ describe('migrateOnRead', () => {
 
       const result = migrateOnRead(definition);
       expect(result.description).toBe('');
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+  });
+
+  describe('wired ingest migration', () => {
+    it('should add settings to ingest if missing', () => {
+      const definition = {
+        name: 'test-stream',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [] },
+          wired: {
+            fields: {},
+            routing: [createRoutingRule()],
+          },
+        },
+      };
+
+      const result = migrateOnRead(definition);
+      expect((result as any).ingest.settings).toEqual({});
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
   });

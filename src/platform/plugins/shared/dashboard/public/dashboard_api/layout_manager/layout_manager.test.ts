@@ -35,13 +35,13 @@ describe('layout manager', () => {
   const PANEL_ONE_ID = 'panelOne';
 
   const panel1 = {
-    gridData: { w: 1, h: 1, x: 0, y: 0, i: PANEL_ONE_ID },
+    grid: { w: 1, h: 1, x: 0, y: 0, i: PANEL_ONE_ID },
     type: 'testPanelType',
-    panelConfig: { title: 'Panel One' },
-    panelIndex: PANEL_ONE_ID,
+    config: { title: 'Panel One' },
+    uid: PANEL_ONE_ID,
   };
 
-  const titleManager = initializeTitleManager(panel1.panelConfig);
+  const titleManager = initializeTitleManager(panel1.config);
   const panel1Api: DefaultEmbeddableApi = {
     type: 'testPanelType',
     uuid: PANEL_ONE_ID,
@@ -55,7 +55,7 @@ describe('layout manager', () => {
   const section1 = {
     title: 'Section one',
     collapsed: false,
-    gridData: {
+    grid: {
       y: 1,
       i: 'section1',
     },
@@ -92,7 +92,7 @@ describe('layout manager', () => {
     const layout = layoutManager.internalApi.layout$.value;
     expect(Object.keys(layout.panels).length).toBe(2);
     expect(layout.panels.panelTwo).toEqual({
-      gridData: {
+      grid: {
         h: 1,
         i: 'panelTwo',
         sectionId: undefined,
@@ -118,7 +118,7 @@ describe('layout manager', () => {
       const layout = layoutManager.internalApi.layout$.value;
       expect(Object.keys(layout.panels).length).toBe(2);
       expect(layout.panels['54321']).toEqual({
-        gridData: {
+        grid: {
           h: 1,
           i: '54321',
           sectionId: undefined,

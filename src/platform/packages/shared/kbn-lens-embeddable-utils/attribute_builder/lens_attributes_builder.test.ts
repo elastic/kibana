@@ -10,7 +10,6 @@
 import 'jest-canvas-mock';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { LensAttributesBuilder } from './lens_attributes_builder';
 import {
   MetricChart,
@@ -19,7 +18,7 @@ import {
   XYDataLayer,
   XYReferenceLinesLayer,
 } from './visualization_types';
-import type { FormulaPublicApi, GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 import type { FormulaValueConfig } from './types';
 
@@ -34,12 +33,9 @@ const mockDataView = {
   metaFields: [],
 } as unknown as jest.Mocked<DataView>;
 
-const lensPluginMockStart = lensPluginMock.createStartContract();
-
 const getDataLayer = (formula: string): GenericIndexPatternColumn => ({
-  customLabel: false,
+  customLabel: true,
   dataType: 'number',
-  filter: undefined,
   isBucketed: false,
   label: formula,
   operationType: 'formula',
@@ -48,11 +44,8 @@ const getDataLayer = (formula: string): GenericIndexPatternColumn => ({
       id: 'percent',
     },
     formula,
-    isFormulaBroken: true,
   } as any,
-  reducedTimeRange: undefined,
   references: [],
-  timeScale: undefined,
 });
 
 const getHistogramLayer = (interval: string, includeEmptyRows?: boolean) => ({
@@ -98,11 +91,6 @@ const AVERAGE_CPU_USER_FORMULA = 'average(system.cpu.user.pct)';
 const AVERAGE_CPU_SYSTEM_FORMULA = 'average(system.cpu.system.pct)';
 
 describe('lens_attributes_builder', () => {
-  let formulaAPI: FormulaPublicApi;
-  beforeAll(async () => {
-    formulaAPI = (await lensPluginMockStart.stateHelperApi()).formula;
-  });
-
   describe('MetricChart', () => {
     it('should build MetricChart', async () => {
       const metriChart = new MetricChart({
@@ -111,7 +99,6 @@ describe('lens_attributes_builder', () => {
         }),
 
         dataView: mockDataView,
-        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
 
@@ -127,7 +114,6 @@ describe('lens_attributes_builder', () => {
           columns: {
             metric_formula_accessor: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
-          indexPatternId: 'mock-id',
         },
       });
 
@@ -151,7 +137,6 @@ describe('lens_attributes_builder', () => {
         }),
 
         dataView: mockDataView,
-        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: metriChart });
       const {
@@ -166,7 +151,6 @@ describe('lens_attributes_builder', () => {
           columns: {
             metric_formula_accessor: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
-          indexPatternId: 'mock-id',
         },
         layer_trendline: {
           columnOrder: ['x_date_histogram', 'metric_formula_accessor_trendline'],
@@ -174,7 +158,6 @@ describe('lens_attributes_builder', () => {
             metric_formula_accessor_trendline: getDataLayer(AVERAGE_CPU_USER_FORMULA),
             x_date_histogram: getHistogramLayer('auto', true),
           },
-          indexPatternId: 'mock-id',
           linkToLayers: ['layer'],
           sampling: 1,
         },
@@ -207,7 +190,6 @@ describe('lens_attributes_builder', () => {
           }),
         ],
         dataView: mockDataView,
-        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
@@ -223,7 +205,6 @@ describe('lens_attributes_builder', () => {
             x_date_histogram: getHistogramLayer('auto'),
             formula_accessor_0_0: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
-          indexPatternId: 'mock-id',
         },
       });
 
@@ -261,7 +242,6 @@ describe('lens_attributes_builder', () => {
           }),
         ],
         dataView: mockDataView,
-        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
@@ -277,7 +257,6 @@ describe('lens_attributes_builder', () => {
             x_date_histogram: getHistogramLayer('auto'),
             formula_accessor_0_0: getDataLayer(AVERAGE_CPU_USER_FORMULA),
           },
-          indexPatternId: 'mock-id',
         },
         layer_1_reference: {
           columnOrder: ['formula_accessor_1_0_reference_column'],
@@ -326,7 +305,6 @@ describe('lens_attributes_builder', () => {
           }),
         ],
         dataView: mockDataView,
-        formulaAPI,
       });
       const builder = new LensAttributesBuilder({ visualization: xyChart });
       const {
@@ -343,7 +321,6 @@ describe('lens_attributes_builder', () => {
             formula_accessor_0_0: getDataLayer(AVERAGE_CPU_USER_FORMULA),
             formula_accessor_0_1: getDataLayer(AVERAGE_CPU_SYSTEM_FORMULA),
           },
-          indexPatternId: 'mock-id',
         },
       });
 

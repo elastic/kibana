@@ -322,9 +322,14 @@ describe('STATS Autocomplete', () => {
           'TS a | stats avg(',
           [
             ...expectedFieldsAvg,
-            ...getFunctionSignaturesByReturnType(Location.STATS_TIMESERIES, AVG_TYPES, {
-              scalar: true,
-            }),
+            ...getFunctionSignaturesByReturnType(
+              [Location.STATS, Location.STATS_TIMESERIES],
+              AVG_TYPES,
+              {
+                scalar: true,
+                timeseriesAgg: true,
+              }
+            ),
             'FUNC($0)',
           ],
           mockCallbacks

@@ -19,12 +19,14 @@ interface ServiceNameLinkProps {
   serviceName: string;
   agentName?: string;
   formattedServiceName: React.ReactNode;
+  'data-test-subj': string;
 }
 
 export function ServiceNameLink({
   serviceName,
   agentName,
   formattedServiceName,
+  'data-test-subj': dataTestSubj,
 }: ServiceNameLinkProps) {
   const {
     share: { url: urlService },
@@ -66,10 +68,7 @@ export function ServiceNameLink({
   return (
     <>
       {canViewApm && routeLinkProps ? (
-        <EuiLink
-          {...routeLinkProps}
-          data-test-subj="unifiedDocViewerObservabilityTracesServiceNameLink"
-        >
+        <EuiLink {...routeLinkProps} data-test-subj={dataTestSubj}>
           {content}
         </EuiLink>
       ) : (
