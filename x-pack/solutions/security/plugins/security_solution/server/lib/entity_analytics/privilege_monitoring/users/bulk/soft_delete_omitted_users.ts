@@ -55,6 +55,9 @@ export const softDeleteOmittedUsers =
                         ctx._source.labels.sources.removeIf(src -> src == params.to_remove);
                         if (ctx._source.labels.sources.isEmpty()) {
                           ctx._source.user.is_privileged = false;
+                          ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
+                          ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
+                          ctx._source.user.entity.attributes.Privileged = false;
                         }
                       }
 
