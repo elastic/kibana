@@ -11,7 +11,7 @@ import { type EnrollmentAPIKey } from '@kbn/fleet-plugin/common/types';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices } from './helpers';
+import { cleanFleetIndices, createTestSpace } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -55,7 +55,7 @@ export default function (providerContext: FtrProviderContext) {
       const defaultSpaceApiKeys = await apiClient.getEnrollmentApiKeys();
       defaultSpaceEnrollmentKey1 = defaultSpaceApiKeys.items[0];
       spaceTest1EnrollmentKey1 = space1ApiKeys.items[0];
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     after(async () => {

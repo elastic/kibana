@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { SpaceTestApiClient } from './api_helper';
-import { expectToRejectWithError } from './helpers';
+import { createTestSpace, expectToRejectWithError } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -24,7 +24,7 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList({
         space: TEST_SPACE_1,
       });
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     after(async () => {

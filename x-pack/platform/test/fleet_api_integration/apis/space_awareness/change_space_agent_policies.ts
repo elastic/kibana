@@ -19,6 +19,7 @@ import { SpaceTestApiClient } from './api_helper';
 import {
   cleanFleetIndices,
   createFleetAgent,
+  createTestSpace,
   expectToRejectWithError,
   expectToRejectWithNotFound,
   getFleetAgentDoc,
@@ -113,7 +114,7 @@ export default function (providerContext: FtrProviderContext) {
         inputs: {},
       });
       defaultPackagePolicy1 = packagePolicyRes;
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     after(async () => {
