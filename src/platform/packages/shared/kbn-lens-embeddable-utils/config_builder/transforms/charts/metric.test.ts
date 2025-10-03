@@ -67,6 +67,9 @@ const defaultValues = [
   },
 ];
 
+/**
+ * Mind that this won't include query/filters validation/defaults
+ */
 function validateAndApiToApiTransforms(originalObject: InputTypeMetricChart) {
   return fromLensStateToAPI(fromAPItoLensState(lensApiStateSchema.validate(originalObject)));
 }

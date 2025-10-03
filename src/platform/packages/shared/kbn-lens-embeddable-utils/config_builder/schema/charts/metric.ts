@@ -36,7 +36,12 @@ import {
   bucketRangesOperationSchema,
   bucketFiltersOperationSchema,
 } from '../bucket_ops';
-import { collapseBySchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  layerSettingsSchema,
+  sharedPanelInfoSchema,
+} from '../shared';
 
 const compareToSchemaShared = schema.object({
   palette: schema.maybe(schema.string({ meta: { description: 'Palette' } })),
@@ -203,6 +208,7 @@ const metricStateBreakdownByOptionsSchema = schema.object({
 export const metricStateSchemaNoESQL = schema.object({
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
+  ...dslOnlyPanelInfoSchema,
   ...layerSettingsSchema,
   ...datasetSchema,
   /**
