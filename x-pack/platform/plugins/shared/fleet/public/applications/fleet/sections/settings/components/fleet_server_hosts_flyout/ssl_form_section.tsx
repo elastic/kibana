@@ -285,6 +285,104 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               />
             </SecretFormRow>
           )}
+          <MultiRowInput
+            placeholder={i18n.translate(
+              'xpack.fleet.settings.fleetServerHosts.sslAgentCertificateAuthoritiesInputPlaceholder',
+              {
+                defaultMessage:
+                  'Specify the Fleet Server CA certificate that Elastic Agents should trust when connecting to Fleet Server.',
+              }
+            )}
+            label={i18n.translate(
+              'xpack.fleet.settings.fleetServerHosts.sslAgentCertificateAuthoritiesInputLabel',
+              {
+                defaultMessage: 'Elastic Agent > Fleet Server certificate authorities',
+              }
+            )}
+            multiline={true}
+            sortable={false}
+            {...inputs.sslAgentCertificateAuthoritiesInput.props}
+          />
+          <EuiFormRow
+            fullWidth
+            label={
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHosts.sslAgentCertificateInputLabel"
+                defaultMessage="Elastic Agent > SSL client certificate for Fleet Server"
+              />
+            }
+            {...inputs.sslAgentCertificateInput.formRowProps}
+          >
+            <EuiTextArea
+              fullWidth
+              rows={5}
+              {...inputs.sslAgentCertificateInput.props}
+              placeholder={i18n.translate(
+                'xpack.fleet.settings.fleetServerHosts.sslAgentCertificateInputPlaceholder',
+                {
+                  defaultMessage:
+                    'Specify the SSL client certificate that Elastic Agents should use when connecting to the Fleet Server. Only needed for mTLS between Elastic Agent and Fleet Server.',
+                }
+              )}
+            />
+          </EuiFormRow>
+          {!useSecretsStorage ? (
+            <SecretFormRow
+              fullWidth
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.fleetServerHosts.sslAgentKeyInputLabel"
+                  defaultMessage="Elastic Agent > SSL private key for Fleet Server"
+                />
+              }
+              {...inputs.sslAgentKeyInput.formRowProps}
+              useSecretsStorage={useSecretsStorage}
+              onToggleSecretStorage={onToggleSecretAndClearValue}
+              disabled={!useSecretsStorage}
+            >
+              <EuiTextArea
+                fullWidth
+                rows={5}
+                {...inputs.sslAgentKeyInput.props}
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.fleetServerHosts.sslAgentKeyInputPlaceholder',
+                  {
+                    defaultMessage:
+                      'Specify the SSL key that Elastic Agents should use when connecting to Fleet Server. Only needed for mTLS between Elastic Agent and Fleet Server.',
+                  }
+                )}
+              />
+            </SecretFormRow>
+          ) : (
+            <SecretFormRow
+              fullWidth
+              title={i18n.translate(
+                'xpack.fleet.settings.fleetServerHosts.sslAgentKeySecretInputTitle',
+                {
+                  defaultMessage: 'Elastic Agent > SSL private key for Fleet Server',
+                }
+              )}
+              {...inputs.sslAgentKeySecretInput.formRowProps}
+              useSecretsStorage={useSecretsStorage}
+              isConvertedToSecret={isConvertedToSecret.sslKey}
+              onToggleSecretStorage={onToggleSecretAndClearValue}
+              cancelEdit={inputs.sslAgentKeySecretInput.cancelEdit}
+            >
+              <EuiTextArea
+                fullWidth
+                rows={5}
+                {...inputs.sslAgentKeySecretInput.props}
+                data-test-subj="sslAgentKeySecretInput"
+                placeholder={i18n.translate(
+                  'xpack.fleet.settings.fleetServerHosts.sslAgentKeySecretInputPlaceholder',
+                  {
+                    defaultMessage:
+                      'Specify the SSL key that Elastic Agents should use when connecting to Fleet Server. Only needed for mTLS between Elastic Agent and Fleet Server.',
+                  }
+                )}
+              />
+            </SecretFormRow>
+          )}
           <EuiSpacer size="m" />
           <EuiFormRow
             fullWidth
