@@ -53,6 +53,7 @@ describe('useChartLayers', () => {
       columns: [],
       metricField: '',
       indices: [],
+      filters: [],
     });
 
     const { result } = renderHook(() =>
@@ -81,6 +82,7 @@ describe('useChartLayers', () => {
       columns: [],
       metricField: '',
       indices: [],
+      filters: [],
     });
 
     const { result } = renderHook(() =>
@@ -117,6 +119,7 @@ describe('useChartLayers', () => {
       columns: [],
       metricField: '',
       indices: [],
+      filters: [],
     });
 
     const { result } = renderHook(() =>

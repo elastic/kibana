@@ -26,5 +26,5 @@ export function extractFilters(query: string) {
       }
       return [];
     })
-    .filter((item) => !isEmpty(item));
+    .filter((item) => item !== '');
 }

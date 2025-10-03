@@ -44,7 +44,7 @@ function TraceMetricsGrid({
   });
 
   const kqlFilters = useMemo(() => {
-    if (query && 'query' in query) {
+    if (query && 'query' in query && query.query) {
       return [`KQL("${query.query.replaceAll('"', '\\"')}")`];
     }
     return [];
