@@ -39,7 +39,7 @@ export function registerUsageCollector(
         users_with_global_entries: {
           type: 'long',
           _meta: {
-            description: 'Number of users with at least one global knowledge base entry',
+            description: 'Number of users with global knowledge base entries',
           },
         },
         users_with_private_entries: {
@@ -59,19 +59,19 @@ export function registerUsageCollector(
         users_with_archived_conversations: {
           type: 'long',
           _meta: {
-            description: 'Number of users with at least one archived conversation',
+            description: 'Number of users with archived conversations',
           },
         },
         users_with_private_conversations: {
           type: 'long',
           _meta: {
-            description: 'Number of users with at least one private conversation',
+            description: 'Number of users with private conversations',
           },
         },
         users_with_shared_conversations: {
           type: 'long',
           _meta: {
-            description: 'Number of users with at least one shared conversation',
+            description: 'Number of users with shared conversations',
           },
         },
       },
