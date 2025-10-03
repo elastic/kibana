@@ -48,7 +48,6 @@ export const useChartLayers = ({
         signal: abortController?.signal,
         timeRange: getTimeRange(),
       }),
-    keepPreviousData: true,
   });
 
   const layers = useMemo<LensSeriesLayer[]>(() => {
