@@ -22,20 +22,10 @@ export interface TelemetryRoot {
 export interface TaskContext {
   reporter: ErrorReporter;
   roots: TelemetryRoot[];
-}
-export interface CheckTaskContext extends TaskContext {
-  baselineSha: string;
+  baselineSha?: string;
 }
 
-export function createTaskContext(): TaskContext {
-  const reporter = new ErrorReporter();
-  return {
-    roots: [],
-    reporter,
-  };
-}
-
-export function createCheckTaskContext({ baselineSha }: { baselineSha: string }): CheckTaskContext {
+export function createTaskContext(baselineSha?: string): TaskContext {
   const reporter = new ErrorReporter();
   return {
     baselineSha,

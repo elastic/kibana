@@ -10,7 +10,7 @@
 export { ErrorReporter } from './error_reporter';
 
 export type { TaskContext } from './task_context';
-export { createTaskContext, createCheckTaskContext } from './task_context';
+export { createTaskContext } from './task_context';
 
 export { parseConfigsTask } from './parse_configs_task';
 export { extractCollectorsTask } from './extract_collectors_task';

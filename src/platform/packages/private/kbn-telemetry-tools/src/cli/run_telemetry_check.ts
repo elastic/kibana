@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ListrTask } from 'listr2';
 import { Listr } from 'listr2';
 import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
@@ -15,7 +16,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { prAutomatedChecks } from '../tools/tasks/pr_automated_checks';
 import type { TaskContext } from '../tools/tasks';
 import {
-  createCheckTaskContext,
+  createTaskContext,
   ErrorReporter,
   parseConfigsTask,
   extractCollectorsTask,
@@ -28,11 +29,11 @@ import {
 export function runTelemetryCheck() {
   run(
     async ({ flags: { baselineSha, fix, 'ignore-stored-json': ignoreStoredJson, path }, log }) => {
-      if (typeof baselineSha !== 'string' || !baselineSha.trim()) {
+      if (typeof baselineSha !== 'undefined' && typeof baselineSha !== 'string') {
         throw createFailError(
           `${chalk.white.bgRed(
             ' TELEMETRY ERROR '
-          )} You must provide a --baseline <SHA> to compare current working tree against.`
+          )} The provided --baseline argument must be a string`
         );
       }
       if (typeof fix !== 'boolean') {
@@ -118,11 +119,15 @@ export function runTelemetryCheck() {
             title: 'Updating telemetry mapping files',
             task: (context, task) => task.newListr(writeToFileTask(context), { exitOnError: true }),
           },
-          {
-            title: 'Automated PR review checks',
-            task: (context, task) =>
-              task.newListr(prAutomatedChecks(context), { exitOnError: true }),
-          },
+          ...(baselineSha
+            ? [
+                {
+                  title: 'Automated PR review checks',
+                  task: (context, task) =>
+                    task.newListr(prAutomatedChecks(context), { exitOnError: true }),
+                } as ListrTask<TaskContext>,
+              ]
+            : []),
         ],
         {
           renderer: process.env.CI ? 'verbose' : ('default' as any),
@@ -130,7 +135,7 @@ export function runTelemetryCheck() {
       );
 
       try {
-        const context = createCheckTaskContext({ baselineSha });
+        const context = createTaskContext(baselineSha);
         await list.run(context);
       } catch (error) {
         process.exitCode = 1;
