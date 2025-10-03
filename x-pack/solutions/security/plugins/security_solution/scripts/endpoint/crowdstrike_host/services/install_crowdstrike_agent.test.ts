@@ -73,7 +73,7 @@ describe('onboardVmHostWithCrowdStrike', () => {
     );
   });
 
-  it('should reuse existing VM when forceNewHost is false', async () => {
+  it('should reuse existing VM when forceNewCrowdStrikeHost is false', async () => {
     const existingVm = 'existing-vm';
     mockedVmServices.findVm.mockResolvedValue({ data: [existingVm] });
     mockedVmServices.createMultipassHostVmClient.mockReturnValue(mockHostVm);
@@ -83,7 +83,7 @@ describe('onboardVmHostWithCrowdStrike', () => {
       log: mockLog,
       sensorInstaller: '/path/to/sensor.deb',
       customerId: 'test-customer-id',
-      forceNewHost: false,
+      forceNewCrowdStrikeHost: false,
     };
 
     const result = await onboardVmHostWithCrowdStrike(options);
@@ -93,7 +93,7 @@ describe('onboardVmHostWithCrowdStrike', () => {
     expect(mockedVmServices.createMultipassHostVmClient).toHaveBeenCalledWith(existingVm, mockLog);
   });
 
-  it('should create new VM even when existing VM found if forceNewHost is true', async () => {
+  it('should create new VM even when existing VM found if forceNewCrowdStrikeHost is true', async () => {
     const existingVm = 'existing-vm';
     mockedVmServices.findVm.mockResolvedValue({ data: [existingVm] });
 
@@ -102,7 +102,7 @@ describe('onboardVmHostWithCrowdStrike', () => {
       log: mockLog,
       sensorInstaller: '/path/to/sensor.deb',
       customerId: 'test-customer-id',
-      forceNewHost: true,
+      forceNewCrowdStrikeHost: true,
     };
 
     const result = await onboardVmHostWithCrowdStrike(options);
