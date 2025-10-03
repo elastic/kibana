@@ -44,7 +44,7 @@ For the Elastic Security 9.1.5 release information, refer to [Elastic Security S
 * Rolls over the reporting data stream if its template version is newer than the version in the data stream's mappings [#234119]({{kib-pull}}234119).
 
 **Dashboards and Visualizations**:
-* Fixes an issue where the dashboard title would not get updated in the breadcrumbs when edited from the list of dashboards [#236561]({{kib-pull}}236561).
+* Fixes an issue where the dashboard title would not get updated in the breadcrumb when edited from the list of dashboards [#236561]({{kib-pull}}236561).
 * Updates dashboards to wait until controls are ready before rendering panels to prevent a double fetch of data [#237169]({{kib-pull}}237169).
 * Fixes an issue with the Lens table's column sort order being different in the dashboard and the exported CSV [#236673]({{kib-pull}}236673).
 
