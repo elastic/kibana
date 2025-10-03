@@ -44,7 +44,7 @@ import {
   getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
-import { XyToolbar, updateLayer } from './xy_config_panel';
+import { XyToolbar, updateLayer } from './toolbar';
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,

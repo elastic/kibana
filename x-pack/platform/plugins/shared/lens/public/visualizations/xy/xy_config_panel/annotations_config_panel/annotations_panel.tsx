@@ -16,7 +16,7 @@ import { search } from '@kbn/data-plugin/public';
 import { LENS_APP_NAME } from '../../../../../common/constants';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../../utils';
 import type { LensAppServices } from '../../../../app_plugin/types';
-import { updateLayer } from '..';
+import { updateLayer } from '../../toolbar';
 import type { FramePublicAPI, VisualizationDimensionEditorProps } from '../../../../types';
 import type { State, XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from '../../types';
 import { isDataLayer } from '../../visualization_helpers';
