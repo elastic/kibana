@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { RULES_UI_DETECTIONS_PRIVILEGE, RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE, RULES_UI_READ_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import {
-  ALERT_SUMMARY_PATH,
-  ALERTS_PATH,
-  SecurityPageName,
-} from '../../common/constants';
+  RULES_UI_DETECTIONS_PRIVILEGE,
+  RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE,
+  RULES_UI_READ_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
+import { ALERT_SUMMARY_PATH, ALERTS_PATH, SecurityPageName } from '../../common/constants';
 import { ALERT_SUMMARY, ALERTS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 

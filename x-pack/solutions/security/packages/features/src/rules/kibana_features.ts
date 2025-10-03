@@ -7,7 +7,6 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import {
   ESQL_RULE_TYPE_ID,
@@ -105,7 +104,7 @@ export const getRulesBaseKibanaFeature = (
         LISTS_API_SUMMARY,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
-        'rac'
+        'rac',
       ],
     },
     read: {
@@ -130,7 +129,7 @@ export const getRulesBaseKibanaFeature = (
         LISTS_API_READ,
         USERS_API_READ,
         INITIALIZE_SECURITY_SOLUTION,
-        'rac'
+        'rac',
       ],
     },
   },

@@ -52,8 +52,8 @@ export const UserPrivilegesProvider = ({
   const read: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].show === true;
 
   const rulesCapabilities = kibanaCapabilities[RULES_FEATURE_ID];
-  const readRules = rulesCapabilities?.[RULES_UI_READ] === true
-  const editRules = rulesCapabilities?.[RULES_UI_EDIT] === true
+  const readRules = rulesCapabilities?.[RULES_UI_READ] === true;
+  const editRules = rulesCapabilities?.[RULES_UI_EDIT] === true;
 
   const shouldFetchListPrivileges = read || readRules;
 

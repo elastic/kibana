@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { pick } from 'lodash';
 import { ProductFeatureSecurityKey } from '../product_features_keys';
 import type { RulesProductFeaturesConfig } from './types';
-import {securityDefaultProductFeaturesConfig} from '../security/product_feature_config'
-import { pick } from 'lodash';
+import { securityDefaultProductFeaturesConfig } from '../security/product_feature_config';
 
-export const rulesDefaultProductFeaturesConfig: RulesProductFeaturesConfig = pick(securityDefaultProductFeaturesConfig, [ProductFeatureSecurityKey.externalDetections, ProductFeatureSecurityKey.detections])
+export const rulesDefaultProductFeaturesConfig: RulesProductFeaturesConfig = pick(
+  securityDefaultProductFeaturesConfig,
+  [ProductFeatureSecurityKey.externalDetections, ProductFeatureSecurityKey.detections]
+);
