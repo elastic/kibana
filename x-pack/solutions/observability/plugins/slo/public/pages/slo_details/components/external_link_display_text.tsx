@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
@@ -19,18 +19,21 @@ export function ExternalLinkDisplayText({
   url: string;
 }) {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup
+      alignItems="flexStart"
+      justifyContent="spaceBetween"
+      gutterSize="xs"
+      responsive={true}
+    >
       <EuiFlexItem grow={false}>
         <EuiText size={textSize}>{content}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        <EuiSpacer size="s" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiLink data-test-subj="sloHealthCalloutInspectTransformLink" href={url}>
-          <EuiFlexGroup
-            alignItems="center"
-            justifyContent="spaceBetween"
-            gutterSize="xs"
-            responsive={false}
-          >
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon type="inspect" color="danger" />
             </EuiFlexItem>

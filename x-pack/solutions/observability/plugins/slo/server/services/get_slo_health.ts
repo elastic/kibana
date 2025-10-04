@@ -10,8 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
 import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
 import type { AggregationsAggregate, FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import type { Dictionary } from 'lodash';
-import { groupBy, keyBy } from 'lodash';
+import { type Dictionary, groupBy, keyBy } from 'lodash';
 import moment from 'moment';
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -39,7 +38,16 @@ export class GetSLOHealth {
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
     let afterKey: AggregationsAggregate | undefined;
-    let sloKeysFromES: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }> = [];
+    let sloKeysFromES: Array<{
+      sloId: string;
+      sloInstanceId: string;
+      sloRevision: number;
+      sloName: string;
+    }> = [];
+
+    const page = typeof params.page === 'number' && params.page >= 0 ? params.page : 0;
+    const perPage =
+      typeof params.perPage === 'number' && params.perPage >= 1 ? params.perPage : 500;
 
     do {
       const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
@@ -60,7 +68,7 @@ export class GetSLOHealth {
                   sloRevision: { terms: { field: 'slo.revision' } },
                 },
                 {
-                  sloName: { terms: { field: 'slo.name' } },
+                  sloName: { terms: { field: 'slo.name.keyword' } },
                 },
               ],
             },
@@ -81,9 +89,12 @@ export class GetSLOHealth {
 
       const buckets = (
         sloIdCompositeQueryResponse.aggregations?.sloIds as {
-          buckets?: Array<{ key: { sloId: string; sloInstanceId: string; sloRevision: number } }>;
+          buckets?: Array<{
+            key: { sloId: string; sloInstanceId: string; sloRevision: number; sloName: string };
+          }>;
         }
       )?.buckets;
+
       if (buckets && buckets.length > 0) {
         sloKeysFromES = sloKeysFromES.concat([
           ...buckets.map((bucket) => {
@@ -91,57 +102,60 @@ export class GetSLOHealth {
               sloId: bucket.key.sloId,
               sloInstanceId: bucket.key.sloInstanceId,
               sloRevision: bucket.key.sloRevision,
+              sloName: bucket.key.sloName,
             };
           }),
         ]);
       }
     } while (afterKey);
 
-    // let filteredList = sloKeysFromES.map((item) => ({
-    //   sloId: item.sloId,
-    //   sloInstanceId: item.sloInstanceId,
-    //   sloRevision: item.sloRevision,
-    // }));
+    const filteredList = sloKeysFromES.map((item) => ({
+      sloId: item.sloId,
+      sloInstanceId: item.sloInstanceId,
+      sloRevision: item.sloRevision,
+      sloName: item.sloName,
+    }));
 
-    let filteredList: any[] = [];
+    let count = 0;
+    let i = 0;
+    let transformStats: Dictionary<TransformGetTransformStatsTransformStats> = {};
 
-    for (let i = 0; i < 100; i++) {
-      filteredList = filteredList.concat({
-        sloId: '770a62cb-f103-478d-b34c-b310c8e80b8e',
-        // sloInstanceId: 'ES-Air',
-        sloRevision: 1,
-      });
-    }
+    do {
+      const tempTransformStats = await this.getTransformStats(i);
+      transformStats = { ...transformStats, ...tempTransformStats.data };
+      count = tempTransformStats.count;
+      i += ES_PAGESIZE_LIMIT;
+    } while (i <= count);
 
-    const transformStatsById = await this.getTransformStats(filteredList);
+    const transformStatsById = await this.getTransformStats(0);
     const summaryDocsById = await this.getSummaryDocsById(filteredList);
 
     const results = filteredList.map((item) => {
-      const health = computeHealth(transformStatsById, item);
+      const health = computeHealth(transformStatsById.data, item);
       const state = computeState(summaryDocsById, item);
 
       return {
         sloId: item.sloId,
         sloRevision: item.sloRevision,
+        sloInstanceId: item.sloInstanceId,
         sloName: item.sloName,
         state,
         health,
       };
     });
 
-    // REVERT FROM TESTING
-    const mappedResults = results; /* Array.from(
+    const mappedResults = Array.from(
       new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
-    ); */
+    );
 
-    // If a statusFilter is provided, we need to filter the results accordingly.
-    // We also need to ensure that we return only unique SLO IDs, as there might be multiple instances.
     const uniqueResults = params.statusFilter
       ? mappedResults.filter((item) => item.health.overall === params.statusFilter)
       : mappedResults;
 
     return fetchSLOHealthResponseSchema.encode({
-      data: uniqueResults.slice(0, 1000), // limit to 1000 results to avoid too large responses
+      data: uniqueResults.slice(page * perPage, (page + 1) * perPage),
+      page,
+      perPage,
       total: uniqueResults.length,
     });
   }
@@ -172,28 +186,27 @@ export class GetSLOHealth {
     return summaryDocsById;
   }
 
-  /*
-  TODO: debug this
-  */
-  private async getTransformStats(
-    sloList: { sloId: string; sloRevision: number }[]
-  ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
+  private async getTransformStats(from: number = 0): Promise<{
+    data: Dictionary<TransformGetTransformStatsTransformStats>;
+    count: number;
+    from: number;
+  }> {
     const transformStats =
       await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
         {
-          transform_id: sloList
-            .map((slo: { sloId: string; sloRevision: number }) => [
-              getSLOTransformId(slo.sloId, slo.sloRevision),
-              getSLOSummaryTransformId(slo.sloId, slo.sloRevision),
-            ])
-            .flat(),
+          transform_id: 'slo-*',
           allow_no_match: true,
-          size: sloList.length * 2,
+          size: ES_PAGESIZE_LIMIT,
+          from,
         },
         { ignore: [404] }
       );
 
-    return keyBy(transformStats.transforms, (transform) => transform.id);
+    return {
+      data: keyBy(transformStats.transforms, (transform) => transform.id),
+      count: transformStats.count ?? 0,
+      from,
+    };
   }
 }
 

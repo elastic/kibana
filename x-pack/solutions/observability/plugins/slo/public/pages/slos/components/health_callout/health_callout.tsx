@@ -17,8 +17,8 @@ import { paths } from '../../../../../common/locators/paths';
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
 export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }) {
-  const { isLoading, isError, data: resultData } = useFetchSloHealth({});
-  const { data: results } = resultData ?? {};
+  const { isLoading, isError, data: resultData } = useFetchSloHealth({ page: 0, perPage: 50 });
+  const { data: results, total } = resultData ?? {};
   const [showCallOut, setShowCallOut] = useState(
     !sessionStorage.getItem(CALLOUT_SESSION_STORAGE_KEY)
   );
@@ -74,6 +74,8 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
                 count: unhealthySloList.length,
               }}
             />
+          </EuiFlexItem>
+          <EuiFlexItem>
             <ul>
               {unhealthySloList.map((result) => (
                 <li key={result.sloId}>
@@ -85,6 +87,15 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
                 </li>
               ))}
             </ul>
+            {typeof total === 'number' && total > results.length && (
+              <p style={{ marginLeft: '4px' }}>
+                <FormattedMessage
+                  id="xpack.slo.sloList.healthCallout.moreUnhealthySloLinkText"
+                  defaultMessage="+ {count} more"
+                  values={{ count: total - results.length }}
+                />
+              </p>
+            )}
           </EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="xs">
             <EuiFlexItem grow={false}>
