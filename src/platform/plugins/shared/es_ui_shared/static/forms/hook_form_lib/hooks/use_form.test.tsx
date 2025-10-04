@@ -8,9 +8,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import type { TestBed } from '../shared_imports';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { emptyField } from '../../helpers/field_validators';
 import { ComboBoxField } from '../../components';
@@ -581,7 +581,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      renderWithI18n(<TestComp />);
 
       let isValid: boolean = false;
 
@@ -624,7 +624,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      renderWithI18n(<TestComp />);
 
       let isValid: boolean = false;
 
@@ -672,7 +672,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      renderWithI18n(<TestComp />);
 
       let isValid: boolean = false;
 
@@ -738,7 +738,7 @@ describe('useForm() hook', () => {
 
       const {
         form: { setInputValue },
-      } = registerTestBed(TestComp)() as TestBed;
+      } = renderWithI18n(<TestComp />) as TestBed;
 
       let errors: string[] = formHook!.getErrors();
       expect(errors).toEqual([]);
@@ -772,7 +772,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      renderWithI18n(<TestComp />);
 
       expect(formHook!.getFormData()).toEqual({
         field1: 'field1_defaultValue',
@@ -833,7 +833,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      renderWithI18n(<TestComp />);
 
       if (formHook === null) {
         throw new Error('Formhook has not been set.');
@@ -880,7 +880,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      renderWithI18n(<TestComp />);
 
       if (formHook === null) {
         throw new Error('Formhook has not been set.');
@@ -950,7 +950,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp)();
+      renderWithI18n(<TestComp />);
 
       if (formHook === null) {
         throw new Error('Formhook has not been set.');
@@ -1025,7 +1025,7 @@ describe('useForm() hook', () => {
       };
 
       test('should run deserializer on the new form data provided', async () => {
-        registerTestBed(TestComp)();
+        renderWithI18n(<TestComp />);
 
         if (formHook === null) {
           throw new Error('Formhook has not been set.');
@@ -1049,7 +1049,7 @@ describe('useForm() hook', () => {
       });
 
       test('should not run deserializer on the new form data provided', async () => {
-        registerTestBed(TestComp)();
+        renderWithI18n(<TestComp />);
 
         if (formHook === null) {
           throw new Error('Formhook has not been set.');

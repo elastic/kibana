@@ -8,7 +8,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { useForm } from './use_form';
@@ -17,6 +18,17 @@ import { Form } from '../components/form';
 import { UseField } from '../components/use_field';
 
 describe('useFormIsModified()', () => {
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   interface Props {
     onIsModifiedChange: (isModified: boolean) => void;
     discard?: string[];
