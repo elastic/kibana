@@ -715,8 +715,6 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getTestRuleData({ tags: ['internally-managed'] }))
           .expect(200);
 
-        objectRemover.add('default', nonInternalRuleType.id, 'rule', 'alerting');
-
         await supertest
           .patch('/internal/alerting/rules/_bulk_delete')
           .set('kbn-xsrf', 'foo')
