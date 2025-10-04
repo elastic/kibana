@@ -147,14 +147,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      renderWithI18n(TestComp, {
-        defaultProps: { onForm: onFormHook },
-        memoryRouter: { wrapComponent: false },
-      });
-
-      const {
-        form: { setInputValue },
-      } = setup() as TestBed;
+      renderWithI18n(<TestComp onForm={onFormHook} />);
 
       if (!formHook) {
         throw new Error(
@@ -165,22 +158,16 @@ describe('useForm() hook', () => {
       let data;
       let isValid;
 
-      await act(async () => {
-        const submitPromise = formHook!.submit();
-        jest.advanceTimersByTime(0);
-        ({ data, isValid } = await submitPromise);
-      });
+      const submitPromise = formHook!.submit();
+      ({ data, isValid } = await submitPromise);
 
       expect(isValid).toBe(true);
       expect(data).toEqual({ username: 'initialValue' });
 
-      await act(async () => {
-        setInputValue('myField', 'wrongValue'); // Validation will fail
+      await user.type(screen.getByTestId('myField'), '{selectall}wrongValue');
 
-        const submitPromise = formHook!.submit();
-        jest.advanceTimersByTime(0);
-        ({ data, isValid } = await submitPromise);
-      });
+      const submitPromise2 = formHook!.submit();
+      ({ data, isValid } = await submitPromise2);
 
       expect(isValid).toBe(false);
       // If the form is not valid, we don't build the final object to avoid
@@ -220,14 +207,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      renderWithI18n(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      });
-
-      const {
-        form: { setInputValue },
-      } = setup() as TestBed;
+      renderWithI18n(<TestComp onData={onFormData} />);
 
       let [{ data, isValid }] = onFormData.mock.calls[
         onFormData.mock.calls.length - 1
@@ -238,10 +218,7 @@ describe('useForm() hook', () => {
       expect(isValid).toBeUndefined();
 
       // Make some changes to the form fields
-      await act(async () => {
-        setInputValue('usernameField', 'John');
-        jest.advanceTimersByTime(0);
-      });
+      await user.type(screen.getByTestId('usernameField'), 'John');
 
       [{ data, isValid }] = onFormData.mock.calls[
         onFormData.mock.calls.length - 1
