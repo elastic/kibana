@@ -14,10 +14,18 @@ import { licenseService } from '../../../common/hooks/use_license';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
 import type { StartServices } from '../../../types';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock dependencies
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
+  useToasts: jest.fn().mockReturnValue({
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+    addInfo: jest.fn(),
+    remove: jest.fn(),
+  }),
 }));
 
 jest.mock('../../../common/hooks/use_license', () => ({
@@ -54,6 +62,10 @@ const defaultProps = {
   analystHourlyRate: 100,
 };
 
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
+);
+
 describe('CostSavingsTrend', () => {
   const createMockKibanaServices = (overrides: Partial<StartServices> = {}) =>
     ({
@@ -73,6 +85,11 @@ describe('CostSavingsTrend', () => {
         },
         uiSettings: {
           get: jest.fn().mockReturnValue('test-connector-id'),
+        },
+        settings: {
+          client: {
+            get: jest.fn(),
+          },
         },
         ...overrides,
       },
@@ -95,13 +112,13 @@ describe('CostSavingsTrend', () => {
   });
 
   it('renders CostSavingsTrend panel', () => {
-    render(<CostSavingsTrend {...defaultProps} />);
+    render(<CostSavingsTrend {...defaultProps} />, { wrapper });
     expect(screen.getByTestId('cost-savings-trend-panel')).toBeInTheDocument();
     expect(screen.getByTestId('mock-visualization-embeddable')).toBeInTheDocument();
   });
 
   it('passes correct props to VisualizationEmbeddable', () => {
-    render(<CostSavingsTrend {...defaultProps} />);
+    render(<CostSavingsTrend {...defaultProps} />, { wrapper });
     expect(VisualizationEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
         'data-test-subj': 'embeddable-area-chart',
