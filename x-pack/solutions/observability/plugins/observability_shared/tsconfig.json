@@ -48,7 +48,6 @@
     "@kbn/charts-theme",
     "@kbn/deeplinks-observability",
     "@kbn/home-sample-data-tab",
-    "@kbn/config-schema",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

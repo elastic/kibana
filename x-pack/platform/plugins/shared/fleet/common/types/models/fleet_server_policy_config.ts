@@ -30,11 +30,15 @@ export interface NewFleetServerHost {
     es_certificate?: string;
     es_key?: string;
     client_auth?: ValueOf<ClientAuth>;
+    agent_certificate_authorities?: string[];
+    agent_certificate?: string;
+    agent_key?: string;
   } | null;
   secrets?: {
     ssl?: {
       key?: SOSecret;
       es_key?: SOSecret;
+      agent_key?: SOSecret;
     };
   };
 }
