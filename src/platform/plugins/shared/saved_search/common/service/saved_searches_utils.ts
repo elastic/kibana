@@ -57,4 +57,4 @@ export const toSavedSearchAttributes = (
     density: savedSearch.density,
     breakdownField: savedSearch.breakdownField,
     visContext: savedSearch.visContext,
-  }) as SavedSearchAttributes;
+  });
