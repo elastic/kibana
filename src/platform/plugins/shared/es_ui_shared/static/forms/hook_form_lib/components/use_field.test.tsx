@@ -54,12 +54,7 @@ describe('<UseField />', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      });
-
-      setup();
+      renderWithI18n(<TestComp onData={onFormData} />);
 
       const [{ data }] = onFormData.mock.calls[
         onFormData.mock.calls.length - 1
