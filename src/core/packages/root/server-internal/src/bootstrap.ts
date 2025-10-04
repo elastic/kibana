@@ -15,6 +15,9 @@ import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
+const SETUP_SIGNAL_TIMEOUT_MS = 90_000;
+const SETUP_SIGNAL_TIMEOUT_SECONDS = SETUP_SIGNAL_TIMEOUT_MS / 1000;
+
 interface BootstrapArgs {
   configs: string[];
   cliArgs: CliArgs;
@@ -40,6 +43,55 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { REPO_ROOT } = require('@kbn/repo-info');
 
+  const shouldWaitForSetupSignal = Boolean(cliArgs.setupOnSignal);
+  let setupSignalCompleted = !shouldWaitForSetupSignal;
+  let resolveSetupSignal: (() => void) | undefined;
+  let rejectSetupSignal: ((error: Error) => void) | undefined;
+  let setupSignalTimer: NodeJS.Timeout | undefined;
+  let logSetupInfo: (message: string) => void = () => {};
+  let logSetupWarn: (message: string) => void = () => {};
+
+  const waitForSetupSignalPromise = shouldWaitForSetupSignal
+    ? new Promise<void>((resolve, reject) => {
+        resolveSetupSignal = () => {
+          if (setupSignalCompleted) {
+            return;
+          }
+          setupSignalCompleted = true;
+          if (setupSignalTimer) {
+            clearTimeout(setupSignalTimer);
+            setupSignalTimer = undefined;
+          }
+          resolve();
+        };
+        rejectSetupSignal = (error) => {
+          if (setupSignalCompleted) {
+            return;
+          }
+          setupSignalCompleted = true;
+          if (setupSignalTimer) {
+            clearTimeout(setupSignalTimer);
+            setupSignalTimer = undefined;
+          }
+          reject(error);
+        };
+      })
+    : Promise.resolve();
+
+  const handleSetupSignal = () => {
+    if (!shouldWaitForSetupSignal || setupSignalCompleted) {
+      return;
+    }
+
+    logSetupInfo('SIGUSR1 received - continuing setup.');
+    resolveSetupSignal?.();
+    process.removeListener('SIGUSR1', handleSetupSignal);
+  };
+
+  if (shouldWaitForSetupSignal) {
+    process.on('SIGUSR1', handleSetupSignal);
+  }
+
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
@@ -52,6 +104,17 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const root = new Root(rawConfigService, env, onRootShutdown);
   const cliLogger = root.logger.get('cli');
   const rootLogger = root.logger.get('root');
+
+  logSetupInfo = (message: string) => cliLogger.info(message, { tags: ['setup-on-signal'] });
+  logSetupWarn = (message: string) => cliLogger.warn(message, { tags: ['setup-on-signal'] });
+
+  let serverListeningSent = false;
+  const notifyServerListening = () => {
+    if (process.send && !serverListeningSent) {
+      process.send(['SERVER_LISTENING']);
+      serverListeningSent = true;
+    }
+  };
 
   rootLogger.info('Kibana is starting');
 
@@ -92,6 +155,17 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   });
 
   function shutdown(reason?: Error) {
+    if (shouldWaitForSetupSignal) {
+      process.removeListener('SIGUSR1', handleSetupSignal);
+      if (setupSignalTimer) {
+        clearTimeout(setupSignalTimer);
+        setupSignalTimer = undefined;
+      }
+      if (!setupSignalCompleted) {
+        resolveSetupSignal?.();
+      }
+    }
+
     rawConfigService.stop();
     return root.shutdown(reason);
   }
@@ -105,8 +179,8 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
       // If setup is on hold then preboot server is supposed to serve user requests and we can let
       // dev parent process know that we are ready for dev mode.
       isSetupOnHold = preboot.isSetupOnHold();
-      if (process.send && isSetupOnHold) {
-        process.send(['SERVER_LISTENING']);
+      if (isSetupOnHold) {
+        notifyServerListening();
       }
 
       if (isSetupOnHold) {
@@ -115,16 +189,48 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
         if (shouldReloadConfig) {
           await reloadConfiguration('configuration might have changed during preboot stage');
         }
+
+        isSetupOnHold = preboot.isSetupOnHold();
       }
+    }
+
+    if (shouldWaitForSetupSignal) {
+      if (!isSetupOnHold) {
+        notifyServerListening();
+      }
+      isSetupOnHold = true;
+
+      if (!setupSignalCompleted) {
+        logSetupInfo('Waiting for SIGUSR1 to continue setup.');
+        setupSignalTimer = setTimeout(() => {
+          logSetupWarn(
+            `SIGUSR1 was not received within ${SETUP_SIGNAL_TIMEOUT_SECONDS} seconds after preboot; initiating shutdown.`
+          );
+          rejectSetupSignal?.(
+            new Error(
+              `SIGUSR1 not received within ${SETUP_SIGNAL_TIMEOUT_SECONDS} seconds after preboot.`
+            )
+          );
+        }, SETUP_SIGNAL_TIMEOUT_MS);
+
+        try {
+          await waitForSetupSignalPromise;
+        } catch (signalError) {
+          return shutdown(
+            signalError instanceof Error ? signalError : new Error(String(signalError))
+          );
+        }
+      } else {
+        logSetupInfo('SIGUSR1 was already received before waiting for setup.');
+      }
+
+      isSetupOnHold = false;
     }
 
     await root.setup();
     await root.start();
 
-    // Notify parent process if we haven't done that yet during preboot stage.
-    if (process.send && !isSetupOnHold) {
-      process.send(['SERVER_LISTENING']);
-    }
+    notifyServerListening();
   } catch (err) {
     await shutdown(err);
   }

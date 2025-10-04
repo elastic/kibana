@@ -37,6 +37,7 @@ export interface CliArgs {
   dist: boolean;
   serverless?: boolean;
   retrictInternalApis?: boolean;
+  setupOnSignal: boolean;
 }
 
 /** @internal */

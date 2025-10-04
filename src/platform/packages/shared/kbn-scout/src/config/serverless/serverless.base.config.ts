@@ -61,6 +61,7 @@ export const defaultConfig: ScoutServerConfig = {
       portInContainer: 8080,
       port: dockerRegistryPort,
       args: dockerArgs,
+      keepRunning: true,
       waitForLogLine: 'package manifests loaded',
       waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
     },

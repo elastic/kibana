@@ -13,11 +13,20 @@ import { tap } from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
+export interface ContainerLogsHandle {
+  lines$: Rx.Observable<string>;
+  stop: () => Promise<void>;
+}
+
 /**
  * Observe the logs for a container, reflecting the log lines
  * to the ToolingLog and the returned Observable
  */
-export function observeContainerLogs(name: string, containerId: string, log: ToolingLog) {
+export function observeContainerLogs(
+  name: string,
+  containerId: string,
+  log: ToolingLog
+): ContainerLogsHandle {
   log.debug(`[docker:${name}] streaming logs from container [id=${containerId}]`);
   const logsProc = execa('docker', ['logs', '--follow', containerId], {
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -30,5 +39,21 @@ export function observeContainerLogs(name: string, containerId: string, log: Too
     observeLines(logsProc.stderr!).pipe(tap((line) => log.error(`[docker:${name}] ${line}`))) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
   ).subscribe(logLine$);
 
-  return logLine$.asObservable();
+  logsProc.once('exit', () => {
+    logLine$.complete();
+  });
+
+  return {
+    lines$: logLine$.asObservable(),
+    stop: async () => {
+      if (!logsProc.killed) {
+        logsProc.kill();
+      }
+      try {
+        await logsProc;
+      } catch {
+        // ignore errors caused by killing the process
+      }
+    },
+  };
 }

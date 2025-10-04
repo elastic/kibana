@@ -36,18 +36,12 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       config = await readConfigFile(log, options.esVersion, options.config, {}, applyFipsOverrides);
     }
 
-    const shutdownEs = await runElasticsearch({
-      config,
-      log,
-      esFrom: options.esFrom,
-      logsDir: options.logsDir,
-    });
+    const mainKibanaProcName = config.get('kbnTestServer.useDedicatedTaskRunner')
+      ? 'kbn-ui'
+      : 'kibana';
 
-    await runKibanaServer({
-      procs,
-      config,
-      installDir: options.installDir,
-      extraKbnOpts: options.installDir
+    const kibanaExtraOptions = [
+      ...(options.installDir
         ? []
         : [
             '--dev',
@@ -56,8 +50,31 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
             config.get('serverless')
               ? '--server.versioned.versionResolution=newest'
               : '--server.versioned.versionResolution=oldest',
-          ],
-    });
+          ]),
+      '--setup-on-signal',
+    ];
+
+    const [shutdownEs] = await Promise.all([
+      runElasticsearch({
+        config,
+        log,
+        esFrom: options.esFrom,
+        logsDir: options.logsDir,
+      }),
+      runKibanaServer({
+        procs,
+        config,
+        installDir: options.installDir,
+        extraKbnOpts: kibanaExtraOptions,
+      }),
+    ]);
+
+    try {
+      procs.signal(mainKibanaProcName, 'SIGUSR1');
+      log.info(`Sent SIGUSR1 to ${mainKibanaProcName} to resume Kibana setup.`);
+    } catch (error) {
+      throw error;
+    }
 
     const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 

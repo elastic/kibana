@@ -48,6 +48,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           portInContainer: 8080,
           port: registryPort,
           args: dockerArgs,
+          keepRunning: true,
           waitForLogLine: 'package manifests loaded',
           waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },

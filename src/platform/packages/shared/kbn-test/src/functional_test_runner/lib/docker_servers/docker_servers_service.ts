@@ -8,6 +8,7 @@
  */
 
 import Url from 'url';
+import { createHash } from 'crypto';
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs';
@@ -19,6 +20,9 @@ import { observeContainerLogs } from './container_logs';
 import type { DockerServer, DockerServerSpec } from './define_docker_servers_config';
 
 const SECOND = 1000;
+const SERVER_LABEL_KEY = 'kbn.ftr.server';
+const ARGS_HASH_LABEL_KEY = 'kbn.ftr.argsHash';
+const KEEP_RUNNING_LABEL_KEY = 'kbn.ftr.keepRunning';
 
 export class DockerServersService {
   private servers: DockerServer[];
@@ -32,6 +36,7 @@ export class DockerServersService {
   ) {
     this.servers = Object.entries(configs).map(([name, config]) => ({
       ...config,
+      keepRunning: Boolean(config.keepRunning),
       name,
       url: Url.format({
         protocol: 'http:',
@@ -61,19 +66,41 @@ export class DockerServersService {
     return { ...server };
   }
 
-  private async dockerRun(server: DockerServer) {
-    const { args } = server;
+  private computeArgsHash(server: DockerServer) {
+    const signature = JSON.stringify({
+      image: server.image,
+      port: server.port,
+      portInContainer: server.portInContainer,
+      args: server.args ?? [],
+    });
+
+    return createHash('sha256').update(signature).digest('hex');
+  }
+
+  private buildDockerArgs(server: DockerServer, argsHash: string) {
+    const args = server.args ?? [];
+
+    return [
+      'run',
+      '-dit',
+      '--label',
+      `${SERVER_LABEL_KEY}=${server.name}`,
+      '--label',
+      `${ARGS_HASH_LABEL_KEY}=${argsHash}`,
+      '--label',
+      `${KEEP_RUNNING_LABEL_KEY}=${server.keepRunning ? 'true' : 'false'}`,
+      ...args,
+      '-p',
+      `${server.port}:${server.portInContainer}`,
+      server.image,
+    ];
+  }
+
+  private async dockerRun(server: DockerServer, argsHash: string) {
     try {
       this.log.info(`[docker:${server.name}] running image "${server.image}"`);
 
-      const dockerArgs = [
-        'run',
-        '-dit',
-        args || [],
-        '-p',
-        `${server.port}:${server.portInContainer}`,
-        server.image,
-      ].flat();
+      const dockerArgs = this.buildDockerArgs(server, argsHash);
       const res = await execa('docker', dockerArgs);
 
       return res.stdout.trim();
@@ -100,41 +127,130 @@ export class DockerServersService {
     }
   }
 
+  private async findReusableContainer(server: DockerServer, argsHash: string) {
+    try {
+      const { stdout } = await execa('docker', [
+        'ps',
+        '-a',
+        '--filter',
+        `label=${SERVER_LABEL_KEY}=${server.name}`,
+        '--format',
+        '{{.ID}}',
+      ]);
+
+      const containerIds = stdout
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      for (const containerId of containerIds) {
+        const labels = await this.getContainerLabels(containerId);
+
+        if (labels[ARGS_HASH_LABEL_KEY] !== argsHash) {
+          this.log.info(
+            `[docker:${server.name}] stopping container ${containerId} due to argument changes`
+          );
+          await this.removeContainer(containerId);
+          continue;
+        }
+
+        const state = await this.getContainerState(containerId);
+        if (state?.Running) {
+          return containerId;
+        }
+
+        await this.removeContainer(containerId);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.log.debug(
+        `[docker:${server.name}] failed to inspect existing containers for reuse: ${errorMessage}`
+      );
+    }
+
+    return undefined;
+  }
+
+  private async getContainerLabels(containerId: string) {
+    const { stdout } = await execa('docker', [
+      'inspect',
+      '--format',
+      '{{json .Config.Labels}}',
+      containerId,
+    ]);
+
+    const labels = stdout ? JSON.parse(stdout) : {};
+    return labels ?? {};
+  }
+
+  private async getContainerState(containerId: string) {
+    const { stdout } = await execa('docker', [
+      'inspect',
+      '--format',
+      '{{json .State}}',
+      containerId,
+    ]);
+
+    return stdout ? JSON.parse(stdout) ?? undefined : undefined;
+  }
+
+  private async removeContainer(containerId: string) {
+    try {
+      await execa('docker', ['rm', '-f', containerId]);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.log.debug(`Failed to remove container ${containerId}: ${errorMessage}`);
+    }
+  }
+
   private async startServer(server: DockerServer) {
     const { log, lifecycle } = this;
-    const { image, name, waitFor, waitForLogLine, waitForLogLineTimeoutMs } = server;
+    const { image, name, waitFor, waitForLogLine, waitForLogLineTimeoutMs, keepRunning } = server;
+    const argsHash = this.computeArgsHash(server);
 
-    // pull image from registry
-    log.info(`[docker:${name}] pulling docker image "${image}"`);
-    await execa('docker', ['pull', image]);
-
-    // run the image that we just pulled
-    const containerId = await this.dockerRun(server);
-
-    lifecycle.cleanup.add(() => {
-      try {
-        execa.sync('docker', ['kill', containerId]);
-        // we don't remove the containers on CI because removing them causes the
-        // network list to be updated and aborts all in-flight requests in Chrome
-        if (!process.env.CI) {
-          execa.sync('docker', ['rm', containerId]);
-        }
-      } catch (error) {
-        if (
-          error.message.includes(`Container ${containerId} is not running`) ||
-          error.message.includes(`No such container: ${containerId}`)
-        ) {
-          return;
-        }
-
-        throw error;
+    let containerId: string | undefined;
+    if (keepRunning) {
+      containerId = await this.findReusableContainer(server, argsHash);
+      if (containerId) {
+        log.info(`[docker:${name}] reusing container ${containerId}`);
       }
-    });
+    }
+
+    if (!containerId) {
+      log.info(`[docker:${name}] pulling docker image "${image}"`);
+      await execa('docker', ['pull', image]);
+      containerId = await this.dockerRun(server, argsHash);
+    }
+
+    if (!containerId) {
+      throw new Error(`[docker:${name}] Failed to start docker container`);
+    }
+
+    if (!keepRunning) {
+      lifecycle.cleanup.add(() => {
+        try {
+          execa.sync('docker', ['kill', containerId]);
+          if (!process.env.CI) {
+            execa.sync('docker', ['rm', containerId]);
+          }
+        } catch (error) {
+          if (
+            error.message.includes(`Container ${containerId} is not running`) ||
+            error.message.includes(`No such container: ${containerId}`)
+          ) {
+            return;
+          }
+
+          throw error;
+        }
+      });
+    }
 
     // push the logs from the container to our logger, and expose an observable of those lines for testing
-    const logLine$ = observeContainerLogs(name, containerId, log);
+    const logStream = observeContainerLogs(name, containerId, log);
+    const logLine$ = logStream.lines$;
     lifecycle.cleanup.add(async () => {
-      await logLine$.toPromise();
+      await logStream.stop();
     });
 
     // ensure container stays running, error if it exits

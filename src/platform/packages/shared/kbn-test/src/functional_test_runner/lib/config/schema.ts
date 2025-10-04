@@ -75,6 +75,7 @@ const dockerServerSchema = () =>
       waitForLogLineTimeoutMs: Joi.number().integer().optional(),
       waitFor: Joi.func().optional(),
       args: Joi.array().items(Joi.string()).optional(),
+      keepRunning: Joi.boolean().optional(),
     })
     .default();
 

@@ -108,32 +108,53 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           abortCtrl.abort();
         };
 
+        const shouldStartEs = process.env.TEST_ES_DISABLE_STARTUP !== 'true';
+        const mainKibanaProcName = config.get('kbnTestServer.useDedicatedTaskRunner')
+          ? 'kbn-ui'
+          : 'kibana';
+
+        const kibanaExtraOptions = [
+          config.get('serverless')
+            ? '--server.versioned.versionResolution=newest'
+            : '--server.versioned.versionResolution=oldest',
+          ...(shouldStartEs ? ['--setup-on-signal'] : []),
+        ];
+
         let shutdownEs: (() => Promise<void>) | undefined;
 
         try {
-          if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await withSpan('start_elasticsearch', () =>
+          const startKibana = () =>
+            withSpan('start_kibana', () =>
+              runKibanaServer({
+                procs,
+                config,
+                logsDir: options.logsDir,
+                installDir: options.installDir,
+                onEarlyExit,
+                extraKbnOpts: kibanaExtraOptions,
+              })
+            );
+
+          if (shouldStartEs) {
+            const shutdownEsPromise = withSpan('start_elasticsearch', () =>
               runElasticsearch({ ...options, log, config, onEarlyExit })
             );
-            if (abortCtrl.signal.aborted) {
-              return;
-            }
-          }
 
-          await withSpan('start_kibana', () =>
-            runKibanaServer({
-              procs,
-              config,
-              logsDir: options.logsDir,
-              installDir: options.installDir,
-              onEarlyExit,
-              extraKbnOpts: [
-                config.get('serverless')
-                  ? '--server.versioned.versionResolution=newest'
-                  : '--server.versioned.versionResolution=oldest',
-              ],
-            })
-          );
+            const kibanaPromise = startKibana();
+
+            shutdownEs = await shutdownEsPromise;
+
+            try {
+              procs.signal(mainKibanaProcName, 'SIGUSR1');
+              log.info(`Sent SIGUSR1 to ${mainKibanaProcName} to resume Kibana setup.`);
+            } catch (error) {
+              throw error;
+            }
+
+            await kibanaPromise;
+          } else {
+            await startKibana();
+          }
 
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
