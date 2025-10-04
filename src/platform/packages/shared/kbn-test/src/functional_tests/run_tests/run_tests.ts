@@ -109,9 +109,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         };
 
         const shouldStartEs = process.env.TEST_ES_DISABLE_STARTUP !== 'true';
-        const mainKibanaProcName = config.get('kbnTestServer.useDedicatedTaskRunner')
-          ? 'kbn-ui'
-          : 'kibana';
+        const kibanaProcs = config.get('kbnTestServer.useDedicatedTaskRunner')
+          ? ['kbn-ui', 'kbn-tasks']
+          : ['kibana'];
 
         const kibanaExtraOptions = [
           config.get('serverless')
@@ -136,17 +136,25 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             );
 
           if (shouldStartEs) {
+            log.info('Starting Kibana');
+
+            const kibanaPromise = startKibana();
+
+            log.info('Starting Elasticsearch');
+
             const shutdownEsPromise = withSpan('start_elasticsearch', () =>
               runElasticsearch({ ...options, log, config, onEarlyExit })
             );
 
-            const kibanaPromise = startKibana();
-
             shutdownEs = await shutdownEsPromise;
 
+            log.info('Started Elasticsearch, ready to send signal to', kibanaProcs.join(', '));
+
             try {
-              procs.signal(mainKibanaProcName, 'SIGUSR1');
-              log.info(`Sent SIGUSR1 to ${mainKibanaProcName} to resume Kibana setup.`);
+              kibanaProcs.forEach((procName) => {
+                procs.signal(procName, 'SIGUSR1');
+                log.info(`Sent SIGUSR1 to ${procName} to resume Kibana setup.`);
+              });
             } catch (error) {
               throw error;
             }

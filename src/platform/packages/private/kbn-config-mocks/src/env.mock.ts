@@ -33,6 +33,7 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       dist: false,
       oss: false,
       runExamples: false,
+      setupOnSignal: false,
       ...(options.cliArgs || {}),
     },
     repoPackages: options.repoPackages ?? getPackages(REPO_ROOT),

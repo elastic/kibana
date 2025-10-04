@@ -54,20 +54,21 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       '--setup-on-signal',
     ];
 
-    const [shutdownEs] = await Promise.all([
-      runElasticsearch({
-        config,
-        log,
-        esFrom: options.esFrom,
-        logsDir: options.logsDir,
-      }),
-      runKibanaServer({
-        procs,
-        config,
-        installDir: options.installDir,
-        extraKbnOpts: kibanaExtraOptions,
-      }),
-    ]);
+    const startEsPromise = runElasticsearch({
+      config,
+      log,
+      esFrom: options.esFrom,
+      logsDir: options.logsDir,
+    });
+
+    const kibanaPromise = runKibanaServer({
+      procs,
+      config,
+      installDir: options.installDir,
+      extraKbnOpts: kibanaExtraOptions,
+    });
+
+    const shutdownEs = await startEsPromise;
 
     try {
       procs.signal(mainKibanaProcName, 'SIGUSR1');
@@ -75,6 +76,8 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     } catch (error) {
       throw error;
     }
+
+    await kibanaPromise;
 
     const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 

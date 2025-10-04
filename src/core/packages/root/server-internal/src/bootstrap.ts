@@ -15,7 +15,7 @@ import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
-const SETUP_SIGNAL_TIMEOUT_MS = 90_000;
+const SETUP_SIGNAL_TIMEOUT_MS = 150_000;
 const SETUP_SIGNAL_TIMEOUT_SECONDS = SETUP_SIGNAL_TIMEOUT_MS / 1000;
 
 interface BootstrapArgs {
