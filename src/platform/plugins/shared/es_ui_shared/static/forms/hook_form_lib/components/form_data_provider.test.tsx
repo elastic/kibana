@@ -8,10 +8,11 @@
  */
 
 import React, { useState } from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import type { TestBed } from '../shared_imports';
-import { registerTestBed } from '../shared_imports';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import type { OnUpdateHandler } from '../types';
 import type { OnUpdateHandler } from '../types';
 import { useForm } from '../hooks/use_form';
 import { Form } from './form';
@@ -20,6 +21,7 @@ import { FormDataProvider } from './form_data_provider';
 
 describe('<FormDataProvider />', () => {
   test('should listen to changes in the form data and re-render the children with the updated data', async () => {
+    const user = userEvent.setup();
     const onFormData = jest.fn();
 
     const TestComp = () => {
@@ -40,13 +42,7 @@ describe('<FormDataProvider />', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      memoryRouter: { wrapComponent: false },
-    });
-
-    const {
-      form: { setInputValue },
-    } = setup() as TestBed;
+    renderWithI18n(<TestComp />);
 
     expect(onFormData.mock.calls.length).toBe(1);
 
@@ -62,10 +58,8 @@ describe('<FormDataProvider />', () => {
     onFormData.mockReset(); // Reset the counter at 0
 
     // Make some changes to the form fields
-    await act(async () => {
-      setInputValue('nameField', 'updated value');
-      setInputValue('lastNameField', 'updated value');
-    });
+    await user.type(screen.getByTestId('nameField'), '{selectall}updated value');
+    await user.type(screen.getByTestId('lastNameField'), '{selectall}updated value');
 
     expect(onFormData).toBeCalledTimes(2);
 
@@ -80,6 +74,7 @@ describe('<FormDataProvider />', () => {
   });
 
   test('should subscribe to the latest updated form data when mounting late', async () => {
+    const user = userEvent.setup();
     const onFormData = jest.fn();
 
     const TestComp = () => {
@@ -104,26 +99,15 @@ describe('<FormDataProvider />', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      memoryRouter: { wrapComponent: false },
-    });
-
-    const {
-      form: { setInputValue },
-      find,
-    } = setup() as TestBed;
+    renderWithI18n(<TestComp />);
 
     expect(onFormData).toBeCalledTimes(0); // Not present in the DOM yet
 
     // Make some changes to the form fields
-    await act(async () => {
-      setInputValue('nameField', 'updated value');
-    });
+    await user.type(screen.getByTestId('nameField'), '{selectall}updated value');
 
     // Update state to trigger the mounting of the FormDataProvider
-    await act(async () => {
-      find('btn').simulate('click').update();
-    });
+    await user.click(screen.getByTestId('btn'));
 
     expect(onFormData.mock.calls.length).toBe(2);
 
@@ -137,6 +121,7 @@ describe('<FormDataProvider />', () => {
   });
 
   test('props.pathsToWatch (string): should not re-render the children when the field that changed is not the one provided', async () => {
+    const user = userEvent.setup();
     const onFormData = jest.fn();
 
     const TestComp = () => {
@@ -156,25 +141,18 @@ describe('<FormDataProvider />', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      memoryRouter: { wrapComponent: false },
-    });
-
-    const {
-      form: { setInputValue },
-    } = setup() as TestBed;
+    renderWithI18n(<TestComp />);
 
     onFormData.mockReset(); // Reset the calls counter at 0
 
     // Make some changes to a field we are **not** interested in
-    await act(async () => {
-      setInputValue('lastNameField', 'updated value');
-    });
+    await user.type(screen.getByTestId('lastNameField'), '{selectall}updated value');
 
     expect(onFormData).toBeCalledTimes(0);
   });
 
   test('props.pathsToWatch (Array<string>): should not re-render the children when the field that changed is not in the watch list', async () => {
+    const user = userEvent.setup();
     const onFormData = jest.fn();
 
     const TestComp = () => {
@@ -195,36 +173,24 @@ describe('<FormDataProvider />', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      memoryRouter: { wrapComponent: false },
-    });
-
-    const {
-      form: { setInputValue },
-    } = setup() as TestBed;
+    renderWithI18n(<TestComp />);
 
     onFormData.mockReset(); // Reset the calls counter at 0
 
     // Make some changes to fields not in the watch list
-    await act(async () => {
-      setInputValue('companyField', 'updated value');
-    });
+    await user.type(screen.getByTestId('companyField'), '{selectall}updated value');
 
     // No re-render
     expect(onFormData).toBeCalledTimes(0);
 
     // Make some changes to fields in the watch list
-    await act(async () => {
-      setInputValue('nameField', 'updated value');
-    });
+    await user.type(screen.getByTestId('nameField'), '{selectall}updated value');
 
     expect(onFormData).toBeCalledTimes(1);
 
     onFormData.mockReset();
 
-    await act(async () => {
-      setInputValue('lastNameField', 'updated value');
-    });
+    await user.type(screen.getByTestId('lastNameField'), '{selectall}updated value');
 
     expect(onFormData.mock.calls.length).toBe(2); // 2 as the form "isValid" change caused a re-render
 
