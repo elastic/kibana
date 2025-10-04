@@ -41,16 +41,16 @@ const onFormHook = (_form: FormHook<any>) => {
 };
 
 describe('useForm() hook', () => {
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
     formHook = null;
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   describe('form.submit() & config.onSubmit()', () => {
@@ -67,26 +67,15 @@ describe('useForm() hook', () => {
         return (
           <Form form={form}>
             <UseField path="username" data-test-subj="usernameField" />
-            <button type="button" onClick={form.submit} />
+            <button type="button" onClick={form.submit} data-test-subj="submitBtn" />
           </Form>
         );
       };
 
-      renderWithI18n(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      });
+      renderWithI18n(<TestComp onData={onFormData} />);
 
-      const {
-        component,
-        form: { setInputValue },
-      } = setup() as TestBed;
-
-      await act(async () => {
-        setInputValue('usernameField', 'John');
-        component.find('button').simulate('click');
-        jest.advanceTimersByTime(0);
-      });
+      await user.type(screen.getByTestId('usernameField'), 'John');
+      await user.click(screen.getByTestId('submitBtn'));
 
       const [formData, isValid] = onFormData.mock.calls[onFormData.mock.calls.length - 1];
 
@@ -105,20 +94,12 @@ describe('useForm() hook', () => {
             <UseField path="tags[0]" data-test-subj="tagField1" />
             <UseField path="tags[1]" data-test-subj="tagField2" />
 
-            <button type="button" onClick={form.submit} />
+            <button type="button" onClick={form.submit} data-test-subj="submitBtn" />
           </Form>
         );
       };
 
-      renderWithI18n(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      });
-
-      const {
-        component,
-        form: { setInputValue },
-      } = setup() as TestBed;
+      renderWithI18n(<TestComp onData={onFormData} />);
 
       const expectedData = {
         address: {
@@ -130,15 +111,12 @@ describe('useForm() hook', () => {
         tags: ['Belgium', 'Europe'],
       };
 
-      await act(async () => {
-        setInputValue('countryCodeField', expectedData.address.country.code);
-        setInputValue('addressNote1Field', expectedData.address.notes[0]);
-        setInputValue('tagField1', expectedData.tags[0]);
-        setInputValue('tagField2', expectedData.tags[1]);
+      await user.type(screen.getByTestId('countryCodeField'), expectedData.address.country.code);
+      await user.type(screen.getByTestId('addressNote1Field'), expectedData.address.notes[0]);
+      await user.type(screen.getByTestId('tagField1'), expectedData.tags[0]);
+      await user.type(screen.getByTestId('tagField2'), expectedData.tags[1]);
 
-        component.find('button').simulate('click');
-        jest.advanceTimersByTime(0);
-      });
+      await user.click(screen.getByTestId('submitBtn'));
 
       const [formData] = onFormData.mock.calls[onFormData.mock.calls.length - 1];
 
