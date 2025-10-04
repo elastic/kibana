@@ -61,13 +61,13 @@ const setServerlessKibanaDevServiceAccountIfPossible = (get, set, opts) => {
    */
   const isESlocalhost = esHosts.length
     ? esHosts.some((hostUrl) => {
-      const parsedUrl = url.parse(hostUrl);
-      return (
-        parsedUrl.hostname === 'localhost' ||
-        parsedUrl.hostname === '127.0.0.1' ||
-        parsedUrl.hostname === 'host.docker.internal'
-      );
-    })
+        const parsedUrl = url.parse(hostUrl);
+        return (
+          parsedUrl.hostname === 'localhost' ||
+          parsedUrl.hostname === '127.0.0.1' ||
+          parsedUrl.hostname === 'host.docker.internal'
+        );
+      })
     : true; // default is localhost:9200
 
   if (!opts.dev || !opts.serverless || !isESlocalhost) {
@@ -234,12 +234,13 @@ export default function (program) {
     .option(
       '--plugin-path <path>',
       'A path to a plugin which should be included by the server, ' +
-      'this can be specified multiple times to specify multiple paths',
+        'this can be specified multiple times to specify multiple paths',
       pluginPathCollector,
       []
     )
     .option('--allow-root', 'Required if Kibana is ran as root')
-    .option('--optimize', 'Deprecated, running the optimizer is no longer required');
+    .option('--optimize', 'Deprecated, running the optimizer is no longer required')
+    .option('--setup-on-signal', 'Delay setup/start until Kibana receives SIGUSR1');
 
   if (!isKibanaDistributable()) {
     command
@@ -251,7 +252,7 @@ export default function (program) {
       .option(
         '--serverless [oblt|security|es|chat]',
         'Start Kibana in a specific serverless project mode. ' +
-        'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
+          'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
   }
 
@@ -274,7 +275,6 @@ export default function (program) {
         '--no-dev-credentials',
         'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
       )
-      .option('--setup-on-signal', 'Delay setup/start until Kibana receives SIGUSR1')
       .option(
         '--extended-stack-trace',
         'Collect more complete stack traces. See src/cli/dev.js for explanation.'
@@ -393,7 +393,7 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
         if (provider.order === 0) {
           console.warn(
             `The serverless SAML authentication provider won't be configured because the order "0" is already used by the custom authentication provider "${providerType}/${providerName}".` +
-            `Please update the custom provider to use a different order or remove it to allow the serverless SAML provider to be configured.`
+              `Please update the custom provider to use a different order or remove it to allow the serverless SAML provider to be configured.`
           );
           return false;
         }

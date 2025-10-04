@@ -114,10 +114,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           : ['kibana'];
 
         const kibanaExtraOptions = [
+          ...(shouldStartEs ? ['--setup-on-signal'] : []),
           config.get('serverless')
             ? '--server.versioned.versionResolution=newest'
             : '--server.versioned.versionResolution=oldest',
-          ...(shouldStartEs ? ['--setup-on-signal'] : []),
         ];
 
         let shutdownEs: (() => Promise<void>) | undefined;
