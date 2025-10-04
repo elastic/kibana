@@ -56,7 +56,7 @@ describe('useField() hook', () => {
         ],
       });
 
-      registerTestBed(TestForm)();
+      renderWithI18n(<TestForm />);
 
       let validateResponse: FieldValidateResponse;
 
@@ -96,7 +96,7 @@ describe('useField() hook', () => {
         ],
       });
 
-      registerTestBed(TestForm)();
+      renderWithI18n(<TestForm />);
 
       let validateResponse: FieldValidateResponse;
 
@@ -136,7 +136,7 @@ describe('useField() hook', () => {
         ],
       });
 
-      registerTestBed(TestForm)();
+      renderWithI18n(<TestForm />);
 
       act(() => {
         // This should **not** call our validator as it is of type ARRAY_ITEM

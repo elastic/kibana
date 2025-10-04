@@ -74,47 +74,48 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
   };
 
   let hookRenderer: any;
+  let TestComponent: React.ComponentType<{ requestConfig: UseRequestConfig }>;
   // We'll use this object to observe the state of the hook and access its callback(s).
   const hookResult = {} as UseRequestResponse;
   const sendRequestSpy = jest.fn();
 
-  const TestComponent = ({ requestConfig }: { requestConfig: UseRequestConfig }) => {
-    const httpClient = {
-      post: (path: string, options: HttpFetchOptions) => {
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            try {
-              resolve(sendRequestSpy(path, options));
-            } catch (e) {
-              reject(e);
-            }
-          }, REQUEST_TIME);
-        });
-      },
+  const setupUseRequest = (config: UseRequestConfig, requestTimings?: number[]) => {
+    TestComponent = ({ requestConfig }: { requestConfig: UseRequestConfig }) => {
+      const httpClient = {
+        post: (path: string, options: HttpFetchOptions) => {
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              try {
+                resolve(sendRequestSpy(path, options));
+              } catch (e) {
+                reject(e);
+              }
+            }, REQUEST_TIME);
+          });
+        },
+      };
+
+      const { isInitialRequest, isLoading, error, data, resendRequest } = useRequest(
+        httpClient as HttpSetup,
+        requestConfig
+      );
+
+      // Force a re-render of the component to stress-test the useRequest hook and verify its
+      // state remains unaffected.
+      const [, setState] = useState(false);
+      useEffect(() => {
+        setState(true);
+      }, []);
+
+      hookResult.isInitialRequest = isInitialRequest;
+      hookResult.isLoading = isLoading;
+      hookResult.error = error;
+      hookResult.data = data;
+      hookResult.resendRequest = resendRequest;
+
+      return null;
     };
 
-    const { isInitialRequest, isLoading, error, data, resendRequest } = useRequest(
-      httpClient as HttpSetup,
-      requestConfig
-    );
-
-    // Force a re-render of the component to stress-test the useRequest hook and verify its
-    // state remains unaffected.
-    const [, setState] = useState(false);
-    useEffect(() => {
-      setState(true);
-    }, []);
-
-    hookResult.isInitialRequest = isInitialRequest;
-    hookResult.isLoading = isLoading;
-    hookResult.error = error;
-    hookResult.data = data;
-    hookResult.resendRequest = resendRequest;
-
-    return null;
-  };
-
-  const setupUseRequest = (config: UseRequestConfig, requestTimings?: number[]) => {
     act(() => {
       hookRenderer = renderWithI18n(<TestComponent requestConfig={config} />);
     });
