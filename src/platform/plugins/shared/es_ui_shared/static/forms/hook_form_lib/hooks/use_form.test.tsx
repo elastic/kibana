@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { emptyField } from '../../helpers/field_validators';
+import { getRandomString } from '../../shared_imports';
 import { ComboBoxField } from '../../components';
 import { Form, UseField, UseArray } from '../components';
 import type {
@@ -264,10 +265,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      registerTestBed(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      })();
+      renderWithI18n(<TestComp onData={onFormData} />);
 
       expect(onFormData.mock.calls.length).toBe(1);
 
@@ -306,14 +304,12 @@ describe('useForm() hook', () => {
         );
       };
 
-      const { find } = registerTestBed(TestComp, { memoryRouter: { wrapComponent: false } })();
+      renderWithI18n(<TestComp />);
 
       expect(formHook?.__getFormDefaultValue()).toEqual({ name: 'John' });
 
       // Make sure a re-render of the component does not re-update the defaultValue
-      act(() => {
-        find('forceUpdateBtn').simulate('click');
-      });
+      await user.click(screen.getByTestId('forceUpdateBtn'));
 
       expect(formHook?.__getFormDefaultValue()).toEqual({ name: 'John' });
     });
@@ -355,16 +351,9 @@ describe('useForm() hook', () => {
       );
     };
 
-    renderWithI18n(TestComp, {
-      defaultProps: { onForm: onFormHook },
-      memoryRouter: { wrapComponent: false },
-    });
+    renderWithI18n(<TestComp onForm={onFormHook} />);
 
     test('should put back the defaultValue for each field', async () => {
-      const {
-        form: { setInputValue },
-      } = setup() as TestBed;
-
       if (!formHook) {
         throw new Error(
           `formHook is not defined. Use the onForm() prop to update the reference to the form hook.`
@@ -373,35 +362,27 @@ describe('useForm() hook', () => {
 
       let formData: Partial<RestFormTest> = {};
 
-      await act(async () => {
-        formData = formHook!.getFormData();
-      });
+      formData = formHook!.getFormData();
       expect(formData).toEqual({
         username: 'defaultValue',
         city: 'inlineDefaultValue',
         deeply: { nested: { value: 'defaultValue' } },
       });
 
-      setInputValue('userNameField', 'changedValue');
-      setInputValue('cityField', 'changedValue');
-      setInputValue('deeplyNestedField', 'changedValue');
+      await user.type(screen.getByTestId('userNameField'), '{selectall}changedValue');
+      await user.type(screen.getByTestId('cityField'), '{selectall}changedValue');
+      await user.type(screen.getByTestId('deeplyNestedField'), '{selectall}changedValue');
 
-      await act(async () => {
-        formData = formHook!.getFormData();
-      });
+      formData = formHook!.getFormData();
       expect(formData).toEqual({
         username: 'changedValue',
         city: 'changedValue',
         deeply: { nested: { value: 'changedValue' } },
       });
 
-      await act(async () => {
-        formHook!.reset();
-      });
+      formHook!.reset();
 
-      await act(async () => {
-        formData = formHook!.getFormData();
-      });
+      formData = formHook!.getFormData();
       expect(formData).toEqual({
         username: 'defaultValue',
         city: 'inlineDefaultValue', // Inline default value is correctly kept after resetting
@@ -410,33 +391,25 @@ describe('useForm() hook', () => {
     });
 
     test('should allow to pass a new "defaultValue" object for the fields', async () => {
-      const {
-        form: { setInputValue },
-      } = setup() as TestBed;
-
       if (!formHook) {
         throw new Error(
           `formHook is not defined. Use the onForm() prop to update the reference to the form hook.`
         );
       }
 
-      setInputValue('userNameField', 'changedValue');
-      setInputValue('cityField', 'changedValue');
-      setInputValue('deeplyNestedField', 'changedValue');
+      await user.type(screen.getByTestId('userNameField'), '{selectall}changedValue');
+      await user.type(screen.getByTestId('cityField'), '{selectall}changedValue');
+      await user.type(screen.getByTestId('deeplyNestedField'), '{selectall}changedValue');
 
       let formData: Partial<RestFormTest> = {};
 
-      await act(async () => {
-        formHook!.reset({
-          defaultValue: {
-            city: () => 'newDefaultValue', // A function can also be passed
-            deeply: { nested: { value: 'newDefaultValue' } },
-          },
-        });
+      formHook!.reset({
+        defaultValue: {
+          city: () => 'newDefaultValue', // A function can also be passed
+          deeply: { nested: { value: 'newDefaultValue' } },
+        },
       });
-      await act(async () => {
-        formData = formHook!.getFormData();
-      });
+      formData = formHook!.getFormData();
       expect(formData).toEqual({
         username: 'configDefaultValue', // Back to the config defaultValue as no value was provided when resetting
         city: 'newDefaultValue',
@@ -487,24 +460,17 @@ describe('useForm() hook', () => {
         );
       };
 
-      const {
-        form: { setInputValue },
-      } = registerTestBed(TestResetComp, {
-        memoryRouter: { wrapComponent: false },
-      })() as TestBed;
+      renderWithI18n(<TestResetComp />);
 
       let { isValid } = formHook!;
       expect(isValid).toBeUndefined();
 
-      await act(async () => {
-        setInputValue('myField', 'changedValue');
-      });
+      await user.type(screen.getByTestId('myField'), 'changedValue');
       ({ isValid } = formHook!);
       expect(isValid).toBe(true);
 
-      await act(async () => {
-        // When we reset the form, value is back to "", which is invalid for the field
-        formHook!.reset();
+      // When we reset the form, value is back to "", which is invalid for the field
+      formHook!.reset();
       });
 
       ({ isValid } = formHook!);
