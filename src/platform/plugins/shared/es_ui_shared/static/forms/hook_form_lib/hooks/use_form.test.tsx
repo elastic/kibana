@@ -41,16 +41,16 @@ const onFormHook = (_form: FormHook<any>) => {
 };
 
 describe('useForm() hook', () => {
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 
   beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
     formHook = null;
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   describe('form.submit() & config.onSubmit()', () => {
@@ -72,21 +72,10 @@ describe('useForm() hook', () => {
         );
       };
 
-      renderWithI18n(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      });
+      renderWithI18n(<TestComp onData={onFormData} />);
 
-      const {
-        component,
-        form: { setInputValue },
-      } = setup() as TestBed;
-
-      await act(async () => {
-        setInputValue('usernameField', 'John');
-        component.find('button').simulate('click');
-        jest.advanceTimersByTime(0);
-      });
+      await user.type(screen.getByTestId('usernameField'), 'John');
+      await user.click(screen.getByRole('button'));
 
       const [formData, isValid] = onFormData.mock.calls[onFormData.mock.calls.length - 1];
 
@@ -110,15 +99,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      renderWithI18n(TestComp, {
-        defaultProps: { onData: onFormData },
-        memoryRouter: { wrapComponent: false },
-      });
-
-      const {
-        component,
-        form: { setInputValue },
-      } = setup() as TestBed;
+      renderWithI18n(<TestComp onData={onFormData} />);
 
       const expectedData = {
         address: {
@@ -130,15 +111,12 @@ describe('useForm() hook', () => {
         tags: ['Belgium', 'Europe'],
       };
 
-      await act(async () => {
-        setInputValue('countryCodeField', expectedData.address.country.code);
-        setInputValue('addressNote1Field', expectedData.address.notes[0]);
-        setInputValue('tagField1', expectedData.tags[0]);
-        setInputValue('tagField2', expectedData.tags[1]);
+      await user.type(screen.getByTestId('countryCodeField'), expectedData.address.country.code);
+      await user.type(screen.getByTestId('addressNote1Field'), expectedData.address.notes[0]);
+      await user.type(screen.getByTestId('tagField1'), expectedData.tags[0]);
+      await user.type(screen.getByTestId('tagField2'), expectedData.tags[1]);
 
-        component.find('button').simulate('click');
-        jest.advanceTimersByTime(0);
-      });
+      await user.click(screen.getByRole('button'));
 
       const [formData] = onFormData.mock.calls[onFormData.mock.calls.length - 1];
 
