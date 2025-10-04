@@ -15,11 +15,13 @@ import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__
 
 jest.mock('../../../common/hooks/use_ai_connectors', () => ({
   useAIConnectors: jest.fn().mockReturnValue({
-    aiConnectors: [{
-      id: 'test-connector-id',
-      name: 'Test Connector',
-      actionTypeId: '.gen-ai',
-    }],
+    aiConnectors: [
+      {
+        id: 'test-connector-id',
+        name: 'Test Connector',
+        actionTypeId: '.gen-ai',
+      },
+    ],
     isLoading: false,
     error: null,
   }),
