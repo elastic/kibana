@@ -8,6 +8,8 @@
  */
 
 import React, { useState } from 'react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { FieldHook } from '../types';
@@ -16,11 +18,14 @@ import { Form } from './form';
 import { UseMultiFields } from './use_multi_fields';
 
 describe('<UseMultiFields />', () => {
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.useRealTimers();
   });
 
@@ -62,12 +67,7 @@ describe('<UseMultiFields />', () => {
   test('it should return 2 hook fields', () => {
     const onFields = jest.fn();
 
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onFields },
-      memoryRouter: { wrapComponent: false },
-    });
-
-    setup();
+    renderWithI18n(<TestComp onFields={onFields} />);
 
     expect(onFields).toHaveBeenCalled();
     const fieldsReturned = onFields.mock.calls[0][0];
@@ -78,15 +78,10 @@ describe('<UseMultiFields />', () => {
     expect(fieldsReturned.bar.isPristine).toBeDefined();
   });
 
-  test('it should keep a stable ref of initial fields passed', () => {
+  test('it should keep a stable ref of initial fields passed', async () => {
     const onFields = jest.fn();
 
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onFields },
-      memoryRouter: { wrapComponent: false },
-    });
-
-    const { find } = setup();
+    renderWithI18n(<TestComp onFields={onFields} />);
 
     expect(onFields).toBeCalledTimes(1);
     let fieldsReturned = onFields.mock.calls[0][0] as { [key: string]: FieldHook };
@@ -94,7 +89,7 @@ describe('<UseMultiFields />', () => {
     expect(paths).toEqual(['bar', 'foo']);
 
     // We change the fields passed down to <UseMultiFields />
-    find('changeFields').simulate('click');
+    await user.click(screen.getByTestId('changeFields'));
     expect(onFields).toBeCalledTimes(2);
     fieldsReturned = onFields.mock.calls[1][0] as { [key: string]: FieldHook };
     paths = Object.values(fieldsReturned).map(({ path }) => path);
