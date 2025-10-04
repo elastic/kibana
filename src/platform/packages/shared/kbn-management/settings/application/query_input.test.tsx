@@ -9,10 +9,10 @@
 
 import React from 'react';
 import { Query } from '@elastic/eui';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { act, waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { getSettingsMock } from '@kbn/management-settings-utilities/mocks/settings.mock';
 
 import { QueryInput } from './query_input';
@@ -30,54 +30,55 @@ const categories = Object.keys(
 describe('Search', () => {
   it('should render normally', async () => {
     const onQueryChange = () => {};
-    const component = shallowWithI18nProvider(
+    const { container } = renderWithI18n(
       <QueryInput {...{ categories, query, onQueryChange }} />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('should call parent function when query is changed', async () => {
     // This test is brittle as it knows about implementation details
     // (EuiFieldSearch uses onKeyup instead of onChange to handle input)
+    const user = userEvent.setup();
     const onQueryChange = jest.fn();
-    const component = mountWithI18nProvider(
+    renderWithI18n(
       <QueryInput {...{ categories, query, onQueryChange }} />
     );
-    findTestSubject(component, 'settingsSearchBar').simulate('keyup', {
-      target: { value: 'new filter' },
-    });
+    
+    const searchInput = screen.getByTestId('settingsSearchBar');
+    await user.type(searchInput, 'new filter');
+    
     expect(onQueryChange).toHaveBeenCalledTimes(1);
   });
 
   it('should handle query parse error', async () => {
+    const user = userEvent.setup();
     const onQueryChange = jest.fn();
-    const component = mountWithI18nProvider(
+    renderWithI18n(
       <QueryInput {...{ categories, query }} onQueryChange={onQueryChange} />
     );
 
-    const searchBar = findTestSubject(component, 'settingsSearchBar');
+    const searchInput = screen.getByTestId('settingsSearchBar');
 
     // Send invalid query
-    act(() => {
-      searchBar.simulate('keyup', { target: { value: '?' } });
-    });
+    await user.clear(searchInput);
+    await user.type(searchInput, '?');
 
     expect(onQueryChange).toHaveBeenCalledTimes(1);
 
-    waitFor(() => {
-      expect(component.contains('Unable to parse query')).toBe(true);
+    await waitFor(() => {
+      expect(screen.getByText('Unable to parse query')).toBeInTheDocument();
     });
 
     // Send valid query to ensure component can recover from invalid query
-    act(() => {
-      searchBar.simulate('keyup', { target: { value: 'dateFormat' } });
-    });
+    await user.clear(searchInput);
+    await user.type(searchInput, 'dateFormat');
 
     expect(onQueryChange).toHaveBeenCalledTimes(2);
 
-    waitFor(() => {
-      expect(component.contains('Unable to parse query')).toBe(false);
+    await waitFor(() => {
+      expect(screen.queryByText('Unable to parse query')).not.toBeInTheDocument();
     });
   });
 });
