@@ -8,9 +8,9 @@
  */
 
 import React from 'react';
-import sinon from 'sinon';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
+import { screen, fireEvent } from '@testing-library/react';
+
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import type { Frequency } from './types';
 import { CronEditor } from './cron_editor';
@@ -18,7 +18,7 @@ import { CronEditor } from './cron_editor';
 describe('CronEditor', () => {
   ['MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR'].forEach((unit) => {
     test(`is rendered with a ${unit} frequency`, () => {
-      const component = mountWithI18nProvider(
+      const { container } = renderWithI18n(
         <CronEditor
           fieldToPreferredValueMap={{}}
           frequency={unit as Frequency}
@@ -27,14 +27,14 @@ describe('CronEditor', () => {
         />
       );
 
-      expect(component.render()).toMatchSnapshot();
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 
   describe('props', () => {
     describe('frequencyBlockList', () => {
       it('excludes the blocked frequencies from the frequency list', () => {
-        const component = mountWithI18nProvider(
+        renderWithI18n(
           <CronEditor
             frequencyBlockList={['HOUR', 'WEEK', 'YEAR']}
             fieldToPreferredValueMap={{}}
@@ -44,14 +44,14 @@ describe('CronEditor', () => {
           />
         );
 
-        const frequencySelect = findTestSubject(component, 'cronFrequencySelect');
-        expect(frequencySelect.text()).toBe('minutedaymonth');
+        const frequencySelect = screen.getByTestId('cronFrequencySelect');
+        expect(frequencySelect).toHaveTextContent('minutedaymonth');
       });
     });
 
     describe('cronExpression', () => {
       it('sets the values of the fields', () => {
-        const component = mountWithI18nProvider(
+        renderWithI18n(
           <CronEditor
             fieldToPreferredValueMap={{}}
             frequency={'YEAR'}
@@ -60,24 +60,24 @@ describe('CronEditor', () => {
           />
         );
 
-        const monthSelect = findTestSubject(component, 'cronFrequencyYearlyMonthSelect');
-        expect(monthSelect.props().value).toBe('2');
+        const monthSelect = screen.getByTestId('cronFrequencyYearlyMonthSelect') as HTMLSelectElement;
+        expect(monthSelect.value).toBe('2');
 
-        const dateSelect = findTestSubject(component, 'cronFrequencyYearlyDateSelect');
-        expect(dateSelect.props().value).toBe('5');
+        const dateSelect = screen.getByTestId('cronFrequencyYearlyDateSelect') as HTMLSelectElement;
+        expect(dateSelect.value).toBe('5');
 
-        const hourSelect = findTestSubject(component, 'cronFrequencyYearlyHourSelect');
-        expect(hourSelect.props().value).toBe('10');
+        const hourSelect = screen.getByTestId('cronFrequencyYearlyHourSelect') as HTMLSelectElement;
+        expect(hourSelect.value).toBe('10');
 
-        const minuteSelect = findTestSubject(component, 'cronFrequencyYearlyMinuteSelect');
-        expect(minuteSelect.props().value).toBe('20');
+        const minuteSelect = screen.getByTestId('cronFrequencyYearlyMinuteSelect') as HTMLSelectElement;
+        expect(minuteSelect.value).toBe('20');
       });
     });
 
     describe('onChange', () => {
       it('is called when the frequency changes', () => {
-        const onChangeSpy = sinon.spy();
-        const component = mountWithI18nProvider(
+        const onChangeSpy = jest.fn();
+        renderWithI18n(
           <CronEditor
             fieldToPreferredValueMap={{}}
             frequency={'YEAR'}
@@ -86,10 +86,10 @@ describe('CronEditor', () => {
           />
         );
 
-        const frequencySelect = findTestSubject(component, 'cronFrequencySelect');
-        frequencySelect.simulate('change', { target: { value: 'MONTH' } });
+        const frequencySelect = screen.getByTestId('cronFrequencySelect');
+        fireEvent.change(frequencySelect, { target: { value: 'MONTH' } });
 
-        sinon.assert.calledWith(onChangeSpy, {
+        expect(onChangeSpy).toHaveBeenCalledWith({
           cronExpression: '0 0 0 1 * ?',
           fieldToPreferredValueMap: {},
           frequency: 'MONTH',
@@ -97,8 +97,8 @@ describe('CronEditor', () => {
       });
 
       it(`is called when a field's value changes`, () => {
-        const onChangeSpy = sinon.spy();
-        const component = mountWithI18nProvider(
+        const onChangeSpy = jest.fn();
+        renderWithI18n(
           <CronEditor
             fieldToPreferredValueMap={{}}
             frequency={'YEAR'}
@@ -107,10 +107,10 @@ describe('CronEditor', () => {
           />
         );
 
-        const minuteSelect = findTestSubject(component, 'cronFrequencyYearlyMinuteSelect');
-        minuteSelect.simulate('change', { target: { value: '40' } });
+        const minuteSelect = screen.getByTestId('cronFrequencyYearlyMinuteSelect');
+        fireEvent.change(minuteSelect, { target: { value: '40' } });
 
-        sinon.assert.calledWith(onChangeSpy, {
+        expect(onChangeSpy).toHaveBeenCalledWith({
           cronExpression: '0 40 * * * ?',
           fieldToPreferredValueMap: { minute: '40' },
           frequency: 'YEAR',

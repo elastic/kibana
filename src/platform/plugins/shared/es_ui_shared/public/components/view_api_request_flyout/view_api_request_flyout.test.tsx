@@ -8,10 +8,11 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
-import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
+import { screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { compressToEncodedURIComponent } from 'lz-string';
+
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { ViewApiRequestFlyout } from './view_api_request_flyout';
 import type { UrlService } from '@kbn/share-plugin/common/url_service';
@@ -46,35 +47,32 @@ const applicationMock = {
 
 describe('ViewApiRequestFlyout', () => {
   test('is rendered', () => {
-    const component = mountWithI18nProvider(<ViewApiRequestFlyout {...payload} />);
-    expect(takeMountedSnapshot(component)).toMatchSnapshot();
+    const { container } = renderWithI18n(<ViewApiRequestFlyout {...payload} />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   describe('props', () => {
     test('on closeFlyout', async () => {
-      const component = mountWithI18nProvider(<ViewApiRequestFlyout {...payload} />);
+      const user = userEvent.setup();
+      renderWithI18n(<ViewApiRequestFlyout {...payload} />);
 
-      await act(async () => {
-        findTestSubject(component, 'apiRequestFlyoutClose').simulate('click');
-      });
+      await user.click(screen.getByTestId('apiRequestFlyoutClose'));
 
-      expect(payload.closeFlyout).toBeCalled();
+      expect(payload.closeFlyout).toHaveBeenCalled();
     });
 
-    test('doesnt have openInConsole when some optional props are not supplied', async () => {
-      const component = mountWithI18nProvider(<ViewApiRequestFlyout {...payload} />);
+    test('doesnt have openInConsole when some optional props are not supplied', () => {
+      renderWithI18n(<ViewApiRequestFlyout {...payload} />);
 
-      const openInConsole = findTestSubject(component, 'apiRequestFlyoutOpenInConsoleButton');
-      expect(openInConsole.length).toEqual(0);
+      expect(screen.queryByTestId('apiRequestFlyoutOpenInConsoleButton')).not.toBeInTheDocument();
 
       // Flyout should *not* be wrapped with RedirectAppLinks
-      const redirectWrapper = findTestSubject(component, 'apiRequestFlyoutRedirectWrapper');
-      expect(redirectWrapper.length).toEqual(0);
+      expect(screen.queryByTestId('apiRequestFlyoutRedirectWrapper')).not.toBeInTheDocument();
     });
 
-    test('has openInConsole when all optional props are supplied', async () => {
+    test('has openInConsole when all optional props are supplied', () => {
       const encodedRequest = compressToEncodedURIComponent(payload.request);
-      const component = mountWithI18nProvider(
+      renderWithI18n(
         <ViewApiRequestFlyout
           {...payload}
           application={applicationMock}
@@ -82,13 +80,12 @@ describe('ViewApiRequestFlyout', () => {
         />
       );
 
-      const openInConsole = findTestSubject(component, 'apiRequestFlyoutOpenInConsoleButton');
-      expect(openInConsole.length).toEqual(1);
-      expect(openInConsole.props().href).toEqual(`devToolsUrl_data:text/plain,${encodedRequest}`);
+      const openInConsole = screen.getByTestId('apiRequestFlyoutOpenInConsoleButton');
+      expect(openInConsole).toBeInTheDocument();
+      expect(openInConsole).toHaveAttribute('href', `devToolsUrl_data:text/plain,${encodedRequest}`);
 
       // Flyout should be wrapped with RedirectAppLinks
-      const redirectWrapper = findTestSubject(component, 'apiRequestFlyoutRedirectWrapper');
-      expect(redirectWrapper.length).toEqual(1);
+      expect(screen.getByTestId('apiRequestFlyoutRedirectWrapper')).toBeInTheDocument();
     });
   });
 });
