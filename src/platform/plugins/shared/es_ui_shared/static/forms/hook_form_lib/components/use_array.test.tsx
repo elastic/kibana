@@ -8,9 +8,10 @@
  */
 
 import React, { useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { registerTestBed } from '../shared_imports';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { useForm } from '../hooks/use_form';
 import { useFormData } from '../hooks/use_form_data';
 import { Form } from './form';
@@ -50,16 +51,13 @@ describe('<UseArray />', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      memoryRouter: { wrapComponent: false },
-    });
+    renderWithI18n(<TestComp />);
 
-    const { find } = setup();
-
-    expect(find('arrayItem').length).toBe(1);
+    expect(screen.getAllByTestId('arrayItem')).toHaveLength(1);
   });
 
   test('it should allow to listen to array item field value change', async () => {
+    const user = userEvent.setup();
     const onFormData = jest.fn();
 
     const TestComp = ({ onData }: { onData: (data: any) => void }) => {
@@ -89,18 +87,9 @@ describe('<UseArray />', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onData: onFormData },
-      memoryRouter: { wrapComponent: false },
-    });
+    renderWithI18n(<TestComp onData={onFormData} />);
 
-    const {
-      form: { setInputValue },
-    } = setup();
-
-    await act(async () => {
-      setInputValue('users[0]Name', 'John');
-    });
+    await user.type(screen.getByTestId('users[0]Name'), 'John');
 
     const formData = onFormData.mock.calls[onFormData.mock.calls.length - 1][0];
 

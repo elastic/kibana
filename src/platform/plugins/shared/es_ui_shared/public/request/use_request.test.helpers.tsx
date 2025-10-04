@@ -8,10 +8,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
-import sinon from 'sinon';
+import { renderHook, act } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 import type { SendRequestConfig, SendRequestResponse } from './send_request';
@@ -22,7 +22,7 @@ export interface UseRequestHelpers {
   advanceTime: (ms: number) => Promise<void>;
   completeRequest: () => Promise<void>;
   hookResult: UseRequestResponse;
-  getSendRequestSpy: () => sinon.SinonStub;
+  getSendRequestSpy: () => jest.MockedFunction<any>;
   setupSuccessRequest: (overrides?: {}, requestTimings?: number[]) => void;
   getSuccessResponse: () => SendRequestResponse;
   setupErrorRequest: (overrides?: {}, requestTimings?: number[]) => void;
@@ -73,81 +73,76 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
     });
   };
 
-  let element: ReactWrapper;
+  let hookRenderer: any;
   // We'll use this object to observe the state of the hook and access its callback(s).
   const hookResult = {} as UseRequestResponse;
-  const sendRequestSpy = sinon.stub();
+  const sendRequestSpy = jest.fn();
 
-  const setupUseRequest = (config: UseRequestConfig, requestTimings?: number[]) => {
-    let requestCount = 0;
-
+  const TestComponent = ({ requestConfig }: { requestConfig: UseRequestConfig }) => {
     const httpClient = {
       post: (path: string, options: HttpFetchOptions) => {
         return new Promise((resolve, reject) => {
-          // Increase the time it takes to resolve a request so we have time to inspect the hook
-          // as it goes through various states.
           setTimeout(() => {
             try {
               resolve(sendRequestSpy(path, options));
             } catch (e) {
               reject(e);
             }
-          }, (requestTimings && requestTimings[requestCount++]) || REQUEST_TIME);
+          }, REQUEST_TIME);
         });
       },
     };
 
-    const TestComponent = ({ requestConfig }: { requestConfig: UseRequestConfig }) => {
-      const { isInitialRequest, isLoading, error, data, resendRequest } = useRequest(
-        httpClient as HttpSetup,
-        requestConfig
-      );
+    const { isInitialRequest, isLoading, error, data, resendRequest } = useRequest(
+      httpClient as HttpSetup,
+      requestConfig
+    );
 
-      // Force a re-render of the component to stress-test the useRequest hook and verify its
-      // state remains unaffected.
-      const [, setState] = useState(false);
-      useEffect(() => {
-        setState(true);
-      }, []);
+    // Force a re-render of the component to stress-test the useRequest hook and verify its
+    // state remains unaffected.
+    const [, setState] = useState(false);
+    useEffect(() => {
+      setState(true);
+    }, []);
 
-      hookResult.isInitialRequest = isInitialRequest;
-      hookResult.isLoading = isLoading;
-      hookResult.error = error;
-      hookResult.data = data;
-      hookResult.resendRequest = resendRequest;
+    hookResult.isInitialRequest = isInitialRequest;
+    hookResult.isLoading = isLoading;
+    hookResult.error = error;
+    hookResult.data = data;
+    hookResult.resendRequest = resendRequest;
 
-      return null;
-    };
+    return null;
+  };
 
+  const setupUseRequest = (config: UseRequestConfig, requestTimings?: number[]) => {
     act(() => {
-      element = mount(<TestComponent requestConfig={config} />);
+      hookRenderer = renderWithI18n(<TestComponent requestConfig={config} />);
     });
   };
 
   // Set up successful request helpers.
   sendRequestSpy
-    .withArgs(
-      successRequest.path,
-      sinon.match({
-        body: JSON.stringify(successRequest.body),
-        query: undefined,
-      })
-    )
-    .resolves(successResponse);
+    .mockImplementation((path: string, options: any) => {
+      if (path === successRequest.path && 
+          JSON.stringify(options.body) === JSON.stringify(successRequest.body)) {
+        return Promise.resolve(successResponse);
+      }
+      if (path === errorRequest.path &&
+          JSON.stringify(options.body) === JSON.stringify(errorRequest.body)) {
+        return Promise.reject(errorResponse);
+      }
+      if (path === errorWithBodyRequest.path &&
+          JSON.stringify(options.body) === JSON.stringify(errorWithBodyRequest.body)) {
+        return Promise.reject(errorWithBodyResponse);
+      }
+      return Promise.resolve(successResponse);
+    });
+
   const setupSuccessRequest = (overrides = {}, requestTimings?: number[]) =>
     setupUseRequest({ ...successRequest, ...overrides }, requestTimings);
   const getSuccessResponse = () => ({ data: successResponse.data, error: null });
 
   // Set up failed request helpers.
-  sendRequestSpy
-    .withArgs(
-      errorRequest.path,
-      sinon.match({
-        body: JSON.stringify(errorRequest.body),
-        query: undefined,
-      })
-    )
-    .rejects(errorResponse);
   const setupErrorRequest = (overrides = {}, requestTimings?: number[]) =>
     setupUseRequest({ ...errorRequest, ...overrides }, requestTimings);
   const getErrorResponse = () => ({
@@ -156,19 +151,10 @@ export const createUseRequestHelpers = (): UseRequestHelpers => {
   });
   // We'll use this to change a success response to an error response, to test how the state changes.
   const setErrorResponse = (overrides = {}) => {
-    element.setProps({ requestConfig: { ...errorRequest, ...overrides } });
+    hookRenderer.rerender(<TestComponent requestConfig={{ ...errorRequest, ...overrides }} />);
   };
 
   // Set up failed request helpers with the alternative error shape.
-  sendRequestSpy
-    .withArgs(
-      errorWithBodyRequest.path,
-      sinon.match({
-        body: JSON.stringify(errorWithBodyRequest.body),
-        query: undefined,
-      })
-    )
-    .rejects(errorWithBodyResponse);
   const setupErrorWithBodyRequest = (overrides = {}) =>
     setupUseRequest({ ...errorWithBodyRequest, ...overrides });
   const getErrorWithBodyResponse = () => ({

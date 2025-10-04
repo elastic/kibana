@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act } from 'react-dom/test-utils';
-import sinon from 'sinon';
+import { act } from '@testing-library/react';
 
 import type { UseRequestHelpers } from './use_request.test.helpers';
 import { REQUEST_TIME, createUseRequestHelpers } from './use_request.test.helpers';
@@ -36,15 +35,15 @@ describe('useRequest hook', () => {
         setupSuccessRequest({ pollIntervalMs: REQUEST_TIME });
 
         await advanceTime(REQUEST_TIME);
-        expect(getSendRequestSpy().callCount).toBe(1);
+        expect(getSendRequestSpy()).toHaveBeenCalledTimes(1);
 
         // We need to advance (1) the pollIntervalMs and (2) the request time.
         await advanceTime(REQUEST_TIME * 2);
-        expect(getSendRequestSpy().callCount).toBe(2);
+        expect(getSendRequestSpy()).toHaveBeenCalledTimes(2);
 
         // We need to advance (1) the pollIntervalMs and (2) the request time.
         await advanceTime(REQUEST_TIME * 2);
-        expect(getSendRequestSpy().callCount).toBe(3);
+        expect(getSendRequestSpy()).toHaveBeenCalledTimes(3);
       });
     });
 
@@ -64,13 +63,13 @@ describe('useRequest hook', () => {
       it('is called with the response once the request resolves', async () => {
         const { setupSuccessRequest, completeRequest, getSuccessResponse } = helpers;
 
-        const deserializer = sinon.stub();
+        const deserializer = jest.fn();
         setupSuccessRequest({ deserializer });
-        sinon.assert.notCalled(deserializer);
+        expect(deserializer).not.toHaveBeenCalled();
         await completeRequest();
 
-        sinon.assert.calledOnce(deserializer);
-        sinon.assert.calledWith(deserializer, getSuccessResponse().data);
+        expect(deserializer).toHaveBeenCalledTimes(1);
+        expect(deserializer).toHaveBeenCalledWith(getSuccessResponse().data);
       });
 
       it('provides the data return value', async () => {
@@ -205,13 +204,13 @@ describe('useRequest hook', () => {
         setupSuccessRequest();
 
         await completeRequest();
-        expect(getSendRequestSpy().callCount).toBe(1);
+        expect(getSendRequestSpy().mock.calls.length).toBe(1);
 
         await act(async () => {
           hookResult.resendRequest();
           await completeRequest();
         });
-        expect(getSendRequestSpy().callCount).toBe(2);
+        expect(getSendRequestSpy().mock.calls.length).toBe(2);
       });
 
       it('resets the pollIntervalMs', async () => {
@@ -221,14 +220,14 @@ describe('useRequest hook', () => {
 
         // The initial request resolves, and then we'll immediately send a new one manually...
         await advanceTime(REQUEST_TIME);
-        expect(getSendRequestSpy().callCount).toBe(1);
+        expect(getSendRequestSpy().mock.calls.length).toBe(1);
         act(() => {
           hookResult.resendRequest();
         });
 
         // The manual request resolves, and we'll send yet another one...
         await advanceTime(REQUEST_TIME);
-        expect(getSendRequestSpy().callCount).toBe(2);
+        expect(getSendRequestSpy().mock.calls.length).toBe(2);
         act(() => {
           hookResult.resendRequest();
         });
@@ -236,7 +235,7 @@ describe('useRequest hook', () => {
         // At this point, we've moved forward 3s. The poll is set at 2s. If resendRequest didn't
         // reset the poll, the request call count would be 4, not 3.
         await advanceTime(REQUEST_TIME);
-        expect(getSendRequestSpy().callCount).toBe(3);
+        expect(getSendRequestSpy().mock.calls.length).toBe(3);
       });
     });
   });
@@ -262,7 +261,7 @@ describe('useRequest hook', () => {
       await completeRequest();
 
       // Two requests were sent...
-      expect(getSendRequestSpy().callCount).toBe(2);
+      expect(getSendRequestSpy().mock.calls.length).toBe(2);
       // ...but the error response is the one that takes precedence because it was *sent* more
       // recently, despite the success response *returning* more recently.
       expect(hookResult.error).toBe(getErrorResponse().error);
@@ -277,7 +276,7 @@ describe('useRequest hook', () => {
 
       // Before the original request resolves, we make a manual resendRequest call.
       await advanceTime(HALF_REQUEST_TIME);
-      expect(getSendRequestSpy().callCount).toBe(0);
+      expect(getSendRequestSpy().mock.calls.length).toBe(0);
       act(() => {
         hookResult.resendRequest();
       });
@@ -285,7 +284,7 @@ describe('useRequest hook', () => {
       // The original quest resolves but it's been marked as outdated by the the manual resendRequest
       // call "interrupts", so data is left undefined.
       await advanceTime(HALF_REQUEST_TIME);
-      expect(getSendRequestSpy().callCount).toBe(1);
+      expect(getSendRequestSpy().mock.calls.length).toBe(1);
       expect(hookResult.data).toBeUndefined();
     });
 
@@ -303,7 +302,7 @@ describe('useRequest hook', () => {
 
       // Complete scheduled poll request.
       await completeRequest();
-      expect(getSendRequestSpy().callCount).toBe(2);
+      expect(getSendRequestSpy().mock.calls.length).toBe(2);
     });
 
     it(`changing pollIntervalMs to undefined cancels the poll`, async () => {
@@ -321,7 +320,7 @@ describe('useRequest hook', () => {
       await completeRequest();
 
       // But because we canceled the poll, we only see 1 request instead of 2.
-      expect(getSendRequestSpy().callCount).toBe(1);
+      expect(getSendRequestSpy().mock.calls.length).toBe(1);
     });
 
     it('when the path changes after a request is scheduled, the scheduled request is sent with that path', async () => {
@@ -348,7 +347,7 @@ describe('useRequest hook', () => {
 
       // If the scheduled poll request was sent to the success path, we wouldn't have an error result.
       // But we do, because it was sent to the error path.
-      expect(getSendRequestSpy().callCount).toBe(3);
+      expect(getSendRequestSpy().mock.calls.length).toBe(3);
       expect(hookResult.error).toBe(getErrorResponse().error);
     });
   });
