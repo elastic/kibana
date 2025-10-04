@@ -10,8 +10,10 @@
 import React from 'react';
 import { merge } from 'lodash';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { AsyncTestBedConfig, TestBed } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
+import { MemoryRouter } from '@kbn/shared-ux-router';
+
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { AppContextProvider } from '../management_app/management_context';
 import { ManagementLandingPage } from './landing';
@@ -31,159 +33,119 @@ const sectionsMock = [
   },
 ];
 
-const testBedConfig: AsyncTestBedConfig = {
-  memoryRouter: {
-    initialEntries: [`/management_landing`],
-    componentRoutePath: '/management_landing',
-  },
-  doMountAsync: true,
-};
+const renderLandingPage = (overrides?: Record<string, unknown>) => {
+  const contextDependencies = {
+    appBasePath: 'http://localhost:9001',
+    kibanaVersion: '8.10.0',
+    cardsNavigationConfig: { enabled: true },
+    sections: sectionsMock,
+    chromeStyle: 'classic',
+  };
 
-export const WithAppDependencies =
-  (Comp: any, overrides: Record<string, unknown> = {}) =>
-  (props: Record<string, unknown>) => {
-    const contextDependencies = {
-      appBasePath: 'http://localhost:9001',
-      kibanaVersion: '8.10.0',
-      cardsNavigationConfig: { enabled: true },
-      sections: sectionsMock,
-      chromeStyle: 'classic',
-    };
-
-    return (
-      // @ts-ignore
+  const Comp = () => (
+    <MemoryRouter initialEntries={['/management_landing']}>
       <AppContextProvider value={merge(contextDependencies, overrides)}>
-        <Comp {...props} setBreadcrumbs={jest.fn()} onAppMounted={jest.fn()} />
+        <ManagementLandingPage setBreadcrumbs={jest.fn()} onAppMounted={jest.fn()} />
       </AppContextProvider>
-    );
-  };
-
-export const setupLandingPage = async (overrides?: Record<string, unknown>): Promise<TestBed> => {
-  const initTestBed = registerTestBed(
-    WithAppDependencies(ManagementLandingPage, overrides),
-    testBedConfig
+    </MemoryRouter>
   );
-  const testBed = await initTestBed();
 
-  return {
-    ...testBed,
-  };
+  return renderWithI18n(<Comp />);
 };
 
 describe('Landing Page', () => {
-  let testBed: TestBed;
-
   describe('Can be configured through cardsNavigationConfig', () => {
-    beforeEach(async () => {
-      testBed = await setupLandingPage();
+    test('Shows cards navigation when feature is enabled', () => {
+      renderLandingPage();
+      expect(screen.getByTestId('cards-navigation-page')).toBeInTheDocument();
     });
 
-    test('Shows cards navigation when feature is enabled', async () => {
-      const { exists } = testBed;
-      expect(exists('cards-navigation-page')).toBe(true);
-    });
+    test('Hide cards navigation when feature is disabled', () => {
+      renderLandingPage({ cardsNavigationConfig: { enabled: false } });
 
-    test('Hide cards navigation when feature is disabled', async () => {
-      testBed = await setupLandingPage({ cardsNavigationConfig: { enabled: false } });
-      const { exists } = testBed;
-
-      expect(exists('cards-navigation-page')).toBe(false);
-      expect(exists('managementHome')).toBe(true);
+      expect(screen.queryByTestId('cards-navigation-page')).not.toBeInTheDocument();
+      expect(screen.getByTestId('managementHome')).toBeInTheDocument();
     });
   });
 
   describe('Empty prompt', () => {
-    test('Renders the default empty prompt when chromeStyle is "classic"', async () => {
-      testBed = await setupLandingPage({
+    test('Renders the default empty prompt when chromeStyle is "classic"', () => {
+      renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
       });
 
-      const { exists } = testBed;
-
-      expect(exists('managementHome')).toBe(true);
+      expect(screen.getByTestId('managementHome')).toBeInTheDocument();
     });
 
-    test('Renders the solution empty prompt when chromeStyle is "project"', async () => {
+    test('Renders the solution empty prompt when chromeStyle is "project"', () => {
       const coreStart = coreMock.createStart();
 
-      testBed = await setupLandingPage({
+      renderLandingPage({
         chromeStyle: 'project',
         cardsNavigationConfig: { enabled: false },
         coreStart,
       });
 
-      const { exists } = testBed;
-
-      expect(exists('managementHome')).toBe(false);
-      expect(exists('managementHomeSolution')).toBe(true);
+      expect(screen.queryByTestId('managementHome')).not.toBeInTheDocument();
+      expect(screen.getByTestId('managementHomeSolution')).toBeInTheDocument();
     });
   });
 
   describe('AutoOps Promotion Callout', () => {
-    test('Shows AutoOps callout when not in cloud and has enterprise license', async () => {
-      testBed = await setupLandingPage({
+    test('Shows AutoOps callout when not in cloud and has enterprise license', () => {
+      renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
         cloud: { isCloudEnabled: false },
         hasEnterpriseLicense: true,
       });
 
-      const { exists } = testBed;
-
-      expect(exists('autoOpsPromotionCallout')).toBe(true);
+      expect(screen.getByTestId('autoOpsPromotionCallout')).toBeInTheDocument();
     });
 
-    test('Hides AutoOps callout when in cloud environment', async () => {
-      testBed = await setupLandingPage({
+    test('Hides AutoOps callout when in cloud environment', () => {
+      renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
         cloud: { isCloudEnabled: true },
         hasEnterpriseLicense: true,
       });
 
-      const { exists } = testBed;
-
-      expect(exists('autoOpsPromotionCallout')).toBe(false);
+      expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
     });
 
-    test('Hides AutoOps callout when not having enterprise license', async () => {
-      testBed = await setupLandingPage({
+    test('Hides AutoOps callout when not having enterprise license', () => {
+      renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
         cloud: { isCloudEnabled: false },
         hasEnterpriseLicense: false,
       });
 
-      const { exists } = testBed;
-
-      expect(exists('autoOpsPromotionCallout')).toBe(false);
+      expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
     });
 
-    test('Hides AutoOps callout when in cloud and without enterprise license', async () => {
-      testBed = await setupLandingPage({
+    test('Hides AutoOps callout when in cloud and without enterprise license', () => {
+      renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
         cloud: { isCloudEnabled: true },
         hasEnterpriseLicense: false,
       });
 
-      const { exists } = testBed;
-
-      expect(exists('autoOpsPromotionCallout')).toBe(false);
+      expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
     });
 
-    test('Shows AutoOps callout when cloud service is not available but has enterprise license', async () => {
-      testBed = await setupLandingPage({
+    test('Shows AutoOps callout when cloud service is not available but has enterprise license', () => {
+      renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
         hasEnterpriseLicense: true,
         // cloud service not provided - defaults to isCloudEnabled: false
       });
 
-      const { exists } = testBed;
-
-      expect(exists('autoOpsPromotionCallout')).toBe(true);
+      expect(screen.getByTestId('autoOpsPromotionCallout')).toBeInTheDocument();
     });
   });
 });
