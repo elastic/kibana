@@ -8,6 +8,7 @@
  */
 
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { Form, UseField } from '../components';
@@ -18,11 +19,14 @@ import type { FieldHook, FieldValidateResponse, FieldConfig } from '..';
 import { VALIDATION_TYPES } from '..';
 
 describe('useField() hook', () => {
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.useRealTimers();
   });
 
@@ -180,14 +184,10 @@ describe('useField() hook', () => {
         }
       );
 
-      const wrapper = registerTestBed(TestForm, {
-        memoryRouter: { wrapComponent: false },
-      })({ showField1: true, showField2: true });
+      const { rerender } = renderWithI18n(<TestForm showField1={true} showField2={true} />);
       expect(field2ValidatorFn).toBeCalledTimes(0);
 
-      await act(async () => {
-        wrapper.setProps({ showField1: false });
-      });
+      rerender(<TestForm showField1={false} showField2={true} />);
       expect(field2ValidatorFn).toBeCalledTimes(1);
     });
   });
