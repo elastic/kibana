@@ -10,7 +10,7 @@
 import React, { useState, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed } from '../shared_imports';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { useForm } from './use_form';
 import { useFormIsModified } from './use_form_is_modified';
 import { Form } from '../components/form';
@@ -67,7 +67,7 @@ describe('useFormIsModified()', () => {
   const isFormModified = () =>
     onIsModifiedChange.mock.calls[onIsModifiedChange.mock.calls.length - 1][0];
 
-  const setup = registerTestBed(TestComp, {
+  renderWithI18n(TestComp, {
     defaultProps: { onIsModifiedChange },
     memoryRouter: { wrapComponent: false },
   });

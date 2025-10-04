@@ -9,11 +9,11 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { first } from 'rxjs';
 
-import type { TestBed } from '../shared_imports';
-import { registerTestBed } from '../shared_imports';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { FormHook, OnUpdateHandler, FieldConfig, FieldHook } from '../types';
 import { useForm } from '../hooks/use_form';
 import { useBehaviorSubject } from '../hooks/utils/use_behavior_subject';

@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 
-import { registerTestBed } from '../shared_imports';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { FieldHook } from '../types';
 import { useForm } from '../hooks/use_form';
 import { Form } from './form';

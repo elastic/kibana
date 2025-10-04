@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import type { TestBed } from '../shared_imports';
-import { registerTestBed, getRandomString } from '../shared_imports';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { emptyField } from '../../helpers/field_validators';
 import { ComboBoxField } from '../../components';
 import { Form, UseField, UseArray } from '../components';
@@ -72,7 +72,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
+      renderWithI18n(TestComp, {
         defaultProps: { onData: onFormData },
         memoryRouter: { wrapComponent: false },
       });
@@ -110,7 +110,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
+      renderWithI18n(TestComp, {
         defaultProps: { onData: onFormData },
         memoryRouter: { wrapComponent: false },
       });
@@ -169,7 +169,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
+      renderWithI18n(TestComp, {
         defaultProps: { onForm: onFormHook },
         memoryRouter: { wrapComponent: false },
       });
@@ -242,7 +242,7 @@ describe('useForm() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
+      renderWithI18n(TestComp, {
         defaultProps: { onData: onFormData },
         memoryRouter: { wrapComponent: false },
       });
@@ -400,7 +400,7 @@ describe('useForm() hook', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
+    renderWithI18n(TestComp, {
       defaultProps: { onForm: onFormHook },
       memoryRouter: { wrapComponent: false },
     });

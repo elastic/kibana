@@ -11,7 +11,7 @@ import React, { useEffect, useRef } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import type { TestBed } from '../shared_imports';
-import { registerTestBed } from '../shared_imports';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { Form, UseField } from '../components';
 import { useForm } from './use_form';
 import type { HookReturn } from './use_form_data';
@@ -74,7 +74,7 @@ describe('useFormData() hook', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
+    renderWithI18n(TestComp, {
       memoryRouter: { wrapComponent: false },
     });
 
@@ -123,7 +123,7 @@ describe('useFormData() hook', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
+    renderWithI18n(TestComp, {
       memoryRouter: { wrapComponent: false },
     });
 
@@ -168,7 +168,7 @@ describe('useFormData() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
+      renderWithI18n(TestComp, {
         memoryRouter: { wrapComponent: false },
       });
 
@@ -217,7 +217,7 @@ describe('useFormData() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
+      renderWithI18n(TestComp, {
         memoryRouter: { wrapComponent: false },
       });
 
@@ -273,7 +273,7 @@ describe('useFormData() hook', () => {
         );
       };
 
-      const setup = registerTestBed(TestComp, {
+      renderWithI18n(TestComp, {
         memoryRouter: { wrapComponent: false },
       });
 
