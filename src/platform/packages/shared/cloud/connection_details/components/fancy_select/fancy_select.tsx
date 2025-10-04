@@ -21,9 +21,12 @@ export interface FancySelectProps {
 export const FancySelect: React.FC<FancySelectProps> = ({ value, options, onChange }) => {
   return (
     <EuiSuperSelect
-      aria-label={i18n.translate('fancySelect.superSelect.ariaLabel', {
-        defaultMessage: 'Fancy options',
-      })}
+      aria-label={i18n.translate(
+        'cloud.connectionDetails.components.fancySelect.superSelect.ariaLabel',
+        {
+          defaultMessage: 'Fancy options',
+        }
+      )}
       valueOfSelected={value}
       options={options.map((option) => ({
         value: option.id,
