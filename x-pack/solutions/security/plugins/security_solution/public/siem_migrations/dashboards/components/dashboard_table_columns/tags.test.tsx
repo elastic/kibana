@@ -15,7 +15,7 @@ describe('createTagsColumn', () => {
       align: 'left',
       field: 'original_dashboard.splunk_properties',
       name: expect.anything(),
-      render: expect.anything(),
+      render: expect.any(Function),
       sortable: false,
       truncateText: true,
       width: '20%',

@@ -24,7 +24,7 @@ describe('createActionsColumn', () => {
       align: 'left',
       field: 'elastic_dashboard',
       name: expect.anything(),
-      render: expect.anything(),
+      render: expect.any(Function),
     });
   });
 });

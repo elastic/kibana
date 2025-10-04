@@ -15,7 +15,7 @@ describe('createUpdatedColumn', () => {
       align: 'left',
       field: 'original_dashboard.last_updated',
       name: expect.anything(),
-      render: expect.anything(),
+      render: expect.any(Function),
       sortable: true,
       truncateText: true,
       width: '15%',

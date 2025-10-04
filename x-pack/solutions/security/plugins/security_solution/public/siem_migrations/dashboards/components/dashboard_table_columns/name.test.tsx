@@ -15,7 +15,7 @@ describe('createNameColumn', () => {
       align: 'left',
       field: 'elastic_dashboard.title',
       name: 'Name',
-      render: expect.anything(),
+      render: expect.any(Function),
       sortable: true,
       truncateText: true,
       width: '50%',

@@ -15,7 +15,7 @@ describe('createStatusColumn', () => {
       align: 'left',
       field: 'translation_result',
       name: expect.anything(),
-      render: expect.anything(),
+      render: expect.any(Function),
       sortable: true,
       truncateText: true,
       width: '15%',
