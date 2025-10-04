@@ -70,5 +70,26 @@ export const MonitoredUserDoc = MonitoredUserUpdateDoc.merge(
       })
       .optional(),
     '@timestamp': z.string().datetime().optional(),
+    user: z
+      .object({
+        name: z.string().optional(),
+        /**
+         * Indicates if the user is privileged.
+         */
+        is_privileged: z.boolean().optional(),
+        entity: z
+          .object({
+            attributes: z
+              .object({
+                /**
+                 * Indicates if the user is privileged.
+                 */
+                Privileged: z.boolean().optional(),
+              })
+              .optional(),
+          })
+          .optional(),
+      })
+      .optional(),
   })
 );
