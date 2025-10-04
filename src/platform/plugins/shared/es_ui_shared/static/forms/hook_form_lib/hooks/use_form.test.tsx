@@ -657,22 +657,17 @@ describe('useForm() hook', () => {
         );
       };
 
-      const {
-        form: { setInputValue },
-      } = renderWithI18n(<TestComp />) as TestBed;
+      renderWithI18n(<TestComp />);
 
       let errors: string[] = formHook!.getErrors();
       expect(errors).toEqual([]);
 
-      await act(async () => {
-        const submitPromise = formHook!.submit();
-        jest.advanceTimersByTime(0);
-        await submitPromise;
-      });
+      const submitPromise = formHook!.submit();
+      await submitPromise;
       errors = formHook!.getErrors();
       expect(errors).toEqual(['Field1 can not be empty']);
 
-      await setInputValue('field2', 'bad');
+      await user.type(screen.getByTestId('field2'), 'bad');
       errors = formHook!.getErrors();
       expect(errors).toEqual(['Field1 can not be empty', 'Field2 is invalid']);
     });

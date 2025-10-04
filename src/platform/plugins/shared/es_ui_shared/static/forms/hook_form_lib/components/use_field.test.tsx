@@ -21,11 +21,14 @@ import { Form } from './form';
 import { UseField } from './use_field';
 
 describe('<UseField />', () => {
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+  const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.useRealTimers();
   });
 
