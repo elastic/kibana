@@ -32,7 +32,7 @@ export function validateLiquidTemplate(yamlString: string): YamlValidationResult
     return [];
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
-    // * Extract error position, by default liquid returns the start of the line of the error message
+    // Extract error position, by default liquid returns the start of the line of the error message
     const position = extractLiquidErrorPosition(yamlString, errorMessage);
     // customer-facing error message without the default line number and column number
     const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
