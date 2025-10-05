@@ -93,9 +93,7 @@ describe('savedObjectToItem', () => {
           syncTooltips: false,
           syncCursor: false,
         },
-        kibanaSavedObjectMeta: {
-          searchSource: { query: { query: 'test', language: 'KQL' } },
-        },
+        query: { query: 'test', language: 'KQL' },
       },
     });
   });
@@ -120,7 +118,6 @@ describe('savedObjectToItem', () => {
         timeRestore: false,
         panels: [],
         options: DEFAULT_DASHBOARD_OPTIONS,
-        kibanaSavedObjectMeta: {},
       },
     });
   });

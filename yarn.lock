@@ -5908,10 +5908,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-eui-a11y@link:packages/kbn-eslint-plugin-eui-a11y":
-  version "0.0.0"
-  uid ""
-
 "@kbn/eslint-plugin-i18n@link:packages/kbn-eslint-plugin-i18n":
   version "0.0.0"
   uid ""
@@ -6105,6 +6101,10 @@
   uid ""
 
 "@kbn/fec-alerts-test-plugin@link:x-pack/platform/test/functional_execution_context/plugins/alerts":
+  version "0.0.0"
+  uid ""
+
+"@kbn/field-formats-common@link:src/platform/packages/shared/kbn-field-formats-common":
   version "0.0.0"
   uid ""
 
@@ -7065,10 +7065,6 @@
   uid ""
 
 "@kbn/paertial-results-example-plugin@link:examples/partial_results_example":
-  version "0.0.0"
-  uid ""
-
-"@kbn/page-attachment-schema@link:x-pack/platform/packages/shared/kbn-page-attachment-schema":
   version "0.0.0"
   uid ""
 
@@ -8697,10 +8693,6 @@
   uid ""
 
 "@kbn/workflows-management-plugin@link:src/platform/plugins/shared/workflows_management":
-  version "0.0.0"
-  uid ""
-
-"@kbn/workflows-plugin-example@link:examples/workflows":
   version "0.0.0"
   uid ""
 

@@ -33,6 +33,7 @@ export function getSessionServiceMock(
     clear: jest.fn(),
     start: jest.fn(),
     restore: jest.fn(),
+    reset: jest.fn(),
     getSessionId: jest.fn(),
     getSession$: jest.fn(() => new BehaviorSubject(undefined).asObservable()),
     state$: new BehaviorSubject<SearchSessionState>(SearchSessionState.None).asObservable(),
