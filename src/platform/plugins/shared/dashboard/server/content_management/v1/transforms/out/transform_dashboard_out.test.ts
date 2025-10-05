@@ -73,7 +73,6 @@ describe('transformDashboardOut', () => {
         ],
       },
       description: 'my description',
-      kibanaSavedObjectMeta: {},
       options: {
         ...DEFAULT_DASHBOARD_OPTIONS,
         hidePanelTitles: false,
@@ -171,9 +170,7 @@ describe('transformDashboardOut', () => {
         ],
       },
       description: 'description',
-      kibanaSavedObjectMeta: {
-        searchSource: { query: { query: 'test', language: 'KQL' } },
-      },
+      query: { query: 'test', language: 'KQL' },
       options: {
         hidePanelTitles: true,
         useMargins: false,
