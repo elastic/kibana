@@ -69,11 +69,6 @@ export interface UseGenericPopoverProps {
    * Popover test subject ID
    */
   popoverTestSubj: string;
-
-  /**
-   * Limit for visible items before showing popover
-   */
-  visibleLimit: number;
 }
 
 export const useNodeDetailsPopover = ({
@@ -82,7 +77,6 @@ export const useNodeDetailsPopover = ({
   contentTestSubj,
   itemTestSubj,
   popoverTestSubj,
-  visibleLimit,
 }: UseGenericPopoverProps): UseNodeDetailsPopoverReturn => {
   const { id, state, actions } = useGraphPopover(popoverId);
 
@@ -120,7 +114,7 @@ export const useNodeDetailsPopover = ({
       panelStyle={{ maxHeight: '336px', overflowY: 'auto' }}
       data-test-subj={popoverTestSubj}
     >
-      {items.length > visibleLimit ? popoverContent : null}
+      {popoverContent}
     </GraphPopover>
   ));
 
