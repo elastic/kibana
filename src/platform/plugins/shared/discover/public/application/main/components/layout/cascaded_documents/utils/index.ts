@@ -14,16 +14,20 @@ import {
   Builder,
   EsqlQuery,
   isColumn,
+  isOptionNode,
+  isFunctionExpression,
   mutate,
+  synth,
   type ESQLCommand,
   type ESQLFunction,
   type ESQLAstItem,
+  type ESQLCommandOption,
+  type ESQLColumn,
 } from '@kbn/esql-ast';
 import type {
   StatsCommandSummary,
   StatsFieldSummary,
 } from '@kbn/esql-ast/src/mutate/commands/stats';
-import { type ESQLColumn, isESQLFunction } from '@kbn/esql-ast/src/types';
 
 type NodeType = 'group' | 'leaf';
 
@@ -44,18 +48,17 @@ export interface ESQLStatsQueryMeta {
   appliedFunctions: AppliedStatsFunction[];
 }
 
-export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
-  const groupByFields: ESQLStatsQueryMeta['groupByFields'] = [];
-  const appliedFunctions: ESQLStatsQueryMeta['appliedFunctions'] = [];
-
-  const esqlQuery = EsqlQuery.fromSrc(queryString);
+function getStatsCommandToOperateOn(esqlQuery: EsqlQuery): StatsCommandSummary | null {
+  let summarizedStatsCommand: StatsCommandSummary | null = null;
 
   const statsCommands = Array.from(mutate.commands.stats.list(esqlQuery.ast));
 
-  let summarizedStatsCommand: StatsCommandSummary | null = null;
+  if (statsCommands.length === 0) {
+    return summarizedStatsCommand;
+  }
 
-  // we always want to operate on the last stats command that has valid grouping options,
-  // but allow for the possibility of multiple stats commands in the query
+  // accounting for the possibility of multiple stats commands in the query,
+  // we always want to operate on the last stats command that has valid grouping options
   for (let i = statsCommands.length - 1; i >= 0; i--) {
     summarizedStatsCommand = mutate.commands.stats.summarizeCommand(esqlQuery, statsCommands[i]);
 
@@ -63,6 +66,17 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       break;
     }
   }
+
+  return summarizedStatsCommand;
+}
+
+export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta => {
+  const groupByFields: ESQLStatsQueryMeta['groupByFields'] = [];
+  const appliedFunctions: ESQLStatsQueryMeta['appliedFunctions'] = [];
+
+  const esqlQuery = EsqlQuery.fromSrc(queryString);
+
+  const summarizedStatsCommand = getStatsCommandToOperateOn(esqlQuery);
 
   if (!summarizedStatsCommand) {
     return { groupByFields, appliedFunctions };
@@ -89,7 +103,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       return { groupByFields: [], appliedFunctions: [] };
     }
 
-    if (isESQLFunction(group.definition)) {
+    if (isFunctionExpression(group.definition)) {
       const functionName = group.definition.name;
       if (!supportedStatsFunctions.has(functionName)) {
         continue;
@@ -152,46 +166,26 @@ CascadeQueryArgs): AggregateQuery => {
     throw new Error('Query does not have a data source');
   }
 
-  const statsCommands = Array.from(mutate.commands.stats.list(EditorESQLQuery.ast));
+  const summarizedStatsCommand = getStatsCommandToOperateOn(EditorESQLQuery);
 
-  if (statsCommands.length === 0) {
-    throw new Error(`Query does not include a "stats" command`);
+  if (!summarizedStatsCommand) {
+    throw new Error('Query does not have a valid stats command with grouping options');
   }
-
-  let statsCommandToOperateOn: StatsCommand | null = null;
-
-  // accounting for the possibility of multiple stats commands in the query,
-  // we always want to operate on the last stats command that has valid grouping options
-  for (let i = statsCommands.length - 1; i >= 0; i--) {
-    const { grouping } = mutate.commands.stats.summarizeCommand(EditorESQLQuery, statsCommands[i]);
-
-    if (grouping && Object.keys(grouping).length) {
-      statsCommandToOperateOn = statsCommands[i] as StatsCommand;
-      break;
-    }
-  }
-
-  if (!statsCommandToOperateOn) {
-    throw new Error(`No valid "stats" command was found in the query`);
-  }
-
-  const { grouping } = mutate.commands.stats.summarizeCommand(
-    EditorESQLQuery,
-    statsCommandToOperateOn
-  );
 
   if (nodeType === 'leaf') {
     const pathSegment = nodePath[nodePath.length - 1];
 
-    // when column name is not assigned, one is created automatically that includes backticks
-    const groupValue = grouping[pathSegment] ?? grouping[`\`${pathSegment}\``];
+    const groupValue =
+      summarizedStatsCommand.grouping[pathSegment] ??
+      // when a column name is not assigned, one is created automatically that includes backticks
+      summarizedStatsCommand.grouping[`\`${pathSegment}\``];
     const isOperable = groupValue && nodePathMap[pathSegment];
 
     if (isOperable && isColumn(groupValue.definition)) {
       return handleStatsByColumnLeafOperation(dataSourceCommand, {
         [pathSegment]: nodePathMap[pathSegment],
       });
-    } else if (isOperable && isESQLFunction(groupValue.definition)) {
+    } else if (isOperable && isFunctionExpression(groupValue.definition)) {
       switch (groupValue.definition.name) {
         case 'categorize': {
           return handleStatsByCategorizeLeafOperation(dataSourceCommand, groupValue, nodePathMap);
@@ -294,5 +288,101 @@ function handleStatsByCategorizeLeafOperation(
 
   return {
     esql: BasicPrettyPrinter.print(cascadeOperationQuery.ast),
+  };
+}
+
+/**
+ * Modifies the provided ESQL query to only include the specified columns in the stats by option.
+ */
+export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]) {
+  const EditorESQLQuery = EsqlQuery.fromSrc(query.esql);
+
+  const dataSourceCommand = mutate.generic.commands.find(
+    EditorESQLQuery.ast,
+    (cmd) => cmd.name === 'from'
+  ) as ESQLCommand<'from'> | undefined;
+
+  if (!dataSourceCommand) {
+    throw new Error('Query does not have a data source');
+  }
+
+  const statsCommands = Array.from(mutate.commands.stats.list(EditorESQLQuery.ast));
+
+  if (statsCommands.length === 0) {
+    throw new Error(`Query does not include a "stats" command`);
+  }
+
+  let statsCommandToOperateOn: StatsCommand | null = null;
+  let statsCommandToOperateOnGrouping: StatsCommandSummary['grouping'] | null = null;
+
+  // accounting for the possibility of multiple stats commands in the query,
+  // we always want to operate on the last stats command that has valid grouping options
+  for (let i = statsCommands.length - 1; i >= 0; i--) {
+    ({ grouping: statsCommandToOperateOnGrouping } = mutate.commands.stats.summarizeCommand(
+      EditorESQLQuery,
+      statsCommands[i]
+    ));
+
+    if (statsCommandToOperateOnGrouping && Object.keys(statsCommandToOperateOnGrouping).length) {
+      statsCommandToOperateOn = statsCommands[i] as StatsCommand;
+      break;
+    }
+  }
+
+  if (!statsCommandToOperateOn) {
+    throw new Error(`No valid "stats" command was found in the query`);
+  }
+
+  const isValidPick = pick.every(
+    (col) =>
+      Object.keys(statsCommandToOperateOnGrouping!).includes(col) ||
+      Object.keys(statsCommandToOperateOnGrouping!).includes(`\`${col}\``)
+  );
+
+  if (!isValidPick) {
+    // nothing to do, return query as is
+    return {
+      esql: BasicPrettyPrinter.print(EditorESQLQuery.ast),
+    };
+  }
+
+  // Create a modified stats command with only the specified column as args for the "by" option
+  const modifiedStatsCommand = Builder.command({
+    name: 'stats',
+    args: statsCommandToOperateOn.args.map((statsCommandArg) => {
+      if (isOptionNode(statsCommandArg) && statsCommandArg.name === 'by') {
+        return Builder.option({
+          name: statsCommandArg.name,
+          args: statsCommandArg.args.reduce<Array<ESQLAstItem>>((acc, cur) => {
+            if (isColumn(cur) && pick.includes(removeBackticks(cur.name))) {
+              acc.push(
+                Builder.expression.column({
+                  args: [Builder.identifier({ name: cur.name })],
+                })
+              );
+            }
+            return acc;
+          }, []),
+        });
+      }
+
+      // leverage synth to clone the rest of the args since we want to use as is
+      return synth.exp((statsCommandArg as ESQLCommandOption).text, { withFormatting: false });
+    }),
+  });
+
+  // Get the position of the original stats command
+  const statsCommandIndex = EditorESQLQuery.ast.commands.findIndex(
+    (cmd) => cmd === statsCommandToOperateOn
+  );
+
+  // remove stats command
+  mutate.generic.commands.remove(EditorESQLQuery.ast, statsCommandToOperateOn);
+
+  // insert modified stats command at same position previous one was at
+  mutate.generic.commands.insert(EditorESQLQuery.ast, modifiedStatsCommand, statsCommandIndex);
+
+  return {
+    esql: BasicPrettyPrinter.print(EditorESQLQuery.ast),
   };
 }

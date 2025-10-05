@@ -8,7 +8,7 @@
  */
 
 import type { AggregateQuery } from '@kbn/es-query';
-import { getESQLStatsQueryMeta, constructCascadeQuery } from '.';
+import { getESQLStatsQueryMeta, constructCascadeQuery, mutateQueryStatsGrouping } from '.';
 
 describe('utils', () => {
   describe('getESQLStatsQueryMeta', () => {
@@ -115,90 +115,37 @@ describe('utils', () => {
   });
 
   describe('constructCascadeQuery', () => {
-    describe('query with single stats command', () => {
-      describe('column options', () => {
-        describe.skip('group queries', () => {
-          it('returns the query without a limit when a group query is requested but there is only one column specified for the stats by option?', () => {
-            const editorQuery: AggregateQuery = {
-              esql: `
-                FROM kibana_sample_data_logs
-                | STATS COUNT() BY clientip
-                | LIMIT 100
-              `,
-            };
+    describe('column options', () => {
+      describe('leaf queries', () => {
+        const nodeType = 'leaf';
 
-            const nodeType = 'group';
-            const nodePath = ['clientip'];
-            const nodePathMap = { clientip: '192.168.1.1' };
-
-            const cascadeQuery = constructCascadeQuery({
-              query: editorQuery,
-              nodeType,
-              nodePath,
-              nodePathMap,
-            });
-
-            expect(cascadeQuery.esql).toEqual(
-              'FROM kibana_sample_data_logs | STATS COUNT() BY clientip'
-            );
-          });
-
-          it('returns a valid group query, when one is requested in an instance where the editor query has multiple columns specified for the stats by option', () => {
-            const editorQuery: AggregateQuery = {
-              esql: `
-                FROM kibana_sample_data_logs
-                | STATS COUNT() BY clientip, url.keyword
-                | LIMIT 100
-              `,
-            };
-
-            const nodeType = 'group';
-            const nodePath = ['clientip', 'url.keyword'];
-            const nodePathMap = { clientip: '192.168.1.1' };
-
-            const cascadeQuery = constructCascadeQuery({
-              query: editorQuery,
-              nodeType,
-              nodePath,
-              nodePathMap,
-            });
-
-            expect(cascadeQuery.esql).toEqual(
-              'FROM kibana_sample_data_logs | WHERE clientip == "192.168.1.1" | STATS COUNT() BY url.keyword'
-            );
-          });
-        });
-
-        describe('leaf queries', () => {
-          const nodeType = 'leaf';
-
-          it('should construct a valid cascade leaf query for a query with just one column', () => {
-            const editorQuery: AggregateQuery = {
-              esql: `
+        it('should construct a valid cascade leaf query for a query with just one column', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
                 FROM kibana_sample_data_logs
                 | STATS count() BY clientip
                 | LIMIT 100
               `,
-            };
+          };
 
-            const nodePath = ['clientip'];
-            const nodePathMap = { clientip: '192.168.1.1' };
+          const nodePath = ['clientip'];
+          const nodePathMap = { clientip: '192.168.1.1' };
 
-            const cascadeQuery = constructCascadeQuery({
-              query: editorQuery,
-              nodeType,
-              nodePath,
-              nodePathMap,
-            });
-
-            expect(cascadeQuery.esql).toMatchInlineSnapshot(
-              `"FROM kibana_sample_data_logs | WHERE clientip == \\"192.168.1.1\\""`
-            );
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
           });
 
-          it('should construct a valid cascade leaf query for a query with multiple columns and multiple STATS commands', () => {
-            const editorQuery: AggregateQuery = {
-              esql: `
+          expect(cascadeQuery.esql).toMatchInlineSnapshot(
+            `"FROM kibana_sample_data_logs | WHERE clientip == \\"192.168.1.1\\""`
+          );
+        });
+
+        it('should construct a valid cascade leaf query for a query with multiple columns and multiple STATS commands', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
                 FROM kibana_sample_data_logs
                 // First aggregate per client + per URL
                 | STATS
@@ -223,80 +170,129 @@ describe('utils', () => {
                 // Sort to see the busiest URLs on top
                 | SORT total_visits DESC
               `,
-            };
+          };
 
-            const nodePath = ['url.keyword'];
-            const nodePathMap = {
-              'url.keyword': 'https://www.elastic.co/downloads/beats/metricbeat',
-            };
+          const nodePath = ['url.keyword'];
+          const nodePathMap = {
+            'url.keyword': 'https://www.elastic.co/downloads/beats/metricbeat',
+          };
 
-            const cascadeQuery = constructCascadeQuery({
-              query: editorQuery,
-              nodeType,
-              nodePath,
-              nodePathMap,
-            });
-
-            expect(cascadeQuery.esql).toMatchInlineSnapshot(
-              `"FROM kibana_sample_data_logs | WHERE \`url.keyword\` == \\"https://www.elastic.co/downloads/beats/metricbeat\\""`
-            );
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
           });
+
+          expect(cascadeQuery.esql).toMatchInlineSnapshot(
+            `"FROM kibana_sample_data_logs | WHERE \`url.keyword\` == \\"https://www.elastic.co/downloads/beats/metricbeat\\""`
+          );
         });
       });
+    });
 
-      describe('function options', () => {
-        describe('categorize operation', () => {
-          it('should construct a valid cascade query for an un-named categorize operation', () => {
-            const editorQuery: AggregateQuery = {
-              esql: `
+    describe('function options', () => {
+      describe('categorize operation', () => {
+        it('should construct a valid cascade query for an un-named categorize operation', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
                   FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(message)
                 `,
-            };
+          };
 
-            const nodeType = 'leaf';
-            const nodePath = ['CATEGORIZE(message)'];
-            const nodePathMap = { 'CATEGORIZE(message)': 'some random pattern' };
+          const nodeType = 'leaf';
+          const nodePath = ['CATEGORIZE(message)'];
+          const nodePathMap = { 'CATEGORIZE(message)': 'some random pattern' };
 
-            const cascadeQuery = constructCascadeQuery({
-              query: editorQuery,
-              nodeType,
-              nodePath,
-              nodePathMap,
-            });
-
-            expect(cascadeQuery.esql).toMatchInlineSnapshot(
-              `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
-            );
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
           });
 
-          it('should construct a valid cascade query for a named categorize operation', () => {
-            const editorQuery: AggregateQuery = {
-              esql: `
+          expect(cascadeQuery.esql).toMatchInlineSnapshot(
+            `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
+          );
+        });
+
+        it('should construct a valid cascade query for a named categorize operation', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
                   FROM kibana_sample_data_logs 
                   | WHERE @timestamp <=?_tend and @timestamp >?_tstart
                     | SAMPLE .001
                     | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(message)
                     | SORT Count DESC
                 `,
-            };
+          };
 
-            const nodeType = 'leaf';
-            const nodePath = ['Pattern'];
-            const nodePathMap = { Pattern: 'some random pattern' };
+          const nodeType = 'leaf';
+          const nodePath = ['Pattern'];
+          const nodePathMap = { Pattern: 'some random pattern' };
 
-            const cascadeQuery = constructCascadeQuery({
-              query: editorQuery,
-              nodeType,
-              nodePath,
-              nodePathMap,
-            });
-
-            expect(cascadeQuery.esql).toMatchInlineSnapshot(
-              `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
-            );
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            nodeType,
+            nodePath,
+            nodePathMap,
           });
+
+          expect(cascadeQuery.esql).toMatchInlineSnapshot(
+            `"FROM kibana_sample_data_logs | WHERE MATCH(message, \\"some random pattern\\", {\\"auto_generate_synonyms_phrase_query\\": FALSE, \\"fuzziness\\": 0, \\"operator\\": \\"AND\\"})"`
+          );
         });
       });
+    });
+  });
+
+  describe('mutateQueryStatsGrouping', () => {
+    it('should return a valid query that only contains the root group by column in the stats by option', () => {
+      const editorQuery: AggregateQuery = {
+        esql: `
+          FROM kibana_sample_data_logs
+            | STATS count = COUNT(bytes), average = AVG(memory)
+              BY CATEGORIZE(message), agent.keyword, url.keyword
+        `,
+      };
+
+      const result = mutateQueryStatsGrouping(editorQuery, ['agent.keyword']);
+
+      expect(result.esql).toMatchInlineSnapshot(
+        `"FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY \`agent.keyword\`"`
+      );
+    });
+
+    it('should return the original query if the root group is the only column in the stats by option', () => {
+      const editorQuery: AggregateQuery = {
+        esql: `
+          FROM kibana_sample_data_logs
+          | STATS COUNT() BY clientip
+          | LIMIT 100
+        `,
+      };
+
+      const result = mutateQueryStatsGrouping(editorQuery, ['clientip']);
+
+      expect(result.esql).toMatchInlineSnapshot(
+        `"FROM kibana_sample_data_logs | STATS COUNT() BY clientip | LIMIT 100"`
+      );
+    });
+
+    it('ignores specified columns to pick that are not present in the stats by option', () => {
+      const editorQuery: AggregateQuery = {
+        esql: `
+          FROM kibana_sample_data_logs
+            | STATS count = COUNT(bytes), average = AVG(memory)
+              BY CATEGORIZE(message), agent.keyword, url.keyword
+        `,
+      };
+
+      const result = mutateQueryStatsGrouping(editorQuery, ['non_existent_column']);
+
+      expect(result.esql).toMatchInlineSnapshot(
+        `"FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(message), agent.keyword, url.keyword"`
+      );
     });
   });
 });
