@@ -490,22 +490,38 @@ describe('EVAL Autocomplete', () => {
       ]),
     ];
 
-    const comparisonOperators = ['==', '!=', '>', '<', '>=', '<='];
-
     test('first position', async () => {
       await evalExpectSuggestions('from a | eval case(', allSuggestions);
       await evalExpectSuggestions('from a | eval case(', allSuggestions);
     });
 
-    test('suggests comparison operators after initial column', async () => {
-      // case( field /) suggest comparison operators at this point to converge to a boolean
-      await evalExpectSuggestions('from a | eval case( textField ', [...comparisonOperators, ',']);
+    test('suggests operators after initial column based on type', async () => {
+      // case( field ) suggests all appropriate operators for that field type
+      await evalExpectSuggestions('from a | eval case( textField ', [
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true, agg: false, scalar: false },
+          ['text']
+        ),
+        ',',
+      ]);
       await evalExpectSuggestions('from a | eval case( doubleField ', [
-        ...comparisonOperators,
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true, agg: false, scalar: false },
+          ['double']
+        ),
         ',',
       ]);
       await evalExpectSuggestions('from a | eval case( booleanField ', [
-        ...comparisonOperators,
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true, agg: false, scalar: false },
+          ['boolean']
+        ),
         ',',
       ]);
     });
@@ -558,6 +574,21 @@ describe('EVAL Autocomplete', () => {
         expectedNumericSuggestions,
         mockCallbacks
       );
+    });
+
+    test('after complete comparison suggests logical operators and comma', async () => {
+      // case( field > field ) should suggest AND, OR, and comma
+      await evalExpectSuggestions('from a | eval case( integerField < doubleField ', [
+        'AND $0',
+        'OR $0',
+        ',',
+      ]);
+
+      await evalExpectSuggestions('from a | eval case( keywordField == textField ', [
+        'AND $0',
+        'OR $0',
+        ',',
+      ]);
     });
 
     test('suggestions for second position', async () => {
@@ -614,7 +645,7 @@ describe('EVAL Autocomplete', () => {
       );
     });
 
-    test('function parameter type filtering - ABS should only suggest numeric fields', async () => {
+    test('function parameter type filtering and parent function exclusion - ABS excludes itself', async () => {
       const expectedNumericFields = getFieldNamesByType([
         'double',
         'integer',
@@ -641,32 +672,64 @@ describe('EVAL Autocomplete', () => {
       );
     });
 
-    test('DATE_DIFF units - should suggest time units as constants', async () => {
-      await evalExpectSuggestions(
-        'from a | eval result = DATE_DIFF(',
-        DATE_DIFF_TIME_UNITS,
-        mockCallbacks
+    test('parent function exclusion - TRIM excludes itself', async () => {
+      const expectedStringFields = getFieldNamesByType(['keyword', 'text']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
       );
-    });
-
-    test('keyword and text are interchangeable - COALESCE with text param suggests both', async () => {
-      const expectedFields = getFieldNamesByType(['keyword', 'text']);
-      mockFieldsWithTypes(mockCallbacks, expectedFields);
 
       await evalExpectSuggestions(
-        'from a | eval result = COALESCE(textField, ',
+        'from a | eval result = TRIM(',
         [
-          ...expectedFields,
+          ...expectedStringFields,
           ...getFunctionSignaturesByReturnType(
             Location.EVAL,
             ['keyword', 'text'],
             { scalar: true },
             undefined,
-            ['coalesce']
+            ['trim']
           ),
         ],
         mockCallbacks
       );
+    });
+
+    test('DATE_DIFF suggested values - suggests time units like year, month, day, hour', async () => {
+      const expectedUnits = DATE_DIFF_TIME_UNITS;
+
+      expect(expectedUnits).toEqual(
+        expect.arrayContaining(['"year", ', '"month", ', '"day", ', '"hour", ', '"minute", '])
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval result = DATE_DIFF(',
+        expectedUnits,
+        mockCallbacks
+      );
+    });
+
+    test('keyword and text are interchangeable - COALESCE with text param suggests both keyword and text fields', async () => {
+      const expectedFields = getFieldNamesByType(['keyword', 'text']);
+      mockFieldsWithTypes(mockCallbacks, expectedFields);
+
+      const expectedSuggestions = [
+        ...expectedFields,
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          ['keyword', 'text'],
+          { scalar: true },
+          undefined,
+          ['coalesce']
+        ),
+      ];
+
+      await evalExpectSuggestions(
+        'from a | eval result = COALESCE(textField, ',
+        expectedSuggestions,
+        mockCallbacks
+      );
+
+      expect(expectedFields).toEqual(expect.arrayContaining(['textField', 'keywordField']));
     });
 
     test('handle unknown types in function contexts', async () => {

@@ -9,37 +9,42 @@
 
 import { isFunctionExpression } from '../../../../../ast/is';
 import type { ISuggestionItem } from '../../../../../commands_registry/types';
-import { getFunctionSuggestions } from '../../../functions';
+import { getFieldsSuggestions, getFunctionsSuggestions } from '../../helpers';
 import { getOperatorsSuggestionsAfterNot } from '../../../operators';
-import type { ExpressionContext } from '../context';
+import type { ExpressionContext } from '../types';
+import { getColumnsByTypeFromCtx, getLicenseCheckerFromCtx } from '../utils';
+import type { GetColumnsByTypeFn } from '../../../../../commands_registry/types';
 
 /**
- * Handles suggestions after the NOT keyword
- *
- * This handler covers two cases:
+ * Suggests completions after the NOT keyword
  * - After unary NOT function: NOT / (suggest boolean functions/fields)
  * - After NOT keyword before operators: field NOT / (suggest IN, LIKE, RLIKE)
  */
-export async function handleAfterNot(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
-  const { expressionRoot, location, env } = ctx;
+export async function suggestAfterNot(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
+  const { expressionRoot, location } = ctx;
 
   // Case 1: Unary NOT operator - suggest boolean expressions
-  // Example: WHERE NOT / → suggest boolean fields and functions
   if (expressionRoot && isFunctionExpression(expressionRoot) && expressionRoot.name === 'not') {
+    const { context } = ctx;
+    const getByType: GetColumnsByTypeFn = (types, ignored, options) =>
+      getColumnsByTypeFromCtx(ctx, types, ignored, options);
+
     return [
-      ...getFunctionSuggestions(
-        { location, returnTypes: ['boolean'] },
-        env.hasMinimumLicenseRequired,
-        env.activeProduct
-      ),
-      ...(await env.getColumnsByType('boolean', [], {
-        advanceCursor: true,
+      ...getFunctionsSuggestions({
+        location,
+        types: ['boolean'],
+        options: {},
+        context,
+        callbacks: { hasMinimumLicenseRequired: getLicenseCheckerFromCtx(ctx) },
+      }),
+      ...(await getFieldsSuggestions(['boolean'], getByType, {
+        addSpaceAfterField: true,
         openSuggestions: true,
+        promoteToTop: false,
       })),
     ];
   }
 
   // Case 2: NOT as part of binary operator - suggest NOT IN, NOT LIKE, NOT RLIKE
-  // Example: field NOT / → suggest IN, LIKE, RLIKE
   return getOperatorsSuggestionsAfterNot();
 }

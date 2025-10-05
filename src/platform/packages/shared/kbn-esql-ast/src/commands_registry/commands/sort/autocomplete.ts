@@ -55,6 +55,11 @@ export async function autocomplete(
         location: Location.SORT,
         context,
         callbacks,
+        options: {
+          addSpaceAfterFirstField: false,
+          addSpaceAfterOperator: true,
+          openSuggestions: true,
+        },
       });
     }
 
@@ -87,6 +92,11 @@ export async function autocomplete(
           location: Location.SORT,
           context,
           callbacks,
+          options: {
+            addSpaceAfterFirstField: false,
+            addSpaceAfterOperator: true,
+            openSuggestions: true,
+          },
         });
         suggestions.push(...expressionSuggestions);
       }

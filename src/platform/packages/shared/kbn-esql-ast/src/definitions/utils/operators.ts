@@ -8,10 +8,21 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
-import { listCompleteItem } from '../../commands_registry/complete_items';
-import { withAutoSuggest } from './autocomplete/helpers';
-import { getFieldsOrFunctionsSuggestions } from './autocomplete/helpers';
+import type {
+  GetColumnsByTypeFn,
+  ICommandCallbacks,
+  ICommandContext,
+  ISuggestionItem,
+  Location,
+} from '../../commands_registry/types';
+import { listCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
+import type { FunctionParameterContext } from './autocomplete/helpers';
+import {
+  withAutoSuggest,
+  getFieldsSuggestions,
+  getFunctionsSuggestions,
+  getLiteralsSuggestions,
+} from './autocomplete/helpers';
 import {
   type FunctionFilterPredicates,
   type FunctionParameterType,
@@ -146,8 +157,11 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType,
   getExpressionType,
   getColumnsByType,
-  hasMinimumLicenseRequired,
-  activeProduct,
+  context,
+  callbacks,
+  addSpaceAfterOperator,
+  openSuggestions,
+  functionParameterContext,
 }: {
   queryText: string;
   location: Location;
@@ -155,8 +169,11 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
   getColumnsByType: GetColumnsByTypeFn;
-  hasMinimumLicenseRequired?: ((minimumLicenseRequired: LicenseType) => boolean) | undefined;
-  activeProduct?: PricingProduct | undefined;
+  context?: ICommandContext;
+  callbacks?: ICommandCallbacks;
+  addSpaceAfterOperator?: boolean;
+  openSuggestions?: boolean;
+  functionParameterContext?: FunctionParameterContext;
 }) {
   const suggestions = [];
   const { complete, reason } = checkFunctionInvocationComplete(operator, getExpressionType);
@@ -185,6 +202,11 @@ export async function getSuggestionsToRightOfOperatorExpression({
             : undefined,
       })
     );
+
+    // Add comma if we're in a function with more mandatory args
+    if (operatorReturnType === 'boolean' && functionParameterContext?.hasMoreMandatoryArgs) {
+      suggestions.push(commaCompleteItem);
+    }
   } else {
     // i.e. ... | <COMMAND> field >= <suggest>
     // i.e. ... | <COMMAND> field + <suggest>
@@ -228,21 +250,42 @@ export async function getSuggestionsToRightOfOperatorExpression({
           const typeToUse = isAndOrWithBooleanLeft
             ? (['any'] as (SupportedDataType | 'unknown' | 'any')[])
             : getSupportedTypesForBinaryOperators(fnDef, leftArgType);
-          // TODO replace with fields callback + function suggestions
+
+          const useValueType = Boolean(operator.subtype === 'binary-expression');
+
+          // Fields/columns suggestions
           suggestions.push(
-            ...(await getFieldsOrFunctionsSuggestions(
-              typeToUse,
+            ...(await getFieldsSuggestions(typeToUse, getColumnsByType, {
+              values: useValueType,
+              addSpaceAfterField: addSpaceAfterOperator ?? false,
+              openSuggestions: openSuggestions ?? false,
+              promoteToTop: true,
+            }))
+          );
+
+          // Date literals (policy-gated in helpers) with consistent advance/comma behavior
+          suggestions.push(
+            ...getLiteralsSuggestions(typeToUse, location, {
+              includeDateLiterals: true,
+              includeCompatibleLiterals: false,
+              addComma: false,
+              advanceCursorAndOpenSuggestions: openSuggestions ?? false,
+            })
+          );
+
+          // Function suggestions
+          suggestions.push(
+            ...getFunctionsSuggestions({
               location,
-              getColumnsByType,
-              {
-                functions: true,
-                columns: true,
-                values: Boolean(operator.subtype === 'binary-expression'),
+              types: typeToUse,
+              options: {
+                ignored: [],
+                addSpaceAfterFunction: addSpaceAfterOperator ?? false,
+                openSuggestions: openSuggestions ?? false,
               },
-              {},
-              hasMinimumLicenseRequired,
-              activeProduct
-            ))
+              context,
+              callbacks,
+            })
           );
         }
       }

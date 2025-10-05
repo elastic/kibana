@@ -17,7 +17,7 @@ import {
 } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
-import { getFunctionSuggestions } from '../../../definitions/utils';
+import { getFunctionsSuggestions } from '../../../definitions/utils/autocomplete/helpers';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 
 interface SuggestionItem {
@@ -62,9 +62,10 @@ const completionExpectSuggestions = async (
 const PROMPT_SUGGESTIONS = [
   ' = ',
   ...getFieldNamesByType(ESQL_STRING_TYPES).map((fieldName) => `${fieldName} `),
-  ...getFunctionSuggestions({
+  ...getFunctionsSuggestions({
     location: Location.COMPLETION,
-    returnTypes: ['text', 'keyword', 'unknown'],
+    types: ['text', 'keyword', 'unknown'],
+    options: {},
   }).map(({ text }) => `${text} `),
 ];
 

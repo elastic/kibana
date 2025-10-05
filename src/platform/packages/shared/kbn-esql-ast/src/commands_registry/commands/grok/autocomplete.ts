@@ -8,15 +8,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import { suggestForExpression } from '../../../definitions/utils';
 
-import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
+import type { ESQLCommand } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import type { ICommandCallbacks } from '../../types';
-import { Location, type ISuggestionItem, type ICommandContext } from '../../types';
+import type { ISuggestionItem, ICommandContext } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
-import { isLiteral, isFunctionExpression } from '../../../ast/is';
+import { Parser } from '../../../parser';
+import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 
 export async function autocomplete(
   query: string,
@@ -28,20 +28,13 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
-  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
+  // If cursor is inside a string literal, don't suggest anything
+  const correctedQuery = correctQuerySyntax(innerText);
+  const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+  const { node } = findAstPosition(root.commands, innerText.length);
 
-  // Only call suggestForExpression for complete expressions (literals, functions)
-  // For simple column references, let the fallback handle field name completion
-  if (expressionRoot && (isLiteral(expressionRoot) || isFunctionExpression(expressionRoot))) {
-    return await suggestForExpression({
-      query,
-      expressionRoot,
-      command,
-      cursorPosition,
-      location: Location.DISSECT, // TODO: Change to Location.GROK when added
-      context,
-      callbacks,
-    });
+  if (node?.type === 'literal' && node.literalType === 'keyword') {
+    return [];
   }
 
   // GROK field /

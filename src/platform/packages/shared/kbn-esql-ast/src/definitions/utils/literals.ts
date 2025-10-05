@@ -13,8 +13,20 @@ import type { ISuggestionItem } from '../../commands_registry/types';
 import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';
 import type { FunctionParameterType, SupportedDataType } from '../types';
+import { commaCompleteItem } from '../../commands_registry/complete_items';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
+
+// Targeted: define option interfaces for constants/date literals
+export interface BuildConstantsOptions {
+  advanceCursorAndOpenSuggestions?: boolean;
+  addComma?: boolean;
+}
+
+export interface DateLiteralsOptions {
+  advanceCursorAndOpenSuggestions?: boolean;
+  addComma?: boolean;
+}
 
 export const buildConstantsDefinitions = (
   userConstants: string[],
@@ -23,7 +35,7 @@ export const buildConstantsDefinitions = (
   /**
    * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
    */
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean },
+  options?: BuildConstantsOptions,
   documentationValue?: string
 ): ISuggestionItem[] =>
   userConstants.map((label) => {
@@ -46,10 +58,7 @@ export const buildConstantsDefinitions = (
     return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });
 
-export function getDateLiterals(options?: {
-  advanceCursorAndOpenSuggestions?: boolean;
-  addComma?: boolean;
-}) {
+export function getDateLiterals(options?: DateLiteralsOptions) {
   return [
     ...buildConstantsDefinitions(
       TIME_SYSTEM_PARAMS,
@@ -89,6 +98,33 @@ export function getUnitDuration(unit: number = 1) {
     return unit > 1 ? result : !result;
   });
   return filteredTimeLiteral.map(({ name }) => `${unit} ${name}`);
+}
+
+/**
+ * Returns time unit literals (e.g., "1 day", "1 hour") and optionally appends a trailing comma item.
+ * Generic literal builder (no policy), controlled via options.
+ */
+export function getTimeUnitLiterals(
+  addComma: boolean,
+  advanceCursorAndOpenSuggestions: boolean
+): ISuggestionItem[] {
+  const items: ISuggestionItem[] = [
+    ...buildConstantsDefinitions(
+      timeUnitsToSuggest.map(({ name }) => name),
+      undefined,
+      undefined,
+      {
+        addComma,
+        advanceCursorAndOpenSuggestions,
+      }
+    ),
+  ];
+
+  if (addComma || advanceCursorAndOpenSuggestions) {
+    items.push(commaCompleteItem);
+  }
+
+  return items;
 }
 
 /**

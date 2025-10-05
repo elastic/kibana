@@ -7,39 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISuggestionItem } from '../../../../../commands_registry/types';
-import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../../../types';
-import { getFunctionDefinition } from '../../../functions';
+import { suggestForExpression } from '../suggestionEngine';
+import type { ExpressionContext } from '../types';
 import {
   getValidSignaturesAndTypesToSuggestNext,
   type FunctionParameterContext,
 } from '../../helpers';
-import type { ExpressionContext } from '../context';
-import { suggestForExpression } from '../suggestForExpression';
+import { getFunctionDefinition } from '../../../functions';
+import type { ISuggestionItem } from '../../../../../commands_registry/types';
+import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../../../types';
 
-/**
- * Handles suggestions when cursor is inside a function call (between parentheses)
- *
- * This handler is called when position is 'in_function', meaning the cursor is
- * positioned within the arguments of a variadic function call like:
- * - CONCAT(field1, /)
- * - BUCKET(longField, /)
- * - CASE(condition1, /)
- *
- * The handler recursively calls suggestForExpression for the current parameter
- * being edited, inheriting and extending the function parameter context.
- */
-export async function handleInFunction({
-  expressionRoot,
-  context,
-  options,
-  innerText,
-  query,
-  command,
-  cursorPosition,
-  location,
-  callbacks,
-}: ExpressionContext): Promise<ISuggestionItem[]> {
+/** Matches comma followed by optional whitespace at end of text */
+const STARTING_NEW_PARAM_REGEX = /,\s*$/;
+
+/** Suggests completions when cursor is inside a function call (e.g., CONCAT(field1, /)) */
+export async function suggestInFunction(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
+  const {
+    expressionRoot,
+    context,
+    options,
+    innerText,
+    query,
+    command,
+    cursorPosition,
+    location,
+    callbacks,
+  } = ctx;
+
   const functionExpression = expressionRoot as ESQLFunction;
   const functionDefinition = getFunctionDefinition(functionExpression.name);
 
@@ -47,14 +41,14 @@ export async function handleInFunction({
     return [];
   }
 
-  const validationResult = getValidSignaturesAndTypesToSuggestNext(
+  const validSignatures = getValidSignaturesAndTypesToSuggestNext(
     functionExpression,
     context,
     functionDefinition
   );
 
   const paramContext = buildFunctionParameterContext(
-    validationResult,
+    validSignatures,
     functionExpression.name,
     functionDefinition,
     options.functionParameterContext
@@ -77,6 +71,7 @@ export async function handleInFunction({
   });
 }
 
+/** Builds function parameter context, adding current function to ignore list */
 function buildFunctionParameterContext(
   validationResult: ReturnType<typeof getValidSignaturesAndTypesToSuggestNext>,
   functionName: string,
@@ -96,12 +91,13 @@ function buildFunctionParameterContext(
   };
 }
 
+/** Determines which expression to use as target for recursive suggestion */
 function determineTargetExpression(
   functionExpression: ESQLFunction,
   innerText: string
 ): ESQLSingleAstItem | undefined {
-  const args = functionExpression.args;
-  const startingNewParam = /,\s*$/.test(innerText);
+  const { args } = functionExpression;
+  const startingNewParam = STARTING_NEW_PARAM_REGEX.test(innerText);
   const firstArgEmpty = isFirstArgumentEmpty(args, innerText);
 
   if (startingNewParam || firstArgEmpty) {
@@ -113,6 +109,7 @@ function determineTargetExpression(
   return (Array.isArray(lastArg) ? lastArg[0] : lastArg) as ESQLSingleAstItem;
 }
 
+/** Checks if cursor is immediately after opening parenthesis with no argument */
 function isFirstArgumentEmpty(args: ESQLFunction['args'], innerText: string): boolean {
   if (args.length === 0 || !args[0]) {
     return false;

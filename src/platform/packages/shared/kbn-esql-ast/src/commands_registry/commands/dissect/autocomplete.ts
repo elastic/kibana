@@ -41,8 +41,8 @@ export async function autocomplete(
 
   const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
 
-  // Only call suggestForExpression for complete expressions (literals, functions)
-  // For simple column references, let the fallback handle field name completion
+  // DISSECT uses suggestForExpression with Location.DISSECT (unlike GROK which doesn't)
+  // because DISSECT has command options (APPEND_SEPARATOR) that require location-aware autocomplete
   if (expressionRoot && (isLiteral(expressionRoot) || isFunctionExpression(expressionRoot))) {
     return await suggestForExpression({
       query,

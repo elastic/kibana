@@ -20,7 +20,11 @@ import {
   withCompleteItem,
 } from '../../complete_items';
 import {
-  getFieldsOrFunctionsSuggestions,
+  getFieldsSuggestions,
+  getFunctionsSuggestions,
+  getLiteralsSuggestions,
+} from '../../../definitions/utils';
+import {
   findFinalWord,
   handleFragment,
   columnExists,
@@ -127,21 +131,42 @@ export async function autocomplete(
   switch (position) {
     case CompletionPosition.AFTER_COMPLETION:
     case CompletionPosition.AFTER_TARGET_ID: {
-      const fieldsAndFunctionsSuggestions = uniqBy(
-        await getFieldsOrFunctionsSuggestions(
-          ['text', 'keyword', 'unknown'],
-          Location.COMPLETION,
-          callbacks?.getByType,
-          {
-            functions: true,
-            columns: true,
-          },
-          {},
-          callbacks?.hasMinimumLicenseRequired,
-          context?.activeProduct
-        ),
-        'label'
+      const types = ['text', 'keyword', 'unknown'];
+      const allSuggestions: ISuggestionItem[] = [];
+
+      // Fields
+      allSuggestions.push(
+        ...(await getFieldsSuggestions(types, callbacks?.getByType, {
+          ignoreColumns: [],
+          values: false,
+          addSpaceAfterField: false,
+          openSuggestions: false,
+          promoteToTop: true,
+        }))
       );
+
+      // Date literals (policy-gated in helpers) with explicit UI options
+      allSuggestions.push(
+        ...getLiteralsSuggestions(types, Location.COMPLETION, {
+          includeDateLiterals: true,
+          includeCompatibleLiterals: false,
+          addComma: false,
+          advanceCursorAndOpenSuggestions: false,
+        })
+      );
+
+      // Functions
+      allSuggestions.push(
+        ...getFunctionsSuggestions({
+          location: Location.COMPLETION,
+          types,
+          options: { ignored: [] },
+          context,
+          callbacks,
+        })
+      );
+
+      const fieldsAndFunctionsSuggestions = uniqBy(allSuggestions, 'label');
 
       const suggestions = await handleFragment(
         innerText,

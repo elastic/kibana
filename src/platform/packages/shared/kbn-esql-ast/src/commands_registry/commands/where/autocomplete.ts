@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { isFunctionExpression } from '../../../ast/is';
+import { within } from '../../../ast/location';
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import { suggestForExpression } from '../../../definitions/utils';
@@ -40,11 +42,20 @@ export async function autocomplete(
     },
   });
 
-  // Is this a complete boolean expression?
-  // If so, we can call it done and suggest a pipe
+  const insideFunction =
+    expressionRoot &&
+    isFunctionExpression(expressionRoot) &&
+    within(cursorPosition, expressionRoot);
+
   const expressionType = getExpressionType(expressionRoot, context?.columns);
 
-  if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
+  if (
+    // Complete boolean expression
+    expressionType === 'boolean' &&
+    isExpressionComplete(expressionType, innerText) &&
+    // Don't suggest pipe if we're inside a function
+    !insideFunction
+  ) {
     suggestions.push(pipeCompleteItem);
   }
 

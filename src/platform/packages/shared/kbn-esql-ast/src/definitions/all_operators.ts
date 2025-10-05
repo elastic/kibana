@@ -23,6 +23,10 @@ export const nullCheckOperators: FunctionDefinition[] = operatorFunctionDefiniti
   ({ name }) => name === 'is null' || name === 'is not null'
 );
 
+export const inOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === 'in' || name === 'not in'
+);
+
 export const logicalOperators: FunctionDefinition[] = [
   {
     name: 'and',

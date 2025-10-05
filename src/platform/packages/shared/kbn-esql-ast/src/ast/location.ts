@@ -9,14 +9,6 @@
 
 import type { ESQLAstComment, ESQLSingleAstItem } from '../types';
 
-/**
- * Location ranges are inclusive, so a location of { min: 0, max: 4 }
- * covers the first 5 characters of a string.
- *
- * @param inner
- * @param outer
- * @returns
- */
 export const within = (
   inner: number | ESQLSingleAstItem,
   outer: ESQLSingleAstItem | ESQLAstComment | undefined
