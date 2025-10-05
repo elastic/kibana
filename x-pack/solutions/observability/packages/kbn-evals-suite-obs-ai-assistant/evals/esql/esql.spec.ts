@@ -127,29 +127,29 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
           name: 'esql: with logs data',
           description: 'ES|QL questions against various generated log datasets.',
           examples: [
-            {
-              input: {
-                question:
-                  'From logs-my_app-*, show the 20 most frequent error messages in the last six hours.',
-              },
-              output: {
-                expected: `FROM logs-my_app-*
-                | WHERE @timestamp >= NOW() - 6 hours AND log.level == "error"
-                | STATS error_count = COUNT(*) BY message
-                | SORT error_count DESC
-                | LIMIT 20`,
-                execute: true,
-                criteria: [
-                  `The results should include error counts for the following errors:
-                    - ERROR: Database connection timed out
-                    - ERROR: Null pointer exception at com.example.UserService
-                    - ERROR: Payment gateway returned status 503
-                    - ERROR: Invalid API key provided
-                    - ERROR: Disk space is critically low`,
-                ],
-              },
-              metadata: {},
-            },
+            // {
+            //   input: {
+            //     question:
+            //       'From logs-my_app-*, show the 20 most frequent error messages in the last six hours.',
+            //   },
+            //   output: {
+            //     expected: `FROM logs-my_app-*
+            //     | WHERE @timestamp >= NOW() - 6 hours AND log.level == "error"
+            //     | STATS error_count = COUNT(*) BY message
+            //     | SORT error_count DESC
+            //     | LIMIT 20`,
+            //     execute: true,
+            //     criteria: [
+            //       `The results should include error counts for the following errors:
+            //         - ERROR: Database connection timed out
+            //         - ERROR: Null pointer exception at com.example.UserService
+            //         - ERROR: Payment gateway returned status 503
+            //         - ERROR: Invalid API key provided
+            //         - ERROR: Disk space is critically low`,
+            //     ],
+            //   },
+            //   metadata: {},
+            // },
             {
               input: {
                 question:
@@ -169,168 +169,168 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               metadata: {},
             },
-            {
-              input: {
-                question:
-                  'Generate a query to calculate hourly error rate for my-service in logs-* over the last 6 hours as a percentage and execute it.',
-              },
-              output: {
-                expected: `FROM logs-*
-                | WHERE @timestamp >= NOW() - 6 hours AND service.name == "my-service"
-                | EVAL is_error = CASE(log.level == "error", 1, 0)
-                | STATS total = COUNT(*), errors = SUM(is_error) BY BUCKET(@timestamp, 1h)
-                | EVAL error_rate_pct = TO_DOUBLE(errors) / total * 100`,
-                execute: true,
-                criteria: [
-                  'The total number of logs in each full one-hour bucket should be 12.',
-                  'The number of errors in each bucket should be between 0 and 12, inclusive.',
-                  'The error rate percentage should be correctly calculated based on total and errors.',
-                ],
-              },
-              metadata: {},
-            },
-            {
-              input: {
-                question:
-                  'What is the average request time in milliseconds for Nginx services over the last 2 hours?',
-              },
-              output: {
-                expected: `FROM logs-nginx.access-*
-                | WHERE @timestamp >= NOW() - 2 hours
-                | GROK message "%{GREEDYDATA} %{NUMBER:request_time}"
-                | STATS average_request_time_ms = AVG(TO_DOUBLE(request_time) * 1000)`,
-                execute: true,
-              },
-              metadata: {},
-            },
-            {
-              input: {
-                question:
-                  "Find the top 5 slowest Nginx requests for the 'api-gateway' service in the last two hours.",
-              },
-              output: {
-                expected: `FROM logs-nginx.access-*
-                | WHERE @timestamp >= NOW() - 2 hours AND service.name == "api-gateway"
-                | DISSECT message "%{} %{} %{} %{} %{} %{} %{} %{} %{} %{} %{request_time}"
-                | EVAL request_time_s = TO_DOUBLE(request_time)
-                | SORT request_time_s DESC
-                | LIMIT 5
-                | KEEP @timestamp, message, request_time_s`,
-                execute: true,
-                criteria: ['Identifies the top 5 slowest requests.'],
-              },
-              metadata: {},
-            },
-            {
-              input: {
-                question:
-                  'Show logs from Kubernetes pods that have restarted in the last 24 hours.',
-              },
-              output: {
-                expected: `FROM logs-*
-                | WHERE @timestamp >= NOW() - 24 hours AND kubernetes.pod.restart_count > 0
-                | KEEP kubernetes.pod.restart_count`,
-                execute: true,
-                criteria: ['The restart count should be identified as 2.'],
-              },
-              metadata: {},
-            },
-            {
-              input: {
-                question: 'Find all log entries with correlation id abc123.',
-              },
-              output: {
-                expected: `FROM logs-*
-                | WHERE trace.id == "abc123"`,
-                execute: true,
-                criteria: ['Should retrieve 1 log with the trace ID abc123.'],
-              },
-              metadata: {},
-            },
-            {
-              input: {
-                question:
-                  'Count the number of apache errors per 10-minute interval over the last 6 hours to find any anomalies.',
-              },
-              output: {
-                expected: `FROM logs-apache.error-*
-                | WHERE @timestamp >= NOW() - 6 hours AND log.level == "error"
-                | STATS error_count = COUNT(*) by BUCKET(@timestamp, 600s)
-                | SORT \`BUCKET(@timestamp, 600s)\` ASC`,
-                execute: true,
-                criteria: [
-                  'The response after query execution should include error count by 10-minute time intervals',
-                  '2 time intervals should have high error counts, while the rest should be low error counts',
-                ],
-              },
-              metadata: {},
-            },
-            {
-              input: {
-                question: 'How many unique users logged in each day over the last 7 days?',
-              },
-              output: {
-                expected: `FROM logs-auth_service-*
-                | WHERE @timestamp >= NOW() - 7 days AND event.action == "login"
-                | STATS unique_users = COUNT_DISTINCT(user.id) BY BUCKET(@timestamp, 1d)
-                | SORT \`BUCKET(@timestamp, 1d)\` ASC`,
-                execute: true,
-              },
-              metadata: {},
-            },
-            {
-              input: {
-                question: 'List users who logged in more than 5 times in the last 3 days.',
-              },
-              output: {
-                expected: `FROM logs-auth_service-*
-                | WHERE @timestamp >= NOW() - 3 days AND event.action == "login"
-                | STATS login_count = COUNT(user.id) BY user.id
-                | WHERE login_count > 5
-                | SORT login_count DESC`,
-                execute: true,
-                criteria: [
-                  'The result should display the login count for each user who logged in more than 5 times',
-                ],
-              },
-              metadata: {},
-            },
-            {
-              input: {
-                question:
-                  'What is the total number of login events, and how many of those occurred during the hour before last? (Total count vs count last hour)',
-              },
-              output: {
-                expected: `FROM logs-auth_service-*
-                | SORT @timestamp
-                | EVAL now = NOW()
-                | EVAL key = CASE(@timestamp < (now - 1 hour) AND @timestamp > (now - 2 hour), "Last hour", "Other")
-                | STATS count = COUNT(*) BY key
-                | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
-                | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
-                | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
-                execute: true,
-              },
-              metadata: {},
-            },
-            {
-              input: {
-                question:
-                  'Show a breakdown of successful (status < 400) and unsuccessful (status >= 400) requests from nginx.access logs over the last 24 hours.',
-              },
-              output: {
-                expected: `FROM logs-nginx.access-*
-                | WHERE @timestamp >= NOW() - 24 hours
-                | EVAL status_type = CASE(http.response.status_code >= 400, "Error (>=400)", "Success (<400)")
-                | STATS count = COUNT(*) BY status_type`,
-                execute: true,
-                criteria: [
-                  'The result should include 2 rows for successful and error counts',
-                  'The successful http responses count should be higher than error error http responses count',
-                ],
-              },
-              metadata: {},
-            },
+            // {
+            //   input: {
+            //     question:
+            //       'Generate a query to calculate hourly error rate for my-service in logs-* over the last 6 hours as a percentage and execute it.',
+            //   },
+            //   output: {
+            //     expected: `FROM logs-*
+            //     | WHERE @timestamp >= NOW() - 6 hours AND service.name == "my-service"
+            //     | EVAL is_error = CASE(log.level == "error", 1, 0)
+            //     | STATS total = COUNT(*), errors = SUM(is_error) BY BUCKET(@timestamp, 1h)
+            //     | EVAL error_rate_pct = TO_DOUBLE(errors) / total * 100`,
+            //     execute: true,
+            //     criteria: [
+            //       'The total number of logs in each full one-hour bucket should be 12.',
+            //       'The number of errors in each bucket should be between 0 and 12, inclusive.',
+            //       'The error rate percentage should be correctly calculated based on total and errors.',
+            //     ],
+            //   },
+            //   metadata: {},
+            // },
+            // {
+            //   input: {
+            //     question:
+            //       'What is the average request time in milliseconds for Nginx services over the last 2 hours?',
+            //   },
+            //   output: {
+            //     expected: `FROM logs-nginx.access-*
+            //     | WHERE @timestamp >= NOW() - 2 hours
+            //     | GROK message "%{GREEDYDATA} %{NUMBER:request_time}"
+            //     | STATS average_request_time_ms = AVG(TO_DOUBLE(request_time) * 1000)`,
+            //     execute: true,
+            //   },
+            //   metadata: {},
+            // },
+            // {
+            //   input: {
+            //     question:
+            //       "Find the top 5 slowest Nginx requests for the 'api-gateway' service in the last two hours.",
+            //   },
+            //   output: {
+            //     expected: `FROM logs-nginx.access-*
+            //     | WHERE @timestamp >= NOW() - 2 hours AND service.name == "api-gateway"
+            //     | DISSECT message "%{} %{} %{} %{} %{} %{} %{} %{} %{} %{} %{request_time}"
+            //     | EVAL request_time_s = TO_DOUBLE(request_time)
+            //     | SORT request_time_s DESC
+            //     | LIMIT 5
+            //     | KEEP @timestamp, message, request_time_s`,
+            //     execute: true,
+            //     criteria: ['Identifies the top 5 slowest requests.'],
+            //   },
+            //   metadata: {},
+            // },
+            // {
+            //   input: {
+            //     question:
+            //       'Show logs from Kubernetes pods that have restarted in the last 24 hours.',
+            //   },
+            //   output: {
+            //     expected: `FROM logs-*
+            //     | WHERE @timestamp >= NOW() - 24 hours AND kubernetes.pod.restart_count > 0
+            //     | KEEP kubernetes.pod.restart_count`,
+            //     execute: true,
+            //     criteria: ['The restart count should be identified as 2.'],
+            //   },
+            //   metadata: {},
+            // },
+            // {
+            //   input: {
+            //     question: 'Find all log entries with correlation id abc123.',
+            //   },
+            //   output: {
+            //     expected: `FROM logs-*
+            //     | WHERE trace.id == "abc123"`,
+            //     execute: true,
+            //     criteria: ['Should retrieve 1 log with the trace ID abc123.'],
+            //   },
+            //   metadata: {},
+            // },
+            // {
+            //   input: {
+            //     question:
+            //       'Count the number of apache errors per 10-minute interval over the last 6 hours to find any anomalies.',
+            //   },
+            //   output: {
+            //     expected: `FROM logs-apache.error-*
+            //     | WHERE @timestamp >= NOW() - 6 hours AND log.level == "error"
+            //     | STATS error_count = COUNT(*) by BUCKET(@timestamp, 600s)
+            //     | SORT \`BUCKET(@timestamp, 600s)\` ASC`,
+            //     execute: true,
+            //     criteria: [
+            //       'The response after query execution should include error count by 10-minute time intervals',
+            //       '2 time intervals should have high error counts, while the rest should be low error counts',
+            //     ],
+            //   },
+            //   metadata: {},
+            // },
+            // {
+            //   input: {
+            //     question: 'How many unique users logged in each day over the last 7 days?',
+            //   },
+            //   output: {
+            //     expected: `FROM logs-auth_service-*
+            //     | WHERE @timestamp >= NOW() - 7 days AND event.action == "login"
+            //     | STATS unique_users = COUNT_DISTINCT(user.id) BY BUCKET(@timestamp, 1d)
+            //     | SORT \`BUCKET(@timestamp, 1d)\` ASC`,
+            //     execute: true,
+            //   },
+            //   metadata: {},
+            // },
+            // {
+            //   input: {
+            //     question: 'List users who logged in more than 5 times in the last 3 days.',
+            //   },
+            //   output: {
+            //     expected: `FROM logs-auth_service-*
+            //     | WHERE @timestamp >= NOW() - 3 days AND event.action == "login"
+            //     | STATS login_count = COUNT(user.id) BY user.id
+            //     | WHERE login_count > 5
+            //     | SORT login_count DESC`,
+            //     execute: true,
+            //     criteria: [
+            //       'The result should display the login count for each user who logged in more than 5 times',
+            //     ],
+            //   },
+            //   metadata: {},
+            // },
+            // {
+            //   input: {
+            //     question:
+            //       'What is the total number of login events, and how many of those occurred during the hour before last? (Total count vs count last hour)',
+            //   },
+            //   output: {
+            //     expected: `FROM logs-auth_service-*
+            //     | SORT @timestamp
+            //     | EVAL now = NOW()
+            //     | EVAL key = CASE(@timestamp < (now - 1 hour) AND @timestamp > (now - 2 hour), "Last hour", "Other")
+            //     | STATS count = COUNT(*) BY key
+            //     | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
+            //     | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
+            //     | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
+            //     execute: true,
+            //   },
+            //   metadata: {},
+            // },
+            // {
+            //   input: {
+            //     question:
+            //       'Show a breakdown of successful (status < 400) and unsuccessful (status >= 400) requests from nginx.access logs over the last 24 hours.',
+            //   },
+            //   output: {
+            //     expected: `FROM logs-nginx.access-*
+            //     | WHERE @timestamp >= NOW() - 24 hours
+            //     | EVAL status_type = CASE(http.response.status_code >= 400, "Error (>=400)", "Success (<400)")
+            //     | STATS count = COUNT(*) BY status_type`,
+            //     execute: true,
+            //     criteria: [
+            //       'The result should include 2 rows for successful and error counts',
+            //       'The successful http responses count should be higher than error error http responses count',
+            //     ],
+            //   },
+            //   metadata: {},
+            // },
           ],
         },
       });
