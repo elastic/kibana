@@ -39,7 +39,7 @@ describe('extractNunjucksVariables', () => {
       {{order.items[0].name}}
       {% if   user.isAdmin %}
         Admin Panel Access  {% endif %}
-        {{   user.getFullName()   }}
+        {{   user.FullName   }}
     `;
 
     const variables = extractTemplateVariables(template);
@@ -47,7 +47,7 @@ describe('extractNunjucksVariables', () => {
       'user.profile.firstName',
       'order.items[0].name',
       'user.isAdmin',
-      'user.getFullName()',
+      'user.FullName',
     ]);
   });
 
