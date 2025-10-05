@@ -143,6 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
             'securitySolutionTimeline',
             'securitySolutionNotes',
             'securitySolutionSiemMigrations',
+            'workflowsManagement',
             'fleet',
             'fleetv2',
           ].sort()

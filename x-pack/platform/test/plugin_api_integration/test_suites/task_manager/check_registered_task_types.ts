@@ -91,6 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.tines',
         'actions:.torq',
         'actions:.webhook',
+        'actions:.workflows',
         'actions:.xmatters',
         'actions:.xsoar',
         'actions:connector_usage_reporting',

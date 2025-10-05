@@ -124,6 +124,10 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.workflows",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.xmatters",
   },
   Object {
