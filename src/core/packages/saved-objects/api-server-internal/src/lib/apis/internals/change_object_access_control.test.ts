@@ -207,7 +207,7 @@ describe('changeObjectAccessControl', () => {
     });
 
     describe('authorization of operations', () => {
-      it('successfully delegates to security extension', async () => {
+      it('successfully delegates to security extension for change ownership', async () => {
         const params = setup({
           objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
         });
@@ -247,6 +247,49 @@ describe('changeObjectAccessControl', () => {
             ],
           },
           'changeOwnership'
+        );
+      });
+
+      it('successfully delegates to security extension for change access mode', async () => {
+        const params = setup({
+          objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
+        });
+        mockMgetResults([
+          {
+            found: true,
+            namespaces: ['default'],
+            type: READ_ONLY_TYPE,
+            id: 'id-1',
+            accessControl: {
+              owner: 'new-owner',
+              accessMode: 'default',
+            },
+          },
+        ]);
+        mockBulkResults({ error: false });
+        await changeObjectAccessControl({
+          ...params,
+          securityExtension: params.securityExtension,
+          options: { accessMode: 'read_only', namespace: 'default' },
+          actionType: 'changeAccessMode',
+          currentUserProfileUid: mockUserProfileId,
+        });
+        expect(mockSecurityExt.authorizeChangeAccessControl).toHaveBeenCalledWith(
+          {
+            namespace: 'default',
+            objects: [
+              {
+                type: READ_ONLY_TYPE,
+                id: 'id-1',
+                accessControl: {
+                  owner: 'new-owner',
+                  accessMode: 'default',
+                },
+                existingNamespaces: ['default'],
+              },
+            ],
+          },
+          'changeAccessMode'
         );
       });
     });

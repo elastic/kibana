@@ -45,21 +45,21 @@ const authorizeDelete = async ({
 
   let name;
   let accessControl;
+  const doc = preflightResult?.rawDocSource?._source;
 
   // Extract data from preflight result based on its type
   if ('savedObjectNamespaces' in preflightResult) {
     // This is a PreflightCheckNamespacesResult (multinamespace)
-    accessControl = preflightResult.rawDocSource?._source.accessControl;
+    accessControl = doc?.accessControl;
     if (securityExtension.includeSavedObjectNames()) {
-      const saveObject = { attributes: preflightResult.rawDocSource?._source[type] };
+      const saveObject = { attributes: doc?.[type] };
       name = SavedObjectsUtils.getName(registry.getNameAttribute(type), saveObject);
     }
   } else {
     // This is an access control preflight result (from accessControlPreflightCheck)
-    const doc = preflightResult?.rawDocSource?._source;
-    accessControl = doc?._source?.accessControl;
+    accessControl = doc?.accessControl;
     if (securityExtension.includeSavedObjectNames()) {
-      const saveObject = { attributes: doc?._source?.[type] };
+      const saveObject = { attributes: doc?.[type] };
       name = SavedObjectsUtils.getName(registry.getNameAttribute(type), saveObject);
     }
   }
@@ -93,6 +93,7 @@ export const performDelete = async <T>(
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
   let preflightResult: PreflightCheckNamespacesResult | PreflightAccessControlResult | undefined;
+
   if (securityExtension) {
     if (registry.isMultiNamespace(type)) {
       preflightResult = await preflightHelper.preflightCheckNamespaces({
@@ -101,16 +102,16 @@ export const performDelete = async <T>(
         namespace,
       });
     } else {
-      preflightResult = await preflightHelper.accessControlPreflightCheck(
-        [
-          {
-            type,
-            id,
-            namespaces: [SavedObjectsUtils.namespaceIdToString(namespace)],
-          },
-        ],
-        namespace
-      );
+      const object = {
+        type,
+        id,
+        namespaces: [SavedObjectsUtils.namespaceIdToString(namespace)],
+      };
+      preflightResult = await preflightHelper.accessControlPreflightCheck(object, namespace);
+    }
+
+    if (!preflightResult) {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
     await authorizeDelete({
@@ -169,7 +170,10 @@ export const performDelete = async <T>(
 
   const deleted = body.result === 'deleted';
   if (deleted) {
-    const namespaces = preflightResult?.savedObjectNamespaces;
+    const namespaces =
+      preflightResult && 'savedObjectNamespaces' in preflightResult
+        ? preflightResult?.savedObjectNamespaces
+        : undefined;
     if (namespaces) {
       // This is a multi-namespace object type, and it might have legacy URL aliases that need to be deleted.
       await deleteLegacyUrlAliases({

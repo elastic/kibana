@@ -308,7 +308,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     { authzAction?: string; auditAction?: AuditAction }
   >;
   private readonly typeRegistry: ISavedObjectTypeRegistry | undefined;
-  private readonly _accessControlService: AccessControlService;
+  public readonly accessControlService: AccessControlService;
 
   constructor({
     actions,
@@ -323,7 +323,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
-    this._accessControlService = new AccessControlService();
+    this.accessControlService = new AccessControlService();
     this.typeRegistry = typeRegistry;
 
     // This comment block is a quick reference for the action map, which maps authorization actions
@@ -406,10 +406,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         },
       ],
     ]);
-  }
-
-  public get accessControlService() {
-    return this._accessControlService;
   }
 
   private assertObjectsArrayNotEmpty(objects: AuthorizeObject[], action: SecurityAction) {
@@ -1207,7 +1203,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     objects: AuthorizeObject[],
     action: SecurityAction = SecurityAction.CHANGE_OWNERSHIP
   ) {
-    return this._accessControlService.getTypesRequiringPrivilegeCheck({
+    return this.accessControlService.getTypesRequiringPrivilegeCheck({
       objects,
       typeRegistry: this.typeRegistry,
       actions: new Set([action]),

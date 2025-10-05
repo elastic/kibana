@@ -35,6 +35,7 @@ import {
 import {
   type AccessControlPreflightObject,
   accessControlPreflightCheck,
+  accessControlBulkPreflightCheck,
 } from '../internals/preflight_check_access_control';
 
 export type IPreflightCheckHelper = PublicMethodsOf<PreflightCheckHelper>;
@@ -77,12 +78,25 @@ export class PreflightCheckHelper {
     });
   }
 
-  public async accessControlPreflightCheck(
+  public async accessControlBulkPreflightCheck(
     objects: AccessControlPreflightObject[],
     namespace: string | undefined
   ) {
-    return await accessControlPreflightCheck({
+    return await accessControlBulkPreflightCheck({
       objects,
+      client: this.client,
+      serializer: this.serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      namespace,
+    });
+  }
+
+  public async accessControlPreflightCheck(
+    object: AccessControlPreflightObject,
+    namespace: string | undefined
+  ) {
+    return await accessControlPreflightCheck({
+      object,
       client: this.client,
       serializer: this.serializer,
       getIndexForType: this.getIndexForType.bind(this),

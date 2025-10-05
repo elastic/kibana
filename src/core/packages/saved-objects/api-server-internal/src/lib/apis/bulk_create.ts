@@ -186,7 +186,7 @@ export const performBulkCreate = async <T>(
       const namespaces = initialNamespaces ?? [namespaceString];
       return { type, id, overwrite, namespaces };
     });
-  const accessControlPreflightResponse = await preflightHelper.accessControlPreflightCheck(
+  const accessControlPreflightResponse = await preflightHelper.accessControlBulkPreflightCheck(
     accessControlPreflightObjects,
     namespace
   );
