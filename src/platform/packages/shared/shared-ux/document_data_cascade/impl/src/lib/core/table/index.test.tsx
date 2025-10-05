@@ -28,6 +28,7 @@ describe('table', () => {
     let cascadeState: ReturnType<typeof useDataCascadeState>;
 
     const TestHelper = ({ children }: PropsWithChildren) => {
+      // capture the cascade state for assertions
       cascadeState = useDataCascadeState();
 
       return <React.Fragment>{children}</React.Fragment>;
@@ -155,6 +156,7 @@ describe('table', () => {
         Array [
           "rowId",
           "rowParentId",
+          "rowData",
           "rowIsExpanded",
           "hasAllParentsExpanded",
           "rowDepth",
