@@ -48,10 +48,10 @@ import {
   registerMonacoConnectorHandler,
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
-import { useYamlValidation } from '../lib/use_yaml_validation';
+import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
-import type { YamlValidationError } from '../model/types';
 import { StepActions } from './step_actions';
+import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
 import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
@@ -113,7 +113,7 @@ export interface WorkflowYAMLEditorProps {
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
   onChange?: (value: string | undefined) => void;
-  onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationError[]>>;
+  onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationResult[]>>;
   onSave?: (value: string) => void;
   esHost?: string;
   kibanaHost?: string;
@@ -1463,7 +1463,7 @@ export const WorkflowYAMLEditor = ({
             if (!editorRef.current) {
               return;
             }
-            navigateToErrorPosition(editorRef.current, error.lineNumber, error.column);
+            navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
           }}
           rightSide={<WorkflowYAMLEditorShortcuts />}
         />
@@ -1491,6 +1491,10 @@ const componentStyles = {
       '.template-variable-error': {
         backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.24),
         color: euiTheme.colors.severity.danger,
+        borderRadius: '2px',
+      },
+      '.template-variable-warning': {
+        backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.24),
         borderRadius: '2px',
       },
       '.step-highlight': {
