@@ -82,10 +82,10 @@ export async function catchError(
       const workflowScopeStack = WorkflowScopeStack.fromStackFrames(
         params.workflowRuntime.getCurrentNodeScope()
       );
+      params.workflowRuntime.exitScope();
 
       // exit the whole node scope
       const scopeEntry = workflowScopeStack.getCurrentScope()!;
-      params.workflowRuntime.exitScope();
 
       const node = params.workflowExecutionGraph.getNode(scopeEntry.nodeId);
 
