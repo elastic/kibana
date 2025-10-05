@@ -24,6 +24,7 @@ const SECOND = 1000;
 const SERVER_LABEL_KEY = 'kbn.ftr.server';
 const ARGS_HASH_LABEL_KEY = 'kbn.ftr.argsHash';
 const KEEP_RUNNING_LABEL_KEY = 'kbn.ftr.keepRunning';
+const HOST_PORT_LABEL_KEY = 'kbn.ftr.hostPort';
 
 export class DockerServersService {
   private servers: DockerServer[];
@@ -104,6 +105,85 @@ export class DockerServersService {
       hostname: 'localhost',
       port: server.port || undefined,
     });
+  }
+
+  private async adoptExistingHostPort(server: DockerServer) {
+    if (!server.keepRunning) {
+      return;
+    }
+
+    try {
+      const { stdout } = await execa('docker', [
+        'ps',
+        '-a',
+        '--filter',
+        `label=${SERVER_LABEL_KEY}=${server.name}`,
+        '--format',
+        '{{.ID}}',
+      ]);
+
+      const containerIds = stdout
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      for (const containerId of containerIds) {
+        const labels = await this.getContainerLabels(containerId);
+        let hostPort = this.normalizePortValue(labels[HOST_PORT_LABEL_KEY]);
+
+        if (hostPort === undefined) {
+          hostPort = await this.getContainerHostPort(containerId, server.portInContainer);
+        }
+
+        if (hostPort === undefined) {
+          continue;
+        }
+
+        if (server.port === hostPort) {
+          return;
+        }
+
+        const originalPortValue = this.originalPortValueByServer.get(server.name);
+        this.overridePortEnv(server, originalPortValue, hostPort);
+        server.port = hostPort;
+        this.updateServerUrl(server);
+        this.originalPortValueByServer.set(server.name, hostPort);
+        return;
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.log.debug(`[docker:${server.name}] failed to adopt existing host port: ${message}`);
+    }
+  }
+
+  private async getContainerHostPort(containerId: string, containerPort: number) {
+    try {
+      const { stdout } = await execa('docker', [
+        'inspect',
+        '--format',
+        '{{json .NetworkSettings.Ports}}',
+        containerId,
+      ]);
+
+      if (!stdout) {
+        return undefined;
+      }
+
+      const mappings = JSON.parse(stdout) as Record<string, Array<{ HostPort: string }>>;
+      const tcpKey = `${containerPort}/tcp`;
+      const udpKey = `${containerPort}/udp`;
+      const entry = mappings?.[tcpKey]?.[0] ?? mappings?.[udpKey]?.[0];
+
+      if (!entry) {
+        return undefined;
+      }
+
+      return this.normalizePortValue(entry.HostPort);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.log.debug(`failed to read host port for container ${containerId}: ${message}`);
+      return undefined;
+    }
   }
 
   private overridePortEnv(
@@ -201,6 +281,8 @@ export class DockerServersService {
       `${ARGS_HASH_LABEL_KEY}=${argsHash}`,
       '--label',
       `${KEEP_RUNNING_LABEL_KEY}=${server.keepRunning ? 'true' : 'false'}`,
+      '--label',
+      `${HOST_PORT_LABEL_KEY}=${server.port}`,
       ...args,
       '-p',
       `${server.port}:${server.portInContainer}`,
@@ -362,6 +444,7 @@ export class DockerServersService {
   private async startServer(server: DockerServer) {
     const { log, lifecycle } = this;
     const { image, name, waitFor, waitForLogLine, waitForLogLineTimeoutMs, keepRunning } = server;
+    await this.adoptExistingHostPort(server);
     let argsHash = this.computeArgsHash(server);
 
     let containerId: string | undefined;
