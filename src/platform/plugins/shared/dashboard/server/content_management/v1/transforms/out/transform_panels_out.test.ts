@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { dashboardState } from '../../schema';
 import { transformPanelsOut } from './transform_panels_out';
 
 describe('transformPanelsOut', () => {
@@ -23,7 +24,9 @@ describe('transformPanelsOut', () => {
         },
       },
     ];
-    expect(transformPanelsOut(panelsJSON, sections)).toMatchInlineSnapshot(`
+    const panels = transformPanelsOut(panelsJSON, sections);
+    dashboardState.panels.validate(panels);
+    expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
           "config": Object {
