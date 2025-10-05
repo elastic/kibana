@@ -30,6 +30,8 @@ const useCases = {
   'Multiple events and alerts': { uniqueEventsCount: 2, uniqueAlertsCount: 2 },
   'Hundreds of events and alerts': { uniqueEventsCount: 120, uniqueAlertsCount: 120 },
   'Millions of events and alerts': { uniqueEventsCount: 1_200_000, uniqueAlertsCount: 1_200_000 },
+  'With clickable events popover - only events': { uniqueEventsCount: 5, uniqueAlertsCount: 0 },
+  'With clickable events popover - only alerts': { uniqueEventsCount: 0, uniqueAlertsCount: 3 },
   'With clickable events popover': { uniqueEventsCount: 5, uniqueAlertsCount: 3 },
 };
 
@@ -53,7 +55,9 @@ const Template = () => {
         uniqueAlertsCount,
         // Add event click handler only for the last use case
         eventClickHandler:
-          useCaseName === 'With clickable events popover'
+          useCaseName === 'With clickable events popover' ||
+          useCaseName === 'With clickable events popover - only events' ||
+          useCaseName === 'With clickable events popover - only alerts'
             ? eventDetailsPopover.onEventClick
             : undefined,
       })),
