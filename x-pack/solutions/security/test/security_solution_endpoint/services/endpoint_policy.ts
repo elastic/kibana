@@ -67,6 +67,7 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
     log.error(error);
     throw new Error(message);
   };
+
   const retrieveEndpointPackageInfo = (() => {
     // Retrieve information about the Endpoint security package
     // EPM does not currently have an API to get the "lastest" information for a page given its name,

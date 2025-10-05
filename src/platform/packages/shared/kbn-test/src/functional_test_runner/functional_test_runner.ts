@@ -112,10 +112,12 @@ export class FunctionalTestRunner {
         return;
       }
 
-      await lifecycle.beforeTests.trigger(mocha.suite);
-      if (abortSignal?.aborted) {
-        this.log.warning('run aborted');
-        return;
+      if (realServices) {
+        await lifecycle.beforeTests.trigger(mocha.suite);
+        if (abortSignal?.aborted) {
+          this.log.warning('run aborted');
+          return;
+        }
       }
 
       this.log.info('Starting tests');
