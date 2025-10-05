@@ -97,6 +97,13 @@ export async function catchError(
         fakeRequest: params.fakeRequest,
         coreStart: params.coreStart,
         node: node as GraphNodeUnion,
+        // Before error handling: Stack might look like
+        // [parent_scope, current_node_scope] <- current_node_scope matches current node
+
+        // After error occurs and we're in catch block:
+        // The current node has moved on, but the scope stack still has the old scope
+        // So we need to pop it to maintain correct execution context
+        // e.g. for current_node the scope is [parent_scope]
         stackFrames: workflowScopeStack.exitScope().stackFrames,
       });
       const stepImplementation = params.nodesFactory.create(stepExecutionRuntime);

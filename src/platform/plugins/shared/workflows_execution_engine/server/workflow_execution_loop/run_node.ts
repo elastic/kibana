@@ -12,7 +12,6 @@ import type { WorkflowExecutionLoopParams } from './types';
 import { runStackMonitor } from './run_stack_monitor';
 import { catchError } from './catch_error';
 import { createStepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime_factory';
-import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 
 /**
  * Executes a single step in the workflow execution process.
@@ -76,10 +75,6 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   try {
     await Promise.race([runMonitorPromise, runStepPromise]);
     if (currentNode?.type.startsWith('enter')) {
-      if (currentNode.type === 'atomic') {
-        console.log();
-      }
-
       params.workflowRuntime.enterScope();
     }
     monitorAbortController.abort();
