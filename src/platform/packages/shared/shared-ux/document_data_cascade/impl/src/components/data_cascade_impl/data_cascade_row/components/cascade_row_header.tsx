@@ -94,6 +94,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
         data: groupNodeData,
       });
     };
+
     return dataFetchFn().catch((error) => {
       // eslint-disable-next-line no-console -- added for debugging purposes
       console.error('Error fetching data for row with ID: %s', rowId, error);
@@ -180,7 +181,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
               grow={6}
               css={styles.rowHeaderSlotContainer}
               style={{
-                maxWidth: `${Math.min(10 + Math.max(headerMetaSlots?.length ?? 0, 1) * 20, 60)}%`,
+                maxWidth: `${Math.min(10 + Math.max(headerMetaSlots?.length ?? 0, 1) * 10, 60)}%`,
               }}
             >
               <EuiFlexGroup
