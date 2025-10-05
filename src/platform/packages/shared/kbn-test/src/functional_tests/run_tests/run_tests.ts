@@ -129,8 +129,30 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         ];
 
         let shutdownEs: (() => Promise<void>) | undefined;
+        let fleetRegistryOverrideArg: string | undefined;
+
+        // Ensure Kibana receives the dynamically assigned Fleet registry port.
+        const applyFleetRegistryOverride = () => {
+          const resolvedRegistryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+          if (!resolvedRegistryPort) {
+            return;
+          }
+
+          const overrideArg = `--xpack.fleet.registryUrl=http://localhost:${resolvedRegistryPort}`;
+          if (!kibanaExtraOptions.includes(overrideArg)) {
+            kibanaExtraOptions.push(overrideArg);
+          }
+
+          fleetRegistryOverrideArg = overrideArg;
+        };
 
         try {
+          if (dockerWarmupPromise) {
+            await dockerWarmupPromise;
+            dockerWarmupPromise = undefined;
+            applyFleetRegistryOverride();
+          }
+
           const startKibana = () =>
             withSpan('start_kibana', () =>
               runKibanaServer({
@@ -188,6 +210,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                         `--xpack.fleet.syncIntegrations.taskInterval=5s`,
                         `--elasticsearch.hosts=http://localhost:9221`,
                         `--server.port=5621`,
+                        ...(fleetRegistryOverrideArg ? [fleetRegistryOverrideArg] : []),
                       ],
                     },
                   },
@@ -201,6 +224,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
                   config.get('serverless')
                     ? '--server.versioned.versionResolution=newest'
                     : '--server.versioned.versionResolution=oldest',
+                  ...(fleetRegistryOverrideArg ? [fleetRegistryOverrideArg] : []),
                 ],
                 remote: true,
               })
@@ -209,10 +233,6 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
           if (abortCtrl.signal.aborted) {
             return;
-          }
-
-          if (dockerWarmupPromise) {
-            await dockerWarmupPromise;
           }
 
           await withSpan('run_tests', () =>
