@@ -113,7 +113,7 @@ export function WorkflowsEmptyState({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                href="https://github.com/elastic/workflow-examples"
+                href="https://github.com/elastic/workflows"
                 target="_blank"
                 iconType="popout"
                 iconSide="right"
