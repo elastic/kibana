@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { RoundedBadge } from '../styles';
 import type { DocumentAnalysisOutput } from './analyze_documents';
@@ -14,12 +14,14 @@ import type { DocumentAnalysisOutput } from './analyze_documents';
 export const TEST_SUBJ_ALERT_ICON = 'label-node-alert-icon';
 export const TEST_SUBJ_ALERT_COUNT = 'label-node-alert-count';
 export const TEST_SUBJ_EVENT_COUNT = 'label-node-event-count';
+export const TEST_SUBJ_EVENT_COUNT_BUTTON = 'label-node-event-count-button';
 
 export const LIMIT = 99;
 export const displayCount = (count: number) => (count > LIMIT ? `+${LIMIT}` : count);
 
 interface LabelNodeBadgesProps {
   analysis: DocumentAnalysisOutput;
+  onEventClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 const CountText: React.FC<{ testSubj: string; color: string; children: React.ReactNode }> = ({
@@ -46,13 +48,37 @@ const AlertIcon: React.FC<{ color: string }> = ({ color }) => (
   <EuiIcon data-test-subj={TEST_SUBJ_ALERT_ICON} type="warningFilled" color={color} size="s" />
 );
 
-const EventBadge: React.FC<{ count: number }> = ({ count }) => {
+const EventBadge: React.FC<{
+  count: number;
+  onEventClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}> = ({ count, onEventClick }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <RoundedBadge>
-      <CountText testSubj={TEST_SUBJ_EVENT_COUNT} color={euiTheme.colors.textHeading}>
-        {displayCount(count)}
-      </CountText>
+      {onEventClick ? (
+        <EuiButtonEmpty
+          size="xs"
+          color="text"
+          data-test-subj={TEST_SUBJ_EVENT_COUNT_BUTTON}
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onEventClick?.(e);
+          }}
+          aria-label="Show event details"
+          flush="both"
+          css={css`
+            font-weight: ${euiTheme.font.weight.medium};
+            color: ${euiTheme.colors.textHeading};
+          `}
+        >
+          {displayCount(count)}
+        </EuiButtonEmpty>
+      ) : (
+        <CountText testSubj={TEST_SUBJ_EVENT_COUNT} color={euiTheme.colors.textHeading}>
+          {displayCount(count)}
+        </CountText>
+      )}
     </RoundedBadge>
   );
 };
@@ -78,7 +104,7 @@ const AlertIconBadge: React.FC = () => (
     <AlertIcon color="danger" />
   </RoundedBadge>
 );
-export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
+export const LabelNodeBadges = ({ analysis, onEventClick }: LabelNodeBadgesProps) => {
   const { euiTheme } = useEuiTheme();
 
   if (analysis.isSingleEvent) {
@@ -95,11 +121,13 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
       `}
     >
       {analysis.isSingleAlert && <AlertIconBadge />}
-      {analysis.isGroupOfEvents && <EventBadge count={analysis.uniqueEventsCount} />}
+      {analysis.isGroupOfEvents && (
+        <EventBadge count={analysis.uniqueEventsCount} onEventClick={onEventClick} />
+      )}
       {analysis.isGroupOfAlerts && <AlertCountBadge count={analysis.uniqueAlertsCount} />}
       {analysis.isGroupOfEventsAndAlerts && (
         <>
-          <EventBadge count={analysis.uniqueEventsCount} />
+          <EventBadge count={analysis.uniqueEventsCount} onEventClick={onEventClick} />
           <AlertCountBadge count={analysis.uniqueAlertsCount} inverted />
         </>
       )}

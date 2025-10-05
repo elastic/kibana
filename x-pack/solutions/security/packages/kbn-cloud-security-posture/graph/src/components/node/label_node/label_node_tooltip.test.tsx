@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { LabelNodeTooltipContent } from './label_node_tooltip';
+import { LabelNodePopoverContent } from './label_node_tooltip';
 import { analyzeDocuments } from './analyze_documents';
 
 const TEST_SUBJ_ALERT_SECTION = 'label-node-tooltip-alert-section';
@@ -17,11 +17,11 @@ const TEST_SUBJ_ALERT_COUNT = 'label-node-tooltip-alert-count';
 const TEST_SUBJ_EVENT_SECTION = 'label-node-tooltip-event-section';
 const TEST_SUBJ_EVENT_COUNT = 'label-node-tooltip-event-count';
 
-describe('LabelNodeTooltipContent', () => {
+describe('LabelNodePopoverContent', () => {
   test('renders nothing with no events or alerts', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 0 });
 
-    const { container } = render(<LabelNodeTooltipContent analysis={analysis} />);
+    const { container } = render(<LabelNodePopoverContent analysis={analysis} />);
 
     // Verify that the container is mostly empty (only has the outer div)
     expect(container.firstChild).toBeEmptyDOMElement();
@@ -30,7 +30,7 @@ describe('LabelNodeTooltipContent', () => {
   test('renders with a single event', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
 
-    render(<LabelNodeTooltipContent analysis={analysis} />);
+    render(<LabelNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_SECTION)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_SECTION)).not.toBeInTheDocument();
@@ -41,7 +41,7 @@ describe('LabelNodeTooltipContent', () => {
   test('renders with a single alert', () => {
     const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 1 });
 
-    render(<LabelNodeTooltipContent analysis={analysis} />);
+    render(<LabelNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_ALERT_SECTION)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_SECTION)).not.toBeInTheDocument();
@@ -55,7 +55,7 @@ describe('LabelNodeTooltipContent', () => {
     const uniqueEventsCount = 120;
     const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount: 0 });
 
-    render(<LabelNodeTooltipContent analysis={analysis} />);
+    render(<LabelNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_SECTION)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_SECTION)).not.toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('LabelNodeTooltipContent', () => {
     const uniqueAlertsCount = 120;
     const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount });
 
-    render(<LabelNodeTooltipContent analysis={analysis} />);
+    render(<LabelNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_ALERT_SECTION)).toBeInTheDocument();
     expect(screen.queryByTestId(TEST_SUBJ_EVENT_SECTION)).not.toBeInTheDocument();
@@ -87,7 +87,7 @@ describe('LabelNodeTooltipContent', () => {
     const uniqueAlertsCount = 120;
     const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount });
 
-    render(<LabelNodeTooltipContent analysis={analysis} />);
+    render(<LabelNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_SECTION)).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ_ALERT_SECTION)).toBeInTheDocument();
@@ -109,7 +109,7 @@ describe('LabelNodeTooltipContent', () => {
     const uniqueAlertsCount = 1_200_000;
     const analysis = analyzeDocuments({ uniqueEventsCount, uniqueAlertsCount });
 
-    render(<LabelNodeTooltipContent analysis={analysis} />);
+    render(<LabelNodePopoverContent analysis={analysis} />);
 
     expect(screen.getByTestId(TEST_SUBJ_EVENT_SECTION)).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ_ALERT_SECTION)).toBeInTheDocument();

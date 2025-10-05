@@ -10,6 +10,8 @@ import { ThemeProvider, css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import type { LabelNodeViewModel } from '../..';
 import { Graph } from '../..';
+import { useEventDetailsPopover } from '../../graph_investigation/use_event_details_popover';
+import { analyzeDocuments } from './analyze_documents';
 import { GlobalStylesStorybookDecorator } from '../../../../.storybook/decorators';
 
 export default {
@@ -28,9 +30,17 @@ const useCases = {
   'Multiple events and alerts': { uniqueEventsCount: 2, uniqueAlertsCount: 2 },
   'Hundreds of events and alerts': { uniqueEventsCount: 120, uniqueAlertsCount: 120 },
   'Millions of events and alerts': { uniqueEventsCount: 1_200_000, uniqueAlertsCount: 1_200_000 },
+  'With clickable events popover': { uniqueEventsCount: 5, uniqueAlertsCount: 3 },
 };
 
 const Template = () => {
+  // Create analysis for the popover use case
+  const popoverAnalysis = analyzeDocuments({ uniqueEventsCount: 5, uniqueAlertsCount: 3 });
+  const eventDetailsPopover = useEventDetailsPopover(
+    popoverAnalysis,
+    'With clickable events popover'
+  );
+
   const nodes: LabelNodeViewModel[] = useMemo(
     () =>
       Object.entries(useCases).map(([useCaseName, { uniqueEventsCount, uniqueAlertsCount }]) => ({
@@ -41,8 +51,13 @@ const Template = () => {
         shape: 'label',
         uniqueEventsCount,
         uniqueAlertsCount,
+        // Add event click handler only for the last use case
+        eventClickHandler:
+          useCaseName === 'With clickable events popover'
+            ? eventDetailsPopover.onEventClick
+            : undefined,
       })),
-    []
+    [eventDetailsPopover.onEventClick]
   );
 
   return (
@@ -56,6 +71,7 @@ const Template = () => {
         edges={[]}
         interactive={true}
       />
+      <eventDetailsPopover.PopoverComponent />
     </ThemeProvider>
   );
 };

@@ -112,7 +112,7 @@ export const useNodeDetailsPopover = ({
   // eslint-disable-next-line react/display-name
   const PopoverComponent = memo(() => (
     <GraphPopover
-      panelPaddingSize="s"
+      panelPaddingSize="m"
       anchorPosition="rightCenter"
       isOpen={state.isOpen}
       anchorElement={state.anchorElement}
