@@ -24,12 +24,34 @@ export const WorkflowTags = ({ tags }: WorkflowTagsProps) => {
   const [firstTag, secondTag, ...restOfTags] = tags;
 
   return (
-    <EuiBadgeGroup gutterSize="xs" css={{ maxWidth: '80%' }}>
-      <EuiBadge key={firstTag} color="hollow">
+    <EuiBadgeGroup
+      gutterSize="xs"
+      css={css`
+        max-width: 80%;
+        flex-wrap: nowrap;
+      `}
+    >
+      <EuiBadge
+        key={firstTag}
+        color="hollow"
+        css={css`
+          max-width: 150px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        `}
+      >
         {firstTag}
       </EuiBadge>
       {secondTag && (
-        <EuiBadge key={secondTag} color="hollow">
+        <EuiBadge
+          key={secondTag}
+          color="hollow"
+          css={css`
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          `}
+        >
           {secondTag}
         </EuiBadge>
       )}
