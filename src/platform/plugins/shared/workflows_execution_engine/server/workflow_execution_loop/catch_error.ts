@@ -82,7 +82,6 @@ export async function catchError(
       const workflowScopeStack = WorkflowScopeStack.fromStackFrames(
         params.workflowRuntime.getCurrentNodeScope()
       );
-      params.workflowRuntime.exitScope();
 
       // exit the whole node scope
       const scopeEntry = workflowScopeStack.getCurrentScope()!;
@@ -98,7 +97,7 @@ export async function catchError(
         fakeRequest: params.fakeRequest,
         coreStart: params.coreStart,
         node: node as GraphNodeUnion,
-        stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+        stackFrames: workflowScopeStack.exitScope().stackFrames,
       });
       const stepImplementation = params.nodesFactory.create(stepExecutionRuntime);
 
@@ -116,12 +115,8 @@ export async function catchError(
         params.workflowRuntime.getWorkflowExecution().error &&
         stepExecutionRuntime.stepExecutionExists()
       ) {
-        if (
-          params.workflowRuntime.getWorkflowExecution().error &&
-          stepExecutionRuntime.stepExecutionExists()
-        ) {
-          await stepExecutionRuntime.failStep(params.workflowRuntime.getWorkflowExecution().error!);
-        }
+        await stepExecutionRuntime.failStep(params.workflowRuntime.getWorkflowExecution().error!);
+        params.workflowRuntime.exitScope();
       }
     }
   } catch (error) {
@@ -130,6 +125,4 @@ export async function catchError(
       `Error in catchError: ${error.message}. Workflow execution may be in an inconsistent state.`
     );
   }
-
-  console.log();
 }
