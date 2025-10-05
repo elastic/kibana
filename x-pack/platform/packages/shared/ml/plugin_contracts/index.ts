@@ -13,13 +13,13 @@ import type { AnomalySwimLaneComponentType } from '@kbn/ml-common-types/anomaly_
 
 export interface MlPluginSetup {
   locator?: LocatorPublic<MlLocatorParams>;
-  getManagementLocator?: (() => Promise<MlManagementLocator>) | undefined;
+  managementLocator?: MlManagementLocator;
   getElasticModels?: (() => Promise<IElasticModels>) | undefined;
 }
 
 export interface MlPluginStart {
   locator?: LocatorPublic<MlLocatorParams>;
-  getManagementLocator?: (() => Promise<MlManagementLocator>) | undefined;
+  managementLocator?: MlManagementLocator;
   getElasticModels?: (() => Promise<IElasticModels>) | undefined;
   getMlApi: () => Promise<MlApi>;
   components: {
