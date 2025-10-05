@@ -69,11 +69,10 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
     async function initNewJobUrl() {
       const startServices = await getStartServices();
-      const { getManagementLocator } = startServices[2];
+      const { managementLocator } = startServices[2];
 
-      if (!getManagementLocator) return;
+      if (!managementLocator) return;
 
-      const managementLocator = await getManagementLocator();
       const { url } = await managementLocator.getUrl(
         { page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB },
         'anomaly_detection'

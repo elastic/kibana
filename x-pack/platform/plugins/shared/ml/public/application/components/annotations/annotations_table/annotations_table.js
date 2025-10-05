@@ -39,7 +39,8 @@ import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
 } from '@kbn/ml-common-constants/annotations';
-import { ML_APP_LOCATOR, ML_PAGES } from '@kbn/ml-common-types/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { timeFormatter } from '@kbn/ml-date-utils';
 
 import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';

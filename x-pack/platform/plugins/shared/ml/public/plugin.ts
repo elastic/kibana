@@ -63,7 +63,6 @@ import {
 } from '@kbn/ml-common-constants/app';
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { ITelemetryClient } from '@kbn/ml-trained-models-utils/src/types/telemetry';
-import type { getMlManagementLocator } from '@kbn/ml-locator/get_ml_management_locator';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin-contracts';
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -138,7 +137,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   private locator: undefined | LocatorPublic<MlLocatorParams>;
-  private getManagementLocator: undefined | (() => ReturnType<typeof getMlManagementLocator>);
+  private managementLocator: undefined | MlManagementLocatorInternal;
 
   private isServerless: boolean = false;
   private enabledFeatures: MlFeatures = {
@@ -224,8 +223,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
-      this.getManagementLocator = async () =>
-        await new MlManagementLocatorInternal(pluginsSetup.share);
+      this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -316,7 +314,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       locator: this.locator,
-      getManagementLocator: this.getManagementLocator,
+      managementLocator: this.managementLocator,
       getElasticModels: async () => await getElasticModels(core.http),
     };
   }
@@ -326,7 +324,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       getElasticModels: async () => await getElasticModels(core.http),
       getMlApi: async () => await getMlSharedServices(core.http),
       locator: this.locator,
-      getManagementLocator: this.getManagementLocator,
+      managementLocator: this.managementLocator,
       components: {
         AnomalySwimLane,
       },
