@@ -52,6 +52,7 @@ export const NewConversationButton: React.FC<{}> = () => {
       iconSide="left"
       aria-label={labels.ariaLabel}
       onClick={handleClick}
+      data-test-subj="agentBuilderNewConversationButton"
       {...buttonProps}
     >
       {labels.display}

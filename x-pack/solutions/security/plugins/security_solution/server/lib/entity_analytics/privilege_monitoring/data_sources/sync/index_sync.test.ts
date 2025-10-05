@@ -76,6 +76,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   const loggerMock = loggingSystemMock.createLogger();
   const auditMock = { log: jest.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
   const telemetryMock = analyticsServiceMock.createAnalyticsServiceSetup();
+  const maxPrivilegedUsersAllowed = 100;
 
   const savedObjectServiceMock = savedObjectsServiceMock.createStartContract();
   const deps: PrivilegeMonitoringGlobalDependencies = {
@@ -95,7 +96,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
-    indexSyncService = createIndexSyncService(dataClient);
+    indexSyncService = createIndexSyncService(dataClient, maxPrivilegedUsersAllowed);
   });
 
   describe('syncAllIndexUsers', () => {

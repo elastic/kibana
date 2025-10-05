@@ -57,7 +57,10 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
     // with the const name as the key and inferred type as the value
     consts: z.object({
       ...Object.fromEntries(
-        Object.entries(definition.consts ?? {}).map(([key, value]) => [key, inferZodType(value)])
+        Object.entries(definition.consts ?? {}).map(([key, value]) => [
+          key,
+          inferZodType(value, { isConst: true }),
+        ])
       ),
     }),
   });

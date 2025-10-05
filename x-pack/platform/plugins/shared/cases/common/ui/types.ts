@@ -75,6 +75,11 @@ export interface CasesUiConfigType {
   stack: {
     enabled: boolean;
   };
+  resilient: {
+    additionalFields: {
+      enabled: boolean;
+    };
+  };
   incrementalId: {
     enabled: boolean;
   };

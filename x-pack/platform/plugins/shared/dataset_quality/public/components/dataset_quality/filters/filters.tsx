@@ -8,6 +8,7 @@
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { css } from '@emotion/css';
 import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
 import { useKibanaContextForPlugin } from '../../../utils';
 import { FilterBar } from './filter_bar';
@@ -34,6 +35,15 @@ const typesNoneMatching = i18n.translate('xpack.datasetQuality.selector.types.no
 const typesNoneAvailable = i18n.translate('xpack.datasetQuality.selector.types.noneAvailable', {
   defaultMessage: 'No types available',
 });
+
+const datePickerStyle = css`
+  .euiFormControlLayout {
+    height: 40px;
+  }
+  .euiButton {
+    height: 40px;
+  }
+`;
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -92,7 +102,7 @@ export default function Filters() {
           onQualitiesChange={onQualitiesChange}
         />
       </EuiFilterGroup>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} className={datePickerStyle}>
         <unifiedSearch.ui.SearchBar
           appName="datasetQuality"
           showDatePicker={true}

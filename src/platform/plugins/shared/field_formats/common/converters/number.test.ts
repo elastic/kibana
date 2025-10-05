@@ -9,6 +9,7 @@
 
 import { NumberFormat } from './number';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 
 describe('NumberFormat', () => {
   const config: { [key: string]: string } = {
@@ -36,13 +37,13 @@ describe('NumberFormat', () => {
     ).toMatchInlineSnapshot(`"{\\"min\\":150,\\"max\\":1000,\\"sum\\":5000,\\"value_count\\":10}"`);
     expect(formatter.convert({ min: 150, max: 1000, sum: 5000, value_count: 10 }, 'html'))
       .toMatchInlineSnapshot(`
-    "{
-      \\"min\\": 150,
-      \\"max\\": 1000,
-      \\"sum\\": 5000,
-      \\"value_count\\": 10
-    }"
-  `);
+      "{
+        \\"min\\": 150,
+        \\"max\\": 1000,
+        \\"sum\\": 5000,
+        \\"value_count\\": 10
+      }"
+    `);
   });
 
   test('object input stringified', () => {
@@ -61,7 +62,9 @@ describe('NumberFormat', () => {
 
   test('null input', () => {
     const formatter = new NumberFormat({}, getConfig);
-    expect(formatter.convert(null)).toMatchInlineSnapshot(`"-"`);
-    expect(formatter.convert(null, 'html')).toMatchInlineSnapshot(`" - "`);
+    expect(formatter.convert(null)).toMatchInlineSnapshot(`"${NULL_LABEL}"`);
+    expect(formatter.convert(null, 'html')).toMatchInlineSnapshot(
+      `"<span class=\\"ffString__emptyValue\\">${NULL_LABEL}</span>"`
+    );
   });
 });

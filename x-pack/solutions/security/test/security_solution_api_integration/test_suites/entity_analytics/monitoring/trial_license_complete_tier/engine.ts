@@ -41,7 +41,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
   }
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/236954
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     const dataViewWithNamespace = dataViewRouteHelpersFactory(supertest, customSpace);
 
@@ -493,6 +494,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         const kathryneBefore = privMonUtils.findUser(usersBefore, 'Kathryne.Ziemann');
         expect(kathryneBefore).toBeDefined();
+        privMonUtils.assertIsPrivileged(kathryneBefore, true);
+        expect(kathryneBefore?.labels?.source_ids).toContain(monitoringSource?.id);
+        expect(kathryneBefore?.labels?.sources).toContain('entity_analytics_integration');
         expect(kathryneBefore?.entity_analytics_monitoring?.labels).toEqual([
           {
             field: 'user.roles',

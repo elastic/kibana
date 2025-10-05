@@ -479,7 +479,8 @@ export class FileUploadManager {
 
     this.setStatus({
       overallImportStatus: STATUS.STARTED,
-      dataViewCreated: this.autoCreateDataView ? STATUS.NOT_STARTED : STATUS.NA,
+      dataViewCreated:
+        this.autoCreateDataView && dataViewName !== null ? STATUS.NOT_STARTED : STATUS.NA,
     });
 
     this.importer = await this.fileUpload.importerFactory(this.commonFileFormat, {});

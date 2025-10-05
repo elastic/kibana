@@ -7,49 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { StepContext, WorkflowYaml } from '@kbn/workflows';
-import {
-  WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
-  WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
-} from '@kbn/workflows';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
-import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
-import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
+import { WorkflowEditor } from './workflow_editor';
+import { WorkflowEditorLayout } from './workflow_detail_layout';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 
-const WorkflowYAMLEditor = React.lazy(() =>
-  import('../../../widgets/workflow_yaml_editor').then((module) => ({
-    default: module.WorkflowYAMLEditor,
-  }))
-);
-
-const WorkflowVisualEditor = React.lazy(() =>
-  import('../../../features/workflow_visual_editor').then((module) => ({
-    default: module.WorkflowVisualEditor,
-  }))
-);
-
 export function WorkflowDetailPage({ id }: { id: string }) {
-  const styles = useMemoCss(componentStyles);
-  const { application, uiSettings, notifications } = useKibana().services;
+  const { application, notifications } = useKibana().services;
   const {
     data: workflow,
     isLoading: isLoadingWorkflow,
@@ -60,8 +38,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const { activeTab, selectedExecutionId, selectedStepId, setActiveTab, setSelectedExecution } =
     useWorkflowUrlState();
 
-  const showExecutionSidebar = activeTab === 'executions' || selectedExecutionId;
-
   const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
   const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
@@ -71,7 +47,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
-  const { updateWorkflow, runWorkflow, runIndividualStep, testWorkflow } = useWorkflowActions();
+  const { updateWorkflow, runWorkflow, testWorkflow } = useWorkflowActions();
 
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
@@ -128,9 +104,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     }
     return parsingResult.data as WorkflowYaml;
   }, [workflowYaml]);
-
-  const [testStepId, setTestStepId] = useState<string | null>(null);
-  const [contextOverride, setcontextOverride] = useState<ContextOverrideData | null>(null);
 
   const handleRunClick = ({ test = false }: { test: boolean }) => {
     const def = test ? definitionFromCurrentYaml : workflow?.definition;
@@ -248,48 +221,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     );
   }, [notifications?.toasts, updateWorkflow, id, workflow]);
 
-  const isVisualEditorEnabled = uiSettings?.get<boolean>(
-    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
-    false
-  );
-  const isExecutionGraphEnabled = uiSettings?.get<boolean>(
-    WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
-    false
-  );
-
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
     setHasChanges(false);
   }, [workflow]);
 
-  const handleChange = (wfString: string) => {
+  const handleChange = (wfString: string = '') => {
     setWorkflowYaml(wfString);
     setHasChanges(originalWorkflowYaml !== wfString);
-  };
-
-  const handleStepRun = async (params: { stepId: string; actionType: string }) => {
-    if (params.actionType === 'run') {
-      const contextOverrideData = buildContextOverrideForStep(workflowYaml, params.stepId);
-
-      if (!Object.keys(contextOverrideData.stepContext).length) {
-        submitStepRun(params.stepId, {});
-        return;
-      }
-
-      setcontextOverride(contextOverrideData);
-      setTestStepId(params.stepId);
-    }
-  };
-
-  const submitStepRun = async (stepId: string, mock: Partial<StepContext>) => {
-    const response = await runIndividualStep.mutateAsync({
-      stepId,
-      workflowYaml,
-      contextOverride: mock,
-    });
-    setSelectedExecution(response.workflowExecutionId);
-    setTestStepId(null);
-    setcontextOverride(null);
   };
 
   if (workflowError) {
@@ -305,83 +244,60 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   }
 
   return (
-    <div css={styles.pageContainer}>
-      <WorkflowDetailHeader
-        name={workflow?.name}
-        isLoading={isLoadingWorkflow}
-        activeTab={activeTab}
-        canRunWorkflow={canRunWorkflow}
-        canSaveWorkflow={canSaveWorkflow}
-        isValid={workflow?.valid ?? true}
-        isEnabled={workflow?.enabled ?? false}
-        handleRunClick={() => handleRunClick({ test: false })}
-        handleSave={handleSave}
-        handleToggleWorkflow={handleToggleWorkflow}
-        canTestWorkflow={canTestWorkflow}
-        handleTestClick={() => handleRunClick({ test: true })}
-        handleTabChange={(tab) => {
-          setActiveTab(tab);
-        }}
-        hasUnsavedChanges={hasChanges}
-        highlightDiff={highlightDiff}
-        setHighlightDiff={setHighlightDiff}
-        lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
-      />
-      <EuiFlexGroup gutterSize="none" css={styles.container}>
-        <EuiFlexItem css={styles.main}>
-          <EuiFlexGroup gutterSize="none">
-            <EuiFlexItem css={styles.yamlEditor}>
-              <React.Suspense fallback={<EuiLoadingSpinner />}>
-                <WorkflowYAMLEditor
-                  workflowId={workflow?.id ?? 'unknown'}
-                  filename={`${workflow?.id ?? 'unknown'}.yaml`}
-                  value={yamlValue}
-                  onChange={(v) => handleChange(v ?? '')}
-                  lastUpdatedAt={workflow?.lastUpdatedAt}
-                  hasChanges={hasChanges}
-                  highlightStep={selectedStepId}
-                  stepExecutions={execution?.stepExecutions}
-                  readOnly={activeTab === 'executions'}
-                  selectedExecutionId={selectedExecutionId}
-                  originalValue={workflow?.yaml ?? ''}
-                  onStepActionClicked={handleStepRun}
-                  highlightDiff={highlightDiff}
-                />
-              </React.Suspense>
-            </EuiFlexItem>
-            {isVisualEditorEnabled && workflow && (
-              <EuiFlexItem css={styles.visualEditor}>
-                <React.Suspense fallback={<EuiLoadingSpinner />}>
-                  <WorkflowVisualEditor
-                    workflowYaml={yamlValue}
-                    workflowExecutionId={selectedExecutionId}
-                  />
-                </React.Suspense>
-              </EuiFlexItem>
-            )}
-            {isExecutionGraphEnabled && workflow && (
-              <EuiFlexItem css={styles.visualEditor}>
-                <React.Suspense fallback={<EuiLoadingSpinner />}>
-                  <ExecutionGraph workflowYaml={yamlValue} />
-                </React.Suspense>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        {showExecutionSidebar && (
-          <EuiFlexItem css={styles.sidebar}>
-            {!selectedExecutionId && <WorkflowExecutionList workflowId={workflow?.id ?? null} />}
-            {workflow && selectedExecutionId && (
+    <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
+      <EuiFlexItem style={{ overflow: 'hidden' }}>
+        <WorkflowDetailHeader
+          name={workflow?.name}
+          isLoading={isLoadingWorkflow}
+          activeTab={activeTab}
+          canRunWorkflow={canRunWorkflow}
+          canSaveWorkflow={canSaveWorkflow}
+          isValid={workflow?.valid ?? true}
+          isEnabled={workflow?.enabled ?? false}
+          handleRunClick={() => handleRunClick({ test: false })}
+          handleSave={handleSave}
+          handleToggleWorkflow={handleToggleWorkflow}
+          canTestWorkflow={canTestWorkflow}
+          handleTestClick={() => handleRunClick({ test: true })}
+          handleTabChange={setActiveTab}
+          hasUnsavedChanges={hasChanges}
+          highlightDiff={highlightDiff}
+          setHighlightDiff={setHighlightDiff}
+          lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
+        />
+        <WorkflowEditorLayout
+          editor={
+            <WorkflowEditor
+              workflow={workflow}
+              workflowYaml={yamlValue}
+              onWorkflowYamlChange={handleChange}
+              hasChanges={hasChanges}
+              execution={execution}
+              activeTab={activeTab}
+              selectedExecutionId={selectedExecutionId}
+              selectedStepId={selectedStepId}
+              highlightDiff={highlightDiff}
+              setSelectedExecution={setSelectedExecution}
+            />
+          }
+          executionList={
+            activeTab === 'executions' && workflow && !selectedExecutionId ? (
+              <WorkflowExecutionList workflowId={workflow?.id ?? null} />
+            ) : null
+          }
+          executionDetail={
+            workflow && selectedExecutionId ? (
               <WorkflowExecutionDetail
                 workflowExecutionId={selectedExecutionId}
                 workflowYaml={yamlValue}
                 showBackButton={activeTab === 'executions'}
                 onClose={() => setSelectedExecution(null)}
               />
-            )}
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+            ) : null
+          }
+        />
+      </EuiFlexItem>
+
       {workflowExecuteModalOpen && workflow && (
         <WorkflowExecuteModal
           definition={workflow.definition}
@@ -396,51 +312,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           onSubmit={handleTestRunWorkflow}
         />
       )}
-      {testStepId && contextOverride && (
-        <TestStepModal
-          initialcontextOverride={contextOverride}
-          onSubmit={({ stepInputs }) => submitStepRun(testStepId, stepInputs)}
-          onClose={() => {
-            setTestStepId(null);
-            setcontextOverride(null);
-          }}
-        />
-      )}
-    </div>
+    </EuiFlexGroup>
   );
 }
-
-const componentStyles = {
-  pageContainer: css({
-    display: 'flex',
-    flexDirection: 'column',
-    flex: '1 1 0',
-    overflow: 'hidden',
-  }),
-  container: css`
-    flex: 1;
-    height: 100%;
-    min-height: 0;
-    flex-wrap: nowrap !important;
-  `,
-  main: css({
-    flex: 1,
-    overflow: 'hidden',
-  }),
-  yamlEditor: css({
-    flex: 1,
-    overflow: 'hidden',
-  }),
-  visualEditor: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flex: 1,
-      overflow: 'hidden',
-      borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
-  sidebar: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      maxWidth: '300px',
-      flex: 1,
-      borderLeft: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
-};

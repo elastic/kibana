@@ -82,3 +82,20 @@ components:
           "@timestamp":
             type: string
             format: date-time
+          user:
+            type: object
+            properties:
+              name:
+                type: string
+              is_privileged:
+                type: boolean
+                description: Indicates if the user is privileged.
+              entity:
+                type: object
+                properties:
+                  attributes:
+                    type: object
+                    properties:
+                       Privileged:
+                        type: boolean
+                        description: Indicates if the user is privileged.

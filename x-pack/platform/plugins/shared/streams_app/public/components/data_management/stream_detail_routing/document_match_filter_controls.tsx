@@ -21,7 +21,7 @@ import {
 
 export interface DocumentMatchFilterControlsProps {
   onFilterChange: (filter: DocumentMatchFilterOptions) => void;
-  matchedDocumentPercentage: number;
+  matchedDocumentPercentage: number | undefined;
   isDisabled?: boolean;
 }
 
@@ -56,13 +56,17 @@ export const DocumentMatchFilterControls = ({
               data-test-subj="routingPreviewMatchedFilterButton"
               hasActiveFilters={documentMatchFilter === 'matched'}
               onClick={() => handleFilterChanged('matched')}
-              isDisabled={isDisabled || isNaN(matchedDocumentPercentage)}
+              isDisabled={
+                isDisabled ||
+                matchedDocumentPercentage === undefined ||
+                isNaN(matchedDocumentPercentage)
+              }
               isSelected={documentMatchFilter === 'matched'}
               badgeColor="success"
               grow={false}
               isToggle
               numActiveFilters={
-                isNaN(matchedDocumentPercentage) ? '' : `${matchedDocumentPercentage}%`
+                matchedDocumentPercentage === undefined ? '' : `${matchedDocumentPercentage}%`
               }
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.matched', {
@@ -77,13 +81,17 @@ export const DocumentMatchFilterControls = ({
               data-test-subj="routingPreviewUnmatchedFilterButton"
               hasActiveFilters={documentMatchFilter === 'unmatched'}
               onClick={() => handleFilterChanged('unmatched')}
-              isDisabled={isDisabled || isNaN(matchedDocumentPercentage)}
+              isDisabled={
+                isDisabled ||
+                matchedDocumentPercentage === undefined ||
+                isNaN(matchedDocumentPercentage)
+              }
               isSelected={documentMatchFilter === 'unmatched'}
               badgeColor="accent"
               grow={false}
               isToggle
               numActiveFilters={
-                isNaN(matchedDocumentPercentage) ? '' : `${100 - matchedDocumentPercentage}%`
+                matchedDocumentPercentage === undefined ? '' : `${100 - matchedDocumentPercentage}%`
               }
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.unmatched', {

@@ -72,6 +72,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
       responsive={false}
       alignItems="stretch"
       justifyContent="center"
+      data-test-subj="agentBuilderConversationInputForm"
       aria-label={i18n.translate('xpack.onechat.conversationInputForm', {
         defaultMessage: 'Message input form',
       })}

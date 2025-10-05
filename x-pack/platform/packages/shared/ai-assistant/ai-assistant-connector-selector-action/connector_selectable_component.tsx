@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import type { EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { EuiBadge, EuiPanel, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { translations as i8n } from './connector_selector.translations';
@@ -31,6 +31,9 @@ export interface ConnectorSelectableComponentProps<
   onValueChange?: (value: string, option: EuiSelectableOption<T>) => void;
   /** Selectable footer component */
   footer?: React.ReactElement;
+
+  /** Render option component */
+  renderOption?: EuiSelectableProps['renderOption'];
 }
 
 export const ConnectorSelectableComponent = <T extends { value: string } = { value: string }>(
@@ -63,6 +66,7 @@ export const ConnectorSelectableComponent = <T extends { value: string } = { val
         key: connector.value,
         checked: connector.value === selectedValue ? 'on' : undefined,
         append: connector.value === props.defaultConnectorId ? defaultConnectorBadge : undefined,
+        'data-test-subj': connector['data-test-subj'] ?? connector.value,
       })),
     [props.preConfiguredConnectors, selectedValue, props.defaultConnectorId, defaultConnectorBadge]
   );
@@ -74,6 +78,7 @@ export const ConnectorSelectableComponent = <T extends { value: string } = { val
         key: connector.value,
         checked: connector.value === selectedValue ? 'on' : undefined,
         append: connector.value === props.defaultConnectorId ? defaultConnectorBadge : undefined,
+        'data-test-subj': connector['data-test-subj'] ?? connector.value,
       })),
     [props.customConnectors, selectedValue, props.defaultConnectorId, defaultConnectorBadge]
   );
@@ -124,6 +129,7 @@ export const ConnectorSelectableComponent = <T extends { value: string } = { val
         singleSelection
         options={options}
         onChange={handleChange}
+        renderOption={props.renderOption}
       >
         {(list) => (
           <>

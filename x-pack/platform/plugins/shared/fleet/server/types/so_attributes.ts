@@ -118,6 +118,7 @@ export interface FleetServerHostSOAttributes {
     ssl?: {
       key?: { id: string };
       es_key?: { id: string };
+      agent_key?: { id: string };
     };
   };
   ssl?: string | null;

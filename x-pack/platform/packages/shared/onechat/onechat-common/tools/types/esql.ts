@@ -47,8 +47,8 @@ export type EsqlToolConfig = {
   params: Record<string, EsqlToolParam>;
 };
 
-export type EsqlToolDefinition = ToolDefinition<EsqlToolConfig>;
-export type EsqlToolDefinitionWithSchema = ToolDefinitionWithSchema<EsqlToolConfig>;
+export type EsqlToolDefinition = ToolDefinition<ToolType.esql, EsqlToolConfig>;
+export type EsqlToolDefinitionWithSchema = ToolDefinitionWithSchema<ToolType.esql, EsqlToolConfig>;
 
 export function isEsqlTool(tool: ToolDefinitionWithSchema): tool is EsqlToolDefinitionWithSchema;
 export function isEsqlTool(tool: ToolDefinition): tool is EsqlToolDefinition;

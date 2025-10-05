@@ -8,11 +8,11 @@
  */
 
 import type { EnterNormalPathNode } from '@kbn/workflows/graph';
-import type { StepErrorCatcher, NodeImplementation } from '../../node_implementation';
+import type { NodeWithErrorCatching, NodeImplementation } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
 
-export class EnterNormalPathNodeImpl implements NodeImplementation, StepErrorCatcher {
+export class EnterNormalPathNodeImpl implements NodeImplementation, NodeWithErrorCatching {
   constructor(
     private node: EnterNormalPathNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,

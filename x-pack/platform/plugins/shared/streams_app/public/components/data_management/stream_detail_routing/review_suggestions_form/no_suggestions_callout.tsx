@@ -7,6 +7,7 @@
 
 import { EuiText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
 import React from 'react';
 import { GenerateSuggestionButton } from './generate_suggestions_button';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
@@ -27,6 +28,9 @@ export function NoSuggestionsCallout({ definition, aiFeatures }: ReviewSuggestio
         }
       )}
       onDismiss={resetForm}
+      className={css`
+        min-block-size: auto; /* Prevent background clipping */
+      `}
     >
       <EuiText size="s">
         {i18n.translate(

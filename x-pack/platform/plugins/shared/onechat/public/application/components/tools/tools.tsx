@@ -19,6 +19,7 @@ import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
 import { OnechatToolsTable } from './table/tools_table';
 import { McpConnectionButton } from './mcp_server/mcp_connection_button';
+import { TechPreviewTitle } from '../common/tech_preview';
 export const OnechatTools = () => {
   const { euiTheme } = useEuiTheme();
   const { createTool } = useToolsActions();
@@ -27,7 +28,7 @@ export const OnechatTools = () => {
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header
-        pageTitle={labels.tools.title}
+        pageTitle={<TechPreviewTitle title={labels.tools.title} />}
         description={
           <FormattedMessage
             id="xpack.onechat.tools.toolsDescription"

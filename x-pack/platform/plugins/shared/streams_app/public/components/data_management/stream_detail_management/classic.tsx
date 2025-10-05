@@ -128,6 +128,15 @@ export function ClassicStreamDetailManagement({
     tabs.processing = processing;
   }
 
+  tabs.schema = {
+    content: (
+      <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
+    ),
+    label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
+      defaultMessage: 'Schema',
+    }),
+  };
+
   tabs.dataQuality = {
     content: <StreamDetailDataQuality definition={definition} />,
     label: (
@@ -144,6 +153,10 @@ export function ClassicStreamDetailManagement({
       </EuiToolTip>
     ),
   };
+
+  if (otherTabs.significantEvents) {
+    tabs.significantEvents = otherTabs.significantEvents;
+  }
 
   if (definition.privileges.manage) {
     tabs.advanced = {
@@ -176,19 +189,8 @@ export function ClassicStreamDetailManagement({
         </EuiToolTip>
       ),
     };
-    tabs.schema = {
-      content: (
-        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
-        defaultMessage: 'Schema',
-      }),
-    };
   }
 
-  if (otherTabs.significantEvents) {
-    tabs.significantEvents = otherTabs.significantEvents;
-  }
   if (isValidManagementSubTab(tab)) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
