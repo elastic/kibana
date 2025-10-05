@@ -117,6 +117,7 @@ export function WorkflowsEmptyState({
                 target="_blank"
                 iconType="popout"
                 iconSide="right"
+                aria-label="Example workflows"
               >
                 <FormattedMessage
                   id="workflows.emptyState.exampleWorkflowsButton"
