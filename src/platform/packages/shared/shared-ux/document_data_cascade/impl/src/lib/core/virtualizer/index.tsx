@@ -80,6 +80,7 @@ export const useCascadeVirtualizerRangeExtractor = <G extends GroupNode>({
           : // when its a group that's not of depth 0, it must have a parent row that is already expanded
           (parentRows = rangeStartRow.getParentRows())?.length
           ? parentRows.reduce<number | null>((acc, row, idx) => {
+              // because we are exploring the active item to its root, we want to compute the correct index
               return (acc! += row.index + idx);
             }, 0)
           : null;
