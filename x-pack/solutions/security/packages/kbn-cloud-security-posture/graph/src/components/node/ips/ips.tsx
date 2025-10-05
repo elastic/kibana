@@ -45,7 +45,6 @@ export const useIpPopover = (ips: string[]): UseIpPopoverReturn => {
     contentTestSubj: GRAPH_IPS_POPOVER_CONTENT_ID,
     itemTestSubj: GRAPH_IPS_POPOVER_IP_ID,
     popoverTestSubj: GRAPH_IPS_POPOVER_ID,
-    visibleLimit: VISIBLE_IPS_LIMIT,
   });
 
   return {

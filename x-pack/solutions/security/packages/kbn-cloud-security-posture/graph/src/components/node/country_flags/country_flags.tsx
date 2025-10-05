@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexItem, EuiText, EuiLink, useEuiFontSize, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexItem, EuiText, useEuiFontSize, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,7 +25,6 @@ import {
 import { RoundedBadge } from '../styles';
 import { getCountryFlag, getCountryName } from './country_codes';
 
-export const MAX_COUNTRY_FLAGS_IN_POPOVER = 10;
 const VISIBLE_FLAGS_LIMIT = 2;
 
 const popoverAriaLabel = i18n.translate(
@@ -53,7 +52,6 @@ export const useCountryFlagsPopover = (countryCodes: string[]): UseCountryFlagsP
     contentTestSubj: GRAPH_FLAGS_POPOVER_CONTENT_ID,
     itemTestSubj: GRAPH_FLAGS_POPOVER_COUNTRY_ID,
     popoverTestSubj: GRAPH_FLAGS_POPOVER_ID,
-    visibleLimit: VISIBLE_FLAGS_LIMIT,
   });
 
   return {
