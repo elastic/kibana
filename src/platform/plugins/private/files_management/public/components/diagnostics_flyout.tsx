@@ -106,7 +106,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                   id="Status"
                   xAccessor={'key'}
                   yAccessors={['count']}
-                  xScaleType={ScaleType.Time}
+                  xScaleType={ScaleType.Linear}
                   yScaleType={ScaleType.Linear}
                   timeZone="local"
                 />
@@ -129,7 +129,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                   id="Extension"
                   xAccessor={'key'}
                   yAccessors={['count']}
-                  xScaleType={ScaleType.Time}
+                  xScaleType={ScaleType.Linear}
                   yScaleType={ScaleType.Linear}
                   timeZone="local"
                 />
