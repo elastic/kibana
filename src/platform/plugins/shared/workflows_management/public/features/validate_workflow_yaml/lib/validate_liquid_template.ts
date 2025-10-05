@@ -11,6 +11,11 @@ import { Liquid } from 'liquidjs';
 import type { YamlValidationResult } from '../model/types';
 import { extractLiquidErrorPosition } from './extract_liquid_error_position';
 
+const liquid = new Liquid({
+  strictFilters: true,
+  strictVariables: false, // Allow undefined variables during validation
+});
+
 function convertOffsetToLineColumn(text: string, offset: number): { line: number; column: number } {
   const lines = text.substring(0, offset).split('\n');
   return {
@@ -21,11 +26,6 @@ function convertOffsetToLineColumn(text: string, offset: number): { line: number
 
 export function validateLiquidTemplate(yamlString: string): YamlValidationResult[] {
   try {
-    // Create a Liquid instance with the same configuration as the templating engine
-    const liquid = new Liquid({
-      strictFilters: true,
-      strictVariables: false, // Allow undefined variables during validation
-    });
     // Parse the template to check for syntax errors
     liquid.parse(yamlString);
     // no errors
