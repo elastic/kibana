@@ -36,32 +36,44 @@ const useCases = {
 };
 
 const Template = () => {
-  // Create analysis for the popover use case
-  const popoverAnalysis = analyzeDocuments({ uniqueEventsCount: 5, uniqueAlertsCount: 3 });
-  const eventDetailsPopover = useEventDetailsPopover(
-    popoverAnalysis,
+  // Create popover hooks for each clickable use case
+  const eventsOnlyPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 5, uniqueAlertsCount: 0 }),
+    'With clickable events popover - only events'
+  );
+  const alertsOnlyPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 3 }),
+    'With clickable events popover - only alerts'
+  );
+  const mixedPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 5, uniqueAlertsCount: 3 }),
     'With clickable events popover'
   );
 
   const nodes: LabelNodeViewModel[] = useMemo(
     () =>
-      Object.entries(useCases).map(([useCaseName, { uniqueEventsCount, uniqueAlertsCount }]) => ({
-        id: useCaseName,
-        label: useCaseName,
-        color: uniqueAlertsCount >= 1 && uniqueEventsCount === 0 ? 'danger' : 'primary',
-        interactive: true,
-        shape: 'label',
-        uniqueEventsCount,
-        uniqueAlertsCount,
-        // Add event click handler only for the last use case
-        eventClickHandler:
-          useCaseName === 'With clickable events popover' ||
-          useCaseName === 'With clickable events popover - only events' ||
-          useCaseName === 'With clickable events popover - only alerts'
-            ? eventDetailsPopover.onEventClick
-            : undefined,
-      })),
-    [eventDetailsPopover.onEventClick]
+      Object.entries(useCases).map(([useCaseName, { uniqueEventsCount, uniqueAlertsCount }]) => {
+        let eventClickHandler;
+        if (useCaseName === 'With clickable events popover - only events') {
+          eventClickHandler = eventsOnlyPopover.onEventClick;
+        } else if (useCaseName === 'With clickable events popover - only alerts') {
+          eventClickHandler = alertsOnlyPopover.onEventClick;
+        } else if (useCaseName === 'With clickable events popover') {
+          eventClickHandler = mixedPopover.onEventClick;
+        }
+
+        return {
+          id: useCaseName,
+          label: useCaseName,
+          color: uniqueAlertsCount >= 1 && uniqueEventsCount === 0 ? 'danger' : 'primary',
+          interactive: true,
+          shape: 'label',
+          uniqueEventsCount,
+          uniqueAlertsCount,
+          eventClickHandler,
+        };
+      }),
+    [eventsOnlyPopover.onEventClick, alertsOnlyPopover.onEventClick, mixedPopover.onEventClick]
   );
 
   return (
@@ -75,7 +87,9 @@ const Template = () => {
         edges={[]}
         interactive={true}
       />
-      <eventDetailsPopover.PopoverComponent />
+      <eventsOnlyPopover.PopoverComponent />
+      <alertsOnlyPopover.PopoverComponent />
+      <mixedPopover.PopoverComponent />
     </ThemeProvider>
   );
 };

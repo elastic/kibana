@@ -87,7 +87,6 @@ export const useNodeDetailsPopover = ({
         bordered={false}
         size="m"
         flush={true}
-        color="primary"
         data-test-subj={contentTestSubj}
       >
         {items.map((item) => (
