@@ -40,6 +40,7 @@ export interface TableProps<G, L>
     | 'getCoreRowModel'
     | 'getExpandedRowModel'
     | 'onExpandedChange'
+    | 'onRowSelectionChange'
     | 'getRowCanExpand'
   > {
   initialData: G[];
@@ -179,6 +180,9 @@ export function getAdaptedTableRows<G extends GroupNode, L extends LeafNode>({
   return {
     rowId: rowInstance.id,
     rowParentId: rowInstance.parentId,
+    get rowData() {
+      return rowInstance.original;
+    },
     get rowIsExpanded() {
       return rowInstance.getIsExpanded();
     },
