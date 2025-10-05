@@ -20,6 +20,7 @@ import type { MockZodError } from '../../../../common/lib/errors/invalid_yaml_sc
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { collectAllVariables } from './collect_all_variables';
+import { validateLiquidTemplate } from './validate_liquid_template';
 
 interface UseYamlValidationProps {
   workflowYamlSchema: z.ZodSchema;
@@ -77,6 +78,7 @@ export function useYamlValidation({
       const validationResults: YamlValidationResult[] = [
         validateStepNameUniqueness(yamlDocument),
         validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
+        validateLiquidTemplate(model.getValue()),
       ].flat();
 
       for (const validationResult of validationResults) {
@@ -155,6 +157,32 @@ export function useYamlValidation({
               stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
             },
           });
+        } else if (validationResult.source === 'liquid-template-validation') {
+          markers.push({
+            severity: SEVERITY_MAP[validationResult.severity],
+            message: validationResult.message,
+            startLineNumber: validationResult.startLineNumber,
+            startColumn: validationResult.startColumn,
+            endLineNumber: validationResult.endLineNumber,
+            endColumn: validationResult.endColumn,
+            source: 'liquid-template-validation',
+          });
+          // Add highlighting for liquid template errors
+          decorations.push({
+            range: new monaco.Range(
+              validationResult.startLineNumber,
+              validationResult.startColumn,
+              validationResult.endLineNumber,
+              validationResult.endColumn
+            ),
+            options: {
+              inlineClassName: `liquid-template-${validationResult.severity}`,
+              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+              hoverMessage: validationResult.hoverMessage
+                ? createMarkdownContent(validationResult.hoverMessage)
+                : null,
+            },
+          });
         }
       }
 
@@ -173,6 +201,11 @@ export function useYamlValidation({
         model,
         'step-name-validation',
         markers.filter((m) => m.source === 'step-name-validation')
+      );
+      monaco.editor.setModelMarkers(
+        model,
+        'liquid-template-validation',
+        markers.filter((m) => m.source === 'liquid-template-validation')
       );
       setError(null);
     },
@@ -243,7 +276,12 @@ export function useYamlValidation({
 
         if (
           !marker.source ||
-          !['step-name-validation', 'variable-validation', 'monaco-yaml'].includes(marker.source)
+          ![
+            'step-name-validation',
+            'variable-validation',
+            'monaco-yaml',
+            'liquid-template-validation',
+          ].includes(marker.source)
         ) {
           continue;
         }
