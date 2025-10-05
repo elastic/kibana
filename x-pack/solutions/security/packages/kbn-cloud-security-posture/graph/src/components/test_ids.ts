@@ -90,6 +90,8 @@ export const GRAPH_FLAGS_POPOVER_COUNTRY_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsPopoverCountry` as const;
 export const GRAPH_FLAGS_POPOVER_ID = `${GRAPH_INVESTIGATION_TEST_ID}CountryFlagsPopover` as const;
 
+export const GRAPH_EVENTS_POPOVER_ID = `${GRAPH_INVESTIGATION_TEST_ID}EventsPopover` as const;
+
 export const GRAPH_TAG_WRAPPER_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagWrapper` as const;
 export const GRAPH_TAG_COUNT_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagCount` as const;
 export const GRAPH_TAG_TEXT_ID = `${GRAPH_INVESTIGATION_TEST_ID}TagText` as const;

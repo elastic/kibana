@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   LabelNodeBadges,
   TEST_SUBJ_ALERT_ICON,
   TEST_SUBJ_ALERT_COUNT,
   TEST_SUBJ_EVENT_COUNT,
+  TEST_SUBJ_EVENT_COUNT_BUTTON,
 } from './label_node_badges';
 import { analyzeDocuments } from './analyze_documents';
 
@@ -101,5 +103,45 @@ describe('LabelNodeBadges', () => {
     expect(screen.getByTestId(TEST_SUBJ_EVENT_COUNT)).toHaveTextContent('+99');
     expect(screen.queryByTestId(TEST_SUBJ_ALERT_ICON)).toBeInTheDocument();
     expect(screen.getByTestId(TEST_SUBJ_ALERT_COUNT)).toHaveTextContent('+99');
+  });
+
+  describe('Popover', () => {
+    const mockOnEventClick = jest.fn();
+
+    beforeEach(() => {
+      mockOnEventClick.mockClear();
+    });
+
+    test('calls onEventClick when event badge button is clicked', async () => {
+      const analysis = analyzeDocuments({ uniqueEventsCount: 3, uniqueAlertsCount: 0 });
+
+      render(<LabelNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
+
+      const eventBadgeButton = screen.getByTestId(TEST_SUBJ_EVENT_COUNT_BUTTON);
+      await userEvent.click(eventBadgeButton);
+
+      expect(mockOnEventClick).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not render clickable event badge when onEventClick is not provided', () => {
+      const analysis = analyzeDocuments({ uniqueEventsCount: 3, uniqueAlertsCount: 0 });
+
+      render(<LabelNodeBadges analysis={analysis} />);
+
+      const eventBadgeButton = screen.queryByTestId(TEST_SUBJ_EVENT_COUNT_BUTTON);
+      const eventBadge = screen.queryByTestId(TEST_SUBJ_EVENT_COUNT);
+
+      expect(eventBadgeButton).not.toBeInTheDocument();
+      expect(eventBadge).toBeInTheDocument();
+    });
+
+    test('does not render event badge when single event', () => {
+      const analysis = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
+
+      render(<LabelNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
+
+      const eventBadgeButton = screen.queryByTestId(TEST_SUBJ_EVENT_COUNT_BUTTON);
+      expect(eventBadgeButton).not.toBeInTheDocument();
+    });
   });
 });

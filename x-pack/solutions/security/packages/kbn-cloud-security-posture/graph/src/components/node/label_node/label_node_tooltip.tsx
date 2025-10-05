@@ -68,7 +68,6 @@ const Section: React.FC<{ testSubj: string; badge: React.ReactNode; label: strin
       {badge}
       <EuiText
         size="s"
-        color="ghost"
         css={css`
           font-weight: ${euiTheme.font.weight.medium};
         `}
@@ -97,7 +96,7 @@ const EventBadge: React.FC<{ count: number }> = ({ count }) => (
   </RoundedBadge>
 );
 
-export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => {
+export const LabelNodePopoverContent = ({ analysis }: LabelNodeTooltipProps) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
@@ -105,7 +104,6 @@ export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => 
         display: flex;
         flex-direction: column;
         gap: ${euiTheme.size.s};
-        margin-top: ${euiTheme.size.s};
       `}
     >
       {analysis.uniqueAlertsCount > 0 && (
