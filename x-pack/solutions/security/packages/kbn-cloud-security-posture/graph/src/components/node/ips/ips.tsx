@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiText, EuiLink, useEuiFontSize } from '@elastic/eui';
+import { EuiFlexGroup, EuiText, EuiButtonEmpty, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import {
@@ -87,19 +87,19 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
   const counter =
     ips.length > VISIBLE_IPS_LIMIT ? (
       onIpClick ? (
-        <EuiLink
-          color="subdued"
+        <EuiButtonEmpty
+          size="xs"
+          color="text"
           data-test-subj={GRAPH_IPS_PLUS_COUNT_BUTTON_ID}
           onClick={onIpClick}
           aria-label={toolTipAriaLabel}
+          flush='both'
+          css={css`
+            font-weight: medium;
+          `}
         >
-          <EuiText
-            css={css`
-              font-weight: medium;
-            `}
-            size="xs"
-          >{`+${ips.length - VISIBLE_IPS_LIMIT}`}</EuiText>
-        </EuiLink>
+          {`+${ips.length - VISIBLE_IPS_LIMIT}`}
+        </EuiButtonEmpty>
       ) : (
         <EuiText
           size="xs"
