@@ -18,6 +18,8 @@ import apm from 'elastic-apm-node';
 import { withSpan } from '@kbn/apm-utils';
 import { applyFipsOverrides } from '../lib/fips_overrides';
 import { Config, readConfigFile } from '../../functional_test_runner';
+import type { DockerServerSpec } from '../../functional_test_runner/lib/docker_servers/define_docker_servers_config';
+import { DockerServersService } from '../../functional_test_runner/lib/docker_servers/docker_servers_service';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
@@ -98,6 +100,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           esVersion: options.esVersion,
         });
         return;
+      }
+
+      let dockerWarmupPromise: Promise<void> | undefined;
+      if (config.has('dockerServers')) {
+        const dockerServersConfig = config.get('dockerServers') as Record<string, DockerServerSpec>;
+        dockerWarmupPromise = DockerServersService.warmUpServers(dockerServersConfig, log);
       }
 
       await withProcRunner(log, async (procs) => {
@@ -201,6 +209,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
           if (abortCtrl.signal.aborted) {
             return;
+          }
+
+          if (dockerWarmupPromise) {
+            await dockerWarmupPromise;
           }
 
           await withSpan('run_tests', () =>
