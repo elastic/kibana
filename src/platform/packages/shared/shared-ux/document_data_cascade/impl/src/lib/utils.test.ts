@@ -26,6 +26,8 @@ describe('cascade row utils', () => {
       customer_email: faker.internet.email(),
     },
     getParentRows: jest.fn(),
+    getToggleSelectedHandler: jest.fn(),
+    getToggleExpandedHandler: jest.fn(),
   };
 
   // TODO: implement mock for getParentRows
