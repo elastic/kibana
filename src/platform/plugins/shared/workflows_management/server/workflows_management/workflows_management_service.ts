@@ -121,18 +121,23 @@ export class WorkflowsService {
     );
 
     // Create execution indices
-    await createOrUpdateIndex({
-      esClient: this.esClient,
-      indexName: this.workflowsExecutionIndex,
-      mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
-      logger: this.logger,
-    });
-    await createOrUpdateIndex({
-      esClient: this.esClient,
-      indexName: this.stepsExecutionIndex,
-      mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-      logger: this.logger,
-    });
+    try {
+      await createOrUpdateIndex({
+        esClient: this.esClient,
+        indexName: this.workflowsExecutionIndex,
+        mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
+        logger: this.logger,
+      });
+      await createOrUpdateIndex({
+        esClient: this.esClient,
+        indexName: this.stepsExecutionIndex,
+        mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
+        logger: this.logger,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to create execution indices: ${error}`);
+      throw error;
+    }
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
