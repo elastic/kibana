@@ -11,9 +11,10 @@ import React, { useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { CascadeRowPrimitiveProps } from '../types';
-import { TableCellRender, useAdaptedTableRows } from '../../../lib/core/table';
 import { type LeafNode, type GroupNode, useDataCascadeState } from '../../../store_provider';
+import { TableCellRender, useAdaptedTableRows } from '../../../lib/core/table';
 import { useTreeGridRowARIAAttributes } from '../../../lib/core/accessibility';
+import { isCascadeGroupRowNode } from '../../../lib/utils';
 import {
   styles as cascadeRowStyles,
   rootRowAttribute,
@@ -51,9 +52,7 @@ export function CascadeRowPrimitive<G extends GroupNode, L extends LeafNode>({
     virtualRowIndex: virtualRow.index,
   });
 
-  const isGroupNode = useMemo(() => {
-    return currentGroupByColumns.length - 1 > rowDepth;
-  }, [currentGroupByColumns.length, rowDepth]);
+  const isGroupNode = isCascadeGroupRowNode(currentGroupByColumns, rowInstance);
 
   const styles = useMemo(() => {
     return cascadeRowStyles(
