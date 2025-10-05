@@ -74,7 +74,7 @@ describe('table', () => {
     });
 
     describe('row expansion', () => {
-      it('supports multiple row to be stay expanded when `allowMultipleRowToggle` is true', () => {
+      it('supports multiple root rows to stay expanded when `allowMultipleRowToggle` is true', () => {
         const data = Array.from(new Array(3)).map((_, index) => ({
           id: String(index),
           name: `Item ${index}`,
@@ -105,7 +105,7 @@ describe('table', () => {
         });
       });
 
-      it('should allow only one row to be expanded at a time when `allowMultipleRowToggle` is false', () => {
+      it('should allow only one root row to be expanded at a time when `allowMultipleRowToggle` is false', () => {
         const data = Array.from(new Array(3)).map((_, index) => ({
           id: String(index),
           name: `Item ${index}`,
