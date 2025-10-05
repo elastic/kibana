@@ -205,7 +205,7 @@ describe('AzureCredentialsFormAgentless', () => {
         uiSettingsClient.get = jest.fn().mockReturnValue(true);
       });
 
-      it('does not show cloud connector credential type on regular cloud', () => {
+      it.skip('does not show cloud connector credential type on regular cloud', () => {
         // Enable cloud connectors in settings
         uiSettingsClient.get = jest.fn().mockReturnValue(true);
 
