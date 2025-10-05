@@ -10,10 +10,10 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import {
-  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from '../../common';
-import { createOrUpdateIndex } from '../../common/create_index';
+import { createIndexWithMappings } from '../../common/create_index';
 
 export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
@@ -23,7 +23,7 @@ export class StepExecutionRepository {
   private async ensureIndexExists() {
     if (this.indexInitialized) return; // Only 1 boolean check after first time
 
-    await createOrUpdateIndex({
+    await createIndexWithMappings({
       esClient: this.esClient,
       indexName: this.indexName,
       mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
