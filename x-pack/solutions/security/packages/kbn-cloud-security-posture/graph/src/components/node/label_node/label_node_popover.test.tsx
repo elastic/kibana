@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { LabelNodePopoverContent } from './label_node_tooltip';
+import { LabelNodePopoverContent } from './label_node_popover';
 import { analyzeDocuments } from './analyze_documents';
 
 const TEST_SUBJ_ALERT_SECTION = 'label-node-tooltip-alert-section';

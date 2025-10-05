@@ -12,6 +12,7 @@ import {
   LabelNodeBadges,
   TEST_SUBJ_ALERT_ICON,
   TEST_SUBJ_ALERT_COUNT,
+  TEST_SUBJ_ALERT_COUNT_BUTTON,
   TEST_SUBJ_EVENT_COUNT,
   TEST_SUBJ_EVENT_COUNT_BUTTON,
 } from './label_node_badges';
@@ -142,6 +143,40 @@ describe('LabelNodeBadges', () => {
 
       const eventBadgeButton = screen.queryByTestId(TEST_SUBJ_EVENT_COUNT_BUTTON);
       expect(eventBadgeButton).not.toBeInTheDocument();
+    });
+
+    test('calls onEventClick when alert count badge button is clicked', async () => {
+      const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 3 });
+
+      render(<LabelNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
+
+      const alertBadgeButton = screen.getByTestId(TEST_SUBJ_ALERT_COUNT_BUTTON);
+      await userEvent.click(alertBadgeButton);
+
+      expect(mockOnEventClick).toHaveBeenCalledTimes(1);
+    });
+
+    test('does not render clickable alert count badge when onEventClick is not provided', () => {
+      const analysis = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 3 });
+
+      render(<LabelNodeBadges analysis={analysis} />);
+
+      const alertBadgeButton = screen.queryByTestId(TEST_SUBJ_ALERT_COUNT_BUTTON);
+      const alertBadge = screen.queryByTestId(TEST_SUBJ_ALERT_COUNT);
+
+      expect(alertBadgeButton).not.toBeInTheDocument();
+      expect(alertBadge).toBeInTheDocument();
+    });
+
+    test('calls onEventClick when alert count badge button is clicked in mixed scenario', async () => {
+      const analysis = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 2 });
+
+      render(<LabelNodeBadges analysis={analysis} onEventClick={mockOnEventClick} />);
+
+      const alertBadgeButton = screen.getByTestId(TEST_SUBJ_ALERT_COUNT_BUTTON);
+      await userEvent.click(alertBadgeButton);
+
+      expect(mockOnEventClick).toHaveBeenCalledTimes(1);
     });
   });
 });

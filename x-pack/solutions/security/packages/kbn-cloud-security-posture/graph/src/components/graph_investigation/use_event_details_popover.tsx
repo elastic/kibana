@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import type { PopoverActions, PopoverState } from '../graph/use_graph_popover';
 import { useGraphPopover } from '../graph/use_graph_popover';
 import { GraphPopover } from '../graph/graph_popover';
-import { LabelNodePopoverContent } from '../node/label_node/label_node_tooltip';
+import { LabelNodePopoverContent } from '../node/label_node/label_node_popover';
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { GRAPH_EVENTS_POPOVER_ID } from '../test_ids';
 
