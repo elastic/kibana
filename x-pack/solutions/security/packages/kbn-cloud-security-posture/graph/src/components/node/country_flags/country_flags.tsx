@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexItem, EuiText, EuiLink, useEuiFontSize } from '@elastic/eui';
+import { EuiFlexItem, EuiText, EuiLink, useEuiFontSize, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -91,23 +91,20 @@ export const CountryFlags = memo(({ countryCodes, onCountryClick }: CountryFlags
   const counter =
     validCodes.length > VISIBLE_FLAGS_LIMIT ? (
       onCountryClick ? (
-        <EuiLink
-          color="subdued"
+        <EuiButtonEmpty
+          size="xs"
+          color="text"
           data-test-subj={GRAPH_FLAGS_PLUS_COUNT_BUTTON_ID}
-          onClick={onCountryClick}
+        onClick={onCountryClick}
           aria-label={popoverAriaLabel}
+          flush='both'
+          css={css`
+            font-weight: medium;
+          `}
         >
-          <EuiText
-            aria-label={popoverAriaLabel}
-            css={css`
-              font-weight: medium;
-            `}
-            size="xs"
-          >
-            {'+'}
-            {validCodes.length - VISIBLE_FLAGS_LIMIT}
-          </EuiText>
-        </EuiLink>
+          {'+'}
+          {validCodes.length - VISIBLE_FLAGS_LIMIT}
+        </EuiButtonEmpty>
       ) : (
         <EuiText
           size="xs"
