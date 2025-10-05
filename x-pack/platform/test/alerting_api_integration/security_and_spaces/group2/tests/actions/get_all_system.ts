@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 
 export default function getAllConnectorTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -194,6 +194,15 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   is_deprecated: false,
                   connector_type_id: '.email',
                   name: 'TestEmail#xyz',
+                  referenced_by_count: 0,
+                },
+                {
+                  connector_type_id: '.workflows',
+                  id: 'system-connector-.workflows',
+                  is_deprecated: false,
+                  is_preconfigured: false,
+                  is_system_action: true,
+                  name: 'Workflows',
                   referenced_by_count: 0,
                 },
               ]);
@@ -402,6 +411,15 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   name: 'TestEmail#xyz',
                   referenced_by_count: 0,
                 },
+                {
+                  connector_type_id: '.workflows',
+                  id: 'system-connector-.workflows',
+                  is_deprecated: false,
+                  is_preconfigured: false,
+                  is_system_action: true,
+                  name: 'Workflows',
+                  referenced_by_count: 0,
+                },
               ]);
               break;
             default:
@@ -568,6 +586,15 @@ export default function getAllConnectorTests({ getService }: FtrProviderContext)
                   is_deprecated: false,
                   connector_type_id: '.email',
                   name: 'TestEmail#xyz',
+                  referenced_by_count: 0,
+                },
+                {
+                  connector_type_id: '.workflows',
+                  id: 'system-connector-.workflows',
+                  is_deprecated: false,
+                  is_preconfigured: false,
+                  is_system_action: true,
+                  name: 'Workflows',
                   referenced_by_count: 0,
                 },
               ]);
