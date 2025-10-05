@@ -54,8 +54,8 @@ export const DashboardViewport = () => {
 
   const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
     const panels = Object.values(layout.panels);
-    const visiblePanels = panels.filter(({ gridData }) => {
-      return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
+    const visiblePanels = panels.filter(({ grid }) => {
+      return !dashboardInternalApi.isSectionCollapsed(grid.sectionId);
     });
     return {
       panelCount: panels.length,
@@ -82,23 +82,18 @@ export const DashboardViewport = () => {
     };
   }, [controlGroupApi]);
 
-  // Bug in main where panels are loaded before control filters are ready
-  // Want to migrate to react embeddable controls with same behavior
-  // TODO - do not load panels until control filters are ready
-  /*
-  const [dashboardInitialized, setDashboardInitialized] = useState(false);
+  const [controlsReady, setControlsReady] = useState(false);
   useEffect(() => {
     let ignore = false;
-    dashboard.untilContainerInitialized().then(() => {
+    dashboardInternalApi.untilControlsInitialized().then(() => {
       if (!ignore) {
-        setDashboardInitialized(true);
+        setControlsReady(true);
       }
     });
     return () => {
       ignore = true;
     };
-  }, [dashboard]);
-  */
+  }, [dashboardInternalApi]);
 
   const styles = useMemoCss(dashboardViewportStyles);
 
@@ -142,7 +137,11 @@ export const DashboardViewport = () => {
         data-shared-items-count={visiblePanelCount}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
+        {panelCount === 0 && sectionCount === 0 ? (
+          <DashboardEmptyScreen />
+        ) : viewMode === 'print' || controlsReady ? (
+          <DashboardGrid />
+        ) : null}
       </div>
     </div>
   );
