@@ -9,11 +9,7 @@
 import { schema } from '@kbn/config-schema';
 import { createOptionsSchemas, referenceSchema } from '@kbn/content-management-utils';
 
-import {
-  dashboardDataSchema,
-  dashboardMetaSchema,
-  dashboardResolveMetaSchema,
-} from './common';
+import { dashboardDataSchema, dashboardMetaSchema, dashboardResolveMetaSchema } from './common';
 
 export const dashboardCreateOptionsSchema = schema.object({
   id: schema.maybe(createOptionsSchemas.id),
