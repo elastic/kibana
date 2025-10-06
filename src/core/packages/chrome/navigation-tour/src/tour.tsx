@@ -50,7 +50,7 @@ function ActiveTour({ state, tourManager }: { state: TourState; tourManager: Tou
   const isLastStep = state.steps.length === state.currentStepIndex + 1;
 
   const handleNext = () => {
-    throw new Error('Function not implemented.');
+    tourManager.nextStep();
   };
 
   const handleSkip = () => {
