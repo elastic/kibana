@@ -18,7 +18,6 @@ import type {
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY, TAB_STATE_URL_KEY } from './constants';
-import type { TabsUrlState } from './types';
 
 export const appLocatorGetLocationCommon = async (
   {
@@ -54,15 +53,13 @@ export const appLocatorGetLocationCommon = async (
     path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
   }
 
-  if (tab && Object.keys(tab).length) {
-    const tabsState: TabsUrlState = {
-      tabId: tab.id,
-      ...('label' in tab ? { tabLabel: tab.label } : {}),
-    };
-
-    if (Object.keys(tabsState).length) {
-      path = setStateToKbnUrl(TAB_STATE_URL_KEY, tabsState, { useHash }, path);
-    }
+  if (tab?.id) {
+    path = setStateToKbnUrl(
+      TAB_STATE_URL_KEY,
+      { tabId: tab.id, tabLabel: 'label' in tab ? tab.label : undefined },
+      { useHash },
+      path
+    );
   }
 
   return {

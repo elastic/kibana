@@ -71,7 +71,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Once created, the new tab will have a unique id which can be referenced too if necessary.
    * Use `label` to set a fallback tab label if it was not defined before yet.
    */
-  tab?: { id: typeof NEW_TAB_ID; label?: string } | { id: string; label?: string };
+  tab?: { id: typeof NEW_TAB_ID | string; label?: string };
 
   /**
    * Columns displayed in the table
