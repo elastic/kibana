@@ -59,7 +59,8 @@
     "@kbn/rrule",
     "@kbn/resizable-layout",
     "@kbn/es-types",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }
