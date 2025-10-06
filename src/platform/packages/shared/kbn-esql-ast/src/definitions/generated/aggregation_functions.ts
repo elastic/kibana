@@ -45,6 +45,16 @@ const absentDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'boolean',
           optional: false,
         },
@@ -244,6 +254,16 @@ const avgDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
           type: 'double',
           optional: false,
         },
@@ -292,9 +312,19 @@ const countDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'boolean',
+          type: 'aggregate_metric_double',
           optional: true,
           supportsWildcard: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: true,
         },
       ],
       returnType: 'long',
@@ -1399,6 +1429,16 @@ const maxDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'boolean',
           optional: false,
         },
@@ -1621,6 +1661,16 @@ const minDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
     {
       params: [
         {
@@ -1913,6 +1963,16 @@ const presentDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
     {
       params: [
         {
@@ -2538,6 +2598,16 @@ const sumDefinition: FunctionDefinition = {
   preview: false,
   alias: undefined,
   signatures: [
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
     {
       params: [
         {
