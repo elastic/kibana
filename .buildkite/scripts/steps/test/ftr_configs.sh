@@ -80,6 +80,21 @@ while read -r config; do
   lastCode=$?
   set -e;
 
+  # Scout reporter
+  REPORT_DIR=$(ls -td .scout/reports/scout-ftr-*/ 2>/dev/null | head -n 1)
+  if [ -n "$REPORT_DIR" ]; then
+    EVENT_LOG_FILE="${REPORT_DIR}event-log.ndjson"
+    if [ -f "$EVENT_LOG_FILE" ]; then
+      export SCOUT_EVENT_LOG_PATH="$EVENT_LOG_FILE"
+      source .buildkite/scripts/steps/test/scout_upload_report_events.sh
+      unset SCOUT_EVENT_LOG_PATH
+    else
+      echo "Could not find event log file for config $config"
+    fi
+  else
+    echo "Could not find any scout report directory."
+  fi
+
   timeSec=$(($(date +%s)-start))
   if [[ $timeSec -gt 60 ]]; then
     min=$((timeSec/60))
@@ -113,8 +128,5 @@ fi
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
-
-# Scout reporter
-source .buildkite/scripts/steps/test/scout_upload_report_events.sh
 
 exit $exitCode
