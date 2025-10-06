@@ -583,9 +583,11 @@ export class CstToAstConverter {
     }
 
     if (ctx._grouping) {
-      const options = this.toByOption(ctx, ctx.fields());
+      const option = this.toByOption(ctx, ctx.fields());
 
-      command.args.push(...options);
+      if (option) {
+        command.args.push(option);
+      }
     }
 
     return command;
@@ -620,17 +622,14 @@ export class CstToAstConverter {
     return aggField;
   }
 
-  /**
-   * @todo Do not return array here.
-   */
   private toByOption(
     ctx: antlr.ParserRuleContext & Pick<cst.StatsCommandContext, 'BY'>,
     expr: cst.FieldsContext | undefined
-  ): ast.ESQLCommandOption[] {
+  ): ast.ESQLCommandOption | undefined {
     const byCtx = ctx.BY();
 
     if (!byCtx || !expr) {
-      return [];
+      return;
     }
 
     const option = this.toOption(byCtx.getText().toLowerCase(), ctx);
@@ -642,7 +641,7 @@ export class CstToAstConverter {
 
     if (lastArg) option.location.max = lastArg.location.max;
 
-    return [option];
+    return option;
   }
 
   // --------------------------------------------------------------------- SORT
@@ -1675,15 +1674,6 @@ export class CstToAstConverter {
     );
   }
 
-  /**
-   * @todo Inline this method.
-   */
-  private getComparisonName(ctx: cst.ComparisonOperatorContext) {
-    return (
-      (ctx.EQ() || ctx.NEQ() || ctx.LT() || ctx.LTE() || ctx.GT() || ctx.GTE()).getText() || ''
-    );
-  }
-
   private visitValueExpression(ctx: cst.ValueExpressionContext) {
     if (!textExistsAndIsValid(ctx.getText())) {
       return [];
@@ -1692,10 +1682,19 @@ export class CstToAstConverter {
       return this.visitOperatorExpression(ctx.operatorExpression());
     }
     if (ctx instanceof cst.ComparisonContext) {
-      const comparisonNode = ctx.comparisonOperator();
+      const operatorCtx = ctx.comparisonOperator();
+      const comparisonOperatorText =
+        (
+          operatorCtx.EQ() ||
+          operatorCtx.NEQ() ||
+          operatorCtx.LT() ||
+          operatorCtx.LTE() ||
+          operatorCtx.GT() ||
+          operatorCtx.GTE()
+        ).getText() || '';
       const comparisonFn = this.toFunction(
-        this.getComparisonName(comparisonNode),
-        comparisonNode,
+        comparisonOperatorText,
+        operatorCtx,
         undefined,
         'binary-expression'
       );
