@@ -77,21 +77,46 @@ describe('AwsCredentialsForm', () => {
     isValid: true,
   };
 
-  // Minimal mock setup for better performance
+  // Complete mock setup for CloudSetupContextValue
   const defaultCloudSetupReturn = {
+    // AWS related properties
     awsPolicyType: 'cloudbeat/cis_aws',
+    awsInputFieldMapping: {},
+    isAwsCloudConnectorEnabled: false,
+    awsOrganizationEnabled: false,
+    awsOverviewPath: '/get-started/aws',
+
+    // Azure related properties
+    azureEnabled: false,
+    isAzureCloudConnectorEnabled: false,
+    azureOrganizationEnabled: false,
+    azurePolicyType: 'cloudbeat/cis_azure',
+    azureOverviewPath: '/get-started/azure',
+    azureInputFieldMapping: {},
+
+    // GCP related properties
+    gcpEnabled: false,
+    isGcpCloudConnectorEnabled: false,
+    gcpOrganizationEnabled: false,
+    gcpPolicyType: 'cloudbeat/cis_gcp',
+    gcpOverviewPath: '/get-started/gcp',
+    gcpInputFieldMapping: {},
+
+    // Common properties
     shortName: 'CSPM',
     templateName: 'cspm',
-    getCloudSetupProviderByInputType: jest.fn(),
     config: {},
     showCloudTemplates: false,
     defaultProvider: 'aws',
     defaultProviderType: 'aws',
-    awsInputFieldMapping: {},
-    isAwsCloudConnectorEnabled: false,
-    awsOrganizationEnabled: false,
     templateInputOptions: [],
-  } as CloudSetupContextValue;
+
+    // Function mocks
+    getCloudSetupProviderByInputType: jest.fn(),
+    getCloudSetupProviders: jest.fn(() => ['aws', 'azure', 'gcp']),
+    getCloudSetupTemplateInputOptions: jest.fn(() => []),
+    getProviderDetails: jest.fn(),
+  };
 
   interface AwsCredentialsFormTestProps {
     newPolicy: NewPackagePolicy;
@@ -118,7 +143,7 @@ describe('AwsCredentialsForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCloudSetup.mockReturnValue(defaultCloudSetupReturn as CloudSetupContextValue);
+    mockUseCloudSetup.mockReturnValue(defaultCloudSetupReturn as unknown as CloudSetupContextValue);
   });
 
   describe('Component Rendering', () => {
@@ -266,7 +291,7 @@ describe('AwsCredentialsForm', () => {
       renderWithProviders(propsWithCloudFormation);
 
       // Should have a documentation link in the setup info
-      expect(screen.getByRole('link', { name: /Getting Started/ })).toBeInTheDocument();
+      expect(screen.getByText('Getting Started')).toBeInTheDocument();
     });
 
     it('shows CloudFormation radio button when CloudFormation is supported', () => {
@@ -304,7 +329,7 @@ describe('AwsCredentialsForm', () => {
       renderWithProviders(defaultProps);
 
       const docLink = screen.getByTestId('externalLink');
-      expect(docLink).toHaveAttribute('href', 'https://docs.elastic.co/aws');
+      expect(docLink).toHaveAttribute('href', '/get-started/aws');
     });
   });
 
