@@ -159,7 +159,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; save: () => Promise<",
+              "{ start: () => string; clear: () => void; reset: () => void; save: () => Promise<",
               "SearchSessionSavedObject",
               ">; destroy: () => void; readonly state$: ",
               "Observable",
@@ -713,7 +713,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; save: () => Promise<",
+              "{ start: () => string; clear: () => void; reset: () => void; save: () => Promise<",
               "SearchSessionSavedObject",
               ">; destroy: () => void; readonly state$: ",
               "Observable",
@@ -1221,7 +1221,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; clear: () => void; save: () => Promise<",
+          "{ start: () => string; clear: () => void; reset: () => void; save: () => Promise<",
           "SearchSessionSavedObject",
           ">; destroy: () => void; readonly state$: ",
           "Observable",

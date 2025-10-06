@@ -85,17 +85,6 @@ export function useReviewSuggestionsForm() {
       });
     },
     acceptSuggestion: (index: number) => {
-      const partition = suggestions[index];
-      streamsRoutingActorRef.send({
-        type: 'suggestion.append',
-        definitions: [
-          {
-            destination: partition.name,
-            where: partition.condition,
-            status: 'enabled',
-          },
-        ],
-      });
       removeSuggestion(index);
     },
     rejectSuggestion: (index: number) => {
