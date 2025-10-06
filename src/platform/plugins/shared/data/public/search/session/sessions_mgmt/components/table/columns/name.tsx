@@ -8,7 +8,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -82,7 +82,7 @@ export const nameColumn = ({
           content={
             <FormattedMessage
               id="data.mgmt.searchSessions.table.notRestorableWarning"
-              defaultMessage="The search session will be executed again. You can then save it for future use."
+              defaultMessage="The background search will be executed again. You can then save it for future use."
             />
           }
         />
@@ -103,7 +103,7 @@ export const nameColumn = ({
             content={
               <FormattedMessage
                 id="data.mgmt.searchSessions.table.versionIncompatibleWarning"
-                defaultMessage="This search session was created in a Kibana instance running a different version. It may not restore correctly."
+                defaultMessage="This background search was created in a Kibana instance running a different version. It may not restore correctly."
               />
             }
           />
@@ -125,9 +125,11 @@ export const nameColumn = ({
           }}
         >
           <TableText data-test-subj="sessionManagementNameCol">
-            {name}
-            {notRestorableWarning}
-            {versionIncompatibleWarning}
+            <EuiFlexGroup gutterSize="s">
+              {name}
+              {notRestorableWarning}
+              {versionIncompatibleWarning}
+            </EuiFlexGroup>
           </TableText>
         </NameColumnText>
       </RedirectAppLinks>
