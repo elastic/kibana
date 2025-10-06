@@ -37,6 +37,11 @@ export const selectWorkflowGraph = createSelector(
   (computed) => computed?.workflowGraph
 );
 
+export const selectWorkflowDefinition = createSelector(
+  selectComputedState,
+  (computed) => computed?.workflowDefinition
+);
+
 export const selectFocusedStepId = createSelector(
   selectWorkflowState,
   (workflow) => workflow.focusedStepId

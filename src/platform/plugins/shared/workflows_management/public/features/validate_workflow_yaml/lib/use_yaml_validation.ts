@@ -10,16 +10,22 @@
 import { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod';
 import { useCallback, useRef, useState } from 'react';
-import { parseDocument, type Document } from 'yaml';
-import { WorkflowGraph } from '@kbn/workflows/graph';
-import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
-import { parseWorkflowYamlToJSON, formatValidationError } from '../../../../common/lib/yaml_utils';
+import { useSelector } from 'react-redux';
+import type { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type YAML from 'yaml';
+import { selectWorkflowDefinition } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
+import { formatValidationError } from '../../../../common/lib/yaml_utils';
 import type { YamlValidationResult } from '../model/types';
 import { MarkerSeverity, getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import type { MockZodError } from '../../../../common/lib/errors/invalid_yaml_schema';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
 import { collectAllVariables } from './collect_all_variables';
+import {
+  selectWorkflowGraph,
+  selectYamlDocument,
+} from '../../../widgets/workflow_yaml_editor/lib/store';
 
 interface UseYamlValidationProps {
   workflowYamlSchema: z.ZodSchema;
@@ -51,6 +57,15 @@ export function useYamlValidation({
   const [error, setError] = useState<Error | null>(null);
   const [validationErrors, setValidationErrors] = useState<YamlValidationResult[] | null>(null);
   const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const yamlDocument = useSelector(selectYamlDocument);
+  const workflowGraph = useSelector(selectWorkflowGraph);
+  const workflowDefinition = useSelector(selectWorkflowDefinition);
+  const yamlDocumentRef = useRef<YAML.Document | undefined>(undefined);
+  yamlDocumentRef.current = yamlDocument;
+  const workflowGraphRef = useRef<WorkflowGraph | undefined>(undefined);
+  workflowGraphRef.current = workflowGraph;
+  const workflowDefinitionRef = useRef<WorkflowYaml | undefined | null>(undefined);
+  workflowDefinitionRef.current = workflowDefinition;
 
   const validateVariables = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -59,12 +74,13 @@ export function useYamlValidation({
         return;
       }
 
-      const { yamlDocument, workflowGraph, workflowDefinition } = getEditorState(
-        model,
-        workflowYamlSchema
-      );
-
       if (!yamlDocument || !workflowGraph || !workflowDefinition) {
+        // console.error(
+        //   'Error validating variables',
+        //   yamlDocument,
+        //   workflowGraph,
+        //   workflowDefinition
+        // );
         setError(new Error('Error validating variables'));
         return;
       }
@@ -75,7 +91,7 @@ export function useYamlValidation({
       const variableItems = collectAllVariables(model, yamlDocument, workflowGraph);
 
       const validationResults: YamlValidationResult[] = [
-        validateStepNameUniqueness(yamlDocument),
+        validateStepNameUniqueness(yamlDocumentRef.current),
         validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
       ].flat();
 
@@ -176,7 +192,7 @@ export function useYamlValidation({
       );
       setError(null);
     },
-    [workflowYamlSchema]
+    [yamlDocument, workflowGraph, workflowDefinition]
   );
 
   const handleMarkersChanged = useCallback(
@@ -301,27 +317,6 @@ export function useYamlValidation({
     validateVariables,
     handleMarkersChanged,
   };
-}
-
-// Will be replaced with a editor state hook
-function getEditorState(model: monaco.editor.ITextModel, workflowYamlSchema: z.ZodSchema) {
-  let yamlDocument: Document;
-  let workflowGraph: WorkflowGraph | null;
-  let workflowDefinition: WorkflowYaml | null;
-
-  const text = model.getValue();
-
-  try {
-    // Parse the YAML to JSON to get the workflow definition
-    const result = parseWorkflowYamlToJSON(text, workflowYamlSchema);
-    yamlDocument = parseDocument(text);
-    workflowGraph = result.success ? WorkflowGraph.fromWorkflowDefinition(result.data) : null;
-    workflowDefinition = result.success ? result.data : null;
-  } catch (e) {
-    // return null values if the YAML is invalid
-    return { yamlDocument: null, workflowGraph: null, workflowDefinition: null };
-  }
-  return { yamlDocument, workflowGraph, workflowDefinition };
 }
 
 function createMarkdownContent(content: string): monaco.IMarkdownString {

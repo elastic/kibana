@@ -10,6 +10,7 @@
 import type { AnyAction, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import YAML, { LineCounter } from 'yaml';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { buildWorkflowLookup } from './build_workflow_lookup';
 import { getWorkflowZodSchemaLoose } from '../../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
@@ -38,7 +39,7 @@ export const performComputation = (
     const lookup = buildWorkflowLookup(yamlDoc, lineCounter);
 
     // Create workflow graph
-    const parsedWorkflow = parsingResult.success ? parsingResult.data : null;
+    const parsedWorkflow = parsingResult.success ? parsingResult.data : undefined;
     const graph = parsedWorkflow ? WorkflowGraph.fromWorkflowDefinition(parsedWorkflow) : undefined;
 
     // Dispatch computed data
@@ -47,9 +48,11 @@ export const performComputation = (
         yamlDocument: yamlDoc,
         workflowLookup: lookup,
         workflowGraph: graph,
+        workflowDefinition: parsedWorkflow as WorkflowYaml,
       })
     );
   } catch (e) {
+    // console.error('Error performing computation', e);
     // Clear computed data on error
     store.dispatch(clearComputedData());
   }

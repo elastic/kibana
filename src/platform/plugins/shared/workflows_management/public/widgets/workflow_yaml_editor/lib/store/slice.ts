@@ -10,7 +10,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type YAML from 'yaml';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { WorkflowEditorState } from './types';
 import { findStepByLine } from './utils/step_finder';
@@ -40,6 +40,7 @@ const workflowEditorSlice = createSlice({
           yamlDocument?: YAML.Document;
           workflowLookup?: WorkflowLookup;
           workflowGraph?: WorkflowGraph;
+          workflowDefinition?: WorkflowYaml;
         };
       }
     ) => {
@@ -47,6 +48,7 @@ const workflowEditorSlice = createSlice({
         yamlDocument: action.payload.yamlDocument,
         workflowLookup: action.payload.workflowLookup,
         workflowGraph: action.payload.workflowGraph,
+        workflowDefinition: action.payload.workflowDefinition,
       };
     },
     clearComputedData: (state) => {
@@ -54,6 +56,7 @@ const workflowEditorSlice = createSlice({
         yamlDocument: undefined,
         workflowLookup: undefined,
         workflowGraph: undefined,
+        workflowDefinition: undefined,
       };
     },
     setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {

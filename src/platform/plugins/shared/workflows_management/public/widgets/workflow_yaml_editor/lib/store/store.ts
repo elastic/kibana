@@ -25,6 +25,7 @@ export const createWorkflowEditorStore = () => {
             'workflow.computed.yamlDocument',
             'workflow.computed.workflowGraph',
             'workflow.computed.workflowLookup',
+            'workflow.computed.workflowDefinition',
           ],
           // Ignore these specific action types that contain non-serializable data
           ignoredActions: ['workflow/_setComputedDataInternal'],

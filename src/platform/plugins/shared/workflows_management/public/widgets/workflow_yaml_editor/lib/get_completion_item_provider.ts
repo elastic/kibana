@@ -24,12 +24,7 @@ import {
   ManualTriggerSchema,
 } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import {
-  getDetailedTypeDescription,
-  getSchemaAtPath,
-  getZodTypeName,
-  parsePath,
-} from '../../../../common/lib/zod';
+import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
@@ -38,14 +33,21 @@ import {
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
-import { generateConnectorSnippet } from './snippets/generate_connector_snippet';
+import {
+  connectorTypeRequiresConnectorId,
+  generateConnectorSnippet,
+  getConnectorIdSuggestions,
+  getConnectorInstancesForType,
+  getConnectorTypeFromContext,
+  getEnhancedTypeInfo,
+  getExistingParametersInWithBlock,
+} from './snippets/generate_connector_snippet';
 import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
 import {
   generateTriggerSnippet,
   generateRRuleTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
 import { getCachedAllConnectors } from './connectors_cache';
-import { getIndentLevel } from './get_indent_level';
 
 // Cache for built-in step types extracted from schema
 let builtInStepTypesCache: Array<{
@@ -313,6 +315,173 @@ function getConnectorCompletionKind(connectorType: string): monaco.languages.Com
     return monaco.languages.CompletionItemKind.Reference; // Will use custom HTTP icon
   }
   return monaco.languages.CompletionItemKind.Function;
+}
+
+/**
+ * Get the specific connector's parameter schema for autocomplete
+ */
+// Cache for connector schemas to avoid repeated processing
+const connectorSchemaCache = new Map<string, Record<string, any> | null>();
+
+// Cache for connector type suggestions to avoid recalculating on every keystroke
+const connectorTypeSuggestionsCache = new Map<string, monaco.languages.CompletionItem[]>();
+
+function getConnectorParamsSchema(
+  connectorType: string,
+  dynamicConnectorTypes?: Record<string, any>
+): Record<string, any> | null {
+  // Check cache first
+  if (connectorSchemaCache.has(connectorType)) {
+    return connectorSchemaCache.get(connectorType)!;
+  }
+
+  try {
+    const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
+    const connector = allConnectors.find((c: any) => c.type === connectorType);
+
+    if (!connector || !connector.paramsSchema) {
+      // No paramsSchema found for connector
+      connectorSchemaCache.set(connectorType, null);
+      return null;
+    }
+
+    // Handle function-generated schemas (like the complex union schemas)
+    let actualSchema = connector.paramsSchema;
+    if (typeof connector.paramsSchema === 'function') {
+      try {
+        actualSchema = (connector.paramsSchema as any)();
+      } catch (error) {
+        // If function execution fails, cache null and return
+        connectorSchemaCache.set(connectorType, null);
+        return null;
+      }
+    }
+
+    // Extract the shape from the Zod schema
+    if (actualSchema instanceof z.ZodObject) {
+      // Found paramsSchema for connector (simple object)
+      const result = actualSchema.shape;
+      connectorSchemaCache.set(connectorType, result);
+      return result;
+    }
+
+    // Handle ZodUnion schemas (from our generic intersection fix)
+    if (actualSchema instanceof z.ZodUnion) {
+      // For union schemas, extract common properties from all options
+      const unionOptions = actualSchema._def.options;
+      const commonProperties: Record<string, any> = {};
+
+      // Helper function to extract properties from any schema type
+      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+        if (schema instanceof z.ZodObject) {
+          return schema.shape;
+        } else if (schema instanceof z.ZodIntersection) {
+          // For intersections, merge properties from both sides
+          const leftProps = extractPropertiesFromSchema(schema._def.left);
+          const rightProps = extractPropertiesFromSchema(schema._def.right);
+          return { ...leftProps, ...rightProps };
+        }
+        return {};
+      };
+
+      // Get properties that exist in ALL union options
+      if (unionOptions.length > 0) {
+        const firstOptionProps = extractPropertiesFromSchema(unionOptions[0]);
+
+        // Check each property in the first option
+        for (const [key, schema] of Object.entries(firstOptionProps)) {
+          // Check if this property exists in ALL other options
+          const existsInAll = unionOptions.every((option: any) => {
+            const optionProps = extractPropertiesFromSchema(option);
+            return optionProps[key];
+          });
+
+          if (existsInAll) {
+            commonProperties[key] = schema;
+          }
+        }
+      }
+
+      if (Object.keys(commonProperties).length > 0) {
+        // Found common properties in union schema
+        connectorSchemaCache.set(connectorType, commonProperties);
+        return commonProperties;
+      }
+    }
+
+    // Handle ZodIntersection schemas (from complex union handling)
+    if (actualSchema instanceof z.ZodIntersection) {
+      // Helper function to extract properties from any schema type (reuse from above)
+      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+        if (schema instanceof z.ZodObject) {
+          return schema.shape;
+        } else if (schema instanceof z.ZodIntersection) {
+          // For intersections, merge properties from both sides
+          const leftProps = extractPropertiesFromSchema(schema._def.left);
+          const rightProps = extractPropertiesFromSchema(schema._def.right);
+          return { ...leftProps, ...rightProps };
+        }
+        return {};
+      };
+
+      // For intersection schemas, extract properties from both sides
+      const allProperties = extractPropertiesFromSchema(actualSchema);
+
+      if (Object.keys(allProperties).length > 0) {
+        connectorSchemaCache.set(connectorType, allProperties);
+        return allProperties;
+      }
+    }
+
+    // Handle discriminated unions
+    if (actualSchema instanceof z.ZodDiscriminatedUnion) {
+      // For discriminated unions, extract common properties from all options
+      const unionOptions = Array.from(actualSchema._def.options.values());
+      const commonProperties: Record<string, any> = {};
+
+      // Helper function to extract properties from any schema type (reuse from above)
+      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+        if (schema instanceof z.ZodObject) {
+          return schema.shape;
+        } else if (schema instanceof z.ZodIntersection) {
+          // For intersections, merge properties from both sides
+          const leftProps = extractPropertiesFromSchema(schema._def.left);
+          const rightProps = extractPropertiesFromSchema(schema._def.right);
+          return { ...leftProps, ...rightProps };
+        }
+        return {};
+      };
+
+      if (unionOptions.length > 0) {
+        const firstOptionProps = extractPropertiesFromSchema(unionOptions[0]);
+
+        // Check each property in the first option
+        for (const [key, schema] of Object.entries(firstOptionProps)) {
+          // Check if this property exists in ALL other options
+          const existsInAll = unionOptions.every((option: any) => {
+            const optionProps = extractPropertiesFromSchema(option);
+            return optionProps[key];
+          });
+
+          if (existsInAll) {
+            commonProperties[key] = schema;
+          }
+        }
+      }
+
+      if (Object.keys(commonProperties).length > 0) {
+        connectorSchemaCache.set(connectorType, commonProperties);
+        return commonProperties;
+      }
+    }
+
+    connectorSchemaCache.set(connectorType, null);
+    return null;
+  } catch (error) {
+    // Error getting connector params schema
+    connectorSchemaCache.set(connectorType, null);
+    return null;
+  }
 }
 
 /**

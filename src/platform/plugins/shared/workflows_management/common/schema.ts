@@ -752,13 +752,12 @@ export function convertDynamicConnectorsToContracts(
             ] as [string, ...string[]])
           : z.string();
 
+      const connectorTypeName = connectorType.actionTypeId.replace(/^\./, '');
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
         connectorType.subActions.forEach((subAction) => {
           // Create type name: actionTypeId.subActionName (e.g., "inference.completion")
-          const subActionType = `${connectorType.actionTypeId.replace(/^\./, '')}.${
-            subAction.name
-          }`;
+          const subActionType = `${connectorTypeName}.${subAction.name}`;
 
           connectorContracts.push({
             type: subActionType,
@@ -778,7 +777,7 @@ export function convertDynamicConnectorsToContracts(
         const outputSchema = getSubActionOutputSchema(connectorType.actionTypeId, '');
 
         connectorContracts.push({
-          type: connectorType.actionTypeId,
+          type: connectorTypeName,
           paramsSchema,
           connectorIdRequired: true,
           connectorId: connectorIdSchema,
