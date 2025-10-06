@@ -305,6 +305,7 @@ export const CascadeNestedGridImplementation: StoryObj<
             size={args.size}
             data={initData}
             cascadeGroups={groupByFields}
+            initialGroupColumn={groupByFields}
             tableTitleSlot={tableTitleSlot}
             onCascadeGroupingChange={onCascadeGroupingChange}
           >
