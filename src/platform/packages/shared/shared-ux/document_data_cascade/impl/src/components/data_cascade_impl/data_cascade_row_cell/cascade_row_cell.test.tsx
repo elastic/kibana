@@ -72,7 +72,13 @@ describe('CascadeRowCellPrimitive', () => {
     renderComponent({
       cascadeGroups,
       initialGroupColumn: [cascadeGroups[0]],
-      row: { id: '1', depth: 0, original: rowData } as Row<any>,
+      row: {
+        id: '1',
+        depth: 0,
+        original: rowData,
+        getToggleSelectedHandler: jest.fn(),
+        getToggleExpandedHandler: jest.fn(),
+      } as unknown as Row<any>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
       getVirtualizer: mockVirtualizerGetter,

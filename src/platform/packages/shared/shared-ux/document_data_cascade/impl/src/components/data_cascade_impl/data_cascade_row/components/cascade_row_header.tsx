@@ -51,6 +51,7 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
   const styles = useMemo(() => cascadeRowHeaderStyles(euiTheme, size), [euiTheme, size]);
 
   const {
+    rowData,
     rowIsExpanded,
     rowDepth,
     rowId,
@@ -68,13 +69,13 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
   );
 
   const headerMetaSlots = useMemo(
-    () => rowHeaderMetaSlots?.({ rowData: rowInstance.original, nodePath }),
-    [rowHeaderMetaSlots, rowInstance, nodePath]
+    () => rowHeaderMetaSlots?.({ rowData, rowDepth, nodePath }),
+    [rowHeaderMetaSlots, rowData, rowDepth, nodePath]
   );
 
   const headerActions = useMemo(
-    () => rowHeaderActions?.({ rowData: rowInstance.original, nodePath }),
-    [rowHeaderActions, rowInstance, nodePath]
+    () => rowHeaderActions?.({ rowData, nodePath }),
+    [rowHeaderActions, rowData, nodePath]
   );
 
   const fetchGroupNodeData = useCallback(() => {
