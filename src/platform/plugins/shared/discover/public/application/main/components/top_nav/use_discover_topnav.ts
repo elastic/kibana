@@ -64,11 +64,13 @@ export const useDiscoverTopNav = ({
     services,
     state: stateContainer,
     onOpenInspector,
+    hasUnsavedChanges,
     isEsqlMode,
     adHocDataViews,
     topNavCustomization,
     shouldShowESQLToDataViewTransitionModal,
     hasShareIntegration,
+    persistedDiscoverSession,
   });
 
   return {
