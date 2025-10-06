@@ -32,8 +32,6 @@ export function registerReindexIndicesRoutes(
 ) {
   const BASE_PATH = `${API_BASE_PATH}/reindex`;
 
-  const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
-
   // Start reindex for an index
   router.post(
     {
@@ -58,6 +56,9 @@ export function registerReindexIndicesRoutes(
       const {
         elasticsearch: { client: esClient },
       } = await core;
+
+      const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
+
       const { indexName } = request.params;
       try {
         const result = await reindexHandler({
@@ -104,6 +105,9 @@ export function registerReindexIndicesRoutes(
       const {
         elasticsearch: { client: esClient },
       } = await core;
+
+      const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
+
       const { indexName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(
