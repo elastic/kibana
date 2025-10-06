@@ -238,7 +238,7 @@ tags:
     description: Manage your Kibana spaces.
   - name: streams
     description: |
-      Streams is a new and experimental way to manage your data in Kibana. The API is currently not considered stable and can change at any point.
+      Streams is a new and experimental way to manage your data in the Elastic stack. The API is currently not considered stable and will most likely change significantly before becoming GA. If you consume this API, please take into account that it may break without additional notice period.
     x-displayName: Streams
   - name: system
     x-displayName: System
