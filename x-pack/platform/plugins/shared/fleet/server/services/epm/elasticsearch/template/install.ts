@@ -428,14 +428,6 @@ export function buildComponentTemplates(params: {
       isSyntheticSourceEnabledByDefault ||
       isTimeSeriesEnabledByDefault);
 
-  const isPkgConfiguringSubobjects =
-    Object.keys(mappingsRuntimeFields).length > 0 ||
-    indexTemplateMappings?.subobjects !== undefined;
-
-  // Setting overrides for otel input packages, but only if the packages don't explicitly disable dynamic mappings or use `dynamic: runtime`
-  // Override the `dynamic: false` set in otel@mappings to avoid conflicts in case
-  const shouldOverrideSettingsForOtelInputs = isOtelInputType && !isPkgConfiguringSubobjects;
-
   templatesMap[packageTemplateName] = {
     template: {
       settings: {
@@ -469,7 +461,6 @@ export function buildComponentTemplates(params: {
           : {}),
         dynamic_templates: mappingsDynamicTemplates.length ? mappingsDynamicTemplates : undefined,
         ...omit(indexTemplateMappings, 'properties', 'dynamic_templates', 'runtime'),
-        ...(shouldOverrideSettingsForOtelInputs ? { subobjects: undefined } : {}),
       },
       ...(lifecycle ? { lifecycle } : {}),
     },
