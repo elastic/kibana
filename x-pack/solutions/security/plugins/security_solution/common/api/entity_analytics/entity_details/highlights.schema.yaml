@@ -73,23 +73,8 @@ paths:
                           type: object
                       vulnerabilitiesTotal:
                         type: object
-                        properties:
-                          CRITICAL:
-                            type: number
-                          HIGH:
-                            type: number
-                          MEDIUM:
-                            type: number
-                          LOW:
-                            type: number
-                          UNKNOWN:
-                            type: number
-                        required:
-                          - CRITICAL
-                          - HIGH
-                          - MEDIUM
-                          - LOW
-                          - UNKNOWN
+                        additionalProperties:
+                          type: number
                       anomalies:
                         type: array
                         items:

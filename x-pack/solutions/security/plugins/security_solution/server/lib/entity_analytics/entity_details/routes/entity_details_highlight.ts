@@ -51,6 +51,15 @@ import type { IdentifierValuesByField } from '../../asset_criticality';
 import { buildCriticalitiesQuery } from '../../asset_criticality';
 import type { AggregationBucket } from '../../../asset_inventory/telemetry/type';
 
+const EMPTY_VULNERABILITIES_TOTAL: EntityDetailsHighlightsResponse['summary']['vulnerabilitiesTotal'] =
+  {
+    CRITICAL: 0,
+    HIGH: 0,
+    MEDIUM: 0,
+    LOW: 0,
+    UNKNOWN: 0,
+  };
+
 export const entityDetailsHighlightsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
@@ -226,9 +235,9 @@ export const entityDetailsHighlightsRoute = (
                   acc[key] = value.doc_count;
                   return acc;
                 },
-                {}
+                EMPTY_VULNERABILITIES_TOTAL
               )
-            : { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, UNKNOWN: 0 };
+            : EMPTY_VULNERABILITIES_TOTAL;
 
           const vulnerabilitiesAnonymized = vulnerabilities?.hits.hits.map((hit) =>
             transformRawDataToRecord({
