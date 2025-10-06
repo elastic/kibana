@@ -27,7 +27,7 @@ export const fuseCommand = {
     }),
     declaration: `FUSE`,
     examples: ['… FORK (LIMIT 1) (LIMIT 2) | FUSE'],
-    hidden: true,
+    hidden: false, // //HD
     preview: true,
     name: 'fuse',
   },

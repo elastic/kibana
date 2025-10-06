@@ -1471,7 +1471,7 @@ export class CstToAstConverter {
 
   // --------------------------------------------------------------------- FUSE
 
-  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLCommand<'fuse'> {
+  private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLAstFuseCommand {
     const fuseTypeCtx = ctx.identifier();
 
     const args: ast.ESQLAstItem[] = [];
@@ -1490,8 +1490,16 @@ export class CstToAstConverter {
       }
       incomplete ||= configurationItemCommandOption?.incomplete ?? true;
     }
+    const fuseCommand = this.createCommand<'fuse', ast.ESQLAstFuseCommand>('fuse', ctx, {
+      args,
+      incomplete
+    });
 
-    return this.createCommand('fuse', ctx, { args, incomplete });
+    if (fuseTypeCtx) {
+      fuseCommand.fuseType = fuseCommand.args[0] as ast.ESQLIdentifier;
+    }
+
+    return fuseCommand;
   }
 
   private fromFuseConfigurationItem(
