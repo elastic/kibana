@@ -373,7 +373,7 @@ export class Parser {
  * @deprecated Use `Parser.parse` instead.
  */
 export const parse = (src: string | undefined, options: ParseOptions = {}): ParseResult => {
-  if (src == null) {
+  if (src == null || !src.trim()) {
     const commands: ESQLAstQueryExpression['commands'] = [];
     return { ast: commands, root: Builder.expression.query(commands), errors: [], tokens: [] };
   }
