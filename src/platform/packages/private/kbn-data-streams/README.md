@@ -25,9 +25,14 @@ Inspired by `@kbn/storage-adapter` and other data stream adapter-like implementa
 
 Mapping updates will apply to the current write-index and your index template. This means new mappings will only be applied to docs that arrive after your mappings update land.
 
+> !IMPORTANT
+> Mapping updates will only be applied once you INCREMENT the template version number in your data stream definition. As you update your definition it is highly recommended that you retain past definitions so that you can test your upgrade path before releasing new mappings.
+
 ### A note on backwards compatibility
 
-These tools assume that you will be introducing backwards compatible changes to your mappings. If you do not apply bwc mappings you will hit a runtime error when running the `DataStreamClient.setup` method as it will try to update the current write index with your new mappings.
+These tools assume that you will be introducing backwards compatible changes to your mappings. If you do not apply bwc mappings you will hit a runtime error initializing your client as it will try to update the current write index with your new mappings.
+
+If you need to make a breaking change to mappings, consider using search-time runtime mappings.
 
 ### Search-time runtime mappings (incoming)
 
