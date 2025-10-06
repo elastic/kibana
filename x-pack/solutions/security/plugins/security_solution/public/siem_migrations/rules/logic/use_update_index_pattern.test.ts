@@ -22,7 +22,7 @@ describe('useUpdateIndexPattern', () => {
 
     result.current.mutate({
       migrationId: 'test-migration-1',
-      ruleId: 'test-rule-1',
+      ids: ['test-rule-1', 'test-rule-2'],
       indexPattern: 'new-index-pattern',
     });
 
@@ -32,7 +32,7 @@ describe('useUpdateIndexPattern', () => {
 
     expect(updateIndexPattern).toHaveBeenCalledWith({
       migrationId: 'test-migration-1',
-      ruleId: 'test-rule-1',
+      ids: ['test-rule-1', 'test-rule-2'],
       indexPattern: 'new-index-pattern',
     });
     expect(onSuccess).toHaveBeenCalledWith({ updated: 1 });
@@ -48,7 +48,7 @@ describe('useUpdateIndexPattern', () => {
 
     result.current.mutate({
       migrationId: 'test-migration-1',
-      ruleId: 'test-rule-1',
+      ids: ['test-rule-1', 'test-rule-2'],
       indexPattern: 'new-index-pattern',
     });
 
