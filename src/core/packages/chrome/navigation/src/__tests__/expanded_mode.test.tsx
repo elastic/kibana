@@ -507,6 +507,10 @@ describe('Expanded mode', () => {
 
         await user.click(coverageLink);
 
+        await waitFor(() => {
+          expect(popover).not.toBeInTheDocument();
+        });
+
         const sidePanel = screen.queryByRole('region', {
           name: /Side panel/,
         });
