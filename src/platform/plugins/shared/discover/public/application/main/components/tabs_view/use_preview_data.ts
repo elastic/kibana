@@ -111,13 +111,31 @@ const getPreviewDataObservable = (
       return combineLatest([
         tabStateContainer.dataState.data$.main$,
         appState.state$.pipe(startWith(appState.get())),
+        tabStateContainer.savedSearchState
+          .getCurrent$()
+          .pipe(startWith(tabStateContainer.savedSearchState.getState())),
       ]).pipe(
-        map(([{ fetchStatus }, { query }]) => ({ fetchStatus, query })),
+        map(([{ fetchStatus }, { query }, { searchSource }]) => ({
+          fetchStatus,
+          query,
+          dataViewName: searchSource?.getField('index')?.name,
+        })),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
-        map(({ fetchStatus, query }) => ({
-          status: getPreviewStatus(fetchStatus),
-          query: getPreviewQuery(query),
-        }))
+        map(({ fetchStatus, query, dataViewName }) => {
+          console.log(
+            `[Discover][Tabs] Tab preview data for tabId=${tabId}, dataView=${
+              dataViewName ?? 'N/A'
+            }`,
+            {
+              fetchStatus,
+              query,
+            }
+          );
+          return {
+            status: getPreviewStatus(fetchStatus),
+            query: getPreviewQuery(query),
+          };
+        })
       );
     })
   );
