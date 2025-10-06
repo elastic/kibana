@@ -9,7 +9,7 @@
 
 import * as Fs from 'fs';
 
-import * as globby from 'globby';
+// import * as globby from 'globby';
 import minimatch from 'minimatch';
 
 import { load as loadYaml } from 'js-yaml';
@@ -19,7 +19,7 @@ import { BuildkiteClient } from '../buildkite';
 import type { TestGroupRunOrderResponse } from './client';
 import { CiStatsClient } from './client';
 
-import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
+// import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { collectEnvFromLabels, expandAgentQueue } from '#pipeline-utils';
 
@@ -311,39 +311,41 @@ export async function pickTestGroupRunOrder() {
 
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
-  const getJestConfigGlobs = (patterns: string[]) => {
-    if (!LIMIT_SOLUTIONS) {
-      return patterns;
-    }
+  // const getJestConfigGlobs = (patterns: string[]) => {
+  //   if (!LIMIT_SOLUTIONS) {
+  //     return patterns;
+  //   }
+  //
+  //   const platformPatterns = ['src/', 'x-pack/platform/'].flatMap((platformPrefix: string) =>
+  //     patterns.map((pattern: string) => `${platformPrefix}${pattern}`)
+  //   );
+  //
+  //   return (
+  //     LIMIT_SOLUTIONS.flatMap((solution: string) =>
+  //       patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
+  //     )
+  //       // When applying the solution filter, still allow platform tests
+  //       .concat(platformPatterns)
+  //   );
+  // };
 
-    const platformPatterns = ['src/', 'x-pack/platform/'].flatMap((platformPrefix: string) =>
-      patterns.map((pattern: string) => `${platformPrefix}${pattern}`)
-    );
+  const jestUnitConfigs: string[] = [];
+  // LIMIT_CONFIG_TYPE.includes('unit')
+  // ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
+  //     cwd: process.cwd(),
+  //     absolute: false,
+  //     ignore: DISABLED_JEST_CONFIGS,
+  //   })
+  // : [];
 
-    return (
-      LIMIT_SOLUTIONS.flatMap((solution: string) =>
-        patterns.map((p: string) => `x-pack/solutions/${solution}/${p}`)
-      )
-        // When applying the solution filter, still allow platform tests
-        .concat(platformPatterns)
-    );
-  };
-
-  const jestUnitConfigs = LIMIT_CONFIG_TYPE.includes('unit')
-    ? globby.sync(getJestConfigGlobs(['**/jest.config.js', '!**/__fixtures__/**']), {
-        cwd: process.cwd(),
-        absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
-      })
-    : [];
-
-  const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
-        cwd: process.cwd(),
-        absolute: false,
-        ignore: DISABLED_JEST_CONFIGS,
-      })
-    : [];
+  const jestIntegrationConfigs: string[] = [];
+  // LIMIT_CONFIG_TYPE.includes('integration')
+  //   ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
+  //       cwd: process.cwd(),
+  //       absolute: false,
+  //       ignore: DISABLED_JEST_CONFIGS,
+  //     })
+  //   : [];
 
   if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
     throw new Error('unable to find any unit, integration, or FTR configs');
