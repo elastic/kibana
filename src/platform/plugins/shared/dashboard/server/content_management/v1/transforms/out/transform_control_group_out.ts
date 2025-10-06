@@ -28,11 +28,18 @@ export function transformControlGroupOut(
   /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
   const legacyControlGroupOptions: StoredControlGroupInput['ignoreParentSettings'] | undefined =
     ignoreParentSettingsJSON ? JSON.parse(ignoreParentSettingsJSON) : undefined;
-  const ignoreFilters =
-    legacyControlGroupOptions?.ignoreFilters || legacyControlGroupOptions?.ignoreQuery;
-  if (ignoreFilters) {
+  if (legacyControlGroupOptions) {
+    const ignoreFilters =
+      legacyControlGroupOptions.ignoreFilters || legacyControlGroupOptions.ignoreQuery;
     controls = controls.reduce((prev, control) => {
-      return [...prev, { ...control, useGlobalFilters: !ignoreFilters }];
+      return [
+        ...prev,
+        {
+          ...control,
+          useGlobalFilters: !ignoreFilters,
+          ignoreValidations: legacyControlGroupOptions.ignoreValidations,
+        },
+      ];
     }, [] as ControlsGroupState['controls']);
   }
   return { controls };
