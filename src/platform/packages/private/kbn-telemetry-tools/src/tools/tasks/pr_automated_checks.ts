@@ -26,6 +26,9 @@ export function prAutomatedChecks({ baselineSha, roots, reporter }: TaskContext)
       return [
         {
           task: async () => {
+            if (!baselineSha) {
+              throw new Error('Cannot fetch the baseline for comparison, no SHA specified.');
+            }
             const url = `${GIT_BASE_URL}/${baselineSha}/${relativePath}`;
             const response = await fetch(url);
             if (!response.ok) {
