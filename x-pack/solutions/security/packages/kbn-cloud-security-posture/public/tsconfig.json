@@ -41,5 +41,6 @@
     "@kbn/shared-ux-router",
     "@kbn/std",
     "@kbn/core-ui-settings-browser",
+    "@kbn/react-query",
   ]
 }
