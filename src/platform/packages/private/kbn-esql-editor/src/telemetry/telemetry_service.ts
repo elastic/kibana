@@ -11,6 +11,7 @@ import {
   ESQL_LOOKUP_JOIN_ACTION_SHOWN,
   ESQL_QUERY_HISTORY_CLICKED,
   ESQL_QUERY_HISTORY_OPENED,
+  ESQL_STARRED_QUERY_CLICKED,
   ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
 } from './events_registration';
 import type { IndexEditorCommandArgs } from '../custom_commands/use_lookup_index_editor';
@@ -89,7 +90,11 @@ export class ESQLEditorTelemetryService {
     }
   }
 
-  public trackQueryHistoryClicked() {
-    this._reportEvent(ESQL_QUERY_HISTORY_CLICKED, {});
+  public trackQueryHistoryClicked(isStarredQuery: boolean = false) {
+    if (isStarredQuery) {
+      this._reportEvent(ESQL_STARRED_QUERY_CLICKED, {});
+    } else {
+      this._reportEvent(ESQL_QUERY_HISTORY_CLICKED, {});
+    }
   }
 }
