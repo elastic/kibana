@@ -22,5 +22,8 @@
     "@kbn/usage-collection-plugin",
     "@kbn/es-query",
     "@kbn/core",
+    "@kbn/core-http-common",
+    "@kbn/cloud-security-posture-plugin",
+    "@kbn/ftr-common-functional-services",
   ]
 }
