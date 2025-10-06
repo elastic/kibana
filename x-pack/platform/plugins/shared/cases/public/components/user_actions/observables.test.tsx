@@ -13,30 +13,33 @@ import { UserActionActions } from '../../../common/types/domain';
 import { renderWithTestingProviders } from '../../common/mock';
 import { getUserAction } from '../../containers/mock';
 import { getMockBuilderArgs } from './mock';
-import { createSettingsUserActionBuilder } from './settings';
+import { createObservablesUserActionBuilder } from './observables';
+import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
-describe('createSettingsUserActionBuilder ', () => {
+describe('createObservablesUserActionBuilder ', () => {
   const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  const tests = [
-    [false, 'disabled'],
-    [true, 'enabled'],
+  const tests: [number, ObservablesActionType, string][] = [
+    [1, 'add', 'added an observable'],
+    [1, 'delete', 'deleted an observable'],
+    [1, 'update', 'updated an observable'],
+    [10, 'add', 'added 10 observables'],
   ];
 
   it.each(tests)(
-    'renders correctly when changed setting sync-alerts to %s',
-    async (syncAlerts, label) => {
-      const userAction = getUserAction('settings', UserActionActions.update, {
-        payload: { settings: { syncAlerts, extractObservables: true } },
+    'renders correctly when changed observables to %s',
+    async (count, actionType, label) => {
+      const userAction = getUserAction('observables', UserActionActions.update, {
+        payload: { observables: { count, actionType } },
       });
-      const builder = createSettingsUserActionBuilder({
+      const builder = createObservablesUserActionBuilder({
         ...builderArgs,
         userAction,
       });
@@ -44,8 +47,7 @@ describe('createSettingsUserActionBuilder ', () => {
       const createdUserAction = builder.build();
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
-      expect(screen.getByTestId('settings-update-action-settings-update')).toBeTruthy();
-      expect(screen.getByText(`${label} sync alerts and enabled extract observables`)).toBeTruthy();
+      expect(screen.getByTestId(`observables-${actionType}-action`)).toHaveTextContent(label);
     }
   );
 });
