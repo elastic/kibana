@@ -6,5 +6,6 @@
  */
 
 const STREAMS_ENDPOINT_LATENCY_EVENT = 'streams-endpoint-latency';
+const STREAMS_STATE_ERROR_EVENT = 'streams-state-error';
 
-export { STREAMS_ENDPOINT_LATENCY_EVENT };
+export { STREAMS_ENDPOINT_LATENCY_EVENT, STREAMS_STATE_ERROR_EVENT };
