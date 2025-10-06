@@ -102,6 +102,9 @@ describe('CostSavingsKeyInsight', () => {
             get: jest.fn(),
           },
         },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(false),
+        },
         ...overrides,
       },
     } as Partial<StartServices>);
