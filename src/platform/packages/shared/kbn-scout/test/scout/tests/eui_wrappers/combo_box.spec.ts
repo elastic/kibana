@@ -57,8 +57,17 @@ test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'
     });
   });
 
+<<<<<<< HEAD
   test(`with the single selection`, async ({ page }) => {
     const selector = { locator: '[id=":r5:-row"] .euiComboBox' };
+=======
+  test(`with the single selection`, async ({ page, log }) => {
+    // Selects the first .euiComboBox after the heading ID #single-selection-with-custom-options
+    const selector = {
+      locator:
+        "//*[@id='single-selection-with-custom-options']/following::*[contains(@class, 'euiComboBox ')][1]",
+    };
+>>>>>>> 9a43d33ef56 (fix: update scout EuiComboBox single selection docs page selector (#237702))
     await navigateToEuiTestPage(
       page,
       'docs/components/forms/selection/combo-box/#single-selection-with-custom-options'
