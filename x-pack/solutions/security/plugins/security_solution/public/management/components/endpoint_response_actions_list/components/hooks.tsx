@@ -339,11 +339,6 @@ export const useActionsLogFilter = ({
       : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
           const featureFlags = ExperimentalFeaturesService.get();
 
-          // upload - v8.9
-          if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
-            return false;
-          }
-
           if (
             commandName === 'runscript' &&
             !featureFlags.microsoftDefenderEndpointRunScriptEnabled &&
