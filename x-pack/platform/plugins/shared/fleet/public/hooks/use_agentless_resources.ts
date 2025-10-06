@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { useStartServices } from './use_core';
 
 const AGENTLESS_TOGGLE_STORAGE_KEY = 'fleet:showAgentlessResources';
 
 /**
- * Hook to get the current state of the "Show agentless resources" toggle
- * @returns boolean - true if agentless resources should be shown, false otherwise
+ * Hook to manage the agentless resources toggle state
+ * @returns object with current state and setter function
  */
-export function useShowAgentlessResourcesFlag(): boolean {
+export function useAgentlessResources() {
   const { storage } = useStartServices();
 
-  return useMemo(() => {
+  const initialValue = useMemo(() => {
     try {
       const stored = storage.get(AGENTLESS_TOGGLE_STORAGE_KEY);
       return stored === true;
@@ -27,34 +27,21 @@ export function useShowAgentlessResourcesFlag(): boolean {
       return false;
     }
   }, [storage]);
-}
 
-/**
- * Hook to set the state of the "Show agentless resources" toggle
- * @returns function to set the toggle state
- */
-export function useSetShowAgentlessResourcesFlag() {
-  const { storage } = useStartServices();
+  const [showAgentless, setShowAgentlessState] = useState<boolean>(initialValue);
 
-  return useCallback(
+  const setShowAgentless = useCallback(
     (enabled: boolean) => {
       try {
         storage.set(AGENTLESS_TOGGLE_STORAGE_KEY, enabled);
+        setShowAgentlessState(enabled);
       } catch (error) {
-        // Silently fail if storage is not available
+        // Silently fail if storage is not available, but still update state
+        setShowAgentlessState(enabled);
       }
     },
     [storage]
   );
-}
-
-/**
- * Combined hook to manage the agentless resources toggle state
- * @returns object with current state and setter function
- */
-export function useAgentlessResourcesToggle() {
-  const showAgentless = useShowAgentlessResourcesFlag();
-  const setShowAgentless = useSetShowAgentlessResourcesFlag();
 
   return { showAgentless, setShowAgentless };
 }

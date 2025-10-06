@@ -24,7 +24,7 @@ import {
   useStartServices,
   useIntraAppState,
   sendGetAgentTags,
-  useShowAgentlessResourcesFlag,
+  useAgentlessResources,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
@@ -44,7 +44,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
-  const showAgentless = useShowAgentlessResourcesFlag();
+  const { showAgentless } = useAgentlessResources();
   const {
     isLoading,
     isInitialRequest,

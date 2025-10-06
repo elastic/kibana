@@ -8,11 +8,7 @@
 import { renderHook, act } from '@testing-library/react';
 
 import { useStartServices } from './use_core';
-import {
-  useShowAgentlessResourcesFlag,
-  useSetShowAgentlessResourcesFlag,
-  useAgentlessResourcesToggle,
-} from './use_agentless_resources';
+import { useAgentlessResources } from './use_agentless_resources';
 
 jest.mock('./use_core');
 
@@ -23,7 +19,7 @@ const mockStorage = {
 
 const mockUseStartServices = useStartServices as jest.MockedFunction<typeof useStartServices>;
 
-describe('useAgentlessResources hooks', () => {
+describe('useAgentlessResources hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseStartServices.mockReturnValue({
@@ -31,67 +27,59 @@ describe('useAgentlessResources hooks', () => {
     } as any);
   });
 
-  describe('useShowAgentlessResourcesFlag', () => {
-    it('should return false by default', () => {
-      mockStorage.get.mockReturnValue(undefined);
-      const { result } = renderHook(() => useShowAgentlessResourcesFlag());
-      expect(result.current).toBe(false);
-    });
+  it('should initialize with false by default', () => {
+    mockStorage.get.mockReturnValue(undefined);
+    const { result } = renderHook(() => useAgentlessResources());
 
-    it('should return true when stored as true', () => {
-      mockStorage.get.mockReturnValue(true);
-      const { result } = renderHook(() => useShowAgentlessResourcesFlag());
-      expect(result.current).toBe(true);
-    });
-
-    it('should handle storage errors gracefully', () => {
-      mockStorage.get.mockImplementation(() => {
-        throw new Error('Storage not available');
-      });
-      const { result } = renderHook(() => useShowAgentlessResourcesFlag());
-      expect(result.current).toBe(false);
-    });
+    expect(result.current.showAgentless).toBe(false);
+    expect(typeof result.current.setShowAgentless).toBe('function');
   });
 
-  describe('useSetShowAgentlessResourcesFlag', () => {
-    it('should set the storage value', () => {
-      const { result } = renderHook(() => useSetShowAgentlessResourcesFlag());
+  it('should initialize with stored value when available', () => {
+    mockStorage.get.mockReturnValue(true);
+    const { result } = renderHook(() => useAgentlessResources());
 
-      act(() => {
-        result.current(true);
-      });
-
-      expect(mockStorage.set).toHaveBeenCalledWith('fleet:showAgentlessResources', true);
-    });
-
-    it('should handle storage errors gracefully', () => {
-      mockStorage.set.mockImplementation(() => {
-        throw new Error('Storage not available');
-      });
-
-      const { result } = renderHook(() => useSetShowAgentlessResourcesFlag());
-
-      expect(() => {
-        act(() => {
-          result.current(true);
-        });
-      }).not.toThrow();
-    });
+    expect(result.current.showAgentless).toBe(true);
   });
 
-  describe('useAgentlessResourcesToggle', () => {
-    it('should provide both getter and setter', () => {
-      mockStorage.get.mockReturnValue(false);
-      const { result } = renderHook(() => useAgentlessResourcesToggle());
+  it('should update both state and storage when setting value', () => {
+    mockStorage.get.mockReturnValue(false);
+    const { result } = renderHook(() => useAgentlessResources());
 
-      expect(result.current.showAgentless).toBe(false);
-      expect(typeof result.current.setShowAgentless).toBe('function');
+    expect(result.current.showAgentless).toBe(false);
 
+    act(() => {
+      result.current.setShowAgentless(true);
+    });
+
+    expect(result.current.showAgentless).toBe(true);
+    expect(mockStorage.set).toHaveBeenCalledWith('fleet:showAgentlessResources', true);
+  });
+
+  it('should handle storage errors gracefully but still update state', () => {
+    mockStorage.get.mockReturnValue(false);
+    mockStorage.set.mockImplementation(() => {
+      throw new Error('Storage not available');
+    });
+
+    const { result } = renderHook(() => useAgentlessResources());
+
+    expect(() => {
       act(() => {
         result.current.setShowAgentless(true);
       });
+    }).not.toThrow();
 
-      expect(mockStorage.set).toHaveBeenCalledWith('fleet:showAgentlessResources', true);
+    // State should still be updated even if storage fails
+    expect(result.current.showAgentless).toBe(true);
+  });
+
+  it('should handle storage read errors gracefully', () => {
+    mockStorage.get.mockImplementation(() => {
+      throw new Error('Storage not available');
     });
+
+    const { result } = renderHook(() => useAgentlessResources());
+    expect(result.current.showAgentless).toBe(false);
   });
 });

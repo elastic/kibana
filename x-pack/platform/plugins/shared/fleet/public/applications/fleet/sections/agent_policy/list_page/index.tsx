@@ -38,7 +38,7 @@ import {
   useUrlParams,
   useBreadcrumbs,
   useGetAgentPoliciesQuery,
-  useShowAgentlessResourcesFlag,
+  useAgentlessResources,
 } from '../../../hooks';
 import { SearchBar } from '../../../components';
 import { AgentPolicySummaryLine } from '../../../../../components';
@@ -57,7 +57,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
 
   // Table and search states
   const { urlParams, toUrlParams } = useUrlParams();
-  const showAgentless = useShowAgentlessResourcesFlag();
+  const { showAgentless } = useAgentlessResources();
   const [search, setSearch] = useState<string>(
     Array.isArray(urlParams.kuery)
       ? urlParams.kuery[urlParams.kuery.length - 1]

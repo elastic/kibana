@@ -28,7 +28,7 @@ import {
   useMigrateSpaceAwarenessMutation,
   usePutSettingsMutation,
   useStartServices,
-  useAgentlessResourcesToggle,
+  useAgentlessResources,
 } from '../../../../hooks';
 
 export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
@@ -44,9 +44,7 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
   const { mutateAsync: mutateSettingsAsync } = usePutSettingsMutation();
 
   // Agentless resources toggle state
-  const { showAgentless: initialShowAgentless, setShowAgentless: setShowAgentlessFlag } =
-    useAgentlessResourcesToggle();
-  const [showAgentless, setShowAgentless] = React.useState<boolean>(initialShowAgentless);
+  const { showAgentless, setShowAgentless } = useAgentlessResources();
 
   const { mutateAsync: mutateSpaceAwarenessAsync, isLoading: mutateSpaceAwarenessIsLoading } =
     useMigrateSpaceAwarenessMutation();
@@ -258,7 +256,7 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
             }
             checked={showAgentless}
             onChange={(e) => {
-              setShowAgentlessFlag(e.target.checked);
+              setShowAgentless(e.target.checked);
               setShowAgentless(e.target.checked);
             }}
             data-test-subj="showAgentlessResourcesSwitch"
