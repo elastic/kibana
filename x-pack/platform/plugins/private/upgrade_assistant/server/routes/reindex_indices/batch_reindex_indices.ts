@@ -56,7 +56,9 @@ export function registerBatchReindexIndicesRoutes(
       } = await core;
       const callAsCurrentUser = esClient.asCurrentUser;
 
-      const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
+      const soClient = new SavedObjectsClient(
+        getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
+      );
 
       const reindexActions = reindexActionsFactory(soClient, callAsCurrentUser);
       try {
@@ -102,7 +104,9 @@ export function registerBatchReindexIndicesRoutes(
         elasticsearch: { client: esClient },
       } = await core;
 
-      const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
+      const soClient = new SavedObjectsClient(
+        getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
+      );
 
       const { indexNames } = request.body;
       const results: PostBatchResponse = {

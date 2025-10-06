@@ -57,7 +57,9 @@ export function registerReindexIndicesRoutes(
         elasticsearch: { client: esClient },
       } = await core;
 
-      const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
+      const soClient = new SavedObjectsClient(
+        getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
+      );
 
       const { indexName } = request.params;
       try {
@@ -106,7 +108,9 @@ export function registerReindexIndicesRoutes(
         elasticsearch: { client: esClient },
       } = await core;
 
-      const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
+      const soClient = new SavedObjectsClient(
+        getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
+      );
 
       const { indexName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
