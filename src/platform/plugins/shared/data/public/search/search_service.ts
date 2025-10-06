@@ -231,6 +231,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const { http, uiSettings, chrome, application, notifications, ...startServices } = coreStart;
 
     const search = ((request, options = {}) => {
+      performance.mark('search_initiated');
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 

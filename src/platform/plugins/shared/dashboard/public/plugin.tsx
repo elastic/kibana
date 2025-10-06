@@ -292,6 +292,19 @@ export class DashboardPlugin
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
+    // Set up performance observer to log marks and measures as they happen
+    if (typeof PerformanceObserver !== 'undefined') {
+      const observer = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'mark') {
+            // console.log(`Performance Mark: ${entry.name} at ${entry.startTime.toFixed(2)}ms`);
+          }
+        });
+      });
+      observer.observe({ entryTypes: ['mark', 'measure'] });
+    }
+
     untilPluginStartServicesReady().then(() => registerActions(plugins));
 
     return {

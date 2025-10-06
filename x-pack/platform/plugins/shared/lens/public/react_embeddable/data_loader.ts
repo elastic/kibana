@@ -114,15 +114,50 @@ export function loadEmbeddableData(
   const onRenderComplete = () => {
     performance.mark('render_complete');
     // list performance marks
-    performance.measure('time_to_charts_lib', 'search_response_received', 'charts_lib_invoked');
-    performance.measure('time_to_render', 'charts_lib_invoked', 'render_complete');
-    // log them
-    console.log(
-      `Performance: ${performance
-        .getEntriesByType('measure')
-        .map((m) => `${m.name}=${m.duration.toFixed(2)}ms`)
-        .join(', ')}`
+    performance.measure('time_to_navigate', 'navigate_to_dashboard', 'dashboard_render_initiated');
+    performance.measure(
+      'time_until_embeddable_requested',
+      'dashboard_render_initiated',
+      'embeddable_requested'
     );
+    performance.measure(
+      'time_until_embeddable_executes_expression',
+      'embeddable_requested',
+      'expression_sent_to_engine'
+    );
+    performance.measure(
+      'time_until_esaggs_fn_invoked',
+      'expression_sent_to_engine',
+      'esaggs_expression_fn'
+    );
+    performance.measure(
+      'time_until_esaggs_requests_data',
+      'esaggs_expression_fn',
+      'search_initiated'
+    );
+    performance.measure('time_to_data', 'search_initiated', 'search_response_received');
+    performance.measure('time_to_charts_lib', 'search_response_received', 'charts_lib_invoked');
+    performance.measure('time_in_charts_lib', 'charts_lib_invoked', 'render_complete');
+    // log them
+    const measures = performance
+      .getEntriesByType('measure')
+      .sort((a, b) => a.startTime - b.startTime);
+    const totalTime = measures.reduce((sum, m) => sum + m.duration, 0);
+
+    const maxNameLength = Math.max(...measures.map((m) => m.name.length));
+    const header = `${'Measure'.padEnd(maxNameLength)} | Duration  | Percentage`;
+    const separator = `${'-'.repeat(maxNameLength)}-|-----------|-----------`;
+    const rows = measures.map((m) => {
+      const percentage = totalTime > 0 ? ((m.duration / totalTime) * 100).toFixed(1) : '0.0';
+      return `${m.name.padEnd(maxNameLength)} | ${m.duration
+        .toFixed(2)
+        .padStart(7)}ms | ${percentage.padStart(8)}%`;
+    });
+
+    console.log(`Performance:\n${header}\n${separator}\n${rows.join('\n')}`);
+
+    performance.clearMarks();
+    performance.clearMeasures();
 
     updateMessages(getUserMessages('embeddableBadge'));
     // No issues so far, blocking errors are handled directly by Lens from this point on
