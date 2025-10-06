@@ -102,7 +102,7 @@ const createVisualizationSchema = z.object({
     .enum(['metric', 'gauge', 'tagcloud', 'pie'])
     .optional()
     .describe(
-      '(optional) The type of chart to create. If not provided, the LLM will suggest the best chart type.'
+      '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
     ),
   esql: z
     .string()
