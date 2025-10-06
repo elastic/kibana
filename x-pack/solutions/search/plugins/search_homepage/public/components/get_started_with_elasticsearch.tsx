@@ -18,13 +18,12 @@ import {
   EuiFlexGrid,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../hooks/use_kibana';
-import { useUserPrivilegesQuery } from '../hooks/api/use_user_permissions';
-import { generateRandomIndexName } from '../utils/indices';
 import { SampleDataActionButton } from './sample_data_action_button';
+import { useIsSampleDataAvailable } from '../hooks/use_is_sample_data_available';
 
 interface GettingStartedCardMetadata {
   title: string | NonNullable<React.ReactNode>;
@@ -120,8 +119,11 @@ export const GetStartedWithElasticsearch = () => {
     }
   }, [application, chrome]);
 
-  const indexName = useMemo(() => generateRandomIndexName(), []);
-  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
+  const {
+    hasRequiredLicense,
+    isPluginAvailable: isSampleDataIngestPluginAvailable,
+    hasPrivileges: hasSampleDataRequiredPrivileges,
+  } = useIsSampleDataAvailable();
   const isSmallScreen = useIsWithinBreakpoints(['xs', 's', 'm']);
 
   const gettingStartedCards: GettingStartedCardMetadata[] = [
@@ -168,9 +170,11 @@ export const GetStartedWithElasticsearch = () => {
           defaultMessage="Start with pre-built data sets, including sample visualizations, dashboards, and more."
         />
       ),
-      buttonComponent: <SampleDataActionButton />,
+      buttonComponent: <SampleDataActionButton hasRequiredLicense={hasRequiredLicense} />,
       conditionalCheck: () =>
-        sampleDataIngest !== undefined && userPrivileges?.privileges?.canManageIndex === true,
+        sampleDataIngest !== undefined &&
+        isSampleDataIngestPluginAvailable &&
+        hasSampleDataRequiredPrivileges,
     },
     // Create index card
     {
