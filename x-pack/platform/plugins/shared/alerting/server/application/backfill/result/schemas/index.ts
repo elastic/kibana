@@ -53,9 +53,10 @@ export const backfillSchema = schema.object({
   status: statusSchema,
   end: schema.maybe(schema.string()),
   schedule: schema.arrayOf(backfillScheduleSchema),
-  initiator: schema.maybe(
-    schema.oneOf([schema.literal(backfillInitiator.USER), schema.literal(backfillInitiator.SYSTEM)])
-  ),
+  initiator: schema.oneOf([
+    schema.literal(backfillInitiator.USER),
+    schema.literal(backfillInitiator.SYSTEM),
+  ]),
   initiatorId: schema.maybe(schema.string()),
   warnings: schema.maybe(schema.arrayOf(schema.string())),
 });
