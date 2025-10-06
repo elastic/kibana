@@ -19,9 +19,11 @@ import { DeviceControlProtectionLevel } from '../device_control_protection_level
 import { DeviceControlNotifyUserOption } from '../device_control_notify_user_option';
 import {
   PolicyOperatingSystem,
+  DeviceControlAccessLevel,
   type Immutable,
 } from '../../../../../../../../common/endpoint/types';
 import type { DeviceControlOSes } from '../../../../types';
+import type { DeviceControlSettingCardSwitchProps } from '../device_control_setting_card_switch';
 
 export type DeviceControlProps = PolicyFormComponentCommonProps;
 
@@ -36,6 +38,49 @@ const DEVICE_CONTROL_OS_VALUES: Immutable<DeviceControlOSes[]> = [
   PolicyOperatingSystem.windows,
   PolicyOperatingSystem.mac,
 ];
+
+type AdjustSubfeatureOnProtectionSwitch = NonNullable<
+  DeviceControlSettingCardSwitchProps['additionalOnSwitchChange']
+>;
+
+// NOTE: it mutates `policyConfigData` passed on input
+const adjustDeviceControlSubfeaturesOnProtectionSwitch: AdjustSubfeatureOnProtectionSwitch = ({
+  value,
+  policyConfigData,
+  protectionOsList,
+}) => {
+  for (const os of protectionOsList) {
+    if (!value) {
+      // When disabling device control, ensure all related settings are properly reset
+      if (policyConfigData[os].device_control) {
+        policyConfigData[os].device_control = {
+          enabled: false,
+          usb_storage:
+            policyConfigData[os].device_control?.usb_storage || DeviceControlAccessLevel.audit,
+        };
+      }
+      if (policyConfigData[os].popup?.device_control) {
+        policyConfigData[os].popup.device_control = {
+          enabled: false,
+          message: policyConfigData[os].popup.device_control?.message || '',
+        };
+      }
+    } else {
+      // When enabling device control, restore to default values to ensure consistency
+      policyConfigData[os].device_control = {
+        enabled: true,
+        usb_storage: DeviceControlAccessLevel.deny_all,
+      };
+      policyConfigData[os].popup = policyConfigData[os].popup || {};
+      policyConfigData[os].popup.device_control = {
+        enabled: true,
+        message: policyConfigData[os].popup.device_control?.message || '',
+      };
+    }
+  }
+
+  return policyConfigData;
+};
 
 export const DeviceControlCard = React.memo<DeviceControlProps>(
   ({ policy, onChange, mode = 'edit', 'data-test-subj': dataTestSubj }) => {
@@ -84,6 +129,7 @@ export const DeviceControlCard = React.memo<DeviceControlProps>(
             mode={mode}
             protectionLabel={protectionLabel}
             osList={DEVICE_CONTROL_OS_VALUES}
+            additionalOnSwitchChange={adjustDeviceControlSubfeaturesOnProtectionSwitch}
             data-test-subj={getTestId('enableDisableSwitch')}
           />
         }
