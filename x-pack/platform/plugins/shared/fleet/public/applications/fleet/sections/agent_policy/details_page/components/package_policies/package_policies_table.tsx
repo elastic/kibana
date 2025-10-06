@@ -166,7 +166,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                   content={
                     <FormattedMessage
                       id="xpack.fleet.policyDetails.packagePoliciesTable.containsOtelPackages"
-                      defaultMessage="The {integrationTitle} integration collects OpenTelemetry data adhering to semantic conventions and is available in technical preview. Elastic Agents must be on version {minVersion} or higher to collect OTel data."
+                      defaultMessage="The {integrationTitle} integration collects OpenTelemetry data adhering to semantic conventions and is available in technical preview. To collect OTel data, Elastic Agents must be on version {minVersion} or later."
                       values={{
                         integrationTitle: packagePolicy.packageTitle,
                         minVersion: OTEL_INPUTS_MINIMUM_VERSION,

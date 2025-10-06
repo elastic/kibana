@@ -88,7 +88,7 @@ export const OtelPackageCallout: React.FC<{
         <p>
           <FormattedMessage
             id="xpack.fleet.epm.otelPackageWarningMessage"
-            defaultMessage="The {packageTitle} integration collects {OTelExternalLink} data adhering to {semanticConventionsLink}, and is available in technical preview. Elastic Agents must be on version {minVersion} or higher to collect OTel data. For more information, see the {fleetUserGuide}."
+            defaultMessage="The {packageTitle} integration collects {OTelExternalLink} data adhering to {semanticConventionsLink}, and is available in technical preview. To collect OTel data, Elastic Agents must be on version {minVersion} or later. For more information, refer to the {fleetUserGuide}."
             values={{
               packageTitle,
               OTelExternalLink: (
