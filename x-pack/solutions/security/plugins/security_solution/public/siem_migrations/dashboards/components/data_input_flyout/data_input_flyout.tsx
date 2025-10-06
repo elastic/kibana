@@ -14,7 +14,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
-  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -53,7 +52,9 @@ export const DashboardMigrationDataInputFlyout = React.memo(
     migrationStats,
     setFlyoutMigrationStats,
   }: DashboardMigrationDataInputFlyoutProps) {
-    const modalTitleId = useGeneratedHtmlId();
+    const modalTitleId = useGeneratedHtmlId({
+      prefix: 'dashboardMigrationDataInputFlyoutTitle',
+    });
 
     const { closeFlyout } = useMigrationDataInputContext();
     const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
@@ -140,10 +141,11 @@ export const DashboardMigrationDataInputFlyout = React.memo(
           minWidth={500}
           data-test-subj="dashboardMigrationDataInputFlyout"
           aria-labelledby={modalTitleId}
+          aria-label={modalTitleId}
         >
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m" id="dashboardMigrationDataInputFlyoutTitle">
-              <EuiText>{i18n.DATA_INPUT_FLYOUT_TITLE}</EuiText>
+            <EuiTitle size="m" id={modalTitleId}>
+              <h2 id={modalTitleId}>{i18n.DATA_INPUT_FLYOUT_TITLE}</h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>

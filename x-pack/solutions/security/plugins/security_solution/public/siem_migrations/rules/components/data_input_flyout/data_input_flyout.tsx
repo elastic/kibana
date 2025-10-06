@@ -43,7 +43,9 @@ export interface MigrationDataInputFlyoutProps {
 }
 export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps>(
   ({ onClose, migrationStats: initialMigrationSats }) => {
-    const modalTitleId = useGeneratedHtmlId();
+    const modalTitleId = useGeneratedHtmlId({
+      prefix: 'rulesMigrationDataInputFlyoutTitle',
+    });
 
     const [migrationStats, setMigrationStats] = useState<RuleMigrationStats | undefined>(
       initialMigrationSats
@@ -125,9 +127,10 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
           minWidth={500}
           data-test-subj="uploadRulesFlyout"
           aria-labelledby={modalTitleId}
+          aria-label={modalTitleId}
         >
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
+            <EuiTitle size="m" id={modalTitleId}>
               <h2 id={modalTitleId}>
                 <FormattedMessage
                   id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.title"
