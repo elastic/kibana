@@ -145,7 +145,7 @@ export function createVisualizationRenderer({
     let toolResult: TabularDataResult | VisualizationResult | undefined = steps
       .filter((s) => s.type === 'tool_call')
       .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-      .find((r) => r.type === 'tabular_data' && r.tool_result_id === toolResultId) as
+      .find((r) => r.type === ToolResultType.tabularData && r.tool_result_id === toolResultId) as
       | TabularDataResult
       | undefined;
 
