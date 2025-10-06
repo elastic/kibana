@@ -1,0 +1,96 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
+import { toolCallMock } from '../../../onechat_api_integration/utils/llm_proxy/mocks';
+import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
+import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
+
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const { onechat } = getPageObjects(['onechat']);
+  const testSubjects = getService('testSubjects');
+  const log = getService('log');
+  const supertest = getService('supertest');
+  const retry = getService('retry');
+  const es = getService('es');
+
+  describe('Conversation Error Handling', function () {
+    let llmProxy: LlmProxy;
+
+    before(async () => {
+      llmProxy = await createLlmProxy(log);
+      await createConnector(llmProxy, supertest);
+    });
+
+    after(async () => {
+      llmProxy.close();
+      await deleteConnectors(supertest);
+      await es.deleteByQuery({
+        index: '.chat-conversations',
+        query: { match_all: {} },
+        wait_for_completion: true,
+        refresh: true,
+        conflicts: 'proceed',
+      });
+    });
+
+    it('shows error message when there is an error and allows user to retry', async () => {
+      const MOCKED_INPUT = 'test error message';
+      const MOCKED_RESPONSE = 'This is a successful response after retry';
+      const MOCKED_TITLE = 'Error Handling Test';
+
+      await onechat.navigateToApp('conversations/new');
+
+      // DON'T set up any interceptors for the first attempt - this will cause a 404 error
+
+      await onechat.typeMessage(MOCKED_INPUT);
+      await onechat.sendMessage();
+
+      const isErrorVisible = await onechat.isErrorVisible();
+      expect(isErrorVisible).to.be(true);
+
+      await testSubjects.find('agentBuilderRoundError');
+      await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
+
+      // Now set up the LLM proxy to work correctly for the retry
+      void llmProxy.interceptors.toolChoice({
+        name: 'set_title',
+        response: toolCallMock('set_title', { title: MOCKED_TITLE }),
+      });
+
+      void llmProxy.interceptors.userMessage({
+        when: ({ messages }) => {
+          const lastMessage = messages[messages.length - 1]?.content as string;
+          return lastMessage?.includes(MOCKED_INPUT);
+        },
+        response: MOCKED_RESPONSE,
+      });
+
+      // Click the retry button
+      await onechat.clickRetryButton();
+
+      // Wait for all interceptors to be called (backend processing complete)
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      // Wait for the successful response to appear
+      await retry.try(async () => {
+        await testSubjects.find('agentBuilderRoundResponse');
+      });
+
+      // Assert the successful response is visible
+      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+      const responseText = await responseElement.getVisibleText();
+      expect(responseText).to.contain(MOCKED_RESPONSE);
+
+      // Assert the error is no longer visible
+      const isErrorStillVisible = await onechat.isErrorVisible();
+      expect(isErrorStillVisible).to.be(false);
+    });
+  });
+}
