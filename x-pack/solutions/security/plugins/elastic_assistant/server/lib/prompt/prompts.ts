@@ -189,7 +189,7 @@ export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate markdown text with mos
       - Risk score: Summarize the entity's risk score and the main factors contributing to it.
       - Criticality: Note the entity's criticality level and its impact on the risk score.
       - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
-      - Misconfigurations: Summarize any significant Misconfiguration and briefly explain why it is significant.
+      - Misconfigurations: Summarize any significant Misconfiguration and briefly explain why it is significant. Consider all misconfigurations in the context as failed (ignore the result.evaluation field).
       - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.  
     The generated data **MUST** follow this pattern:
   """- **{title1}**: {description1}

@@ -49,6 +49,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createGetRiskScores } from '../../risk_score/get_risk_score';
 import type { IdentifierValuesByField } from '../../asset_criticality';
 import { buildCriticalitiesQuery } from '../../asset_criticality';
+import type { AggregationBucket } from '../../../asset_inventory/telemetry/type';
 
 export const entityDetailsHighlightsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -185,7 +186,8 @@ export const entityDetailsHighlightsRoute = (
             ...misconfigurationQuery,
             _source: false,
             fields,
-            size: 10,
+            size: 100,
+            aggs: undefined,
             query: misconfigurationQuery.query as QueryDslQueryContainer,
           });
 
@@ -203,21 +205,32 @@ export const entityDetailsHighlightsRoute = (
             query: buildVulnerabilityEntityFlyoutPreviewQuery(entityField, entityIdentifier),
             enabled: true,
             pageSize: 1,
+            sort: [{ 'vulnerability.score.base': 'desc' }],
           });
 
           const vulnerabilities =
             entityField === 'host.name' // only hosts have vulnerabilities
-              ? await esClient.search({
+              ? await esClient.search<unknown, { count: { buckets: AggregationBucket[] } }>({
                   ...vulnerabilitiesQuery,
                   query: vulnerabilitiesQuery.query as QueryDslQueryContainer,
-                  aggs: undefined, // We only need the hits
                   _source: false,
                   fields,
-                  size: 10,
+                  size: 100,
                 })
-              : { hits: { hits: [] } };
+              : null;
 
-          const vulnerabilitiesAnonymized = vulnerabilities.hits.hits.map((hit) =>
+          const vulnerabilitiesAggregations = vulnerabilities?.aggregations?.count?.buckets;
+          const vulnerabilitiesTotal = vulnerabilitiesAggregations
+            ? Object.entries(vulnerabilitiesAggregations).reduce<Record<string, number>>(
+                (acc, [key, value]) => {
+                  acc[key] = value.doc_count;
+                  return acc;
+                },
+                {}
+              )
+            : { CRITICAL: 0, HIGH: 0, MEDIUM: 0, LOW: 0, UNKNOWN: 0 };
+
+          const vulnerabilitiesAnonymized = vulnerabilities?.hits.hits.map((hit) =>
             transformRawDataToRecord({
               anonymizationFields,
               currentReplacements: localReplacements,
@@ -302,8 +315,9 @@ export const entityDetailsHighlightsRoute = (
               summary: {
                 assetCriticality: assetCriticalityAnonymized,
                 riskScore: anonymizedRiskScore,
-                misconfigurations: misconfigurationsAnonymized,
-                vulnerabilities: vulnerabilitiesAnonymized,
+                failedMisconfigurations: misconfigurationsAnonymized,
+                vulnerabilities: vulnerabilitiesAnonymized ?? [],
+                vulnerabilitiesTotal, // Prevents the UI from displaying the wrong number of vulnerabilities
                 anomalies: anomaliesAnonymized,
               },
               replacements: localReplacements,

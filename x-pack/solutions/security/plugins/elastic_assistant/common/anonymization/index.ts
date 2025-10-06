@@ -128,6 +128,12 @@ export const DEFAULT_ALLOW = [
   'vulnerability.report_id',
   'vulnerability.scanner.vendor',
   'vulnerability.severity',
+  'vulnerability.score.base',
+  'vulnerability.score.version',
+  'vulnerability.id',
+  'package.name',
+  'package.version',
+  'package.fixed_version',
 ];
 
 /** By default, these fields will be anonymized */

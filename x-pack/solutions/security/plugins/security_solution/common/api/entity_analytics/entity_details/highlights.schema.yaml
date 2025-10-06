@@ -63,7 +63,7 @@ paths:
                         type: array
                         items:
                           type: object
-                      misconfigurations:
+                      failedMisconfigurations:
                         type: array
                         items:
                           type: object
@@ -71,6 +71,25 @@ paths:
                         type: array
                         items:
                           type: object
+                      vulnerabilitiesTotal:
+                        type: object
+                        properties:
+                          CRITICAL:
+                            type: number
+                          HIGH:
+                            type: number
+                          MEDIUM:
+                            type: number
+                          LOW:
+                            type: number
+                          UNKNOWN:
+                            type: number
+                        required:
+                          - CRITICAL
+                          - HIGH
+                          - MEDIUM
+                          - LOW
+                          - UNKNOWN
                       anomalies:
                         type: array
                         items:

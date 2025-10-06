@@ -53,8 +53,17 @@ export const EntityDetailsHighlightsResponse = z.object({
   summary: z.object({
     assetCriticality: z.array(z.object({})).optional(),
     riskScore: z.array(z.object({})).optional(),
-    misconfigurations: z.array(z.object({})).optional(),
+    failedMisconfigurations: z.array(z.object({})).optional(),
     vulnerabilities: z.array(z.object({})).optional(),
+    vulnerabilitiesTotal: z
+      .object({
+        CRITICAL: z.number(),
+        HIGH: z.number(),
+        MEDIUM: z.number(),
+        LOW: z.number(),
+        UNKNOWN: z.number(),
+      })
+      .optional(),
     anomalies: z.array(z.object({})).optional(),
   }),
   replacements: Replacements,
