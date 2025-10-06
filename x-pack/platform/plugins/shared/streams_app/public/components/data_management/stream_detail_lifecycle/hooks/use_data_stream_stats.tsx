@@ -8,8 +8,10 @@
 import moment from 'moment';
 import type { Streams } from '@kbn/streams-schema';
 import type { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import { useAggregations } from './use_ingestion_rate';
 
 export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number] & {
   bytesPerDoc: number;
@@ -24,6 +26,12 @@ export const useDataStreamStats = ({
   const {
     services: { dataStreamsClient },
   } = useKibana();
+  const { timeState } = useTimefilter();
+  const { aggregations } = useAggregations({
+    definition,
+    timeState,
+    isFailureStore: false,
+  });
 
   const statsFetch = useStreamsAppFetch(
     async () => {
@@ -38,20 +46,26 @@ export const useDataStreamStats = ({
       if (!dsStats || !dsStats.creationDate) {
         return undefined;
       }
-      const daysSinceCreation = Math.max(
+
+      const rangeInDays = Math.max(
         1,
-        Math.round(moment().diff(moment(dsStats.creationDate), 'days'))
+        Math.round(moment(timeState.end).diff(moment(timeState.start), 'days'))
       );
+
+      const countRange = aggregations?.buckets?.reduce((sum, bucket) => sum + bucket.doc_count, 0);
+
+      const bytesPerDoc =
+        dsStats.totalDocs && dsStats.sizeBytes ? dsStats.sizeBytes / dsStats.totalDocs : 0;
+      const perDayDocs = countRange ? countRange / rangeInDays : 0;
+      const bytesPerDay = bytesPerDoc * perDayDocs;
 
       return {
         ...dsStats,
-        bytesPerDay:
-          dsStats.sizeBytes && dsStats.totalDocs !== 0 ? dsStats.sizeBytes / daysSinceCreation : 0,
-        bytesPerDoc:
-          dsStats.totalDocs && dsStats.sizeBytes ? dsStats.sizeBytes / dsStats.totalDocs : 0,
+        bytesPerDay,
+        bytesPerDoc,
       };
     },
-    [dataStreamsClient, definition],
+    [dataStreamsClient, definition, aggregations?.buckets, timeState.end, timeState.start],
     {
       withTimeRange: false,
       withRefresh: true,

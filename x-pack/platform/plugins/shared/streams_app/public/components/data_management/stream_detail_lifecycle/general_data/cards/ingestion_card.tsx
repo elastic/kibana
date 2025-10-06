@@ -36,7 +36,7 @@ export const IngestionCard = ({
             })}
             content={i18n.translate('xpack.streams.ingestionCard.tooltip', {
               defaultMessage:
-                'Approximate average (stream total size divided by the number of days since creation)',
+                'Approximate average, calculated by extrapolating the ingestion rate from the documents on the selected time range and the average document size.',
             })}
           />
         ),
@@ -49,7 +49,10 @@ export const IngestionCard = ({
       data: (
         <PrivilegesWarningIconWrapper
           hasPrivileges={definition.privileges.monitor}
-          title="ingestionRate"
+          title={i18n.translate(
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.dailyIngestionRateLabel',
+            { defaultMessage: 'Daily ingestion rate' }
+          )}
         >
           {statsError ? '-' : stats?.bytesPerDay ? formatBytes(stats.bytesPerDay || 0) : '-'}
         </PrivilegesWarningIconWrapper>
@@ -66,7 +69,10 @@ export const IngestionCard = ({
       data: (
         <PrivilegesWarningIconWrapper
           hasPrivileges={definition.privileges.monitor}
-          title="ingestionRate"
+          title={i18n.translate(
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.monthlyIngestionRateLabel',
+            { defaultMessage: 'Monthly ingestion rate' }
+          )}
         >
           {statsError ? '-' : stats?.bytesPerDay ? formatBytes((stats.bytesPerDay || 0) * 30) : '-'}
         </PrivilegesWarningIconWrapper>

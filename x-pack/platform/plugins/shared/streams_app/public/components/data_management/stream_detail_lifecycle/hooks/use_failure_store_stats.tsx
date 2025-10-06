@@ -8,8 +8,10 @@
 import moment from 'moment';
 import type { Streams } from '@kbn/streams-schema';
 import type { FailureStoreStatsResponse } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
+import { useAggregations } from './use_ingestion_rate';
 
 export type FailureStoreStats = FailureStoreStatsResponse & {
   bytesPerDay: number;
@@ -28,6 +30,12 @@ export const useFailureStoreStats = ({
       },
     },
   } = useKibana();
+  const { timeState } = useTimefilter();
+  const { aggregations } = useAggregations({
+    definition,
+    timeState,
+    isFailureStore: true,
+  });
 
   const statsFetch = useStreamsAppFetch(
     async ({ signal }) => {
@@ -48,21 +56,32 @@ export const useFailureStoreStats = ({
         };
       }
 
-      const daysSinceCreation = Math.max(
+      const rangeInDays = Math.max(
         1,
-        Math.round(moment().diff(moment(stats.creationDate), 'days'))
+        Math.round(moment(timeState.end).diff(moment(timeState.start), 'days'))
       );
 
+      const countRange = aggregations?.buckets?.reduce((sum, bucket) => sum + bucket.doc_count, 0);
+
+      const bytesPerDoc = stats.count && stats.size ? stats.size / stats.count : 0;
+      const perDayDocs = countRange ? countRange / rangeInDays : 0;
+      const bytesPerDay = bytesPerDoc * perDayDocs;
       return {
         config,
         stats: {
           ...stats,
-          bytesPerDay: stats.size && stats.count !== 0 ? stats.size / daysSinceCreation : 0,
-          bytesPerDoc: stats.count && stats.size ? stats.size / stats.count : 0,
+          bytesPerDay,
+          bytesPerDoc,
         },
       };
     },
-    [definition.stream.name, streamsRepositoryClient],
+    [
+      definition.stream.name,
+      aggregations?.buckets,
+      streamsRepositoryClient,
+      timeState.end,
+      timeState.start,
+    ],
     {
       withTimeRange: false,
       withRefresh: true,

@@ -43,7 +43,7 @@ export const IngestionCard = ({
               'xpack.streams.streamDetailView.failureStoreEnabled.failedIngestionCard.tooltip',
               {
                 defaultMessage:
-                  'Approximate average (failure store indices total size divided by the number of days since creation)',
+                  'Approximate average, calculated by extrapolating the ingestion rate from the failed documents on the selected time range and the average document size.',
               }
             )}
           />
@@ -55,7 +55,13 @@ export const IngestionCard = ({
   const metrics = [
     {
       data: (
-        <PrivilegesWarningIconWrapper hasPrivileges={hasPrivileges} title="storageSize">
+        <PrivilegesWarningIconWrapper
+          hasPrivileges={hasPrivileges}
+          title={i18n.translate(
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.dailyIngestionRateLabel',
+            { defaultMessage: 'Daily ingestion rate' }
+          )}
+        >
           {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay)}
         </PrivilegesWarningIconWrapper>
       ),
@@ -70,7 +76,13 @@ export const IngestionCard = ({
     },
     {
       data: (
-        <PrivilegesWarningIconWrapper hasPrivileges={hasPrivileges} title="storageSize">
+        <PrivilegesWarningIconWrapper
+          hasPrivileges={hasPrivileges}
+          title={i18n.translate(
+            'xpack.streams.ingestionCard.privilegesWarningIconWrapper.monthlyIngestionRateLabel',
+            { defaultMessage: 'Monthly ingestion rate' }
+          )}
+        >
           {statsError || !stats || !stats.bytesPerDay ? '-' : formatBytes(stats.bytesPerDay * 30)}
         </PrivilegesWarningIconWrapper>
       ),
