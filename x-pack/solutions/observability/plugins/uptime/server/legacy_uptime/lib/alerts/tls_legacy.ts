@@ -52,7 +52,7 @@ const mapCertsToSummaryString = (
     .reduce((prev, cur) => (prev === '' ? cur : prev.concat(`; ${cur}`)), '');
 
 const getValidAfter = ({ not_after: date }: Cert) => {
-  if (!date) return 'Error, missing `certificate_not_valid_after` date.';
+  if (!date) return 'Error, missing `not_after` date.';
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
     ? tlsTranslations.validAfterExpiredString(date, relativeDate)
@@ -60,7 +60,7 @@ const getValidAfter = ({ not_after: date }: Cert) => {
 };
 
 const getValidBefore = ({ not_before: date }: Cert): string => {
-  if (!date) return 'Error, missing `certificate_not_valid_before` date.';
+  if (!date) return 'Error, missing `not_before` date.';
   const relativeDate = moment().diff(date, 'days');
   return relativeDate >= 0
     ? tlsTranslations.validBeforeExpiredString(date, relativeDate)

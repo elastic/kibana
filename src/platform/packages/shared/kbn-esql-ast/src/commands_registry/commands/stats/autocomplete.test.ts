@@ -71,7 +71,12 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 ];
 
 // types accepted by the AVG function
-export const AVG_TYPES: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
+export const AVG_TYPES: Array<FieldType & FunctionReturnType> = [
+  'double',
+  'integer',
+  'long',
+  'aggregate_metric_double',
+];
 
 export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
   'BY ',
@@ -395,6 +400,7 @@ describe('STATS Autocomplete', () => {
               'keyword',
               'date_nanos',
               'unsigned_long',
+              'aggregate_metric_double',
             ],
             {
               scalar: true,
@@ -414,9 +420,13 @@ describe('STATS Autocomplete', () => {
           'from a | stats avg(b) by stringField',
           [
             ...getFieldNamesByType(AVG_TYPES),
-            ...getFunctionSignaturesByReturnType(Location.EVAL, AVG_TYPES, {
-              scalar: true,
-            }),
+            ...getFunctionSignaturesByReturnType(
+              Location.EVAL,
+              [...AVG_TYPES, 'aggregate_metric_double'],
+              {
+                scalar: true,
+              }
+            ),
           ],
           mockCallbacks,
           mockContext,

@@ -36,7 +36,9 @@ export const fieldTypes: readonly string[] = [
   'unsupported',
   'date_nanos',
   'function_named_parameters',
-];
+  'aggregate_metric_double',
+  'dense_vector',
+] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
 

@@ -10,7 +10,6 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -100,6 +99,8 @@ export interface ESQLEditorProps {
   dataErrorsControl?: DataErrorsControl;
   /** Optional form field label to show above the query editor */
   formLabel?: string;
+  /** Whether to merge external messages into the editor's message list */
+  mergeExternalMessages?: boolean;
 }
 
 interface ESQLVariableService {
@@ -127,7 +128,6 @@ export interface ESQLEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
-  expressions: ExpressionsStart;
   storage: Storage;
   uiActions: UiActionsStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
