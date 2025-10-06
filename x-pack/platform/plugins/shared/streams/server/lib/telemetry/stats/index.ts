@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-import { createFieldTestingConfig } from '../../base.jest.integration.config';
-
-export default createFieldTestingConfig({
-  testsDirectory: 'type_specific',
-  groupNumber: 1,
-  totalGroups: 2,
-});
+export { StatsTelemetryService } from './stats_telemetry_service';
+export { registerStreamsUsageCollector } from './streams_usage_collector';

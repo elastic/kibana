@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-const STREAMS_ENDPOINT_LATENCY_EVENT = 'streams-endpoint-latency';
+import { createFieldTestingConfig } from '../base.jest.integration.config';
 
-export { STREAMS_ENDPOINT_LATENCY_EVENT };
+export default createFieldTestingConfig({
+  testsDirectory: 'type_specific',
+  groupNumber: 1,
+  totalGroups: 2,
+});
