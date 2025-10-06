@@ -10,17 +10,18 @@
 import type { ElementTarget } from '@elastic/eui';
 import type { ReactNode } from 'react';
 
-export type TourStepId = 'sidenav-home' | 'sidenav-manage-data';
+export type TourStepId = 'sidenav-home' | 'sidenav-more' | 'sidenav-manage-data';
 
 export interface TourStep {
   id: TourStepId;
   title: ReactNode;
   content: ReactNode;
   target: ElementTarget;
+  required: boolean;
 }
 
 export interface TourState {
-  status: 'idle' | 'active' | 'completed' | 'skipped';
+  status: 'idle' | 'waiting' | 'active' | 'completed' | 'skipped';
   currentStepIndex: number;
   steps: TourStep[];
 }

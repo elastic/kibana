@@ -37,6 +37,7 @@ import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_
 import type { UseIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
 import type { canUseCases } from './client/helpers/can_use_cases';
 import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
+import type { getObservablesFromEcs } from './client/helpers/get_observables_from_ecs';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
 import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
@@ -174,6 +175,7 @@ export interface CasesPublicStart {
     getUICapabilities: typeof getUICapabilities;
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
     groupAlertsByRule: GroupAlertsByRule;
+    getObservablesFromEcs: typeof getObservablesFromEcs;
   };
 }
 

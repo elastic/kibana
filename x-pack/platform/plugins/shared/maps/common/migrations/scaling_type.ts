@@ -9,7 +9,7 @@ import _ from 'lodash';
 import type { Writable } from '@kbn/utility-types';
 import { SOURCE_TYPES, SCALING_TYPES } from '../constants';
 import type { LayerDescriptor, ESSearchSourceDescriptor } from '../descriptor_types';
-import type { MapAttributes } from '../content_management';
+import type { StoredMapAttributes } from '../../server';
 
 function isEsDocumentSource(layerDescriptor: LayerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
@@ -19,8 +19,8 @@ function isEsDocumentSource(layerDescriptor: LayerDescriptor) {
 export function migrateUseTopHitsToScalingType({
   attributes,
 }: {
-  attributes: MapAttributes;
-}): MapAttributes {
+  attributes: StoredMapAttributes;
+}): StoredMapAttributes {
   if (!attributes || !attributes.layerListJSON) {
     return attributes;
   }

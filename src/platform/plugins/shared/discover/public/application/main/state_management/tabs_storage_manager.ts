@@ -72,8 +72,9 @@ export interface TabsStorageManager {
    * Supports two-way sync of the selected tab id with the URL.
    */
   startUrlSync: (props: { onChanged?: (nextState: TabsUrlState) => void }) => () => void;
+  pushSelectedTabIdToUrl: (selectedTabId: string, options?: { replace?: boolean }) => Promise<void>;
   persistLocally: (
-    props: TabsInternalStatePayload,
+    props: Omit<TabsInternalStatePayload, 'selectedTabId'>,
     getAppState: (tabId: string) => DiscoverAppState | undefined,
     getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
     discoverSessionId: string | undefined
@@ -112,6 +113,9 @@ export const createTabsStorageManager = ({
     spaceId: '',
   };
 
+  // Used to avoid triggering onChanged during programmatic tab ID URL updates
+  let isPushingTabIdToUrl = false;
+
   const startUrlSync: TabsStorageManager['startUrlSync'] = ({
     onChanged, // can be called when selectedTabId changes in URL to trigger app state change if needed
   }) => {
@@ -137,7 +141,9 @@ export const createTabsStorageManager = ({
 
     const listener = onChanged
       ? urlStateContainer.state$.subscribe((state) => {
-          onChanged(state);
+          if (!isPushingTabIdToUrl) {
+            onChanged(state);
+          }
         })
       : null;
 
@@ -150,18 +156,27 @@ export const createTabsStorageManager = ({
   };
 
   const getTabsStateFromURL = () => {
-    return urlStateStorage.get(TAB_STATE_URL_KEY) as TabsUrlState;
+    return urlStateStorage.get<TabsUrlState>(TAB_STATE_URL_KEY);
   };
 
-  const pushSelectedTabIdToUrl = async (selectedTabId: string) => {
+  const pushSelectedTabIdToUrl: TabsStorageManager['pushSelectedTabIdToUrl'] = async (
+    selectedTabId,
+    { replace = false } = {}
+  ) => {
     const nextState: TabsUrlState = {
       tabId: selectedTabId,
     };
     const previousState = getTabsStateFromURL();
     // If the previous tab was a "new" (unsaved) tab, we replace the URL state instead of pushing a new history entry.
     // This prevents cluttering the browser history with intermediate "new tab" states that are not meaningful to the user.
-    const shouldReplace = previousState?.tabId === NEW_TAB_ID;
-    await urlStateStorage.set(TAB_STATE_URL_KEY, nextState, { replace: shouldReplace });
+    const shouldReplace = replace || previousState?.tabId === NEW_TAB_ID;
+
+    try {
+      isPushingTabIdToUrl = true;
+      await urlStateStorage.set(TAB_STATE_URL_KEY, nextState, { replace: shouldReplace });
+    } finally {
+      isPushingTabIdToUrl = false;
+    }
   };
 
   const toTabStateInStorage = (
@@ -290,7 +305,7 @@ export const createTabsStorageManager = ({
   };
 
   const persistLocally: TabsStorageManager['persistLocally'] = async (
-    { allTabs, selectedTabId, recentlyClosedTabs },
+    { allTabs, recentlyClosedTabs },
     getAppState,
     getInternalState,
     discoverSessionId
@@ -298,8 +313,6 @@ export const createTabsStorageManager = ({
     if (!enabled) {
       return;
     }
-
-    await pushSelectedTabIdToUrl(selectedTabId);
 
     const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map((tab) =>
       toTabStateInStorage(tab, getAppState, getInternalState)
@@ -480,6 +493,7 @@ export const createTabsStorageManager = ({
 
   return {
     startUrlSync,
+    pushSelectedTabIdToUrl,
     persistLocally,
     updateTabStateLocally,
     loadLocally,

@@ -87,5 +87,6 @@
     "@kbn/otel-semantic-conventions",
     "@kbn/storage-adapter",
     "@kbn/cloud-plugin",
+    "@kbn/es-ui-shared-plugin",
   ]
 }

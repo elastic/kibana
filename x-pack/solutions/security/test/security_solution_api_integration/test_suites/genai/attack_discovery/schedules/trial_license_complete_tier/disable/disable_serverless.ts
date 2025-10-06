@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { ATTACK_DISCOVERY_SCHEDULES } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_INTERNAL_SCHEDULES } from '@kbn/elastic-assistant-common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllAttackDiscoverySchedules,
@@ -94,7 +94,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingAssistantAndScheduleKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}/${createdSchedule.id}/_disable`,
+            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}/_disable`,
           })
         );
 
@@ -116,7 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingScheduleKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}/${createdSchedule.id}/_disable`,
+            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}/_disable`,
           })
         );
 
@@ -136,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(result).toEqual(
           getMissingAssistantAndScheduleKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}/${createdSchedule.id}/_disable`,
+            routeDetails: `POST ${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/${createdSchedule.id}/_disable`,
           })
         );
 

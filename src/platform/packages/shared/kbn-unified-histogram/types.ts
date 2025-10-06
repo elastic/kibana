@@ -216,7 +216,6 @@ export interface ChartSectionProps {
    * The current query
    */
   query?: Query | AggregateQuery;
-
   /**
    * Callback to pass to the Lens embeddable to handle filter changes
    */
@@ -238,21 +237,22 @@ export interface ChartSectionProps {
    * @returns The toggle action elements
    */
   renderToggleActions: () => React.ReactElement | undefined;
-
   /**
    * The request parameters for the chart
    */
   requestParams: UseRequestParamsResult;
-
   /**
    * Observable for fetching the histogram data
    */
   input$: UnifiedHistogramInput$;
-
   /**
    * Flag indicating that the chart is currently loading
    */
   isChartLoading?: boolean;
+  /**
+   * Controls whether or not the chart is visible (used for Show and Hide toggle)
+   */
+  isComponentVisible: boolean;
 }
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover

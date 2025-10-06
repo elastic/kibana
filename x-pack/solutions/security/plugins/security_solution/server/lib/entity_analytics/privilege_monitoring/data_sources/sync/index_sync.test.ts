@@ -45,6 +45,7 @@ jest.mock('./stale_users', () => {
 const mockSearchUsernamesInIndex = jest.fn();
 const mockGetMonitoredUsers = jest.fn();
 const mockGetExistingUsersMap = jest.fn();
+const mockFindStaleUsersFactory = jest.fn();
 jest.mock('../../users/search', () => {
   return {
     createSearchService: () => ({
@@ -52,6 +53,12 @@ jest.mock('../../users/search', () => {
         mockSearchUsernamesInIndex(obj),
       getExistingUsersMap: (usernames: string[]) => mockGetExistingUsersMap(usernames),
     }),
+  };
+});
+
+jest.mock('./stale_users', () => {
+  return {
+    findStaleUsersFactory: () => mockFindStaleUsersFactory,
   };
 });
 
@@ -69,6 +76,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   const loggerMock = loggingSystemMock.createLogger();
   const auditMock = { log: jest.fn().mockReturnValue(undefined) } as unknown as AuditLogger;
   const telemetryMock = analyticsServiceMock.createAnalyticsServiceSetup();
+  const maxPrivilegedUsersAllowed = 100;
 
   const savedObjectServiceMock = savedObjectsServiceMock.createStartContract();
   const deps: PrivilegeMonitoringGlobalDependencies = {
@@ -88,7 +96,7 @@ describe('Privileged User Monitoring: Index Sync Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataClient = new PrivilegeMonitoringDataClient(deps);
-    indexSyncService = createIndexSyncService(dataClient);
+    indexSyncService = createIndexSyncService(dataClient, maxPrivilegedUsersAllowed);
   });
 
   describe('syncAllIndexUsers', () => {

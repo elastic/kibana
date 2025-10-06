@@ -11,6 +11,7 @@ import type { ProductInstallState, InstallationStatus } from '../install_status'
 export const INSTALLATION_STATUS_API_PATH = '/internal/product_doc_base/status';
 export const INSTALL_ALL_API_PATH = '/internal/product_doc_base/install';
 export const UNINSTALL_ALL_API_PATH = '/internal/product_doc_base/uninstall';
+export const UPDATE_ALL_API_PATH = '/internal/product_doc_base/update_all';
 
 export interface InstallationStatusResponse {
   inferenceId: string;
@@ -19,6 +20,11 @@ export interface InstallationStatusResponse {
 }
 
 export interface PerformInstallResponse {
+  installed: boolean;
+  failureReason?: string;
+}
+
+export interface PerformUpdateResponse {
   installed: boolean;
   failureReason?: string;
 }

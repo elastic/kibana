@@ -940,6 +940,7 @@
   "risk-engine-configuration": [
     "alertSampleSizePerShard",
     "dataViewId",
+    "enableResetToZero",
     "enabled",
     "excludeAlertStatuses",
     "filter",

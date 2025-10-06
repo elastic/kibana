@@ -3616,6 +3616,17 @@
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTableItem.isInternallyManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3698,6 +3709,17 @@
             "signature": [
               "boolean | undefined"
             ],
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleType.isInternallyManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3930,6 +3952,20 @@
             "description": [],
             "signature": [
               "React.FunctionComponent<any> | React.LazyExoticComponent<React.ComponentType<any>> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.isInternallyManaged",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,

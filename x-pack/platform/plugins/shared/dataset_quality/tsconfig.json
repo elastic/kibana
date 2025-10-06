@@ -70,7 +70,9 @@
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/xstate-utils",
-    "@kbn/failure-store-modal"
+    "@kbn/failure-store-modal",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server-mocks"
   ],
   "exclude": [
     "target/**/*"

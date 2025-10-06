@@ -9,6 +9,8 @@
 
 import { z } from '@kbn/zod';
 
+export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
+
 /* -- Settings -- */
 export const RetryPolicySchema = z.object({
   'max-attempts': z.number().int().min(1).optional(),
@@ -53,6 +55,7 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
+  timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -109,10 +112,10 @@ export const TriggerTypes = [
 export type TriggerType = (typeof TriggerTypes)[number];
 
 /* --- Steps --- */
-const StepWithTimeoutSchema = z.object({
-  timeout: z.number().optional(),
+export const TimeoutPropSchema = z.object({
+  timeout: DurationSchema.optional(),
 });
-export type StepWithTimeout = z.infer<typeof StepWithTimeoutSchema>;
+export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 const StepWithForEachSchema = z.object({
   foreach: z.string().optional(),
@@ -137,14 +140,14 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
 })
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
-  .merge(StepWithTimeoutSchema)
+  .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait'),
   with: z.object({
-    duration: z.string().regex(/^\d+(ms|[smhdw])$/), // e.g., '5s', '1m', '2h'
+    duration: DurationSchema, // e.g., '5s', '1m', '2h'
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
@@ -164,7 +167,7 @@ export const HttpStepSchema = BaseStepSchema.extend({
 })
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
-  .merge(StepWithTimeoutSchema)
+  .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
 

@@ -2016,6 +2016,27 @@
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.fieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsMetadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "public",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-public.FieldsMetadataPublicStart",
+                "text": "FieldsMetadataPublicStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

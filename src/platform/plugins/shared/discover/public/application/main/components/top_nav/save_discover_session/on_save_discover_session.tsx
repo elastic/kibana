@@ -76,7 +76,9 @@ export const onSaveDiscoverSession = async ({
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
   }) => {
-    let response: { discoverSession: DiscoverSession | undefined } = { discoverSession: undefined };
+    let response: { discoverSession: DiscoverSession | undefined; nextSelectedTabId?: string } = {
+      discoverSession: undefined,
+    };
 
     try {
       response = await state.internalState
@@ -118,7 +120,10 @@ export const onSaveDiscoverSession = async ({
       if (onSaveCb) {
         onSaveCb();
       } else if (response.discoverSession.id !== persistedDiscoverSession?.id) {
-        services.locator.navigate({ savedSearchId: response.discoverSession.id });
+        services.locator.navigate({
+          savedSearchId: response.discoverSession.id,
+          ...(response?.nextSelectedTabId ? { tab: { id: response.nextSelectedTabId } } : {}),
+        });
       }
     }
 

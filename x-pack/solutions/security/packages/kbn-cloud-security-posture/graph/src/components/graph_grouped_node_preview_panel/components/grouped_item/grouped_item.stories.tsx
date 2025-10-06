@@ -49,7 +49,7 @@ export const EntityItem: StoryFn<EntityStoryProps> = ({
   ...itemArgs
 }: EntityStoryProps) => {
   const item: EntityItemType = {
-    type: 'entity',
+    itemType: 'entity',
     ...itemArgs,
   };
 
@@ -77,7 +77,7 @@ export const EventItem: StoryFn<EventAlertStoryProps> = ({
   ...itemArgs
 }: EventAlertStoryProps) => {
   const item: EventItemType = {
-    type: 'event',
+    itemType: 'event',
     ...itemArgs,
   };
 
@@ -102,7 +102,7 @@ export const AlertItem: StoryFn<EventAlertStoryProps> = ({
   ...itemArgs
 }: EventAlertStoryProps) => {
   const item: AlertItemType = {
-    type: 'alert',
+    itemType: 'alert',
     ...itemArgs,
   };
 

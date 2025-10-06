@@ -83,6 +83,7 @@ export interface RiskEngineConfiguration {
   };
   excludeAlertStatuses?: string[];
   excludeAlertTags?: string[];
+  enableResetToZero: boolean;
 }
 
 export interface CalculateScoresParams {

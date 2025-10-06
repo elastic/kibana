@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode, HTMLAttributes, ForwardedRef } from 'react';
-import React, { forwardRef } from 'react';
+import React, { Suspense, forwardRef } from 'react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import { EuiIcon, EuiScreenReaderOnly, EuiText, euiFontSize, useEuiTheme } from '@elastic/eui';
@@ -144,7 +144,9 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
     const content = (
       <>
         <div className="iconWrapper">
-          <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+          <Suspense fallback={<EuiIcon aria-hidden color="currentColor" type={'empty'} />}>
+            <EuiIcon aria-hidden color="currentColor" type={iconType || 'empty'} />
+          </Suspense>
         </div>
         {isLabelVisible ? (
           <EuiText

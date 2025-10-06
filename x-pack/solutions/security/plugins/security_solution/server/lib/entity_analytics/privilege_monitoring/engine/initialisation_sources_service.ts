@@ -45,6 +45,7 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
     indexPattern: getStreamPatternFor(integration, namespace),
     name: integrationsSourceIndex(namespace, integration),
     matchers: getMatchersFor(integration),
+    integrationName: integration,
     integrations: { syncMarkerIndex: getLastFullSyncMarkersIndex(namespace, integration) },
   });
 

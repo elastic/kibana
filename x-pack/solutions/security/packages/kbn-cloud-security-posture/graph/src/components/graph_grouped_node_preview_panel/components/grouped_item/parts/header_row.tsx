@@ -20,7 +20,7 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
 
   const title = useMemo(() => {
-    switch (item.type) {
+    switch (item.itemType) {
       case 'event':
       case 'alert':
         return displayEventName(item);
@@ -31,12 +31,12 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {item.type === 'alert' && (
+      {item.itemType === 'alert' && (
         <EuiFlexItem grow={false}>
           <EuiIcon type="warningFilled" size="m" color="danger" />
         </EuiFlexItem>
       )}
-      {item.type === 'entity' && item.icon && (
+      {item.itemType === 'entity' && item.icon && (
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={item.icon}

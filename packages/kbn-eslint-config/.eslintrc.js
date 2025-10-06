@@ -34,7 +34,6 @@ module.exports = {
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
-    '@kbn/eslint-plugin-eui-a11y',
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',

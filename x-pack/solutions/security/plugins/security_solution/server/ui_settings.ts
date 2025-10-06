@@ -50,6 +50,7 @@ import {
   DEFAULT_VALUE_REPORT_MINUTES,
   DEFAULT_VALUE_REPORT_RATE,
   DEFAULT_VALUE_REPORT_TITLE,
+  ENABLE_ESQL_RISK_SCORING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -369,51 +370,47 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
-    ...(experimentalFeatures.continueSuppressionWindowAdvancedSettingEnabled
-      ? {
-          [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
-            name: i18n.translate(
-              'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel',
-              {
-                defaultMessage: 'Default suppression behavior on alert closure',
-              }
-            ),
-            value: SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
-            description: i18n.translate(
-              'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription',
-              {
-                defaultMessage:
-                  'If an alert is closed while suppression is active, you can choose whether suppression continues or resets.',
-              }
-            ),
-            type: 'select',
-            schema: schema.oneOf([
-              schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow),
-              schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow),
-            ]),
-            options: [
-              SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
-              SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow,
-            ],
-            optionLabels: {
-              [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: i18n.translate(
-                'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.restart',
-                {
-                  defaultMessage: 'Restart suppression',
-                }
-              ),
-              [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: i18n.translate(
-                'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.continue',
-                {
-                  defaultMessage: 'Continue suppression until window ends',
-                }
-              ),
-            },
-            category: [APP_ID],
-            requiresPageReload: false,
-          },
+    [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel',
+        {
+          defaultMessage: 'Default suppression behavior on alert closure',
         }
-      : {}),
+      ),
+      value: SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription',
+        {
+          defaultMessage:
+            'If an alert is closed while suppression is active, you can choose whether suppression continues or resets.',
+        }
+      ),
+      type: 'select',
+      schema: schema.oneOf([
+        schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow),
+        schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow),
+      ]),
+      options: [
+        SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+        SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow,
+      ],
+      optionLabels: {
+        [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: i18n.translate(
+          'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.restart',
+          {
+            defaultMessage: 'Restart suppression',
+          }
+        ),
+        [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: i18n.translate(
+          'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.continue',
+          {
+            defaultMessage: 'Continue suppression until window ends',
+          }
+        ),
+      },
+      category: [APP_ID],
+      requiresPageReload: false,
+    },
     [SHOW_RELATED_INTEGRATIONS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
         defaultMessage: 'Related integrations',
@@ -480,7 +477,7 @@ export const initUiSettings = (
           defaultMessage: 'Privileged user monitoring',
         }
       ),
-      value: false,
+      value: true,
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
         {
@@ -495,6 +492,29 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.disableESQLRiskScoring
+      ? {}
+      : {
+          [ENABLE_ESQL_RISK_SCORING]: {
+            name: i18n.translate('xpack.securitySolution.uiSettings.enableEsqlRiskScoringLabel', {
+              defaultMessage: 'Enable ESQL-based risk scoring',
+            }),
+            value: true,
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.enableEsqlRiskScoringDescription',
+              {
+                defaultMessage:
+                  '<p>Enables risk scoring based on ESQL queries. Disabling this will revert to using scripted metrics</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
+              }
+            ),
+            type: 'boolean',
+            category: [APP_ID],
+            requiresPageReload: true,
+            schema: schema.boolean(),
+            solutionViews: ['classic', 'security'],
+          },
+        }),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
           [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {

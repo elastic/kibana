@@ -12,3 +12,8 @@ export type IdentifiedSystemsEvent = ServerSentEventBase<
   'identified_systems',
   { systems: System[] }
 >;
+
+export type StreamDescriptionEvent = ServerSentEventBase<
+  'stream_description',
+  { description: string }
+>;

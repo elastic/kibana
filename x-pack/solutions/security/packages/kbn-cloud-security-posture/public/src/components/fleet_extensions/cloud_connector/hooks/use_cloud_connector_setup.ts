@@ -41,7 +41,16 @@ export const useCloudConnectorSetup = (
 ): UseCloudConnectorSetupReturn => {
   // State for new connection form
   const [newConnectionCredentials, setNewConnectionCredentials] =
-    useState<CloudConnectorCredentials>({ roleArn: undefined, externalId: undefined });
+    useState<CloudConnectorCredentials>(() => {
+      const vars = input.streams[0]?.vars ?? {};
+      const externalIdKey = Object.keys(vars).find((key) =>
+        key.toLowerCase().includes('external_id')
+      );
+      return {
+        roleArn: vars.role_arn?.value,
+        externalId: externalIdKey ? vars[externalIdKey]?.value : undefined,
+      };
+    });
 
   // State for existing connection form
   const [existingConnectionCredentials, setExistingConnectionCredentials] =

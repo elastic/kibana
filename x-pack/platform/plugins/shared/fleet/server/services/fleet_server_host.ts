@@ -134,7 +134,8 @@ class FleetServerHostService {
     } else {
       if (
         (!fleetServerHost.ssl?.key && fleetServerHost.secrets?.ssl?.key) ||
-        (!fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key)
+        (!fleetServerHost.ssl?.es_key && fleetServerHost.secrets?.ssl?.es_key) ||
+        (!fleetServerHost.ssl?.agent_key && fleetServerHost.secrets?.ssl?.agent_key)
       ) {
         data.ssl = JSON.stringify({ ...fleetServerHost.ssl, ...fleetServerHost.secrets.ssl });
       }
@@ -290,7 +291,8 @@ class FleetServerHostService {
     } else {
       if (
         (!data.ssl?.key && data.secrets?.ssl?.key) ||
-        (!data.ssl?.es_key && data.secrets?.ssl?.es_key)
+        (!data.ssl?.es_key && data.secrets?.ssl?.es_key) ||
+        (!data.ssl?.agent_key && data.secrets?.ssl?.agent_key)
       ) {
         updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
       }

@@ -543,10 +543,6 @@ export const reindexServiceFactory = (
             allow_restricted_indices: true,
             privileges: ['all'],
           },
-          {
-            names: ['.tasks'],
-            privileges: ['read'],
-          },
         ],
       });
 

@@ -211,6 +211,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
             <EuiCallOut
               size="s"
               iconType="info"
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.description"

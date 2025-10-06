@@ -10,7 +10,7 @@
 import type { Reference } from '@kbn/content-management-utils';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, first, skipWhile, switchMap } from 'rxjs';
 
 export const CONTROL_GROUP_EMBEDDABLE_ID = 'CONTROL_GROUP_EMBEDDABLE_ID';
 
@@ -19,6 +19,22 @@ export function initializeControlGroupManager(
   getReferences: (id: string) => Reference[]
 ) {
   const controlGroupApi$ = new BehaviorSubject<ControlGroupApi | undefined>(undefined);
+
+  async function untilControlsInitialized(): Promise<void> {
+    return new Promise((resolve) => {
+      controlGroupApi$
+        .pipe(
+          skipWhile((controlGroupApi) => !controlGroupApi),
+          switchMap(async (controlGroupApi) => {
+            await controlGroupApi?.untilInitialized();
+          }),
+          first()
+        )
+        .subscribe(() => {
+          resolve();
+        });
+    });
+  }
 
   return {
     api: {
@@ -53,6 +69,7 @@ export function initializeControlGroupManager(
       },
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
         controlGroupApi$.next(controlGroupApi),
+      untilControlsInitialized,
     },
   };
 }

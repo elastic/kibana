@@ -11,8 +11,51 @@ import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AuthType, SSLCertType } from '../../../common/auth/constants';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  formSerializer,
+  formDeserializer,
+} from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form';
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
+  const original = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
+  return {
+    ...original,
+    useKibana: jest.fn(),
+    useConnectorContext: jest.fn(),
+  };
+});
+
+const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+};
 
 describe('WebhookActionConnectorFields renders', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        http: {
+          get: jest.fn(),
+          post: jest.fn(),
+        },
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+          },
+        },
+      },
+    });
+    (useConnectorContext as jest.Mock).mockReturnValue({
+      services: {
+        isWebhookSslWithPfxEnabled: true,
+      },
+    });
+  });
+
   it('renders all connector fields', async () => {
     const actionConnector = {
       actionTypeId: '.webhook',
@@ -20,7 +63,7 @@ describe('WebhookActionConnectorFields renders', () => {
       config: {
         method: 'PUT',
         url: 'https://test.com',
-        headers: [{ key: 'content-type', value: 'text' }],
+        headers: [{ key: 'content-type', value: 'text', type: 'config' }],
         hasAuth: true,
         authType: AuthType.Basic,
       },
@@ -38,7 +81,8 @@ describe('WebhookActionConnectorFields renders', () => {
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </ConnectorFormTestProvider>
+      </ConnectorFormTestProvider>,
+      { wrapper: customQueryProviderWrapper }
     );
 
     await screen.findByTestId('webhookViewHeadersSwitch');
@@ -49,14 +93,14 @@ describe('WebhookActionConnectorFields renders', () => {
     expect(screen.getByTestId('webhookPasswordInput')).toBeInTheDocument();
   });
 
-  it('renders OAuth2 option and fields', () => {
+  it('renders OAuth2 option and fields', async () => {
     const actionConnector = {
       actionTypeId: '.webhook',
       name: 'webhook',
       config: {
         method: 'PUT',
         url: 'https://test.com',
-        headers: [{ key: 'content-type', value: 'text' }],
+        headers: { 'content-type': 'text' },
         hasAuth: true,
         authType: AuthType.OAuth2ClientCredentials,
       },
@@ -64,19 +108,25 @@ describe('WebhookActionConnectorFields renders', () => {
       isDeprecated: false,
     };
 
-    const { getByTestId } = render(
-      <ConnectorFormTestProvider connector={actionConnector}>
+    render(
+      <ConnectorFormTestProvider
+        connector={actionConnector}
+        serializer={formSerializer}
+        deserializer={formDeserializer}
+      >
         <WebhookActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </ConnectorFormTestProvider>
+      </ConnectorFormTestProvider>,
+      { wrapper: customQueryProviderWrapper }
     );
 
-    expect(getByTestId('authOAuth2')).toBeInTheDocument();
-    expect(getByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
-    expect(getByTestId('clientIdOAuth2')).toBeInTheDocument();
+    await screen.findByTestId('authOAuth2');
+    expect(screen.getByTestId('authOAuth2')).toBeInTheDocument();
+    expect(screen.getByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
+    expect(screen.getByTestId('clientIdOAuth2')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
@@ -87,7 +137,7 @@ describe('WebhookActionConnectorFields renders', () => {
       config: {
         method: 'PUT',
         url: 'https://test.com',
-        headers: [{ key: 'content-type', value: 'text' }],
+        headers: { 'content-type': 'text' },
         hasAuth: true,
       },
       secrets: {
@@ -109,14 +159,22 @@ describe('WebhookActionConnectorFields renders', () => {
 
     it('connector validation succeeds when connector config is valid', async () => {
       const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          serializer={formSerializer}
+          deserializer={formDeserializer}
+        >
           <WebhookActionConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
+
+      await screen.findByTestId('webhookHeaderPanel');
 
       await act(async () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
@@ -129,7 +187,7 @@ describe('WebhookActionConnectorFields renders', () => {
           config: {
             method: 'PUT',
             url: 'https://test.com',
-            headers: [{ key: 'content-type', value: 'text' }],
+            headers: { 'content-type': 'text' },
             hasAuth: true,
             authType: AuthType.Basic,
           },
@@ -140,6 +198,7 @@ describe('WebhookActionConnectorFields renders', () => {
           __internal__: {
             hasHeaders: true,
             hasCA: false,
+            headers: [{ key: 'content-type', value: 'text', type: 'config' }],
           },
           isDeprecated: false,
         },
@@ -157,14 +216,22 @@ describe('WebhookActionConnectorFields renders', () => {
       };
 
       const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={connector}
+          onSubmit={onSubmit}
+          serializer={formSerializer}
+          deserializer={formDeserializer}
+        >
           <WebhookActionConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
+
+      await screen.findByTestId('webhookHeaderPanel');
 
       await act(async () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
@@ -177,13 +244,15 @@ describe('WebhookActionConnectorFields renders', () => {
           config: {
             method: 'PUT',
             url: 'https://test.com',
-            headers: [{ key: 'content-type', value: 'text' }],
+            headers: { 'content-type': 'text' },
             hasAuth: false,
             authType: null,
           },
+          secrets: {},
           __internal__: {
             hasHeaders: true,
             hasCA: false,
+            headers: [{ key: 'content-type', value: 'text', type: 'config' }],
           },
           isDeprecated: false,
         },
@@ -209,7 +278,8 @@ describe('WebhookActionConnectorFields renders', () => {
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
 
       await act(async () => {
@@ -256,7 +326,8 @@ describe('WebhookActionConnectorFields renders', () => {
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
 
       await act(async () => {
@@ -282,7 +353,8 @@ describe('WebhookActionConnectorFields renders', () => {
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
 
       await userEvent.clear(res.getByTestId(field));
@@ -308,14 +380,22 @@ describe('WebhookActionConnectorFields renders', () => {
       };
 
       const res = render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={connector}
+          onSubmit={onSubmit}
+          serializer={formSerializer}
+          deserializer={formDeserializer}
+        >
           <WebhookActionConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
+
+      await screen.findByTestId('webhookHeaderPanel');
 
       await act(async () => {
         await userEvent.click(res.getByTestId('form-test-provide-submit'));
@@ -332,7 +412,7 @@ describe('WebhookActionConnectorFields renders', () => {
             authType: AuthType.Basic,
             ca: Buffer.from('some binary string').toString('base64'),
             verificationMode: 'full',
-            headers: [{ key: 'content-type', value: 'text' }],
+            headers: { 'content-type': 'text' },
           },
           secrets: {
             user: 'user',
@@ -341,6 +421,7 @@ describe('WebhookActionConnectorFields renders', () => {
           __internal__: {
             hasHeaders: true,
             hasCA: true,
+            headers: [{ key: 'content-type', value: 'text', type: 'config' }],
           },
           isDeprecated: false,
         },
@@ -363,14 +444,22 @@ describe('WebhookActionConnectorFields renders', () => {
       };
 
       const res = render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={connector}
+          onSubmit={onSubmit}
+          serializer={formSerializer}
+          deserializer={formDeserializer}
+        >
           <WebhookActionConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
+
+      await screen.findByTestId('webhookHeaderPanel');
 
       await act(async () => {
         await userEvent.click(res.getByTestId('form-test-provide-submit'));
@@ -386,7 +475,7 @@ describe('WebhookActionConnectorFields renders', () => {
             hasAuth: true,
             authType: AuthType.SSL,
             certType: SSLCertType.CRT,
-            headers: [{ key: 'content-type', value: 'text' }],
+            headers: { 'content-type': 'text' },
           },
           secrets: {
             crt: Buffer.from('some binary string').toString('base64'),
@@ -395,6 +484,7 @@ describe('WebhookActionConnectorFields renders', () => {
           __internal__: {
             hasHeaders: true,
             hasCA: false,
+            headers: [{ key: 'content-type', value: 'text', type: 'config' }],
           },
           isDeprecated: false,
         },
@@ -416,14 +506,22 @@ describe('WebhookActionConnectorFields renders', () => {
       };
 
       const res = render(
-        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={connector}
+          onSubmit={onSubmit}
+          serializer={formSerializer}
+          deserializer={formDeserializer}
+        >
           <WebhookActionConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
+
+      await screen.findByTestId('webhookHeaderPanel');
 
       await act(async () => {
         await userEvent.click(res.getByTestId('form-test-provide-submit'));
@@ -439,16 +537,17 @@ describe('WebhookActionConnectorFields renders', () => {
             hasAuth: true,
             authType: AuthType.SSL,
             certType: SSLCertType.PFX,
-            headers: [{ key: 'content-type', value: 'text' }],
+            headers: { 'content-type': 'text' },
           },
           secrets: {
             pfx: Buffer.from('some binary string').toString('base64'),
           },
+          isDeprecated: false,
           __internal__: {
             hasHeaders: true,
+            headers: [{ key: 'content-type', value: 'text', type: 'config' }],
             hasCA: false,
           },
-          isDeprecated: false,
         },
         isValid: true,
       });
@@ -474,7 +573,8 @@ describe('WebhookActionConnectorFields renders', () => {
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
 
       await act(async () => {

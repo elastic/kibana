@@ -9,10 +9,8 @@ import moment from 'moment';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   MonitoringEngineComponentResourceEnum,
-  type CreateMonitoringEntitySource,
   type MonitoringEngineDescriptor,
 } from '../../../../../common/api/entity_analytics';
-import { defaultMonitoringUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { PrivilegeMonitoringDataClient } from './data_client';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
@@ -62,19 +60,12 @@ export const createInitialisationService = (
     );
     const descriptor = await descriptorClient.init();
     dataClient.log('info', `Initialized privileged monitoring engine saved object`);
-
-    if (deps.experimentalFeatures?.integrationsSyncEnabled ?? false) {
-      // upsert index AND integration sources
-      await InitSourceCreationService.upsertSources(monitoringIndexSourceClient);
-    } else {
-      // upsert ONLY index source
-      await createOrUpdateDefaultDataSource(monitoringIndexSourceClient);
-    }
-
     try {
+      dataClient.log('debug', 'Upserting privilege monitoring sources');
+      await InitSourceCreationService.upsertSources(monitoringIndexSourceClient);
+
       dataClient.log('debug', 'Creating privilege user monitoring event.ingested pipeline');
-      await IndexService.createIngestPipelineIfDoesNotExist();
-      await IndexService.upsertIndex();
+      await IndexService.initialisePrivmonIndex();
 
       if (deps.apiKeyManager) {
         await deps.apiKeyManager.generate();
@@ -123,66 +114,5 @@ export const createInitialisationService = (
     return descriptor;
   };
 
-  const createOrUpdateDefaultDataSource = async (
-    monitoringIndexSourceClient: MonitoringEntitySourceDescriptorClient
-  ) => {
-    const sourceName = dataClient.index;
-
-    const defaultIndexSource: CreateMonitoringEntitySource = {
-      type: 'index',
-      managed: true,
-      indexPattern: defaultMonitoringUsersIndex(deps.namespace),
-      name: sourceName,
-    };
-
-    const existingSources = await monitoringIndexSourceClient.find({
-      name: sourceName,
-    });
-
-    if (existingSources.saved_objects.length > 0) {
-      dataClient.log('info', 'Default index source already exists, updating it.');
-      const existingSource = existingSources.saved_objects[0];
-      try {
-        await monitoringIndexSourceClient.update({
-          id: existingSource.id,
-          ...defaultIndexSource,
-        });
-      } catch (e) {
-        dataClient.log(
-          'error',
-          `Failed to update default index source for privilege monitoring: ${e.message}`
-        );
-        dataClient.audit(
-          PrivilegeMonitoringEngineActions.INIT,
-          MonitoringEngineComponentResourceEnum.privmon_engine,
-          'Failed to update default index source for privilege monitoring',
-          e
-        );
-      }
-    } else {
-      dataClient.log('info', 'Creating default index source for privilege monitoring.');
-
-      try {
-        // TODO: failing test, empty sources array. FIX
-        const indexSourceDescriptor = monitoringIndexSourceClient.create(defaultIndexSource);
-
-        dataClient.log(
-          'debug',
-          `Created index source for privilege monitoring: ${JSON.stringify(indexSourceDescriptor)}`
-        );
-      } catch (e) {
-        dataClient.log(
-          'error',
-          `Failed to create default index source for privilege monitoring: ${e.message}`
-        );
-        dataClient.audit(
-          PrivilegeMonitoringEngineActions.INIT,
-          MonitoringEngineComponentResourceEnum.privmon_engine,
-          'Failed to create default index source for privilege monitoring',
-          e
-        );
-      }
-    }
-  };
   return { init };
 };

@@ -17,6 +17,9 @@ import {
   EuiLoadingElastic,
   EuiSpacer,
   EuiButtonEmpty,
+  EuiPanel,
+  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
@@ -24,6 +27,7 @@ import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
 import type { OverlayRef } from '@kbn/core/public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsTreeTable } from './tree_table';
@@ -36,6 +40,7 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { FeedbackButton } from '../feedback_button';
+import { AssetImage } from '../asset_image';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -111,7 +116,12 @@ export function StreamListView() {
           background: ${euiTheme.colors.backgroundBasePlain};
         `}
         pageTitle={
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            gutterSize="s"
+            responsive={false}
+            alignItems="center"
+          >
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
                 {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {
@@ -180,6 +190,7 @@ export function StreamListView() {
           <StreamsListEmptyPrompt onAddData={handleAddData} />
         ) : (
           <>
+            <WelcomePanel />
             <StreamsTreeTable
               loading={streamsListFetch.loading}
               streams={streamsListFetch.value?.streams}
@@ -200,6 +211,85 @@ export function StreamListView() {
           refreshStreams={streamsListFetch.refresh}
         />
       )}
+    </>
+  );
+}
+
+function WelcomePanel() {
+  const {
+    core: { docLinks },
+  } = useKibana();
+  const [isDismissed, setIsDismissed] = useLocalStorage('streamsWelcomePanelDismissed', false);
+
+  if (isDismissed) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiPanel hasBorder={true} paddingSize="m" color="subdued" grow={false} borderRadius="m">
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <AssetImage type="yourPreviewWillAppearHere" size="s" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="xs">
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h4>
+                    {i18n.translate('xpack.streams.streamsListView.welcomeTitle', {
+                      defaultMessage: 'Welcome to Streams',
+                    })}
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('xpack.streams.streamsListView.welcomeDescription', {
+                    defaultMessage:
+                      'Use Streams to organize and process your data into clear structured flows, and simplify routing, field extraction, and retention management.',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="row" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="primary"
+                      size="s"
+                      href={docLinks.links.observability.logsStreams}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
+                        defaultMessage: 'Go to docs',
+                      })}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiButtonEmpty
+                      color="text"
+                      size="s"
+                      onClick={() => setIsDismissed(true)}
+                      aria-label={i18n.translate(
+                        'xpack.streams.streamsListView.dismissWelcomeButtonLabel',
+                        {
+                          defaultMessage: 'Dismiss welcome panel',
+                        }
+                      )}
+                    >
+                      {i18n.translate('xpack.streams.streamsListView.learnMoreButtonLabel', {
+                        defaultMessage: 'Hide this',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      <EuiSpacer size="l" />
     </>
   );
 }

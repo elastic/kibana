@@ -290,7 +290,7 @@ export class EndpointAppContextService {
   }
 
   /**
-   * SpaceId should be defined if wanting go get back an inernal client that is scoped to a given space id
+   * SpaceId should be defined if wanting go get back an internal client that is scoped to a given space id
    * @param spaceId
    * @param unscoped
    */

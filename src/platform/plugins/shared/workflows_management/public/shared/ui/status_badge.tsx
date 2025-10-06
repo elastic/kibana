@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBadge,
   EuiBeacon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -70,6 +69,11 @@ const getExecutionStatusColorsMap = (
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
       tokenColor: 'gray',
     },
+    [ExecutionStatus.TIMED_OUT]: {
+      color: euiTheme.colors.danger,
+      backgroundColor: euiTheme.colors.backgroundBaseDanger,
+      tokenColor: 'euiColorVis6' as const,
+    },
     [ExecutionStatus.SKIPPED]: {
       color: euiTheme.colors.textDisabled,
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
@@ -95,6 +99,7 @@ export const getExecutionStatusColors = (
 const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
   [ExecutionStatus.COMPLETED]: 'checkInCircleFilled',
   [ExecutionStatus.FAILED]: 'errorFilled',
+  [ExecutionStatus.TIMED_OUT]: 'errorFilled',
   [ExecutionStatus.PENDING]: 'clock',
   [ExecutionStatus.RUNNING]: 'play',
   [ExecutionStatus.WAITING]: 'clock',
@@ -126,9 +131,7 @@ export function StatusBadge({
   ...props
 }: { status: ExecutionStatus | undefined; textProps?: EuiTextProps } & EuiFlexGroupProps) {
   const { euiTheme } = useEuiTheme();
-  if (!status) {
-    return <EuiBadge color="subdued">-</EuiBadge>;
-  }
+  if (!status) return;
 
   const statusLabel = getStatusLabel(status);
   const icon = getExecutionStatusIcon(euiTheme, status);

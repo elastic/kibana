@@ -62,7 +62,7 @@ describe('AlertsPreview', () => {
       {
         id: `attack-discovery-alerts-preview-${uuid.v4()}`,
         tableType: TableId.alertsOnRuleDetailsPage,
-        initialPageSize: size,
+        pageSize: size,
         query,
         showAlertStatusWithFlapping: false,
       },

@@ -88,11 +88,18 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   }
 
   // Resolve Jest configuration
-  const baseConfig = await resolveJestConfig(parsedArguments, resolvedConfigPath);
+  const { config: baseConfig, configPath } = await resolveJestConfig(
+    parsedArguments,
+    resolvedConfigPath
+  );
 
   // Set up Scout reporter if enabled
-  if (SCOUT_REPORTER_ENABLED && resolvedConfigPath) {
-    process.env.JEST_CONFIG_PATH = resolvedConfigPath;
+  if (SCOUT_REPORTER_ENABLED) {
+    if (configPath) {
+      process.env.JEST_CONFIG_PATH = configPath;
+    } else {
+      log.warning('JEST_CONFIG_PATH not set because the Jest config path could not be determined');
+    }
   }
 
   log.debug('Setting up Jest with shared cache directory...');
@@ -235,7 +242,7 @@ function discoverJestConfig(
 async function resolveJestConfig(
   parsedArguments: any,
   resolvedConfigPath?: string
-): Promise<Config.InitialOptions> {
+): Promise<{ config: Config.InitialOptions; configPath: string | undefined }> {
   let initialOptions: Config.InitialOptions | undefined;
 
   // If a config path was provided via argv, try to parse it as JSON first
@@ -270,7 +277,7 @@ async function resolveJestConfig(
     initialOptions = (await readInitialOptions(resolvedConfigPath!)).config;
   }
 
-  return initialOptions;
+  return { config: initialOptions, configPath: resolvedConfigPath };
 }
 
 interface JestExecutionContext {

@@ -17,7 +17,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { AlertNavigationHandler } from './alert_navigation_registry';
 import { AlertNavigationRegistry } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/rule_api';
-import { MAINTENANCE_WINDOWS_APP_ID } from '../common';
+import { MAINTENANCE_WINDOWS_APP_ID, getMaxAlertLimit } from '../common';
 import type { Rule } from '../common';
 
 export interface PluginSetupContract {
@@ -95,7 +95,7 @@ export class AlertingPublicPlugin
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.config = this.initContext.config.get<AlertingUIConfig>();
-    this.maxAlertsPerRun = this.config.rules.run.alerts.max;
+    this.maxAlertsPerRun = getMaxAlertLimit(this.config.rules.run.alerts.max);
   }
 
   public setup(core: CoreSetup, plugins: AlertingPluginSetup) {

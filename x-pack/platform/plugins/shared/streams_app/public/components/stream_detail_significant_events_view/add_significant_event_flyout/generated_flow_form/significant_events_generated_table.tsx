@@ -13,6 +13,7 @@ import {
   EuiText,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
@@ -132,7 +133,7 @@ export function SignificantEventsGeneratedTable({
     },
     {
       field: 'title',
-      width: '60%',
+      width: '30%',
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.titleColumn', {
         defaultMessage: 'Title',
       }),
@@ -144,7 +145,19 @@ export function SignificantEventsGeneratedTable({
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.systemColumn', {
         defaultMessage: 'System',
       }),
-      render: (_, item: StreamQueryKql) => <EuiBadge color="hollow">{item.system?.name}</EuiBadge>,
+      render: (_, item: StreamQueryKql) => {
+        return <EuiBadge color="hollow">{item.system?.name}</EuiBadge>;
+      },
+    },
+    {
+      width: '30%',
+      field: 'system',
+      name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.queryColumn', {
+        defaultMessage: 'Query',
+      }),
+      render: (_, item: StreamQueryKql) => {
+        return <EuiCodeBlock paddingSize="none">{JSON.stringify(item.kql?.query)}</EuiCodeBlock>;
+      },
     },
     {
       name: (
@@ -166,7 +179,7 @@ export function SignificantEventsGeneratedTable({
             isQueryValid={!validation.kql.isInvalid}
             showTitle={false}
             compressed={true}
-            hideXAxis={true}
+            hideAxis={true}
             height={40}
           />
         );

@@ -647,10 +647,10 @@
       },
       "settings": {
         "properties": {
-          "syncAlerts": {
+          "extractObservables": {
             "type": "boolean"
           },
-          "extractObservables": {
+          "syncAlerts": {
             "type": "boolean"
           }
         }
@@ -3128,6 +3128,9 @@
       },
       "dataViewId": {
         "type": "keyword"
+      },
+      "enableResetToZero": {
+        "type": "boolean"
       },
       "enabled": {
         "type": "boolean"

@@ -14,21 +14,41 @@ import type { ColumnMeta } from './utils';
 
 /**
  * Converts old stringified colorMapping configs to new raw value configs
+ *
+ * Also fixes loop mode issue https://github.com/elastic/kibana/issues/231165
  */
 export function convertToRawColorMappings(
-  colorMapping: DeprecatedColorMappingConfig | ColorMapping.Config,
+  { ...colorMapping }: DeprecatedColorMappingConfig | ColorMapping.Config,
   columnMeta?: ColumnMeta | null
 ): ColorMapping.Config {
+  const isLegacyLoopMode =
+    ('assignmentMode' in colorMapping && colorMapping.assignmentMode === 'auto') ||
+    colorMapping.assignments.length === 0;
+  delete (colorMapping as DeprecatedColorMappingConfig).assignmentMode;
+
   return {
     ...colorMapping,
     assignments: colorMapping.assignments.map((oldAssignment) => {
       if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
       return convertColorMappingAssignment(oldAssignment, columnMeta);
     }),
-    specialAssignments: colorMapping.specialAssignments.map((oldAssignment) => {
-      if (isValidColorMappingAssignment(oldAssignment)) return oldAssignment;
+    specialAssignments: colorMapping.specialAssignments.map((oldAssignment, i) => {
+      const isBadColor = isLegacyLoopMode && i === 0;
+      const newColor = isBadColor
+        ? ({
+            type: 'loop',
+          } satisfies ColorMapping.Config['specialAssignments'][number]['color'])
+        : oldAssignment.color;
+
+      if (isValidColorMappingAssignment(oldAssignment)) {
+        return {
+          ...oldAssignment,
+          color: newColor,
+        };
+      }
+
       return {
-        color: oldAssignment.color,
+        color: newColor,
         touched: oldAssignment.touched,
         rules: [oldAssignment.rule],
       };

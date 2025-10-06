@@ -25,14 +25,12 @@ import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';
 import HeatmapComponent from './heatmap_component';
+import { EMPTY_LABEL, MISSING_TOKEN } from '@kbn/field-formats-common';
 
 // these are used within the DSL terms aggs custom format
 const OTHER_BUCKET_LABEL = '[OTHER LABEL]';
 const MISSING_BUCKET_LABEL = '[MISSING LABEL]';
-// this should come from the field formatter
-const EMPTY_LABEL = '(empty)';
 
-const MISSING_TOKEN = '__missing__';
 const OTHER_TOKEN = '__other__';
 
 const categoricalTable: Datatable = {

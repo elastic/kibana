@@ -19,10 +19,17 @@ export function getStepsCollectionSchema(
   workflowExecutionGraph: WorkflowGraph,
   stepName: string
 ) {
+  const stepId = getStepId(stepName);
+  const stepNode =
+    workflowExecutionGraph.getNode(stepId) ||
+    workflowExecutionGraph.getNode('enterForeach_' + stepId) ||
+    workflowExecutionGraph.getNode('enterCondition_' + stepId);
+
+  if (!stepNode) {
+    throw new Error(`Step with id ${stepId} not found in the workflow graph.`);
+  }
   // reverse predecessors so the earliest steps are first and will be available when we reach the later ones
-  const predecessors = [
-    ...workflowExecutionGraph.getAllPredecessors(getStepId(stepName)),
-  ].reverse();
+  const predecessors = [...workflowExecutionGraph.getAllPredecessors(stepNode.id)].reverse();
 
   if (predecessors.length === 0) {
     return z.object({});

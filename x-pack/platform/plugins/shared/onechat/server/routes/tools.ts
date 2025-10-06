@@ -357,7 +357,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         const { tools: toolService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
         const tool = await registry.get(id);
-        const toolSchema = typeof tool.schema === 'function' ? await tool.schema() : tool.schema;
+        const toolSchema = await tool.getSchema();
         const validation = toolSchema.safeParse(toolParams);
         if (validation.error) {
           return response.badRequest({

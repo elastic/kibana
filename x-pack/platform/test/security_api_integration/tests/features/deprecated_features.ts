@@ -378,7 +378,7 @@ export default function ({ getService }: FtrProviderContext) {
           tags: ['defacement'],
           severity: CaseSeverity.LOW,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
-          settings: { syncAlerts: true },
+          settings: { syncAlerts: true, extractObservables: true },
           owner: 'cases_owner_one',
           assignees: [],
           ...props,

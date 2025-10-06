@@ -34,13 +34,16 @@ export interface EntitySpecificFields extends BaseGroupedItemCommonFields {
 }
 
 export interface EventItem extends EventOrAlertSpecificFields {
-  type: 'event';
+  itemType: 'event';
 }
 export interface AlertItem extends EventOrAlertSpecificFields {
-  type: 'alert';
+  itemType: 'alert';
 }
 export interface EntityItem extends EntitySpecificFields {
-  type: 'entity';
+  itemType: 'entity';
+  type?: string;
+  subType?: string;
 }
 
 export type EntityOrEventItem = EventItem | AlertItem | EntityItem;
+export type PanelItems = EntityItem[] | Array<EventItem | AlertItem>;

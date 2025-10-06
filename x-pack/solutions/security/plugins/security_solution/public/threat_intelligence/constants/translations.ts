@@ -28,10 +28,3 @@ export const DESCRIPTION = i18n.translate(
       'Elastic threat intelligence helps you see if you are open to or have been subject to current or historical known threats.',
   }
 );
-
-export const KEYWORDS = i18n.translate(
-  'xpack.securitySolution.threatIntelligence.navigation.indicatorsNavItemKeywords',
-  {
-    defaultMessage: 'Indicators',
-  }
-);

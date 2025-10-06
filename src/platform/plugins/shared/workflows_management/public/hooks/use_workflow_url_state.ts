@@ -66,14 +66,13 @@ export function useWorkflowUrlState() {
 
   const setActiveTab = useCallback(
     (tab: 'workflow' | 'executions') => {
-      // When switching to workflow tab, clear execution selection
-      const updates: Partial<WorkflowUrlState> = { tab };
-      if (tab === 'workflow') {
-        updates.executionId = undefined;
-        updates.stepId = undefined;
-        updates.stepExecutionId = undefined;
-      }
-      updateUrlState(updates);
+      // When switching to other tab, clear execution selection
+      updateUrlState({
+        executionId: undefined,
+        stepExecutionId: undefined,
+        stepId: undefined,
+        tab,
+      });
     },
     [updateUrlState]
   );
@@ -81,7 +80,6 @@ export function useWorkflowUrlState() {
   const setSelectedExecution = useCallback(
     (executionId: string | null) => {
       updateUrlState({
-        tab: 'executions', // Automatically switch to executions tab
         executionId: executionId || undefined,
         stepExecutionId: undefined,
         stepId: undefined,

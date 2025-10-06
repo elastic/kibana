@@ -8,7 +8,9 @@
  */
 
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
+import { type ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Dimension } from '../../../common/types';
+import { DIMENSION_TYPES } from '../../../common/fields/constants';
 
 const INVALID_FIELD_NAME = '_metric_names_hash';
 export function extractDimensions(
@@ -24,11 +26,15 @@ export function extractDimensions(
     }
 
     for (const [type, typeInfo] of Object.entries(fieldInfo)) {
-      if (typeInfo.time_series_dimension !== true || (filterSet && !filterSet.has(fieldName))) {
+      if (
+        typeInfo.time_series_dimension !== true ||
+        (filterSet && !filterSet.has(fieldName)) ||
+        !DIMENSION_TYPES.includes(type as ES_FIELD_TYPES)
+      ) {
         continue;
       }
 
-      result.set(fieldName, { name: fieldName, type });
+      result.set(fieldName, { name: fieldName, type: type as ES_FIELD_TYPES });
     }
   }
 

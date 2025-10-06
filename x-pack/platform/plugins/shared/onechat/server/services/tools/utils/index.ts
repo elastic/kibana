@@ -7,3 +7,4 @@
 
 export { toDescriptorWithSchema, toExecutableTool } from './tool_conversion';
 export { registryToProvider } from './registry_to_provider';
+export { getToolTypeInfo } from './get_tool_type_info';

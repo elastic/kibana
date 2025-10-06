@@ -8,9 +8,11 @@
  */
 
 import React, { useEffect } from 'react';
+import { css } from '@emotion/react';
 
-import { EuiPageBody } from '@elastic/eui';
+import { EuiPageBody, useEuiTheme, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { CardsNavigation } from '@kbn/management-cards-navigation';
+import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
 
 import { useAppContext } from '../management_app/management_context';
 import { ClassicEmptyPrompt } from './classic_empty_prompt';
@@ -25,9 +27,23 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
-  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig, chromeStyle, coreStart } =
-    useAppContext();
+  const { euiTheme } = useEuiTheme();
+  const {
+    appBasePath,
+    sections,
+    kibanaVersion,
+    cardsNavigationConfig,
+    chromeStyle,
+    coreStart,
+    cloud,
+    hasEnterpriseLicense,
+  } = useAppContext();
   setBreadcrumbs();
+
+  // Check if cloud services are available
+  const isCloudEnabled = cloud?.isCloudEnabled || false;
+  // AutoOps promotion callout should only be shown for self-managed instances with an enterprise license
+  const shouldShowAutoOpsPromotion = !isCloudEnabled && hasEnterpriseLicense;
 
   useEffect(() => {
     onAppMounted('');
@@ -52,5 +68,22 @@ export const ManagementLandingPage = ({
     return <SolutionEmptyPrompt kibanaVersion={kibanaVersion} coreStart={coreStart} />;
   }
 
-  return <ClassicEmptyPrompt kibanaVersion={kibanaVersion} />;
+  return (
+    <EuiPageBody restrictWidth={true}>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          {shouldShowAutoOpsPromotion && (
+            <div
+              css={css`
+                max-width: 600px;
+              `}
+            >
+              <AutoOpsPromotionCallout style={{ margin: `0 ${euiTheme.size.l}` }} />
+            </div>
+          )}
+          <ClassicEmptyPrompt kibanaVersion={kibanaVersion} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPageBody>
+  );
 };
