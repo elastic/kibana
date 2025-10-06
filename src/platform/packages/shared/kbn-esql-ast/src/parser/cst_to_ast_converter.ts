@@ -1470,9 +1470,7 @@ export class CstToAstConverter {
 
     // FUSE <fuse_method>
     if (fuseTypeCtx) {
-      const name = this.sanitizeIdentifierString(fuseTypeCtx);
-      const fuseType = Builder.identifier({ name }, this.getParserFields(fuseTypeCtx));
-      command.args.push(fuseType);
+      command.args.push(this.fromIdentifier(fuseTypeCtx));
     }
 
     for (const config of ctx.fuseConfiguration_list()) {
