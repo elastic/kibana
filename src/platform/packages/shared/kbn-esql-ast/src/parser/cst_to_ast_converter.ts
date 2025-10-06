@@ -10,7 +10,7 @@
 import * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
 import type * as ast from '../types';
-import { isCommand, isOptionNode } from '../ast/is';
+import { isCommand } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import { getPosition } from './tokens';
 import { nonNullable } from './helpers';
@@ -407,22 +407,29 @@ export class CstToAstConverter {
     return command;
   }
 
-  private toOption(name: string, ctx: antlr.ParserRuleContext): ast.ESQLCommandOption {
+  private toOption(
+    name: string,
+    ctx: antlr.ParserRuleContext,
+    args: ast.ESQLAstItem[] = [],
+    incomplete?: boolean
+  ): ast.ESQLCommandOption {
     return {
       type: 'option',
       name,
       text: ctx.getText(),
       location: getPosition(ctx.start, ctx.stop),
-      args: [],
-      incomplete: Boolean(
-        ctx.exception ||
-          ctx.children?.some((c) => {
-            // TODO: 1. Remove this expect error comment
-            // TODO: 2. .isErrorNode is function: .isErrorNode()
-            // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
-            return Boolean(c.isErrorNode);
-          })
-      ),
+      args,
+      incomplete:
+        incomplete ??
+        Boolean(
+          ctx.exception ||
+            ctx.children?.some((c) => {
+              // TODO: 1. Remove this expect error comment
+              // TODO: 2. .isErrorNode is function: .isErrorNode()
+              // @ts-expect-error not exposed in type but exists see https://github.com/antlr/antlr4/blob/v4.11.1/runtime/JavaScript/src/antlr4/tree/ErrorNodeImpl.js#L19
+              return Boolean(c.isErrorNode);
+            })
+        ),
     };
   }
 
@@ -1465,105 +1472,85 @@ export class CstToAstConverter {
   // --------------------------------------------------------------------- FUSE
 
   private fromFuseCommand(ctx: cst.FuseCommandContext): ast.ESQLCommand<'fuse'> {
-    const command = this.createCommand('fuse', ctx);
     const fuseTypeCtx = ctx.identifier();
+
+    const args: ast.ESQLAstItem[] = [];
+    let incomplete = false;
 
     // FUSE <fuse_method>
     if (fuseTypeCtx) {
-      command.args.push(this.fromIdentifier(fuseTypeCtx));
+      args.push(this.fromIdentifier(fuseTypeCtx));
     }
 
+    // FUSE SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
     for (const config of ctx.fuseConfiguration_list()) {
-      this.processFuseConfigurationItem(config, command);
+      const configurationItemCommandOption = this.fromFuseConfigurationItem(config);
+      if (configurationItemCommandOption) {
+        args.push(configurationItemCommandOption);
+      }
+      incomplete ||= configurationItemCommandOption?.incomplete ?? true;
     }
 
-    const hasIncompleteConfigs = command.args.some((arg) => {
-      return isOptionNode(arg) && arg.incomplete;
-    });
-    if (hasIncompleteConfigs) {
-      command.incomplete = true;
-    }
-
-    return command;
+    return this.createCommand('fuse', ctx, { args, incomplete });
   }
 
-  private processFuseConfigurationItem(
-    configCtx: cst.FuseConfigurationContext,
-    command: ast.ESQLCommand<'fuse'>
-  ) {
+  private fromFuseConfigurationItem(
+    configCtx: cst.FuseConfigurationContext
+  ): ast.ESQLCommandOption | null {
     const byContext = configCtx.BY();
 
     // SCORE BY <score_column>
     const scoreCtx = configCtx.SCORE();
     if (scoreCtx && byContext) {
-      const option = this.toOption(scoreCtx.getText().toLowerCase(), configCtx);
-      const scoreColumnCtx = configCtx.qualifiedName();
+      const args: ast.ESQLAstItem[] = [];
 
+      const scoreColumnCtx = configCtx.qualifiedName();
       if (textExistsAndIsValid(scoreColumnCtx.getText())) {
-        const scoreColumn = this.toColumn(scoreColumnCtx);
-        option.args.push(scoreColumn);
-        option.incomplete = false;
-      } else {
-        option.incomplete = true;
+        args.push(this.toColumn(scoreColumnCtx));
       }
 
-      command.args.push(option);
-      return;
+      const incomplete = args.length === 0;
+      return this.toOption('score by', configCtx, args, incomplete);
     }
 
     // KEY BY <key_columns>
     const keyCtx = configCtx.KEY();
     if (keyCtx && byContext) {
-      const option = this.toOption(keyCtx.getText().toLowerCase(), configCtx);
-      const fields = this.fromFields(configCtx.fields());
-
-      if (fields.length > 0) {
-        option.incomplete = false;
-        option.args.push(...fields);
-      } else {
-        option.incomplete = true;
-      }
-
-      command.args.push(option);
-      return;
+      const args = this.fromFields(configCtx.fields());
+      const incomplete = args.length === 0;
+      return this.toOption('key by', configCtx, args, incomplete);
     }
 
     // GROUP BY <group_column>
     const groupCtx = configCtx.GROUP();
     if (groupCtx && byContext) {
-      const option = this.toOption(groupCtx.getText().toLowerCase(), configCtx);
-
+      const args: ast.ESQLAstItem[] = [];
       const groupColumnCtx = configCtx.qualifiedName();
 
       if (textExistsAndIsValid(groupColumnCtx.getText())) {
-        const groupColumn = this.toColumn(groupColumnCtx);
-        option.args.push(groupColumn);
-        option.incomplete = false;
-      } else {
-        option.incomplete = true;
+        args.push(this.toColumn(groupColumnCtx));
       }
 
-      command.args.push(option);
-      return;
+      const incomplete = args.length === 0;
+      return this.toOption('group by', configCtx, args, incomplete);
     }
 
     // WITH <map_expression>
     const withCtx = configCtx.WITH();
     if (withCtx) {
+      const args: ast.ESQLAstItem[] = [];
       const mapExpressionCtx = configCtx.mapExpression();
-      const withOption = this.toOption(withCtx.getText().toLowerCase(), configCtx);
 
       const map = this.fromMapExpression(mapExpressionCtx);
       if (map && textExistsAndIsValid(map.text)) {
-        withOption.args.push(map);
-        withOption.incomplete = map.incomplete;
-      } else {
-        withOption.incomplete = true;
+        args.push(map);
       }
 
-      command.args.push(withOption);
-      return;
+      const incomplete = args.length === 0 || map.incomplete;
+      return this.toOption('with', configCtx, args, incomplete);
     }
+
+    return null;
   }
 
   // --------------------------------------------------------------------- FORK

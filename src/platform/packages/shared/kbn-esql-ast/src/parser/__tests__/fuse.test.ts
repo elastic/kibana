@@ -59,7 +59,7 @@ describe('FUSE', () => {
         args: [
           {
             type: 'option',
-            name: 'score',
+            name: 'score by',
             args: [{ type: 'column', name: 'new_score' }],
             incomplete: false,
           },
@@ -80,7 +80,7 @@ describe('FUSE', () => {
         args: [
           {
             type: 'option',
-            name: 'key',
+            name: 'key by',
             args: [
               { type: 'column', name: 'field1' },
               { type: 'column', name: 'field2' },
@@ -104,7 +104,7 @@ describe('FUSE', () => {
         args: [
           {
             type: 'option',
-            name: 'group',
+            name: 'group by',
             args: [{ type: 'column', name: 'group_field' }],
             incomplete: false,
           },
@@ -157,12 +157,12 @@ describe('FUSE', () => {
           { type: 'identifier', name: 'rrf' },
           {
             type: 'option',
-            name: 'score',
+            name: 'score by',
             args: [{ type: 'column', name: 'new_score' }],
           },
           {
             type: 'option',
-            name: 'key',
+            name: 'key by',
             args: [
               { type: 'column', name: 'k1' },
               { type: 'column', name: 'k2' },
@@ -170,7 +170,7 @@ describe('FUSE', () => {
           },
           {
             type: 'option',
-            name: 'group',
+            name: 'group by',
             args: [{ type: 'column', name: 'g' }],
           },
           {
@@ -226,7 +226,7 @@ describe('FUSE', () => {
         args: [
           {
             type: 'option',
-            name: 'score',
+            name: 'score by',
             args: [],
             incomplete: true,
           },
@@ -247,7 +247,7 @@ describe('FUSE', () => {
         args: [
           {
             type: 'option',
-            name: 'key',
+            name: 'key by',
             args: [],
             incomplete: true,
           },
@@ -268,7 +268,7 @@ describe('FUSE', () => {
         args: [
           {
             type: 'option',
-            name: 'group',
+            name: 'group by',
             args: [],
             incomplete: true,
           },
@@ -339,13 +339,13 @@ describe('FUSE', () => {
         args: [
           {
             type: 'option',
-            name: 'score',
+            name: 'score by',
             args: [{ type: 'column', name: 's1' }],
             incomplete: false,
           },
           {
             type: 'option',
-            name: 'score',
+            name: 'score by',
             args: [{ type: 'column', name: 's2' }],
             incomplete: false,
           },
