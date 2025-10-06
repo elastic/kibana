@@ -10,6 +10,7 @@ import type { Gap } from '../../../../lib/rule_gaps/gap';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { logProcessedAsAuditEvent } from './utils';
 import type { RulesClientContext } from '../../../../rules_client';
+import { backfillInitiator } from '../../../../../common/constants';
 
 interface ProcessGapsBatchParams {
   rule: { id: string; name: string };
@@ -68,6 +69,7 @@ export const processGapsBatch = async (
   const schedulingPayload = {
     ruleId: rule.id,
     ranges: gapRanges,
+    initiator: backfillInitiator.USER,
   };
 
   const results = await scheduleBackfill(context, [schedulingPayload], gapsInBackfillScheduling);

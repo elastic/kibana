@@ -17,6 +17,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common
 import { getRule } from '../get/get_rule';
 import type { SanitizedRuleWithLegacyId } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillInitiator } from '../../../../../common/constants';
 
 export async function fillGapById(context: RulesClientContext, params: FillGapByIdParams) {
   try {
@@ -65,6 +66,7 @@ export async function fillGapById(context: RulesClientContext, params: FillGapBy
 
     const allGapsToSchedule = {
       ruleId: params.ruleId,
+      initiator: backfillInitiator.USER,
       ranges: gapState.unfilledIntervals.map((interval) => ({
         start: interval.gte,
         end: interval.lte,

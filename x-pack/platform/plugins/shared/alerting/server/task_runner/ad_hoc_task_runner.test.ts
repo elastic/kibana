@@ -287,6 +287,7 @@ describe('Ad Hoc Task Runner', () => {
         duration: '1h',
         enabled: true,
         end: '2024-03-01T05:00:00.000Z',
+        initiator: 'user',
         rule: {
           name: 'test',
           tags: [],

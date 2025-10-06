@@ -45,6 +45,7 @@ const actionsClient = actionsClientMock.create();
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {
   return {
     ruleId: '1',
+    initiator: 'user',
     ranges: [
       {
         start: '2023-11-16T08:00:00.000Z',
