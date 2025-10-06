@@ -36,9 +36,6 @@ const title = i18n.translate(
     defaultMessage: 'Elasticsearch',
   }
 );
-const AGENTS_TITLE = i18n.translate('xpack.enterpriseSearch.searchNav.agents', {
-  defaultMessage: 'Agents',
-});
 const icon = 'logoElasticsearch';
 
 const euiItemTypeToNodeDefinition = ({
@@ -128,9 +125,10 @@ export const getNavigationTreeDefinition = ({
                   link: 'dashboards',
                 },
                 {
+                  badgeTypeV2: 'techPreview',
                   iconV2: agentsIcon,
                   link: 'agent_builder',
-                  title: AGENTS_TITLE,
+                  withBadge: true,
                 },
                 {
                   badgeOptions: {
@@ -335,7 +333,7 @@ export const getNavigationTreeDefinition = ({
                       title: i18n.translate(
                         'xpack.enterpriseSearch.searchNav.ingest.indices.title',
                         {
-                          defaultMessage: 'Indices, data streams and roll ups',
+                          defaultMessage: 'Indices and data streams',
                         }
                       ),
                     },

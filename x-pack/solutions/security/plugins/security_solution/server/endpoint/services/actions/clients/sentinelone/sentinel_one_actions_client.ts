@@ -475,19 +475,31 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       const scriptDetails = await this.sendAction<
         SentinelOneGetRemoteScriptsResponse,
         SentinelOneGetRemoteScriptsParams
-      >(SUB_ACTION.GET_REMOTE_SCRIPTS, { ids: scriptId });
+      >(SUB_ACTION.GET_REMOTE_SCRIPTS, { ids: scriptId }).then(
+        (response) => response.data?.data[0]
+      );
 
-      if (scriptDetails.data?.data.length === 0 || scriptDetails.data?.data[0].id !== scriptId) {
+      if (!scriptDetails || scriptDetails.id !== scriptId) {
         throw new ResponseActionsClientError(`Script ID [${scriptId}] not found`, 404);
       }
 
+      // This validation is needed because, when calling the S1 API to execute a script ID that does not support
+      // the targeted host's OS type, S1 API still returns a successful response, but it includes
+      // no `parentTaskId` - which indicates nothing was actually triggered in S1.
+      if (agentDetails.osType && !scriptDetails.osTypes.includes(agentDetails.osType)) {
+        throw new ResponseActionsClientError(
+          `Script [${scriptDetails.scriptName}] not supported for OS type [${agentDetails.osType}]`,
+          400
+        );
+      }
+
       // Prepend the script name to the `comment` field for reference
-      const scriptNameComment = `(Script name: ${scriptDetails.data?.data[0].scriptName})`;
+      const scriptNameComment = `(Script name: ${scriptDetails.scriptName})`;
 
       if (!(runScriptRequestPayload.comment ?? '').startsWith(scriptNameComment)) {
-        runScriptRequestPayload.comment = `(Script name: ${
-          scriptDetails.data?.data[0].scriptName
-        })${runScriptRequestPayload.comment ? ` ${runScriptRequestPayload.comment}` : ''}`;
+        runScriptRequestPayload.comment = `(Script name: ${scriptDetails.scriptName})${
+          runScriptRequestPayload.comment ? ` ${runScriptRequestPayload.comment}` : ''
+        }`;
       }
     }
 
@@ -610,15 +622,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: ResponseActionGetFileRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
-    if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
-    ) {
-      throw new ResponseActionsClientError(
-        `get-file not supported for ${this.agentType} agent type. Feature disabled`,
-        400
-      );
-    }
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       ResponseActionGetFileParameters,
       ResponseActionGetFileOutputContent,
@@ -713,13 +716,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     } = await this.fetchActionRequestEsDoc(actionId);
 
     const {
-      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
       responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
       responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
     } = this.options.endpointService.experimentalFeatures;
 
     if (
-      (command === 'get-file' && !isGetFileEnabled) ||
       (command === 'running-processes' && !isRunningProcessesEnabled) ||
       (command === 'runscript' && !isRunScriptEnabled)
     ) {
@@ -826,13 +827,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     } = await this.fetchActionRequestEsDoc(actionId);
 
     const {
-      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
       responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
       responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
     } = this.options.endpointService.experimentalFeatures;
 
     if (
-      (command === 'get-file' && !isGetFileEnabled) ||
       (command === 'running-processes' && !isRunningProcessesEnabled) ||
       (command === 'runscript' && !isRunScriptEnabled)
     ) {

@@ -32,7 +32,7 @@ async function readFromCsv(
   decompressed: Readable,
   dataset: HuggingFaceDatasetSpec,
   logger: Logger,
-  limit: number
+  limit?: number
 ): Promise<Array<Record<string, unknown>>> {
   const docs: Array<Record<string, unknown>> = [];
 
@@ -52,7 +52,7 @@ async function readFromCsv(
         const document = convertToDocument(row, dataset);
         docs.push(document);
 
-        if (docs.length >= limit) {
+        if (limit !== undefined && docs.length >= limit) {
           logger.debug(`Reached limit of ${limit} documents`);
           csvStream.destroy();
           resolveWithCleanup(docs);
@@ -94,7 +94,7 @@ async function readFromJson(
   decompressed: Readable,
   dataset: HuggingFaceDatasetSpec,
   logger: Logger,
-  limit: number
+  limit?: number
 ): Promise<Array<Record<string, unknown>>> {
   const docs: Array<Record<string, unknown>> = [];
   const rl = readline.createInterface({ input: decompressed, crlfDelay: Infinity });
@@ -106,7 +106,7 @@ async function readFromJson(
     const document = convertToDocument(raw, dataset);
     docs.push(document);
 
-    if (docs.length >= limit) {
+    if (limit !== undefined && docs.length >= limit) {
       logger.debug(`Reached limit of ${limit} documents`);
       break;
     }
@@ -118,7 +118,7 @@ async function readFromJson(
 export async function fetchRowsFromDataset({
   dataset,
   logger,
-  limit = 1000,
+  limit,
   accessToken,
 }: {
   dataset: HuggingFaceDatasetSpec;

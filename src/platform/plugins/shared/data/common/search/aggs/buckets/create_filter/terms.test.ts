@@ -14,6 +14,7 @@ import { mockAggTypesRegistry } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import type { IBucketAggConfig } from '../bucket_agg_type';
 import type { Filter, ExistsFilter } from '@kbn/es-query';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 
 describe('AggConfig Filters', () => {
   describe('terms', () => {
@@ -95,7 +96,7 @@ describe('AggConfig Filters', () => {
       ]);
       const filter = createFilterTerms(
         aggConfigs.aggs[0] as IBucketAggConfig,
-        '__missing__',
+        MISSING_TOKEN,
         {}
       ) as ExistsFilter;
 
