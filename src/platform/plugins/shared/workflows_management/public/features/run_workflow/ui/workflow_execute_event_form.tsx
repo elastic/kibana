@@ -223,7 +223,6 @@ export const WorkflowExecuteEventForm = ({
           id: alert._id,
           index: alert._index,
           timestamp: alert._source['@timestamp'],
-          rule: unflattenedAlert.kibana.alert.rule,
           ...unflattenedAlert.kibana.alert,
         };
       });
