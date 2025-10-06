@@ -10,7 +10,7 @@ import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@tanstack/react-query';
+} from '@kbn/react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,

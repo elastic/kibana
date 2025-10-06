@@ -12,8 +12,8 @@ import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+} from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import {
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
