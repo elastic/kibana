@@ -13,7 +13,6 @@ import {
   EuiResizableContainer,
   EuiSplitPanel,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
@@ -183,8 +182,6 @@ export function StreamDetailEnrichmentContentImpl() {
 }
 
 const StepsEditor = React.memo(() => {
-  const { euiTheme } = useEuiTheme();
-
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
@@ -242,7 +239,7 @@ const StepsEditor = React.memo(() => {
                   <p>
                     <FormattedMessage
                       id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
-                      defaultMessage="The following fields are malformed and won't be stored correctly: {fields}"
+                      defaultMessage="Some fields are malformed and won’t be stored correctly: {fields}"
                       values={{
                         fields: errors.ignoredFields.map((field) => (
                           <>
@@ -257,7 +254,7 @@ const StepsEditor = React.memo(() => {
                       'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.causesLabel',
                       {
                         defaultMessage:
-                          'Common causes include data type mismatches (e.g. an invalid format for a date field) or exceeding configured field limits.',
+                          'This can happen due to type mismatches or fields exceeding configured limits.',
                       }
                     )}
                   </p>
@@ -266,7 +263,7 @@ const StepsEditor = React.memo(() => {
                       'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.suggestionsLabel',
                       {
                         defaultMessage:
-                          'Review your field mappings, add processors to normalize these fields into the correct format, or consider removing the conflicting fields entirely.',
+                          'Check your field mappings, add processors to normalize values, or remove the conflicting fields.',
                       }
                     )}
                   </p>
