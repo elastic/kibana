@@ -399,6 +399,13 @@ describe('Authenticator', () => {
       ).rejects.toThrowError(
         'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
       );
+
+      await expect(
+        authenticator.login(httpServerMock.createKibanaRequest(), {
+          provider: 'basic',
+          value: undefined,
+        } as any)
+      ).rejects.toThrowError('Login "attempt.value" should not be empty.');
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 

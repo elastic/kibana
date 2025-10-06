@@ -140,6 +140,10 @@ const ACCESS_AGREEMENT_ROUTE = '/security/access_agreement';
  */
 const OVERWRITTEN_SESSION_ROUTE = '/security/overwritten_session';
 function assertLoginAttempt(attempt: ProviderLoginAttempt) {
+  if (!attempt.value) {
+    throw new Error('Login "attempt.value" should not be empty.');
+  }
+
   if (!isLoginAttemptWithProviderType(attempt) && !isLoginAttemptWithProviderName(attempt)) {
     throw new Error(
       'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
