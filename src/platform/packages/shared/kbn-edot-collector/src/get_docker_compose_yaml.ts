@@ -10,9 +10,9 @@
 import dedent from 'dedent';
 
 /**
- * Generates a Docker Compose configuration for running EDOT (Elastic Distribution of OpenTelemetry).
+ * Generates a Docker Compose configuration for running the EDOT Collector (Elastic Distribution of OpenTelemetry Collector) in Gateway mode.
  *
- * @param collectorConfigPath - Path to the EDOT collector configuration file
+ * @param collectorConfigPath - Path to the EDOT Collector configuration file
  * @returns Docker Compose YAML configuration string
  */
 export function getDockerComposeYaml({ collectorConfigPath }: { collectorConfigPath: string }) {
@@ -20,7 +20,7 @@ export function getDockerComposeYaml({ collectorConfigPath }: { collectorConfigP
     services:
       otel-collector:
         image: docker.elastic.co/elastic-agent/elastic-otel-collector:9.0.0
-        container_name: kibana-dev-edot
+        container_name: kibana-dev-edot-collector
         restart: unless-stopped
         command: ["--config", "/etc/otelcol-config.yml"]
         volumes:

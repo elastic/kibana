@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ensureEdot } from './src/ensure_edot';
-export { readKibanaConfig } from './src/read_kibana_config';
-export type { KibanaConfig } from './src/read_kibana_config';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-edot-collector'],
+};
