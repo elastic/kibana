@@ -22,8 +22,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
 import type { OverlayRef } from '@kbn/core/public';
@@ -49,20 +47,11 @@ export function StreamListView() {
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
-        share,
       },
     },
     core,
     isServerless,
   } = context;
-  const onboardingLocator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
-    OBSERVABILITY_ONBOARDING_LOCATOR
-  );
-  const handleAddData = onboardingLocator
-    ? () => {
-        onboardingLocator.navigate({});
-      }
-    : undefined;
 
   const { timeState } = useTimefilter();
   const streamsListFetch = useStreamsAppFetch(
@@ -186,8 +175,8 @@ export function StreamListView() {
               </h2>
             }
           />
-        ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value?.streams) ? (
-          <StreamsListEmptyPrompt onAddData={handleAddData} />
+        ) : !streamsListFetch.loading && !isEmpty(streamsListFetch.value?.streams) ? (
+          <StreamsListEmptyPrompt />
         ) : (
           <>
             <WelcomePanel />
