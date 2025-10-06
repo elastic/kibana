@@ -196,7 +196,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
 
     await pageObjects.streams.reviewStagedFieldMappingChanges();
     await pageObjects.streams.submitSchemaChanges();
-    await pageObjects.streams.closeToasts();
+    await pageObjects.toasts.closeAll();
 
     // Verify the field is now mapped
     await pageObjects.streams.expectCellValueContains({
@@ -258,7 +258,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.reviewStagedFieldMappingChanges();
     await pageObjects.streams.submitSchemaChanges();
 
-    await pageObjects.streams.closeToasts();
+    await pageObjects.toasts.closeAll();
     await pageObjects.streams.expectSchemaEditorTableVisible();
     // Search for the newly added field
     await pageObjects.streams.searchFields(fieldName);

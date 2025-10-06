@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 
 import {
   AGENT_ACTIONS_INDEX,
@@ -16,7 +17,7 @@ import {
   type FleetServerAgent,
 } from '@kbn/fleet-plugin/common';
 import { ENROLLMENT_API_KEYS_INDEX } from '@kbn/fleet-plugin/common/constants';
-import { asyncForEach } from '@kbn/std';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 const ES_INDEX_OPTIONS = { headers: { 'X-elastic-product-origin': 'fleet' } };
 
@@ -152,4 +153,17 @@ export async function makeAgentsUpgradeable(esClient: Client, agentIds: string[]
       },
     });
   });
+}
+
+export async function createTestSpace(ftrProvider: FtrProviderContext, spaceId: string) {
+  const spaces = ftrProvider.getService('spaces');
+  const space = await spaces.get(spaceId).catch((err) => {
+    if (err.message.includes('404 Not Found')) {
+      return undefined;
+    }
+    throw err;
+  });
+  if (!space) {
+    await spaces.createTestSpace(spaceId);
+  }
 }
