@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -96,6 +96,26 @@ export const MetricsGrid = ({
   const handleCloseFlyout = useCallback(() => {
     setExpandedMetric(undefined);
   }, []);
+
+  // TODO: find a better way to handle conflicts with other flyouts
+  // Close the metric insights flyout if the user clicks on the inspector button
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
+        if (expandedMetric) {
+          handleCloseFlyout();
+        }
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, [expandedMetric, handleCloseFlyout]);
 
   const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
 
