@@ -28,7 +28,7 @@ jest.mock('../../../shared/ui/yaml_editor', () => ({
 }));
 
 // Mock the validation hook
-jest.mock('../lib/use_yaml_validation', () => ({
+jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => ({
   useYamlValidation: () => ({
     error: null,
     validationErrors: [],
