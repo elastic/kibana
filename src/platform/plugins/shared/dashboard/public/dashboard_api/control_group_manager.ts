@@ -26,7 +26,7 @@ export function initializeControlGroupManager(
         .pipe(
           skipWhile((controlGroupApi) => !controlGroupApi),
           switchMap(async (controlGroupApi) => {
-            await controlGroupApi?.untilInitialized();
+            await controlGroupApi?.untilFiltersPublished();
           }),
           first()
         )
