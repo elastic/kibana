@@ -44,7 +44,7 @@ Verify that node is healthy
 ```
 yarn start --server.port=5701 --elasticsearch.hosts=http://localhost:9500 --dev.basePathProxyTarget=5703
 ```
-- Login into http://localhost/5701/<YOUR_PATH>
+- Login into http://localhost:5701/<YOUR_PATH>
 
 ### Start Cluster A (main)
 
@@ -67,7 +67,7 @@ curl -k -u elastic:changeme http://localhost:9200
 yarn start
 ```
 
-- Login into http://localhost/5601/<YOUR_PATH>
+- Login into http://localhost:5601/<YOUR_PATH>
 
 To avoid issues, it might be needed to login to one of the kibana instances with an incognito session.
 
