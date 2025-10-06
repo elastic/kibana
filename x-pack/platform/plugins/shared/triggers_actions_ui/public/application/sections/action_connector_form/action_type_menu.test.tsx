@@ -157,7 +157,7 @@ describe('connector_add_flyout', () => {
       expect(await screen.findByTestId('my-action-type-card')).toBeInTheDocument();
     });
 
-    it(`renders action type based on hideInUi flag`, async () => {
+    it('renders action type based on hideInUi flag', async () => {
       const onActionTypeChange = jest.fn();
       const actionType1 = actionTypeRegistryMock.createMockActionTypeModel({
         id: 'my-action-type-1',

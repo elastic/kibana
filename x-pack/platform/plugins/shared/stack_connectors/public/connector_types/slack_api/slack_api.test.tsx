@@ -62,6 +62,16 @@ describe('hideInUi', () => {
     }
     expect(hideInUiResult).toEqual(false);
   });
+
+  test('should return false when slack is not found in config', () => {
+    if (connectorTypeModel?.hideInUi) {
+      hideInUiResult = connectorTypeModel.hideInUi([
+        // @ts-expect-error necessary fields only
+        { id: '.cases', enabledInConfig: true, enabledInLicense: true, name: 'Cases' },
+      ]);
+    }
+    expect(hideInUiResult).toEqual(false);
+  });
 });
 
 describe('Slack action params validation', () => {

@@ -108,9 +108,9 @@ export const ActionTypeMenu = ({
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(([id, details]) => {
       const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
-      const shouldHideInUi =
-        actionTypeModel?.hideInUi &&
-        actionTypeModel?.hideInUi(actionTypesIndex ? Object.values(actionTypesIndex) : []);
+      const shouldHideInUi = actionTypeModel?.hideInUi?.(
+        actionTypesIndex ? Object.values(actionTypesIndex) : []
+      );
 
       return details.enabledInConfig === true && !shouldHideInUi;
     })

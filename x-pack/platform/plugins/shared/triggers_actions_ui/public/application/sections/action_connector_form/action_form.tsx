@@ -297,9 +297,7 @@ export const ActionForm = ({
     actionTypeNodes = actionTypeRegistry
       .list()
       .filter(
-        (item) =>
-          actionTypesIndex[item.id] &&
-          !(item.hideInUi != null ? item.hideInUi(Object.values(actionTypesIndex)) : false)
+        (item) => actionTypesIndex[item.id] && !item.hideInUi?.(Object.values(actionTypesIndex))
       )
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
