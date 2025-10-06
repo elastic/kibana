@@ -20,7 +20,7 @@ actions:
     description: Change tag description and displayName
     update:
       description: >
-        Streams is a new and experimental way to manage your data in Kibana. The API is currently not considered stable and can change at any point.
+        Streams is a new and experimental way to manage your data in the Elastic stack. The API is currently not considered stable and will most likely change significantly before becoming GA. If you consume this API, please take into account that it may break without any notice period.
       x-displayName: "Streams"
   - target: '$.tags[?(@.name=="data views")]'
     description: Change displayName
