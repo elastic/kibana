@@ -24,7 +24,7 @@ import type {
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { APIKeys } from './api_keys';
-import type { AuthenticationResult } from './authentication_result';
+import { AuthenticationResult } from './authentication_result';
 import type { ProviderLoginAttempt } from './authenticator';
 import { Authenticator } from './authenticator';
 import { canRedirectRequest } from './can_redirect_request';
@@ -404,6 +404,17 @@ export class AuthenticationService {
         const providerIdentifier =
           'name' in attempt.provider ? attempt.provider.name : attempt.provider.type;
         this.logger.info(`Performing login attempt with "${providerIdentifier}" provider.`);
+
+        if (!attempt.value) {
+          const emptyAttemptError = new Error(
+            `Login attempt with ${providerIdentifier} failed: attempt.value is empty`
+          );
+
+          this.logger.error(
+            `${emptyAttemptError.message}. Error stack: ${emptyAttemptError.stack}`
+          );
+          return AuthenticationResult.failed(emptyAttemptError);
+        }
 
         let loginResult: AuthenticationResult;
         try {
