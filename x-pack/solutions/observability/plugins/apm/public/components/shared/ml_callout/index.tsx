@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
@@ -160,24 +160,16 @@ export function MLCallout({
       {properties.primaryAction && (
         <EuiFlexItem grow={false}>{properties.primaryAction}</EuiFlexItem>
       )}
-      {dismissable && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            data-test-subj="apmMLCalloutButton"
-            onClick={onDismiss}
-            color={properties.color}
-          >
-            {i18n.translate('xpack.apm.mlCallout.dismissButton', {
-              defaultMessage: `Dismiss`,
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   ) : null;
 
   return (
-    <EuiCallOut title={properties.title} iconType={properties.icon} color={properties.color}>
+    <EuiCallOut
+      title={properties.title}
+      iconType={properties.icon}
+      color={properties.color}
+      onDismiss={dismissable ? onDismiss : undefined}
+    >
       <p>{properties.text}</p>
       {actions}
     </EuiCallOut>

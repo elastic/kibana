@@ -88,7 +88,7 @@ export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigr
   }, [selectedTab, tabs, onTabClick]);
 
   const migrationsDashboardsFlyoutTitleId = useGeneratedHtmlId({
-    prefix: 'migrationRulesFlyoutTitle',
+    prefix: 'migrationDashboardsFlyoutTitle',
   });
 
   return (

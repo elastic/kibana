@@ -13,6 +13,7 @@ import type {
   NavigationTreeDefinition,
   NodeDefinition,
 } from '@kbn/core-chrome-browser';
+import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
@@ -35,9 +36,6 @@ const title = i18n.translate(
     defaultMessage: 'Elasticsearch',
   }
 );
-const AGENTS_TITLE = i18n.translate('xpack.enterpriseSearch.searchNav.agents', {
-  defaultMessage: 'Agents',
-});
 const icon = 'logoElasticsearch';
 
 const euiItemTypeToNodeDefinition = ({
@@ -127,9 +125,10 @@ export const getNavigationTreeDefinition = ({
                   link: 'dashboards',
                 },
                 {
+                  badgeTypeV2: 'techPreview',
                   iconV2: agentsIcon,
                   link: 'agent_builder',
-                  title: AGENTS_TITLE,
+                  withBadge: true,
                 },
                 {
                   badgeOptions: {
@@ -334,7 +333,7 @@ export const getNavigationTreeDefinition = ({
                       title: i18n.translate(
                         'xpack.enterpriseSearch.searchNav.ingest.indices.title',
                         {
-                          defaultMessage: 'Indices, data streams and roll ups',
+                          defaultMessage: 'Indices and data streams',
                         }
                       ),
                     },
@@ -362,11 +361,11 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   iconV2: 'database',
-                  id: 'ingest_and_data',
+                  id: DATA_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to anchor the tour step
                   sideNavVersion: 'v2',
                   renderAs: 'panelOpener',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.ingestAndData', {
-                    defaultMessage: 'Ingest and manage data',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.dataManagement', {
+                    defaultMessage: 'Data management',
                   }),
                 },
                 {
@@ -530,7 +529,7 @@ export const getNavigationTreeDefinition = ({
                           ),
                         },
                       ],
-                      id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
+                      id: STACK_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to open the panel programmatically
                       renderAs: 'panelOpener',
                       spaceBefore: null,
                       title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {

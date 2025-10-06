@@ -22,6 +22,7 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import useObservable from 'react-use/lib/useObservable';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
@@ -34,6 +35,7 @@ import {
   getShareAppMenuItem,
   getInspectAppMenuItem,
   convertAppMenuItemToTopNavItem,
+  getBackgroundSearchFlyout,
 } from './app_menu_actions';
 import type { TopNavCustomization } from '../../../../customizations';
 import { useProfileAccessor } from '../../../../context_awareness';
@@ -72,6 +74,7 @@ export const useTopNavLinks = ({
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
+  const appId = useObservable(services.application.currentAppId$);
   const { authorizedRuleTypes }: { authorizedRuleTypes: RuleTypeWithDescription[] } =
     useGetRuleTypesPermissions({
       http: services.http,
@@ -124,6 +127,29 @@ export const useTopNavLinks = ({
         items.push(alertsAppMenuItem);
       }
 
+      if (
+        !!appId &&
+        services.data.search.isBackgroundSearchEnabled &&
+        services.capabilities.discover_v2.storeSearchSession
+      ) {
+        const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
+          onClick: () => {
+            services.data.search.showSearchSessionsFlyout({
+              appId,
+              onBackgroundSearchOpened: services.discoverFeatureFlags.getTabsEnabled()
+                ? ({ session, event }) => {
+                    event?.preventDefault();
+                    dispatch(
+                      internalStateActions.openSearchSessionInNewTab({ searchSession: session })
+                    );
+                  }
+                : undefined,
+            });
+          },
+        });
+        items.push(backgroundSearchFlyoutMenuItem);
+      }
+
       if (!defaultMenu?.newItem?.disabled) {
         const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
           isEsqlMode && currentDataView.type === ESQL_TYPE
@@ -169,9 +195,11 @@ export const useTopNavLinks = ({
     }, [
       defaultMenu,
       services,
-      onOpenInspector,
       discoverParams,
+      appId,
+      onOpenInspector,
       state,
+      dispatch,
       isEsqlMode,
       currentDataView,
       hasShareIntegration,
