@@ -125,8 +125,10 @@ export const getNavigationTreeDefinition = ({
                   link: 'dashboards',
                 },
                 {
+                  badgeTypeV2: 'techPreview',
                   iconV2: agentsIcon,
                   link: 'agent_builder',
+                  withBadge: true,
                 },
                 {
                   badgeOptions: {
@@ -331,7 +333,7 @@ export const getNavigationTreeDefinition = ({
                       title: i18n.translate(
                         'xpack.enterpriseSearch.searchNav.ingest.indices.title',
                         {
-                          defaultMessage: 'Indices, data streams and roll ups',
+                          defaultMessage: 'Indices and data streams',
                         }
                       ),
                     },
