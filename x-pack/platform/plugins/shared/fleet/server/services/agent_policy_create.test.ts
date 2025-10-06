@@ -209,13 +209,19 @@ describe('createAgentPolicyWithPackages', () => {
     );
   });
 
-  it('should no create agentless policy with system package', async () => {
+  it('should no create agentless policy with system package or monitoring', async () => {
     const response = await createAgentPolicyWithPackages({
       esClient: esClientMock,
       soClient: soClientMock,
       agentPolicyService: mockedAgentPolicyService,
-      newPolicy: { name: 'Agent policy 1', namespace: 'default', supports_agentless: true },
+      newPolicy: {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
       withSysMonitoring: true,
+      monitoringEnabled: ['logs', 'metrics'],
       spaceId: 'default',
     });
 
@@ -223,8 +229,23 @@ describe('createAgentPolicyWithPackages', () => {
     expect(mockedBulkInstallPackages).not.toHaveBeenCalled();
     expect(mockedPackagePolicyService.create).not.toHaveBeenCalled();
 
+    expect(agentPolicyService.create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
+      expect.objectContaining({ skipDeploy: true })
+    );
+
     expect(appContextService.getLogger().debug).toHaveBeenCalledWith(
       'Disabling system monitoring for agentless policy [Agent policy 1]'
+    );
+    expect(appContextService.getLogger().debug).toHaveBeenCalledWith(
+      'Disabling monitoring for agentless policy [Agent policy 1]'
     );
 
     expect(agentlessAgentService.createAgentlessAgent).toHaveBeenCalled();

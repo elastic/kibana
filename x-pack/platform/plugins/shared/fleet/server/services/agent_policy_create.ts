@@ -110,7 +110,7 @@ interface CreateAgentPolicyParams {
   newPolicy: NewAgentPolicy;
   hasFleetServer?: boolean;
   withSysMonitoring: boolean;
-  monitoringEnabled?: string[];
+  monitoringEnabled?: NewAgentPolicy['monitoring_enabled'];
   spaceId: string;
   user?: AuthenticatedUser;
   authorizationHeader?: HTTPAuthorizationHeader | null;
@@ -127,7 +127,7 @@ export async function createAgentPolicyWithPackages({
   newPolicy,
   hasFleetServer,
   withSysMonitoring: withSysMonitoringParams,
-  monitoringEnabled,
+  monitoringEnabled: monitoringEnabledParams,
   spaceId,
   user,
   authorizationHeader,
@@ -160,6 +160,12 @@ export async function createAgentPolicyWithPackages({
   if (!withSysMonitoring && withSysMonitoringParams) {
     logger.debug(`Disabling system monitoring for agentless policy [${newPolicy.name}]`);
   }
+  const monitoringEnabled =
+    newPolicy.supports_agentless && monitoringEnabledParams ? [] : monitoringEnabledParams || [];
+
+  if (monitoringEnabledParams?.length && !monitoringEnabled?.length) {
+    logger.debug(`Disabling monitoring for agentless policy [${newPolicy.name}]`);
+  }
 
   if (withSysMonitoring) {
     packagesToInstall.push(FLEET_SYSTEM_PACKAGE);
@@ -180,15 +186,20 @@ export async function createAgentPolicyWithPackages({
     });
   }
 
-  const { id, ...policy } = newPolicy; // omit id from create object
+  const { id, monitoring_enabled: _, ...policy } = newPolicy; // omit id from create object
 
-  const agentPolicy = await agentPolicyService.create(soClient, esClient, policy, {
-    user,
-    id: agentPolicyId,
-    authorizationHeader,
-    hasFleetServer,
-    skipDeploy: true, // skip deploying the policy until package policies are added
-  });
+  const agentPolicy = await agentPolicyService.create(
+    soClient,
+    esClient,
+    { ...policy, monitoring_enabled: monitoringEnabled },
+    {
+      user,
+      id: agentPolicyId,
+      authorizationHeader,
+      hasFleetServer,
+      skipDeploy: true, // skip deploying the policy until package policies are added
+    }
+  );
 
   // Create the fleet server package policy and add it to agent policy.
   if (hasFleetServer) {
