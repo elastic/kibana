@@ -184,7 +184,7 @@ describe('ruleActionsConnectorsBody', () => {
         actions: [],
       },
       connectors: [...availableConnectors],
-      connectorTypes: connectorTypes,
+      connectorTypes,
       aadTemplateFields: [],
       selectedRuleType: {
         defaultActionGroupId: 'default',
