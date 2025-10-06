@@ -17,6 +17,8 @@ import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts'
 import type { MlCoreSetup } from '../../plugin';
 import { validateLookbackInterval, validateTopNBucket } from '../validators';
 
+const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger'));
+
 export function registerAnomalyDetectionRule(
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup,
   getStartServices: MlCoreSetup['getStartServices'],
@@ -32,7 +34,6 @@ export function registerAnomalyDetectionRule(
       return docLinks.links.ml.alertingRules;
     },
     ruleParamsExpression: (props: RuleTypeParamsExpressionProps<MlAnomalyDetectionAlertParams>) => {
-      const MlAlertTrigger = lazy(() => import('./ml_anomaly_alert_trigger'));
       return (
         <MlAlertTrigger
           {...props}

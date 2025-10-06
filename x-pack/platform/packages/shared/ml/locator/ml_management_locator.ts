@@ -35,15 +35,23 @@ import { formatTrainedModelsManagementUrl } from './formatters/trained_models';
  */
 export class MlManagementLocatorInternal implements MlManagementLocator {
   private _locator: LocatorPublic<SerializableRecord> | undefined;
+  private _share: SharePublicStart | SharePublicSetup;
   private _sectionId: string = 'ml';
   private validPaths = new Set(Object.values(ML_PAGES));
 
   constructor(share: SharePublicStart | SharePublicSetup) {
-    this._locator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
+    this._share = share;
   }
   sectionId?: string | undefined;
   locator?: LocatorPublic<SerializableRecord> | undefined;
   _validPaths?: Set<string> | undefined;
+
+  private getLocator() {
+    if (!this._locator) {
+      this._locator = this._share.url.locators.get(MANAGEMENT_APP_LOCATOR);
+    }
+    return this._locator;
+  }
 
   private getPath = (params: MlLocatorParams, appId: string) => {
     let path: string = '';
@@ -99,7 +107,7 @@ export class MlManagementLocatorInternal implements MlManagementLocator {
     appId: string = 'anomaly_detection'
   ) => {
     const path = params ? this.getPath(params, appId) : '';
-    const url = await this._locator?.getUrl({
+    const url = await this.getLocator()?.getUrl({
       sectionId: this._sectionId,
       appId: `${appId}${path}`,
     });
@@ -112,7 +120,7 @@ export class MlManagementLocatorInternal implements MlManagementLocator {
     appId: string = 'anomaly_detection'
   ) => {
     const path = this.getPath(params, appId);
-    const url = this._locator?.getRedirectUrl({
+    const url = this.getLocator()?.getRedirectUrl({
       sectionId: this._sectionId,
       appId: `${appId}/${path}`,
     });
@@ -120,7 +128,7 @@ export class MlManagementLocatorInternal implements MlManagementLocator {
   };
 
   public readonly navigate = async (path: string, appId: string = 'anomaly_detection') => {
-    await this._locator?.navigate({
+    await this.getLocator()?.navigate({
       sectionId: this._sectionId,
       appId: `${appId}/${path}`,
     });
