@@ -1481,7 +1481,7 @@ export class CstToAstConverter {
 
     const fuseCommand = this.createCommand<'fuse', ast.ESQLAstFuseCommand>('fuse', ctx, {
       args,
-      incomplete
+      incomplete,
     });
 
     if (fuseTypeCtx) {
