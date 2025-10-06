@@ -6,8 +6,8 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import type { StreamEndpointLatencyProps } from './types';
-import { STREAMS_ENDPOINT_LATENCY_EVENT } from './constants';
+import type { StreamEndpointLatencyProps, StreamsStateErrorProps } from './types';
+import { STREAMS_ENDPOINT_LATENCY_EVENT, STREAMS_STATE_ERROR_EVENT } from './constants';
 
 const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
   'POST /api/streams/{name}/processing/_simulate 2023-10-31',
@@ -23,7 +23,7 @@ const LATENCY_TRACKING_ENDPOINT_ALLOW_LIST = [
   'POST /api/streams/_resync 2023-10-31',
 ];
 
-export class StreamsTelemetryClient {
+export class EbtTelemetryClient {
   constructor(private readonly analytics: AnalyticsServiceSetup) {}
 
   public startTrackingEndpointLatency(
@@ -39,5 +39,18 @@ export class StreamsTelemetryClient {
         duration_ms: Date.now() - startTime,
       });
     };
+  }
+
+  public reportStreamsStateError(error: Error & { statusCode: number }) {
+    const errorData: StreamsStateErrorProps = {
+      error: {
+        name: error.name,
+        message: error.message,
+        stack_trace: error.stack,
+      },
+      status_code: error.statusCode,
+    };
+
+    this.analytics.reportEvent(STREAMS_STATE_ERROR_EVENT, errorData);
   }
 }

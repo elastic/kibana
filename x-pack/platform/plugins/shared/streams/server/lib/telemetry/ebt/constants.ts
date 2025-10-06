@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-interface StreamEndpointLatencyProps {
-  name: string;
-  endpoint: string;
-  duration_ms: number;
-}
+const STREAMS_ENDPOINT_LATENCY_EVENT = 'streams-endpoint-latency';
+const STREAMS_STATE_ERROR_EVENT = 'streams-state-error';
 
-export { type StreamEndpointLatencyProps };
+export { STREAMS_ENDPOINT_LATENCY_EVENT, STREAMS_STATE_ERROR_EVENT };
