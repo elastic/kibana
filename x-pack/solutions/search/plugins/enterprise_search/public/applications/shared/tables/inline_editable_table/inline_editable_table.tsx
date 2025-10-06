@@ -25,6 +25,7 @@ import { InlineEditableTableLogic } from './inline_editable_table_logic';
 import type { FormErrors, InlineEditableTableColumn } from './types';
 
 export interface InlineEditableTableProps<Item extends ItemWithAnID> {
+  ariaLabel?: string;
   columns: Array<InlineEditableTableColumn<Item>>;
   items: Item[];
   defaultItem?: Partial<Item>;
