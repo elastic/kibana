@@ -175,7 +175,7 @@ export function StreamListView() {
               </h2>
             }
           />
-        ) : !streamsListFetch.loading && !isEmpty(streamsListFetch.value?.streams) ? (
+        ) : !streamsListFetch.loading && isEmpty(streamsListFetch.value?.streams) ? (
           <StreamsListEmptyPrompt />
         ) : (
           <>
