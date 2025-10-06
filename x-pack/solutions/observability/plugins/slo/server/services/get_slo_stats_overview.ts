@@ -86,11 +86,7 @@ export class GetSLOStatsOverview {
     let alertFilters: QueryDslQueryContainer[] = [];
     let alertFilterTerms: QueryDslQueryContainer[] = [];
     let afterKey: AggregationsAggregate | undefined;
-    // instantiate ruleFilters with dummy value
-    let ruleFilters: KueryNode = {
-      type: 'literal',
-      def: true,
-    };
+    let ruleFilters: KueryNode | undefined;
 
     try {
       if (querySLOsForIds) {
@@ -268,7 +264,7 @@ export class GetSLOStatsOverview {
                   AlertConsumers.ALERTS,
                   AlertConsumers.OBSERVABILITY,
                 ],
-                ...(ruleFilters?.def ? {} : { filter: ruleFilters }),
+                ...(ruleFilters ? { filter: ruleFilters } : {}),
               },
             }),
 
