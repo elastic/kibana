@@ -68,11 +68,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...emptyAssets,
       });
 
-      /**
-       * Rule APIs forbid deleting internal rules types.
-       * So we delete the rules directly using ES.
-       */
-      await alertingApi.deleteAllRulesEs();
+      await alertingApi.deleteAllInternalRules({ roleAuthc });
     });
 
     it('lists empty queries when none are defined on the stream', async () => {
