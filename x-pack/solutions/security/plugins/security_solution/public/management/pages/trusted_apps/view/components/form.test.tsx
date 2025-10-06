@@ -528,7 +528,7 @@ describe('Trusted apps form', () => {
         expect(formProps.onChange).toHaveBeenCalledWith(expectedAfterSwitchToBasicMode);
       });
 
-      describe.only('Process Descendants', () => {
+      describe('Process Descendants', () => {
         beforeEach(() => {
           mockedContext.setExperimentalFlag({
             filterProcessDescendantsForTrustedAppsEnabled: true,
