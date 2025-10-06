@@ -262,6 +262,5 @@
     "@kbn/rrule",
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
-    "@kbn/security-solution-plugin"
   ]
 }
