@@ -8,7 +8,7 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback } from 'react';
 
 import { SecondaryMenu } from '../secondary_menu';
 import { useNestedMenu } from './use_nested_menu';
@@ -21,34 +21,31 @@ export interface PanelProps {
 }
 
 export const Panel: FC<PanelProps> = ({ children, id, title }) => {
-  const panelRef = useRef<HTMLDivElement | null>(null);
-
   const { currentPanel, panelStackDepth, returnFocusId } = useNestedMenu();
 
-  useEffect(() => {
-    if (currentPanel !== id) return;
+  const panelRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (currentPanel !== id) return;
 
-    // If we have a return focus id, we focus the trigger element
-    if (returnFocusId) {
-      const triggerElement = document.getElementById(returnFocusId);
-      if (triggerElement) return triggerElement.focus();
-    }
+      // If we have a return focus id, we focus the trigger element
+      if (returnFocusId && node) {
+        const triggerElement = node.querySelector<HTMLElement>(`#${returnFocusId}`);
+        if (triggerElement) return triggerElement.focus();
+      }
 
-    // If we are at the root panel, we don't need to focus anything
-    if (panelStackDepth === 0) return;
+      // If we are at the root panel, we don't need to focus anything
+      if (panelStackDepth === 0) return;
 
-    // Otherwise, we focus the first focusable element in the panel
-    if (panelRef.current) {
-      const elements = getFocusableElements(panelRef.current);
-      elements[0]?.focus();
-    }
-    // We want to focus the appropriate element when the panel becomes active
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [panelRef.current, currentPanel, id, returnFocusId, panelStackDepth]);
+      // Otherwise, we focus the first focusable element in the panel
+      if (node) {
+        const elements = getFocusableElements(node);
+        elements[0]?.focus();
+      }
+    },
+    [currentPanel, id, panelStackDepth, returnFocusId]
+  );
 
-  if (currentPanel !== id) {
-    return null;
-  }
+  if (currentPanel !== id) return null;
 
   if (title) {
     return (
