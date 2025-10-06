@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-interface StreamEndpointLatencyProps {
-  name: string;
-  endpoint: string;
-  duration_ms: number;
-}
+import { createFieldTestingConfig } from '../base.jest.integration.config';
 
-export { type StreamEndpointLatencyProps };
+export default createFieldTestingConfig({
+  testsDirectory: 'type_specific',
+  groupNumber: 2,
+  totalGroups: 2,
+});
