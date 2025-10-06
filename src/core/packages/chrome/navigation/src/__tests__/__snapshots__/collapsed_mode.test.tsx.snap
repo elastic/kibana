@@ -14,7 +14,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
-          class="css-18bgeak-wrapperStyles"
+          class="css-uf4ax2-wrapperStyles"
           data-test-subj="side-nav-logo-wrapper"
         >
           <a
