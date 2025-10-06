@@ -1,4 +1,6 @@
-# EDOT (Elastic Distribution of OpenTelemetry) CLI
+# @kbn/edot
+
+EDOT (Elastic Distribution of OpenTelemetry) CLI tool for Kibana development.
 
 This package provides a developer command to easily start EDOT (Elastic Distribution of OpenTelemetry Collector) and connect it to your Elasticsearch cluster.
 
@@ -155,14 +157,3 @@ docker logs kibana-dev-edot
 2. Check Elasticsearch connection in the logs: `docker logs kibana-dev-edot`
 3. Verify your Elasticsearch credentials are correct
 4. Make sure you've installed the OpenTelemetry Assets integrations
-
-## Architecture
-
-The implementation follows the same pattern as the EIS (Elastic Inference Service) command:
-
-- `scripts/edot.js` - Entry point script
-- `scripts/edot.ts` - CLI runner using `@kbn/dev-cli-runner`
-- `src/edot/ensure_edot.ts` - Main orchestration logic
-- `src/edot/read_kibana_config.ts` - Reads Kibana configuration
-- `src/edot/get_edot_collector_config.ts` - Generates EDOT collector config
-- `src/edot/get_docker_compose_yaml.ts` - Generates Docker Compose config

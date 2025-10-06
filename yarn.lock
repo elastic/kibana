@@ -6033,6 +6033,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/edot@link:src/platform/packages/shared/kbn-edot":
+  version "0.0.0"
+  uid ""
+
 "@kbn/elastic-agent-utils@link:src/platform/packages/shared/kbn-elastic-agent-utils":
   version "0.0.0"
   uid ""
