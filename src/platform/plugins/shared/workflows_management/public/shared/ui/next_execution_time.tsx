@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
 import { getWorkflowNextExecutionTime } from '../../lib/next_execution_time';
+import { useGetFormattedDateTime } from './use_formatted_date';
 
 interface NextExecutionTimeProps {
   triggers: WorkflowTrigger[];
@@ -20,6 +21,7 @@ interface NextExecutionTimeProps {
 
 export function NextExecutionTime({ triggers }: NextExecutionTimeProps) {
   const nextExecutionTime = getWorkflowNextExecutionTime(triggers);
+  const getFormattedDateTime = useGetFormattedDateTime();
 
   if (!nextExecutionTime) {
     return null;
@@ -30,7 +32,7 @@ export function NextExecutionTime({ triggers }: NextExecutionTimeProps) {
       content={i18n.translate('workflows.workflowList.nextExecutionTime.tooltip', {
         defaultMessage: 'Next execution: {date}',
         values: {
-          date: nextExecutionTime.toLocaleString(),
+          date: getFormattedDateTime(nextExecutionTime),
         },
       })}
     >
