@@ -33,6 +33,7 @@ import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
 import { PromptTextArea } from './prompt_textarea';
 import { useAiRuleCreation } from './hooks/use_ai_rule_creation';
 import { CreateRulePage } from './rule_create_form';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const AiAssistedCreateRulePageComponent: React.FC = () => {
   const [
@@ -50,6 +51,7 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const isLoading = userInfoLoading || listsConfigLoading;
   const { euiTheme } = useEuiTheme();
   const collapseFn = useRef<() => void | undefined>();
+  const { settings } = useKibana().services;
 
   const [promptValue, setPromptValue] = useState('');
   const { aiConnectors, isLoading: isAiConnectorsLoading } = useAIConnectors();
@@ -142,15 +144,11 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                       <EuiFlexItem grow={false}>
                         <ConnectorSelector
                           isLoading={isAiConnectorsLoading}
-                          connectors={aiConnectors.map((c) => ({
-                            name: c.name,
-                            id: c.id,
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            description: (c as any).config?.apiProvider,
-                          }))}
+                          connectors={aiConnectors}
                           selectedId={selectedConnectorId}
                           onChange={setSelectedConnectorId}
                           mode={'combobox'}
+                          settings={settings}
                         />
                       </EuiFlexItem>
                       <EuiSpacer size="m" />
