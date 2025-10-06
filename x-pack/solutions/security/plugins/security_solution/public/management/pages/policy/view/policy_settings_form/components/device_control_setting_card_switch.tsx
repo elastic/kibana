@@ -11,7 +11,7 @@ import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { PolicyFormComponentCommonProps } from '../types';
-import type { ImmutableArray, PolicyConfig } from '../../../../../../../common/endpoint/types';
+import type { ImmutableArray } from '../../../../../../../common/endpoint/types';
 import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../../../../../../common/endpoint/types';
 import type { DeviceControlOSes } from '../../../types';
 
