@@ -91,7 +91,7 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     await pageObjects.streams.confirmStreamDeleteInModal('logs.edit-test');
 
     await pageObjects.streams.expectRoutingRuleHidden('logs.edit-test');
-    await pageObjects.streams.expectToastVisible();
+    await pageObjects.toasts.waitFor();
   });
 
   test('should cancel rule removal', async ({ page, pageObjects }) => {
