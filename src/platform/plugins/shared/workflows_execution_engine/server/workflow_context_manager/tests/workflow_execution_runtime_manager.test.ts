@@ -262,7 +262,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should complete workflow execution if no nodes to process', async () => {
       // Mock the WorkflowExecutionRuntimeManager to have no current node
-      (underTest as any).currentNodeId = undefined;
+      (underTest as any).nextNodeId = undefined;
       workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         ...workflowExecution,
         currentNodeId: undefined,
@@ -281,10 +281,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should log workflow completion', async () => {
       // Mock the WorkflowExecutionRuntimeManager to have no current node
-      (underTest as any).currentNodeId = undefined;
+      (underTest as any).nextNodeId = undefined;
       workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         ...workflowExecution,
-        currentNodeId: undefined,
+        nextNodeId: undefined,
       });
 
       await underTest.saveState();
