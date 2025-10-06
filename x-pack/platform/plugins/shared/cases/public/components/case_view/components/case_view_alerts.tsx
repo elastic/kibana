@@ -11,12 +11,13 @@ import { AlertsTable as DefaultAlertsTable } from '@kbn/response-ops-alerts-tabl
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import React, { useCallback, useMemo, type ComponentType } from 'react';
 import type { SetRequired } from 'type-fest';
-import type { CaseViewAlertsTableProps, CaseUI } from '../../../../common';
+import type { CaseUI } from '../../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { useKibana } from '../../../common/lib/kibana';
 import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';
 import { CaseViewTabs } from '../case_view_tabs';
+import type { CaseViewAlertsTableProps } from '../types';
 import { CaseViewAlertsEmpty } from './case_view_alerts_empty';
 import { getManualAlertIds } from './helpers';
 
@@ -89,7 +90,6 @@ export const CaseViewAlerts = ({
         query={alertIdsQuery}
         showAlertStatusWithFlapping={caseData.owner !== SECURITY_SOLUTION_OWNER}
         onLoaded={onLoaded}
-        caseData={caseData}
         // Only provide the services to the default alerts table.
         // Spreading from object to avoid incorrectly overriding
         // services to `undefined` in custom solution tables

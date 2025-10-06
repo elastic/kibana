@@ -15,19 +15,23 @@
     "requiredPlugins": [
       "data",
       "dataViews",
+      "uiActions",
       "esql",
       "features",
       "inference",
       "kibanaUtils",
       "lens",
       "management",
-      "share"
+      "share",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaReact"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "spaces",
+      "workflowsManagement"
     ],
     "extraPublicDirs": []
   }

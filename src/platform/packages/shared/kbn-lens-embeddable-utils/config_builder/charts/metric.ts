@@ -9,7 +9,6 @@
 
 import type {
   FormBasedPersistedState,
-  FormulaPublicApi,
   MetricVisualizationState,
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
@@ -30,7 +29,6 @@ import {
   getHistogramColumn,
   getValueColumn,
 } from '../columns';
-import type { LensApiState } from '../schema';
 
 const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
@@ -100,8 +98,7 @@ function buildVisualizationState(config: LensMetricConfig): MetricVisualizationS
 function buildFormulaLayer(
   layer: LensMetricConfig,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): FormBasedPersistedState['layers'] {
   const baseLayer: PersistedIndexPatternLayer = {
     columnOrder: [ACCESSOR, HISTOGRAM_COLUMN_NAME],
@@ -124,19 +121,13 @@ function buildFormulaLayer(
     layer_0_trendline?: PersistedIndexPatternLayer;
   } = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView),
     },
     ...(layer.trendLine
       ? {
           [TRENDLINE_LAYER_ID]: {
             linkToLayers: [DEFAULT_LAYER_ID],
-            ...getFormulaColumn(
-              `${ACCESSOR}_trendline`,
-              mapToFormula(layer),
-              dataView,
-              formulaAPI,
-              baseLayer
-            ),
+            ...getFormulaColumn(`${ACCESSOR}_trendline`, mapToFormula(layer), dataView, baseLayer),
           },
         }
       : {}),
@@ -163,8 +154,7 @@ function buildFormulaLayer(
     const formulaColumn = getFormulaColumn(
       columnName,
       { formula: layer.querySecondaryMetric },
-      dataView,
-      formulaAPI
+      dataView
     );
 
     addLayerFormulaColumns(defaultLayer, formulaColumn);
@@ -175,12 +165,7 @@ function buildFormulaLayer(
 
   if (layer.queryMaxValue) {
     const columnName = getAccessorName('max');
-    const formulaColumn = getFormulaColumn(
-      columnName,
-      { formula: layer.queryMaxValue },
-      dataView,
-      formulaAPI
-    );
+    const formulaColumn = getFormulaColumn(columnName, { formula: layer.queryMaxValue }, dataView);
 
     addLayerFormulaColumns(defaultLayer, formulaColumn);
     if (trendLineLayer) {
@@ -211,11 +196,11 @@ function getValueColumns(layer: LensMetricConfig) {
 
 export async function buildMetric(
   config: LensMetricConfig,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
+  { dataViewsAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensMetricConfig, i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as LensMetricConfig, i, dataView);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,
@@ -237,20 +222,4 @@ export async function buildMetric(
       adHocDataViews: getAdhocDataviews(dataviews),
     },
   };
-}
-
-export function fromMetricLegacyToAPI(
-  config: LensAttributes,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
-): Extract<LensApiState, { type: 'metric' }> {
-  return {
-    type: 'metric',
-    dataset: {
-      type: 'dataView',
-      name: '',
-    },
-    metric: {
-      operation: 'count',
-    },
-  } as Extract<LensApiState, { type: 'metric' }>;
 }

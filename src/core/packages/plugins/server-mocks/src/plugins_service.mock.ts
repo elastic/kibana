@@ -14,48 +14,52 @@ import {
   type InternalPluginsServiceSetup,
   type InternalPluginsServiceStart,
 } from '@kbn/core-plugins-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 type PluginsServiceMock = jest.Mocked<PublicMethodsOf<PluginsService>>;
 
-const createInternalSetupContractMock = (): InternalPluginsServiceSetup => ({
-  contracts: new Map(),
-  initialized: true,
-});
-const createInternalStartContractMock = (): InternalPluginsServiceStart => ({
-  contracts: new Map(),
-});
+const createInternalSetupContractMock = (): InternalPluginsServiceSetup =>
+  lazyObject({
+    contracts: new Map(),
+    initialized: true,
+  });
+const createInternalStartContractMock = (): InternalPluginsServiceStart =>
+  lazyObject({
+    contracts: new Map(),
+  });
 
-const createServiceMock = (): PluginsServiceMock => ({
-  discover: jest.fn(),
-  getExposedPluginConfigsToUsage: jest.fn(),
-  preboot: jest.fn(),
-  setup: jest.fn().mockResolvedValue(createInternalSetupContractMock()),
-  start: jest.fn().mockResolvedValue(createInternalStartContractMock()),
-  stop: jest.fn(),
-});
+const createServiceMock = (): PluginsServiceMock =>
+  lazyObject({
+    discover: jest.fn(),
+    getExposedPluginConfigsToUsage: jest.fn(),
+    preboot: jest.fn(),
+    setup: jest.fn().mockResolvedValue(createInternalSetupContractMock()),
+    start: jest.fn().mockResolvedValue(createInternalStartContractMock()),
+    stop: jest.fn(),
+  });
 
 const createSetupContractMock = () => {
-  const contract: jest.Mocked<PluginsServiceSetup> = {
+  const contract: jest.Mocked<PluginsServiceSetup> = lazyObject({
     onSetup: jest.fn(),
     onStart: jest.fn(),
-  };
+  });
 
   return contract;
 };
 
 const createStartContractMock = () => {
-  const contract: jest.Mocked<PluginsServiceStart> = {
+  const contract: jest.Mocked<PluginsServiceStart> = lazyObject({
     onStart: jest.fn(),
-  };
+  });
   return contract;
 };
 
 function createUiPlugins() {
-  return {
+  return lazyObject({
     browserConfigs: new Map(),
     internal: new Map(),
     public: new Map(),
-  };
+  });
 }
 
 export const pluginServiceMock = {

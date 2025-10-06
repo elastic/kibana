@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { entries, findLastIndex, intersection, isNil } from 'lodash';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import { entries, findLastIndex, isNil } from 'lodash';
 import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLCommandOption } from '@kbn/esql-ast';
 import {
   type ESQLAstCommand,
-  parse,
+  Parser,
   isOptionNode,
   isColumn,
   isFunctionExpression,
@@ -45,6 +45,7 @@ interface EsqlQueryHits {
 type EsqlResultRow = Array<string | null>;
 
 const ESQL_DOCUMENT_ID = 'esql_query_document';
+const CHUNK_SIZE = 100;
 
 export interface EsqlTable {
   columns: EsqlResultColumn[];
@@ -63,36 +64,50 @@ export const ALERT_ID_COLUMN = 'Alert ID';
 export const ALERT_ID_SUGGESTED_MAX = 10;
 
 export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): EsqlDocument => {
-  return columns.reduce<Record<string, string | null>>((acc, column, i) => {
-    acc[column.name] = row[i];
-
-    return acc;
-  }, {});
+  const doc: EsqlDocument = {};
+  for (let i = 0; i < columns.length; ++i) {
+    doc[columns[i].name] = row[i];
+  }
+  return doc;
 };
 
-export const getEsqlQueryHits = (
+export const getEsqlQueryHits = async (
   table: EsqlTable,
   query: string,
-  isGroupAgg: boolean
-): EsqlQueryHits => {
+  isGroupAgg: boolean,
+  isPreview: boolean = false
+): Promise<EsqlQueryHits> => {
   if (isGroupAgg) {
     const alertIdFields = getAlertIdFields(query, table.columns);
-    return toGroupedEsqlQueryHits(table, alertIdFields);
+    return await toGroupedEsqlQueryHits(table, alertIdFields, isPreview);
   }
-  return toEsqlQueryHits(table);
+  return await toEsqlQueryHits(table, isPreview);
 };
 
-export const toEsqlQueryHits = (table: EsqlTable): EsqlQueryHits => {
+export const toEsqlQueryHits = async (
+  table: EsqlTable,
+  isPreview: boolean = false,
+  chunkSize: number = CHUNK_SIZE
+): Promise<EsqlQueryHits> => {
   const hits: EsqlHit[] = [];
   const rows: EsqlDocument[] = [];
-  for (const row of table.values) {
+  for (let r = 0; r < table.values.length; r++) {
+    const row = table.values[r];
     const document = rowToDocument(table.columns, row);
     hits.push({
       _id: ESQL_DOCUMENT_ID,
       _index: '',
       _source: document,
     });
-    rows.push(rows.length > 0 ? document : { [ALERT_ID_COLUMN]: ActionGroupId, ...document });
+    if (isPreview) {
+      rows.push(
+        rows.length > 0 ? document : Object.assign({ [ALERT_ID_COLUMN]: ActionGroupId }, document)
+      );
+    }
+
+    if (r !== 0 && r % chunkSize === 0) {
+      await new Promise(setImmediate);
+    }
   }
 
   return {
@@ -110,19 +125,23 @@ export const toEsqlQueryHits = (table: EsqlTable): EsqlQueryHits => {
       },
     },
     rows,
-    cols: getColumnsForPreview(table.columns),
+    cols: isPreview ? getColumnsForPreview(table.columns) : [],
   };
 };
 
-export const toGroupedEsqlQueryHits = (
+export const toGroupedEsqlQueryHits = async (
   table: EsqlTable,
-  alertIdFields: string[]
-): EsqlQueryHits => {
+  alertIdFields: string[],
+  isPreview: boolean = false,
+  chunkSize: number = CHUNK_SIZE
+): Promise<EsqlQueryHits> => {
   const duplicateAlertIds: Set<string> = new Set<string>();
   const longAlertIds: Set<string> = new Set<string>();
   const rows: EsqlDocument[] = [];
   const mappedAlertIds: Record<string, Array<string | null>> = {};
-  const groupedHits = table.values.reduce<Record<string, EsqlHit[]>>((acc, row) => {
+  const groupedHits: Record<string, EsqlHit[]> = {};
+  for (let r = 0; r < table.values.length; r++) {
+    const row = table.values[r];
     const document = rowToDocument(table.columns, row);
     const mappedAlertId = alertIdFields.filter((a) => !isNil(document[a])).map((a) => document[a]);
     if (mappedAlertId.length > 0) {
@@ -132,21 +151,27 @@ export const toGroupedEsqlQueryHits = (
         _index: '',
         _source: document,
       };
-      if (acc[alertId]) {
+      if (groupedHits[alertId]) {
         duplicateAlertIds.add(alertId);
-        acc[alertId].push(hit);
+        groupedHits[alertId].push(hit);
       } else {
-        acc[alertId] = [hit];
+        groupedHits[alertId] = [hit];
         mappedAlertIds[alertId] = mappedAlertId;
       }
-      rows.push({ [ALERT_ID_COLUMN]: alertId, ...document });
 
-      if (mappedAlertId.length >= ALERT_ID_SUGGESTED_MAX) {
-        longAlertIds.add(alertId);
+      if (isPreview) {
+        rows.push(Object.assign({ [ALERT_ID_COLUMN]: alertId }, document));
+
+        if (mappedAlertId.length >= ALERT_ID_SUGGESTED_MAX) {
+          longAlertIds.add(alertId);
+        }
+      }
+
+      if (r !== 0 && r % chunkSize === 0) {
+        await new Promise(setImmediate);
       }
     }
-    return acc;
-  }, {});
+  }
 
   const aggregations = {
     groupAgg: {
@@ -163,7 +188,6 @@ export const toGroupedEsqlQueryHits = (
       }),
     },
   };
-
   return {
     results: {
       isCountAgg: false,
@@ -180,21 +204,21 @@ export const toGroupedEsqlQueryHits = (
     duplicateAlertIds,
     longAlertIds,
     rows,
-    cols: getColumnsForPreview(table.columns),
+    cols: isPreview ? getColumnsForPreview(table.columns) : [],
   };
 };
 
-export const transformDatatableToEsqlTable = (datatable: Datatable): EsqlTable => {
-  const columns: EsqlResultColumn[] = datatable.columns.map((c) => ({
-    name: c.id,
-    type: c.meta.type,
-  }));
-  const values: EsqlResultRow[] = datatable.rows.map((r) => Object.values(r));
+export const transformToEsqlTable = (datatable: ESQLSearchResponse): EsqlTable => {
+  const columns: EsqlResultColumn[] = datatable.columns;
+  // Convert each value to string or null to match EsqlResultRow type
+  const values: EsqlResultRow[] = datatable.values.map(
+    (row) => row.map((v) => (v === null || typeof v === 'string' ? v : String(v))) as EsqlResultRow
+  );
   return { columns, values };
 };
 
 export const getAlertIdFields = (query: string, resultColumns: EsqlResultColumn[]): string[] => {
-  const { root } = parse(query);
+  const { root } = Parser.parse(query);
   const commands = root.commands;
   const columns = resultColumns.map((c) => c.name);
 
@@ -261,19 +285,17 @@ const getRenameCommands = (commands: ESQLAstCommand[]): ESQLAstCommand[] =>
   commands.filter((c) => c.name === 'rename');
 
 const getFieldsFromRenameCommands = (astCommands: ESQLAstCommand[], fields: string[]): string[] => {
-  return astCommands.reduce((updatedFields, command) => {
+  for (const command of astCommands) {
     for (const renameArg of command.args) {
       if (isFunctionExpression(renameArg)) {
         const { original, renamed } = getArgsFromRenameFunction(renameArg);
         if (isColumn(original) && isColumn(renamed)) {
-          updatedFields = updatedFields.map((field) =>
-            field === original.name ? renamed.name : field
-          );
+          fields = fields.map((field) => (field === original.name ? renamed.name : field));
         }
       }
     }
-    return updatedFields;
-  }, fields);
+  }
+  return fields;
 };
 
 const getMetadataOption = (commands: ESQLAstCommand[]): ESQLCommandOption | undefined => {
@@ -309,4 +331,9 @@ const getColumnsForPreview = (
     cols.push({ id: c.name, actions: false });
   }
   return cols;
+};
+
+const intersection = (fields: string[], columns: string[]): string[] => {
+  const columnSet = new Set(columns);
+  return fields.filter((item) => columnSet.has(item));
 };

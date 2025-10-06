@@ -51,7 +51,7 @@ export const getCommandContext = async (
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,
         variables: callbacks?.getVariables?.(),
       };
-    case 'inlinestats':
+    case 'inline stats':
       return {
         histogramBarTarget: (await callbacks?.getPreferences?.())?.histogramBarTarget || 50,
         supportsControls: callbacks?.canSuggestVariables?.() ?? false,

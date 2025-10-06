@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
@@ -12,6 +13,7 @@ import { getAdvancedParameters } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import { useMemo, useCallback, useState } from 'react';
 import { useAbortController, useAbortableAsync } from '@kbn/react-hooks';
+import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { MappedSchemaField, SchemaField } from '../types';
@@ -35,6 +37,7 @@ export const useSchemaFields = ({
     core: {
       notifications: { toasts },
     },
+    services: { telemetryClient },
   } = useKibana();
 
   const abortController = useAbortController();
@@ -75,37 +78,8 @@ export const useSchemaFields = ({
   const [fields, setFields] = useState<SchemaField[]>([]);
 
   const storedFields = useMemo(() => {
-    let inheritedFields: SchemaField[] = [];
-
-    if (Streams.WiredStream.GetResponse.is(definition)) {
-      inheritedFields = Object.entries(definition.inherited_fields).map(([name, field]) => ({
-        name,
-        type: field.type,
-        format: 'format' in field ? field.format : undefined,
-        additionalParameters: getAdvancedParameters(name, field),
-        parent: field.from,
-        alias_for: field.alias_for,
-        status: 'inherited',
-      }));
-    }
-
-    const mappedFields: SchemaField[] = Object.entries(
-      Streams.WiredStream.GetResponse.is(definition)
-        ? definition.stream.ingest.wired.fields
-        : definition.stream.ingest.classic.field_overrides || {}
-    ).map(([name, field]) => ({
-      name,
-      type: field.type,
-      format: 'format' in field ? field.format : undefined,
-      additionalParameters: getAdvancedParameters(name, field),
-      parent: definition.stream.name,
-      status: 'mapped',
-    }));
-
-    const allManagedFieldsSet = new Set([
-      ...inheritedFields.map((field) => field.name),
-      ...mappedFields.map((field) => field.name),
-    ]);
+    const definitionFields = getDefinitionFields(definition);
+    const allManagedFieldsSet = new Set([...definitionFields.map((field) => field.name)]);
 
     const unmanagedFields: SchemaField[] = dataViewFields
       ? dataViewFields
@@ -122,8 +96,7 @@ export const useSchemaFields = ({
       : [];
 
     const allFoundFieldsSet = new Set([
-      ...inheritedFields.map((field) => field.name),
-      ...mappedFields.map((field) => field.name),
+      ...definitionFields.map((field) => field.name),
       ...unmanagedFields.map((field) => field.name),
     ]);
 
@@ -136,15 +109,10 @@ export const useSchemaFields = ({
           status: 'unmapped',
         })) ?? [];
 
-    const nextStoredFields = [
-      ...inheritedFields,
-      ...mappedFields,
-      ...unmanagedFields,
-      ...unmappedFields,
-    ];
-    setFields(nextStoredFields);
-    return nextStoredFields;
+    return [...definitionFields, ...unmanagedFields, ...unmappedFields];
   }, [dataViewFields, definition, unmappedFieldsValue?.unmappedFields]);
+
+  useEffect(() => setFields(storedFields), [storedFields]);
 
   const refreshFields = useCallback(() => {
     refreshDefinition();
@@ -152,30 +120,39 @@ export const useSchemaFields = ({
     refreshDataViewFields();
   }, [refreshDefinition, refreshUnmappedFields, refreshDataViewFields]);
 
-  const updateField = useCallback(
-    async (field: SchemaField) => {
-      const index = fields.findIndex((f) => f.name === field.name);
-      if (index === -1) {
-        return;
-      }
-
-      const before = fields.slice(0, index);
-      const after = fields.slice(index + 1);
-      const nextFields = [...before, field, ...after];
-      setFields(nextFields);
+  const addField = useCallback(
+    (field: SchemaField) => {
+      setFields([...fields, field]);
     },
     [fields]
   );
 
+  const updateField = useCallback(
+    (field: SchemaField) => {
+      setFields((prevFields) => {
+        const index = prevFields.findIndex((f) => f.name === field.name);
+        if (index === -1) {
+          return prevFields;
+        }
+
+        const before = prevFields.slice(0, index);
+        const after = prevFields.slice(index + 1);
+        return [...before, field, ...after];
+      });
+    },
+    [setFields]
+  );
+
   const pendingChangesCount = useMemo(() => {
-    const added = fields.length - storedFields.length;
-
-    const changed = fields.filter((field) => {
+    const addedOrChanged = fields.filter((field) => {
       const stored = storedFields.find((storedField) => storedField.name === field.name);
-      return stored && !isEqual(field, stored);
-    }).length;
+      if (!stored) {
+        return field.status !== 'unmapped';
+      }
+      return !isEqual(field, stored);
+    });
 
-    return added + changed;
+    return addedOrChanged.length;
   }, [fields, storedFields]);
 
   const discardChanges = useCallback(() => {
@@ -218,6 +195,10 @@ export const useSchemaFields = ({
         },
       });
 
+      telemetryClient.trackSchemaUpdated({
+        stream_type: getStreamTypeFromDefinition(definition.stream),
+      });
+
       toasts.addSuccess(
         i18n.translate('xpack.streams.streamDetailSchemaEditorEditSuccessToast', {
           defaultMessage: 'Schema was successfully modified',
@@ -234,16 +215,56 @@ export const useSchemaFields = ({
         toastLifeTimeMs: 5000,
       });
     }
-  }, [fields, streamsRepositoryClient, abortController.signal, definition, toasts, refreshFields]);
+  }, [
+    fields,
+    streamsRepositoryClient,
+    abortController.signal,
+    definition,
+    telemetryClient,
+    toasts,
+    refreshFields,
+  ]);
 
   return {
     fields,
     storedFields,
     isLoadingFields: isLoadingUnmappedFields || isLoadingDataViewFields,
     refreshFields,
+    addField,
     updateField,
     pendingChangesCount,
     discardChanges,
     submitChanges,
   };
+};
+
+export const getDefinitionFields = (definition: Streams.ingest.all.GetResponse): SchemaField[] => {
+  let inheritedFields: SchemaField[] = [];
+
+  if (Streams.WiredStream.GetResponse.is(definition)) {
+    inheritedFields = Object.entries(definition.inherited_fields).map(([name, field]) => ({
+      name,
+      type: field.type,
+      format: 'format' in field ? field.format : undefined,
+      additionalParameters: getAdvancedParameters(name, field),
+      parent: field.from,
+      alias_for: field.alias_for,
+      status: 'inherited',
+    }));
+  }
+
+  const mappedFields: SchemaField[] = Object.entries(
+    Streams.WiredStream.GetResponse.is(definition)
+      ? definition.stream.ingest.wired.fields
+      : definition.stream.ingest.classic.field_overrides || {}
+  ).map(([name, field]) => ({
+    name,
+    type: field.type,
+    format: 'format' in field ? field.format : undefined,
+    additionalParameters: getAdvancedParameters(name, field),
+    parent: definition.stream.name,
+    status: 'mapped',
+  }));
+
+  return [...inheritedFields, ...mappedFields];
 };

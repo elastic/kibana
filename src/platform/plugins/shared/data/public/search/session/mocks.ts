@@ -26,11 +26,14 @@ export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
   };
 }
 
-export function getSessionServiceMock(): jest.Mocked<ISessionService> {
+export function getSessionServiceMock(
+  overrides: Partial<jest.Mocked<ISessionService>> = {}
+): jest.Mocked<ISessionService> {
   return {
     clear: jest.fn(),
     start: jest.fn(),
     restore: jest.fn(),
+    reset: jest.fn(),
     getSessionId: jest.fn(),
     getSession$: jest.fn(() => new BehaviorSubject(undefined).asObservable()),
     state$: new BehaviorSubject<SearchSessionState>(SearchSessionState.None).asObservable(),
@@ -59,6 +62,7 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     getSearchSessionIndicatorUiConfig: jest.fn(() => ({ isDisabled: () => ({ disabled: false }) })),
     hasAccess: jest.fn(() => true),
     continue: jest.fn(),
+    ...overrides,
   };
 }
 

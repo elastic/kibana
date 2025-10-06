@@ -8,8 +8,9 @@
  */
 
 import type * as types from '../types';
+import { resolveItem } from '../visitor/utils';
 import type { NodeMatchTemplate } from './helpers';
-import { templateToPredicate } from './helpers';
+import { replaceProperties, templateToPredicate } from './helpers';
 
 type Node = types.ESQLAstNode | types.ESQLAstNode[];
 
@@ -274,16 +275,13 @@ export class Walker {
   public static readonly replace = (
     tree: WalkerAstNode,
     matcher: NodeMatchTemplate | ((node: types.ESQLProperNode) => boolean),
-    newValue: types.ESQLProperNode
+    newValue: types.ESQLProperNode | ((node: types.ESQLProperNode) => types.ESQLProperNode)
   ): types.ESQLProperNode | undefined => {
     const node =
       typeof matcher === 'function' ? Walker.find(tree, matcher) : Walker.match(tree, matcher);
     if (!node) return;
-    for (const key in node) {
-      if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(node, key))
-        delete (node as any)[key];
-    }
-    Object.assign(node, newValue);
+    const replacement = typeof newValue === 'function' ? newValue(node) : newValue;
+    replaceProperties(node, replacement);
     return node;
   };
 
@@ -299,7 +297,7 @@ export class Walker {
   public static readonly replaceAll = (
     tree: WalkerAstNode,
     matcher: NodeMatchTemplate | ((node: types.ESQLProperNode) => boolean),
-    newValue: types.ESQLProperNode
+    newValue: types.ESQLProperNode | ((node: types.ESQLProperNode) => types.ESQLProperNode)
   ): types.ESQLProperNode[] => {
     const nodes =
       typeof matcher === 'function'
@@ -307,11 +305,8 @@ export class Walker {
         : Walker.matchAll(tree, matcher);
     if (nodes.length === 0) return [];
     for (const node of nodes) {
-      for (const key in node) {
-        if (typeof key === 'string' && Object.prototype.hasOwnProperty.call(node, key))
-          delete (node as any)[key];
-      }
-      Object.assign(node, newValue);
+      const replacement = typeof newValue === 'function' ? newValue(node) : newValue;
+      replaceProperties(node, replacement);
     }
     return nodes;
   };
@@ -671,11 +666,11 @@ export class Walker {
     (options.visitMapEntry ?? options.visitAny)?.(node, parent, this);
 
     if (options.order === 'backward') {
-      this.walkSingleAstItem(node.value, node);
-      this.walkSingleAstItem(node.key, node);
+      this.walkSingleAstItem(resolveItem(node.value), node);
+      this.walkSingleAstItem(resolveItem(node.key), node);
     } else {
-      this.walkSingleAstItem(node.key, node);
-      this.walkSingleAstItem(node.value, node);
+      this.walkSingleAstItem(resolveItem(node.key), node);
+      this.walkSingleAstItem(resolveItem(node.value), node);
     }
   }
 

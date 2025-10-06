@@ -545,52 +545,6 @@
           },
           {
             "parentPluginId": "@kbn/index-management-shared-types",
-            "id": "def-common.ExtensionsSetup.setIndexMappingsContent",
-            "type": "Function",
-            "tags": [],
-            "label": "setIndexMappingsContent",
-            "description": [],
-            "signature": [
-              "(content: ",
-              {
-                "pluginId": "@kbn/index-management-shared-types",
-                "scope": "common",
-                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
-                "section": "def-common.IndexContent",
-                "text": "IndexContent"
-              },
-              ") => void"
-            ],
-            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/index-management-shared-types",
-                "id": "def-common.ExtensionsSetup.setIndexMappingsContent.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "content",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/index-management-shared-types",
-                    "scope": "common",
-                    "docId": "kibKbnIndexManagementSharedTypesPluginApi",
-                    "section": "def-common.IndexContent",
-                    "text": "IndexContent"
-                  }
-                ],
-                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/services/extensions_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/index-management-shared-types",
             "id": "def-common.ExtensionsSetup.setIndexDetailsPageRoute",
             "type": "Function",
             "tags": [],
@@ -745,6 +699,20 @@
             "type": "string",
             "tags": [],
             "label": "data_stream",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.Index.mode",
+            "type": "string",
+            "tags": [],
+            "label": "mode",
             "description": [],
             "signature": [
               "string | undefined"

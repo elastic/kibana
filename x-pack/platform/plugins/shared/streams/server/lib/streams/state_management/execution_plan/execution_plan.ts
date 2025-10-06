@@ -50,6 +50,8 @@ import type {
   UpsertIngestPipelineAction,
   RolloverAction,
   UpdateDefaultIngestPipelineAction,
+  UnlinkAssetsAction,
+  UnlinkSystemsAction,
   UpdateIngestSettingsAction,
 } from './types';
 
@@ -84,6 +86,8 @@ export class ExecutionPlan {
       delete_dot_streams_document: [],
       update_data_stream_mappings: [],
       delete_queries: [],
+      unlink_assets: [],
+      unlink_systems: [],
       update_ingest_settings: [],
     };
   }
@@ -172,6 +176,8 @@ export class ExecutionPlan {
         delete_dot_streams_document,
         update_data_stream_mappings,
         delete_queries,
+        unlink_assets,
+        unlink_systems,
         update_ingest_settings,
         ...rest
       } = this.actionsByType;
@@ -211,6 +217,8 @@ export class ExecutionPlan {
         this.deleteComponentTemplates(delete_component_template),
         this.deleteIngestPipelines(delete_ingest_pipeline),
         this.deleteQueries(delete_queries),
+        this.unlinkAssets(unlink_assets),
+        this.unlinkSystems(unlink_systems),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
@@ -231,6 +239,32 @@ export class ExecutionPlan {
 
     return Promise.all(
       actions.map((action) => this.dependencies.queryClient.deleteAll(action.request.name))
+    );
+  }
+
+  private async unlinkAssets(actions: UnlinkAssetsAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.flatMap((action) => [
+        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'dashboard'),
+        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'rule'),
+        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'slo'),
+      ])
+    );
+  }
+
+  private async unlinkSystems(actions: UnlinkSystemsAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.map((action) =>
+        this.dependencies.systemClient.syncSystemList(action.request.name, [])
+      )
     );
   }
 

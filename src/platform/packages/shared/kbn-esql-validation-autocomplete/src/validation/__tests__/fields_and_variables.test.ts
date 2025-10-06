@@ -116,8 +116,6 @@ describe('column escaping', () => {
 
 describe('user-defined column support', () => {
   describe('user-defined column data type detection', () => {
-    // most of these tests are aspirational (and skipped) because we don't have
-    // a good way to compute the type of an expression yet.
     beforeAll(() => {
       setTestFunctions([
         // this test function is just used to test the type of the user-defined column

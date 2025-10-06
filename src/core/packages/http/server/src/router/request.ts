@@ -45,6 +45,7 @@ export interface KibanaRequestState extends RequestApplicationState {
   span?: Span | null;
   authzResult?: Record<string, boolean>;
   measureElu?: () => void;
+  startTime: number;
 }
 
 /**

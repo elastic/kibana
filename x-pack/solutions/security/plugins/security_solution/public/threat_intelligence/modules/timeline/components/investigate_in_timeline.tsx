@@ -8,10 +8,11 @@
 import React, { type VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSecurityContext } from '../../../hooks/use_security_context';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { BUTTON_ICON_LABEL } from './translations';
 import { useInvestigateInTimeline } from '../../../hooks/use_investigate_in_timeline';
+import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
 
 export interface InvestigateInTimelineProps {
   /**
@@ -42,9 +43,13 @@ export const InvestigateInTimelineContextMenu: VFC<InvestigateInTimelineProps> =
   'data-test-subj': dataTestSub,
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
-  const securitySolutionContext = useSecurityContext();
+  const {
+    application: { capabilities },
+  } = useKibana().services;
 
-  if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineFn) {
+  const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
+
+  if (!hasAccessToTimeline || !investigateInTimelineFn) {
     return null;
   }
 
@@ -80,9 +85,13 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = 
   'data-test-subj': dataTestSub,
 }) => {
   const { investigateInTimelineFn } = useInvestigateInTimeline({ indicator: data });
-  const securitySolutionContext = useSecurityContext();
+  const {
+    application: { capabilities },
+  } = useKibana().services;
 
-  if (!securitySolutionContext?.hasAccessToTimeline || !investigateInTimelineFn) {
+  const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
+
+  if (!hasAccessToTimeline || !investigateInTimelineFn) {
     return null;
   }
 
@@ -90,12 +99,11 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = 
     <EuiToolTip content={BUTTON_ICON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={BUTTON_ICON_LABEL}
-        iconType="timeline"
-        iconSize="s"
-        size="xs"
-        color="primary"
-        onClick={investigateInTimelineFn}
+        color="text"
         data-test-subj={dataTestSub}
+        iconType="timeline"
+        onClick={investigateInTimelineFn}
+        size="s"
       />
     </EuiToolTip>
   );
