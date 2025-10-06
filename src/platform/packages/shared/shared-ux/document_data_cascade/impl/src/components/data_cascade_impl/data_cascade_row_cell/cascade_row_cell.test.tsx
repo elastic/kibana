@@ -71,7 +71,7 @@ describe('CascadeRowCellPrimitive', () => {
 
     renderComponent({
       cascadeGroups,
-      initialGroupColumn: cascadeGroups[0],
+      initialGroupColumn: [cascadeGroups[0]],
       row: { id: '1', depth: 0, original: rowData } as Row<any>,
       children: () => <div>Test Child</div>,
       onCascadeLeafNodeExpanded,
