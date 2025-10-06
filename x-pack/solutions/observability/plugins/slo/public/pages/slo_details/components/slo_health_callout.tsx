@@ -17,14 +17,6 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { ExternalLinkDisplayText } from './external_link_display_text';
 
-const getTransformUrlQueryState = (transformId: string) => {
-  return kbnRison.encode({
-    transform: {
-      queryText: transformId,
-    },
-  });
-};
-
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
 
@@ -40,7 +32,11 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
     return (
       managementLocator?.getRedirectUrl({
         sectionId: 'data',
-        appId: `transform?_a=${getTransformUrlQueryState(transformId)}`,
+        appId: `transform?_a=${kbnRison.encode({
+          transform: {
+            queryText: transformId,
+          },
+        })}`,
       }) || ''
     );
   };
