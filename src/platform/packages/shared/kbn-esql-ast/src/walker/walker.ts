@@ -8,6 +8,7 @@
  */
 
 import type * as types from '../types';
+import { resolveItem } from '../visitor/utils';
 import type { NodeMatchTemplate } from './helpers';
 import { replaceProperties, templateToPredicate } from './helpers';
 
@@ -665,11 +666,11 @@ export class Walker {
     (options.visitMapEntry ?? options.visitAny)?.(node, parent, this);
 
     if (options.order === 'backward') {
-      this.walkSingleAstItem(node.value, node);
-      this.walkSingleAstItem(node.key, node);
+      this.walkSingleAstItem(resolveItem(node.value), node);
+      this.walkSingleAstItem(resolveItem(node.key), node);
     } else {
-      this.walkSingleAstItem(node.key, node);
-      this.walkSingleAstItem(node.value, node);
+      this.walkSingleAstItem(resolveItem(node.key), node);
+      this.walkSingleAstItem(resolveItem(node.value), node);
     }
   }
 

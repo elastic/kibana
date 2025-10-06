@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import objectHash from 'object-hash';
+import invariant from 'node:assert';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { defaultsDeep } from 'lodash';
@@ -50,17 +50,24 @@ export async function initialize({
     }
   }
 
-  const previousVersions: string[] = [];
+  const version = dataStreams.version;
+  const previousVersions: number[] = [];
   dataStreams = applyDefaults(dataStreams);
-  const nextHash = objectHash(dataStreams);
 
-  if (existingIndexTemplate && existingIndexTemplate.index_template?._meta?.version !== nextHash) {
-    if (existingIndexTemplate.index_template?._meta?.version) {
-      previousVersions.push(existingIndexTemplate.index_template._meta.version);
+  if (existingIndexTemplate) {
+    const deployedVersion = existingIndexTemplate.index_template?._meta?.version;
+    invariant(
+      typeof deployedVersion === 'number' && deployedVersion > 0,
+      `Datastream metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
+    );
+
+    if (deployedVersion >= version) {
+      return; // already applied our mappings etc.
     }
-    if (existingIndexTemplate.index_template?._meta?.previousVersions) {
-      previousVersions.push(...existingIndexTemplate.index_template?._meta?.previousVersions);
-    }
+    previousVersions.push(
+      deployedVersion,
+      ...existingIndexTemplate.index_template?._meta?.previousVersions
+    );
   }
 
   // Should be idempotent
@@ -80,7 +87,7 @@ export async function initialize({
       },
       _meta: {
         ...dataStreams.template._meta,
-        version: nextHash,
+        version,
         previousVersions,
       },
     })
