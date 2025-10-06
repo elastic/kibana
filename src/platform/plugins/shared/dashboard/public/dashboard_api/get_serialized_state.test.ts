@@ -56,15 +56,7 @@ describe('getSerializedState', () => {
       Object {
         "controlGroupInput": undefined,
         "description": "",
-        "kibanaSavedObjectMeta": Object {
-          "searchSource": Object {
-            "filters": Array [],
-            "query": Object {
-              "language": "kuery",
-              "query": "hi",
-            },
-          },
-        },
+        "filters": Array [],
         "options": Object {
           "hidePanelTitles": false,
           "syncColors": false,
@@ -73,6 +65,10 @@ describe('getSerializedState', () => {
           "useMargins": true,
         },
         "panels": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "hi",
+        },
         "refreshInterval": undefined,
         "timeRange": undefined,
         "timeRestore": false,
