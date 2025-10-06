@@ -10,6 +10,7 @@ import moment from 'moment';
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { EndpointIntegrationFleetError } from './errors';
 import { getControlledArtifactCutoffDate } from '../../../common/endpoint/utils/controlled_artifact_rollout';
+import { DeviceControlAccessLevel } from '../../../common/endpoint/types';
 
 export const validateEndpointPackagePolicy = (
   inputs: NewPackagePolicyInput[],
@@ -53,6 +54,35 @@ export const validateEndpointPackagePolicy = (
           )} UTC time.`
         );
       }
+    }
+  }
+
+  // Validate device control notifications
+  const policyValue = input?.config?.policy?.value;
+  if (policyValue?.windows?.device_control || policyValue?.mac?.device_control) {
+    const windowsAccessLevel = policyValue?.windows?.device_control?.usb_storage;
+    const macAccessLevel = policyValue?.mac?.device_control?.usb_storage;
+    const windowsNotificationEnabled = policyValue?.windows?.popup?.device_control?.enabled;
+    const macNotificationEnabled = policyValue?.mac?.popup?.device_control?.enabled;
+
+    if (
+      windowsNotificationEnabled &&
+      windowsAccessLevel &&
+      windowsAccessLevel !== DeviceControlAccessLevel.deny_all
+    ) {
+      throw new EndpointIntegrationFleetError(
+        `Device Control user notifications are only supported when USB storage access level is set to deny_all. Current Windows access level is "${windowsAccessLevel}". Please either set the access level to deny_all or disable user notifications.`
+      );
+    }
+
+    if (
+      macNotificationEnabled &&
+      macAccessLevel &&
+      macAccessLevel !== DeviceControlAccessLevel.deny_all
+    ) {
+      throw new EndpointIntegrationFleetError(
+        `Device Control user notifications are only supported when USB storage access level is set to deny_all. Current Mac access level is "${macAccessLevel}". Please either set the access level to deny_all or disable user notifications.`
+      );
     }
   }
 };
