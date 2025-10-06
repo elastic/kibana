@@ -79,15 +79,18 @@ export const AzureCredentialsFormAgentless = ({
 
   const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);
 
+  //  TODO: remove this patch when the Azure cloud connector reusability components are added
   if (
     azureCredentialsType &&
     azureCredentialsType === 'cloud_connectors' &&
-    !newPolicy.supports_cloud_connector
+    (!newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id)
   ) {
     updatePolicy({
       updatedPolicy: {
         ...newPolicy,
         supports_cloud_connector: true,
+
+        cloud_connector_id: undefined,
       },
     });
   }
@@ -95,12 +98,13 @@ export const AzureCredentialsFormAgentless = ({
   if (
     azureCredentialsType &&
     azureCredentialsType !== 'cloud_connectors' &&
-    newPolicy.supports_cloud_connector
+    (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id)
   ) {
     updatePolicy({
       updatedPolicy: {
         ...newPolicy,
         supports_cloud_connector: false,
+        cloud_connector_id: undefined,
       },
     });
   }
