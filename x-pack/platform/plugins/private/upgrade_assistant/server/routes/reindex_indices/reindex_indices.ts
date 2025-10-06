@@ -58,7 +58,9 @@ export function registerReindexIndicesRoutes(
       } = await core;
       const { indexName } = request.params;
 
-      const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
+      const soClient = new SavedObjectsClient(
+        getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
+      );
 
       try {
         const result = await reindexHandler({
@@ -114,13 +116,11 @@ export function registerReindexIndicesRoutes(
       const { indexName } = request.params;
       const asCurrentUser = esClient.asCurrentUser;
 
-      const soClient = new SavedObjectsClient(getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE]));
-
-      const reindexActions = reindexActionsFactory(
-        soClient,
-        asCurrentUser,
-        log
+      const soClient = new SavedObjectsClient(
+        getSavedObjectsService().createInternalRepository([REINDEX_OP_TYPE])
       );
+
+      const reindexActions = reindexActionsFactory(soClient, asCurrentUser, log);
       const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
 
       try {
