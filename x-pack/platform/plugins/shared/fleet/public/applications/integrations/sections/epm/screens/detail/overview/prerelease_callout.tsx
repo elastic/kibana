@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -15,7 +15,7 @@ import type { PackageInfo } from '../../../../../types';
 import { useLink, useStartServices } from '../../../../../hooks';
 import { isPackagePrerelease } from '../../../../../../../../common/services';
 import {
-  OTEL_INPUTS_MINIMUM_FLEET_SERVER_VERSION,
+  OTEL_INPUTS_MINIMUM_VERSION,
   packageInfoHasOtelInputs,
 } from '../../../../../../../../common/services/otelcol_helpers';
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -31,40 +31,38 @@ export const PrereleaseCallout: React.FC<{
     pkgkey: `${name}-${latestGAVersion}`,
   });
   const isPrerelease = isPackagePrerelease(packageInfo.version);
-  if (isPrerelease) {
-    if (enableOtelIntegrations && packageInfoHasOtelInputs(packageInfo)) {
-      return <OtelPackageCallout packageInfo={packageInfo} />;
-    }
-    return (
-      <>
-        <EuiCallOut
-          announceOnMount
-          data-test-subj="prereleaseCallout"
-          title={i18n.translate('xpack.fleet.epm.prereleaseWarningCalloutTitle', {
-            defaultMessage: 'This is a pre-release version of {packageTitle} integration.',
-            values: {
-              packageTitle: title,
-            },
-          })}
-          iconType="info"
-          color="warning"
-        >
-          {latestGAVersion && (
-            <p>
-              <EuiButton href={overviewPathLatestGA} color="warning" data-test-subj="switchToGABtn">
-                <FormattedMessage
-                  id="xpack.fleet.epm.prereleaseWarningCalloutSwitchToGAButton"
-                  defaultMessage="Switch to latest GA version"
-                />
-              </EuiButton>
-            </p>
-          )}
-        </EuiCallOut>
-        <EuiSpacer size="l" />
-      </>
-    );
+  if (!isPrerelease) return null;
+
+  if (enableOtelIntegrations && packageInfoHasOtelInputs(packageInfo)) {
+    return <OtelPackageCallout packageInfo={packageInfo} />;
   }
-  return null;
+  return (
+    <>
+      <EuiCallOut
+        announceOnMount
+        data-test-subj="prereleaseCallout"
+        title={i18n.translate('xpack.fleet.epm.prereleaseWarningCalloutTitle', {
+          defaultMessage: 'This is a pre-release version of {packageTitle} integration.',
+          values: {
+            packageTitle: title,
+          },
+        })}
+        iconType="info"
+        color="warning"
+      >
+        {latestGAVersion && (
+          <p>
+            <EuiButton href={overviewPathLatestGA} color="warning" data-test-subj="switchToGABtn">
+              <FormattedMessage
+                id="xpack.fleet.epm.prereleaseWarningCalloutSwitchToGAButton"
+                defaultMessage="Switch to latest GA version"
+              />
+            </EuiButton>
+          </p>
+        )}
+      </EuiCallOut>
+    </>
+  );
 };
 
 export const OtelPackageCallout: React.FC<{
@@ -90,13 +88,13 @@ export const OtelPackageCallout: React.FC<{
         <p>
           <FormattedMessage
             id="xpack.fleet.epm.otelPackageWarningMessage"
-            defaultMessage="The {packageTitle} integration collects {OTelExternalLink} data adhering to {semanticConventionsLink}, and is available in technical preview. To use this integration, your Fleet Servers and assigned Elastic Agents need to be be at least on version {minVersion} and you must be running the EDOT Collector in agent mode. For more information, see the {fleetUserGuide}."
+            defaultMessage="The {packageTitle} integration collects {OTelExternalLink} data adhering to {semanticConventionsLink}, and is available in technical preview. Elastic Agents must be on version {minVersion} or higher to collect OTel data. For more information, see the {fleetUserGuide}."
             values={{
               packageTitle,
               OTelExternalLink: (
                 <EuiLink href="https://opentelemetry.io/" target="_blank" external>
                   {i18n.translate('xpack.fleet.settings.otelPackageWarning.OtelLinkLabel', {
-                    defaultMessage: 'Open Telemetry',
+                    defaultMessage: 'OpenTelemetry',
                   })}
                 </EuiLink>
               ),
@@ -121,12 +119,11 @@ export const OtelPackageCallout: React.FC<{
                   })}
                 </EuiLink>
               ),
-              minVersion: OTEL_INPUTS_MINIMUM_FLEET_SERVER_VERSION,
+              minVersion: OTEL_INPUTS_MINIMUM_VERSION,
             }}
           />
         </p>
       </EuiCallOut>
-      <EuiSpacer size="l" />
     </>
   );
 };

@@ -9,7 +9,7 @@ import type { PackageInfo, PackagePolicyInput } from '../types';
 
 import { isInputOnlyPolicyTemplate } from './policy_template';
 
-export const OTEL_INPUTS_MINIMUM_FLEET_SERVER_VERSION = '9.2.0';
+export const OTEL_INPUTS_MINIMUM_VERSION = '9.2.0';
 
 export const packageInfoHasOtelInputs = (packageInfo: PackageInfo | undefined) => {
   const isOtelInput = (packageInfo?.policy_templates || []).some(
@@ -23,7 +23,7 @@ export const packagePolicyHasOtelInputs = (
   packagePolicyInputs: PackagePolicyInput[] | undefined
 ) => {
   const isOtelInput = (packagePolicyInputs || []).some(
-    (input) => input.type === OTEL_COLLECTOR_INPUT_TYPE
+    (input) => input.type === OTEL_COLLECTOR_INPUT_TYPE && input.enabled
   );
   return isOtelInput;
 };

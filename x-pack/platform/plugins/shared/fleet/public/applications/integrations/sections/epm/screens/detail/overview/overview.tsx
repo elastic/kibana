@@ -290,6 +290,7 @@ export const OverviewPage: React.FC<Props> = memo(
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
           <PrereleaseCallout packageInfo={packageInfo} latestGAVersion={latestGAVersion} />
+          <EuiSpacer size="l" />
 
           {packageInfo.readme ? (
             <Readme

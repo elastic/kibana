@@ -39,8 +39,12 @@ import {
 } from '../../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../../services';
 
+import {
+  OTEL_INPUTS_MINIMUM_VERSION,
+  packagePolicyHasOtelInputs,
+} from '../../../../../../../../common/services/otelcol_helpers';
+
 import { AddIntegrationFlyout } from './add_integration_flyout';
-import { OTEL_INPUTS_MINIMUM_FLEET_SERVER_VERSION, packagePolicyHasOtelInputs } from '../../../../../../../../common/services/otelcol_helpers';
 
 interface Props {
   packagePolicies: PackagePolicy[];
@@ -154,23 +158,24 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 ) : null}
               </EuiLink>
             </EuiFlexItem>
-            { enableOtelIntegrations && packagePolicyHasOtelInputs(packagePolicy?.inputs) && <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type="warning"
-                color="warning"
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.policyDetails.packagePoliciesTabl.containsOtelPackages"
-                    defaultMessage="The {integrationTitle} integration collects OpenTelemetry data adhering to semantic conventions and is available in technical preview. To use this integration, your Fleet Servers and assigned Elastic Agents need to be be at least on version {minVersion}."
-                    values={{
-                      integrationTitle: packagePolicy.packageTitle,
-                      minVersion: OTEL_INPUTS_MINIMUM_FLEET_SERVER_VERSION
-                    }}
-                  />
-                }
-              />
-            </EuiFlexItem>
-            }
+            {enableOtelIntegrations && packagePolicyHasOtelInputs(packagePolicy?.inputs) && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="warning"
+                  color="warning"
+                  content={
+                    <FormattedMessage
+                      id="xpack.fleet.policyDetails.packagePoliciesTable.containsOtelPackages"
+                      defaultMessage="The {integrationTitle} integration collects OpenTelemetry data adhering to semantic conventions and is available in technical preview. Elastic Agents must be on version {minVersion} or higher to collect OTel data."
+                      values={{
+                        integrationTitle: packagePolicy.packageTitle,
+                        minVersion: OTEL_INPUTS_MINIMUM_VERSION,
+                      }}
+                    />
+                  }
+                />
+              </EuiFlexItem>
+            )}
             {canUseMultipleAgentPolicies &&
               canReadAgentPolicies &&
               canReadIntegrationPolicies &&
@@ -395,6 +400,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       canReadIntegrationPolicies,
       getHref,
       agentPolicy,
+      enableOtelIntegrations,
       canUseMultipleAgentPolicies,
       canReadAgentPolicies,
       getSharedPoliciesNumber,

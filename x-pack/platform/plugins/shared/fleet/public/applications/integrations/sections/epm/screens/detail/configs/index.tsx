@@ -81,6 +81,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 <>
                   <EuiSpacer size="s" />
                   <PrereleaseCallout packageInfo={packageInfo} />
+                  <EuiSpacer size="l" />
                 </>
               )}
               <EuiText>
