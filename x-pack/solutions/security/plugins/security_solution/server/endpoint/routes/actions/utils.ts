@@ -111,6 +111,7 @@ const COMMANDS_WITH_ACCESS_TO_FILES: CommandsWithFileAccess = deepFreeze<Command
 
 /**
  * Returns boolean indicating if the response action has access to files.
+ * NOTE that this utility DOES NOT check privileges.
  * @param agentType
  * @param action
  */
