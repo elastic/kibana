@@ -50,7 +50,8 @@
     "@kbn/core-i18n-browser-mocks",
     "@kbn/stack-connectors-plugin",
     "@kbn/core-lifecycle-browser-mocks",
-    "@kbn/serverless"
+    "@kbn/serverless",
+    "@kbn/resizable-layout"
   ],
   "exclude": ["target/**/*"]
 }
