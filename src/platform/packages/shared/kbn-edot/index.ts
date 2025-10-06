@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('@kbn/edot/scripts/edot');
+export { ensureEdot } from './src/ensure_edot';
+export { readKibanaConfig } from './src/read_kibana_config';
+export type { KibanaConfig } from './src/read_kibana_config';

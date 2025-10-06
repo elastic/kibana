@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('@kbn/edot/scripts/edot');
+import type { ExecaError } from 'execa';
+import execa from 'execa';
+
+class DockerUnavailableError extends Error {
+  constructor(cause: ExecaError) {
+    super(`Docker is not available`, { cause });
+  }
+}
+
+export async function assertDockerAvailable(): Promise<void> {
+  await execa.command(`docker info`).catch((error: ExecaError) => {
+    throw new DockerUnavailableError(error);
+  });
+}
