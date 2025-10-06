@@ -12,7 +12,7 @@ import { type SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { debounce } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { useCancellableSearch } from '../../hooks/use_cancellable_search';
 import { useDataSource } from '../../hooks/use_data_source';
 

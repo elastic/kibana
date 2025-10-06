@@ -41,6 +41,7 @@ import type {
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { EventBusPluginStart } from '@kbn/event-bus-plugin/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -90,6 +91,7 @@ export interface SLOPublicPluginsStart {
   discoverShared: DiscoverSharedPublicStart;
   embeddable: EmbeddableStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  eventBus: EventBusPluginStart;
   fieldFormats: FieldFormatsStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;

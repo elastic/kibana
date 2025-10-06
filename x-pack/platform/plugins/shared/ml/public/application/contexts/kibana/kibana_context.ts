@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EventBusPluginStart } from '@kbn/event-bus-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -46,6 +47,7 @@ interface StartPlugins {
   dataViews: DataViewsPublicPluginStart;
   dataVisualizer?: DataVisualizerPluginStart;
   embeddable: EmbeddableStart;
+  eventBus: EventBusPluginStart;
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;

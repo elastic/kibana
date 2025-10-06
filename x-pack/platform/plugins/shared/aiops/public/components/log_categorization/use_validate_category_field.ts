@@ -13,10 +13,8 @@ import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types'
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
-
 import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
-
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 export function useValidateFieldRequest() {
   const { http } = useAiopsAppContext();

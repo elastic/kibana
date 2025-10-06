@@ -27,9 +27,9 @@ import { ProgressControls } from '@kbn/aiops-components';
 import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
 import {
   clearAllRowState,
-  setGroupResults,
   useAppDispatch,
   useAppSelector,
+  logRateAnalysisSlice,
 } from '@kbn/aiops-log-rate-analysis/state';
 import {
   getSwappedWindowParameters,
@@ -48,8 +48,8 @@ import {
   resetResults,
 } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import { fetchFieldCandidates } from '@kbn/aiops-log-rate-analysis/state/log_rate_analysis_field_candidates_slice';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useDataSource } from '../../hooks/use_data_source';
 
 import {
@@ -100,10 +100,12 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barColorOverride,
   barHighlightColorOverride,
 }) => {
-  const { analytics, http, embeddingOrigin } = useAiopsAppContext();
+  const { analytics, http, embeddingOrigin, eventBus } = useAiopsAppContext();
+  const logRateAnalysis = eventBus.get(logRateAnalysisSlice);
   const { dataView } = useDataSource();
 
   const dispatch = useAppDispatch();
+  const { setGroupResults } = logRateAnalysis.actions;
   const {
     analysisType,
     earliest,
@@ -113,7 +115,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     stickyHistogram,
     isBrushCleared,
     groupResults,
-  } = useAppSelector((s) => s.logRateAnalysis);
+  } = logRateAnalysis.useEventBusState();
   const { isRunning, errors: streamErrors } = useAppSelector((s) => s.stream);
   const data = useAppSelector((s) => s.logRateAnalysisResults);
   const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);
@@ -228,7 +230,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
     // Reset grouping to false and clear all row selections when restarting the analysis.
     if (resetGroupButton) {
-      dispatch(setGroupResults(false));
+      setGroupResults(false);
       // When toggling the group switch, clear all row selections
       dispatch(clearAllRowState());
     }

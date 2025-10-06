@@ -20,6 +20,7 @@
       "dataVisualizer",
       "discover",
       "embeddable",
+      "eventBus",
       "features",
       "fieldFormats",
       "lens",

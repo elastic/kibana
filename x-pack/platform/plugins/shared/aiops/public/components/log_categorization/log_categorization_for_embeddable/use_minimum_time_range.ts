@@ -13,7 +13,7 @@ import { getTimeFieldRange } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import type { MinimumTimeRangeOption } from './minimum_time_range';
 import { DEFAULT_MINIMUM_TIME_RANGE_OPTION, MINIMUM_TIME_RANGE } from './minimum_time_range';
 import type { AiOpsKey, AiOpsStorageMapped } from '../../../types/storage';

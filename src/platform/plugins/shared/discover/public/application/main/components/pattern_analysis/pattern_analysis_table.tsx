@@ -13,7 +13,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { type EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
 import { pick } from 'lodash';
 import type { LogCategorizationEmbeddableProps } from '@kbn/aiops-plugin/public/components/log_categorization/log_categorization_for_embeddable/log_categorization_for_discover';
-import type { AiopsAppContextValue } from '@kbn/aiops-plugin/public/hooks/use_aiops_app_context';
+import type { AiopsAppContextValue } from '@kbn/aiops-context';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { PATTERN_ANALYSIS_LOADED } from './constants';

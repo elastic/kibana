@@ -10,12 +10,13 @@ import React from 'react';
 
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import { i18n } from '@kbn/i18n';
 import {
   clearAllRowState,
-  setGroupResults,
   useAppDispatch,
   useAppSelector,
+  logRateAnalysisSlice,
 } from '@kbn/aiops-log-rate-analysis/state';
 import {
   commonColumns,
@@ -89,9 +90,12 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
   foundGroups,
   growFirstItem = false,
 }) => {
+  const { eventBus } = useAiopsAppContext();
+  const logRateAnalysis = eventBus.get(logRateAnalysisSlice);
   const dispatch = useAppDispatch();
 
-  const { groupResults } = useAppSelector((s) => s.logRateAnalysis);
+  const { setGroupResults } = logRateAnalysis.actions;
+  const groupResults = logRateAnalysis.useEventBusState((s) => s.groupResults);
   const { isRunning } = useAppSelector((s) => s.stream);
   const fieldCandidates = useAppSelector((s) => s.logRateAnalysisFieldCandidates);
   const { skippedColumns } = useAppSelector((s) => s.logRateAnalysisTable);
@@ -101,7 +105,7 @@ export const LogRateAnalysisOptions: FC<LogRateAnalysisOptionsProps> = ({
   const toggleIdSelected = groupResults ? resultsGroupedOnId : resultsGroupedOffId;
 
   const onGroupResultsToggle = (optionId: string) => {
-    dispatch(setGroupResults(optionId === resultsGroupedOnId));
+    setGroupResults(optionId === resultsGroupedOnId);
     // When toggling the group switch, clear all row selections
     dispatch(clearAllRowState());
   };

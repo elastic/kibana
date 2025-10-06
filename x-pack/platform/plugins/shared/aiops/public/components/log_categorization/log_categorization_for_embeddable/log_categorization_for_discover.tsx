@@ -26,13 +26,13 @@ import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import useMountedState from 'react-use/lib/useMountedState';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { getCategorizationDataViewField } from '@kbn/aiops-utils';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
 } from '../../../application/url_state/log_pattern_analysis';
 import { useData } from '../../../hooks/use_data';
 import { useSearch } from '../../../hooks/use_search';
-import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { useCategorizeRequest } from '../use_categorize_request';
 import type { EventRate } from '../use_categorize_request';

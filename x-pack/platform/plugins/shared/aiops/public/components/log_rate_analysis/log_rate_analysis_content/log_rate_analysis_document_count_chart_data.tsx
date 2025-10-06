@@ -11,11 +11,11 @@ import type { Moment } from 'moment';
 import type { estypes } from '@elastic/elasticsearch';
 
 import {
-  useAppDispatch,
   useCurrentSelectedSignificantItem,
   useCurrentSelectedGroup,
-  setDocumentCountChartData,
+  logRateAnalysisSlice,
 } from '@kbn/aiops-log-rate-analysis/state';
+import { useAiopsAppContext } from '@kbn/aiops-context';
 
 import { DEFAULT_SEARCH_QUERY } from './log_rate_analysis_content';
 
@@ -32,11 +32,13 @@ export interface LogRateAnalysisDocumentcountChartDataProps {
 export const LogRateAnalysisDocumentCountChartData: FC<
   LogRateAnalysisDocumentcountChartDataProps
 > = ({ timeRange, esSearchQuery }) => {
+  const { eventBus } = useAiopsAppContext();
+  const { setDocumentCountChartData } = eventBus.get(logRateAnalysisSlice).actions;
+
   const { dataView } = useDataSource();
 
   const currentSelectedGroup = useCurrentSelectedGroup();
   const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
-  const dispatch = useAppDispatch();
 
   const { documentStats, earliest, latest, intervalMs } = useData(
     dataView,
@@ -57,15 +59,13 @@ export const LogRateAnalysisDocumentCountChartData: FC<
   // across Log Rate Analysis and Pattern Analysis. We discussed that we should
   // split this up into more specific hooks.
   useEffect(() => {
-    dispatch(
-      setDocumentCountChartData({
-        earliest,
-        latest,
-        intervalMs,
-        documentStats,
-      })
-    );
-  }, [documentStats, dispatch, earliest, intervalMs, latest]);
+    setDocumentCountChartData({
+      earliest,
+      latest,
+      intervalMs,
+      documentStats,
+    });
+  }, [documentStats, earliest, intervalMs, latest, setDocumentCountChartData]);
 
   return null;
 };
