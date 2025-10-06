@@ -100,6 +100,8 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
           {
             iconV2: agentsIcon, // Temp svg until we have icon in EUI
             link: 'agent_builder',
+            withBadge: true,
+            badgeTypeV2: 'techPreview',
           },
           {
             link: 'workflows',
@@ -274,7 +276,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.indices.title', {
-                  defaultMessage: 'Indices, data streams and roll ups',
+                  defaultMessage: 'Indices and data streams',
                 }),
               },
               {
