@@ -30,7 +30,7 @@ describe('AccessControlService', () => {
     let service: AccessControlService;
 
     beforeEach(() => {
-      service = new AccessControlService();
+      service = new AccessControlService({ typeRegistry });
     });
 
     it('returns type if object is read_only, has owner, and user is not owner', () => {
@@ -44,7 +44,6 @@ describe('AccessControlService', () => {
       ];
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
-        typeRegistry,
         actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.has('dashboard')).toBe(true);
@@ -61,7 +60,6 @@ describe('AccessControlService', () => {
       ];
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
-        typeRegistry,
         actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.size).toBe(0);
@@ -77,7 +75,6 @@ describe('AccessControlService', () => {
       ];
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
-        typeRegistry,
         actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.size).toBe(0);
@@ -94,7 +91,6 @@ describe('AccessControlService', () => {
       ];
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
-        typeRegistry,
         actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.size).toBe(0);
@@ -111,7 +107,6 @@ describe('AccessControlService', () => {
       ];
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
-        typeRegistry,
         actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.size).toBe(0);
@@ -152,7 +147,6 @@ describe('AccessControlService', () => {
       ];
       const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
         objects,
-        typeRegistry,
         actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
       });
       expect(typesRequiringAccessControl.has('dashboard')).toBe(true);
@@ -172,7 +166,6 @@ describe('AccessControlService', () => {
         ];
         const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
           objects,
-          typeRegistry,
           actions: new Set([SecurityAction.CHANGE_OWNERSHIP]),
         });
         expect(typesRequiringAccessControl.has('dashboard')).toBe(true);
@@ -189,7 +182,6 @@ describe('AccessControlService', () => {
         ];
         const { typesRequiringAccessControl } = service.getTypesRequiringPrivilegeCheck({
           objects,
-          typeRegistry,
           actions: new Set([SecurityAction.CHANGE_ACCESS_MODE]),
         });
         expect(typesRequiringAccessControl.has('dashboard')).toBe(true);
@@ -200,7 +192,7 @@ describe('AccessControlService', () => {
   describe('#enforceAccessControl', () => {
     let service: AccessControlService;
     beforeEach(() => {
-      service = new AccessControlService();
+      service = new AccessControlService({ typeRegistry });
     });
 
     const makeAuthResult = (
