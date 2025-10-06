@@ -3,7 +3,12 @@
 set -euo pipefail
 
 # Directory that stores namespace bookkeeping (pid files, metadata, logs).
-FTR_NETNS_STATE_DIR=${FTR_NETNS_STATE_DIR:-${WORKSPACE:-$(pwd)}/.buildkite/tmp/ftr_netns}
+# The location can be overridden with FTR_NETNS_STATE_DIR.  FTR_NETNS_DIR controls where
+# the namespace handles are created and defaults to a child of the state directory.
+# Set FTR_NETNS_SUDO_MODE to "true" (or "false") to opt in/out of sudo usage when
+# managing namespaces.
+FTR_TEMP_WORKSPACE=${WORKSPACE:-$(pwd)}
+FTR_NETNS_STATE_DIR=${FTR_NETNS_STATE_DIR:-${FTR_TEMP_WORKSPACE}/.buildkite/tmp/ftr_netns}
 mkdir -p "${FTR_NETNS_STATE_DIR}"
 
 # Networking defaults. These can be overridden via environment variables in Buildkite.
@@ -15,7 +20,70 @@ FTR_NETNS_GATEWAY=${FTR_NETNS_GATEWAY:-${FTR_NETNS_IPV4_PREFIX}.1}
 FTR_NETNS_BRIDGE_ADDRESS=${FTR_NETNS_BRIDGE_ADDRESS:-${FTR_NETNS_GATEWAY}/${FTR_NETNS_PREFIX_LENGTH}}
 FTR_NETNS_SUBNET_CIDR=${FTR_NETNS_SUBNET_CIDR:-${FTR_NETNS_IPV4_PREFIX}.0/${FTR_NETNS_PREFIX_LENGTH}}
 FTR_NETNS_MTU=${FTR_NETNS_MTU:-65520}
+FTR_NETNS_SUDO_MODE=${FTR_NETNS_SUDO_MODE:-auto}
 
+FTR_NETNS_DIR=${FTR_NETNS_DIR:-${FTR_NETNS_STATE_DIR}/netns}
+FTR_NETNS_SUDO_CMD=()
+
+ftr_netns_cmd() {
+  if [[ ${#FTR_NETNS_SUDO_CMD[@]} -gt 0 ]]; then
+    "${FTR_NETNS_SUDO_CMD[@]}" "$@"
+  else
+    "$@"
+  fi
+}
+
+ftr_netns_requirements_check() {
+  local need_sudo=false
+
+  case "${FTR_NETNS_SUDO_MODE}" in
+    true)
+      need_sudo=true
+      ;;
+    false)
+      need_sudo=false
+      ;;
+    auto)
+      if [[ -d "${FTR_NETNS_DIR}" && -w "${FTR_NETNS_DIR}" ]]; then
+        need_sudo=false
+      else
+        need_sudo=true
+      fi
+      ;;
+    *)
+      echo "Invalid FTR_NETNS_SUDO_MODE value '${FTR_NETNS_SUDO_MODE}'. Expected auto|true|false" >&2
+      exit 1
+      ;;
+  esac
+
+  if [[ "${need_sudo}" == "true" ]]; then
+    if ! command -v sudo >/dev/null 2>&1; then
+      echo "sudo is required to manage network namespaces. Install sudo or set FTR_NETNS_SUDO_MODE=false after granting permissions." >&2
+      exit 1
+    fi
+
+    FTR_NETNS_SUDO_CMD=(sudo -n)
+
+    if ! ftr_netns_cmd true 2>/dev/null; then
+      echo "sudo requires a password or is not permitted. Configure passwordless sudo for the Buildkite agent or run the step as root." >&2
+      exit 1
+    fi
+
+    if ! ftr_netns_cmd mkdir -p "${FTR_NETNS_DIR}" >/dev/null 2>&1; then
+      echo "Unable to create ${FTR_NETNS_DIR}. Ensure the Buildkite agent user has permission or adjust FTR_NETNS_DIR." >&2
+      exit 1
+    fi
+  else
+    mkdir -p "${FTR_NETNS_DIR}" >/dev/null 2>&1 || {
+      echo "Unable to create ${FTR_NETNS_DIR} without sudo. Set FTR_NETNS_SUDO_MODE=true or grant write permissions." >&2
+      exit 1
+    }
+  fi
+}
+
+ftr_netns_requirements_check
+
+export IP_NETNS_DIR="${FTR_NETNS_DIR}"
 # shellcheck disable=SC2034 # The array is mutated through helper functions.
 declare -a FTR_NETNS_ACTIVE_INDICES=()
 
@@ -42,7 +110,6 @@ ftr_netns_mark_inactive() {
   FTR_NETNS_ACTIVE_INDICES=("${next_active_indices[@]}")
 }
 
-# Returns the namespace name for an index.
 ftr_netns_name() {
   local namespace_index="$1"
   printf "kbnftrns%d" "${namespace_index}"
@@ -74,17 +141,20 @@ ftr_netns_ipv4_for_index() {
 # Produces the on-disk path that represents the namespace.
 ftr_netns_path() {
   local identifier="$1"
+  local namespace_label
   if [[ "${identifier}" =~ ^[0-9]+$ ]]; then
-    printf "/var/run/netns/%s" "$(ftr_netns_name "${identifier}")"
+    namespace_label=$(ftr_netns_name "${identifier}")
   else
-    printf "/var/run/netns/%s" "${identifier}"
+    namespace_label="${identifier}"
   fi
+
+  printf "%s/%s" "${FTR_NETNS_DIR}" "${namespace_label}"
 }
 
 # Ensures IPv4 forwarding is enabled when running in bridge mode.
 ftr_netns_enable_ipv4_forwarding() {
   if command -v sysctl >/dev/null 2>&1; then
-    sysctl -w net.ipv4.ip_forward=1 >/dev/null
+    ftr_netns_cmd sysctl -w net.ipv4.ip_forward=1 >/dev/null
   fi
 }
 
@@ -95,16 +165,16 @@ ftr_netns_configure_nat_rules() {
     return 1
   fi
 
-  if ! iptables -C FORWARD -i "${FTR_NETNS_BRIDGE_NAME}" -j ACCEPT >/dev/null 2>&1; then
-    iptables -I FORWARD -i "${FTR_NETNS_BRIDGE_NAME}" -j ACCEPT
+  if ! ftr_netns_cmd iptables -C FORWARD -i "${FTR_NETNS_BRIDGE_NAME}" -j ACCEPT >/dev/null 2>&1; then
+    ftr_netns_cmd iptables -I FORWARD -i "${FTR_NETNS_BRIDGE_NAME}" -j ACCEPT
   fi
 
-  if ! iptables -C FORWARD -o "${FTR_NETNS_BRIDGE_NAME}" -j ACCEPT >/dev/null 2>&1; then
-    iptables -I FORWARD -o "${FTR_NETNS_BRIDGE_NAME}" -j ACCEPT
+  if ! ftr_netns_cmd iptables -C FORWARD -o "${FTR_NETNS_BRIDGE_NAME}" -j ACCEPT >/dev/null 2>&1; then
+    ftr_netns_cmd iptables -I FORWARD -o "${FTR_NETNS_BRIDGE_NAME}" -j ACCEPT
   fi
 
-  if ! iptables -t nat -C POSTROUTING -s "${FTR_NETNS_SUBNET_CIDR}" -j MASQUERADE >/dev/null 2>&1; then
-    iptables -t nat -A POSTROUTING -s "${FTR_NETNS_SUBNET_CIDR}" -j MASQUERADE
+  if ! ftr_netns_cmd iptables -t nat -C POSTROUTING -s "${FTR_NETNS_SUBNET_CIDR}" -j MASQUERADE >/dev/null 2>&1; then
+    ftr_netns_cmd iptables -t nat -A POSTROUTING -s "${FTR_NETNS_SUBNET_CIDR}" -j MASQUERADE
   fi
 }
 
@@ -115,14 +185,14 @@ ftr_netns_prepare_bridge() {
     return 1
   fi
 
-  if ! ip link show "${FTR_NETNS_BRIDGE_NAME}" >/dev/null 2>&1; then
-    ip link add name "${FTR_NETNS_BRIDGE_NAME}" type bridge
+  if ! ftr_netns_cmd ip link show "${FTR_NETNS_BRIDGE_NAME}" >/dev/null 2>&1; then
+    ftr_netns_cmd ip link add name "${FTR_NETNS_BRIDGE_NAME}" type bridge
   fi
 
-  ip link set "${FTR_NETNS_BRIDGE_NAME}" up
+  ftr_netns_cmd ip link set "${FTR_NETNS_BRIDGE_NAME}" up
 
-  if ! ip addr show dev "${FTR_NETNS_BRIDGE_NAME}" | grep -q "${FTR_NETNS_GATEWAY}"; then
-    ip addr add "${FTR_NETNS_BRIDGE_ADDRESS}" dev "${FTR_NETNS_BRIDGE_NAME}" 2>/dev/null || true
+  if ! ftr_netns_cmd ip addr show dev "${FTR_NETNS_BRIDGE_NAME}" | grep -q "${FTR_NETNS_GATEWAY}"; then
+    ftr_netns_cmd ip addr add "${FTR_NETNS_BRIDGE_ADDRESS}" dev "${FTR_NETNS_BRIDGE_NAME}" 2>/dev/null || true
   fi
 
   ftr_netns_enable_ipv4_forwarding
@@ -132,7 +202,7 @@ ftr_netns_prepare_bridge() {
 # Tears down the host veth pair that was created for a namespace.
 ftr_netns_remove_veth() {
   local host_veth_name="$1"
-  ip link delete "${host_veth_name}" >/dev/null 2>&1 || true
+  ftr_netns_cmd ip link delete "${host_veth_name}" >/dev/null 2>&1 || true
 }
 
 # Configures bridge-based networking for a namespace. Returns 0 on success.
@@ -146,19 +216,21 @@ ftr_netns_try_bridge() {
 
   # Create a veth pair that connects the namespace to the bridge.
   ftr_netns_remove_veth "${host_veth_name}"
-  ip link add "${host_veth_name}" type veth peer name "${namespace_veth_name}" || return 1
+  if ! ftr_netns_cmd ip link add "${host_veth_name}" type veth peer name "${namespace_veth_name}"; then
+    return 1
+  fi
 
-  if ! ip link set "${host_veth_name}" master "${FTR_NETNS_BRIDGE_NAME}"; then
+  if ! ftr_netns_cmd ip link set "${host_veth_name}" master "${FTR_NETNS_BRIDGE_NAME}"; then
     ftr_netns_remove_veth "${host_veth_name}"
     return 1
   fi
 
-  ip link set "${host_veth_name}" up || {
+  ftr_netns_cmd ip link set "${host_veth_name}" up || {
     ftr_netns_remove_veth "${host_veth_name}"
     return 1
   }
 
-  if ! ip link set "${namespace_veth_name}" netns "${namespace_name}"; then
+  if ! ftr_netns_cmd ip link set "${namespace_veth_name}" netns "${namespace_name}"; then
     ftr_netns_remove_veth "${host_veth_name}"
     return 1
   fi
@@ -169,12 +241,12 @@ ftr_netns_try_bridge() {
     return 1
   }
 
-  ip netns exec "${namespace_name}" ip link set lo up
-  ip netns exec "${namespace_name}" ip link set "${namespace_veth_name}" name eth0
-  ip netns exec "${namespace_name}" ip addr flush dev eth0
-  ip netns exec "${namespace_name}" ip addr add "${namespace_ipv4}/${FTR_NETNS_PREFIX_LENGTH}" dev eth0
-  ip netns exec "${namespace_name}" ip link set eth0 up
-  ip netns exec "${namespace_name}" ip route replace default via "${FTR_NETNS_GATEWAY}"
+  ftr_netns_cmd ip netns exec "${namespace_name}" ip link set lo up
+  ftr_netns_cmd ip netns exec "${namespace_name}" ip link set "${namespace_veth_name}" name eth0
+  ftr_netns_cmd ip netns exec "${namespace_name}" ip addr flush dev eth0
+  ftr_netns_cmd ip netns exec "${namespace_name}" ip addr add "${namespace_ipv4}/${FTR_NETNS_PREFIX_LENGTH}" dev eth0
+  ftr_netns_cmd ip netns exec "${namespace_name}" ip link set eth0 up
+  ftr_netns_cmd ip netns exec "${namespace_name}" ip route replace default via "${FTR_NETNS_GATEWAY}"
 
   echo "bridge" > "${FTR_NETNS_STATE_DIR}/${namespace_name}.mode"
 }
@@ -240,7 +312,16 @@ ftr_netns_create() {
 
   ftr_netns_destroy "${namespace_index}" true
 
-  ip netns add "${namespace_name}"
+  if ! ftr_netns_cmd ip netns add "${namespace_name}"; then
+    echo "Failed to create network namespace ${namespace_name}. Ensure the Buildkite agent has CAP_NET_ADMIN (try setting FTR_NETNS_SUDO_MODE=true)." >&2
+    return 1
+  fi
+
+  if [[ ${#FTR_NETNS_SUDO_CMD[@]} -gt 0 ]]; then
+    local namespace_path
+    namespace_path=$(ftr_netns_path "${namespace_name}")
+    ftr_netns_cmd chown "$(id -u):$(id -g)" "${namespace_path}"
+  fi
 
   local host_veth_name
   host_veth_name=$(ftr_netns_host_veth "${namespace_index}")
@@ -255,7 +336,7 @@ ftr_netns_create() {
       configured_mode="bridge"
     elif [[ "${requested_mode}" == "bridge" ]]; then
       echo "Failed to configure bridge networking for namespace ${namespace_name}" >&2
-      ip netns delete "${namespace_name}"
+      ftr_netns_cmd ip netns delete "${namespace_name}"
       return 1
     else
       echo "Bridge networking unavailable, falling back to slirp4netns for namespace ${namespace_name}" >&2
@@ -263,7 +344,7 @@ ftr_netns_create() {
   fi
 
   if [[ -z "${configured_mode}" ]]; then
-    ip netns exec "${namespace_name}" ip link set lo up
+    ftr_netns_cmd ip netns exec "${namespace_name}" ip link set lo up
     ftr_netns_start_slirp "${namespace_name}"
     configured_mode="slirp"
   fi
@@ -285,8 +366,8 @@ ftr_netns_destroy() {
   ftr_netns_stop_slirp "${namespace_name}"
   ftr_netns_remove_veth "${host_veth_name}"
 
-  if ip netns list | awk '{print $1}' | grep -Fx "${namespace_name}" >/dev/null 2>&1; then
-    ip netns delete "${namespace_name}"
+  if ftr_netns_cmd ip netns list | awk '{print $1}' | grep -Fx "${namespace_name}" >/dev/null 2>&1; then
+    ftr_netns_cmd ip netns delete "${namespace_name}"
   elif [[ "${skip_missing_ok}" != "true" ]]; then
     echo "Namespace ${namespace_name} did not exist during cleanup" >&2
   fi

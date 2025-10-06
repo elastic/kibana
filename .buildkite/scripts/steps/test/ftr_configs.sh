@@ -3,6 +3,13 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
+
+# Ensure network namespace helpers operate within a workspace-local, writable directory.
+FTR_NETNS_TMP_ROOT=${WORKSPACE:-$(pwd)}
+export FTR_NETNS_STATE_DIR=${FTR_NETNS_STATE_DIR:-${FTR_NETNS_TMP_ROOT}/.buildkite/tmp/ftr_netns}
+export FTR_NETNS_DIR=${FTR_NETNS_DIR:-${FTR_NETNS_STATE_DIR}/netns}
+export FTR_NETNS_SUDO_MODE=${FTR_NETNS_SUDO_MODE:-auto}
+
 source .buildkite/scripts/steps/test/ftr_netns.sh
 
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
