@@ -8,19 +8,30 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
-import { listCompleteItem } from '../../commands_registry/complete_items';
-import { withAutoSuggest } from './autocomplete/helpers';
-import { getFieldsOrFunctionsSuggestions } from './autocomplete/helpers';
+import type {
+  GetColumnsByTypeFn,
+  ICommandCallbacks,
+  ICommandContext,
+  ISuggestionItem,
+  Location,
+} from '../../commands_registry/types';
+import { listCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
+import type { FunctionParameterContext } from './autocomplete/helpers';
+import {
+  withAutoSuggest,
+  getFieldsSuggestions,
+  getFunctionsSuggestions,
+  getLiteralsSuggestions,
+} from './autocomplete/helpers';
 import {
   type FunctionFilterPredicates,
   type FunctionParameterType,
   type FunctionDefinition,
   type SupportedDataType,
-  type ArrayType,
   FunctionDefinitionTypes,
   isParameterType,
   isReturnType,
+  isArrayType,
 } from '../types';
 import { operatorsDefinitions, logicalOperators } from '../all_operators';
 import {
@@ -94,7 +105,7 @@ const getNullCheckOperators = () => {
 };
 
 /** Suggest complete "IS [NOT] NULL" operators when the user has started typing "IS ..." */
-export const getNullCheckOperatorSuggestions = (
+const getNullCheckOperatorSuggestions = (
   queryText: string,
   location: Location,
   leftParamType: FunctionParameterType
@@ -118,19 +129,16 @@ export const getNullCheckOperatorSuggestions = (
   });
 };
 
-export function isArrayType(type: string): type is ArrayType {
-  return type.endsWith('[]');
-}
-
 function getSupportedTypesForBinaryOperators(
   fnDef: FunctionDefinition | undefined,
-  previousType: string
+  previousType: SupportedDataType | 'unknown'
 ) {
   // Retrieve list of all 'right' supported types that match the left hand side of the function
-  return fnDef && Array.isArray(fnDef?.signatures)
+  return fnDef
     ? fnDef.signatures
         .filter(({ params }) => params.find((p) => p.name === 'left' && p.type === previousType))
-        .map(({ params }) => params[1]?.type)
+        .map(({ params }) => params[1]?.type as SupportedDataType | 'unknown')
+        .filter((type) => type !== undefined && !isArrayType(type))
     : [previousType];
 }
 
@@ -149,8 +157,11 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType,
   getExpressionType,
   getColumnsByType,
-  hasMinimumLicenseRequired,
-  activeProduct,
+  context,
+  callbacks,
+  addSpaceAfterOperator,
+  openSuggestions,
+  functionParameterContext,
 }: {
   queryText: string;
   location: Location;
@@ -158,13 +169,16 @@ export async function getSuggestionsToRightOfOperatorExpression({
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
   getColumnsByType: GetColumnsByTypeFn;
-  hasMinimumLicenseRequired?: ((minimumLicenseRequired: LicenseType) => boolean) | undefined;
-  activeProduct?: PricingProduct | undefined;
+  context?: ICommandContext;
+  callbacks?: ICommandCallbacks;
+  addSpaceAfterOperator?: boolean;
+  openSuggestions?: boolean;
+  functionParameterContext?: FunctionParameterContext;
 }) {
   const suggestions = [];
-  const isFnComplete = checkFunctionInvocationComplete(operator, getExpressionType);
+  const { complete, reason } = checkFunctionInvocationComplete(operator, getExpressionType);
 
-  if (isFnComplete.complete) {
+  if (complete) {
     // i.e. ... | <COMMAND> field > 0 <suggest>
     // i.e. ... | <COMMAND> field + otherN <suggest>
     const operatorReturnType = getExpressionType(operator);
@@ -188,6 +202,11 @@ export async function getSuggestionsToRightOfOperatorExpression({
             : undefined,
       })
     );
+
+    // Add comma if we're in a function with more mandatory args
+    if (operatorReturnType === 'boolean' && functionParameterContext?.hasMoreMandatoryArgs) {
+      suggestions.push(commaCompleteItem);
+    }
   } else {
     // i.e. ... | <COMMAND> field >= <suggest>
     // i.e. ... | <COMMAND> field + <suggest>
@@ -200,28 +219,12 @@ export async function getSuggestionsToRightOfOperatorExpression({
     const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExpressionType);
     const leftArgType = getExpressionType(operator.args[cleanedArgs.length - 1]);
 
-    if (isFnComplete.reason === 'tooFewArgs') {
+    if (reason === 'tooFewArgs') {
       const fnDef = getFunctionDefinition(operator.name);
-      if (
-        fnDef?.signatures.every(({ params }) =>
-          params.some(({ type }) => isArrayType(type as string))
-        )
-      ) {
+
+      if (fnDef?.signatures.every(({ params }) => params.some(({ type }) => isArrayType(type)))) {
         suggestions.push(listCompleteItem);
       } else {
-        const finalType = leftArgType || 'any';
-        const supportedTypes = getSupportedTypesForBinaryOperators(fnDef, finalType);
-
-        // this is a special case with AND/OR
-        // <COMMAND> expression AND/OR <suggest>
-        // technically another boolean value should be suggested, but it is a better experience
-        // to actually suggest a wider set of fields/functions
-        const typeToUse =
-          finalType === 'boolean' &&
-          getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR
-            ? ['any']
-            : supportedTypes;
-
         const couldBeNullCheck = getNullCheckOperators().some(({ name }) =>
           name.startsWith(operator.name.toLowerCase())
         );
@@ -231,25 +234,58 @@ export async function getSuggestionsToRightOfOperatorExpression({
             ...getNullCheckOperatorSuggestions(
               queryText,
               location,
-              finalType === 'unknown' || finalType === 'unsupported' ? 'any' : finalType
+              leftArgType === 'unknown' || leftArgType === 'unsupported' ? 'any' : leftArgType
             )
           );
         } else {
-          // TODO replace with fields callback + function suggestions
+          // this is a special case with AND/OR
+          // <COMMAND> expression AND/OR <suggest>
+          // technically another boolean value should be suggested, but it is a better experience
+          // to actually suggest a wider set of fields/functions
+          const isAndOrWithBooleanLeft =
+            leftArgType === 'boolean' &&
+            (operator.name === 'and' || operator.name === 'or') &&
+            getFunctionDefinition(operator.name)?.type === FunctionDefinitionTypes.OPERATOR;
+
+          const typeToUse = isAndOrWithBooleanLeft
+            ? (['any'] as (SupportedDataType | 'unknown' | 'any')[])
+            : getSupportedTypesForBinaryOperators(fnDef, leftArgType);
+
+          const useValueType = Boolean(operator.subtype === 'binary-expression');
+
+          // Fields/columns suggestions
           suggestions.push(
-            ...(await getFieldsOrFunctionsSuggestions(
-              typeToUse,
+            ...(await getFieldsSuggestions(typeToUse, getColumnsByType, {
+              values: useValueType,
+              addSpaceAfterField: addSpaceAfterOperator ?? false,
+              openSuggestions: openSuggestions ?? false,
+              promoteToTop: true,
+            }))
+          );
+
+          // Date literals (policy-gated in helpers) with consistent advance/comma behavior
+          suggestions.push(
+            ...getLiteralsSuggestions(typeToUse, location, {
+              includeDateLiterals: true,
+              includeCompatibleLiterals: false,
+              addComma: false,
+              advanceCursorAndOpenSuggestions: openSuggestions ?? false,
+            })
+          );
+
+          // Function suggestions
+          suggestions.push(
+            ...getFunctionsSuggestions({
               location,
-              getColumnsByType,
-              {
-                functions: true,
-                columns: true,
-                values: Boolean(operator.subtype === 'binary-expression'),
+              types: typeToUse,
+              options: {
+                ignored: [],
+                addSpaceAfterFunction: addSpaceAfterOperator ?? false,
+                openSuggestions: openSuggestions ?? false,
               },
-              {},
-              hasMinimumLicenseRequired,
-              activeProduct
-            ))
+              context,
+              callbacks,
+            })
           );
         }
       }
@@ -267,7 +303,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
      *
      * I believe this is only used in WHERE and probably bears some rethinking.
      */
-    if (isFnComplete.reason === 'wrongTypes') {
+    if (reason === 'wrongTypes') {
       if (leftArgType && preferredExpressionType) {
         // suggest something to complete the operator
         if (

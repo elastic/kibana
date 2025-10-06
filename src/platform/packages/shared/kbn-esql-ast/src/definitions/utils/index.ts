@@ -8,16 +8,17 @@
  */
 
 export {
-  getFieldsOrFunctionsSuggestions,
+  getFieldsSuggestions,
+  getFunctionsSuggestions,
+  getLiteralsSuggestions,
   getControlSuggestionIfSupported,
   getControlSuggestion,
   getSafeInsertText,
   pushItUpInTheList,
 } from './autocomplete/helpers';
-export { getSuggestionsToRightOfOperatorExpression } from './operators';
+export { suggestForExpression } from './autocomplete/expressions';
 export {
   buildColumnSuggestions as buildFieldsDefinitionsWithMetadata,
-  getFunctionSuggestions,
   getFunctionSignatures,
   getFunctionDefinition,
 } from './functions';

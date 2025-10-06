@@ -227,7 +227,7 @@ export function getFunctionSignatures(
   });
 }
 
-const allFunctions = memoize(
+export const allFunctions = memoize(
   () =>
     aggFunctionDefinitions
       .concat(scalarFunctionDefinitions)
@@ -284,25 +284,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     sortText: functionsPriority,
   });
 }
-
-/**
- * Builds suggestions for functions based on the provided predicates.
- *
- * @param predicates a set of conditions that must be met for a function to be included in the suggestions
- * @returns
- */
-export const getFunctionSuggestions = (
-  predicates?: FunctionFilterPredicates,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
-  activeProduct?: PricingProduct | undefined
-): ISuggestionItem[] => {
-  return filterFunctionDefinitions(
-    allFunctions(),
-    predicates,
-    hasMinimumLicenseRequired,
-    activeProduct
-  ).map(getFunctionSuggestion);
-};
 
 export function checkFunctionInvocationComplete(
   func: ESQLFunction,

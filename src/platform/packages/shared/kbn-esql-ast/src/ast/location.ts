@@ -7,18 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLSingleAstItem } from '../types';
+import type { ESQLAstComment, ESQLSingleAstItem } from '../types';
 
-/**
- * Location ranges are inclusive, so a location of { min: 0, max: 4 }
- * covers the first 5 characters of a string.
- *
- * @param inner
- * @param outer
- * @returns
- */
-export const within = (inner: number | ESQLSingleAstItem, outer: ESQLSingleAstItem | undefined) => {
-  if (!outer) {
+export const within = (
+  inner: number | ESQLSingleAstItem,
+  outer: ESQLSingleAstItem | ESQLAstComment | undefined
+) => {
+  if (!outer?.location) {
     return false;
   }
 

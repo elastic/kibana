@@ -30,20 +30,47 @@ const expressionOperatorSuggestions = getFunctionSignaturesByReturnType(
   ['keyword']
 );
 
-const sortExpectSuggestions = (
+interface SuggestionItem {
+  text: string;
+  [key: string]: unknown;
+}
+
+type ExpectedSort =
+  | string[]
+  | {
+      contains?: string[];
+      notContains?: string[];
+      containsItems?: SuggestionItem[];
+      hasAny?: boolean;
+    };
+
+const sortExpectSuggestions = async (
   query: string,
-  expectedSuggestions: string[],
+  expected: ExpectedSort,
   mockCallbacks?: ICommandCallbacks,
   context = mockContext
 ) => {
-  return expectSuggestions(
-    query,
-    expectedSuggestions,
-    context,
-    'sort',
-    mockCallbacks,
-    autocomplete
-  );
+  if (Array.isArray(expected)) {
+    return expectSuggestions(query, expected, context, 'sort', mockCallbacks, autocomplete);
+  }
+  const results = await suggest(query, context, 'sort', mockCallbacks, autocomplete);
+  const texts = results.map(({ text }) => text);
+
+  if (expected.contains?.length) {
+    expect(texts).toEqual(expect.arrayContaining(expected.contains));
+  }
+
+  if (expected.notContains?.length) {
+    expected.notContains.forEach((excludedText) => expect(texts).not.toContain(excludedText));
+  }
+
+  if (expected.containsItems?.length) {
+    expect(results).toEqual(expect.arrayContaining(expected.containsItems));
+  }
+
+  if (expected.hasAny) {
+    expect(results.length).toBeGreaterThan(0);
+  }
 };
 
 describe('SORT Autocomplete', () => {
@@ -120,14 +147,7 @@ describe('SORT Autocomplete', () => {
     });
 
     it('suggests within functions', async () => {
-      const suggestions = await suggest(
-        'FROM a | SORT TRIM(',
-        undefined,
-        'sort',
-        undefined,
-        autocomplete
-      );
-      expect(suggestions).not.toHaveLength(0);
+      await sortExpectSuggestions('FROM a | SORT TRIM(', { hasAny: true });
     });
   });
 
@@ -287,6 +307,62 @@ describe('SORT Autocomplete', () => {
 
     test('after nulls are entered, suggests comma or pipe', async () => {
       await sortExpectSuggestions('from a | sort keywordField NULLS LAST ', [', ', '| ']);
+    });
+  });
+
+  describe('boolean expressions (grammar-based)', () => {
+    test('IS NULL / IS NOT NULL suggestions', async () => {
+      await sortExpectSuggestions('from a | sort keywordField IS ', {
+        contains: ['IS NULL', 'IS NOT NULL'],
+      });
+    });
+
+    test('suggestions after IN operator', async () => {
+      await sortExpectSuggestions('from a | sort doubleField IN ', ['( $0 )']);
+      await sortExpectSuggestions('from a | sort doubleField NOT IN ', ['( $0 )']);
+    });
+
+    test('function call within sort expression', async () => {
+      await sortExpectSuggestions('from a | sort ROUND(doubleField, ', { hasAny: true });
+    });
+
+    test('operators after complete IN expression', async () => {
+      await sortExpectSuggestions('from a | sort doubleField IN (1.0, 2.0) ', [
+        'AND $0',
+        'OR $0',
+        ', ',
+        '| ',
+        'ASC',
+        'DESC',
+        'NULLS FIRST',
+        'NULLS LAST',
+      ]);
+    });
+
+    test('pattern matching operators (LIKE/RLIKE)', async () => {
+      await sortExpectSuggestions('from a | sort textField LIKE ', { hasAny: true });
+    });
+
+    test('complex nested expressions', async () => {
+      await sortExpectSuggestions(
+        'from a | sort (ROUND(doubleField) > 5 AND textField LIKE "test") ',
+        ['AND $0', 'OR $0', ', ', '| ', 'ASC', 'DESC', 'NULLS FIRST', 'NULLS LAST']
+      );
+    });
+  });
+
+  describe('Replacement ranges for NULLS and operators', () => {
+    test('replacement range for NULLS suggestions after partial prefix', async () => {
+      const query = 'from a | sort keywordField ASC NULLS F';
+
+      const suggestions = await suggest(query, mockContext, 'sort', undefined, autocomplete);
+      const { length } = query;
+
+      const nullsFirst = suggestions.find(({ text }) => text === 'NULLS FIRST');
+      const nullsLast = suggestions.find(({ text }) => text === 'NULLS LAST');
+
+      expect(nullsFirst?.rangeToReplace).toEqual({ start: length - 7, end: length });
+      expect(nullsLast?.rangeToReplace).toEqual({ start: length - 7, end: length });
     });
   });
 });

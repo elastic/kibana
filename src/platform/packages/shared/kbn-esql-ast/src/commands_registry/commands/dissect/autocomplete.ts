@@ -8,13 +8,15 @@
  */
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand } from '../../../types';
+import { suggestForExpression } from '../../../definitions/utils';
+
+import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { pipeCompleteItem, colonCompleteItem, semiColonCompleteItem } from '../../complete_items';
-import { type ISuggestionItem, type ICommandContext } from '../../types';
+import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
+import { isLiteral, isFunctionExpression } from '../../../ast/is';
 
 const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-ast.esql.definitions.appendSeparatorDoc', {
@@ -32,20 +34,27 @@ export async function autocomplete(
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   const commandArgs = command.args.filter((arg) => !Array.isArray(arg) && arg.type !== 'unknown');
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
-    cursorPosition,
-    callbacks,
-    context
-  );
-  if (functionsSpecificSuggestions) {
-    return functionsSpecificSuggestions;
+  const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
+
+  // DISSECT uses suggestForExpression with Location.DISSECT (unlike GROK which doesn't)
+  // because DISSECT has command options (APPEND_SEPARATOR) that require location-aware autocomplete
+  if (expressionRoot && (isLiteral(expressionRoot) || isFunctionExpression(expressionRoot))) {
+    return await suggestForExpression({
+      query,
+      expressionRoot,
+      command,
+      cursorPosition,
+      location: Location.DISSECT,
+      context,
+      callbacks,
+    });
   }
+
   // DISSECT field/
   if (commandArgs.length === 1 && /\s$/.test(innerText)) {
     return buildConstantsDefinitions(
@@ -74,10 +83,12 @@ export async function autocomplete(
 
   // DISSECT /
   const fieldSuggestions = (await callbacks?.getByType?.(ESQL_STRING_TYPES)) ?? [];
-  return fieldSuggestions.map((sug) =>
-    withAutoSuggest({
+  return fieldSuggestions.map((sug) => {
+    const withSpace = {
       ...sug,
       text: `${sug.text} `,
-    })
-  );
+    };
+
+    return withAutoSuggest(withSpace);
+  });
 }

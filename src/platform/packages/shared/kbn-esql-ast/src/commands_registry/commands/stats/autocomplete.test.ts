@@ -14,12 +14,15 @@ import {
 import { Location } from '../../types';
 import { autocomplete } from './autocomplete';
 import {
+  DATE_DIFF_TIME_UNITS,
   expectSuggestions,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   getLiteralsByType,
+  mockFieldsWithTypes,
+  suggest as testSuggest,
 } from '../../../__tests__/autocomplete';
-import type { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks, ISuggestionItem } from '../../types';
 import type { FunctionReturnType, FieldType } from '../../../definitions/types';
 import {
   ESQL_NUMBER_TYPES,
@@ -29,7 +32,8 @@ import {
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
 import { setTestFunctions } from '../../../definitions/utils/test_functions';
-import { allStarConstant, getDateHistogramCompletionItem } from '../../../..';
+import { getDateHistogramCompletionItem } from '../../../..';
+import { getUnitDuration } from '../../../definitions/utils/literals';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 const allAggFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any', {
@@ -84,22 +88,60 @@ export const EXPECTED_FOR_EMPTY_EXPRESSION = [
   ...allEvalFunctionsForStats,
 ];
 
-const statsExpectSuggestions = (
+type ExpectedStats =
+  | string[]
+  | {
+      contains?: string[];
+      notContains?: string[];
+      containsItems?: ISuggestionItem[];
+      noCommaFor?: string[];
+      hasAnyComma?: boolean;
+    };
+
+const statsExpectSuggestions = async (
   query: string,
-  expectedSuggestions: string[],
+  expected: ExpectedStats,
   mockCallbacks?: ICommandCallbacks,
   context = mockContext,
   offset?: number
 ) => {
-  return expectSuggestions(
-    query,
-    expectedSuggestions,
-    context,
-    'stats',
-    mockCallbacks,
-    autocomplete,
-    offset
-  );
+  if (Array.isArray(expected)) {
+    return expectSuggestions(
+      query,
+      expected,
+      context,
+      'stats',
+      mockCallbacks,
+      autocomplete,
+      offset
+    );
+  }
+
+  const results = await testSuggest(query, context, 'stats', mockCallbacks, autocomplete, offset);
+  const texts = results.map(({ text }) => text);
+
+  if (expected.contains?.length) {
+    expect(texts).toEqual(expect.arrayContaining(expected.contains));
+  }
+
+  if (expected.notContains?.length) {
+    expected.notContains.forEach((suggestion) => expect(texts).not.toContain(suggestion));
+  }
+
+  if (expected.containsItems?.length) {
+    expect(results).toEqual(expect.arrayContaining(expected.containsItems));
+  }
+
+  if (expected.noCommaFor?.length) {
+    const set = new Set(expected.noCommaFor);
+    const subset = results.filter(({ text }) => set.has(text));
+
+    subset.forEach(({ text }) => expect(text).not.toContain(','));
+  }
+
+  if (expected.hasAnyComma) {
+    expect(results.some(({ text }) => text.endsWith(','))).toBe(true);
+  }
 };
 
 describe('STATS Autocomplete', () => {
@@ -126,14 +168,17 @@ describe('STATS Autocomplete', () => {
     afterEach(() => setTestFunctions([]));
 
     describe('... <aggregates> ...', () => {
-      test('suggestions for a fresh expression', async () => {
-        await statsExpectSuggestions('from a | stats ', EXPECTED_FOR_FIRST_EMPTY_EXPRESSION);
-        await statsExpectSuggestions('FROM a | STATS ', EXPECTED_FOR_FIRST_EMPTY_EXPRESSION);
-        await statsExpectSuggestions('from a | stats a=max(b), ', EXPECTED_FOR_EMPTY_EXPRESSION);
-        await statsExpectSuggestions(
+      test.each([
+        ['from a | stats ', EXPECTED_FOR_FIRST_EMPTY_EXPRESSION, 'lowercase fresh expression'],
+        ['FROM a | STATS ', EXPECTED_FOR_FIRST_EMPTY_EXPRESSION, 'uppercase fresh expression'],
+        ['from a | stats a=max(b), ', EXPECTED_FOR_EMPTY_EXPRESSION, 'after comma in aggregate'],
+        [
           'from a | stats a=max(b) WHERE doubleField > longField, ',
-          EXPECTED_FOR_EMPTY_EXPRESSION
-        );
+          EXPECTED_FOR_EMPTY_EXPRESSION,
+          'after comma with WHERE clause',
+        ],
+      ])('suggestions for %s', async (query, expected, description) => {
+        await statsExpectSuggestions(query, expected);
       });
 
       test('on assignment expression, shows all agg and eval functions', async () => {
@@ -144,8 +189,12 @@ describe('STATS Autocomplete', () => {
         ]);
       });
 
-      test('on space after aggregate field', async () => {
-        await statsExpectSuggestions('from a | stats a=min(integerField) ', [
+      test.each([
+        ['from a | stats a=min(integerField) ', 'integer', 'complete aggregate with space'],
+        ['FROM index1 | STATS AVG(doubleField) WHE', 'double', 'partial WHERE keyword'],
+        ['FROM index1 | STATS AVG(doubleField) B', 'double', 'partial BY keyword'],
+      ])('on space after aggregate field - %s', async (query, returnType, description) => {
+        await statsExpectSuggestions(query, [
           'WHERE ',
           'BY ',
           ', ',
@@ -154,33 +203,7 @@ describe('STATS Autocomplete', () => {
             Location.STATS,
             'any',
             { operators: true, skipAssign: true },
-            ['integer']
-          ),
-        ]);
-
-        await statsExpectSuggestions('FROM index1 | STATS AVG(doubleField) WHE', [
-          'WHERE ',
-          'BY ',
-          ', ',
-          '| ',
-          ...getFunctionSignaturesByReturnType(
-            Location.STATS,
-            'any',
-            { operators: true, skipAssign: true },
-            ['double']
-          ),
-        ]);
-
-        await statsExpectSuggestions('FROM index1 | STATS AVG(doubleField) B', [
-          'WHERE ',
-          'BY ',
-          ', ',
-          '| ',
-          ...getFunctionSignaturesByReturnType(
-            Location.STATS,
-            'any',
-            { operators: true, skipAssign: true },
-            ['double']
+            [returnType]
           ),
         ]);
       });
@@ -230,14 +253,14 @@ describe('STATS Autocomplete', () => {
             locationsAvailable: [Location.STATS_TIMESERIES],
           },
         ]);
+
         const expectedFields = getFieldNamesByType([
           ...ESQL_COMMON_NUMERIC_TYPES,
           'date',
           'date_nanos',
         ]);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-          expectedFields.map((name) => ({ label: name, text: name }))
-        );
+
+        mockFieldsWithTypes(mockCallbacks, expectedFields);
         await statsExpectSuggestions(
           'from a | stats by bucket(',
           [
@@ -248,14 +271,12 @@ describe('STATS Autocomplete', () => {
               {
                 scalar: true,
               }
-            ).map((f) => `${f},`),
+            ).map((functionName) => `${functionName},`),
           ],
           mockCallbacks
         );
         const expectedFieldsRound = getFieldNamesByType(roundParameterTypes);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-          expectedFieldsRound.map((name) => ({ label: name, text: name }))
-        );
+        mockFieldsWithTypes(mockCallbacks, expectedFieldsRound);
         await statsExpectSuggestions(
           'from a | stats round(',
           [
@@ -305,9 +326,7 @@ describe('STATS Autocomplete', () => {
           mockCallbacks
         );
         const expectedFieldsAvg = getFieldNamesByType(AVG_TYPES);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-          expectedFieldsAvg.map((name) => ({ label: name, text: name }))
-        );
+        mockFieldsWithTypes(mockCallbacks, expectedFieldsAvg);
         await statsExpectSuggestions(
           'from a | stats avg(',
           [
@@ -361,9 +380,7 @@ describe('STATS Autocomplete', () => {
           'text',
           'keyword',
         ]);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-          expectedFields.map((name) => ({ label: name, text: name }))
-        );
+        mockFieldsWithTypes(mockCallbacks, expectedFields);
         const expected = [
           ...expectedFields,
           ...getFunctionSignaturesByReturnType(
@@ -392,9 +409,7 @@ describe('STATS Autocomplete', () => {
 
       test('inside function argument list', async () => {
         const expectedFieldsAvg = getFieldNamesByType(AVG_TYPES);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-          expectedFieldsAvg.map((name) => ({ label: name, text: name }))
-        );
+        mockFieldsWithTypes(mockCallbacks, expectedFieldsAvg);
         await statsExpectSuggestions(
           'from a | stats avg(b) by stringField',
           [
@@ -463,6 +478,67 @@ describe('STATS Autocomplete', () => {
         ]);
       });
 
+      test('MEDIAN function accepts numeric fields', async () => {
+        const numericFields = getFieldNamesByType(['double', 'integer', 'long']);
+        mockFieldsWithTypes(mockCallbacks, numericFields);
+        await statsExpectSuggestions(
+          'FROM a | STATS MEDIAN(',
+          [
+            ...numericFields,
+            ...getFunctionSignaturesByReturnType(Location.STATS, ['double', 'integer', 'long'], {
+              scalar: true,
+            }),
+          ],
+          mockCallbacks
+        );
+      });
+
+      test('WEIGHTED_AVG function accepts two numeric parameters', async () => {
+        const numericFields = getFieldNamesByType(['double', 'integer', 'long']);
+        mockFieldsWithTypes(mockCallbacks, numericFields);
+        await statsExpectSuggestions(
+          'FROM a | STATS WEIGHTED_AVG(doubleField, ',
+          [
+            ...numericFields,
+            ...getFunctionSignaturesByReturnType(Location.STATS, ['double', 'integer', 'long'], {
+              scalar: true,
+            }),
+          ],
+          mockCallbacks
+        );
+      });
+
+      test('TOP function limit parameter is constantOnly (no fields)', async () => {
+        const numericFields = getFieldNamesByType(['integer', 'long', 'double']);
+        mockFieldsWithTypes(mockCallbacks, numericFields);
+        await statsExpectSuggestions('FROM a | STATS TOP(booleanField, ', {
+          notContains: numericFields,
+        });
+      });
+
+      test('TOP function order parameter has suggested values (asc/desc)', async () => {
+        await statsExpectSuggestions('FROM a | STATS TOP(booleanField, 10, ', {
+          contains: ['"asc"', '"desc"'],
+        });
+      });
+
+      test('count(*) suggests * for all fields', async () => {
+        const expectedFields = getFieldNamesByType('any');
+        mockFieldsWithTypes(mockCallbacks, expectedFields);
+
+        await statsExpectSuggestions(
+          'from a | stats count(',
+          {
+            contains: [
+              '*',
+              ...expectedFields,
+              ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { scalar: false }),
+            ],
+          },
+          mockCallbacks
+        );
+      });
+
       describe('...WHERE expression...', () => {
         it('suggests fields and functions in empty expression', async () => {
           await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE ', [
@@ -481,9 +557,7 @@ describe('STATS Autocomplete', () => {
 
         it('suggests after operator', async () => {
           const expectedFieldsStrings = getFieldNamesByType(['text', 'keyword']);
-          (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-            expectedFieldsStrings.map((name) => ({ label: name, text: name }))
-          );
+          mockFieldsWithTypes(mockCallbacks, expectedFieldsStrings);
           await statsExpectSuggestions(
             'FROM a | STATS MIN(b) WHERE keywordField != ',
             [
@@ -502,18 +576,19 @@ describe('STATS Autocomplete', () => {
           test.each(completedExpressionSuggestions)(
             'suggests "%s" after complete boolean expression',
             async (suggestion) => {
-              const suggestions = await suggest(
-                'FROM a | STATS MIN(b) WHERE keywordField != keywordField '
+              await statsExpectSuggestions(
+                'FROM a | STATS MIN(b) WHERE keywordField != keywordField ',
+                { contains: [suggestion] }
               );
-              expect(suggestions.map(({ text }) => text)).toContain(suggestion);
             }
           );
 
           test.each(completedExpressionSuggestions)(
             'does NOT suggest "%s" after complete non-boolean',
             async (suggestion) => {
-              const suggestions = await suggest('FROM a | STATS MIN(b) WHERE longField + 1 ');
-              expect(suggestions.map(({ text }) => text)).not.toContain(suggestion);
+              await statsExpectSuggestions('FROM a | STATS MIN(b) WHERE longField + 1 ', {
+                notContains: [suggestion],
+              });
             }
           );
         });
@@ -529,6 +604,33 @@ describe('STATS Autocomplete', () => {
                 ['double']
               ),
             ]
+          );
+        });
+
+        it('IN operator suggests fields and literals', async () => {
+          const expectedFieldsStrings = getFieldNamesByType(['text', 'keyword']);
+          const expectedLiterals = getLiteralsByType(['text', 'keyword']);
+
+          mockFieldsWithTypes(mockCallbacks, expectedFieldsStrings);
+          await statsExpectSuggestions(
+            'FROM a | STATS AVG(bytes) WHERE agent IN (extension, ',
+            {
+              contains: [...expectedFieldsStrings, ...expectedLiterals],
+            },
+            mockCallbacks
+          );
+        });
+
+        it('IN operator does not suggest user-defined aggregation columns', async () => {
+          const expectedFieldsStrings = getFieldNamesByType(['text', 'keyword']);
+          mockFieldsWithTypes(mockCallbacks, expectedFieldsStrings);
+          await statsExpectSuggestions(
+            'FROM a | STATS col0=AVG(bytes) WHERE agent IN (extension, ',
+            {
+              contains: [...expectedFieldsStrings],
+              notContains: ['col0'],
+            },
+            mockCallbacks
           );
         });
       });
@@ -549,9 +651,22 @@ describe('STATS Autocomplete', () => {
         await statsExpectSuggestions('from a | stats a=min(b) by ', expected);
       });
 
+      test('STATS BY without aggregates (grouping only)', async () => {
+        const expected = [
+          ' = ',
+          getDateHistogramCompletionItem().text,
+          ...getFieldNamesByType('any'),
+          ...allEvalFunctionsForStats,
+          ...allGroupingFunctions,
+        ];
+
+        await statsExpectSuggestions('FROM a | STATS BY ', expected);
+      });
+
       test('no grouping functions as args to scalar function', async () => {
-        const suggestions = await suggest('FROM a | STATS a=MIN(b) BY ACOS(');
-        expect(suggestions.some((s) => allGroupingFunctions.includes(s.text))).toBe(false);
+        await statsExpectSuggestions('FROM a | STATS a=MIN(b) BY ACOS(', {
+          notContains: allGroupingFunctions,
+        });
       });
 
       test('on partial column name', async () => {
@@ -569,8 +684,21 @@ describe('STATS Autocomplete', () => {
 
         await statsExpectSuggestions('from a | stats a=max(b) BY integerField, keywor', [
           ...expected,
-          ...getFieldNamesByType('any'),
+          ...getFieldNamesByType('any').filter((name) => name !== 'integerField'),
         ]);
+      });
+
+      test('excludes already used columns in BY clause', async () => {
+        await statsExpectSuggestions('from a | stats a=max(b) BY integerField, keywordField, ', {
+          notContains: ['integerField', 'keywordField'],
+        });
+
+        await statsExpectSuggestions(
+          'from a | stats a=max(b) BY col0 = integerField, col1 = keywordField, ',
+          {
+            notContains: ['integerField', 'keywordField'],
+          }
+        );
       });
 
       test('on complete column name', async () => {
@@ -662,9 +790,7 @@ describe('STATS Autocomplete', () => {
 
       test('on space before expression right hand side operand', async () => {
         const expectedFieldsNumeric = getFieldNamesByType(['integer', 'double', 'long']);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-          expectedFieldsNumeric.map((name) => ({ label: name, text: name }))
-        );
+        mockFieldsWithTypes(mockCallbacks, expectedFieldsNumeric);
         await statsExpectSuggestions(
           'from a | stats avg(b) by integerField % ',
           [
@@ -682,9 +808,7 @@ describe('STATS Autocomplete', () => {
           mockCallbacks
         );
         const expectedFieldsAny = getFieldNamesByType(['any']);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-          expectedFieldsAny.map((name) => ({ label: name, text: name }))
-        );
+        mockFieldsWithTypes(mockCallbacks, expectedFieldsAny);
         await statsExpectSuggestions(
           'from a | stats avg(b) by col0 = ',
           [
@@ -747,89 +871,223 @@ describe('STATS Autocomplete', () => {
         );
       });
 
-      test('within bucket()', async () => {
-        const expectedFields = getFieldNamesByType([
-          'date',
-          'date_nanos',
-          ...ESQL_COMMON_NUMERIC_TYPES,
-        ]);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-          expectedFields.map((name) => ({ label: name, text: name }))
-        );
-        await statsExpectSuggestions(
-          'FROM a | STATS COUNT() BY BUCKET(, 50, ?_tstart, ?_tend)',
-          [
-            // Note there's no space or comma in the suggested field names
-            ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
-            ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
-              {
-                scalar: true,
-              }
-            ),
-          ],
-          mockCallbacks,
-          mockContext,
-          33
-        );
-        await statsExpectSuggestions(
-          'FROM a | STATS COUNT() BY BUCKET( , 50, ?_tstart, ?_tend)',
-          [
-            // Note there's no space or comma in the suggested field names
-            ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
-            ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
-              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
-              {
-                scalar: true,
-              }
-            ),
-          ],
-          mockCallbacks,
-          mockContext,
-          33
-        );
-        const expectedFields1 = getFieldNamesByType([
-          'integer',
-          'date_period',
-          'time_duration',
-        ] as FieldType[]);
-        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-          expectedFields1.map((name) => ({ label: name, text: name }))
-        );
-        await statsExpectSuggestions(
-          'from a | stats avg(b) by BUCKET(dateField, 50, ?_tstart, ?_tend)',
-          [
-            ...getLiteralsByType('time_duration'),
-            ...getFunctionSignaturesByReturnType(
-              Location.EVAL,
-              ['integer', 'date_period', 'time_duration'],
-              {
-                scalar: true,
-              }
-            ),
-            ...['integerField', 'integerPrompt'],
-          ],
-          mockCallbacks,
-          mockContext,
-          43 // at the second argument of the bucket function
-        );
-      });
+      describe('BUCKET function', () => {
+        test('first parameter - date/numeric fields (with/without space)', async () => {
+          const expectedFields = getFieldNamesByType([
+            'date',
+            'date_nanos',
+            ...ESQL_COMMON_NUMERIC_TYPES,
+          ]);
+          mockFieldsWithTypes(mockCallbacks, expectedFields);
 
-      test('count(/) to suggest * for all', async () => {
-        const suggestions = await suggest('from a | stats count(');
-        expect(suggestions).toContain(allStarConstant);
+          const expectedSuggestions = [
+            ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
+            ...getFunctionSignaturesByReturnType(
+              Location.EVAL,
+              ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+              { scalar: true }
+            ),
+          ];
+
+          await statsExpectSuggestions(
+            'FROM a | STATS COUNT() BY BUCKET(, 50, ?_tstart, ?_tend)',
+            expectedSuggestions,
+            mockCallbacks,
+            mockContext,
+            33
+          );
+
+          await statsExpectSuggestions(
+            'FROM a | STATS COUNT() BY BUCKET( , 50, ?_tstart, ?_tend)',
+            expectedSuggestions,
+            mockCallbacks,
+            mockContext,
+            33
+          );
+        });
+
+        test('second parameter - duration types', async () => {
+          const expectedFields = getFieldNamesByType([
+            'integer',
+            'date_period',
+            'time_duration',
+          ] as FieldType[]);
+          mockFieldsWithTypes(mockCallbacks, expectedFields);
+
+          await statsExpectSuggestions(
+            'from a | stats avg(b) by BUCKET(dateField, 50, ?_tstart, ?_tend)',
+            [
+              ...getLiteralsByType('time_duration'),
+              ...getFunctionSignaturesByReturnType(
+                Location.EVAL,
+                ['integer', 'date_period', 'time_duration'],
+                { scalar: true }
+              ),
+              ...['integerField', 'integerPrompt'],
+            ],
+            mockCallbacks,
+            mockContext,
+            43
+          );
+        });
+
+        test('first param suggests fields even with constantOnly params 2,3,4', async () => {
+          const expectedFields = getFieldNamesByType([
+            'date',
+            'date_nanos',
+            ...ESQL_COMMON_NUMERIC_TYPES,
+          ]);
+          mockFieldsWithTypes(mockCallbacks, expectedFields);
+          await statsExpectSuggestions(
+            'FROM a | STATS BY BUCKET(',
+            [
+              ...getFieldNamesByType(['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES]),
+              ...getFunctionSignaturesByReturnType(
+                Location.EVAL,
+                ['date', 'date_nanos', ...ESQL_COMMON_NUMERIC_TYPES],
+                { scalar: true }
+              ).map((fn) => `${fn},`),
+            ],
+            mockCallbacks
+          );
+        });
       });
 
       describe('date histogram snippet', () => {
         test('uses histogramBarTarget preference when available', async () => {
           const expectedCompletionItem = getDateHistogramCompletionItem(50);
-
-          const suggestions = await suggest('FROM a | STATS BY ');
-
-          expect(suggestions).toContainEqual(expectedCompletionItem);
+          await statsExpectSuggestions('FROM a | STATS BY ', {
+            containsItems: [expectedCompletionItem],
+          });
         });
+      });
+
+      describe('expressions in function arguments', () => {
+        test('suggests operators after field in function', async () => {
+          await statsExpectSuggestions('FROM a | STATS avg(doubleField ', [
+            ...getFunctionSignaturesByReturnType(
+              Location.STATS,
+              'any',
+              { operators: true, skipAssign: true },
+              ['double']
+            ),
+          ]);
+        });
+
+        test('suggests fields and functions after operator in function', async () => {
+          await statsExpectSuggestions('FROM a | STATS avg(doubleField + ', {
+            contains: ['doubleField', 'ABS($0)', 'ROUND($0)'],
+          });
+        });
+
+        test('nested functions in aggregation - suggests fields', async () => {
+          await statsExpectSuggestions('FROM a | STATS sum(abs(', {
+            contains: ['doubleField', 'integerField', 'longField'],
+          });
+        });
+
+        test('complex expression in BY clause', async () => {
+          await statsExpectSuggestions('FROM a | STATS count() BY bucket(dateField, ', {
+            contains: ['1 day', '1 hour'],
+          });
+        });
+
+        test('comma suggestion in function with multiple mandatory params', async () => {
+          await statsExpectSuggestions('FROM a | STATS percentile(doubleField', {
+            hasAnyComma: true,
+          });
+        });
+
+        test('second arg for PERCENTILE is constant-only (no fields suggested)', async () => {
+          const numericFields = getFieldNamesByType(['integer', 'long', 'double']);
+          mockFieldsWithTypes(mockCallbacks, numericFields);
+          await statsExpectSuggestions('FROM a | STATS PERCENTILE(longField, ', {
+            notContains: numericFields,
+          });
+        });
+
+        test('parenthesized argument allows arithmetic operators', async () => {
+          await statsExpectSuggestions('FROM a | STATS avg((doubleField) ', [
+            ...getFunctionSignaturesByReturnType(
+              Location.STATS,
+              'any',
+              { operators: true, skipAssign: true },
+              ['double']
+            ),
+          ]);
+        });
+
+        test('no comma when cursor followed by comma', async () => {
+          await statsExpectSuggestions('FROM a | STATS count() BY BUCKET(', {
+            noCommaFor: ['dateField', 'doubleField'],
+          });
+        });
+      });
+    });
+  });
+
+  describe('function parameter constraints', () => {
+    it('constantOnly constraint - DATE_DIFF in aggregation should suggest only constants', async () => {
+      await statsExpectSuggestions(
+        'from a | stats total = SUM(DATE_DIFF(',
+        DATE_DIFF_TIME_UNITS,
+        mockCallbacks
+      );
+    });
+
+    it('constantOnly constraint - DATE_DIFF in WHERE clause should suggest only constants', async () => {
+      await statsExpectSuggestions(
+        'from a | stats count() WHERE DATE_DIFF(',
+        DATE_DIFF_TIME_UNITS,
+        mockCallbacks
+      );
+    });
+
+    it('time interval literals for constantOnly date_period parameters in aggregation', async () => {
+      const timeIntervals = getUnitDuration(1).map((interval) => `${interval}, `);
+      const dateFields = getFieldNamesByType(['date', 'date_nanos']);
+
+      mockFieldsWithTypes(mockCallbacks, dateFields);
+      await statsExpectSuggestions(
+        'from a | stats earliest = MIN(DATE_TRUNC(',
+        {
+          contains: [...timeIntervals.slice(0, 4), ...dateFields],
+        },
+        mockCallbacks
+      );
+    });
+  });
+
+  describe('timeseries context', () => {
+    it('timeseries aggregate functions available in STATS', async () => {
+      const timeseriesFunctions = getFunctionSignaturesByReturnType(Location.STATS, 'any', {
+        timeseriesAgg: true,
+      });
+
+      if (timeseriesFunctions.length > 0) {
+        await statsExpectSuggestions(
+          'from a | stats ',
+          {
+            contains: timeseriesFunctions,
+          },
+          mockCallbacks
+        );
+      }
+    });
+  });
+
+  describe('function filtering (functionsToIgnore)', () => {
+    test('aggregation functions should NOT be suggested INSIDE a function after using MAX', async () => {
+      // Inside AVG() function - other agg functions should be filtered after MAX is used
+      await statsExpectSuggestions('FROM a | STATS total = AVG(MAX(integerField', {
+        notContains: allAggFunctions.filter((f) => f !== 'MAX($0)'), // MAX itself OK, others filtered
+      });
+    });
+
+    test('grouping functions should NOT be suggested INSIDE variadic functions in main STATS clause', async () => {
+      // Inside AVG() - grouping functions should be filtered
+      await statsExpectSuggestions('FROM a | STATS a = AVG(', {
+        notContains: allGroupingFunctions,
       });
     });
   });

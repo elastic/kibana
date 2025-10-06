@@ -13,10 +13,13 @@ import {
   expectSuggestions,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
+  DATE_DIFF_TIME_UNITS,
+  mockFieldsWithTypes,
 } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
 import { timeUnitsToSuggest } from '../../../definitions/constants';
+import { getDateLiterals } from '../../../definitions/utils';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
@@ -172,9 +175,7 @@ describe('EVAL Autocomplete', () => {
 
   test('after NOT', async () => {
     const expectedFields = getFieldNamesByType('boolean');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
+    mockFieldsWithTypes(mockCallbacks, expectedFields);
     await evalExpectSuggestions(
       'from index | EVAL keywordField not ',
       ['LIKE $0', 'RLIKE $0', 'IN $0'],
@@ -209,9 +210,7 @@ describe('EVAL Autocomplete', () => {
 
   test('in and around functions', async () => {
     const expectedDoubleLongFields = getFieldNamesByType(['double', 'long']);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedDoubleLongFields.map((name) => ({ label: name, text: name }))
-    );
+    mockFieldsWithTypes(mockCallbacks, expectedDoubleLongFields);
     await evalExpectSuggestions(
       'from a | eval a=round(doubleField) ',
       [
@@ -247,9 +246,7 @@ describe('EVAL Autocomplete', () => {
       mockCallbacks
     );
     const expectedDoubleIntegerFields = getFieldNamesByType(['integer', 'long']);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedDoubleIntegerFields.map((name) => ({ label: name, text: name }))
-    );
+    mockFieldsWithTypes(mockCallbacks, expectedDoubleIntegerFields);
     await evalExpectSuggestions(
       'from a | eval a=round(doubleField, ',
       [
@@ -279,9 +276,7 @@ describe('EVAL Autocomplete', () => {
       mockCallbacks
     );
     const expectedAny = getFieldNamesByType('any');
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedAny.map((name) => ({ label: name, text: name }))
-    );
+    mockFieldsWithTypes(mockCallbacks, expectedAny);
     await evalExpectSuggestions(
       'from a | eval a=round(doubleField), ',
       [
@@ -294,9 +289,7 @@ describe('EVAL Autocomplete', () => {
       mockCallbacks
     );
     const expectedNumeric = getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedNumeric.map((name) => ({ label: name, text: name }))
-    );
+    mockFieldsWithTypes(mockCallbacks, expectedNumeric);
     await evalExpectSuggestions(
       'from a | eval a=round(doubleField) + ',
       [
@@ -328,9 +321,7 @@ describe('EVAL Autocomplete', () => {
       mockCallbacks
     );
     const expectedStrings = getFieldNamesByType(['text', 'keyword']);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedStrings.map((name) => ({ label: name, text: name }))
-    );
+    mockFieldsWithTypes(mockCallbacks, expectedStrings);
     // test that comma is correctly added to the suggestions if minParams is not reached yet
     await evalExpectSuggestions(
       'from a | eval a=concat( ',
@@ -499,22 +490,38 @@ describe('EVAL Autocomplete', () => {
       ]),
     ];
 
-    const comparisonOperators = ['==', '!=', '>', '<', '>=', '<='];
-
     test('first position', async () => {
       await evalExpectSuggestions('from a | eval case(', allSuggestions);
       await evalExpectSuggestions('from a | eval case(', allSuggestions);
     });
 
-    test('suggests comparison operators after initial column', async () => {
-      // case( field /) suggest comparison operators at this point to converge to a boolean
-      await evalExpectSuggestions('from a | eval case( textField ', [...comparisonOperators, ',']);
+    test('suggests operators after initial column based on type', async () => {
+      // case( field ) suggests all appropriate operators for that field type
+      await evalExpectSuggestions('from a | eval case( textField ', [
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true, agg: false, scalar: false },
+          ['text']
+        ),
+        ',',
+      ]);
       await evalExpectSuggestions('from a | eval case( doubleField ', [
-        ...comparisonOperators,
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true, agg: false, scalar: false },
+          ['double']
+        ),
         ',',
       ]);
       await evalExpectSuggestions('from a | eval case( booleanField ', [
-        ...comparisonOperators,
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          'any',
+          { operators: true, skipAssign: true, agg: false, scalar: false },
+          ['boolean']
+        ),
         ',',
       ]);
     });
@@ -569,6 +576,21 @@ describe('EVAL Autocomplete', () => {
       );
     });
 
+    test('after complete comparison suggests logical operators and comma', async () => {
+      // case( field > field ) should suggest AND, OR, and comma
+      await evalExpectSuggestions('from a | eval case( integerField < doubleField ', [
+        'AND $0',
+        'OR $0',
+        ',',
+      ]);
+
+      await evalExpectSuggestions('from a | eval case( keywordField == textField ', [
+        'AND $0',
+        'OR $0',
+        ',',
+      ]);
+    });
+
     test('suggestions for second position', async () => {
       // case( field > 0, >) suggests fields like normal
       await evalExpectSuggestions('from a | eval case( integerField != doubleField, ', [
@@ -589,6 +611,332 @@ describe('EVAL Autocomplete', () => {
             'case',
           ]),
         ]
+      );
+    });
+  });
+
+  describe('controls literals', () => {
+    test('suggests "Create new control" when supportsControls is true', async () => {
+      const controlsContext = {
+        ...mockContext,
+        supportsControls: true,
+      };
+
+      await evalExpectSuggestions(
+        'from logs* | eval ',
+        [
+          '',
+          ' = ',
+          ...getFieldNamesByType('any'),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+        ],
+        undefined,
+        controlsContext
+      );
+    });
+  });
+
+  describe('function parameter constraints', () => {
+    test('constantOnly constraint - DATE_DIFF should suggest only constants, not fields', async () => {
+      await evalExpectSuggestions(
+        'from a | eval result = DATE_DIFF(',
+        DATE_DIFF_TIME_UNITS,
+        mockCallbacks
+      );
+    });
+
+    test('function parameter type filtering and parent function exclusion - ABS excludes itself', async () => {
+      const expectedNumericFields = getFieldNamesByType([
+        'double',
+        'integer',
+        'long',
+        'unsigned_long',
+      ]);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedNumericFields.map((name) => ({ label: name, text: name }))
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval result = ABS(',
+        [
+          ...expectedNumericFields,
+          ...getFunctionSignaturesByReturnType(
+            Location.EVAL,
+            ['double', 'integer', 'long', 'unsigned_long'],
+            { scalar: true },
+            undefined,
+            ['abs']
+          ),
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('parent function exclusion - TRIM excludes itself', async () => {
+      const expectedStringFields = getFieldNamesByType(['keyword', 'text']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval result = TRIM(',
+        [
+          ...expectedStringFields,
+          ...getFunctionSignaturesByReturnType(
+            Location.EVAL,
+            ['keyword', 'text'],
+            { scalar: true },
+            undefined,
+            ['trim']
+          ),
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('DATE_DIFF suggested values - suggests time units like year, month, day, hour', async () => {
+      const expectedUnits = DATE_DIFF_TIME_UNITS;
+
+      expect(expectedUnits).toEqual(
+        expect.arrayContaining(['"year", ', '"month", ', '"day", ', '"hour", ', '"minute", '])
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval result = DATE_DIFF(',
+        expectedUnits,
+        mockCallbacks
+      );
+    });
+
+    test('keyword and text are interchangeable - COALESCE with text param suggests both keyword and text fields', async () => {
+      const expectedFields = getFieldNamesByType(['keyword', 'text']);
+      mockFieldsWithTypes(mockCallbacks, expectedFields);
+
+      const expectedSuggestions = [
+        ...expectedFields,
+        ...getFunctionSignaturesByReturnType(
+          Location.EVAL,
+          ['keyword', 'text'],
+          { scalar: true },
+          undefined,
+          ['coalesce']
+        ),
+      ];
+
+      await evalExpectSuggestions(
+        'from a | eval result = COALESCE(textField, ',
+        expectedSuggestions,
+        mockCallbacks
+      );
+
+      expect(expectedFields).toEqual(expect.arrayContaining(['textField', 'keywordField']));
+    });
+
+    test('handle unknown types in function contexts', async () => {
+      const expectedFields = getFieldNamesByType(['double', 'integer', 'long', 'unsigned_long']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval result = abs(b ',
+        [
+          ...expectedFields,
+          ...getFunctionSignaturesByReturnType(
+            Location.EVAL,
+            ['double', 'integer', 'long', 'unsigned_long'],
+            { scalar: true },
+            undefined,
+            ['abs']
+          ),
+        ],
+        mockCallbacks,
+        mockContext,
+        27 // Position after 'b' with space
+      );
+    });
+  });
+
+  describe('complex expressions in functions', () => {
+    test('suggests operators after field in function', async () => {
+      const expectedFields = getFieldNamesByType(['double']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval result = abs(doubleField ',
+        [
+          ...getFunctionSignaturesByReturnType(
+            Location.EVAL,
+            'any',
+            { operators: true, skipAssign: true },
+            ['double']
+          ),
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('suggests fields after operator in function', async () => {
+      const expectedFields = getFieldNamesByType(['double']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval result = round(doubleField + ',
+        [
+          ...expectedFields,
+          ...getFunctionSignaturesByReturnType(Location.EVAL, ['double', 'integer', 'long'], {
+            scalar: true,
+          }),
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('nested functions with expressions', async () => {
+      const expectedFields = getFieldNamesByType(['double']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval result = round(abs(doubleField - ',
+        [
+          ...expectedFields,
+          ...getFunctionSignaturesByReturnType(Location.EVAL, ['double', 'integer', 'long'], {
+            scalar: true,
+          }),
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('multiple nested function calls', async () => {
+      const expectedFields = getFieldNamesByType(['double']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+      await evalExpectSuggestions(
+        'from a | eval result = ceil(floor(abs(',
+        [
+          ...expectedFields,
+          ...getFunctionSignaturesByReturnType(
+            Location.EVAL,
+            ['double', 'integer', 'long', 'unsigned_long'],
+            { scalar: true }
+          ).filter((fn) => !fn.includes('ABS(') && !fn.includes('CEIL(') && !fn.includes('FLOOR(')),
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('function with multiple parameters and expressions', async () => {
+      const expectedFields = getFieldNamesByType(['double']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval result = pow(doubleField + 2, ',
+        [
+          ...expectedFields,
+          ...getFunctionSignaturesByReturnType(
+            Location.EVAL,
+            ['double', 'integer', 'long', 'unsigned_long'],
+            { scalar: true }
+          ).filter((fn) => !fn.includes('POW(')),
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('conditional expressions in functions', async () => {
+      const expectedFields = getFieldNamesByType('any');
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+
+      await evalExpectSuggestions(
+        'from a | eval result = case(booleanField, doubleField * 2, ',
+        [
+          ...expectedFields,
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }).filter(
+            (fn) => !fn.includes('CASE')
+          ),
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('string concatenation in functions', async () => {
+      const expectedFields = getFieldNamesByType(['text', 'keyword']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+
+      const baseFunctions = getFunctionSignaturesByReturnType(Location.EVAL, 'any', {
+        scalar: true,
+      }).filter((fn) => !fn.includes('CONCAT('));
+
+      await evalExpectSuggestions(
+        'from a | eval result = concat(textField, " - ", ',
+        [...expectedFields, ...baseFunctions, 'MV_CONCAT($0)'],
+        mockCallbacks
+      );
+    });
+
+    test('date arithmetic in functions', async () => {
+      const expectedFields = getFieldNamesByType(['date']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+
+      const baseFunctions = getFunctionSignaturesByReturnType(Location.EVAL, ['date'], {
+        scalar: true,
+      });
+      const dateLiterals = getDateLiterals().map((item) => item.text);
+
+      await evalExpectSuggestions(
+        'from a | eval result = date_diff("day", dateField, ',
+        [...dateLiterals, ...expectedFields, ...baseFunctions, 'TO_DATE_NANOS($0)'],
+        mockCallbacks
+      );
+    });
+
+    test('boolean expressions in functions', async () => {
+      const expectedFields = getFieldNamesByType('any');
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+      await evalExpectSuggestions(
+        'from a | eval result = case(doubleField > 10 AND ',
+        [
+          ...expectedFields,
+          ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+        ],
+        mockCallbacks
+      );
+    });
+
+    test('comma handling in multi-parameter functions', async () => {
+      const expectedFields = getFieldNamesByType(['integer']);
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedFields.map((name) => ({ label: name, text: name }))
+      );
+      await evalExpectSuggestions(
+        'from a | eval result = round(doubleField',
+        [
+          ...expectedFields,
+          ...getFunctionSignaturesByReturnType(
+            Location.EVAL,
+            ['double', 'integer', 'long', 'unsigned_long'],
+            { scalar: true }
+          ).filter((fn) => !fn.includes('ROUND(')),
+        ],
+        mockCallbacks
       );
     });
   });

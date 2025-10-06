@@ -9,10 +9,9 @@
 import { isAssignment, isColumn, isFunctionExpression } from '../../../ast/is';
 import { within } from '../../../ast/location';
 import { isMarkerNode } from '../../../definitions/utils/ast';
-import {
-  getExpressionPosition,
-  suggestForExpression,
-} from '../../../definitions/utils/autocomplete/helpers';
+import { getExpressionPosition } from '../../../definitions/utils/autocomplete/expressions';
+import { suggestForExpression } from '../../../definitions/utils';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import {
@@ -28,7 +27,7 @@ export async function autocomplete(
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
@@ -56,13 +55,13 @@ export async function autocomplete(
   }
 
   const suggestions = await suggestForExpression({
-    innerText,
-    getColumnsByType: callbacks?.getByType,
+    query,
     expressionRoot,
+    command,
+    cursorPosition,
     location: Location.EVAL,
     context,
-    hasMinimumLicenseRequired: callbacks?.hasMinimumLicenseRequired,
-    activeProduct: context?.activeProduct,
+    callbacks,
   });
 
   const positionInExpression = getExpressionPosition(query, expressionRoot);
@@ -72,15 +71,25 @@ export async function autocomplete(
     );
   }
 
+  const insideFunction =
+    lastArg && isFunctionExpression(lastArg) && within(cursorPosition || 0, lastArg);
+
+  const expressionType = getExpressionType(expressionRoot, context?.columns);
+
   if (
     // don't suggest finishing characters if incomplete expression
-    isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText) &&
+    isExpressionComplete(expressionType, innerText) &&
     // don't suggest finishing characters if the expression is a column
     // because "EVAL columnName" is a useless expression
     expressionRoot &&
-    (!isColumn(expressionRoot) || insideAssignment)
+    (!isColumn(expressionRoot) || insideAssignment) &&
+    // don't suggest finishing characters if we're inside a function
+    !insideFunction
   ) {
-    suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' });
+    suggestions.push(
+      withAutoSuggest(pipeCompleteItem),
+      withAutoSuggest({ ...commaCompleteItem, text: ', ' })
+    );
   }
 
   return suggestions;

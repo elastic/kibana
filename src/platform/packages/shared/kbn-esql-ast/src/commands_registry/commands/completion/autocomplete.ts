@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../../definitions/utils';
 import type * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
@@ -20,11 +20,16 @@ import {
   withCompleteItem,
 } from '../../complete_items';
 import {
-  getFieldsOrFunctionsSuggestions,
+  getFieldsSuggestions,
+  getFunctionsSuggestions,
+  getLiteralsSuggestions,
+} from '../../../definitions/utils';
+import {
   findFinalWord,
   handleFragment,
   columnExists,
   createInferenceEndpointToCompletionItem,
+  withAutoSuggest,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import {
@@ -36,7 +41,6 @@ import {
 import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
@@ -95,7 +99,7 @@ export async function autocomplete(
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
@@ -107,35 +111,62 @@ export async function autocomplete(
 
   const endpoints = context?.inferenceEndpoints;
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
-    cursorPosition,
-    callbacks,
-    context
-  );
+  // Only call suggestForExpression if cursor is inside the prompt expression
+  if (prompt && cursorPosition <= prompt.location.max) {
+    const functionsSpecificSuggestions = await suggestForExpression({
+      query,
+      expressionRoot: prompt,
+      command,
+      cursorPosition,
+      location: Location.COMPLETION,
+      context,
+      callbacks,
+    });
 
-  if (functionsSpecificSuggestions?.length) {
-    return functionsSpecificSuggestions;
+    if (functionsSpecificSuggestions.length > 0) {
+      return functionsSpecificSuggestions;
+    }
   }
 
   switch (position) {
     case CompletionPosition.AFTER_COMPLETION:
     case CompletionPosition.AFTER_TARGET_ID: {
-      const fieldsAndFunctionsSuggestions = uniqBy(
-        await getFieldsOrFunctionsSuggestions(
-          ['text', 'keyword', 'unknown'],
-          Location.COMPLETION,
-          callbacks?.getByType,
-          {
-            functions: true,
-            columns: true,
-          },
-          {},
-          callbacks?.hasMinimumLicenseRequired,
-          context?.activeProduct
-        ),
-        'label'
+      const types = ['text', 'keyword', 'unknown'];
+      const allSuggestions: ISuggestionItem[] = [];
+
+      // Fields
+      allSuggestions.push(
+        ...(await getFieldsSuggestions(types, callbacks?.getByType, {
+          ignoreColumns: [],
+          values: false,
+          addSpaceAfterField: false,
+          openSuggestions: false,
+          promoteToTop: true,
+        }))
       );
+
+      // Date literals (policy-gated in helpers) with explicit UI options
+      allSuggestions.push(
+        ...getLiteralsSuggestions(types, Location.COMPLETION, {
+          includeDateLiterals: true,
+          includeCompatibleLiterals: false,
+          addComma: false,
+          advanceCursorAndOpenSuggestions: false,
+        })
+      );
+
+      // Functions
+      allSuggestions.push(
+        ...getFunctionsSuggestions({
+          location: Location.COMPLETION,
+          types,
+          options: { ignored: [] },
+          context,
+          callbacks,
+        })
+      );
+
+      const fieldsAndFunctionsSuggestions = uniqBy(allSuggestions, 'label');
 
       const suggestions = await handleFragment(
         innerText,

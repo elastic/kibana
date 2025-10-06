@@ -6,37 +6,31 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLControlVariable, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { LicenseType } from '@kbn/licensing-types';
-import { uniq, uniqBy } from 'lodash';
-import { isColumn, isFunctionExpression, isLiteral } from '../../../ast/is';
-import { within } from '../../../ast/location';
+import { uniqBy } from 'lodash';
+import { isLiteral } from '../../../ast/is';
 import type {
   GetColumnsByTypeFn,
+  ICommandCallbacks,
   ICommandContext,
   ISuggestionItem,
 } from '../../../commands_registry/types';
 import { Location } from '../../../commands_registry/types';
-import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../types';
-import { Walker } from '../../../walker';
-import { logicalOperators } from '../../all_operators';
+import type { ESQLAstItem, ESQLFunction } from '../../../types';
 import { EDITOR_MARKER } from '../../constants';
-import type { FunctionDefinition, FunctionParameterType, Signature } from '../../types';
-import { isParameterType, type SupportedDataType } from '../../types';
+import type { FunctionDefinition, Signature } from '../../types';
+import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType } from '../expressions';
-import { getFunctionDefinition, getFunctionSuggestions } from '../functions';
-import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import {
-  getOperatorSuggestion,
-  getOperatorSuggestions,
-  getOperatorsSuggestionsAfterNot,
-  getSuggestionsToRightOfOperatorExpression,
-} from '../operators';
-import { getColumnByName, getOverlapRange, isParamExpressionType } from '../shared';
-import { buildValueDefinitions } from '../values';
+  allFunctions,
+  filterFunctionDefinitions,
+  getFunctionDefinition,
+  getFunctionSuggestion,
+} from '../functions';
+import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
+import { getColumnByName } from '../shared';
 
 export const shouldBeQuotedText = (
   text: string,
@@ -146,64 +140,142 @@ export function getFragmentData(innerText: string) {
   }
 }
 
-/**
- * TODO — split this into distinct functions, one for fields, one for functions, one for literals
- */
-export async function getFieldsOrFunctionsSuggestions(
-  types: (SupportedDataType | 'unknown')[],
-  location: Location,
+interface FieldSuggestionsOptions {
+  ignoreColumns?: string[];
+  values?: boolean;
+  addSpaceAfterField?: boolean;
+  openSuggestions?: boolean;
+  addComma?: boolean;
+  promoteToTop?: boolean;
+}
+
+export async function getFieldsSuggestions(
+  types: (SupportedDataType | 'unknown' | 'any')[],
   getFieldsByType: GetColumnsByTypeFn,
-  {
-    functions,
-    columns: fields,
-    values = false,
-    literals = false,
-  }: {
-    functions: boolean;
-    columns: boolean;
-    literals?: boolean;
-    values?: boolean;
-  },
-  {
-    ignoreFn = [],
-    ignoreColumns = [],
-  }: {
-    ignoreFn?: string[];
-    ignoreColumns?: string[];
-  } = {},
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
-  activeProduct?: PricingProduct
+  options: FieldSuggestionsOptions = {}
 ): Promise<ISuggestionItem[]> {
-  const filteredFieldsByType = pushItUpInTheList(
-    (await (fields
-      ? getFieldsByType(types, ignoreColumns, {
-          advanceCursor: location === Location.SORT,
-          openSuggestions: location === Location.SORT,
-          variableType: values ? ESQLVariableType.VALUES : ESQLVariableType.FIELDS,
-        })
-      : [])) as ISuggestionItem[],
-    functions
+  const {
+    ignoreColumns = [],
+    values = false,
+    addSpaceAfterField = false,
+    openSuggestions = false,
+    addComma = false,
+    promoteToTop = true,
+  } = options;
+
+  const suggestions = await getFieldsByType(types, ignoreColumns, {
+    advanceCursor: addSpaceAfterField,
+    openSuggestions,
+    addComma,
+    variableType: values ? ESQLVariableType.VALUES : ESQLVariableType.FIELDS,
+  });
+
+  return pushItUpInTheList(suggestions as ISuggestionItem[], promoteToTop);
+}
+
+interface FunctionSuggestionOptions {
+  ignored?: string[];
+  addComma?: boolean;
+  addSpaceAfterFunction?: boolean;
+  openSuggestions?: boolean;
+}
+
+interface GetFunctionsSuggestionsParams {
+  location: Location;
+  types: (SupportedDataType | 'unknown' | 'any')[];
+  options?: FunctionSuggestionOptions;
+  context?: ICommandContext;
+  callbacks?: ICommandCallbacks;
+}
+
+export function getFunctionsSuggestions({
+  location,
+  types,
+  options = {},
+  context,
+  callbacks,
+}: GetFunctionsSuggestionsParams): ISuggestionItem[] {
+  const {
+    ignored = [],
+    addComma = false,
+    addSpaceAfterFunction = false,
+    openSuggestions = false,
+  } = options;
+
+  const predicates = {
+    location,
+    returnTypes: types,
+    ignored,
+  };
+
+  const hasMinimumLicenseRequired = callbacks?.hasMinimumLicenseRequired;
+  const activeProduct = context?.activeProduct;
+
+  const filteredFunctions = filterFunctionDefinitions(
+    allFunctions(),
+    predicates,
+    hasMinimumLicenseRequired,
+    activeProduct
   );
 
-  // could also be in stats (bucket) but our autocomplete is not great yet
-  const displayDateSuggestions =
-    types.includes('date') && [Location.WHERE, Location.EVAL].includes(location);
+  const textSuffix = (addComma ? ',' : '') + (addSpaceAfterFunction ? ' ' : '');
 
-  const suggestions = filteredFieldsByType.concat(
-    displayDateSuggestions ? getDateLiterals() : [],
-    functions
-      ? getFunctionSuggestions(
-          {
-            location,
-            returnTypes: types,
-            ignored: ignoreFn,
-          },
-          hasMinimumLicenseRequired,
-          activeProduct
-        )
-      : [],
-    literals ? getCompatibleLiterals(types) : []
-  );
+  return filteredFunctions.map((fn) => {
+    const suggestion = getFunctionSuggestion(fn);
+
+    if (textSuffix) {
+      suggestion.text += textSuffix;
+    }
+
+    if (openSuggestions) {
+      return withAutoSuggest(suggestion);
+    }
+
+    return suggestion;
+  });
+}
+
+interface LiteralSuggestionsOptions {
+  includeDateLiterals?: boolean;
+  includeCompatibleLiterals?: boolean;
+  // Pass-through options for literal builders
+  addComma?: boolean;
+  advanceCursorAndOpenSuggestions?: boolean;
+}
+
+export function getLiteralsSuggestions(
+  types: (SupportedDataType | 'unknown' | 'any')[],
+  location: Location,
+  options: LiteralSuggestionsOptions = {}
+): ISuggestionItem[] {
+  const { includeDateLiterals = true, includeCompatibleLiterals = true } = options;
+
+  const suggestions: ISuggestionItem[] = [];
+
+  // Date literals gated by policy: only WHERE/EVAL/STATS_WHERE and only if types include 'date'
+  if (
+    includeDateLiterals &&
+    (location === Location.WHERE ||
+      location === Location.EVAL ||
+      location === Location.STATS_WHERE) &&
+    types.includes('date')
+  ) {
+    suggestions.push(
+      ...getDateLiterals({
+        addComma: options.addComma,
+        advanceCursorAndOpenSuggestions: options.advanceCursorAndOpenSuggestions,
+      })
+    );
+  }
+
+  if (includeCompatibleLiterals) {
+    suggestions.push(
+      ...getCompatibleLiterals(types, {
+        addComma: options.addComma,
+        advanceCursorAndOpenSuggestions: options.advanceCursorAndOpenSuggestions,
+      })
+    );
+  }
 
   return suggestions;
 }
@@ -215,350 +287,13 @@ export function getLastNonWhitespaceChar(text: string) {
 export const columnExists = (col: string, context?: ICommandContext) =>
   Boolean(context ? getColumnByName(col, context) : undefined);
 
-/**
- * The position of the cursor within an expression.
- */
-type ExpressionPosition =
-  | 'after_column'
-  | 'after_function'
-  | 'in_function'
-  | 'after_not'
-  | 'after_operator'
-  | 'after_literal'
-  | 'empty_expression';
-
-/**
- * Escapes special characters in a string to be used as a literal match in a regular expression.
- * @param {string} text The input string to escape.
- * @returns {string} The escaped string.
- */
-function escapeRegExp(text: string): string {
-  // Characters with special meaning in regex: . * + ? ^ $ { } ( ) | [ ] \
-  // We need to escape all of them. The `$&` in the replacement string means "the matched substring".
-  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/**
- * Determines the position of the cursor within an expression.
- * @param innerText
- * @param expressionRoot
- * @returns
- */
-export const getExpressionPosition = (
-  innerText: string,
-  expressionRoot: ESQLSingleAstItem | undefined
-): ExpressionPosition => {
-  const endsWithNot = / not$/i.test(innerText.trimEnd());
-  if (
-    endsWithNot &&
-    !(
-      expressionRoot &&
-      isFunctionExpression(expressionRoot) &&
-      // See https://github.com/elastic/kibana/issues/199401
-      // for more information on this check...
-      ['is null', 'is not null'].includes(expressionRoot.name)
-    )
-  ) {
-    return 'after_not';
-  }
-
-  if (expressionRoot) {
-    if (
-      isColumn(expressionRoot) &&
-      // and not directly after the column name or prefix e.g. "colu/"
-      // we are escaping the column name here as it may contain special characters such as ??
-      !new RegExp(`${escapeRegExp(expressionRoot.parts.join('\\.'))}$`).test(innerText)
-    ) {
-      return 'after_column';
-    }
-
-    if (isFunctionExpression(expressionRoot) && expressionRoot.subtype === 'variadic-call') {
-      return within(innerText.length, expressionRoot) ? 'in_function' : 'after_function';
-    }
-
-    if (isFunctionExpression(expressionRoot) && expressionRoot.subtype !== 'variadic-call') {
-      return 'after_operator';
-    }
-
-    if (isLiteral(expressionRoot)) {
-      return 'after_literal';
-    }
-  }
-
-  return 'empty_expression';
-};
-
-interface FunctionParameterContext {
+export interface FunctionParameterContext {
   paramDefinitions: Signature['params'];
   functionsToIgnore: string[];
-}
-
-/**
- * Creates suggestion within an expression.
- *
- * TODO — should this function know about the command context
- * or would we prefer a set of generic configuration options?
- *
- * @param param0
- * @returns
- */
-export async function suggestForExpression({
-  expressionRoot,
-  innerText,
-  getColumnsByType: _getColumnsByType,
-  location,
-  preferredExpressionType,
-  context,
-  advanceCursorAfterInitialColumn = true,
-  hasMinimumLicenseRequired,
-  activeProduct,
-  ignoredColumnsForEmptyExpression = [],
-  functionParameterContext,
-}: {
-  expressionRoot: ESQLSingleAstItem | undefined;
-  location: Location;
-  preferredExpressionType?: SupportedDataType;
-  innerText: string;
-  getColumnsByType?: GetColumnsByTypeFn | undefined;
-  context?: ICommandContext;
-  activeProduct?: PricingProduct;
-  advanceCursorAfterInitialColumn?: boolean;
-  // @TODO should this be required?
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
-  // a set of columns not to suggest when the expression is empty
-  ignoredColumnsForEmptyExpression?: string[];
-  functionParameterContext?: FunctionParameterContext;
-}): Promise<ISuggestionItem[]> {
-  const getColumnsByType = _getColumnsByType ? _getColumnsByType : () => Promise.resolve([]);
-
-  const suggestions: ISuggestionItem[] = [];
-
-  const position = getExpressionPosition(innerText, expressionRoot);
-  switch (position) {
-    case 'in_function': {
-      const fn = expressionRoot as ESQLFunction;
-      const fnDefinition = getFunctionDefinition(fn.name);
-
-      if (!fnDefinition || !context) {
-        break;
-      }
-
-      const newFunctionParameterContext: FunctionParameterContext = {
-        paramDefinitions: getValidSignaturesAndTypesToSuggestNext(fn, context, fnDefinition)
-          .compatibleParamDefs,
-        functionsToIgnore: [fn.name],
-      };
-
-      const lastArg = (expressionRoot as ESQLFunction).args.slice(-1)[0] as ESQLAstItem;
-
-      const startingNewParameterExpression = /,\s*$/.test(innerText);
-      const newExpressionRoot = startingNewParameterExpression
-        ? undefined
-        : ((Array.isArray(lastArg) ? lastArg[0] : lastArg) as ESQLSingleAstItem);
-
-      return suggestForExpression({
-        expressionRoot: newExpressionRoot,
-        innerText,
-        getColumnsByType,
-        location,
-        preferredExpressionType,
-        context,
-        advanceCursorAfterInitialColumn,
-        hasMinimumLicenseRequired,
-        activeProduct,
-        ignoredColumnsForEmptyExpression,
-        functionParameterContext: newFunctionParameterContext,
-      });
-    }
-    /**
-     * After a literal, column, or complete (non-operator) function call
-     */
-    case 'after_literal':
-    case 'after_column':
-    case 'after_function':
-      const expressionType = getExpressionType(expressionRoot, context?.columns);
-
-      if (!isParameterType(expressionType)) {
-        break;
-      }
-
-      suggestions.push(
-        ...getOperatorSuggestions(
-          {
-            location,
-            // In case of a param literal, we don't know the type of the left operand
-            // so we can only suggest operators that accept any type as a left operand
-            leftParamType: isParamExpressionType(expressionType) ? undefined : expressionType,
-            ignored: ['='],
-            allowed:
-              expressionType === 'boolean' && position === 'after_literal'
-                ? [
-                    ...logicalOperators
-                      .filter(({ locationsAvailable }) => locationsAvailable.includes(location))
-                      .map(({ name }) => name),
-                  ]
-                : undefined,
-          },
-          hasMinimumLicenseRequired,
-          activeProduct
-        )
-      );
-
-      break;
-
-    /**
-     * After a NOT keyword
-     *
-     * the NOT function is a special operator that can be used in different ways,
-     * and not all these are mapped within the AST data structure: in particular
-     * <COMMAND> <field> NOT <here>
-     * is an incomplete statement and it results in a missing AST node, so we need to detect
-     * from the query string itself
-     *
-     * (this comment was copied but seems to still apply)
-     */
-    case 'after_not':
-      if (expressionRoot && isFunctionExpression(expressionRoot) && expressionRoot.name === 'not') {
-        suggestions.push(
-          ...getFunctionSuggestions(
-            { location, returnTypes: ['boolean'] },
-            hasMinimumLicenseRequired,
-            activeProduct
-          ),
-          ...(await getColumnsByType('boolean', [], {
-            advanceCursor: true,
-            openSuggestions: true,
-          }))
-        );
-      } else {
-        suggestions.push(...getOperatorsSuggestionsAfterNot());
-      }
-
-      break;
-
-    /**
-     * After an operator (e.g. AND, OR, IS NULL, +, etc.)
-     */
-    case 'after_operator':
-      if (!expressionRoot) {
-        break;
-      }
-
-      if (!isFunctionExpression(expressionRoot) || expressionRoot.subtype === 'variadic-call') {
-        // this is already guaranteed in the getPosition function, but TypeScript doesn't know
-        break;
-      }
-
-      let rightmostOperator = expressionRoot;
-      // get rightmost function
-      const walker = new Walker({
-        visitFunction: (fn: ESQLFunction) => {
-          if (fn.location.min > rightmostOperator.location.min && fn.subtype !== 'variadic-call')
-            rightmostOperator = fn;
-        },
-      });
-      walker.walkFunction(expressionRoot);
-
-      // See https://github.com/elastic/kibana/issues/199401 for an explanation of
-      // why this check has to be so convoluted
-      if (rightmostOperator.text.toLowerCase().trim().endsWith('null')) {
-        suggestions.push(...logicalOperators.map(getOperatorSuggestion));
-        break;
-      }
-
-      suggestions.push(
-        ...(await getSuggestionsToRightOfOperatorExpression({
-          queryText: innerText,
-          location,
-          rootOperator: rightmostOperator,
-          preferredExpressionType,
-          getExpressionType: (expression) => getExpressionType(expression, context?.columns),
-          getColumnsByType,
-          hasMinimumLicenseRequired,
-          activeProduct,
-        }))
-      );
-
-      break;
-
-    case 'empty_expression':
-      let acceptedTypes: FunctionParameterType[] = ['any'];
-
-      /** Is this expression within a function parameter context? */
-      if (functionParameterContext) {
-        const { paramDefinitions } = functionParameterContext;
-
-        const suggestedValues = uniq(
-          paramDefinitions
-            .map((d) => d.suggestedValues)
-            .filter((d) => d)
-            .flat()
-        ) as string[];
-
-        if (suggestedValues.length) {
-          return buildValueDefinitions(suggestedValues);
-        }
-
-        acceptedTypes = ensureKeywordAndText(paramDefinitions.map((p) => p.type));
-
-        suggestions.push(
-          ...getCompatibleLiterals(
-            acceptedTypes,
-            {
-              supportsControls: context?.supportsControls,
-            },
-            context?.variables
-          )
-        );
-      }
-
-      const columnSuggestions: ISuggestionItem[] = await getColumnsByType(
-        acceptedTypes,
-        ignoredColumnsForEmptyExpression,
-        {
-          advanceCursor: advanceCursorAfterInitialColumn,
-          openSuggestions: true,
-        }
-      );
-      suggestions.push(
-        ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions(
-          { location, returnTypes: acceptedTypes },
-          hasMinimumLicenseRequired,
-          activeProduct
-        )
-      );
-
-      break;
-  }
-
-  /**
-   * Attach replacement ranges if there's a prefix.
-   *
-   * Can't rely on Monaco because
-   * - it counts "." as a word separator
-   * - it doesn't handle multi-word completions (like "is null")
-   *
-   * TODO - think about how to generalize this — issue: https://github.com/elastic/kibana/issues/209905
-   */
-  const hasNonWhitespacePrefix = !/\s/.test(innerText[innerText.length - 1]);
-  suggestions.forEach((s) => {
-    if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
-      // this suggestion has spaces in it (e.g. "IS NOT NULL")
-      // so we need to see if there's an overlap
-      s.rangeToReplace = getOverlapRange(innerText, s.text);
-      return;
-    } else if (hasNonWhitespacePrefix) {
-      // get index of first char of final word
-      const lastNonWhitespaceIndex = innerText.search(/\b\w(?=\w*$)/);
-      s.rangeToReplace = {
-        start: lastNonWhitespaceIndex,
-        end: innerText.length,
-      };
-    }
-  });
-
-  return suggestions;
+  // Flag to suggest comma after function parameters when more mandatory args exist
+  hasMoreMandatoryArgs?: boolean;
+  // Function definition for function-specific parameter handling (e.g., CASE function)
+  functionDefinition?: FunctionDefinition;
 }
 
 export function getControlSuggestion(
@@ -595,18 +330,7 @@ export function getControlSuggestion(
   ];
 }
 
-// Helper to ensure both keyword and text types are present
-const ensureKeywordAndText = (types: FunctionParameterType[]) => {
-  if (types.includes('keyword') && !types.includes('text')) {
-    types.push('text');
-  }
-  if (types.includes('text') && !types.includes('keyword')) {
-    types.push('keyword');
-  }
-  return types;
-};
-
-const getVariablePrefix = (variableType: ESQLVariableType) =>
+export const getVariablePrefix = (variableType: ESQLVariableType) =>
   variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
     ? '??'
     : '?';
@@ -620,12 +344,15 @@ export function getControlSuggestionIfSupported(
   if (!supportsControls) {
     return [];
   }
+
   const prefix = shouldBePrefixed ? getVariablePrefix(type) : '';
   const filteredVariables = variables?.filter((variable) => variable.type === type) ?? [];
+
   const controlSuggestion = getControlSuggestion(
     type,
     filteredVariables?.map((v) => `${prefix}${v.key}`)
   );
+
   return controlSuggestion;
 }
 
@@ -749,6 +476,38 @@ export function getValidSignaturesAndTypesToSuggestNext(
   };
 }
 
+export function createInferenceEndpointToCompletionItem(
+  inferenceEndpoint: InferenceEndpointAutocompleteItem
+): ISuggestionItem {
+  return {
+    detail: i18n.translate('kbn-esql-ast.esql.definitions.rerankInferenceIdDoc', {
+      defaultMessage: 'Inference endpoint used for the completion',
+    }),
+    kind: 'Reference',
+    label: inferenceEndpoint.inference_id,
+    sortText: '1',
+    text: inferenceEndpoint.inference_id,
+  };
+}
+
+/**
+ * Given a suggestion item, decorates it with editor.action.triggerSuggest
+ * that triggers the autocomplete dialog again after accepting the suggestion.
+ *
+ * If the suggestion item already has a custom command, it will preserve it.
+ */
+export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionItem {
+  return {
+    ...suggestionItem,
+    command: suggestionItem.command
+      ? suggestionItem.command
+      : {
+          title: 'Trigger Suggestion Dialog',
+          id: 'editor.action.triggerSuggest',
+        },
+  };
+}
+
 export function getLookupIndexCreateSuggestion(
   innerText: string,
   indexName?: string
@@ -812,34 +571,28 @@ export function getLookupIndexCreateSuggestion(
   } as ISuggestionItem;
 }
 
-export function createInferenceEndpointToCompletionItem(
-  inferenceEndpoint: InferenceEndpointAutocompleteItem
-): ISuggestionItem {
-  return {
-    detail: i18n.translate('kbn-esql-ast.esql.definitions.rerankInferenceIdDoc', {
-      defaultMessage: 'Inference endpoint used for the completion',
-    }),
-    kind: 'Reference',
-    label: inferenceEndpoint.inference_id,
-    sortText: '1',
-    text: inferenceEndpoint.inference_id,
-  };
-}
+// ============================================================================
+// Helper Functions: Function Parameter Context
+// ============================================================================
 
-/**
- * Given a suggestion item, decorates it with editor.action.triggerSuggest
- * that triggers the autocomplete dialog again after accepting the suggestion.
- *
- * If the suggestion item already has a custom command, it will preserve it.
- */
-export function withAutoSuggest(suggestionItem: ISuggestionItem): ISuggestionItem {
+// Builds function parameter context for suggestions
+// Commands with special filtering (like STATS) can extend with command-specific functionsToIgnore
+export function buildFunctionParameterContext(
+  fn: ESQLFunction,
+  context?: ICommandContext
+): FunctionParameterContext | null {
+  const fnDefinition = getFunctionDefinition(fn.name);
+
+  if (!fnDefinition || !context) {
+    return null;
+  }
+
+  const validationResult = getValidSignaturesAndTypesToSuggestNext(fn, context, fnDefinition);
+
   return {
-    ...suggestionItem,
-    command: suggestionItem.command
-      ? suggestionItem.command
-      : {
-          title: 'Trigger Suggestion Dialog',
-          id: 'editor.action.triggerSuggest',
-        },
+    paramDefinitions: validationResult.compatibleParamDefs,
+    functionsToIgnore: [fn.name], // Basic recursion prevention
+    hasMoreMandatoryArgs: validationResult.hasMoreMandatoryArgs,
+    functionDefinition: fnDefinition,
   };
 }
