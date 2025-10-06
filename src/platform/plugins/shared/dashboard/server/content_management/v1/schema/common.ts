@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { controlsGroupSchema } from '@kbn/controls-schemas';
-import { SortDirection } from '@kbn/data-plugin/common/search';
 import { referenceSchema } from '@kbn/content-management-utils';
 import { filterSchema, querySchema, timeRangeSchema } from '@kbn/es-query-server';
 
@@ -167,66 +167,13 @@ export const optionsSchema = schema.object({
   }),
 });
 
-export const searchSourceSchema = schema.object(
-  {
-    type: schema.maybe(schema.string()),
-    query: schema.maybe(querySchema),
-    filters: schema.maybe(schema.arrayOf(filterSchema)),
-    sort: schema.maybe(
-      schema.arrayOf(
-        schema.recordOf(
-          schema.string(),
-          schema.oneOf([
-            schema.oneOf([schema.literal(SortDirection.asc), schema.literal(SortDirection.desc)]),
-            schema.object({
-              order: schema.oneOf([
-                schema.literal(SortDirection.asc),
-                schema.literal(SortDirection.desc),
-              ]),
-              format: schema.maybe(schema.string()),
-            }),
-            schema.object({
-              order: schema.oneOf([
-                schema.literal(SortDirection.asc),
-                schema.literal(SortDirection.desc),
-              ]),
-              numeric_type: schema.maybe(
-                schema.oneOf([
-                  schema.literal('double'),
-                  schema.literal('long'),
-                  schema.literal('date'),
-                  schema.literal('date_nanos'),
-                ])
-              ),
-            }),
-          ])
-        )
-      )
-    ),
-  },
-  /**
-   The Dashboard _should_ only ever uses the query and filters fields on the search
-   source. But we should be liberal in what we accept, so we allow unknowns.
-   */
-  { defaultValue: {}, unknowns: 'allow' }
-);
-
 export const dashboardState = {
   controlGroupInput: schema.maybe(controlsGroupSchema),
   description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
-  kibanaSavedObjectMeta: schema.object(
-    {
-      searchSource: schema.maybe(searchSourceSchema),
-    },
-    {
-      meta: {
-        description: 'A container for various metadata',
-      },
-      defaultValue: {},
-    }
-  ),
+  filters: schema.maybe(schema.arrayOf(filterSchema)),
   options: optionsSchema,
   panels: schema.arrayOf(schema.oneOf([panelSchema, sectionSchema]), { defaultValue: [] }),
+  query: schema.maybe(querySchema),
   refreshInterval: schema.maybe(refreshIntervalSchema),
   tags: schema.maybe(
     schema.arrayOf(
