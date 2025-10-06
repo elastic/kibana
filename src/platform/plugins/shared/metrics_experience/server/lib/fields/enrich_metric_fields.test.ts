@@ -24,7 +24,7 @@ const extractDimensionsMock = extractDimensions as jest.MockedFunction<typeof ex
 const msearchMock = jest.fn() as jest.MockedFunction<TracedElasticsearchClient['msearch']>;
 const esClientMock = { msearch: msearchMock } as unknown as TracedElasticsearchClient;
 const normalizeUnitMock = normalizeUnit as jest.MockedFunction<typeof normalizeUnit>;
-const timeRangeFixture: EpochTimeRange = { to: Date.now() - 300_000, from: Date.now() };
+const timeRangeFixture: EpochTimeRange = { from: Date.now() - 300_000, to: Date.now() };
 
 describe('enrichMetricFields', () => {
   let logger: Logger;
