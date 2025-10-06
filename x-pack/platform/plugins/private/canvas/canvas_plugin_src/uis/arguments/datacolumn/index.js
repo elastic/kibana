@@ -140,7 +140,7 @@ const DatacolumnArgInput = ({
           options={[firstColumnOption, ...options]}
           value={mathValue.column}
           onChange={onChangeColumn}
-          aria-label={i18n.translate('canvas.datacolumn.columnSelectAriaLabel', {
+          aria-label={i18n.translate('xpack.canvas.datacolumn.columnSelectAriaLabel', {
             defaultMessage: 'Column',
           })}
         />

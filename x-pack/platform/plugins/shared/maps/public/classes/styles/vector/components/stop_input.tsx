@@ -145,7 +145,7 @@ export class StopInput extends Component<Props, State> {
         onFocus={this._onFocus}
         data-test-subj={this.props.dataTestSubj}
         compressed
-        aria-label={i18n.translate('xpack.ml.stopInput.valueComboBoxAriaLabel', {
+        aria-label={i18n.translate('xpack.maps.stopInput.valueComboBoxAriaLabel', {
           defaultMessage: 'Stop value',
         })}
       />

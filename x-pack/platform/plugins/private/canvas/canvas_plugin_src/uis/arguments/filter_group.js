@@ -82,7 +82,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
         value={argValue || ''}
         options={choices}
         onChange={handleSelectGroup}
-        aria-label={i18n.translate('canvas.filterGroup.select.ariaLabel', {
+        aria-label={i18n.translate('xpack.canvas.filterGroup.select.ariaLabel', {
           defaultMessage: 'Filter group',
         })}
       />

@@ -93,7 +93,7 @@ export const FieldTypeSelector = ({
       valueOfSelected={value}
       options={typeSelectorOptions}
       fullWidth
-      aria-label={i18n.translate('streamsApp.fieldFormType.typeSelectAriaLabel', {
+      aria-label={i18n.translate('xpack.streams.fieldFormType.typeSelectAriaLabel', {
         defaultMessage: 'Field type',
       })}
     />

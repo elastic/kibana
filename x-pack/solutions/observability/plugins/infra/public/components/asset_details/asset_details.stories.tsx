@@ -74,7 +74,7 @@ const FlyoutTemplate: StoryFn<AssetDetailsStoryArgs> = (args) => {
           text: id,
           value: id,
         }))}
-        aria-label={i18n.translate('infra.assetDetails.flyout.tabSelectAriaLabel', {
+        aria-label={i18n.translate('xpack.infra.assetDetails.flyout.tabSelectAriaLabel', {
           defaultMessage: 'Asset details tabs',
         })}
       />

@@ -36,7 +36,7 @@ export const SimpleMathFunction = ({ onChange, value, onlymath }) => {
       options={options}
       value={value}
       onChange={onChange}
-      aria-label={i18n.translate('canvas.simpleMathFunction.functionSelectAriaLabel', {
+      aria-label={i18n.translate('xpack.canvas.simpleMathFunction.functionSelectAriaLabel', {
         defaultMessage: 'Math function',
       })}
     />

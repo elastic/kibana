@@ -44,7 +44,7 @@ export const ESFieldSelect: React.FunctionComponent<ESFieldSelectProps> = ({
       singleSelection={{ asPlainText: true }}
       isClearable={false}
       compressed
-      aria-label={i18n.translate('esFieldSelect.fieldComboBox.ariaLabel', {
+      aria-label={i18n.translate('xpack.canvas.esFieldSelect.fieldComboBox.ariaLabel', {
         defaultMessage: 'Field',
       })}
     />

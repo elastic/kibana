@@ -75,7 +75,7 @@ export class FormatSelect extends PureComponent<Props> {
           id={argId}
           value={isCustomFormat ? 'custom' : argValue}
           options={this._options}
-          aria-label={i18n.translate('formatSelect.select.ariaLabel', {
+          aria-label={i18n.translate('xpack.canvas.formatSelect.select.ariaLabel', {
             defaultMessage: 'Format options',
           })}
           onChange={this._handleSelectChange}

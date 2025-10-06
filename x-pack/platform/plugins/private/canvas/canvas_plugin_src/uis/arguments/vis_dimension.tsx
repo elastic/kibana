@@ -83,9 +83,12 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
           options={options}
           value={columnId}
           onChange={onChange}
-          aria-label={i18n.translate('visDimensionArgInput.dimensionSelect.ariaLabel', {
-            defaultMessage: 'Dimension',
-          })}
+          aria-label={i18n.translate(
+            'xpack.canvas.visDimensionArgInput.dimensionSelect.ariaLabel',
+            {
+              defaultMessage: 'Dimension',
+            }
+          )}
         />
       </EuiFlexItem>
       {confirm && (

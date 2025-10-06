@@ -104,7 +104,7 @@ export const Datatable: FC<Props> = ({
         {paginate && (
           <div className="canvasDataTable__footer">
             <EuiPagination
-              aria-label={i18n.translate('canvasDatatable.pagination.ariaLabel', {
+              aria-label={i18n.translate('xpack.canvas.canvasDatatable.pagination.ariaLabel', {
                 defaultMessage: 'Data table pages',
               })}
               pageCount={totalPages}
