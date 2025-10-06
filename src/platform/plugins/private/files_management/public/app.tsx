@@ -89,7 +89,7 @@ export const App: FunctionComponent = () => {
           <EuiButtonEmpty
             onClick={() => setShowDiagnosticsFlyout(true)}
             aria-label={i18nTexts.diagnosticsFlyoutTitle}
-            data-test-subj="filesManagementDiagnosticsButton"
+            data-test-subj="filesManagementOpenDiagnosticsFlyoutButton"
           >
             {i18nTexts.diagnosticsFlyoutTitle}
           </EuiButtonEmpty>,

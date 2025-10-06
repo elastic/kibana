@@ -14,19 +14,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const supertest = getService('supertest');
+  const fileRoute = '/api/files/files/defaultImage';
 
   describe('Files management', () => {
-    const createdFileIds: string[] = [];
+    let createdFileIds: string[] = [];
 
     before(async () => {
       await PageObjects.filesManagement.navigateTo();
     });
 
-    afterEach(async () => {
+    after(async () => {
       for (const fileId of createdFileIds) {
-        await supertest.delete(`/api/files/files/defaultImage/${fileId}`).set('kbn-xsrf', 'xxx');
+        await supertest.delete(`${fileRoute}/${fileId}`).set('kbn-xsrf', 'xxx');
       }
-      createdFileIds.length = 0;
+      createdFileIds = [];
     });
 
     it(`should render an empty prompt`, async () => {
@@ -38,26 +39,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should display charts when diagnostics flyout has data', async () => {
-      const createResponse = await supertest
-        .post('/api/files/files/defaultImage')
-        .set('kbn-xsrf', 'xxx')
-        .send({
-          name: 'test',
-          mimeType: 'image/png',
-        });
+    it('should display charts in diagnostics flyout if any files exist', async () => {
+      const createFileResponse = await supertest.post(fileRoute).set('kbn-xsrf', 'xxx').send({
+        name: 'test',
+        mimeType: 'image/png',
+      });
 
-      const createdFileId = createResponse.body.file.id;
+      const createdFileId = createFileResponse.body.file.id;
       createdFileIds.push(createdFileId);
 
-      await supertest
-        .put(`/api/files/files/defaultImage/${createdFileId}/blob`)
-        .set('kbn-xsrf', 'xxx')
-        .set('Content-Type', 'image/png')
-        .send(Buffer.from('file'))
-        .expect(200);
-
-      await testSubjects.click('filesManagementDiagnosticsButton');
+      await testSubjects.click('filesManagementOpenDiagnosticsFlyoutButton');
       await testSubjects.existOrFail('diagnosticsFlyout');
 
       await retry.waitFor('Display charts', async () => {
