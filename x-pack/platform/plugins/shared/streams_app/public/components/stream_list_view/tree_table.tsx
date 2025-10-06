@@ -347,8 +347,8 @@ export function StreamsTreeTable({
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
-              <DataQualityColumn 
-                histogramQueryFetch={getStreamDocCounts(item.stream.name)} 
+              <DataQualityColumn
+                histogramQueryFetch={getStreamDocCounts(item.stream.name)}
                 streamName={item.stream.name}
               />
             ) : null,
