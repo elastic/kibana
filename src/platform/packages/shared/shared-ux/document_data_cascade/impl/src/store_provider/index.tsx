@@ -9,7 +9,7 @@
 
 import { once } from 'lodash';
 import { enableMapSet } from 'immer';
-import React, { createContext, useContext, type PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo, type PropsWithChildren } from 'react';
 import { useCreateStore, type ActionsFromReducers } from './store';
 import {
   type GroupNode,
@@ -21,7 +21,7 @@ import {
 export type { GroupNode, LeafNode, IStoreState } from './reducers';
 
 interface IDataCascadeProviderProps {
-  initialGroupColumn?: string;
+  initialGroupColumn?: string[];
   cascadeGroups: string[];
 }
 
@@ -74,6 +74,11 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   const StoreContext = createStoreContext<G, L>();
   const storeReducers = createStoreReducers<G, L>();
 
+  const validatedInitialGroupColumn = useMemo(() => {
+    if (!initialGroupColumn) return [];
+    return initialGroupColumn.filter((col) => cascadeGroups.includes(col));
+  }, [initialGroupColumn, cascadeGroups]);
+
   const { state, actions } = useCreateStore({
     initialState: {
       table: {} as TableState,
@@ -81,8 +86,8 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
       leafNodes: new Map<string, L[]>(), // TODO: consider externalizing this so the consumer might provide their own external cache
       groupByColumns: cascadeGroups,
       currentGroupByColumns: cascadeGroups.length
-        ? initialGroupColumn && cascadeGroups.includes(initialGroupColumn)
-          ? [initialGroupColumn]
+        ? validatedInitialGroupColumn.length
+          ? validatedInitialGroupColumn
           : [cascadeGroups[0]]
         : [],
     },
