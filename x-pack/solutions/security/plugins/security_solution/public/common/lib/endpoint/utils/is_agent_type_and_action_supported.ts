@@ -23,7 +23,6 @@ export const isAgentTypeAndActionSupported = (
   actionType: ResponseActionType = 'manual'
 ): boolean => {
   const features = ExperimentalFeaturesService.get();
-  const isSentinelOneGetFileEnabled = features.responseActionsSentinelOneGetFileEnabled;
   const isSentinelOneRunScriptEnabled = features.responseActionsSentinelOneRunScriptEnabled;
   const isCrowdstrikeHostIsolationEnabled =
     features.responseActionsCrowdstrikeManualHostIsolationEnabled;
@@ -42,18 +41,9 @@ export const isAgentTypeAndActionSupported = (
   if (isAgentTypeSupported && isActionNameSupported && actionName) {
     switch (agentType) {
       case 'sentinel_one':
-        switch (actionName) {
-          case 'get-file':
-            if (!isSentinelOneGetFileEnabled) {
-              isActionNameSupported = false;
-            }
-            break;
-          case 'runscript':
-            if (!isSentinelOneRunScriptEnabled) {
-              isActionNameSupported = false;
-            }
+        if (actionName === 'runscript' && !isSentinelOneRunScriptEnabled) {
+          isActionNameSupported = false;
         }
-
         break;
 
       case 'crowdstrike':

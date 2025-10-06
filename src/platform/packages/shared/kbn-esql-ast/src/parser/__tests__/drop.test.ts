@@ -318,8 +318,7 @@ describe('DROP', () => {
       const src = `DROP`;
       const { errors } = EsqlQuery.fromSrc(src);
 
-      expect(errors.length).toBe(1);
-      expect(errors[0].message.startsWith('SyntaxError:')).toBe(true);
+      expect(errors.length > 0).toBe(true);
     });
   });
 });

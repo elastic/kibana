@@ -43,11 +43,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the `upload` endpoint response action (v8.9)
-   */
-  responseActionUploadEnabled: true,
-
-  /**
    * Enables Automated Endpoint Process actions
    */
   automatedProcessActionsEnabled: true,
@@ -58,9 +53,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: v8.14.0
    */
   responseActionsSentinelOneV2Enabled: true,
-
-  /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: true,
 
   /** Enables the `kill-process` response action for SentinelOne */
   responseActionsSentinelOneKillProcessEnabled: true,

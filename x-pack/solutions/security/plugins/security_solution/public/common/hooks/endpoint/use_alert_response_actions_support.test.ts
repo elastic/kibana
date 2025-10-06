@@ -65,7 +65,6 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
 
     // Enable feature flags by default
     appContextMock.setExperimentalFlag({
-      responseActionsSentinelOneGetFileEnabled: true,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
       responseActionsMSDefenderEndpointEnabled: true,
     });

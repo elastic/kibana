@@ -1524,7 +1524,6 @@ describe('Response actions history', () => {
 
     beforeEach(() => {
       featureFlags = {
-        responseActionUploadEnabled: true,
         crowdstrikeRunScriptEnabled: true,
         microsoftDefenderEndpointCancelEnabled: true,
       };
