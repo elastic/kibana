@@ -16,11 +16,7 @@ import {
   ATTACK_DISCOVERY_INTERNAL_FIND,
   transformAttackDiscoveryAlertFromApi,
 } from '@kbn/elastic-assistant-common';
-import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@kbn/react-query';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback, useRef } from 'react';
 

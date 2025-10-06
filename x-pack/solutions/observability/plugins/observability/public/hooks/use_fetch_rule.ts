@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@kbn/react-query';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';

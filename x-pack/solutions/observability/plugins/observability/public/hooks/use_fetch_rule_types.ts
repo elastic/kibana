@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@kbn/react-query';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
 import { useQuery } from '@kbn/react-query';
 import { camelCase, mapKeys } from 'lodash';
 import { i18n } from '@kbn/i18n';
