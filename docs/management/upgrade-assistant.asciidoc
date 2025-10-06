@@ -11,8 +11,10 @@ and guides you through the process of resolving issues if any deprecated feature
 [discrete]
 === Required permissions
 
-The `manage` cluster privilege is required to access the *Upgrade assistant*.
+For 7.last, the `manage` cluster privilege is required to access the *Upgrade assistant*.
 Additional privileges may be needed to perform certain actions.
+
+Reindexing indices requires "all" access for the existing and target index. For 8.last, the `superuser` role is required.
 
 [discrete]
 === Feature set
