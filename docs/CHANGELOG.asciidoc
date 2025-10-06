@@ -157,6 +157,7 @@ Search solution::
 Management::
 * Fixes privilege requirements when reindexing indices through Upgrade Assistant. Previously, the `superuser` role was required, but now the `cluster: manage` and `all` privileges are sufficient ({kibana-pull}237055[#237055]).
 
+
 [[release-notes-8.19.4]]
 == {kib} 8.19.4
 
