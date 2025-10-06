@@ -66,6 +66,9 @@ describe('reindex API', () => {
       licensing: licensingMock.createSetup(),
       lib: { handleEsError },
       getSecurityPlugin: () => securityMock.createStart(),
+      getSavedObjectsService: () => ({
+        createInternalRepository: jest.fn(),
+      }),
     };
     registerReindexIndicesRoutes(routeDependencies, () => worker);
 

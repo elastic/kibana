@@ -27,7 +27,7 @@ export function registerBatchReindexIndicesRoutes(
     licensing,
     log,
     getSecurityPlugin,
-    getSavedObjectsService
+    getSavedObjectsService,
     lib: { handleEsError },
   }: RouteDependencies,
   getWorker: () => ReindexWorker
