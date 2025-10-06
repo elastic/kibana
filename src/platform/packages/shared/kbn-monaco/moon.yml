@@ -13,7 +13,9 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-monaco
+dependsOn: []
 tags:
+  - is-webpack-built
   - platform
   - shared-common
   - prod
