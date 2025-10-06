@@ -58,7 +58,10 @@ test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'
   });
 
   test(`with the single selection`, async ({ page }) => {
-    const selector = { locator: '[id=":r5:-row"] .euiComboBox' };
+    const selector = {
+      locator:
+        '//h3[@id="single-selection-with-custom-options"]/following-sibling::div[.//div[contains(@class,"euiComboBox")]][1]',
+    };
     await navigateToEuiTestPage(
       page,
       'docs/components/forms/selection/combo-box/#single-selection-with-custom-options'
