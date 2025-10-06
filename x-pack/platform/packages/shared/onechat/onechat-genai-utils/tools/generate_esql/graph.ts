@@ -80,8 +80,12 @@ export const createNlToEsqlGraph = ({
         .object({
           commands: z
             .array(z.string())
+            .optional()
             .describe('ES|QL source and processing commands to get documentation for.'),
-          functions: z.array(z.string()).describe('ES|QL functions to get documentation for.'),
+          functions: z
+            .array(z.string())
+            .optional()
+            .describe('ES|QL functions to get documentation for.'),
         })
         .describe('Tool to use to request ES|QL documentation'),
       { name: 'request_documentation' }
