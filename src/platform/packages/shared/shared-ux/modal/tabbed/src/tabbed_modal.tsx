@@ -138,9 +138,9 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
       <Global
         styles={{
           // overrides so modal retains a fixed position from top of viewport, despite having content of varying heights
-          ['.euiOverlayMask']: {
-            alignItems: 'flex-start !important',
-            paddingBlockStart: '20vh !important',
+          [`.euiOverlayMask:has([id="${tabbedModalHTMLId}"])`]: {
+            alignItems: 'flex-start',
+            paddingBlockStart: '20vh',
           },
         }}
       />
