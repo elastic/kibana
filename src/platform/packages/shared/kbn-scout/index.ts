@@ -53,3 +53,6 @@ export { mergeTests, test as playwrightTest } from 'playwright/test';
 export { measurePerformance, measurePerformanceAsync } from './src/common';
 
 export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
+
+// EUI wrappers
+export * from './src/playwright/eui_components';

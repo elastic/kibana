@@ -12,11 +12,11 @@ import { EuiDataGridWrapper } from '../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiDataGrid', { tag: ['@svlSecurity', '@ess'] }, () => {
-  test(`data grid, run`, async ({ page }) => {
+  test(`data grid, run`, async ({ page, log }) => {
     const selector = {
       locator: '.euiDataGrid',
     };
-    await navigateToEuiTestPage(page, 'docs/components/data-grid/#core-concepts');
+    await navigateToEuiTestPage(page, 'docs/components/data-grid/#core-concepts', log);
 
     await test.step('should return column names', async () => {
       const dataGrid = new EuiDataGridWrapper(page, selector);
