@@ -61,12 +61,6 @@ Array [
         </p>
       </div>
     </div>
-    <div
-      aria-atomic="true"
-      aria-live="polite"
-      class="emotion-euiScreenReaderOnly"
-      role="status"
-    />
   </div>,
   <div
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
