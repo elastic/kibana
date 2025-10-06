@@ -161,7 +161,7 @@ export async function createAgentPolicyWithPackages({
     logger.debug(`Disabling system monitoring for agentless policy [${newPolicy.name}]`);
   }
   const monitoringEnabled =
-    newPolicy.supports_agentless && monitoringEnabledParams ? [] : monitoringEnabledParams || [];
+    newPolicy.supports_agentless && monitoringEnabledParams ? [] : monitoringEnabledParams;
 
   if (monitoringEnabledParams?.length && !monitoringEnabled?.length) {
     logger.debug(`Disabling monitoring for agentless policy [${newPolicy.name}]`);
