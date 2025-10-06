@@ -10,7 +10,12 @@ import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices, expectToRejectWithError, expectToRejectWithNotFound } from './helpers';
+import {
+  cleanFleetIndices,
+  createTestSpace,
+  expectToRejectWithError,
+  expectToRejectWithNotFound,
+} from './helpers';
 import { setupTestUsers, testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
@@ -52,7 +57,7 @@ export default function (providerContext: FtrProviderContext) {
 
       await apiClient.postEnableSpaceAwareness();
 
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
       const [
         _defaultSpacePolicy1,
         _spaceTest1Policy1,
