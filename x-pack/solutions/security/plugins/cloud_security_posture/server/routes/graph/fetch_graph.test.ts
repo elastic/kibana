@@ -18,7 +18,7 @@ describe('fetchGraph', () => {
   beforeEach(() => {
     const toRecordsMock = jest.fn().mockResolvedValue([{ id: 'dummy' }]);
     // Stub the esClient helpers.esql method to return an object with toRecords
-    (esClient.asCurrentUser.helpers as jest.Mocked<any>).esql = jest.fn().mockReturnValue({
+    esClient.asCurrentUser.helpers.esql.mockReturnValue({
       toRecords: toRecordsMock,
       toArrowTable: jest.fn(),
       toArrowReader: jest.fn(),

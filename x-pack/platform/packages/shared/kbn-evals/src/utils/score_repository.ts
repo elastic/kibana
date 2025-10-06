@@ -131,7 +131,6 @@ export class EvaluationScoreRepository {
         .existsIndexTemplate({
           name: EVALUATIONS_DATA_STREAM_TEMPLATE,
         })
-        .then(() => true)
         .catch(() => false);
 
       if (!templateExists) {
