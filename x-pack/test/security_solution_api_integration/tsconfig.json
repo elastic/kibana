@@ -72,6 +72,5 @@
     "@kbn/response-ops-rule-params",
     "@kbn/config-schema",
     "@kbn/securitysolution-exceptions-common",
-    "@kbn/security-solution-test-api-clients",
   ]
 }

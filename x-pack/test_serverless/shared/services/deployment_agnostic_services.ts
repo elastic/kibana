@@ -36,6 +36,9 @@ const pickedServices = _.pick(apiIntegrationServices, [
   'security',
   'usageAPI',
   'console',
+  'detectionsApi',
+  'exceptionsApi',
+  'entityAnalyticsApi',
 ]);
 
 export const services = {
