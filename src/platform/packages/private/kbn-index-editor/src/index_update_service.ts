@@ -125,10 +125,15 @@ export class IndexUpdateService {
     this.listenForUpdates();
   }
 
+  private indexHasNewFields: boolean = false;
+
   /** Indicates the service has been completed */
   private readonly _completed$ = new Subject<{
     indexName: string | null;
     isIndexCreated: boolean;
+
+    // Indicates if new fields have been saved during the session
+    indexHasNewFields: boolean;
   }>();
   public readonly completed$ = this._completed$.asObservable();
 
@@ -567,11 +572,16 @@ export class IndexUpdateService {
           }) => {
             this._isSaving$.next(false);
 
-            // Send telemetry about the save event
             const { newRowsCount, newColumnsCount, cellsEditedCount } = this.summarizeSavingUpdates(
               savingDocs,
               updates
             );
+
+            if (newColumnsCount > 0) {
+              this.indexHasNewFields = true;
+            }
+
+            // Send telemetry about the save event
             this.telemetry.trackSaveSubmitted({
               pendingRowsAdded: newRowsCount,
               pendingColsAdded: newColumnsCount,
@@ -978,6 +988,7 @@ export class IndexUpdateService {
     this._completed$.next({
       indexName: this.getIndexName(),
       isIndexCreated: this.isIndexCreated(),
+      indexHasNewFields: this.indexHasNewFields,
     });
     this._completed$.complete();
 
