@@ -65,6 +65,8 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_source: {
             type: 'external',
             is_customized: false,
+            customized_fields: [],
+            has_base_version: true,
           },
         },
       });
@@ -97,6 +99,8 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_source: {
             type: 'external',
             is_customized: true,
+            customized_fields: [{ field_name: 'name' }],
+            has_base_version: true,
           },
         },
       });
@@ -110,6 +114,8 @@ export default ({ getService }: FtrProviderContext): void => {
         rule_source: {
           type: 'external',
           is_customized: false,
+          customized_fields: [],
+          has_base_version: true,
         },
       };
 
@@ -139,6 +145,8 @@ export default ({ getService }: FtrProviderContext): void => {
         rule_source: {
           type: 'external',
           is_customized: false,
+          customized_fields: [],
+          has_base_version: true,
         },
       };
 

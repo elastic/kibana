@@ -14,6 +14,7 @@ import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
@@ -25,11 +26,15 @@ export const getShareAppMenuItem = ({
   services,
   stateContainer,
   hasIntegrations,
+  hasUnsavedChanges,
+  persistedDiscoverSession,
 }: {
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
   hasIntegrations: boolean;
+  hasUnsavedChanges: boolean;
+  persistedDiscoverSession: DiscoverSession | undefined;
 }): AppMenuActionPrimary[] => {
   if (!services.share) {
     return [];
@@ -149,7 +154,7 @@ export const getShareAppMenuItem = ({
             defaultMessage: 'Untitled Discover session',
           }),
       },
-      isDirty: !savedSearch.id || stateContainer.appState.hasChanged(),
+      isDirty: !persistedDiscoverSession || hasUnsavedChanges,
       onClose: () => {
         anchorElement?.focus();
       },

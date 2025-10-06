@@ -28,7 +28,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.data.kibanaSavedObjectMeta.searchSource).to.eql({});
       expect(response.body.data.panels).to.eql([]);
       expect(response.body.data.timeRestore).to.be(false);
       expect(response.body.data.options).to.eql({

@@ -3393,7 +3393,7 @@
         "label": "RunStepCommand",
         "description": [],
         "signature": [
-          "{ stepId: string; workflowYaml: string; contextOverride?: Record<string, any> | undefined; }"
+          "{ workflowYaml: string; stepId: string; contextOverride?: Record<string, any> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
