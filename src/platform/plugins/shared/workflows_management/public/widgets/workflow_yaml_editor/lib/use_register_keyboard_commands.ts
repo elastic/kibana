@@ -15,6 +15,8 @@ interface RegisterKeyboardCommandsParams {
   editor: monaco.editor.IStandaloneCodeEditor;
   openActionsPopover: () => void;
   save: () => void;
+  run: () => void;
+  saveAndRun: () => void;
 }
 
 interface UseRegisterKeyboardCommandsReturn {
@@ -33,21 +35,11 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
     (params: RegisterKeyboardCommandsParams) => {
       unregisterKeyboardCommands();
 
-      const { editor, openActionsPopover, save } = params;
+      const { editor, openActionsPopover, save, run, saveAndRun } = params;
+
       // CMD+K shortcut, while focus is on the editor
       actionsMenuAction.current = [
-        // Open the actions popover
-        editor.addAction({
-          id: 'workflows.editor.action.openActionsPopover',
-          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.openActionsPopover', {
-            defaultMessage: 'Open actions popover',
-          }),
-          // eslint-disable-next-line no-bitwise
-          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
-          run: openActionsPopover,
-        }),
-
-        // Ensure comment toggle works by explicitly triggering the built-in command
+        // Comment line action
         // This addresses keyboard layout issues where Ctrl+/ doesn't work on non-US layouts
         // See: https://github.com/microsoft/monaco-editor/issues/1233
         // Solution: Register multiple keybindings to cover different keyboard layouts
@@ -68,19 +60,48 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
           },
         }),
 
+        // Open the actions popover
+        editor.addAction({
+          id: 'workflows.editor.action.openActionsPopover',
+          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.openActionsPopover', {
+            defaultMessage: 'Open actions popover',
+          }),
+          // eslint-disable-next-line no-bitwise
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
+          run: openActionsPopover,
+        }),
+
         // Save action
         editor.addAction({
           id: 'workflows.editor.action.save',
           label: i18n.translate('workflows.workflowDetail.yamlEditor.action.save', {
             defaultMessage: 'Save',
           }),
-          keybindings: [
-            // eslint-disable-next-line no-bitwise
-            monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
-          ],
-          run: () => {
-            save();
-          },
+          // eslint-disable-next-line no-bitwise
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
+          run: save,
+        }),
+
+        // Run action
+        editor.addAction({
+          id: 'workflows.editor.action.run',
+          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.run', {
+            defaultMessage: 'Run',
+          }),
+          // eslint-disable-next-line no-bitwise
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+          run,
+        }),
+
+        // Save and Run action
+        editor.addAction({
+          id: 'workflows.editor.action.saveAndRun',
+          label: i18n.translate('workflows.workflowDetail.yamlEditor.action.saveAndRun', {
+            defaultMessage: 'Save and Run',
+          }),
+          // eslint-disable-next-line no-bitwise
+          keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+          run: saveAndRun,
         }),
       ];
     },

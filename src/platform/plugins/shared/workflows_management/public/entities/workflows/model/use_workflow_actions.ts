@@ -18,8 +18,8 @@ import type {
   TestWorkflowCommand,
 } from '@kbn/workflows';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { useKibana } from '../../../hooks/use_kibana';
 
 type HttpError = IHttpFetchError<ResponseErrorBody>;
 
@@ -36,7 +36,6 @@ export function useWorkflowActions() {
     networkMode: 'always',
     mutationKey: ['POST', 'workflows'],
     mutationFn: (workflow) => {
-      if (!http) throw new Error('HTTP service is not available');
       return http.post<WorkflowDetailDto>('/api/workflows', {
         body: JSON.stringify(workflow),
       });
@@ -49,7 +48,6 @@ export function useWorkflowActions() {
   const updateWorkflow = useMutation<void, HttpError, UpdateWorkflowParams>({
     mutationKey: ['PUT', 'workflows', 'id'],
     mutationFn: ({ id, workflow }: UpdateWorkflowParams) => {
-      if (!http) throw new Error('HTTP service is not available');
       return http.put<void>(`/api/workflows/${id}`, {
         body: JSON.stringify(workflow),
       });
@@ -62,7 +60,6 @@ export function useWorkflowActions() {
   const deleteWorkflows = useMutation({
     mutationKey: ['DELETE', 'workflows'],
     mutationFn: ({ ids }: { ids: string[] }) => {
-      if (!http) throw new Error('HTTP service is not available');
       return http.delete(`/api/workflows`, {
         body: JSON.stringify({ ids }),
       });
@@ -79,7 +76,6 @@ export function useWorkflowActions() {
   >({
     mutationKey: ['POST', 'workflows', 'id', 'run'],
     mutationFn: ({ id, inputs }) => {
-      if (!http) throw new Error('HTTP service is not available');
       return http.post(`/api/workflows/${id}/run`, {
         body: JSON.stringify({ inputs }),
       });
@@ -95,7 +91,6 @@ export function useWorkflowActions() {
   const runIndividualStep = useMutation<RunWorkflowResponseDto, Error, RunStepCommand>({
     mutationKey: ['POST', 'workflows', 'stepId', 'run'],
     mutationFn: ({ stepId, contextOverride, workflowYaml }) => {
-      if (!http) throw new Error('HTTP service is not available');
       return http.post(`/api/workflows/testStep`, {
         body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
       });
@@ -108,7 +103,6 @@ export function useWorkflowActions() {
   const cloneWorkflow = useMutation({
     mutationKey: ['POST', 'workflows', 'id', 'clone'],
     mutationFn: ({ id }: { id: string }) => {
-      if (!http) throw new Error('HTTP service is not available');
       return http.post(`/api/workflows/${id}/clone`);
     },
     onSuccess: () => {
@@ -125,7 +119,6 @@ export function useWorkflowActions() {
       workflowYaml: string;
       inputs: Record<string, any>;
     }) => {
-      if (!http) throw new Error('HTTP service is not available');
       return http.post(`/api/workflows/test`, {
         body: JSON.stringify({ workflowYaml, inputs }),
       });

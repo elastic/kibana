@@ -115,6 +115,8 @@ export interface WorkflowYAMLEditorProps {
   onChange?: (value: string | undefined) => void;
   onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationResult[]>>;
   onSave: () => void;
+  onRun: () => void;
+  onSaveAndRun: () => void;
   esHost?: string;
   kibanaHost?: string;
   selectedExecutionId?: string;
@@ -134,6 +136,8 @@ export const WorkflowYAMLEditor = ({
   onMount,
   onChange,
   onSave,
+  onRun,
+  onSaveAndRun,
   onValidationErrors,
   esHost = 'http://localhost:9200',
   kibanaHost,
@@ -413,6 +417,14 @@ export const WorkflowYAMLEditor = ({
   useEffect(() => {
     saveRef.current = onSave;
   }, [onSave]);
+  const runRef = useRef(onRun);
+  useEffect(() => {
+    runRef.current = onRun;
+  }, [onRun]);
+  const saveAndRunRef = useRef(onSaveAndRun);
+  useEffect(() => {
+    saveAndRunRef.current = onSaveAndRun;
+  }, [onSaveAndRun]);
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
@@ -425,6 +437,8 @@ export const WorkflowYAMLEditor = ({
       editor,
       openActionsPopover,
       save: () => saveRef.current(),
+      run: () => runRef.current(),
+      saveAndRun: () => saveAndRunRef.current(),
     });
 
     // Listen to content changes to detect typing
