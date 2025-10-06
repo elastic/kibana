@@ -12,6 +12,7 @@ import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unifi
 import React, { useRef } from 'react';
 import type { Observable } from 'rxjs';
 import { AT_TIMESTAMP, PROCESSOR_EVENT } from '@kbn/apm-types';
+import { i18n } from '@kbn/i18n';
 import { chartPalette } from '.';
 import { useLensProps } from '../chart/hooks/use_lens_props';
 import { LensWrapper } from '../chart/lens_wrapper';
@@ -54,7 +55,9 @@ export const ThroughputChart = ({
     .toString();
 
   const throughputLensProps = useLensProps({
-    title: 'Throughput',
+    title: i18n.translate('metricsExperience.grid.throughput.label', {
+      defaultMessage: 'Throughput',
+    }),
     query,
     getTimeRange,
     seriesType: 'line',

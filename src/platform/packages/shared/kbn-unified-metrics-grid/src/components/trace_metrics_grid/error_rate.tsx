@@ -12,6 +12,7 @@ import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unifi
 import React, { useRef } from 'react';
 import type { Observable } from 'rxjs';
 import { AT_TIMESTAMP, EVENT_OUTCOME, PROCESSOR_EVENT, STATUS_CODE } from '@kbn/apm-types';
+import { i18n } from '@kbn/i18n';
 import type { DataSource } from '.';
 import { chartPalette } from '.';
 import { useLensProps } from '../chart/hooks/use_lens_props';
@@ -66,9 +67,10 @@ export const ErrorRateChart = ({
 }: Props) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const query = getQuery(dataSource, indexes, filters);
-
   const errorRateLensProps = useLensProps({
-    title: 'Error Rate',
+    title: i18n.translate('metricsExperience.grid.errorRate.label', {
+      defaultMessage: 'Error Rate',
+    }),
     query,
     getTimeRange,
     seriesType: 'line',

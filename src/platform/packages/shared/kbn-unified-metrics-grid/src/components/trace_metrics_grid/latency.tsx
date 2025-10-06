@@ -12,6 +12,7 @@ import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unifi
 import React, { useRef } from 'react';
 import type { Observable } from 'rxjs';
 import { AT_TIMESTAMP, DURATION, PROCESSOR_EVENT, TRANSACTION_DURATION } from '@kbn/apm-types';
+import { i18n } from '@kbn/i18n';
 import type { DataSource } from '.';
 import { chartPalette } from '.';
 import { useLensProps } from '../chart/hooks/use_lens_props';
@@ -66,7 +67,9 @@ export const LatencyChart = ({
   const query = getQuery(dataSource, indexes, filters);
 
   const latencyLensProps = useLensProps({
-    title: 'Latency',
+    title: i18n.translate('metricsExperience.grid.latency.label', {
+      defaultMessage: 'Latency',
+    }),
     query,
     getTimeRange,
     seriesType: 'line',
