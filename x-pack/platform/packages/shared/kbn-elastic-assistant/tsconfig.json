@@ -53,5 +53,6 @@
     "@kbn/ai-assistant-default-llm-setting",
     "@kbn/management-settings-ids",
     "@kbn/core-ui-settings-browser",
+    "@kbn/ai-assistant-connector-selector-action",
   ]
 }
