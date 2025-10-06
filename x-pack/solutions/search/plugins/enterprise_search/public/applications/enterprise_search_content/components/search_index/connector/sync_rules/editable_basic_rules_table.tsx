@@ -47,6 +47,21 @@ import { ConnectorFilteringLogic } from './connector_filtering_logic';
 
 const instanceId = 'FilteringRulesTable';
 
+const i18nMessages = {
+  field: i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.basicTable.fieldTitle', {
+    defaultMessage: 'Field',
+  }),
+  policy: i18n.translate('xpack.enterpriseSearch.index.connector.rule.basicTable.policyTitle', {
+    defaultMessage: 'Policy',
+  }),
+  rule: i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.basicTable.ruleTitle', {
+    defaultMessage: 'Rule',
+  }),
+  value: i18n.translate('xpack.enterpriseSearch.index.connector.syncRules.basicTable.valueTitle', {
+    defaultMessage: 'Value',
+  }),
+};
+
 function validateItem(filteringRule: FilteringRule): FormErrors {
   if (filteringRule.rule === 'regex') {
     try {
@@ -90,6 +105,7 @@ export const SyncRulesTable: React.FC = () => {
     {
       editingRender: (filteringRule, onChange) => (
         <EuiSelect
+          autoFocus
           fullWidth
           value={filteringRule.policy}
           onChange={(e) => onChange(e.target.value)}
@@ -103,12 +119,11 @@ export const SyncRulesTable: React.FC = () => {
               value: 'exclude',
             },
           ]}
+          aria-label={i18nMessages.policy}
         />
       ),
       field: 'policy',
-      name: i18n.translate('xpack.enterpriseSearch.index.connector.rule.basicTable.policyTitle', {
-        defaultMessage: 'Policy',
-      }),
+      name: i18nMessages.policy,
       render: (indexingRule) => (
         <EuiText size="s">{filteringPolicyToText(indexingRule.policy)}</EuiText>
       ),
@@ -117,15 +132,17 @@ export const SyncRulesTable: React.FC = () => {
       editingRender: (rule, onChange) => (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
-            <EuiFieldText fullWidth value={rule.field} onChange={(e) => onChange(e.target.value)} />
+            <EuiFieldText
+              fullWidth
+              value={rule.field}
+              onChange={(e) => onChange(e.target.value)}
+              aria-label={i18nMessages.field}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
       field: 'field',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.index.connector.syncRules.basicTable.fieldTitle',
-        { defaultMessage: 'Field' }
-      ),
+      name: i18nMessages.field,
       render: (rule) => (
         <EuiText size="s">
           <EuiCode>{rule.field}</EuiCode>
@@ -142,30 +159,28 @@ export const SyncRulesTable: React.FC = () => {
             text: filteringRuleToText(rule),
             value: rule,
           }))}
+          aria-label={i18nMessages.rule}
         />
       ),
       field: 'rule',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.index.connector.syncRules.basicTable.ruleTitle',
-        { defaultMessage: 'Rule' }
-      ),
+      name: i18nMessages.rule,
       render: (rule) => <EuiText size="s">{filteringRuleToText(rule.rule)}</EuiText>,
     },
     {
       editingRender: (rule, onChange) => (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
-            <EuiFieldText fullWidth value={rule.value} onChange={(e) => onChange(e.target.value)} />
+            <EuiFieldText
+              fullWidth
+              value={rule.value}
+              onChange={(e) => onChange(e.target.value)}
+              aria-label={i18nMessages.value}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
       field: 'value',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.index.connector.syncRules.basicTable.valueTitle',
-        {
-          defaultMessage: 'Value',
-        }
-      ),
+      name: i18nMessages.value,
       render: (rule) => (
         <EuiText size="s">
           <EuiCode>{rule.value}</EuiCode>
