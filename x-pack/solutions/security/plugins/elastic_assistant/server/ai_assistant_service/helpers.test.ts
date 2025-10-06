@@ -11,6 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 const mockLogger = loggerMock.create();
 const mockProductDocManager = {
   getStatus: jest.fn(),
+  getStatuses: jest.fn(),
   install: jest.fn(),
   uninstall: jest.fn(),
   update: jest.fn(),
