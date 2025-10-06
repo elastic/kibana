@@ -756,12 +756,18 @@ const ESQLEditorInternal = function ESQLEditor({
     [dataSourcesCache, getJoinIndices, onQueryUpdate, queryValidation]
   );
 
+  // Refresh the fields cache when a new field has been added to the lookup index
+  const onNewFieldsAddedToLookupIndex = useCallback(() => {
+    esqlFieldsCache.clear?.();
+  }, [esqlFieldsCache]);
+
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editor1,
     editorModel,
     getJoinIndices,
     query,
-    onLookupIndexCreate
+    onLookupIndexCreate,
+    onNewFieldsAddedToLookupIndex
   );
 
   useDebounceWithOptions(
