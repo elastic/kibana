@@ -7,3 +7,5 @@
 
 export const USAGE_REPORTING_ENDPOINT = '/api/v1/usage';
 export const METERING_SERVICE_BATCH_SIZE = 1000;
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
+  'aiAssistant.defaultLlmSettingEnabled' as const;

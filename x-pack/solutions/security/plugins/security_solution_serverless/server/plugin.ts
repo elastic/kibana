@@ -20,7 +20,7 @@ import {
 } from '@kbn/security-solution-plugin/server/ui_settings';
 import { isSupportedConnector } from '@kbn/inference-common';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '@kbn/security-solution-plugin/common/constants';
+import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from './constants';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 import type { ServerlessSecurityConfig } from './config';
 import { createConfig } from './config';
