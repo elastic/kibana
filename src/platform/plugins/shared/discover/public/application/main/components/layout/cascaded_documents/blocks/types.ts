@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useEsqlDataCascadeRowHeaderComponents } from './use_row_header_components';
-export { useEsqlDataCascadeHeaderComponent } from './use_table_header_components';
-export { ESQLDataCascadeLeafCell } from './cascade_leaf_component';
-export type { ESQLDataGroupNode, DataTableRecord } from './types';
+import type { DataTableRecord } from '@kbn/discover-utils';
+
+type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
+
+export type { ESQLDataGroupNode, DataTableRecord };
