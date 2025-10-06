@@ -163,8 +163,9 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       queryString: string,
       activeSolutionId: SolutionId
     ) => {
+      const encodedQuery = encodeURIComponent(queryString);
       const result = await core.http.get(
-        `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${queryString}`
+        `${REGISTRY_EXTENSIONS_ROUTE}${activeSolutionId}/${encodedQuery}`
       );
       return result;
     };
