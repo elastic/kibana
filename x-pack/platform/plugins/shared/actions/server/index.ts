@@ -4,12 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ContainerModule } from 'inversify';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import { PluginInitializer } from '@kbn/core-di-server';
+import { type PluginConfigDescriptor } from '@kbn/core/server';
+import { Setup, Start } from '@kbn/core-di';
 import type { ActionsConfig } from './config';
-import { configSchema } from './config';
+import { configSchema, getValidatedConfig } from './config';
 import type { ActionsClient as ActionsClientClass } from './actions_client';
 import type { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
+import { ACTIONS_CONFIG, IN_MEMORY_CONNECTORS_SERVICE } from './constants';
+import { resolveCustomHosts } from './lib/custom_host_settings';
+import { ModuleSetup } from './module_setup';
+import { ModuleStart } from './module_start';
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
@@ -31,7 +38,7 @@ export type {
   Connector,
 } from './application/connector/types';
 
-export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { PluginSetupContract, PluginStartContract } from './types';
 
 export {
   asSavedObjectExecutionSource,
@@ -40,12 +47,6 @@ export {
   getBasicAuthHeader,
 } from './lib';
 export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
-
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { ActionsPlugin } = await import('./plugin');
-  return new ActionsPlugin(initContext);
-};
-
 export { SubActionConnector } from './sub_action_framework/sub_action_connector';
 export { CaseConnector } from './sub_action_framework/case';
 export type { ServiceParams } from './sub_action_framework/types';
@@ -61,3 +62,18 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
 
 export { urlAllowListValidator } from './sub_action_framework/helpers';
 export { ActionExecutionSourceType } from './lib/action_execution_source';
+
+export const module = new ContainerModule(({ bind }) => {
+  bind(ACTIONS_CONFIG).toDynamicValue(({ get }) => {
+    const loggerFactory = get(PluginInitializer('logger'));
+    const configService = get(PluginInitializer('config'));
+    const logger = loggerFactory.get();
+    return getValidatedConfig(
+      logger,
+      resolveCustomHosts(logger, configService.get<ActionsConfig>())
+    );
+  });
+  bind(IN_MEMORY_CONNECTORS_SERVICE).toConstantValue([]);
+  bind(Setup).to(ModuleSetup).inSingletonScope();
+  bind(Start).to(ModuleStart).inSingletonScope();
+});
