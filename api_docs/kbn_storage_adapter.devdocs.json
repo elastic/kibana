@@ -17,7 +17,7 @@
         "tags": [],
         "label": "StorageIndexAdapter",
         "description": [
-          "\nAdapter for writing and reading documents to/from Elasticsearch,\nusing plain indices.\n\nTODO:\n- Index Lifecycle Management\n- Schema upgrades w/ fallbacks"
+          "\nAdapter for writing and reading documents to/from Elasticsearch,\nusing plain indices.\n\nTODO:\n- Schema upgrades w/ fallbacks"
         ],
         "signature": [
           {
