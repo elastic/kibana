@@ -199,12 +199,14 @@ const ResizableSuggestionsListDiv: React.FC<{
         })}
       >
         <div
-          className={classNames('kbnTypeahead__popover', 'eui-scrollBar', {
+          className={classNames('kbnTypeahead__popover', {
             ['kbnTypeahead__popover--bottom']: isSuggestionsListFittable,
             ['kbnTypeahead__popover--top']: !isSuggestionsListFittable,
           })}
         >
-          {props.children(containerRect)}
+          <div className={classNames('kbnTypeahead__popover-content', 'eui-scrollBar')}>
+            {props.children(containerRect)}
+          </div>
         </div>
       </div>
     </div>
@@ -303,10 +305,15 @@ const suggestionsStyles: EmotionStyles = {
         position: 'relative',
         zIndex: context.euiTheme.levels.menu,
         width: '100%',
-        overflowY: 'auto',
+        overflow: 'hidden',
+
+        '.kbnTypeahead__popover-content': {
+          maxHeight: 'inherit',
+          overflowY: 'auto',
+        },
 
         '&.kbnTypeahead__popover--top': css([
-          euiShadowFlat(context),
+          euiShadowFlat(context, { border: 'none' }),
           {
             borderTopLeftRadius: context.euiTheme.border.radius.medium,
             borderTopRightRadius: context.euiTheme.border.radius.medium,
@@ -315,7 +322,7 @@ const suggestionsStyles: EmotionStyles = {
           },
         ]),
         '&.kbnTypeahead__popover--bottom': css([
-          euiShadow(context),
+          euiShadow(context, 'l', { border: 'none' }),
           {
             borderBottomLeftRadius: context.euiTheme.border.radius.medium,
             borderBottomRightRadius: context.euiTheme.border.radius.medium,
