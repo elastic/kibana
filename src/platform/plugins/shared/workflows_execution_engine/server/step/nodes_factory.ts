@@ -82,12 +82,7 @@ export class NodesFactory {
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
     const node = stepExecutionRuntime.node;
-    const stepLogger = this.workflowLogger.createStepLogger(
-      this.workflowRuntime.getCurrentStepExecutionId(),
-      node.stepId,
-      node.stepId,
-      node.stepType
-    );
+    const stepLogger = stepExecutionRuntime.stepLogger;
 
     // Handle elasticsearch.* and kibana.* actions
     if (node.stepType && node.stepType.startsWith('elasticsearch.')) {

@@ -10,11 +10,9 @@
 import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { buildStepExecutionId } from '../utils';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 
 interface WorkflowExecutionRuntimeManagerInit {
@@ -98,14 +96,6 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowGraph.getNode(this.workflowExecution.currentNodeId as string);
   }
 
-  public getCurrentStepExecutionId(): string {
-    return buildStepExecutionId(
-      this.workflowExecution.id,
-      this.getCurrentNode()!.stepId,
-      this.workflowExecution.scopeStack
-    );
-  }
-
   public navigateToNode(nodeId: string): void {
     if (!this.workflowGraph.getNode(nodeId)) {
       throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
@@ -166,35 +156,6 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionState.updateWorkflowExecution({
       error: error ? String(error) : undefined,
     });
-  }
-
-  public async setWaitStep(): Promise<void> {
-    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const stepId = this.getCurrentNode()!.stepId;
-    return withSpan(
-      {
-        name: `workflow.step.${stepId}.delayed`,
-        type: 'workflow',
-        subtype: 'step_delayed',
-        labels: {
-          workflow_step_id: stepId,
-          workflow_execution_id: workflowExecution.id,
-          workflow_id: workflowExecution.workflowId,
-          trace_id: this.getTraceId(),
-          service_name: 'workflow-engine',
-        },
-      },
-      async () => {
-        this.workflowExecutionState.upsertStep({
-          id: this.getCurrentStepExecutionId(),
-          status: ExecutionStatus.WAITING,
-        });
-
-        this.workflowExecutionState.updateWorkflowExecution({
-          status: ExecutionStatus.WAITING,
-        });
-      }
-    );
   }
 
   public markWorkflowTimeouted(): void {

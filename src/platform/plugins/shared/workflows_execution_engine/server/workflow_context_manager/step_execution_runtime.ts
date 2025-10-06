@@ -52,7 +52,7 @@ export class StepExecutionRuntime {
 
   public contextManager: WorkflowContextManager;
   public readonly stepExecutionId: string;
-  public readonly stepLogger: IWorkflowEventLogger | null = null;
+  public readonly stepLogger: IWorkflowEventLogger;
   public readonly node: GraphNodeUnion;
   public readonly abortController = new AbortController();
 
