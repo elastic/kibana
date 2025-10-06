@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { updatePrivilegedMonitoringEntitySource, MAX_PER_PAGE } from './update_source_index';
+import { updatePrivilegedMonitoringSourceIndex, MAX_PER_PAGE } from './update_source_index';
 import { monitoringEntitySourceTypeName } from '../saved_objects/monitoring_entity_source_type';
 import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 
@@ -62,7 +62,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('updatePrivilegedMonitoringEntitySource', () => {
+describe('updatePrivilegedMonitoringSourceIndex', () => {
   const DEFAULT_PARAMS = {
     logger: mockLogger,
     getStartServices: mockGetStartServices,
@@ -75,7 +75,7 @@ describe('updatePrivilegedMonitoringEntitySource', () => {
       { security: mockSecurity, encryptedSavedObjects: mockEncryptedSavedObjects },
     ]);
 
-    await updatePrivilegedMonitoringEntitySource(DEFAULT_PARAMS);
+    await updatePrivilegedMonitoringSourceIndex(DEFAULT_PARAMS);
 
     expect(mockSoClient.find).not.toHaveBeenCalled();
     expect(mockDeleteUsersWithSourceIndex).not.toHaveBeenCalled();
@@ -101,7 +101,7 @@ describe('updatePrivilegedMonitoringEntitySource', () => {
     ];
     mockSoClient.find.mockResolvedValue({ saved_objects: savedObjects });
 
-    await updatePrivilegedMonitoringEntitySource(DEFAULT_PARAMS);
+    await updatePrivilegedMonitoringSourceIndex(DEFAULT_PARAMS);
 
     expect(mockSoClient.find).toHaveBeenCalledWith({
       type: monitoringEntitySourceTypeName,
@@ -122,7 +122,7 @@ describe('updatePrivilegedMonitoringEntitySource', () => {
     ]);
     mockSoClient.find.mockResolvedValue({ saved_objects: [] });
 
-    await updatePrivilegedMonitoringEntitySource(DEFAULT_PARAMS);
+    await updatePrivilegedMonitoringSourceIndex(DEFAULT_PARAMS);
 
     expect(mockMigrateSourceIndex).not.toHaveBeenCalled();
     expect(mockDeleteUsersWithSourceIndex).toHaveBeenCalledWith('*');
@@ -144,7 +144,7 @@ describe('updatePrivilegedMonitoringEntitySource', () => {
     mockSoClient.find.mockResolvedValue({ saved_objects: savedObjects });
     mockApiKeyManager.getClient.mockResolvedValue(undefined);
 
-    await updatePrivilegedMonitoringEntitySource(DEFAULT_PARAMS);
+    await updatePrivilegedMonitoringSourceIndex(DEFAULT_PARAMS);
 
     expect(mockMigrateSourceIndex).not.toHaveBeenCalled();
     expect(mockDeleteUsersWithSourceIndex).toHaveBeenCalledWith('*');
