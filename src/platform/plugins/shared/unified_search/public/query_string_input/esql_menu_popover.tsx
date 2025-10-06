@@ -14,6 +14,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenu,
   useEuiScrollBar,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
@@ -253,11 +254,15 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
     categorizationField,
   ]);
 
-  const esqlMenuPopoverStyles = css`
+  const esqlMenuPopoverStyles = ({ euiTheme }: UseEuiTheme) => css`
     width: 240px;
+    padding: ${euiTheme.size.s};
     max-height: 350px;
     overflow-y: auto;
-    ${useEuiScrollBar()};
+    ${
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      useEuiScrollBar()
+    };
   `;
 
   return (
@@ -277,14 +282,15 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
         }
         panelProps={{
           ['data-test-subj']: 'esql-menu-popover',
-          css: esqlMenuPopoverStyles,
         }}
         isOpen={isESQLMenuPopoverOpen}
         closePopover={() => setIsESQLMenuPopoverOpen(false)}
-        panelPaddingSize="s"
+        panelPaddingSize="none"
         display="block"
       >
-        <EuiContextMenu initialPanelId={0} panels={esqlContextMenuPanels} />
+        <div css={esqlMenuPopoverStyles}>
+          <EuiContextMenu initialPanelId={0} panels={esqlContextMenuPanels} />
+        </div>
       </EuiPopover>
       <LanguageDocumentationFlyout
         searchInDescription
