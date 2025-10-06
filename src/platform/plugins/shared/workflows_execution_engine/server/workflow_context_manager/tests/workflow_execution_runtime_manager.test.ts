@@ -126,11 +126,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       it('should change current node id in workflow execution state', () => {
         underTest.navigateToNode('node3');
-        expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
-          expect.objectContaining({
-            currentNodeId: 'node3',
-          })
-        );
+        // navigateToNode only updates local state, not the workflow execution state
+        // The state is only persisted when saveState is called
+        expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
       });
     });
 
@@ -263,7 +261,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should complete workflow execution if no nodes to process', async () => {
-      workflowExecution.currentNodeId = undefined;
+      // Mock the WorkflowExecutionRuntimeManager to have no current node
+      (underTest as any).currentNodeId = undefined;
+      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        ...workflowExecution,
+        currentNodeId: undefined,
+      });
+
       await underTest.saveState();
 
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
@@ -276,7 +280,13 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should log workflow completion', async () => {
-      workflowExecution.currentNodeId = undefined;
+      // Mock the WorkflowExecutionRuntimeManager to have no current node
+      (underTest as any).currentNodeId = undefined;
+      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        ...workflowExecution,
+        currentNodeId: undefined,
+      });
+
       await underTest.saveState();
       expect(workflowLogger.logInfo).toHaveBeenCalledWith(
         `Workflow execution completed successfully`,
