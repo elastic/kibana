@@ -6,13 +6,13 @@
  */
 
 import { validateToolId } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { StaticToolRegistration } from '@kbn/onechat-server/tools';
 
 export interface BuiltinToolRegistry {
-  register(tool: BuiltinToolDefinition<any>): void;
+  register(tool: StaticToolRegistration<any>): void;
   has(toolId: string): boolean;
-  get(toolId: string): BuiltinToolDefinition | undefined;
-  list(): BuiltinToolDefinition[];
+  get(toolId: string): StaticToolRegistration | undefined;
+  list(): StaticToolRegistration[];
 }
 
 export const createBuiltinToolRegistry = (): BuiltinToolRegistry => {
@@ -20,11 +20,11 @@ export const createBuiltinToolRegistry = (): BuiltinToolRegistry => {
 };
 
 class BuiltinToolRegistryImpl implements BuiltinToolRegistry {
-  private tools: Map<string, BuiltinToolDefinition> = new Map();
+  private tools: Map<string, StaticToolRegistration> = new Map();
 
   constructor() {}
 
-  register(tool: BuiltinToolDefinition) {
+  register(tool: StaticToolRegistration) {
     if (this.tools.has(tool.id)) {
       throw new Error(`Tool with id ${tool.id} already registered`);
     }

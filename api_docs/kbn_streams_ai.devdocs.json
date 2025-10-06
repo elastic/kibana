@@ -2329,7 +2329,7 @@
           "\nIdentifies systems in a stream, by:\n- describing the dataset (via sampled documents)\n- clustering docs together on similarity\n- asking the LLM to identify systems by creating\nqueries and validating the resulting clusters"
         ],
         "signature": [
-          "({\n  stream,\n  systems,\n  start,\n  end,\n  esClient,\n  kql,\n  inferenceClient,\n  logger,\n}: { stream: ",
+          "({\n  stream,\n  systems,\n  start,\n  end,\n  esClient,\n  kql,\n  inferenceClient,\n  logger,\n  dropUnmapped = false,\n}: { stream: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -2363,7 +2363,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; }) => Promise<{ systems: ",
+          "; dropUnmapped?: boolean | undefined; }) => Promise<{ systems: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -2382,7 +2382,7 @@
             "id": "def-server.identifySystems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  stream,\n  systems,\n  start,\n  end,\n  esClient,\n  kql,\n  inferenceClient,\n  logger,\n}",
+            "label": "{\n  stream,\n  systems,\n  start,\n  end,\n  esClient,\n  kql,\n  inferenceClient,\n  logger,\n  dropUnmapped = false,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
             "deprecated": false,
@@ -3497,6 +3497,20 @@
                     "section": "def-common.Logger",
                     "text": "Logger"
                   }
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.identifySystems.$1.dropUnmapped",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "dropUnmapped",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/systems/identify_systems.ts",
                 "deprecated": false,
