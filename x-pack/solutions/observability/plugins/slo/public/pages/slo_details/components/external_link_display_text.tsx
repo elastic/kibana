@@ -24,7 +24,7 @@ export function ExternalLinkDisplayText({
         <EuiText size={textSize}>{content}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink data-test-subj="sloHealthCalloutInspectTransformLink" href={url}>
+        <EuiLink data-test-subj="sloHealthCalloutInspectLink" href={url}>
           <EuiFlexGroup
             alignItems="center"
             justifyContent="spaceBetween"
