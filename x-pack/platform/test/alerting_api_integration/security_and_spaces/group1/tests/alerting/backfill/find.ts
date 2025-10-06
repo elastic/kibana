@@ -247,8 +247,9 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
           // assertions for initiator filter
           expect(findInitiatorUserResponse.status).to.eql(200);
           expect(findInitiatorUserResponse.body.total).to.be.greaterThan(0);
-          expect(findInitiatorUserResponse.body.data.every((d: any) => d.initiator === 'user')).to
-            .be(true);
+          expect(
+            findInitiatorUserResponse.body.data.every((d: any) => d.initiator === 'user')
+          ).to.be(true);
 
           expect(findInitiatorSystemResponse.status).to.eql(200);
           expect(findInitiatorSystemResponse.body.total).to.eql(0);
