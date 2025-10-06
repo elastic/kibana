@@ -7639,6 +7639,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-query@link:src/platform/packages/shared/kbn-react-query":
+  version "0.0.0"
+  uid ""
+
 "@kbn/recently-accessed@link:src/platform/packages/shared/kbn-recently-accessed":
   version "0.0.0"
   uid ""
