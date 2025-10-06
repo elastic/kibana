@@ -30,7 +30,7 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
@@ -53,9 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.name = 'some other name';
 
         // update a simple rule's name
-        const { body } = await securitySolutionApi
-          .bulkUpdateRules({ body: [updatedRule] })
-          .expect(200);
+        const { body } = await detectionsApi.bulkUpdateRules({ body: [updatedRule] }).expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
@@ -83,11 +81,11 @@ export default ({ getService }: FtrProviderContext) => {
           required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
         };
 
-        await securitySolutionApi.createRule({
+        await detectionsApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
         });
 
-        const { body: updatedRulesBulkResponse } = await securitySolutionApi
+        const { body: updatedRulesBulkResponse } = await detectionsApi
           .bulkUpdateRules({
             body: [ruleUpdateProperties],
           })
@@ -95,7 +93,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(updatedRulesBulkResponse[0]).toMatchObject(expectedRule);
 
-        const { body: updatedRule } = await securitySolutionApi
+        const { body: updatedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-1' },
           })
@@ -108,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // create a second simple rule
-        await securitySolutionApi.createRule({ body: getSimpleRule('rule-2') }).expect(200);
+        await detectionsApi.createRule({ body: getSimpleRule('rule-2') }).expect(200);
 
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
@@ -117,7 +115,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
 
         // update both rule names
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
@@ -147,9 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
 
-        const { body } = await securitySolutionApi
-          .bulkUpdateRules({ body: [updatedRule1] })
-          .expect(200);
+        const { body } = await detectionsApi.bulkUpdateRules({ body: [updatedRule1] }).expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
@@ -175,7 +171,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
         delete updatedRule2.rule_id;
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
@@ -205,9 +201,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
 
-        const { body } = await securitySolutionApi
-          .bulkUpdateRules({ body: [updatedRule1] })
-          .expect(200);
+        const { body } = await detectionsApi.bulkUpdateRules({ body: [updatedRule1] }).expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
@@ -226,9 +220,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.severity = 'low';
         updatedRule1.enabled = false;
 
-        const { body } = await securitySolutionApi
-          .bulkUpdateRules({ body: [updatedRule1] })
-          .expect(200);
+        const { body } = await detectionsApi.bulkUpdateRules({ body: [updatedRule1] }).expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.enabled = false;
@@ -248,15 +240,13 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.timeline_title = 'some title';
         ruleUpdate.timeline_id = 'some id';
 
-        await securitySolutionApi.bulkUpdateRules({ body: [ruleUpdate] }).expect(200);
+        await detectionsApi.bulkUpdateRules({ body: [ruleUpdate] }).expect(200);
 
         // update a simple rule's name
         const ruleUpdate2 = getSimpleRuleUpdate('rule-1');
         ruleUpdate2.name = 'some other name';
 
-        const { body } = await securitySolutionApi
-          .bulkUpdateRules({ body: [ruleUpdate2] })
-          .expect(200);
+        const { body } = await detectionsApi.bulkUpdateRules({ body: [ruleUpdate2] }).expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
@@ -272,9 +262,7 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.id = '1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5';
         delete ruleUpdate.rule_id;
 
-        const { body } = await securitySolutionApi
-          .bulkUpdateRules({ body: [ruleUpdate] })
-          .expect(200);
+        const { body } = await detectionsApi.bulkUpdateRules({ body: [ruleUpdate] }).expect(200);
 
         expect(body).toEqual([
           {
@@ -292,9 +280,7 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.rule_id = 'fake_id';
         delete ruleUpdate.id;
 
-        const { body } = await securitySolutionApi
-          .bulkUpdateRules({ body: [ruleUpdate] })
-          .expect(200);
+        const { body } = await detectionsApi.bulkUpdateRules({ body: [ruleUpdate] }).expect(200);
 
         expect(body).toEqual([
           {
@@ -316,7 +302,7 @@ export default ({ getService }: FtrProviderContext) => {
         delete ruleUpdate.id;
 
         // update one rule name and give a fake id for the second
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkUpdateRules({ body: [ruleUpdate, ruleUpdate2] })
           .expect(200);
 
@@ -352,9 +338,7 @@ export default ({ getService }: FtrProviderContext) => {
         rule2.id = 'b3aa019a-656c-4311-b13b-4d9852e24347';
         rule2.name = 'some other name';
 
-        const { body } = await securitySolutionApi
-          .bulkUpdateRules({ body: [rule1, rule2] })
-          .expect(200);
+        const { body } = await detectionsApi.bulkUpdateRules({ body: [rule1, rule2] }).expect(200);
 
         const outputRule = getSimpleRuleOutput();
         outputRule.name = 'some other name';
@@ -381,7 +365,7 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await installPrebuiltRules(es, supertest);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .bulkUpdateRules({
             body: [getCustomQueryRuleParams({ rule_id: 'rule-1', author: ['new user'] })],
           })

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { rootRequest } from './common';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { rootRequest, waitForRootRequest } from './common';
 
 export const createConnector = (connector: Record<string, unknown>) =>
   rootRequest<Connector>({
@@ -14,6 +14,9 @@ export const createConnector = (connector: Record<string, unknown>) =>
     url: '/api/actions/action',
     body: connector,
   });
+
+export const waitForConnectorCreation = (connector: Record<string, unknown>) =>
+  waitForRootRequest<Connector>(createConnector(connector));
 
 const slackConnectorAPIPayload = {
   actionTypeId: '.slack',
