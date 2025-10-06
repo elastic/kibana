@@ -23,6 +23,7 @@ import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
@@ -56,21 +57,25 @@ export const useTopNavLinks = ({
   services,
   state,
   onOpenInspector,
+  hasUnsavedChanges,
   isEsqlMode,
   adHocDataViews,
   topNavCustomization,
   shouldShowESQLToDataViewTransitionModal,
   hasShareIntegration,
+  persistedDiscoverSession,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
+  hasUnsavedChanges: boolean;
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
   shouldShowESQLToDataViewTransitionModal: boolean;
   hasShareIntegration: boolean;
+  persistedDiscoverSession: DiscoverSession | undefined;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
   const currentDataView = useCurrentDataView();
@@ -187,6 +192,8 @@ export const useTopNavLinks = ({
           services,
           stateContainer: state,
           hasIntegrations: hasShareIntegration,
+          hasUnsavedChanges,
+          persistedDiscoverSession,
         });
         items.push(...shareAppMenuItem);
       }
@@ -202,7 +209,9 @@ export const useTopNavLinks = ({
       dispatch,
       isEsqlMode,
       currentDataView,
+      persistedDiscoverSession,
       hasShareIntegration,
+      hasUnsavedChanges,
     ]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');

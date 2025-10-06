@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { createFieldTestingConfig } from '../../base.jest.integration.config';
-
-export default createFieldTestingConfig({
-  testsDirectory: 'common',
-  groupNumber: 1,
-  totalGroups: 2,
-});
+export { EbtTelemetryService } from './service';
+export { EbtTelemetryClient } from './client';
+export * from './constants';
+export * from './events';
+export type * from './types';
