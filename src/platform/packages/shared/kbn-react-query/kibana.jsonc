@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/react-query",
   "owner": [
-    "@elastic/kibana-security"
+    "@elastic/appex-sharedux"
   ],
   "group": "platform",
   "visibility": "shared"
