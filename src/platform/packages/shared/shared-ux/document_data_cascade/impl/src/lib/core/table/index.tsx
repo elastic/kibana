@@ -118,22 +118,22 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
           } else {
             newExpandedRows[proposedRowId] = true;
           }
-        } else if (row?.parentId && previousExpandedRows.includes(row?.parentId)) {
+        } else if (row?.parentId && proposedExpandedRows.includes(row?.parentId)) {
           // when row is a child, and its parent id is in previous expanded row,
           // we need to check if it has a sibling then apply a fitting treatment
           const siblings = table.getRow(row?.parentId)?.getLeafRows() ?? [];
-          const expandedRowSibling = siblings.find(
+          const expandedRowSiblings = siblings.filter(
             (sibling) => proposedExpandedRows.includes(sibling.id) && sibling.id !== proposedRowId
           );
 
           // we want to keep the row when it either has no sibling in the newly expanded rows,
           // or has a sibling but it isn't present in the previously expanded rows
           if (
-            !expandedRowSibling ||
-            (expandedRowSibling && !previousExpandedRows.includes(proposedRowId))
+            !expandedRowSiblings.length ||
+            (expandedRowSiblings.length && !previousExpandedRows.includes(proposedRowId))
           ) {
             newExpandedRows[proposedRowId] = true;
-            newExpandedRows[row.parentId] = true; // we keep the parent as well
+            newExpandedRows[row.parentId] = true; // we keep it's parent as well
           }
         }
       }
