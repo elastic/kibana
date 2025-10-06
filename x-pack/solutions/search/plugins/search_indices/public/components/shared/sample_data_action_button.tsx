@@ -12,8 +12,10 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useSampleDataStatus } from '../../hooks/use_sample_data_status';
 import { useKibana } from '../../hooks/use_kibana';
@@ -24,11 +26,13 @@ import { useNavigateToDashboard } from '../../hooks/use_navigate_to_dashboard';
 interface SampleDataActionButtonProps {
   isLoading: boolean;
   onIngestSampleData: () => void;
+  hasRequiredLicense: boolean;
 }
 
 export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
   isLoading,
   onIngestSampleData,
+  hasRequiredLicense,
 }) => {
   const { application, http, share, uiSettings } = useKibana().services;
   const { isInstalled, indexName, dashboardId, isLoading: isStatusLoading } = useSampleDataStatus();
@@ -156,7 +160,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
     );
   }
 
-  return (
+  const installButton = (
     <EuiButtonEmpty
       color="primary"
       iconSide="left"
@@ -164,6 +168,7 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
       size="s"
       data-test-subj="installSampleBtn"
       isLoading={isLoading}
+      disabled={!hasRequiredLicense}
       onClick={onIngestSampleData}
     >
       <FormattedMessage
@@ -171,5 +176,28 @@ export const SampleDataActionButton: React.FC<SampleDataActionButtonProps> = ({
         defaultMessage="Install a sample dataset"
       />
     </EuiButtonEmpty>
+  );
+
+  return hasRequiredLicense ? (
+    installButton
+  ) : (
+    <EuiToolTip
+      position="bottom"
+      title={i18n.translate(
+        'xpack.searchIndices.shared.createIndex.ingestSampleData.licenseTooltip.title',
+        {
+          defaultMessage: 'Enterprise',
+        }
+      )}
+      content={i18n.translate(
+        'xpack.searchIndices.shared.createIndex.ingestSampleData.licenseTooltip.description',
+        {
+          defaultMessage:
+            'This dataset makes use of AI features that require an Enterprise license.',
+        }
+      )}
+    >
+      {installButton}
+    </EuiToolTip>
   );
 };
