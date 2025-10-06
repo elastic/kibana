@@ -11,7 +11,6 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/test",
     "@kbn/field-types",
     "@kbn/unified-histogram",
     "@kbn/metrics-experience-plugin",
@@ -20,7 +19,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/chart-icons",
-    "@kbn/esql-utils",
     "@kbn/data-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/data-views-plugin",
