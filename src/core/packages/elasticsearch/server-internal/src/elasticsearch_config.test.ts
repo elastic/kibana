@@ -32,6 +32,7 @@ test('set correct defaults', () => {
     ElasticsearchConfig {
       "apiVersion": "master",
       "apisToRedactInLogs": Array [],
+      "bufferThreshold": 3,
       "compression": false,
       "customHeaders": Object {},
       "dnsCacheTtl": "P0D",
@@ -78,6 +79,7 @@ test('set correct defaults (serverless)', () => {
     ElasticsearchConfig {
       "apiVersion": "master",
       "apisToRedactInLogs": Array [],
+      "bufferThreshold": 3,
       "compression": false,
       "customHeaders": Object {},
       "dnsCacheTtl": "P0D",

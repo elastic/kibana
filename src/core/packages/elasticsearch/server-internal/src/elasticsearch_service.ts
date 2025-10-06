@@ -42,6 +42,7 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 import { getElasticsearchCapabilities } from './get_capabilities';
+import { bufferStatusFlapping } from './buffer_status_flapping';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -127,7 +128,9 @@ export class ElasticsearchService
       },
       clusterInfo$: this.clusterInfo$,
       esNodesCompatibility$,
-      status$: calculateStatus$(esNodesCompatibility$),
+      status$: calculateStatus$(
+        esNodesCompatibility$.pipe(bufferStatusFlapping(config.bufferThreshold))
+      ), // wrap for backward compatibility
       setUnauthorizedErrorHandler: (handler) => {
         if (this.unauthorizedErrorHandler) {
           throw new Error('setUnauthorizedErrorHandler can only be called once.');

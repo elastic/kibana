@@ -197,6 +197,7 @@ export const configSchema = schema.object({
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
   publicBaseUrl: schema.maybe(hostURISchema),
+  bufferThreshold: schema.number({ defaultValue: 3, min: 1 }),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -303,6 +304,15 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
  * @internal
  */
 export class ElasticsearchConfig implements IElasticsearchConfig {
+  /**
+   * The maximum number of consecutive failures allowed for the nodes info request
+   * until the overall ES compatibility status is set to red.
+   * Only applies to the nodes info request used for version compatibility checks,
+   * not the regular health check requests.
+   * @internal
+   */
+  public readonly bufferThreshold: number;
+
   /**
    * @internal
    * Only valid in dev mode. Skip the valid connection check during startup. The connection check allows
@@ -491,6 +501,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
     this.dnsCacheTtl = rawConfig.dnsCacheTtl;
     this.publicBaseUrl = rawConfig.publicBaseUrl;
+    this.bufferThreshold = rawConfig.bufferThreshold ? rawConfig.bufferThreshold : 3; // default to 3 to be safe
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

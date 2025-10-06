@@ -189,6 +189,7 @@ describe('#preboot', () => {
 
       expect(config).toMatchInlineSnapshot(`
         Object {
+          "bufferThreshold": 3,
           "healthCheckDelay": "PT0.01S",
           "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
@@ -222,7 +223,6 @@ describe('#setup', () => {
     expect(typeof setupContract.agentStatsProvider.getAgentsStats).toEqual('function');
   });
 
-  // TODO: update to account for new behavior of pollEsNodesVersion
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
@@ -461,6 +461,7 @@ describe('#start', () => {
 
       expect(config).toMatchInlineSnapshot(`
         Object {
+          "bufferThreshold": 3,
           "healthCheckDelay": "PT0.01S",
           "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
@@ -488,9 +489,8 @@ describe('#stop', () => {
 
     expect(mockClusterClientInstance.close).toHaveBeenCalledTimes(1);
   });
-  // TODO: update to account for new behavior of pollEsNodesVersion
-  it.skip('stops pollEsNodeVersions even if there are active subscriptions', async () => {
-    expect.assertions(2);
+  it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
+    expect.assertions(3);
 
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>

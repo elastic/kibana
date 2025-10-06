@@ -146,7 +146,7 @@ describe('pollEsNodesVersion', () => {
     internalClient.nodes.info.mockImplementationOnce(() => Promise.reject(new Error(error)));
   };
 
-  it.skip('returns isCompatible=false and keeps polling when a poll request throws', (done) => {
+  it('returns isCompatible=false and keeps polling when a poll request throws', (done) => {
     expect.assertions(3); // getting only 2
     const expectedCompatibilityResults = [false, false, true];
     jest.clearAllMocks();
