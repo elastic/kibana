@@ -42,7 +42,7 @@ export function createFieldTestingConfig({ testsDirectory, groupNumber, totalGro
 
   return {
     preset: '@kbn/test/jest_integration',
-    rootDir: '../../../../../../../../../../../../../../../..',
+    rootDir: '../../../../../../../../../../../../../../..',
     roots: [
       '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/rule_management',
     ],

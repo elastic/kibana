@@ -88,7 +88,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
       await pageObjects.streams.saveRoutingRule();
 
       // Wait for the error toast to appear
-      await pageObjects.streams.expectToastVisible();
+      await pageObjects.toasts.waitFor();
 
       // Should stay in creating state due to validation error
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
