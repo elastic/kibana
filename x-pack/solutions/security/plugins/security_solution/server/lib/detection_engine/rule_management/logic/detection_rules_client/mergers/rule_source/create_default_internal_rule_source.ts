@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-const STREAMS_ENDPOINT_LATENCY_EVENT = 'streams-endpoint-latency';
+import type { InternalRuleSource } from '../../../../../../../../common/api/detection_engine/model/rule_schema';
 
-export { STREAMS_ENDPOINT_LATENCY_EVENT };
+export const createDefaultInternalRuleSource = (): InternalRuleSource => ({
+  type: 'internal',
+});

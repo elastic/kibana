@@ -325,6 +325,52 @@ describe('<SnapshotList />', () => {
           });
         });
       });
+
+      describe('state', () => {
+        test('partial state search is parsed', async () => {
+          await setSearchText('state:SUCCESS');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'SUCCESS',
+            searchMatch: 'must',
+            searchOperator: 'eq',
+          });
+        });
+
+        test('excluding partial state search is parsed', async () => {
+          await setSearchText('-state:FAILED');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'FAILED',
+            searchMatch: 'must_not',
+            searchOperator: 'eq',
+          });
+        });
+
+        test('exact state search is parsed', async () => {
+          await setSearchText('state=IN_PROGRESS');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'IN_PROGRESS',
+            searchMatch: 'must',
+            searchOperator: 'exact',
+          });
+        });
+
+        test('excluding exact state search is parsed', async () => {
+          await setSearchText('-state=PARTIAL');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'PARTIAL',
+            searchMatch: 'must_not',
+            searchOperator: 'exact',
+          });
+        });
+      });
     });
 
     describe('error handling', () => {
