@@ -119,20 +119,7 @@
       }
     ],
     "interfaces": [],
-    "enums": [
-      {
-        "parentPluginId": "cases",
-        "id": "def-public.AttachmentActionType",
-        "type": "Enum",
-        "tags": [],
-        "label": "AttachmentActionType",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "cases",
