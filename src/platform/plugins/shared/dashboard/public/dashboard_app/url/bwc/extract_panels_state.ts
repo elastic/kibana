@@ -52,8 +52,7 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
     const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
 
     if (panel.panels) {
-      const { panels: sectionPanels } =
-        extractPanelsState({ panels: panel.panels });
+      const { panels: sectionPanels } = extractPanelsState({ panels: panel.panels });
       panel.panels = sectionPanels;
     }
 
