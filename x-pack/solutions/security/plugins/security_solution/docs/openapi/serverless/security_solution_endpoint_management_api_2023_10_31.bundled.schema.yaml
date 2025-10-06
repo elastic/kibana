@@ -140,7 +140,7 @@ paths:
 
             `{file_id}` = `{action_id}.{agent_id}`
 
-            - For all other agents types: the `file_id` is the `agent_id` for
+            - For all other agent types: the `file_id` is the `agent_id` for
             which the response action was sent to.
           in: path
           name: file_id
@@ -204,7 +204,7 @@ paths:
 
             `{file_id}` = `{action_id}.{agent_id}`
 
-            - For all other agents types: the `file_id` is the `agent_id` for
+            - For all other agent types: the `file_id` is the `agent_id` for
             which the response action was sent to.
           in: path
           name: file_id
