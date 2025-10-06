@@ -123,7 +123,7 @@ const createVisualizationSchema = z.object({
     ])
     .optional()
     .describe(
-      '(optional) The type of chart to create. If not provided, the LLM will suggest the best chart type.'
+      '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
     ),
   esql: z
     .string()
@@ -438,6 +438,7 @@ This tool will:
               type: ToolResultType.error,
               data: {
                 message: `Failed to create visualization: ${error.message}`,
+                metadata: {nlQuery, esql, chartType}
               },
             },
           ],
