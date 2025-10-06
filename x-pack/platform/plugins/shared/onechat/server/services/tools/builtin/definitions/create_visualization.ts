@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
-import { platformCoreTools } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type {
@@ -22,8 +22,9 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
-import { getToolResultId } from '@kbn/onechat-server/src/tools';
+import { getToolResultId } from '@kbn/onechat-server';
 import { generateEsql } from '@kbn/onechat-genai-utils';
+import { getChartType } from './guess_chart_type';
 
 const metricSchema = parse(esqlMetricState.getSchema());
 
@@ -92,6 +93,13 @@ const fixArraySchemas = (schema: any): any => {
 const fixedMetricSchema = fixArraySchemas(metricSchema);
 const zodMetricSchema = jsonSchemaToZod(fixedMetricSchema);
 
+enum SupportedChartType {
+  Metric = 'metric',
+  Gauge = 'gauge',
+  TagCloud = 'tagcloud',
+  Pie = 'pie',
+}
+
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
   existingConfig: z
@@ -99,7 +107,12 @@ const createVisualizationSchema = z.object({
     .optional()
     .describe('An existing visualization configuration to modify.'),
   chartType: z
-    .enum(['metric', 'gauge', 'tagcloud', 'pie'])
+    .enum([
+      SupportedChartType.Metric,
+      SupportedChartType.Gauge,
+      SupportedChartType.TagCloud,
+      SupportedChartType.Pie,
+    ])
     .optional()
     .describe(
       '(optional) The type of chart to create. If not provided, the LLM will suggest the best chart type.'
@@ -112,7 +125,6 @@ const createVisualizationSchema = z.object({
     ),
 });
 
-type SupportedChartType = 'metric' | 'gauge' | 'tagcloud' | 'pie';
 type VisualizationConfig = LensMetricConfig | LensGaugeConfig | LensTagCloudConfig | LensPieConfig;
 
 const MAX_RETRY_ATTEMPTS = 5;
@@ -233,7 +245,7 @@ Generate the ${state.chartType} visualization configuration.`),
       logger.debug(`Configuration: ${configStr}`);
 
       let validatedConfig: any | null = null;
-      if (state.chartType === 'metric') {
+      if (state.chartType === SupportedChartType.Metric) {
         validatedConfig = esqlMetricState.validate(config);
       }
       // TODO: Add validation for other chart types (gauge, tagcloud, pie)
@@ -304,56 +316,42 @@ export const createVisualizationTool = (): BuiltinToolDefinition<
 > => {
   return {
     id: platformCoreTools.createVisualization,
+    type: ToolType.builtin,
     description: `Create a visualization configuration based on a natural language description.
 
 This tool will:
-1. Determine the best chart type if not specified (from: metric, gauge, tagcloud, pie)
+1. Determine the best chart type if not specified (from: ${Object.values(SupportedChartType).join(
+      ', '
+    )})
 2. Generate an ES|QL query if not provided
 3. Generate a valid visualization configuration`,
     schema: createVisualizationSchema,
+    tags: [],
     handler: async (
       { query: nlQuery, chartType, esql, existingConfig },
       { esClient, modelProvider, logger }
     ) => {
       try {
         // Step 1: Determine chart type if not provided
-        let selectedChartType: SupportedChartType = chartType || 'metric';
+        let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
         const parsedExistingConfig = existingConfig ? JSON.parse(existingConfig) : null;
 
         if (!chartType) {
           logger.debug('Chart type not provided, using LLM to suggest one');
-          const model = await modelProvider.getDefaultModel();
-          const chartTypeResponse = await model.chatModel.invoke([
-            {
-              role: 'system',
-              content: `You are a data visualization expert. Based on the user's query, suggest the most appropriate chart type from the following options: metric, gauge, tagcloud, pie.
-
-Respond with ONLY the chart type name, nothing else.
-
-Guidelines:
-- metric: For single numeric values, KPIs, or metrics with optional trend lines
-- gauge: For progress indicators, goals, or values with min/max ranges
-- tagcloud: For displaying word frequencies or categorical data
-- pie: For showing proportions or parts of a whole`,
-            },
-            {
-              role: 'user',
-              content: existingConfig
-                ? `Existing chart type to modify: ${parsedExistingConfig.type}\n\nUser query: ${nlQuery}`
-                : nlQuery,
-            },
-          ]);
-
-          const suggestedType = chartTypeResponse.content
-            .toString()
-            .trim()
-            .toLowerCase() as SupportedChartType;
-
-          if (['metric', 'gauge', 'tagcloud', 'pie'].includes(suggestedType)) {
-            selectedChartType = suggestedType;
-            logger.debug(`LLM suggested chart type: ${selectedChartType}`);
+          const suggestedChartType = await getChartType(
+            modelProvider,
+            parsedExistingConfig?.type,
+            nlQuery
+          );
+          if (
+            Object.values(SupportedChartType).includes(suggestedChartType as SupportedChartType)
+          ) {
+            selectedChartType = suggestedChartType as SupportedChartType;
           } else {
-            logger.warn(`LLM suggested invalid chart type: ${suggestedType}, defaulting to metric`);
+            logger.warn(
+              `LLM suggested invalid chart type: ${suggestedChartType}, defaulting to metric`
+            );
+            selectedChartType = SupportedChartType.Metric;
           }
         }
 
@@ -440,6 +438,5 @@ Guidelines:
         };
       }
     },
-    tags: [],
   };
 };
