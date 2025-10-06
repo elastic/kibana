@@ -14,7 +14,7 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import type { KibanaErrorBoundaryProviderDeps } from '../../types';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '../..';
 import { BadComponent } from '../../mocks';
-import { MONITOR_NAVIGATION_WITHIN_MS } from './error_service';
+import { TRANSIENT_NAVIGATION_WINDOW_MS } from './error_service';
 import userEvent from '@testing-library/user-event';
 
 describe('<KibanaErrorBoundaryProvider>', () => {
@@ -38,7 +38,7 @@ describe('<KibanaErrorBoundaryProvider>', () => {
     unmount(); // Unmount to commit/report the error
 
     // Wait for the error to be reported/committed
-    await new Promise((resolve) => setTimeout(resolve, 1.5 * MONITOR_NAVIGATION_WITHIN_MS));
+    await new Promise((resolve) => setTimeout(resolve, 1.5 * TRANSIENT_NAVIGATION_WINDOW_MS));
 
     expect(reportEventSpy).toBeCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
@@ -46,7 +46,7 @@ describe('<KibanaErrorBoundaryProvider>', () => {
       error_message: 'Error: This is an error to show the test user!',
       error_stack: expect.any(String),
       component_render_min_duration_ms: expect.any(Number),
-      has_subsequent_navigation: expect.any(Boolean),
+      has_transient_navigation: expect.any(Boolean),
     });
   });
 
@@ -69,10 +69,14 @@ describe('<KibanaErrorBoundaryProvider>', () => {
       </KibanaErrorBoundaryProvider>
     );
     await userEvent.click(await findByTestId('clickForErrorBtn'));
+
+    // Wait for nav to settle
+    await new Promise((resolve) => setTimeout(resolve, TRANSIENT_NAVIGATION_WINDOW_MS));
+
     unmount(); // Unmount to commit/report the error
 
     // Wait for the error to be reported/committed
-    await new Promise((resolve) => setTimeout(resolve, 1.5 * MONITOR_NAVIGATION_WITHIN_MS));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     expect(reportEventParentSpy).not.toBeCalled();
     expect(reportEventChildSpy).toBeCalledWith('fatal-error-react', {
@@ -80,7 +84,7 @@ describe('<KibanaErrorBoundaryProvider>', () => {
       component_stack: expect.any(String),
       error_message: 'Error: This is an error to show the test user!',
       error_stack: expect.any(String),
-      has_subsequent_navigation: expect.any(Boolean),
+      has_transient_navigation: expect.any(Boolean),
       component_render_min_duration_ms: expect.any(Number),
     });
     expect(

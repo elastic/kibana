@@ -40,11 +40,11 @@ export const reactFatalErrorSchema = {
       optional: false as const,
     },
   },
-  has_subsequent_navigation: {
+  has_transient_navigation: {
     type: 'boolean' as const,
     _meta: {
       description:
-        'Indicates if there was a navigation after the error occurred. This helps identify transient navigation related errors.',
+        'Indicates if navigation occurred within the transient window (e.g. first 250ms) after the error occurred. This helps identify transient errors, successfully followed by a navigation, that users may not have seen.',
       optional: false as const,
     },
   },

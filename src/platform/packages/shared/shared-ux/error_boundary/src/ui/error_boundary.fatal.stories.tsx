@@ -8,7 +8,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiFormFieldset } from '@elastic/eui';
+import {
+  EuiFormFieldset,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiTitle,
+  EuiText,
+  EuiIconTip,
+} from '@elastic/eui';
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryFn } from '@storybook/react';
 import { Template } from '../../mocks/src/storybook_template';
@@ -16,7 +24,6 @@ import {
   BadComponent,
   createServicesWithAnalyticsMock,
   Spacer,
-  TelemetryEventsPanel,
   DocsBlock,
   StoryActionButton,
 } from '../../mocks';
@@ -25,7 +32,7 @@ import mdx from '../../README.mdx';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_provider';
 import {
   DEFAULT_MAX_ERROR_DURATION_MS,
-  MONITOR_NAVIGATION_WITHIN_MS,
+  TRANSIENT_NAVIGATION_WINDOW_MS,
 } from '../services/error_service';
 import { KibanaErrorBoundary } from './error_boundary';
 import { KibanaSectionErrorBoundary } from './section_error_boundary';
@@ -33,7 +40,7 @@ import { KibanaSectionErrorBoundary } from './section_error_boundary';
 export default {
   title: 'Errors/Fatal Errors',
   description:
-    'This is the Kibana Error Boundary. Use this to put a boundary around React components that may throw errors when rendering. It will intercept the error and determine if it is fatal or recoverable.\n\nIn these stories we demonstrate the new telemetry fields: `component_render_min_duration_ms` and `has_subsequent_navigation`. You can observe reported telemetry via the Storybook Actions panel ("Report telemetry event") or in the in-page telemetry panel included below each story.',
+    'This is the Kibana Error Boundary. Use this to put a boundary around React components that may throw errors when rendering. It will intercept the error and determine if it is fatal or recoverable.\n\nIn these stories we demonstrate the new telemetry fields: `component_render_min_duration_ms` and `has_transient_navigation`. You can observe reported telemetry in Storybook\'s Actions tab ("Report telemetry event").',
   parameters: {
     docs: {
       page: mdx,
@@ -76,284 +83,14 @@ export const SectionErrorInCallout: StoryFn = () => {
   );
 };
 
-/**
- * Demonstrates has_subsequent_navigation = false
- * Steps:
- * 1) Click "Throw error" (red button)
- * 2) Click "Unmount in 400ms" (no navigation)
- * The telemetry action should log has_subsequent_navigation: false
- */
-export const TransientError: StoryFn<{ unmountDelayMs: number }> = ({ unmountDelayMs }) => {
-  const { services, mock } = createServicesWithAnalyticsMock();
+export const TransientError: StoryFn = () => {
+  const { services } = createServicesWithAnalyticsMock();
 
-  const [showBoundary, setShowBoundary] = useState(true);
+  // Start with boundary NOT mounted so the embedded "Throw error" button is not visible outside cards
+  const [showBoundary, setShowBoundary] = useState(false);
   const startRef = useRef<number>(0);
-  const [remainingMs, setRemainingMs] = useState(DEFAULT_MAX_ERROR_DURATION_MS);
-  const unmountTimeoutRef = useRef<number | null>(null);
-  const logUnmount = useMemo(() => action('Unmounted error boundary'), []);
-
-  useEffect(() => {
-    return () => {
-      if (unmountTimeoutRef.current) window.clearTimeout(unmountTimeoutRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      if (!startRef.current) return;
-      const elapsed = Date.now() - startRef.current;
-      setRemainingMs(Math.max(0, DEFAULT_MAX_ERROR_DURATION_MS - elapsed));
-    }, 200);
-    return () => window.clearInterval(id);
-  }, []);
-
-  // Start countdown when the internal BadComponent throw button is clicked manually
-  useEffect(() => {
-    const btn = document.querySelector(
-      '[data-test-subj="clickForErrorBtn"]'
-    ) as HTMLButtonElement | null;
-    if (!btn) return;
-    const handler = () => {
-      startRef.current = Date.now();
-    };
-    btn.addEventListener('click', handler);
-    return () => btn.removeEventListener('click', handler);
-  }, [showBoundary]);
-
-  const clickErrorButton = useCallback(() => {
-    const btn = document.querySelector(
-      '[data-test-subj="clickForErrorBtn"]'
-    ) as HTMLButtonElement | null;
-    if (btn) {
-      btn.click();
-      return true;
-    }
-    return false;
-  }, []);
-
-  const throwAndUnmount200ms = useCallback(() => {
-    // Reset countdown and boundary
-    startRef.current = Date.now();
-    setShowBoundary(false);
-    window.setTimeout(() => setShowBoundary(true), 0);
-    // Ensure button is clickable after mount
-    window.setTimeout(() => {
-      clickErrorButton();
-      if (unmountTimeoutRef.current) window.clearTimeout(unmountTimeoutRef.current);
-      unmountTimeoutRef.current = window.setTimeout(() => {
-        setShowBoundary(false);
-        const elapsed = Date.now() - startRef.current;
-        logUnmount({ plannedDelayMs: 200, elapsedMs: elapsed });
-        // Stop countdown after unmount and reset to default for the next run
-        startRef.current = 0;
-        setRemainingMs(DEFAULT_MAX_ERROR_DURATION_MS);
-        // Remount to allow repeated testing
-        window.setTimeout(() => setShowBoundary(true), 0);
-      }, 200);
-    }, 0);
-  }, [clickErrorButton, logUnmount]);
-
-  const manualUnmount = useCallback(() => {
-    setShowBoundary(false);
-    if (startRef.current) {
-      const elapsed = Date.now() - startRef.current;
-      logUnmount({ plannedDelayMs: 'manual', elapsedMs: elapsed });
-    }
-    // Stop countdown after unmount and reset to default for the next run
-    startRef.current = 0;
-    setRemainingMs(DEFAULT_MAX_ERROR_DURATION_MS);
-    // Remount so user can re-throw and countdown continues from last startRef
-    window.setTimeout(() => setShowBoundary(true), 0);
-  }, [logUnmount]);
-
-  return (
-    <Template>
-      <KibanaErrorBoundaryDepsProvider {...services}>
-        <DocsBlock title="Background">
-          <div>
-            This story focuses on <code>component_render_min_duration_ms</code> — the minimum time
-            an error UI must remain mounted before we consider it &ldquo;seen&rdquo; and eligible
-            for telemetry. This filtering helps suppress brief, noisy glitches and only report
-            meaningful failures. If an error remains visible and the user doesn&rsquo;t interact, it
-            will auto-commit after
-            <code> DEFAULT_MAX_ERROR_DURATION_MS</code> ({DEFAULT_MAX_ERROR_DURATION_MS}ms). Or when
-            the user reacts to the error e.g. clicks the &quot;Refresh page&quot; button or
-            navigates away the error will be committed/reported (This is simulated by the
-            &quot;Unmount&quot; button below).
-          </div>
-        </DocsBlock>
-        <DocsBlock title="Behavior">
-          <div>
-            <ul style={{ listStyle: 'inside' }}>
-              <li>
-                <StoryActionButton onClick={throwAndUnmount200ms}>
-                  Throw and unmount in 200ms
-                </StoryActionButton>
-                shows a brief error that does not get reported because 200ms is less than
-                <code> MONITOR_NAVIGATION_WITHIN_MS</code> ({MONITOR_NAVIGATION_WITHIN_MS}ms).
-              </li>
-              <li>
-                Or click the <b>Throw error</b> button below and then
-                <StoryActionButton onClick={manualUnmount} disabled={!showBoundary}>
-                  Unmount
-                </StoryActionButton>
-                when ready. If you do nothing, the error will auto-commit after
-                <code> DEFAULT_MAX_ERROR_DURATION_MS</code> ({DEFAULT_MAX_ERROR_DURATION_MS}ms).
-              </li>
-            </ul>
-            <div style={{ marginTop: 8, fontFamily: 'monospace' }}>
-              Auto-commit in: ~{Math.ceil(remainingMs / 1000)}s
-            </div>
-          </div>
-        </DocsBlock>
-        <Spacer />
-        {showBoundary && (
-          <KibanaErrorBoundary>
-            <BadComponent />
-          </KibanaErrorBoundary>
-        )}
-        <Spacer />
-        <TelemetryEventsPanel mock={mock} />
-      </KibanaErrorBoundaryDepsProvider>
-    </Template>
-  );
-};
-
-export const TransientSectionError: StoryFn<{ unmountDelayMs: number }> = ({ unmountDelayMs }) => {
-  const { services, mock } = createServicesWithAnalyticsMock();
-
-  const [showBoundary, setShowBoundary] = useState(true);
-  const startRef = useRef<number>(0);
-  const [remainingMs, setRemainingMs] = useState(DEFAULT_MAX_ERROR_DURATION_MS);
-  const unmountTimeoutRef = useRef<number | null>(null);
-  const logUnmount = useMemo(() => action('Unmounted section error boundary'), []);
-
-  useEffect(() => {
-    return () => {
-      if (unmountTimeoutRef.current) window.clearTimeout(unmountTimeoutRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      if (!startRef.current) return;
-      const elapsed = Date.now() - startRef.current;
-      setRemainingMs(Math.max(0, DEFAULT_MAX_ERROR_DURATION_MS - elapsed));
-    }, 200);
-    return () => window.clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    const btn = document.querySelector(
-      '[data-test-subj="clickForErrorBtn"]'
-    ) as HTMLButtonElement | null;
-    if (!btn) return;
-    const handler = () => {
-      startRef.current = Date.now();
-    };
-    btn.addEventListener('click', handler);
-    return () => btn.removeEventListener('click', handler);
-  }, [showBoundary]);
-
-  const clickErrorButton = useCallback(() => {
-    const btn = document.querySelector(
-      '[data-test-subj="clickForErrorBtn"]'
-    ) as HTMLButtonElement | null;
-    if (btn) {
-      btn.click();
-      return true;
-    }
-    return false;
-  }, []);
-
-  const throwAndUnmount200ms = useCallback(() => {
-    startRef.current = Date.now();
-    setShowBoundary(false);
-    window.setTimeout(() => setShowBoundary(true), 0);
-    window.setTimeout(() => {
-      clickErrorButton();
-      if (unmountTimeoutRef.current) window.clearTimeout(unmountTimeoutRef.current);
-      unmountTimeoutRef.current = window.setTimeout(() => {
-        setShowBoundary(false);
-        const elapsed = Date.now() - startRef.current;
-        logUnmount({ plannedDelayMs: 200, elapsedMs: elapsed });
-        startRef.current = 0;
-        setRemainingMs(DEFAULT_MAX_ERROR_DURATION_MS);
-        window.setTimeout(() => setShowBoundary(true), 0);
-      }, 200);
-    }, 0);
-  }, [clickErrorButton, logUnmount]);
-
-  const manualUnmount = useCallback(() => {
-    setShowBoundary(false);
-    if (startRef.current) {
-      const elapsed = Date.now() - startRef.current;
-      logUnmount({ plannedDelayMs: 'manual', elapsedMs: elapsed });
-    }
-    startRef.current = 0;
-    setRemainingMs(DEFAULT_MAX_ERROR_DURATION_MS);
-    window.setTimeout(() => setShowBoundary(true), 0);
-  }, [logUnmount]);
-
-  return (
-    <Template>
-      <KibanaErrorBoundaryDepsProvider {...services}>
-        <EuiFormFieldset legend={{ children: 'Section A' }}>
-          <DocsBlock title="Behavior">
-            <div>
-              <ul style={{ listStyle: 'inside' }}>
-                <li>
-                  <StoryActionButton onClick={throwAndUnmount200ms}>
-                    Throw and unmount in 200ms
-                  </StoryActionButton>
-                  shows a brief error that does not get reported because 200ms is less than
-                  <code> MONITOR_NAVIGATION_WITHIN_MS</code> ({MONITOR_NAVIGATION_WITHIN_MS}ms).
-                </li>
-                <li>
-                  Or click the <b>Throw error</b> button below and then
-                  <StoryActionButton onClick={manualUnmount} disabled={!showBoundary}>
-                    Unmount
-                  </StoryActionButton>{' '}
-                  when ready. If you do nothing, the error will auto-commit after{' '}
-                  <code> DEFAULT_MAX_ERROR_DURATION_MS</code> ({DEFAULT_MAX_ERROR_DURATION_MS}ms).
-                </li>
-              </ul>
-              <div style={{ marginTop: 8, fontFamily: 'monospace' }}>
-                Auto-commit in: ~{Math.ceil(remainingMs / 1000)}s
-              </div>
-            </div>
-          </DocsBlock>
-          <Spacer />
-          {showBoundary && (
-            <KibanaSectionErrorBoundary sectionName="sectionA">
-              <BadComponent />
-            </KibanaSectionErrorBoundary>
-          )}
-        </EuiFormFieldset>
-        <Spacer />
-        <TelemetryEventsPanel mock={mock} />
-      </KibanaErrorBoundaryDepsProvider>
-    </Template>
-  );
-};
-
-/**
- * Demonstrates has_subsequent_navigation = true
- * Steps:
- * 1) Click "Throw error" (red button) to render the error UI
- * 2) Click "Navigate in 100ms"
- * 3) Click "Unmount in 400ms"
- * The telemetry action should log has_subsequent_navigation: true
- */
-export const TransientErrorWithNavigation: StoryFn<{ unmountDelayMs: number }> = ({
-  unmountDelayMs,
-}) => {
-  const { services, mock } = createServicesWithAnalyticsMock();
-
-  const [showBoundary, setShowBoundary] = useState(true);
   const navTimeoutRef = useRef<number | null>(null);
   const unmountTimeoutRef = useRef<number | null>(null);
-  const startRef = useRef<number>(0);
   const logUnmount = useMemo(() => action('Unmounted error boundary'), []);
 
   useEffect(() => {
@@ -363,32 +100,12 @@ export const TransientErrorWithNavigation: StoryFn<{ unmountDelayMs: number }> =
     };
   }, []);
 
-  const scheduleNavigation = useCallback((delayMs: number) => {
+  const clearTimers = useCallback(() => {
     if (navTimeoutRef.current) window.clearTimeout(navTimeoutRef.current);
-    navTimeoutRef.current = window.setTimeout(() => {
-      const newPath = `/storybook-nav-${Date.now()}`;
-      window.history.pushState({}, '', newPath);
-      // trigger a small re-render to make it evident
-      // (not required for the service logic which reads location directly)
-      setShowBoundary((v) => v);
-    }, delayMs);
-  }, []);
-
-  const scheduleUnmount = useCallback((delayMs: number) => {
     if (unmountTimeoutRef.current) window.clearTimeout(unmountTimeoutRef.current);
-    const plannedAt = Date.now();
-    unmountTimeoutRef.current = window.setTimeout(() => {
-      setShowBoundary(false);
-      const startAt = startRef.current || plannedAt;
-      const elapsed = Date.now() - startAt;
-      logUnmount({ plannedDelayMs: delayMs, elapsedMs: elapsed });
-      // Automatically remount so the user can re-throw
-      window.setTimeout(() => setShowBoundary(true), 0);
-    }, delayMs);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    navTimeoutRef.current = null;
+    unmountTimeoutRef.current = null;
   }, []);
-
-  const willReport = unmountDelayMs >= MONITOR_NAVIGATION_WITHIN_MS;
 
   const clickErrorButton = useCallback(() => {
     const btn = document.querySelector(
@@ -401,118 +118,370 @@ export const TransientErrorWithNavigation: StoryFn<{ unmountDelayMs: number }> =
     return false;
   }, []);
 
-  const throwWithNavigation = useCallback(() => {
-    // Clear previous telemetry events for a clean run
-    (mock as any)?.clear?.();
-    // Reset and re-render the boundary so it can throw again on repeated clicks
-    if (!showBoundary) setShowBoundary(true);
-    startRef.current = Date.now();
-    // Wait a microtask to allow the boundary to mount before clicking the inner button
-    window.setTimeout(() => {
-      scheduleNavigation(100);
-      clickErrorButton();
-      scheduleUnmount(unmountDelayMs);
-    }, 0);
-  }, [mock, showBoundary, clickErrorButton, scheduleNavigation, scheduleUnmount, unmountDelayMs]);
-
-  const throwWithoutNavigation = useCallback(() => {
-    // Clear previous telemetry events for a clean run
-    (mock as any)?.clear?.();
-    if (!showBoundary) setShowBoundary(true);
+  const scheduleNavigation = useCallback((delayMs: number) => {
     if (navTimeoutRef.current) window.clearTimeout(navTimeoutRef.current);
-    startRef.current = Date.now();
-    window.setTimeout(() => {
-      clickErrorButton();
-      scheduleUnmount(unmountDelayMs);
-    }, 0);
-  }, [mock, showBoundary, clickErrorButton, scheduleUnmount, unmountDelayMs]);
+    navTimeoutRef.current = window.setTimeout(() => {
+      const newPath = `/storybook-nav-${Date.now()}`;
+      window.history.pushState({}, '', newPath);
+      setShowBoundary((v) => v);
+    }, delayMs);
+  }, []);
+
+  const scheduleUnmount = useCallback(
+    (delayMs: number) => {
+      if (unmountTimeoutRef.current) window.clearTimeout(unmountTimeoutRef.current);
+      const plannedAt = Date.now();
+      unmountTimeoutRef.current = window.setTimeout(() => {
+        setShowBoundary(false);
+        const startAt = startRef.current || plannedAt;
+        const elapsed = Date.now() - startAt;
+        logUnmount({ plannedDelayMs: delayMs, elapsedMs: elapsed });
+        // Remount to allow repeated runs
+        window.setTimeout(() => setShowBoundary(true), 0);
+      }, delayMs);
+    },
+    [logUnmount]
+  );
+
+  const runScenario = useCallback(
+    ({
+      unmountDelayMs,
+      withNav,
+      navAfterWindow,
+    }: {
+      unmountDelayMs: number;
+      withNav?: boolean;
+      // if true, schedule nav after TRANSIENT_NAVIGATION_WINDOW_MS, else schedule close to unmount
+      navAfterWindow?: boolean;
+    }) => {
+      // Do not clear any telemetry storage here; events are visible in Storybook Actions
+      clearTimers();
+      if (!showBoundary) setShowBoundary(true);
+      startRef.current = Date.now();
+      window.setTimeout(() => {
+        clickErrorButton();
+        if (withNav) {
+          let navDelay = Math.max(0, unmountDelayMs - 20);
+          if (navAfterWindow) {
+            navDelay = Math.min(
+              Math.max(TRANSIENT_NAVIGATION_WINDOW_MS + 10, 0),
+              Math.max(0, unmountDelayMs - 20)
+            );
+          }
+          scheduleNavigation(navDelay);
+        }
+        scheduleUnmount(unmountDelayMs);
+      }, 0);
+    },
+    [showBoundary, clearTimers, clickErrorButton, scheduleNavigation, scheduleUnmount]
+  );
+
+  // Manual flows
+  const [manualMode, setManualMode] = useState<'none' | 'plain' | 'nav'>('none');
+
+  const startManual = useCallback(
+    (mode: 'plain' | 'nav') => {
+      // Do not clear any telemetry storage here; events are visible in Storybook Actions
+      clearTimers();
+      if (!showBoundary) setShowBoundary(true);
+      startRef.current = Date.now();
+      setManualMode(mode);
+      window.setTimeout(() => {
+        clickErrorButton();
+      }, 0);
+    },
+    [clearTimers, showBoundary, clickErrorButton]
+  );
+
+  const manualUnmount = useCallback(() => {
+    if (manualMode === 'nav') {
+      // Navigate just before unmount
+      scheduleNavigation(0);
+      window.setTimeout(() => {
+        setShowBoundary(false);
+        const elapsed = Date.now() - startRef.current;
+        logUnmount({ plannedDelayMs: 'manual+nav', elapsedMs: elapsed });
+        window.setTimeout(() => setShowBoundary(true), 0);
+        setManualMode('none');
+      }, 20);
+    } else if (manualMode === 'plain') {
+      setShowBoundary(false);
+      const elapsed = Date.now() - startRef.current;
+      logUnmount({ plannedDelayMs: 'manual', elapsedMs: elapsed });
+      window.setTimeout(() => setShowBoundary(true), 0);
+      setManualMode('none');
+    }
+  }, [manualMode, scheduleNavigation, logUnmount]);
 
   return (
     <Template>
       <KibanaErrorBoundaryDepsProvider {...services}>
         <DocsBlock title="Background">
           <div>
-            For non-recoverable errors, <code>ErrorBoundary</code> reports two important metrics,{' '}
-            <code>has_subsequent_navigation</code> and <code>component_render_min_duration_ms</code>
-            .
-            <ul style={{ listStyle: 'inside' }}>
-              <li>
-                <code>
-                  <strong>component_render_min_duration_ms</strong>
-                </code>{' '}
-                measures the time from when the erroring component started rendering to when the
-                error UI was displayed. This helps identify components that fail quickly versus
-                those that render for a long time before failing. The metric helps identify whether
-                the user has visually observed the error.
-              </li>
-              <li>
-                <code>
-                  <strong>has_subsequent_navigation</strong>
-                </code>{' '}
-                indicates whether a navigation occurred during the first{' '}
-                <code>{MONITOR_NAVIGATION_WITHIN_MS}ms</code> (
-                <code>MONITOR_NAVIGATION_WITHIN_MS</code>) after the error rendered. This helps
-                identify transient errors that may be related to navigation or network issues.
-              </li>
-            </ul>
+            Here a &quot;Transient Error&quot; is as an error that self-resolves quickly, often
+            following a navigation, where user may not even visually notice the error.
+            <br />
+            <br />
+            When an unrecoverable error is thrown, Error Boundary waits for at least{' '}
+            <code>TRANSIENT_NAVIGATION_WINDOW_MS</code> ({TRANSIENT_NAVIGATION_WINDOW_MS}ms) to
+            capture any transient navigation. It then reports telemetry including{' '}
+            <code>has_transient_navigation</code> and <code>component_render_min_duration_ms</code>.
+            If no user interaction occurs, the error auto-commits after{' '}
+            <code>DEFAULT_MAX_ERROR_DURATION_MS</code> ({DEFAULT_MAX_ERROR_DURATION_MS}ms).
           </div>
+          <ul style={{ listStyleType: 'circle', paddingLeft: '1.5em' }}>
+            <li>
+              <strong>
+                <code>component_render_min_duration_ms</code>
+              </strong>
+              : records how long the error component stayed rendered. Helpful to identify
+              short-lived momentary errors that users may not have seen.
+            </li>
+            <li>
+              <strong>
+                <code>has_transient_navigation</code>
+              </strong>
+              : true if a navigation occurred within the first{' '}
+              <code>TRANSIENT_NAVIGATION_WINDOW_MS</code> after error occurred. Helps identify
+              transient errors followed possibly by a successful navigation.
+            </li>
+          </ul>
         </DocsBlock>
 
         <DocsBlock title="Behavior">
           <div>
-            <ul style={{ listStyle: 'inside' }}>
-              <li>
-                Click{' '}
-                <StoryActionButton onClick={throwWithNavigation}>
-                  Throw with Navigation
-                </StoryActionButton>
-                to throw a fatal error caught by Error Boundary, and trigger a navigation after
-                100ms via
-                <code> window.history.pushState </code>.
-              </li>
-              <li>
-                Click{' '}
-                <StoryActionButton onClick={throwWithoutNavigation}>
-                  Throw without Navigation
-                </StoryActionButton>
-                to throw a fatal error with no subsequent navigation.
-              </li>
-            </ul>
-            <div style={{ marginTop: 8 }}>
-              The Error Boundary component will automatically unmount after
-              <strong> {unmountDelayMs}ms</strong>. It must stay rendered for at least{' '}
-              <code>MONITOR_NAVIGATION_WITHIN_MS</code> ({MONITOR_NAVIGATION_WITHIN_MS}ms) to report
-              the error. Any less duration is considered transient and will not be reported.
-              Experiment with unmount duration in the Storybook <strong>Controls</strong> tab to see
-              if reporting occurs.
-              <br />
-              <br />
-              You can examine the telemetry event in the Storybook <strong>Actions</strong> panel or
-              below.
-            </div>
-            <div style={{ marginTop: 8, fontFamily: 'monospace' }}>
-              Will telemetry event be reported: {willReport ? 'Yes' : 'No'} (unmount in{' '}
-              {unmountDelayMs}ms)
-            </div>
+            Use the scenarios below to simulate short-lived vs longer errors and with/without
+            navigation inside the transient window. Each scenario mounts a boundary, throws, and
+            then unmounts per its plan so you can observe timings and navigation classification.
+            <br />
+            <br />
+            <b>Note</b> reported events can be observed in Storybook&apos;s <strong>Actions</strong>{' '}
+            tab (watch the log entry &quot;Report telemetry event&quot;).
           </div>
         </DocsBlock>
+
         <Spacer />
+
+        <EuiFlexGroup gutterSize="m" wrap>
+          <EuiFlexItem grow={1} style={{ minWidth: 280 }}>
+            <EuiPanel>
+              <EuiTitle size="xs">
+                <h3>100ms</h3>
+              </EuiTitle>
+              <EuiText size="s">
+                <p>
+                  Auto unmount after 100ms. No navigation. Expected: has_transient_navigation =
+                  false.
+                </p>
+              </EuiText>
+              <StoryActionButton onClick={() => runScenario({ unmountDelayMs: 100 })}>
+                Run 100ms
+              </StoryActionButton>
+              <span style={{ marginLeft: 8 }}>
+                ?
+                <EuiIconTip
+                  content={
+                    <span>
+                      <strong>Telemetry expectation</strong>:<br />
+                      <code>component_render_min_duration_ms</code> ≈ <strong>100ms</strong>
+                      (actual render time until unmount). Reporting may still wait for the
+                      <code> TRANSIENT_NAVIGATION_WINDOW_MS</code>, but this metric reflects the
+                      component’s own lifetime. <code>has_transient_navigation</code> ={' '}
+                      <strong>false</strong> (no navigation occurred).
+                    </span>
+                  }
+                  position="right"
+                  type="questionInCircle"
+                />
+              </span>
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={1} style={{ minWidth: 280 }}>
+            <EuiPanel>
+              <EuiTitle size="xs">
+                <h3>With Nav 100ms</h3>
+              </EuiTitle>
+              <EuiText size="s">
+                <p>
+                  Navigate just before unmount (within 100ms). Expected: has_transient_navigation =
+                  true.
+                </p>
+              </EuiText>
+              <StoryActionButton
+                onClick={() => runScenario({ unmountDelayMs: 100, withNav: true })}
+              >
+                Run 100ms + Nav
+              </StoryActionButton>
+              <span style={{ marginLeft: 8 }}>
+                ?
+                <EuiIconTip
+                  content={
+                    <span>
+                      <strong>Telemetry expectation</strong>:<br />
+                      <code>component_render_min_duration_ms</code> ≈ <strong>100ms</strong>
+                      (actual render time until unmount). A navigation occurs within the transient
+                      window, so <code>has_transient_navigation</code> = <strong>true</strong>.
+                    </span>
+                  }
+                  position="right"
+                  type="questionInCircle"
+                />
+              </span>
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={1} style={{ minWidth: 280 }}>
+            <EuiPanel>
+              <EuiTitle size="xs">
+                <h3>400ms</h3>
+              </EuiTitle>
+              <EuiText size="s">
+                <p>
+                  Auto unmount after 400ms. No navigation. Expected: has_transient_navigation =
+                  false.
+                </p>
+              </EuiText>
+              <StoryActionButton onClick={() => runScenario({ unmountDelayMs: 400 })}>
+                Run 400ms
+              </StoryActionButton>
+              <span style={{ marginLeft: 8 }}>
+                ?
+                <EuiIconTip
+                  content={
+                    <span>
+                      <strong>Telemetry expectation</strong>:<br />
+                      <code>component_render_min_duration_ms</code> ≈ <strong>400ms</strong>
+                      (actual render time). No navigation takes place, so{' '}
+                      <code>has_transient_navigation</code> = <strong>false</strong>.
+                    </span>
+                  }
+                  position="right"
+                  type="questionInCircle"
+                />
+              </span>
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={1} style={{ minWidth: 280 }}>
+            <EuiPanel>
+              <EuiTitle size="xs">
+                <h3>With Nav 400ms</h3>
+              </EuiTitle>
+              <EuiText size="s">
+                <p>
+                  Navigate after <code>TRANSIENT_NAVIGATION_WINDOW_MS</code> and before unmount.
+                  Expected: has_transient_navigation = false.
+                </p>
+              </EuiText>
+              <StoryActionButton
+                onClick={() =>
+                  runScenario({ unmountDelayMs: 400, withNav: true, navAfterWindow: true })
+                }
+              >
+                Run 400ms + Nav (after window)
+              </StoryActionButton>
+              <span style={{ marginLeft: 8 }}>
+                ?
+                <EuiIconTip
+                  content={
+                    <span>
+                      <strong>Telemetry expectation</strong>:<br />
+                      <code>component_render_min_duration_ms</code> ≈ <strong>400ms</strong>
+                      (actual render time). Navigation occurs <em>after</em> the transient window,
+                      so <code>has_transient_navigation</code> = <strong>false</strong>.
+                    </span>
+                  }
+                  position="right"
+                  type="questionInCircle"
+                />
+              </span>
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={1} style={{ minWidth: 280 }}>
+            <EuiPanel>
+              <EuiTitle size="xs">
+                <h3>Manual</h3>
+              </EuiTitle>
+              <EuiText size="s">
+                <p>Throw and manually unmount when ready. No navigation.</p>
+              </EuiText>
+              {manualMode !== 'plain' ? (
+                <StoryActionButton onClick={() => startManual('plain')}>
+                  Throw (manual)
+                </StoryActionButton>
+              ) : (
+                <StoryActionButton color="primary" onClick={manualUnmount}>
+                  Unmount now
+                </StoryActionButton>
+              )}
+              <span style={{ marginLeft: 8 }}>
+                ?
+                <EuiIconTip
+                  content={
+                    <span>
+                      <strong>Telemetry expectation</strong>:<br />
+                      <code>component_render_min_duration_ms</code> equals the time until you click{' '}
+                      <em>Unmount now</em> (the component’s actual render duration). Unless you
+                      navigate, <code>has_transient_navigation</code> will be <strong>false</strong>
+                      . Reporting may still wait out the transient window, but the duration reflects
+                      the component’s lifetime.
+                    </span>
+                  }
+                  position="right"
+                  type="questionInCircle"
+                />
+              </span>
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={1} style={{ minWidth: 280 }}>
+            <EuiPanel>
+              <EuiTitle size="xs">
+                <h3>Manual Nav</h3>
+              </EuiTitle>
+              <EuiText size="s">
+                <p>Throw and unmount with a navigation just before unmounting.</p>
+              </EuiText>
+              {manualMode !== 'nav' ? (
+                <StoryActionButton onClick={() => startManual('nav')}>
+                  Throw (manual + nav)
+                </StoryActionButton>
+              ) : (
+                <StoryActionButton color="primary" onClick={manualUnmount}>
+                  Unmount with Nav
+                </StoryActionButton>
+              )}
+              <span style={{ marginLeft: 8 }}>
+                ?
+                <EuiIconTip
+                  content={
+                    <span>
+                      <strong>Telemetry expectation</strong>:<br />
+                      The duration equals the time until you unmount. If you click
+                      <em> Unmount with Nav</em> quickly after throwing, the navigation occurs
+                      within <code>TRANSIENT_NAVIGATION_WINDOW_MS</code> and{' '}
+                      <code>has_transient_navigation</code> will be <strong>true</strong>. Waiting
+                      longer makes it <strong>false</strong>.
+                    </span>
+                  }
+                  position="right"
+                  type="questionInCircle"
+                />
+              </span>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <Spacer />
+
         {showBoundary && (
           <KibanaErrorBoundary>
             <BadComponent />
           </KibanaErrorBoundary>
         )}
-        <TelemetryEventsPanel mock={mock} />
       </KibanaErrorBoundaryDepsProvider>
     </Template>
   );
-};
-
-// Ensure default control value when the story loads
-TransientErrorWithNavigation.args = { unmountDelayMs: 400 };
-TransientErrorWithNavigation.argTypes = {
-  unmountDelayMs: {
-    name: 'Unmount after (ms)',
-    control: { type: 'range', min: 100, max: 4000, step: 100 },
-  },
 };

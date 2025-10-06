@@ -12,7 +12,6 @@ export { ChunkLoadErrorComponent } from './src/chunk_load_error_component';
 export { getServicesMock } from './src/jest';
 export { KibanaErrorBoundaryStorybookMock } from './src/storybook';
 export { createAnalyticsMock } from './src/analytics_mock';
-export { TelemetryEventsPanel } from './src/telemetry_panel';
 export {
   ControlsBar,
   Spacer,

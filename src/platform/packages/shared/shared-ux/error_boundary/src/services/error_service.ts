@@ -14,11 +14,12 @@ import { ThrowIfError } from '../ui/throw_if_error';
 
 const MATCH_CHUNK_LOAD_ERROR = /ChunkLoadError/;
 
-// Maximum duration to track for error component rendering (10 seconds)
+// Maximum duration to track for error component rendering
 export const DEFAULT_MAX_ERROR_DURATION_MS = 10 * 1000; // 10 seconds
 
-// Time to wait before checking if navigation occurred after an error
-export const MONITOR_NAVIGATION_WITHIN_MS = 250;
+// Time window to capture transient navigation after an error
+// Navigation within this window suggests the error was transient and may not have been seen by users
+export const TRANSIENT_NAVIGATION_WINDOW_MS = 250;
 
 interface ErrorServiceError {
   error: Error;
@@ -33,15 +34,17 @@ interface Deps {
 
 // To keep track of errors that are enqueued for later reporting
 interface EnqueuedError extends ErrorServiceError {
-  startTime: number;
-  isCommitted: boolean;
   id: string;
+  isReported: boolean;
 
   initialPathname: string;
-  hasSubsequentNavigation: boolean;
+  hasTransientNavigation: boolean;
+  transientNavigationDetermined: boolean;
 
-  timeoutIdCommitError?: ReturnType<typeof setTimeout>;
-  committedAt?: number; // Track when commit was first requested
+  enqueuedAt: number; // Timestamp when error was enqueued
+  committedAt?: number; // Track when commit was requested (externally or auto)
+
+  timeoutId?: ReturnType<typeof setTimeout>;
 }
 
 /**
@@ -76,7 +79,7 @@ export class KibanaErrorService {
 
     if (stackLines) {
       let i = 0;
-      while (i < stackLines.length - 1) {
+      while (i < stackLines.length) {
         // scan the stack trace text
         if (stackLines[i].match(errorIndicator)) {
           // extract the name of the bad component
@@ -111,62 +114,106 @@ export class KibanaErrorService {
     const isFatal = this.getIsFatal(error);
     const id = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    // Create the enqueued error object with timing information
+    // Create the enqueued error object
     const enqueuedError: EnqueuedError = {
       id,
       error,
       errorInfo,
       isFatal,
       name: this.getErrorComponentName(errorInfo),
-      startTime: Date.now(),
-      isCommitted: false,
-      hasSubsequentNavigation: false,
+      isReported: false,
+      hasTransientNavigation: false,
+      transientNavigationDetermined: false,
       initialPathname: this.getCurrentPathname(),
+      enqueuedAt: Date.now(), // Set the enqueued timestamp
     };
 
-    // Auto commit the error after DEFAULT_MAX_ERROR_DURATION_MS to ensure it doesn't linger indefinitely
-    if (isFatal) {
-      enqueuedError.timeoutIdCommitError = setTimeout(() => {
-        this.commitError(id);
-      }, DEFAULT_MAX_ERROR_DURATION_MS);
-    }
-
     this.enqueuedErrors.set(id, enqueuedError);
+
+    // Set up single timer for transient navigation check
+    if (isFatal) {
+      enqueuedError.timeoutId = setTimeout(() => {
+        this.handleTransientNavigationCheck(id);
+      }, TRANSIENT_NAVIGATION_WINDOW_MS);
+    }
 
     return enqueuedError;
   }
 
   /**
-   * Commits an error, ensuring at least MONITOR_NAVIGATION_WITHIN_MS has passed for navigation check
+   * Handles the transient navigation check after TRANSIENT_NAVIGATION_WINDOW_MS
+   * @private
+   */
+  private handleTransientNavigationCheck(errorId: string): void {
+    const enqueuedError = this.enqueuedErrors.get(errorId);
+    if (!enqueuedError || enqueuedError.isReported) {
+      return;
+    }
+
+    // Check for transient navigation
+    const currentPathname = this.getCurrentPathname();
+    const navigationOccurred = enqueuedError.initialPathname !== currentPathname;
+
+    enqueuedError.hasTransientNavigation = navigationOccurred;
+    enqueuedError.transientNavigationDetermined = true;
+
+    // If external commit was already requested, commit immediately
+    if (enqueuedError.committedAt) {
+      this.reportError(enqueuedError);
+    } else {
+      // Otherwise, set up timer for the remaining duration until max timeout
+      const remainingTime = DEFAULT_MAX_ERROR_DURATION_MS - TRANSIENT_NAVIGATION_WINDOW_MS;
+      enqueuedError.timeoutId = setTimeout(() => {
+        this.reportError(enqueuedError);
+      }, remainingTime);
+    }
+  }
+
+  /**
+   * Commits an error, ensuring transient navigation has been determined
    * @param errorId The ID of the enqueued error
    * @returns The error object or null if not found or already committed
    */
   public commitError(errorId: string): ErrorServiceError | null {
     const enqueuedError = this.enqueuedErrors.get(errorId);
 
-    if (!enqueuedError || enqueuedError.isCommitted) {
+    if (!enqueuedError || enqueuedError.isReported) {
       return null;
     }
 
-    const now = Date.now();
+    // Mark the commit timestamp
+    enqueuedError.committedAt = enqueuedError.committedAt ?? Date.now();
 
-    // If not already elapsed, wait at least MONITOR_NAVIGATION_WITHIN_MS to check for navigation
-    // This is needed as to capture visually unseen errors, absorbed by navigation
-    const timeSinceEnqueue = now - enqueuedError.startTime;
-    if (timeSinceEnqueue < MONITOR_NAVIGATION_WITHIN_MS) {
-      const remainingWait = MONITOR_NAVIGATION_WITHIN_MS - timeSinceEnqueue;
-      if (enqueuedError.timeoutIdCommitError) clearTimeout(enqueuedError.timeoutIdCommitError);
-      enqueuedError.timeoutIdCommitError = setTimeout(() => {
-        this.commitError(errorId);
-      }, remainingWait);
+    // If transient navigation hasn't been determined yet, just mark the request and return null
+    // The handleTransientNavigationCheck will call reportError when ready
+    if (!enqueuedError.transientNavigationDetermined) {
       return null;
     }
 
-    // Mark the error as committed
-    enqueuedError.isCommitted = true;
-    enqueuedError.committedAt = !enqueuedError.committedAt ? now : enqueuedError.committedAt;
-    if (enqueuedError.timeoutIdCommitError) {
-      clearTimeout(enqueuedError.timeoutIdCommitError);
+    // Transient navigation is already determined, commit immediately
+    return this.reportError(enqueuedError);
+  }
+
+  /**
+   * Actually reports the error telemetry
+   * @private
+   */
+  private reportError(enqueuedError: EnqueuedError): ErrorServiceError {
+    if (enqueuedError.isReported) {
+      return {
+        error: enqueuedError.error,
+        errorInfo: enqueuedError.errorInfo,
+        isFatal: enqueuedError.isFatal,
+        name: enqueuedError.name,
+      };
+    }
+
+    // Mark the error as reported
+    enqueuedError.isReported = true;
+
+    if (enqueuedError.timeoutId) {
+      // Mark the error as committed
+      enqueuedError.timeoutId = undefined;
     }
 
     try {
@@ -179,10 +226,9 @@ export class KibanaErrorService {
             enqueuedError.error instanceof Error && typeof enqueuedError.error.stack === 'string'
               ? enqueuedError.error.stack
               : '',
-          component_render_min_duration_ms: enqueuedError.committedAt - enqueuedError.startTime,
-          has_subsequent_navigation:
-            enqueuedError.hasSubsequentNavigation ||
-            enqueuedError.initialPathname !== this.getCurrentPathname(),
+          component_render_min_duration_ms:
+            (enqueuedError.committedAt ?? Date.now()) - enqueuedError.enqueuedAt,
+          has_transient_navigation: enqueuedError.hasTransientNavigation,
         });
       }
     } catch (e) {
