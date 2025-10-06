@@ -47,8 +47,8 @@ describe('Errors page', () => {
     it('has no detectable a11y violations on load', () => {
       cy.visitKibana(javaServiceErrorsPageHref);
       cy.contains('Error occurrences');
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
+      checkA11y();
     });
 
     describe('when service has no errors', () => {

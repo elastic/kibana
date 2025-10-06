@@ -83,8 +83,8 @@ describe('Dependencies', () => {
         })}`
       );
       cy.contains('h1', 'postgresql');
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
+      checkA11y();
     });
   });
 
