@@ -600,6 +600,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   {
                     link: 'management:dataViews',
                   },
+                  {
+                    link: 'management:search_sessions',
+                  },
                 ],
               },
             ],
