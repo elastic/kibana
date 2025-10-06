@@ -372,7 +372,9 @@ describe('Authenticator', () => {
     let mockSessVal: SessionValue;
 
     beforeEach(() => {
-      mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      mockOptions = getMockOptions({
+        providers: { basic: { basic1: { order: 0 } }, oidc: { oidc1: { order: 1 } } },
+      });
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -402,7 +404,7 @@ describe('Authenticator', () => {
 
       await expect(
         authenticator.login(httpServerMock.createKibanaRequest(), {
-          provider: 'basic',
+          provider: { type: 'oidc' },
           value: undefined,
         } as any)
       ).rejects.toThrowError('Login "attempt.value" should not be empty.');
