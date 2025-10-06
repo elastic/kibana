@@ -6315,12 +6315,36 @@ components:
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
       type: string
+    ExternalRuleCustomizedFields:
+      description: >-
+        An array of customized field names — that is, fields that the user has
+        modified from their base value. Defaults to an empty array.
+      items:
+        type: object
+        properties:
+          field_name:
+            description: Name of a user-modified field in the rule object.
+            type: string
+        required:
+          - field_name
+      type: array
+    ExternalRuleHasBaseVersion:
+      description: >-
+        Determines whether an external/prebuilt rule has its original,
+        unmodified version present when the calculation of its customization
+        status is performed (`rule_source.is_customized` and
+        `rule_source.customized_fields`).
+      type: boolean
     ExternalRuleSource:
       description: >-
         Type of rule source for externally sourced rules, i.e. rules that have
         an external source, such as the Elastic Prebuilt rules repo.
       type: object
       properties:
+        customized_fields:
+          $ref: '#/components/schemas/ExternalRuleCustomizedFields'
+        has_base_version:
+          $ref: '#/components/schemas/ExternalRuleHasBaseVersion'
         is_customized:
           $ref: '#/components/schemas/IsExternalRuleCustomized'
         type:
@@ -6330,6 +6354,8 @@ components:
       required:
         - type
         - is_customized
+        - has_base_version
+        - customized_fields
     FindRulesSortField:
       enum:
         - created_at
