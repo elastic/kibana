@@ -8,7 +8,7 @@
 import { ModelFamily, ModelPlatform, ModelProvider } from '../model_provider';
 import { type InferenceConnector, InferenceConnectorType } from './connectors';
 
-export const DEFAULT_OPENAI_MODEL = 'gpt-5-chat';
+export const DEFAULT_OPENAI_MODEL = 'gpt-4.1';
 
 /**
  * Returns the default model as defined in the connector's config, if available.

@@ -245,5 +245,5 @@ export const prepareMessages = (messages: Message[]) =>
     return acc;
   }, [] as Message[]);
 
-export const DEFAULT_BEDROCK_MODEL = 'us.anthropic.claude-sonnet-4-20250514-v1:0';
+export const DEFAULT_BEDROCK_MODEL = 'us.anthropic.claude-sonnet-4-5-20250929-v1:0';
 export const DEFAULT_BEDROCK_REGION = 'us-east-1';

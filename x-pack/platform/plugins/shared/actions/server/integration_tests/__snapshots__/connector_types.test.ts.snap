@@ -2386,7 +2386,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+        "default": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
         "error": [Function],
         "presence": "optional",
       },
@@ -10742,7 +10742,7 @@ Object {
           },
           "defaultModel": Object {
             "flags": Object {
-              "default": "gpt-5-chat",
+              "default": "gpt-4.1",
               "error": [Function],
               "presence": "optional",
             },

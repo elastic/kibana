@@ -91,7 +91,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: {
             ...config,
-            defaultModel: 'gpt-5-chat',
+            defaultModel: 'gpt-4.1',
           },
         });
       });
