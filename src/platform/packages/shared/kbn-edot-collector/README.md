@@ -1,22 +1,22 @@
-# @kbn/edot
+# @kbn/edot-collector
 
-EDOT (Elastic Distribution of OpenTelemetry) CLI tool for Kibana development.
+EDOT Collector (Elastic Distribution of OpenTelemetry Collector) CLI tool for Kibana development.
 
-This package provides a developer command to easily start EDOT (Elastic Distribution of OpenTelemetry Collector) and connect it to your Elasticsearch cluster.
+This package provides a developer command to easily start an EDOT Collector instance in Gateway mode and connect it to your Elasticsearch cluster.
 
 ## Usage
 
 ### Basic usage
 
 ```bash
-node scripts/edot.js
+node scripts/edot_collector.js
 ```
 
 This will:
 
 1. Read Elasticsearch connection details from `config/kibana.yml` and `config/kibana.dev.yml`
 2. Generate an OpenTelemetry Collector configuration
-3. Start a Docker container named `kibana-dev-edot` with the EDOT collector
+3. Start a Docker container named `kibana-dev-edot-collector` with the EDOT Collector running in Gateway mode
 4. Expose OTLP endpoints (gRPC on 4317, HTTP on 4318) for application instrumentation
 5. Send telemetry data to your Elasticsearch cluster
 
@@ -24,13 +24,13 @@ This will:
 
 ```bash
 # Single config file
-node scripts/edot.js --config path/to/custom/kibana.yml
+node scripts/edot_collector.js --config path/to/custom/kibana.yml
 
 # Short form
-node scripts/edot.js -c path/to/custom/kibana.yml
+node scripts/edot_collector.js -c path/to/custom/kibana.yml
 
 # Multiple config files (later files override earlier ones)
-node scripts/edot.js --config config/kibana.yml --config config/kibana.dev.yml
+node scripts/edot_collector.js --config config/kibana.yml --config config/kibana.dev.yml
 ```
 
 ### Using environment variables
@@ -41,7 +41,7 @@ You can override Elasticsearch connection settings using environment variables:
 ELASTICSEARCH_HOST=https://my-cluster.es.cloud:443 \
 ELASTICSEARCH_USERNAME=elastic \
 ELASTICSEARCH_PASSWORD=secret \
-node scripts/edot.js
+node scripts/edot_collector.js
 ```
 
 ## Configuration
@@ -60,7 +60,7 @@ Default values if not specified:
 
 ## What gets collected
 
-The EDOT collector is configured to collect:
+The EDOT Collector is configured to collect:
 
 - **Application traces**: Distributed traces from instrumented applications via OTLP
 - **Application logs**: Logs from instrumented applications via OTLP
@@ -103,28 +103,28 @@ sdk.start();
 
 ## Managing the container
 
-The EDOT collector runs in a Docker container named `kibana-dev-edot`.
+The EDOT Collector runs in a Docker container named `kibana-dev-edot-collector`.
 
 ```bash
 # Check container status
-docker ps | grep kibana-dev-edot
+docker ps | grep kibana-dev-edot-collector
 
 # View logs
-docker logs kibana-dev-edot
+docker logs kibana-dev-edot-collector
 
 # Stop the container
-docker stop kibana-dev-edot
+docker stop kibana-dev-edot-collector
 
 # Remove the container
-docker rm kibana-dev-edot
+docker rm kibana-dev-edot-collector
 
 # Stop via docker-compose
-docker compose -f data/edot/docker-compose.yaml down
+docker compose -f data/edot_collector/docker-compose.yaml down
 ```
 
 ## Generated files
 
-The command generates the following files in `data/edot/`:
+The command generates the following files in `data/edot_collector/`:
 
 - `docker-compose.yaml` - Docker Compose configuration
 - `otel-collector-config.yml` - OpenTelemetry Collector configuration
@@ -148,12 +148,12 @@ docker info
 Check the logs:
 
 ```bash
-docker logs kibana-dev-edot
+docker logs kibana-dev-edot-collector
 ```
 
 ### Can't see data in Kibana
 
-1. Verify the container is running: `docker ps | grep kibana-dev-edot`
-2. Check Elasticsearch connection in the logs: `docker logs kibana-dev-edot`
+1. Verify the container is running: `docker ps | grep kibana-dev-edot-collector`
+2. Check Elasticsearch connection in the logs: `docker logs kibana-dev-edot-collector`
 3. Verify your Elasticsearch credentials are correct
 4. Make sure you've installed the OpenTelemetry Assets integrations

@@ -6033,7 +6033,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/edot@link:src/platform/packages/shared/kbn-edot":
+"@kbn/edot-collector@link:src/platform/packages/shared/kbn-edot-collector":
   version "0.0.0"
   uid ""
 

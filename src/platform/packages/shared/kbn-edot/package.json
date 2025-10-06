@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/edot",
-  "version": "1.0.0",
-  "description": "EDOT (Elastic Distribution of OpenTelemetry) development tool for Kibana",
-  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
-  "private": true
-}

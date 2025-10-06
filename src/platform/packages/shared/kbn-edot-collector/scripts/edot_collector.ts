@@ -8,7 +8,7 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { ensureEdot } from '../src/ensure_edot';
+import { ensureEdotCollector } from '../src/ensure_edot_collector';
 
 run(
   ({ log, addCleanupTask }) => {
@@ -18,20 +18,19 @@ run(
       controller.abort();
     });
 
-    return ensureEdot({
+    return ensureEdotCollector({
       log,
       signal: controller.signal,
     }).catch((error) => {
-      throw new Error('Failed to start EDOT', { cause: error });
+      throw new Error('Failed to start EDOT Collector', { cause: error });
     });
   },
   {
     description: `
-      Start EDOT (Elastic Distribution of OpenTelemetry Collector) and connect it to Elasticsearch.
+      Start EDOT Collector (Elastic Distribution of OpenTelemetry Collector) as a Gateway and connect it to Elasticsearch.
       
       Reads Elasticsearch connection details from kibana.yml and kibana.dev.yml, generates 
-      OpenTelemetry Collector configuration, and starts a Docker container to collect host 
-      and Docker metrics.
+      OpenTelemetry Collector configuration, and starts a Docker container running the EDOT Collector.
     `,
     flags: {
       string: ['config'],

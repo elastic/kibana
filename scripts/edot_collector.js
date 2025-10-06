@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/edot/scripts/edot');
+require('@kbn/edot-collector/scripts/edot_collector');
