@@ -49,6 +49,8 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
   const isInitialValueSet = useRef<boolean>(false);
 
   useEffect(() => {
+    const ALLOWED_PATHS = ['/guide/', '/docs/'];
+
     const loadBufferFromRemote = async (url: string) => {
       if (/^https?:\/\//.test(url)) {
         // Check if this is a valid URL
@@ -59,8 +61,13 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         }
         // Parse the URL to avoid issues with spaces and other special characters.
         const parsedURL = new URL(url);
-        if (parsedURL.origin === 'https://www.elastic.co') {
-          const resp = await fetch(parsedURL);
+        // Validate protocol, hostname, and allowed path to prevent request forgery
+        if (
+          parsedURL.protocol === 'https:' &&
+          parsedURL.hostname === 'www.elastic.co' &&
+          ALLOWED_PATHS.some((path) => parsedURL.pathname.startsWith(path))
+        ) {
+          const resp = await fetch(parsedURL.href);
           const data = await resp.text();
           setValue(`${localStorageValue ?? ''}\n\n${data}`);
         } else {
