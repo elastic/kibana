@@ -63,6 +63,10 @@ export function WorkflowExecuteModal({
 
   return (
     <>
+      {/*
+        The following Global CSS is needed to ensure that modal will not overlay SearchBar's
+        autocomplete popup
+      */}
       <Global
         styles={css`
           .euiOverlayMask:has(.workflowExecuteModal) {
