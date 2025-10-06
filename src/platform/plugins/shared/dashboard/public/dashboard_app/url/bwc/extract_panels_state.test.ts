@@ -11,7 +11,6 @@ import { coreServices } from '../../../services/kibana_services';
 import { extractPanelsState } from './extract_panels_state';
 
 describe('extractPanelsState', () => {
-  
   describe('8.19', () => {
     test('should migrate panels in sections', () => {
       const { panels } = extractPanelsState({
