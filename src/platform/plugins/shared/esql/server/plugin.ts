@@ -41,6 +41,20 @@ export class EsqlServerPlugin implements Plugin<EsqlServerPluginSetup> {
 
     registerRoutes(core, this.extensionsRegistry, initContext);
 
+    this.extensionsRegistry.setRecommendedQueries(
+      [
+        {
+          name: 'Metrics dfgfd',
+          query: 'ts kibana_sample_data_logstsdb',
+        },
+        {
+          name: 'Logs count',
+          query: 'from kibana_sample_data_logs | STATS count(*)',
+        },
+      ],
+      'oblt'
+    );
+
     return {
       getExtensionsRegistry: () => this.extensionsRegistry,
     };

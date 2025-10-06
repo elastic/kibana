@@ -72,6 +72,9 @@ export const getCommandContext = async (
       return {
         timeSeriesSources: timeseriesSources?.indices || [],
         sources: await getSources(),
+        editorExtensions: (await callbacks?.getEditorExtensions?.(queryString)) ?? {
+          recommendedQueries: [],
+        },
       };
     default:
       return {};
