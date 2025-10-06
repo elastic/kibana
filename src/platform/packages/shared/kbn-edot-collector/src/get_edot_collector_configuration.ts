@@ -10,14 +10,14 @@
 import yaml from 'js-yaml';
 
 /**
- * Generates the OpenTelemetry Collector configuration for EDOT.
+ * Generates the OpenTelemetry Collector configuration for the EDOT Collector.
  *
  * @param elasticsearchEndpoint - The Elasticsearch endpoint URL
  * @param username - Elasticsearch username
  * @param password - Elasticsearch password
- * @returns YAML configuration string for the EDOT collector
+ * @returns YAML configuration string for the EDOT Collector
  */
-export function getEdotCollectorConfig({
+export function getEdotCollectorConfiguration({
   elasticsearchEndpoint,
   username,
   password,

@@ -1,6 +1,6 @@
 {
   "type": "shared-server",
-  "id": "@kbn/edot",
+  "id": "@kbn/edot-collector",
   "owner": "@elastic/obs-ux-infra_services-team",
   "group": "platform",
   "visibility": "shared",

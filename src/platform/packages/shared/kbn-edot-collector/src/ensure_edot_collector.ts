@@ -14,17 +14,17 @@ import chalk from 'chalk';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { assertDockerAvailable } from './util/assert_docker_available';
 import { getDockerComposeYaml } from './get_docker_compose_yaml';
-import { getEdotCollectorConfig } from './get_edot_collector_config';
+import { getEdotCollectorConfiguration } from './get_edot_collector_configuration';
 import { writeFile } from './util/file_utils';
 import { readKibanaConfig } from './read_kibana_config';
 import { untilContainerReady } from './util/until_container_ready';
 
-const DATA_DIR = Path.join(REPO_ROOT, 'data', 'edot');
+const DATA_DIR = Path.join(REPO_ROOT, 'data', 'edot_collector');
 const DOCKER_COMPOSE_FILE_PATH = Path.join(DATA_DIR, 'docker-compose.yaml');
 const COLLECTOR_CONFIG_FILE_PATH = Path.join(DATA_DIR, 'otel-collector-config.yml');
 
 /**
- * Stops the EDOT Docker containers.
+ * Stops the EDOT Collector Docker containers.
  *
  * @param cleanup - Whether to perform cleanup after stopping
  */
@@ -57,15 +57,21 @@ function normalizeElasticsearchHost(host: string): string {
 }
 
 /**
- * Ensures EDOT (Elastic Distribution of OpenTelemetry) is running.
- * Reads configuration from kibana.dev.yml, generates EDOT collector config,
+ * Ensures the EDOT Collector (Elastic Distribution of OpenTelemetry Collector) is running in Gateway mode.
+ * Reads configuration from kibana.dev.yml, generates EDOT Collector configuration,
  * and starts the Docker container.
  *
  * @param log - Tooling logger for output
  * @param signal - Abort signal for cleanup
  */
-export async function ensureEdot({ log, signal }: { log: ToolingLog; signal: AbortSignal }) {
-  log.info(`Ensuring EDOT is available`);
+export async function ensureEdotCollector({
+  log,
+  signal,
+}: {
+  log: ToolingLog;
+  signal: AbortSignal;
+}) {
+  log.info(`Ensuring EDOT Collector is available`);
 
   await assertDockerAvailable();
 
@@ -84,8 +90,8 @@ export async function ensureEdot({ log, signal }: { log: ToolingLog; signal: Abo
   log.debug(`Stopping existing containers`);
   await down();
 
-  // Generate EDOT collector configuration
-  const collectorConfig = getEdotCollectorConfig({
+  // Generate EDOT Collector configuration
+  const collectorConfig = getEdotCollectorConfiguration({
     elasticsearchEndpoint: elasticsearchHost,
     username: elasticsearchUsername,
     password: elasticsearchPassword,
@@ -104,7 +110,7 @@ export async function ensureEdot({ log, signal }: { log: ToolingLog; signal: Abo
 
   // Wait for container to be running
   untilContainerReady({
-    containerName: 'kibana-dev-edot',
+    containerName: 'kibana-dev-edot-collector',
     signal,
     log,
     dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH,
@@ -116,7 +122,7 @@ export async function ensureEdot({ log, signal }: { log: ToolingLog; signal: Abo
       log.write(
         `${chalk.green(
           '✔'
-        )} EDOT collector started successfully and connected to ${elasticsearchHost}`
+        )} EDOT Collector started successfully in Gateway mode and connected to ${elasticsearchHost}`
       );
 
       log.write('');
@@ -131,9 +137,9 @@ export async function ensureEdot({ log, signal }: { log: ToolingLog; signal: Abo
       log.write(`  ${chalk.dim('gRPC:')} http://localhost:4317`);
       log.write(`  ${chalk.dim('HTTP:')} http://localhost:4318`);
       log.write('');
-      log.write(`${chalk.dim('Container name:')} kibana-dev-edot`);
-      log.write(`${chalk.dim('To stop:')} docker stop kibana-dev-edot`);
-      log.write(`${chalk.dim('To remove:')} docker rm kibana-dev-edot`);
+      log.write(`${chalk.dim('Container name:')} kibana-dev-edot-collector`);
+      log.write(`${chalk.dim('To stop:')} docker stop kibana-dev-edot-collector`);
+      log.write(`${chalk.dim('To remove:')} docker rm kibana-dev-edot-collector`);
     })
     .catch((error) => {
       log.error(error);
