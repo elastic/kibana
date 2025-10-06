@@ -131,7 +131,7 @@ describe('Observability AI Assistant client', () => {
 
   let llmSimulator: LlmSimulator;
 
-  function createClient() {
+  function createClient(namespace: string = 'default') {
     jest.resetAllMocks();
 
     // uncomment this line for debugging
@@ -1658,9 +1658,9 @@ describe('Observability AI Assistant client', () => {
     });
 
     const runWithNamespace = async (namespace: string) => {
+      // client = createClient(namespace);
       client = createClient();
       (client as any).dependencies.namespace = namespace;
-
       (
         await client.complete({
           functionClient: functionClientMock,
@@ -1689,12 +1689,13 @@ describe('Observability AI Assistant client', () => {
     });
 
     it('generates a link with space segment for non-default space', async () => {
+      const space = 'myspace';
       await runWithNamespace('myspace');
 
       expect(functionClientMock.registerInstruction).toHaveBeenCalled();
       expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
         expect.stringContaining(
-          'http://localhost:5601/s/myspace/app/observabilityAIAssistant/conversations/'
+          `http://localhost:5601/s/${space}/app/observabilityAIAssistant/conversations/`
         )
       );
     });
