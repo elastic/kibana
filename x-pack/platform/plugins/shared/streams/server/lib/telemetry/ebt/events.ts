@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { STREAMS_ENDPOINT_LATENCY_EVENT } from './constants';
-import { streamsEndpointLatencySchema } from './schemas';
+import { STREAMS_ENDPOINT_LATENCY_EVENT, STREAMS_STATE_ERROR_EVENT } from './constants';
+import { streamsEndpointLatencySchema, streamsStateErrorSchema } from './schemas';
 
 const streamsEndpointLatencyEventType = {
   eventType: STREAMS_ENDPOINT_LATENCY_EVENT,
   schema: streamsEndpointLatencySchema,
 };
 
-export { streamsEndpointLatencyEventType };
+const streamsStateErrorEventType = {
+  eventType: STREAMS_STATE_ERROR_EVENT,
+  schema: streamsStateErrorSchema,
+};
+
+export { streamsEndpointLatencyEventType, streamsStateErrorEventType };
