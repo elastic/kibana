@@ -1,0 +1,11 @@
+{
+  "name": "@kbn/react-query",
+  "version": "1.0.0",
+  "description": "React Query async state management, but with networkMode: 'always' behavior by default (needed for some airgapped environments)",
+  "author": "Gerard Soldevila <soldevila@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elastic/kibana/issues"
+  },
+  "homepage": "https://github.com/elastic/kibana/tree/main/packages/react-query#readme"
+}
