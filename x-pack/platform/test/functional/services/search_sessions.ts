@@ -80,6 +80,11 @@ export class SearchSessionsService extends FtrService {
     await this.expectManagementTable();
   }
 
+  public async closeFlyout() {
+    await this.testSubjects.click('euiFlyoutCloseButton');
+    await this.testSubjects.missingOrFail('searchSessionsMgmtUiTable');
+  }
+
   public async expectManagementTable() {
     await this.testSubjects.existOrFail('searchSessionsMgmtUiTable');
   }
