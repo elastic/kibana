@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { useKibana } from '../../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsPreviewProps } from '../types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
@@ -20,8 +20,9 @@ import { ConnectorCard } from '../card';
 const ResilientFieldsComponent: React.FunctionComponent<
   ConnectorFieldsPreviewProps<ResilientFieldsType>
 > = ({ connector, fields }) => {
-  const { incidentTypes = null, severityCode = null } = fields ?? {};
+  const { incidentTypes = null, severityCode = null, additionalFields = null } = fields ?? {};
   const { http } = useKibana().services;
+  const showAdditionalFields = KibanaServices.getConfig()?.resilient.additionalFields.enabled;
 
   const {
     isLoading: isLoadingIncidentTypesData,
@@ -70,8 +71,24 @@ const ResilientFieldsComponent: React.FunctionComponent<
             },
           ]
         : []),
+      ...(showAdditionalFields && additionalFields != null && additionalFields.length > 0
+        ? [
+            {
+              title: i18n.ADDITIONAL_FIELDS_LABEL,
+              description: additionalFields,
+              displayAsCodeBlock: true,
+            },
+          ]
+        : []),
     ],
-    [incidentTypes, severityCode, allIncidentTypes, severity]
+    [
+      incidentTypes,
+      severityCode,
+      allIncidentTypes,
+      severity,
+      showAdditionalFields,
+      additionalFields,
+    ]
   );
 
   return (

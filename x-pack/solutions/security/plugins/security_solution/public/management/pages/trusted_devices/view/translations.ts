@@ -19,7 +19,7 @@ export const DETAILS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.trustedDevices.form.detailsHeaderDescription',
   {
     defaultMessage:
-      'Add a trusted device to improve performance or alleviate compatibility issues.',
+      'Allow a specific external device to connect to your endpoints, even when Device Control is enabled.',
   }
 );
 
