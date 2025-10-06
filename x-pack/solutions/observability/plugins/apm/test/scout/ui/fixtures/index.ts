@@ -29,6 +29,12 @@ const APM_ROLES = {
   apmAllPrivilegesWithoutWriteSettings: {
     elasticsearch: {
       cluster: ['manage_api_key'],
+      indices: [
+        {
+          names: ['apm-*'],
+          privileges: ['read', 'view_index_metadata'],
+        },
+      ],
     },
     kibana: [
       {

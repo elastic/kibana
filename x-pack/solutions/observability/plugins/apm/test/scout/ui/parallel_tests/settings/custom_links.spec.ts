@@ -31,18 +31,6 @@ test.describe('Custom links - Privileged User', { tag: ['@ess', '@svlOblt'] }, (
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  test('shows create button functionality', async ({ page, pageObjects: { customLinksPage } }) => {
-    await customLinksPage.goto();
-
-    // Verify the create button is present and enabled
-    const createButton = await customLinksPage.getCreateCustomLinkButton();
-    await expect(createButton).toBeEnabled();
-
-    // Test the create button functionality
-    await createButton.click();
-    await expect(page.getByText('Create link')).toBeVisible();
-  });
-
   test('creates custom link and deletes the created custom link', async ({
     page,
     pageObjects: { customLinksPage },
@@ -50,7 +38,6 @@ test.describe('Custom links - Privileged User', { tag: ['@ess', '@svlOblt'] }, (
     await customLinksPage.goto();
 
     await customLinksPage.clickCreateCustomLink();
-
     await expect(page.getByText('Create link')).toBeVisible();
     await expect(page.getByText('Save')).toBeDisabled();
 

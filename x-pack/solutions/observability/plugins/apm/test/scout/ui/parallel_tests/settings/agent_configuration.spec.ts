@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt';
-import { test } from '../../fixtures';
+import { test, apmAuth } from '../../fixtures';
 
 test.describe('Agent Configuration - Viewer', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
@@ -20,15 +20,27 @@ test.describe('Agent Configuration - Viewer', { tag: ['@ess'] }, () => {
   });
 });
 
+test.describe(
+  'Agent Configuration - APM All Privileges Without Write Settings',
+  { tag: ['@ess'] },
+  () => {
+    test.beforeEach(async ({ browserAuth }) => {
+      await apmAuth.loginAsApmAllPrivilegesWithoutWriteSettings(browserAuth);
+    });
+
+    test('shows create button as disabled', async ({
+      pageObjects: { agentConfigurationsPage },
+    }) => {
+      await agentConfigurationsPage.goto();
+      const createButton = await agentConfigurationsPage.getCreateConfigurationButton();
+      await expect(createButton).toBeDisabled();
+    });
+  }
+);
+
 test.describe('Agent Configuration - Privileged User', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
-  });
-
-  test('shows create button as enabled', async ({ pageObjects: { agentConfigurationsPage } }) => {
-    await agentConfigurationsPage.goto();
-    const createButton = await agentConfigurationsPage.getCreateConfigurationButton();
-    await expect(createButton).toBeEnabled();
   });
 
   test('configures, creates and deletes an agent configuration with all services and production environment', async ({
@@ -36,6 +48,8 @@ test.describe('Agent Configuration - Privileged User', { tag: ['@ess'] }, () => 
     pageObjects: { agentConfigurationsPage },
   }) => {
     await agentConfigurationsPage.goto();
+    const createButton = await agentConfigurationsPage.getCreateConfigurationButton();
+    await expect(createButton).toBeEnabled();
 
     await test.step('create configuration workflow', async () => {
       await agentConfigurationsPage.clickCreateConfiguration();
