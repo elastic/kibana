@@ -19,8 +19,17 @@ import { SecurityAction } from '.';
 
 export const MANAGE_ACCESS_CONTROL_ACTION = 'manage_access_control';
 
+interface AccessControlServiceParams {
+  typeRegistry?: ISavedObjectTypeRegistry;
+}
+
 export class AccessControlService {
   private userForOperation: AuthenticatedUser | null = null;
+  private typeRegistry: ISavedObjectTypeRegistry | undefined;
+
+  constructor({ typeRegistry }: AccessControlServiceParams) {
+    this.typeRegistry = typeRegistry;
+  }
 
   setUserForOperation(user: AuthenticatedUser | null) {
     this.userForOperation = user;
@@ -28,14 +37,13 @@ export class AccessControlService {
 
   getTypesRequiringPrivilegeCheck({
     objects,
-    typeRegistry,
     actions,
   }: {
     objects: AuthorizeObject[];
-    typeRegistry?: ISavedObjectTypeRegistry;
+
     actions: Set<SecurityAction>;
   }): GetTypesRequiringAccessControlCheckResult {
-    if (!typeRegistry) {
+    if (!this.typeRegistry) {
       return { typesRequiringAccessControl: new Set<string>(), results: [] };
     }
     const currentUser = this.userForOperation;
@@ -61,7 +69,7 @@ export class AccessControlService {
       if (
         // ToDo: This logic behaves strangely if accessControl.mode is undefined, which for some reason it can be?
         // Shouldn't we only need to check that accessControl is defined?
-        typeRegistry.supportsAccessControl(obj.type) &&
+        this.typeRegistry?.supportsAccessControl(obj.type) &&
         (obj.accessControl?.accessMode === 'read_only' || anyActionsForcingDefaultCheck) &&
         obj.accessControl?.owner &&
         currentUser && // Sid - if we don't have a user, should't we ultimately throw?
@@ -103,6 +111,9 @@ export class AccessControlService {
     const unauthorizedTypes: Set<string> = new Set();
 
     for (const type of typesRequiringAccessControl) {
+      if (!this.typeRegistry?.supportsAccessControl(type)) {
+        continue;
+      }
       const typeAuth = typeMap.get(type);
       const accessControlAuth = typeAuth?.[MANAGE_ACCESS_CONTROL_ACTION as A];
       if (!accessControlAuth) {

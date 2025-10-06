@@ -323,9 +323,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
-    this.accessControlService = new AccessControlService();
-    this.typeRegistry = typeRegistry;
 
+    this.typeRegistry = typeRegistry;
+    this.accessControlService = new AccessControlService({ typeRegistry });
     // This comment block is a quick reference for the action map, which maps authorization actions
     // and audit actions to a "security action" as used by the authorization methods.
     // Security Action                    ES AUTH ACTION          AUDIT ACTION
@@ -452,6 +452,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     params: CheckAuthorizationParams<A>
   ): Promise<CheckAuthorizationResult<A>> {
     const { types, spaces, actions, options = { allowGlobalResource: false } } = params;
+
     const { allowGlobalResource, typesRequiringAccessControl } = options;
     if (types.size === 0) {
       throw new Error('No types specified for authorization check');
@@ -690,7 +691,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const { typesRequiringAccessControl } =
       this.accessControlService.getTypesRequiringPrivilegeCheck({
         objects: accessControlObjects || [],
-        typeRegistry: this.typeRegistry,
         actions: params.actions,
       });
 
@@ -1149,7 +1149,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const { typesRequiringAccessControl } =
       this.accessControlService.getTypesRequiringPrivilegeCheck({
         objects,
-        typeRegistry: this.typeRegistry,
         actions: new Set([action]),
       });
 
@@ -1158,6 +1157,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
      * Saved Objects, but still require authorization. Hence, we pass an empty actions list to the base
      * authorization checks.
      */
+
     if (typesRequiringAccessControl.size > 0) {
       const authorizationResult = await this.checkAuthorization({
         types: new Set(typesRequiringAccessControl),
@@ -1205,7 +1205,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   ) {
     return this.accessControlService.getTypesRequiringPrivilegeCheck({
       objects,
-      typeRegistry: this.typeRegistry,
       actions: new Set([action]),
     }) as GetTypesRequiringAccessControlCheckResult;
   }
