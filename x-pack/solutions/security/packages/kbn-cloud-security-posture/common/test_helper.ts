@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { RoleCredentials } from '@kbn/test-suites-xpack-platform/serverless/shared/services';
 import type { Agent as SuperTestAgent } from 'supertest';
+
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 
 export async function createPackagePolicy(
   supertest: SuperTestAgent,

@@ -5,9 +5,10 @@
  * 2.0.
  */
 import type { PackagePolicy, NewPackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { Agent as SuperTestAgent } from 'supertest';
 import type { BetterTest } from '../../common/bettertest';
 
-export function setupFleet(bettertest: BetterTest) {
+export function setupFleet(bettertest: SuperTestAgent) {
   return bettertest({ pathname: '/api/fleet/setup', method: 'post' });
 }
 

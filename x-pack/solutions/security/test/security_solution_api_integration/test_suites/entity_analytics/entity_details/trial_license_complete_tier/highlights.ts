@@ -8,6 +8,7 @@
 import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DEFAULT_ANOMALY_SCORE } from '@kbn/security-solution-plugin/common/constants';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 import { deleteAllRules } from '../../../../config/services/detections_response/rules';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -30,7 +31,6 @@ import {
   indexDocuments,
   setupMlModulesWithRetry,
 } from '../../../detections_response/utils';
-import { createPackagePolicy } from '../../utils/package_policy';
 import { deleteAllDocuments } from '../../utils/elasticsearch_helpers';
 
 const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';

@@ -11,7 +11,6 @@ import type {
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-common/schema/rules/v3';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { createPackagePolicy } from './helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -234,4 +233,14 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
   });
+}
+function createPackagePolicy(
+  supertest: Agent,
+  agentPolicyId: string,
+  arg2: string,
+  arg3: string,
+  arg4: string,
+  arg5: string
+) {
+  throw new Error('Function not implemented.');
 }
