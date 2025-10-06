@@ -89,7 +89,7 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        if (file.match(/(jest(\.integration)?)\.config\.(t|j)s$/)) {
+        if (file.match(/jest(\.integration)?\.config(\.\w+)?\.(t|j)s$/)) {
           return false;
         }
 
