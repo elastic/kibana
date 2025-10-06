@@ -21,9 +21,8 @@ import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import {
   ControlGroupRenderer,
-  ControlPanelsState,
+  type ControlPanelsState,
   type ControlGroupRendererApi,
-  type ControlGroupRuntimeState,
 } from '@kbn/control-group-renderer';
 import { css } from '@emotion/react';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';

@@ -38,7 +38,7 @@ export const useChildrenApi = (
   state: ControlGroupCreationOptions | undefined,
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
 ) => {
-  const children$Ref = useRef(new BehaviorSubject<{ [id: string]: unknown }>({}));
+  const children$Ref = useRef(new BehaviorSubject<{ [id: string]: DefaultEmbeddableApi }>({}));
   const currentChildState$Ref = useRef(
     new BehaviorSubject<{ [id: string]: SerializedPanelState }>({})
   );
@@ -91,6 +91,17 @@ export const useChildrenApi = (
         children$Ref.current.next({
           ...children$Ref.current.value,
           [child.uuid]: child,
+        });
+      },
+      getChildApi: async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
+        if (children$Ref.current.value[uuid]) return children$Ref.current.value[uuid];
+        return new Promise((resolve) => {
+          const subscription = children$Ref.current.subscribe(() => {
+            if (children$Ref.current.value[uuid]) {
+              subscription.unsubscribe();
+              resolve(children$Ref.current.value[uuid]);
+            }
+          });
         });
       },
       removeChild: (id: string) => {

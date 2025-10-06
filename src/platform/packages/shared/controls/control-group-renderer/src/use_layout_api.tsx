@@ -92,7 +92,7 @@ export const useLayoutApi = (
             },
           },
         });
-        // return (await getChildApi(uuid)) as ApiType;
+        return await childrenApi?.getChildApi(uuid);
       },
       replacePanel: async <State extends StickyControlState = StickyControlState>(
         idToRemove: string,
