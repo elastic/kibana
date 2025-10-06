@@ -36,7 +36,7 @@ const readOperations: Record<AlertingEntity, string[]> = {
 };
 
 const manualRunOperations: Record<AlertingEntity, string[]> = {
-  rule: ['scheduleBackfill'],
+  rule: ['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
   alert: [],
 };
 
@@ -60,8 +60,6 @@ const writeOperations: Record<AlertingEntity, string[]> = {
     'bulkDelete',
     'unsnooze',
     'runSoon',
-    'deleteBackfill',
-    'fillGaps',
   ],
   alert: ['update'],
 };

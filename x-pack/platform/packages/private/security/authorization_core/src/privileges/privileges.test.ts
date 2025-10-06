@@ -591,11 +591,9 @@ describe('features', () => {
         'bulkDelete',
         'unsnooze',
         'runSoon',
-        'deleteBackfill',
-        'fillGaps',
       ],
       ...['enable', 'disable', 'bulkEnable', 'bulkDisable'],
-      ...['scheduleBackfill'],
+      ...['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
     ];
 
     const expectedAllPrivileges = [
@@ -766,11 +764,9 @@ describe('features', () => {
         'bulkDelete',
         'unsnooze',
         'runSoon',
-        'deleteBackfill',
-        'fillGaps',
       ],
       ...['enable', 'disable', 'bulkEnable', 'bulkDisable'],
-      ...['scheduleBackfill'],
+      ...['deleteBackfill', 'fillGaps', 'scheduleBackfill'],
     ];
 
     const expectedAllPrivileges = [

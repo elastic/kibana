@@ -145,14 +145,14 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       },
       subFeatures: [
         {
-          name: 'Run backfill',
+          name: 'Manual run',
           privilegeGroups: [
             {
               groupType: 'independent',
               privileges: [
                 {
-                  name: 'Run backfill',
-                  id: 'run_backfill',
+                  name: 'Manual run',
+                  id: 'manual_run',
                   includeIn: 'all',
                   savedObject: { all: [], read: [] },
                   alerting: { rule: { manual_run: testAlertingFeatures } },

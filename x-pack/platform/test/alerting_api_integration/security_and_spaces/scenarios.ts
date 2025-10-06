@@ -219,17 +219,17 @@ export const StackAlertsOnly: User = {
   },
 };
 
-export const RunBackfillOnlyUser: User = {
-  username: 'run_backfill_only',
-  fullName: 'run_backfill_only',
-  password: 'run_backfill_only-password',
+export const ManualRunOnlyUser: User = {
+  username: 'manual_run_only',
+  fullName: 'manual_run_only',
+  password: 'manual_run_only-password',
   role: {
-    name: 'run_backfill_only_role',
+    name: 'manual_run_only_role',
     kibana: [
       {
         feature: {
           actions: ['all'],
-          alertsFixture: ['read', 'run_backfill'],
+          alertsFixture: ['read', 'manual_run'],
         },
         spaces: ['space1'],
       },
@@ -280,7 +280,7 @@ export const Users: User[] = [
   Space1AllAlertingNoneActions,
   CasesAll,
   StackAlertsOnly,
-  RunBackfillOnlyUser,
+  ManualRunOnlyUser,
   EnableDisableOnlyUser,
 ];
 
@@ -402,13 +402,13 @@ export const EnableDisableOnlyUserAtSpace1: EnableDisableOnlyUserAtSpace1 = {
   space: Space1,
 };
 
-interface RunBackfillOnlyUserAtSpace1 extends Scenario {
-  id: 'run_backfill_only at space1';
+interface ManualRunOnlyUserAtSpace1 extends Scenario {
+  id: 'manual_run_only at space1';
 }
 
-export const RunBackfillOnlyUserAtSpace1: RunBackfillOnlyUserAtSpace1 = {
-  id: 'run_backfill_only at space1',
-  user: RunBackfillOnlyUser,
+export const ManualRunOnlyUserAtSpace1: ManualRunOnlyUserAtSpace1 = {
+  id: 'manual_run_only at space1',
+  user: ManualRunOnlyUser,
   space: Space1,
 };
 
