@@ -55,6 +55,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
       expect(data.end).to.eql(end1);
       expect(data.status).to.eql('pending');
       expect(data.space_id).to.eql(spaceId);
+      expect(data.initiator).to.eql('user');
+      expect(data.initiator_id).to.be(undefined);
       expect(typeof data.created_at).to.be('string');
       testExpectedRule(data, ruleId, false);
       expect(data.schedule.length).to.eql(12);
@@ -77,6 +79,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
       expect(data.end).to.eql(end2);
       expect(data.status).to.eql('pending');
       expect(data.space_id).to.eql(spaceId);
+      expect(data.initiator).to.eql('user');
+      expect(data.initiator_id).to.be(undefined);
       expect(typeof data.created_at).to.be('string');
       testExpectedRule(data, ruleId, false);
       expect(data.schedule.length).to.eql(4);
@@ -210,6 +214,26 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
 
+          // find backfills filtered by initiator=user (should return the same backfills)
+          const findInitiatorUserResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                apiOptions.spaceId
+              )}/internal/alerting/rules/backfill/_find?initiator=user`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password);
+
+          // find backfills filtered by initiator=system (should be empty)
+          const findInitiatorSystemResponse = await supertestWithoutAuth
+            .post(
+              `${getUrlPrefix(
+                apiOptions.spaceId
+              )}/internal/alerting/rules/backfill/_find?initiator=system`
+            )
+            .set('kbn-xsrf', 'foo')
+            .auth(apiOptions.username, apiOptions.password);
+
           // find backfills for rule id that does not exist
           const findNoRulesResponse = await supertestWithoutAuth
             .post(
@@ -219,6 +243,15 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             )
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
+
+          // assertions for initiator filter
+          expect(findInitiatorUserResponse.status).to.eql(200);
+          expect(findInitiatorUserResponse.body.total).to.be.greaterThan(0);
+          expect(findInitiatorUserResponse.body.data.every((d: any) => d.initiator === 'user')).to
+            .be(true);
+
+          expect(findInitiatorSystemResponse.status).to.eql(200);
+          expect(findInitiatorSystemResponse.body.total).to.eql(0);
 
           // find backfill with start time that is before both backfill starts
           const findWithStartBothRulesResponse = await supertestWithoutAuth

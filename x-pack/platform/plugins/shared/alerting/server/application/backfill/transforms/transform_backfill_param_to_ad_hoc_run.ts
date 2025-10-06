@@ -12,6 +12,7 @@ import { calculateSchedule } from '../../../backfill_client/lib';
 import { adHocRunStatus } from '../../../../common/constants';
 import type { RuleDomain } from '../../rule/types';
 import type { ScheduleBackfillParam } from '../methods/schedule/types';
+import { backfillInitiator } from '../../../../common/constants';
 
 export const transformBackfillParamToAdHocRun = (
   param: ScheduleBackfillParam,
@@ -31,6 +32,8 @@ export const transformBackfillParamToAdHocRun = (
     duration: rule.schedule.interval,
     enabled: true,
     end,
+    initiator: param.initiator ?? backfillInitiator.USER,
+    initiatorId: param.initiatorId,
     rule: {
       name: rule.name,
       tags: rule.tags,

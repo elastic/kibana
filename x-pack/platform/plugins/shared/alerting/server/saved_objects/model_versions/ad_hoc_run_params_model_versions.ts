@@ -9,6 +9,7 @@ import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server
 import {
   rawAdHocRunParamsSchemaV1,
   rawAdHocRunParamsSchemaV2,
+  rawAdHocRunParamsSchemaV3,
 } from '../schemas/raw_ad_hoc_run_params';
 
 export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
@@ -24,6 +25,27 @@ export const adHocRunParamsModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawAdHocRunParamsSchemaV2.extends({}, { unknowns: 'ignore' }),
       create: rawAdHocRunParamsSchemaV2,
+    },
+  },
+  '3': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          initiator: { type: 'keyword' },
+          initiatorId: { type: 'keyword' },
+        },
+      },
+      {
+        type: 'data_backfill',
+        backfillFn: (document) => {
+          return { attributes: { initiator: 'user' } };
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawAdHocRunParamsSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: rawAdHocRunParamsSchemaV3,
     },
   },
 };
