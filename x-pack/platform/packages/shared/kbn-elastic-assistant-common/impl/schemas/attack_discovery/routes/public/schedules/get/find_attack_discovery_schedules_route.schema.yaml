@@ -1,0 +1,100 @@
+openapi: 3.0.0
+info:
+  title: Find Attack Discovery Schedules API endpoint
+  version: '2023-10-31'
+paths:
+  /api/attack_discovery/schedules/_find:
+    get:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/attack_discovery/schedules/_find?page=1&per_page=10&sort_field=name&sort_direction=asc' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-labels: [ess, serverless]
+      operationId: FindAttackDiscoverySchedules
+      summary: Finds Attack discovery schedules that match the search criteria
+      description: Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields.
+      tags:
+        - Attack discovery API
+      parameters:
+        - name: page
+          description: Page number to return (used for pagination). Defaults to 1.
+          in: query
+          required: false
+          schema:
+            type: number
+          example: 1
+        - name: per_page
+          description: Number of Attack discovery schedules to return per page (used for pagination). Defaults to 10.
+          in: query
+          required: false
+          schema:
+            type: number
+          example: 10
+        - name: sort_field
+          description: Field used to sort results. Common fields include 'name', 'created_at', 'updated_at', and 'enabled'.
+          in: query
+          required: false
+          schema:
+            $ref: '../../../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          example: "name"
+        - name: sort_direction
+          description: Sort order direction. Use 'asc' for ascending or 'desc' for descending. Defaults to 'asc'.
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+          example: "asc"
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - page
+                  - per_page
+                  - total
+                  - data
+                properties:
+                  page:
+                    type: number
+                    description: Current page number of the paginated result set.
+                  per_page:
+                    type: number
+                    description: Number of items requested per page.
+                  total:
+                    type: number
+                    description: Total number of Attack discovery schedules matching the query (across all pages).
+                  data:
+                    type: array
+                    description: Array of matched Attack discovery schedule objects.
+                    items:
+                      $ref: '../schedules_api.schema.yaml#/components/schemas/AttackDiscoveryApiSchedule'
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: number
+                    description: HTTP status code
+                    example: 400
+                  error:
+                    type: string
+                    description: Error type
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    description: Human-readable error message
+                    example: "Invalid request payload"

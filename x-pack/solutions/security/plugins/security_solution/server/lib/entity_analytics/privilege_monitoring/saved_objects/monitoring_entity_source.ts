@@ -169,4 +169,43 @@ export class MonitoringEntitySourceDescriptorClient {
       }
     }
   }
+
+  /**
+   * Integrations Specific Methods
+   */
+  async updateLastProcessedMarker(
+    source: MonitoringEntitySource,
+    lastProcessedMarker: string
+  ): Promise<void> {
+    await this.update({
+      ...source,
+      integrations: {
+        syncData: {
+          lastUpdateProcessed: lastProcessedMarker,
+        },
+      },
+    });
+  }
+
+  async getLastProcessedMarker(source: MonitoringEntitySource): Promise<string | undefined> {
+    return source.integrations?.syncData?.lastUpdateProcessed;
+  }
+
+  async getLastFullSyncMarker(source: MonitoringEntitySource): Promise<string | undefined> {
+    return source.integrations?.syncData?.lastFullSync;
+  }
+
+  async updateLastFullSyncMarker(
+    source: MonitoringEntitySource,
+    lastFullSyncMarker: string
+  ): Promise<void> {
+    await this.update({
+      ...source,
+      integrations: {
+        syncData: {
+          lastFullSync: lastFullSyncMarker,
+        },
+      },
+    });
+  }
 }

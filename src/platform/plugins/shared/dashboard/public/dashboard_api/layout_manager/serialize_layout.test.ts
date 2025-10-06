@@ -14,7 +14,7 @@ describe('serializeLayout', () => {
     const layout = {
       panels: {
         '1': {
-          gridData: {
+          grid: {
             h: 6,
             i: '1',
             w: 6,
@@ -24,7 +24,7 @@ describe('serializeLayout', () => {
           type: 'testPanelType',
         },
         '3': {
-          gridData: {
+          grid: {
             h: 6,
             i: '3',
             sectionId: 'section1',
@@ -38,7 +38,7 @@ describe('serializeLayout', () => {
       sections: {
         section1: {
           collapsed: true,
-          gridData: {
+          grid: {
             i: 'section1',
             y: 6,
           },
@@ -71,39 +71,39 @@ describe('serializeLayout', () => {
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
-          "gridData": Object {
+          "config": Object {
+            "title": "panel One",
+          },
+          "grid": Object {
             "h": 6,
             "i": "1",
             "w": 6,
             "x": 0,
             "y": 0,
           },
-          "panelConfig": Object {
-            "title": "panel One",
-          },
-          "panelIndex": "1",
           "type": "testPanelType",
+          "uid": "1",
         },
         Object {
           "collapsed": true,
-          "gridData": Object {
+          "grid": Object {
             "i": "section1",
             "y": 6,
           },
           "panels": Array [
             Object {
-              "gridData": Object {
+              "config": Object {
+                "title": "panel Three",
+              },
+              "grid": Object {
                 "h": 6,
                 "i": "3",
                 "w": 6,
                 "x": 0,
                 "y": 0,
               },
-              "panelConfig": Object {
-                "title": "panel Three",
-              },
-              "panelIndex": "3",
               "type": "testPanelType",
+              "uid": "3",
             },
           ],
           "title": "Section One",

@@ -23,7 +23,7 @@ export function generateNewPanelIds(panels: DashboardState['panels'], references
 
   function generateNewPanelId(panel: DashboardPanel) {
     const newPanelId = v4();
-    const oldPanelId = panel.panelIndex ?? panel.gridData.i;
+    const oldPanelId = panel.uid ?? panel.grid.i;
     const panelReferences =
       oldPanelId && references ? getReferencesForPanelId(oldPanelId, references) : [];
 
@@ -31,8 +31,8 @@ export function generateNewPanelIds(panels: DashboardState['panels'], references
 
     return {
       ...panel,
-      panelIndex: newPanelId,
-      gridData: { ...panel.gridData, i: newPanelId },
+      uid: newPanelId,
+      grid: { ...panel.grid, i: newPanelId },
     };
   }
 
@@ -42,7 +42,7 @@ export function generateNewPanelIds(panels: DashboardState['panels'], references
       const newSectionId = v4();
       newPanels.push({
         ...section,
-        gridData: { ...section.gridData, i: newSectionId },
+        grid: { ...section.grid, i: newSectionId },
         panels: section.panels.map((panelInSection) => {
           return generateNewPanelId(panelInSection as DashboardPanel);
         }),

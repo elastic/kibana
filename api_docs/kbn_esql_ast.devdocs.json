@@ -6875,7 +6875,8 @@
         "label": "getDateHistogramCompletionItem",
         "description": [],
         "signature": [
-          "(histogramBarTarget?: number) => { label: string; text: string; asSnippet: true; kind: \"Issue\"; detail: string; sortText: string; command: { title: string; id: string; }; }"
+          "(histogramBarTarget?: number) => ",
+          "ISuggestionItem"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
@@ -8217,12 +8218,12 @@
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts"
           },
           {
-            "plugin": "@kbn/monaco",
-            "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/hover/hover.ts"
+            "plugin": "@kbn/esql-validation-autocomplete",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/hover/index.ts"
           },
           {
-            "plugin": "@kbn/monaco",
-            "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/hover/hover.ts"
+            "plugin": "@kbn/esql-validation-autocomplete",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/hover/index.ts"
           },
           {
             "plugin": "@kbn/esql-utils",
@@ -8964,6 +8965,44 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.withAutoSuggest",
+        "type": "Function",
+        "tags": [],
+        "label": "withAutoSuggest",
+        "description": [
+          "\nGiven a suggestion item, decorates it with editor.action.triggerSuggest\nthat triggers the autocomplete dialog again after accepting the suggestion.\n\nIf the suggestion item already has a custom command, it will preserve it."
+        ],
+        "signature": [
+          "(suggestionItem: ",
+          "ISuggestionItem",
+          ") => ",
+          "ISuggestionItem"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/utils/autocomplete/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.withAutoSuggest.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "suggestionItem",
+            "description": [],
+            "signature": [
+              "ISuggestionItem"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/utils/autocomplete/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -11057,6 +11096,20 @@
             "type": "Array",
             "tags": [],
             "label": "ignored",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.FunctionFilterPredicates.allowed",
+            "type": "Array",
+            "tags": [],
+            "label": "allowed",
             "description": [],
             "signature": [
               "string[] | undefined"
@@ -15183,83 +15236,12 @@
         "tags": [],
         "label": "assignCompletionItem",
         "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.assignCompletionItem.detail",
-            "type": "string",
-            "tags": [],
-            "label": "detail",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.assignCompletionItem.command",
-            "type": "Object",
-            "tags": [],
-            "label": "command",
-            "description": [],
-            "signature": [
-              "{ title: string; id: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.assignCompletionItem.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.assignCompletionItem.kind",
-            "type": "string",
-            "tags": [],
-            "label": "kind",
-            "description": [],
-            "signature": [
-              "\"Variable\""
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.assignCompletionItem.sortText",
-            "type": "string",
-            "tags": [],
-            "label": "sortText",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.assignCompletionItem.text",
-            "type": "string",
-            "tags": [],
-            "label": "text",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -15291,83 +15273,12 @@
         "tags": [],
         "label": "byCompleteItem",
         "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.byCompleteItem.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.byCompleteItem.text",
-            "type": "string",
-            "tags": [],
-            "label": "text",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.byCompleteItem.kind",
-            "type": "string",
-            "tags": [],
-            "label": "kind",
-            "description": [],
-            "signature": [
-              "\"Reference\""
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.byCompleteItem.detail",
-            "type": "string",
-            "tags": [],
-            "label": "detail",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.byCompleteItem.sortText",
-            "type": "string",
-            "tags": [],
-            "label": "sortText",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.byCompleteItem.command",
-            "type": "Object",
-            "tags": [],
-            "label": "command",
-            "description": [],
-            "signature": [
-              "{ title: string; id: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -15953,97 +15864,12 @@
         "tags": [],
         "label": "listCompleteItem",
         "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.listCompleteItem.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.listCompleteItem.text",
-            "type": "string",
-            "tags": [],
-            "label": "text",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.listCompleteItem.asSnippet",
-            "type": "boolean",
-            "tags": [],
-            "label": "asSnippet",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.listCompleteItem.kind",
-            "type": "string",
-            "tags": [],
-            "label": "kind",
-            "description": [],
-            "signature": [
-              "\"Operator\""
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.listCompleteItem.detail",
-            "type": "string",
-            "tags": [],
-            "label": "detail",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.listCompleteItem.sortText",
-            "type": "string",
-            "tags": [],
-            "label": "sortText",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.listCompleteItem.command",
-            "type": "Object",
-            "tags": [],
-            "label": "command",
-            "description": [],
-            "signature": [
-              "{ title: string; id: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -16053,83 +15879,12 @@
         "tags": [],
         "label": "onCompleteItem",
         "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.onCompleteItem.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.onCompleteItem.text",
-            "type": "string",
-            "tags": [],
-            "label": "text",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.onCompleteItem.kind",
-            "type": "string",
-            "tags": [],
-            "label": "kind",
-            "description": [],
-            "signature": [
-              "\"Reference\""
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.onCompleteItem.detail",
-            "type": "string",
-            "tags": [],
-            "label": "detail",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.onCompleteItem.sortText",
-            "type": "string",
-            "tags": [],
-            "label": "sortText",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.onCompleteItem.command",
-            "type": "Object",
-            "tags": [],
-            "label": "command",
-            "description": [],
-            "signature": [
-              "{ title: string; id: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -16139,83 +15894,12 @@
         "tags": [],
         "label": "pipeCompleteItem",
         "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.pipeCompleteItem.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.pipeCompleteItem.text",
-            "type": "string",
-            "tags": [],
-            "label": "text",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.pipeCompleteItem.kind",
-            "type": "string",
-            "tags": [],
-            "label": "kind",
-            "description": [],
-            "signature": [
-              "\"Keyword\""
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.pipeCompleteItem.detail",
-            "type": "string",
-            "tags": [],
-            "label": "detail",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.pipeCompleteItem.sortText",
-            "type": "string",
-            "tags": [],
-            "label": "sortText",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.pipeCompleteItem.command",
-            "type": "Object",
-            "tags": [],
-            "label": "command",
-            "description": [],
-            "signature": [
-              "{ title: string; id: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -16231,42 +15915,6 @@
         "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.TRIGGER_SUGGESTION_COMMAND",
-        "type": "Object",
-        "tags": [],
-        "label": "TRIGGER_SUGGESTION_COMMAND",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.TRIGGER_SUGGESTION_COMMAND.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.TRIGGER_SUGGESTION_COMMAND.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/constants.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -16293,83 +15941,12 @@
         "tags": [],
         "label": "whereCompleteItem",
         "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.whereCompleteItem.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.whereCompleteItem.text",
-            "type": "string",
-            "tags": [],
-            "label": "text",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.whereCompleteItem.kind",
-            "type": "string",
-            "tags": [],
-            "label": "kind",
-            "description": [],
-            "signature": [
-              "\"Reference\""
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.whereCompleteItem.detail",
-            "type": "string",
-            "tags": [],
-            "label": "detail",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.whereCompleteItem.sortText",
-            "type": "string",
-            "tags": [],
-            "label": "sortText",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.whereCompleteItem.command",
-            "type": "Object",
-            "tags": [],
-            "label": "command",
-            "description": [],
-            "signature": [
-              "{ title: string; id: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -16379,97 +15956,12 @@
         "tags": [],
         "label": "withCompleteItem",
         "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.withCompleteItem.label",
-            "type": "string",
-            "tags": [],
-            "label": "label",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.withCompleteItem.text",
-            "type": "string",
-            "tags": [],
-            "label": "text",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.withCompleteItem.asSnippet",
-            "type": "boolean",
-            "tags": [],
-            "label": "asSnippet",
-            "description": [],
-            "signature": [
-              "true"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.withCompleteItem.kind",
-            "type": "string",
-            "tags": [],
-            "label": "kind",
-            "description": [],
-            "signature": [
-              "\"Reference\""
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.withCompleteItem.detail",
-            "type": "string",
-            "tags": [],
-            "label": "detail",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.withCompleteItem.sortText",
-            "type": "string",
-            "tags": [],
-            "label": "sortText",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.withCompleteItem.command",
-            "type": "Object",
-            "tags": [],
-            "label": "command",
-            "description": [],
-            "signature": [
-              "{ title: string; id: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ]

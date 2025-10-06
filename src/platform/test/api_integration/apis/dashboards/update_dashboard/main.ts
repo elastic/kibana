@@ -17,14 +17,16 @@ const updatedDashboard = {
   panels: [
     {
       type: 'visualization',
-      gridData: { x: 0, y: 0, w: 48, h: 60, i: '1' },
-      panelIndex: '1',
+      grid: { x: 0, y: 0, w: 48, h: 60, i: '1' },
+      uid: '1',
       version: '7.3.0',
     },
   ],
-  timeFrom: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+  timeRange: {
+    from: 'Wed Sep 16 2015 22:52:17 GMT-0700',
+    to: 'Fri Sep 18 2015 12:24:38 GMT-0700',
+  },
   timeRestore: true,
-  timeTo: 'Fri Sep 18 2015 12:24:38 GMT-0700',
   references: [
     {
       id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',

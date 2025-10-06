@@ -43,6 +43,7 @@ import {
   ruleType,
   ruleTypeFromApi,
 } from './test_helper';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -909,6 +910,95 @@ describe('rules_list ', () => {
         expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
       });
     });
+  });
+});
+
+describe('internally managed rule', () => {
+  let ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract>;
+  let actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract<unknown, unknown>>;
+
+  beforeEach(() => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    const internallyManagedRule = {
+      ...mockedRulesData[0],
+      ruleTypeId: 'internally_managed_rule_type',
+      name: 'internally managed',
+      isSnoozedUntil: null,
+    };
+
+    loadRulesWithKueryFilter.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 4,
+      data: [internallyManagedRule],
+    });
+    const ruleTypeMock: RuleTypeModel = {
+      isInternallyManaged: true,
+      id: 'internally_managed_rule_type',
+      iconClass: 'test',
+      description: 'Rule when testing',
+      documentationUrl: 'https://localhost.local/docs',
+      validate: () => {
+        return { errors: {} };
+      },
+      ruleParamsExpression: jest.fn(),
+      requiresAppContext: false,
+    };
+    getRuleTypes.mockResolvedValue([ruleTypeMock]);
+    loadAllActions.mockResolvedValue([]);
+
+    loadActionTypes.mockResolvedValue([]);
+    getRuleTypes.mockResolvedValue([
+      { ...ruleTypeFromApi, isInternallyManaged: true, id: 'internally_managed_rule_type' },
+    ]);
+    loadAllActions.mockResolvedValue([]);
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({
+      ruleEnabledStatus: { enabled: 1, disabled: 0 },
+      ruleExecutionStatus: { ok: 1, active: 1, error: 0, pending: 0, unknown: 0, warning: 0 },
+      ruleMutedStatus: { muted: 0, unmuted: 0 },
+      ruleTags,
+      ruleLastRunOutcome: {
+        succeeded: 0,
+        failed: 0,
+        warning: 0,
+      },
+    });
+    loadRuleTags.mockResolvedValue({
+      data: [],
+      page: 1,
+      perPage: 50,
+      total: 0,
+    });
+
+    actionTypeRegistry = actionTypeRegistryMock.create();
+    ruleTypeRegistry = ruleTypeRegistryMock.create();
+
+    ruleTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
+
+  it('render no delete button and only update api key action when rule is internally managed', async () => {
+    renderWithProviders(<RulesList />);
+    expect(screen.queryByTestId('editActionHoverButton')).toBeNull();
+    expect(screen.queryByTestId('deleteActionHoverButton')).toBeNull();
+    expect(screen.queryByTestId('rulesListNotifyBadge-unsnoozed')).toBeNull();
+
+    userEvent.click(await screen.findByTestId('selectActionButton'));
+    expect(await screen.findByTestId('updateApiKeyInternallyManaged')).toBeInTheDocument();
+    expect(screen.queryByTestId('snoozeButton')).toBeNull();
+    expect(screen.queryByTestId('disableButton')).toBeNull();
+    expect(screen.queryByTestId('editRule')).toBeNull();
+    expect(screen.queryByTestId('deleteRule')).toBeNull();
+    expect(screen.queryByTestId('runRule')).toBeNull();
+    expect(screen.queryByTestId('cloneRule')).toBeNull();
   });
 });
 

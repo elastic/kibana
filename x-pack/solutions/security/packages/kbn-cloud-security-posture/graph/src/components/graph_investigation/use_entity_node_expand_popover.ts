@@ -10,7 +10,7 @@ import { useCallback } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useNodeExpandGraphPopover } from './use_node_expand_graph_popover';
-import { getNodeDocumentMode, type NodeProps } from '../../..';
+import type { NodeProps } from '../../..';
 import {
   GRAPH_NODE_EXPAND_POPOVER_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
@@ -91,8 +91,7 @@ export const useEntityNodeExpandPopover = (
         ? 'hide'
         : 'show';
 
-      const shouldDisableEntityDetailsListItem =
-        !onShowEntityDetailsClick || getNodeDocumentMode(node.data) !== 'single-entity';
+      const shouldDisableEntityDetailsListItem = !onShowEntityDetailsClick;
 
       return [
         {

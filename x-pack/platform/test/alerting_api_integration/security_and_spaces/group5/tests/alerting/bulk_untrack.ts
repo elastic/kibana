@@ -29,7 +29,8 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('bulk untrack', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/223942
+  describe.skip('bulk untrack', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {

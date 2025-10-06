@@ -30,9 +30,9 @@ export type DashboardOptions = TypeOf<typeof schema.optionsSchema>;
 // Panel config has some defined types but also allows for custom keys added by embeddables
 // The schema uses "unknowns: 'allow'" to permit any other keys, but the TypeOf helper does not
 // recognize this, so we need to manually extend the type here.
-export type DashboardPanel = Omit<TypeOf<typeof schema.panelSchema>, 'panelConfig'> & {
-  panelConfig: TypeOf<typeof schema.panelSchema>['panelConfig'] & { [key: string]: any };
-  gridData: GridData;
+export type DashboardPanel = Omit<TypeOf<typeof schema.panelSchema>, 'config'> & {
+  config: TypeOf<typeof schema.panelSchema>['config'] & { [key: string]: any };
+  grid: GridData;
 };
 export type DashboardSection = TypeOf<typeof schema.sectionSchema>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type

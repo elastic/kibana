@@ -15,9 +15,6 @@ import type {
 } from '../../common/http_api/conversations';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
-import { getTechnicalPreviewWarning } from './utils';
-
-const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Conversation API');
 
 export function registerConversationRoutes({
   router,
@@ -35,9 +32,10 @@ export function registerConversationRoutes({
       },
       access: 'public',
       summary: 'List conversations',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'List all conversations for a user. Use the optional agent ID to filter conversations by a specific agent.',
       options: {
-        tags: ['conversation', 'oas-tag:elastic agent builder'],
+        tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -88,9 +86,10 @@ export function registerConversationRoutes({
       },
       access: 'public',
       summary: 'Get conversation by ID',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'Get a specific conversation by ID. Use this endpoint to retrieve the complete conversation history including all messages and metadata.',
       options: {
-        tags: ['conversation', 'oas-tag:elastic agent builder'],
+        tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -135,9 +134,9 @@ export function registerConversationRoutes({
       },
       access: 'public',
       summary: 'Delete conversation by ID',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description: 'Delete a conversation by ID. This action cannot be undone.',
       options: {
-        tags: ['conversation', 'oas-tag:elastic agent builder'],
+        tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',

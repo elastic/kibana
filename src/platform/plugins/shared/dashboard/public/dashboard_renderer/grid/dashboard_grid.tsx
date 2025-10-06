@@ -71,7 +71,7 @@ export const DashboardGrid = () => {
           updatedLayout.sections[widget.id] = {
             collapsed: widget.isCollapsed,
             title: widget.title,
-            gridData: {
+            grid: {
               i: widget.id,
               y: widget.row,
             },
@@ -79,7 +79,7 @@ export const DashboardGrid = () => {
           Object.values(widget.panels).forEach((panel) => {
             updatedLayout.panels[panel.id] = {
               ...currLayout.panels[panel.id],
-              gridData: {
+              grid: {
                 ...convertGridPanelToDashboardGridData(panel),
                 sectionId: widget.id,
               },
@@ -89,7 +89,7 @@ export const DashboardGrid = () => {
           // widget is a panel
           updatedLayout.panels[widget.id] = {
             ...currLayout.panels[widget.id],
-            gridData: convertGridPanelToDashboardGridData(widget),
+            grid: convertGridPanelToDashboardGridData(widget),
           };
         }
       });
@@ -118,7 +118,7 @@ export const DashboardGrid = () => {
           type={type}
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
-          data-grid-row={panels[id].gridData.y} // initialize data-grid-row
+          data-grid-row={panels[id].grid.y} // initialize data-grid-row
         />
       );
     },

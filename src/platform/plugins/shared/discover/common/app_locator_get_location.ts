@@ -10,7 +10,11 @@
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { isFilterPinned, isOfAggregateQueryType } from '@kbn/es-query';
 import type { setStateToKbnUrl as setStateToKbnUrlCommon } from '@kbn/kibana-utils-plugin/common';
-import type { DiscoverAppLocatorGetLocation, MainHistoryLocationState } from './app_locator';
+import type {
+  DiscoverAppLocatorGetLocation,
+  DiscoverAppLocatorParams,
+  MainHistoryLocationState,
+} from './app_locator';
 import type { DiscoverAppState } from '../public';
 import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 import {
@@ -30,53 +34,8 @@ export const appLocatorGetLocationCommon = async (
   },
   ...[params]: Parameters<DiscoverAppLocatorGetLocation>
 ): ReturnType<DiscoverAppLocatorGetLocation> => {
-  const {
-    useHash = useHashOriginal,
-    filters,
-    dataViewId,
-    indexPatternId,
-    dataViewSpec,
-    query,
-    refreshInterval,
-    savedSearchId,
-    timeRange,
-    searchSessionId,
-    columns,
-    grid,
-    savedQuery,
-    sort,
-    interval,
-    viewMode,
-    hideAggregatedPreview,
-    breakdownField,
-    isAlertResults,
-    tab,
-  } = params;
+  const { useHash = useHashOriginal, savedSearchId, searchSessionId, tab } = params;
   const savedSearchPath = savedSearchId ? `view/${encodeURIComponent(savedSearchId)}` : '';
-  const appState: Partial<DiscoverAppState> = {};
-  const queryState: GlobalQueryStateFromUrl = {};
-
-  if (query) appState.query = query;
-  if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
-  if (indexPatternId)
-    appState.dataSource = createDataViewDataSource({ dataViewId: indexPatternId });
-  if (dataViewId) appState.dataSource = createDataViewDataSource({ dataViewId });
-  if (isOfAggregateQueryType(query)) appState.dataSource = createEsqlDataSource();
-  if (columns) appState.columns = columns;
-  if (grid) appState.grid = grid;
-  if (savedQuery) appState.savedQuery = savedQuery;
-  if (sort) appState.sort = sort;
-  if (interval) appState.interval = interval;
-  if (timeRange) queryState.time = timeRange;
-  if (filters && filters.length) queryState.filters = filters?.filter((f) => isFilterPinned(f));
-  if (refreshInterval) queryState.refreshInterval = refreshInterval;
-  if (viewMode) appState.viewMode = viewMode;
-  if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
-  if (breakdownField) appState.breakdownField = breakdownField;
-
-  const state: MainHistoryLocationState = {};
-  if (dataViewSpec) state.dataViewSpec = dataViewSpec;
-  if (isAlertResults) state.isAlertResults = isAlertResults;
 
   let path = `#/${savedSearchPath}`;
 
@@ -84,10 +43,12 @@ export const appLocatorGetLocationCommon = async (
     path = `${path}?searchSessionId=${searchSessionId}`;
   }
 
-  if (Object.keys(queryState).length) {
+  const { appState, globalState, state } = parseAppLocatorParams(params);
+
+  if (Object.keys(globalState).length) {
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
       GLOBAL_STATE_URL_KEY,
-      queryState,
+      globalState,
       { useHash },
       path
     );
@@ -111,4 +72,53 @@ export const appLocatorGetLocationCommon = async (
     path,
     state,
   };
+};
+
+export const parseAppLocatorParams = (params: DiscoverAppLocatorParams) => {
+  const {
+    filters,
+    dataViewId,
+    indexPatternId,
+    dataViewSpec,
+    query,
+    refreshInterval,
+    timeRange,
+    columns,
+    grid,
+    savedQuery,
+    sort,
+    interval,
+    viewMode,
+    hideAggregatedPreview,
+    breakdownField,
+    isAlertResults,
+  } = params;
+
+  const appState: Partial<DiscoverAppState> = {};
+  const globalState: GlobalQueryStateFromUrl = {};
+
+  if (query) appState.query = query;
+  if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
+  if (indexPatternId)
+    appState.dataSource = createDataViewDataSource({ dataViewId: indexPatternId });
+  if (dataViewId) appState.dataSource = createDataViewDataSource({ dataViewId });
+  if (isOfAggregateQueryType(query)) appState.dataSource = createEsqlDataSource();
+  if (columns) appState.columns = columns;
+  if (grid) appState.grid = grid;
+  if (savedQuery) appState.savedQuery = savedQuery;
+  if (sort) appState.sort = sort;
+  if (interval) appState.interval = interval;
+  if (timeRange) globalState.time = timeRange;
+  if (filters && filters.length) globalState.filters = filters?.filter((f) => isFilterPinned(f));
+  if (refreshInterval) globalState.refreshInterval = refreshInterval;
+  if (viewMode) appState.viewMode = viewMode;
+  if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;
+  if (breakdownField) appState.breakdownField = breakdownField;
+
+  const state: MainHistoryLocationState = {};
+
+  if (dataViewSpec) state.dataViewSpec = dataViewSpec;
+  if (isAlertResults) state.isAlertResults = isAlertResults;
+
+  return { appState, globalState, state };
 };

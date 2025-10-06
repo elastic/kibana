@@ -6,29 +6,24 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { isWhereBlock } from '@kbn/streamlang';
 import React from 'react';
 import { useSelector } from '@xstate5/react';
 import { css } from '@emotion/react';
 import { CreateStepButton } from '../../../create_step_button';
-import type { StreamEnrichmentContextType } from '../../../state_management/stream_enrichment_state_machine';
 import { StepContextMenu } from '../context_menu';
-import type { RootLevelMap } from '../../../state_management/stream_enrichment_state_machine/utils';
 import { BlockDisableOverlay } from '../block_disable_overlay';
 import { ConditionDisplay } from '../../../../shared';
+import type { StepConfigurationProps } from '../../steps_list';
 
 export const WhereBlockSummary = ({
   stepRef,
   rootLevelMap,
   stepUnderEdit,
   level,
-}: {
-  stepRef: StreamEnrichmentContextType['stepRefs'][number];
-  rootLevelMap: RootLevelMap;
-  stepUnderEdit?: StreamlangStepWithUIAttributes;
-  level: number;
-}) => {
+  isFirstStepInLevel,
+  isLastStepInLevel,
+}: StepConfigurationProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   if (!isWhereBlock(step)) return null;
@@ -64,7 +59,12 @@ export const WhereBlockSummary = ({
       >
         <EuiFlexGroup gutterSize="none">
           <CreateStepButton parentId={stepRef.id} mode="inline" nestingDisabled={level >= 2} />
-          <StepContextMenu stepRef={stepRef} stepUnderEdit={stepUnderEdit} />
+          <StepContextMenu
+            stepRef={stepRef}
+            stepUnderEdit={stepUnderEdit}
+            isFirstStepInLevel={isFirstStepInLevel}
+            isLastStepInLevel={isLastStepInLevel}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
