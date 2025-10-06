@@ -37,7 +37,7 @@ describe('ESQLMenuPopover', () => {
     return await act(async () => {
       render(
         <KibanaContextProvider services={services}>
-          <ESQLMenuPopover adHocDataview={adHocDataview} queryString="FROM logstash1" />
+          <ESQLMenuPopover adHocDataview={adHocDataview} />
         </KibanaContextProvider>
       );
     });
