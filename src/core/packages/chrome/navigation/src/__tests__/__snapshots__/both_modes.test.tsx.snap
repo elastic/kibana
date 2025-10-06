@@ -16,7 +16,7 @@ exports[`Both modes should render the side navigation 1`] = `
       >
         <a
           aria-label="Solution homepage"
-          class="css-12wdbuf-buttonStyles"
+          class="css-1p9ljkz-buttonStyles"
           data-highlighted="false"
           data-menu-item="true"
           data-test-subj="sideNavLogo"
@@ -52,7 +52,7 @@ exports[`Both modes should render the side navigation 1`] = `
           >
             <a
               aria-haspopup="false"
-              class="css-12wdbuf-buttonStyles"
+              class="css-1p9ljkz-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="sideNavPrimaryMenuItem-dashboards"
@@ -86,7 +86,7 @@ exports[`Both modes should render the side navigation 1`] = `
           >
             <a
               aria-haspopup="false"
-              class="css-12wdbuf-buttonStyles"
+              class="css-1p9ljkz-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="sideNavPrimaryMenuItem-discover"
@@ -121,7 +121,7 @@ exports[`Both modes should render the side navigation 1`] = `
             <a
               aria-expanded="false"
               aria-haspopup="true"
-              class="css-12wdbuf-buttonStyles"
+              class="css-1p9ljkz-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
               data-test-subj="sideNavPrimaryMenuItem-apps_overview"
