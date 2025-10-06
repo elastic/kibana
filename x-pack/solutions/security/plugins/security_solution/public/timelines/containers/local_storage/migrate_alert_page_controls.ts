@@ -109,12 +109,7 @@ export async function migrateAlertPageControlsTo816(storage: Storage, plugins: S
     // Only run when it is old format
     const newFormat: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanelState> = {
       initialChildControlState: {},
-      // autoApplySelections: oldFormat.showApplySelections ?? true,
       ignoreParentSettings: oldFormat.ignoreParentSettings,
-      // editorConfig: {
-      //   hideDataViewSelector: true,
-      //   hideAdditionalSettings: true,
-      // },
     };
 
     for (const [key, value] of Object.entries(oldFormat.panels)) {

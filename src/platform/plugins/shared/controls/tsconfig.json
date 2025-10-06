@@ -3,14 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
+  "extraPublicDirs": ["common"],
   "include": [
     "common/**/*",
     "public/**/*",
     "public/**/*.json",
     "server/**/*",
     "../../../../../typings/**/*",
-    "./jest_setup.ts",
-    "../../../packages/private/kbn-controls-renderer/src/control_group_renderer"
+    "./jest_setup.ts"
   ],
   "kbn_references": [
     "@kbn/core",

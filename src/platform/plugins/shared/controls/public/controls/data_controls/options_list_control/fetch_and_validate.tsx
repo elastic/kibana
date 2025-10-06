@@ -43,7 +43,7 @@ export function fetchAndValidate$({
   selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
   searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
   sort$: PublishingSubject<OptionsListSortingType | undefined>;
-}): Observable<OptionsListSuccessResponse | { error: Error | unknown }> {
+}): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
 
@@ -108,11 +108,12 @@ export function fetchAndValidate$({
           selectedOptions,
           field: field.toSpec(),
           size: requestSize,
-          ignoreValidations,
 
-          // TODO get expensive queries setting and ignore validations
-          allowExpensiveQueries: true,
+          ignoreValidations,
           ...fetchContext,
+
+          // TODO: get expensive queries setting
+          allowExpensiveQueries: true,
         };
 
         const newAbortController = new AbortController();

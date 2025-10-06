@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
 import type {
   ControlGroupRendererApi,
   ControlGroupRendererProps,
   ControlGroupStateBuilder,
 } from '@kbn/control-group-renderer';
+import React, { useEffect, useState } from 'react';
 import { TEST_IDS } from '../constants';
 import { getControlGroupMock } from './control_group';
 

@@ -16,7 +16,7 @@ import type { DataControlState } from '@kbn/controls-schemas';
 
 import { coreServices } from '../../services/kibana_services';
 
-export const openDataControlEditor = <State extends DataControlState>({
+export const openDataControlEditor = <State extends DataControlState = DataControlState>({
   initialState,
   parentApi,
   controlId,

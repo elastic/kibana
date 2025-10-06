@@ -10,8 +10,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject, combineLatest, map } from 'rxjs';
 
-import { ControlsRenderer } from '@kbn/controls-renderer';
-import type { ControlsRendererParentApi } from '@kbn/controls-renderer/src/types';
+import { ControlsRenderer, type ControlsRendererParentApi } from '@kbn/controls-renderer';
 import type { StickyControlState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';

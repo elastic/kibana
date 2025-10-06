@@ -9,9 +9,8 @@
 
 import type { Observable } from 'rxjs';
 
-import type { ControlsRendererParentApi } from '@kbn/controls-renderer/src/types';
-import type { StickyControlState } from '@kbn/controls-schemas';
-import type { DataControlState, TimeSlice } from '@kbn/controls-schemas/src/types';
+import type { ControlsRendererParentApi } from '@kbn/controls-renderer';
+import type { DataControlState, StickyControlState, TimeSlice } from '@kbn/controls-schemas';
 import type { StoredControlGroupInput } from '@kbn/dashboard-plugin/server/dashboard_saved_object';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { PublishesESQLVariables } from '@kbn/esql-types';

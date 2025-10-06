@@ -9,13 +9,12 @@ import React, { useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import { switchMap, tap } from 'rxjs';
 
-import type { TimeRange } from '@kbn/es-query';
 import {
   ControlGroupRenderer,
-  type ControlGroupRuntimeState,
   type ControlGroupStateBuilder,
   type ControlGroupRendererApi,
 } from '@kbn/control-group-renderer';
+import type { TimeRange } from '@kbn/es-query';
 
 import type { Timeslice } from '../../../common/descriptor_types';
 

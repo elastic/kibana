@@ -8,3 +8,4 @@
  */
 
 export { ControlsRenderer } from './src/controls_renderer';
+export type { ControlsRendererParentApi } from './src/types';
