@@ -11,7 +11,6 @@ import moment from 'moment';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { testUsers } from '../test_users';
-import { checkBulkAgentAction } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
