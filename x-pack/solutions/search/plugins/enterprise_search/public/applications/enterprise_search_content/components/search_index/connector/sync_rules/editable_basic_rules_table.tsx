@@ -182,7 +182,7 @@ export const SyncRulesTable: React.FC = () => {
       )}
       ariaLabel={i18n.translate(
         'xpack.enterpriseSearch.content.index.connector.syncRules.table.ariaLabel',
-        { defaultMessage: 'Sync rules table' }
+        { defaultMessage: 'Sync rules' }
       )}
       columns={columns}
       defaultItem={{
