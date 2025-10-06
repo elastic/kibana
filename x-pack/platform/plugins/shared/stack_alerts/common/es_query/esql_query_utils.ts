@@ -208,7 +208,7 @@ export const toGroupedEsqlQueryHits = async (
   };
 };
 
-export const transformDatatableToEsqlTable = (datatable: ESQLSearchResponse): EsqlTable => {
+export const transformToEsqlTable = (datatable: ESQLSearchResponse): EsqlTable => {
   const columns: EsqlResultColumn[] = datatable.columns;
   // Convert each value to string or null to match EsqlResultRow type
   const values: EsqlResultRow[] = datatable.values.map(

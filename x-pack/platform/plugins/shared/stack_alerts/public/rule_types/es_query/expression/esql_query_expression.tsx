@@ -41,11 +41,7 @@ import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
-import {
-  transformDatatableToEsqlTable,
-  getEsqlQueryHits,
-  ALERT_ID_SUGGESTED_MAX,
-} from '../../../../common';
+import { transformToEsqlTable, getEsqlQueryHits, ALERT_ID_SUGGESTED_MAX } from '../../../../common';
 
 const getTimeFilter = (
   queryService: DataPublicPluginStart['query'],
@@ -220,7 +216,7 @@ export const EsqlQueryExpression: React.FC<
       filter: timeFilter,
     });
     if (table.response) {
-      const esqlTable = transformDatatableToEsqlTable(table.response);
+      const esqlTable = transformToEsqlTable(table.response);
       const { results, duplicateAlertIds, longAlertIds, rows, cols } = await getEsqlQueryHits(
         esqlTable,
         esqlQuery.esql,

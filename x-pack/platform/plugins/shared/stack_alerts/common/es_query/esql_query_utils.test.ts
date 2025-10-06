@@ -8,7 +8,7 @@
 import {
   rowToDocument,
   toEsqlQueryHits,
-  transformDatatableToEsqlTable,
+  transformToEsqlTable,
   toGroupedEsqlQueryHits,
   getAlertIdFields,
 } from './esql_query_utils';
@@ -640,10 +640,10 @@ describe('ESQL query utils', () => {
     });
   });
 
-  describe('transformDatatableToEsqlTable', () => {
+  describe('transformToEsqlTable', () => {
     it('correctly converts data table to ESQL table', () => {
       expect(
-        transformDatatableToEsqlTable({
+        transformToEsqlTable({
           columns: [
             { name: '@timestamp', type: 'date' },
             { name: 'ecs.version', type: 'string' },
