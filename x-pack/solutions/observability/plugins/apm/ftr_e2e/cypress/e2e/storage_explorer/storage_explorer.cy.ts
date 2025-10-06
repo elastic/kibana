@@ -71,8 +71,8 @@ describe.skip('Storage explorer', () => {
 
     it('has no detectable a11y violations on load', () => {
       cy.contains('h1', 'Storage explorer');
-      // set skipFailures to true to not fail the test when there are accessibility failures
-      checkA11y({ skipFailures: true });
+
+      checkA11y();
     });
 
     it('has a list of summary stats', () => {
