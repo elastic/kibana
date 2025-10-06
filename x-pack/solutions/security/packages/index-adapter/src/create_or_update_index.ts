@@ -12,6 +12,47 @@ import type {
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { reindexIndexDocuments } from './reindex_index';
+
+const shouldReindexForError = (error: unknown): boolean => {
+  if (
+    !error ||
+    typeof error !== 'object' ||
+    !('body' in error) ||
+    !error.body ||
+    typeof error.body !== 'object'
+  ) {
+    return false;
+  }
+  const { body } = error as { body: { error?: { type?: string; reason?: string } } };
+
+  if (!body.error) {
+    return false;
+  }
+
+  const errorType = body.error.type;
+  const errorReason = body.error.reason;
+
+  if (errorType === 'illegal_argument_exception') {
+    return true;
+  }
+
+  if (errorType === 'mapper_exception') {
+    const reindexReasons = [
+      'mapper',
+      "can't merge",
+      'different type',
+      'cannot change',
+      'conflicting type',
+    ];
+
+    return reindexReasons.some((reason) =>
+      errorReason?.toLowerCase().includes(reason.toLowerCase())
+    );
+  }
+
+  return false;
+};
 
 interface UpdateIndexMappingsOpts {
   logger: Logger;
@@ -19,6 +60,7 @@ interface UpdateIndexMappingsOpts {
   indexNames: string[];
   totalFieldsLimit: number;
   writeIndexOnly?: boolean;
+  enableReindexing?: boolean;
 }
 
 interface UpdateIndexOpts {
@@ -27,6 +69,7 @@ interface UpdateIndexOpts {
   indexName: string;
   totalFieldsLimit: number;
   writeIndexOnly?: boolean;
+  enableReindexing?: boolean;
 }
 
 const updateTotalFieldLimitSetting = async ({
@@ -55,7 +98,13 @@ const updateTotalFieldLimitSetting = async ({
 // is due to the fact settings can be classed as dynamic and static, and static
 // updates will fail on an index that isn't closed. New settings *will* be applied as part
 // of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
-const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: UpdateIndexOpts) => {
+const updateMapping = async ({
+  logger,
+  esClient,
+  indexName,
+  writeIndexOnly,
+  enableReindexing = false,
+}: UpdateIndexOpts) => {
   logger.debug(`Updating mappings for ${indexName} data stream.`);
 
   let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
@@ -90,7 +139,16 @@ const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: Up
     );
   } catch (err) {
     logger.error(`Failed to PUT mapping for ${indexName}: ${err.message}`);
-    throw err;
+    if (enableReindexing && shouldReindexForError(err)) {
+      logger.info(`Mapping update failed for ${indexName}, triggering reindex due to conflict.`);
+      await reindexIndexDocuments({
+        esClient,
+        logger,
+        indexName,
+      });
+    } else {
+      throw err;
+    }
   }
 };
 /**
@@ -102,6 +160,7 @@ const updateIndexMappings = async ({
   totalFieldsLimit,
   indexNames,
   writeIndexOnly,
+  enableReindexing = false,
 }: UpdateIndexMappingsOpts) => {
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time
@@ -113,7 +172,14 @@ const updateIndexMappings = async ({
   // Update mappings of the found indices.
   await Promise.all(
     indexNames.map((indexName) =>
-      updateMapping({ logger, esClient, totalFieldsLimit, indexName, writeIndexOnly })
+      updateMapping({
+        logger,
+        esClient,
+        totalFieldsLimit,
+        indexName,
+        writeIndexOnly,
+        enableReindexing,
+      })
     )
   );
 };
@@ -123,6 +189,7 @@ export interface CreateOrUpdateIndexParams {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
+  enableReindexing?: boolean;
 }
 
 export async function createOrUpdateIndex({
@@ -130,6 +197,7 @@ export async function createOrUpdateIndex({
   esClient,
   name,
   totalFieldsLimit,
+  enableReindexing = false,
 }: CreateOrUpdateIndexParams): Promise<void> {
   logger.info(`Creating index - ${name}`);
 
@@ -154,6 +222,7 @@ export async function createOrUpdateIndex({
       esClient,
       indexNames: [name],
       totalFieldsLimit,
+      enableReindexing,
     });
   } else {
     try {
@@ -214,6 +283,7 @@ export interface CreateOrUpdateSpacesIndexParams {
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   writeIndexOnly?: boolean;
+  enableReindexing?: boolean;
 }
 
 export async function updateIndices({
@@ -222,6 +292,7 @@ export async function updateIndices({
   name,
   totalFieldsLimit,
   writeIndexOnly,
+  enableReindexing = false,
 }: CreateOrUpdateSpacesIndexParams): Promise<void> {
   logger.info(`Updating indices - ${name}`);
 
@@ -246,6 +317,7 @@ export async function updateIndices({
       totalFieldsLimit,
       indexNames: indices,
       writeIndexOnly,
+      enableReindexing,
     });
   }
 }
