@@ -50,7 +50,10 @@ export function PreviewPanel() {
     routingSnapshot.matches({ ready: 'reorderingRules' })
   ) {
     content = <EditingPanel />;
-  } else if (routingSnapshot.matches({ ready: 'creatingNewRule' })) {
+  } else if (
+    routingSnapshot.matches({ ready: 'creatingNewRule' }) ||
+    routingSnapshot.matches({ ready: 'reviewSuggestedRule' })
+  ) {
     content = <SamplePreviewPanel enableActions />;
   }
 

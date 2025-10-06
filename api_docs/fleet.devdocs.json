@@ -24867,15 +24867,9 @@
             "label": "meta",
             "description": [],
             "signature": [
-              "{ [key: string]: unknown; package?: Pick<",
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.PackagePolicyPackage",
-                "text": "PackagePolicyPackage"
-              },
-              ", \"version\" | \"name\"> | undefined; } | undefined"
+              "{ [key: string]: unknown; package?: ",
+              "FullAgentPolicyMetaPackage",
+              " | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/agent_policy.ts",
             "deprecated": false,
