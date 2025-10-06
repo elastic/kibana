@@ -7,13 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DataErrorsControl } from './src/types';
-export type { ESQLEditorProps } from './src/esql_editor';
-import { ESQLEditor } from './src/esql_editor';
-export type { ESQLEditorRestorableState } from './src/restorable_state';
-
-export { registerESQLEditorAnalyticsEvents } from './src/telemetry/events_registration';
-
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default ESQLEditor;
+export { CopyElasticSearchDevToolsOption } from './copy_elastic_search_devtools_option';
+export { CopyWorkflowStepOption } from './copy_workflow_step_option';

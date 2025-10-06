@@ -7,13 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DataErrorsControl } from './src/types';
-export type { ESQLEditorProps } from './src/esql_editor';
-import { ESQLEditor } from './src/esql_editor';
-export type { ESQLEditorRestorableState } from './src/restorable_state';
+import type { WorkflowLookup } from './build_workflow_lookup';
 
-export { registerESQLEditorAnalyticsEvents } from './src/telemetry/events_registration';
+export function findStepByLine(
+  lineNumber: number,
+  workflowMetadata: WorkflowLookup
+): string | undefined {
+  if (!workflowMetadata) {
+    return;
+  }
 
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default ESQLEditor;
+  return Object.values(workflowMetadata.steps!).find(
+    (stepIfo) => stepIfo.lineStart <= lineNumber && lineNumber <= stepIfo.lineEnd
+  )?.stepId;
+}
