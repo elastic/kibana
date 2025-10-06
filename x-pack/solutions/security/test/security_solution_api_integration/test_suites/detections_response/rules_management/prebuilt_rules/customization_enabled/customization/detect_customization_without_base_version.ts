@@ -50,6 +50,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(customizedResponse.rule_source).toMatchObject({
         type: 'external',
         is_customized: true,
+        customized_fields: [],
+        has_base_version: false,
       });
     };
 
@@ -304,6 +306,7 @@ export default ({ getService }: FtrProviderContext): void => {
       beforeEach(async () => {
         await createPrebuiltRuleAssetSavedObjects(es, [SAVED_QUERY_PREBUILT_RULE_ASSET]);
         await installPrebuiltRules(es, supertest);
+        await deleteAllPrebuiltRuleAssets(es, log);
       });
 
       it('"saved_id" field', () =>
@@ -568,6 +571,43 @@ export default ({ getService }: FtrProviderContext): void => {
             missing_fields_strategy: 'suppress',
           },
         }));
+    });
+
+    describe('when rule is previously customized', () => {
+      beforeEach(async () => {
+        await createPrebuiltRuleAssetSavedObjects(es, [QUERY_PREBUILT_RULE_ASSET]);
+        await installPrebuiltRules(es, supertest);
+      });
+
+      it('should reset customized_fields to empty array', async () => {
+        const { body: customizedResponseWithBaseVersion } = await detectionsApi
+          .patchRule({
+            body: { rule_id: PREBUILT_RULE_ID, name: 'Customized rule name' },
+          })
+          .expect(200);
+
+        expect(customizedResponseWithBaseVersion.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: true,
+          customized_fields: [{ field_name: 'name' }],
+          has_base_version: true,
+        });
+
+        await deleteAllPrebuiltRuleAssets(es, log);
+
+        const { body: customizedResponseWithoutBaseVersion } = await detectionsApi
+          .patchRule({
+            body: { rule_id: PREBUILT_RULE_ID, name: 'New customized rule name' },
+          })
+          .expect(200);
+
+        expect(customizedResponseWithoutBaseVersion.rule_source).toMatchObject({
+          type: 'external',
+          is_customized: true,
+          customized_fields: [],
+          has_base_version: false,
+        });
+      });
     });
   });
 };
