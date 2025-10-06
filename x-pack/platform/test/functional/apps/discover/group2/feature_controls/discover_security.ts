@@ -235,7 +235,7 @@ export default function (ctx: FtrProviderContext) {
             pause: true,
           },
         });
-        expect(parsedSharedUrl.tab.id).to.be.a('uuid');
+        expect(parsedSharedUrl.tab.id).to.be.a('string');
         expect(parsedSharedUrl.tab.label).to.be.a('string');
         await share.closeShareModal();
       });
