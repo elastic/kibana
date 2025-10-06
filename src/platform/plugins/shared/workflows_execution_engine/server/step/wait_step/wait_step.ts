@@ -88,7 +88,7 @@ export class WaitStepImpl implements NodeImplementation {
       resumeExecutionTaskId: resumeExecutionTask.taskId,
     });
     this.logStartWait();
-    await this.workflowRuntime.setWaitStep();
+    await this.stepExecutionRuntime.setWaitStep();
   }
 
   private async exitLongWait(): Promise<void> {
