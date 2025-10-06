@@ -24,9 +24,7 @@ import { allowedExperimentalValues } from '../../../../../common';
 const mockUpsertSources = jest.fn();
 jest.mock('./initialisation_sources_service', () => {
   return {
-    createInitialisationSourcesService: () => ({
-      upsertSources: () => mockUpsertSources(),
-    }),
+    createInitialisationSourcesService: () => () => mockUpsertSources(),
   };
 });
 
