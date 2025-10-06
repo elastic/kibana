@@ -26,35 +26,15 @@ describe('ExitNormalPathNodeImpl', () => {
       enterNodeId: 'enterNormalPath1',
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
-    workflowRuntime.exitScope = jest.fn();
     workflowRuntime.navigateToNode = jest.fn();
 
     underTest = new ExitNormalPathNodeImpl(node, workflowRuntime);
   });
 
   describe('run', () => {
-    it('should exit scope', async () => {
-      await underTest.run();
-      expect(workflowRuntime.exitScope).toHaveBeenCalled();
-    });
-
     it('should go to exit on failure zone node', async () => {
       await underTest.run();
       expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.exitOnFailureZoneNodeId);
-    });
-
-    it('should execute steps in correct order', async () => {
-      const calls: string[] = [];
-      workflowRuntime.exitScope = jest.fn().mockImplementation(() => {
-        calls.push('exitScope');
-      });
-      workflowRuntime.navigateToNode = jest.fn().mockImplementation(() => {
-        calls.push('goToStep');
-      });
-
-      await underTest.run();
-
-      expect(calls).toEqual(['exitScope', 'goToStep']);
     });
   });
 });
