@@ -187,15 +187,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // check that other bucket requested add to a session
         await searchSessionsManagement.goTo();
 
-        searchSessionList = await searchSessionsManagement.getList();
-        searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-        expect(searchSessionItem.searchesCount).to.be(2);
-
         await new Promise((resolve) => setTimeout(resolve, 10_000));
         await retry.waitFor('session should be in a completed status', async () => {
           searchSessionList = await searchSessionsManagement.getList();
           searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
           return searchSessionItem.status === 'complete';
+        });
+
+        await retry.waitFor('the third search should be added to the session', async () => {
+          searchSessionList = await searchSessionsManagement.getList();
+          searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
+          return searchSessionItem.searchesCount === 3;
         });
 
         await searchSessionItem.view();
