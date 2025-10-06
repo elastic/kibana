@@ -114,8 +114,8 @@ export const OtelPackageCallout: React.FC<{
               ),
               fleetUserGuide: (
                 <EuiLink href={docLinks.links.fleet.edotCollector} target="_blank">
-                  {i18n.translate('xpack.fleet.settings.editOutputFlyout.fleetUserGuideLabel', {
-                    defaultMessage: 'User Guide',
+                  {i18n.translate('xpack.fleet.epm.otelPackageWarningMessage.fleetUserGuideLabel', {
+                    defaultMessage: 'user guide',
                   })}
                 </EuiLink>
               ),
