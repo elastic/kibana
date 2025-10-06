@@ -35,6 +35,7 @@ export enum TabStatus {
 
 // TODO adjust interface when real data is available, this currently types TAB_CONTENT_MOCK
 export interface TabPreviewData {
+  title?: string;
   query: AggregateQuery | Query;
   status: TabStatus;
 }

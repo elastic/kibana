@@ -153,6 +153,11 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
           {showPreview && !!tabPreviewData && (
             <>
               <EuiSplitPanel.Inner paddingSize="none" css={getSplitPanelCss(euiTheme)}>
+                {tabPreviewData.title ? (
+                  <EuiText size="s" className="eui-textBreakWord">
+                    {tabPreviewData.title}
+                  </EuiText>
+                ) : null}
                 <EuiCodeBlock
                   language={getQueryLanguage(tabPreviewData)}
                   transparentBackground

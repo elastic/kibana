@@ -70,7 +70,10 @@ const DEFAULT_PREVIEW_QUERY = {
   query: i18n.translate('discover.tabsView.defaultQuery', { defaultMessage: '(Empty query)' }),
 };
 
-const getPreviewQuery = (query: TabPreviewData['query'] | undefined): TabPreviewData['query'] => {
+const getPreviewQuery = (
+  query: TabPreviewData['query'] | undefined,
+  dataViewName: string | undefined
+): TabPreviewData['query'] => {
   if (!query) {
     return DEFAULT_PREVIEW_QUERY;
   }
@@ -86,7 +89,7 @@ const getPreviewQuery = (query: TabPreviewData['query'] | undefined): TabPreview
 
   return {
     ...query,
-    query: trimmedQuery || DEFAULT_PREVIEW_QUERY.query,
+    query: trimmedQuery || dataViewName ? '' : DEFAULT_PREVIEW_QUERY.query,
   };
 };
 
@@ -94,14 +97,14 @@ const getPreviewDataObservable = (
   runtimeStateManager: RuntimeStateManager,
   tabId: string,
   initialAppState: TabState['initialAppState'] | undefined
-) =>
-  selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
+) => {
+  return selectTabRuntimeState(runtimeStateManager, tabId).stateContainer$.pipe(
     switchMap((tabStateContainer) => {
       if (!tabStateContainer) {
         return of({
           status: TabStatus.DEFAULT,
           query: initialAppState?.query
-            ? getPreviewQuery(initialAppState.query)
+            ? getPreviewQuery(initialAppState.query, undefined)
             : DEFAULT_PREVIEW_QUERY,
         });
       }
@@ -122,20 +125,18 @@ const getPreviewDataObservable = (
         })),
         distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         map(({ fetchStatus, query, dataViewName }) => {
-          console.log(
-            `[Discover][Tabs] Tab preview data for tabId=${tabId}, dataView=${
-              dataViewName ?? 'N/A'
-            }`,
-            {
-              fetchStatus,
-              query,
-            }
-          );
           return {
             status: getPreviewStatus(fetchStatus),
-            query: getPreviewQuery(query),
+            query: getPreviewQuery(query, dataViewName),
+            title: dataViewName
+              ? i18n.translate('discover.tabsView.tabPreviewDataViewTitle', {
+                  defaultMessage: 'Data View: {dataViewName}',
+                  values: { dataViewName },
+                })
+              : undefined,
           };
         })
       );
     })
   );
+};
