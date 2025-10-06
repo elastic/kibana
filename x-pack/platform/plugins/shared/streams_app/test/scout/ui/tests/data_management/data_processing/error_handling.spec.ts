@@ -9,8 +9,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
-// Failing: See https://github.com/elastic/kibana/issues/236525
-test.describe.skip(
+test.describe(
   'Stream data processing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -62,6 +61,7 @@ test.describe.skip(
         await route.continue();
       });
       await pageObjects.streams.saveStepsListChanges();
+      await pageObjects.streams.confirmChangesInReviewModal();
 
       // Should succeed
       expect(await pageObjects.streams.getProcessorsListItems()).toHaveLength(1);

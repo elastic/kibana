@@ -27,6 +27,7 @@ export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
   timeRangeRelative: TimeRange | undefined;
   searchSessionId: string | undefined;
+  isSearchSessionRestored: boolean;
 }
 
 export interface TabStateGlobalState {
@@ -41,6 +42,7 @@ export interface TabState extends TabItem {
     serializedSearchSource?: SerializedSearchSourceFields;
     visContext?: UnifiedHistogramVisContext | {};
     controlGroupJson?: string;
+    searchSessionId?: string;
   };
   initialAppState?: DiscoverAppState;
 
@@ -94,9 +96,10 @@ export interface DiscoverInternalState {
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
     areInitializing: boolean;
-    byId: Record<string, TabState | RecentlyClosedTabState>;
+    byId: Record<string, TabState>;
     allIds: string[];
     unsavedIds: string[];
+    recentlyClosedTabsById: Record<string, RecentlyClosedTabState>;
     recentlyClosedTabIds: string[];
     /**
      * WARNING: You probably don't want to use this property.
