@@ -358,12 +358,10 @@
                 "type": "keyword"
               },
               "supports_cloud_connector": {
-                "type": "boolean",
-                "description": "Whether the package policy supports cloud connector"
+                "type": "boolean"
               },
               "cloud_connector_id": {
-                "type": "keyword",
-                "description": "The ID of the cloud connector"
+                "type": "keyword"
               }
             }
           }
@@ -514,35 +512,28 @@
           "items": {
             "properties": {
               "id": {
-                "type": "keyword",
-                "description": "The ID of the cloud connector"
+                "type": "keyword"
               },
               "created_at": {
-                "type": "date",
-                "description": "The date the cloud connector was created"
+                "type": "date"
               },
               "updated_at": {
-                "type": "date",
-                "description": "The date the cloud connector was updated"
+                "type": "date"
               },
               "hasCredentials": {
-                "type": "boolean",
-                "description": "Whether the cloud connector has credentials"
+                "type": "boolean"
               },
               "cloud_provider": {
-                "type": "keyword",
-                "description": "The cloud provider of the cloud connector"
+                "type": "keyword"
               },
               "packagePolicyIds": {
                 "type": "array",
                 "items": {
-                  "type": "keyword",
-                  "description": "The ID of the package policy"
+                  "type": "keyword"
                 }
               },
               "packagePolicyCount": {
-                "type": "long",
-                "description": "The number of package policies associated with the cloud connector"
+                "type": "long"
               }
             }
           }
