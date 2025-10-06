@@ -52,9 +52,8 @@ export function extractPanelsState(state: { [key: string]: unknown }): {
     const panel = typeof legacyPanel === 'object' ? { ...legacyPanel } : {};
 
     if (panel.panels) {
-      const { panels: sectionPanels, savedObjectReferences: sectionPanelReferences } =
+      const { panels: sectionPanels } =
         extractPanelsState({ panels: panel.panels });
-      savedObjectReferences.push(...(sectionPanelReferences ?? []));
       panel.panels = sectionPanels;
     }
 
