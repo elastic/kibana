@@ -10,7 +10,6 @@
 import { flow } from 'lodash';
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 import type {
@@ -18,6 +17,7 @@ import type {
   StoredControlState,
 } from '../../../../dashboard_saved_object';
 import { embeddableService, logger } from '../../../../kibana_services';
+import type { DashboardAttributes } from '../../types';
 
 /**
  * Transform functions for serialized controls state.
@@ -25,7 +25,10 @@ import { embeddableService, logger } from '../../../../kibana_services';
 export const transformControlsState: (
   serializedControlState: string,
   references: Reference[]
-) => ControlsGroupState['controls'] = (serializedControlState, references) => {
+) => DashboardAttributes['controlGroupInput']['controls'] = (
+  serializedControlState,
+  references
+) => {
   const state = flow(
     JSON.parse,
     transformControlObjectToArray,
@@ -57,8 +60,8 @@ export function transformControlProperties(controls: Array<StoredControlState>) 
 function injectControlReferences(
   controls: Array<StoredControlState>,
   references: Reference[]
-): ControlsGroupState['controls'] {
-  const transformedControls: ControlsGroupState['controls'] = [];
+): DashboardAttributes['controlGroupInput']['controls'] {
+  const transformedControls: DashboardAttributes['controlGroupInput']['controls'] = [];
 
   controls.forEach((control) => {
     const transforms = embeddableService.getTransforms(control.type);
@@ -69,14 +72,10 @@ function injectControlReferences(
             control,
             references,
             control.id
-          ) as ControlsGroupState['controls'][number]
+          ) as DashboardAttributes['controlGroupInput']['controls'][number]
         );
       } else {
-        transformedControls.push({
-          dataViewId: '',
-          fieldName: '',
-          ...control,
-        });
+        transformedControls.push(control);
       }
     } catch (transformOutError) {
       // do not prevent read on transformOutError

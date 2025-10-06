@@ -8,19 +8,19 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import type {
   DashboardSavedObjectAttributes,
   StoredControlGroupInput,
 } from '../../../../dashboard_saved_object';
 import { transformControlsState } from './transform_controls_state';
+import type { DashboardAttributes } from '../../types';
 
 export function transformControlGroupOut(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>,
   references: Reference[],
   ignoreParentSettingsJSON?: string
-): ControlsGroupState {
+): DashboardAttributes['controlGroupInput'] {
   let controls = controlGroupInput.panelsJSON
     ? transformControlsState(controlGroupInput.panelsJSON, references)
     : [];
@@ -40,7 +40,7 @@ export function transformControlGroupOut(
           ignoreValidations: legacyControlGroupOptions.ignoreValidations,
         },
       ];
-    }, [] as ControlsGroupState['controls']);
+    }, [] as DashboardAttributes['controlGroupInput']['controls']);
   }
   return { controls };
 }
