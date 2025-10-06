@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await unifiedTabs.closeAllTabs();
       await unifiedTabs.hideTabPreview();
     });
 

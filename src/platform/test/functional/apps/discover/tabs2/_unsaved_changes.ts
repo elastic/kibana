@@ -14,8 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const queryBar = getService('queryBar');
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
-  const toasts = getService('toasts');
 
   const { discover, unifiedTabs } = getPageObjects(['discover', 'unifiedTabs']);
 
@@ -27,161 +25,130 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const SEARCH_NAME = `unsaved_changes_${Date.now()}`;
 
       await discover.saveSearch(SEARCH_NAME);
-
-      expect(await toasts.getCount()).to.be(1);
-      await toasts.dismissAll();
+      await discover.waitUntilTabIsLoaded();
 
       const selectedTab = await unifiedTabs.getSelectedTab();
-      const tabUnsavedIndicator = await unifiedTabs.getTabUnsavedIndicatorTestSubj(
-        selectedTab?.element
-      );
-      await testSubjects.missingOrFail(tabUnsavedIndicator);
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab?.index)).to.be(false);
 
       await queryBar.setQuery(QUERY1);
       await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
 
-      await testSubjects.existOrFail(tabUnsavedIndicator);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab?.index)).to.be(true);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
     });
 
     it('clears unsaved changes badge on session save', async () => {
       const SEARCH_NAME = `unsaved_changes_${Date.now()}`;
 
       await discover.saveSearch(SEARCH_NAME);
-
-      expect(await toasts.getCount()).to.be(1);
-      await toasts.dismissAll();
+      await discover.waitUntilTabIsLoaded();
 
       const selectedTab = await unifiedTabs.getSelectedTab();
-      const tabUnsavedIndicator = await unifiedTabs.getTabUnsavedIndicatorTestSubj(
-        selectedTab?.element
-      );
-
-      await testSubjects.missingOrFail(tabUnsavedIndicator);
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab?.index)).to.be(false);
 
       await queryBar.setQuery(QUERY1);
       await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
 
-      await testSubjects.existOrFail(tabUnsavedIndicator);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab?.index)).to.be(true);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
 
       await discover.saveSearch(SEARCH_NAME);
+      await discover.waitUntilTabIsLoaded();
 
-      expect(await toasts.getCount()).to.be(1);
-      await toasts.dismissAll();
-
-      await testSubjects.missingOrFail(tabUnsavedIndicator);
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab?.index)).to.be(false);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(false);
     });
 
     it('reverts unsaved changes in all tabs after clicking revert changes button', async () => {
       const SEARCH_NAME = `unsaved_changes_${Date.now()}`;
 
       const selectedTab1 = await unifiedTabs.getSelectedTab();
-      const tab1UnsavedIndicator = await unifiedTabs.getTabUnsavedIndicatorTestSubj(
-        selectedTab1?.element
-      );
 
       await unifiedTabs.createNewTab();
 
       const selectedTab2 = await unifiedTabs.getSelectedTab();
-      const tab2UnsavedIndicator = await unifiedTabs.getTabUnsavedIndicatorTestSubj(
-        selectedTab2?.element
-      );
 
       await discover.saveSearch(SEARCH_NAME);
-
-      expect(await toasts.getCount()).to.be(1);
-      await toasts.dismissAll();
+      await discover.waitUntilTabIsLoaded();
 
       await queryBar.setQuery(QUERY2);
       await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
 
-      await testSubjects.existOrFail(tab2UnsavedIndicator);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(true);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
 
       await unifiedTabs.selectTab(0);
       await queryBar.setQuery(QUERY1);
       await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
 
-      await testSubjects.existOrFail(tab1UnsavedIndicator);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(true);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
 
-      await testSubjects.click('unsavedChangesBadge');
-      await testSubjects.click('revertUnsavedChangesButton');
+      await discover.revertUnsavedChanges();
+      await discover.waitUntilTabIsLoaded();
 
-      await testSubjects.missingOrFail(tab1UnsavedIndicator);
-      await testSubjects.missingOrFail(tab2UnsavedIndicator);
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(false);
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(false);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(false);
     });
 
     it('persists unsaved state for modified tabs across a refresh and clears it upon saving', async () => {
       const SEARCH_NAME = `unsaved_changes_${Date.now()}`;
 
       const selectedTab1 = await unifiedTabs.getSelectedTab();
-      const tab1UnsavedIndicator = await unifiedTabs.getTabUnsavedIndicatorTestSubj(
-        selectedTab1?.element
-      );
 
       await unifiedTabs.createNewTab();
 
       const selectedTab2 = await unifiedTabs.getSelectedTab();
-      const tab2UnsavedIndicator = await unifiedTabs.getTabUnsavedIndicatorTestSubj(
-        selectedTab2?.element
-      );
 
       await unifiedTabs.createNewTab();
 
       const selectedTab3 = await unifiedTabs.getSelectedTab();
-      const tab3UnsavedIndicator = await unifiedTabs.getTabUnsavedIndicatorTestSubj(
-        selectedTab3?.element
-      );
 
       await discover.saveSearch(SEARCH_NAME);
-
-      expect(await toasts.getCount()).to.be(1);
-      await toasts.dismissAll();
+      await discover.waitUntilTabIsLoaded();
 
       await unifiedTabs.selectTab(0);
       await queryBar.setQuery(QUERY1);
       await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
 
-      await testSubjects.existOrFail(tab1UnsavedIndicator);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(true);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
 
       await unifiedTabs.selectTab(1);
       await queryBar.setQuery(QUERY2);
       await queryBar.submitQuery();
+      await discover.waitUntilTabIsLoaded();
 
-      await testSubjects.existOrFail(tab2UnsavedIndicator);
-      await testSubjects.existOrFail('unsavedChangesBadge');
-      await testSubjects.missingOrFail(tab3UnsavedIndicator);
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(true);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab3?.index)).to.be(false);
 
       await browser.refresh();
       await discover.waitUntilTabIsLoaded();
 
-      await testSubjects.existOrFail(tab1UnsavedIndicator);
-      await testSubjects.existOrFail(tab2UnsavedIndicator);
-      await testSubjects.missingOrFail(tab3UnsavedIndicator);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(true);
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(true);
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab3?.index)).to.be(false);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
 
       await discover.saveSearch(SEARCH_NAME);
+      await discover.waitUntilTabIsLoaded();
 
-      expect(await toasts.getCount()).to.be(1);
-      await toasts.dismissAll();
-
-      await testSubjects.missingOrFail(tab1UnsavedIndicator);
-      await testSubjects.missingOrFail(tab2UnsavedIndicator);
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(false);
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(false);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(false);
     });
 
     it('forces a refetch on previously modified tab when switching back after reverting changes', async () => {
       const SEARCH_NAME = `unsaved_changes_${Date.now()}`;
 
       const selectedTab1 = await unifiedTabs.getSelectedTab();
-      const tab1UnsavedIndicator = await unifiedTabs.getTabUnsavedIndicatorTestSubj(
-        selectedTab1?.element
-      );
 
       await discover.waitUntilSearchingHasFinished();
       const originalHitCount = await discover.getHitCount();
@@ -189,34 +156,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedTabs.createNewTab();
 
       const selectedTab2 = await unifiedTabs.getSelectedTab();
-      const tab2UnsavedIndicator = await unifiedTabs.getTabUnsavedIndicatorTestSubj(
-        selectedTab2?.element
-      );
 
-      await testSubjects.missingOrFail(tab2UnsavedIndicator);
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(false);
 
       await discover.saveSearch(SEARCH_NAME);
-
-      expect(await toasts.getCount()).to.be(1);
-      await toasts.dismissAll();
+      await discover.waitUntilTabIsLoaded();
 
       await unifiedTabs.selectTab(0);
       await queryBar.setQuery(QUERY1);
       await queryBar.submitQuery();
       await discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.existOrFail(tab1UnsavedIndicator);
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(true);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
 
       const hitCountAfterChange = await discover.getHitCount();
       expect(hitCountAfterChange).to.not.equal(originalHitCount);
 
       await unifiedTabs.selectTab(1);
-      await testSubjects.click('unsavedChangesBadge');
-      await testSubjects.click('revertUnsavedChangesButton');
+      await discover.revertUnsavedChanges();
+      await discover.waitUntilTabIsLoaded();
 
-      await testSubjects.missingOrFail(tab1UnsavedIndicator);
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(false);
+      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(false);
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
