@@ -140,40 +140,39 @@ describe('ruleActionsConnectorsBody', () => {
 
   test('filters out when connector should be hidden in UI', async () => {
     const connectorTypes = [
-      { id: 'type-a', name: 'Type A' },
-      { id: 'type-b', name: 'Type B' },
-      { id: 'type-c', name: 'Type C' },
+      { id: '.slack', name: 'Slack' },
+      { id: '.slack_api', name: 'Slack API' },
+      { id: '.cases', name: 'Cases' },
     ];
 
     const availableConnectors = [
-      { actionTypeId: 'type-a', name: 'Type A' },
-      { actionTypeId: 'type-b', name: 'Type B' },
-      { actionTypeId: 'type-c', name: 'Type C' },
+      { actionTypeId: '.slack', name: 'Slack' },
+      { actionTypeId: '.slack_api', name: 'Slack API' },
+      { actionTypeId: '.cases', name: 'Cases' },
     ];
 
     const subtype = [
-      { id: 'type-b', name: 'Type B' },
-      { id: 'type-c', name: 'Type C' },
+      { id: '.slack_api', name: 'Slack API' },
+      { id: '.slack', name: 'Slack' },
     ];
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(
-      getActionTypeModel('A', {
-        id: 'type-a',
-        hideInUi: () => true,
-      })
-    );
-    actionTypeRegistry.register(
-      getActionTypeModel('B', {
-        id: 'type-b',
+      getActionTypeModel('Slack', {
+        id: '.slack',
         subtype,
-        // Simulate hideInUi returning true for type-b
         hideInUi: () => true,
       })
     );
     actionTypeRegistry.register(
-      getActionTypeModel('C', {
-        id: 'type-c',
+      getActionTypeModel('Slack API', {
+        id: '.slack_api',
+        subtype,
         hideInUi: () => false,
+      })
+    );
+    actionTypeRegistry.register(
+      getActionTypeModel('Cases', {
+        id: '.cases',
       })
     );
 
@@ -198,7 +197,7 @@ describe('ruleActionsConnectorsBody', () => {
 
     expect(filterButtons).toHaveLength(3);
     expect(filterButtons[0]).toHaveTextContent('All');
-    expect(filterButtons[1]).toHaveTextContent('Type A');
-    expect(filterButtons[2]).toHaveTextContent('Type C');
+    expect(filterButtons[1]).toHaveTextContent('Cases');
+    expect(filterButtons[2]).toHaveTextContent('Slack API');
   });
 });
