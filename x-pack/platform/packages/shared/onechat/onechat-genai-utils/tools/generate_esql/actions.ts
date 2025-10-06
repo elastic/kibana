@@ -68,7 +68,7 @@ export function isExecuteQueryAction(action: Action): action is ExecuteQueryActi
 /**
  * Format an action into a couple of [ai, user] messages to be used in prompts.
  */
-export const formatAction = (action: Action, toolCallAgnostic = true): BaseMessageLike[] => {
+export const formatAction = (action: Action, withoutToolCalls = true): BaseMessageLike[] => {
   // Important notice: Claude is *very* stupid with tool configuration
   // and will be fine calling tools that are not available, just based on previous tool calls
   // which means we can't represent the action history as a tool call list
@@ -90,7 +90,7 @@ export const formatAction = (action: Action, toolCallAgnostic = true): BaseMessa
       if (!action.wasCorrected) {
         return [];
       }
-      return toolCallAgnostic
+      return withoutToolCalls
         ? [
             createAIMessage('Now you can execute the query'),
             createUserMessage(
@@ -119,13 +119,11 @@ export const formatAction = (action: Action, toolCallAgnostic = true): BaseMessa
       if (action.success) {
         return [];
       }
-      return toolCallAgnostic
+      return withoutToolCalls
         ? [
             createAIMessage('Now you can execute the query'),
             createUserMessage(
-              action.success
-                ? `Done`
-                : `I tried executing it and I got the following error:
+              `I tried executing it and I got the following error:
 
 \`\`\`
 ${action.error}
@@ -145,11 +143,12 @@ Can you fix the query?`
               content: {
                 success: action.success,
                 error: action.error,
-                instructions: action.error ? 'Please generate a query again' : undefined,
               },
             }),
           ];
     case 'request_documentation':
+      // always use tool call format for this action, to stay closer to the original flow
+      // also Claude don't seem to care about requesting more doc.
       return [
         createToolCallMessage({
           toolCallId,
