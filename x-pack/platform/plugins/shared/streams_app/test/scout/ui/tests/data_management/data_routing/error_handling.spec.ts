@@ -8,8 +8,7 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/236644
-test.describe.skip(
+test.describe(
   'Stream data routing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -43,7 +42,7 @@ test.describe.skip(
 
       // Should show error and stay in creating state
       await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText('Failed to fetch')).toBeVisible();
+      await expect(page.getByTestId('errorToastMessage')).toContainText('Failed to fetch');
       await pageObjects.streams.closeToasts();
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
 
@@ -76,7 +75,7 @@ test.describe.skip(
 
       // Should show error and return to editing state
       await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText('Failed to fetch')).toBeVisible();
+      await expect(page.getByTestId('errorToastMessage')).toContainText('Failed to fetch');
       await pageObjects.streams.closeToasts();
 
       // Restore network and retry
