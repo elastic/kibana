@@ -126,7 +126,7 @@ export async function createAgentPolicyWithPackages({
   agentPolicyService,
   newPolicy,
   hasFleetServer,
-  withSysMonitoring,
+  withSysMonitoring: withSysMonitoringParams,
   monitoringEnabled,
   spaceId,
   user,
@@ -155,6 +155,12 @@ export async function createAgentPolicyWithPackages({
       newPolicy.is_default_fleet_server = true;
     }
   }
+
+  const withSysMonitoring = withSysMonitoringParams && !newPolicy.supports_agentless;
+  if (!withSysMonitoring && withSysMonitoringParams) {
+    logger.debug(`Disabling system monitoring for agentless policy [${newPolicy.name}]`);
+  }
+
   if (withSysMonitoring) {
     packagesToInstall.push(FLEET_SYSTEM_PACKAGE);
   }
