@@ -246,7 +246,7 @@ export function getConnectorIdSuggestions(
     }
 
     // Create a label that shows both ID and name for better visibility
-    const displayLabel = `${instance.id} • ${connectorName}`;
+    const displayLabel = `${connectorName} • ${instance.id}`;
 
     suggestions.push({
       label: displayLabel, // Show both connector ID and name

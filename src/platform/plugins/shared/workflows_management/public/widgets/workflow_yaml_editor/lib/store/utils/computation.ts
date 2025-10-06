@@ -45,6 +45,7 @@ export const performComputation = (
     // Dispatch computed data
     store.dispatch(
       _setComputedDataInternal({
+        yamlLineCounter: lineCounter,
         yamlDocument: yamlDoc,
         workflowLookup: lookup,
         workflowGraph: graph,

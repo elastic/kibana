@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export interface ConnectorIdItem {
+  id: string;
+  connectorType: string;
+  type: 'connector-id';
+  key: string | null;
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+  yamlPath: (string | number)[];
+}
+
 export interface VariableItem {
   id: string;
   type: 'regexp' | 'foreach';
@@ -64,8 +76,15 @@ interface YamlValidationResultMonacoYaml extends YamlValidationResultBase {
   hoverMessage: null;
 }
 
+interface YamlValidationResultConnectorIdError extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  source: 'connector-id-validation';
+}
+
 export type YamlValidationResult =
   | YamlValidationResultNonUniqueStepName
   | YamlValidationResultVariableError
   | YamlValidationResultVariableValid
-  | YamlValidationResultMonacoYaml;
+  | YamlValidationResultMonacoYaml
+  | YamlValidationResultConnectorIdError;

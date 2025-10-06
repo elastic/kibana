@@ -27,6 +27,11 @@ export const selectYamlDocument = createSelector(
   (computed) => computed?.yamlDocument
 );
 
+export const selectYamlLineCounter = createSelector(
+  selectComputedState,
+  (computed) => computed?.yamlLineCounter
+);
+
 export const selectWorkflowLookup = createSelector(
   selectComputedState,
   (computed) => computed?.workflowLookup

@@ -31,6 +31,7 @@ import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public';
 import type YAML from 'yaml';
 import { type Pair, type Scalar, isPair, isScalar } from 'yaml';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHandleMarkersChanged } from '../../../features/validate_workflow_yaml/lib/use_handle_markers_changed';
 import {
   getWorkflowZodSchema,
   getWorkflowZodSchemaLoose,
@@ -572,12 +573,9 @@ export const WorkflowYAMLEditor = ({
   const changesHighlightDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
-  const {
-    error: errorValidating,
-    validationErrors,
-    validateVariables,
-    handleMarkersChanged,
-  } = useYamlValidation({
+  const { error: errorValidating } = useYamlValidation(editorRef.current);
+
+  const { validationErrors, handleMarkersChanged } = useHandleMarkersChanged({
     workflowYamlSchema: workflowYamlSchemaLoose,
     onValidationErrors,
   });
@@ -721,10 +719,9 @@ export const WorkflowYAMLEditor = ({
           return;
         }
         dispatch(setYamlString(model.getValue()));
-        validateVariables(editorRef.current);
       }
     },
-    [validateVariables, dispatch]
+    [dispatch]
   );
 
   useEffect(() => {
@@ -806,7 +803,6 @@ export const WorkflowYAMLEditor = ({
       // Initial YAML parsing from main
       const value = model.getValue();
       if (value && value.trim() !== '') {
-        validateVariables(editor);
         // Use setTimeout to defer state updates until after the current render cycle
         // This prevents the flushSync warning while maintaining the correct order
         setTimeout(() => {
