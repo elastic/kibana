@@ -24,11 +24,11 @@ import { generateApmData, generateCustomApmLogs } from '../../src/data_generator
  * This generates criteria based on expected queries and execution requirements.
  */
 function createEsqlCriteria({
-  specificCriteria,
+  specificCriteria = [],
   execute,
   expectedQuery,
 }: {
-  specificCriteria: string[];
+  specificCriteria?: string[];
   execute: boolean;
   expectedQuery?: string | string[];
 }): string[] {
@@ -215,7 +215,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM logs-nginx.access-*
                 | WHERE @timestamp >= NOW() - 2 hours
@@ -301,7 +300,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM logs-auth_service-*
                 | WHERE @timestamp >= NOW() - 7 days AND event.action == "login"
@@ -337,7 +335,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM logs-auth_service-*
                 | SORT @timestamp
@@ -426,7 +423,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [],
                   execute: false,
                   expectedQuery: `FROM metrics-apm
                 | WHERE metricset.name == "service_destination" AND @timestamp >= NOW() - 24 hours
@@ -618,7 +614,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM packetbeat-*
                 | STATS doc_count = COUNT(*) BY destination.domain
@@ -724,7 +719,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM employees
                 | EVAL hire_date_formatted = DATE_FORMAT("MMMM YYYY", hire_date)
@@ -758,7 +752,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
               },
               output: {
                 criteria: createEsqlCriteria({
-                  specificCriteria: [],
                   execute: true,
                   expectedQuery: `FROM employees
                 | WHERE DATE_EXTRACT("year", hire_date) == 2024
@@ -787,7 +780,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM .ds-metrics-apm*
               | WHERE @timestamp >= NOW() - 15 minutes
@@ -804,7 +796,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM metricbeat*
               | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
@@ -821,7 +812,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM postgres-logs*
               | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
@@ -838,7 +828,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM logs-auth_service-*
               | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
@@ -867,7 +856,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM network_firewall
               | WHERE _raw == "SYN Timeout"
@@ -899,7 +887,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM prod_web
               | WHERE _raw NOT LIKE "Connection reset"
@@ -921,7 +908,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM security
               | WHERE _raw == "Failed password" AND sourcetype == "linux_secure"`,
@@ -935,7 +921,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM firewall
               | WHERE (action == "allow" AND dest_port == 443) OR (action == "block" AND protocol == "tcp")`,
@@ -949,7 +934,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM prod_web
               | WHERE host LIKE "webapp-%"`,
@@ -963,7 +947,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM sales
               | WHERE status >= 400 AND status < 500`,
@@ -993,7 +976,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM network_logs
               | RENAME source_ip AS client_ip, dest_ip AS server_ip`,
@@ -1007,7 +989,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM employees
               | KEEP name, department, title`,
@@ -1021,7 +1002,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM employees
               | DROP _raw, _time`,
@@ -1035,7 +1015,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM web_traffic
               | STATS count = count(*), unique_visitors = count_distinct(client_ip), avg_latency = avg(response_time) by http_method`,
@@ -1049,7 +1028,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM products
               | STATS total_sales = sum(sales) by category
@@ -1064,7 +1042,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM access_logs
               | STATS count = count(*) by user
@@ -1080,7 +1057,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM error_logs
               | STATS count = count(*) by error_code
@@ -1116,7 +1092,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: [
                   `FROM main
@@ -1134,7 +1109,6 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             output: {
               criteria: createEsqlCriteria({
-                specificCriteria: [],
                 execute: false,
                 expectedQuery: `FROM firewall
               | KEEP @timestamp, src_ip, dest_ip, action`,
