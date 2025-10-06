@@ -2086,6 +2086,16 @@ const isNotNullDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'boolean',
           optional: false,
         },
@@ -2157,6 +2167,16 @@ const isNotNullDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
           optional: false,
         },
       ],
@@ -2319,6 +2339,16 @@ const isNullDefinition: FunctionDefinition = {
       params: [
         {
           name: 'left',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
           type: 'boolean',
           optional: false,
         },
@@ -2390,6 +2420,16 @@ const isNullDefinition: FunctionDefinition = {
         {
           name: 'left',
           type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
           optional: false,
         },
       ],
