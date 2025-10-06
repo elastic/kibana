@@ -8,8 +8,17 @@
  */
 
 import { z } from '@kbn/zod';
+import moment from 'moment-timezone';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
+
+// Timezone validation helper
+const validateTimezone = (timezone: string) => {
+  if (moment.tz.zone(timezone) != null) {
+    return null;
+  }
+  return `Invalid timezone: ${timezone}`;
+};
 
 // RRule validation helpers
 const validateRRuleFrequency = (freq: string, byweekday?: string[], bymonthday?: number[]) => {
@@ -144,6 +153,8 @@ export const ScheduledTriggerSchema = z.object({
             if (timeError) return false;
             const dateError = validateRRuleDateStart(data.dtstart);
             if (dateError) return false;
+            const timezoneError = validateTimezone(data.tzid);
+            if (timezoneError) return false;
             return true;
           },
           (data) => {
@@ -153,6 +164,8 @@ export const ScheduledTriggerSchema = z.object({
             if (timeError) return { message: timeError };
             const dateError = validateRRuleDateStart(data.dtstart);
             if (dateError) return { message: dateError };
+            const timezoneError = validateTimezone(data.tzid);
+            if (timezoneError) return { message: timezoneError };
             return { message: 'Invalid RRule configuration' };
           }
         ),
