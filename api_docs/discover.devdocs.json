@@ -2537,7 +2537,7 @@
                 "section": "def-common.DiscoverSession",
                 "text": "DiscoverSession"
               },
-              " | undefined; }, ",
+              " | undefined; nextSelectedTabId: string; }, ",
               "SaveDiscoverSessionThunkParams",
               ", { state: ",
               "DiscoverInternalState",
@@ -4244,7 +4244,7 @@
         "signature": [
           "Omit<",
           "SearchEmbeddableState",
-          ", \"rows\" | \"searchSource\" | \"inspectorAdapters\" | \"columnsMeta\" | \"totalHitCount\"> & Pick<",
+          ", \"rows\" | \"inspectorAdapters\" | \"searchSource\" | \"columnsMeta\" | \"totalHitCount\"> & Pick<",
           "SerializableSavedSearch",
           ", \"serializedSearchSource\"> & ",
           {
