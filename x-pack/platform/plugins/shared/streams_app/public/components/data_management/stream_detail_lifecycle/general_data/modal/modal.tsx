@@ -122,7 +122,7 @@ export function EditLifecycleModal({
                     ? i18n.translate(
                         'xpack.streams.streamDetailLifecycle.wiredInheritSwitchLabel',
                         {
-                          defaultMessage: 'Inherit from parent stream',
+                          defaultMessage: 'Inherit retention',
                         }
                       )
                     : i18n.translate(
@@ -140,15 +140,14 @@ export function EditLifecycleModal({
                     ? i18n.translate(
                         'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
                         {
-                          defaultMessage:
-                            "Use the retention configuration from this stream's parent",
+                          defaultMessage: 'Use the parent stream’s retention configuration',
                         }
                       )
                     : i18n.translate(
                         'xpack.streams.streamDetailLifecycle.inheritSwitchDescription',
                         {
                           defaultMessage:
-                            "Use the retention configuration from this stream's index template",
+                            '/Use the stream’s index template retention configuration',
                         }
                       )
                 }
@@ -175,7 +174,7 @@ export function EditLifecycleModal({
             <EuiText>
               <h5>
                 {i18n.translate('xpack.streams.streamDetailLifecycle.dataRetention', {
-                  defaultMessage: 'Data retention',
+                  defaultMessage: 'Custom retention',
                 })}
               </h5>
             </EuiText>

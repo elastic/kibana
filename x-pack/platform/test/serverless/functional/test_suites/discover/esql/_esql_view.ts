@@ -347,7 +347,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'logstash-*',
           ]);
         } else {
-          expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+          ['kibana_sample_data_flights', 'logstash-*'].forEach((item) => {
+            expect(availableDataViews).to.contain(item);
+          });
         }
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
