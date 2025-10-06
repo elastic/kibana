@@ -3154,6 +3154,81 @@ Object {
 }
 `;
 
+exports[`Connector type config checks detect connector type changes for: .workflows 1`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {},
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .workflows 2`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {},
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .workflows 3`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "subAction": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "subActionParams": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+      },
+      "keys": Object {
+        "workflowId": Object {
+          "flags": Object {
+            "error": [Function],
+          },
+          "type": "string",
+        },
+      },
+      "type": "object",
+    },
+  },
+  "type": "object",
+}
+`;
+
 exports[`Connector type config checks detect connector type changes for: .cases-webhook 1`] = `
 Object {
   "flags": Object {

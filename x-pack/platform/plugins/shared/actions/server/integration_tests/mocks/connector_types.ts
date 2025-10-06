@@ -31,12 +31,12 @@ export const connectorTypes: string[] = [
   '.d3security',
   '.resilient',
   '.thehive',
-  '.workflows',
   '.xsoar',
   '.sentinelone',
   '.crowdstrike',
   '.inference',
   '.microsoft_defender_endpoint',
   '.cases',
+  '.workflows',
   '.observability-ai-assistant',
 ];

@@ -212,6 +212,9 @@ export default function ({ getService }: FtrProviderContext) {
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:mark_removed_tasks_as_unrecognized',
         'unusedUrlsCleanupTask',
+        'workflow:resume',
+        'workflow:run',
+        'workflow:scheduled',
       ]);
     });
   });
