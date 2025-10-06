@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 
@@ -30,10 +29,11 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type {
   DefaultEmbeddableApi,
   EmbeddableSetup,
-  ReactEmbeddableFactory,
+  EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -48,9 +48,11 @@ import type {
 } from '@kbn/presentation-publishing';
 import {
   apiHasExecutionContext,
-  initializeTimeRange,
+  initializeTimeRangeManager,
   initializeTitleManager,
   useBatchedPublishingSubjects,
+  timeRangeComparators,
+  titleComparators,
 } from '@kbn/presentation-publishing';
 import { dashboardCrossfilterSlice } from '@kbn/eventbus-slices';
 
@@ -392,18 +394,9 @@ export async function resolveEmbeddableJsSandboxUserInput(
 export const getJsSandboxEmbeddableFactory = (
   getStartServices: StartServicesAccessor<JsSandboxPluginStartDeps, JsSandboxPluginStart>
 ) => {
-  const factory: ReactEmbeddableFactory<
-    JsSandboxEmbeddableState,
-    JsSandboxEmbeddableState,
-    JsSandboxEmbeddableApi
-  > = {
+  const factory: EmbeddableFactory<JsSandboxEmbeddableState, JsSandboxEmbeddableApi> = {
     type: 'js_sandbox',
-    deserializeState: (state) => {
-      const serializedState = cloneDeep(state.rawState);
-      console.log('serializedState', serializedState);
-      return serializedState;
-    },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
       const { data, eventBus } = pluginStart;
@@ -418,38 +411,32 @@ export const getJsSandboxEmbeddableFactory = (
 
       const dashboardCrossfilter = eventBus.get(dashboardCrossfilterSlice);
 
-      const {
-        api: timeRangeApi,
-        comparators: timeRangeComparators,
-        serialize: serializeTimeRange,
-      } = initializeTimeRange(state);
-
-      const titleManager = initializeTitleManager(state);
+      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
+      const titleManager = initializeTitleManager(initialState.rawState);
 
       const { jsSandboxControlsApi, serializeJsSandboxChartState, jsSandboxControlsComparators } =
-        initializeJsSandboxControls(state);
+        initializeJsSandboxControls(initialState.rawState);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
 
-      const api = buildApi(
+      const api = finalizeApi(
         {
           ...titleManager.api,
           dataViews$,
           serializeState: () => {
             return {
               rawState: {
-                timeRange: undefined,
-                ...titleManager.serialize(),
-                ...serializeTimeRange(),
+                ...titleManager.getLatestState(),
+                ...timeRangeManager.getLatestState(),
                 ...serializeJsSandboxChartState(),
               },
               references: [],
             };
           },
-          ...timeRangeApi,
+          ...timeRangeManager.api,
           ...jsSandboxControlsApi,
           getTypeDisplayName: () =>
             i18n.translate('jsSandbox.embeddable.typeDisplayName', {
@@ -478,7 +465,7 @@ export const getJsSandboxEmbeddableFactory = (
           blockingError$,
         },
         {
-          ...titleManager.comparators,
+          ...titleComparators,
           ...timeRangeComparators,
           ...jsSandboxControlsComparators,
         }
