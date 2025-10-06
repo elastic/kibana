@@ -13,7 +13,7 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import parse from 'joi-to-json';
 import { StateGraph, Annotation, messagesStateReducer } from '@langchain/langgraph';
 import type { BaseMessage } from '@langchain/core/messages';
-import { HumanMessage, AIMessage } from '@langchain/core/messages';
+import { HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages';
 
 import {
   esqlMetricState,
@@ -185,7 +185,7 @@ IMPORTANT RULES:
 4. Make sure to follow schema definition strictly`;
 
     const messages: BaseMessage[] = [
-      new HumanMessage(systemPrompt),
+      new SystemMessage(systemPrompt),
       new HumanMessage(`User query: ${state.nlQuery}
 
 ES|QL query: ${state.esqlQuery}
