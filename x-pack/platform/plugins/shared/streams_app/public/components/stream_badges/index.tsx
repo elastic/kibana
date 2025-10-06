@@ -175,7 +175,7 @@ export function DiscoverBadgeButton({
 
   return (
     <EuiButtonIcon
-      data-test-subj="streamsDetailOpenInDiscoverBadgeButton"
+      data-test-subj={`streamsDiscoverActionButton-${definition.stream.name}`}
       href={discoverLink}
       iconType="discoverApp"
       size="xs"

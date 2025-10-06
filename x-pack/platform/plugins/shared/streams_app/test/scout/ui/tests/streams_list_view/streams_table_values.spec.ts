@@ -12,8 +12,6 @@ const INGESTION_DURATION_MINUTES = 5;
 
 test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    await apiServices.streams.deleteStream('logs-10-docs-per-minute');
-    await apiServices.streams.deleteStream('logs-20-docs-per-minute');
     const currentTime = Date.now();
     await apiServices.streams.enable();
     // Generate logs for the last 2 minutes for two streams with different ingestion rates
@@ -31,7 +29,7 @@ test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, 
     });
   });
 
-  test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.streams.gotoStreamMainPage();
   });
@@ -174,5 +172,16 @@ test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, 
     // Verify the retention for each log stream is the 'logs' ILM policy
     await pageObjects.streams.verifyRetention('logs-10-docs-per-minute', 'logs');
     await pageObjects.streams.verifyRetention('logs-20-docs-per-minute', 'logs');
+  });
+
+  test('should provide Discover actions with correct ESQL queries', async ({ pageObjects }) => {
+    // Wait for the streams table to load
+    await pageObjects.streams.expectStreamsTableVisible();
+
+    const streamNames = ['logs-10-docs-per-minute', 'logs-20-docs-per-minute'];
+
+    for (const name of streamNames) {
+      await pageObjects.streams.verifyDiscoverButtonLink(name);
+    }
   });
 });
