@@ -11,6 +11,7 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/test",
     "@kbn/field-types",
     "@kbn/unified-histogram",
     "@kbn/metrics-experience-plugin",
