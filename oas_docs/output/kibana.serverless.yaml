@@ -14516,6 +14516,19 @@ paths:
                       - status
                   status:
                     $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
+                  users:
+                    description: User statistics for privilege monitoring
+                    type: object
+                    properties:
+                      current_count:
+                        description: Current number of privileged users being monitored
+                        type: integer
+                      max_allowed:
+                        description: Maximum number of privileged users allowed to be monitored
+                        type: integer
+                    required:
+                      - current_count
+                      - max_allowed
                 required:
                   - status
           description: Successful response
@@ -31401,6 +31414,16 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                agent_key:
+                                  anyOf:
+                                    - additionalProperties: false
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
                                 es_key:
                                   anyOf:
                                     - additionalProperties: false
@@ -31426,6 +31449,14 @@ paths:
                           nullable: true
                           type: object
                           properties:
+                            agent_certificate:
+                              type: string
+                            agent_certificate_authorities:
+                              items:
+                                type: string
+                              type: array
+                            agent_key:
+                              type: string
                             certificate:
                               type: string
                             certificate_authorities:
@@ -31536,6 +31567,16 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        agent_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
                         es_key:
                           anyOf:
                             - additionalProperties: false
@@ -31561,6 +31602,14 @@ paths:
                   nullable: true
                   type: object
                   properties:
+                    agent_certificate:
+                      type: string
+                    agent_certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    agent_key:
+                      type: string
                     certificate:
                       type: string
                     certificate_authorities:
@@ -31626,6 +31675,16 @@ paths:
                             additionalProperties: false
                             type: object
                             properties:
+                              agent_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -31651,6 +31710,14 @@ paths:
                         nullable: true
                         type: object
                         properties:
+                          agent_certificate:
+                            type: string
+                          agent_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          agent_key:
+                            type: string
                           certificate:
                             type: string
                           certificate_authorities:
@@ -31809,6 +31876,16 @@ paths:
                             additionalProperties: false
                             type: object
                             properties:
+                              agent_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -31834,6 +31911,14 @@ paths:
                         nullable: true
                         type: object
                         properties:
+                          agent_certificate:
+                            type: string
+                          agent_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          agent_key:
+                            type: string
                           certificate:
                             type: string
                           certificate_authorities:
@@ -31933,6 +32018,16 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        agent_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
                         es_key:
                           anyOf:
                             - additionalProperties: false
@@ -31958,6 +32053,14 @@ paths:
                   nullable: true
                   type: object
                   properties:
+                    agent_certificate:
+                      type: string
+                    agent_certificate_authorities:
+                      items:
+                        type: string
+                      type: array
+                    agent_key:
+                      type: string
                     certificate:
                       type: string
                     certificate_authorities:
@@ -32022,6 +32125,16 @@ paths:
                             additionalProperties: false
                             type: object
                             properties:
+                              agent_key:
+                                anyOf:
+                                  - additionalProperties: false
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                               es_key:
                                 anyOf:
                                   - additionalProperties: false
@@ -32047,6 +32160,14 @@ paths:
                         nullable: true
                         type: object
                         properties:
+                          agent_certificate:
+                            type: string
+                          agent_certificate_authorities:
+                            items:
+                              type: string
+                            type: array
+                          agent_key:
+                            type: string
                           certificate:
                             type: string
                           certificate_authorities:
@@ -46737,6 +46858,8 @@ paths:
             schema:
               type: object
               properties:
+                enable_reset_to_zero:
+                  type: boolean
                 exclude_alert_statuses:
                   items:
                     type: string
@@ -70660,10 +70783,28 @@ components:
         - endpoint_host_isolation_exceptions
         - endpoint_blocklists
       type: string
+    Security_Detections_API_ExternalRuleCustomizedFields:
+      description: An array of customized field names — that is, fields that the user has modified from their base value. Defaults to an empty array.
+      items:
+        type: object
+        properties:
+          field_name:
+            description: Name of a user-modified field in the rule object.
+            type: string
+        required:
+          - field_name
+      type: array
+    Security_Detections_API_ExternalRuleHasBaseVersion:
+      description: Determines whether an external/prebuilt rule has its original, unmodified version present when the calculation of its customization status is performed (`rule_source.is_customized` and `rule_source.customized_fields`).
+      type: boolean
     Security_Detections_API_ExternalRuleSource:
       description: Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
       type: object
       properties:
+        customized_fields:
+          $ref: '#/components/schemas/Security_Detections_API_ExternalRuleCustomizedFields'
+        has_base_version:
+          $ref: '#/components/schemas/Security_Detections_API_ExternalRuleHasBaseVersion'
         is_customized:
           $ref: '#/components/schemas/Security_Detections_API_IsExternalRuleCustomized'
         type:
@@ -70673,6 +70814,8 @@ components:
       required:
         - type
         - is_customized
+        - has_base_version
+        - customized_fields
     Security_Detections_API_FindRulesSortField:
       enum:
         - created_at
@@ -77498,6 +77641,23 @@ components:
               properties:
                 ingested:
                   format: date-time
+                  type: string
+            user:
+              type: object
+              properties:
+                entity:
+                  type: object
+                  properties:
+                    attributes:
+                      type: object
+                      properties:
+                        Privileged:
+                          description: Indicates if the user is privileged.
+                          type: boolean
+                is_privileged:
+                  description: Indicates if the user is privileged.
+                  type: boolean
+                name:
                   type: string
     Security_Entity_Analytics_API_MonitoredUserUpdateDoc:
       type: object

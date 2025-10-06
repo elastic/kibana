@@ -43,11 +43,6 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the `upload` endpoint response action (v8.9)
-   */
-  responseActionUploadEnabled: true,
-
-  /**
    * Enables Automated Endpoint Process actions
    */
   automatedProcessActionsEnabled: true,
@@ -242,10 +237,6 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
   /**
 
-   /**
-   * Enables Integrations Sync for Privileged User Monitoring
-   */
-  integrationsSyncEnabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -290,7 +281,7 @@ export const allowedExperimentalValues = Object.freeze({
   eventCollectionDataReductionBannerEnabled: true,
 
   /** Enables new Data View Picker */
-  newDataViewPickerEnabled: false,
+  newDataViewPickerEnabled: true,
 
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command
