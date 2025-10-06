@@ -8,7 +8,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { SettingsContextProvider, useSettingsContext } from './settings_context';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
 import { Subject } from 'rxjs';

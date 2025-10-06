@@ -15,7 +15,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { GenAiSettingsApp } from '../components/gen_ai_settings_app';
 import { EnabledFeaturesContextProvider } from '../contexts/enabled_features_context';
 import type { GenAiSettingsConfigType } from '../../common/config';

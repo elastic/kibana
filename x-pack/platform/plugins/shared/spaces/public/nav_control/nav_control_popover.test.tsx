@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';

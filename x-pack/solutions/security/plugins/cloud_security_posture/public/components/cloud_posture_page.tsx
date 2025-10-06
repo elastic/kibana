@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NoDataPageProps } from '@kbn/shared-ux-page-no-data';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useCallback } from 'react';
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { reviewRuleInstall } from '../../api';
 import { REVIEW_RULE_INSTALLATION_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
 import type { ReviewRuleInstallationResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';

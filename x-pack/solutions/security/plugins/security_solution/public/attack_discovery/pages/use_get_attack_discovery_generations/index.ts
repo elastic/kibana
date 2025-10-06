@@ -19,8 +19,8 @@ import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+} from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback, useRef } from 'react';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 

@@ -12,7 +12,7 @@ import {
   EuiSkeletonRectangle,
   useEuiTheme,
 } from '@elastic/eui';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 

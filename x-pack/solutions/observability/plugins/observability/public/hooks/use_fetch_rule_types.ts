@@ -9,8 +9,8 @@ import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+} from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { camelCase, mapKeys } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';

@@ -10,7 +10,7 @@ import {
   useMutation,
   type UseMutationOptions,
   type UseMutationResult,
-} from '@tanstack/react-query';
+} from '@kbn/react-query';
 import type { ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import type { CancelActionRequestBody } from '../../../../common/api/endpoint';
 import { KibanaServices } from '../../../common/lib/kibana';

@@ -10,7 +10,7 @@ import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-} from '@tanstack/react-query';
+} from '@kbn/react-query';
 import type { DataStreamApis } from '../use_data_stream_apis';
 import type { AIConnector } from '../../connectorland/connector_selector';
 import type { Conversation } from '../../..';

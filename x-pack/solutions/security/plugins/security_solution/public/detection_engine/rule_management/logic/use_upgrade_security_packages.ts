@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useIsMutating } from '@tanstack/react-query';
+import { useIsMutating } from '@kbn/react-query';
 import { useEffect } from 'react';
 import {
   BOOTSTRAP_PREBUILT_RULES_KEY,

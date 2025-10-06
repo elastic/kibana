@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
