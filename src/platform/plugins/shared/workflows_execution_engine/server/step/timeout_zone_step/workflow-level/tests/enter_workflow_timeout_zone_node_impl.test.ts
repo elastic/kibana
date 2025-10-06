@@ -118,11 +118,11 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     });
   });
 
-  describe.skip('monitor method', () => {
-    let monitoredContextMock: WorkflowContextManager;
+  describe('monitor method', () => {
+    let monitoredStepExecutionRuntimeMock: StepExecutionRuntime;
 
     beforeEach(() => {
-      monitoredContextMock = {
+      monitoredStepExecutionRuntimeMock = {
         stepExecutionId: 'monitored-step-123',
         abortController: {
           abort: jest.fn(),
@@ -133,7 +133,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
           exitScope: jest.fn(),
           stackFrames: [],
         } as any,
-      } as any as WorkflowContextManager;
+      } as any as StepExecutionRuntime;
     });
 
     it('should not abort or fail steps when within timeout limit', async () => {
@@ -143,9 +143,9 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       });
 
-      await impl.monitor(monitoredContextMock);
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
 
-      expect(monitoredContextMock.abortController.abort).not.toHaveBeenCalled();
+      expect(monitoredStepExecutionRuntimeMock.abortController.abort).not.toHaveBeenCalled();
       expect(wfExecutionStateMock.upsertStep).not.toHaveBeenCalled();
       expect(wfExecutionRuntimeManagerMock.markWorkflowTimeouted).not.toHaveBeenCalled();
     });
@@ -158,11 +158,11 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       });
 
       // Mock empty scope stack (no nested scopes to fail)
-      (monitoredContextMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
+      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
 
-      await impl.monitor(monitoredContextMock);
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
 
-      expect(monitoredContextMock.abortController.abort).toHaveBeenCalledTimes(1);
+      expect(monitoredStepExecutionRuntimeMock.abortController.abort).toHaveBeenCalledTimes(1);
       expect(wfExecutionStateMock.upsertStep).toHaveBeenCalledWith({
         id: 'monitored-step-123',
         status: ExecutionStatus.FAILED,
@@ -201,18 +201,18 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       };
 
       // Create a new monitored context with proper nested stack
-      const nestedMonitoredContext = {
-        ...monitoredContextMock,
+      const nestedMonitoredStepExecutionRuntime = {
+        ...monitoredStepExecutionRuntimeMock,
         scopeStack: mockNestedStack1,
-      } as unknown as WorkflowContextManager;
+      } as unknown as StepExecutionRuntime;
 
       // Mock the chained calls for exitScope
       mockNestedStack1.exitScope.mockReturnValue(mockNestedStack2);
       mockNestedStack2.exitScope.mockReturnValue(mockEmptyStack);
 
-      await impl.monitor(nestedMonitoredContext);
+      await impl.monitor(nestedMonitoredStepExecutionRuntime);
 
-      expect(monitoredContextMock.abortController.abort).toHaveBeenCalledTimes(1);
+      expect(monitoredStepExecutionRuntimeMock.abortController.abort).toHaveBeenCalledTimes(1);
 
       // Should fail the monitored step first
       expect(wfExecutionStateMock.upsertStep).toHaveBeenCalledWith({
@@ -242,41 +242,46 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       });
 
-      await impl.monitor(monitoredContextMock);
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
 
       expect(parseDuration).toHaveBeenCalledWith('2m');
-      expect(monitoredContextMock.abortController.abort).not.toHaveBeenCalled();
+      expect(monitoredStepExecutionRuntimeMock.abortController.abort).not.toHaveBeenCalled();
     });
 
     it('should parse timeout correctly for various duration formats', async () => {
       // Test seconds
       node.timeout = '30s';
       mockParseDuration.mockReturnValue(30000);
-      await impl.monitor(monitoredContextMock);
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
       expect(parseDuration).toHaveBeenCalledWith('30s');
 
       // Test minutes
       node.timeout = '5m';
       mockParseDuration.mockReturnValue(300000);
-      await impl.monitor(monitoredContextMock);
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
       expect(parseDuration).toHaveBeenCalledWith('5m');
 
       // Test hours
       node.timeout = '1h';
       mockParseDuration.mockReturnValue(3600000);
-      await impl.monitor(monitoredContextMock);
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
       expect(parseDuration).toHaveBeenCalledWith('1h');
     });
 
-    it('should get step execution using step execution id from context', async () => {
+    it('should get step execution using step execution id from step execution runtime', async () => {
       const startTime = new Date().getTime() - 30000;
       wfExecutionStateMock.getStepExecution = jest.fn().mockReturnValue({
         startedAt: new Date(startTime).toISOString(),
       });
 
-      await impl.monitor(monitoredContextMock);
+      // Add stepExecutionId to the step execution runtime mock
+      (stepExecutionRuntimeMock as any).stepExecutionId = 'step-execution-runtime-id';
 
-      expect(wfExecutionStateMock.getStepExecution).toHaveBeenCalledWith('workflow-step-exec-456');
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
+
+      expect(wfExecutionStateMock.getStepExecution).toHaveBeenCalledWith(
+        'step-execution-runtime-id'
+      );
     });
 
     it('should use correct time calculations', async () => {
@@ -287,11 +292,11 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       });
 
-      (monitoredContextMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
+      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
 
-      await impl.monitor(monitoredContextMock);
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
 
-      expect(monitoredContextMock.abortController.abort).toHaveBeenCalledTimes(1);
+      expect(monitoredStepExecutionRuntimeMock.abortController.abort).toHaveBeenCalledTimes(1);
       expect(wfExecutionRuntimeManagerMock.markWorkflowTimeouted).toHaveBeenCalledTimes(1);
     });
 
@@ -301,7 +306,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       });
 
-      const result = await impl.monitor(monitoredContextMock);
+      const result = await impl.monitor(monitoredStepExecutionRuntimeMock);
       expect(result).toBeUndefined(); // Promise<void> resolves to undefined
     });
 
@@ -313,10 +318,10 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       });
 
-      await impl.monitor(monitoredContextMock);
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
 
       // Should not timeout when duration equals timeout limit (using > comparison)
-      expect(monitoredContextMock.abortController.abort).not.toHaveBeenCalled();
+      expect(monitoredStepExecutionRuntimeMock.abortController.abort).not.toHaveBeenCalled();
     });
 
     it('should timeout when duration is greater than timeout by 1ms', async () => {
@@ -327,11 +332,11 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
         startedAt: new Date(startTime).toISOString(),
       });
 
-      (monitoredContextMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
+      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
 
-      await impl.monitor(monitoredContextMock);
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
 
-      expect(monitoredContextMock.abortController.abort).toHaveBeenCalledTimes(1);
+      expect(monitoredStepExecutionRuntimeMock.abortController.abort).toHaveBeenCalledTimes(1);
       expect(wfExecutionRuntimeManagerMock.markWorkflowTimeouted).toHaveBeenCalledTimes(1);
     });
   });
