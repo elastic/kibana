@@ -445,11 +445,11 @@ class PackageClientImpl implements PackageClient {
       spaceIds: ['*'],
       fields: ['id', 'name'],
     });
-    const packagePolicyIdsForCurrentUser = packagePolicySORes.saved_objects.map((so) => so.id);
+    const packagePolicyIdsForInternalUser = packagePolicySORes.saved_objects.map((so) => so.id);
 
     return await rollbackInstallation({
       esClient,
-      currentUserPolicyIds: packagePolicyIdsForCurrentUser,
+      currentUserPolicyIds: packagePolicyIdsForInternalUser,
       pkgName,
       spaceId: '*',
     });
