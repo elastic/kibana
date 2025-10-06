@@ -90,13 +90,9 @@ const LogsApp: React.FC<{
                 <Route
                   path="/"
                   exact
-                  render={() => {
-                    plugins.share.url.locators
-                      .get<LogsLocatorParams>(LOGS_LOCATOR_ID)
-                      ?.navigate({});
-
-                    return null;
-                  }}
+                  render={() =>
+                    plugins.share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)?.navigate({})
+                  }
                 />
               )}
               <Route path="/link-to" component={LinkToLogsPage} />
