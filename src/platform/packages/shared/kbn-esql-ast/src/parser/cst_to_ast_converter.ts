@@ -442,7 +442,14 @@ export class CstToAstConverter {
   // --------------------------------------------------------------------- FROM
 
   private fromFromCommand(ctx: cst.FromCommandContext): ast.ESQLCommand<'from'> {
-    const command = this.createCommand('from', ctx);
+    return this.fromFromCompatibleCommand('from', ctx);
+  }
+
+  private fromFromCompatibleCommand<Name extends string>(
+    commandName: Name,
+    ctx: antlr.ParserRuleContext & Pick<cst.FromCommandContext, 'indexPatternAndMetadataFields'>
+  ): ast.ESQLCommand<Name> {
+    const command = this.createCommand(commandName, ctx);
     const indexPatternCtx = ctx.indexPatternAndMetadataFields();
     const metadataCtx = indexPatternCtx.metadata();
     const sources = indexPatternCtx
@@ -477,25 +484,7 @@ export class CstToAstConverter {
   // ----------------------------------------------------------------------- TS
 
   private fromTimeseriesCommand(ctx: cst.TimeSeriesCommandContext): ast.ESQLCommand<'ts'> {
-    const command = this.createCommand('ts', ctx);
-    const indexPatternCtx = ctx.indexPatternAndMetadataFields();
-    const metadataCtx = indexPatternCtx.metadata();
-    const sources = indexPatternCtx
-      .getTypedRuleContexts(cst.IndexPatternContext as any)
-      .map((sourceCtx) => this.toSource(sourceCtx));
-
-    command.args.push(...sources);
-
-    if (metadataCtx && metadataCtx.METADATA()) {
-      const name = metadataCtx.METADATA().getText().toLowerCase();
-      const option = this.toOption(name, metadataCtx);
-      const optionArgs = this.toColumnsFromCommand(metadataCtx);
-
-      option.args.push(...optionArgs);
-      command.args.push(option);
-    }
-
-    return command;
+    return this.fromFromCompatibleCommand('ts', ctx);
   }
 
   // --------------------------------------------------------------------- SHOW
@@ -1526,7 +1515,7 @@ export class CstToAstConverter {
   ): ast.ESQLColumn[] {
     const identifiers = this.extractIdentifiers(ctx);
 
-    return this.makeColumnsOutOfIdentifiers(identifiers);
+    return this.toColumns(identifiers);
   }
 
   private extractIdentifiers(
@@ -1568,7 +1557,7 @@ export class CstToAstConverter {
     return context;
   }
 
-  private makeColumnsOutOfIdentifiers(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
+  private toColumns(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
     const args: ast.ESQLColumn[] =
       identifiers
         .filter((child) => textExistsAndIsValid(child.getText()))
