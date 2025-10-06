@@ -6,10 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { loadConfiguration } from './config_loader';
 import { piiFilter } from './filters/pii_filter';
-// import { patchMocha } from './patch_mocha';
+import { patchMocha } from './patch_mocha';
 
 export const initApm = (
   argv: string[],
@@ -36,7 +35,7 @@ export const initApm = (
     apm.addFilter(piiFilter);
   }
 
-  // patchMocha(apm);
+  patchMocha(apm);
 
   apm.start(apmConfig);
 };

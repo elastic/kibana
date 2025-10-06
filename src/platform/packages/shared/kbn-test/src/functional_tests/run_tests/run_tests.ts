@@ -96,6 +96,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           log,
           config,
           esVersion: options.esVersion,
+        }).finally(() => {
+          tx.end();
         });
         return;
       }
@@ -171,6 +173,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           }
 
           if (abortCtrl.signal.aborted) {
+            tx.setOutcome('failure');
             return;
           }
 
@@ -182,6 +185,11 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               signal: abortCtrl.signal,
             })
           );
+
+          tx.setOutcome('success');
+        } catch (err) {
+          tx.setOutcome('failure');
+          throw err;
         } finally {
           try {
             const delay = config.get('kbnTestServer.delayShutdown');
@@ -196,9 +204,9 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               await withSpan('shutdown_es', () => shutdownEs!());
             }
           }
-
-          tx.end();
         }
+      }).finally(() => {
+        tx.end();
       });
     });
   }

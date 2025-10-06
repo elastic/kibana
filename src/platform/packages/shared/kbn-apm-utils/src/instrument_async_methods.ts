@@ -18,6 +18,8 @@ const isAsyncFunction = (fn: unknown): fn is (...args: any[]) => Promise<any> =>
   return typeof fn === 'function' && fn.constructor?.name === 'AsyncFunction';
 };
 
+const IGNORE_LIST = ['kibanaServer.request'];
+
 /**
  * Wrap each async method on a class instance or plain object in a withSpan() call using the method name.
  * Mutates the target (and its prototype chain) in-place.
@@ -47,6 +49,12 @@ export function instrumentAsyncMethods(
         continue;
       }
 
+      const spanName = `${name}.${propertyName}`;
+
+      if (IGNORE_LIST.includes(spanName)) {
+        return;
+      }
+
       const descriptor = Object.getOwnPropertyDescriptor(current, propertyName);
       if (!descriptor || descriptor.get || descriptor.set) {
         continue;
@@ -69,7 +77,7 @@ export function instrumentAsyncMethods(
 
       const wrappedFn = function wrapped(this: unknown, ...args: any[]) {
         let spanOptions: SpanOptions = {
-          name: `${name}.${propertyName}`,
+          name: spanName,
         };
 
         if (getSpanOptions) {
