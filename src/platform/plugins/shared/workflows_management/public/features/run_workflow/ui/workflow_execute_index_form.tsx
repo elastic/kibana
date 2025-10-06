@@ -26,17 +26,14 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import { take } from 'rxjs';
+import type { SearchHit } from '@kbn/es-types';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Document {
-  _id: string;
-  _index: string;
-  _source: {
-    '@timestamp': string;
-    agent?: string;
-    user?: string;
-    [key: string]: any;
-  };
+  '@timestamp': string;
+  agent?: string;
+  user?: string;
+  [key: string]: any;
 }
 
 interface WorkflowExecuteEventFormProps {
@@ -69,8 +66,8 @@ export const WorkflowExecuteIndexForm = ({
   const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [selectedDataView, setSelectedDataView] = useState<DataView | null>(null);
   const [dataViews, setDataViews] = useState<DataViewListItem[]>([]);
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [selectedDocuments, setSelectedDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<SearchHit<Document>[]>([]);
+  const [selectedDocuments, setSelectedDocuments] = useState<SearchHit<Document>[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [timeRange, setTimeRange] = useState<TimeRange>({
@@ -164,7 +161,7 @@ export const WorkflowExecuteIndexForm = ({
         response.rawResponse.hits &&
         response.rawResponse.hits.hits
       ) {
-        setDocuments(response.rawResponse.hits.hits as Document[]);
+        setDocuments(response.rawResponse.hits.hits as SearchHit<Document>[]);
       } else {
         setDocuments([]);
       }
@@ -213,7 +210,7 @@ export const WorkflowExecuteIndexForm = ({
   };
 
   // Handle document selection
-  const handleDocumentSelection = (selectedItems: Document[]) => {
+  const handleDocumentSelection = (selectedItems: SearchHit<Document>[]) => {
     setSelectedDocuments(selectedItems);
 
     if (selectedItems.length > 0) {
@@ -286,7 +283,7 @@ export const WorkflowExecuteIndexForm = ({
   // Table selection configuration
   const selection = {
     onSelectionChange: handleDocumentSelection,
-    selectable: (item: Document) => true,
+    selectable: (item: SearchHit<Document>) => true,
     selectableMessage: (selectable: boolean) => (!selectable ? 'Document not selectable' : ''),
   };
 
