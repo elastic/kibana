@@ -46,6 +46,9 @@ const mockedUseKibana = {
     uiSettings: {
       get: jest.fn().mockReturnValue('default-connector-id'),
     },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockReturnValue(false),
+    },
   },
 };
 jest.mock('../../../common/lib/kibana', () => {

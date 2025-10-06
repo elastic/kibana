@@ -73,6 +73,9 @@ describe('CostSavingsTrend', () => {
         http: {
           fetch: jest.fn(),
         },
+        featureFlags: {
+          getBooleanValue: jest.fn().mockReturnValue(false),
+        },
         notifications: {
           toasts: {
             addError: jest.fn(),
