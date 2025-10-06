@@ -17,7 +17,7 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy } from '../helper';
+import { createPackagePolicy } from '../../../../common/utils/cloud_security_posture/helper';
 
 const currentTimeMinusFourHours = new Date(Date.now() - 21600000).toISOString();
 const currentTimeMinusTenMinutes = new Date(Date.now() - 600000).toISOString();

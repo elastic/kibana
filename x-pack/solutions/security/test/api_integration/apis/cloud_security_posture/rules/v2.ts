@@ -11,7 +11,7 @@ import type {
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy } from '../helper';
+import { createPackagePolicy } from '../../../../common/utils/cloud_security_posture/helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

@@ -5,5 +5,5 @@
  * 2.0.
  */
 export { dataViewRouteHelpersFactory } from './data_view';
-export { EsIndexDataProvider } from './es_index_data_provider';
+export { EsIndexDataProvider } from '../../common/utils/cloud_security_posture/es_index_data_provider';
 export { waitForPluginInitialized, result } from './helpers';

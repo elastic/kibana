@@ -30,7 +30,7 @@ import {
   setupMlModulesWithRetry,
 } from '../../../detections_response/utils';
 import { EsIndexDataProvider } from '../../../../../cloud_security_posture_api/utils';
-import { createPackagePolicy } from '../../../../../api_integration/apis/cloud_security_posture/helper';
+import { createPackagePolicy } from '../../../../../common/utils/cloud_security_posture/helper';
 
 const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 const VULNERABILITIES_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilities_latest-default';

@@ -13,7 +13,7 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
-import { createPackagePolicy } from '../helper';
+import { createPackagePolicy } from '../../../../common/utils/cloud_security_posture/helper';
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';
 
 export default function (providerContext: FtrProviderContext) {

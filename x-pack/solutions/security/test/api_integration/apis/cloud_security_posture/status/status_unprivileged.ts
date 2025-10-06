@@ -15,7 +15,13 @@ import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { find, without } from 'lodash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { createPackagePolicy, createUser, createCSPRole, deleteRole, deleteUser } from '../helper';
+import {
+  createPackagePolicy,
+  createUser,
+  createCSPRole,
+  deleteRole,
+  deleteUser,
+} from '../../../../common/utils/cloud_security_posture/helper';
 
 const UNPRIVILEGED_ROLE = 'unprivileged_test_role';
 const UNPRIVILEGED_USERNAME = 'unprivileged_test_user';
