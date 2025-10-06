@@ -54,7 +54,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
   const canTestWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (!id) {
       notifications?.toasts.addError(new Error('Workflow is not loaded'), {
         toastLifeTimeMs: 3000,
@@ -65,34 +65,20 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       return;
     }
     updateWorkflow.mutate(
+      { id, workflow: { yaml: workflowYaml } },
       {
-        id,
-        workflow: {
-          yaml: workflowYaml,
-        },
-      },
-      {
-        onError: (err: unknown) => {
-          // Extract message from HTTP error body and update the error message
-          if (
-            err &&
-            typeof err === 'object' &&
-            'body' in err &&
-            err.body &&
-            typeof err.body === 'object' &&
-            'message' in err.body &&
-            typeof err.body.message === 'string'
-          ) {
-            (err as any).message = err.body.message;
+        onError: (err) => {
+          if (err.body?.message) {
+            err.message = err.body.message; // Extract message from HTTP error body and update the error message
           }
-          notifications?.toasts.addError(err as Error, {
+          notifications?.toasts.addError(err, {
             toastLifeTimeMs: 3000,
             title: 'Failed to save workflow',
           });
         },
       }
     );
-  };
+  }, [id, workflowYaml, updateWorkflow, notifications?.toasts]);
 
   const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
@@ -273,6 +259,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                 workflow={workflow}
                 workflowYaml={yamlValue}
                 onWorkflowYamlChange={handleChange}
+                handleSave={handleSave}
                 hasChanges={hasChanges}
                 execution={execution}
                 activeTab={activeTab}

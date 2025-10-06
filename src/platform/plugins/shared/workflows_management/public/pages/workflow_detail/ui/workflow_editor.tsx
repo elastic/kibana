@@ -41,6 +41,7 @@ interface WorkflowEditorProps {
   workflowYaml: string;
   onWorkflowYamlChange: (yaml: string | undefined) => void;
   hasChanges: boolean;
+  handleSave: () => void;
   activeTab: WorkflowUrlStateTabType;
   selectedExecutionId: string | undefined;
   selectedStepId: string | undefined;
@@ -53,6 +54,7 @@ interface WorkflowEditorProps {
 export function WorkflowEditor({
   workflowYaml,
   onWorkflowYamlChange,
+  handleSave,
   hasChanges,
   activeTab,
   selectedExecutionId,
@@ -116,6 +118,7 @@ export function WorkflowEditor({
               filename={`${workflow?.id ?? 'unknown'}.yaml`}
               value={yamlValue}
               onChange={onWorkflowYamlChange}
+              onSave={handleSave}
               lastUpdatedAt={workflow?.lastUpdatedAt}
               hasChanges={hasChanges}
               highlightStep={selectedStepId}
