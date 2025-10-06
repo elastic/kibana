@@ -110,7 +110,7 @@ interface CreateAgentPolicyParams {
   newPolicy: NewAgentPolicy;
   hasFleetServer?: boolean;
   withSysMonitoring: boolean;
-  monitoringEnabled?: NewAgentPolicy['monitoring_enabled'];
+  monitoringEnabled?: string[];
   spaceId: string;
   user?: AuthenticatedUser;
   authorizationHeader?: HTTPAuthorizationHeader | null;
@@ -191,7 +191,7 @@ export async function createAgentPolicyWithPackages({
   const agentPolicy = await agentPolicyService.create(
     soClient,
     esClient,
-    { ...policy, monitoring_enabled: monitoringEnabled },
+    { ...policy, monitoring_enabled: monitoringEnabled as NewAgentPolicy['monitoring_enabled'] },
     {
       user,
       id: agentPolicyId,
