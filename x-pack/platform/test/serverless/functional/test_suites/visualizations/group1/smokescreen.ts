@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -505,7 +506,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
-        '-',
+        NULL_LABEL,
         '222,420.00',
         '702,050.00',
         '1,879,613.33',

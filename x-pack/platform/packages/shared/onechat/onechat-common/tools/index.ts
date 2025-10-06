@@ -45,6 +45,12 @@ export {
   type WorkflowToolDefinitionWithSchema,
 } from './types/workflow';
 export {
+  isBuiltinTool,
+  type BuiltinToolConfig,
+  type BuiltinToolDefinition,
+  type BuiltinToolDefinitionWithSchema,
+} from './types/builtin';
+export {
   ToolResultType,
   type ToolResult,
   type ErrorResult,

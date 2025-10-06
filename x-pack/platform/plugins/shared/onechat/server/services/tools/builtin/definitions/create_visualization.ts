@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -23,6 +24,73 @@ import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { getToolResultId } from '@kbn/onechat-server/src/tools';
 import { generateEsql } from '@kbn/onechat-genai-utils';
+
+const metricSchema = parse(esqlMetricState.getSchema());
+
+// Helper function to fix array schemas by adding missing items
+const fixArraySchemas = (schema: any): any => {
+  if (!schema || typeof schema !== 'object') {
+    return schema;
+  }
+
+  // If type is an array of schemas (not a type array like ["string", "null"]),
+  // this is non-standard and we should handle it specially
+  if (Array.isArray(schema.type) && typeof schema.type[0] === 'object') {
+    return {
+      ...schema,
+      type: schema.type.map(fixArraySchemas),
+    };
+  }
+
+  // Handle arrays - ensure they have items property
+  if (schema.type === 'array' && !schema.items) {
+    return {
+      ...schema,
+      items: {},
+    };
+  }
+
+  // Handle arrays defined as ["array", ...] union types
+  if (Array.isArray(schema.type) && schema.type.includes('array') && !schema.items) {
+    // Remove 'array' from the type union since we can't properly define it without items
+    const filteredTypes = schema.type.filter((t: string) => t !== 'array');
+    return {
+      ...schema,
+      type: filteredTypes.length === 1 ? filteredTypes[0] : filteredTypes,
+    };
+  }
+
+  // Recursively fix properties
+  if (schema.properties) {
+    const fixedProperties: any = {};
+    for (const [key, value] of Object.entries(schema.properties)) {
+      fixedProperties[key] = fixArraySchemas(value);
+    }
+    schema = { ...schema, properties: fixedProperties };
+  }
+
+  // Recursively fix anyOf/oneOf/allOf
+  if (schema.anyOf) {
+    schema = { ...schema, anyOf: schema.anyOf.map(fixArraySchemas) };
+  }
+  if (schema.oneOf) {
+    schema = { ...schema, oneOf: schema.oneOf.map(fixArraySchemas) };
+  }
+  if (schema.allOf) {
+    schema = { ...schema, allOf: schema.allOf.map(fixArraySchemas) };
+  }
+
+  // Recursively fix items
+  if (schema.items) {
+    schema = { ...schema, items: fixArraySchemas(schema.items) };
+  }
+
+  return schema;
+};
+
+// Fix the metric schema and convert to Zod
+const fixedMetricSchema = fixArraySchemas(metricSchema);
+const zodMetricSchema = jsonSchemaToZod(fixedMetricSchema);
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -81,7 +149,7 @@ const createVisualizationGraph = (model: any, logger: any) => {
       `Attempting to generate visualization configuration (attempt ${attemptCount}/${MAX_RETRY_ATTEMPTS})`
     );
 
-    const systemPrompt = `You are a Kibana Lens visualization configuration expert. Generate a valid JSON configuration for a ${
+    const systemPrompt = `You are a Kibana Lens visualization configuration expert. Generate a valid configuration for a ${
       state.chartType
     } visualization based on the provided schema and ES|QL query.
 
@@ -91,11 +159,10 @@ ${JSON.stringify(state.schema, null, 2)}
 ${state.existingConfig ? `Existing configuration to modify: ${state.existingConfig}` : ''}
 
 IMPORTANT RULES:
-1. The response must be valid JSON only, no markdown or explanations
-2. The 'dataset' field must contain: { type: "esql", query: "<the provided ES|QL query>" }
-3. always use { operation: 'value', column: '<esql column name>', ...other options } for operations
-4. All field names must match those available in the ES|QL query result
-5. Make sure to follow schema definition strictly`;
+1. The 'dataset' field must contain: { type: "esql", query: "<the provided ES|QL query>" }
+2. always use { operation: 'value', column: '<esql column name>', ...other options } for operations
+3. All field names must match those available in the ES|QL query result
+4. Make sure to follow schema definition strictly`;
 
     const messages: BaseMessage[] = [
       new HumanMessage(systemPrompt),
@@ -103,16 +170,41 @@ IMPORTANT RULES:
 
 ES|QL query: ${state.esqlQuery}
 
-Generate the ${state.chartType} visualization configuration in valid JSON format.`),
+Generate the ${state.chartType} visualization configuration.`),
       ...state.messages,
     ];
 
-    const configResponse = await model.chatModel.invoke(messages);
+    try {
+      // Use withStructuredOutput with zodMetricSchema
+      logger.debug(`Using zodMetricSchema for structured output`);
 
-    return {
-      messages: [new AIMessage(configResponse.content)],
-      attemptCount,
-    };
+      const structuredModel = model.chatModel.withStructuredOutput(zodMetricSchema, {
+        name: 'extract',
+      });
+      const configResponse = await structuredModel.invoke(messages);
+
+      return {
+        messages: [new AIMessage(JSON.stringify(configResponse))],
+        attemptCount,
+      };
+    } catch (error) {
+      // If structured output fails, log and return error message for retry
+      logger.warn(
+        `Structured output generation failed (attempt ${attemptCount}/${MAX_RETRY_ATTEMPTS}): ${error.message}`
+      );
+      logger.debug(`Full error: ${JSON.stringify(error, null, 2)}`);
+      return {
+        messages: [
+          new AIMessage(
+            JSON.stringify({
+              error: `Failed to generate structured output: ${error.message}`,
+            })
+          ),
+        ],
+        attemptCount,
+        error: error.message,
+      };
+    }
   };
 
   const validateConfigNode = async (state: VisualizationState) => {
@@ -124,6 +216,20 @@ Generate the ${state.chartType} visualization configuration in valid JSON format
 
     try {
       const config = JSON.parse(configStr) as VisualizationConfig;
+
+      // Check if the generation itself failed
+      if ((config as any).error) {
+        logger.warn(
+          `Configuration generation failed (attempt ${state.attemptCount}/${MAX_RETRY_ATTEMPTS}): ${
+            (config as any).error
+          }`
+        );
+        return {
+          validatedConfig: null,
+          error: (config as any).error,
+        };
+      }
+
       logger.debug(`Configuration: ${configStr}`);
 
       let validatedConfig: any | null = null;
@@ -152,11 +258,11 @@ Generate the ${state.chartType} visualization configuration in valid JSON format
 
   const addValidationFeedbackNode = async (state: VisualizationState) => {
     const feedbackMessage = new HumanMessage(
-      `The configuration you provided failed JOI schema validation with the following error:
+      `The configuration generation or validation failed with the following error:
 
 ${state.error}
 
-Please fix the configuration and provide a corrected version that passes validation. Remember to return valid JSON only, no markdown or explanations.`
+Please fix the configuration and provide a corrected version that passes validation. Remember to follow the schema strictly.`
     );
 
     return {
@@ -279,7 +385,7 @@ Guidelines:
 
         // Step 3: Generate visualization configuration using langgraph with validation retry
         const model = await modelProvider.getDefaultModel();
-        const schema = parse(esqlMetricState.getSchema());
+        const schema = metricSchema;
 
         // Create and invoke the validation retry graph
         const graph = createVisualizationGraph(model, logger);
