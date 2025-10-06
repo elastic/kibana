@@ -19,6 +19,13 @@ export class MigrateLegacyAgentPolicies {
     this.serverSetup = serverSetup;
   }
 
+  /**
+   * Main entry point for migrating legacy agent policies.
+   * This method orchestrates the migration process by:
+   * 1. Fetching all private locations and space IDs
+   * 2. Retrieving associated agent policies
+   * 3. Migrating each policy to include the correct spaces
+   */
   public run = async () => {
     const { coreStart } = this.serverSetup;
     const soClient = coreStart.savedObjects.createInternalRepository();
@@ -52,11 +59,23 @@ export class MigrateLegacyAgentPolicies {
     );
   };
 
+  /**
+   * Expands a space list to include all available spaces if needed.
+   * @param spaceList - The list of spaces to expand (can be undefined or empty)
+   * @param allSpaceIds - All available space IDs in the cluster
+   * @returns The expanded list of space IDs. If spaceList is empty/undefined or contains '*', returns allSpaceIds
+   */
   private expandSpaces = (spaceList: string[] | undefined, allSpaceIds: string[]) => {
     if (!spaceList || spaceList.length === 0) return allSpaceIds;
     return spaceList.includes('*') ? allSpaceIds : spaceList;
   };
 
+  /**
+   * Migrates an agent policy to include the required spaces for private locations.
+   * Only updates the policy if there are spaces that need to be added.
+   * @param privateLocationSpaces - The spaces that the private location should be accessible from
+   * @param policy - The agent policy to potentially migrate
+   */
   private migrateAgentPolicyIfNeeded = async ({
     privateLocationSpaces,
     policy,
@@ -85,6 +104,10 @@ export class MigrateLegacyAgentPolicies {
     });
   };
 
+  /**
+   * Retrieves all space IDs from the cluster.
+   * @returns A promise that resolves to an array of all space IDs in the cluster
+   */
   private getAllSpaceIds = async () => {
     const { saved_objects: spaceSO } = await this.serverSetup.coreStart.savedObjects
       .createInternalRepository(['space'])
@@ -97,6 +120,12 @@ export class MigrateLegacyAgentPolicies {
     return spaceSO.map((space) => space.id);
   };
 
+  /**
+   * Retrieves agent policies by their IDs from the Fleet service.
+   * @param agentPolicyIds - Array of agent policy IDs to retrieve
+   * @param soClient - Saved Objects client for the operation
+   * @returns A promise that resolves to an array of agent policies
+   */
   private getLegacyAgentPolicies = async ({
     agentPolicyIds,
     soClient,
