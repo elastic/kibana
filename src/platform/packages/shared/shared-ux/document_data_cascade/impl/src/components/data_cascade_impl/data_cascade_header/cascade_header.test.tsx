@@ -15,7 +15,7 @@ import { CascadeHeaderPrimitive } from './cascade_header';
 describe('CascadeHeaderPrimitive', () => {
   it('renders the table title with the default group selector when the `tableTitleSlot` props is provided', () => {
     render(
-      <DataCascadeProvider cascadeGroups={['group1', 'group2']} initialGroupColumn="group1">
+      <DataCascadeProvider cascadeGroups={['group1', 'group2']} initialGroupColumn={['group1']}>
         <CascadeHeaderPrimitive
           tableInstance={null as any} // Ignored in test
           tableTitleSlot={() => <div>Table Title</div>}
@@ -29,7 +29,7 @@ describe('CascadeHeaderPrimitive', () => {
 
   it('renders the custom table header when the `customTableHeader` prop is provided', () => {
     render(
-      <DataCascadeProvider cascadeGroups={['group1', 'group2']} initialGroupColumn="group1">
+      <DataCascadeProvider cascadeGroups={['group1', 'group2']} initialGroupColumn={['group1']}>
         <CascadeHeaderPrimitive
           tableInstance={null as any} // Ignored in test
           customTableHeader={(props) => (
