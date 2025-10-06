@@ -25,5 +25,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     loadTestFile(require.resolve('./esql'));
     loadTestFile(require.resolve('./async_search'));
     loadTestFile(require.resolve('./sessions_in_space'));
+    loadTestFile(require.resolve('./tabs'));
   });
 }
