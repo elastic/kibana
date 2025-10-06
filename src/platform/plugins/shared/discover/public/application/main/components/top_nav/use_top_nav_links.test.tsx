@@ -66,6 +66,7 @@ describe('useTopNavLinks', () => {
           topNavCustomization: undefined,
           shouldShowESQLToDataViewTransitionModal: false,
           hasShareIntegration,
+          persistedDiscoverSession: undefined,
           ...hookAttrs,
         }),
       {
@@ -269,6 +270,7 @@ describe('useTopNavLinks', () => {
             topNavCustomization: undefined,
             shouldShowESQLToDataViewTransitionModal: false,
             hasShareIntegration: true,
+            persistedDiscoverSession: undefined,
           }),
         {
           wrapper: Wrapper,

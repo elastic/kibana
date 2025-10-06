@@ -70,6 +70,7 @@ export const useDiscoverTopNav = ({
     topNavCustomization,
     shouldShowESQLToDataViewTransitionModal,
     hasShareIntegration,
+    persistedDiscoverSession,
   });
 
   return {
