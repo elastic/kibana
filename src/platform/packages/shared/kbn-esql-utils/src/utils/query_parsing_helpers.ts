@@ -522,3 +522,13 @@ export const getCategorizeField = (esql: string): string[] => {
 
   return columns;
 };
+
+/** Strips comments from an ES|QL query string.
+ * Supports both single-line (//) and multi-line (/* * /) comments.
+ * @param esql - The ES|QL query string
+ * @returns The query string without comments
+ */
+export const stripCommentsFromEsql = (esql: string): string => {
+  const { root } = parse(esql);
+  return BasicPrettyPrinter.print(root);
+};

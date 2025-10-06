@@ -49,6 +49,7 @@ export {
   getRemoteClustersFromESQLQuery,
   getLookupIndicesFromQuery,
   convertTimeseriesCommandToFrom,
+  stripCommentsFromEsql,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

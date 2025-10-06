@@ -28,6 +28,7 @@ import {
   findClosestColumn,
   getKqlSearchQueries,
   convertTimeseriesCommandToFrom,
+  stripCommentsFromEsql,
 } from './query_parsing_helpers';
 import type { monaco } from '@kbn/monaco';
 import type { ESQLColumn } from '@kbn/esql-ast';
@@ -1074,6 +1075,36 @@ describe('esql query helpers', () => {
           'FROM "cluster1:index1,cluster1:index2", "cluster2:index3", cluster3:index3, index4'
         )
       ).toEqual(['cluster3', 'cluster1', 'cluster2']);
+    });
+  });
+
+  describe('stripCommentsFromEsql', function () {
+    it('should remove single-line comments', function () {
+      const result = stripCommentsFromEsql(
+        'FROM index1 | KEEP field1, field2 | SORT field1 // this is a comment'
+      );
+      expect(result).toBe('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+
+    it('should remove single-line comments located at the beginning', function () {
+      const result = stripCommentsFromEsql(
+        '// this is a comment\nFROM index1 | KEEP field1, field2 | SORT field1'
+      );
+      expect(result).toBe('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+
+    it('should remove multi-line comments', function () {
+      const result = stripCommentsFromEsql(
+        'FROM index1 | KEEP field1, field2 | SORT field1 /* this is a \n multi-line comment */'
+      );
+      expect(result).toBe('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+
+    it('should remove all comments', function () {
+      const result = stripCommentsFromEsql(
+        'FROM index1 | KEEP field1, field2 | SORT field1 // single line comment\n /* multi-line \n comment */'
+      );
+      expect(result).toBe('FROM index1 | KEEP field1, field2 | SORT field1');
     });
   });
 });

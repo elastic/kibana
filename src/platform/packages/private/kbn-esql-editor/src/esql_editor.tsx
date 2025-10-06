@@ -33,7 +33,11 @@ import {
   type ESQLControlVariable,
   type IndicesAutocompleteResult,
 } from '@kbn/esql-types';
-import { fixESQLQueryWithVariables, getRemoteClustersFromESQLQuery } from '@kbn/esql-utils';
+import {
+  fixESQLQueryWithVariables,
+  getRemoteClustersFromESQLQuery,
+  stripCommentsFromEsql,
+} from '@kbn/esql-utils';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
@@ -571,12 +575,14 @@ const ESQLEditorInternal = function ESQLEditor({
       getJoinIndices,
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
       getEditorExtensions: async (queryString: string) => {
+        // Strip comments from the query string before sending it to the backend
+        const queryWithoutComments = stripCommentsFromEsql(queryString);
         // Only fetch recommendations if there's an active solutionId and a non-empty query
         // Otherwise the route will return an error
-        if (activeSolutionId && queryString.trim() !== '') {
+        if (activeSolutionId && queryWithoutComments.trim() !== '') {
           return (
             (await kibana.services?.esql?.getEditorExtensionsAutocomplete(
-              queryString,
+              queryWithoutComments,
               activeSolutionId
             )) ?? { recommendedQueries: [], recommendedFields: [] }
           );
