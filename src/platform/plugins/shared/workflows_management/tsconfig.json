@@ -57,7 +57,9 @@
     "@kbn/es-query",
     "@kbn/data-plugin",
     "@kbn/rrule",
-    "@kbn/resizable-layout"
+    "@kbn/resizable-layout",
+    "@kbn/es-types",
+    "@kbn/search-types"
   ],
   "exclude": ["target/**/*"]
 }
