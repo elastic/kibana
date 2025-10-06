@@ -105,7 +105,28 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       const actionId = body.actionId;
-      await checkBulkAgentAction(supertest, actionId);
+      // TODO: use helper function `checkBulkAgentAction`
+      await new Promise((resolve, reject) => {
+        let attempts = 0;
+        const intervalId = setInterval(async () => {
+          if (attempts > 5) {
+            clearInterval(intervalId);
+            reject(new Error('action timed out'));
+          }
+          ++attempts;
+          const {
+            body: { items: actionStatuses },
+          } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
+
+          const action = actionStatuses?.find((a: any) => a.actionId === actionId);
+          if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
+            clearInterval(intervalId);
+            resolve({});
+          }
+        }, 3000);
+      }).catch((e) => {
+        throw e;
+      });
     });
 
     it('should create action with additional_metrics when api contains CPU option', async () => {
