@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-import { type SavedObjectReference } from '@kbn/core/server';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -41,24 +40,6 @@ export default function ({ getService }: FtrProviderContext) {
         .send();
 
       expect(response.status).to.be(404);
-    });
-
-    it('should inject tag names into attributes', async () => {
-      const response = await supertest
-        .get(`${PUBLIC_API_PATH}/8d66658a-f5b7-4482-84dc-f41d317473b8`)
-        .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-        .set('elastic-api-version', '1')
-        .send();
-
-      expect(response.status).to.be(200);
-
-      expect(response.body.data.tags).to.contain('bar');
-      expect(response.body.data.tags).to.contain('buzz');
-      expect(response.body.data.tags).to.have.length(2);
-      const referenceIds = response.body.data.references.map((ref: SavedObjectReference) => ref.id);
-      expect(referenceIds).to.contain('tag-2');
-      expect(referenceIds).to.contain('tag-3');
-      expect(response.body.data.references).to.have.length(2);
     });
   });
 }

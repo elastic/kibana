@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KeyboardEvent, ForwardedRef } from 'react';
-import React, { forwardRef } from 'react';
+import type { KeyboardEvent, ForwardedRef, ComponentProps } from 'react';
+import React, { Suspense, forwardRef } from 'react';
 import { css } from '@emotion/react';
 import type { EuiButtonIconProps, IconType } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
@@ -45,18 +45,22 @@ export const SideNavFooterItem = forwardRef<HTMLDivElement, SideNavFooterItemPro
       width: 100%;
     `;
 
+    const buttonProps: ComponentProps<typeof EuiButtonIcon> & { 'data-highlighted': string } = {
+      'aria-current': isCurrent ? 'page' : undefined,
+      'aria-label': label,
+      color: isHighlighted ? 'primary' : 'text',
+      'data-test-subj': `footerMenuItem-${id}`,
+      'data-highlighted': isHighlighted ? 'true' : 'false',
+      display: isHighlighted ? 'base' : 'empty',
+      size: 's',
+      iconType: 'empty', // iconType is passed in Suspense below
+      ...props,
+    };
+
     const menuItem = (
-      <EuiButtonIcon
-        aria-current={isCurrent ? 'page' : undefined}
-        aria-label={label}
-        color={isHighlighted ? 'primary' : 'text'}
-        data-highlighted={isHighlighted ? 'true' : 'false'}
-        data-test-subj={`footerMenuItem-${id}`}
-        display={isHighlighted ? 'base' : 'empty'}
-        iconType={iconType || 'empty'}
-        size="s"
-        {...props}
-      />
+      <Suspense fallback={<EuiButtonIcon {...buttonProps} />}>
+        <EuiButtonIcon {...buttonProps} iconType={iconType || 'empty'} />
+      </Suspense>
     );
 
     if (!hasContent) {

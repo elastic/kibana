@@ -181,8 +181,22 @@ export async function getESQLResults({
       }
     )
   );
+
+  const rawResponse = result.rawResponse as unknown as ESQLSearchResponse;
+
+  // Normalize response.values: if all arrays are empty, convert to single empty array
+  const normalizedValues =
+    rawResponse.values && rawResponse.values.every((row) => Array.isArray(row) && row.length === 0)
+      ? []
+      : rawResponse.values;
+
+  const response = {
+    ...rawResponse,
+    values: normalizedValues,
+  };
+
   return {
-    response: result.rawResponse as unknown as ESQLSearchResponse,
+    response,
     params: result.requestParams as unknown as ESQLSearchParams,
   };
 }

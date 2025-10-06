@@ -16,6 +16,7 @@ import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_f
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';
 import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
+import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 
 export function useCustomCards(
   createCollectionCardHandler: (query: string) => () => void
@@ -36,6 +37,7 @@ export function useCustomCards(
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
   );
+  const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
 
   const { href: autoDetectUrl } = reactRouterNavigate(history, `/auto-detect/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
@@ -45,9 +47,13 @@ export function useCustomCards(
     `/otel-kubernetes/${location.search}`
   );
   const { href: firehoseUrl } = reactRouterNavigate(history, `/firehose/${location.search}`);
+  const { href: otelApmQuickstartUrl } = reactRouterNavigate(
+    history,
+    `/otel-apm/${location.search}`
+  );
 
   const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
-  const otelApmUrl = isServerless ? `${apmUrl}?agent=openTelemetry` : apmUrl;
+  const otelApmUrl = isManagedOtlpServiceAvailable ? otelApmQuickstartUrl : apmUrl;
   const syntheticsLocator = share?.url.locators.get(syntheticsAddMonitorLocatorID);
 
   const firehoseQuickstartCard: IntegrationCardItem = {
@@ -283,6 +289,33 @@ export function useCustomCards(
       isQuickstart: true,
     },
     {
+      id: 'otel-virtual',
+      type: 'virtual',
+      title: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.apmOtelTitle',
+        {
+          defaultMessage: 'OpenTelemetry',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.observability_onboarding.useCustomCardsForCategory.apmOtelDescription',
+        {
+          defaultMessage: 'Monitor your applications with OpenTelemetry SDK',
+        }
+      ),
+      name: 'otel',
+      categories: ['observability'],
+      icons: [
+        {
+          type: 'svg',
+          src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+        },
+      ],
+      url: otelApmUrl,
+      version: '',
+      integration: '',
+    },
+    {
       id: 'apm-virtual',
       type: 'virtual',
       title: i18n.translate('xpack.observability_onboarding.useCustomCardsForCategory.apmTitle', {
@@ -303,33 +336,6 @@ export function useCustomCards(
         },
       ],
       url: apmUrl,
-      version: '',
-      integration: '',
-    },
-    {
-      id: 'otel-virtual',
-      type: 'virtual',
-      title: i18n.translate(
-        'xpack.observability_onboarding.useCustomCardsForCategory.apmOtelTitle',
-        {
-          defaultMessage: 'OpenTelemetry',
-        }
-      ),
-      description: i18n.translate(
-        'xpack.observability_onboarding.useCustomCardsForCategory.apmOtelDescription',
-        {
-          defaultMessage: 'Collect distributed traces with OpenTelemetry',
-        }
-      ),
-      name: 'otel',
-      categories: ['observability'],
-      icons: [
-        {
-          type: 'svg',
-          src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
-        },
-      ],
-      url: otelApmUrl,
       version: '',
       integration: '',
     },

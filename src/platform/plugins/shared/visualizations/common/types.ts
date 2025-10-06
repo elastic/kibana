@@ -16,7 +16,6 @@ import type {
   BUCKET_TYPES,
 } from '@kbn/data-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { Reference } from '@kbn/content-management-utils';
 
 export interface VisParams {
   [key: string]: any;
@@ -38,9 +37,8 @@ export type {
 export interface SerializedVisData {
   expression?: string;
   aggs: AggConfigSerialized[];
-  searchSource: SerializedSearchSourceFields & { indexRefName?: string };
+  searchSource: SerializedSearchSourceFields;
   savedSearchId?: string;
-  savedSearchRefName?: string | Reference;
 }
 
 export interface SerializedVis<T = VisParams> {

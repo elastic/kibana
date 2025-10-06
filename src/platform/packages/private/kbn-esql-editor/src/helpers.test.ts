@@ -77,6 +77,24 @@ describe('helpers', function () {
         },
       ]);
     });
+
+    it('should return the generic error object for an error with unexpected format', function () {
+      const error = new Error(
+        '[esql] > Unexpected error from Elasticsearch: verification_exception - Found ambiguous reference to [user_id]; matches any of [line 3:15 [user_id], line 4:15 [user_id]]'
+      );
+      const errors = [error];
+      expect(parseErrors(errors, `FROM "kibana_sample_data_ecommerce"`)).toEqual([
+        {
+          endColumn: 10,
+          endLineNumber: 1,
+          message: error.message,
+          severity: 8,
+          startColumn: 1,
+          startLineNumber: 1,
+          code: 'unknownError',
+        },
+      ]);
+    });
   });
 
   describe('parseWarning', function () {

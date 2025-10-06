@@ -180,6 +180,7 @@ const enrichOperators = (
         Location.STATS_WHERE,
         Location.STATS_BY,
         Location.COMPLETION,
+        Location.RERANK,
       ]);
       // Adding comparison operator signatures for ip and version types
       signatures.push(...comparisonOperatorSignatures);
@@ -195,6 +196,7 @@ const enrichOperators = (
         Location.STATS_WHERE,
         Location.STATS_BY,
         Location.COMPLETION,
+        Location.RERANK,
       ]);
 
       // taking care the `...EVAL col = @timestamp + 1 year` cases
@@ -210,6 +212,7 @@ const enrichOperators = (
         Location.ROW,
         Location.STATS_WHERE,
         Location.COMPLETION,
+        Location.RERANK,
       ];
     }
     if (isInOperator) {

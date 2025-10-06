@@ -111,6 +111,10 @@ export const MigrationTaskStatusEnum = MigrationTaskStatus.enum;
 export type MigrationLastExecution = z.infer<typeof MigrationLastExecution>;
 export const MigrationLastExecution = z.object({
   /**
+   * The total execution time in milliseconds for the migration. This includes duration of last_execution and any previous executions.
+   */
+  total_execution_time_ms: z.number().int().optional(),
+  /**
    * The moment the last execution started.
    */
   started_at: z.string().optional(),

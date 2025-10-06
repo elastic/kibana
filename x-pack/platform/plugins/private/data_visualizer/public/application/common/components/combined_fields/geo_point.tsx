@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { debounce } from 'lodash';
+import { cloneDeep, debounce } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChangeEvent } from 'react';
 import React, { Component, Fragment } from 'react';
@@ -25,19 +25,17 @@ import {
 import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import {
   createGeoPointCombinedField,
-  isWithinLatRange,
-  isWithinLonRange,
-  getFieldNames,
   getNameCollisionMsg,
   addCombinedFieldsToMappings,
   addCombinedFieldsToPipeline,
+  getLatLonFields,
 } from './utils';
 import type { AddCombinedField } from './combined_fields_form';
 
 interface Props {
   addCombinedField: AddCombinedField;
   hasNameCollision: (name: string) => boolean;
-  results: FindFileStructureResponse;
+  results?: FindFileStructureResponse;
 }
 
 interface State {
@@ -54,25 +52,26 @@ export class GeoPointForm extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const latFields: EuiSelectOption[] = [{ value: '', text: '' }];
-    const lonFields: EuiSelectOption[] = [{ value: '', text: '' }];
-    getFieldNames(props.results).forEach((columnName: string) => {
-      if (isWithinLatRange(columnName, props.results.field_stats)) {
-        latFields.push({ value: columnName, text: columnName });
-      }
-      if (isWithinLonRange(columnName, props.results.field_stats)) {
-        lonFields.push({ value: columnName, text: columnName });
-      }
-    });
+    const { latFields, lonFields } = getLatLonFields(props.results);
+
+    const latOptions: EuiSelectOption[] = latFields.map((field) => ({
+      value: field,
+      text: field,
+    }));
+
+    const lonOptions: EuiSelectOption[] = lonFields.map((field) => ({
+      value: field,
+      text: field,
+    }));
 
     this.state = {
-      latField: '',
-      lonField: '',
+      latField: latOptions.length > 0 ? (latOptions[0].value as string) : '',
+      lonField: lonOptions.length > 0 ? (lonOptions[0].value as string) : '',
       geoPointField: '',
       geoPointFieldError: '',
       submitError: '',
-      latFields,
-      lonFields,
+      latFields: latOptions,
+      lonFields: lonOptions,
     };
   }
 
@@ -109,8 +108,12 @@ export class GeoPointForm extends Component<Props, State> {
 
       this.props.addCombinedField(
         combinedField,
-        (mappings) => addCombinedFieldsToMappings(mappings, [combinedField]),
-        (pipeline) => addCombinedFieldsToPipeline(pipeline, [combinedField])
+        (mappings) => {
+          const newMappings = cloneDeep(mappings);
+          return addCombinedFieldsToMappings(newMappings, [combinedField]);
+        },
+        (pipelines) =>
+          pipelines.map((pipeline) => addCombinedFieldsToPipeline(pipeline, [combinedField]))
       );
 
       this.setState({ submitError: '' });

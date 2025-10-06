@@ -202,15 +202,17 @@ describe('extractTokensDangerouslySlow', () => {
       generators = await client.getLogGenerators({
         rpm: 16 * 2000,
         distribution: 'uniform',
-        systems: [
-          'HealthApp',
-          'Android',
-          'Thunderbird',
-          'Zookeeper',
-          'Mac',
-          'OpenStack',
-          'Proxifier',
-        ],
+        systems: {
+          loghub: [
+            'HealthApp',
+            'Android',
+            'Thunderbird',
+            'Zookeeper',
+            'Mac',
+            'OpenStack',
+            'Proxifier',
+          ],
+        },
       });
     }, 60_000); // Ensure there's enough time to gather sample logs
 

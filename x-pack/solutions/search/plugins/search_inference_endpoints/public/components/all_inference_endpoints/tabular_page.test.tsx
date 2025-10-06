@@ -122,6 +122,9 @@ const inferenceEndpoints = [
   },
 ] as InferenceAPIConfigResponse[];
 
+const elasticDescription = 'Runs on GPUs (token-based billing)';
+const elasticsearchDescription = 'Runs on ML Nodes (resource-based billing)';
+
 jest.mock('../../hooks/use_delete_endpoint', () => ({
   useDeleteEndpoint: () => ({
     mutate: jest.fn().mockImplementation(() => Promise.resolve()), // Mock implementation of the mutate function
@@ -146,39 +149,42 @@ describe('When the tabular page is loaded', () => {
     expect(rows[11]).toHaveTextContent('third-party-model');
   });
 
-  it('should display all service and model ids in the table', () => {
+  // Caveat: preconfigured endpoints display a description instead of model id
+  it('should display all service and model ids or descriptions in the table', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
     const rows = screen.getAllByRole('row');
     expect(rows[1]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent('.elser-2-elastic');
+    expect(rows[1]).toHaveTextContent(elasticDescription);
+    expect(rows[1]).not.toHaveTextContent('elser_model_2');
 
     expect(rows[2]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent('.elser_model_2');
+    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
+    expect(rows[2]).not.toHaveTextContent('.elser_model_2');
 
     expect(rows[3]).toHaveTextContent('Elasticsearch');
-    expect(rows[3]).toHaveTextContent('.multilingual-e5-small');
+    expect(rows[3]).toHaveTextContent(elasticsearchDescription);
 
     expect(rows[4]).toHaveTextContent('Elastic');
-    expect(rows[4]).toHaveTextContent('multilingual-embed-v1');
+    expect(rows[1]).toHaveTextContent(elasticDescription);
 
     expect(rows[5]).toHaveTextContent('Elastic');
-    expect(rows[5]).toHaveTextContent('rerank-v1');
+    expect(rows[1]).toHaveTextContent(elasticDescription);
 
     expect(rows[6]).toHaveTextContent('Elastic');
-    expect(rows[6]).toHaveTextContent('rainbow-sprinkles');
+    expect(rows[1]).toHaveTextContent(elasticDescription);
 
     expect(rows[7]).toHaveTextContent('Elastic');
-    expect(rows[7]).toHaveTextContent('elser_model_2');
+    expect(rows[1]).toHaveTextContent(elasticDescription);
 
     expect(rows[8]).toHaveTextContent('Elasticsearch');
-    expect(rows[8]).toHaveTextContent('.rerank-v1');
+    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
 
     expect(rows[9]).toHaveTextContent('Elasticsearch');
-    expect(rows[9]).toHaveTextContent('.own_model');
+    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
 
     expect(rows[10]).toHaveTextContent('Elasticsearch');
-    expect(rows[10]).toHaveTextContent('.elser_model_2');
+    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
 
     expect(rows[11]).toHaveTextContent('OpenAI');
     expect(rows[11]).toHaveTextContent('.own_model');

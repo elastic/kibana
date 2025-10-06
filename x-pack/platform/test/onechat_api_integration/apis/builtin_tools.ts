@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain(
-          `Invalid tool id: "${searchTool}": Tool id is using a protected namespaces`
+          `Invalid tool id: "${searchTool}": Tool id is using a protected namespace.`
         );
       });
     });

@@ -95,12 +95,12 @@ export const LabelNodeBadges = ({ analysis }: LabelNodeBadgesProps) => {
       `}
     >
       {analysis.isSingleAlert && <AlertIconBadge />}
-      {analysis.isGroupOfEvents && <EventBadge count={analysis.eventsCount} />}
-      {analysis.isGroupOfAlerts && <AlertCountBadge count={analysis.alertsCount} />}
+      {analysis.isGroupOfEvents && <EventBadge count={analysis.uniqueEventsCount} />}
+      {analysis.isGroupOfAlerts && <AlertCountBadge count={analysis.uniqueAlertsCount} />}
       {analysis.isGroupOfEventsAndAlerts && (
         <>
-          <EventBadge count={analysis.eventsCount} />
-          <AlertCountBadge count={analysis.alertsCount} inverted />
+          <EventBadge count={analysis.uniqueEventsCount} />
+          <AlertCountBadge count={analysis.uniqueAlertsCount} inverted />
         </>
       )}
     </div>

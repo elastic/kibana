@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { NodeTypes, Node } from '@xyflow/react';
 import { Background, Controls, ReactFlow } from '@xyflow/react';
@@ -82,15 +82,28 @@ const ReactFlowWrapper: React.FC<{
 
 export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) => {
   const { euiTheme } = useEuiTheme();
+  const [debouncedWorkflowYaml, setDebouncedWorkflowYaml] = React.useState(workflowYaml);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedWorkflowYaml(workflowYaml);
+    }, 500);
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [workflowYaml]);
 
   const workflowExecutionGraph: { result: any; error: any } | null = useMemo(() => {
-    if (!workflowYaml) {
+    if (!debouncedWorkflowYaml) {
       return null;
     }
     let result = null;
     let error = null;
     try {
-      const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+      const parsingResult = parseWorkflowYamlToJSON(
+        debouncedWorkflowYaml,
+        getWorkflowZodSchemaLoose()
+      );
       if (parsingResult.error) {
         error = parsingResult.error;
       }
@@ -100,7 +113,7 @@ export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) 
     }
 
     return { result, error };
-  }, [workflowYaml]);
+  }, [debouncedWorkflowYaml]);
 
   const layoutResult: { result: any; error: string } | null = useMemo(() => {
     if (!workflowExecutionGraph) {

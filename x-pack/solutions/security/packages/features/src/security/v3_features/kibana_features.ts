@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import {
@@ -25,6 +24,7 @@ import {
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
   SERVER_APP_ID,
+  SECURITY_FEATURE_ID_V4,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../types';
 import type { BaseKibanaFeatureConfig } from '../../types';
@@ -49,6 +49,19 @@ const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
 export const getSecurityV3BaseKibanaFeature = ({
   savedObjects,
 }: SecurityFeatureParams): BaseKibanaFeatureConfig => ({
+  deprecated: {
+    notice: i18n.translate(
+      'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionSecurity.deprecationMessage',
+      {
+        defaultMessage: 'The {currentId} permissions are deprecated, please see {latestId}.',
+        values: {
+          currentId: SECURITY_FEATURE_ID_V3,
+          latestId: SECURITY_FEATURE_ID_V4,
+        },
+      }
+    ),
+  },
+
   id: SECURITY_FEATURE_ID_V3,
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.linkSecuritySolutionTitle',
@@ -58,7 +71,6 @@ export const getSecurityV3BaseKibanaFeature = ({
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
@@ -74,6 +86,12 @@ export const getSecurityV3BaseKibanaFeature = ({
   ),
   privileges: {
     all: {
+      replacedBy: {
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
+        default: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['all'] }],
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
+        minimal: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_all'] }],
+      },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'rac', 'lists-all', 'lists-read', 'lists-summary'],
@@ -91,6 +109,12 @@ export const getSecurityV3BaseKibanaFeature = ({
       ui: ['show', 'crud'],
     },
     read: {
+      replacedBy: {
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
+        default: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] }],
+        // note: ESS/serverless specific productFeaturesExtensions modify this privilege array
+        minimal: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_read'] }],
+      },
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [APP_ID, 'rac', 'lists-read'],

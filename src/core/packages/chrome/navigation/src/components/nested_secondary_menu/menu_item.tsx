@@ -8,40 +8,30 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
 import type { ComponentProps, FC, ReactNode } from 'react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 
 import { SecondaryMenu } from '../secondary_menu';
-import { useNestedMenu } from './use_nested_menu';
 
 export interface ItemProps
   extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isHighlighted' | 'href'> {
   children: ReactNode;
-  hasSubmenu?: boolean;
   href?: string;
   iconType?: IconType;
   isHighlighted?: boolean;
   isCurrent?: boolean;
   onClick?: () => void;
-  submenuPanelId?: string;
 }
 
 export const Item: FC<ItemProps> = ({
   children,
-  hasSubmenu = false,
   href,
   id,
   isHighlighted = false,
   isCurrent,
-  onClick,
-  submenuPanelId,
   ...props
 }) => {
-  const { goToPanel } = useNestedMenu();
-  const { euiTheme } = useEuiTheme();
-
   const itemStyle = css`
     align-items: center;
     display: flex;
@@ -49,41 +39,18 @@ export const Item: FC<ItemProps> = ({
     width: 100%;
   `;
 
-  const arrowStyle = css`
-    margin-left: ${euiTheme.size.xs};
-    opacity: 0.6;
-  `;
-
-  const handleClick = useCallback(() => {
-    onClick?.();
-    if (hasSubmenu && submenuPanelId) {
-      goToPanel(submenuPanelId);
-    }
-  }, [onClick, hasSubmenu, submenuPanelId, goToPanel]);
-
   return (
     <SecondaryMenu.Item
       id={id}
       href={href || ''}
       isHighlighted={isHighlighted}
       isCurrent={isCurrent}
-      onClick={handleClick}
       {...props}
       key={`nested-item-${id}`}
       testSubjPrefix="nestedMenuItem"
     >
       <div css={itemStyle}>
         <span>{children}</span>
-        {hasSubmenu && (
-          <EuiButtonIcon
-            aria-label={`${children} has submenu`}
-            color="text"
-            css={arrowStyle}
-            display="empty"
-            iconType="arrowRight"
-            size="xs"
-          />
-        )}
       </div>
     </SecondaryMenu.Item>
   );

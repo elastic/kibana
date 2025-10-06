@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EuiProvider } from '@elastic/eui';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
@@ -44,17 +45,19 @@ describe('EditRoleMappingPage', () => {
 
     return mountWithIntl(
       <KibanaContextProvider services={coreStart}>
-        <EditRoleMappingPage
-          action="edit"
-          name={name}
-          roleMappingsAPI={roleMappingsAPI}
-          securityFeaturesAPI={securityFeaturesAPI}
-          rolesAPIClient={rolesAPI}
-          notifications={coreStart.notifications}
-          docLinks={coreStart.docLinks}
-          history={history}
-          readOnly={!coreStart.application.capabilities.role_mappings.save}
-        />
+        <EuiProvider>
+          <EditRoleMappingPage
+            action="edit"
+            name={name}
+            roleMappingsAPI={roleMappingsAPI}
+            securityFeaturesAPI={securityFeaturesAPI}
+            rolesAPIClient={rolesAPI}
+            notifications={coreStart.notifications}
+            docLinks={coreStart.docLinks}
+            history={history}
+            readOnly={!coreStart.application.capabilities.role_mappings.save}
+          />
+        </EuiProvider>
       </KibanaContextProvider>
     );
   };

@@ -35,8 +35,9 @@ export const registerEnsureUpToDateTaskDefinition = ({
         return {
           async run() {
             const inferenceId = context.taskInstance?.params?.inferenceId;
+            const forceUpdate = context.taskInstance?.params?.forceUpdate;
             const { packageInstaller } = getServices();
-            return packageInstaller.ensureUpToDate({ inferenceId });
+            return packageInstaller.ensureUpToDate({ inferenceId, forceUpdate });
           },
         };
       },
@@ -49,10 +50,12 @@ export const scheduleEnsureUpToDateTask = async ({
   taskManager,
   logger,
   inferenceId,
+  forceUpdate,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
   inferenceId: string;
+  forceUpdate?: boolean;
 }) => {
   const taskId = isImpliedDefaultElserInferenceId(inferenceId)
     ? ENSURE_DOC_UP_TO_DATE_TASK_ID
@@ -61,7 +64,7 @@ export const scheduleEnsureUpToDateTask = async ({
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: ENSURE_DOC_UP_TO_DATE_TASK_TYPE,
-      params: { inferenceId },
+      params: { inferenceId, forceUpdate },
       state: {},
       scope: ['productDoc'],
     });

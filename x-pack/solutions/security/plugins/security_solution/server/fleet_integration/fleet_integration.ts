@@ -506,6 +506,8 @@ export const getPackagePolicyDeleteCallback = (
       }
     }
 
+    // Add processing of setting response actions to orphan for integrations (ex. Crowdstrike,
+    // SentinelOne, etc) that support response actions
     policiesToRemove.push(
       updateDeletedPolicyResponseActions(endpointServices, deletePackagePolicy)
     );

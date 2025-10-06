@@ -11,6 +11,7 @@ export enum SecurityCellActionsTrigger {
   DEFAULT = 'security-default-cellActions',
   DETAILS_FLYOUT = 'security-detailsFlyout-cellActions',
   ALERTS_COUNT = 'security-alertsCount-cellActions',
+  CASE_EVENTS = 'security-case-events-cellActions',
 }
 
 export enum EsqlInTimelineTrigger {

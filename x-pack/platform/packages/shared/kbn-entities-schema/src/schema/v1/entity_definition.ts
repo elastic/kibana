@@ -62,6 +62,7 @@ export const entityDefinitionSchema = z.object({
           z.literal('transform'),
           z.literal('ingest_pipeline'),
           z.literal('template'),
+          z.literal('ilm_policy'),
         ]),
         id: z.string(),
       })

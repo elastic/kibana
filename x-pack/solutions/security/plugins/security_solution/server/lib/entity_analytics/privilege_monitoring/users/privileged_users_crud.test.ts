@@ -36,6 +36,11 @@ describe('createPrivilegedUsersCrudService', () => {
     user: {
       name: 'test-user',
       is_privileged: true,
+      entity: {
+        attributes: {
+          Privileged: true,
+        },
+      },
     },
     labels: {
       sources: ['api'],
@@ -99,7 +104,12 @@ describe('createPrivilegedUsersCrudService', () => {
         _id: 'new-user-id',
         _index: TEST_INDEX,
         _source: {
-          user: { is_privileged: true },
+          user: {
+            is_privileged: true,
+            entity: {
+              attributes: { Privileged: true },
+            },
+          },
           labels: { sources: ['api'] },
           '@timestamp': '2025-08-25T00:00:00.000Z',
         },
@@ -165,7 +175,11 @@ describe('createPrivilegedUsersCrudService', () => {
     it('should update existing user when username already exists', async () => {
       const existingUserId = 'existing-user-id';
       const existingUserDoc = {
-        user: { name: 'test-user', is_privileged: true },
+        user: {
+          name: 'test-user',
+          is_privileged: true,
+          entity: { attributes: { Privileged: false } },
+        },
         labels: { sources: ['csv'] },
         '@timestamp': '2025-08-24T00:00:00.000Z',
       };
@@ -201,7 +215,11 @@ describe('createPrivilegedUsersCrudService', () => {
       // Mock get response for updated user
       const updatedUserDoc = {
         ...existingUserDoc,
-        user: { ...mockUserInput.user, is_privileged: true },
+        user: {
+          ...mockUserInput.user,
+          is_privileged: true,
+          entity: { attributes: { Privileged: true } },
+        },
         labels: { sources: ['csv', 'api'] }, // Should merge sources
       };
 
@@ -227,7 +245,11 @@ describe('createPrivilegedUsersCrudService', () => {
         refresh: 'wait_for',
         doc: {
           ...mockUserInput,
-          user: { ...mockUserInput.user, is_privileged: true },
+          user: {
+            ...mockUserInput.user,
+            is_privileged: true,
+            entity: { attributes: { Privileged: true } },
+          },
           labels: { sources: ['csv', 'api'] },
         },
       });
@@ -241,6 +263,7 @@ describe('createPrivilegedUsersCrudService', () => {
           user: expect.objectContaining({
             name: 'test-user',
             is_privileged: true,
+            entity: { attributes: { Privileged: true } },
           }),
           labels: expect.objectContaining({
             sources: ['csv', 'api'],
@@ -301,6 +324,7 @@ describe('createPrivilegedUsersCrudService', () => {
           user: expect.objectContaining({
             name: 'test-user',
             is_privileged: true,
+            entity: { attributes: { Privileged: true } },
           }),
           labels: {
             sources: ['api'],
@@ -313,6 +337,7 @@ describe('createPrivilegedUsersCrudService', () => {
           user: expect.objectContaining({
             name: 'test-user',
             is_privileged: true,
+            entity: { attributes: { Privileged: true } },
           }),
         })
       );
@@ -333,7 +358,11 @@ describe('createPrivilegedUsersCrudService', () => {
               _id: undefined, // No ID - edge case
               _score: 1.0,
               _source: {
-                user: { name: 'test-user', is_privileged: true },
+                user: {
+                  name: 'test-user',
+                  is_privileged: true,
+                  entity: { attributes: { Privileged: true } },
+                },
                 labels: { sources: ['csv'] },
                 '@timestamp': '2025-08-24T00:00:00.000Z',
               },
@@ -380,6 +409,7 @@ describe('createPrivilegedUsersCrudService', () => {
           user: expect.objectContaining({
             name: 'test-user',
             is_privileged: true,
+            entity: { attributes: { Privileged: true } },
           }),
         })
       );
@@ -392,7 +422,11 @@ describe('createPrivilegedUsersCrudService', () => {
         _index: TEST_INDEX,
         _id: 'test-id',
         _source: {
-          user: { name: 'test-user', is_privileged: true },
+          user: {
+            name: 'test-user',
+            is_privileged: true,
+            entity: { attributes: { Privileged: true } },
+          },
           '@timestamp': '2025-08-25T00:00:00.000Z',
         },
         found: true,
@@ -409,7 +443,11 @@ describe('createPrivilegedUsersCrudService', () => {
       });
       expect(result).toEqual({
         id: 'test-id',
-        user: { name: 'test-user', is_privileged: true },
+        user: {
+          name: 'test-user',
+          is_privileged: true,
+          entity: { attributes: { Privileged: true } },
+        },
         '@timestamp': '2025-08-25T00:00:00.000Z',
       });
     });
@@ -447,7 +485,11 @@ describe('createPrivilegedUsersCrudService', () => {
         _index: TEST_INDEX,
         _id: 'test-id',
         _source: {
-          user: { name: 'updated-name', is_privileged: true },
+          user: {
+            name: 'updated-name',
+            is_privileged: true,
+            entity: { attributes: { Privileged: true } },
+          },
           '@timestamp': '2025-08-25T00:00:00.000Z',
         },
         found: true,
@@ -467,7 +509,11 @@ describe('createPrivilegedUsersCrudService', () => {
       });
       expect(result).toEqual({
         id: 'test-id',
-        user: { name: 'updated-name', is_privileged: true },
+        user: {
+          name: 'updated-name',
+          is_privileged: true,
+          entity: { attributes: { Privileged: true } },
+        },
         '@timestamp': '2025-08-25T00:00:00.000Z',
       });
     });
@@ -488,7 +534,11 @@ describe('createPrivilegedUsersCrudService', () => {
               _id: 'user1',
               _score: 1.0,
               _source: {
-                user: { name: 'user1', is_privileged: true },
+                user: {
+                  name: 'user1',
+                  is_privileged: true,
+                  entity: { attributes: { Privileged: true } },
+                },
                 '@timestamp': '2025-08-25T00:00:00.000Z',
               },
             },
@@ -497,7 +547,11 @@ describe('createPrivilegedUsersCrudService', () => {
               _id: 'user2',
               _score: 1.0,
               _source: {
-                user: { name: 'user2', is_privileged: true },
+                user: {
+                  name: 'user2',
+                  is_privileged: true,
+                  entity: { attributes: { Privileged: true } },
+                },
                 '@timestamp': '2025-08-25T01:00:00.000Z',
               },
             },
@@ -517,12 +571,20 @@ describe('createPrivilegedUsersCrudService', () => {
       expect(result).toEqual([
         {
           id: 'user1',
-          user: { name: 'user1', is_privileged: true },
+          user: {
+            name: 'user1',
+            is_privileged: true,
+            entity: { attributes: { Privileged: true } },
+          },
           '@timestamp': '2025-08-25T00:00:00.000Z',
         },
         {
           id: 'user2',
-          user: { name: 'user2', is_privileged: true },
+          user: {
+            name: 'user2',
+            is_privileged: true,
+            entity: { attributes: { Privileged: true } },
+          },
           '@timestamp': '2025-08-25T01:00:00.000Z',
         },
       ]);

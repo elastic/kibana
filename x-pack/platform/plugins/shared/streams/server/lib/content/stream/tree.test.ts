@@ -61,6 +61,7 @@ describe('content pack tree helpers', () => {
         streams: [root, child1, child2, child1Nested],
         include: {
           objects: {
+            mappings: true,
             queries: [],
             routing: [{ destination: 'root.child1', objects: { all: {} } }],
           },
@@ -96,6 +97,7 @@ describe('content pack tree helpers', () => {
         streams: [root],
         include: {
           objects: {
+            mappings: true,
             queries: [{ id: 'keep' }],
             routing: [],
           },
@@ -120,6 +122,7 @@ describe('content pack tree helpers', () => {
           streams: [root, child1],
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [{ destination: 'root.child2', objects: { all: {} } }],
             },
@@ -133,11 +136,12 @@ describe('content pack tree helpers', () => {
           streams: [root, child1],
           include: {
             objects: {
+              mappings: true,
               queries: [],
               routing: [
                 {
                   destination: 'root.child1',
-                  objects: { queries: [{ id: 'foo' }], routing: [] },
+                  objects: { mappings: true, queries: [{ id: 'foo' }], routing: [] },
                 },
               ],
             },

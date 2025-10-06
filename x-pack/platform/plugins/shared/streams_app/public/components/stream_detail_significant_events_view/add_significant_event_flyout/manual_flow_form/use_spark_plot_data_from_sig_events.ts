@@ -36,18 +36,11 @@ export function useSparkplotDataFromSigEvents({
         };
       }) ?? [];
 
-    const { id, kql, title } = queryValues;
-
     const change =
-      changePoints && occurrences && id && kql && title
+      changePoints && occurrences
         ? formatChangePoint({
             change_points: changePoints,
             occurrences: timeseries,
-            query: {
-              id,
-              kql,
-              title,
-            },
           })
         : undefined;
 
@@ -57,7 +50,7 @@ export function useSparkplotDataFromSigEvents({
         ? [
             getAnnotationFromFormattedChangePoint({
               query: {
-                id,
+                id: queryValues.id,
               },
               change,
               theme,

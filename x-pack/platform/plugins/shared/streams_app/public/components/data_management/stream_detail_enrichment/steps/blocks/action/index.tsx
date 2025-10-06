@@ -21,13 +21,8 @@ import { getStepPanelColour } from '../../../utils';
 export type ActionBlockProps = StepConfigurationProps & {
   processorMetrics?: ProcessorMetrics;
 };
-export function ActionBlock({
-  stepRef,
-  level,
-  stepUnderEdit,
-  rootLevelMap,
-  stepsProcessingSummaryMap,
-}: StepConfigurationProps) {
+export function ActionBlock(props: StepConfigurationProps) {
+  const { stepRef, level } = props;
   const { euiTheme } = useEuiTheme();
   const isUnderEdit = useSelector(stepRef, (snapshot) => isStepUnderEdit(snapshot));
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
@@ -54,38 +49,27 @@ export function ActionBlock({
   return (
     <EuiPanel
       data-test-subj="streamsAppProcessorBlock"
-      paddingSize="m"
       hasShadow={false}
       color={isUnderEdit && isRootStepValue ? undefined : panelColour}
       css={
         isUnderEdit
-          ? css`
+          ? // eslint-disable-next-line @elastic/eui/no-css-color
+            css`
               border: 1px solid ${euiTheme.colors.borderStrongPrimary};
               box-sizing: border-box;
+              padding: ${euiTheme.size.m};
             `
           : css`
               border: ${euiTheme.border.thin};
+              border-radius: ${euiTheme.size.s};
+              padding: ${euiTheme.size.m};
             `
       }
     >
       {isUnderEdit ? (
-        <ActionBlockEditor
-          processorMetrics={processorMetrics}
-          stepRef={stepRef}
-          level={level}
-          ref={freshBlockRef}
-          rootLevelMap={rootLevelMap}
-          stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-        />
+        <ActionBlockEditor {...props} processorMetrics={processorMetrics} />
       ) : (
-        <ActionBlockListItem
-          processorMetrics={processorMetrics}
-          stepRef={stepRef}
-          level={level}
-          stepUnderEdit={stepUnderEdit}
-          rootLevelMap={rootLevelMap}
-          stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-        />
+        <ActionBlockListItem {...props} processorMetrics={processorMetrics} />
       )}
     </EuiPanel>
   );

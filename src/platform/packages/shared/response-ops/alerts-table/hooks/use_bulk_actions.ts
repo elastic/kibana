@@ -154,9 +154,11 @@ export const useBulkAddToCaseActions = ({
               const caseAttachments = alerts
                 ? casesService?.helpers.groupAlertsByRule(alerts) ?? []
                 : [];
-
+              const dataArray = alerts ? alerts.map((alert) => alert.data) : [];
+              const observables = casesService?.helpers.getObservablesFromEcs(dataArray);
               createCaseFlyout.open({
                 attachments: caseAttachments,
+                observables,
               });
             },
           },
@@ -178,6 +180,11 @@ export const useBulkAddToCaseActions = ({
                     caseId: theCase.id,
                     groupAlertsByRule: casesService?.helpers.groupAlertsByRule,
                   });
+                },
+                getObservables: ({ theCase }) => {
+                  if (!alerts || theCase == null) return [];
+                  const dataArray = alerts.map((alert) => alert.data);
+                  return casesService?.helpers.getObservablesFromEcs(dataArray) ?? [];
                 },
               });
             },

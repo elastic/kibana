@@ -31,7 +31,13 @@
         ],
         "signature": [
           "({ onDataViewCreated, allowAdHocDataView, onTryESQL: onTryESQLProp, onESQLNavigationComplete, }: ",
-          "NoDataViewsPromptProps",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptProps",
+            "text": "NoDataViewsPromptProps"
+          },
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/impl/src/no_data_views.tsx",
@@ -46,7 +52,13 @@
             "label": "{\n  onDataViewCreated,\n  allowAdHocDataView = false,\n  onTryESQL: onTryESQLProp,\n  onESQLNavigationComplete,\n}",
             "description": [],
             "signature": [
-              "NoDataViewsPromptProps"
+              {
+                "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+                "section": "def-public.NoDataViewsPromptProps",
+                "text": "NoDataViewsPromptProps"
+              }
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/impl/src/no_data_views.tsx",
             "deprecated": false,
@@ -68,7 +80,13 @@
         ],
         "signature": [
           "({ onClickCreate, canCreateNewDataView, dataViewsDocLink, onTryESQL, esqlDocLink, emptyPromptColor, }: ",
-          "NoDataViewsPromptComponentProps",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptComponentProps",
+            "text": "NoDataViewsPromptComponentProps"
+          },
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/impl/src/no_data_views.component.tsx",
@@ -83,7 +101,13 @@
             "label": "{\n  onClickCreate,\n  canCreateNewDataView,\n  dataViewsDocLink,\n  onTryESQL,\n  esqlDocLink,\n  emptyPromptColor = 'plain',\n}",
             "description": [],
             "signature": [
-              "NoDataViewsPromptComponentProps"
+              {
+                "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+                "section": "def-public.NoDataViewsPromptComponentProps",
+                "text": "NoDataViewsPromptComponentProps"
+              }
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/impl/src/no_data_views.component.tsx",
             "deprecated": false,
@@ -105,7 +129,13 @@
         ],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
-          "NoDataViewsPromptKibanaDependencies",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptKibanaDependencies",
+            "text": "NoDataViewsPromptKibanaDependencies"
+          },
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/impl/src/services.tsx",
@@ -121,7 +151,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "NoDataViewsPromptKibanaDependencies",
+              {
+                "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+                "section": "def-public.NoDataViewsPromptKibanaDependencies",
+                "text": "NoDataViewsPromptKibanaDependencies"
+              },
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/impl/src/services.tsx",
@@ -144,7 +180,13 @@
         ],
         "signature": [
           "({ children, ...services }: React.PropsWithChildren<",
-          "NoDataViewsPromptServices",
+          {
+            "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+            "section": "def-public.NoDataViewsPromptServices",
+            "text": "NoDataViewsPromptServices"
+          },
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/impl/src/services.tsx",
@@ -160,7 +202,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "NoDataViewsPromptServices",
+              {
+                "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+                "section": "def-public.NoDataViewsPromptServices",
+                "text": "NoDataViewsPromptServices"
+              },
               ">"
             ],
             "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/impl/src/services.tsx",
@@ -216,7 +264,7 @@
         "tags": [],
         "label": "NoDataViewsPromptComponentProps",
         "description": [],
-        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -229,7 +277,7 @@
             "description": [
               "True if the user has permission to create a data view, false otherwise."
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -245,7 +293,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -262,7 +310,7 @@
               "PanelColor",
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -278,7 +326,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -296,7 +344,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -314,7 +362,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -330,7 +378,7 @@
         "description": [
           "\nKibana-specific service types."
         ],
-        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -343,10 +391,16 @@
             "description": [],
             "signature": [
               "{ docLinks: { links: { indexPatterns: { introduction: string; }; query: { queryESQL: string; }; }; }; application: { navigateToApp: ",
-              "NavigateToAppFn",
+              {
+                "pluginId": "@kbn/shared-ux-prompt-no-data-views-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxPromptNoDataViewsTypesPluginApi",
+                "section": "def-public.NavigateToAppFn",
+                "text": "NavigateToAppFn"
+              },
               "; }; }"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -358,11 +412,9 @@
             "label": "dataViewEditor",
             "description": [],
             "signature": [
-              "{ userPermissions: { editDataView: () => boolean; }; openEditor: (options: ",
-              "DataViewEditorOptions",
-              ") => () => void; }"
+              "{ userPermissions: { editDataView: () => boolean; }; openEditor: (options: DataViewEditorOptions) => () => void; }"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -378,7 +430,7 @@
               "ILocatorClient",
               "; }; } | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -392,7 +444,7 @@
         "tags": [],
         "label": "NoDataViewsPromptProps",
         "description": [],
-        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -408,7 +460,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -424,7 +476,7 @@
             "signature": [
               "(dataView: unknown) => void"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -438,7 +490,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+                "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -458,7 +510,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -476,7 +528,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -485,16 +537,17 @@
           {
             "parentPluginId": "@kbn/shared-ux-prompt-no-data-views",
             "id": "def-public.NoDataViewsPromptProps.emptyPromptColor",
-            "type": "Any",
+            "type": "CompoundType",
             "tags": [],
             "label": "emptyPromptColor",
             "description": [
               "Empty prompt color"
             ],
             "signature": [
-              "any"
+              "PanelColor",
+              " | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -510,7 +563,7 @@
         "description": [
           "\nAbstract external services for this component."
         ],
-        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+        "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -523,7 +576,7 @@
             "description": [
               "True if the user has permission to create a new Data View, false otherwise."
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -537,11 +590,9 @@
               "A method to open the Data View Editor flow."
             ],
             "signature": [
-              "(options: ",
-              "DataViewEditorOptions",
-              ") => () => void"
+              "(options: DataViewEditorOptions) => () => void"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -555,7 +606,7 @@
                 "signature": [
                   "DataViewEditorOptions"
                 ],
-                "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+                "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -572,7 +623,7 @@
             "description": [
               "A link to information about Data Views in Kibana"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -588,7 +639,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -601,7 +652,7 @@
             "description": [
               "A link to the documentation for ES|QL"
             ],
-            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.d.ts",
+            "path": "src/platform/packages/shared/shared-ux/prompt/no_data_views/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

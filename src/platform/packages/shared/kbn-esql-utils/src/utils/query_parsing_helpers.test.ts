@@ -27,6 +27,7 @@ import {
   getCategorizeField,
   findClosestColumn,
   getKqlSearchQueries,
+  convertTimeseriesCommandToFrom,
 } from './query_parsing_helpers';
 import type { monaco } from '@kbn/monaco';
 import type { ESQLColumn } from '@kbn/esql-ast';
@@ -257,6 +258,20 @@ describe('esql query helpers', () => {
       expect(code).toEqual(
         'FROM index1 /* cmt */\n  | KEEP field1, field2 /* cmt */\n  | SORT field1 /* cmt */'
       );
+    });
+  });
+
+  describe('convertTimeseriesCommandToFrom', function () {
+    it('should return the query as it is if no TS command is found', function () {
+      const query = convertTimeseriesCommandToFrom(
+        'FROM index1 | KEEP field1, field2 | SORT field1'
+      );
+      expect(query).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
+    });
+
+    it('should return the query with FROM command if TS command is found', function () {
+      const query = convertTimeseriesCommandToFrom('TS index1 | KEEP field1, field2 | SORT field1');
+      expect(query).toEqual('FROM index1 | KEEP field1, field2 | SORT field1');
     });
   });
 

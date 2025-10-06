@@ -16,11 +16,44 @@ import {
   EuiText,
   EuiSpacer,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import type { SnapshotRestore, SnapshotRestoreShard } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';
 import { FormattedDateTime } from '../../../../components';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    /*
+     * 1. Adjust table styling to differentiate from parent table
+     * 2. Allow child progress bar to expand to container size
+     */
+    shardsTable: css`
+      margin: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.l}; /* 1 */
+
+      .euiToolTipAnchor {
+        width: 100%; /* 2 */
+      }
+
+      .euiTable {
+        background: none;
+
+        .euiTableRow:last-child > .euiTableRowCell {
+          border-bottom: none;
+        }
+
+        .euiTableRow:hover,
+        .euiTableRow:hover > .euiTableRowCell {
+          background: ${euiTheme.colors.lightestShade};
+        }
+      }
+    `,
+  };
+};
 
 interface Props {
   shards: SnapshotRestore['shards'];
@@ -28,6 +61,7 @@ interface Props {
 
 export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
   const { i18n } = useServices();
+  const styles = useStyles();
 
   const Progress = ({
     total,
@@ -191,7 +225,7 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
 
   return (
     <EuiBasicTable
-      className="snapshotRestore__shardsTable"
+      css={styles.shardsTable}
       compressed={true}
       // @ts-ignore `shards` is a Partial<> but this component treats a number of fields as required
       items={shards}

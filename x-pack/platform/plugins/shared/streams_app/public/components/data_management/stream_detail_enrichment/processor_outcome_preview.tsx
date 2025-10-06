@@ -50,6 +50,7 @@ import {
 } from './empty_prompts';
 import { PreviewFlyout, MemoPreviewTable } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
+import { RowSelectionContext } from '../shared/preview_table';
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
@@ -373,23 +374,28 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     }
   }, [docViewerContext, docViewsRegistry, hasSimulatedRecords]);
 
+  const rowSelectionContextValue = useMemo(
+    () => ({ selectedRowIndex, onRowSelected }),
+    [selectedRowIndex, onRowSelected]
+  );
+
   return (
     <>
-      <MemoPreviewTable
-        documents={previewDocuments}
-        originalSamples={originalSamples}
-        showRowSourceAvatars={shouldShowRowSourceAvatars}
-        onRowSelected={onRowSelected}
-        selectedRowIndex={selectedRowIndex}
-        displayColumns={previewColumns}
-        rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
-        toolbarVisibility
-        setVisibleColumns={setVisibleColumns}
-        sorting={previewColumnsSorting}
-        setSorting={setPreviewColumnsSorting}
-        columnOrderHint={previewColumnsOrder}
-        renderCellValue={renderCellValue}
-      />
+      <RowSelectionContext.Provider value={rowSelectionContextValue}>
+        <MemoPreviewTable
+          documents={previewDocuments}
+          originalSamples={originalSamples}
+          showRowSourceAvatars={shouldShowRowSourceAvatars}
+          displayColumns={previewColumns}
+          rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
+          toolbarVisibility
+          setVisibleColumns={setVisibleColumns}
+          sorting={previewColumnsSorting}
+          setSorting={setPreviewColumnsSorting}
+          columnOrderHint={previewColumnsOrder}
+          renderCellValue={renderCellValue}
+        />
+      </RowSelectionContext.Provider>
       <DocViewerContext.Provider value={docViewerContext}>
         <PreviewFlyout
           currentDoc={currentDoc}

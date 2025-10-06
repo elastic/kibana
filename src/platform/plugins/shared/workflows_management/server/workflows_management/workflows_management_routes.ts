@@ -534,6 +534,58 @@ export function defineRoutes(
       }
     }
   );
+  router.post(
+    {
+      path: '/api/workflows/testStep',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: ['all'],
+        },
+      },
+      validate: {
+        body: schema.object({
+          stepId: schema.string(),
+          contextOverride: schema.recordOf(schema.string(), schema.any()),
+          workflowYaml: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const spaceId = spaces.getSpaceId(request);
+
+        const workflowExecutionId = await api.testStep(
+          request.body.workflowYaml,
+          request.body.stepId,
+          request.body.contextOverride,
+          spaceId
+        );
+
+        return response.ok({
+          body: {
+            workflowExecutionId,
+          },
+        });
+      } catch (error) {
+        if (error instanceof InvalidYamlSyntaxError || error instanceof InvalidYamlSchemaError) {
+          return response.badRequest({
+            body: {
+              message: `Invalid workflow yaml: ${error.message}`,
+            },
+          });
+        }
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
   router.get(
     {
       path: '/api/workflowExecutions',

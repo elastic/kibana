@@ -194,14 +194,13 @@ export const createExternalService = (
 
       return { id: incidentId, key, created: fields.created, updated: fields.updated, ...fields };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get incident with id ${id}. Error: ${
-            error.message
-          } Reason: ${createErrorMessage(error.response?.data)}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to get incident with id ${id}. Error: ${error.message} Reason: ${createErrorMessage(
+          error.response?.data
+        )}`
       );
+      throw error;
     }
   };
 
@@ -253,14 +252,13 @@ export const createExternalService = (
         url: getIncidentViewURL(updatedIncident.key),
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to create incident. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to create incident. Error: ${error.message}. Reason: ${createErrorMessage(
+          error.response?.data
+        )}`
       );
+      throw error;
     }
   };
 
@@ -299,14 +297,13 @@ export const createExternalService = (
         url: getIncidentViewURL(updatedIncident.key),
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to update incident with id ${incidentId}. Error: ${
-            error.message
-          }. Reason: ${createErrorMessage(error.response?.data)}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to update incident with id ${incidentId}. Error: ${
+          error.message
+        }. Reason: ${createErrorMessage(error.response?.data)}`
       );
+      throw error;
     }
   };
 
@@ -336,14 +333,13 @@ export const createExternalService = (
         pushedDate: new Date(res.data.created).toISOString(),
       };
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to create comment at incident with id ${incidentId}. Error: ${
-            error.message
-          }. Reason: ${createErrorMessage(error.response?.data)}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to create comment at incident with id ${incidentId}. Error: ${
+          error.message
+        }. Reason: ${createErrorMessage(error.response?.data)}`
       );
+      throw error;
     }
   };
 
@@ -366,14 +362,13 @@ export const createExternalService = (
       const { issueTypes, values } = res.data;
       return normalizeIssueTypes(issueTypes || values);
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get issue types. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to get issue types. Error: ${error.message}. Reason: ${createErrorMessage(
+          error.response?.data
+        )}`
       );
+      throw error;
     }
   };
 
@@ -402,14 +397,13 @@ export const createExternalService = (
       );
       return normalizeFields(fields);
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get fields. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to get fields. Error: ${error.message}. Reason: ${createErrorMessage(
+          error.response?.data
+        )}`
       );
+      throw error;
     }
   };
 
@@ -459,14 +453,13 @@ export const createExternalService = (
 
       return normalizeSearchResults(res.data?.issues ?? []);
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get issues. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to get issues. Error: ${error.message}. Reason: ${createErrorMessage(
+          error.response?.data
+        )}`
       );
+      throw error;
     }
   };
 
@@ -488,14 +481,13 @@ export const createExternalService = (
 
       return normalizeIssue(res.data ?? {});
     } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get issue with id ${id}. Error: ${error.message}. Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
+      error.message = getErrorMessage(
+        i18n.NAME,
+        `Unable to get issue with id ${id}. Error: ${error.message}. Reason: ${createErrorMessage(
+          error.response?.data
+        )}`
       );
+      throw error;
     }
   };
 

@@ -17,7 +17,7 @@ describe('EnterFallbackPathNodeImpl', () => {
   beforeEach(() => {
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
     workflowRuntime.enterScope = jest.fn();
-    workflowRuntime.goToNextStep = jest.fn();
+    workflowRuntime.navigateToNextNode = jest.fn();
 
     underTest = new EnterFallbackPathNodeImpl(workflowRuntime);
   });
@@ -25,20 +25,20 @@ describe('EnterFallbackPathNodeImpl', () => {
   describe('run', () => {
     it('should enter scope', async () => {
       await underTest.run();
-      expect(workflowRuntime.enterScope).toHaveBeenCalled();
+      expect(workflowRuntime.enterScope).toHaveBeenCalledWith('fallback');
     });
 
-    it('should go to next step', async () => {
+    it('should go to next node', async () => {
       await underTest.run();
-      expect(workflowRuntime.goToNextStep).toHaveBeenCalled();
+      expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
 
-    it('should execute steps in correct order', async () => {
+    it('should execute functions in correct order', async () => {
       const calls: string[] = [];
       workflowRuntime.enterScope = jest.fn().mockImplementation(() => {
         calls.push('enterScope');
       });
-      workflowRuntime.goToNextStep = jest.fn().mockImplementation(() => {
+      workflowRuntime.navigateToNextNode = jest.fn().mockImplementation(() => {
         calls.push('goToNextStep');
       });
 

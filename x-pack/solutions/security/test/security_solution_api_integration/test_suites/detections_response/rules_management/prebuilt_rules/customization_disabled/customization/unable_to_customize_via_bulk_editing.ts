@@ -17,14 +17,14 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const fetchPrebuiltRule = async () => {
     const {
       body: {
         data: [prebuiltRule],
       },
-    } = await securitySolutionApi.findRules({
+    } = await detectionsApi.findRules({
       query: {
         filter: 'alert.attributes.params.immutable: true',
         per_page: 1,
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const prebuiltRule = await fetchPrebuiltRule();
 
-        await securitySolutionApi
+        await detectionsApi
           .performRulesBulkAction({
             query: {},
             body: {
@@ -112,7 +112,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await installMockPrebuiltRules(supertest, es);
       const prebuiltRule = await fetchPrebuiltRule();
 
-      const { body } = await securitySolutionApi
+      const { body } = await detectionsApi
         .performRulesBulkAction({
           query: {},
           body: {
@@ -153,7 +153,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Check that the updates were not made
-      const { body: readRule } = await securitySolutionApi
+      const { body: readRule } = await detectionsApi
         .readRule({ query: { rule_id: prebuiltRule.rule_id } })
         .expect(200);
 

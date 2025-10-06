@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
+import { isAgentMigrationSupported, MINIMUM_MIGRATE_AGENT_VERSION } from '../../../common/services';
 import { FleetError } from '../../errors';
 
 import type { Agent } from '../../types';
@@ -64,6 +65,10 @@ export async function bulkMigrateAgentsBatch(
       errors[agent.id] = new FleetError(
         `Agent ${agent.id} cannot be migrated because it is a fleet-server.`
       );
+    } else if (!isAgentMigrationSupported(agent)) {
+      errors[agent.id] = new FleetError(
+        `Agent ${agent.id} cannot be migrated. Migrate action is supported from version ${MINIMUM_MIGRATE_AGENT_VERSION}.`
+      );
     } else {
       agentsToAction.push(agent);
     }
@@ -81,10 +86,12 @@ export async function bulkMigrateAgentsBatch(
     type: 'MIGRATE',
     total,
     data: {
-      enrollment_token: options.enrollment_token,
       target_uri: options.uri,
       settings: options.settings,
     },
+    ...(options.enrollment_token && {
+      secrets: { enrollment_token: options.enrollment_token },
+    }),
     namespaces,
   });
 

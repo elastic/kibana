@@ -501,6 +501,7 @@ export class ChromeService {
       loadingCount$,
       dataTestSubj$: activeDataTestSubj$,
       isFeedbackBtnVisible$: this.isFeedbackBtnVisible$,
+      navigationTourManager: projectNavigation.tourManager,
     };
 
     const getProjectHeader = ({
@@ -793,6 +794,7 @@ export class ChromeService {
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
         updateSolutionNavigations: projectNavigation.updateSolutionNavigations,
         changeActiveSolutionNavigation: projectNavigation.changeActiveSolutionNavigation,
+        navigationTourManager: projectNavigation.tourManager,
       },
     };
   }

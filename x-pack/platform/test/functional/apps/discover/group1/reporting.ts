@@ -240,12 +240,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
         await timePicker.setAbsoluteRange(fromTime, toTime);
+        await discover.waitUntilTabIsLoaded();
         await discover.clickNewSearchButton();
+        await discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await discover.getHitCount()).to.equal('4,675');
         });
         await discover.saveSearch('large export');
-
+        await discover.waitUntilTabIsLoaded();
         // match file length, the beginning and the end of the csv file contents
         const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
         expect(csvFile.length).to.be(4845684);

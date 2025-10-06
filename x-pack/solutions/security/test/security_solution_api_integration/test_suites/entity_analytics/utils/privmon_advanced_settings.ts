@@ -25,3 +25,9 @@ export const disablePrivmonSetting = async (kibanaServer: KbnClient, space: stri
     { space }
   );
 };
+
+export const toggleIntegrationsSyncFlag = async (kibanaServer: KbnClient, enable: boolean) => {
+  await kibanaServer.uiSettings.update({
+    'securitySolution:entityAnalytics:privilegeMonitoring:enableIntegrations': enable,
+  });
+};

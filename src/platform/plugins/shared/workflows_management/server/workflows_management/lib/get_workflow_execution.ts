@@ -90,6 +90,7 @@ function transformToWorkflowExecutionDetailDto(
   return {
     ...workflowExecution,
     id,
+    stepId: workflowExecution.stepId,
     stepExecutions,
     triggeredBy: workflowExecution.triggeredBy, // <-- Include the triggeredBy field
     yaml,

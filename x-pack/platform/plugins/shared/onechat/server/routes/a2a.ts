@@ -6,15 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { getTechnicalPreviewWarning } from './utils';
 import { KibanaA2AAdapter } from '../utils/a2a/kibana_a2a_adapter';
 import { getKibanaUrl } from '../utils/get_kibana_url';
-
-const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic A2A Server');
 
 export const A2A_SERVER_PATH = `${publicApiPath}/a2a`;
 
@@ -40,12 +38,14 @@ export function registerA2ARoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'A2A Agent Card',
-      description: 'Provides agent discovery metadata for A2A protocol',
+      summary: 'Get A2A agent card',
+      description:
+        'Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.',
       options: {
-        tags: ['a2a'],
+        tags: ['a2a', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -55,9 +55,16 @@ export function registerA2ARoutes({
         validate: {
           request: {
             params: schema.object({
-              agentId: schema.string(),
+              agentId: schema.string({
+                meta: {
+                  description: 'The unique identifier of the agent to get A2A metadata for.',
+                },
+              }),
             }),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/a2a_agent_card.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -72,13 +79,15 @@ export function registerA2ARoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'A2A Task Endpoint',
-      description: TECHNICAL_PREVIEW_WARNING,
+      summary: 'Send A2A task',
+      description:
+        'Handle A2A (Agent-to-Agent) task requests. Use this endpoint to process inter-agent communication using JSON-RPC 2.0 protocol.',
       options: {
-        tags: ['a2a'],
+        tags: ['a2a', 'oas-tag:agent builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -88,10 +97,23 @@ export function registerA2ARoutes({
         validate: {
           request: {
             params: schema.object({
-              agentId: schema.string(),
+              agentId: schema.string({
+                meta: {
+                  description: 'The unique identifier of the agent to send the A2A task to.',
+                },
+              }),
             }),
-            body: schema.object({}, { unknowns: 'allow' }),
+            body: schema.object(
+              {},
+              {
+                unknowns: 'allow',
+                meta: { description: 'JSON-RPC 2.0 request payload for A2A communication.' },
+              }
+            ),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/a2a_task.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

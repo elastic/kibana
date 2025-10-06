@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { useController } from 'react-hook-form';
-import { ProcessorConditionEditorWrapper } from '../../../../condition_editor';
 import type { ProcessorFormState } from '../../../types';
+import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
 
 export const ProcessorConditionEditor = () => {
   const { field } = useController<ProcessorFormState, 'where'>({ name: 'where' });

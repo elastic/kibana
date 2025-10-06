@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core-lifecycle-browser';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { AppMountParameters } from '@kbn/core-application-browser';
-import { i18n } from '@kbn/i18n';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
+import { eventTypes } from '../common/events';
+import {
+  AGENT_BUILDER_FULL_TITLE,
+  AGENT_BUILDER_SHORT_TITLE,
+  ONECHAT_APP_ID,
+  ONECHAT_PATH,
+} from '../common/features';
 import type { OnechatInternalService } from './services';
 import type { OnechatStartDependencies } from './types';
-import { ONECHAT_APP_ID, ONECHAT_PATH, ONECHAT_TITLE } from '../common/features';
-import { eventTypes } from '../common/events';
 
 export const registerApp = ({
   core,
@@ -27,7 +32,7 @@ export const registerApp = ({
     id: ONECHAT_APP_ID,
     appRoute: ONECHAT_PATH,
     category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-    title: ONECHAT_TITLE,
+    title: AGENT_BUILDER_SHORT_TITLE,
     euiIconType: 'logoElasticsearch',
     visibleIn: ['sideNav', 'globalSearch'],
     deepLinks: [
@@ -53,7 +58,7 @@ export const registerApp = ({
       const { mountApp } = await import('./application');
       const [coreStart, startDependencies] = await core.getStartServices();
 
-      coreStart.chrome.docTitle.change(ONECHAT_TITLE);
+      coreStart.chrome.docTitle.change(AGENT_BUILDER_FULL_TITLE);
       const services = getServices();
 
       return mountApp({ core: coreStart, services, element, history, plugins: startDependencies });
@@ -70,7 +75,7 @@ export const registerManagementSection = ({
 }) => {
   management.sections.section.ai.registerApp({
     id: 'agentBuilder',
-    title: ONECHAT_TITLE,
+    title: AGENT_BUILDER_FULL_TITLE,
     order: 3,
     mount: async (mountParams) => {
       const { mountManagementSection } = await import('./management/mount_management_section');

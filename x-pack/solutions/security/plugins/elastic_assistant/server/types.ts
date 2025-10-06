@@ -29,7 +29,7 @@ import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type {
-  AttackDiscoveryPostRequestBody,
+  AttackDiscoveryPostInternalRequestBody,
   DefendInsightsPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
@@ -292,7 +292,9 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+    | ExecuteConnectorRequestBody
+    | AttackDiscoveryPostInternalRequestBody
+    | DefendInsightsPostRequestBody
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;

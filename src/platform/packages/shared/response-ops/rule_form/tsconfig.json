@@ -9,7 +9,6 @@
   "kbn_references": [
     "@kbn/alerting-types",
     "@kbn/i18n",
-    "@kbn/triggers-actions-ui-types",
     "@kbn/core",
     "@kbn/actions-types",
     "@kbn/alerts-ui-shared",

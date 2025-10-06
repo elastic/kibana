@@ -29,6 +29,7 @@ export interface PushedArgs {
 export interface AttachmentStatsAttributes {
   total_comments: number;
   total_alerts: number;
+  total_events: number;
 }
 
 export interface GetCaseArgs {

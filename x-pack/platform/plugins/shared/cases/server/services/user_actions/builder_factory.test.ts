@@ -671,6 +671,7 @@ describe('UserActionBuilder', () => {
               "description": "testing sir",
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",

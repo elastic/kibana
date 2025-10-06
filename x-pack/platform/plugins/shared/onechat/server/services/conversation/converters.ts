@@ -86,11 +86,12 @@ export const fromEsWithoutRounds = (document: Document): ConversationWithoutRoun
   return convertBaseFromEs(document);
 };
 
-export const toEs = (conversation: Conversation): ConversationProperties => {
+export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
   return {
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
     user_name: conversation.user.username,
+    space,
     title: conversation.title,
     created_at: conversation.created_at,
     updated_at: conversation.updated_at,
@@ -101,15 +102,18 @@ export const toEs = (conversation: Conversation): ConversationProperties => {
 export const updateConversation = ({
   conversation,
   update,
+  space,
   updateDate,
 }: {
   conversation: Conversation;
   update: ConversationUpdateRequest;
+  space: string;
   updateDate: Date;
 }) => {
   const updated = {
     ...conversation,
     ...update,
+    space,
     updatedAt: updateDate.toISOString(),
   };
 
@@ -118,17 +122,20 @@ export const updateConversation = ({
 
 export const createRequestToEs = ({
   conversation,
+  space,
   currentUser,
   creationDate,
 }: {
   conversation: ConversationCreateRequest;
   currentUser: UserIdAndName;
   creationDate: Date;
+  space: string;
 }): ConversationProperties => {
   return {
     agent_id: conversation.agent_id,
     user_id: currentUser.id,
     user_name: currentUser.username,
+    space,
     title: conversation.title,
     created_at: creationDate.toISOString(),
     updated_at: creationDate.toISOString(),

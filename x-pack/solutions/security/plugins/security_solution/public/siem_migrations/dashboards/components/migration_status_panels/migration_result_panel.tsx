@@ -40,6 +40,7 @@ import { DashboardMigrationsUploadMissingPanel } from './upload_missing_panel';
 import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
 import { useCompleteBadgeStyles } from '../../../common/hooks/use_complete_status_badge_styles';
+import { TotalExecutionTime } from '../../../common/components/total_execution_time';
 
 const headerStyle = css`
   &:hover {
@@ -82,6 +83,12 @@ export const DashboardMigrationResultPanel = React.memo<DashboardMigrationResult
                         moment(migrationStats.last_updated_at).fromNow()
                       )}
                     </p>
+                    {migrationStats.last_execution?.total_execution_time_ms && (
+                      <TotalExecutionTime
+                        migrationType="dashboard"
+                        milliseconds={migrationStats.last_execution.total_execution_time_ms}
+                      />
+                    )}
                   </PanelText>
                 </EuiFlexItem>
               </EuiFlexGroup>

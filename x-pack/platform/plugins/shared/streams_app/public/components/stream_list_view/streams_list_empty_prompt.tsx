@@ -34,7 +34,7 @@ export const StreamsListEmptyPrompt = ({ onAddData }: { onAddData?: () => void }
         <p>
           {i18n.translate('xpack.streams.emptyState.body', {
             defaultMessage:
-              'Easily turn your data into clear, structured flows with simple tools for routing, field extraction, and retention. Just stream it into Elastic to get started and your new streams will appear here.',
+              'Streams provides a centralized UI that streamlines common tasks like rerouting data, extracting fields, or setting data retention, so you don’t need to navigate to multiple applications or manually configure underlying Elasticsearch components.',
           })}
         </p>
       }

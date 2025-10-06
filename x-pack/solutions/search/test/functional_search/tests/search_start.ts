@@ -9,16 +9,14 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { common, searchStart, searchNavigation, embeddedConsole } = getPageObjects([
+  const { searchStart, searchNavigation, embeddedConsole } = getPageObjects([
     'searchStart',
-    'common',
     'searchNavigation',
     'embeddedConsole',
   ]);
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const es = getService('es');
-  const browser = getService('browser');
-  const spaces = getService('spaces');
+  const searchSpace = getService('searchSpace');
 
   const deleteAllTestIndices = async () => {
     await esDeleteAllIndices(['search-*', 'test-*']);
@@ -29,17 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let spaceCreated: { id: string } = { id: '' };
 
     before(async () => {
-      // Navigate to the spaces management page which will log us in Kibana
-      await common.navigateToUrl('management', 'kibana/spaces', {
-        shouldUseHashForSubUrl: false,
-      });
-
-      // Create a space with the search solution and navigate to its home page
-      ({ cleanUp, space: spaceCreated } = await spaces.create({
-        name: 'search-ftr',
-        solution: 'es',
-      }));
-      await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+      ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace('search-start-ftr'));
+      await searchSpace.navigateTo(spaceCreated.id);
     });
 
     after(async () => {

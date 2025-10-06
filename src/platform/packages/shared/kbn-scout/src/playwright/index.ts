@@ -43,3 +43,6 @@ export { tags } from './tags';
 // Test entrypoints
 export { test, spaceTest, lighthouseTest, globalSetupHook } from './test/ui';
 export { apiTest } from './test/api';
+
+// Test helpers for EUI components
+export * from './eui_components';

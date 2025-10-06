@@ -612,7 +612,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: jsmManagementActionId,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message:
                 'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });
@@ -636,7 +636,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: jsmManagementActionId,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message:
                 'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });

@@ -11,8 +11,8 @@ import type { ConnectorExecutor } from '../connector_executor';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import type { RunStepResult, BaseStep } from './step_base';
-import { StepBase } from './step_base';
+import type { RunStepResult, BaseStep } from './node_implementation';
+import { BaseAtomicNodeImplementation } from './node_implementation';
 
 // Extend BaseStep for connector-specific properties
 export interface ConnectorStep extends BaseStep {
@@ -20,7 +20,7 @@ export interface ConnectorStep extends BaseStep {
   with?: Record<string, any>;
 }
 
-export class ConnectorStepImpl extends StepBase<ConnectorStep> {
+export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorStep> {
   constructor(
     step: ConnectorStep,
     contextManager: WorkflowContextManager,

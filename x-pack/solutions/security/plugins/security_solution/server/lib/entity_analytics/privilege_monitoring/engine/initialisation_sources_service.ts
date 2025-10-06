@@ -15,6 +15,7 @@ import {
   getStreamPatternFor,
   INTEGRATION_TYPES,
   integrationsSourceIndex,
+  oktaLastFullSyncMarkersIndex,
 } from '../data_sources';
 import { PrivilegeMonitoringEngineActions } from '../auditing/actions';
 
@@ -29,12 +30,23 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
     name,
   });
 
+  const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType) => {
+    // When using AD, will use the users index: TODO in: https://github.com/elastic/security-team/issues/13990
+    /* if (integration === 'ad') {
+      return getStreamPatternFor(integration, namespace);
+    }*/
+    // okta has a dedicated index for last full sync markers
+    return oktaLastFullSyncMarkersIndex(namespace);
+  };
+
   const makeIntegrationSource = (namespace: string, integration: IntegrationType) => ({
     type: 'entity_analytics_integration' as const,
     managed: true,
     indexPattern: getStreamPatternFor(integration, namespace),
     name: integrationsSourceIndex(namespace, integration),
     matchers: getMatchersFor(integration),
+    integrationName: integration,
+    integrations: { syncMarkerIndex: getLastFullSyncMarkersIndex(namespace, integration) },
   });
 
   function buildRequiredSources(namespace: string, indexPattern: string) {

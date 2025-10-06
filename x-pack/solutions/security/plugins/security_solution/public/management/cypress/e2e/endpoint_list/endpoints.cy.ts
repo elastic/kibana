@@ -113,6 +113,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
     cy.getByTestSubj('policyDetailsConfirmModal').should('be.visible').click();
     cy.getByTestSubj('confirmModalConfirmButton').should('be.visible').click();
     cy.contains(/has been updated/);
+    cy.getByTestSubj('policyDetailsBackLink').scrollIntoView();
     cy.getByTestSubj('policyDetailsBackLink').should('be.visible').click();
     cy.location('pathname', { timeout: 20000 }).should('equal', APP_ENDPOINTS_PATH);
 

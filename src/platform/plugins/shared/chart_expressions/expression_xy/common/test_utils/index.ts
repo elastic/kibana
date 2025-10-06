@@ -94,7 +94,7 @@ export const sampleLayer: DataLayerConfig = {
   accessors: ['a', 'b'],
   splitAccessors: ['d'],
   columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
-  xScaleType: 'ordinal',
+  xScaleType: 'time',
   isHistogram: false,
   isHorizontal: false,
   isPercentage: false,

@@ -24,12 +24,7 @@ export class MetricChart implements Chart<MetricVisualizationState> {
   }
 
   getLayers(): FormBasedPersistedState['layers'] {
-    return this.chartConfig.layers.getLayer(
-      DEFAULT_LAYER_ID,
-      ACCESSOR,
-      this.chartConfig.dataView,
-      this.chartConfig.formulaAPI
-    );
+    return this.chartConfig.layers.getLayer(DEFAULT_LAYER_ID, ACCESSOR, this.chartConfig.dataView);
   }
 
   getVisualizationState(): MetricVisualizationState {

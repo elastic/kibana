@@ -51,7 +51,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     }).expect(200);
   }
 
-  describe('Knowledge management tab', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/231420
+  describe.skip('Knowledge management tab', () => {
     before(async () => {
       await clearKnowledgeBase(es);
       await deployTinyElserAndSetupKb(getService);

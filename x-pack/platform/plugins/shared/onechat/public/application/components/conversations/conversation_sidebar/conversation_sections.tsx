@@ -58,6 +58,7 @@ export const ConversationSections: React.FC<ConversationSectionsProps> = ({ conv
                 values: { sectionLabel: label },
               })}
               flush
+              data-test-subj="agentBuilderConversationList"
             >
               {sectionConversations.map((conversation) => (
                 <ConversationItem key={conversation.id} conversation={conversation} />

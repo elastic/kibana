@@ -13,6 +13,9 @@ import type {
   RunWorkflowCommand,
   WorkflowDetailDto,
   RunWorkflowResponseDto,
+  RunStepCommand,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
 } from '@kbn/workflows';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -77,6 +80,18 @@ export function useWorkflowActions() {
     },
   });
 
+  const runIndividualStep = useMutation<RunWorkflowResponseDto, Error, RunStepCommand>({
+    mutationKey: ['POST', 'workflows', 'stepId', 'run'],
+    mutationFn: ({ stepId, contextOverride, workflowYaml }) => {
+      return http!.post(`/api/workflows/testStep`, {
+        body: JSON.stringify({ stepId, contextOverride, workflowYaml }),
+      });
+    },
+    onSuccess: ({ workflowExecutionId }, {}) => {
+      queryClient.invalidateQueries({ queryKey: ['workflows', workflowExecutionId, 'executions'] });
+    },
+  });
+
   const cloneWorkflow = useMutation({
     mutationKey: ['POST', 'workflows', 'id', 'clone'],
     mutationFn: ({ id }: { id: string }) => {
@@ -87,11 +102,28 @@ export function useWorkflowActions() {
     },
   });
 
+  const testWorkflow = useMutation<TestWorkflowResponseDto, Error, TestWorkflowCommand>({
+    mutationKey: ['POST', 'workflows', 'test'],
+    mutationFn: ({
+      workflowYaml,
+      inputs,
+    }: {
+      workflowYaml: string;
+      inputs: Record<string, any>;
+    }) => {
+      return http!.post(`/api/workflows/test`, {
+        body: JSON.stringify({ workflowYaml, inputs }),
+      });
+    },
+  });
+
   return {
     createWorkflow,
     updateWorkflow, // kc: maybe return mutation.mutate? where the navigation is handled?
     deleteWorkflows,
     runWorkflow,
+    runIndividualStep,
     cloneWorkflow,
+    testWorkflow,
   };
 }

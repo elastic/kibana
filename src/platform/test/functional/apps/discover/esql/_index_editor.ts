@@ -12,7 +12,7 @@ import path from 'path';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const INDEX_NAME_MANUAL = 'test-lookup-index-manual';
-const INDEX_NAME_FILE = 'testlookupindexfile';
+const INDEX_NAME_FILE = 'test-lookup-index-file';
 const INDEX_NAME_EDITION = 'test-lookup-index-edition';
 const INITIAL_COLUMN_PLACEHOLDERS = 4;
 const IMPORT_FILE_PATH = path.join(__dirname, 'imports', 'customers.csv');
@@ -94,12 +94,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const gridData = await dataGrid.getDataGridTableData();
         expect(gridData.columns).to.eql([
           'Select column',
-          'Stringcustomer_first_name',
-          'Stringcustomer_full_name',
-          'Stringcustomer_gender',
+          'Keywordcustomer_first_name',
+          'Keywordcustomer_full_name',
+          'Keywordcustomer_gender',
           'Numbercustomer_id',
-          'Stringcustomer_last_name',
-          'Stringemail',
+          'Keywordcustomer_last_name',
+          'Keywordemail',
         ]);
         expect(gridData.rows[0]).to.eql([
           '', // toggles column

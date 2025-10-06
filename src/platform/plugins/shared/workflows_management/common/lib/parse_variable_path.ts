@@ -19,6 +19,10 @@ export interface ParsedVariablePath {
   filters: string[];
 }
 
+// Receives a variable path e.g. 'items[0].name' or 'items[0].name | title' or 'items[0].name | title | uppercase'
+// Tries to parse the path into a property path and filters
+// Returns null if the path is invalid
+// Returns an object with the property path and filters if the path is valid
 export function parseVariablePath(path: string): ParsedVariablePath | null {
   const errors: string[] = [];
   // Trim whitespace

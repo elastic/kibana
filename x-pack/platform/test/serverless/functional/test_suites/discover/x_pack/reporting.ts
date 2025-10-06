@@ -135,14 +135,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('generates a large export', async () => {
         await PageObjects.discover.clickNewSearchButton();
+        await PageObjects.discover.waitUntilTabIsLoaded();
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.waitUntilTabIsLoaded();
 
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('4,675');
         });
         await PageObjects.discover.saveSearch('large export');
+        await PageObjects.discover.waitUntilTabIsLoaded();
 
         // match file length, the beginning and the end of the csv file contents
         const { text: csvFile } = await getReport({ timeout: 80 * 1000 });
@@ -150,7 +153,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // to make sure the order of records is stable we need to sort by the unique Order Id
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('order_id');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         await PageObjects.discover.clickFieldSort('order_id', 'Sort A-Z');
+        await PageObjects.discover.waitUntilTabIsLoaded();
         const { text: csvFileOrderId } = await getReport({ timeout: 80 * 1000 });
         expectSnapshot(csvFileOrderId.slice(0, 5000)).toMatch();
         expectSnapshot(csvFileOrderId.slice(-5000)).toMatch();

@@ -268,11 +268,13 @@ export function ControlLabel({
 export function ControlWidth({
   minimumWidth,
   grow,
+  hideFitToSpace,
   onMinimumSizeChange,
   onGrowChange,
 }: {
   minimumWidth: string;
   grow: boolean;
+  hideFitToSpace: boolean;
   onMinimumSizeChange: (id: string) => void;
   onGrowChange: (e: EuiSwitchEvent) => void;
 }) {
@@ -296,17 +298,21 @@ export function ControlWidth({
           data-test-subj="esqlControlMinimumWidth"
         />
       </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiSwitch
-        compressed
-        label={i18n.translate('esql.flyout.grow.label', {
-          defaultMessage: 'Expand width to fit available space',
-        })}
-        color="primary"
-        checked={grow ?? false}
-        onChange={(e) => onGrowChange(e)}
-        data-test-subj="esqlControlGrow"
-      />
+      {!hideFitToSpace && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiSwitch
+            compressed
+            label={i18n.translate('esql.flyout.grow.label', {
+              defaultMessage: 'Expand width to fit available space',
+            })}
+            color="primary"
+            checked={grow ?? false}
+            onChange={(e) => onGrowChange(e)}
+            data-test-subj="esqlControlGrow"
+          />
+        </>
+      )}
     </>
   );
 }
@@ -326,10 +332,10 @@ export function Header({
             <h2 id={ariaLabelledBy}>
               {isInEditMode
                 ? i18n.translate('esql.flyout.editTitle', {
-                    defaultMessage: 'Edit ES|QL control',
+                    defaultMessage: 'Edit variable control',
                   })
                 : i18n.translate('esql.flyout.title', {
-                    defaultMessage: 'Create ES|QL control',
+                    defaultMessage: 'Create variable control',
                   })}
             </h2>
           </EuiTitle>
@@ -359,15 +365,11 @@ export function Header({
 }
 
 export function Footer({
-  isControlInEditMode,
-  variableName,
   onCancelControl,
   isSaveDisabled,
   closeFlyout,
   onCreateControl,
 }: {
-  isControlInEditMode: boolean;
-  variableName: string;
   isSaveDisabled: boolean;
   closeFlyout: () => void;
   onCreateControl: () => void;

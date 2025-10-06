@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, IToasts } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ReactElement, PropsWithChildren } from 'react';
 import type React from 'react';
@@ -37,6 +37,7 @@ import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_
 import type { UseIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
 import type { canUseCases } from './client/helpers/can_use_cases';
 import type { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
+import type { getObservablesFromEcs } from './client/helpers/get_observables_from_ecs';
 import type { GetCasesContextProps } from './client/ui/get_cases_context';
 import type { GetCasesProps } from './client/ui/get_cases';
 import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
@@ -61,6 +62,7 @@ import type {
   PersistableStateAttachmentPayload,
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
+  EventAttachmentPayload,
 } from '../common/types/domain';
 
 export interface CasesPublicSetupDependencies {
@@ -94,6 +96,7 @@ export interface CasesPublicStartDependencies {
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  toastNotifications: IToasts;
 }
 
 /**
@@ -172,11 +175,13 @@ export interface CasesPublicStart {
     getUICapabilities: typeof getUICapabilities;
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
     groupAlertsByRule: GroupAlertsByRule;
+    getObservablesFromEcs: typeof getObservablesFromEcs;
   };
 }
 
 export type SupportedCaseAttachment =
   | AlertAttachmentPayload
+  | EventAttachmentPayload
   | UserCommentAttachmentPayload
   | PersistableStateAttachmentPayload
   | ExternalReferenceNoSOAttachmentPayload

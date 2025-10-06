@@ -2,16 +2,24 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "jest", "@kbn/ambient-ftr-types"],
+    "types": [
+      "node",
+      "jest",
+      "@kbn/ambient-ftr-types"
+    ],
   },
   "include": [
     "**/*",
     "../../../../../typings/**/*",
     "../../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
-    { "path": "../security_solution_endpoint/tsconfig.json" },
+    {
+      "path": "../security_solution_endpoint/tsconfig.json"
+    },
     "@kbn/dev-utils",
     "@kbn/test",
     "@kbn/expect",
@@ -55,6 +63,7 @@
     "@kbn/response-ops-rule-params",
     "@kbn/securitysolution-exceptions-common",
     "@kbn/std",
-    "@kbn/securitysolution-utils"
+    "@kbn/securitysolution-utils",
+    "@kbn/security-solution-test-api-clients"
   ]
 }

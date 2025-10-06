@@ -26,7 +26,7 @@ export function LogEntryRatePageProvider({ getPageObjects, getService }: FtrProv
     },
 
     async getNoDataScreen() {
-      return await testSubjects.find('noDataPage');
+      return await testSubjects.find('kbnNoDataPage');
     },
 
     getNoMlReadPrivilegesPrompt() {

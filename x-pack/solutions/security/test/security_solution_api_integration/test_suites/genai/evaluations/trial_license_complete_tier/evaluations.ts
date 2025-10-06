@@ -66,6 +66,21 @@ export default ({ getService }: FtrProviderContext) => {
         const route = routeWithNamespace(`/api/saved_objects/epm-packages/security_ai_prompts`);
         await supertest.delete(route).set('kbn-xsrf', 'foo');
       }
+
+      // Ensure .integration_knowledge index exists to ensure that integration knowledge tool
+      // is registered but doesn't intefere with evals
+      const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
+      try {
+        const indexExists = await es.indices.exists({
+          index: INTEGRATION_KNOWLEDGE_INDEX,
+        });
+        if (!indexExists) {
+          await es.indices.create({ index: INTEGRATION_KNOWLEDGE_INDEX });
+        }
+      } catch (e) {
+        // Log errors but don't fail evals
+        log.error(`Error creating ${INTEGRATION_KNOWLEDGE_INDEX} index: ${e}`);
+      }
     });
 
     after(async () => {

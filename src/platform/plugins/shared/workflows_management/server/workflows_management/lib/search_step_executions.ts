@@ -61,7 +61,7 @@ export const searchStepExecutions = async ({
         .map((hit) => hit._source as EsWorkflowStepExecution)
         // TODO: It should be sorted on ES side
         // This sort is needed to ensure steps are returned in the execution order
-        .sort((fst, scd) => fst.topologicalIndex - scd.topologicalIndex)
+        .sort((fst, scd) => fst.globalExecutionIndex - scd.globalExecutionIndex)
     );
   } catch (error) {
     logger.error(`Failed to search workflows: ${error}`);

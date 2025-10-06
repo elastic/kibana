@@ -132,7 +132,7 @@ export class GlobalVisitorContext<
         if (!this.methods.visitStatsCommand) break;
         return this.visitStatsCommand(parent, commandNode, input as any);
       }
-      case 'inline_stats': {
+      case 'inline stats': {
         if (!this.methods.visitInlineStatsCommand) break;
         return this.visitInlineStatsCommand(parent, commandNode, input as any);
       }

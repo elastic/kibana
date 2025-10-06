@@ -34,10 +34,15 @@ import type {
 
 import { orderDataStreamsAndIndices } from '../../../../../lib';
 import { DataStreamBadge } from '../../../../../data_stream_badge';
+import { indicesFieldWrapperStyle } from '../../../../../styles';
 
 import { mapSelectionToIndicesOptions, determineListMode } from './helpers';
 
 import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_list_help_text';
+
+const styles = {
+  indicesFieldWrapper: indicesFieldWrapperStyle,
+};
 
 interface IndicesConfig {
   indices?: string[] | string;
@@ -199,7 +204,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
             <Fragment>
               <EuiSpacer size="m" />
               <EuiFormRow
-                className="snapshotRestore__policyForm__stepSettings__indicesFieldWrapper"
+                css={styles.indicesFieldWrapper}
                 label={
                   selectIndicesMode === 'list' ? (
                     <EuiFlexGroup justifyContent="spaceBetween">

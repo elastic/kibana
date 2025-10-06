@@ -10,18 +10,18 @@ import { isEmpty, isObjectLike, get } from 'lodash';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import * as i18n from './translations';
 
-export const createServiceError = (error: AxiosError, message: string) => {
+export const addServiceMessageToError = (error: AxiosError, message: string) => {
   const serverResponse =
     error.response && error.response.data ? JSON.stringify(error.response.data) : null;
 
-  return new Error(
-    getErrorMessage(
-      i18n.NAME,
-      `${message}. Error: ${error.message}. ${serverResponse != null ? serverResponse : ''} ${
-        error.response?.statusText != null ? `Reason: ${error.response?.statusText}` : ''
-      }`
-    )
+  error.message = getErrorMessage(
+    i18n.NAME,
+    `${message}. Error: ${error.message}. ${serverResponse != null ? serverResponse : ''} ${
+      error.response?.statusText != null ? `Reason: ${error.response?.statusText}` : ''
+    }`
   );
+
+  return error;
 };
 
 export const getObjectValueByKeyAsString = (

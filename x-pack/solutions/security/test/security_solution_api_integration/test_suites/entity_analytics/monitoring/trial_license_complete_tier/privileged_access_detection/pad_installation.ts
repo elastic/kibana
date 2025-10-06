@@ -11,7 +11,7 @@ import { dataViewRouteHelpersFactory } from '../../../utils/data_view';
 import { enablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const supertest = getService('supertest');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
     describe('privileged access detection status and installation APIs', () => {
       it('should be able to successfully install the package', async () => {
         const statusResponseBeforeInstallation =
-          await api.getPrivilegedAccessDetectionPackageStatus();
+          await entityAnalyticsApi.getPrivilegedAccessDetectionPackageStatus();
 
         if (statusResponseBeforeInstallation.status !== 200) {
           log.error(`Retrieving status failed`);
@@ -125,7 +125,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(packageInstallationStatusBeforeInstallation).eql('incomplete');
         expect(mlModuleSetupStatusBeforeInstallation).eql('incomplete');
 
-        const installationResponse = await api.installPrivilegedAccessDetectionPackage('default');
+        const installationResponse =
+          await entityAnalyticsApi.installPrivilegedAccessDetectionPackage('default');
 
         expect(installationResponse.status).eql(200);
         expect(installationResponse.body.message).eql(
@@ -138,7 +139,7 @@ export default ({ getService }: FtrProviderContext) => {
         log.info('Privileged access detection installation was successful');
 
         const statusResponseAfterInstallation =
-          await api.getPrivilegedAccessDetectionPackageStatus();
+          await entityAnalyticsApi.getPrivilegedAccessDetectionPackageStatus();
 
         if (statusResponseAfterInstallation.status !== 200) {
           log.error(`Retrieving status failed`);

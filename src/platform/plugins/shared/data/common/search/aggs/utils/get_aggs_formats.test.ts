@@ -13,6 +13,7 @@ import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plu
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { MultiFieldKey } from '../buckets/multi_field_key';
 import { getAggsFormats } from './get_aggs_formats';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 
 const getAggFormat = (
   mapping: SerializedFieldFormat,
@@ -136,7 +137,7 @@ describe('getAggsFormats', () => {
 
     expect(format.convert('machine.os.keyword')).toBe('machine.os.keyword');
     expect(format.convert('__other__')).toBe(mapping.params.otherBucketLabel);
-    expect(format.convert('__missing__')).toBe(mapping.params.missingBucketLabel);
+    expect(format.convert(MISSING_TOKEN)).toBe(mapping.params.missingBucketLabel);
     expect(getFormat).toHaveBeenCalledTimes(1);
   });
 

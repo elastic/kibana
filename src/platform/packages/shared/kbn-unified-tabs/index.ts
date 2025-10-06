@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { TabItem, TabPreviewData } from './src/types';
-export { TabStatus } from './src/types';
+export type { TabItem, TabPreviewData, TabsEBTEvent } from './src/types';
+export { TabStatus, TabsEventName } from './src/types';
+export { TabsEventDataKeys } from './src/event_data_keys';
 export {
   TabbedContent as UnifiedTabs,
   type TabbedContentProps as UnifiedTabsProps,

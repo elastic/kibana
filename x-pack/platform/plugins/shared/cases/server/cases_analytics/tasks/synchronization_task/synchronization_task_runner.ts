@@ -19,9 +19,10 @@ import type {
   IndicesGetMappingResponse,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { Owner } from '../../../../common/constants/types';
 import type { ConfigType } from '../../../config';
 import { isRetryableEsClientError } from '../../utils';
-import { SYNCHRONIZATION_QUERIES_DICTIONARY } from '../../constants';
+import { type CAISyncType, SYNCHRONIZATION_QUERIES_DICTIONARY } from '../../constants';
 
 interface SynchronizationTaskRunnerFactoryConstructorParams {
   taskInstance: ConcreteTaskInstance;
@@ -48,6 +49,9 @@ const LOOKBACK_WINDOW = 5 * 60 * 1000;
 export class SynchronizationTaskRunner implements CancellableTask {
   private readonly sourceIndex: string;
   private readonly destIndex: string;
+  private readonly owner: Owner;
+  private readonly spaceId: string;
+  private readonly syncType: CAISyncType;
   private readonly getESClient: () => Promise<ElasticsearchClient>;
   private readonly logger: Logger;
   private readonly errorSource = TaskErrorSource.FRAMEWORK;
@@ -69,6 +73,9 @@ export class SynchronizationTaskRunner implements CancellableTask {
     this.esReindexTaskId = taskInstance.state.esReindexTaskId;
     this.sourceIndex = taskInstance.params.sourceIndex;
     this.destIndex = taskInstance.params.destIndex;
+    this.owner = taskInstance.params.owner;
+    this.spaceId = taskInstance.params.spaceId;
+    this.syncType = taskInstance.params.syncType;
     this.getESClient = getESClient;
     this.logger = logger;
     this.analyticsConfig = analyticsConfig;
@@ -195,11 +202,10 @@ export class SynchronizationTaskRunner implements CancellableTask {
     if (painlessScript.found) {
       this.logDebug(`Synchronizing with ${this.sourceIndex}.`);
 
-      const sourceQuery = this.buildSourceQuery();
       const reindexResponse = await esClient.reindex({
         source: {
           index: this.sourceIndex,
-          query: sourceQuery,
+          query: this.buildSourceQuery(),
         },
         dest: { index: this.destIndex },
         script: {
@@ -241,8 +247,10 @@ export class SynchronizationTaskRunner implements CancellableTask {
   }
 
   private buildSourceQuery(): QueryDslQueryContainer {
-    return SYNCHRONIZATION_QUERIES_DICTIONARY[this.destIndex](
-      new Date(this.lastSyncSuccess ? this.lastSyncSuccess : Date.now() - LOOKBACK_WINDOW)
+    return SYNCHRONIZATION_QUERIES_DICTIONARY[this.syncType](
+      new Date(this.lastSyncSuccess ? this.lastSyncSuccess : Date.now() - LOOKBACK_WINDOW),
+      this.spaceId,
+      this.owner
     );
   }
 

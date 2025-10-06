@@ -32,7 +32,7 @@ export async function initPlugin() {
 }
 
 function createServerCallback() {
-  const payloads: string[] = [];
+  let payloads: string[] = [];
   return (request: http.IncomingMessage, response: http.ServerResponse) => {
     const credentials = pipe(
       fromNullable(request.headers.authorization),
@@ -52,6 +52,7 @@ function createServerCallback() {
       response.statusCode = 200;
       response.setHeader('Content-Type', 'application/json');
       response.end(JSON.stringify(payloads, null, 4));
+      payloads = [];
       return;
     }
 
@@ -77,6 +78,11 @@ function createServerCallback() {
           case 'failure':
             response.statusCode = 500;
             response.end('Error');
+            return;
+          case 'header_as_payload':
+            payloads.push(JSON.stringify(request.headers));
+            response.statusCode = 200;
+            response.end('OK');
             return;
         }
 

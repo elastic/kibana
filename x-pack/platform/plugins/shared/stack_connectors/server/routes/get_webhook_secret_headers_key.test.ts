@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getWebhookSecretHeadersKeyRoute } from './get_webhook_secret_headers_key';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { getWebhookSecretHeadersKeyRoute } from './get_webhook_secret_headers_key';
 import Boom from '@hapi/boom';
 
 describe('getWebhookSecretHeadersKeyRoute', () => {

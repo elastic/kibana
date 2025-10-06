@@ -219,7 +219,7 @@ describe('LabelNode', () => {
         ...baseProps,
         data: {
           ...baseProps.data,
-          eventsCount: 3,
+          uniqueEventsCount: 3,
         },
       };
 
@@ -241,7 +241,7 @@ describe('LabelNode', () => {
         ...baseProps,
         data: {
           ...baseProps.data,
-          alertsCount: 3,
+          uniqueAlertsCount: 3,
         },
       };
 

@@ -14,6 +14,7 @@ import type {
 } from '../../../common/types';
 import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
 import { FleetError } from '../../errors';
+import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
@@ -92,7 +93,7 @@ function generateOTelAttributesTransform(
       context = 'span';
       break;
     default:
-      throw new Error(`unexpected data stream type ${type}`);
+      throw new FleetError(`unexpected data stream type ${type}`);
   }
   return {
     [`transform/${suffix}-routing`]: {
@@ -259,8 +260,9 @@ function attachOtelcolExporter(
 function generateOtelcolExporter(dataOutput: Output): Record<OTelCollectorComponentID, any> {
   switch (dataOutput.type) {
     case outputType.Elasticsearch:
+      const outputID = getOutputIdForAgentPolicy(dataOutput);
       return {
-        [`elasticsearch/${dataOutput.id}`]: {
+        [`elasticsearch/${outputID}`]: {
           endpoints: dataOutput.hosts,
         },
       };

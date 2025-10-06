@@ -48,6 +48,7 @@ describe('GenAiSettingsApp', () => {
       showSpacesIntegration: true,
       isPermissionsBased: false,
       showAiBreadcrumb: true,
+      showAiAssistantsVisibilitySetting: true,
     });
   });
 
@@ -82,6 +83,7 @@ describe('GenAiSettingsApp', () => {
         showSpacesIntegration: true,
         isPermissionsBased: false,
         showAiBreadcrumb: false,
+        showAiAssistantsVisibilitySetting: true,
       });
 
       renderComponent();
@@ -127,6 +129,7 @@ describe('GenAiSettingsApp', () => {
         showSpacesIntegration: false,
         isPermissionsBased: false,
         showAiBreadcrumb: true,
+        showAiAssistantsVisibilitySetting: true,
       });
 
       renderComponent();
@@ -137,6 +140,7 @@ describe('GenAiSettingsApp', () => {
         showSpacesIntegration: true,
         isPermissionsBased: false,
         showAiBreadcrumb: true,
+        showAiAssistantsVisibilitySetting: true,
       });
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
@@ -159,6 +163,7 @@ describe('GenAiSettingsApp', () => {
         showSpacesIntegration: true,
         isPermissionsBased: true,
         showAiBreadcrumb: true,
+        showAiAssistantsVisibilitySetting: true,
       });
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
@@ -178,6 +183,7 @@ describe('GenAiSettingsApp', () => {
         showSpacesIntegration: true,
         isPermissionsBased: true,
         showAiBreadcrumb: true,
+        showAiAssistantsVisibilitySetting: true,
       });
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,

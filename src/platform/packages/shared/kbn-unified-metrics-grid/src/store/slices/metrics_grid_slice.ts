@@ -14,6 +14,9 @@ export interface MetricsGridState {
   // Pagination state
   currentPage: number;
 
+  // Search state
+  searchTerm: string;
+
   // UI state
   isFullscreen: boolean;
 
@@ -26,6 +29,7 @@ export interface MetricsGridState {
 
 const initialState: MetricsGridState = {
   currentPage: 0,
+  searchTerm: '',
   isFullscreen: false,
   dimensions: [],
   valueFilters: [],
@@ -37,6 +41,11 @@ export const metricsGridSlice = createSlice({
   reducers: {
     setCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload;
+    },
+    setSearchTerm: (state, action: PayloadAction<string>) => {
+      state.searchTerm = action.payload;
+      // Reset to first page when search changes
+      state.currentPage = 0;
     },
     resetCurrentPage: (state) => {
       state.currentPage = 0;
@@ -63,6 +72,7 @@ export const metricsGridSlice = createSlice({
 
 export const {
   setCurrentPage,
+  setSearchTerm,
   resetCurrentPage,
   setIsFullscreen,
   toggleFullscreen,
@@ -74,6 +84,8 @@ export const {
 // Selectors
 export const selectCurrentPage = (state: { metricsGrid: MetricsGridState }) =>
   state.metricsGrid.currentPage;
+export const selectSearchTerm = (state: { metricsGrid: MetricsGridState }) =>
+  state.metricsGrid.searchTerm;
 export const selectIsFullscreen = (state: { metricsGrid: MetricsGridState }) =>
   state.metricsGrid.isFullscreen;
 export const selectDimensions = (state: { metricsGrid: MetricsGridState }) =>

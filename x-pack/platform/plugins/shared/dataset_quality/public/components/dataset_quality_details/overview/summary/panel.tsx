@@ -11,6 +11,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiSkeletonText,
   EuiSkeletonTitle,
   EuiText,
   EuiToolTip,
@@ -36,10 +37,12 @@ export function Panel({
   title,
   secondaryTitle,
   children,
+  isLoading = false,
 }: {
   title: string;
   secondaryTitle?: React.ReactNode;
   children: React.ReactNode | React.ReactNode[];
+  isLoading?: boolean;
 }) {
   const renderChildrenWithSeparator = (panelChildren: React.ReactNode | React.ReactNode[]) => {
     if (Array.isArray(panelChildren)) {
@@ -62,9 +65,11 @@ export function Panel({
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiText>
-              <h5>{title}</h5>
-            </EuiText>
+            <EuiSkeletonTitle size="s" isLoading={isLoading}>
+              <EuiText>
+                <h5>{title}</h5>
+              </EuiText>
+            </EuiSkeletonTitle>
           </EuiFlexItem>
           {secondaryTitle && <EuiFlexItem grow={false}>{secondaryTitle}</EuiFlexItem>}
         </EuiFlexGroup>
@@ -92,7 +97,10 @@ export function PanelIndicator({
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       {isLoading ? (
-        <EuiSkeletonTitle size="m" />
+        <>
+          <EuiSkeletonText lines={1} />
+          <EuiSkeletonTitle size="m" />
+        </>
       ) : (
         <>
           {tooltip ? (

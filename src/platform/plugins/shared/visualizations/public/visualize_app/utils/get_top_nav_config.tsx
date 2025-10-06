@@ -47,7 +47,6 @@ import { getUiActions } from '../../services';
 import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
-import { serializeReferences } from '../../utils/saved_visualization_references';
 import { serializeState } from '../../embeddable/state';
 
 interface VisualizeCapabilities {
@@ -190,8 +189,6 @@ export const getTopNavConfig = (
           }
 
           if (stateTransfer) {
-            const serializedVis = vis.serialize();
-            const { references } = serializeReferences(serializedVis);
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
@@ -199,7 +196,6 @@ export const getTopNavConfig = (
                   rawState: {
                     savedObjectId: id,
                   },
-                  references,
                 },
                 embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
                 searchSessionId: data.search.session.getSessionId(),

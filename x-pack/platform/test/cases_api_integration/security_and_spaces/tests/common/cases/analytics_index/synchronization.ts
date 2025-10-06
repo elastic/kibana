@@ -11,12 +11,13 @@ import {
   CaseStatuses,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import {
   runActivitySynchronizationTask,
   runAttachmentsSynchronizationTask,
   runCasesSynchronizationTask,
   runCommentsSynchronizationTask,
+  runSchedulerTask,
 } from '../../../../../common/lib/api/analytics';
 import {
   createCase,
@@ -28,11 +29,9 @@ import {
   getAuthWithSuperUser,
   getConfigurationRequest,
   updateCase,
-  deleteCases,
   deleteAllCaseAnalyticsItems,
 } from '../../../../../common/lib/api';
 import {
-  getPostCaseRequest,
   postCaseReq,
   postFileReq,
   postCommentAlertReq,
@@ -54,6 +53,11 @@ export default ({ getService }: FtrProviderContext): void => {
         supertest,
         auth: authSpace1,
       });
+
+      // make sure the indexes are created before each test
+      await createCase(supertest, postCaseReq, 200);
+      await createCase(supertest, postCaseReq, 200, authSpace1);
+      await runSchedulerTask(supertest);
     });
 
     after(async () => {
@@ -62,11 +66,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
     // This test passes locally but fails in the flaky test runner.
     // Increasing the timeout did not work.
-    it.skip('should sync the cases index', async () => {
+    it('should sync the cases index', async () => {
       await createConfiguration(
         supertest,
         getConfigurationRequest({
           overrides: {
+            owner: SECURITY_SOLUTION_OWNER,
             customFields: [
               {
                 key: 'test_custom_field',
@@ -79,24 +84,28 @@ export default ({ getService }: FtrProviderContext): void => {
         })
       );
 
-      const postCaseRequest = getPostCaseRequest({
-        category: 'foobar',
-        customFields: [
-          {
-            key: 'test_custom_field',
-            type: CustomFieldTypes.TEXT,
-            value: 'value',
-          },
-        ],
-      });
-
-      const caseToBackfill = await createCase(supertest, postCaseRequest, 200);
+      const caseToBackfill = await createCase(
+        supertest,
+        {
+          ...postCaseReq,
+          category: 'foobar',
+          customFields: [
+            {
+              key: 'test_custom_field',
+              type: CustomFieldTypes.TEXT,
+              value: 'value',
+            },
+          ],
+          owner: SECURITY_SOLUTION_OWNER,
+        },
+        200
+      );
 
       await runCasesSynchronizationTask(supertest);
 
       await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
-          index: '.internal.cases',
+          index: '.internal.cases.default-securitysolution',
           id: `cases:${caseToBackfill.id}`,
         });
 
@@ -134,7 +143,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           description: 'This is a brand new case of a bad meanie defacing data',
           observables: [],
-          owner: 'securitySolutionFixture',
+          owner: 'securitySolution',
           severity: 'low',
           severity_sort: 0,
           space_ids: ['default'],
@@ -152,7 +161,10 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should sync the cases attachments index', async () => {
       const postedCase = await createCase(
         supertest,
-        { ...postCaseReq, owner: SECURITY_SOLUTION_OWNER },
+        {
+          ...postCaseReq,
+          owner: SECURITY_SOLUTION_OWNER,
+        },
         200,
         authSpace1
       );
@@ -178,36 +190,40 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await runAttachmentsSynchronizationTask(supertest);
 
-      await retry.try(async () => {
+      await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
-          index: '.internal.cases-attachments',
+          index: '.internal.cases-attachments.space1-securitysolution',
           id: `cases-comments:${postedCaseWithAttachments.comments![0].id}`,
         });
 
         expect(firstAttachmentAnalytics.found).to.be(true);
-      });
 
-      const secondAttachmentAnalytics = await esClient.get({
-        index: '.internal.cases-attachments',
-        id: `cases-comments:${postedCaseWithAttachments.comments![1].id}`,
-      });
+        const secondAttachmentAnalytics = await esClient.get({
+          index: '.internal.cases-attachments.space1-securitysolution',
+          id: `cases-comments:${postedCaseWithAttachments.comments![1].id}`,
+        });
 
-      expect(secondAttachmentAnalytics.found).to.be(true);
+        expect(secondAttachmentAnalytics.found).to.be(true);
+      });
     });
 
     it('should sync the cases comments index', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200);
+      const postedCase = await createCase(
+        supertest,
+        { ...postCaseReq, owner: SECURITY_SOLUTION_OWNER },
+        200
+      );
       const patchedCase = await createComment({
         supertest,
         caseId: postedCase.id,
-        params: postCommentUserReq,
+        params: { ...postCommentUserReq, owner: SECURITY_SOLUTION_OWNER },
       });
 
       await runCommentsSynchronizationTask(supertest);
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
-          index: '.internal.cases-comments',
+          index: '.internal.cases-comments.default-securitysolution',
           id: `cases-comments:${patchedCase.comments![0].id}`,
         });
 
@@ -234,14 +250,18 @@ export default ({ getService }: FtrProviderContext): void => {
             full_name: null,
             username: 'elastic',
           },
-          owner: 'securitySolutionFixture',
+          owner: 'securitySolution',
           space_ids: ['default'],
         });
       });
     });
 
     it('should sync the activity index', async () => {
-      const postedCase = await createCase(supertest, postCaseReq, 200);
+      const postedCase = await createCase(
+        supertest,
+        { ...postCaseReq, owner: SECURITY_SOLUTION_OWNER },
+        200
+      );
       await updateCase({
         supertest,
         params: {
@@ -258,19 +278,12 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      const caseToDelete = await createCase(supertest, getPostCaseRequest(), 200, authSpace1);
-      await deleteCases({
-        supertest,
-        caseIDs: [caseToDelete.id],
-        auth: authSpace1,
-      });
-
       await runActivitySynchronizationTask(supertest);
 
       let activityArray: any[] = [];
       await retry.try(async () => {
         const activityAnalytics = await esClient.search({
-          index: '.internal.cases-activity',
+          index: '.internal.cases-activity.default-securitysolution',
         });
 
         // @ts-ignore
@@ -284,7 +297,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const categoryActivity = activityArray.find(
         (activity) => activity._source.type === 'category'
       );
-      expect(categoryActivity?._source.owner).to.be('securitySolutionFixture');
+      expect(categoryActivity?._source.owner).to.be('securitySolution');
       expect(categoryActivity?._source.action).to.be('update');
       expect(categoryActivity?._source.case_id).to.be(postedCase.id);
       expect(categoryActivity?._source.payload?.category).to.be('categoryValue');
@@ -292,13 +305,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const severityActivity = activityArray.find(
         (activity) => activity._source.type === 'severity'
       );
-      expect(severityActivity?._source.owner).to.be('securitySolutionFixture');
+      expect(severityActivity?._source.owner).to.be('securitySolution');
       expect(severityActivity?._source.action).to.be('update');
       expect(severityActivity?._source.case_id).to.be(postedCase.id);
       expect(severityActivity?._source.payload?.severity).to.be('medium');
 
       const statusActivity = activityArray.find((activity) => activity._source.type === 'status');
-      expect(statusActivity?._source.owner).to.be('securitySolutionFixture');
+      expect(statusActivity?._source.owner).to.be('securitySolution');
       expect(statusActivity?._source.action).to.be('update');
       expect(statusActivity?._source.case_id).to.be(postedCase.id);
       expect(statusActivity?._source.payload?.status).to.be('in-progress');

@@ -65,7 +65,11 @@ export const ConversationTitle: React.FC<{}> = () => {
   return (
     <EuiPageHeaderSection css={sectionStyles}>
       {!isLoading && (
-        <EuiTitle aria-label={labels.ariaLabel} size="xxs">
+        <EuiTitle
+          aria-label={labels.ariaLabel}
+          size="xxs"
+          data-test-subj="agentBuilderConversationTitle"
+        >
           <h1>{titleDisplayText}</h1>
         </EuiTitle>
       )}

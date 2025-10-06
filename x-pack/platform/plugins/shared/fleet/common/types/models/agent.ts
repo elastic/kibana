@@ -82,6 +82,7 @@ export interface NewAgentAction {
     user_info?: {
       password?: SOSecret;
     };
+    enrollment_token?: SOSecret;
   };
 }
 

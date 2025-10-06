@@ -115,6 +115,7 @@ export const SynonymRuleFlyout: React.FC<SynonymRuleFlyoutProps> = ({
         banner={
           backendError && (
             <EuiCallOut
+              announceOnMount
               data-test-subj="searchSynonymsSynonymsRuleFlyoutErrorBanner"
               color="danger"
               title={i18n.translate(

@@ -34,7 +34,7 @@ describe('createStatusUserActionBuilder ', () => {
     'renders correctly when changed setting sync-alerts to %s',
     async (syncAlerts, label) => {
       const userAction = getUserAction('settings', UserActionActions.update, {
-        payload: { settings: { syncAlerts } },
+        payload: { settings: { syncAlerts, extractObservables: true } },
       });
       const builder = createSettingsUserActionBuilder({
         ...builderArgs,
@@ -45,7 +45,7 @@ describe('createStatusUserActionBuilder ', () => {
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
       expect(screen.getByTestId('settings-update-action-settings-update')).toBeTruthy();
-      expect(screen.getByText(`${label} sync alerts`)).toBeTruthy();
+      expect(screen.getByText(`${label} sync alerts and enabled extract observables`)).toBeTruthy();
     }
   );
 });

@@ -23,6 +23,24 @@ jest.mock('../action_type_registry', () => {
   };
 });
 
+const mockTee = jest.fn();
+
+const mockCreate = jest.fn().mockImplementation(() => ({
+  tee: mockTee.mockReturnValue([jest.fn(), jest.fn()]),
+}));
+
+jest.mock('openai', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    api_key: '123',
+    chat: {
+      completions: {
+        create: mockCreate,
+      },
+    },
+  })),
+}));
+
 describe('Connector type config checks', () => {
   let esServer: TestElasticsearchUtils;
   let kibanaServer: TestKibanaUtils;
@@ -52,10 +70,6 @@ describe('Connector type config checks', () => {
   });
 
   for (const connectorTypeId of connectorTypes) {
-    const skipConnectorType = ['.gen-ai', '.inference'];
-    if (skipConnectorType.includes(connectorTypeId)) {
-      continue;
-    }
     test(`detect connector type changes for: ${connectorTypeId}`, async () => {
       const {
         getService,
@@ -73,6 +87,11 @@ describe('Connector type config checks', () => {
             oAuthServerUrl: 'https://_fake_auth.com/',
             oAuthScope: 'some-scope',
             apiUrl: 'https://_face_api_.com',
+          };
+        } else if (connectorTypeId === '.gen-ai') {
+          connectorConfig = {
+            apiUrl: 'https//_fake_api_.com',
+            provider: 'Azure Open AI',
           };
         } else if (connectorTypeId === '.bedrock') {
           connectorConfig = {

@@ -1,0 +1,10 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          deleteAgentResponseExample:
+            description: "Example response showing that deletion of the agent has been successful"
+            value: 
+              success: true

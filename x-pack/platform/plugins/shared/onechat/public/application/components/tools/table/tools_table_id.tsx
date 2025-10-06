@@ -7,13 +7,13 @@
 
 import { EuiFlexGroup, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import React from 'react';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { useToolsActions } from '../../../context/tools_provider';
 
 export interface ToolIdWithDescriptionProps {
-  tool: ToolDefinitionWithSchema;
+  tool: ToolDefinition;
 }
 
 export const ToolIdWithDescription = ({ tool }: ToolIdWithDescriptionProps) => {

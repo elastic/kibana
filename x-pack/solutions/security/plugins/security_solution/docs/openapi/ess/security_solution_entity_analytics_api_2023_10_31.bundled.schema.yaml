@@ -410,6 +410,21 @@ paths:
                       - status
                   status:
                     $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
+                  users:
+                    description: User statistics for privilege monitoring
+                    type: object
+                    properties:
+                      current_count:
+                        description: Current number of privileged users being monitored
+                        type: integer
+                      max_allowed:
+                        description: >-
+                          Maximum number of privileged users allowed to be
+                          monitored
+                        type: integer
+                    required:
+                      - current_count
+                      - max_allowed
                 required:
                   - status
           description: Successful response
@@ -968,6 +983,65 @@ paths:
       summary: Apply DataView indices to all installed engines
       tags:
         - Security Entity Analytics API
+  /api/entity_store/entities/{entityType}:
+    put:
+      description: >
+        Update or create an entity in Entity Store.
+
+        If the specified entity already exists, it is updated with the provided
+        values.  If the entity does not exist, a new one is created. By default,
+        only the following fields can be updated: * `entity.attributes.*` *
+        `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set
+        the `force` query parameter to `true`. > info > Some fields always
+        retain the first observed value. Updates to these fields will not appear
+        in the final index.
+
+        > Due to technical limitations, not all updates are guaranteed to appear
+        in the final list of observed values.
+
+        > Due to technical limitations, create is an async operation. The time
+        for a document to be present in the  > final index depends on the entity
+        store transform and usually takes more than 1 minute.
+      operationId: UpsertEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Entity'
+        description: Schema for the updating a single entity
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+          description: Entity updated or created
+        '403':
+          description: Operation on a restricted field
+        '409':
+          description: >-
+            Conflict. The entity was updated while another update was happening
+            in ElasticSearch
+        '503':
+          description: >-
+            Operation on an uninitialized Engine or in a cluster without CRUD
+            API Enabled
+      summary: Upsert an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -1123,6 +1197,8 @@ paths:
             schema:
               type: object
               properties:
+                enable_reset_to_zero:
+                  type: boolean
                 exclude_alert_statuses:
                   items:
                     type: string
@@ -1199,6 +1275,28 @@ paths:
         - Security Entity Analytics API
 components:
   schemas:
+    Asset:
+      additionalProperties: false
+      type: object
+      properties:
+        business_unit:
+          type: string
+        criticality:
+          $ref: '#/components/schemas/AssetCriticalityLevel'
+        environment:
+          type: string
+        id:
+          type: string
+        model:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        serial_number:
+          type: string
+        vendor:
+          type: string
     AssetCriticalityBulkUploadErrorItem:
       type: object
       properties:
@@ -1403,12 +1501,14 @@ components:
         - entity_engine
         - entity_definition
         - index
+        - data_stream
         - component_template
         - index_template
         - ingest_pipeline
         - enrich_policy
         - task
         - transform
+        - ilm_policy
       type: string
     EngineComponentStatus:
       type: object
@@ -1507,6 +1607,7 @@ components:
         - status
         - fieldHistoryLength
     EngineMetadata:
+      additionalProperties: false
       type: object
       properties:
         Type:
@@ -1561,6 +1662,116 @@ components:
       required:
         - has_all_required
         - privileges
+    EntityField:
+      additionalProperties: false
+      type: object
+      properties:
+        attributes:
+          additionalProperties: false
+          type: object
+          properties:
+            asset:
+              type: boolean
+            managed:
+              type: boolean
+            mfa_enabled:
+              type: boolean
+            privileged:
+              type: boolean
+        behaviors:
+          additionalProperties: false
+          type: object
+          properties:
+            brute_force_victim:
+              type: boolean
+            new_country_login:
+              type: boolean
+            used_usb_device:
+              type: boolean
+        EngineMetadata:
+          $ref: '#/components/schemas/EngineMetadata'
+        id:
+          type: string
+        lifecycle:
+          additionalProperties: false
+          type: object
+          properties:
+            first_seen:
+              format: date-time
+              type: string
+            last_activity:
+              format: date-time
+              type: string
+        name:
+          type: string
+        relationships:
+          additionalProperties: false
+          type: object
+          properties:
+            accessed_frequently_by:
+              items:
+                type: string
+              type: array
+            accesses_frequently:
+              items:
+                type: string
+              type: array
+            communicates_with:
+              items:
+                type: string
+              type: array
+            dependent_of:
+              items:
+                type: string
+              type: array
+            depends_on:
+              items:
+                type: string
+              type: array
+            owned_by:
+              items:
+                type: string
+              type: array
+            owns:
+              items:
+                type: string
+              type: array
+            supervised_by:
+              items:
+                type: string
+              type: array
+            supervises:
+              items:
+                type: string
+              type: array
+        risk:
+          additionalProperties: false
+          type: object
+          properties:
+            calculated_level:
+              $ref: '#/components/schemas/EntityRiskLevels'
+              description: Lexical description of the entity's risk.
+              example: Critical
+            calculated_score:
+              description: The raw numeric value of the given entity's risk score.
+              format: double
+              type: number
+            calculated_score_norm:
+              description: >-
+                The normalized numeric value of the given entity's risk score.
+                Useful for comparing with other entities.
+              format: double
+              maximum: 100
+              minimum: 0
+              type: number
+        source:
+          type: string
+        sub_type:
+          type: string
+        type:
+          type: string
+      required:
+        - id
     EntityRiskLevels:
       enum:
         - Unknown
@@ -1656,74 +1867,40 @@ components:
         - generic
       type: string
     GenericEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
         entity:
-          type: object
-          properties:
-            category:
-              type: string
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            id:
-              type: string
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - id
-            - name
-            - type
+          $ref: '#/components/schemas/EntityField'
       required:
         - entity
     HostEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         host:
+          additionalProperties: false
           type: object
           properties:
             architecture:
@@ -1734,6 +1911,8 @@ components:
               items:
                 type: string
               type: array
+            entity:
+              $ref: '#/components/schemas/EntityField'
             hostname:
               items:
                 type: string
@@ -1761,7 +1940,6 @@ components:
           required:
             - name
       required:
-        - host
         - entity
     IdField:
       enum:
@@ -1810,6 +1988,23 @@ components:
                 ingested:
                   format: date-time
                   type: string
+            user:
+              type: object
+              properties:
+                entity:
+                  type: object
+                  properties:
+                    attributes:
+                      type: object
+                      properties:
+                        Privileged:
+                          description: Indicates if the user is privileged.
+                          type: boolean
+                is_privileged:
+                  description: Indicates if the user is privileged.
+                  type: boolean
+                name:
+                  type: string
     MonitoredUserUpdateDoc:
       type: object
       properties:
@@ -1818,14 +2013,7 @@ components:
           properties:
             labels:
               items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                  source:
-                    type: string
-                  value:
-                    type: string
+                $ref: '#/components/schemas/MonitoringLabel'
               type: array
         id:
           type: string
@@ -1870,6 +2058,19 @@ components:
           $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
         - status
+    MonitoringLabel:
+      type: object
+      properties:
+        field:
+          type: string
+        source:
+          type: string
+        value:
+          type: string
+      required:
+        - field
+        - value
+        - source
     PrivilegeMonitoringEngineStatus:
       description: The status of the Privilege Monitoring Engine
       enum:
@@ -1960,42 +2161,30 @@ components:
         - description
         - category
     ServiceEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         service:
+          additionalProperties: false
           type: object
           properties:
+            entity:
+              $ref: '#/components/schemas/EntityField'
             name:
               type: string
             risk:
@@ -2003,7 +2192,6 @@ components:
           required:
             - name
       required:
-        - service
         - entity
     StoreStatus:
       enum:
@@ -2079,40 +2267,26 @@ components:
         - exponential_avg_documents_indexed
         - exponential_avg_documents_processed
     UserEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         user:
+          additionalProperties: false
           type: object
           properties:
             domain:
@@ -2139,6 +2313,7 @@ components:
               type: string
             risk:
               $ref: '#/components/schemas/EntityRiskScoreRecord'
+              additionalProperties: false
             roles:
               items:
                 type: string
@@ -2146,7 +2321,6 @@ components:
           required:
             - name
       required:
-        - user
         - entity
     UserName:
       type: object

@@ -11,7 +11,6 @@ import type { Query, Filter } from '@kbn/es-query';
 import type { FillStyle, SeriesType, TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useAsync from 'react-use/lib/useAsync';
 import type { LensAttributes, XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import {
   LensAttributesBuilder,
@@ -126,9 +125,6 @@ export function RuleConditionChart({
   const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
   const [chartLoading, setChartLoading] = useState<boolean>(false);
   const filters = [...(searchConfiguration.filter || []), ...additionalFilters];
-  const formulaAsync = useAsync(() => {
-    return lens.stateHelperApi();
-  }, [lens]);
 
   // Handle Lens error
   useEffect(() => {
@@ -333,7 +329,7 @@ export function RuleConditionChart({
   }, [aggMap, equation]);
 
   useEffect(() => {
-    if (!formulaAsync.value || !dataView || !formula) {
+    if (!dataView || !formula) {
       return;
     }
     const formatId = lensFieldFormatter(metrics);
@@ -428,7 +424,6 @@ export function RuleConditionChart({
           },
         },
         layers,
-        formulaAPI: formulaAsync.value.formula,
         dataView,
       }),
     }).build();
@@ -441,7 +436,6 @@ export function RuleConditionChart({
     label,
     searchConfiguration,
     formula,
-    formulaAsync.value,
     groupBy,
     interval,
     metrics,

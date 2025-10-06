@@ -21,6 +21,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiThemeProvider,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
@@ -29,7 +30,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import type { LanguageDefinition } from '../types';
-import './code_box.scss';
+import * as Styles from './styles';
 
 interface CodeBoxProps {
   languages?: LanguageDefinition[];
@@ -62,6 +63,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   showTopBar = true,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const { euiTheme } = useEuiTheme();
 
   const getAriaLabel = (name: string) =>
     consoleTitle
@@ -123,7 +125,11 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
 
   return (
     <EuiThemeProvider colorMode="dark">
-      <EuiPanel paddingSize="xs" className="codeBoxPanel" data-test-subj="codeBlockControlsPanel">
+      <EuiPanel
+        paddingSize="xs"
+        css={Styles.codeBoxPanel(euiTheme)}
+        data-test-subj="codeBlockControlsPanel"
+      >
         {showTopBar && (
           <>
             <EuiFlexGroup
@@ -184,7 +190,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
           fontSize="m"
           language={languageType || selectedLanguage?.languageStyling || selectedLanguage?.id}
           overflowHeight={500}
-          className="codeBoxCodeBlock"
+          css={Styles.codeBoxCodeBlock}
         >
           {codeSnippet}
         </EuiCodeBlock>

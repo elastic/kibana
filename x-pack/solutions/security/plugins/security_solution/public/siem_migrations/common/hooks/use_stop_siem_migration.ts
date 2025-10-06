@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -35,11 +35,14 @@ export function useStopSiemMigration<T extends MigrationType>(
 ) {
   const { siemMigrations } = useKibana().services;
   const { addSuccess, addError } = useAppToasts();
-  const stopMigration = useMemo(
-    () =>
-      migrationType === 'rule'
-        ? siemMigrations?.rules.stopRuleMigration
-        : siemMigrations?.dashboards.stopDashboardMigration,
+  const stopMigration = useCallback(
+    (migrationId: string) => {
+      if (migrationType === 'rule') {
+        return siemMigrations.rules.stopRuleMigration(migrationId);
+      } else {
+        return siemMigrations.dashboards.stopDashboardMigration(migrationId);
+      }
+    },
     [siemMigrations, migrationType]
   );
 

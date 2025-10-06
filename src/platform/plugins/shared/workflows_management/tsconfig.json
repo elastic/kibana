@@ -47,7 +47,10 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/react-field",
     "@kbn/storage-adapter",
-    "@kbn/core-i18n-browser-mocks"
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-lifecycle-browser-mocks",
+    "@kbn/serverless",
+    "@kbn/resizable-layout"
   ],
   "exclude": ["target/**/*"]
 }

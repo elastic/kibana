@@ -540,9 +540,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       {
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition, {
-          isServerless: this.dependencies.isServerless,
-        }),
+        request: generateIngestPipeline(this._definition.name, this._definition),
       },
       {
         type: 'upsert_ingest_pipeline',
@@ -647,9 +645,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       actions.push({
         type: 'upsert_ingest_pipeline',
         stream: this._definition.name,
-        request: generateIngestPipeline(this._definition.name, this._definition, {
-          isServerless: this.dependencies.isServerless,
-        }),
+        request: generateIngestPipeline(this._definition.name, this._definition),
       });
     }
     const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).reverse();

@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('With columns');
 
       expect(await findFirstColumnTokens()).to.eql(['Number', 'Text', 'Geo point', 'Date']);

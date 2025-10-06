@@ -14,7 +14,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'svlCommonPage',
     'embeddedConsole',
-    'svlSearchElasticsearchStartPage',
+    'searchStart',
     'svlApiKeys',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       after(async () => {
         await deleteAllTestIndices();
-        await pageObjects.svlSearchElasticsearchStartPage.clearSkipEmptyStateStorageFlag();
+        await pageObjects.searchStart.clearSkipEmptyStateStorageFlag();
       });
       beforeEach(async () => {
         await deleteAllTestIndices();
@@ -43,60 +43,60 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should have embedded dev console', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.searchStart.expectToBeOnStartPage();
         await testHasEmbeddedConsole(pageObjects);
       });
 
       it('should support index creation flow with UI', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+        await pageObjects.searchStart.expectToBeOnStartPage();
+        await pageObjects.searchStart.expectCreateIndexUIView();
+        await pageObjects.searchStart.expectCreateIndexButtonToBeEnabled();
+        await pageObjects.searchStart.clickCreateIndexButton();
+        await pageObjects.searchStart.expectToBeOnIndexDetailsPage();
       });
 
       it('should support setting index name', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectIndexNameToExist();
-        await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue('INVALID_INDEX');
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeDisabled();
-        await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue('test-index-name');
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+        await pageObjects.searchStart.expectToBeOnStartPage();
+        await pageObjects.searchStart.expectIndexNameToExist();
+        await pageObjects.searchStart.setIndexNameValue('INVALID_INDEX');
+        await pageObjects.searchStart.expectCreateIndexButtonToBeDisabled();
+        await pageObjects.searchStart.setIndexNameValue('test-index-name');
+        await pageObjects.searchStart.expectCreateIndexButtonToBeEnabled();
+        await pageObjects.searchStart.clickCreateIndexButton();
+        await pageObjects.searchStart.expectToBeOnIndexDetailsPage();
       });
 
       it('should redirect to index details when index is created via API', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.searchStart.expectToBeOnStartPage();
         await es.indices.create({ index: 'test-my-index' });
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+        await pageObjects.searchStart.expectToBeOnIndexDetailsPage();
       });
 
       it('should redirect to index list when multiple indices are created via API', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.searchStart.expectToBeOnStartPage();
         await es.indices.create({ index: 'test-my-index-001' });
         await es.indices.create({ index: 'test-my-index-002' });
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+        await pageObjects.searchStart.expectToBeOnIndexListPage();
       });
       it('should redirect to indices list if single index exist on page load', async () => {
-        await svlSearchNavigation.navigateToGettingStartedPage();
+        await svlSearchNavigation.navigateToSearchPlaygroundList();
         await es.indices.create({ index: 'test-my-index-001' });
         await svlSearchNavigation.navigateToElasticsearchStartPage(true);
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexListPage();
+        await pageObjects.searchStart.expectToBeOnIndexListPage();
       });
 
       it('should support switching between UI and Code Views', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexCodeView();
-        await pageObjects.svlSearchElasticsearchStartPage.clickUIViewButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexUIView();
+        await pageObjects.searchStart.expectToBeOnStartPage();
+        await pageObjects.searchStart.expectCreateIndexUIView();
+        await pageObjects.searchStart.clickCodeViewButton();
+        await pageObjects.searchStart.expectCreateIndexCodeView();
+        await pageObjects.searchStart.clickUIViewButton();
+        await pageObjects.searchStart.expectCreateIndexUIView();
       });
 
       it('should show the api key in code view', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        await pageObjects.searchStart.expectToBeOnStartPage();
+        await pageObjects.searchStart.clickCodeViewButton();
         // sometimes the API key exists in the cluster and its lost in sessionStorage
         // if fails we retry to delete the API key and refresh the browser
         await retry.try(
@@ -106,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           async () => {
             await pageObjects.svlApiKeys.deleteAPIKeys();
             await browser.refresh();
-            await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+            await pageObjects.searchStart.clickCodeViewButton();
           }
         );
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
@@ -118,27 +118,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // check that when browser is refreshed, the api key is still available
         await browser.refresh();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        await pageObjects.searchStart.clickCodeViewButton();
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
-        await pageObjects.svlSearchElasticsearchStartPage.expectAPIKeyPreGenerated();
+        await pageObjects.searchStart.expectAPIKeyPreGenerated();
         const refreshBrowserApiKeyUI = await pageObjects.svlApiKeys.getAPIKeyFromUI();
         expect(refreshBrowserApiKeyUI).to.eql(apiKeyUI);
 
         // check that when api key is invalidated, a new one is generated
         await pageObjects.svlApiKeys.invalidateAPIKey(apiKeySession.id);
         await browser.refresh();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        await pageObjects.searchStart.clickCodeViewButton();
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
         const newApiKeyUI = await pageObjects.svlApiKeys.getAPIKeyFromUI();
         expect(newApiKeyUI).to.not.eql(apiKeyUI);
-        await pageObjects.svlSearchElasticsearchStartPage.expectAPIKeyVisibleInCodeBlock(
-          newApiKeyUI
-        );
+        await pageObjects.searchStart.expectAPIKeyVisibleInCodeBlock(newApiKeyUI);
       });
 
       it('should create a new api key when the existing one is invalidated', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        await pageObjects.searchStart.expectToBeOnStartPage();
+        await pageObjects.searchStart.clickCodeViewButton();
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
         // Get initial API key
         const initialApiKey = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
@@ -148,7 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await svlSearchNavigation.navigateToInferenceManagementPage();
         await pageObjects.svlApiKeys.invalidateAPIKey(initialApiKey.id);
         await svlSearchNavigation.navigateToElasticsearchStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        await pageObjects.searchStart.clickCodeViewButton();
 
         // Check that new key was generated
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
@@ -160,20 +158,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should explicitly ask to create api key when project already has an apikey', async () => {
         await pageObjects.svlApiKeys.clearAPIKeySessionStorage();
         await pageObjects.svlApiKeys.createAPIKey();
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        await pageObjects.searchStart.expectToBeOnStartPage();
+        await pageObjects.searchStart.clickCodeViewButton();
         await pageObjects.svlApiKeys.createApiKeyFromFlyout();
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
       });
 
       it('Same API Key should be present on start page and index detail view', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        await pageObjects.searchStart.clickCodeViewButton();
         await pageObjects.svlApiKeys.expectAPIKeyAvailable();
         const apiKeyUI = await pageObjects.svlApiKeys.getAPIKeyFromUI();
 
-        await pageObjects.svlSearchElasticsearchStartPage.clickUIViewButton();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+        await pageObjects.searchStart.clickUIViewButton();
+        await pageObjects.searchStart.clickCreateIndexButton();
+        await pageObjects.searchStart.expectToBeOnIndexDetailsPage();
 
         await pageObjects.svlApiKeys.expectShownAPIKeyAvailable();
         const indexDetailsApiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
@@ -182,28 +180,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should have file upload link', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.clickFileUploadLink();
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnMLFileUploadPage();
+        await pageObjects.searchStart.expectToBeOnStartPage();
+        await pageObjects.searchStart.clickFileUploadLink();
+        await pageObjects.searchStart.expectToBeOnMLFileUploadPage();
       });
 
       it('should have o11y links', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectAnalyzeLogsLink();
-        await pageObjects.svlSearchElasticsearchStartPage.expectO11yTrialLink();
+        await pageObjects.searchStart.expectToBeOnStartPage();
+        await pageObjects.searchStart.expectAnalyzeLogsLink();
+        await pageObjects.searchStart.expectO11yTrialLink();
       });
 
       it('should have close button', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectCloseCreateIndexButtonExists();
-        await pageObjects.svlSearchElasticsearchStartPage.clickCloseCreateIndexButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnSearchHomepagePage();
+        await pageObjects.searchStart.expectToBeOnStartPage();
+        await pageObjects.searchStart.expectCloseCreateIndexButtonExists();
+        await pageObjects.searchStart.clickCloseCreateIndexButton();
+        await pageObjects.searchStart.expectToBeOnSearchHomepagePage();
       });
       it('should have skip button', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
-        await pageObjects.svlSearchElasticsearchStartPage.expectSkipButtonExists();
-        await pageObjects.svlSearchElasticsearchStartPage.clickSkipButton();
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnSearchHomepagePage();
+        await pageObjects.searchStart.expectToBeOnStartPage();
+        await pageObjects.searchStart.expectSkipButtonExists();
+        await pageObjects.searchStart.clickSkipButton();
+        await pageObjects.searchStart.expectToBeOnSearchHomepagePage();
       });
     });
     describe('viewer', function () {
@@ -216,7 +214,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should navigate to the discover page', async () => {
-        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnDiscoverPage();
+        await pageObjects.searchStart.expectToBeOnDiscoverPage();
       });
     });
   });

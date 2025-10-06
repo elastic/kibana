@@ -9,18 +9,20 @@
 
 import _ from 'lodash';
 import { globSync } from 'fs';
+import normalizePath from 'normalize-path';
 import processFunctionDefinition from './process_function_definition';
 
 export default function (directory) {
   function getTuple(directory, name) {
-    return [name, require('../' + directory + '/' + name)]; // eslint-disable-line import/no-dynamic-require
+    return [name, require(`../${directory}/${name}`)]; // eslint-disable-line import/no-dynamic-require
   }
 
   // Get a list of all files and use the filename as the object key
   const files = _.map(
-    globSync('../' + directory + '/*.js', { cwd: __dirname }).filter(
-      (filename) => !filename.includes('.test')
-    ),
+    globSync(`../${directory}/*.js`, { cwd: __dirname })
+      .filter((filename) => !filename.includes('.test'))
+      .map((p) => normalizePath(p)),
+
     function (file) {
       const name = file.substring(file.lastIndexOf('/') + 1, file.lastIndexOf('.'));
       return getTuple(directory, name);
@@ -29,12 +31,12 @@ export default function (directory) {
 
   // Get a list of all directories with an index.js, use the directory name as the key in the object
   const directories = _.chain(
-    globSync('../' + directory + '/*/index.js', {
+    globSync(`../${directory}/*/index.js`, {
       cwd: __dirname,
     })
   )
     .map(function (file) {
-      const parts = file.split('/');
+      const parts = normalizePath(file).split('/');
       const name = parts[parts.length - 2];
       return getTuple(directory, name);
     })

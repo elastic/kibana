@@ -20,11 +20,19 @@ import {
   EuiSpacer,
   EuiConfirmModal,
   htmlIdGenerator,
+  EuiText,
 } from '@elastic/eui';
 
+import { ConvertToLookupIndexModalContainer } from '../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
-import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
+import {
+  INDEX_OPEN,
+  IndexDetailsSection,
+  MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX,
+  MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX,
+} from '../../../../../../common/constants';
 import { getIndexDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
+import { notificationService } from '../../../../services/notification';
 import { AppContext } from '../../../../app_context';
 
 export class IndexActionsContextMenu extends Component {
@@ -243,6 +251,50 @@ export class IndexActionsContextMenu extends Component {
         }
       }
     });
+    if (selectedIndexCount === 1) {
+      const indexName = indexNames[0];
+      const isConvertable = this.isConvertableToLookupIndex(indexName);
+
+      const index = indices.find((index) => index.name === indexName);
+
+      const {
+        plugins: { reindexService },
+      } = this.context;
+
+      // Only show the "Convert to lookup index" action if the reindexService plugin is available,
+      // the index is not already a lookup index and the index is not hidden
+      if (reindexService && index?.mode !== 'lookup' && !index?.hidden) {
+        items.push({
+          'data-test-subj': 'convertToLookupIndexButton',
+          name: (
+            <>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton"
+                  defaultMessage="Convert to lookup index"
+                />
+              </EuiText>
+              {!isConvertable && (
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="xs">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.indexActionsMenu.convertToLookupIndexButton.error"
+                      defaultMessage="The index must have less than 2 billion documents and a single shard to be converted."
+                    />
+                  </EuiText>
+                </>
+              )}
+            </>
+          ),
+          disabled: !isConvertable,
+          onClick: () => {
+            this.closePopover();
+            this.setState({ renderConfirmModal: this.renderConvertToLookupIndexModal });
+          },
+        });
+      }
+    }
     const panelTree = {
       id: 0,
       title: i18n.translate('xpack.idxMgmt.indexActionsMenu.panelTitle', {
@@ -419,7 +471,7 @@ export class IndexActionsContextMenu extends Component {
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
-            defaultMessage="You can't recover a deleted index. Make sure you have appropriate backups."
+            defaultMessage="You can't recover a deleted index. Make sure you have appropriate backups. Deleting an index currently being reindexed will stop the reindex operation."
           />
         </p>
       </Fragment>
@@ -460,6 +512,61 @@ export class IndexActionsContextMenu extends Component {
         {standardIndexModalBody}
       </EuiConfirmModal>
     );
+  };
+
+  renderConvertToLookupIndexModal = () => {
+    const {
+      services: { extensionsService },
+      core: { application, http },
+    } = this.context;
+
+    const { indexNames, indicesListURLParams } = this.props;
+    const sourceIndexName = indexNames[0];
+
+    return (
+      <ConvertToLookupIndexModalContainer
+        onCloseModal={() => this.closeConfirmModal()}
+        onSuccess={(lookupIndexName) => {
+          navigateToIndexDetailsPage(
+            lookupIndexName,
+            indicesListURLParams,
+            extensionsService,
+            application,
+            http,
+            IndexDetailsSection.Overview
+          );
+
+          notificationService.showSuccessToast(
+            i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastTitle', {
+              defaultMessage: 'Index successfully converted to lookup mode',
+            }),
+            i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastMessage', {
+              defaultMessage: 'The {lookupIndexName} lookup index has been created.',
+              values: { lookupIndexName },
+            })
+          );
+        }}
+        sourceIndexName={sourceIndexName}
+      />
+    );
+  };
+
+  isConvertableToLookupIndex = (indexName) => {
+    const index = this.props.indices.find((index) => index.name === indexName);
+
+    if (!index) {
+      return false;
+    }
+
+    if (
+      index?.documents >= 0 &&
+      index?.documents <= MAX_DOCUMENTS_FOR_CONVERT_TO_LOOKUP_INDEX &&
+      Number(index?.primary) === MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX
+    ) {
+      return true;
+    }
+
+    return false;
   };
 
   render() {

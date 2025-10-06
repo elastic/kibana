@@ -77,26 +77,6 @@ export const ANALYTICS_PLUGIN = {
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
-export const SEARCH_EXPERIENCES_PLUGIN = {
-  ID: 'searchExperiences',
-  NAME: i18n.translate('xpack.enterpriseSearch.searchExperiences.productName', {
-    defaultMessage: 'Search Experiences',
-  }),
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.searchExperiences.navTitle', {
-    defaultMessage: 'Search Experiences',
-  }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.searchExperiences.productDescription', {
-    defaultMessage: 'Build an intuitive, engaging search experience without reinventing the wheel.',
-  }),
-  URL: '/app/enterprise_search/search_experiences',
-  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
-  GITHUB_URL: 'https://github.com/elastic/search-ui/',
-  DOCUMENTATION_URL: 'https://docs.elastic.co/search-ui/',
-  ELASTICSEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/elasticsearch',
-  APP_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/app-search',
-  WORKPLACE_SEARCH_TUTORIAL_URL: 'https://docs.elastic.co/search-ui/tutorials/workplace-search',
-};
-
 export const APPLICATIONS_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   LOGO: 'logoElasticsearch',

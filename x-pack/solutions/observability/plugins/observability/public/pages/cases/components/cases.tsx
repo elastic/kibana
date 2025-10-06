@@ -65,6 +65,7 @@ export function Cases({ permissions }: CasesProps) {
         features={{
           alerts: { sync: false, isExperimental: false },
           observables: { enabled: false },
+          events: { enabled: false },
         }}
         owner={[observabilityFeatureId]}
         permissions={permissions}

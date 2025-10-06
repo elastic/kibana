@@ -133,15 +133,15 @@ export function getSampleDashboardState(overrides?: Partial<DashboardState>): Da
 export function getMockPanels() {
   return [
     {
-      gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
-      panelConfig: { title: 'panel One' },
-      panelIndex: '1',
+      grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+      config: { title: 'panel One' },
+      uid: '1',
       type: 'testPanelType',
     },
     {
-      gridData: { x: 6, y: 0, w: 6, h: 6, i: '2' },
-      panelConfig: { title: 'panel Two' },
-      panelIndex: '2',
+      grid: { x: 6, y: 0, w: 6, h: 6, i: '2' },
+      config: { title: 'panel Two' },
+      uid: '2',
       type: 'testPanelType',
     },
   ];
@@ -153,15 +153,15 @@ export function getMockPanelsWithSections() {
     {
       title: 'Section One',
       collapsed: true,
-      gridData: {
+      grid: {
         y: 6,
         i: 'section1',
       },
       panels: [
         {
-          gridData: { x: 0, y: 0, w: 6, h: 6, i: '3' },
-          panelConfig: { title: 'panel Three' },
-          panelIndex: '3',
+          grid: { x: 0, y: 0, w: 6, h: 6, i: '3' },
+          config: { title: 'panel Three' },
+          uid: '3',
           type: 'testPanelType',
         },
       ],
@@ -169,15 +169,15 @@ export function getMockPanelsWithSections() {
     {
       title: 'Section Two',
       collapsed: false,
-      gridData: {
+      grid: {
         y: 7,
         i: 'section2',
       },
       panels: [
         {
-          gridData: { x: 0, y: 0, w: 6, h: 6, i: '4' },
-          panelConfig: { title: 'panel Four' },
-          panelIndex: '4',
+          grid: { x: 0, y: 0, w: 6, h: 6, i: '4' },
+          config: { title: 'panel Four' },
+          uid: '4',
           type: 'testPanelType',
         },
       ],

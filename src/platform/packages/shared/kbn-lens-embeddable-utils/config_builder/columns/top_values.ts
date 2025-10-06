@@ -8,7 +8,11 @@
  */
 
 import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
-import type { TopValuesColumnParams } from '../../attribute_builder/utils';
+
+type TopValuesColumnParams = Pick<
+  TermsIndexPatternColumn['params'],
+  'size' | 'orderDirection' | 'orderBy' | 'secondaryFields' | 'accuracyMode' | 'orderAgg'
+>;
 
 const DEFAULT_BREAKDOWN_SIZE = 10;
 

@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { StreamSystemConfiguration } from './stream_system_configuration';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ComponentTemplatePanel } from './component_template_panel';
@@ -37,6 +39,10 @@ export function UnmanagedElasticsearchAssets({
       },
     },
   } = useKibana();
+
+  const {
+    features: { significantEvents },
+  } = useStreamsPrivileges();
 
   const unmanagedAssetsDetailsFetch = useStreamsAppFetch(
     ({ signal }) => {
@@ -84,6 +90,7 @@ export function UnmanagedElasticsearchAssets({
   if (!definition.data_stream_exists) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
           defaultMessage: 'Data stream missing',
         })}
@@ -103,6 +110,11 @@ export function UnmanagedElasticsearchAssets({
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem>
+          {significantEvents?.available && (
+            <StreamSystemConfiguration definition={definition.stream} />
+          )}
+        </EuiFlexItem>
         <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
           <Row
             left={

@@ -35,7 +35,7 @@ export class WorkChatAppPlugin
 
   public setup(
     core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>,
-    { chatDataRegistry }: WorkChatAppPluginSetupDependencies
+    { dataSourcesRegistry }: WorkChatAppPluginSetupDependencies
   ): WorkChatAppPluginSetup {
     registerApp({
       core,

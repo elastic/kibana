@@ -126,6 +126,7 @@ describe(
         'scan'
         // TODO: currently not implemented for Endpoint
         // 'runscript'
+        // 'cancel'
       );
 
       const deniedResponseActions = pick(consoleHelpPanelResponseActionsTestSubj, 'execute');

@@ -8,6 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const labels = {
+  common: {
+    optional: i18n.translate('xpack.onechat.common.optional', {
+      defaultMessage: 'Optional',
+    }),
+  },
   conversations: {
     title: i18n.translate('xpack.onechat.conversations.title', { defaultMessage: 'Agent Chat' }),
     manageAgents: i18n.translate('xpack.onechat.agents.manageAgents', {
@@ -47,6 +52,12 @@ export const labels = {
     ),
     saveButtonLabel: i18n.translate('xpack.onechat.tools.saveButtonLabel', {
       defaultMessage: 'Save',
+    }),
+    testButtonLabel: i18n.translate('xpack.onechat.tools.testButtonLabel', {
+      defaultMessage: 'Test',
+    }),
+    saveAndTestButtonLabel: i18n.translate('xpack.onechat.tools.saveAndTestButtonLabel', {
+      defaultMessage: 'Save & test',
     }),
     cancelButtonLabel: i18n.translate('xpack.onechat.tools.cancelButtonLabel', {
       defaultMessage: 'Cancel',
@@ -225,6 +236,11 @@ export const labels = {
         defaultMessage: "You can't recover deleted data.",
       }
     ),
+    testTool: {
+      backToEditToolButton: i18n.translate('xpack.onechat.tools.testTool.backToEditToolButton', {
+        defaultMessage: 'Back to edit tool',
+      }),
+    },
   },
   agents: {
     title: i18n.translate('xpack.onechat.agents.list.title', { defaultMessage: 'Agents' }),
@@ -234,9 +250,6 @@ export const labels = {
       defaultMessage: 'Create Agent',
     }),
     settings: {
-      optionalLabel: i18n.translate('xpack.onechat.agents.form.settings.optionalLabel', {
-        defaultMessage: 'Optional',
-      }),
       cancelButtonLabel: i18n.translate('xpack.onechat.agents.form.settings.cancelButtonLabel', {
         defaultMessage: 'Cancel',
       }),

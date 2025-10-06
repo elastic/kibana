@@ -10,13 +10,14 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { SPAN_ID_FIELD } from '@kbn/discover-utils';
+import { SPAN_ID_FIELD, TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { useState, useEffect } from 'react';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 
 interface UseSpanParams {
-  spanId?: string;
+  spanId: string;
+  traceId: string;
 }
 
 interface GetTransactionParams {
@@ -24,9 +25,10 @@ interface GetTransactionParams {
   indexPattern: string;
   data: DataPublicPluginStart;
   signal: AbortSignal;
+  traceId: string;
 }
 
-async function getSpanData({ spanId, indexPattern, data, signal }: GetTransactionParams) {
+async function getSpanData({ spanId, indexPattern, data, traceId, signal }: GetTransactionParams) {
   return lastValueFrom(
     data.search.search(
       {
@@ -42,8 +44,11 @@ async function getSpanData({ spanId, indexPattern, data, signal }: GetTransactio
               },
             ],
             query: {
-              match: {
-                [SPAN_ID_FIELD]: spanId,
+              bool: {
+                filter: [
+                  { term: { [TRACE_ID_FIELD]: traceId } },
+                  { term: { [SPAN_ID_FIELD]: spanId } },
+                ],
               },
             },
           },
@@ -54,7 +59,7 @@ async function getSpanData({ spanId, indexPattern, data, signal }: GetTransactio
   );
 }
 
-export const useSpan = ({ spanId }: UseSpanParams) => {
+export const useSpan = ({ spanId, traceId }: UseSpanParams) => {
   const { indexes } = useDataSourcesContext();
   const indexPattern = indexes.apm.traces;
   const { data, core } = getUnifiedDocViewerServices();
@@ -63,12 +68,6 @@ export const useSpan = ({ spanId }: UseSpanParams) => {
   const [docId, setDocId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!spanId) {
-      setSpan(null);
-      setLoading(false);
-      return;
-    }
-
     const controller = new AbortController();
     const { signal } = controller;
 
@@ -76,7 +75,7 @@ export const useSpan = ({ spanId }: UseSpanParams) => {
       try {
         setLoading(true);
         const result = indexPattern
-          ? await getSpanData({ spanId, indexPattern, data, signal })
+          ? await getSpanData({ spanId, indexPattern, data, signal, traceId })
           : undefined;
         setSpan(result?.rawResponse.hits.hits[0]?.fields ?? null);
         setDocId(result?.rawResponse.hits.hits[0]?._id ?? null);
@@ -101,7 +100,7 @@ export const useSpan = ({ spanId }: UseSpanParams) => {
     return function onUnmount() {
       controller.abort();
     };
-  }, [core.notifications.toasts, data, indexPattern, spanId]);
+  }, [core.notifications.toasts, data, indexPattern, spanId, traceId]);
 
   return { loading, span, docId };
 };

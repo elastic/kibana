@@ -236,4 +236,80 @@ export const i18nStrings = {
       }),
     },
   },
+  launchPad: {
+    title: i18n.translate('securitySolutionPackages.navLinks.launchPad', {
+      defaultMessage: 'Launchpad',
+    }),
+    migrations: {
+      title: i18n.translate('securitySolutionPackages.navLinks.launchPad.migrations', {
+        defaultMessage: 'Migrations',
+      }),
+    },
+  },
+  // also used in sidenav v2
+  // for serverless tiers (EASE (search_ai_lake|ai_soc_engine) | essential | complete)
+  ingestAndManageData: {
+    title: i18n.translate('securitySolutionPackages.navLinks.dataManagement', {
+      defaultMessage: 'Data management',
+    }),
+    ingestAndIntegrations: {
+      title: i18n.translate(
+        'securitySolutionPackages.navLinks.ingestAndManageData.ingestAndIntegrations',
+        {
+          defaultMessage: 'Ingest and Integrations',
+        }
+      ),
+    },
+    indicesAndDataStreams: {
+      title: i18n.translate(
+        'securitySolutionPackages.navLinks.ingestAndManageData.indicesAndDataStreams',
+        {
+          defaultMessage: 'Indices and data streams',
+        }
+      ),
+    },
+  },
+  // rename this key to stackManagement once we switch to v2 completely
+  // also used in sidenav v2 for
+  // serverless tiers (EASE (search_ai_lake|ai_soc_engine) | essential | complete)
+  stackManagementV2: {
+    title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.title', {
+      defaultMessage: 'Stack Management',
+    }),
+    serverlessTitle: i18n.translate(
+      'securitySolutionPackages.navLinks.stackManagement_v2.serverlessTitle',
+      { defaultMessage: 'Admin and Settings' }
+    ),
+    organization: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.organization', {
+        defaultMessage: 'Organization',
+      }),
+    },
+    alertsAndInsights: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.alertsInsights', {
+        defaultMessage: 'Alerts and Insights',
+      }),
+    },
+    security: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.security', {
+        defaultMessage: 'Security',
+      }),
+    },
+    data: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.data', {
+        defaultMessage: 'Data',
+      }),
+    },
+    kibana: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.kibana', {
+        defaultMessage: 'Kibana',
+      }),
+    },
+    // serverless only
+    access: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.access', {
+        defaultMessage: 'Access',
+      }),
+    },
+  },
 };

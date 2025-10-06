@@ -980,7 +980,7 @@
                 "section": "def-public.IconButton",
                 "text": "IconButton"
               },
-              "[] | undefined; } | undefined"
+              "[] | undefined; additionalControls?: { prependRight?: React.ReactNode; } | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart_section_template.tsx",
             "deprecated": false,
@@ -1723,6 +1723,27 @@
             "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramChartProps.esqlVariables",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/components/chart/chart.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1991,6 +2012,27 @@
                 "section": "def-public.DataViewsServicePublic",
                 "text": "DataViewsServicePublic"
               }
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/unified-histogram",
+            "id": "def-public.UnifiedHistogramServices.fieldsMetadata",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsMetadata",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "public",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-public.FieldsMetadataPublicStart",
+                "text": "FieldsMetadataPublicStart"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-histogram/types.ts",
             "deprecated": false,
@@ -3005,7 +3047,15 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; breakdownField?: string | undefined; externalVisContext?: ",
+          "[] | undefined; breakdownField?: string | undefined; esqlVariables?: ",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.ESQLControlVariable",
+            "text": "ESQLControlVariable"
+          },
+          "[] | undefined; externalVisContext?: ",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",
