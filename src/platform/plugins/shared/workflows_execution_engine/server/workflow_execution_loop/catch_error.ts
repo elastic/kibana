@@ -13,6 +13,7 @@ import type { WorkflowExecutionLoopParams } from './types';
 import { createStepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
+import { stringifyStackFrames } from '../utils';
 
 /**
  * Handles workflow execution errors by bubbling them up through the scope hierarchy
@@ -67,26 +68,34 @@ export async function catchError(
     // 3. The top stack entry has nested scopes to process
     // This allows error handling to bubble up through the scope hierarchy.
 
-    if (!params.workflowRuntime.getWorkflowExecution().error) {
+    if (!params.workflowExecutionState.getWorkflowExecution().error) {
       return;
     }
 
     if (failedStepExecutionRuntime.stepExecutionExists()) {
-      failedStepExecutionRuntime.failStep(params.workflowRuntime.getWorkflowExecution().error!);
+      failedStepExecutionRuntime.failStep(
+        params.workflowExecutionState.getWorkflowExecution().error!
+      );
     }
 
     while (
-      params.workflowRuntime.getWorkflowExecution().error &&
-      params.workflowRuntime.getWorkflowExecution().scopeStack.length
+      params.workflowExecutionState.getWorkflowExecution().error &&
+      params.workflowExecutionState.getWorkflowExecution().scopeStack.length
     ) {
       const workflowScopeStack = WorkflowScopeStack.fromStackFrames(
-        params.workflowRuntime.getCurrentNodeScope()
+        params.workflowExecutionState.getWorkflowExecution().scopeStack
       );
-
-      // exit the whole node scope
       const scopeEntry = workflowScopeStack.getCurrentScope()!;
+      const newWorkflowScopeStack = workflowScopeStack.exitScope();
 
+      const beforeExitScopePath = stringifyStackFrames(workflowScopeStack.stackFrames);
       const node = params.workflowExecutionGraph.getNode(scopeEntry.nodeId);
+      params.workflowExecutionState.updateWorkflowExecution({
+        currentNodeId: scopeEntry.nodeId,
+        scopeStack: newWorkflowScopeStack.stackFrames,
+      });
+
+      const afterExitScopePath = stringifyStackFrames(newWorkflowScopeStack.stackFrames);
 
       params.workflowRuntime.navigateToNode(node.id);
       const stepExecutionRuntime = createStepExecutionRuntime({
@@ -104,7 +113,7 @@ export async function catchError(
         // The current node has moved on, but the scope stack still has the old scope
         // So we need to pop it to maintain correct execution context
         // e.g. for current_node the scope is [parent_scope]
-        stackFrames: workflowScopeStack.exitScope().stackFrames,
+        stackFrames: newWorkflowScopeStack.stackFrames,
       });
       const stepImplementation = params.nodesFactory.create(stepExecutionRuntime);
 
@@ -114,20 +123,24 @@ export async function catchError(
         try {
           await stepErrorCatcher.catchError();
         } catch (error) {
-          params.workflowRuntime.setWorkflowError(error);
+          params.workflowExecutionState.updateWorkflowExecution({
+            error,
+          });
         }
       }
 
-      if (
-        params.workflowRuntime.getWorkflowExecution().error &&
-        stepExecutionRuntime.stepExecutionExists()
-      ) {
-        await stepExecutionRuntime.failStep(params.workflowRuntime.getWorkflowExecution().error!);
-        params.workflowRuntime.exitScope();
+      if (params.workflowExecutionState.getWorkflowExecution().error) {
+        if (stepExecutionRuntime.stepExecutionExists()) {
+          await stepExecutionRuntime.failStep(
+            params.workflowExecutionState.getWorkflowExecution().error!
+          );
+        }
       }
     }
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(error);
+    params.workflowExecutionState.updateWorkflowExecution({
+      error,
+    });
     params.workflowLogger.logError(
       `Error in catchError: ${error.message}. Workflow execution may be in an inconsistent state.`
     );

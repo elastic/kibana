@@ -131,6 +131,19 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public exitScope(): void {
+    const currentNode = this.getCurrentNode();
+
+    if (!currentNode?.type.startsWith('exit')) {
+      return;
+    }
+
+    const scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+    const entered = currentNode.type.replace('exit', 'enter');
+
+    if (entered !== scopeStack.getCurrentScope()?.nodeType) {
+      return;
+    }
+
     this.workflowExecutionState.updateWorkflowExecution({
       scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).exitScope()
         .stackFrames,
