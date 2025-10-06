@@ -101,7 +101,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
 
   private async handleLongDelay(delayMs: number): Promise<void> {
     const stepState = this.stepExecutionRuntime.getCurrentStepState() || {};
-    await this.workflowRuntime.setWaitStep();
+    await this.stepExecutionRuntime.setWaitStep();
     const workflowExecution = this.workflowRuntime.getWorkflowExecution();
     const runAt = new Date(new Date().getTime() + delayMs);
     const resumeExecutionTask = await this.workflowTaskManager.scheduleResumeTask({
