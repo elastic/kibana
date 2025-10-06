@@ -315,7 +315,6 @@ export const WorkflowExecuteEventForm = ({
             tableLayout="fixed"
             items={alerts}
             columns={columns}
-            onChange={() => {}}
             selection={{
               onSelectionChange: updateEventData,
             }}
