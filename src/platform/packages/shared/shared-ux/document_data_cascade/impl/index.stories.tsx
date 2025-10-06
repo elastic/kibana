@@ -186,11 +186,12 @@ export const CascadeNestedGridImplementation: StoryObj<
     const rowHeaderMetaSlots = useCallback<
       NonNullable<DataCascadeRowProps<MockGroupData, LeafNode>['rowHeaderMetaSlots']>
     >(
-      ({ rowData, nodePath }) => {
+      ({ rowDepth, rowData, nodePath }) => {
+        const rowGroup = nodePath[nodePath.length - 1];
         const baseSlotDef: React.ReactNode[] = [];
 
         // Only show the count stat on the last grouping level
-        return rowData.depth === groupByFields.length - 1
+        return rowDepth === groupByFields.length - 1
           ? [
               <EuiStat
                 title={rowData.count}
@@ -198,9 +199,16 @@ export const CascadeNestedGridImplementation: StoryObj<
                 description={
                   <FormattedMessage
                     id="sharedUXPackages.data_cascade.demo.row.count"
-                    defaultMessage="<indicator>{identifier} record count</indicator>"
+                    defaultMessage="<indicator>count</indicator>"
                     values={{
-                      indicator: (chunks) => <EuiHealth color="subdued">{chunks}</EuiHealth>,
+                      identifier: rowData[rowGroup] ?? '',
+                      indicator: (chunks) => (
+                        <EuiHealth color="subdued">
+                          <EuiText>
+                            <p>{chunks}</p>
+                          </EuiText>
+                        </EuiHealth>
+                      ),
                     }}
                   />
                 }

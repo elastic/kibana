@@ -119,7 +119,11 @@ export interface CascadeRowHeaderPrimitiveProps<G extends GroupNode, L extends L
   /**
    * @description The row header meta slots for the cascade row.
    */
-  rowHeaderMetaSlots?: (props: { rowData: G; nodePath: string[] }) => React.ReactNode[];
+  rowHeaderMetaSlots?: (props: {
+    rowDepth: number;
+    rowData: G;
+    nodePath: string[];
+  }) => React.ReactNode[];
   /**
    * @description The row header actions slot for the cascade row.
    */
