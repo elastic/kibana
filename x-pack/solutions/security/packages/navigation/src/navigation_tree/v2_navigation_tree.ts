@@ -21,6 +21,11 @@ const LazyIconWorkflow = lazy(() =>
 );
 
 export const createV2NavigationTree = (core: CoreStart): NodeDefinition[] => [
+  {
+    link: 'discover',
+    iconV2: 'discoverApp',
+    sideNavVersion: 'v2',
+  },
   defaultNavigationTree.dashboards({ sideNavVersion: 'v2' }),
   defaultNavigationTree.rules({ sideNavVersion: 'v2' }),
   {

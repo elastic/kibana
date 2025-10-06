@@ -11,12 +11,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { OverviewTab } from './overview_tab';
-
-jest.mock('./tab_title_and_description', () => ({
-  TabTitleAndDescription: ({ metric }: { metric: MetricField }) => (
-    <div data-test-subj="tab-title-description">Tab Title for {metric.name}</div>
-  ),
-}));
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('./dimension_badges', () => ({
   DimensionBadges: ({ dimensions }: { dimensions: Dimension[] }) => (
@@ -55,7 +50,6 @@ describe('Metric Flyout Overview Tab', () => {
     index: 'test-index',
     type: 'double',
     unit: 'ms',
-    source: 'ecs',
     dimensions: [],
     ...overrides,
   });
@@ -67,10 +61,10 @@ describe('Metric Flyout Overview Tab', () => {
   describe('basic rendering', () => {
     it('renders the tab title and description', () => {
       const metric = createMockMetric();
-      const { getByTestId } = render(<OverviewTab metric={metric} />);
+      const { getByText, getByTestId } = render(<OverviewTab metric={metric} />);
 
-      expect(getByTestId('tab-title-description')).toBeInTheDocument();
-      expect(getByTestId('tab-title-description')).toHaveTextContent('Tab Title for test.metric');
+      expect(getByTestId('metricsExperienceFlyoutMetricName')).toBeInTheDocument();
+      expect(getByText(metric.name)).toBeInTheDocument();
     });
 
     it('renders main description list', () => {
@@ -137,59 +131,6 @@ describe('Metric Flyout Overview Tab', () => {
     });
   });
 
-  describe('Otel metrics', () => {
-    it('renders otel section when source is otel and stability exists', () => {
-      const metric = createMockMetric({
-        source: 'otel',
-        stability: 'stable',
-      });
-
-      const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
-
-      expect(
-        getByTestId('metricsExperienceFlyoutOverviewTabOtelDescriptionList')
-      ).toBeInTheDocument();
-      expect(getByText('stable')).toBeInTheDocument();
-    });
-
-    it('renders stability badge for experimental metrics', () => {
-      const metric = createMockMetric({
-        source: 'otel',
-        stability: 'experimental',
-      });
-      const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
-
-      expect(
-        getByTestId('metricsExperienceFlyoutOverviewTabOtelDescriptionList')
-      ).toBeInTheDocument();
-      expect(getByText('experimental')).toBeInTheDocument();
-    });
-
-    it('does not render Otel section when source is not Otel', () => {
-      const metric = createMockMetric({
-        source: 'ecs',
-        stability: 'stable',
-      });
-      const { queryByTestId } = render(<OverviewTab metric={metric} />);
-
-      expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabOtelDescriptionList')
-      ).not.toBeInTheDocument();
-    });
-
-    it('does not render Otel section when stability is not present', () => {
-      const metric = createMockMetric({
-        source: 'otel',
-        stability: undefined,
-      });
-      const { queryByTestId } = render(<OverviewTab metric={metric} />);
-
-      expect(
-        queryByTestId('metricsExperienceFlyoutOverviewTabOtelDescriptionList')
-      ).not.toBeInTheDocument();
-    });
-  });
-
   describe('dimensions handling', () => {
     it('does not render dimensions section when no dimensions', () => {
       const metric = createMockMetric({ dimensions: [] });
@@ -205,14 +146,26 @@ describe('Metric Flyout Overview Tab', () => {
 
     it('renders dimensions when present', () => {
       const dimensions = [
-        { name: 'host.name', type: 'keyword' },
-        { name: 'service.name', type: 'keyword' },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
       ];
       const metric = createMockMetric({ dimensions });
       const { getByTestId } = render(<OverviewTab metric={metric} />);
 
       expect(getByTestId('dimension-badge-host.name')).toBeInTheDocument();
       expect(getByTestId('dimension-badge-service.name')).toBeInTheDocument();
+    });
+  });
+
+  describe('description display', () => {
+    it('renders description when present', () => {
+      const metric = createMockMetric();
+      const { getByTestId, getByText } = render(
+        <OverviewTab metric={metric} description="Test description" />
+      );
+
+      expect(getByTestId('metricsExperienceFlyoutMetricDescription')).toBeInTheDocument();
+      expect(getByText('Test description')).toBeInTheDocument();
     });
   });
 });

@@ -11,7 +11,6 @@ import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common'
 import { noop } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { LensAttributes } from '../server/content_management';
 import { extract, inject } from '../common/embeddable_factory';
 import { LensDocumentService } from './persistence';
 import { DOC_TYPE } from '../common/constants';
@@ -32,7 +31,7 @@ export interface LensAttributesService {
     managed: boolean;
   }>;
   saveToLibrary: (
-    attributes: LensAttributes,
+    attributes: LensSavedObjectAttributes,
     references: Reference[],
     savedObjectId?: string
   ) => Promise<string>;
@@ -48,7 +47,7 @@ export interface LensAttributesService {
 }
 
 export const savedObjectToEmbeddableAttributes = (
-  savedObject: SavedObjectCommon<LensAttributes>
+  savedObject: SavedObjectCommon<LensSavedObjectAttributes>
 ): LensSavedObjectAttributes => {
   return {
     ...savedObject.attributes,
@@ -73,9 +72,7 @@ export function getLensAttributeService(http: HttpStart): LensAttributesService 
       return {
         attributes: {
           ...item,
-          visualizationType: item.visualizationType ?? null,
           state: item.state as LensSavedObjectAttributes['state'],
-          references: item.references,
         },
         sharingSavedObjectProps: {
           aliasTargetId: meta.aliasTargetId,
@@ -87,13 +84,12 @@ export function getLensAttributeService(http: HttpStart): LensAttributesService 
       };
     },
     saveToLibrary: async (
-      attributes: LensAttributes,
+      attributes: LensSavedObjectAttributes,
       references: Reference[],
       savedObjectId?: string
     ) => {
       const result = await lensDocumentService.save({
         ...attributes,
-        visualizationType: attributes.visualizationType ?? null,
         state: attributes.state as LensSavedObjectAttributes['state'],
         references,
         savedObjectId,

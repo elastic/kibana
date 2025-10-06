@@ -2311,7 +2311,9 @@
           "type": "Function",
           "tags": [],
           "label": "registerTransforms",
-          "description": [],
+          "description": [
+            "\nUse registerTransforms to register transforms for an embeddable type.\nPublic transforms registry uses transformOut to convert StoredEmbeddableState from URL into EmbeddableState.\ntransformIn is not used."
+          ],
           "signature": [
             "(type: string, getTransforms: () => Promise<",
             {
@@ -2986,7 +2988,9 @@
           "type": "Function",
           "tags": [],
           "label": "registerTransforms",
-          "description": [],
+          "description": [
+            "\nUse registerTransforms to register transforms for an embeddable type.\nTransforms decouple REST API state from stored state,\nallowing embeddables to have one shape for REST APIs and another for storage.\nEmbeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.\nOn read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.\nOn write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState."
+          ],
           "signature": [
             "(type: string, transforms: ",
             {
@@ -3370,7 +3374,7 @@
         "label": "EmbeddableTransforms",
         "description": [],
         "signature": [
-          "{ transformOut?: ((state: StoredState, references?: ",
+          "{ transformOut?: ((storedState: StoredEmbeddableState, references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",
@@ -3378,7 +3382,7 @@
             "section": "def-server.Reference",
             "text": "Reference"
           },
-          "[] | undefined) => State) | undefined; transformIn?: ((state: State) => { state: StoredState; references?: ",
+          "[] | undefined) => EmbeddableState) | undefined; transformIn?: ((state: EmbeddableState) => { state: StoredEmbeddableState; references?: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

@@ -6,7 +6,6 @@
  */
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import moment from 'moment';
 import type {
   UserActionAction,
   CommentUserAction,
@@ -50,8 +49,6 @@ import type {
   CasesSimilarResponseUI,
   ObservableUI,
   InternalFindCaseUserActions,
-  CaseSummary,
-  InferenceConnectors,
   EventAttachmentUI,
 } from '../../common/ui/types';
 import { CaseMetricsFeature } from '../../common/types/api';
@@ -370,19 +367,6 @@ export const basicCaseMetrics: SingleCaseMetrics = {
   },
 };
 
-export const mockCaseSummary: CaseSummary = {
-  content: 'case summary',
-  generatedAt: moment().toISOString(),
-};
-
-export const mockInferenceConnectors: InferenceConnectors = {
-  connectors: [
-    {
-      connectorId: 'connector-id',
-    },
-  ],
-};
-
 export const mockCase: CaseUI = {
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
@@ -490,8 +474,15 @@ export const cases: CasesUI = [
     comments: [],
     status: CaseStatuses['in-progress'],
     severity: CaseSeverity.MEDIUM,
+    incrementalId: 1,
   },
-  { ...pushedCase, updatedAt: laterTime, id: '2', totalComment: 0, comments: [] },
+  {
+    ...pushedCase,
+    updatedAt: laterTime,
+    id: '2',
+    totalComment: 0,
+    comments: [],
+  },
   { ...basicCase, id: '3', totalComment: 0, comments: [] },
   { ...basicCase, id: '4', totalComment: 0, comments: [] },
   caseWithAlerts,
@@ -659,6 +650,7 @@ export const casesSnake: Cases = [
   {
     ...pushedCaseSnake,
     id: '1',
+    incremental_id: 1,
     totalComment: 0,
     comments: [],
     status: CaseStatuses['in-progress'],
