@@ -17,7 +17,6 @@ import {
   EuiFilterButton,
 } from '@elastic/eui';
 import type { DataCascadeProps } from '@kbn/shared-ux-document-data-cascade';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   useCurrentTabSelector,
@@ -25,8 +24,7 @@ import {
   useInternalStateDispatch,
   useCurrentTabAction,
 } from '../../../../state_management/redux';
-
-type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
+import type { ESQLDataGroupNode, DataTableRecord } from './types';
 
 interface UseTableHeaderProps {
   viewModeToggle: React.ReactNode;

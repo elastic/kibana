@@ -17,8 +17,8 @@ import {
   DataCascadeRowCell,
   type DataCascadeRowProps,
   type DataCascadeRowCellProps,
+  type DataCascadeProps,
 } from '@kbn/shared-ux-document-data-cascade';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
@@ -26,11 +26,18 @@ import { useScopedServices } from '../../../../../components/scoped_services_pro
 import { useAppStateSelector } from '../../../state_management/discover_app_state_container';
 import { useCurrentTabSelector } from '../../../state_management/redux';
 import { fetchEsql } from '../../../data_fetching/fetch_esql';
-import { constructCascadeQuery, type CascadeQueryArgs, getESQLStatsQueryMeta } from './utils';
+import {
+  constructCascadeQuery,
+  type CascadeQueryArgs,
+  getESQLStatsQueryMeta,
+  mutateQueryStatsGrouping,
+} from './utils';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeHeaderComponent,
   ESQLDataCascadeLeafCell,
+  type ESQLDataGroupNode,
+  type DataTableRecord,
 } from './blocks';
 import { esqlCascadeStyles } from './esql_data_cascade.styles';
 
@@ -42,8 +49,6 @@ interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'> {
   viewModeToggle?: React.ReactNode | null;
   // stateContainer: DiscoverStateContainer;
 }
-
-type ESQLDataGroupNode = DataTableRecord['flattened'] & { id: string };
 
 export const ESQLDataCascade = React.memo(
   ({
@@ -61,43 +66,18 @@ export const ESQLDataCascade = React.memo(
     const { scopedProfilesManager } = useScopedServices();
     const { expressions } = useDiscoverServices();
 
+    const styles = useMemo(() => esqlCascadeStyles({ euiTheme }), [euiTheme]);
+
     const queryMeta = useMemo(() => {
       return getESQLStatsQueryMeta((query as AggregateQuery).esql);
     }, [query]);
 
-    const styles = useMemo(() => esqlCascadeStyles({ euiTheme }), [euiTheme]);
-
-    const cascadeGroupData = useMemo(
-      () =>
-        (initialData ?? []).map((datum) => ({
-          id: datum.id,
-          ...datum.flattened,
-        })),
-      [initialData]
-    );
-
-    const onCascadeGroupingChange = useCallback(() => {
-      /** no op */
-    }, []);
-
-    const customTableHeading = useEsqlDataCascadeHeaderComponent({ viewModeToggle });
-
-    const { renderRowActionPopover, rowActions, rowHeaderMeta, rowHeaderTitle } =
-      useEsqlDataCascadeRowHeaderComponents(props.services, queryMeta);
-
-    const fetchCascadeData = useCallback(
-      async ({ nodeType, nodePath, nodePathMap }: Omit<CascadeQueryArgs, 'query'>) => {
-        const newQuery = constructCascadeQuery({
-          query: query as AggregateQuery,
-          nodeType,
-          nodePath,
-          nodePathMap,
-        });
-
+    const scopedESQLQueryFetch = useCallback(
+      async (esqlQuery: AggregateQuery) => {
         const inspectorAdapters = { requests: new RequestAdapter() };
 
         const { records } = await fetchEsql({
-          query: newQuery,
+          query: esqlQuery,
           dataView,
           data: props.services.data,
           expressions,
@@ -124,9 +104,52 @@ export const ESQLDataCascade = React.memo(
         globalFilters,
         globalTimeRange,
         props.services.data,
-        query,
         scopedProfilesManager,
       ]
+    );
+
+    const [cascadeGroupData, setCascadeGroupData] = React.useState(() =>
+      (initialData ?? []).map((datum) => ({
+        id: datum.id,
+        ...datum.flattened,
+      }))
+    );
+
+    const customTableHeading = useEsqlDataCascadeHeaderComponent({ viewModeToggle });
+
+    const { renderRowActionPopover, rowActions, rowHeaderMeta, rowHeaderTitle } =
+      useEsqlDataCascadeRowHeaderComponents(props.services, query as AggregateQuery, queryMeta);
+
+    const cascadeLeafRowRenderer = useCallback<
+      DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
+    >(
+      ({ data: cellData, cellId, getScrollElement, getScrollOffset, getScrollMargin }) => (
+        <ESQLDataCascadeLeafCell
+          {...props}
+          dataView={dataView}
+          cellData={cellData!}
+          queryMeta={queryMeta}
+          cellId={cellId}
+          getScrollElement={getScrollElement}
+          getScrollOffset={getScrollOffset}
+          getScrollMargin={getScrollMargin}
+        />
+      ),
+      [dataView, props, queryMeta]
+    );
+
+    const fetchCascadeData = useCallback(
+      async ({ nodeType, nodePath, nodePathMap }: Omit<CascadeQueryArgs, 'query'>) => {
+        const newQuery = constructCascadeQuery({
+          query: query as AggregateQuery,
+          nodeType,
+          nodePath,
+          nodePathMap,
+        });
+
+        return scopedESQLQueryFetch(newQuery);
+      },
+      [query, scopedESQLQueryFetch]
     );
 
     const onCascadeGroupNodeExpanded = useCallback<
@@ -134,13 +157,12 @@ export const ESQLDataCascade = React.memo(
         DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupNodeExpanded']
       >
     >(
-      // @ts-expect-error - WIP to understand how data is structured
       ({ nodePath, nodePathMap }) => {
         return fetchCascadeData({
           nodePath,
           nodePathMap,
           nodeType: 'group',
-        });
+        }) as unknown as Promise<ESQLDataGroupNode[]>;
       },
       [fetchCascadeData]
     );
@@ -160,22 +182,24 @@ export const ESQLDataCascade = React.memo(
       [fetchCascadeData]
     );
 
-    const cascadeLeafRowRenderer = useCallback<
-      DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
+    const onCascadeGroupingChange = useCallback<
+      DataCascadeProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupingChange']
     >(
-      ({ data: cellData, cellId, getScrollElement, getScrollOffset, getScrollMargin }) => (
-        <ESQLDataCascadeLeafCell
-          {...props}
-          dataView={dataView}
-          cellData={cellData!}
-          queryMeta={queryMeta}
-          cellId={cellId}
-          getScrollElement={getScrollElement}
-          getScrollOffset={getScrollOffset}
-          getScrollMargin={getScrollMargin}
-        />
-      ),
-      [dataView, props, queryMeta]
+      ([rootGroup]) => {
+        const rootQuery = mutateQueryStatsGrouping(query as AggregateQuery, [rootGroup]);
+
+        scopedESQLQueryFetch(rootQuery).then((records) => {
+          setCascadeGroupData(
+            records.map((datum) => ({
+              id: datum.id,
+              ...datum.flattened,
+            }))
+          );
+        });
+
+        return;
+      },
+      [query, scopedESQLQueryFetch]
     );
 
     return (
