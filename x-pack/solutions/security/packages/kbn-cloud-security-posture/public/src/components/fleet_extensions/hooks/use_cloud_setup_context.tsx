@@ -333,8 +333,7 @@ const buildCloudSetupState = ({
     newPolicy,
     cloud,
     packageInfo,
-    cloudConnectorsFeatureEnabled:
-      cloudConnectorsFeatureEnabled && (cloud.isCloudEnabled || cloud.isServerlessEnabled),
+    cloudConnectorsFeatureEnabled: cloud.isCloudEnabled || cloud.isServerlessEnabled,
   });
 
   const cloudSetupContextValues = {
