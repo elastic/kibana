@@ -73,7 +73,7 @@ export default function searchSolutionNavigation({
         // {
         //   link: { navId: 'agent_builder' },
         //   breadcrumbs: ['Agent Chat'],
-        //   pageTestSubject: 'onechatPageConversations',
+        //   pageTestSubject: 'agentBuilderWrapper',
         // },
         // {
         //   link: { deepLinkId: 'searchPlayground' },

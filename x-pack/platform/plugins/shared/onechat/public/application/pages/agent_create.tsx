@@ -10,6 +10,7 @@ import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 import { CreateAgent } from '../components/agents/edit/create_agent';
+import { PageWrapper } from '../page_wrapper';
 
 export const OnechatAgentsCreate = () => {
   useBreadcrumb([
@@ -21,5 +22,9 @@ export const OnechatAgentsCreate = () => {
       text: labels.agents.newAgent,
     },
   ]);
-  return <CreateAgent />;
+  return (
+    <PageWrapper>
+      <CreateAgent />;
+    </PageWrapper>
+  );
 };

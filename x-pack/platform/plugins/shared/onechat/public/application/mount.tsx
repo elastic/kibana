@@ -17,7 +17,6 @@ import { OnechatRoutes } from './routes';
 import type { OnechatInternalService } from '../services';
 import type { OnechatStartDependencies } from '../types';
 import { OnechatServicesContext } from './context/onechat_services_context';
-import { AccessBoundary } from './components/access/access_boundary';
 
 export const mountApp = async ({
   core,
@@ -43,11 +42,9 @@ export const mountApp = async ({
           <QueryClientProvider client={queryClient}>
             <OnechatServicesContext.Provider value={services}>
               <RedirectAppLinks coreStart={core}>
-                <AccessBoundary>
-                  <Router history={history}>
-                    <OnechatRoutes />
-                  </Router>
-                </AccessBoundary>
+                <Router history={history}>
+                  <OnechatRoutes />
+                </Router>
               </RedirectAppLinks>
             </OnechatServicesContext.Provider>
           </QueryClientProvider>

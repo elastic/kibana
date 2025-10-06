@@ -11,12 +11,15 @@ import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 import { ToolsProvider } from '../context/tools_provider';
+import { PageWrapper } from '../page_wrapper';
 
 export const OnechatToolsPage = () => {
   useBreadcrumb([{ text: labels.tools.title, path: appPaths.tools.list }]);
   return (
-    <ToolsProvider>
-      <OnechatTools />
-    </ToolsProvider>
+    <PageWrapper>
+      <ToolsProvider>
+        <OnechatTools />
+      </ToolsProvider>
+    </PageWrapper>
   );
 };
