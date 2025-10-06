@@ -19,5 +19,6 @@
     "@kbn/logging-mocks",
     "@kbn/inference-common",
     "@kbn/i18n",
+    "@kbn/licensing-types",
   ]
 }
