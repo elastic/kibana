@@ -39,6 +39,15 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     log.warning('❗️❗️❗️');
   }
 
+  if (process.env.FTR_NETNS_NAME) {
+    const namespaceLabel = process.env.FTR_NETNS_NAME;
+    const namespaceMode = process.env.FTR_NETNS_MODE ?? 'unknown';
+    const namespaceIndex = process.env.FTR_NETNS_INDEX ?? 'n/a';
+    log.info(
+      `Running inside network namespace "${namespaceLabel}" (mode: ${namespaceMode}, index: ${namespaceIndex})`
+    );
+  }
+
   const settingOverrides = {
     mochaOpts: {
       bail: options.bail,
