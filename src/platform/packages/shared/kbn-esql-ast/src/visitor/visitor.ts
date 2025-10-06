@@ -225,6 +225,12 @@ export class Visitor<
             NonNullable<Methods['visitQuery']>
           >;
         }
+        case 'header-command': {
+          this.ctx.assertMethodExists('visitHeaderCommand');
+          return this.ctx.methods.visitHeaderCommand!(ctx as any, input) as ReturnType<
+            NonNullable<Methods['visitHeaderCommand']>
+          >;
+        }
         case 'command': {
           this.ctx.assertMethodExists('visitCommand');
           return this.ctx.methods.visitCommand!(ctx as any, input) as ReturnType<
@@ -268,6 +274,21 @@ export class Visitor<
   ) {
     this.ctx.assertMethodExists('visitCommand');
     return this.ctx.visitCommand(null, node, input);
+  }
+
+  /**
+   * Traverse starting from known header command node with default context.
+   *
+   * @param node Header command node to traverse.
+   * @param input Input to pass to the first visitor.
+   * @returns The output of the visitor.
+   */
+  public visitHeaderCommand(
+    node: import('../types').ESQLAstHeaderCommand,
+    input: UndefinedToVoid<Parameters<NonNullable<Methods['visitHeaderCommand']>>[1]>
+  ) {
+    this.ctx.assertMethodExists('visitHeaderCommand');
+    return this.ctx.visitHeaderCommand(null, node, input);
   }
 
   /**
