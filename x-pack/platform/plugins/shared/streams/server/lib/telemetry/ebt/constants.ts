@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import { createFieldTestingConfig } from '../../base.jest.integration.config';
+const STREAMS_ENDPOINT_LATENCY_EVENT = 'streams-endpoint-latency';
+const STREAMS_STATE_ERROR_EVENT = 'streams-state-error';
 
-export default createFieldTestingConfig({
-  testsDirectory: 'common',
-  groupNumber: 2,
-  totalGroups: 2,
-});
+export { STREAMS_ENDPOINT_LATENCY_EVENT, STREAMS_STATE_ERROR_EVENT };
