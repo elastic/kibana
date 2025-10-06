@@ -351,16 +351,26 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               }
             : undefined;
 
+          // Normalize body.values: if all arrays are empty, convert to single empty array
+          const normalizedValues = body.values.every(
+            (row) => Array.isArray(row) && row.length === 0
+          )
+            ? []
+            : body.values;
+
           const allColumns =
             // eslint-disable-next-line @typescript-eslint/naming-convention
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
               const originalTypes = original_types ?? [];
               const hasConflict = type === 'unsupported' && originalTypes.length > 1;
+              const kibanaFieldType = hasConflict
+                ? KBN_FIELD_TYPES.CONFLICT
+                : esFieldTypeToKibanaFieldType(type);
               return {
                 id: name,
                 name,
                 meta: {
-                  type: hasConflict ? KBN_FIELD_TYPES.CONFLICT : esFieldTypeToKibanaFieldType(type),
+                  type: kibanaFieldType,
                   esType: type,
                   sourceParams:
                     type === 'date'
@@ -374,6 +384,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                           indexPattern,
                           sourceField: name,
                         },
+                  params: {
+                    id: kibanaFieldType,
+                  },
                 },
                 isNull: hasEmptyColumns ? !lookup.has(name) : false,
               };
@@ -392,7 +405,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           }
           const columnNames = updatedWithVariablesColumns?.map(({ name }) => name);
 
-          const rows = body.values.map((row) => zipObject(columnNames, row));
+          const rows = normalizedValues.map((row) => zipObject(columnNames, row));
 
           return {
             type: 'datatable',
@@ -400,7 +413,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               type: ESQL_TABLE_TYPE,
               query,
               statistics: {
-                totalCount: body.values.length,
+                totalCount: normalizedValues.length,
               },
             },
             columns: updatedWithVariablesColumns,

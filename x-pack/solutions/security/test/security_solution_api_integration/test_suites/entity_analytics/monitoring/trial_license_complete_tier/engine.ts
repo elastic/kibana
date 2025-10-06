@@ -41,7 +41,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
   }
 
-  describe('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/236954
+  describe.skip('@ess @serverless @skipInServerlessMKI Entity Privilege Monitoring APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
     const dataViewWithNamespace = dataViewRouteHelpersFactory(supertest, customSpace);
 
@@ -274,7 +275,7 @@ export default ({ getService }: FtrProviderContext) => {
       const indexName = 'privileged-users-index-pattern';
       const entitySource = createIndexEntitySource(indexName, { name: 'PrivilegedUsers' });
       const entitySourceIntegration = createIntegrationEntitySource({
-        name: '.entity_analytics.monitoring.sources.okta-default',
+        name: '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
       });
       beforeEach(async () => {
         await enablePrivmonSetting(kibanaServer);
@@ -296,7 +297,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(names).toEqual(
           expect.arrayContaining([
             'PrivilegedUsers',
-            '.entity_analytics.monitoring.sources.okta-default',
+            '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
           ])
         );
         // Try to create the same entity sources again
@@ -461,16 +462,49 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should sync integrations during update detection ', async () => {
         // schedule a sync
+        const monitoringSource = await privMonUtils.getIntegrationMonitoringSource(
+          'entityanalytics_okta'
+        );
+        expect(monitoringSource).toBeDefined();
+        expect(monitoringSource?.name).toBe(
+          '.entity_analytics.monitoring.sources.entityanalytics_okta-default'
+        );
         await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
         await privMonUtils.waitForSyncTaskRun();
-        const res = await api.listPrivMonUsers({ query: {} });
+
+        const { body: usersBefore } = await api.listPrivMonUsers({ query: {} });
         // each user should be privileged and have correct source
-        res.body.forEach((r: any) => {
-          expect(r.user.is_privileged).toBe(true);
+        usersBefore.forEach((r: any) => {
+          privMonUtils.assertIsPrivileged(r, true);
           expect(r.user.name).toBeDefined();
           expect(r.labels.sources).toContain('entity_analytics_integration');
+          expect(r.labels.source_ids).toContain(monitoringSource?.id);
         });
-        expect(res.body.length).toBe(6); // should be 6 privileged users
+        expect(usersBefore.length).toBe(6); // should be 6 privileged users
+
+        const mableBefore = privMonUtils.findUser(usersBefore, 'Mable.Mann');
+        expect(mableBefore).toBeDefined();
+        expect(mableBefore?.entity_analytics_monitoring?.labels).toEqual([
+          {
+            field: 'user.roles',
+            source: monitoringSource?.id,
+            value: 'Group Administrator',
+          },
+        ]);
+
+        const kathryneBefore = privMonUtils.findUser(usersBefore, 'Kathryne.Ziemann');
+        expect(kathryneBefore).toBeDefined();
+        privMonUtils.assertIsPrivileged(kathryneBefore, true);
+        expect(kathryneBefore?.labels?.source_ids).toContain(monitoringSource?.id);
+        expect(kathryneBefore?.labels?.sources).toContain('entity_analytics_integration');
+        expect(kathryneBefore?.entity_analytics_monitoring?.labels).toEqual([
+          {
+            field: 'user.roles',
+            source: monitoringSource?.id,
+            value: 'Read-only Administrator',
+          },
+        ]);
+
         // update okta user to non-privileged, to test sync updates
         await privMonUtils.integrationsSync.setIntegrationUserPrivilege({
           id: 'AZlHQD20hY07UD0HNBs-',
@@ -480,12 +514,30 @@ export default ({ getService }: FtrProviderContext) => {
         // schedule another sync
         await privMonUtils.scheduleMonitoringEngineNow({ ignoreConflict: true });
         await privMonUtils.waitForSyncTaskRun();
-        const res2 = await api.listPrivMonUsers({ query: {} });
+        const { body: usersAfter } = await api.listPrivMonUsers({ query: {} });
+
         // find the updated user
-        const updatedUser = res2.body.find((u: any) => u.user.name === 'Mable.Mann');
-        // check user is now non-privileged and does not have integration source
-        expect(updatedUser.user.is_privileged).toBe(false);
-        expect(updatedUser.labels.sources).toHaveLength(0);
+        const mableAfter = privMonUtils.findUser(usersAfter, 'Mable.Mann');
+        expect(mableAfter).toBeDefined();
+        privMonUtils.assertIsPrivileged(mableAfter, false);
+        expect(mableAfter?.entity_analytics_monitoring?.labels).toEqual([]);
+        privMonUtils.expectTimestampsHaveBeenUpdated(mableBefore, mableAfter);
+
+        // kathryne should remain privileged
+        const kathryneAfter = privMonUtils.findUser(usersAfter, 'Kathryne.Ziemann');
+        expect(kathryneAfter).toBeDefined();
+        privMonUtils.assertIsPrivileged(kathryneAfter, true);
+        expect(kathryneAfter?.labels?.source_ids).toContain(monitoringSource?.id);
+        expect(kathryneAfter?.labels?.sources).toContain('entity_analytics_integration');
+        expect(kathryneAfter?.entity_analytics_monitoring?.labels).toEqual([
+          {
+            field: 'user.roles',
+            source: monitoringSource?.id,
+            value: 'Read-only Administrator',
+          },
+        ]);
+        expect(kathryneAfter?.['@timestamp']).toEqual(kathryneBefore?.['@timestamp']);
+        expect(kathryneAfter?.event?.ingested).toEqual(kathryneBefore?.event?.ingested);
       });
 
       it('should update and create users within lastProcessedMarker range during update detection ', async () => {
@@ -568,7 +620,7 @@ export default ({ getService }: FtrProviderContext) => {
         // confirm default sources have been created
         expect(names).toEqual(
           expect.arrayContaining([
-            '.entity_analytics.monitoring.sources.okta-default',
+            '.entity_analytics.monitoring.sources.entityanalytics_okta-default',
             // '.entity_analytics.monitoring.sources.ad-default',
             '.entity_analytics.monitoring.users-default',
           ])

@@ -82,7 +82,7 @@ export const AlertsTabContent = () => {
               id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
               consumers={INFRA_ALERT_CONSUMERS}
-              initialPageSize={ALERTS_PER_PAGE}
+              pageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
               services={{
                 data,
