@@ -51,6 +51,7 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/serverless",
+    "@kbn/rrule",
     "@kbn/resizable-layout"
   ],
   "exclude": ["target/**/*"]
