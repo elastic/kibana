@@ -19,6 +19,10 @@ import { css } from '@emotion/react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { MessageRole } from '@kbn/inference-common';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
+import {
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+  DEFAULT_AI_CONNECTOR,
+} from '../../../../common/constants';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
@@ -26,7 +30,6 @@ import { licenseService } from '../../../common/hooks/use_license';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
 import { useAIConnectors } from '../../../common/hooks/use_ai_connectors';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, DEFAULT_AI_CONNECTOR } from '@kbn/security-solution-plugin/common/constants';
 
 interface Props {
   isLoading: boolean;
@@ -38,14 +41,20 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
     euiTheme: { size },
   } = useEuiTheme();
 
-  const { http, notifications, inference, settings, uiSettings, featureFlags } = useKibana().services;
+  const { http, notifications, inference, settings, uiSettings, featureFlags } =
+    useKibana().services;
   const [newDefaultConnectorId, setNewDefaultConnectorId] = useState<string | undefined>(undefined);
   const [insightResult, setInsightResult] = useState<string>('');
   const { aiConnectors: connectors } = useAIConnectors();
   const legacyDefaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
-  const useNewDefaultConnector = featureFlags.getBooleanValue(AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, false);
+  const useNewDefaultConnector = featureFlags.getBooleanValue(
+    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+    false
+  );
 
-  const defaultConnectorId = useNewDefaultConnector ? newDefaultConnectorId: legacyDefaultConnectorId;
+  const defaultConnectorId = useNewDefaultConnector
+    ? newDefaultConnectorId
+    : legacyDefaultConnectorId;
 
   useEffect(() => {
     if (connectors) {

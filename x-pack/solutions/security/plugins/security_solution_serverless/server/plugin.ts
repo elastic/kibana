@@ -14,9 +14,14 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { getDefaultAIConnectorSetting, getDefaultValueReportSettings } from '@kbn/security-solution-plugin/server/ui_settings';
-import { getEnabledProductFeatures } from '../common/pli/pli_features';
+import {
+  getDefaultAIConnectorSetting,
+  getDefaultValueReportSettings,
+} from '@kbn/security-solution-plugin/server/ui_settings';
 import { isSupportedConnector } from '@kbn/inference-common';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '@kbn/security-solution-plugin/common/constants';
+import { getEnabledProductFeatures } from '../common/pli/pli_features';
 import type { ServerlessSecurityConfig } from './config';
 import { createConfig } from './config';
 import type {
@@ -38,16 +43,15 @@ import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task
 import { telemetryEvents } from './telemetry/event_based_telemetry';
 import { UsageReportingService } from './common/services/usage_reporting_service';
 import { ai4SocMeteringService } from './ai4soc/services';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '@kbn/security-solution-plugin/common/constants';
 export class SecuritySolutionServerlessPlugin
   implements
-  Plugin<
-    SecuritySolutionServerlessPluginSetup,
-    SecuritySolutionServerlessPluginStart,
-    SecuritySolutionServerlessPluginSetupDeps,
-    SecuritySolutionServerlessPluginStartDeps
-  > {
+    Plugin<
+      SecuritySolutionServerlessPluginSetup,
+      SecuritySolutionServerlessPluginStart,
+      SecuritySolutionServerlessPluginSetupDeps,
+      SecuritySolutionServerlessPluginStartDeps
+    >
+{
   private kibanaVersion: string;
   private config: ServerlessSecurityConfig;
   private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;
@@ -94,7 +98,10 @@ export class SecuritySolutionServerlessPlugin
     coreSetup
       .getStartServices()
       .then(async ([coreStart, depsStart]) => {
-        const useNewDefaultConnector = await coreStart.featureFlags.getBooleanValue(AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, false);
+        const useNewDefaultConnector = await coreStart.featureFlags.getBooleanValue(
+          AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+          false
+        );
         if (useNewDefaultConnector) {
           coreSetup.uiSettings.register({
             ...getDefaultValueReportSettings(),
@@ -103,7 +110,7 @@ export class SecuritySolutionServerlessPlugin
         }
         try {
           const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
-          // using "default" space actually forces the api to use undefined space (see getAllUnsecured)	
+          // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
           const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
             (connector: Connector) => isSupportedConnector(connector)
           );
@@ -116,7 +123,7 @@ export class SecuritySolutionServerlessPlugin
           this.logger.error(`Error registering default AI connector: ${error}`);
         }
       })
-      .catch(() => { }); // it shouldn't reject, but just in case
+      .catch(() => {}); // it shouldn't reject, but just in case
 
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
@@ -181,14 +188,14 @@ export class SecuritySolutionServerlessPlugin
         taskManager: pluginsSetup.taskManager,
         interval: this.config.cloudSecurityUsageReportingTaskInterval,
       })
-      .catch(() => { });
+      .catch(() => {});
 
     this.endpointUsageReportingTask
       ?.start({
         taskManager: pluginsSetup.taskManager,
         interval: this.config.usageReportingTaskInterval,
       })
-      .catch(() => { });
+      .catch(() => {});
 
     if (ai4SocMeteringService.shouldMeter(this.config)) {
       this.ai4SocUsageReportingTask
@@ -196,18 +203,18 @@ export class SecuritySolutionServerlessPlugin
           taskManager: pluginsSetup.taskManager,
           interval: this.config.ai4SocUsageReportingTaskInterval,
         })
-        .catch(() => { });
+        .catch(() => {});
     }
 
-    this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager }).catch(() => { });
+    this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager }).catch(() => {});
 
     setEndpointPackagePolicyServerlessBillingFlags(
       internalSOClient,
       internalESClient,
       pluginsSetup.fleet.packagePolicyService
-    ).catch(() => { });
+    ).catch(() => {});
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }

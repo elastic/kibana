@@ -10,12 +10,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { type PromptContext } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
+import {
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+  DEFAULT_AI_CONNECTOR,
+} from '../../../../common/constants';
 import { AlertSummary } from './alert_summary';
 import { AlertSummaryOptionsMenu } from './settings_menu';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAIForSOCDetailsContext } from '../context';
 import { useAIConnectors } from '../../../common/hooks/use_ai_connectors';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, DEFAULT_AI_CONNECTOR } from '@kbn/security-solution-plugin/common/constants';
 export const ALERT_SUMMARY_SECTION_TEST_ID = 'ai-for-soc-alert-flyout-alert-summary-section';
 
 const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummarySection.title', {
@@ -40,7 +43,7 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
     application: { capabilities },
     settings,
     uiSettings,
-    featureFlags
+    featureFlags,
   } = useKibana().services;
 
   const { eventId, showAnonymizedValues } = useAIForSOCDetailsContext();
@@ -49,7 +52,10 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
 
   const canSeeAdvancedSettings = capabilities.management.kibana.settings ?? false;
   const legacyDefaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
-  const useNewDefaultConnector = featureFlags.getBooleanValue(AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, false);
+  const useNewDefaultConnector = featureFlags.getBooleanValue(
+    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+    false
+  );
 
   useEffect(() => {
     if (connectors) {
@@ -88,7 +94,9 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
       <AlertSummary
         alertId={eventId}
         canSeeAdvancedSettings={canSeeAdvancedSettings}
-        defaultConnectorId={useNewDefaultConnector ? newDefaultConnectorId: legacyDefaultConnectorId}
+        defaultConnectorId={
+          useNewDefaultConnector ? newDefaultConnectorId : legacyDefaultConnectorId
+        }
         promptContext={promptContext}
         setHasAlertSummary={setHasAlertSummary}
         showAnonymizedValues={showAnonymizedValues}
