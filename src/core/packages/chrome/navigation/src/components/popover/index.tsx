@@ -83,6 +83,7 @@ export const SideNavPopover = ({
 
   const [isOpenedByClick, setIsOpenedByClick] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [shouldFocusOnOpen, setShouldFocusOnOpen] = useState(false);
 
   const setOpenedByClick = useCallback(() => setIsOpenedByClick(true), []);
 
@@ -97,6 +98,7 @@ export const SideNavPopover = ({
     setIsOpen(false);
     clearOpenedByClick();
     clearTimeout();
+    setShouldFocusOnOpen(false);
     anyPopoverOpen = false;
   }, [clearOpenedByClick, clearTimeout]);
 
@@ -151,8 +153,8 @@ export const SideNavPopover = ({
           // Required for entering the popover with Enter or Space key
           // Otherwise the navigation happens immediately
           e.preventDefault();
+          setShouldFocusOnOpen(true);
           open();
-          focusFirstElement(popoverRef);
         }
       } else {
         trigger.props.onKeyDown?.(e);
@@ -262,12 +264,17 @@ export const SideNavPopover = ({
       >
         <div
           ref={(ref) => {
+            popoverRef.current = ref;
+
             if (ref) {
               const elements = getFocusableElements(ref);
               updateTabIndices(elements);
-            }
 
-            popoverRef.current = ref;
+              if (shouldFocusOnOpen) {
+                focusFirstElement(popoverRef);
+                setShouldFocusOnOpen(false);
+              }
+            }
           }}
           onKeyDown={handlePopoverKeyDown}
           css={popoverContentStyles}
