@@ -24,6 +24,7 @@ import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 import { SettingCardHeader } from './setting_card';
 import type { PolicyFormComponentCommonProps } from '../types';
+import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../../../../../../common/endpoint/types';
 import { useGetCustomNotificationUnavailableComponent } from '../hooks/use_get_custom_notification_unavailable_component';
 import {
   NOTIFY_USER_SECTION_TITLE,
@@ -49,6 +50,10 @@ export const DeviceControlNotifyUserOption = React.memo(
 
     const isDeviceControlEnabled = useMemo(() => {
       return policy.windows.device_control?.enabled || policy.mac.device_control?.enabled || false;
+    }, [policy]);
+
+    const currentAccessLevel = useMemo(() => {
+      return policy.windows.device_control?.usb_storage || policy.mac.device_control?.usb_storage;
     }, [policy]);
 
     const userNotificationSelected = policy.windows.popup.device_control?.enabled || false;
@@ -171,6 +176,10 @@ export const DeviceControlNotifyUserOption = React.memo(
     ]);
 
     if (!isEnterprise) {
+      return null;
+    }
+
+    if (currentAccessLevel !== DeviceControlAccessLevelEnum.deny_all) {
       return null;
     }
 
