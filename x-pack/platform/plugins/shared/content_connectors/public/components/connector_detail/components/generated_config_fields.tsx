@@ -277,6 +277,10 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                           isLoading={isGenerateLoading}
                           onClick={refreshButtonClick}
                           disabled={!connector.index_name}
+                          aria-label={i18n.translate(
+                            'xpack.contentConnectors.connectorDeployment.generateAPIKey',
+                            { defaultMessage: 'Generate an Elasticsearch API key' }
+                          )}
                         />
                       </EuiFlexItem>
                     )
