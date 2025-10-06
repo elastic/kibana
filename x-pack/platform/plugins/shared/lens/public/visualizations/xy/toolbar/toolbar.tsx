@@ -57,7 +57,7 @@ const legendOptions: Array<{
   },
 ];
 
-const getDataBounds = function (
+export const getDataBounds = function (
   activeData: FramePublicAPI['activeData'],
   axes: AxisGroupConfiguration[]
 ) {
@@ -90,7 +90,11 @@ const getDataBounds = function (
   return groups;
 };
 
-function hasPercentageAxis(axisGroups: AxisGroupConfiguration[], groupId: string, state: XYState) {
+export function hasPercentageAxis(
+  axisGroups: AxisGroupConfiguration[],
+  groupId: string,
+  state: XYState
+) {
   return Boolean(
     axisGroups
       .find((group) => group.groupId === groupId)
@@ -102,12 +106,14 @@ function hasPercentageAxis(axisGroups: AxisGroupConfiguration[], groupId: string
   );
 }
 
-const axisKeyToTitleMapping: Record<keyof AxesSettingsConfig, 'xTitle' | 'yTitle' | 'yRightTitle'> =
-  {
-    x: 'xTitle',
-    yLeft: 'yTitle',
-    yRight: 'yRightTitle',
-  };
+export const axisKeyToTitleMapping: Record<
+  keyof AxesSettingsConfig,
+  'xTitle' | 'yTitle' | 'yRightTitle'
+> = {
+  x: 'xTitle',
+  yLeft: 'yTitle',
+  yRight: 'yRightTitle',
+};
 
 const xyLegendValues: Array<{
   value: XYLegendValue;
@@ -517,6 +523,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
       {/* Axis settings */}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+          {/* Axis 1 */}
           <TooltipWrapper
             tooltipContent={
               shouldRotate
@@ -557,6 +564,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             />
           </TooltipWrapper>
 
+          {/* Axis 2 */}
           <AxisSettingsPopover
             axis="x"
             layers={state?.layers}
@@ -581,6 +589,7 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             dataBounds={xDataBounds}
           />
 
+          {/* Axis 3 */}
           <TooltipWrapper
             tooltipContent={
               shouldRotate

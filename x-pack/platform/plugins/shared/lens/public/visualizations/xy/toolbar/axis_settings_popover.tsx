@@ -134,7 +134,7 @@ export interface AxisSettingsPopoverProps {
   useMultilayerTimeAxis?: boolean;
 }
 
-const popoverConfig = (
+export const popoverConfig = (
   axis: AxesSettingsConfigKeys,
   isHorizontal: boolean
 ): {
@@ -188,14 +188,35 @@ const popoverConfig = (
   }
 };
 
-export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverProps> = ({
-  layers,
+export const AxisSettingsPopover: React.FC<AxisSettingsPopoverProps> = (props) => {
+  const { layers, axis, isDisabled } = props;
+
+  const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
+  const config = popoverConfig(axis, isHorizontal);
+
+  return (
+    <ToolbarPopover
+      title={config.popoverTitle}
+      type={config.icon}
+      groupPosition={config.groupPosition}
+      isDisabled={isDisabled}
+      buttonDataTestSubj={config.buttonDataTestSubj}
+      panelStyle={{ width: '500px' }}
+    >
+      <XyAxisSettings {...props} />
+    </ToolbarPopover>
+  );
+};
+
+/**
+ * Extract the toolbar popover content. Does not depend on the wrapper
+ */
+export const XyAxisSettings: React.FC<AxisSettingsPopoverProps> = ({
   axis,
   axisTitle,
   updateTitleState,
   toggleTickLabelsVisibility,
   toggleGridlinesVisibility,
-  isDisabled,
   areTickLabelsVisible,
   areGridlinesVisible,
   isTitleVisible,
@@ -215,9 +236,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   setScale,
   setScaleWithExtent,
 }) => {
-  const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
-  const config = popoverConfig(axis, isHorizontal);
-
   const onExtentChange = useCallback(
     (newExtent: AxisExtentConfig | undefined) => {
       if (setExtent && newExtent && !isEqual(newExtent, extent)) {
@@ -238,22 +256,15 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   });
 
   return (
-    <ToolbarPopover
-      title={config.popoverTitle}
-      type={config.icon}
-      groupPosition={config.groupPosition}
-      isDisabled={isDisabled}
-      buttonDataTestSubj={config.buttonDataTestSubj}
-      panelStyle={{
-        width: '500px',
-      }}
-    >
+    <>
+      {/* Title settings */}
       <ToolbarTitleSettings
         settingId={axis}
         title={axisTitle}
         updateTitleState={(title) => updateTitleState(title, axis)}
         isTitleVisible={isTitleVisible}
       />
+      {/* Grid lines */}
       <EuiFormRow
         display="columnCompressed"
         label={i18n.translate('xpack.lens.xyChart.Gridlines', {
@@ -272,7 +283,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           showLabel={false}
         />
       </EuiFormRow>
-
+      {/* Tick lines */}
       <AxisTicksSettings
         axis={axis}
         updateTicksVisibilityState={(visible) => {
@@ -280,6 +291,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
         }}
         isAxisLabelVisible={areTickLabelsVisible}
       />
+      {/* Orientation */}
       {!useMultilayerTimeAxis && areTickLabelsVisible && (
         <AxisLabelOrientationSelector
           axis={axis}
@@ -293,6 +305,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           }}
         />
       )}
+      {/* Show partial data markers */}
       {setEndzoneVisibility && (
         <EuiFormRow
           display="columnCompressed"
@@ -313,6 +326,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           />
         </EuiFormRow>
       )}
+      {/* Show current time marker */}
       {setCurrentTimeMarkerVisibility && (
         <EuiFormRow
           display="columnCompressed"
@@ -333,6 +347,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           />
         </EuiFormRow>
       )}
+      {/* Scale */}
       {setScale && (
         <EuiFormRow
           display="columnCompressed"
@@ -384,6 +399,7 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           />
         </EuiFormRow>
       )}
+      {/* Bounds and Round to nice values */}
       {localExtent && setLocalExtent && (
         <AxisBoundsControl
           type={axis !== 'x' ? 'metric' : 'bucket'}
@@ -398,6 +414,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           canHaveNiceValues={axis !== 'x' || Boolean(extent)}
         />
       )}
-    </ToolbarPopover>
+    </>
   );
 };
