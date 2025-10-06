@@ -24,6 +24,7 @@ import type { ItemWithAnID } from '../../types';
 import { PageIntroduction } from '../../page_introduction/page_introduction';
 
 export interface InlineEditableTableProps<Item extends ItemWithAnID> {
+  ariaLabel?: string;
   columns: Array<InlineEditableTableColumn<Item>>;
   items: Item[];
   defaultItem?: Partial<Item>;
@@ -86,6 +87,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
 };
 
 export const InlineEditableTableContents = <Item extends ItemWithAnID>({
+  ariaLabel,
   columns,
   emptyPropertyAllowed,
   items,
@@ -149,6 +151,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
       />
       <EuiSpacer size="l" />
       <ReorderableTable
+        ariaLabel={ariaLabel}
         className={classNames(className, 'editableTable')}
         items={displayedItems}
         unreorderableItems={uneditableItems}

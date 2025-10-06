@@ -29,9 +29,6 @@ export const reorderableTableStyles = (euiTheme: EuiThemeComputed<{}>) =>
 
     // Row
     '.reorderableTableRow': {
-      '> .euiFlexGroup > .euiFlexItem': {
-        margin: `${euiTheme.size.m} 0`,
-      },
       backgroundColor: euiTheme.colors.emptyShade,
       borderTop: euiTheme.border.thin,
     },

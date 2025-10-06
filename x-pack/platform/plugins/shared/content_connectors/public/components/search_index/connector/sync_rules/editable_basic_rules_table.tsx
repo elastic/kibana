@@ -184,6 +184,10 @@ export const SyncRulesTable: React.FC = () => {
         'xpack.contentConnectors.content.index.connector.syncRules.table.addRuleLabel',
         { defaultMessage: 'Add sync rule' }
       )}
+      ariaLabel={i18n.translate(
+        'xpack.contentConnectors.content.index.connector.syncRules.table.ariaLabel',
+        { defaultMessage: 'Sync rules table' }
+      )}
       columns={columns}
       defaultItem={{
         policy: 'include',
