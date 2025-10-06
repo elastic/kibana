@@ -672,9 +672,6 @@ Search::
 * Fixes an issue in Search Playground where context limit errors were not handled well when using the Elastic Managed LLM ({kibana-pull}225360[#225360]).
 * Adjusts the `z-index` of the app menu header to not conflict with the Persistent Console ({kibana-pull}224708[#224708]).
 
-Management::
-* Fixes privilege requirements when reindexing indices through Upgrade Assistant. Previously, the `superuser` role was required, but now the `cluster: manage` and `all` privileges are sufficient ({kibana-pull}237055[#237055]).
-
 [[release-notes-8.18.8]]
 == {kib} 8.18.8
 
