@@ -129,7 +129,7 @@ describe('get_prompt', () => {
               promptId: promptDictionary.systemPrompt,
               promptGroupId: promptGroupId.aiAssistant,
               provider: 'bedrock',
-              model: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+              model: 'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
               description: 'Default prompt for AI Assistant system prompt.',
               prompt: {
                 default: 'Hello world this is a system prompt for bedrock claude-3-7-sonnet',

@@ -113,8 +113,8 @@ When you run a comparison, you'll get detailed analysis showing:
 
 ```text
 📋 Run Metadata:
-Current Run: 161de0d567799670 (2025-08-28T14:17:07.396Z) - Model: us.anthropic.claude-sonnet-4-20250514-v1:0
-Reference Run: 026c5060fbfc7dcb (2025-08-28T14:21:35.886Z) - Model: us.anthropic.claude-sonnet-4-20250514-v1:0
+Current Run: 161de0d567799670 (2025-08-28T14:17:07.396Z) - Model: us.anthropic.claude-3-7-sonnet-20250219-v1:0
+Reference Run: 026c5060fbfc7dcb (2025-08-28T14:21:35.886Z) - Model: us.anthropic.claude-3-7-sonnet-20250219-v1:0
 
 📈 ambiguous-queries Performance Comparison:
 

@@ -122,7 +122,7 @@ The evaluation data is stored with the following structure:
     "@timestamp": "2025-08-28T14:21:35.886Z",
     "run_id": "026c5060fbfc7dcb",
     "model": {
-      "id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+      "id": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
       "family": "anthropic",
       "provider": "bedrock"
     },
