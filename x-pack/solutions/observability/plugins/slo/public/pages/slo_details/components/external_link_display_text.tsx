@@ -32,7 +32,7 @@ export function ExternalLinkDisplayText({
         <EuiSpacer size="s" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink data-test-subj="sloHealthCalloutInspectTransformLink" href={url}>
+        <EuiLink data-test-subj="sloHealthCalloutInspectLink" href={url}>
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon type="inspect" color="danger" />

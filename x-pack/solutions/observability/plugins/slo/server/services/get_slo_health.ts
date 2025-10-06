@@ -137,7 +137,6 @@ export class GetSLOHealth {
       return {
         sloId: item.sloId,
         sloRevision: item.sloRevision,
-        sloInstanceId: item.sloInstanceId,
         sloName: item.sloName,
         state,
         health,

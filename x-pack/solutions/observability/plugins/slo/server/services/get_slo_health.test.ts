@@ -109,7 +109,12 @@ describe('GetSLOHealth', () => {
             "sloRevision": 1,
             "state": "no_data",
           },
-        ],
+          "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
+          "sloName": "irrelevant",
+          "sloRevision": 1,
+          "state": "no_data",
+        },
+      ],
         "page": 0,
         "perPage": 500,
         "total": 1,
@@ -202,12 +207,16 @@ describe('GetSLOHealth', () => {
               "sloRevision": 1,
               "state": "no_data",
             },
-          ],
+            "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
+            "sloName": "irrelevant",
+            "sloRevision": 1,
+            "state": "no_data",
+          },
+        ],
           "page": 0,
           "perPage": 500,
           "total": 1,
-        }
-      `);
+        }`);
     });
 
     it('returns unhealthy whenever one of the transform is unhealthy', async () => {
@@ -266,7 +275,12 @@ describe('GetSLOHealth', () => {
               "sloRevision": 1,
               "state": "no_data",
             },
-          ],
+            "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
+            "sloName": "irrelevant",
+            "sloRevision": 1,
+            "state": "no_data",
+          },
+        ],
           "page": 0,
           "perPage": 500,
           "total": 1,
