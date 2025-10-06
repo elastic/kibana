@@ -301,6 +301,8 @@ export class SearchSessionService implements ISearchSessionService {
     const searchInfo: SearchSessionRequestInfo = {
       id: searchId,
       strategy,
+      params: searchRequest.params,
+      added: new Date().toISOString(),
     };
 
     if (!this.trackIdBatchQueueMap.has(sessionId)) {
