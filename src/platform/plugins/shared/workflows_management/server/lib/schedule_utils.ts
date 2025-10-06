@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Frequency, Weekday } from '@kbn/rrule';
+import { Frequency } from '@kbn/rrule';
 
 // Define the trigger type based on the schema
 export interface WorkflowTrigger {
@@ -66,15 +66,6 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
     return convertRRuleToTaskSchedule(config.rrule);
   }
 
-  // Handle interval-based scheduling format (e.g., every: "5m")
-  if (config.every && typeof config.every === 'string') {
-    const parsed = parseIntervalString(config.every);
-    if (parsed) {
-      const interval = `${parsed.value}${parsed.unit}`;
-      return { interval };
-    }
-  }
-
   // Handle legacy interval-based scheduling (e.g., every 5 minutes)
   if (config.every && config.unit) {
     const every = parseInt(config.every, 10);
@@ -86,7 +77,7 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
       );
     }
 
-    if (!unit) {
+    if (!unit || !['s', 'm', 'h', 'd'].includes(unit)) {
       throw new Error(
         `Invalid schedule configuration: unsupported unit "${unit}". Supported units: s, m, h, d`
       );
@@ -94,6 +85,22 @@ export function convertWorkflowScheduleToTaskSchedule(trigger: WorkflowTrigger) 
 
     const interval = `${every}${unit}`;
     return { interval };
+  }
+
+  // Handle interval-based scheduling format (e.g., every: "5m")
+  if (config.every && typeof config.every === 'string') {
+    const parsed = parseIntervalString(config.every);
+    if (parsed) {
+      const interval = `${parsed.value}${parsed.unit}`;
+      return { interval };
+    } else {
+      // Only throw specific format error if it looks like it was intended to be a new format
+      if (config.every.match(/^\d+[smhd]$/)) {
+        throw new Error(
+          `Invalid interval format: "${config.every}". Use format like "5m", "2h", "1d", "30s"`
+        );
+      }
+    }
   }
 
   throw new Error(
@@ -120,7 +127,12 @@ export function getScheduledTriggers(triggers: WorkflowTrigger[]): WorkflowTrigg
  */
 export function convertRRuleToTaskSchedule(rruleConfig: WorkflowRRuleConfig) {
   // Validate required fields
-  if (!rruleConfig.freq || !rruleConfig.interval || !rruleConfig.tzid) {
+  if (
+    !rruleConfig.freq ||
+    rruleConfig.interval === undefined ||
+    rruleConfig.interval === null ||
+    !rruleConfig.tzid
+  ) {
     throw new Error('RRule configuration must include freq, interval, and tzid fields');
   }
 
@@ -137,7 +149,7 @@ export function convertRRuleToTaskSchedule(rruleConfig: WorkflowRRuleConfig) {
   }
 
   // Validate interval
-  if (rruleConfig.interval < 1) {
+  if (!Number.isInteger(rruleConfig.interval) || rruleConfig.interval < 1) {
     throw new Error('Interval must be a positive integer');
   }
 
@@ -179,23 +191,16 @@ export function convertRRuleToTaskSchedule(rruleConfig: WorkflowRRuleConfig) {
   }
 
   if (rruleConfig.byweekday && rruleConfig.byweekday.length > 0) {
-    // Convert weekday strings to Weekday enum values
-    const weekdayMap: Record<string, Weekday> = {
-      MO: Weekday.MO,
-      TU: Weekday.TU,
-      WE: Weekday.WE,
-      TH: Weekday.TH,
-      FR: Weekday.FR,
-      SA: Weekday.SA,
-      SU: Weekday.SU,
-    };
-
+    // Validate weekday strings (Task Manager expects strings, not enum values)
+    const validWeekdays = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
     const weekdays = rruleConfig.byweekday.map((day) => {
-      const weekday = weekdayMap[day.toUpperCase()];
-      if (!weekday) {
-        throw new Error(`Invalid RRule byweekday: "${day}"`);
+      const upperDay = day.toUpperCase();
+      if (!validWeekdays.includes(upperDay)) {
+        throw new Error(
+          `Invalid RRule byweekday: "${day}". Valid values are: ${validWeekdays.join(', ')}`
+        );
       }
-      return weekday;
+      return upperDay;
     });
 
     rrule.byweekday = weekdays;

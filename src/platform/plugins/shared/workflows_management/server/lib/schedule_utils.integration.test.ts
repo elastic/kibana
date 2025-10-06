@@ -11,7 +11,7 @@ import {
   convertWorkflowScheduleToTaskSchedule,
   convertRRuleToTaskSchedule,
 } from './schedule_utils';
-import { Frequency, Weekday } from '@kbn/rrule';
+import { Frequency } from '@kbn/rrule';
 
 /**
  * Integration test to verify RRule scheduling works end-to-end with TaskManager
@@ -66,7 +66,7 @@ describe('RRule Scheduling Integration', () => {
           freq: Frequency.WEEKLY,
           interval: 1,
           tzid: 'America/New_York',
-          byweekday: [Weekday.MO, Weekday.FR],
+          byweekday: ['MO', 'FR'],
           byhour: [14],
           byminute: [0],
         },
@@ -200,7 +200,7 @@ describe('RRule Scheduling Integration', () => {
           freq: Frequency.WEEKLY,
           interval: 2,
           tzid: 'America/New_York',
-          byweekday: [Weekday.MO, Weekday.WE, Weekday.FR],
+          byweekday: ['MO', 'WE', 'FR'],
           byhour: [8, 17],
           byminute: [0],
           dtstart: '2024-01-15T08:00:00-05:00',
