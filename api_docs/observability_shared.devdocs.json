@@ -546,7 +546,7 @@
         "label": "FeatureFeedbackButton",
         "description": [],
         "signature": [
-          "({ formUrl, formConfig, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, nodeType, surveyButtonText, }: FeatureFeedbackButtonProps) => React.JSX.Element"
+          "({ formUrl, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, nodeType, surveyButtonText, }: FeatureFeedbackButtonProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
         "deprecated": false,
@@ -557,7 +557,7 @@
             "id": "def-public.FeatureFeedbackButton.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  formUrl,\n  formConfig,\n  'data-test-subj': dts,\n  onClickCapture,\n  defaultButton,\n  kibanaVersion,\n  isCloudEnv,\n  isServerlessEnv,\n  sanitizedPath,\n  nodeType,\n  surveyButtonText = FEEDBACK_BUTTON_DEFAULT_TEXT,\n}",
+            "label": "{\n  formUrl,\n  'data-test-subj': dts,\n  onClickCapture,\n  defaultButton,\n  kibanaVersion,\n  isCloudEnv,\n  isServerlessEnv,\n  sanitizedPath,\n  nodeType,\n  surveyButtonText = FEEDBACK_BUTTON_DEFAULT_TEXT,\n}",
             "description": [],
             "signature": [
               "FeatureFeedbackButtonProps"
@@ -836,9 +836,7 @@
         "label": "getSurveyFeedbackURL",
         "description": [],
         "signature": [
-          "({ formUrl, formConfig, kibanaVersion, sanitizedPath, isCloudEnv, isServerlessEnv, nodeType, }: { formUrl: string; formConfig?: ",
-          "FormConfig",
-          " | undefined; kibanaVersion?: string | undefined; deploymentType?: string | undefined; sanitizedPath?: string | undefined; mlJobType?: string | undefined; isCloudEnv?: boolean | undefined; isServerlessEnv?: boolean | undefined; nodeType?: ",
+          "({ formUrl, kibanaVersion, sanitizedPath, isCloudEnv, isServerlessEnv, nodeType, }: { formUrl: string; kibanaVersion?: string | undefined; deploymentType?: string | undefined; sanitizedPath?: string | undefined; mlJobType?: string | undefined; isCloudEnv?: boolean | undefined; isServerlessEnv?: boolean | undefined; nodeType?: ",
           "NodeType",
           " | undefined; }) => string"
         ],
@@ -851,7 +849,7 @@
             "id": "def-public.getSurveyFeedbackURL.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  formUrl,\n  formConfig,\n  kibanaVersion,\n  sanitizedPath,\n  isCloudEnv,\n  isServerlessEnv,\n  nodeType,\n}",
+            "label": "{\n  formUrl,\n  kibanaVersion,\n  sanitizedPath,\n  isCloudEnv,\n  isServerlessEnv,\n  nodeType,\n}",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
             "deprecated": false,
@@ -864,21 +862,6 @@
                 "tags": [],
                 "label": "formUrl",
                 "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.formConfig",
-                "type": "Object",
-                "tags": [],
-                "label": "formConfig",
-                "description": [],
-                "signature": [
-                  "FormConfig",
-                  " | undefined"
-                ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false
