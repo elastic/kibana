@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -10,12 +12,12 @@ import execa from 'execa';
 import Path from 'path';
 import chalk from 'chalk';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { assertDockerAvailable } from '../util/assert_docker_available';
+import { assertDockerAvailable } from './util/assert_docker_available';
 import { getDockerComposeYaml } from './get_docker_compose_yaml';
 import { getEdotCollectorConfig } from './get_edot_collector_config';
-import { writeFile } from '../util/file_utils';
+import { writeFile } from './util/file_utils';
 import { readKibanaConfig } from './read_kibana_config';
-import { untilContainerReady } from '../util/until_container_ready';
+import { untilContainerReady } from './util/until_container_ready';
 
 const DATA_DIR = Path.join(REPO_ROOT, 'data', 'edot');
 const DOCKER_COMPOSE_FILE_PATH = Path.join(DATA_DIR, 'docker-compose.yaml');
