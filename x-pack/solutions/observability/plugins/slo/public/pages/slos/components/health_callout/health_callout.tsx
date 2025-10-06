@@ -16,7 +16,7 @@ import { SloHealthIssuesList } from './slo_health_issues_list';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
-export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }) {
+export function HealthCallout({ sloList = [] }: { sloList?: Array<{ id: string; name: string }> }) {
   const { http } = useKibana().services;
   const { isLoading, isError, data: results } = useFetchSloHealth({ list: sloList });
   const [showCallOut, setShowCallOut] = useState(
@@ -32,7 +32,7 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
     return null;
   }
 
-  const unhealthySloList = results.filter((result) => result.health.overall === 'unhealthy');
+  const unhealthySloList = results.filter((result) => result.health.overall !== 'healthy');
   if (unhealthySloList.length === 0) {
     return null;
   }
@@ -81,7 +81,13 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
                 id="xpack.slo.sloList.healthCallout.description"
                 defaultMessage="The following {count, plural, one {transform is} other {transforms are}} in {stateText} state:"
                 values={{
-                  count: unhealthySloList.length,
+                  count: unhealthySloList.reduce(
+                    (acc, result) =>
+                      acc +
+                      (result.health.rollup !== 'healthy' ? 1 : 0) +
+                      (result.health.summary !== 'healthy' ? 1 : 0),
+                    0
+                  ),
                   stateText,
                 }}
               />
