@@ -98,16 +98,6 @@ export class SecuritySolutionServerlessPlugin
     coreSetup
       .getStartServices()
       .then(async ([coreStart, depsStart]) => {
-        const useNewDefaultConnector = await coreStart.featureFlags.getBooleanValue(
-          AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-          false
-        );
-        if (useNewDefaultConnector) {
-          coreSetup.uiSettings.register({
-            ...getDefaultValueReportSettings(),
-          });
-          return;
-        }
         try {
           const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
           // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
