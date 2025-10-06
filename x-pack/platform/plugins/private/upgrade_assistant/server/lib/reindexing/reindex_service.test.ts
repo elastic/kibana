@@ -137,6 +137,7 @@ describe('reindexService', () => {
             },
           ],
         },
+      });
     });
   });
 
