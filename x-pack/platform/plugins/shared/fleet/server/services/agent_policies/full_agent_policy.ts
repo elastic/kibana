@@ -418,6 +418,33 @@ export function generateFleetConfig(
     hosts: fleetServerHost.host_urls,
   };
 
+  // generating the ssl configs for checking into Fleet
+  // These correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
+  if (
+    fleetServerHost.ssl?.agent_certificate_authorities ||
+    fleetServerHost.ssl?.agent_certificate ||
+    fleetServerHost.ssl?.agent_key
+  ) {
+    config.ssl = {
+      ...(fleetServerHost.ssl.agent_certificate_authorities && {
+        certificate_authorities: fleetServerHost.ssl.agent_certificate_authorities,
+      }),
+      ...(fleetServerHost.ssl?.agent_certificate && {
+        certificate: fleetServerHost.ssl.agent_certificate,
+      }),
+      ...(fleetServerHost.ssl?.agent_key &&
+        !fleetServerHost.secrets?.ssl?.agent_key && {
+          key: fleetServerHost.ssl.agent_key,
+        }),
+    };
+  }
+  // if both ssl.agent_key and secrets.ssl.agent_key are present, prefer the secrets'
+  if (fleetServerHost.secrets?.ssl?.agent_key) {
+    config.secrets = {
+      ssl: { key: fleetServerHost.secrets?.ssl?.agent_key },
+    };
+  }
+
   const fleetServerHostproxy = fleetServerHost.proxy_id
     ? proxies.find((proxy) => proxy.id === fleetServerHost.proxy_id)
     : null;
@@ -683,11 +710,9 @@ export function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerH
     };
   }
   // if both ssl.es_key and secrets.ssl.es_key are present, prefer the secrets'
-  if (fleetServerHost?.secrets) {
+  if (fleetServerHost?.secrets?.ssl?.es_key) {
     outputConfig.secrets = {
-      ...(fleetServerHost?.secrets?.ssl?.es_key && {
-        ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
-      }),
+      ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
     };
   }
 
