@@ -151,7 +151,7 @@ export const getShareAppMenuItem = ({
             defaultMessage: 'Untitled Discover session',
           }),
       },
-      isDirty: hasUnsavedChanges,
+      isDirty: !persistedDiscoverSession || hasUnsavedChanges,
       onClose: () => {
         anchorElement?.focus();
       },
