@@ -32,7 +32,7 @@ const axeOptions = {
  * @param options - Configuration options for the accessibility check.
  * @param options.skipFailures - **@deprecated** Use of this option is discouraged. It may be used temporarily, but please ensure that all identified issues are addressed promptly.
  */
-export const checkA11y = ({ skipFailures }: { skipFailures?: true }) => {
+export const checkA11y = ({ skipFailures }: { skipFailures?: true } = {}) => {
   // https://github.com/component-driven/cypress-axe#cychecka11y
   cy.injectAxe();
   cy.configureAxe(axeConfig);
