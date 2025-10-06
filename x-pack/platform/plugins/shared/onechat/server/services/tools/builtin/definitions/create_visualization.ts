@@ -129,7 +129,7 @@ const createVisualizationSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) An ES|QL query. If not provided, the generate_esql tool will be used to create the query.'
+      '(optional) An ES|QL query. If not provided, tool with automatically generate the query.'
     ),
 });
 
