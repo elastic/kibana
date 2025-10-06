@@ -10,37 +10,45 @@ import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type {
-  LensMetricConfig,
-  LensGaugeConfig,
-  LensTagCloudConfig,
-  LensPieConfig,
-} from '@kbn/lens-embeddable-utils/config_builder';
 import parse from 'joi-to-json';
 import { StateGraph, Annotation, messagesStateReducer } from '@langchain/langgraph';
 import type { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
 
-import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
+import {
+  esqlMetricState,
+  type MetricStateESQL,
+} from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { getToolResultId } from '@kbn/onechat-server';
+import type { ScopedModel } from '@kbn/onechat-server';
+import type { Logger } from '@kbn/logging';
 import { generateEsql } from '@kbn/onechat-genai-utils';
 import { getChartType } from './guess_chart_type';
 
 const metricSchema = parse(esqlMetricState.getSchema());
 
+// Type for JSON Schema objects
+interface JsonSchema {
+  type?: string | string[];
+  properties?: Record<string, JsonSchema>;
+  items?: JsonSchema;
+  anyOf?: JsonSchema[];
+  oneOf?: JsonSchema[];
+  allOf?: JsonSchema[];
+  [key: string]: unknown;
+}
+
 // Helper function to fix array schemas by adding missing items
-const fixArraySchemas = (schema: any): any => {
+const fixArraySchemas = (schema: JsonSchema): JsonSchema => {
   if (!schema || typeof schema !== 'object') {
     return schema;
   }
 
   // If type is an array of schemas (not a type array like ["string", "null"]),
   // this is non-standard and we should handle it specially
-  if (Array.isArray(schema.type) && typeof schema.type[0] === 'object') {
-    return {
-      ...schema,
-      type: schema.type.map(fixArraySchemas),
-    };
+  if (Array.isArray(schema.type) && schema.type.length > 0 && typeof schema.type[0] === 'object') {
+    // This is a non-standard case - skip type modification for now
+    return schema;
   }
 
   // Handle arrays - ensure they have items property
@@ -63,7 +71,7 @@ const fixArraySchemas = (schema: any): any => {
 
   // Recursively fix properties
   if (schema.properties) {
-    const fixedProperties: any = {};
+    const fixedProperties: Record<string, JsonSchema> = {};
     for (const [key, value] of Object.entries(schema.properties)) {
       fixedProperties[key] = fixArraySchemas(value);
     }
@@ -125,7 +133,7 @@ const createVisualizationSchema = z.object({
     ),
 });
 
-type VisualizationConfig = LensMetricConfig | LensGaugeConfig | LensTagCloudConfig | LensPieConfig;
+type VisualizationConfig = MetricStateESQL;
 
 const MAX_RETRY_ATTEMPTS = 5;
 
@@ -134,7 +142,7 @@ const VisualizationStateAnnotation = Annotation.Root({
   nlQuery: Annotation<string>(),
   esqlQuery: Annotation<string>(),
   chartType: Annotation<SupportedChartType>(),
-  schema: Annotation<any>(),
+  schema: Annotation<JsonSchema>(),
   existingConfig: Annotation<string | undefined>(),
 
   messages: Annotation<BaseMessage[]>({
@@ -146,14 +154,14 @@ const VisualizationStateAnnotation = Annotation.Root({
     default: () => 0,
   }),
 
-  validatedConfig: Annotation<any | null>(),
+  validatedConfig: Annotation<VisualizationConfig | null>(),
   error: Annotation<string | null>(),
 });
 
 type VisualizationState = typeof VisualizationStateAnnotation.State;
 
 // Create the langgraph for config generation with validation retry
-const createVisualizationGraph = (model: any, logger: any) => {
+const createVisualizationGraph = (model: ScopedModel, logger: Logger) => {
   // Node: Generate configuration
   const generateConfigNode = async (state: VisualizationState) => {
     const attemptCount = state.attemptCount + 1;
@@ -230,21 +238,19 @@ Generate the ${state.chartType} visualization configuration.`),
       const config = JSON.parse(configStr) as VisualizationConfig;
 
       // Check if the generation itself failed
-      if ((config as any).error) {
+      if ('error' in config && typeof config.error === 'string') {
         logger.warn(
-          `Configuration generation failed (attempt ${state.attemptCount}/${MAX_RETRY_ATTEMPTS}): ${
-            (config as any).error
-          }`
+          `Configuration generation failed (attempt ${state.attemptCount}/${MAX_RETRY_ATTEMPTS}): ${config.error}`
         );
         return {
           validatedConfig: null,
-          error: (config as any).error,
+          error: config.error,
         };
       }
 
       logger.debug(`Configuration: ${configStr}`);
 
-      let validatedConfig: any | null = null;
+      let validatedConfig: VisualizationConfig | null = null;
       if (state.chartType === SupportedChartType.Metric) {
         validatedConfig = esqlMetricState.validate(config);
       }
