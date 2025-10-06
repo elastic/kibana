@@ -36,6 +36,7 @@ export interface StreamRoutingContext {
   definition: Streams.WiredStream.GetResponse;
   initialRouting: RoutingDefinitionWithUIAttributes[];
   routing: RoutingDefinitionWithUIAttributes[];
+  suggestedRuleId: string | null;
 }
 
 export type StreamRoutingEvent =
@@ -44,7 +45,7 @@ export type StreamRoutingEvent =
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }
   | { type: 'routingRule.edit'; id: string }
-  | { type: 'routingRule.fork' }
+  | { type: 'routingRule.fork'; routingRule?: RoutingDefinition }
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }
   | { type: 'routingRule.save' }
@@ -57,4 +58,4 @@ export type StreamRoutingEvent =
       index: number;
       toggle?: boolean;
     }
-  | { type: 'suggestion.append'; definitions: RoutingDefinition[] };
+  | { type: 'routingRule.reviewSuggested'; id: string };

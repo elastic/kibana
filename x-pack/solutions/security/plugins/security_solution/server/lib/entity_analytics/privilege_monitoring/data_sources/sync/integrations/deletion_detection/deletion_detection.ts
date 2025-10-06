@@ -71,14 +71,12 @@ export const createDeletionDetectionService = (
         completedEventTimeStamp,
       });
 
-      dataClient.log(`debug`, `allIntegrationsUserNames: ${allIntegrationsUserNames}`);
       // get all users in the privileged index for this source that are not in integrations docs
       const staleUsers = await findStaleUsers(
         source.id,
         allIntegrationsUserNames,
         'entity_analytics_integration' // TODO: confirm index/type constant
       );
-      dataClient.log(`debug`, `staleUsers: ${staleUsers}`);
       const ops = bulkUtilsService.bulkSoftDeleteOperations(
         staleUsers,
         dataClient.index,
