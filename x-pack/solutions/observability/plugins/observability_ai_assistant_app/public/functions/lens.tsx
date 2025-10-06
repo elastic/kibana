@@ -169,24 +169,6 @@ export function registerLensRenderFunction({
           filter: layer.filter ?? '',
         })),
       };
-      // const xyDataLayer = new XYDataLayer({
-      //   data: layers.map((layer) => ({
-      //     type: 'formula',
-      //     value: layer.formula,
-      //     label: layer.label,
-      //     format: layer.format,
-      //     filter: {
-      //       language: 'kql',
-      //       query: layer.filter ?? '',
-      //     },
-      //   })),
-      //   options: {
-      //     seriesType,
-      //     breakdown: breakdown
-      //       ? { type: 'top_values', params: { size: 10 }, field: breakdown.field }
-      //       : undefined,
-      //   },
-      // });
 
       if (!timeField) return;
 
