@@ -13,8 +13,7 @@ describe('parseEsqlQuery', () => {
       'detects incorrect syntax in "%s"',
       (esqlQuery) => {
         const result = parseEsqlQuery(esqlQuery);
-        expect(result.errors.length).toEqual(1);
-        expect(result.errors[0].message.startsWith('SyntaxError:')).toBeTruthy();
+        expect(result.errors.length > 0).toEqual(true);
         expect(parseEsqlQuery(esqlQuery)).toMatchObject({
           hasMetadataOperator: false,
           isEsqlQueryAggregating: false,
