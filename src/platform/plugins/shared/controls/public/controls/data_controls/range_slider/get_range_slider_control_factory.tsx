@@ -197,10 +197,8 @@ export const getRangesliderControlFactory = (): EmbeddableFactory<
 
       const selectionHasNoResults$ = new BehaviorSubject(false);
       const hasNotResultsSubscription = hasNoResults$({
+        api: dataControlManager.api,
         controlFetch$,
-        dataViews$: dataControlManager.api.dataViews$,
-        rangeFilters$: dataControlManager.api.appliedFilters$,
-        useGlobalFilters$: dataControlManager.api.useGlobalFilters$,
         setIsLoading: (isLoading: boolean) => {
           loadingHasNoResults$.next(isLoading);
         },
