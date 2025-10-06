@@ -144,5 +144,48 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const responseText = await responseElement.getVisibleText();
       expect(responseText).to.contain(MOCKED_RESPONSE);
     });
+
+    it('an error does not persist across conversations', async () => {
+      const SUCCESSFUL_INPUT = 'successful conversation message';
+      const SUCCESSFUL_RESPONSE = 'This is a successful response';
+      const SUCCESSFUL_TITLE = 'Successful Conversation';
+
+      const ERROR_INPUT = 'error conversation message';
+
+      // Create a successful conversation first
+      const successfulConversationId = await onechat.createConversationViaUI(
+        SUCCESSFUL_TITLE,
+        SUCCESSFUL_INPUT,
+        SUCCESSFUL_RESPONSE,
+        llmProxy
+      );
+
+      // Now create a new conversation that will have an error
+      await onechat.clickNewConversationButton();
+
+      await retry.try(async () => {
+        await testSubjects.existOrFail('agentBuilderWelcomePage');
+      });
+
+      // DON'T set up any interceptors for the error conversation
+      await onechat.typeMessage(ERROR_INPUT);
+      await onechat.sendMessage();
+
+      const isErrorVisible = await onechat.isErrorVisible();
+      expect(isErrorVisible).to.be(true);
+
+      await testSubjects.find('agentBuilderRoundError');
+      await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
+
+      // Navigate back to the successful conversation
+      await onechat.navigateToConversationViaHistory(successfulConversationId);
+
+      const isErrorVisibleInSuccessful = await onechat.isErrorVisible();
+      expect(isErrorVisibleInSuccessful).to.be(false);
+
+      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+      const responseText = await responseElement.getVisibleText();
+      expect(responseText).to.contain(SUCCESSFUL_RESPONSE);
+    });
   });
 }
