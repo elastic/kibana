@@ -20,27 +20,30 @@ export const checkEventCommand: Command<void> = {
   description:
     'Check if a specific event exists in Elasticsearch for a given build and test config',
   flags: {
-    string: ['buildId', 'testConfig', 'esURL', 'esAPIKey'],
-    boolean: ['verifyTLSCerts'],
+    string: ['buildNumber', 'testConfig', 'esURL', 'esAPIKey'],
+    boolean: ['verifyTLSCerts', 'dontFailOnError'],
     default: {
       esURL: SCOUT_REPORTER_ES_URL,
       esAPIKey: SCOUT_REPORTER_ES_API_KEY,
       verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
+      dontFailOnError: false,
     },
     help: `
-    --buildId         (required)  The Buildkite build ID.
+    --buildNumber     (required)  The Buildkite build number.
     --testConfig      (required)  The path to the test config file.
     --esURL           (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
     --esAPIKey        (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
     --verifyTLSCerts  (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
+    --dontFailOnError (optional)  If present, errors will be logged but the process will not fail (default: false)
     `,
   },
   run: async ({ flagsReader, log }) => {
-    const buildId = flagsReader.requiredString('buildId');
+    const buildNumber = flagsReader.requiredString('buildNumber');
     const testConfig = flagsReader.requiredString('testConfig');
     const esURL = flagsReader.requiredString('esURL');
     const esAPIKey = flagsReader.requiredString('esAPIKey');
     const verifyTLSCerts = flagsReader.boolean('verifyTLSCerts');
+    const dontFailOnError = flagsReader.boolean('dontFailOnError');
 
     log.info(`Connecting to Elasticsearch at ${esURL}`);
     const es = await getValidatedESClient(
@@ -54,7 +57,7 @@ export const checkEventCommand: Command<void> = {
       { log, cli: true }
     );
 
-    log.info(`Checking for event with buildId: ${buildId} and testConfig: ${testConfig}`);
+    log.info(`Checking for event with buildNumber: ${buildNumber} and testConfig: ${testConfig}`);
 
     const indexName = '.ds-scout-events-v1-*-*';
 
@@ -74,8 +77,8 @@ export const checkEventCommand: Command<void> = {
               },
             ],
             must: [
-              { term: { 'buildkite.build.number': buildId } },
-              { term: { 'test_run.config.file.path': testConfig } },
+              { term: { 'buildkite.build.number': buildNumber } },
+              { term: { 'test_run.config.file.path.keyword': testConfig } },
             ],
           },
         },
@@ -83,15 +86,18 @@ export const checkEventCommand: Command<void> = {
 
       if ((result.hits.total as any).value > 0) {
         log.success('Event found!');
-        process.exitCode = 0; // Success
       } else {
         log.error('Event not found.');
-        process.exitCode = 1; // Failure
+        if (!dontFailOnError) {
+          process.exitCode = 1;
+        }
       }
     } catch (error) {
       log.error('Error checking for event:');
       log.error(error);
-      process.exitCode = 1;
+      if (!dontFailOnError) {
+        process.exitCode = 1;
+      }
     }
   },
 };
