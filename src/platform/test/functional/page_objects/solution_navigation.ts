@@ -390,7 +390,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         await panelOpenerBtn.click();
       },
       async isCollapsed() {
-        const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton', TIMEOUT_CHECK);
+        const selector = (await this.isV2()) ? 'sideNavCollapseButton' : 'euiCollapsibleNavButton';
+        const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
         return (await collapseNavBtn.getAttribute('aria-expanded')) === 'false';
       },
       async isExpanded() {
@@ -409,7 +410,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
             shouldBeCollapsed ? 'Collapsing' : 'Expanding'
           );
 
-          const collapseNavBtn = await testSubjects.find('euiCollapsibleNavButton', TIMEOUT_CHECK);
+          const selector = (await this.isV2())
+            ? 'sideNavCollapseButton'
+            : 'euiCollapsibleNavButton';
+          const collapseNavBtn = await testSubjects.find(selector, TIMEOUT_CHECK);
           await collapseNavBtn.click();
         }
       },
