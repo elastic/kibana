@@ -32,6 +32,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await searchSessions.deleteAllSearchSessions();
     });
 
+    loadTestFile(require.resolve('./entrypoint'));
     loadTestFile(require.resolve('./async_search'));
     loadTestFile(require.resolve('./session_searches_integration'));
     loadTestFile(require.resolve('./save_search_session'));

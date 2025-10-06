@@ -21,6 +21,8 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       await PageObjects.common.navigateToApp('discover');
     });
 
+    loadTestFile(require.resolve('./classic'));
+    loadTestFile(require.resolve('./esql'));
     loadTestFile(require.resolve('./async_search'));
     loadTestFile(require.resolve('./sessions_in_space'));
   });
