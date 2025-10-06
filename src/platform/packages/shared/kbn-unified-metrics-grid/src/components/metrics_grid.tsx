@@ -20,6 +20,7 @@ import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
+import { createESQLQuery } from '../common/utils';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
@@ -126,6 +127,15 @@ export const MetricsGrid = ({
             const isFocused =
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
 
+            const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
+            const esqlQuery = isSupported
+              ? createESQLQuery({
+                  metric,
+                  dimensions,
+                  filters,
+                })
+              : '';
+
             return (
               <EuiFlexItem key={key}>
                 <div
@@ -152,19 +162,20 @@ export const MetricsGrid = ({
                   }}
                 >
                   <Chart
-                    metric={metric}
+                    esqlQuery={esqlQuery}
                     size={chartSize}
                     color={colorPalette[index % colorPalette.length]}
-                    dimensions={dimensions}
                     discoverFetch$={discoverFetch$}
                     requestParams={requestParams}
                     services={services}
                     abortController={abortController}
                     searchSessionId={searchSessionId}
-                    filters={filters}
                     onBrushEnd={onBrushEnd}
                     onFilter={onFilter}
-                    onViewDetails={handleViewDetails}
+                    onViewDetails={() => handleViewDetails(esqlQuery, metric)}
+                    title={metric.name}
+                    unit={metric.unit}
+                    seriesType={metric.type === 'histogram' ? 'bar' : 'area'}
                   />
                 </div>
               </EuiFlexItem>

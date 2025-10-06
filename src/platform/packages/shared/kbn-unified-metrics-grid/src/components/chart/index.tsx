@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
-import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import type { Observable } from 'rxjs';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
 import { useBoolean } from '@kbn/react-hooks';
-import { createESQLQuery } from '../../common/utils/esql/create_esql_query';
+import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
+import React, { useRef } from 'react';
+import type { Observable } from 'rxjs';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
-import { ChartContainer } from '../chart_container';
 
 export const ChartSizes = {
   s: 230,
@@ -27,19 +27,19 @@ export const ChartSizes = {
 export type ChartSize = keyof typeof ChartSizes;
 export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestParams'> &
   Omit<LensWrapperProps, 'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description'> & {
-    dimensions: string[];
     color?: string;
     size?: ChartSize;
-    filters?: Array<{ field: string; value: string }>;
     discoverFetch$: Observable<UnifiedHistogramInputMessage>;
-    metric: MetricField;
-    onViewDetails: (esqlQuery: string, metric: MetricField) => void;
+    onViewDetails?: () => void;
+    esqlQuery: string;
+    title: string;
+    unit?: MetricUnit;
+    seriesType: LensSeriesLayer['seriesType'];
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
 export const Chart = ({
   abortController,
-  metric,
   color,
   services,
   searchSessionId,
@@ -48,34 +48,24 @@ export const Chart = ({
   onViewDetails,
   requestParams,
   discoverFetch$,
-  dimensions = [],
   size = 'm',
-  filters = [],
+  esqlQuery,
+  title,
+  unit,
+  seriesType,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
+  const { euiTheme } = useEuiTheme();
 
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
   const { SaveModalComponent } = services.lens;
-
   const { getTimeRange } = requestParams;
 
-  const esqlQuery = useMemo(() => {
-    const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
-    if (!isSupported) {
-      return '';
-    }
-    return createESQLQuery({
-      metric,
-      dimensions,
-      filters,
-    });
-  }, [metric, dimensions, filters]);
-
   const lensProps = useLensProps({
-    title: metric.name,
+    title,
     query: esqlQuery,
-    unit: metric.unit,
-    seriesType: dimensions.length > 0 ? 'line' : 'area',
+    unit,
+    seriesType,
     color,
     services,
     searchSessionId,
@@ -85,12 +75,22 @@ export const Chart = ({
     chartRef,
   });
 
-  const handleViewDetails = useCallback(() => {
-    onViewDetails(esqlQuery, metric);
-  }, [onViewDetails, esqlQuery, metric]);
-
   return (
-    <ChartContainer size={size} ref={chartRef}>
+    <div
+      css={css`
+        height: ${ChartSizes[size]}px;
+        outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
+        border-radius: ${euiTheme.border.radius.medium};
+
+        &:hover {
+          .metricsExperienceChartTitle {
+            z-index: ${Number(euiTheme.levels.menu) + 1};
+            transition: none;
+          }
+        }
+      `}
+      ref={chartRef}
+    >
       {lensProps ? (
         <>
           <LensWrapperMemo
@@ -99,7 +99,7 @@ export const Chart = ({
             onBrushEnd={onBrushEnd}
             onFilter={onFilter}
             abortController={abortController}
-            onViewDetails={handleViewDetails}
+            onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}
           />
           {isSaveModalVisible && (
@@ -124,6 +124,6 @@ export const Chart = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </ChartContainer>
+    </div>
   );
 };

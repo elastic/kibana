@@ -1,0 +1,132 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  AT_TIMESTAMP,
+  DURATION,
+  EVENT_OUTCOME,
+  PROCESSOR_EVENT,
+  STATUS_CODE,
+  TRANSACTION_DURATION,
+} from '@kbn/apm-types';
+import { evaluate, from, keep, sort, stats, where } from '@kbn/esql-composer';
+import { i18n } from '@kbn/i18n';
+import { chartPalette, type DataSource } from '.';
+import type { ChartProps } from '../chart';
+
+type TraceChart = Pick<ChartProps, 'title' | 'color' | 'unit' | 'seriesType' | 'esqlQuery'> & {
+  id: string;
+};
+
+function getWhereClauses(dataSource: DataSource, filters: string[]) {
+  return [...filters, ...(dataSource === 'apm' ? [`${PROCESSOR_EVENT} == "transaction"`] : [])].map(
+    (filter) => where(filter)
+  );
+}
+
+export function getErrorRateChart({
+  dataSource,
+  indexes,
+  filters,
+}: {
+  dataSource: DataSource;
+  indexes: string;
+  filters: string[];
+}): TraceChart {
+  const whereClauses = getWhereClauses(dataSource, filters);
+  return {
+    id: 'error_rate',
+    title: i18n.translate('metricsExperience.grid.error_rate.label', {
+      defaultMessage: 'Error Rate',
+    }),
+    color: chartPalette[6],
+    unit: 'percent',
+    seriesType: 'line',
+    esqlQuery: from(indexes)
+      .pipe(
+        ...whereClauses,
+        dataSource === 'apm'
+          ? stats(
+              `failure = COUNT(*) WHERE ${EVENT_OUTCOME} == "failure", all = COUNT(*)  BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
+            )
+          : stats(
+              `failure = COUNT(*) WHERE ${STATUS_CODE} == "Error", all = COUNT(*)  BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
+            ),
+        evaluate('error_rate = TO_DOUBLE(failure) / all'),
+        keep('timestamp, error_rate'),
+        sort('timestamp')
+      )
+      .toString(),
+  };
+}
+
+export function getLatencyChart({
+  dataSource,
+  indexes,
+  filters,
+}: {
+  dataSource: DataSource;
+  indexes: string;
+  filters: string[];
+}): TraceChart {
+  const whereClauses = getWhereClauses(dataSource, filters);
+  return {
+    id: 'latency',
+    title: i18n.translate('metricsExperience.grid.latency.label', {
+      defaultMessage: 'Latency',
+    }),
+    color: chartPalette[2],
+    unit: 'count',
+    seriesType: 'line',
+    esqlQuery: from(indexes)
+      .pipe(
+        ...whereClauses,
+        dataSource === 'apm'
+          ? evaluate(`duration_ms = ROUND(${TRANSACTION_DURATION})/1000`) // apm duration is in us
+          : evaluate(`duration_ms = ROUND(${DURATION})/1000/1000`), // otel duration is in ns
+        stats(
+          `avg_duration = AVG(duration_ms) BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
+        ),
+        keep('avg_duration, timestamp'),
+        sort('timestamp')
+      )
+      .toString(),
+  };
+}
+
+export function getThroughputChart({
+  indexes,
+  filters,
+  dataSource,
+}: {
+  indexes: string;
+  filters: string[];
+  dataSource: DataSource;
+}): TraceChart {
+  const whereClauses = getWhereClauses(dataSource, filters);
+  return {
+    id: 'throughput',
+    title: i18n.translate('metricsExperience.grid.throughput.label', {
+      defaultMessage: 'Throughput',
+    }),
+    color: chartPalette[0],
+    unit: 'count',
+    seriesType: 'line',
+    esqlQuery: from(indexes)
+      .pipe(
+        ...whereClauses,
+        stats(
+          `throughput = COUNT(*) BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
+        ),
+        keep('timestamp, throughput'),
+        sort('timestamp')
+      )
+      .toString(),
+  };
+}

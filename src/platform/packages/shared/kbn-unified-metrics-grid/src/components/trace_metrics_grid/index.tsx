@@ -16,9 +16,8 @@ import { Provider } from 'react-redux';
 import { Subject } from 'rxjs';
 import { useEsqlQueryInfo } from '../../hooks';
 import { store } from '../../store';
-import { ErrorRateChart } from './error_rate';
-import { LatencyChart } from './latency';
-import { ThroughputChart } from './throughput';
+import { Chart } from '../chart';
+import { getErrorRateChart, getLatencyChart, getThroughputChart } from './trace_charts_definition';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
@@ -54,7 +53,7 @@ function TraceMetricsGrid({
     return [...esqlQuery.filters, ...kqlFilters];
   }, [esqlQuery.filters, kqlFilters]);
 
-  const { getTimeRange, updateTimeRange } = requestParams;
+  const { updateTimeRange } = requestParams;
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -65,6 +64,17 @@ function TraceMetricsGrid({
     input$,
     beforeFetch: updateTimeRange,
   });
+
+  const charts = useMemo(() => {
+    if (!indexes.apm.traces) {
+      return [];
+    }
+    return [
+      getLatencyChart({ dataSource, indexes: indexes.apm.traces, filters }),
+      getErrorRateChart({ dataSource, indexes: indexes.apm.traces, filters }),
+      getThroughputChart({ dataSource, indexes: indexes.apm.traces, filters }),
+    ];
+  }, [dataSource, indexes.apm.traces, filters]);
 
   if (!indexes.apm.traces) {
     return undefined;
@@ -81,48 +91,21 @@ function TraceMetricsGrid({
         `}
       >
         <EuiFlexGrid columns={3}>
-          <EuiFlexItem>
-            <LatencyChart
-              indexes={indexes.apm.traces}
-              getTimeRange={getTimeRange}
-              services={services}
-              discoverFetch$={discoverFetch$}
-              searchSessionId={searchSessionId}
-              abortController={abortController}
-              onBrushEnd={onBrushEnd}
-              onFilter={onFilter}
-              filters={filters}
-              dataSource={dataSource}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ErrorRateChart
-              indexes={indexes.apm.traces}
-              getTimeRange={getTimeRange}
-              services={services}
-              discoverFetch$={discoverFetch$}
-              searchSessionId={searchSessionId}
-              abortController={abortController}
-              onBrushEnd={onBrushEnd}
-              onFilter={onFilter}
-              filters={filters}
-              dataSource={dataSource}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ThroughputChart
-              indexes={indexes.apm.traces}
-              getTimeRange={getTimeRange}
-              services={services}
-              discoverFetch$={discoverFetch$}
-              searchSessionId={searchSessionId}
-              abortController={abortController}
-              onBrushEnd={onBrushEnd}
-              onFilter={onFilter}
-              filters={filters}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem />
+          {charts.map(({ id, ...chartProps }) => (
+            <EuiFlexItem key={id}>
+              <Chart
+                requestParams={requestParams}
+                searchSessionId={searchSessionId}
+                abortController={abortController}
+                onBrushEnd={onBrushEnd}
+                onFilter={onFilter}
+                services={services}
+                discoverFetch$={discoverFetch$}
+                size="s"
+                {...chartProps}
+              />
+            </EuiFlexItem>
+          ))}
         </EuiFlexGrid>
       </EuiPanel>
     </Provider>
