@@ -285,7 +285,7 @@ describe('saved search embeddable', () => {
       expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
 
       // trigger a refetch
-      dashboadFilters.next([]);
+      dashboadFilters.next([{ meta: {} }]);
       await waitOneTick();
       expect(resolveDataSourceProfileSpy).toHaveBeenCalled();
     });
