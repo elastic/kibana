@@ -1,0 +1,623 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { MlGetJobsResponse, MlPutJobRequest } from '@elastic/elasticsearch/lib/api/types';
+import moment from 'moment';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { evaluate as base } from '../../src/evaluate';
+import type { EvaluateMLDataset } from './evaluate_ml_dataset';
+import { createEvaluateMLDataset } from './evaluate_ml_dataset';
+import {
+  cleanupMachineLearningJobs,
+  setupMLJobAndDatafeed,
+} from '../../utils/machine_learning_jobs';
+import { loadSampleData } from '../../utils/load_sample_data';
+
+/**
+ * NOTE: This scenario has been migrated from the legacy evaluation framework.
+ * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/machine_learning/index.spec.ts
+ * Any changes should be made in both places until the legacy evaluation framework is removed.
+ */
+
+const evaluate = base.extend<{
+  evaluateMLDataset: EvaluateMLDataset;
+}>({
+  evaluateMLDataset: [
+    ({ chatClient, evaluators, phoenixClient }, use) => {
+      use(
+        createEvaluateMLDataset({
+          chatClient,
+          evaluators,
+          phoenixClient,
+        })
+      );
+    },
+    { scope: 'test' },
+  ],
+});
+
+evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
+  const TEST_INDEX = 'my-index-000001';
+  const TEST_JOB_ID = 'test-job-anomaly-detection';
+  const TEST_DATAFEED_ID = `datafeed-${TEST_JOB_ID}`;
+  const SERVICE_TEST_NAME = 'web-api';
+  const TEST_JOB_ID_2 = 'response_time_anomaly_detection';
+  const TEST_DATAFEED_ID_2 = `datafeed-${TEST_JOB_ID_2}`;
+  let jobs: MlGetJobsResponse = { count: 0, jobs: [] };
+  let jobIds: string[] = [];
+  evaluate.beforeAll(async ({ apmSynthtraceEsClient, kbnClient, esClient, log }) => {
+    await cleanupMachineLearningJobs({ esClient, log });
+    await esClient.indices.delete({ index: TEST_INDEX, ignore_unavailable: true });
+    await apmSynthtraceEsClient.clean();
+    const logsSampleDataIndex = await loadSampleData({
+      log,
+      kbnClient,
+      sampleDataId: 'logs',
+    });
+    // Get time range for the sample data
+    const timeFieldRangeResponse = await kbnClient.request<{
+      success: boolean;
+      start: number;
+      end: number;
+    }>({
+      method: 'POST',
+      path: '/internal/ml/fields_service/time_field_range',
+      body: {
+        index: logsSampleDataIndex,
+        timeFieldName: 'timestamp',
+        query: {
+          bool: {
+            must: [
+              {
+                match_all: {},
+              },
+            ],
+            must_not: [
+              {
+                term: {
+                  _tier: {
+                    value: 'data_frozen',
+                  },
+                },
+              },
+            ],
+          },
+        },
+        runtimeMappings: {
+          hour_of_day: {
+            type: 'long',
+            script: {
+              source: "emit(doc['timestamp'].value.getHour());",
+            },
+          },
+        },
+      },
+      headers: { 'elastic-api-version': '1' },
+    });
+
+    log.debug('Creating ML jobs from logs sample data');
+    await kbnClient.request({
+      method: 'POST',
+      path: '/internal/ml/modules/setup/sample_data_weblogs',
+      body: {
+        prefix: 'test_',
+        indexPatternName: logsSampleDataIndex,
+        useDedicatedIndex: false,
+        startDatafeed: true,
+        start: timeFieldRangeResponse.data.start,
+        end: timeFieldRangeResponse.data.end,
+      },
+      headers: { 'elastic-api-version': '1' },
+    });
+    log.debug('Generating APM data');
+
+    const range = timerange(moment().subtract(1, 'days'), moment());
+
+    const myServiceInstance = apm
+      .service({ name: SERVICE_TEST_NAME, environment: 'production', agentName: 'nodejs' })
+      .instance('my-instance');
+
+    // Normal transactions: same duration 5 ms
+    const normalDocs = range
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp) =>
+        myServiceInstance
+          .transaction('GET /api')
+          .duration(5) // duration in ms
+          .timestamp(timestamp)
+      );
+    await apmSynthtraceEsClient.index(normalDocs);
+    const ML_JOB_CONFIG_1: MlPutJobRequest = {
+      job_id: TEST_JOB_ID,
+      description: 'Detect anomalies in APM transaction duration',
+      analysis_config: {
+        bucket_span: '5m',
+        detectors: [{ function: 'mean', field_name: 'transaction.duration.us' }],
+      },
+      data_description: { time_field: '@timestamp' },
+      datafeed_config: {
+        datafeed_id: TEST_DATAFEED_ID,
+        indices: ['traces-apm*'],
+        query: { match: { 'service.name': SERVICE_TEST_NAME } },
+      },
+    };
+
+    await setupMLJobAndDatafeed(esClient, ML_JOB_CONFIG_1, TEST_JOB_ID, TEST_DATAFEED_ID, 'now-1h');
+
+    await esClient.indices.create({
+      index: TEST_INDEX,
+      mappings: {
+        properties: {
+          '@timestamp': { type: 'date' },
+          response_time: { type: 'float' },
+          service: { type: 'keyword' },
+        },
+      },
+    });
+
+    const ML_JOB_CONFIG_2 = {
+      job_id: TEST_JOB_ID_2,
+      description: 'Detect anomalies in average response_time',
+      analysis_config: {
+        bucket_span: '5m',
+        detectors: [
+          {
+            function: 'mean',
+            field_name: 'response_time',
+          },
+        ],
+      },
+      data_description: {
+        time_field: '@timestamp',
+      },
+      datafeed_config: {
+        datafeed_id: TEST_DATAFEED_ID_2,
+        indices: [TEST_INDEX],
+        query: { match_all: {} },
+      },
+    };
+
+    await setupMLJobAndDatafeed(
+      esClient,
+      ML_JOB_CONFIG_2,
+      TEST_JOB_ID_2,
+      TEST_DATAFEED_ID_2,
+      'now-1h'
+    );
+
+    await esClient.ml.closeJob({ job_id: TEST_JOB_ID_2, force: true });
+
+    jobs = await esClient.ml.getJobs();
+    jobIds = jobs.jobs.map((job) => job.job_id);
+  });
+
+  evaluate.afterAll(async ({ apmSynthtraceEsClient, kbnClient, esClient, log }) => {
+    await cleanupMachineLearningJobs({ esClient, log });
+    await esClient.indices.delete({ index: TEST_INDEX, ignore_unavailable: true });
+    await apmSynthtraceEsClient.clean();
+  });
+
+  evaluate.describe('Machine learning (ML) jobs', () => {
+    evaluate('returns the ML jobs configuration', async ({ evaluateMLDataset }) => {
+      await evaluateMLDataset({
+        dataset: {
+          name: 'ml: jobs',
+          description: 'Returns the machine learning jobs configuration.',
+          examples: [
+            {
+              input: {
+                prompt:
+                  'List all machine learning jobs with details such as id, state, and description, datafeed indices, influencers and bucket span',
+              },
+              output: {
+                criteria: [
+                  'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
+                  'Returns the list of machine learning jobs based on the response from the Elasticsearch function, Each job includes id, state, description, datafeed indices, influencers, and bucket_span, its not empty',
+                  `Includes ${jobIds.join(', ')} in the list of machine learning jobs`,
+                ],
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('returns the ML jobs stats details', async ({ evaluateMLDataset }) => {
+      await evaluateMLDataset({
+        dataset: {
+          name: 'ml: jobs stats',
+          description: 'Returns the machine learning jobs statistics details.',
+          examples: [
+            {
+              input: {
+                prompt:
+                  'List all the machine learning job statistics, including processed record counts, model size stats, timing/bucket counts, memory status and current node information.',
+              },
+              output: {
+                criteria: [
+                  'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/_stats',
+                  `Returns the list of machine learning jobs stats based on the response from the Elasticsearch function, Each job includes processed_record_count, model_size_stats , bucket_count, memory_status, and node information, its not empty`,
+                  `Includes ${jobIds.join(', ')} in the list of machine learning jobs stats`,
+                ],
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('returns open ML jobs', async ({ evaluateMLDataset }) => {
+      await evaluateMLDataset({
+        dataset: {
+          name: 'ml: open jobs',
+          description: 'Returns the open machine learning jobs.',
+          examples: [
+            {
+              input: {
+                prompt: 'Which machine learning jobs are open?',
+              },
+              output: {
+                criteria: [
+                  'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
+                  'Returns the open machine learning jobs based on the response from the Elasticsearch function, its not empty',
+                  `Includes ${TEST_JOB_ID} in the list of open machine learning jobs`,
+                ],
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('returns closed ML jobs', async ({ evaluateMLDataset }) => {
+      const closedJobIds = jobIds.filter((jobId) => jobId !== TEST_JOB_ID);
+      await evaluateMLDataset({
+        dataset: {
+          name: 'ml: closed jobs',
+          description: 'Returns the closed machine learning jobs.',
+          examples: [
+            {
+              input: {
+                prompt: 'Which machine learning jobs are closed?',
+              },
+              output: {
+                criteria: [
+                  'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
+                  'Returns the closed ML jobs based on the response from the Elasticsearch function, its not empty',
+                  `Includes ${closedJobIds.join(', ')} in the list of closed machine learning jobs`,
+                  `Does not include ${TEST_JOB_ID} in the list of closed ML jobs`,
+                ],
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('returns failed or stopped ML jobs', async ({ evaluateMLDataset }) => {
+      await evaluateMLDataset({
+        dataset: {
+          name: 'ml: failed or stopped jobs',
+          description: 'Returns the failed or stopped machine learning jobs.',
+          examples: [
+            {
+              input: {
+                prompt: 'List all failed or stopped machine learning jobs',
+              },
+              output: {
+                criteria: [
+                  'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors',
+                  'Filters jobs whose state is failed or stopped/closed, its not empty',
+                  'Returns those jobs in the response',
+                ],
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('returns specific ML job status', async ({ evaluateMLDataset }) => {
+      await evaluateMLDataset({
+        dataset: {
+          name: 'ml: specific job status',
+          description: 'Returns the status of a specific machine learning job.',
+          examples: [
+            {
+              input: {
+                prompt: `What is the status of machine learning job with the ID ${TEST_JOB_ID}?`,
+              },
+              output: {
+                criteria: [
+                  `Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors/${TEST_JOB_ID}`,
+                  `Returns the details of ML job id ${TEST_JOB_ID} based on the response from the Elasticsearch function`,
+                ],
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate('lists open ML jobs for specific apps', async ({ evaluateMLDataset }) => {
+      await evaluateMLDataset({
+        dataset: {
+          name: 'ml: open jobs for specific apps',
+          description: 'Returns the open machine learning jobs for specific applications.',
+          examples: [
+            {
+              input: {
+                prompt: `List all open machine learning jobs for app ${SERVICE_TEST_NAME}`,
+              },
+              output: {
+                criteria: [
+                  'Calls the Elasticsearch function with GET method and path that contains: ml/anomaly_detectors or uses the query function',
+                  'Filters jobs by the service name, its not empty',
+                  `Includes ${TEST_JOB_ID} in the list of open machine learning jobs`,
+                ],
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate(
+      `reports whether ML job ids ${TEST_JOB_ID} and ${TEST_JOB_ID_2} is running and the last time evaluate ran`,
+      async ({ evaluateMLDataset }) => {
+        await evaluateMLDataset({
+          dataset: {
+            name: 'ml: job running status and last run time',
+            description: `Reports whether machine learning job ids ${TEST_JOB_ID} and ${TEST_JOB_ID_2} is running and the last time evaluate ran.`,
+            examples: [
+              {
+                input: {
+                  prompt: `Are the machine learning jobs ${TEST_JOB_ID} and ${TEST_JOB_ID_2} running now? When was the last time evaluate ran?`,
+                },
+                output: {
+                  criteria: [
+                    'Checks ml/anomaly_detectors/${TEST_JOB_ID}/_stats and ml/anomaly_detectors/${TEST_JOB_ID_2}/_stats for state=open/closed',
+                    'Returns the last time the job ran by reading data_counts.latest_record_timestamp or timing stats for last run time',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+  });
+
+  evaluate.describe('Anomaly detection', () => {
+    evaluate(
+      'returns anomalies and explain what the anomaly is about?',
+      async ({ evaluateMLDataset }) => {
+        await evaluateMLDataset({
+          dataset: {
+            name: 'ml: anomalies',
+            description: 'Returns anomalies detected by machine learning jobs.',
+            examples: [
+              {
+                input: {
+                  prompt: `List anomalies and explain what the anomaly is about.`,
+                },
+                output: {
+                  criteria: [
+                    'Calls the Elasticsearch function or try to find anomalies by running ES|QL queries',
+                    'Returns a list of anomalies found based on the response from the Elasticsearch function, there are more than 0 anomalies',
+                    `Includes job with ID ${jobIds.join(', ')} in the anomalies`,
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'returns anomalies in indices and explain what the anomaly is about?',
+      async ({ evaluateMLDataset }) => {
+        const listJobIds = jobIds.join(', ');
+        await evaluateMLDataset({
+          dataset: {
+            name: 'ml: anomalies for specific indices',
+            description:
+              'Returns anomalies detected by machine learning jobs for specific indices.',
+            examples: [
+              {
+                input: {
+                  prompt: `List anomalies in ${listJobIds} indices and explain what the anomaly is about.`,
+                },
+                output: {
+                  criteria: [
+                    'Calls the Elasticsearch function or try to find anomalies by running ES|QL queries',
+                    `Returns a list of anomalies found based on the response from the Elasticsearch function. Includes job with ID ${listJobIds} in the anomalies, there are more than 0 anomalies`,
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'list ML job anomalies with score > 50 and links them to jobs',
+      async ({ evaluateMLDataset }) => {
+        await evaluateMLDataset({
+          dataset: {
+            name: 'ml: anomalies with score > 50',
+            description:
+              'Returns anomalies detected by machine learning jobs with anomaly score > 50.',
+            examples: [
+              {
+                input: {
+                  prompt: 'Any anomalies with anomaly score > 50? List them with job id.',
+                },
+                output: {
+                  criteria: [
+                    'Calls the Elasticsearch tool or try to find anomalies by running ES|QL queries score > 50',
+                    'Returns timestamp, job_id, and score. Links anomalies to their respective ML jobs. There are more than 0 anomalies',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'explains anomalies for a ML job id with cause analysis',
+      async ({ evaluateMLDataset }) => {
+        await evaluateMLDataset({
+          dataset: {
+            name: 'ml: explain anomalies for a job with cause analysis',
+            description:
+              'Explains anomalies detected by a machine learning job with cause analysis.',
+            examples: [
+              {
+                input: {
+                  prompt: `Explain ${TEST_JOB_ID} anomaly alerts and indicate probable cause.`,
+                },
+                output: {
+                  criteria: [
+                    `Fetches ml/anomaly_detectors/${TEST_JOB_ID} or uses the query function`,
+                    'Provides summary and probable causes based on influencers/fields',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'explains anomalies for a specific application with probable cause',
+      async ({ evaluateMLDataset }) => {
+        await evaluateMLDataset({
+          dataset: {
+            name: 'ml: explain anomalies for a specific application with probable cause',
+            description:
+              'Explains anomalies detected for a specific application with probable cause.',
+            examples: [
+              {
+                input: {
+                  prompt: `Explain ${SERVICE_TEST_NAME} anomaly alerts and indicate the probable cause.`,
+                },
+                output: {
+                  criteria: [
+                    'Fetches anomalies for the given service/application',
+                    'Analyzes influencer fields to infer probable cause',
+                    'Returns a summary of anomalies with likely causes',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+
+    evaluate(
+      'performs root cause analysis on the top influencer for anomalies',
+      async ({ evaluateMLDataset }) => {
+        await evaluateMLDataset({
+          dataset: {
+            name: 'ml: root cause analysis on top influencer for anomalies',
+            description:
+              'Performs root cause analysis on the top influencer for anomalies detected by machine learning jobs.',
+            examples: [
+              {
+                input: {
+                  prompt: 'Determine the top influencer field and value responsible for anomalies.',
+                },
+                output: {
+                  criteria: [
+                    'Queries ml/anomaly_detectors/_results or uses the query function to fetch recent anomalies',
+                    'Identifies highest influencer_score field/value',
+                    'Provides reasoning of probable root cause',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+  });
+
+  evaluate.describe('ML jobs Alerts', () => {
+    evaluate('summarizes ML jobs alerts', async ({ evaluateMLDataset }) => {
+      await evaluateMLDataset({
+        dataset: {
+          name: 'ml: jobs alerts summary',
+          description: 'Summarizes machine learning jobs alerts.',
+          examples: [
+            {
+              input: {
+                prompt: 'Summarize machine learning jobs alerts',
+              },
+              output: {
+                criteria: [
+                  'Calls the Elasticsearch tool or executes a query on the ML jobs alerts',
+                  'Provides a summary of the alerts including job_id, severity, and timestamp',
+                ],
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
+
+    evaluate(
+      'lists ML jobs alerts in the past hour with severity',
+      async ({ evaluateMLDataset }) => {
+        await evaluateMLDataset({
+          dataset: {
+            name: 'ml: jobs alerts in the past hour',
+            description: 'Lists machine learning jobs alerts in the past hour with severity.',
+            examples: [
+              {
+                input: {
+                  prompt:
+                    'Any alerts raised for the past 1 hour? List them with job id and severity.',
+                },
+                output: {
+                  criteria: [
+                    'Executes a query on the ML alerts index or uses the Elasticsearch API',
+                    'Filters by timestamp within the last 1 hour',
+                    'Returns job_id and severity',
+                  ],
+                },
+                metadata: {},
+              },
+            ],
+          },
+        });
+      }
+    );
+  });
+});
