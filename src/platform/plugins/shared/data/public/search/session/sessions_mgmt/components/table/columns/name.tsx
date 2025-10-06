@@ -76,17 +76,15 @@ export const nameColumn = ({
       ? searchUsageCollector.trackSessionViewRestored
       : searchUsageCollector.trackSessionReloaded;
     const notRestorableWarning = isRestorable ? null : (
-      <>
-        <EuiIconTip
-          type="warning"
-          content={
-            <FormattedMessage
-              id="data.mgmt.searchSessions.table.notRestorableWarning"
-              defaultMessage="The background search will be executed again. You can then save it for future use."
-            />
-          }
-        />
-      </>
+      <EuiIconTip
+        type="warning"
+        content={
+          <FormattedMessage
+            id="data.mgmt.searchSessions.table.notRestorableWarning"
+            defaultMessage="The background search will be executed again. You can then save it for future use."
+          />
+        }
+      />
     );
 
     // show version warning only if:
@@ -95,19 +93,16 @@ export const nameColumn = ({
     // 2. if still can restore this session: it has IN_PROGRESS or COMPLETE status.
     const versionIncompatibleWarning =
       isRestorable && version !== kibanaVersion ? (
-        <>
-          {' '}
-          <EuiIconTip
-            type="warning"
-            iconProps={{ 'data-test-subj': 'versionIncompatibleWarningTestSubj' }}
-            content={
-              <FormattedMessage
-                id="data.mgmt.searchSessions.table.versionIncompatibleWarning"
-                defaultMessage="This background search was created in a Kibana instance running a different version. It may not restore correctly."
-              />
-            }
-          />
-        </>
+        <EuiIconTip
+          type="warning"
+          iconProps={{ 'data-test-subj': 'versionIncompatibleWarningTestSubj' }}
+          content={
+            <FormattedMessage
+              id="data.mgmt.searchSessions.table.versionIncompatibleWarning"
+              defaultMessage="This background search was created in a Kibana instance running a different version. It may not restore correctly."
+            />
+          }
+        />
       ) : null;
 
     return (
