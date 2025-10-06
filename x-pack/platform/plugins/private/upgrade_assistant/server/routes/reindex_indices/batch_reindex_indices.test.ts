@@ -63,7 +63,7 @@ describe('reindex API', () => {
       lib: { handleEsError },
       getSecurityPlugin: () => securityMock.createStart(),
       getSavedObjectsService: () => ({
-        createInternalRepository: jest.fn()
+        createInternalRepository: jest.fn(),
       }),
     };
     registerBatchReindexIndicesRoutes(routeDependencies, () => worker);
