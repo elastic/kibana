@@ -33,7 +33,7 @@ const anomalySwimlaneEmbeddableCustomInputSchema = schema.object({
   ...baseUserInputProps,
   id: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),
-  filters: schema.maybe(filterSchema),
+  filters: schema.maybe(schema.arrayOf(filterSchema)),
   query: schema.maybe(querySchema),
   timeRange: schema.maybe(timeRangeSchema),
   refreshConfig: schema.maybe(refreshIntervalSchema),
