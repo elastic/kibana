@@ -92,5 +92,57 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const isErrorStillVisible = await onechat.isErrorVisible();
       expect(isErrorStillVisible).to.be(false);
     });
+
+    it('can start a new conversation when there is an error', async () => {
+      const MOCKED_INPUT = 'test error message for new conversation';
+      const MOCKED_RESPONSE = 'This is a successful response in new conversation';
+      const MOCKED_TITLE = 'New Conversation After Error';
+
+      await onechat.navigateToApp('conversations/new');
+
+      // DON'T set up any interceptors for the first attempt - this will cause a 404 error
+      await onechat.typeMessage(MOCKED_INPUT);
+      await onechat.sendMessage();
+
+      // Wait for error to appear
+      const isErrorVisible = await onechat.isErrorVisible();
+      expect(isErrorVisible).to.be(true);
+
+      await testSubjects.find('agentBuilderRoundError');
+      await testSubjects.existOrFail('agentBuilderRoundErrorRetryButton');
+
+      await onechat.clickNewConversationButton();
+
+      // Wait for navigation to complete and assert we're back to the initial state
+      await retry.try(async () => {
+        await testSubjects.existOrFail('agentBuilderWelcomePage');
+      });
+
+      void llmProxy.interceptors.toolChoice({
+        name: 'set_title',
+        response: toolCallMock('set_title', { title: MOCKED_TITLE }),
+      });
+
+      void llmProxy.interceptors.userMessage({
+        when: ({ messages }) => {
+          const lastMessage = messages[messages.length - 1]?.content as string;
+          return lastMessage?.includes(MOCKED_INPUT);
+        },
+        response: MOCKED_RESPONSE,
+      });
+
+      await onechat.typeMessage(MOCKED_INPUT);
+      await onechat.sendMessage();
+
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      await retry.try(async () => {
+        await testSubjects.find('agentBuilderRoundResponse');
+      });
+
+      const responseElement = await testSubjects.find('agentBuilderRoundResponse');
+      const responseText = await responseElement.getVisibleText();
+      expect(responseText).to.contain(MOCKED_RESPONSE);
+    });
   });
 }
