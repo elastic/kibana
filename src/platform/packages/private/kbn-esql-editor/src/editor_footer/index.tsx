@@ -33,6 +33,7 @@ import { SubmitFeedbackComponent } from './feedback_component';
 import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
+import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -64,6 +65,7 @@ interface EditorFooterProps {
   hideQueryHistory?: boolean;
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
+  telemetryService: ESQLEditorTelemetryService;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -90,6 +92,7 @@ export const EditorFooter = memo(function EditorFooter({
   measuredContainerWidth,
   code,
   dataErrorsControl,
+  telemetryService,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
@@ -97,7 +100,9 @@ export const EditorFooter = memo(function EditorFooter({
   const [isWarningPopoverOpen, setIsWarningPopoverOpen] = useState(false);
 
   const onUpdateAndSubmit = useCallback(
-    (qs: string) => {
+    (qs: string, isStarred: boolean) => {
+      // notify telemetry that a query has been submitted from the history panel
+      telemetryService.trackQueryHistoryClicked(isStarred);
       // update the query first
       updateQuery(qs);
       // submit the query with some latency

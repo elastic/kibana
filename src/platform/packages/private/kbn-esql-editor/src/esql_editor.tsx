@@ -207,7 +207,6 @@ const ESQLEditorInternal = function ESQLEditor({
       if (currentValue != null) {
         setCodeStateOnSubmission(currentValue);
       }
-      telemetryService.trackQueryHistoryClicked();
       onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
     }
   }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
@@ -1123,6 +1122,7 @@ const ESQLEditorInternal = function ESQLEditor({
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
+        telemetryService={telemetryService}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (
