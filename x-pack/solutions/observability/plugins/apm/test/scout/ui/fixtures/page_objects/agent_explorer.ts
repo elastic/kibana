@@ -23,12 +23,4 @@ export class AgentExplorerPage {
 
     return this.page;
   }
-
-  async clickAgentToggle() {
-    await this.page.testSubj.locator('apmAgentExplorerListToggle').click();
-  }
-
-  async clickInstance(instanceName: string) {
-    await this.page.getByText(instanceName).click();
-  }
 }
