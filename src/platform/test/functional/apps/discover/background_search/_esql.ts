@@ -13,11 +13,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const monacoEditor = getService('monacoEditor');
-  const retry = getService('retry');
-  const toasts = getService('toasts');
+  const searchSessions = getService('searchSessions');
 
   const { common, unifiedFieldList, discover } = getPageObjects([
     'common',
@@ -58,31 +56,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'FROM kibana_sample_data_flights | LIMIT 10 | WHERE DELAY(1000ms)'
         );
 
-        await testSubjects.click('querySubmitButton');
-
-        await retry.waitFor('waits for the send to background button to be enabled', async () => {
-          const disabled = await testSubjects.getAttribute(
-            'queryCancelButton-secondary-button',
-            'disabled'
-          );
-          return disabled !== 'true';
-        });
-
-        await testSubjects.click('queryCancelButton-secondary-button');
-
-        await retry.waitFor(
-          'the toast appears indicating that the search session is saved',
-          async () => {
-            const count = await toasts.getCount();
-            return count > 0;
-          }
-        );
+        await searchSessions.save({ withRefresh: true });
       });
 
       describe('when clicking the open background search flyout button', () => {
         it('opens the background search flyout', async () => {
-          await testSubjects.click('openBackgroundSearchFlyoutButton');
-          await testSubjects.exists('searchSessionsMgmtUiTable');
+          await searchSessions.openFlyout();
+          await searchSessions.expectManagementTable();
         });
       });
     });

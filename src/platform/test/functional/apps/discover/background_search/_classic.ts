@@ -13,8 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
+  const searchSessions = getService('searchSessions');
 
   const { common, unifiedFieldList, discover } = getPageObjects([
     'common',
@@ -46,8 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Classic view', function () {
       describe('when clicking the open background search flyout button', () => {
         it('opens the background search flyout', async () => {
-          await testSubjects.click('openBackgroundSearchFlyoutButton');
-          await testSubjects.exists('searchSessionsMgmtUiTable');
+          await searchSessions.openFlyout();
+          await searchSessions.expectManagementTable();
         });
       });
     });
