@@ -24,6 +24,8 @@ const scoutReporter = [
 
 /** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
+  retryTimes: process.env.CI ? 3 : 0,
+
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
