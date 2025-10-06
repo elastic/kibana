@@ -79,7 +79,7 @@ export function regenerateMoonProjects() {
       skip: [],
     };
 
-    const packages: Package[] = filter
+    const packages: Package[] = filter?.length
       ? filterPackages(getPackages(REPO_ROOT), filter)
       : getPackages(REPO_ROOT);
     const packageIds = packages.map((pkg) => pkg.name);
