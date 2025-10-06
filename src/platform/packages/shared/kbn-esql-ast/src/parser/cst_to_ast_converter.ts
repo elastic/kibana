@@ -367,7 +367,7 @@ export class CstToAstConverter {
       return this.fromSampleCommand(sampleCommandCtx);
     }
 
-    const inlinestatsCommandCtx = ctx.inlinestatsCommand();
+    const inlinestatsCommandCtx = ctx.inlineStatsCommand();
 
     if (inlinestatsCommandCtx) {
       return this.fromInlinestatsCommand(inlinestatsCommandCtx);
@@ -442,7 +442,14 @@ export class CstToAstConverter {
   // --------------------------------------------------------------------- FROM
 
   private fromFromCommand(ctx: cst.FromCommandContext): ast.ESQLCommand<'from'> {
-    const command = this.createCommand('from', ctx);
+    return this.fromFromCompatibleCommand('from', ctx);
+  }
+
+  private fromFromCompatibleCommand<Name extends string>(
+    commandName: Name,
+    ctx: antlr.ParserRuleContext & Pick<cst.FromCommandContext, 'indexPatternAndMetadataFields'>
+  ): ast.ESQLCommand<Name> {
+    const command = this.createCommand(commandName, ctx);
     const indexPatternCtx = ctx.indexPatternAndMetadataFields();
     const metadataCtx = indexPatternCtx.metadata();
     const sources = indexPatternCtx
@@ -477,25 +484,7 @@ export class CstToAstConverter {
   // ----------------------------------------------------------------------- TS
 
   private fromTimeseriesCommand(ctx: cst.TimeSeriesCommandContext): ast.ESQLCommand<'ts'> {
-    const command = this.createCommand('ts', ctx);
-    const indexPatternCtx = ctx.indexPatternAndMetadataFields();
-    const metadataCtx = indexPatternCtx.metadata();
-    const sources = indexPatternCtx
-      .getTypedRuleContexts(cst.IndexPatternContext as any)
-      .map((sourceCtx) => this.toSource(sourceCtx));
-
-    command.args.push(...sources);
-
-    if (metadataCtx && metadataCtx.METADATA()) {
-      const name = metadataCtx.METADATA().getText().toLowerCase();
-      const option = this.toOption(name, metadataCtx);
-      const optionArgs = this.toColumnsFromCommand(metadataCtx);
-
-      option.args.push(...optionArgs);
-      command.args.push(option);
-    }
-
-    return command;
+    return this.fromFromCompatibleCommand('ts', ctx);
   }
 
   // --------------------------------------------------------------------- SHOW
@@ -579,7 +568,15 @@ export class CstToAstConverter {
   // -------------------------------------------------------------------- STATS
 
   private fromStatsCommand(ctx: cst.StatsCommandContext): ast.ESQLCommand<'stats'> {
-    const command = this.createCommand('stats', ctx);
+    return this.fromStatsLikeCommand('stats', ctx);
+  }
+
+  private fromStatsLikeCommand<Name extends string>(
+    name: Name,
+    ctx: antlr.ParserRuleContext &
+      Pick<cst.StatsCommandContext, '_stats' | '_grouping' | 'aggFields' | 'fields' | 'BY'>
+  ): ast.ESQLCommand<Name> {
+    const command = this.createCommand(name, ctx);
 
     if (ctx._stats) {
       command.args.push(...this.fromAggFields(ctx.aggFields()));
@@ -627,7 +624,7 @@ export class CstToAstConverter {
    * @todo Do not return array here.
    */
   private toByOption(
-    ctx: cst.StatsCommandContext | cst.InlinestatsCommandContext,
+    ctx: antlr.ParserRuleContext & Pick<cst.StatsCommandContext, 'BY'>,
     expr: cst.FieldsContext | undefined
   ): ast.ESQLCommandOption[] {
     const byCtx = ctx.BY();
@@ -1054,8 +1051,8 @@ export class CstToAstConverter {
     const onOption = this.toOption('on', joinCondition);
     const joinPredicates: ast.ESQLAstItem[] = onOption.args;
 
-    for (const joinPredicateCtx of joinCondition.joinPredicate_list()) {
-      const expression = this.visitValueExpression(joinPredicateCtx.valueExpression());
+    for (const joinPredicateCtx of joinCondition.booleanExpression_list()) {
+      const expression = this.fromBooleanExpression(joinPredicateCtx);
 
       if (expression) {
         joinPredicates.push(expression);
@@ -1229,22 +1226,12 @@ export class CstToAstConverter {
     return command;
   }
 
-  // -------------------------------------------------------------- INLINESTATS
+  // ------------------------------------------------------------- INLINE STATS
 
   private fromInlinestatsCommand(
-    ctx: cst.InlinestatsCommandContext
-  ): ast.ESQLCommand<'inlinestats'> {
-    const command = this.createCommand('inlinestats', ctx);
-
-    // STATS expression is optional
-    if (ctx._stats) {
-      command.args.push(...this.fromAggFields(ctx.aggFields()));
-    }
-    if (ctx._grouping) {
-      command.args.push(...this.toByOption(ctx, ctx.fields()));
-    }
-
-    return command;
+    ctx: cst.InlineStatsCommandContext
+  ): ast.ESQLCommand<'inline stats'> {
+    return this.fromStatsLikeCommand('inline stats', ctx);
   }
 
   // ------------------------------------------------------------------- RERANK
@@ -1405,9 +1392,8 @@ export class CstToAstConverter {
    * Parses a single RERANK field entry.
    *
    * Supports three forms:
-   * 1) Assignment:     qualifiedName '=' booleanExpression
-   * 2) Expression:      qualifiedName booleanExpression
-   * 3) Column only:     qualifiedName
+   * 1) Assignment: qualifiedName '=' booleanExpression
+   * 2) Column only: qualifiedName
    */
   private fromRerankField(ctx: cst.RerankFieldContext): ast.ESQLAstField | undefined {
     try {
@@ -1418,29 +1404,45 @@ export class CstToAstConverter {
       }
 
       // 1) field assignment: <col> = <booleanExpression>
-      if (ctx.ASSIGN() && ctx.booleanExpression()) {
+      if (ctx.ASSIGN()) {
         const left = this.toColumn(qualifiedNameCtx);
-        const right = this.collectBooleanExpression(ctx.booleanExpression());
         const assignment = this.toFunction(
           ctx.ASSIGN().getText(),
           ctx,
           undefined,
           'binary-expression'
         ) as ast.ESQLBinaryExpression;
-        assignment.args.push(left, right);
-        assignment.location = this.computeLocationExtends(assignment);
+
+        if (ctx.booleanExpression()) {
+          const right = this.collectBooleanExpression(ctx.booleanExpression());
+          // Mark as incomplete if RHS is empty, contains incomplete items, or the parser raised an exception
+          const hasItems = right.length > 0;
+          const hasIncompleteItem = right.some((item) =>
+            Array.isArray(item) ? false : !!item?.incomplete
+          );
+          const hasException = !!ctx.booleanExpression()?.exception;
+
+          if (!hasItems || hasIncompleteItem || hasException) {
+            assignment.incomplete = true;
+          }
+
+          assignment.args.push(left, right);
+          assignment.location = this.computeLocationExtends(assignment);
+        } else {
+          // User typed something like `ON col0 =` and stopped.
+          // Build an assignment with only the left operand, mark it as incomplete,
+          assignment.args.push(left, []);
+          assignment.incomplete = true;
+          assignment.location = {
+            min: left.location.min,
+            max: ctx.ASSIGN()!.symbol.stop,
+          };
+        }
 
         return assignment;
       }
 
-      // 2) expression following a qualified name
-      if (ctx.booleanExpression()) {
-        return this.collectBooleanExpression(ctx.booleanExpression())[0] as
-          | ast.ESQLAstField
-          | undefined;
-      }
-
-      // 3) simple column reference
+      // 2) simple column reference
       return this.toColumn(qualifiedNameCtx);
     } catch (e) {
       // do nothing
@@ -1513,7 +1515,7 @@ export class CstToAstConverter {
   ): ast.ESQLColumn[] {
     const identifiers = this.extractIdentifiers(ctx);
 
-    return this.makeColumnsOutOfIdentifiers(identifiers);
+    return this.toColumns(identifiers);
   }
 
   private extractIdentifiers(
@@ -1555,7 +1557,7 @@ export class CstToAstConverter {
     return context;
   }
 
-  private makeColumnsOutOfIdentifiers(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
+  private toColumns(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
     const args: ast.ESQLColumn[] =
       identifiers
         .filter((child) => textExistsAndIsValid(child.getText()))
@@ -2389,10 +2391,12 @@ export class CstToAstConverter {
   // -------------------------------------------------------- expression: "map"
 
   private fromMapExpression(ctx: cst.MapExpressionContext): ast.ESQLMap {
+    const location = getPosition(ctx.start, ctx.stop);
     const map = Builder.expression.map(
       {},
       {
-        location: getPosition(ctx.start, ctx.stop),
+        text: this.parser.src.slice(location.min, location.max + 1),
+        location,
         incomplete: Boolean(ctx.exception),
       }
     );
@@ -2445,8 +2449,10 @@ export class CstToAstConverter {
       }
 
       if (value) {
+        const location = getPosition(ctx.start, ctx.stop);
         const entry = Builder.expression.entry(key, value, {
-          location: getPosition(ctx.start, ctx.stop),
+          text: this.parser.src.slice(location.min, location.max + 1),
+          location,
           incomplete: Boolean(ctx.exception) || key.incomplete || value.incomplete,
         });
 

@@ -67,6 +67,7 @@ Object {
   },
   "fields": Object {},
   "id": "id",
+  "managed": undefined,
   "name": "Kibana *",
   "namespaces": undefined,
   "runtimeFieldMap": Object {

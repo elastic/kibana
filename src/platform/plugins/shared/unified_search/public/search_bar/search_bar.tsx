@@ -153,6 +153,13 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
 
   renderQueryInputAppend?: () => React.ReactNode;
   onESQLDocsFlyoutVisibilityChanged?: QueryBarTopRowProps['onESQLDocsFlyoutVisibilityChanged'];
+  /**
+   * Optional configuration for ES|QL variables.
+   *
+   * This prop allows you to define and manage variables used within ES|QL queries,
+   * typically bound to UI controls like dropdowns or input fields (Dashboard controls here).
+   */
+  esqlVariablesConfig?: QueryBarTopRowProps['esqlVariablesConfig'];
 
   esqlEditorInitialState?: QueryBarTopRowProps['esqlEditorInitialState'];
   onEsqlEditorInitialStateChange?: QueryBarTopRowProps['onEsqlEditorInitialStateChange'];
@@ -772,6 +779,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           bubbleSubmitEvent={this.props.bubbleSubmitEvent}
           esqlEditorInitialState={this.props.esqlEditorInitialState}
           onEsqlEditorInitialStateChange={this.props.onEsqlEditorInitialStateChange}
+          esqlVariablesConfig={this.props.esqlVariablesConfig}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
         />
       </div>

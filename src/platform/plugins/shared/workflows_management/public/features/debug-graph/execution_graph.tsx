@@ -8,17 +8,17 @@
  */
 
 import React, { useMemo } from 'react';
-import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { NodeTypes, Node } from '@xyflow/react';
 import { Background, Controls, ReactFlow } from '@xyflow/react';
 import { useEuiTheme } from '@elastic/eui';
-import { getWorkflowZodSchemaLoose } from '../../../common/schema';
-import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
+import { useSelector } from 'react-redux';
+
 import { ExecutionGraphEdge, ExecutionGraphNode } from './nodes';
 import { convertWorkflowGraphToReactFlow } from './workflow_graph_layout';
 import { mainScopeNodes, secondaryScopeNodes, atomicNodes } from './nodes/types';
 
 import '@xyflow/react/dist/style.css';
+import { selectWorkflowGraph } from '../../widgets/workflow_yaml_editor/lib/store';
 
 export interface ExecutionGraphProps {
   workflowYaml: string | undefined;
@@ -82,44 +82,22 @@ const ReactFlowWrapper: React.FC<{
 
 export const ExecutionGraph: React.FC<ExecutionGraphProps> = ({ workflowYaml }) => {
   const { euiTheme } = useEuiTheme();
-
-  const workflowExecutionGraph: { result: any; error: any } | null = useMemo(() => {
-    if (!workflowYaml) {
-      return null;
-    }
-    let result = null;
-    let error = null;
-    try {
-      const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
-      if (parsingResult.error) {
-        error = parsingResult.error;
-      }
-      result = convertToWorkflowGraph((parsingResult as { data: any }).data);
-    } catch (e) {
-      error = e;
-    }
-
-    return { result, error };
-  }, [workflowYaml]);
+  const workflowGraph = useSelector(selectWorkflowGraph);
 
   const layoutResult: { result: any; error: string } | null = useMemo(() => {
-    if (!workflowExecutionGraph) {
+    if (!workflowGraph) {
       return null;
-    }
-
-    if (workflowExecutionGraph.error) {
-      return { result: null, error: workflowExecutionGraph.error };
     }
 
     let result = null;
     let error = null;
     try {
-      result = convertWorkflowGraphToReactFlow(workflowExecutionGraph.result);
+      result = convertWorkflowGraphToReactFlow(workflowGraph);
     } catch (e) {
       error = e.message;
     }
     return { result, error };
-  }, [workflowExecutionGraph]);
+  }, [workflowGraph]);
 
   return (
     <>

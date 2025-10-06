@@ -245,7 +245,7 @@ describe('Agent configuration', () => {
       });
 
       it('should display advanced configuration section', () => {
-        cy.contains('Advanced Configuration').should('be.visible');
+        cy.contains('Advanced Configuration').scrollIntoView().should('be.visible');
         cy.contains('Advanced configuration allows you to define custom settings').should(
           'be.visible'
         );

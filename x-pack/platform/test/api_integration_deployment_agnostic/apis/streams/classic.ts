@@ -78,7 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       {
                         action: 'grok',
                         where: { always: {} },
-                        from: 'message',
+                        from: 'nested.message',
                         patterns: [
                           '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                         ],
@@ -126,7 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               steps: [
                 {
                   action: 'grok',
-                  from: 'message',
+                  from: 'nested.message',
                   patterns: [
                     '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                   ],
@@ -148,10 +148,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('Executes processing on classic streams', async () => {
+      it('Executes processing on classic streams with dotted field names', async () => {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',
-          message: '2023-01-01T00:00:10.000Z error test',
+          'nested.message': '2023-01-01T00:00:10.000Z error test',
         };
         const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
         expect(response.result).to.eql('created');
@@ -159,7 +159,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
-          message: '2023-01-01T00:00:10.000Z error test',
+          nested: { message: '2023-01-01T00:00:10.000Z error test' },
+          inner_timestamp: '2023-01-01T00:00:10.000Z',
+          message2: 'test',
+          log: {
+            level: 'error',
+          },
+        });
+      });
+
+      it('Executes processing on classic streams with subobjects', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          nested: { message: '2023-01-01T00:00:10.000Z error test' },
+        };
+        const response = await indexDocument(esClient, TEST_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+
+        const result = await fetchDocument(esClient, TEST_STREAM_NAME, response._id);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          nested: { message: '2023-01-01T00:00:10.000Z error test' },
           inner_timestamp: '2023-01-01T00:00:10.000Z',
           message2: 'test',
           log: {
@@ -254,7 +274,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect((streamsResponse as any).message).to.contain('Failed to change state:');
         expect((streamsResponse as any).message).to.contain(
-          `The cluster state may be inconsistent. If you experience issues, please use the resync API to restore a consistent state.`
+          `The stream state may be inconsistent. Revert your last change, or use the resync API to restore a consistent state.`
         );
       });
     });
@@ -481,9 +501,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: '2023-01-01T00:00:10.000Z error test',
           inner_timestamp: '2023-01-01T00:00:10.000Z',
           message2: 'test',
-          log: {
-            level: 'error',
-          },
+          'log.level': 'error',
         });
       });
 

@@ -17,6 +17,7 @@ import type {
   ConversationUpdateRequest,
   ConversationListOptions,
 } from '../../../common/conversations';
+import { createSpaceDslFilter } from '../../utils/spaces';
 import type { ConversationStorage } from './storage';
 import {
   fromEs,
@@ -37,22 +38,34 @@ export interface ConversationClient {
 }
 
 export const createClient = ({
+  space,
   storage,
   user,
 }: {
+  space: string;
   storage: ConversationStorage;
   user: UserIdAndName;
 }): ConversationClient => {
-  return new ConversationClientImpl({ storage, user });
+  return new ConversationClientImpl({ storage, user, space });
 };
 
 class ConversationClientImpl implements ConversationClient {
+  private readonly space: string;
   private readonly storage: ConversationStorage;
   private readonly user: UserIdAndName;
 
-  constructor({ storage, user }: { storage: ConversationStorage; user: UserIdAndName }) {
+  constructor({
+    storage,
+    user,
+    space,
+  }: {
+    storage: ConversationStorage;
+    user: UserIdAndName;
+    space: string;
+  }) {
     this.storage = storage;
     this.user = user;
+    this.space = space;
   }
 
   async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
@@ -66,6 +79,7 @@ class ConversationClientImpl implements ConversationClient {
       },
       query: {
         bool: {
+          filter: [createSpaceDslFilter(this.space)],
           must: [
             {
               term: this.user.username
@@ -110,6 +124,7 @@ class ConversationClientImpl implements ConversationClient {
       conversation,
       currentUser: this.user,
       creationDate: now,
+      space: this.space,
     });
 
     await this.storage.getClient().index({
@@ -137,8 +152,9 @@ class ConversationClientImpl implements ConversationClient {
       conversation: storedConversation,
       update: conversationUpdate,
       updateDate: now,
+      space: this.space,
     });
-    const attributes = toEs(updatedConversation);
+    const attributes = toEs(updatedConversation, this.space);
 
     await this.storage.getClient().index({
       id: conversationUpdate.id,
@@ -169,14 +185,7 @@ class ConversationClientImpl implements ConversationClient {
       terminate_after: 1,
       query: {
         bool: {
-          filter: [
-            {
-              bool: {
-                should: [{ term: { _id: conversationId } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+          filter: [createSpaceDslFilter(this.space), { term: { _id: conversationId } }],
         },
       },
     });

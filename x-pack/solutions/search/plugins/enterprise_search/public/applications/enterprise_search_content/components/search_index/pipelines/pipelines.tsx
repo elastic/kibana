@@ -33,8 +33,8 @@ import { docLinks } from '../../../../shared/doc_links';
 import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
 import { getContentExtractionDisabled, isApiIndex, isConnectorIndex } from '../../../utils/indices';
 
+import { SearchIndexTabId } from '../constants';
 import { IndexNameLogic } from '../index_name_logic';
-import { SearchIndexTabId } from '../search_index';
 
 import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
@@ -55,6 +55,7 @@ export const SearchIndexPipelines: React.FC = () => {
     isDeleteModalOpen,
     pipelineName,
     defaultPipelineValues,
+    showPipelineSettings,
   } = useValues(PipelinesLogic);
   const {
     closeAddMlInferencePipelineModal,
@@ -94,7 +95,7 @@ export const SearchIndexPipelines: React.FC = () => {
   }, [indexName, revertPipeline]);
 
   useEffect(() => {
-    if (index) {
+    if (index && !showPipelineSettings) {
       fetchDefaultPipeline(undefined);
       setPipelineState(
         isConnectorIndex(index)
@@ -102,7 +103,7 @@ export const SearchIndexPipelines: React.FC = () => {
           : defaultPipelineValues
       );
     }
-  }, [index]);
+  }, [index, showPipelineSettings]);
 
   if (!index) {
     return <></>;
@@ -135,6 +136,7 @@ export const SearchIndexPipelines: React.FC = () => {
       {showMissingPipelineCallout && (
         <>
           <EuiCallOut
+            announceOnMount
             color="danger"
             iconType="error"
             title={i18n.translate(
