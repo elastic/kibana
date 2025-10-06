@@ -20,7 +20,7 @@ export default function searchSolutionNavigation({
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Search Solution Navigation', () => {
+  describe('Elasticsearch Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 

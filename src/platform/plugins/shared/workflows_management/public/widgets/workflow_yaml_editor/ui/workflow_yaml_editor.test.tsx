@@ -28,7 +28,7 @@ jest.mock('../../../shared/ui/yaml_editor', () => ({
 }));
 
 // Mock the validation hook
-jest.mock('../lib/use_yaml_validation', () => ({
+jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => ({
   useYamlValidation: () => ({
     error: null,
     validationErrors: [],
@@ -73,20 +73,6 @@ describe('WorkflowYAMLEditor', () => {
   it('renders without crashing', () => {
     renderWithI18n(<WorkflowYAMLEditor {...defaultProps} />);
     expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
-  });
-
-  it('shows saved status when no changes', () => {
-    const { getByText } = renderWithI18n(
-      <WorkflowYAMLEditor {...defaultProps} hasChanges={false} />
-    );
-    expect(getByText('Saved')).toBeInTheDocument();
-  });
-
-  it('shows unsaved changes when there are changes', () => {
-    const { getByText } = renderWithI18n(
-      <WorkflowYAMLEditor {...defaultProps} hasChanges={true} />
-    );
-    expect(getByText('Unsaved changes')).toBeInTheDocument();
   });
 
   it('calls onChange when editor content changes', async () => {

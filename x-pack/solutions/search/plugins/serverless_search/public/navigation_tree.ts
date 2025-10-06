@@ -43,9 +43,6 @@ const CONTENT_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.content', 
 const OTHER_TITLE = i18n.translate('xpack.serverlessSearch.nav.mngt.other', {
   defaultMessage: 'Other',
 });
-const AGENTS_TITLE = i18n.translate('xpack.serverlessSearch.nav.agents', {
-  defaultMessage: 'Agents',
-});
 const AI_TITLE = i18n.translate('xpack.serverlessSearch.nav.adminAndSettings.ai.title', {
   defaultMessage: 'AI',
 });
@@ -102,8 +99,9 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
           },
           {
             iconV2: agentsIcon, // Temp svg until we have icon in EUI
-            title: AGENTS_TITLE,
             link: 'agent_builder',
+            withBadge: true,
+            badgeTypeV2: 'techPreview',
           },
           {
             link: 'workflows',
@@ -278,7 +276,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
                 ],
                 title: i18n.translate('xpack.serverlessSearch.nav.ingest.indices.title', {
-                  defaultMessage: 'Indices, data streams and roll ups',
+                  defaultMessage: 'Indices and data streams',
                 }),
               },
               {
