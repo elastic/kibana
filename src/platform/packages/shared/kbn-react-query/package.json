@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "React Query async state management, but with networkMode: 'always' behavior by default (needed for some airgapped environments)",
   "author": "Gerard Soldevila <soldevila@gmail.com>",
-  "license": "MIT",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
   "bugs": {
     "url": "https://github.com/elastic/kibana/issues"
   },
