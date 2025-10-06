@@ -71,6 +71,20 @@ export const SELECT_OS_LABEL = i18n.translate('xpack.securitySolution.trustedApp
   defaultMessage: 'Select operating system',
 });
 
+export const PROCESS_DESCENDANTS_TRUSTED_APP = i18n.translate(
+  'xpack.securitySolution.trustedApps.processDescendants.label',
+  {
+    defaultMessage: 'Process Descendants',
+  }
+);
+
+export const TRUSTED_APP_EVENTS = i18n.translate(
+  'xpack.securitySolution.trustedApps.processDescendants.label',
+  {
+    defaultMessage: 'Events',
+  }
+);
+
 export const CONDITION_FIELD_TITLE: { [K in ConditionEntryField]: string } = {
   [ConditionEntryField.HASH]: i18n.translate(
     'xpack.securitySolution.trustedapps.logicalConditionBuilder.entry.field.hash',

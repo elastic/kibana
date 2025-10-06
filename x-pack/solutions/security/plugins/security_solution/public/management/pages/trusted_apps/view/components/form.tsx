@@ -81,6 +81,8 @@ import {
   SELECT_OS_LABEL,
   USING_ADVANCED_MODE,
   USING_ADVANCED_MODE_DESCRIPTION,
+  PROCESS_DESCENDANTS_TRUSTED_APP,
+  TRUSTED_APP_EVENTS,
 } from '../translations';
 import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
@@ -705,7 +707,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       () => [
         {
           id: 'events',
-          label: <EuiText size="s">Events</EuiText>,
+          label: <EuiText size="s">{TRUSTED_APP_EVENTS}</EuiText>,
           iconType: isProcessDescendantsSelected ? 'empty' : 'checkInCircleFilled',
           'data-test-subj': 'trustedApps-filterEventsButton',
         },
@@ -713,7 +715,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           id: 'descendants',
           label: (
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiText size="s">Process Descendants</EuiText>
+              <EuiText size="s">{PROCESS_DESCENDANTS_TRUSTED_APP}</EuiText>
               <EuiIconTip
                 content={
                   <EuiText size="s">
