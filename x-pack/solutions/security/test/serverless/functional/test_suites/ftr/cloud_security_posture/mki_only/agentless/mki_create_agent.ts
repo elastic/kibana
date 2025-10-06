@@ -44,18 +44,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.selectSetupTechnology('agentless');
+      const credentialsSelector = await testSubjects.find(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
+      const currentValue = await credentialsSelector.getAttribute('value');
 
-      try {
-        const credentialsSelector = await testSubjects.find(
-          AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ
-        );
-        const currentValue = await credentialsSelector.getAttribute('value');
-
-        if (currentValue !== 'direct_access_keys') {
-          await cisIntegration.selectAwsCredentials('direct');
-        }
-      } catch (error) {
-        // Fallback: try to select direct credentials anyway
+      if (currentValue !== 'direct_access_keys') {
         await cisIntegration.selectAwsCredentials('direct');
       }
 
