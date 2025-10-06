@@ -22,7 +22,7 @@ type Params = Record<string, string | number | boolean | null>;
 // Helper function to safely extract the target AST node
 function getFunctionNodeFromAst(ast: ESQLAstQueryExpression) {
   const statsCommand = ast.commands?.find((c) => isCommand(c) && c.name.toLowerCase() === 'stats');
-  if (statsCommand && isCommand(statsCommand)) {
+  if (statsCommand) {
     const functionNode = statsCommand.args?.[0];
     if (functionNode && isFunctionExpression(functionNode)) {
       return functionNode;
