@@ -449,7 +449,14 @@ export class CstToAstConverter {
   // --------------------------------------------------------------------- FROM
 
   private fromFromCommand(ctx: cst.FromCommandContext): ast.ESQLCommand<'from'> {
-    const command = this.createCommand('from', ctx);
+    return this.fromFromCompatibleCommand('from', ctx);
+  }
+
+  private fromFromCompatibleCommand<Name extends string>(
+    commandName: Name,
+    ctx: antlr.ParserRuleContext & Pick<cst.FromCommandContext, 'indexPatternAndMetadataFields'>
+  ): ast.ESQLCommand<Name> {
+    const command = this.createCommand(commandName, ctx);
     const indexPatternCtx = ctx.indexPatternAndMetadataFields();
     const metadataCtx = indexPatternCtx.metadata();
     const sources = indexPatternCtx
@@ -484,25 +491,7 @@ export class CstToAstConverter {
   // ----------------------------------------------------------------------- TS
 
   private fromTimeseriesCommand(ctx: cst.TimeSeriesCommandContext): ast.ESQLCommand<'ts'> {
-    const command = this.createCommand('ts', ctx);
-    const indexPatternCtx = ctx.indexPatternAndMetadataFields();
-    const metadataCtx = indexPatternCtx.metadata();
-    const sources = indexPatternCtx
-      .getTypedRuleContexts(cst.IndexPatternContext as any)
-      .map((sourceCtx) => this.toSource(sourceCtx));
-
-    command.args.push(...sources);
-
-    if (metadataCtx && metadataCtx.METADATA()) {
-      const name = metadataCtx.METADATA().getText().toLowerCase();
-      const option = this.toOption(name, metadataCtx);
-      const optionArgs = this.toColumnsFromCommand(metadataCtx);
-
-      option.args.push(...optionArgs);
-      command.args.push(option);
-    }
-
-    return command;
+    return this.fromFromCompatibleCommand('ts', ctx);
   }
 
   // --------------------------------------------------------------------- SHOW
@@ -601,9 +590,11 @@ export class CstToAstConverter {
     }
 
     if (ctx._grouping) {
-      const options = this.toByOption(ctx, ctx.fields());
+      const option = this.toByOption(ctx, ctx.fields());
 
-      command.args.push(...options);
+      if (option) {
+        command.args.push(option);
+      }
     }
 
     return command;
@@ -638,17 +629,14 @@ export class CstToAstConverter {
     return aggField;
   }
 
-  /**
-   * @todo Do not return array here.
-   */
   private toByOption(
     ctx: antlr.ParserRuleContext & Pick<cst.StatsCommandContext, 'BY'>,
     expr: cst.FieldsContext | undefined
-  ): ast.ESQLCommandOption[] {
+  ): ast.ESQLCommandOption | undefined {
     const byCtx = ctx.BY();
 
     if (!byCtx || !expr) {
-      return [];
+      return;
     }
 
     const option = this.toOption(byCtx.getText().toLowerCase(), ctx);
@@ -660,7 +648,7 @@ export class CstToAstConverter {
 
     if (lastArg) option.location.max = lastArg.location.max;
 
-    return [option];
+    return option;
   }
 
   // --------------------------------------------------------------------- SORT
@@ -1490,6 +1478,7 @@ export class CstToAstConverter {
       }
       incomplete ||= configurationItemCommandOption?.incomplete ?? true;
     }
+
     const fuseCommand = this.createCommand<'fuse', ast.ESQLAstFuseCommand>('fuse', ctx, {
       args,
       incomplete
@@ -1617,7 +1606,7 @@ export class CstToAstConverter {
   ): ast.ESQLColumn[] {
     const identifiers = this.extractIdentifiers(ctx);
 
-    return this.makeColumnsOutOfIdentifiers(identifiers);
+    return this.toColumns(identifiers);
   }
 
   private extractIdentifiers(
@@ -1659,7 +1648,7 @@ export class CstToAstConverter {
     return context;
   }
 
-  private makeColumnsOutOfIdentifiers(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
+  private toColumns(identifiers: antlr.ParserRuleContext[]): ast.ESQLColumn[] {
     const args: ast.ESQLColumn[] =
       identifiers
         .filter((child) => textExistsAndIsValid(child.getText()))
@@ -1777,15 +1766,6 @@ export class CstToAstConverter {
     );
   }
 
-  /**
-   * @todo Inline this method.
-   */
-  private getComparisonName(ctx: cst.ComparisonOperatorContext) {
-    return (
-      (ctx.EQ() || ctx.NEQ() || ctx.LT() || ctx.LTE() || ctx.GT() || ctx.GTE()).getText() || ''
-    );
-  }
-
   private visitValueExpression(ctx: cst.ValueExpressionContext) {
     if (!textExistsAndIsValid(ctx.getText())) {
       return [];
@@ -1794,10 +1774,19 @@ export class CstToAstConverter {
       return this.visitOperatorExpression(ctx.operatorExpression());
     }
     if (ctx instanceof cst.ComparisonContext) {
-      const comparisonNode = ctx.comparisonOperator();
+      const operatorCtx = ctx.comparisonOperator();
+      const comparisonOperatorText =
+        (
+          operatorCtx.EQ() ||
+          operatorCtx.NEQ() ||
+          operatorCtx.LT() ||
+          operatorCtx.LTE() ||
+          operatorCtx.GT() ||
+          operatorCtx.GTE()
+        ).getText() || '';
       const comparisonFn = this.toFunction(
-        this.getComparisonName(comparisonNode),
-        comparisonNode,
+        comparisonOperatorText,
+        operatorCtx,
         undefined,
         'binary-expression'
       );
