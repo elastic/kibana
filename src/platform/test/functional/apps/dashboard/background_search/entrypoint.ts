@@ -13,9 +13,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardName = 'dashboard with filter';
 
   const { dashboard } = getPageObjects(['dashboard', 'common', 'timePicker']);
-  const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
+  const searchSessions = getService('searchSessions');
 
   describe('dashboard background search', function () {
     before(async () => {
@@ -44,8 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('opens the background search flyout', async () => {
           await dashboard.gotoDashboardEditMode(dashboardName);
 
-          await testSubjects.click('backgroundSearchButton');
-          await testSubjects.exists('searchSessionsMgmtUiTable');
+          await searchSessions.openFlyout();
+          await searchSessions.expectManagementTable();
         });
       });
     });
@@ -55,8 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('opens the background search flyout', async () => {
           await dashboard.loadSavedDashboard(dashboardName);
 
-          await testSubjects.click('backgroundSearchButton');
-          await testSubjects.exists('searchSessionsMgmtUiTable');
+          await searchSessions.openFlyout();
+          await searchSessions.expectManagementTable();
         });
       });
     });
