@@ -55,7 +55,7 @@ export const createNlToEsqlGraph = ({
   esClient,
   docBase,
   logger,
-  events, // TODO: use / send  events
+  events,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
@@ -63,6 +63,7 @@ export const createNlToEsqlGraph = ({
   logger?: Logger;
   events?: ToolEventEmitter;
 }) => {
+  // resolve the search target / generate sampling data
   const resolveTarget = async (state: StateType) => {
     const resolvedResource = await resolveResourceWithSamplingStats({
       resourceName: state.target,
@@ -113,6 +114,7 @@ export const createNlToEsqlGraph = ({
     };
   };
 
+  // generate esql step - generate the esql query based on the doc and the user's input
   const generateEsql = async (state: StateType) => {
     const generateModel = model.chatModel;
 
@@ -157,6 +159,7 @@ export const createNlToEsqlGraph = ({
     }
   };
 
+  // autocorrect step - try to correct common mistakes in the esql query
   const autocorrectQuery = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
     if (!isGenerateQueryAction(lastAction) || !lastAction.query) {
@@ -185,6 +188,7 @@ export const createNlToEsqlGraph = ({
     }
   };
 
+  // execute query step - execute the query and get the results
   const executeQuery = async (state: StateType) => {
     let query;
     const lastAction = state.actions[state.actions.length - 1];
@@ -231,6 +235,7 @@ export const createNlToEsqlGraph = ({
     }
   };
 
+  // finalize step - process / generate the outputs
   const finalize = async (state: StateType) => {
     const lastAction = state.actions[state.actions.length - 1];
     const generateActions = state.actions.filter(isGenerateQueryAction);
