@@ -27,10 +27,11 @@ import {
 import {
   dataGeneratorFactory,
   forceStartDatafeeds,
+  indexDocuments,
   setupMlModulesWithRetry,
 } from '../../../detections_response/utils';
-import { EsIndexDataProvider } from '../../../../../cloud_security_posture_api/utils';
-import { createPackagePolicy } from '../../../../../api_integration/apis/cloud_security_posture/helper';
+import { createPackagePolicy } from '../../utils/package_policy';
+import { deleteAllDocuments } from '../../utils/elasticsearch_helpers';
 
 const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 const VULNERABILITIES_LATEST_INDEX = 'logs-cloud_security_posture.vulnerabilities_latest-default';
@@ -124,8 +125,6 @@ export default function ({ getService }: FtrProviderContext) {
       log,
     });
     const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
-    const findingsLatestIndex = new EsIndexDataProvider(es, FINDINGS_LATEST_INDEX);
-    const vulnerabilitiesLatestIndex = new EsIndexDataProvider(es, VULNERABILITIES_LATEST_INDEX);
     let agentPolicyId: string;
     let packagePolicyId: string;
 
@@ -173,8 +172,18 @@ export default function ({ getService }: FtrProviderContext) {
         'cspm'
       );
       packagePolicyId = packagePolicyItem.id;
-      await findingsLatestIndex.addBulk(misConfigurationMockData);
-      await vulnerabilitiesLatestIndex.addBulk(vulnerabilityMockData);
+      await indexDocuments({
+        es,
+        index: FINDINGS_LATEST_INDEX,
+        documents: misConfigurationMockData,
+        log,
+      });
+      await indexDocuments({
+        es,
+        index: VULNERABILITIES_LATEST_INDEX,
+        documents: vulnerabilityMockData,
+        log,
+      });
 
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
@@ -206,8 +215,8 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({ packagePolicyIds: [packagePolicyId] });
 
-      await findingsLatestIndex.deleteAll();
-      await vulnerabilitiesLatestIndex.deleteAll();
+      await deleteAllDocuments(es, FINDINGS_LATEST_INDEX);
+      await deleteAllDocuments(es, VULNERABILITIES_LATEST_INDEX);
 
       await esArchiver.unload(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
