@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import styled from '@emotion/styled';
-import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import {
   ControlGroupRenderer,
   type ControlPanelsState,
   type ControlGroupRendererApi,
   type ControlGroupRuntimeState,
 } from '@kbn/control-group-renderer';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import styled from '@emotion/styled';
+import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import type { DataControlApi } from '@kbn/controls-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Subscription } from 'rxjs';
@@ -68,6 +68,7 @@ export const ControlsContent = ({
     if (!current || !controlConfigs.replace) {
       return;
     }
+
     Object.entries(controlConfigs.replace).forEach(([key, replaceable]) => {
       current.replacePanel(key, {
         panelType: replaceable.control.type,

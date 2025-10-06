@@ -76,14 +76,6 @@ export const useESQLVariables = ({
         controlGroupApi.updateInput({ initialChildControlState: savedControlGroupState });
       });
 
-    const variableSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
-      if (!isEqual(newVariables, currentEsqlVariables)) {
-        // Update the ESQL variables in the internal state
-        dispatch(setEsqlVariables({ esqlVariables: newVariables }));
-        stateContainer.dataState.fetch();
-      }
-    });
-
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
       if (input && input.initialChildControlState) {
         const currentTabControlState = input.initialChildControlState;
@@ -98,10 +90,18 @@ export const useESQLVariables = ({
       }
     });
 
+    const variableSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
+      if (!isEqual(newVariables, currentEsqlVariables)) {
+        // Update the ESQL variables in the internal state
+        dispatch(setEsqlVariables({ esqlVariables: newVariables }));
+        stateContainer.dataState.fetch();
+      }
+    });
+
     return () => {
       inputSubscription.unsubscribe();
-      variableSubscription.unsubscribe();
       savedSearchResetSubsciption.unsubscribe();
+      variableSubscription.unsubscribe();
     };
   }, [
     controlGroupApi,

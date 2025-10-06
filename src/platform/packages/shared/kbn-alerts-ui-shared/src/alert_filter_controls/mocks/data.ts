@@ -121,7 +121,6 @@ export const initialInputData: ControlGroupRuntimeState = {
       },
     },
   },
-  // autoApplySelections: true,
   ignoreParentSettings: {
     ignoreFilters: false,
     ignoreQuery: false,
