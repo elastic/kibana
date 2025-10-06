@@ -11,7 +11,7 @@ import { test, expect } from '../../../../src/playwright';
 import { EuiComboBoxWrapper } from '../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
-test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'] }, () => {
+test.describe.only('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'] }, () => {
   test(`with multiple selections (pills)`, async ({ page }) => {
     const dataTestSubj = 'demoComboBox';
     await navigateToEuiTestPage(page, 'docs/components/forms/selection/combo-box/');
@@ -58,7 +58,10 @@ test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'
   });
 
   test(`with the single selection`, async ({ page }) => {
-    const selector = { locator: '[id=":r5:-row"] .euiComboBox' };
+    const selector = {
+      locator:
+        '//h3[@id="single-selection-with-custom-options"]/following-sibling::div[.//div[contains(@class,"euiComboBox")]][1]',
+    };
     await navigateToEuiTestPage(
       page,
       'docs/components/forms/selection/combo-box/#single-selection-with-custom-options'
