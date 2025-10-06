@@ -117,6 +117,8 @@ include::upgrade-notes.asciidoc[]
 
 The 8.19.5 release includes the following fixes.
 
+IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
 [float]
 [[fixes-v8.19.5]]
 === Fixes
@@ -677,6 +679,8 @@ Search::
 == {kib} 8.18.8
 
 The 8.18.8 release includes the following fixes.
+
+IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
 
 [float]
 [[fixes-v8.18.8]]
