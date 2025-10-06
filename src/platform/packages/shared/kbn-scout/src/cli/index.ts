@@ -27,6 +27,7 @@ export async function run() {
       reportingCLI.initializeReportDatastream,
       reportingCLI.uploadEvents,
       reportingCLI.updateTestConfigStats,
+      reportingCLI.checkEventCommand,
       createTestTrack,
     ]
   ).execute();
