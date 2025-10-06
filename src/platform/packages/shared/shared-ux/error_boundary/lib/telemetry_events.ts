@@ -36,7 +36,7 @@ export const reactFatalErrorSchema = {
     type: 'long' as const,
     _meta: {
       description:
-        'Minimum duration in milliseconds that the fatal error component stayed rendered (before unmount). A max value of 120,000 (2 minutes) is enforced to prevent excessive, indefinite or indeterminable durations.',
+        'Minimum duration in milliseconds that the fatal error component stayed rendered (before unmount). A max value of 10,000 (10s) is enforced to prevent excessive, indefinite or indeterminable durations.',
       optional: false as const,
     },
   },
