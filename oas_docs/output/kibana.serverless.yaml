@@ -13795,7 +13795,7 @@ paths:
             The file identifier is constructed one of two ways:
             - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
             `{file_id}` = `{action_id}.{agent_id}`
-            - For all other agents types: the `file_id` is the `agent_id` for which the response action was sent to.
+            - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
           in: path
           name: file_id
           required: true
@@ -13857,7 +13857,7 @@ paths:
             The file identifier is constructed one of two ways:
             - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
             `{file_id}` = `{action_id}.{agent_id}`
-            - For all other agents types: the `file_id` is the `agent_id` for which the response action was sent to.
+            - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
           in: path
           name: file_id
           required: true
