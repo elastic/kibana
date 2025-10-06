@@ -14,6 +14,8 @@ import { once } from 'lodash';
  * Event types.
  */
 export const ESQL_LOOKUP_JOIN_ACTION_SHOWN = 'esql.lookup_action_shown';
+export const ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN =
+  'esql.suggestions_with_custom_command_shown';
 
 /**
  * Registers the esql editor analytics events.
@@ -42,6 +44,24 @@ export const registerESQLEditorAnalyticsEvents = once((analytics: AnalyticsServi
         _meta: {
           description:
             'The higher privilege the user has for this index. Possible values are: create|edit|read',
+        },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: ESQL_SUGGESTIONS_WITH_CUSTOM_COMMAND_SHOWN,
+    schema: {
+      command_ids: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'The command id attached to the suggestion item',
+          },
+        },
+        _meta: {
+          description: 'List of commands ids suggested',
         },
       },
     },
