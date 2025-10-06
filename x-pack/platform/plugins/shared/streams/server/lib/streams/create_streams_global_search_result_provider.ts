@@ -11,13 +11,13 @@ import type {
   GlobalSearchProviderResult,
   GlobalSearchResultProvider,
 } from '@kbn/global-search-plugin/server';
-import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { Streams } from '@kbn/streams-schema';
 import type { SearchHit } from '@kbn/es-types';
 import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
-import type { StreamsStorageClient, StreamsStorageSettings } from './service';
-import { streamsStorageSettings } from './service';
-import { migrateOnRead } from './helpers/migrate_on_read';
+import {
+  createStreamsStorageClient,
+  type StreamsStorageClient,
+} from './storage/streams_storage_client';
 import { checkAccessBulk } from './stream_crud';
 
 const streamTypes = ['classic stream', 'wired stream', 'group stream', 'stream'];
@@ -34,13 +34,7 @@ export function createStreamsGlobalSearchResultProvider(
         return from([]);
       }
 
-      const storageAdapter = new StorageIndexAdapter<
-        StreamsStorageSettings,
-        Streams.all.Definition
-      >(client.asInternalUser, logger, streamsStorageSettings, {
-        migrateSource: migrateOnRead,
-      });
-      const storageClient = storageAdapter.getClient();
+      const storageClient = createStreamsStorageClient(client.asInternalUser, logger);
 
       return from(findStreams({ term, types, maxResults, storageClient, client, core })).pipe(
         takeUntil(aborted$)
