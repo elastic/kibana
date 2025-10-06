@@ -23,10 +23,10 @@ import {
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import { take } from 'rxjs';
 import type { SearchHit } from '@kbn/es-types';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Document {
@@ -63,7 +63,6 @@ export const WorkflowExecuteIndexForm = ({
   const { services } = useKibana();
   const { unifiedSearch } = services;
   const { SearchBar } = unifiedSearch.ui;
-  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
   const [selectedDataView, setSelectedDataView] = useState<DataView | null>(null);
   const [dataViews, setDataViews] = useState<DataViewListItem[]>([]);
   const [documents, setDocuments] = useState<SearchHit<Document>[]>([]);
@@ -74,17 +73,6 @@ export const WorkflowExecuteIndexForm = ({
     from: 'now-15m',
     to: 'now',
   });
-
-  // Get current user
-  useEffect(() => {
-    if (!services.security) {
-      setErrors('Security service not available');
-      return;
-    }
-    getCurrentUser(services.security).then((user: AuthenticatedUser | null): void => {
-      setCurrentUser(user);
-    });
-  }, [services.security, setErrors]);
 
   // Load data views
   useEffect(() => {
@@ -120,57 +108,55 @@ export const WorkflowExecuteIndexForm = ({
     setDocumentsLoading(true);
     setErrors(null);
 
-    try {
-      const esQuery = buildEsQuery(selectedDataView, query ? [query] : [], []);
-      const searchQuery = {
-        bool: {
-          must: esQuery.bool.must || [],
-          filter: [
-            ...(esQuery.bool.filter || []),
-            {
-              range: {
-                '@timestamp': {
-                  gte: timeRange.from,
-                  lte: timeRange.to,
-                },
+    const esQuery = buildEsQuery(selectedDataView, query ? [query] : [], []);
+    const searchQuery = {
+      bool: {
+        must: esQuery.bool.must || [],
+        filter: [
+          ...(esQuery.bool.filter || []),
+          {
+            range: {
+              '@timestamp': {
+                gte: timeRange.from,
+                lte: timeRange.to,
               },
             },
-          ],
-          should: esQuery.bool.should || [],
-          must_not: esQuery.bool.must_not || [],
-        },
-      };
-
-      const request = {
-        params: {
-          index: selectedDataView.getIndexPattern(),
-          body: {
-            query: searchQuery,
-            size: 50,
-            sort: [{ '@timestamp': { order: 'desc' } }],
-            _source: ['@timestamp', 'agent', 'user', 'message', 'host.name', 'source.ip'],
           },
+        ],
+        should: esQuery.bool.should || [],
+        must_not: esQuery.bool.must_not || [],
+      },
+    };
+
+    const request: IEsSearchRequest = {
+      params: {
+        index: selectedDataView.getIndexPattern(),
+        query: searchQuery,
+        size: 50,
+        sort: [{ '@timestamp': { order: 'desc' } }],
+        _source: ['@timestamp', 'agent', 'user', 'message', 'host.name', 'source.ip'],
+      },
+    };
+
+    services.data.search
+      .search<IEsSearchRequest, IEsSearchResponse<Document>>(request)
+      .pipe(take(1))
+      .subscribe({
+        next: (response) => {
+          const hits: SearchHit<Document>[] =
+            response?.rawResponse?.hits?.hits.filter(
+              (hit): hit is SearchHit<Document> => !!hit._source
+            ) ?? [];
+          setDocuments(hits);
         },
-      };
-
-      const response = await services.data.search.search(request).pipe(take(1)).toPromise();
-
-      if (
-        response &&
-        response.rawResponse &&
-        response.rawResponse.hits &&
-        response.rawResponse.hits.hits
-      ) {
-        setDocuments(response.rawResponse.hits.hits as SearchHit<Document>[]);
-      } else {
-        setDocuments([]);
-      }
-    } catch (err) {
-      setErrors(err instanceof Error ? err.message : 'Failed to fetch documents');
-      setDocuments([]);
-    } finally {
-      setDocumentsLoading(false);
-    }
+        error: (err) => {
+          setErrors(err instanceof Error ? err.message : 'Failed to fetch documents');
+          setDocuments([]);
+        },
+        complete: () => {
+          setDocumentsLoading(false);
+        },
+      });
   }, [selectedDataView, query, services.data, setErrors, timeRange.from, timeRange.to]);
 
   // Fetch documents when data view, query, or filters change
@@ -225,10 +211,6 @@ export const WorkflowExecuteIndexForm = ({
           })),
           query: query.query,
           dataView: selectedDataView?.title,
-          additionalData: {
-            user: currentUser?.email || 'workflow-user@gmail.com',
-            userName: currentUser?.username || 'workflow-user',
-          },
         },
       };
 
