@@ -39,7 +39,7 @@ describe('extractPanelsState', () => {
           gridData: {},
           panels: [
             {
-              config: {
+              panelConfig: {
                 timeRange: {
                   from: 'now-7d/d',
                   to: 'now',
