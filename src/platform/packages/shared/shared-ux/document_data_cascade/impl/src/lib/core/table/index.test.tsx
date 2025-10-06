@@ -138,6 +138,52 @@ describe('table', () => {
           expect(Object.keys(cascadeState.table.expanded)).toHaveLength(1);
         });
       });
+
+      it('should only allow one sibling row to be expanded at a time when `allowMultipleRowToggle` is false', () => {
+        const data = Array.from(new Array(3)).map((_, index) => ({
+          id: String(index),
+          name: `Item ${index}`,
+          children: Array.from(new Array(3)).map((__, childIndex) => ({
+            id: `${index}-${childIndex}`,
+            name: `Item ${index}-${childIndex}`,
+          })),
+        }));
+
+        const { result } = renderHook(useCascadeTable, {
+          wrapper: ({ children }) =>
+            createHookWrapper({
+              children,
+              helper: TestHelper,
+            }),
+          initialProps: {
+            initialData: data,
+            allowMultipleRowToggle: false,
+            enableRowSelection: false,
+            header: jest.fn(),
+            rowCell: jest.fn(),
+          } as TableProps<GroupNode, unknown>,
+        });
+
+        // Initially no rows should be expanded
+        expect(Object.keys(cascadeState.table.expanded ?? {})).toHaveLength(0);
+
+        // expand first root row
+        const firstRootRow = result.current.rows[0];
+        act(() => firstRootRow.getToggleExpandedHandler()());
+        expect(Object.keys(cascadeState.table.expanded)).toHaveLength(1);
+
+        // expand first child of the first root row
+        const firstChildRow = firstRootRow.subRows[0];
+        act(() => firstChildRow.getToggleExpandedHandler()());
+        expect(Object.keys(cascadeState.table.expanded)).toHaveLength(2);
+
+        // expand second child of the first root row, expect the first child to be collapsed
+        const secondChildRow = firstRootRow.subRows[1];
+        act(() => secondChildRow.getToggleExpandedHandler()());
+        expect(Object.keys(cascadeState.table.expanded)).toHaveLength(2);
+        expect(cascadeState.table.expanded?.[firstChildRow.id]).toBeUndefined();
+        expect(cascadeState.table.expanded?.[secondChildRow.id]).toBe(true);
+      });
     });
   });
 
