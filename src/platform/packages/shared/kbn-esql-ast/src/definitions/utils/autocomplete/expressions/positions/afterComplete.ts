@@ -88,7 +88,7 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
   suggestions.push(...nextItems);
 
   // Add comma if we have more mandatory args in the function
-  if (functionParameterContext?.hasMoreMandatoryArgs) {
+  if (functionParameterContext?.hasMoreMandatoryArgs && !timeUnitItems.length) {
     suggestions.push(commaCompleteItem);
   }
 
