@@ -373,7 +373,10 @@ describe('Authenticator', () => {
 
     beforeEach(() => {
       mockOptions = getMockOptions({
-        providers: { basic: { basic1: { order: 0 } }, oidc: { oidc1: { order: 1 } } },
+        providers: {
+          basic: { basic1: { order: 0 } },
+          oidc: { oidc1: { order: 1, realm: 'oidc' } },
+        },
       });
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
