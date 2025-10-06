@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 
 import classNames from 'classnames';
 
 import { useActions, useValues, BindLogic } from 'kea';
 
-import { EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer, useUpdateEffect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ReorderableTable } from '../reorderable_table';
@@ -105,6 +105,14 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   const { editingItemId, isEditing, isEditingUnsavedItem, rowErrors } =
     useValues(InlineEditableTableLogic);
   const { editNewItem, reorderItems } = useActions(InlineEditableTableLogic);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+
+  useUpdateEffect(() => {
+    if (!isEditing) {
+      // Editing just ended, focus the add button
+      addButtonRef.current?.focus();
+    }
+  }, [isEditing]);
 
   // TODO These two things shoud just be selectors
   const isEditingItem = (item: Item) => item.id === editingItemId;
@@ -135,6 +143,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
         title={title || ''}
         actions={[
           <EuiButton
+            buttonRef={addButtonRef}
             size="s"
             iconType="plusInCircle"
             disabled={isEditing}
