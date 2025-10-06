@@ -165,6 +165,7 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
                     {clipped ? (
                       <EuiPanel paddingSize="s" hasShadow={false} color="warning">
                         <EuiCallOut
+                          announceOnMount
                           data-test-subj="clipped-tokens-callout"
                           title={
                             <FormattedMessage
