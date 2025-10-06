@@ -27,6 +27,7 @@ export class KibanaPhoenixClient {
       log: SomeDevLog;
       model: Model;
       runId: string;
+      repetitions?: number;
     }
   ) {
     this.phoenixClient = createClient({
@@ -135,6 +136,7 @@ export class KibanaPhoenixClient {
           info: this.options.log.info.bind(this.options.log),
           log: this.options.log.info.bind(this.options.log),
         },
+        repetitions: this.options.repetitions ?? 1,
       });
 
       this.experiments.push(ranExperiment);
