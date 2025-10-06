@@ -20,16 +20,54 @@ describe('extractPanelsState', () => {
             type: 'lens',
             config: {},
           },
+          {
+            title: 'Section 1',
+            grid: { y: 1, i: 'section1' },
+            panels: [
+              {
+                grid: { x: 0, y: 2, w: 24, h: 15, i: 'panelInSection' },
+                type: 'lens',
+                config: {},
+              },
+            ],
+          },
         ],
       });
-      expect(panels).toEqual([
-        {
-          config: {},
-          grid: { x: 0, y: 0, w: 24, h: 15 },
-          type: 'lens',
-          uid: 'panel1',
-        },
-      ]);
+      expect(panels).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "config": Object {},
+            "grid": Object {
+              "h": 15,
+              "w": 24,
+              "x": 0,
+              "y": 0,
+            },
+            "type": "lens",
+            "uid": "panel1",
+          },
+          Object {
+            "grid": Object {
+              "y": 1,
+            },
+            "panels": Array [
+              Object {
+                "config": Object {},
+                "grid": Object {
+                  "h": 15,
+                  "w": 24,
+                  "x": 0,
+                  "y": 2,
+                },
+                "type": "lens",
+                "uid": "panelInSection",
+              },
+            ],
+            "title": "Section 1",
+            "uid": "section1",
+          },
+        ]
+      `);
     });
   });
 
