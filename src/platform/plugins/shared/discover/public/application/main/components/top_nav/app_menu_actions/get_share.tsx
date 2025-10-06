@@ -20,7 +20,6 @@ import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sh
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
 import type { TabState } from '../../../state_management/redux/types';
 
 export const getShareAppMenuItem = ({
@@ -58,7 +57,7 @@ export const getShareAppMenuItem = ({
       isEsqlMode
     );
 
-    const { locator, core } = services;
+    const { locator, discoverFeatureFlags } = services;
     const appState = stateContainer.appState.getState();
     const { timefilter } = services.data.query.timefilter;
     const timeRange = timefilter.getTime();
@@ -77,7 +76,7 @@ export const getShareAppMenuItem = ({
       refreshInterval,
     };
 
-    const tabsEnabled = core.featureFlags.getBooleanValue(TABS_ENABLED_FEATURE_FLAG_KEY, false);
+    const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
 
     if (tabsEnabled && currentTab) {
       params.tab = {
