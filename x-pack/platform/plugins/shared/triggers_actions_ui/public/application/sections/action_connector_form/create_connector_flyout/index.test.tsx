@@ -192,6 +192,62 @@ describe('CreateConnectorFlyout', () => {
     });
   });
 
+  it('shows the correct buttons when selecting an action type with subtype', async () => {
+    actionTypeRegistry.get.mockReturnValue({
+      ...actionTypeModel,
+      subtype: [
+        { id: 'my-action-type', name: 'My Action Type' },
+        { id: 'my-action-type-1', name: 'My Action Type 1' },
+      ],
+    });
+
+    loadActionTypes.mockResolvedValueOnce([
+      {
+        id: actionTypeModel.id,
+        enabled: true,
+        name: 'Test',
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting', 'siem'],
+      },
+      {
+        id: 'my-action-type',
+        name: 'Test',
+        enabled: false,
+        enabledInConfig: false,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting', 'siem'],
+      },
+      {
+        id: 'my-action-type-1',
+        name: 'My Action Type 1',
+        enabled: true,
+        enabledInConfig: true,
+        minimumLicenseRequired: 'basic' as const,
+        supportedFeatureIds: ['alerting', 'siem'],
+        enabledInLicense: true,
+      },
+    ]);
+
+    const { getByTestId } = appMockRenderer.render(
+      <CreateConnectorFlyout
+        actionTypeRegistry={actionTypeRegistry}
+        onClose={onClose}
+        onConnectorCreated={onConnectorCreated}
+        onTestConnector={onTestConnector}
+      />
+    );
+    await act(() => Promise.resolve());
+
+    await userEvent.click(getByTestId(`${actionTypeModel.id}-card`));
+
+    await waitFor(() => {
+      expect(getByTestId(`${actionTypeModel.id}Button`)).toHaveTextContent('My Action Type 1');
+    });
+  });
+
   describe('Licensing', () => {
     it('renders banner with subscription links when gold features are disabled due to licensing', async () => {
       const disabledActionType = actionTypeRegistryMock.createMockActionTypeModel();

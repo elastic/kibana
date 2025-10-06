@@ -137,4 +137,68 @@ describe('ruleActionsConnectorsBody', () => {
     expect(await screen.findAllByTestId('ruleActionsConnectorsModalCard')).toHaveLength(1);
     expect(await screen.findByText('connector-1')).toBeInTheDocument();
   });
+
+  test('filters out when connector should be hidden in UI', async () => {
+    const connectorTypes = [
+      { id: 'type-a', name: 'Type A' },
+      { id: 'type-b', name: 'Type B' },
+      { id: 'type-c', name: 'Type C' },
+    ];
+
+    const availableConnectors = [
+      { actionTypeId: 'type-a', name: 'Type A' },
+      { actionTypeId: 'type-b', name: 'Type B' },
+      { actionTypeId: 'type-c', name: 'Type C' },
+    ];
+
+    const subtype = [
+      { id: 'type-b', name: 'Type B' },
+      { id: 'type-c', name: 'Type C' },
+    ];
+    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+    actionTypeRegistry.register(
+      getActionTypeModel('A', {
+        id: 'type-a',
+        hideInUi: () => true,
+      })
+    );
+    actionTypeRegistry.register(
+      getActionTypeModel('B', {
+        id: 'type-b',
+        subtype,
+        // Simulate hideInUi returning true for type-b
+        hideInUi: () => true,
+      })
+    );
+    actionTypeRegistry.register(
+      getActionTypeModel('C', {
+        id: 'type-c',
+        hideInUi: () => false,
+      })
+    );
+
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+      },
+      formData: {
+        actions: [],
+      },
+      connectors: [...availableConnectors],
+      connectorTypes: connectorTypes,
+      aadTemplateFields: [],
+      selectedRuleType: {
+        defaultActionGroupId: 'default',
+      },
+    });
+
+    render(<RuleActionsConnectorsBody onSelectConnector={mockOnSelectConnector} />);
+
+    const filterButtons = await screen.findAllByTestId('ruleActionsConnectorsModalFilterButton');
+
+    expect(filterButtons).toHaveLength(3);
+    expect(filterButtons[0]).toHaveTextContent('All');
+    expect(filterButtons[1]).toHaveTextContent('Type A');
+    expect(filterButtons[2]).toHaveTextContent('Type C');
+  });
 });

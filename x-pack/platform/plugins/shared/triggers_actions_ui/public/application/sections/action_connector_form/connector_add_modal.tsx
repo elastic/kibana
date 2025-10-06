@@ -78,7 +78,7 @@ const ConnectorAddModal = ({
   const canSave = hasSaveActionsCapability(capabilities);
   const actionTypeModel = actionTypeRegistry.get(actionType.id);
   const groupActionTypeModel: Array<ActionTypeModel & { name: string }> =
-    actionTypeModel && actionTypeModel.subtype
+    actionTypeModel && actionTypeModel.subtype && allActionTypes?.length
       ? (actionTypeModel?.subtype ?? [])
           .filter((item) => allActionTypes && allActionTypes[item.id].enabledInConfig)
           .map((subtypeAction) => ({

@@ -41,6 +41,29 @@ describe('connectorTypeRegistry.get works', () => {
   });
 });
 
+describe('hideInUi', () => {
+  let hideInUiResult: boolean | undefined;
+  test('should return true when slack is enabled in config', () => {
+    if (connectorTypeModel?.hideInUi) {
+      hideInUiResult = connectorTypeModel.hideInUi([
+        // @ts-expect-error necessary fields only
+        { id: '.slack', enabledInConfig: true, enabledInLicense: true, name: 'Slack' },
+      ]);
+    }
+    expect(hideInUiResult).toEqual(true);
+  });
+
+  test('should return false when slack is disabled in config', () => {
+    if (connectorTypeModel?.hideInUi) {
+      hideInUiResult = connectorTypeModel.hideInUi([
+        // @ts-expect-error necessary fields only
+        { id: '.slack', enabledInConfig: false, enabledInLicense: true, name: 'Slack' },
+      ]);
+    }
+    expect(hideInUiResult).toEqual(false);
+  });
+});
+
 describe('Slack action params validation', () => {
   describe('postMessage', () => {
     test('should succeed when action params include valid message and channels list', async () => {

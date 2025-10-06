@@ -137,7 +137,9 @@ describe('ruleActionsConnectorsModal', () => {
   test('should not render connector if hideInUi is true', () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     actionTypeRegistry.register(getActionTypeModel('1', { id: 'actionType-1' }));
-    actionTypeRegistry.register(getActionTypeModel('2', { id: 'actionType-2', hideInUi: true }));
+    actionTypeRegistry.register(
+      getActionTypeModel('2', { id: 'actionType-2', hideInUi: () => true })
+    );
 
     useRuleFormState.mockReturnValue({
       plugins: {
@@ -169,7 +171,7 @@ describe('ruleActionsConnectorsModal', () => {
     actionTypeRegistry.register(
       getActionTypeModel('2', {
         id: 'actionType-2',
-        hideInUi: true,
+        hideInUi: () => true,
         subtype: [
           { id: 'actionType-1', name: 'connector-1' },
           { id: 'actionType-2', name: 'connector-2' },
@@ -210,7 +212,7 @@ describe('ruleActionsConnectorsModal', () => {
     actionTypeRegistry.register(
       getActionTypeModel('2', {
         id: 'actionType-2',
-        hideInUi: true,
+        hideInUi: () => true,
         subtype: [
           { id: 'actionType-1', name: 'connector-1' },
           { id: 'actionType-2', name: 'connector-2' },
