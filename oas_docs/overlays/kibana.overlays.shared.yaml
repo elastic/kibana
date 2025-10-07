@@ -66,31 +66,31 @@ actions:
     description: Change tag description and displayName
     update:
       description: >
-        Elastic Agent binary download sources APIs enable you to manage download sources for Elastic Agent binaries, including creating, updating, and deleting custom download sources for agent installations.
+        Elastic Agent binary download sources APIs enable you to manage download sources for Elastic Agent binaries, including creating, updating, and deleting custom download sources for agent binaries.
       x-displayName: 'Elastic Agent binary download sources'
   - target: '$.tags[?(@.name=="Elastic Agent policies")]'
     description: Change tag description and displayName
     update:
       description: >
-        Elastic Agent policies APIs enable you to manage agent policies, including creating, updating, and deleting policies, as well as managing policy outputs, manifests, and auto-upgrade settings.
+        Elastic Agent policies APIs enable you to manage agent policies, including creating, updating, and deleting policies, as well as to retrieve agent policy outputs, manifests, and auto-upgrade status information.
       x-displayName: 'Elastic Agent policies'
   - target: '$.tags[?(@.name=="Elastic Agent status")]'
     description: Change tag description and displayName
     update:
       description: >
-        Elastic Agent status APIs enable you to retrieve status information about Elastic Agents, including health summaries and operational status.
+        Enables you to retrieve status information about Elastic Agents, including health summaries and operational status.
       x-displayName: 'Elastic Agent status'
   - target: '$.tags[?(@.name=="Elastic Agents")]'
     description: Change tag description and displayName
     update:
       description: >
-        Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and configuring agent setup.
+        Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and initiating agent setup.
       x-displayName: 'Elastic Agents'
   - target: '$.tags[?(@.name=="Fleet enrollment API keys")]'
     description: Change tag description and displayName
     update:
       description: >
-        Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking keys used for agent enrollment.
+        Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
       x-displayName: 'Fleet enrollment API keys'
   - target: '$.tags[?(@.name=="Fleet internals")]'
     description: Change tag description and displayName
@@ -102,7 +102,7 @@ actions:
     description: Change tag description and displayName
     update:
       description: >
-        Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating API keys, and monitoring output health.
+        Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating Logstash API keys, and monitoring output health.
       x-displayName: 'Fleet outputs'
   - target: '$.tags[?(@.name=="Fleet package policies")]'
     description: Change tag description and displayName
@@ -126,7 +126,7 @@ actions:
     description: Change tag description and displayName
     update:
       description: >
-        Enables you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
+        Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
       x-displayName: 'Fleet uninstall tokens'
   - target: '$.tags[?(@.name=="Message Signing Service")]'
     description: Change tag description and displayName
