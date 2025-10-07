@@ -22,6 +22,7 @@ import { EuiCode, EuiText, useEuiTheme } from '@elastic/eui';
 import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 import { VisualizeLens } from '../../tools/esql/visualize_lens';
+import { VisualizeMaps } from '../../tools/esql/visualize_maps';
 
 type MutableNode = Node & {
   value?: string;
@@ -164,9 +165,21 @@ export function createVisualizationRenderer({
       return <EuiText>Unable to find visualization for {ToolResultAttribute}.</EuiText>;
     }
 
-    // Handle visualization result (pre-built Lens config)
     if (toolResult.type === 'visualization') {
-      const { visualization } = toolResult.data;
+      const { visualization, chartType: visChartType } = toolResult.data;
+
+      // Render map visualization
+      if (visChartType === 'maps' || visChartType === 'map') {
+        const title =
+          typeof visualization.title === 'string' ? visualization.title : 'AI Generated Map';
+        const mapWithTitle = {
+          ...visualization,
+          title,
+        };
+        return <VisualizeMaps mapConfig={mapWithTitle} uiActions={startDependencies.uiActions} />;
+      }
+
+      // Render Lens visualization
       return (
         <VisualizeLens
           lensConfig={visualization}

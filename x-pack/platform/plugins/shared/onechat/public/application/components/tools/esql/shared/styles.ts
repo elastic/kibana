@@ -31,3 +31,14 @@ export const actionsContainer = (euiTheme: UseEuiTheme['euiTheme']) =>
     display: 'inline-flex',
     gap: 0,
   });
+
+export const mapVisualizationStyles = css`
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+  padding-top: 28px;
+
+  .mapEmbeddableContainer {
+    min-height: 400px;
+  }
+`;

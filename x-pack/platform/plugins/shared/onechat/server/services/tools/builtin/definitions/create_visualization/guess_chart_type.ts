@@ -21,7 +21,8 @@ export async function getChartType(
 Respond with ONLY the chart type name, nothing else.
 
 Guidelines:
-- metric: For single numeric values, KPIs, or metrics with optional trend line`,
+- metric: For single numeric values, KPIs, or metrics with optional trend line
+- map: For displaying geographical data`,
     },
     {
       role: 'user',

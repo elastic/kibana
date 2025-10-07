@@ -12,12 +12,15 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import parse from 'joi-to-json';
 
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
+import { mapAttributesSchema } from '@kbn/maps-plugin/server/content_management/schema/v1/map_attributes_schema/map_attributes_schema';
 import { getToolResultId } from '@kbn/onechat-server';
 import { getChartType } from './guess_chart_type';
 import { SupportedChartType } from './types';
 import { createVisualizationGraph } from './graph_lens';
+import { createMapGraph } from './graph_maps';
 
 const metricSchema = parse(esqlMetricState.getSchema());
+const mapSchema = parse(mapAttributesSchema.getSchema());
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
@@ -85,25 +88,39 @@ This tool will:
 
         // Step 2: Generate visualization configuration using langgraph with validation retry
         const model = await modelProvider.getDefaultModel();
-        const schema = metricSchema;
 
-        // Create and invoke the validation retry graph
-        const graph = createVisualizationGraph(model, logger, esClient);
+        // Choose schema and graph based on chart type
+        const isMap = selectedChartType === SupportedChartType.Map;
+        const schema = isMap ? mapSchema : metricSchema;
+        const graph = isMap
+          ? createMapGraph(model, logger, esClient)
+          : createVisualizationGraph(model, logger, esClient);
 
-        const finalState = await graph.invoke({
+        // Build initial state based on chart type
+        const baseState = {
           nlQuery,
           chartType: selectedChartType,
           schema,
           existingConfig,
           parsedExistingConfig,
-          esqlQuery: esql || '',
+          ...(isMap ? { esqlQuery: esql || '' } : {}),
           currentAttempt: 0,
           actions: [],
           validatedConfig: null,
           error: null,
-        });
+        };
 
-        const { validatedConfig, error, currentAttempt, esqlQuery } = finalState;
+        const finalState = await graph.invoke(
+          isMap
+            ? baseState
+            : {
+                ...baseState,
+                esqlQuery: esql || '',
+              }
+        );
+
+        const { validatedConfig, error, currentAttempt } = finalState;
+        const esqlQuery = isMap ? '' : (finalState as any).esqlQuery || '';
 
         if (!validatedConfig) {
           throw new Error(

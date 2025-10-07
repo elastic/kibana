@@ -12,26 +12,49 @@ import type {
   InlineEditLensEmbeddableContext,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
+import type { MapAttributes } from '@kbn/maps-plugin/server';
+import type { MapEmbeddableState } from '@kbn/maps-plugin/common';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { EditVisualizationButton, saveButtonLabel } from './edit_visualization_button';
 import { actionsContainer } from './styles';
+import { MapsActions } from './maps_actions';
 
-interface Props {
+interface LensProps {
   onSave: () => void;
   uiActions: UiActionsStart;
   lensInput: TypedLensByValueInput | undefined;
   lensLoadEvent: InlineEditLensEmbeddableContext['lensEvent'] | null;
   setLensInput: (input: TypedLensByValueInput) => void;
+  isMap?: false;
 }
 
-export function VisualizationActions({
-  onSave,
-  uiActions,
-  lensInput,
-  lensLoadEvent,
-  setLensInput,
-}: Props) {
+interface MapProps {
+  uiActions: UiActionsStart;
+  mapInput: MapEmbeddableState | undefined;
+  mapConfig: MapAttributes;
+  setMapInput: (input: MapEmbeddableState) => void;
+  isMap: true;
+}
+
+type Props = LensProps | MapProps;
+
+export function VisualizationActions(props: Props) {
   const { euiTheme } = useEuiTheme();
+
+  // Handle map visualizations
+  if (props.isMap) {
+    return (
+      <MapsActions
+        uiActions={props.uiActions}
+        mapInput={props.mapInput}
+        mapConfig={props.mapConfig}
+        setMapInput={props.setMapInput}
+      />
+    );
+  }
+
+  // Handle Lens visualizations
+  const { lensInput, lensLoadEvent, setLensInput, onSave, uiActions } = props;
 
   if (!lensInput) {
     return null;
