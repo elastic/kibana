@@ -14,17 +14,17 @@
  *   version: Bundle (no version)
  */
 
+/* eslint-disable @typescript-eslint/no-duplicate-imports */
+
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
-import type { CancelActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/cancel/cancel.gen';
 import type {
   CreateUpdateProtectionUpdatesNoteRequestParamsInput,
   CreateUpdateProtectionUpdatesNoteRequestBodyInput,
-  GetProtectionUpdatesNoteRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import type { EndpointExecuteActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/execute/execute.gen';
 import type { EndpointFileDownloadRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/file_download/file_download.gen';
@@ -35,41 +35,37 @@ import type { EndpointGetActionsStatusRequestQueryInput } from '@kbn/security-so
 import type { EndpointGetFileActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/get_file/get_file.gen';
 import type { EndpointGetProcessesActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/running_procs/running_procs.gen';
 import type { EndpointIsolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/isolate/isolate.gen';
+import type { EndpointIsolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/isolate/deprecated_isolate.gen';
 import type { EndpointKillProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/kill_process/kill_process.gen';
 import type { EndpointScanActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/scan/scan.gen';
 import type { EndpointSuspendProcessActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/suspend_process/suspend_process.gen';
 import type { EndpointUnisolateActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/unisolate.gen';
+import type { EndpointUnisolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/unisolate/deprecated_unisolate.gen';
+import type { GetAgentPolicySummaryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/deprecated_agent_policy_summary.gen';
 import type { GetEndpointMetadataListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/metadata/get_metadata.gen';
 import type {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/suggestions/get_suggestions.gen';
 import type { GetPolicyResponseRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy_response.gen';
+import type { GetProtectionUpdatesNoteRequestParamsInput } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
+import type { GetWorkflowInsightsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
+import type { RunScriptActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/run_script/run_script.gen';
 import type {
-  GetWorkflowInsightsRequestQueryInput,
   UpdateWorkflowInsightRequestParamsInput,
   UpdateWorkflowInsightRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/endpoint/workflow_insights/workflow_insights.gen';
-import type { RunScriptActionRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/response_actions/run_script/run_script.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
-import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
+
+function getRouteUrlForSpace(routeUrl: string, spaceId?: string): string {
+  return spaceId ? `/s/${spaceId}${routeUrl}` : routeUrl;
+}
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   return {
-    /**
-     * Cancel a running or pending response action (Applies only to some agent types).
-     */
-    cancelAction(props: CancelActionProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/cancel', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
     createUpdateProtectionUpdatesNote(
       props: CreateUpdateProtectionUpdatesNoteProps,
       kibanaSpace: string = 'default'
@@ -101,12 +97,8 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .send(props.body as object);
     },
     /**
-      * Download a file from an endpoint. 
-> info
-> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-> {`file_id`} = {`action_id`}`.`{`agent_id`}
-
-      */
+     * Download a file from an endpoint.
+     */
     endpointFileDownload(props: EndpointFileDownloadProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
@@ -120,12 +112,8 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-      * Get information for the specified file using the file ID.
-> info
-> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-> {`file_id`} = {`action_id`}`.`{`agent_id`}
-
-      */
+     * Get information for the specified file using the file ID.
+     */
     endpointFileInfo(props: EndpointFileInfoProps, kibanaSpace: string = 'default') {
       return supertest
         .get(
@@ -228,6 +216,20 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .send(props.body as object);
     },
     /**
+      * Isolate an endpoint from the network.
+> info
+> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/isolate`.
+
+      */
+    endpointIsolateRedirect(props: EndpointIsolateRedirectProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(getRouteUrlForSpace('/api/endpoint/isolate', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * Terminate a running process on an endpoint.
      */
     endpointKillProcessAction(
@@ -278,6 +280,23 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .send(props.body as object);
     },
     /**
+      * Release an isolated endpoint, allowing it to rejoin a network.
+> info
+> This URL will return a 308 permanent redirect to `POST <kibana host>:<port>/api/endpoint/action/unisolate`.
+
+      */
+    endpointUnisolateRedirect(
+      props: EndpointUnisolateRedirectProps,
+      kibanaSpace: string = 'default'
+    ) {
+      return supertest
+        .post(getRouteUrlForSpace('/api/endpoint/unisolate', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * Upload a file to an endpoint.
      */
     endpointUploadAction(kibanaSpace: string = 'default') {
@@ -286,6 +305,14 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    getAgentPolicySummary(props: GetAgentPolicySummaryProps, kibanaSpace: string = 'default') {
+      return supertest
+        .get(getRouteUrlForSpace('/api/endpoint/policy/summaries', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
     },
     getEndpointMetadataList(props: GetEndpointMetadataListProps, kibanaSpace: string = 'default') {
       return supertest
@@ -299,7 +326,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
       return supertest
         .post(
           getRouteUrlForSpace(
-            replaceParams('/internal/api/endpoint/suggestions/{suggestion_type}', props.params),
+            replaceParams('/api/endpoint/suggestions/{suggestion_type}', props.params),
             kibanaSpace
           )
         )
@@ -343,7 +370,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .query(props.query);
     },
     /**
-     * Run a script on a host. Currently supported only for some agent types.
+     * Run a shell command on an endpoint.
      */
     runScriptAction(props: RunScriptActionProps, kibanaSpace: string = 'default') {
       return supertest
@@ -369,9 +396,6 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   };
 }
 
-export interface CancelActionProps {
-  body: CancelActionRequestBodyInput;
-}
 export interface CreateUpdateProtectionUpdatesNoteProps {
   params: CreateUpdateProtectionUpdatesNoteRequestParamsInput;
   body: CreateUpdateProtectionUpdatesNoteRequestBodyInput;
@@ -403,6 +427,9 @@ export interface EndpointGetProcessesActionProps {
 export interface EndpointIsolateActionProps {
   body: EndpointIsolateActionRequestBodyInput;
 }
+export interface EndpointIsolateRedirectProps {
+  body: EndpointIsolateRedirectRequestBodyInput;
+}
 export interface EndpointKillProcessActionProps {
   body: EndpointKillProcessActionRequestBodyInput;
 }
@@ -414,6 +441,12 @@ export interface EndpointSuspendProcessActionProps {
 }
 export interface EndpointUnisolateActionProps {
   body: EndpointUnisolateActionRequestBodyInput;
+}
+export interface EndpointUnisolateRedirectProps {
+  body: EndpointUnisolateRedirectRequestBodyInput;
+}
+export interface GetAgentPolicySummaryProps {
+  query: GetAgentPolicySummaryRequestQueryInput;
 }
 export interface GetEndpointMetadataListProps {
   query: GetEndpointMetadataListRequestQueryInput;

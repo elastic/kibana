@@ -14,6 +14,8 @@
  *   version: Bundle (no version)
  */
 
+/* eslint-disable @typescript-eslint/no-duplicate-imports */
+
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,

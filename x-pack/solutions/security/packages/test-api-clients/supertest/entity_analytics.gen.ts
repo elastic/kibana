@@ -14,6 +14,8 @@
  *   version: Bundle (no version)
  */
 
+/* eslint-disable @typescript-eslint/no-duplicate-imports */
+
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -23,27 +25,12 @@ import { replaceParams } from '@kbn/openapi-common/shared';
 import type { BulkUpsertAssetCriticalityRecordsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/bulk_upload_asset_criticality.gen';
 import type { ConfigureRiskEngineSavedObjectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_configure_saved_object_route.gen';
 import type { CreateAssetCriticalityRecordRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/create_asset_criticality.gen';
-import type {
-  CreateEntitySourceRequestBodyInput,
-  DeleteEntitySourceRequestParamsInput,
-  GetEntitySourceRequestParamsInput,
-  ListEntitySourcesRequestQueryInput,
-  UpdateEntitySourceRequestParamsInput,
-  UpdateEntitySourceRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/monitoring_entity_source/monitoring_entity_source.gen';
-import type { CreatePrivilegesImportIndexRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/create_index.gen';
-import type { CreatePrivMonUserRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/create.gen';
 import type { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
 import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/delete.gen';
-import type { DeleteMonitoringEngineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/delete.gen';
-import type { DeletePrivMonUserRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/delete.gen';
-import type {
-  DeprecatedTriggerRiskScoreCalculationRequestBodyInput,
-  TriggerRiskScoreCalculationRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type { DeprecatedTriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type { GetAssetCriticalityRecordRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import type { GetEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/get.gen';
@@ -54,23 +41,16 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/init.gen';
 import type { InitEntityStoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/enable.gen';
 import type { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
-import type { ListPrivMonUsersRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/list.gen';
 import type { PreviewRiskScoreRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/preview_route.gen';
-import type { SearchPrivilegesIndicesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/search_indices.gen';
 import type { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
 import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
-import type {
-  UpdatePrivMonUserRequestParamsInput,
-  UpdatePrivMonUserRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/update.gen';
-import type {
-  UpsertEntityRequestQueryInput,
-  UpsertEntityRequestParamsInput,
-  UpsertEntityRequestBodyInput,
-} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
+import type { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
-import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
+
+function getRouteUrlForSpace(routeUrl: string, spaceId?: string): string {
+  return spaceId ? `/s/${spaceId}${routeUrl}` : routeUrl;
+}
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -148,35 +128,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    createEntitySource(props: CreateEntitySourceProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/entity_source', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    createPrivilegesImportIndex(
-      props: CreatePrivilegesImportIndexProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .put(
-          getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace)
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    createPrivMonUser(props: CreatePrivMonUserProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/users', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
     /**
      * Delete the asset criticality record for a specific entity.
      */
@@ -204,38 +155,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
-    deleteEntitySource(props: DeleteEntitySourceProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    deleteMonitoringEngine(props: DeleteMonitoringEngineProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/delete', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    deletePrivMonUser(props: DeletePrivMonUserProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
     /**
      * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
      */
@@ -249,13 +168,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
-    },
-    disableMonitoringEngine(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/disable', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     disableRiskEngine(kibanaSpace: string = 'default') {
       return supertest
@@ -325,18 +237,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    getEntitySource(props: GetEntitySourceProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
     getEntityStoreStatus(props: GetEntityStoreStatusProps, kibanaSpace: string = 'default') {
       return supertest
         .get(getRouteUrlForSpace('/api/entity_store/status', kibanaSpace))
@@ -344,18 +244,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
-    },
-    getPrivilegedAccessDetectionPackageStatus(kibanaSpace: string = 'default') {
-      return supertest
-        .get(
-          getRouteUrlForSpace(
-            '/api/entity_analytics/privileged_user_monitoring/pad/status',
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
      * Returns the status of both the legacy transform-based risk engine, as well as the new risk engine
@@ -388,13 +276,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    initMonitoringEngine(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/init', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
     /**
      * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
      */
@@ -403,18 +284,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .post(getRouteUrlForSpace('/internal/risk_score/engine/init', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    installPrivilegedAccessDetectionPackage(kibanaSpace: string = 'default') {
-      return supertest
-        .post(
-          getRouteUrlForSpace(
-            '/api/entity_analytics/privileged_user_monitoring/pad/install',
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
@@ -442,24 +311,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    listEntitySources(props: ListEntitySourcesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(
-          getRouteUrlForSpace('/api/entity_analytics/monitoring/entity_source/list', kibanaSpace)
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    listPrivMonUsers(props: ListPrivMonUsersProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/users/list', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
     /**
      * Calculates and returns a list of Risk Scores, sorted by identifier_type and risk score.
      */
@@ -470,32 +321,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
-    },
-    privmonBulkUploadUsersCsv(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/users/_csv', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    privMonHealth(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/health', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Check if the current user has all required permissions for Privilege Monitoring
-     */
-    privMonPrivileges(kibanaSpace: string = 'default') {
-      return supertest
-        .get(
-          getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/privileges', kibanaSpace)
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     readRiskEngineSettings(kibanaSpace: string = 'default') {
       return supertest
@@ -518,15 +343,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
-    scheduleMonitoringEngine(kibanaSpace: string = 'default') {
-      return supertest
-        .post(
-          getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/schedule_now', kibanaSpace)
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
     /**
      * Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
      */
@@ -536,16 +352,6 @@ If a record already exists for the specified entity, that record is overwritten 
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    searchPrivilegesIndices(props: SearchPrivilegesIndicesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(
-          getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace)
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
     },
     startEntityEngine(props: StartEntityEngineProps, kibanaSpace: string = 'default') {
       return supertest
@@ -585,59 +391,12 @@ If a record already exists for the specified entity, that record is overwritten 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    updateEntitySource(props: UpdateEntitySourceProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    updatePrivMonUser(props: UpdatePrivMonUserProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
     uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
       return supertest
         .post(getRouteUrlForSpace('/api/asset_criticality/upload_csv', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-      * Update or create an entity in Entity Store.
-If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
-> Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
-> Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
-
-      */
-    upsertEntity(props: UpsertEntityProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(
-          getRouteUrlForSpace(
-            replaceParams('/api/entity_store/entities/{entityType}', props.params),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object)
-        .query(props.query);
     },
   };
 }
@@ -651,30 +410,12 @@ export interface ConfigureRiskEngineSavedObjectProps {
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;
 }
-export interface CreateEntitySourceProps {
-  body: CreateEntitySourceRequestBodyInput;
-}
-export interface CreatePrivilegesImportIndexProps {
-  body: CreatePrivilegesImportIndexRequestBodyInput;
-}
-export interface CreatePrivMonUserProps {
-  body: CreatePrivMonUserRequestBodyInput;
-}
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
-}
-export interface DeleteEntitySourceProps {
-  params: DeleteEntitySourceRequestParamsInput;
-}
-export interface DeleteMonitoringEngineProps {
-  query: DeleteMonitoringEngineRequestQueryInput;
-}
-export interface DeletePrivMonUserProps {
-  params: DeletePrivMonUserRequestParamsInput;
 }
 export interface DeprecatedTriggerRiskScoreCalculationProps {
   body: DeprecatedTriggerRiskScoreCalculationRequestBodyInput;
@@ -687,9 +428,6 @@ export interface GetAssetCriticalityRecordProps {
 }
 export interface GetEntityEngineProps {
   params: GetEntityEngineRequestParamsInput;
-}
-export interface GetEntitySourceProps {
-  params: GetEntitySourceRequestParamsInput;
 }
 export interface GetEntityStoreStatusProps {
   query: GetEntityStoreStatusRequestQueryInput;
@@ -704,17 +442,8 @@ export interface InitEntityStoreProps {
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;
 }
-export interface ListEntitySourcesProps {
-  query: ListEntitySourcesRequestQueryInput;
-}
-export interface ListPrivMonUsersProps {
-  query: ListPrivMonUsersRequestQueryInput;
-}
 export interface PreviewRiskScoreProps {
   body: PreviewRiskScoreRequestBodyInput;
-}
-export interface SearchPrivilegesIndicesProps {
-  query: SearchPrivilegesIndicesRequestQueryInput;
 }
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
@@ -724,17 +453,4 @@ export interface StopEntityEngineProps {
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;
-}
-export interface UpdateEntitySourceProps {
-  params: UpdateEntitySourceRequestParamsInput;
-  body: UpdateEntitySourceRequestBodyInput;
-}
-export interface UpdatePrivMonUserProps {
-  params: UpdatePrivMonUserRequestParamsInput;
-  body: UpdatePrivMonUserRequestBodyInput;
-}
-export interface UpsertEntityProps {
-  query: UpsertEntityRequestQueryInput;
-  params: UpsertEntityRequestParamsInput;
-  body: UpsertEntityRequestBodyInput;
 }

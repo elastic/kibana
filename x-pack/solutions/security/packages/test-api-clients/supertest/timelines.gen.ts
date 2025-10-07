@@ -41,7 +41,10 @@ import type { PersistPinnedEventRouteRequestBodyInput } from '@kbn/security-solu
 import type { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
-import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
+
+function getRouteUrlForSpace(routeUrl: string, spaceId?: string): string {
+  return spaceId ? `/s/${spaceId}${routeUrl}` : routeUrl;
+}
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
