@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
   AGENT_BUILDER_ENABLED_SETTING_ID,
-  AGENT_BUILDER_CREATE_VISUALIZATIONS_SETTING_ID,
+  AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
 } from '@kbn/management-settings-ids';
 import { FieldRow, FieldRowKibanaProvider } from '@kbn/management-settings-components-field-row';
 import { i18n } from '@kbn/i18n';
@@ -20,10 +20,7 @@ import { useKibana } from '../../application/hooks/use_kibana';
 
 export const AgentBuilderSettingsApp: React.FC = () => {
   const { services } = useKibana();
-  const settingsKeys = [
-    AGENT_BUILDER_ENABLED_SETTING_ID,
-    AGENT_BUILDER_CREATE_VISUALIZATIONS_SETTING_ID,
-  ];
+  const settingsKeys = [AGENT_BUILDER_ENABLED_SETTING_ID, AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID];
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
     useEditableSettings(settingsKeys);
 

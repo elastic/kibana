@@ -10,7 +10,7 @@ import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import { i18n } from '@kbn/i18n';
 import {
   AGENT_BUILDER_ENABLED_SETTING_ID,
-  AGENT_BUILDER_CREATE_VISUALIZATIONS_SETTING_ID,
+  AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID,
 } from '@kbn/management-settings-ids';
 
 export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServiceSetup }) => {
@@ -28,12 +28,12 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       requiresPageReload: true,
       readonly: false,
     },
-    [AGENT_BUILDER_CREATE_VISUALIZATIONS_SETTING_ID]: {
+    [AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID]: {
       description: i18n.translate('xpack.onechat.uiSettings.createVisualizations.description', {
-        defaultMessage: 'Enables the create_visualization tool for Agent Builder.',
+        defaultMessage: 'Enables the dashDashboard Agent and related tools for Agent Builder.',
       }),
       name: i18n.translate('xpack.onechat.uiSettings.createVisualizations.name', {
-        defaultMessage: 'Agent Builder: Create Visualizations',
+        defaultMessage: 'Agent Builder: Dashboard Agent and tools',
       }),
       schema: schema.boolean(),
       value: false,

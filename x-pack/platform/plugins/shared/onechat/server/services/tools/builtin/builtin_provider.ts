@@ -10,7 +10,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolType } from '@kbn/onechat-common';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
 import { platformCoreTools } from '@kbn/onechat-common/tools/constants';
-import { AGENT_BUILDER_CREATE_VISUALIZATIONS_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ToolProviderFn, ReadonlyToolProvider } from '../tool_provider';
 import type { BuiltinToolRegistry } from './builtin_registry';
 import type {
@@ -37,7 +37,7 @@ export const createBuiltinProviderFn =
     const soClient = savedObjects.getScopedClient(request);
     const uiSettingsClient = uiSettings.asScopedToClient(soClient);
     const createVisualizationsEnabled = await uiSettingsClient.get<boolean>(
-      AGENT_BUILDER_CREATE_VISUALIZATIONS_SETTING_ID
+      AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID
     );
     return createBuiltinToolProvider({
       registry,
