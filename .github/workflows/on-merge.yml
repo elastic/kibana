@@ -62,6 +62,7 @@ jobs:
           repository: 'elastic/kibana-github-actions'
           ref: main
           path: ./actions
+          persist-credentials: false
 
       - name: Install Actions
         if: ${{ steps.check_event.outputs.result == 'true' }}
