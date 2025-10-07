@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { TagcloudToolbar } from './toolbar';
+export { TagcloudToolbar } from './tagcloud_toolbar';
 export { TagcloudFlyoutToolbar } from './flyout_toolbar';
