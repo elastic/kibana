@@ -523,7 +523,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it.only('weights entity scores differently when host and user risk weights are configured', async () => {
+        it('weights entity scores differently when host and user risk weights are configured', async () => {
           const usersId = uuidv4();
           const hostsId = uuidv4();
           const userDocs = buildDocument({ 'user.name': 'user-1' }, usersId);
@@ -631,7 +631,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe.only('@ess @serverless Risk Scoring Preview API', () => {
+  describe('@ess @serverless Risk Scoring Preview API', () => {
     describe('ESQL based risk scoring', () => {
       doTests();
     });
