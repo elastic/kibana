@@ -1499,6 +1499,17 @@
           },
           {
             "parentPluginId": "@kbn/data-streams",
+            "id": "def-server.DataStreamDefinition.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-data-streams/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-streams",
             "id": "def-server.DataStreamDefinition.template",
             "type": "CompoundType",
             "tags": [],

@@ -99,12 +99,11 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = 
     <EuiToolTip content={BUTTON_ICON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={BUTTON_ICON_LABEL}
-        iconType="timeline"
-        iconSize="s"
-        size="xs"
-        color="primary"
-        onClick={investigateInTimelineFn}
+        color="text"
         data-test-subj={dataTestSub}
+        iconType="timeline"
+        onClick={investigateInTimelineFn}
+        size="s"
       />
     </EuiToolTip>
   );
