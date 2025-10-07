@@ -6518,8 +6518,8 @@ describe('#authorizeChangeAccessControl', () => {
       typeMap: new Map(),
     });
 
-    expect(
-      await securityExtension.authorizeChangeAccessControl(
+    await expect(
+      securityExtension.authorizeChangeAccessControl(
         {
           namespace,
           objects: objectsWithExistingNamespaces,
@@ -6553,8 +6553,8 @@ describe('#authorizeChangeAccessControl', () => {
       true
     );
 
-    expect(
-      await securityExtension.authorizeChangeAccessControl(
+    await expect(
+      securityExtension.authorizeChangeAccessControl(
         {
           namespace,
           objects: objectsWithExistingNamespaces,
@@ -6581,8 +6581,8 @@ describe('#authorizeChangeAccessControl', () => {
       false
     );
 
-    expect(
-      await securityExtension.authorizeChangeAccessControl(
+    await expect(
+      securityExtension.authorizeChangeAccessControl(
         {
           namespace,
           objects: objectsWithExistingNamespaces,
