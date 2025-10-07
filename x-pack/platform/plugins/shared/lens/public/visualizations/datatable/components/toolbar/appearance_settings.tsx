@@ -18,7 +18,7 @@ import {
   DEFAULT_ROW_HEIGHT_LINES,
   ROW_HEIGHT_LINES_KEYS,
 } from '../constants';
-import { DensitySettings } from '../density_settings';
+import { DensitySettings } from './density_settings';
 
 type LineCounts = {
   [key in keyof typeof ROW_HEIGHT_LINES_KEYS]: number;
