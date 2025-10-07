@@ -220,7 +220,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
     describe('Bulk import knowledge base entries', () => {
       const tempDir = os.tmpdir();
-      const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
+      const createdTempFiles: string[] = [];
 
       async function prepareBulkImportData() {
         const entries = [
@@ -252,7 +252,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       }
 
       async function uploadBulkImportFile(content: string) {
+        const tempFilePath = path.join(
+          tempDir,
+          `bulk_import_${Date.now()}_${Math.random().toString(36).slice(2)}.ndjson`
+        );
         fs.writeFileSync(tempFilePath, content, 'utf8');
+        createdTempFiles.push(tempFilePath);
 
         log.debug(`File saved to: ${tempFilePath}`);
 
@@ -289,7 +294,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       afterEach(async () => {
         await clearKnowledgeBase(es);
         await browser.refresh();
-        fs.unlinkSync(tempFilePath);
+        for (const file of createdTempFiles.splice(0)) {
+          try {
+            fs.unlinkSync(file);
+          } catch (_e) {
+            // ignore
+          }
+        }
       });
 
       after(async () => {
