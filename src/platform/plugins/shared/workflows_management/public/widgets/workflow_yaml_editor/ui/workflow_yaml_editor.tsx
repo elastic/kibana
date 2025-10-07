@@ -1087,7 +1087,6 @@ export const WorkflowYAMLEditor = ({
         >
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             {/* Debug: Download Schema Button - Only show in development */}
-
             <EuiFlexItem grow={false}>
               <div
                 css={{
