@@ -56,7 +56,6 @@ _search_ai_lake_analyst:
         - "feature_indexPatterns.read"
         - "feature_fleetv2.read"
       resources: "*"
-  run_as: [ ]
 
 _search_ai_lake_soc_manager:
   metadata:
