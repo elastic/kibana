@@ -414,7 +414,7 @@ describe('<SnapshotList />', () => {
       });
 
       testBed = await setup();
-      const { component, find } = testBed;
+      const { component } = testBed;
 
       // Component should render successfully with the snapshots
       expect(component.find('EuiBasicTable').exists()).toBe(true);

@@ -219,10 +219,11 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
             return (
               <SnapshotDeleteProvider>
                 {(deleteSnapshotPrompt) => {
-                  const isDeleteDisabled =
+                  const isDeleteDisabled = Boolean(
                     managedRepository &&
-                    repository === managedRepository &&
-                    isLastSuccessfulSnapshot;
+                      repository === managedRepository &&
+                      isLastSuccessfulSnapshot
+                  );
                   const label = isDeleteDisabled
                     ? i18n.translate(
                         'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
