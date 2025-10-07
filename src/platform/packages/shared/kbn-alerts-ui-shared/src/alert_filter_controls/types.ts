@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupRenderer, ControlGroupRendererApi } from '@kbn/control-group-renderer';
+import type { ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
