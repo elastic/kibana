@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const XY_ID = 'lnsXY';
-export const METRIC_ID = 'lnsMetric';
+import { act } from '@testing-library/react';
 
-export const METRIC_TREND_LINE_ID = 'metricTrendline';
-export const XY_REFERENCE_LINE_ID = 'referenceLine';
-export const XY_ANNOTATIONS_ID = 'annotations';
-export const XY_DATA_ID = 'data';
+import { POPOVER_HOVER_DELAY } from '../constants';
+
+export const flushPopoverTimers = () => {
+  act(() => {
+    jest.advanceTimersByTime(POPOVER_HOVER_DELAY);
+    jest.runOnlyPendingTimers();
+  });
+};
