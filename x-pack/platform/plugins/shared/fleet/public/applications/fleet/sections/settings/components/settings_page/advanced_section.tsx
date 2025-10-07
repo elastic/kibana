@@ -186,7 +186,7 @@ export const AdvancedSection: React.FunctionComponent<{}> = ({}) => {
           <p>
             <FormattedMessage
               id="xpack.fleet.settings.advancedSection.switchLabel"
-              defaultMessage="Switching on this setting will enable auto deletion of unenrolled agents. For more information see our {docLink}."
+              defaultMessage="Switching on this setting will enable auto-deletion of unenrolled agents. For more information, refer to the {docLink}."
               values={{
                 docLink: (
                   <EuiLink target="_blank" external href={docLinks.links.fleet.settings}>
