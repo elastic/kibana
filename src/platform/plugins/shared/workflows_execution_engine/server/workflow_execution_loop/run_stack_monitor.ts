@@ -82,14 +82,14 @@ export async function runStackMonitor(
 
     while (!nodeStack.isEmpty() && !monitorAbortController.signal.aborted) {
       const scopeData = nodeStack.getCurrentScope()!;
-      const node = params.workflowExecutionGraph.getNode(scopeData.nodeId);
       nodeStack = nodeStack.exitScope();
-      const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
-        node,
-        stackFrames: params.workflowRuntime.getCurrentNodeScope(),
-      });
+      const scopeStepExecutionRuntime =
+        params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+          nodeId: scopeData.nodeId,
+          stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+        });
 
-      const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
+      const nodeImplementation = params.nodesFactory.create(scopeStepExecutionRuntime);
 
       if (typeof (nodeImplementation as unknown as MonitorableNode).monitor === 'function') {
         const monitored = nodeImplementation as unknown as MonitorableNode;

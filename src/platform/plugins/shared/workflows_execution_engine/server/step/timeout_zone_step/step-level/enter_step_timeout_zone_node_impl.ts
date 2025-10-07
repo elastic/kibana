@@ -8,6 +8,7 @@
  */
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
+import type { StepExecutionRuntimeFactory } from '../../../workflow_context_manager/step_execution_runtime_factory';
 import type { NodeImplementation, MonitorableNode } from '../../node_implementation';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../../../workflow_context_manager/workflow_execution_state';
@@ -19,7 +20,6 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
   constructor(
     private node: EnterTimeoutZoneNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private wfExecutionState: WorkflowExecutionState,
     private stepExecutionRuntime: StepExecutionRuntime
   ) {}
 
@@ -30,9 +30,7 @@ export class EnterStepTimeoutZoneNodeImpl implements NodeImplementation, Monitor
 
   public monitor(monitoredContext: StepExecutionRuntime): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
-    const stepExecution = this.wfExecutionState.getStepExecution(
-      this.stepExecutionRuntime.stepExecutionId
-    )!;
+    const stepExecution = this.stepExecutionRuntime.stepExecution!;
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
     const currentTimeMs = new Date().getTime();
     const currentStepDuration = currentTimeMs - whenStepStartedTime;

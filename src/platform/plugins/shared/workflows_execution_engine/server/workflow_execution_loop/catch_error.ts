@@ -87,7 +87,6 @@ export async function catchError(
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
 
       const beforeExitScopePath = stringifyStackFrames(workflowScopeStack.stackFrames);
-      const node = params.workflowExecutionGraph.getNode(scopeEntry.nodeId);
       params.workflowExecutionState.updateWorkflowExecution({
         currentNodeId: scopeEntry.nodeId,
         scopeStack: newWorkflowScopeStack.stackFrames,
@@ -95,10 +94,10 @@ export async function catchError(
 
       const afterExitScopePath = stringifyStackFrames(newWorkflowScopeStack.stackFrames);
 
-      params.workflowRuntime.navigateToNode(node.id);
+      params.workflowRuntime.navigateToNode(scopeEntry.nodeId);
 
       const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
-        node,
+        nodeId: scopeEntry.nodeId,
         stackFrames: newWorkflowScopeStack.stackFrames,
       });
       const stepImplementation = params.nodesFactory.create(stepExecutionRuntime);

@@ -500,11 +500,11 @@ async function createContainer(
   const nodesFactory = new NodesFactory(
     connectorExecutor,
     workflowRuntime,
-    workflowExecutionState,
     workflowLogger,
     workflowTaskManager,
     urlValidator,
-    workflowExecutionGraph
+    workflowExecutionGraph,
+    stepExecutionRuntimeFactory
   );
 
   return {

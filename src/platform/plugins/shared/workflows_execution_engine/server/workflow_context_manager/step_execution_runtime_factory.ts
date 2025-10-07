@@ -56,12 +56,13 @@ export class StepExecutionRuntimeFactory {
   ) {}
 
   createStepExecutionRuntime({
-    node,
+    nodeId,
     stackFrames,
   }: {
-    node: GraphNodeUnion;
+    nodeId: string;
     stackFrames: StackFrame[];
   }): StepExecutionRuntime {
+    const node = this.params.workflowExecutionGraph.getNode(nodeId);
     const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
     const stepExecutionId = buildStepExecutionId(workflowExecution.id, node.stepId, stackFrames);
 

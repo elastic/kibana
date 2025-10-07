@@ -60,6 +60,10 @@ export class StepExecutionRuntime {
     return WorkflowScopeStack.fromStackFrames(this.stackFrames);
   }
 
+  public get stepExecution(): EsWorkflowStepExecution | undefined {
+    return this.workflowExecutionState.getStepExecution(this.stepExecutionId);
+  }
+
   private get topologicalOrder(): string[] {
     return this.workflowGraph.topologicalOrder;
   }
