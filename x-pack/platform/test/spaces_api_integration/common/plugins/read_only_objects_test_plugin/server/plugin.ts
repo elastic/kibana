@@ -40,7 +40,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
     });
 
     const router = core.http.createRouter();
-
+    // Create
     router.post(
       {
         path: '/read_only_objects/create',
@@ -51,7 +51,13 @@ export class ReadOnlyObjectsPlugin implements Plugin {
           },
         },
         validate: {
+          query: schema.object({
+            overwrite: schema.boolean({
+              defaultValue: false,
+            }),
+          }),
           body: schema.object({
+            id: schema.maybe(schema.string()),
             type: schema.maybe(
               schema.oneOf([schema.literal(READ_ONLY_TYPE), schema.literal(NON_READ_ONLY_TYPE)])
             ),
@@ -64,7 +70,11 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         const objType = request.body.type || READ_ONLY_TYPE;
         const { isReadOnly } = request.body;
 
-        const options = isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {};
+        const options = {
+          overwrite: request.query.overwrite ?? false,
+          ...(request.body.id ? { id: request.body.id } : {}),
+          ...(isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {}),
+        };
         try {
           const result = await soClient.create(
             objType,
@@ -90,6 +100,72 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
+    // Bulk Create
+    router.post(
+      {
+        path: '/read_only_objects/bulk_create',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          request: {
+            query: schema.object({
+              overwrite: schema.boolean({
+                defaultValue: false,
+              }),
+            }),
+            body: schema.object({
+              objects: schema.arrayOf(
+                schema.object({
+                  id: schema.maybe(schema.string()),
+                  type: schema.maybe(
+                    schema.oneOf([
+                      schema.literal(READ_ONLY_TYPE),
+                      schema.literal(NON_READ_ONLY_TYPE),
+                    ])
+                  ),
+                  isReadOnly: schema.maybe(schema.boolean()),
+                })
+              ),
+              force: schema.maybe(schema.boolean({ defaultValue: false })),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        const overwrite = request.query.overwrite ?? false;
+        try {
+          const createObjects = request.body.objects.map((obj) => ({
+            type: obj.type || READ_ONLY_TYPE,
+            ...(obj.id ? { id: obj.id } : {}),
+            ...(obj.isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {}),
+            attributes: {
+              description: 'description',
+            },
+          }));
+          const result = await soClient.bulkCreate(createObjects, { overwrite });
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          if (SavedObjectsErrorHelpers.isSavedObjectsClientError(error)) {
+            return response.customError({
+              statusCode: error.output.statusCode,
+              body: {
+                message: error.message,
+              },
+            });
+          }
+          throw error;
+        }
+      }
+    );
+
     router.get(
       {
         path: '/read_only_objects/_find',
@@ -146,6 +222,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
     router.put(
       {
         path: '/read_only_objects/update',
@@ -191,7 +268,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
     );
     router.put(
       {
-        path: '/read_only_objects/transfer',
+        path: '/read_only_objects/change_owner',
         security: {
           authz: {
             enabled: false,
@@ -282,6 +359,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
     router.delete(
       {
         path: '/read_only_objects/{objectId}',
@@ -317,6 +395,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
     router.post(
       {
         path: '/read_only_objects/bulk_delete',
@@ -411,6 +490,64 @@ export class ReadOnlyObjectsPlugin implements Plugin {
           }
           throw error;
         }
+      }
+    );
+    // Get NON_READ_ONLY_TYPE
+    router.get(
+      {
+        path: '/non_read_only_objects/{objectId}',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: {
+          params: schema.object({
+            objectId: schema.string(),
+          }),
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const soClient = (await context.core).savedObjects.client;
+          const result = await soClient.get(NON_READ_ONLY_TYPE, request.params.objectId);
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
+          if (error.output && error.output.statusCode === 404) {
+            return response.notFound({
+              body: error.message,
+            });
+          }
+          return response.forbidden({
+            body: error.message,
+          });
+        }
+      }
+    );
+
+    // FIND NON_READ_ONLY_TYPE
+    router.get(
+      {
+        path: '/non_read_only_objects/_find',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      async (context, request, response) => {
+        const soClient = (await context.core).savedObjects.client;
+        const result = await soClient.find({
+          type: NON_READ_ONLY_TYPE,
+        });
+        return response.ok({
+          body: result,
+        });
       }
     );
   }
