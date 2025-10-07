@@ -50,7 +50,7 @@ export function findCommandOptionByName(
  *          "SCORE BY field_name /" returns false
  */
 export function immediatelyAfterOptionField(innerText: string, optionName: string): boolean {
-  const regex = new RegExp(`${optionName}\\s+\\S*$`, 'i');
+  const regex = new RegExp(`${optionName}\\s+\\S+$`, 'i');
   return regex.test(innerText);
 }
 

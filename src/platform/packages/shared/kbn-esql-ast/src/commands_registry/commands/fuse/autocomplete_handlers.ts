@@ -175,14 +175,14 @@ export function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggest
       {
         label: 'linear',
         kind: 'Value',
-        detail: 'fuse type', // //HD Check details
+        detail: '',
         text: 'linear ',
         sortText: '0',
       },
       {
         label: 'rrf',
         kind: 'Value',
-        detail: 'fuse type',
+        detail: '',
         text: 'rrf ',
         sortText: '0',
       }
@@ -193,7 +193,7 @@ export function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggest
     suggestions.push({
       label: 'SCORE BY',
       kind: 'Reference',
-      detail: 'score by <field>',
+      detail: '',
       text: 'SCORE BY ',
       sortText: '1',
     });
@@ -203,7 +203,7 @@ export function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggest
     suggestions.push({
       label: 'GROUP BY',
       kind: 'Reference',
-      detail: 'group by <field>',
+      detail: '',
       text: 'GROUP BY ',
       sortText: '2',
     });
@@ -213,14 +213,14 @@ export function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggest
     suggestions.push({
       label: 'KEY BY',
       kind: 'Reference',
-      detail: 'key by <field>',
+      detail: '',
       text: 'KEY BY ',
       sortText: '3',
     });
   }
 
   if (!withOption) {
-    suggestions.push(withCompleteItem); // //HD modify details...
+    suggestions.push({ ...withCompleteItem, sortText: '4' });
   }
 
   return suggestions.map((s) => withAutoSuggest(s));
