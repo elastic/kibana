@@ -49,7 +49,7 @@ export const getConnectorType = (): ConnectorTypeModel<
   id: SLACK_API_CONNECTOR_ID,
   subtype,
   // Hide slack api connector in UI when when slack connector is enabled in config
-  hideInUi: (actionTypes) =>
+  getHideInUi: (actionTypes) =>
     actionTypes.find((actionType) => actionType.id === SLACK_CONNECTOR_ID)?.enabledInConfig ===
     true,
   modalWidth: 675,

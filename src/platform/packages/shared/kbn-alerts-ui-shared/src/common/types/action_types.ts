@@ -129,7 +129,7 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   isExperimental?: boolean;
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
-  hideInUi?: (actionTypes: ActionType[]) => boolean;
+  getHideInUi?: (actionTypes: ActionType[]) => boolean;
   modalWidth?: number;
   isSystemActionType?: boolean;
   subFeature?: SubFeature;

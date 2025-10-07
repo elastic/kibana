@@ -167,7 +167,7 @@ describe('connector_add_flyout', () => {
           const validationResult = { errors: {} };
           return Promise.resolve(validationResult);
         },
-        hideInUi: () => true,
+        getHideInUi: () => true,
         actionConnectorFields: null,
       });
       const actionType2 = actionTypeRegistryMock.createMockActionTypeModel({
@@ -178,7 +178,7 @@ describe('connector_add_flyout', () => {
           const validationResult = { errors: {} };
           return Promise.resolve(validationResult);
         },
-        hideInUi: () => false,
+        getHideInUi: () => false,
         actionConnectorFields: null,
       });
 

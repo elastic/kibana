@@ -42,35 +42,34 @@ describe('connectorTypeRegistry.get works', () => {
 });
 
 describe('hideInUi', () => {
-  let hideInUiResult: boolean | undefined;
   test('should return true when slack is enabled in config', () => {
-    if (connectorTypeModel?.hideInUi) {
-      hideInUiResult = connectorTypeModel.hideInUi([
+    expect(
+      // @ts-expect-error
+      connectorTypeModel.getHideInUi([
         // @ts-expect-error necessary fields only
         { id: '.slack', enabledInConfig: true, enabledInLicense: true, name: 'Slack' },
-      ]);
-    }
-    expect(hideInUiResult).toEqual(true);
+      ])
+    ).toEqual(true);
   });
 
   test('should return false when slack is disabled in config', () => {
-    if (connectorTypeModel?.hideInUi) {
-      hideInUiResult = connectorTypeModel.hideInUi([
+    expect(
+      // @ts-expect-error
+      connectorTypeModel.getHideInUi([
         // @ts-expect-error necessary fields only
         { id: '.slack', enabledInConfig: false, enabledInLicense: true, name: 'Slack' },
-      ]);
-    }
-    expect(hideInUiResult).toEqual(false);
+      ])
+    ).toEqual(false);
   });
 
   test('should return false when slack is not found in config', () => {
-    if (connectorTypeModel?.hideInUi) {
-      hideInUiResult = connectorTypeModel.hideInUi([
+    expect(
+      // @ts-expect-error
+      connectorTypeModel.getHideInUi([
         // @ts-expect-error necessary fields only
         { id: '.cases', enabledInConfig: true, enabledInLicense: true, name: 'Cases' },
-      ]);
-    }
-    expect(hideInUiResult).toEqual(false);
+      ])
+    ).toEqual(false);
   });
 });
 

@@ -209,7 +209,7 @@ export const RuleActionsConnectorsBody = ({
       const subtype = actionTypeModel.subtype;
 
       const shownActionTypeId =
-        actionTypeModel.hideInUi != null && actionTypeModel.hideInUi(connectorTypes)
+        actionTypeModel.getHideInUi != null && actionTypeModel.getHideInUi(connectorTypes)
           ? subtype?.filter((type) => type.id !== actionTypeId)[0].id
           : undefined;
 

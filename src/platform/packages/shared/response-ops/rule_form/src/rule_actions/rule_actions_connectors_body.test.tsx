@@ -140,9 +140,9 @@ describe('ruleActionsConnectorsBody', () => {
 
   test('filters out when connector should be hidden in UI', async () => {
     const connectorTypes = [
-      { id: '.slack', name: 'Slack' },
-      { id: '.slack_api', name: 'Slack API' },
-      { id: '.cases', name: 'Cases' },
+      { id: '.slack', name: 'Slack', enabledInConfig: false },
+      { id: '.slack_api', name: 'Slack API', enabledInConfig: true },
+      { id: '.cases', name: 'Cases', enabledInConfig: true },
     ];
 
     const availableConnectors = [
@@ -160,14 +160,14 @@ describe('ruleActionsConnectorsBody', () => {
       getActionTypeModel('Slack', {
         id: '.slack',
         subtype,
-        hideInUi: () => true,
+        getHideInUi: () => true,
       })
     );
     actionTypeRegistry.register(
       getActionTypeModel('Slack API', {
         id: '.slack_api',
         subtype,
-        hideInUi: () => false,
+        getHideInUi: () => false,
       })
     );
     actionTypeRegistry.register(
@@ -193,8 +193,14 @@ describe('ruleActionsConnectorsBody', () => {
 
     render(<RuleActionsConnectorsBody onSelectConnector={mockOnSelectConnector} />);
 
-    const filterButtons = await screen.findAllByTestId('ruleActionsConnectorsModalFilterButton');
+    const modalCards = await screen.findAllByTestId('ruleActionsConnectorsModalCard');
+    expect(modalCards).toHaveLength(2);
+    expect(modalCards[0]).toHaveTextContent('Slack API');
+    expect(modalCards[1]).toHaveTextContent('Cases');
 
+    expect(screen.queryByText('Slack')).not.toBeInTheDocument();
+
+    const filterButtons = await screen.findAllByTestId('ruleActionsConnectorsModalFilterButton');
     expect(filterButtons).toHaveLength(3);
     expect(filterButtons[0]).toHaveTextContent('All');
     expect(filterButtons[1]).toHaveTextContent('Cases');
