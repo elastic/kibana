@@ -12,7 +12,6 @@ import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_s
 import type { WorkflowExecutionLoopParams } from './types';
 import { cancelWorkflowIfRequested } from './cancel_workflow_if_requested';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import { createStepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime_factory';
 
 /**
  * Runs a monitoring loop that continuously checks workflow execution state and invokes
@@ -85,19 +84,12 @@ export async function runStackMonitor(
       const scopeData = nodeStack.getCurrentScope()!;
       const node = params.workflowExecutionGraph.getNode(scopeData.nodeId);
       nodeStack = nodeStack.exitScope();
+      const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        node,
+        stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+      });
 
-      const nodeImplementation = params.nodesFactory.create(
-        createStepExecutionRuntime({
-          workflowExecutionGraph: params.workflowExecutionGraph,
-          workflowExecutionState: params.workflowExecutionState,
-          workflowLogger: params.workflowLogger,
-          esClient: params.esClient,
-          fakeRequest: params.fakeRequest,
-          coreStart: params.coreStart,
-          node,
-          stackFrames: params.workflowRuntime.getCurrentNodeScope(),
-        })
-      );
+      const nodeImplementation = params.nodesFactory.create(stepExecutionRuntime);
 
       if (typeof (nodeImplementation as unknown as MonitorableNode).monitor === 'function') {
         const monitored = nodeImplementation as unknown as MonitorableNode;

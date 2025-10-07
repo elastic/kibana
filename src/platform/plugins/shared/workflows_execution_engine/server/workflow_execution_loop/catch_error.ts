@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
 import type { WorkflowExecutionLoopParams } from './types';
-import { createStepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
 import { stringifyStackFrames } from '../utils';
@@ -98,21 +96,9 @@ export async function catchError(
       const afterExitScopePath = stringifyStackFrames(newWorkflowScopeStack.stackFrames);
 
       params.workflowRuntime.navigateToNode(node.id);
-      const stepExecutionRuntime = createStepExecutionRuntime({
-        workflowExecutionGraph: params.workflowExecutionGraph,
-        workflowExecutionState: params.workflowExecutionState,
-        workflowLogger: params.workflowLogger,
-        esClient: params.esClient,
-        fakeRequest: params.fakeRequest,
-        coreStart: params.coreStart,
-        node: node as GraphNodeUnion,
-        // Before error handling: Stack might look like
-        // [parent_scope, current_node_scope] <- current_node_scope matches current node
 
-        // After error occurs and we're in catch block:
-        // The current node has moved on, but the scope stack still has the old scope
-        // So we need to pop it to maintain correct execution context
-        // e.g. for current_node the scope is [parent_scope]
+      const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        node,
         stackFrames: newWorkflowScopeStack.stackFrames,
       });
       const stepImplementation = params.nodesFactory.create(stepExecutionRuntime);

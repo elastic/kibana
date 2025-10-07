@@ -18,50 +18,76 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WorkflowContextManager } from './workflow_context_manager';
 
-export function createStepExecutionRuntime({
-  node,
-  stackFrames,
-  workflowExecutionGraph,
-  workflowExecutionState,
-  workflowLogger,
-  esClient,
-  fakeRequest,
-  coreStart,
-}: {
-  node: GraphNodeUnion;
-  stackFrames: StackFrame[];
-  workflowExecutionState: WorkflowExecutionState;
-  workflowExecutionGraph: WorkflowGraph;
-  workflowLogger: IWorkflowEventLogger;
-  esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
-  fakeRequest?: KibanaRequest;
-  coreStart?: CoreStart; // For using Kibana's internal HTTP client
-}): StepExecutionRuntime {
-  const workflowExecution = workflowExecutionState.getWorkflowExecution();
-  const stepExecutionId = buildStepExecutionId(workflowExecution.id, node.stepId, stackFrames);
+/**
+ * Factory class responsible for creating StepExecutionRuntime instances.
+ *
+ * This class separates the step execution runtime initialization logic from the
+ * step execution runtime itself, providing a clean abstraction for runtime creation.
+ * It encapsulates the complex setup required for step execution including workflow state,
+ * graph navigation, logging, and context management.
+ *
+ * @example
+ * ```typescript
+ * const factory = new StepExecutionRuntimeFactory({
+ *   workflowExecutionState,
+ *   workflowExecutionGraph,
+ *   workflowLogger,
+ *   esClient,
+ *   fakeRequest,
+ *   coreStart
+ * });
+ *
+ * const runtime = factory.createStepExecutionRuntime({
+ *   node: graphNode,
+ *   stackFrames: currentStackFrames
+ * });
+ * ```
+ */
+export class StepExecutionRuntimeFactory {
+  constructor(
+    private params: {
+      workflowExecutionState: WorkflowExecutionState;
+      workflowExecutionGraph: WorkflowGraph;
+      workflowLogger: IWorkflowEventLogger;
+      esClient: ElasticsearchClient; // ES client (user-scoped if available, fallback otherwise)
+      fakeRequest?: KibanaRequest;
+      coreStart?: CoreStart; // For using Kibana's internal HTTP client
+    }
+  ) {}
 
-  const stepLogger = workflowLogger.createStepLogger(
-    stepExecutionId,
-    node.stepId,
-    node.stepId,
-    node.stepType
-  );
-  const contextManager = new WorkflowContextManager({
-    workflowExecutionGraph,
-    workflowExecutionState,
+  createStepExecutionRuntime({
     node,
     stackFrames,
-    esClient,
-    fakeRequest,
-    coreStart,
-  });
-  return new StepExecutionRuntime({
-    stepExecutionId,
-    workflowExecutionGraph,
-    workflowExecutionState,
-    stepLogger,
-    stackFrames,
-    node,
-    contextManager,
-  });
+  }: {
+    node: GraphNodeUnion;
+    stackFrames: StackFrame[];
+  }): StepExecutionRuntime {
+    const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
+    const stepExecutionId = buildStepExecutionId(workflowExecution.id, node.stepId, stackFrames);
+
+    const stepLogger = this.params.workflowLogger.createStepLogger(
+      stepExecutionId,
+      node.stepId,
+      node.stepId,
+      node.stepType
+    );
+    const contextManager = new WorkflowContextManager({
+      workflowExecutionGraph: this.params.workflowExecutionGraph,
+      workflowExecutionState: this.params.workflowExecutionState,
+      node,
+      stackFrames,
+      esClient: this.params.esClient,
+      fakeRequest: this.params.fakeRequest,
+      coreStart: this.params.coreStart,
+    });
+    return new StepExecutionRuntime({
+      stepExecutionId,
+      workflowExecutionGraph: this.params.workflowExecutionGraph,
+      workflowExecutionState: this.params.workflowExecutionState,
+      stepLogger,
+      stackFrames,
+      node,
+      contextManager,
+    });
+  }
 }

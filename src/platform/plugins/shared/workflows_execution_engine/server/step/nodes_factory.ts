@@ -68,6 +68,7 @@ import { WaitStepImpl } from './wait_step/wait_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
 import { KibanaActionStepImpl } from './kibana_action_step';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
+import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 
 export class NodesFactory {
   constructor(
@@ -77,7 +78,8 @@ export class NodesFactory {
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
     private workflowTaskManager: WorkflowTaskManager,
     private urlValidator: UrlValidator,
-    private workflowGraph: WorkflowGraph
+    private workflowGraph: WorkflowGraph,
+    private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {

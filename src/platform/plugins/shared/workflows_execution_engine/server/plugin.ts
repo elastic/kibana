@@ -48,6 +48,7 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import { StepExecutionRuntimeFactory } from './workflow_context_manager/step_execution_runtime_factory';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -485,6 +486,15 @@ async function createContainer(
 
   const urlValidator = new UrlValidator({
     allowedHosts: config.http.allowedHosts,
+  });
+
+  const stepExecutionRuntimeFactory = new StepExecutionRuntimeFactory({
+    workflowExecutionGraph,
+    workflowExecutionState,
+    workflowLogger,
+    esClient,
+    fakeRequest,
+    coreStart,
   });
 
   const nodesFactory = new NodesFactory(

@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import type { WorkflowExecutionLoopParams } from './types';
 import { runStackMonitor } from './run_stack_monitor';
 import { catchError } from './catch_error';
-import { createStepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime_factory';
 
 /**
  * Executes a single step in the workflow execution process.
@@ -40,23 +38,20 @@ import { createStepExecutionRuntime } from '../workflow_context_manager/step_exe
  * @throws Will catch and handle errors through the workflow runtime's error handling mechanism
  */
 export async function runNode(params: WorkflowExecutionLoopParams): Promise<void> {
-  const currentNode = params.workflowRuntime.getCurrentNode();
+  const node = params.workflowRuntime.getCurrentNode();
+
+  if (!node) {
+    return;
+  }
 
   // Exit the scope of the current node if it's an exit node
   // It should be done before creating StepExecutionRuntime to ensure the scope stack for the node is correct
   // e.g. the same as for enter-* nodes
-  if (currentNode?.type.startsWith('exit')) {
+  if (node?.type.startsWith('exit')) {
     params.workflowRuntime.exitScope();
   }
-
-  const stepExecutionRuntime = createStepExecutionRuntime({
-    workflowExecutionGraph: params.workflowExecutionGraph,
-    workflowExecutionState: params.workflowExecutionState,
-    workflowLogger: params.workflowLogger,
-    esClient: params.esClient,
-    fakeRequest: params.fakeRequest,
-    coreStart: params.coreStart,
-    node: currentNode as GraphNodeUnion,
+  const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+    node,
     stackFrames: params.workflowRuntime.getCurrentNodeScope(),
   });
 
@@ -74,7 +69,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
   try {
     await Promise.race([runMonitorPromise, runStepPromise]);
-    if (currentNode?.type.startsWith('enter')) {
+    if (node.type.startsWith('enter')) {
       params.workflowRuntime.enterScope();
     }
     monitorAbortController.abort();
