@@ -73,42 +73,64 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
     sslESKey: false,
     sslAgentKey: false,
   });
-  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(true);
-
-  const useSecretsStorage = secretsToggleState === true;
+  const [outputSecretsToggleState, setOutputSecretsToggleState] = useState<
+    'disabled' | true | false
+  >(true);
+  const useOutputSecretsStorage = outputSecretsToggleState === true;
+  const [sslSecretsToggleState, setSSLSecretsToggleState] = useState<'disabled' | true | false>(
+    true
+  );
+  const useSSLSecretsStorage = sslSecretsToggleState === true;
 
   const fleetStatus = useFleetStatus();
-  if (fleetStatus.isSecretsStorageEnabled !== undefined && secretsToggleState === 'disabled') {
-    setSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
+  if (
+    fleetStatus.isSSLSecretsStorageEnabled !== undefined &&
+    sslSecretsToggleState === 'disabled'
+  ) {
+    setSSLSecretsToggleState(fleetStatus.isSSLSecretsStorageEnabled);
+  }
+  if (
+    fleetStatus.isSecretsStorageEnabled !== undefined &&
+    outputSecretsToggleState === 'disabled'
+  ) {
+    setOutputSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
   }
 
-  const onToggleSecretStorage = (secretEnabled: boolean) => {
-    if (secretsToggleState === 'disabled') {
+  const onToggleOutputSecretStorage = (secretEnabled: boolean) => {
+    if (outputSecretsToggleState === 'disabled') {
       return;
     }
+    setOutputSecretsToggleState(secretEnabled);
+  };
 
-    setSecretsToggleState(secretEnabled);
+  const onToggleSSLSecretStorage = (secretEnabled: boolean) => {
+    if (sslSecretsToggleState === 'disabled') {
+      return;
+    }
+    setSSLSecretsToggleState(secretEnabled);
   };
 
   useEffect(() => {
     if (!isFirstLoad) return;
     setIsFirstLoad(false);
     // populate the secret input with the value of the plain input in order to re-save the key with secret storage
-    if (useSecretsStorage && enableSSLSecrets) {
+    if (useSSLSecretsStorage && enableSSLSecrets) {
       if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
         inputs.sslKeySecretInput.setValue(inputs.sslKeyInput.value);
         inputs.sslKeyInput.clear();
         setIsConvertedToSecret({ ...isConvertedToSecret, sslKey: true });
       }
-      if (inputs.sslESKeyInput.value && !inputs.sslESKeySecretInput.value) {
-        inputs.sslESKeySecretInput.setValue(inputs.sslESKeyInput.value);
-        inputs.sslESKeyInput.clear();
-        setIsConvertedToSecret({ ...isConvertedToSecret, sslESKey: true });
-      }
       if (inputs.sslAgentKeyInput.value && !inputs.sslAgentKeySecretInput.value) {
         inputs.sslAgentKeySecretInput.setValue(inputs.sslAgentKeyInput.value);
         inputs.sslAgentKeyInput.clear();
         setIsConvertedToSecret({ ...isConvertedToSecret, sslAgentKey: true });
+      }
+    }
+    if (useOutputSecretsStorage) {
+      if (inputs.sslESKeyInput.value && !inputs.sslESKeySecretInput.value) {
+        inputs.sslESKeySecretInput.setValue(inputs.sslESKeyInput.value);
+        inputs.sslESKeyInput.clear();
+        setIsConvertedToSecret({ ...isConvertedToSecret, sslESKey: true });
       }
     }
   }, [
@@ -121,28 +143,40 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
     inputs.sslESKeySecretInput,
     inputs.sslAgentKeyInput,
     inputs.sslAgentKeySecretInput,
-    secretsToggleState,
-    useSecretsStorage,
+    setOutputSecretsToggleState,
+    setSSLSecretsToggleState,
+    useSSLSecretsStorage,
+    useOutputSecretsStorage,
     enableSSLSecrets,
   ]);
 
-  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
+  const onToggleOutputSecretAndClearValue = (secretEnabled: boolean) => {
+    if (secretEnabled) {
+      inputs.sslESKeyInput.clear();
+    } else {
+      inputs.sslESKeySecretInput.setValue('');
+    }
+    setIsConvertedToSecret({
+      ...isConvertedToSecret,
+      sslESKey: false,
+    });
+    onToggleOutputSecretStorage(secretEnabled);
+  };
+
+  const onToggleSSLSecretAndClearValue = (secretEnabled: boolean) => {
     if (secretEnabled) {
       inputs.sslKeyInput.clear();
-      inputs.sslESKeyInput.clear();
       inputs.sslAgentKeyInput.clear();
     } else {
       inputs.sslKeySecretInput.setValue('');
-      inputs.sslESKeySecretInput.setValue('');
       inputs.sslAgentKeySecretInput.setValue('');
     }
     setIsConvertedToSecret({
       ...isConvertedToSecret,
       sslKey: false,
-      sslESKey: false,
       sslAgentKey: false,
     });
-    onToggleSecretStorage(secretEnabled);
+    onToggleSSLSecretStorage(secretEnabled);
   };
 
   return (
@@ -319,8 +353,10 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
           <EuiSpacer size="l" />
           <SSLFormSection
             inputs={inputs}
-            useSecretsStorage={enableSSLSecrets && useSecretsStorage}
-            onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+            useSSLSecretsStorage={enableSSLSecrets && useSSLSecretsStorage}
+            useOutputSecretsStorage={useOutputSecretsStorage}
+            onToggleOutputSecretAndClearValue={onToggleOutputSecretAndClearValue}
+            onToggleSSLSecretAndClearValue={onToggleSSLSecretAndClearValue}
             isConvertedToSecret={isConvertedToSecret}
           />
         </EuiForm>

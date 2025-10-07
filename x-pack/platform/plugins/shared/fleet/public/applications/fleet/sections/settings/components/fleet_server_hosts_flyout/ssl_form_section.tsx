@@ -30,16 +30,26 @@ import type { FleetServerHostSSLInputsType } from './use_fleet_server_host_form'
 
 interface Props {
   inputs: FleetServerHostSSLInputsType;
-  useSecretsStorage: boolean;
+  useOutputSecretsStorage: boolean;
+  useSSLSecretsStorage: boolean;
   isConvertedToSecret: {
     sslKey: boolean;
     sslESKey: boolean;
+    sslAgentKey: boolean;
   };
-  onToggleSecretAndClearValue: (secretEnabled: boolean) => void;
+  onToggleOutputSecretAndClearValue: (secretEnabled: boolean) => void;
+  onToggleSSLSecretAndClearValue: (secretEnabled: boolean) => void;
 }
 
 export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
-  const { inputs, useSecretsStorage, isConvertedToSecret, onToggleSecretAndClearValue } = props;
+  const {
+    inputs,
+    useOutputSecretsStorage,
+    useSSLSecretsStorage,
+    isConvertedToSecret,
+    onToggleOutputSecretAndClearValue,
+    onToggleSSLSecretAndClearValue,
+  } = props;
 
   const clientAuthenticationsOptions = [
     {
@@ -130,7 +140,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               )}
             />
           </EuiFormRow>
-          {!useSecretsStorage ? (
+          {!useSSLSecretsStorage ? (
             <SecretFormRow
               fullWidth
               label={
@@ -140,9 +150,9 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 />
               }
               {...inputs.sslKeyInput.formRowProps}
-              useSecretsStorage={useSecretsStorage}
-              onToggleSecretStorage={onToggleSecretAndClearValue}
-              disabled={!useSecretsStorage}
+              useSecretsStorage={useSSLSecretsStorage}
+              onToggleSecretStorage={onToggleSSLSecretAndClearValue}
+              disabled={!useSSLSecretsStorage}
               secretType="ssl"
             >
               <EuiTextArea
@@ -168,9 +178,9 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 }
               )}
               {...inputs.sslKeySecretInput.formRowProps}
-              useSecretsStorage={useSecretsStorage}
+              useSecretsStorage={useSSLSecretsStorage}
               isConvertedToSecret={isConvertedToSecret.sslKey}
-              onToggleSecretStorage={onToggleSecretAndClearValue}
+              onToggleSecretStorage={onToggleSSLSecretAndClearValue}
               cancelEdit={inputs.sslKeySecretInput.cancelEdit}
               secretType="ssl"
             >
@@ -230,7 +240,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               )}
             />
           </EuiFormRow>
-          {!useSecretsStorage ? (
+          {!useOutputSecretsStorage ? (
             <SecretFormRow
               fullWidth
               label={
@@ -240,10 +250,10 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 />
               }
               {...inputs.sslESKeyInput.formRowProps}
-              useSecretsStorage={useSecretsStorage}
-              onToggleSecretStorage={onToggleSecretAndClearValue}
-              disabled={!useSecretsStorage}
-              secretType="ssl"
+              useSecretsStorage={useOutputSecretsStorage}
+              onToggleSecretStorage={onToggleOutputSecretAndClearValue}
+              disabled={!useOutputSecretsStorage}
+              secretType="output"
             >
               <EuiTextArea
                 fullWidth
@@ -268,11 +278,11 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 }
               )}
               {...inputs.sslESKeySecretInput.formRowProps}
-              useSecretsStorage={useSecretsStorage}
+              useSecretsStorage={useOutputSecretsStorage}
               isConvertedToSecret={isConvertedToSecret.sslKey}
-              onToggleSecretStorage={onToggleSecretAndClearValue}
+              onToggleSecretStorage={onToggleOutputSecretAndClearValue}
               cancelEdit={inputs.sslESKeySecretInput.cancelEdit}
-              secretType="ssl"
+              secretType="output"
             >
               <EuiTextArea
                 fullWidth
@@ -330,7 +340,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               )}
             />
           </EuiFormRow>
-          {!useSecretsStorage ? (
+          {!useSSLSecretsStorage ? (
             <SecretFormRow
               fullWidth
               label={
@@ -340,9 +350,9 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 />
               }
               {...inputs.sslAgentKeyInput.formRowProps}
-              useSecretsStorage={useSecretsStorage}
-              onToggleSecretStorage={onToggleSecretAndClearValue}
-              disabled={!useSecretsStorage}
+              useSecretsStorage={useSSLSecretsStorage}
+              onToggleSecretStorage={onToggleSSLSecretAndClearValue}
+              disabled={!useSSLSecretsStorage}
               secretType="ssl"
             >
               <EuiTextArea
@@ -368,9 +378,9 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 }
               )}
               {...inputs.sslAgentKeySecretInput.formRowProps}
-              useSecretsStorage={useSecretsStorage}
+              useSecretsStorage={useSSLSecretsStorage}
               isConvertedToSecret={isConvertedToSecret.sslKey}
-              onToggleSecretStorage={onToggleSecretAndClearValue}
+              onToggleSecretStorage={onToggleSSLSecretAndClearValue}
               cancelEdit={inputs.sslAgentKeySecretInput.cancelEdit}
               secretType="ssl"
             >
