@@ -240,4 +240,4 @@ mapped_pages:
 | [urlDrilldown](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/drilldowns/url_drilldown/README.md) | NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin. |
 | [ux](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/ux/readme.md) | https://docs.elastic.dev/kibana-dev-docs/welcome |
 | [watcher](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/watcher/README.md) | This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation): |
-| [workchatApp](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/workchat_app/README.md) | WorkChat application plugin |
+| [workplaceAIApp](https://github.com/elastic/kibana/blob/main/x-pack/solutions/workplace_ai/plugins/workplace_ai_app/README.md) | Workplace AI application plugin |
