@@ -645,7 +645,8 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[], readonlyMo
           requiresPageReload: true,
           schema: schema.string(),
           solutionViews: ['classic', 'security'],
-          readonlyMode: readonlyMode
+          readonlyMode: readonlyMode,
+          readonly: readonlyMode !== undefined
         },
       }
     : null;
