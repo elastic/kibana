@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useState } from 'react';
+import { useEuiOverflowScroll } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-/**
- * Hook for persisting popover on trigger click.
- */
-export const usePersistentPopover = () => {
-  const [isPersistent, setIsPersistent] = useState(false);
+export const useScroll = (withMask: boolean = false) => {
+  const scrollStyles = css`
+    ${useEuiOverflowScroll('y', withMask)}
+    --secondary-menu-header-height: 44px;
+    scroll-padding-top: var(--secondary-menu-header-height);
+  `;
 
-  const setPersistent = useCallback(() => setIsPersistent(true), []);
-  const clearPersistent = useCallback(() => setIsPersistent(false), []);
-
-  return { isPersistent, setPersistent, clearPersistent };
+  return scrollStyles;
 };

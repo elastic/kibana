@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const LEARN_MORE_LABEL: string = i18n.translate(
-  'searchApiPanels.welcomeBanner.panels.learnMore',
-  {
-    defaultMessage: 'Learn more',
-  }
-);
-export const API_KEY_PLACEHOLDER = 'your_api_key';
-export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
-export const INDEX_NAME_PLACEHOLDER = 'index_name';
+/**
+ * Updates the tab indices for a given set of elements.
+ *
+ * @param elements - The elements to update the tab indices for.
+ */
+export const updateTabIndices = (elements: HTMLElement[]) => {
+  elements.forEach((el, idx) => {
+    el.tabIndex = idx === 0 ? 0 : -1;
+  });
+};
