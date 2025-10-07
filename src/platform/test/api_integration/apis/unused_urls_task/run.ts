@@ -13,6 +13,7 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   describe('run', () => {
     beforeEach(async () => {
@@ -29,16 +30,27 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('runs unused URLs cleanup if its enabled', async () => {
+      const { total: initialUrls } = await kibanaServer.savedObjects.find({ type: 'url' });
+      // 6 unused URLs + 1 regular URL
+      expect(initialUrls).to.be(7);
+
       const response1 = await supertest.post('/internal/unused_urls_task/run');
 
       expect(response1.status).to.be(200);
-      // Deletes only 5 URLs because the limit is set to 5
+      // Deletes 5 unused URLs because the limit is set to 5
       expect(response1.body).to.eql({
         message: 'Unused URLs cleanup task has finished.',
         deletedCount: 5,
       });
 
-      // Delete the remaining URL
+      // Make sure the previous request deleted 5 unused URLs before firing the next request
+      await retry.try(async () => {
+        const { total } = await kibanaServer.savedObjects.find({ type: 'url' });
+        // 1 unused URL + 1 regular URL left
+        expect(total).to.eql(2);
+      });
+
+      // Delete the remaining unused URL
       const response2 = await supertest.post('/internal/unused_urls_task/run');
 
       expect(response2.status).to.be(200);
