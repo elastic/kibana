@@ -155,9 +155,7 @@ export const WorkflowExecuteManualForm = ({
               maxLines: 10,
             }}
             width="100%"
-            editorDidMount={() => {}}
             onChange={handleChange}
-            suggestionProvider={undefined}
             dataTestSubj={'workflow-manual-json-editor'}
             options={{
               language: 'json',
@@ -175,12 +173,13 @@ export const WorkflowExecuteManualForm = ({
               wordWrapColumn: 80,
               wrappingIndent: 'indent',
               theme: 'vs-light',
-              quickSuggestions: {
-                other: true,
-                comments: false,
-                strings: true,
-              },
               formatOnType: true,
+              quickSuggestions: false,
+              suggestOnTriggerCharacters: false,
+              wordBasedSuggestions: false,
+              parameterHints: {
+                enabled: false,
+              },
             }}
           />
         </EuiFormRow>
