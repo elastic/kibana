@@ -69,7 +69,12 @@ export const createBuiltinToolProvider = ({
     }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
 
   const isToolEnabled = (toolId: string): boolean => {
-    if (toolId === platformCoreTools.createVisualization) {
+    if (
+      toolId === platformCoreTools.createVisualization ||
+      toolId === platformCoreTools.listDataViews ||
+      toolId === platformCoreTools.getDataView ||
+      toolId === platformCoreTools.dataViewExplorer
+    ) {
       return createVisualizationsEnabled;
     }
     return true;

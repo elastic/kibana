@@ -9,24 +9,25 @@ import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { Logger } from '@kbn/logging';
 import { mapAttributesSchema } from '@kbn/maps-plugin/server/content_management/schema/v1/map_attributes_schema/map_attributes_schema';
-import { generateEsql, indexExplorer } from '@kbn/onechat-genai-utils';
+import { generateEsql } from '@kbn/onechat-genai-utils';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { JsonSchema, SupportedChartType, MapConfig } from './types';
 import {
-  EXPLORE_INDICES_NODE,
+  EXPLORE_DATAVIEWS_NODE,
   GENERATE_ESQL_NODE,
   GENERATE_CONFIG_NODE,
   VALIDATE_CONFIG_NODE,
   MAX_RETRY_ATTEMPTS,
   type Action,
-  type ExploreIndicesAction,
-  type RequestIndicesAction,
+  type ExploreDataViewsAction,
+  type RequestDataViewsAction,
   type GenerateEsqlAction,
   type RequestEsqlAction,
   type GenerateConfigAction,
   type ValidateConfigAction,
-  isExploreIndicesAction,
-  isRequestIndicesAction,
+  isExploreDataViewsAction,
+  isRequestDataViewsAction,
   isGenerateEsqlAction,
   isRequestEsqlAction,
   isGenerateConfigAction,
@@ -43,8 +44,8 @@ const MapStateAnnotation = Annotation.Root({
   parsedExistingConfig: Annotation<MapConfig | null>(),
   // internal
   currentAttempt: Annotation<number>({ reducer: (_, newValue) => newValue, default: () => 0 }),
-  exploredIndices: Annotation<
-    Record<string, Array<{ type: string; name: string; reason?: string }>>
+  exploredDataViews: Annotation<
+    Record<string, Array<{ id: string; title: string; reason?: string }>>
   >({
     reducer: (a, b) => ({ ...a, ...b }),
     default: () => ({}),
@@ -67,66 +68,121 @@ type MapState = typeof MapStateAnnotation.State;
 export const createMapGraph = (
   model: ScopedModel,
   logger: Logger,
-  esClient: IScopedClusterClient
+  esClient: IScopedClusterClient,
+  dataViewsService: DataViewsService
 ) => {
-  // Node: Explore indices on demand
-  const exploreIndicesNode = async (state: MapState) => {
-    logger.debug('Exploring indices for map');
+  // Node: Explore data views on demand
+  const exploreDataViewsNode = async (state: MapState) => {
+    logger.debug('Exploring data views for map');
 
-    // Get the last request_indices action to know what to explore
-    const lastRequestAction = [...state.actions].reverse().find(isRequestIndicesAction);
+    // Get the last request_dataviews action to know what to explore
+    const lastRequestAction = [...state.actions].reverse().find(isRequestDataViewsAction);
 
     if (!lastRequestAction) {
-      const action: ExploreIndicesAction = {
-        type: 'explore_indices',
+      const action: ExploreDataViewsAction = {
+        type: 'explore_dataviews',
         success: false,
         requestId: 'unknown',
         description: 'No request found',
-        error: 'No index exploration request found in actions',
+        error: 'No data view exploration request found in actions',
       };
       return {
         actions: [action],
       };
     }
 
-    let action: ExploreIndicesAction;
+    let action: ExploreDataViewsAction;
     try {
-      const response = await indexExplorer({
-        nlQuery: lastRequestAction.description,
-        indexPattern: lastRequestAction.indexPattern || '*',
-        limit: lastRequestAction.limit || 5,
-        esClient: esClient.asCurrentUser,
-        model,
-      });
+      // Get all data views
+      let dataViews = await dataViewsService.getIdsWithTitle();
 
-      if (!response.resources || response.resources.length === 0) {
+      // Filter by pattern if provided
+      if (lastRequestAction.pattern) {
+        const regexPattern = new RegExp(lastRequestAction.pattern.replace(/\*/g, '.*'));
+        dataViews = dataViews.filter((dv) => regexPattern.test(dv.title));
+      }
+
+      // If no data views, return empty
+      if (dataViews.length === 0) {
         action = {
-          type: 'explore_indices',
+          type: 'explore_dataviews',
           success: false,
           requestId: lastRequestAction.requestId,
           description: lastRequestAction.description,
-          error: 'No indices found',
+          error: lastRequestAction.pattern
+            ? `No data views found matching pattern: ${lastRequestAction.pattern}`
+            : 'No data views found',
         };
       } else {
-        logger.debug(
-          `Found ${response.resources.length} indices for ${lastRequestAction.requestId}`
-        );
-        action = {
-          type: 'explore_indices',
-          success: true,
-          requestId: lastRequestAction.requestId,
-          description: lastRequestAction.description,
-          resources: response.resources.map((r) => ({
-            type: r.type,
-            name: r.name,
-            reason: r.reason,
-          })),
-        };
+        // Use LLM to select most relevant data views
+        const limit = lastRequestAction.limit || 5;
+        const prompt = `Given the following Kibana data views, select the ${limit} most relevant one(s) for this query: "${
+          lastRequestAction.description
+        }"
+
+Available data views:
+${dataViews.map((dv) => `- ID: ${dv.id}, Title: ${dv.title}`).join('\n')}
+
+Return ONLY a JSON array of objects with the selected data view IDs and a brief reason why each was selected.
+Format: [{ "id": "data-view-id", "reason": "brief explanation" }]
+
+Select up to ${limit} data view(s).`;
+
+        try {
+          const response = await model.chatModel.invoke([['user', prompt]]);
+          const content =
+            typeof response.content === 'string'
+              ? response.content
+              : JSON.stringify(response.content);
+
+          // Extract JSON from markdown code blocks or plain text
+          const jsonMatch =
+            content.match(/```(?:json)?\s*(\[[\s\S]*?\])\s*```/) || content.match(/(\[[\s\S]*?\])/);
+
+          if (!jsonMatch) {
+            throw new Error('Failed to parse LLM response');
+          }
+
+          const selected = JSON.parse(jsonMatch[1]) as Array<{ id: string; reason: string }>;
+
+          logger.debug(
+            `Found ${selected.length} relevant data views for ${lastRequestAction.requestId}`
+          );
+          action = {
+            type: 'explore_dataviews',
+            success: true,
+            requestId: lastRequestAction.requestId,
+            description: lastRequestAction.description,
+            resources: selected.slice(0, limit).map((item) => {
+              const dv = dataViews.find((d) => d.id === item.id);
+              return {
+                id: item.id,
+                title: dv?.title || 'Unknown',
+                reason: item.reason,
+              };
+            }),
+          };
+        } catch (llmError) {
+          logger.error(`Data view explorer LLM selection failed: ${llmError.message}`);
+
+          // Fallback: return first N data views
+          action = {
+            type: 'explore_dataviews',
+            success: true,
+            requestId: lastRequestAction.requestId,
+            description: lastRequestAction.description,
+            resources: dataViews.slice(0, limit).map((dv) => ({
+              id: dv.id,
+              title: dv.title,
+              reason: 'Selected by fallback (LLM selection failed)',
+            })),
+          };
+        }
       }
     } catch (error) {
-      logger.error(`Failed to explore indices: ${error.message}`);
+      logger.error(`Failed to explore data views: ${error.message}`);
       action = {
-        type: 'explore_indices',
+        type: 'explore_dataviews',
         success: false,
         requestId: lastRequestAction.requestId,
         description: lastRequestAction.description,
@@ -135,7 +191,7 @@ export const createMapGraph = (
     }
 
     return {
-      exploredIndices:
+      exploredDataViews:
         action.success && action.resources ? { [action.requestId]: action.resources } : {},
       actions: [action],
     };
@@ -215,15 +271,15 @@ export const createMapGraph = (
         (action) =>
           isGenerateConfigAction(action) ||
           isValidateConfigAction(action) ||
-          isExploreIndicesAction(action) ||
+          isExploreDataViewsAction(action) ||
           isGenerateEsqlAction(action)
       )
       .map((action) => {
         if (isGenerateConfigAction(action)) {
           return `Previous generation attempt ${action.attempt}: ${
             action.success
-              ? action.needsIndices
-                ? `REQUESTED INDICES: ${action.needsIndices.description}`
+              ? action.needsDataViews
+                ? `REQUESTED DATA VIEWS: ${action.needsDataViews.description}`
                 : action.needsEsql
                 ? `REQUESTED ES|QL: ${action.needsEsql.description}`
                 : 'SUCCESS'
@@ -235,10 +291,10 @@ export const createMapGraph = (
             action.success ? 'SUCCESS' : `FAILED - ${action.error}`
           }`;
         }
-        if (isExploreIndicesAction(action)) {
-          return `Index exploration for "${action.requestId}": ${
+        if (isExploreDataViewsAction(action)) {
+          return `Data view exploration for "${action.requestId}": ${
             action.success
-              ? `SUCCESS - found ${action.resources?.length} indices`
+              ? `SUCCESS - found ${action.resources?.length} data views`
               : `FAILED - ${action.error}`
           }`;
         }
@@ -252,12 +308,12 @@ export const createMapGraph = (
       .filter(Boolean)
       .join('\n');
 
-    // Format available explored indices
-    const availableIndicesContext = Object.keys(state.exploredIndices).length
-      ? `\n\nAvailable explored indices:\n${Object.entries(state.exploredIndices)
+    // Format available explored data views
+    const availableDataViewsContext = Object.keys(state.exploredDataViews).length
+      ? `\n\nAvailable explored data views:\n${Object.entries(state.exploredDataViews)
           .map(
             ([id, resources]) =>
-              `- ${id}: ${resources.map((r) => `${r.name} (${r.type})`).join(', ')}`
+              `- ${id}: ${resources.map((r) => `${r.title} (${r.id})`).join(', ')}`
           )
           .join('\n')}`
       : '';
@@ -273,8 +329,10 @@ export const createMapGraph = (
 1. Generate a valid map configuration following the schema strictly
 2. All required fields must be present
 3. Use appropriate layer configurations for the map type requested
-4. If you need to find indices/datastreams for non-ES|QL layers, you can request index exploration
-5. If you need ES|QL data for your map layers, you can request ES|QL generation${availableIndicesContext}${availableEsqlContext}`;
+4. If you need to find data views for non-ES|QL layers, you can request data view exploration
+5. If you need ES|QL data for your map layers, you can request ES|QL generation (AVOID ESQL WHEN POSSIBLE!)
+6. When using data views, use the data view ID as the indexPatternId${availableDataViewsContext}${availableEsqlContext}
+7. ALWWAYS add a base map layer`;
 
     const additionalContext = previousActionContext
       ? `Previous attempts:\n${previousActionContext}\n\nPlease fix the issues mentioned above.`
@@ -291,24 +349,29 @@ export const createMapGraph = (
 
     let action: GenerateConfigAction;
     try {
-      // Define a schema that allows LLM to return config, request indices, or request ES|QL
+      // Define a schema that allows LLM to return config, request data views, or request ES|QL
       const responseSchema = z.object({
-        type: z.enum(['config', 'request_indices', 'request_esql']).describe('Type of response'),
+        type: z.enum(['config', 'request_dataviews', 'request_esql']).describe('Type of response'),
         config: z.any().optional().describe('The map configuration (if type is config)'),
-        requestIndices: z
+        requestDataViews: z
           .object({
-            requestId: z.string().describe('Unique identifier for this index exploration request'),
+            requestId: z
+              .string()
+              .describe('Unique identifier for this data view exploration request'),
             description: z
               .string()
-              .describe('Description of what indices to look for (natural language)'),
-            indexPattern: z
+              .describe('Description of what data views to look for (natural language)'),
+            pattern: z
               .string()
               .optional()
-              .describe('Optional index pattern to filter by (e.g. "logs-*")'),
-            limit: z.number().optional().describe('Max number of indices to return (default: 5)'),
+              .describe('Optional pattern to filter data views by title (e.g. "logs*")'),
+            limit: z
+              .number()
+              .optional()
+              .describe('Max number of data views to return (default: 5)'),
           })
           .optional()
-          .describe('Index exploration request details (if type is request_indices)'),
+          .describe('Data view exploration request details (if type is request_dataviews)'),
         requestEsql: z
           .object({
             queryId: z.string().describe('Unique identifier for this ES|QL query'),
@@ -323,23 +386,23 @@ export const createMapGraph = (
       });
       const response = await structuredModel.invoke(prompt);
 
-      if (response.type === 'request_indices' && response.requestIndices) {
-        // LLM is requesting index exploration
+      if (response.type === 'request_dataviews' && response.requestDataViews) {
+        // LLM is requesting data view exploration
         logger.debug(
-          `LLM requested index exploration: ${response.requestIndices.requestId} - ${response.requestIndices.description}`
+          `LLM requested data view exploration: ${response.requestDataViews.requestId} - ${response.requestDataViews.description}`
         );
-        const requestAction: RequestIndicesAction = {
-          type: 'request_indices',
-          requestId: response.requestIndices.requestId,
-          description: response.requestIndices.description,
-          indexPattern: response.requestIndices.indexPattern,
-          limit: response.requestIndices.limit,
+        const requestAction: RequestDataViewsAction = {
+          type: 'request_dataviews',
+          requestId: response.requestDataViews.requestId,
+          description: response.requestDataViews.description,
+          pattern: response.requestDataViews.pattern,
+          limit: response.requestDataViews.limit,
           attempt,
         };
         action = {
           type: 'generate_config',
           success: true,
-          needsIndices: requestAction,
+          needsDataViews: requestAction,
           attempt,
         };
       } else if (response.type === 'request_esql' && response.requestEsql) {
@@ -386,8 +449,8 @@ export const createMapGraph = (
 
     return {
       currentAttempt: attempt,
-      actions: action.needsIndices
-        ? [action.needsIndices, action]
+      actions: action.needsDataViews
+        ? [action.needsDataViews, action]
         : action.needsEsql
         ? [action.needsEsql, action]
         : [action],
@@ -467,7 +530,7 @@ export const createMapGraph = (
     };
   };
 
-  // Router: After config generation, check if indices or ES|QL is needed or go to validation
+  // Router: After config generation, check if data views or ES|QL is needed or go to validation
   const afterGenerateConfigRouter = (state: MapState): string => {
     const lastGenerateAction = [...state.actions].reverse().find(isGenerateConfigAction);
 
@@ -476,12 +539,12 @@ export const createMapGraph = (
       return VALIDATE_CONFIG_NODE;
     }
 
-    // If LLM requested index exploration, go explore indices
-    if (lastGenerateAction.needsIndices) {
+    // If LLM requested data view exploration, go explore data views
+    if (lastGenerateAction.needsDataViews) {
       logger.debug(
-        `Index exploration requested: ${lastGenerateAction.needsIndices.requestId}, routing to index exploration`
+        `Data view exploration requested: ${lastGenerateAction.needsDataViews.requestId}, routing to data view exploration`
       );
-      return EXPLORE_INDICES_NODE;
+      return EXPLORE_DATAVIEWS_NODE;
     }
 
     // If LLM requested ES|QL, go generate it
@@ -529,7 +592,7 @@ export const createMapGraph = (
   // Build and compile the graph
   const graph = new StateGraph(MapStateAnnotation)
     // Add nodes
-    .addNode(EXPLORE_INDICES_NODE, exploreIndicesNode)
+    .addNode(EXPLORE_DATAVIEWS_NODE, exploreDataViewsNode)
     .addNode(GENERATE_ESQL_NODE, generateESQLNode)
     .addNode(GENERATE_CONFIG_NODE, generateConfigNode)
     .addNode(VALIDATE_CONFIG_NODE, validateConfigNode)
@@ -537,11 +600,11 @@ export const createMapGraph = (
     // Add edges
     .addEdge('__start__', GENERATE_CONFIG_NODE)
     .addConditionalEdges(GENERATE_CONFIG_NODE, afterGenerateConfigRouter, {
-      [EXPLORE_INDICES_NODE]: EXPLORE_INDICES_NODE,
+      [EXPLORE_DATAVIEWS_NODE]: EXPLORE_DATAVIEWS_NODE,
       [GENERATE_ESQL_NODE]: GENERATE_ESQL_NODE,
       [VALIDATE_CONFIG_NODE]: VALIDATE_CONFIG_NODE,
     })
-    .addEdge(EXPLORE_INDICES_NODE, GENERATE_CONFIG_NODE)
+    .addEdge(EXPLORE_DATAVIEWS_NODE, GENERATE_CONFIG_NODE)
     .addEdge(GENERATE_ESQL_NODE, GENERATE_CONFIG_NODE)
     .addConditionalEdges(VALIDATE_CONFIG_NODE, shouldRetryRouter, {
       [GENERATE_CONFIG_NODE]: GENERATE_CONFIG_NODE,

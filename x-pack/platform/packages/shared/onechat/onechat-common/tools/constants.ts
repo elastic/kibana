@@ -24,6 +24,9 @@ export const platformCoreTools = {
   generateEsql: platformCoreTool('generate_esql'),
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
+  listDataViews: platformCoreTool('list_dataviews'),
+  getDataView: platformCoreTool('get_dataview'),
+  dataViewExplorer: platformCoreTool('dataview_explorer'),
 } as const;
 
 /**

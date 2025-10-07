@@ -9,6 +9,7 @@ import type { MaybePromise } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ToolEventEmitter, ModelProvider, ScopedRunner, ToolProvider } from '../runner';
 
@@ -64,4 +65,9 @@ export interface ToolHandlerContext {
    * Logger scoped to this execution
    */
   logger: Logger;
+  /**
+   * Data Views service scoped to the current user.
+   * Can be used to access and query Kibana data views.
+   */
+  dataViewsService: DataViewsService;
 }

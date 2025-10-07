@@ -7,21 +7,21 @@
 
 import type { MapConfig } from './types';
 
-export interface ExploreIndicesAction {
-  type: 'explore_indices';
+export interface ExploreDataViewsAction {
+  type: 'explore_dataviews';
   success: boolean;
   requestId: string; // Unique identifier for this request
-  description: string; // What indices to look for
-  resources?: Array<{ type: string; name: string; reason?: string }>; // Found indices
+  description: string; // What data views to look for
+  resources?: Array<{ id: string; title: string; reason?: string }>; // Found data views
   error?: string;
 }
 
-export interface RequestIndicesAction {
-  type: 'request_indices';
+export interface RequestDataViewsAction {
+  type: 'request_dataviews';
   requestId: string; // Unique identifier for this request
-  description: string; // What indices to look for
-  indexPattern?: string; // Optional index pattern filter
-  limit?: number; // Max number of indices to return
+  description: string; // What data views to look for
+  pattern?: string; // Optional pattern to filter data views by title
+  limit?: number; // Max number of data views to return
   attempt: number;
 }
 
@@ -46,7 +46,7 @@ export interface GenerateConfigAction {
   success: boolean;
   config?: any; // Can be any shape - gets validated in ValidateConfigAction
   needsEsql?: RequestEsqlAction; // If set, LLM is requesting ES|QL generation
-  needsIndices?: RequestIndicesAction; // If set, LLM is requesting index exploration
+  needsDataViews?: RequestDataViewsAction; // If set, LLM is requesting data view exploration
   attempt: number;
   error?: string;
 }
@@ -60,19 +60,19 @@ export interface ValidateConfigAction {
 }
 
 export type Action =
-  | ExploreIndicesAction
-  | RequestIndicesAction
+  | ExploreDataViewsAction
+  | RequestDataViewsAction
   | GenerateEsqlAction
   | RequestEsqlAction
   | GenerateConfigAction
   | ValidateConfigAction;
 
-export function isExploreIndicesAction(action: Action): action is ExploreIndicesAction {
-  return action.type === 'explore_indices';
+export function isExploreDataViewsAction(action: Action): action is ExploreDataViewsAction {
+  return action.type === 'explore_dataviews';
 }
 
-export function isRequestIndicesAction(action: Action): action is RequestIndicesAction {
-  return action.type === 'request_indices';
+export function isRequestDataViewsAction(action: Action): action is RequestDataViewsAction {
+  return action.type === 'request_dataviews';
 }
 
 export function isGenerateEsqlAction(action: Action): action is GenerateEsqlAction {
@@ -92,7 +92,7 @@ export function isValidateConfigAction(action: Action): action is ValidateConfig
 }
 
 // Node name constants
-export const EXPLORE_INDICES_NODE = 'explore_indices';
+export const EXPLORE_DATAVIEWS_NODE = 'explore_dataviews';
 export const GENERATE_ESQL_NODE = 'generate_esql';
 export const GENERATE_CONFIG_NODE = 'generate_config';
 export const VALIDATE_CONFIG_NODE = 'validate_config';

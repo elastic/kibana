@@ -60,7 +60,7 @@ This tool will:
     tags: [],
     handler: async (
       { query: nlQuery, chartType, esql, existingConfig },
-      { esClient, modelProvider, logger }
+      { esClient, modelProvider, logger, dataViewsService }
     ) => {
       try {
         // Step 1: Determine chart type if not provided
@@ -93,7 +93,7 @@ This tool will:
         const isMap = selectedChartType === SupportedChartType.Map;
         const schema = isMap ? mapSchema : metricSchema;
         const graph = isMap
-          ? createMapGraph(model, logger, esClient)
+          ? createMapGraph(model, logger, esClient, dataViewsService)
           : createVisualizationGraph(model, logger, esClient);
 
         // Build initial state based on chart type

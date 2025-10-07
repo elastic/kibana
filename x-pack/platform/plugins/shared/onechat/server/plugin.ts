@@ -31,7 +31,6 @@ export class OnechatPlugin
     >
 {
   private logger: Logger;
-  // @ts-expect-error unused for now
   private config: OnechatConfig;
   private serviceManager = new ServiceManager();
 
@@ -82,13 +81,14 @@ export class OnechatPlugin
 
   start(
     { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
-    { inference, spaces }: OnechatStartDependencies
+    { inference, spaces, dataViews }: OnechatStartDependencies
   ): OnechatPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
       inference,
+      dataViews,
       spaces,
       uiSettings,
       savedObjects,

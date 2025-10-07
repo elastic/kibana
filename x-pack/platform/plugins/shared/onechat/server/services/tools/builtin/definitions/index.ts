@@ -13,3 +13,6 @@ export { generateEsqlTool } from './generate_esql';
 export { executeEsqlTool } from './execute_esql';
 export { searchTool } from './search';
 export { createVisualizationTool } from './create_visualization';
+export { listDataViewsTool } from './list_dataviews';
+export { getDataViewTool } from './get_dataview';
+export { dataViewExplorerTool } from './dataview_explorer';
