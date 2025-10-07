@@ -166,18 +166,8 @@ describe('saved_searches_utils', () => {
 
       const result = toSavedSearchAttributes(savedSearch, '{}');
       expect(result).toEqual({
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: '{}',
-        },
         title: 'title',
-        sort: [['a', 'asc']],
-        columns: ['c', 'd'],
         description: 'description',
-        grid: {},
-        hideChart: true,
-        isTextBasedQuery: true,
-        usesAdHocDataView: false,
-        timeRestore: false,
         tabs: [
           {
             id: expect.any(String),
@@ -197,6 +187,35 @@ describe('saved_searches_utils', () => {
           },
         ],
       });
+    });
+
+    test('should drop top-level tab attributes', () => {
+      const savedSearch: SavedSearch = {
+        id: 'id',
+        searchSource: createSearchSourceMock(),
+        title: 'title',
+        sort: [['a', 'asc']],
+        columns: ['c', 'd'],
+        description: 'description',
+        grid: {},
+        hideChart: true,
+        isTextBasedQuery: true,
+        usesAdHocDataView: false,
+        managed: false,
+        rowsPerPage: 100,
+        sampleSize: 500,
+        breakdownField: 'someField',
+      };
+
+      const result = toSavedSearchAttributes(savedSearch, '{}');
+      // Top-level attributes should not include rowsPerPage, sampleSize, breakdownField
+      expect(result).not.toHaveProperty('rowsPerPage');
+      expect(result).not.toHaveProperty('sampleSize');
+      expect(result).not.toHaveProperty('breakdownField');
+      // But they should be present in the tab attributes
+      expect(result.tabs?.[0].attributes.rowsPerPage).toBe(100);
+      expect(result.tabs?.[0].attributes.sampleSize).toBe(500);
+      expect(result.tabs?.[0].attributes.breakdownField).toBe('someField');
     });
   });
 });

@@ -14,7 +14,8 @@ import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Reference } from '@kbn/content-management-utils';
-import type { SavedSearch, SavedSearchAttributes, SerializableSavedSearch } from '../types';
+import type { DiscoverSessionAttributes } from '../../server/saved_objects';
+import type { SavedSearch, SerializableSavedSearch } from '../types';
 import { SavedSearchType as SAVED_SEARCH_TYPE } from '..';
 import { fromSavedSearchAttributes } from './saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../content_management';
@@ -72,7 +73,7 @@ export const convertToSavedSearch = async <
     managed,
   }: {
     savedSearchId: string | undefined;
-    attributes: SavedSearchAttributes;
+    attributes: DiscoverSessionAttributes;
     references: Reference[];
     sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
     managed: boolean | undefined;

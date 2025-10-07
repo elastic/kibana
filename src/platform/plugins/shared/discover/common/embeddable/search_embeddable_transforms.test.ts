@@ -29,12 +29,13 @@ describe('searchEmbeddableTransforms', () => {
           title: 'Test Title',
           description: 'Test Description',
           columns: ['column1', 'column2'],
+          references: [{ id: 'ref1', name: 'ref', type: 'index-pattern' }],
         },
       } as SearchEmbeddableSerializedState;
       const expectedAttributes = {
         title: 'Test Title',
         description: 'Test Description',
-        columns: ['column1', 'column2'],
+        references: [{ id: 'ref1', name: 'ref', type: 'index-pattern' }],
         tabs: [
           {
             id: expect.any(String),
@@ -64,6 +65,43 @@ describe('searchEmbeddableTransforms', () => {
             id: expect.any(String),
             label: 'Untitled',
             attributes: {},
+          },
+        ],
+      };
+      const result = searchEmbeddableTransforms.transformOut?.(state);
+      expect(result).toEqual({
+        ...state,
+        attributes: expectedAttributes,
+      });
+    });
+
+    it('removes top-level tab attributes if tabs already present', () => {
+      const state = {
+        title: 'Test Title',
+        description: 'Test Description',
+        attributes: {
+          title: 'Test Title',
+          description: 'Test Description',
+          tabs: [
+            {
+              id: 'tab-1',
+              label: 'Tab 1',
+              attributes: { columns: ['foo'] },
+            },
+          ],
+          columns: ['should be removed'],
+          references: [{ id: 'ref2', name: 'ref2', type: 'index-pattern' }],
+        },
+      } as SearchEmbeddableSerializedState;
+      const expectedAttributes = {
+        title: 'Test Title',
+        description: 'Test Description',
+        references: [{ id: 'ref2', name: 'ref2', type: 'index-pattern' }],
+        tabs: [
+          {
+            id: 'tab-1',
+            label: 'Tab 1',
+            attributes: { columns: ['foo'] },
           },
         ],
       };

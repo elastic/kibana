@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DiscoverSessionTab, DiscoverSessionTabAttributes } from './schema';
+export type {
+  DiscoverSessionTab,
+  DiscoverSessionTabAttributes,
+  DiscoverSessionAttributes,
+} from './schema';
 export { getSavedSearchObjectType } from './search';

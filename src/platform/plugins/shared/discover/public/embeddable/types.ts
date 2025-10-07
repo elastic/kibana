@@ -37,6 +37,7 @@ import type {
   DynamicActionsSerializedState,
   HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server/saved_objects';
 import type { EDITABLE_SAVED_SEARCH_KEYS } from './constants';
 
 export type SearchEmbeddableState = Pick<
@@ -79,12 +80,16 @@ export type EditableSavedSearchAttributes = Partial<
   Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
 >;
 
-export type SearchEmbeddableSerializedState = SerializedTitles &
+// Prior to tabs, unlinked search embeddables could be created without `tabs` property and have `sort`, `columns` etc. at the root of the saved object
+// Since embeddables don't automatically apply migrations but require opening/saving, we need to support both cases here
+export type SearchEmbeddableSerializedState<
+  T extends SavedSearchAttributes | DiscoverSessionAttributes = SavedSearchAttributes
+> = SerializedTitles &
   SerializedTimeRange &
   Partial<DynamicActionsSerializedState> &
   EditableSavedSearchAttributes & {
     // by value
-    attributes?: SavedSearchAttributes & { references: SavedSearch['references'] };
+    attributes?: T & { references: SavedSearch['references'] };
     // by reference
     savedObjectId?: string;
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;

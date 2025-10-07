@@ -10,31 +10,34 @@
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
+import type { DiscoverSessionAttributes } from '../../server/saved_objects';
 import type { SavedSearch } from '..';
 import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '../saved_searches_utils';
-import type { SavedSearchAttributes, SerializableSavedSearch } from '../types';
-import { extractTabs } from './extract_tabs';
+import type { SerializableSavedSearch } from '../types';
+import { extractTabs, removeTopLevelTabAttributes } from './extract_tabs';
 
 export const fromSavedSearchAttributes = (
   id: string | undefined,
-  attributes: SavedSearchAttributes,
+  attributes: DiscoverSessionAttributes,
   tags: string[] | undefined,
   references: SavedObjectReference[] | undefined,
   searchSource: SavedSearch['searchSource'] | SerializedSearchSourceFields,
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'],
   managed: boolean,
   serialized: boolean = false
-): SavedSearch | SerializableSavedSearch => ({
-  ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource, managed, serialized),
-  sharingSavedObjectProps,
-  references,
-});
+): SavedSearch | SerializableSavedSearch => {
+  return {
+    ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource, managed, serialized),
+    sharingSavedObjectProps,
+    references,
+  };
+};
 
 export const toSavedSearchAttributes = (
   savedSearch: SavedSearch,
   searchSourceJSON: string
-): SavedSearchAttributes =>
-  extractTabs({
+): DiscoverSessionAttributes => {
+  const attributes = extractTabs({
     kibanaSavedObjectMeta: { searchSourceJSON },
     title: savedSearch.title ?? '',
     sort: savedSearch.sort ?? [],
@@ -57,4 +60,6 @@ export const toSavedSearchAttributes = (
     density: savedSearch.density,
     breakdownField: savedSearch.breakdownField,
     visContext: savedSearch.visContext,
-  }) as SavedSearchAttributes;
+  });
+  return removeTopLevelTabAttributes(attributes);
+};

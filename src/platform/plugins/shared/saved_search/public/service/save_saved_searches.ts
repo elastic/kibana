@@ -10,12 +10,12 @@
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
+import type { DiscoverSessionAttributes } from '../../server/saved_objects';
 import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { toSavedSearchAttributes } from '../../common/service/saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
-import type { SavedSearchAttributes } from '../../common';
 
 export interface SaveSavedSearchOptions {
   onTitleDuplicate?: () => void;
@@ -25,7 +25,7 @@ export interface SaveSavedSearchOptions {
 
 export const saveSearchSavedObject = async (
   id: string | undefined,
-  attributes: SavedSearchAttributes,
+  attributes: DiscoverSessionAttributes,
   references: Reference[] | undefined,
   contentManagement: ContentManagementPublicStart['client']
 ) => {
@@ -55,7 +55,10 @@ export const saveSearchSavedObject = async (
   return resp.item.id;
 };
 
-/** @internal **/
+/**
+ * @internal
+ * @deprecated Use saveDiscoverSession instead
+ */
 export const saveSavedSearch = async (
   savedSearch: SavedSearch,
   options: SaveSavedSearchOptions,

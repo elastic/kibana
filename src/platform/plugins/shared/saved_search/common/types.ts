@@ -44,16 +44,17 @@ export type VisContextUnmapped =
   | {}; // cleared value
 
 /** @internal **/
+/** @deprecated Use {@link DiscoverSessionAttributes} (if using {title, description, tabs}) or {@link DiscoverSessionTabAttributes} (if using {sort, columns, ...etc}) instead */
 export interface SavedSearchAttributes {
   title: string;
-  sort: SortOrder[];
-  columns: string[];
+  sort?: SortOrder[];
+  columns?: string[];
   description: string;
-  grid: DiscoverGridSettings;
-  hideChart: boolean;
-  isTextBasedQuery: boolean;
+  grid?: DiscoverGridSettings;
+  hideChart?: boolean;
+  isTextBasedQuery?: boolean;
   usesAdHocDataView?: boolean;
-  kibanaSavedObjectMeta: {
+  kibanaSavedObjectMeta?: {
     searchSourceJSON: string;
   };
   viewMode?: VIEW_MODE;

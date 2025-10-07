@@ -185,5 +185,29 @@ export const SCHEMA_SEARCH_MODEL_VERSION_8 = SCHEMA_SEARCH_MODEL_VERSION_7.exten
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_8, { minSize: 1 }),
 });
 
+export const SCHEMA_SEARCH_MODEL_VERSION_9 = SCHEMA_SEARCH_MODEL_VERSION_8.extends({
+  columns: undefined,
+  sort: undefined,
+  grid: undefined,
+  rowHeight: undefined,
+  rowsPerPage: undefined,
+  hideChart: undefined,
+  breakdownField: undefined,
+  kibanaSavedObjectMeta: undefined,
+  isTextBasedQuery: undefined,
+  usesAdHocDataView: undefined,
+  timeRestore: undefined,
+  timeRange: undefined,
+  refreshInterval: undefined,
+  viewMode: undefined,
+  hideAggregatedPreview: undefined,
+  sampleSize: undefined,
+  headerRowHeight: undefined,
+  visContext: undefined,
+  density: undefined,
+  controlGroupJson: undefined,
+});
+
 export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_8>;
 export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_8>;
+export type DiscoverSessionAttributes = TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_9>;

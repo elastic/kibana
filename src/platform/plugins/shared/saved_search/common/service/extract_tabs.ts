@@ -15,6 +15,7 @@ import { omit } from 'lodash';
 import type {
   SCHEMA_SEARCH_MODEL_VERSION_5,
   SCHEMA_SEARCH_MODEL_VERSION_6,
+  SCHEMA_SEARCH_MODEL_VERSION_7,
 } from '../../server/saved_objects/schema';
 
 export const extractTabsBackfillFn: SavedObjectModelDataBackfillFn<
@@ -41,4 +42,15 @@ export function extractTabs<T extends TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_
     },
   ];
   return { ...attributes, tabs };
+}
+
+/**
+ * Extract tab attributes into a separate array since multiple tabs are supported
+ * @param attributes The previous attributes to be transformed (version 5)
+ */
+export function removeTopLevelTabAttributes<T extends TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_7>>(
+  attributes: T
+) {
+  const { title, description, tabs } = attributes;
+  return { title, description, tabs };
 }
