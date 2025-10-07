@@ -6,7 +6,7 @@
  */
 
 import type { GenericFtrProviderContext } from '@kbn/test';
-import type { pageObjects } from '../../serverless/functional/page_objects';
+import type { pageObjects } from '../../functional/page_objects';
 import { services as deploymentAgnosticFunctionalServices } from '../../serverless/functional/services/deployment_agnostic_services';
 import { oneChatCommonServices } from './common';
 

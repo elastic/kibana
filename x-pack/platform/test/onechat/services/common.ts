@@ -10,7 +10,6 @@ import { services as platformDeploymentAgnosticServices } from '../../api_integr
 
 /**
  * Services common to both API and UI onechat test suites.
- * These must be safe across stateful and serverless deployments.
  */
 export const oneChatCommonServices = {
   ...platformDeploymentAgnosticServices,

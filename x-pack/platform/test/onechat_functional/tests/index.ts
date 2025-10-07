@@ -7,18 +7,8 @@
 
 import type { OneChatUiFtrProviderContext } from '../../onechat/services/functional';
 
-export default function ({ loadTestFile, getService, getPageObject }: OneChatUiFtrProviderContext) {
+export default function ({ loadTestFile }: OneChatUiFtrProviderContext) {
   describe('Agent Builder', function () {
-    before(async () => {
-      const config = getService('config');
-      const isServerless = Boolean(config.get('serverless'));
-
-      if (isServerless) {
-        const common = getPageObject('svlCommonPage');
-        await common.loginAsAdmin();
-      }
-    });
-
     describe('converse', function () {
       loadTestFile(require.resolve('./converse/conversation_flow.ts'));
       loadTestFile(require.resolve('./converse/conversation_history.ts'));

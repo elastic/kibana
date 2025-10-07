@@ -6,7 +6,6 @@
  */
 
 import type { FtrConfigProviderContext } from '@kbn/test';
-import { createTestConfig } from '../../serverless/functional/config.base';
 
 export interface CreateTestConfigOptions<T> {
   services: T;
@@ -41,5 +40,3 @@ export const createStatefulTestConfig = <T>({
     };
   };
 };
-
-export const createServerlessTestConfig = createTestConfig;
