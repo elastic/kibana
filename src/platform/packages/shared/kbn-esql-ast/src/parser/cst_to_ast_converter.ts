@@ -18,6 +18,7 @@ import { firstItem, lastItem, resolveItem } from '../visitor/utils';
 import { type AstNodeParserFields, Builder } from '../builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
 import type { Parser } from './parser';
+import { EDITOR_MARKER } from '../definitions/constants';
 
 const textExistsAndIsValid = (text: string | undefined): text is string =>
   !!(text && !/<missing /.test(text));
@@ -1578,7 +1579,8 @@ export class CstToAstConverter {
     const keyCtx = configCtx.KEY();
     if (keyCtx && byContext) {
       const args = this.fromFields(configCtx.fields());
-      const incomplete = args.length === 0;
+      const incomplete =
+        args.length === 0 || args.some((arg) => arg.incomplete || arg.text.includes(EDITOR_MARKER));
       return this.toOption('key by', configCtx, args, incomplete);
     }
 

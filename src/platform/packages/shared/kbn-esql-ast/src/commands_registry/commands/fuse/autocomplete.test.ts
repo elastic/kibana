@@ -59,7 +59,7 @@ describe('FUSE Autocomplete', () => {
     });
 
     it('does not suggest already used arguments', async () => {
-      await fuseExpectSuggestions('FROM a | FUSE linear SCORE BY x KEY BY y /', [
+      await fuseExpectSuggestions('FROM a | FUSE linear SCORE BY x KEY BY y ', [
         'GROUP BY ',
         'WITH ',
         '| ',
@@ -126,6 +126,119 @@ describe('FUSE Autocomplete', () => {
       );
       await fuseExpectSuggestions(
         'FROM a | FUSE linear GROUP BY textFi/',
+        expectedStringFields,
+        mockCallbacks
+      );
+    });
+  });
+
+  describe('KEY BY', () => {
+    it('suggests string fields after KEY BY', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      const mockCallbacks = getMockCallbacks();
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
+      );
+      await fuseExpectSuggestions(
+        'FROM a | FUSE linear KEY BY /',
+        expectedStringFields,
+        mockCallbacks
+      );
+    });
+
+    it('suggests partial string fields after KEY BY', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      const mockCallbacks = getMockCallbacks();
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
+      );
+      await fuseExpectSuggestions(
+        'FROM a | FUSE linear KEY BY textFi/',
+        expectedStringFields,
+        mockCallbacks
+      );
+    });
+
+    it('suggests string fields after a comma following KEY BY', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      const mockCallbacks = getMockCallbacks();
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
+      );
+      await fuseExpectSuggestions(
+        'FROM a | FUSE linear KEY BY keywordField, /',
+        expectedStringFields,
+        mockCallbacks
+      );
+    });
+
+    it('suggests partial string fields after a comma following KEY BY', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      const mockCallbacks = getMockCallbacks();
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
+      );
+      await fuseExpectSuggestions(
+        'FROM a | FUSE linear KEY BY keywordField, textFi/',
+        expectedStringFields,
+        mockCallbacks
+      );
+    });
+
+    it('does not suggest already used fields after a comma following KEY BY', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      const mockCallbacks = getMockCallbacks();
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
+      );
+      await fuseExpectSuggestions(
+        'FROM a | FUSE KEY BY keywordField, textField, /',
+        expectedStringFields,
+        mockCallbacks
+      );
+      expect(mockCallbacks.getByType).toHaveBeenCalledWith(
+        ESQL_STRING_TYPES,
+        ['keywordField', 'textField'], // Ignored fields
+        { openSuggestions: true }
+      );
+    });
+
+    it('suggests other config arguments after KEY BY fields', async () => {
+      await fuseExpectSuggestions('FROM a | FUSE KEY BY keywordField, textField ', [
+        'SCORE BY ',
+        'GROUP BY ',
+        'WITH ',
+        '| ',
+      ]);
+    });
+
+    it('suggests other config arguments and a coma immediately after a field', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      const mockCallbacks = getMockCallbacks();
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
+      );
+      await fuseExpectSuggestions(
+        'FROM a | FUSE KEY BY keywordField, textField',
+        [
+          'textField GROUP BY ',
+          'textField SCORE BY ',
+          'textField WITH ',
+          'textField | ',
+          'textField, ',
+        ],
+        mockCallbacks
+      );
+    });
+
+    it('works properly if its preceded by other configs', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      const mockCallbacks = getMockCallbacks();
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
+      );
+      await fuseExpectSuggestions(
+        'FROM a | FUSE linear SCORE BY keywordField GROUP BY keywordField WITH {} KEY BY /',
         expectedStringFields,
         mockCallbacks
       );

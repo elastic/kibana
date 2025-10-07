@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
-import { ESQL_STRING_TYPES, withAutoSuggest } from '../../../..';
-import { isOptionNode } from '../../../ast/is';
+import { ESQL_STRING_TYPES, commaCompleteItem, withAutoSuggest } from '../../../..';
+import { isColumn, isOptionNode } from '../../../ast/is';
 import type {
   ESQLAstFuseCommand,
   ESQLCommand,
@@ -85,6 +85,47 @@ export async function autocomplete(
         },
         () => []
       );
+    case FusePosition.KEY_BY:
+      const keyByOption = findCommandOptionByName(fuseCommand, 'key by');
+
+      const alreadyUsedFields =
+        keyByOption?.args.map((arg) => (isColumn(arg) ? arg.name : '')) ?? [];
+
+      const allFields =
+        (await callbacks?.getByType?.(ESQL_STRING_TYPES, alreadyUsedFields, {
+          openSuggestions: true,
+        })) ?? [];
+
+      return handleFragment(
+        innerText,
+        (fragment) => columnExists(fragment, context),
+        (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+          return allFields.map((suggestion) =>
+            withAutoSuggest({
+              ...suggestion,
+              rangeToReplace,
+            })
+          );
+        },
+        (fragment: string, rangeToReplace: { start: number; end: number }) => {
+          const finalSuggestions = getFuseArgumentsSuggestions(fuseCommand).map((s) => ({
+            ...s,
+            text: ` ${s.text}`,
+          }));
+          if (allFields.length > 0) {
+            finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+          }
+
+          return finalSuggestions.map<ISuggestionItem>((s) =>
+            withAutoSuggest({
+              ...s,
+              filterText: fragment,
+              text: fragment + s.text,
+              rangeToReplace,
+            })
+          );
+        }
+      );
   }
 
   return [pipeCompleteItem];
@@ -93,15 +134,15 @@ export async function autocomplete(
 function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
   const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
 
-  if ((scoreBy && scoreBy.incomplete) || /SCORE BY\s*\S*$/i.test(innerText)) {
+  if ((scoreBy && scoreBy.incomplete) || /SCORE BY\s+\S*$/i.test(innerText)) {
     return FusePosition.SCORE_BY;
   }
 
-  if ((groupBy && groupBy.incomplete) || /GROUP BY\s*\S*$/i.test(innerText)) {
+  if ((groupBy && groupBy.incomplete) || /GROUP BY\s+\S*$/i.test(innerText)) {
     return FusePosition.GROUP_BY;
   }
 
-  if (keyBy && keyBy.incomplete) {
+  if ((keyBy && keyBy.incomplete) || /KEY BY(\s+\S+,?)+$/i.test(innerText)) {
     return FusePosition.KEY_BY;
   }
 
