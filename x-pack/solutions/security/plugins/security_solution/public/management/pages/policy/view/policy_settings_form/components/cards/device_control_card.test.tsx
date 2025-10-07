@@ -177,5 +177,28 @@ describe('Policy Device Control Card', () => {
         )
       );
     });
+
+    it.each([
+      [DeviceControlAccessLevel.audit, 'Allow all'],
+      [DeviceControlAccessLevel.read_only, 'Read only'],
+      [DeviceControlAccessLevel.no_execute, 'Block execute'],
+    ])(
+      'should NOT display user notification section when access level is %s',
+      (accessLevel, accessLevelLabel) => {
+        set(formProps.policy, 'windows.device_control.usb_storage', accessLevel);
+        set(formProps.policy, 'mac.device_control.usb_storage', accessLevel);
+
+        const { getByTestId } = render();
+
+        expectIsViewOnly(getByTestId(testSubj.card));
+
+        expect(getByTestId(testSubj.card)).toHaveTextContent(
+          exactMatchText(
+            `TypeDevice ControlOperating systemWindows, Mac Device ControlUSB storage access level${accessLevelLabel}`
+          )
+        );
+        expect(renderResult.queryByTestId('test-deviceControl-notifyUser')).toBeNull();
+      }
+    );
   });
 });
