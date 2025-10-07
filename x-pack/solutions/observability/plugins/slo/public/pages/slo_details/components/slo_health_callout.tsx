@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React from 'react';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
-import { useKibana } from '../../../hooks/use_kibana';
 import { getSloHealthStateText } from '../../../lib/slo_health_helpers';
 import { SloHealthIssuesList } from '../../slos/components/health_callout/slo_health_issues_list';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
-  const { http } = useKibana().services;
   const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
 
   if (isLoading || isError || data === undefined || data?.length !== 1) {
@@ -54,24 +52,10 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
         <EuiFlexItem>
           <FormattedMessage
             id="xpack.slo.sloDetails.healthCallout.description"
-            defaultMessage="The following {count, plural, one {transform is} other {transforms are}} in {stateText} state:"
+            defaultMessage="The following {count, plural, one {transform is} other {transforms are}} in {stateText} state. You can inspect {count, plural, it {one} other {each one}} here:"
             values={{ count, stateText }}
           />
-          <SloHealthIssuesList results={data} />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="sloSloHealthCalloutInspectTransformButton"
-            color="danger"
-            fill
-            href={http?.basePath.prepend('/app/management/data/transform')}
-          >
-            <FormattedMessage
-              id="xpack.slo.sloDetails.healthCallout.buttonTransformLabel"
-              defaultMessage="Inspect transform"
-            />
-          </EuiButton>
+          <SloHealthIssuesList results={data} linkToTransformPage={true} externalLinkTextSize="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiCallOut>

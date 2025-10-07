@@ -12,17 +12,43 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiCopy } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { FetchSLOHealthResponse } from '@kbn/slo-schema';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
+import kbnRison from '@kbn/rison';
 import React from 'react';
-import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../../common/constants';
+import { paths } from '../../../../../common/locators/paths';
+import { ExternalLinkDisplayText } from '../../../slo_details/components/external_link_display_text';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { getSLOTransformId, getSLOSummaryTransformId } from '../../../../../common/constants';
 
 interface Props {
   results: FetchSLOHealthResponse;
+  linkToTransformPage?: boolean;
+  externalLinkTextSize: 's' | 'xs';
 }
 
-export function SloHealthIssuesList({ results }: Props) {
+export function SloHealthIssuesList({ results, linkToTransformPage, externalLinkTextSize }: Props) {
+  const {
+    share: {
+      url: { locators },
+    },
+  } = useKibana().services;
+
+  const managementLocator = locators.get(MANAGEMENT_APP_LOCATOR);
+
+  const getUrl = (transformId: string) => {
+    return (
+      managementLocator?.getRedirectUrl({
+        sectionId: 'data',
+        appId: `transform?_a=${kbnRison.encode({
+          transform: {
+            queryText: transformId,
+          },
+        })}`,
+      }) || ''
+    );
+  };
+
   const unhealthyRollupTransforms = results.filter(
     (result) => result.health.rollup === 'unhealthy'
   );
@@ -36,89 +62,57 @@ export function SloHealthIssuesList({ results }: Props) {
     <ul>
       {unhealthyRollupTransforms.map((result) => (
         <li key={`${result.sloId}-rollup-unhealthy`}>
-          {getSLOTransformId(result.sloId, result.sloRevision)}{' '}
-          {i18n.translate('xpack.slo.sloHealthIssuesList.li.unhealthyLabel', {
-            defaultMessage: '(unhealthy)',
-          })}
-          <EuiCopy textToCopy={getSLOTransformId(result.sloId, result.sloRevision)}>
-            {(copy) => (
-              <EuiButtonIcon
-                data-test-subj="sloHealthCalloutCopyButton"
-                aria-label={i18n.translate('xpack.slo.sloList.healthCallout.copyToClipboard', {
-                  defaultMessage: 'Copy to clipboard',
-                })}
-                color="text"
-                iconType="copy"
-                onClick={copy}
-              />
-            )}
-          </EuiCopy>
+          <ExternalLinkDisplayText
+            textSize={externalLinkTextSize}
+            content={`${result.sloName} (unhealthy)`}
+            url={
+              linkToTransformPage
+                ? getUrl(getSLOTransformId(result.sloId, result.sloRevision))
+                : paths.sloDetails(result.sloId, '*', undefined, 'overview')
+            }
+          />
         </li>
       ))}
 
       {unhealthySummaryTransforms.map((result) => (
         <li key={`${result.sloId}-summary-unhealthy`}>
-          {getSLOSummaryTransformId(result.sloId, result.sloRevision)}{' '}
-          {i18n.translate('xpack.slo.sloHealthIssuesList.li.unhealthyLabel', {
-            defaultMessage: '(unhealthy)',
-          })}
-          <EuiCopy textToCopy={getSLOSummaryTransformId(result.sloId, result.sloRevision)}>
-            {(copy) => (
-              <EuiButtonIcon
-                data-test-subj="sloHealthCalloutCopyButton"
-                aria-label={i18n.translate('xpack.slo.sloList.healthCallout.copyToClipboard', {
-                  defaultMessage: 'Copy to clipboard',
-                })}
-                color="text"
-                iconType="copy"
-                onClick={copy}
-              />
-            )}
-          </EuiCopy>
+          <ExternalLinkDisplayText
+            textSize={externalLinkTextSize}
+            content={`${result.sloName} (unhealthy)`}
+            url={
+              linkToTransformPage
+                ? getUrl(getSLOSummaryTransformId(result.sloId, result.sloRevision))
+                : paths.sloDetails(result.sloId, '*', undefined, 'overview')
+            }
+          />
         </li>
       ))}
 
       {missingRollupTransforms.map((result) => (
         <li key={`${result.sloId}-rollup-missing`}>
-          {getSLOTransformId(result.sloId, result.sloRevision)}{' '}
-          {i18n.translate('xpack.slo.sloHealthIssuesList.li.missingLabel', {
-            defaultMessage: '(missing)',
-          })}
-          <EuiCopy textToCopy={getSLOTransformId(result.sloId, result.sloRevision)}>
-            {(copy) => (
-              <EuiButtonIcon
-                data-test-subj="sloHealthCalloutCopyButton"
-                aria-label={i18n.translate('xpack.slo.sloList.healthCallout.copyToClipboard', {
-                  defaultMessage: 'Copy to clipboard',
-                })}
-                color="text"
-                iconType="copy"
-                onClick={copy}
-              />
-            )}
-          </EuiCopy>
+          <ExternalLinkDisplayText
+            textSize={externalLinkTextSize}
+            content={`${result.sloName} (missing)`}
+            url={
+              linkToTransformPage
+                ? getUrl(getSLOTransformId(result.sloId, result.sloRevision))
+                : paths.sloDetails(result.sloId, '*', undefined, 'overview')
+            }
+          />
         </li>
       ))}
 
       {missingSummaryTransforms.map((result) => (
         <li key={`${result.sloId}-summary-missing`}>
-          {getSLOSummaryTransformId(result.sloId, result.sloRevision)}{' '}
-          {i18n.translate('xpack.slo.sloHealthIssuesList.li.missingLabel', {
-            defaultMessage: '(missing)',
-          })}
-          <EuiCopy textToCopy={getSLOSummaryTransformId(result.sloId, result.sloRevision)}>
-            {(copy) => (
-              <EuiButtonIcon
-                data-test-subj="sloHealthCalloutCopyButton"
-                aria-label={i18n.translate('xpack.slo.sloList.healthCallout.copyToClipboard', {
-                  defaultMessage: 'Copy to clipboard',
-                })}
-                color="text"
-                iconType="copy"
-                onClick={copy}
-              />
-            )}
-          </EuiCopy>
+          <ExternalLinkDisplayText
+            textSize={externalLinkTextSize}
+            content={`${result.sloName} (missing)`}
+            url={
+              linkToTransformPage
+                ? getUrl(getSLOSummaryTransformId(result.sloId, result.sloRevision))
+                : paths.sloDetails(result.sloId, '*', undefined, 'overview')
+            }
+          />
         </li>
       ))}
     </ul>

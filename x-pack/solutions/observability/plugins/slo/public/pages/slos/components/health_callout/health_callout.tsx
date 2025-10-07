@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
@@ -16,7 +16,8 @@ import { SloHealthIssuesList } from './slo_health_issues_list';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
-export function HealthCallout({ sloList = [] }: { sloList?: Array<{ id: string; name: string }> }) {
+// export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }) {
+export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryResponse[] }) {
   const { http } = useKibana().services;
   const { isLoading, isError, data: results } = useFetchSloHealth({ list: sloList });
   const [showCallOut, setShowCallOut] = useState(
@@ -32,15 +33,17 @@ export function HealthCallout({ sloList = [] }: { sloList?: Array<{ id: string; 
     return null;
   }
 
-  const unhealthySloList = results.filter((result) => result.health.overall !== 'healthy');
-  if (unhealthySloList.length === 0) {
+  const unhealthyAndMissingSloList = results.filter(
+    (result) => result.health.overall === 'unhealthy' || result.health.overall === 'missing'
+  );
+  if (unhealthyAndMissingSloList.length === 0) {
     return null;
   }
 
-  const hasUnhealthy = unhealthySloList.some(
+  const hasUnhealthy = unhealthyAndMissingSloList.some(
     (result) => result.health.rollup === 'unhealthy' || result.health.summary === 'unhealthy'
   );
-  const hasMissing = unhealthySloList.some(
+  const hasMissing = unhealthyAndMissingSloList.some(
     (result) => result.health.rollup === 'missing' || result.health.summary === 'missing'
   );
 
@@ -63,12 +66,13 @@ export function HealthCallout({ sloList = [] }: { sloList?: Array<{ id: string; 
       title={
         <FormattedMessage
           id="xpack.slo.sloList.healthCallout.title"
-          defaultMessage="Transform error detected"
+          defaultMessage="Some SLOs are unhealthy"
         />
       }
     >
       {isOpen && (
         <EuiFlexGroup
+          gutterSize="xs"
           direction="column"
           alignItems="flexStart"
           onClick={(e) => {
@@ -79,9 +83,10 @@ export function HealthCallout({ sloList = [] }: { sloList?: Array<{ id: string; 
             <span data-test-subj="sloHealthCalloutDescription">
               <FormattedMessage
                 id="xpack.slo.sloList.healthCallout.description"
-                defaultMessage="The following {count, plural, one {transform is} other {transforms are}} in {stateText} state:"
+                defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}}
+          in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
                 values={{
-                  count: unhealthySloList.reduce(
+                  count: unhealthyAndMissingSloList.reduce(
                     (acc, result) =>
                       acc +
                       (result.health.rollup !== 'healthy' ? 1 : 0) +
@@ -92,23 +97,13 @@ export function HealthCallout({ sloList = [] }: { sloList?: Array<{ id: string; 
                 }}
               />
             </span>
-            <SloHealthIssuesList results={unhealthySloList} />
+            <SloHealthIssuesList
+              results={unhealthyAndMissingSloList}
+              linkToTransformPage={false}
+              externalLinkTextSize="s"
+            />
           </EuiFlexItem>
-          <EuiFlexGroup direction="row">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="sloHealthCalloutInspectTransformButton"
-                color="danger"
-                size="s"
-                fill
-                href={http?.basePath.prepend('/app/management/data/transform')}
-              >
-                <FormattedMessage
-                  id="xpack.slo.sloList.healthCallout.buttonTransformLabel"
-                  defaultMessage="Inspect transform"
-                />
-              </EuiButton>
-            </EuiFlexItem>
+          <EuiFlexGroup direction="row" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 data-test-subj="sloHealthCalloutDimissButton"
