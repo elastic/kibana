@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { FramePublicAPI, VisualizationToolbarProps } from '../../../types';
-import { Toolbar } from './toolbar';
+import { GaugeToolbar } from '.';
 import type { GaugeVisualizationState } from '../constants';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -45,7 +45,7 @@ describe('gauge toolbar', () => {
   ) => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    const rtlRender = render(<Toolbar {...defaultProps} {...propsOverrides} />);
+    const rtlRender = render(<GaugeToolbar {...defaultProps} {...propsOverrides} />);
     const openPopover = async () =>
       await user.click(screen.getByRole('button', { name: toolbarName }));
     await openPopover();
