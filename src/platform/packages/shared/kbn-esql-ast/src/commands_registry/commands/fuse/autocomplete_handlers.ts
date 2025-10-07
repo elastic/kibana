@@ -1,0 +1,201 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  withAutoSuggest,
+  commaCompleteItem,
+  pipeCompleteItem,
+  withCompleteItem,
+} from '../../../..';
+import { isColumn } from '../../../ast/is';
+import { ESQL_STRING_TYPES } from '../../../definitions/types';
+import { handleFragment, columnExists } from '../../../definitions/utils/autocomplete/helpers';
+import type { ESQLAstFuseCommand } from '../../../types';
+import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../../types';
+import { extractFuseArgs, findCommandOptionByName } from './utils';
+
+/**
+ * Returns suggestions for the `SCORE BY` argument of the `FUSE` command.
+ * Returns fields of double type.
+ */
+export async function scoreByAutocomplete(
+  innerText: string,
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext
+) {
+  const numericFields = await callbacks?.getByType?.('double', [], {
+    advanceCursor: true,
+    openSuggestions: true,
+  });
+  return await handleFragment(
+    innerText,
+    (fragment) => columnExists(fragment, context),
+    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+      return (
+        numericFields?.map((suggestion) => {
+          return {
+            ...suggestion,
+            rangeToReplace,
+          };
+        }) ?? []
+      );
+    },
+    () => []
+  );
+}
+
+/**
+ *  Returns suggestions for the `GROUP BY` argument of the `FUSE` command.
+ *  Returns fields of string type.
+ */
+export async function groupByAutocomplete(
+  innerText: string,
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext
+) {
+  const stringFields = await callbacks?.getByType?.(ESQL_STRING_TYPES, [], {
+    advanceCursor: true,
+    openSuggestions: true,
+  });
+  return await handleFragment(
+    innerText,
+    (fragment) => columnExists(fragment, context),
+    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+      return (
+        stringFields?.map((suggestion) => {
+          return {
+            ...suggestion,
+            rangeToReplace,
+          };
+        }) ?? []
+      );
+    },
+    () => []
+  );
+}
+
+/**
+ * Returns suggestions for the `KEY BY` argument of the `FUSE` command.
+ * Returns fields of string type that are not already used in the `KEY BY` argument.
+ * If there are already fields used, it also suggests a comma to add another field or
+ *  other FUSE arguments configurations to scape from KEY BY.
+ */
+export async function keyByAutocomplete(
+  innerText: string,
+  command: ESQLAstFuseCommand,
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext
+) {
+  const keyByOption = findCommandOptionByName(command, 'key by');
+
+  const alreadyUsedFields = keyByOption?.args.map((arg) => (isColumn(arg) ? arg.name : '')) ?? [];
+
+  const allFields =
+    (await callbacks?.getByType?.(ESQL_STRING_TYPES, alreadyUsedFields, {
+      openSuggestions: true,
+    })) ?? [];
+
+  return handleFragment(
+    innerText,
+    (fragment) => columnExists(fragment, context),
+    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+      return allFields.map((suggestion) =>
+        withAutoSuggest({
+          ...suggestion,
+          rangeToReplace,
+        })
+      );
+    },
+    (fragment: string, rangeToReplace: { start: number; end: number }) => {
+      const finalSuggestions = fuseArgumentsAutocomplete(command).map((s) => ({
+        ...s,
+        text: ` ${s.text}`,
+      }));
+      if (allFields.length > 0) {
+        finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+      }
+
+      return finalSuggestions.map<ISuggestionItem>((s) =>
+        withAutoSuggest({
+          ...s,
+          filterText: fragment,
+          text: fragment + s.text,
+          rangeToReplace,
+        })
+      );
+    }
+  );
+}
+
+/**
+ * Returns suggestions for the arguments of the `FUSE` command.
+ * Arguments can be placed at any order, except for the `<fuse_method>` which should be the first argument if present.
+ * These arguments are: `<fuse_method>`, `SCORE BY`, `GROUP BY`, `KEY BY`, `WITH`.
+ * It also suggests a pipe to chain another command after the `FUSE` command.
+ */
+export function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem[] {
+  const suggestions: ISuggestionItem[] = [pipeCompleteItem];
+
+  const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
+
+  if (command.args.length === 0) {
+    suggestions.push(
+      {
+        label: 'linear',
+        kind: 'Value',
+        detail: 'fuse type', // //HD Check details
+        text: 'linear ',
+        sortText: '0',
+      },
+      {
+        label: 'rrf',
+        kind: 'Value',
+        detail: 'fuse type',
+        text: 'rrf ',
+        sortText: '0',
+      }
+    );
+  }
+
+  if (!scoreBy) {
+    suggestions.push({
+      label: 'SCORE BY',
+      kind: 'Reference',
+      detail: 'score by <field>',
+      text: 'SCORE BY ',
+      sortText: '1',
+    });
+  }
+
+  if (!groupBy) {
+    suggestions.push({
+      label: 'GROUP BY',
+      kind: 'Reference',
+      detail: 'group by <field>',
+      text: 'GROUP BY ',
+      sortText: '2',
+    });
+  }
+
+  if (!keyBy) {
+    suggestions.push({
+      label: 'KEY BY',
+      kind: 'Reference',
+      detail: 'key by <field>',
+      text: 'KEY BY ',
+      sortText: '3',
+    });
+  }
+
+  if (!withOption) {
+    suggestions.push(withCompleteItem); // //HD modify details...
+  }
+
+  return suggestions.map((s) => withAutoSuggest(s));
+}

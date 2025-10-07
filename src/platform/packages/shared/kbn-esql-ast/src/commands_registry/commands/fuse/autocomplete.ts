@@ -6,139 +6,26 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
-import {
-  ESQL_STRING_TYPES,
-  commaCompleteItem,
-  withAutoSuggest,
-  withCompleteItem,
-} from '../../../..';
-import { isColumn, isOptionNode } from '../../../ast/is';
-import type {
-  ESQLAstFuseCommand,
-  ESQLCommand,
-  ESQLCommandOption,
-  ESQLIdentifier,
-} from '../../../types';
-import { pipeCompleteItem } from '../../complete_items';
+import type { ESQLAstFuseCommand, ESQLCommand } from '../../../types';
 import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
+import {
+  scoreByAutocomplete,
+  groupByAutocomplete,
+  keyByAutocomplete,
+  fuseArgumentsAutocomplete,
+} from './autocomplete_handlers';
+import { extractFuseArgs } from './utils';
 
-enum FusePosition {
+export enum FusePosition {
   BEFORE_NEW_ARGUMENT = 'before_new_argument',
-  AFTER_FUSE_TYPE = 'after_fuse_type',
-  AFTER_CONFIG_ITEM = 'after_config_item',
   SCORE_BY = 'score_by',
   KEY_BY = 'key_by',
   GROUP_BY = 'group_by',
   WITH = 'with',
 }
 
-export async function autocomplete(
-  query: string,
-  command: ESQLCommand,
-  callbacks?: ICommandCallbacks,
-  context?: ICommandContext,
-  cursorPosition?: number
-): Promise<ISuggestionItem[]> {
-  const fuseCommand = command as ESQLAstFuseCommand;
-
-  const innerText = query.substring(0, cursorPosition);
-
-  const position = getPosition(innerText, fuseCommand);
-
-  switch (position) {
-    case FusePosition.BEFORE_NEW_ARGUMENT:
-      return getFuseArgumentsSuggestions(fuseCommand);
-    case FusePosition.SCORE_BY:
-      const numericFields = await callbacks?.getByType?.('double', [], {
-        advanceCursor: true,
-        openSuggestions: true,
-      });
-      return await handleFragment(
-        innerText,
-        (fragment) => columnExists(fragment, context),
-        (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-          return (
-            numericFields?.map((suggestion) => {
-              return {
-                ...suggestion,
-                rangeToReplace,
-              };
-            }) ?? []
-          );
-        },
-        () => []
-      );
-    case FusePosition.GROUP_BY:
-      const stringFields = await callbacks?.getByType?.(ESQL_STRING_TYPES, [], {
-        advanceCursor: true,
-        openSuggestions: true,
-      });
-      return await handleFragment(
-        innerText,
-        (fragment) => columnExists(fragment, context),
-        (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-          return (
-            stringFields?.map((suggestion) => {
-              return {
-                ...suggestion,
-                rangeToReplace,
-              };
-            }) ?? []
-          );
-        },
-        () => []
-      );
-    case FusePosition.KEY_BY:
-      const keyByOption = findCommandOptionByName(fuseCommand, 'key by');
-
-      const alreadyUsedFields =
-        keyByOption?.args.map((arg) => (isColumn(arg) ? arg.name : '')) ?? [];
-
-      const allFields =
-        (await callbacks?.getByType?.(ESQL_STRING_TYPES, alreadyUsedFields, {
-          openSuggestions: true,
-        })) ?? [];
-
-      return handleFragment(
-        innerText,
-        (fragment) => columnExists(fragment, context),
-        (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-          return allFields.map((suggestion) =>
-            withAutoSuggest({
-              ...suggestion,
-              rangeToReplace,
-            })
-          );
-        },
-        (fragment: string, rangeToReplace: { start: number; end: number }) => {
-          const finalSuggestions = getFuseArgumentsSuggestions(fuseCommand).map((s) => ({
-            ...s,
-            text: ` ${s.text}`,
-          }));
-          if (allFields.length > 0) {
-            finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
-          }
-
-          return finalSuggestions.map<ISuggestionItem>((s) =>
-            withAutoSuggest({
-              ...s,
-              filterText: fragment,
-              text: fragment + s.text,
-              rangeToReplace,
-            })
-          );
-        }
-      );
-    case FusePosition.WITH:
-      return [];
-  }
-
-  return [pipeCompleteItem];
-}
-
-function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
+export function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
   const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
 
   if ((scoreBy && scoreBy.incomplete) || /SCORE BY\s+\S*$/i.test(innerText)) {
@@ -160,90 +47,40 @@ function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePositi
   return FusePosition.BEFORE_NEW_ARGUMENT;
 }
 
-function extractFuseArgs(command: ESQLAstFuseCommand): Partial<{
-  fuseType: ESQLIdentifier;
-  scoreBy: ESQLCommandOption;
-  keyBy: ESQLCommandOption;
-  groupBy: ESQLCommandOption;
-  withOption: ESQLCommandOption;
-}> {
-  const fuseType = command.fuseType;
-  const scoreBy = findCommandOptionByName(command, 'score by');
-  const keyBy = findCommandOptionByName(command, 'key by');
-  const groupBy = findCommandOptionByName(command, 'group by');
-  const withOption = findCommandOptionByName(command, 'with');
-
-  return { fuseType, scoreBy, keyBy, groupBy, withOption };
-}
-
-function findCommandOptionByName(
+// FUSE <fuse_method> SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
+export async function autocomplete(
+  query: string,
   command: ESQLCommand,
-  name: string
-): ESQLCommandOption | undefined {
-  return command.args.find(
-    (arg): arg is ESQLCommandOption =>
-      isOptionNode(arg) && arg.name.toLowerCase() === name.toLowerCase()
-  );
-}
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext,
+  cursorPosition?: number
+): Promise<ISuggestionItem[]> {
+  const fuseCommand = command as ESQLAstFuseCommand;
 
-function getFuseArgumentsSuggestions(command: ESQLAstFuseCommand): ISuggestionItem[] {
-  // //HD change name?
-  const suggestions: ISuggestionItem[] = [pipeCompleteItem];
+  const innerText = query.substring(0, cursorPosition);
 
-  const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
+  const position = getPosition(innerText, fuseCommand);
 
-  if (command.args.length === 0) {
-    suggestions.push(
-      {
-        label: 'linear',
-        kind: 'Value',
-        detail: 'fuse type', // //HD Check details
-        text: 'linear ',
-        sortText: '0',
-      },
-      {
-        label: 'rrf',
-        kind: 'Value',
-        detail: 'fuse type',
-        text: 'rrf ',
-        sortText: '0',
-      }
-    );
+  switch (position) {
+    // FUSE arguments can be suggested in any order, except for <fuse_method> which should come first if present.
+    // <fuse_method>, SCORE BY, KEY BY, GROUP BY, WITH
+    case FusePosition.BEFORE_NEW_ARGUMENT:
+      return fuseArgumentsAutocomplete(fuseCommand);
+
+    // SCORE BY suggests a single field of double type
+    case FusePosition.SCORE_BY:
+      return await scoreByAutocomplete(innerText, callbacks, context);
+
+    // GROUP BY suggests a single field of string type
+    case FusePosition.GROUP_BY:
+      return await groupByAutocomplete(innerText, callbacks, context);
+
+    // KEY BY suggests multiple fields of string type
+    case FusePosition.KEY_BY:
+      return await keyByAutocomplete(innerText, fuseCommand, callbacks, context);
+
+    // WITH suggests a map of options that depends on the <fuse_method>
+    case FusePosition.WITH:
+      return [];
   }
-
-  if (!scoreBy) {
-    suggestions.push({
-      label: 'SCORE BY',
-      kind: 'Reference',
-      detail: 'score by <field>',
-      text: 'SCORE BY ',
-      sortText: '1',
-    });
-  }
-
-  if (!groupBy) {
-    suggestions.push({
-      label: 'GROUP BY',
-      kind: 'Reference',
-      detail: 'group by <field>',
-      text: 'GROUP BY ',
-      sortText: '2',
-    });
-  }
-
-  if (!keyBy) {
-    suggestions.push({
-      label: 'KEY BY',
-      kind: 'Reference',
-      detail: 'key by <field>',
-      text: 'KEY BY ',
-      sortText: '3',
-    });
-  }
-
-  if (!withOption) {
-    suggestions.push(withCompleteItem); // //HD modify details...
-  }
-
-  return suggestions.map((s) => withAutoSuggest(s));
 }
