@@ -30,8 +30,8 @@ export function transformPanelsIn(widgets: DashboardAttributes['panels'] | undef
 
   widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const { panels: sectionPanels, grid, ...restOfSection } = widget as DashboardSection;
-      const idx = grid.i ?? uuidv4();
+      const { panels: sectionPanels, grid, uid, ...restOfSection } = widget as DashboardSection;
+      const idx = uid ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       (sectionPanels as DashboardPanel[]).forEach((panel) => {
         const { storedPanel, references } = transformPanelIn(panel);
@@ -64,7 +64,7 @@ function transformPanelIn(panel: DashboardPanel): {
   try {
     if (transforms?.transformIn) {
       const transformed = transforms.transformIn(config);
-      transformedPanelConfig = transformed.state;
+      transformedPanelConfig = transformed.state as Record<string, unknown>;
       references = transformed.references;
     }
   } catch (transformInError) {
