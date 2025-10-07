@@ -30,7 +30,7 @@ export const useUpdateMigrationRule = (migrationRule: RuleMigrationRule) => {
 
   const reportTelemetry = useCallback(
     (error?: Error) => {
-      telemetry.reportTranslatedRuleUpdate({ migrationRule, error });
+      telemetry.reportTranslatedItemUpdate({ migrationRule, error });
     },
     [telemetry, migrationRule]
   );

@@ -126,11 +126,11 @@ describe('SiemRulesMigrationsTelemetry', () => {
   });
 
   it('reports setup rules query copied', () => {
-    telemetry.reportSetupRulesQueryCopied({ migrationId: 'mno' });
+    telemetry.reportSetupQueryCopied({ migrationId: 'mno' });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.SetupRulesQueryCopied,
+      SiemMigrationsEventTypes.SetupQueryCopied,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupRulesQueryCopied],
+        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.SetupQueryCopied],
         migrationId: 'mno',
       }
     );
@@ -182,14 +182,14 @@ describe('SiemRulesMigrationsTelemetry', () => {
 
   it('reports translated rule install', () => {
     const migrationRule = migrationRules[0];
-    telemetry.reportTranslatedRuleInstall({
+    telemetry.reportTranslatedItemInstall({
       migrationRule,
       enabled: true,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(
-      SiemMigrationsEventTypes.TranslatedRuleInstall,
+      SiemMigrationsEventTypes.TranslatedItemInstall,
       {
-        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslatedRuleInstall],
+        eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslatedItemInstall],
         migrationId: 'test-migration-1',
         ruleMigrationId: '1',
         author: 'elastic',
