@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { ReadonlyModeType } from '@kbn/core-ui-settings-common';
 import {
   APP_ID,
   DEFAULT_ALERT_TAGS_KEY,
@@ -54,7 +55,6 @@ import {
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
-import { ReadonlyModeType } from '@kbn/core/packages/ui-settings/common';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
 
@@ -622,7 +622,10 @@ export const initUiSettings = (
   uiSettings.register(orderSettings(securityUiSettings));
 };
 
-export const getDefaultAIConnectorSetting = (connectors: Connector[], readonlyMode?:ReadonlyModeType ): SettingsConfig | null =>
+export const getDefaultAIConnectorSetting = (
+  connectors: Connector[],
+  readonlyMode?: ReadonlyModeType
+): SettingsConfig | null =>
   connectors.length > 0
     ? {
         [DEFAULT_AI_CONNECTOR]: {
@@ -645,8 +648,8 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[], readonlyMo
           requiresPageReload: true,
           schema: schema.string(),
           solutionViews: ['classic', 'security'],
-          readonlyMode: readonlyMode,
-          readonly: readonlyMode !== undefined
+          readonlyMode,
+          readonly: readonlyMode !== undefined,
         },
       }
     : null;
