@@ -106,64 +106,6 @@ export const useMonacoWorkflowStyles = () => {
           overflow: auto;
           max-height: 120px;
         }
-        
-        /* Connector inline highlighting */
-        .connector-inline-highlight {
-          background-color: rgba(255, 165, 0, 0.12) !important;
-          border-radius: 3px !important;
-          padding: 1px 3px !important;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
-        }
-        
-        .connector-inline-highlight.connector-elasticsearch {
-          background-color: rgba(255, 215, 0, 0.12) !important;
-          box-shadow: 0 1px 2px rgba(255, 215, 0, 0.2) !important;
-        }
-        
-        .connector-inline-highlight::after {
-          content: '';
-          display: inline-block;
-          width: 16px;
-          height: 16px;
-          margin-left: 4px;
-          vertical-align: middle;
-          position: relative;
-          top: -1px;
-        }
-        
-        /* Trigger inline highlighting */
-        .trigger-inline-highlight {
-          background-color: rgba(0, 191, 179, 0.12) !important;
-          border-radius: 3px !important;
-          padding: 1px 3px !important;
-          box-shadow: 0 1px 2px rgba(0, 191, 179, 0.15) !important;
-        }
-        
-        .trigger-inline-highlight::after {
-          content: '';
-          display: inline-block;
-          width: 16px;
-          height: 16px;
-          margin-left: 4px;
-          vertical-align: middle;
-          position: relative;
-          top: -1px;
-        }
-        
-        .trigger-inline-highlight.trigger-alert {
-          background-color: rgba(240, 78, 152, 0.12) !important;
-          box-shadow: 0 1px 2px rgba(240, 78, 152, 0.2) !important;
-        }
-        
-        .trigger-inline-highlight.trigger-scheduled {
-          background-color: rgba(255, 193, 7, 0.12) !important;
-          box-shadow: 0 1px 2px rgba(255, 193, 7, 0.2) !important;
-        }
-        
-        .trigger-inline-highlight.trigger-manual {
-          background-color: rgba(108, 117, 125, 0.12) !important;
-          box-shadow: 0 1px 2px rgba(108, 117, 125, 0.2) !important;
-        }
       `;
       document.head.appendChild(style);
     }

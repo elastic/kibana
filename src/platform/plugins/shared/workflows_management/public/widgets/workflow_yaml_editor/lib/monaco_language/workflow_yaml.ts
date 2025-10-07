@@ -37,6 +37,14 @@ const buildWorkflowTheme = (
 
   return {
     ...baseTheme,
+    base: 'vs',
+    inherit: true,
+    colors: {
+      'editor.background': euiTheme.colors.backgroundBaseSubdued,
+      'editorHoverWidget.foreground': euiTheme.colors.textParagraph,
+      'editorHoverWidget.background': euiTheme.colors.backgroundBasePlain,
+      'editorHoverWidget.border': euiTheme.colors.borderBasePlain,
+    },
     rules: [
       ...baseTheme.rules,
       // Template variables

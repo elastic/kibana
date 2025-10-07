@@ -10,17 +10,81 @@
 import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public';
 import React, { useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { addDynamicConnectorsToCache } from '../../../../common/schema';
+import type { ConnectorsResponse } from '../../../entities/connectors/model/use_available_connectors';
+import { HARDCODED_ICONS } from './hardcoded_icons';
+import type { ConnectorTypeInfoMinimal } from '../../../../common/schema';
 
-export function useDynamicConnectorIcons(connectorsData: Record<string, any> | undefined) {
+const predefinedStepTypes = [
+  {
+    actionTypeId: 'console',
+    displayName: 'Console',
+  },
+
+  {
+    actionTypeId: 'elasticsearch',
+    displayName: 'Elasticsearch',
+  },
+  {
+    actionTypeId: 'kibana',
+    displayName: 'Kibana',
+  },
+  {
+    actionTypeId: 'slack',
+    displayName: 'Slack',
+  },
+  {
+    actionTypeId: 'inference',
+    displayName: 'Inference',
+  },
+  {
+    actionTypeId: 'if',
+    displayName: 'If',
+  },
+  {
+    actionTypeId: 'foreach',
+    displayName: 'Foreach',
+  },
+  {
+    actionTypeId: 'parallel',
+    displayName: 'Parallel',
+  },
+  {
+    actionTypeId: 'merge',
+    displayName: 'Merge',
+  },
+  {
+    actionTypeId: 'wait',
+    displayName: 'Wait',
+  },
+  {
+    actionTypeId: 'http',
+    displayName: 'HTTP',
+  },
+  {
+    actionTypeId: 'manual',
+    displayName: 'Manual',
+  },
+  {
+    actionTypeId: 'alert',
+    displayName: 'Alert',
+  },
+  {
+    actionTypeId: 'scheduled',
+    displayName: 'Scheduled',
+  },
+];
+
+export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefined) {
   useEffect(() => {
-    if (connectorsData?.connectorTypes) {
-      addDynamicConnectorsToCache(connectorsData.connectorTypes);
-      // Inject dynamic CSS for connector icons
-      injectDynamicConnectorIcons(connectorsData.connectorTypes);
-      // Inject dynamic CSS for shadow icons (::after pseudo-elements)
-      injectDynamicShadowIcons(connectorsData.connectorTypes);
+    if (!connectorsData?.connectorTypes) {
+      return;
     }
+    const connectorTypes = Object.values(connectorsData.connectorTypes).map((connector) => ({
+      actionTypeId: connector.actionTypeId.slice(1), // remove the leading dot
+      displayName: connector.displayName,
+    }));
+    injectDynamicConnectorIcons([...predefinedStepTypes, ...connectorTypes]);
+    injectDynamicShadowIcons([...predefinedStepTypes, ...connectorTypes]);
   }, [connectorsData?.connectorTypes]);
 }
 
@@ -28,7 +92,7 @@ export function useDynamicConnectorIcons(connectorsData: Record<string, any> | u
  * Inject dynamic CSS for connector icons in Monaco autocompletion
  * This creates CSS rules for each connector type to show custom icons
  */
-function injectDynamicConnectorIcons(connectorTypes: Record<string, any>) {
+function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMinimal[]) {
   const styleId = 'dynamic-connector-icons';
 
   // Remove existing dynamic styles
@@ -41,13 +105,8 @@ function injectDynamicConnectorIcons(connectorTypes: Record<string, any>) {
   let cssToInject = '';
 
   for (const connector of Object.values(connectorTypes)) {
-    const connectorType = (connector as any).actionTypeId;
-    const displayName = (connector as any).displayName;
-
-    // Skip if we already have hardcoded CSS for this connector
-    if (['elasticsearch', 'kibana'].some((type) => connectorType.includes(type))) {
-      continue;
-    }
+    const connectorType = connector.actionTypeId;
+    const displayName = connector.displayName;
 
     try {
       // Generate CSS rule for this connector
@@ -91,7 +150,7 @@ function injectDynamicConnectorIcons(connectorTypes: Record<string, any>) {
  * Inject dynamic CSS for connector shadow icons (::after pseudo-elements)
  * This creates CSS rules for each connector type to show custom icons in the editor
  */
-function injectDynamicShadowIcons(connectorTypes: Record<string, any>) {
+function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal[]) {
   const styleId = 'dynamic-shadow-icons';
 
   // Remove existing dynamic shadow styles
@@ -103,26 +162,8 @@ function injectDynamicShadowIcons(connectorTypes: Record<string, any>) {
   // Generate CSS for each connector type
   let cssToInject = '';
 
-  for (const connector of Object.values(connectorTypes)) {
-    const connectorType = (connector as any).actionTypeId;
-
-    // Skip if we already have hardcoded CSS for this connector
-    if (
-      [
-        'elasticsearch',
-        'kibana',
-        'console',
-        'http',
-        'foreach',
-        'if',
-        'parallel',
-        'merge',
-        'wait',
-      ].some((type) => connectorType.includes(type))
-    ) {
-      continue;
-    }
-
+  for (const connector of connectorTypes) {
+    const connectorType = connector.actionTypeId;
     try {
       // Generate CSS rule for this connector shadow icon
       const iconBase64 = getConnectorIconBase64(connectorType);
@@ -150,7 +191,7 @@ function injectDynamicShadowIcons(connectorTypes: Record<string, any>) {
         }
 
         cssToInject += `
-          .connector-inline-highlight.connector-${className}::after {
+          .type-inline-highlight.type-${className}::after {
             background-image: url("data:image/svg+xml;base64,${iconBase64}");
             background-size: contain;
             background-repeat: no-repeat;
@@ -187,7 +228,7 @@ function getConnectorIconBase64(connectorType: string): string {
     // First, try to get the logo directly from stack connectors
     if (connectorType in STACK_CONNECTOR_LOGOS) {
       const LogoComponent =
-        STACK_CONNECTOR_LOGOS[connectorType as keyof typeof STACK_CONNECTOR_LOGOS];
+        STACK_CONNECTOR_LOGOS[`.${connectorType}` as keyof typeof STACK_CONNECTOR_LOGOS];
 
       // Render the actual logo component to HTML string
       const logoElement = React.createElement(LogoComponent, { width: 16, height: 16 });
@@ -235,14 +276,13 @@ function getConnectorIconBase64(connectorType: string): string {
     }
 
     // Handle connectors that use EUI built-in icons instead of custom logo components
-    if (connectorType === '.slack' || connectorType === '.slack_api') {
+    if (connectorType === 'slack' || connectorType === 'slack_api') {
       // hardcoded slack logo
-      return 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj4KICA8ZyBmaWxsPSJub25lIj4KICAgIDxwYXRoIGZpbGw9IiNFMDFFNUEiIGQ9Ik02LjgxMjkwMzIzIDMuNDA2NDUxNjFDNi44MTI5MDMyMyA1LjIzODcwOTY4IDUuMzE2MTI5MDMgNi43MzU0ODM4NyAzLjQ4Mzg3MDk3IDYuNzM1NDgzODcgMS42NTE2MTI5IDYuNzM1NDgzODcuMTU0ODM4NzEgNS4yMzg3MDk2OC4xNTQ4Mzg3MSAzLjQwNjQ1MTYxLjE1NDgzODcxIDEuNTc0MTkzNTUgMS42NTE2MTI5LjA3NzQxOTM1NDggMy40ODM4NzA5Ny4wNzc0MTkzNTQ4TDYuODEyOTAzMjMuMDc3NDE5MzU0OCA2LjgxMjkwMzIzIDMuNDA2NDUxNjF6TTguNDkwMzIyNTggMy40MDY0NTE2MUM4LjQ5MDMyMjU4IDEuNTc0MTkzNTUgOS45ODcwOTY3Ny4wNzc0MTkzNTQ4IDExLjgxOTM1NDguMDc3NDE5MzU0OCAxMy42NTE2MTI5LjA3NzQxOTM1NDggMTUuMTQ4Mzg3MSAxLjU3NDE5MzU1IDE1LjE0ODM4NzEgMy40MDY0NTE2MUwxNS4xNDgzODcxIDExLjc0MTkzNTVDMTUuMTQ4Mzg3MSAxMy41NzQxOTM1IDEzLjY1MTYxMjkgMTUuMDcwOTY3NyAxMS44MTkzNTQ4IDE1LjA3MDk2NzcgOS45ODcwOTY3NyAxNS4wNzA5Njc3IDguNDkwMzIyNTggMTMuNTc0MTkzNSA4LjQ5MDMyMjU4IDExLjc0MTkzNTVMOC40OTAzMjI1OCAzLjQwNjQ1MTYxeiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMCAxNi43NzQpIi8+CiAgICA8cGF0aCBmaWxsPSIjMzZDNUYwIiBkPSJNMTEuODE5MzU0OCA2LjgxMjkwMzIzQzkuOTg3MDk2NzcgNi44MTI5MDMyMyA4LjQ5MDMyMjU4IDUuMzE2MTI5MDMgOC40OTAzMjI1OCAzLjQ4Mzg3MDk3IDguNDkwMzIyNTggMS42NTE2MTI5IDkuOTg3MDk2NzcuMTU0ODM4NzEgMTEuODE5MzU0OC4xNTQ4Mzg3MSAxMy42NTE2MTI5LjE1NDgzODcxIDE1LjE0ODM4NzEgMS42NTE2MTI5IDE1LjE0ODM4NzEgMy40ODM4NzA5N0wxNS4xNDgzODcxIDYuODEyOTAzMjMgMTEuODE5MzU0OCA2LjgxMjkwMzIzek0xMS44MTkzNTQ4IDguNDkwMzIyNThDMTMuNjUxNjEyOSA4LjQ5MDMyMjU4IDE1LjE0ODM4NzEgOS45ODcwOTY3NyAxNS4xNDgzODcxIDExLjgxOTM1NDggMTUuMTQ4Mzg3MSAxMy42NTE2MTI5IDEzLjY1MTYxMjkgMTUuMTQ4Mzg3MSAxMS44MTkzNTQ4IDE1LjE0ODM4NzFMMy40ODM4NzA5NyAxNS4xNDgzODcxQzEuNjUxNjEyOSAxNS4xNDgzODcxLjE1NDgzODcxIDEzLjY1MTYxMjkuMTU0ODM4NzEgMTEuODE5MzU0OC4xNTQ4Mzg3MSA5Ljk4NzA5Njc3IDEuNjUxNjEyOSA4LjQ5MDMyMjU4IDMuNDgzODcwOTcgOC40OTAzMjI1OEwxMS44MTkzNTQ4IDguNDkwMzIyNTh6Ii8+CiAgICA8cGF0aCBmaWxsPSIjMkVCNjdEIiBkPSJNOC40MTI5MDMyMyAxMS44MTkzNTQ4QzguNDEyOTAzMjMgOS45ODcwOTY3NyA5LjkwOTY3NzQyIDguNDkwMzIyNTggMTEuNzQxOTM1NSA4LjQ5MDMyMjU4IDEzLjU3NDE5MzUgOC40OTAzMjI1OCAxNS4wNzA5Njc3IDkuOTg3MDk2NzcgMTUuMDcwOTY3NyAxMS44MTkzNTQ4IDE1LjA3MDk2NzcgMTMuNjUxNjEyOSAxMy41NzQxOTM1IDE1LjE0ODM4NzEgMTEuNzQxOTM1NSAxNS4xNDgzODcxTDguNDEyOTAzMjMgMTUuMTQ4Mzg3MSA4LjQxMjkwMzIzIDExLjgxOTM1NDh6TTYuNzM1NDgzODcgMTEuODE5MzU0OEM2LjczNTQ4Mzg3IDEzLjY1MTYxMjkgNS4yMzg3MDk2OCAxNS4xNDgzODcxIDMuNDA2NDUxNjEgMTUuMTQ4Mzg3MSAxLjU3NDE5MzU1IDE1LjE0ODM4NzEuMDc3NDE5MzU0OCAxMy42NTE2MTI5LjA3NzQxOTM1NDggMTEuODE5MzU0OEwuMDc3NDE5MzU0OCAzLjQ4Mzg3MDk3Qy4wNzc0MTkzNTQ4IDEuNjUxNjEyOSAxLjU3NDE5MzU1LjE1NDgzODcxIDMuNDA2NDUxNjEuMTU0ODM4NzEgNS4yMzg3MDk2OC4xNTQ4Mzg3MSA2LjczNTQ4Mzg3IDEuNjUxNjEyOSA2LjczNTQ4Mzg3IDMuNDgzODcwOTdMNi43MzU0ODM4NyAxMS44MTkzNTQ4eiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTYuNzc0KSIvPgogICAgPHBhdGggZmlsbD0iI0VDQjIyRSIgZD0iTTMuNDA2NDUxNjEgOC40MTI5MDMyM0M1LjIzODcwOTY4IDguNDEyOTAzMjMgNi43MzU0ODM4NyA5LjkwOTY3NzQyIDYuNzM1NDgzODcgMTEuNzQxOTM1NSA2LjczNTQ4Mzg3IDEzLjU3NDE5MzUgNS4yMzg3MDk2OCAxNS4wNzA5Njc3IDMuNDA2NDUxNjEgMTUuMDcwOTY3NyAxLjU3NDE5MzU1IDE1LjA3MDk2NzcuMDc3NDE5MzU0OCAxMy41NzQxOTM1LjA3NzQxOTM1NDggMTEuNzQxOTM1NUwuMDc3NDE5MzU0OCA4LjQxMjkwMzIzIDMuNDA2NDUxNjEgOC40MTI5MDMyM3pNMy40MDY0NTE2MSA2LjczNTQ4Mzg3QzEuNTc0MTkzNTUgNi43MzU0ODM4Ny4wNzc0MTkzNTQ4IDUuMjM4NzA5NjguMDc3NDE5MzU0OCAzLjQwNjQ1MTYxLjA3NzQxOTM1NDggMS41NzQxOTM1NSAxLjU3NDE5MzU1LjA3NzQxOTM1NDggMy40MDY0NTE2MS4wNzc0MTkzNTQ4TDExLjc0MTkzNTUuMDc3NDE5MzU0OEMxMy41NzQxOTM1LjA3NzQxOTM1NDggMTUuMDcwOTY3NyAxLjU3NDE5MzU1IDE1LjA3MDk2NzcgMy40MDY0NTE2MSAxNS4wNzA5Njc3IDUuMjM4NzA5NjggMTMuNTc0MTkzNSA2LjczNTQ4Mzg3IDExLjc0MTkzNTUgNi43MzU0ODM4N0wzLjQwNjQ1MTYxIDYuNzM1NDgzODd6IiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNi43NzQgMTYuNzc0KSIvPgogIDwvZz4KPC9zdmc+Cg==';
+      return HARDCODED_ICONS.slack;
     }
 
-    if (connectorType === '.email') {
-      // hardcoded email logo
-      return 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiI+CiAgPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBkPSJNMTQuOTQ5MTk3NCwzLjY4NDQ1ODIgTDguNjM3ODk4NDgsOC45MTIxNzAyNiBDOC4yNjc4NjA2Myw5LjIxODY3NjMxIDcuNzMyMTM5MzcsOS4yMTg2NzYzMSA3LjM2MjEwMTUyLDguOTEyMTcwMjYgTDEuMDUwODAyNTUsMy42ODQ0NTgyIEMxLjAxNzg0NDMyLDMuNzgzNjUwNzcgMSwzLjg4OTc0MTUgMSw0IEwxLDEyIEMxLDEyLjU1MjI4NDcgMS40NDc3MTUyNSwxMyAyLDEzIEwxNCwxMyBDMTQuNTUyMjg0NywxMyAxNSwxMi41NTIyODQ3IDE1LDEyIEwxNSw0IEMxNSwzLjg4OTc0MTUgMTQuOTgyMTU1NywzLjc4MzY1MDc3IDE0Ljk0OTE5NzQsMy42ODQ0NTgyIFogTTIsMiBMMTQsMiBDMTUuMTA0NTY5NSwyIDE2LDIuODk1NDMwNSAxNiw0IEwxNiwxMiBDMTYsMTMuMTA0NTY5NSAxNS4xMDQ1Njk1LDE0IDE0LDE0IEwyLDE0IEMwLjg5NTQzMDUsMTQgMS4zNTI3MDc1ZS0xNiwxMy4xMDQ1Njk1IDAsMTIgTDAsNCBDLTEuMzUyNzA3NWUtMTYsMi44OTU0MzA1IDAuODk1NDMwNSwyIDIsMiBaIE0xLjc4OTY5MzExLDMgTDcuMzY2MzI4MzYsNy42MDMzOTcxNyBDNy43MzQ1OTA0Miw3LjkwNzM4OTg5IDguMjY2Mzk5MjQsNy45MDg1OTQzMiA4LjYzNjAzNDQ2LDcuNjA2MjcyNzcgTDE0LjI2NzkyMSwzIEwxLjc4OTY5MzExLDMgWiIgLz4KPC9zdmc+Cg==';
+    if (connectorType in HARDCODED_ICONS) {
+      return HARDCODED_ICONS[connectorType as keyof typeof HARDCODED_ICONS];
     }
 
     // Fallback to default icon for other connector types

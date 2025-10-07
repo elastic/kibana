@@ -14,10 +14,11 @@ import { configureMonacoYamlSchema } from '@kbn/monaco';
 import type { MonacoYamlOptions } from 'monaco-yaml';
 
 interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId'> {
+  languageId?: string;
   schemas: MonacoYamlOptions['schemas'] | null;
 }
 
-export function YamlEditor(props: YamlEditorProps) {
+export function YamlEditor({ languageId = 'yaml', ...props }: YamlEditorProps) {
   useEffect(() => {
     if (props.schemas) {
       // Configure Monaco YAML with completions and hover disabled
@@ -30,5 +31,5 @@ export function YamlEditor(props: YamlEditorProps) {
     }
   }, [props.schemas]);
 
-  return <CodeEditor languageId="yaml" {...props} />;
+  return <CodeEditor languageId={languageId} {...props} />;
 }

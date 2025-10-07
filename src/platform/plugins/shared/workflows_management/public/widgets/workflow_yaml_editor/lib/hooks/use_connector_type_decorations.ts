@@ -160,7 +160,7 @@ export const useConnectorTypeDecorations = ({
                 endColumn: actualEndColumn,
               },
               options: {
-                inlineClassName: `connector-inline-highlight connector-${className}`,
+                inlineClassName: `type-inline-highlight type-${className}`,
               },
             },
           ];

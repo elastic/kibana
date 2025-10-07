@@ -617,6 +617,7 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
 const staticConnectors: ConnectorContract[] = [
   {
     type: 'console',
+    displayName: 'Console',
     paramsSchema: z
       .object({
         message: z.string(),
@@ -631,6 +632,7 @@ const staticConnectors: ConnectorContract[] = [
   // Generic request types for raw API calls
   {
     type: 'elasticsearch.request',
+    displayName: 'Elasticsearch Request',
     connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
@@ -645,6 +647,7 @@ const staticConnectors: ConnectorContract[] = [
   },
   {
     type: 'kibana.request',
+    displayName: 'Kibana Request',
     connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
@@ -741,6 +744,7 @@ export function convertDynamicConnectorsToContracts(
 
           connectorContracts.push({
             type: subActionType,
+            displayName: connectorType.displayName,
             paramsSchema: getSubActionParamsSchema(connectorType.actionTypeId, subAction.name),
             connectorIdRequired: true,
             connectorId: connectorIdSchema,
@@ -758,6 +762,7 @@ export function convertDynamicConnectorsToContracts(
 
         connectorContracts.push({
           type: connectorTypeName,
+          displayName: connectorType.displayName,
           paramsSchema,
           connectorIdRequired: true,
           connectorId: connectorIdSchema,
@@ -772,6 +777,7 @@ export function convertDynamicConnectorsToContracts(
       // Return a basic connector contract as fallback
       connectorContracts.push({
         type: connectorType.actionTypeId,
+        displayName: connectorType.displayName,
         paramsSchema: z.any(),
         connectorIdRequired: true,
         connectorId: z.string(),
@@ -806,6 +812,8 @@ export interface ConnectorTypeInfo {
   minimumLicenseRequired: string;
   subActions: ConnectorSubAction[];
 }
+
+export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
 
 // Global cache for all connectors (static + generated + dynamic)
 let allConnectorsCache: ConnectorContract[] | null = null;

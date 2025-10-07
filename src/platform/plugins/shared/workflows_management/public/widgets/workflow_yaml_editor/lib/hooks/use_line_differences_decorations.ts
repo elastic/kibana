@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef, useCallback } from 'react';
-import type { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/monaco';
 
 interface UseLineDifferencesDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;
@@ -60,12 +60,7 @@ export const useLineDifferencesDecorations = ({
     if (changedLines.length === 0) return;
 
     const decorations = changedLines.map((lineNumber) => ({
-      range: new (window as any).monaco.Range(
-        lineNumber,
-        1,
-        lineNumber,
-        model.getLineMaxColumn(lineNumber)
-      ),
+      range: new monaco.Range(lineNumber, 1, lineNumber, model.getLineMaxColumn(lineNumber)),
       options: {
         className: 'changed-line-highlight',
         isWholeLine: true,

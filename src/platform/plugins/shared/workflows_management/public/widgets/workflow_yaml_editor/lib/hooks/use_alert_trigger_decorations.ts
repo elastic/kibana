@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import type { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/monaco';
 import type { Document } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { getTriggerNodes } from '../../../../../common/lib/yaml_utils';
@@ -75,7 +75,7 @@ export const useAlertTriggerDecorations = ({
             }
           }
 
-          typeRange = new (window as any).monaco.Range(
+          typeRange = new monaco.Range(
             typeLineNumber,
             1,
             typeLineNumber,
@@ -84,7 +84,7 @@ export const useAlertTriggerDecorations = ({
         }
 
         const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
-          range: new (window as any).monaco.Range(
+          range: new monaco.Range(
             typeRange!.startLineNumber,
             1,
             typeRange!.startLineNumber,
@@ -105,7 +105,7 @@ export const useAlertTriggerDecorations = ({
         };
 
         const lineHighlightDecoration: monaco.editor.IModelDeltaDecoration = {
-          range: new (window as any).monaco.Range(
+          range: new monaco.Range(
             typeRange!.startLineNumber,
             1,
             typeRange!.startLineNumber,

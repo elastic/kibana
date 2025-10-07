@@ -144,7 +144,7 @@ export const useTriggerTypeDecorations = ({
                 endColumn: actualEndColumn,
               },
               options: {
-                inlineClassName: `trigger-inline-highlight trigger-${className}`,
+                inlineClassName: `type-inline-highlight type-${className}`,
               },
             },
           ];

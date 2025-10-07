@@ -25,6 +25,7 @@ import {
 
 export interface ConnectorContract {
   type: string;
+  displayName: string;
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
   connectorId?: z.ZodType;
@@ -36,8 +37,6 @@ export interface ConnectorContract {
 export interface DynamicConnectorContract extends ConnectorContract {
   /** Action type ID from Kibana actions plugin */
   actionTypeId: string;
-  /** Display name from actions plugin */
-  displayName: string;
   /** Available connector instances */
   instances: Array<{
     id: string;

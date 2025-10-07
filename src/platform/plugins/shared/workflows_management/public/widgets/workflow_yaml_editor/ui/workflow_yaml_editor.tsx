@@ -19,7 +19,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type YAML from 'yaml';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHandleMarkersChanged } from '../../../features/validate_workflow_yaml/lib/use_handle_markers_changed';
-import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
+import { addDynamicConnectorsToCache, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
@@ -61,12 +61,16 @@ import {
   useAlertTriggerDecorations,
 } from '../lib/hooks';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
-import { useWorkflowsMonacoTheme } from './use_workflows_monaco_theme';
+import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
 import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
 import { useMonacoWorkflowStyles } from '../styles/use_monaco_workflow_styles';
-import { registerWorkflowYamlLanguage } from '../lib/monaco_language/workflow_yaml';
-import { useDynamicConnectorIcons } from './use_dynamic_connector_icons';
+import {
+  WORKFLOW_YAML_LANG_ID,
+  registerWorkflowYamlLanguage,
+} from '../lib/monaco_language/workflow_yaml';
+import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import { getMonacoMarkerInterceptor } from '../lib/get_monaco_marker_interceptor';
+import { useStaticTypeIcons } from '../styles/use_static_type_icons';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -187,6 +191,12 @@ export const WorkflowYAMLEditor = ({
   // Data
   const { data: connectorsData } = useAvailableConnectors();
 
+  useEffect(() => {
+    if (connectorsData?.connectorTypes) {
+      addDynamicConnectorsToCache(connectorsData.connectorTypes);
+    }
+  }, [connectorsData?.connectorTypes]);
+
   // Styles
   const styles = useWorkflowEditorStyles();
   useMonacoWorkflowStyles();
@@ -195,7 +205,8 @@ export const WorkflowYAMLEditor = ({
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
   useWorkflowsMonacoTheme();
-  useDynamicConnectorIcons(connectorsData);
+  useStaticTypeIcons();
+  useDynamicTypeIcons(connectorsData);
 
   // Only show debug features in development
   const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -617,6 +628,7 @@ export const WorkflowYAMLEditor = ({
       )}
       <div css={styles.editorContainer}>
         <YamlEditor
+          languageId={WORKFLOW_YAML_LANG_ID}
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
           onChange={handleChange}
