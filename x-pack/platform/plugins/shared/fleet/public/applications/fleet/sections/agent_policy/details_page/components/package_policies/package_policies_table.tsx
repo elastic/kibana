@@ -235,14 +235,14 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               {packagePolicy.hasUpgrade && (
                 <>
                   <EuiFlexItem grow={false}>
-                    <EuiToolTip
+                    <EuiIconTip
+                      type="warning"
+                      color="warning"
                       content={i18n.translate(
                         'xpack.fleet.policyDetails.packagePoliciesTable.upgradeAvailable',
                         { defaultMessage: 'Upgrade Available' }
                       )}
-                    >
-                      <EuiIcon type="warning" color="warning" tabIndex={0} />
-                    </EuiToolTip>
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
