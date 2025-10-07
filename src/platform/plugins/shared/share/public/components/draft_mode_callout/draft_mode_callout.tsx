@@ -10,16 +10,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CommonProps } from '@elastic/eui';
-import { EuiButton, EuiCallOut, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-interface DraftModeCalloutButtonProps extends CommonProps {
-  onClick: () => void;
-  label: string;
-}
-
 export interface DraftModeCalloutProps extends CommonProps {
-  buttonProps?: DraftModeCalloutButtonProps;
   isEmbed?: boolean;
   message?: React.ReactNode;
 }
@@ -42,7 +36,6 @@ const linkMessage = (
  * A warning callout to indicate the user has unsaved changes.
  */
 export const DraftModeCallout = ({
-  buttonProps,
   isEmbed = false,
   message = isEmbed ? codeMessage : linkMessage,
   ['data-test-subj']: dataTestSubj = 'unsavedChangesDraftModeCallOut',
@@ -59,17 +52,6 @@ export const DraftModeCallout = ({
       <EuiText component="p" size="s">
         {message}
       </EuiText>
-      {buttonProps && (
-        <EuiButton
-          color="warning"
-          fill
-          size="s"
-          data-test-subj={buttonProps['data-test-subj']}
-          onClick={buttonProps.onClick}
-        >
-          {buttonProps.label}
-        </EuiButton>
-      )}
     </EuiCallOut>
   );
 };
