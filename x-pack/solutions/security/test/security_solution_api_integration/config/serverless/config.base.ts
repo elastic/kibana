@@ -25,6 +25,7 @@ export interface CreateTestConfigOptions {
    */
   kbnTestServerWait?: RegExp;
   suiteTags?: { include?: string[]; exclude?: string[] };
+  indexRefreshInterval?: string;
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -80,6 +81,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
             installMockPrebuiltRulesPackage({ getService }),
         },
       },
+      indexRefreshInterval: options.indexRefreshInterval,
     };
   };
 }
