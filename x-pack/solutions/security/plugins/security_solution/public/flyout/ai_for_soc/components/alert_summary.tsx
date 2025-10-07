@@ -93,7 +93,7 @@ export const AlertSummary = memo(
       messageAndReplacements,
     } = useAlertSummary({
       alertId,
-      defaultConnectorId: defaultConnectorId || '', // Provide fallback to avoid hook issues
+      defaultConnectorId: defaultConnectorId || '',
       promptContext,
       showAnonymizedValues,
     });
@@ -104,9 +104,7 @@ export const AlertSummary = memo(
 
     // Don't render the summary UI if no connector ID is available
     if (!defaultConnectorId) {
-      return (
-        <ConnectorMissingCallout canSeeAdvancedSettings={canSeeAdvancedSettings} />
-      );
+      return <ConnectorMissingCallout canSeeAdvancedSettings={canSeeAdvancedSettings} />;
     }
 
     return (

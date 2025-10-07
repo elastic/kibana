@@ -10,7 +10,10 @@ import { useDefaultAIConnectorId } from './use_default_ai_connector_id';
 import { useKibana } from '../lib/kibana';
 import { useAIConnectors } from './use_ai_connectors';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, DEFAULT_AI_CONNECTOR } from '@kbn/security-solution-plugin/common/constants';
+import {
+  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+  DEFAULT_AI_CONNECTOR,
+} from '../../../common/constants';
 
 jest.mock('../lib/kibana');
 jest.mock('./use_ai_connectors');
@@ -35,7 +38,7 @@ describe('useDefaultAIConnectorId', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockUseKibana.mockReturnValue({
       services: {
         settings: mockSettings,
@@ -46,6 +49,7 @@ describe('useDefaultAIConnectorId', () => {
 
     mockUseAIConnectors.mockReturnValue({
       aiConnectors: mockConnectors,
+      isLoading: false,
     });
 
     mockUiSettings.get.mockReturnValue('legacy-connector-id');
@@ -58,7 +62,7 @@ describe('useDefaultAIConnectorId', () => {
 
     const { result } = renderHook(() => useDefaultAIConnectorId());
 
-    expect(result.current).toBe('legacy-connector-id');
+    expect(result.current.defaultConnectorId).toBe('legacy-connector-id');
   });
 
   it('should return new connector id when new default connector feature is enabled', () => {
@@ -66,7 +70,7 @@ describe('useDefaultAIConnectorId', () => {
 
     const { result } = renderHook(() => useDefaultAIConnectorId());
 
-    expect(result.current).toBe('new-connector-id');
+    expect(result.current.defaultConnectorId).toBe('new-connector-id');
   });
 
   it('should return undefined when new default connector feature is enabled but getDefaultConnector returns undefined', () => {
@@ -75,7 +79,7 @@ describe('useDefaultAIConnectorId', () => {
 
     const { result } = renderHook(() => useDefaultAIConnectorId());
 
-    expect(result.current).toBeUndefined();
+    expect(result.current.defaultConnectorId).toBeUndefined();
   });
 
   it('should return undefined when new default connector feature is enabled but getDefaultConnector returns null', () => {
@@ -84,7 +88,7 @@ describe('useDefaultAIConnectorId', () => {
 
     const { result } = renderHook(() => useDefaultAIConnectorId());
 
-    expect(result.current).toBeUndefined();
+    expect(result.current.defaultConnectorId).toBeUndefined();
   });
 
   it('should call getBooleanValue with correct parameters', () => {
@@ -114,6 +118,28 @@ describe('useDefaultAIConnectorId', () => {
 
     const { result } = renderHook(() => useDefaultAIConnectorId());
 
-    expect(result.current).toBeUndefined();
+    expect(result.current.defaultConnectorId).toBeUndefined();
+  });
+
+  it('should return isLoading true when connectors are loading', () => {
+    mockUseAIConnectors.mockReturnValue({
+      aiConnectors: mockConnectors,
+      isLoading: true,
+    });
+
+    const { result } = renderHook(() => useDefaultAIConnectorId());
+
+    expect(result.current.isLoading).toBe(true);
+  });
+
+  it('should return isLoading false when connectors are not loading', () => {
+    mockUseAIConnectors.mockReturnValue({
+      aiConnectors: mockConnectors,
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() => useDefaultAIConnectorId());
+
+    expect(result.current.isLoading).toBe(false);
   });
 });

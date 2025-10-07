@@ -24,7 +24,7 @@ import * as i18n from './translations';
 import { licenseService } from '../../../common/hooks/use_license';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
-import { useDefaultAIConnectorId } from '@kbn/security-solution-plugin/public/common/hooks/use_default_ai_connector_id';
+import { useDefaultAIConnectorId } from '../../../common/hooks/use_default_ai_connector_id';
 
 interface Props {
   isLoading: boolean;
@@ -36,11 +36,9 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
     euiTheme: { size },
   } = useEuiTheme();
 
-  const { http, notifications, inference } =
-    useKibana().services;
+  const { http, notifications, inference } = useKibana().services;
   const [insightResult, setInsightResult] = useState<string>('');
-  const defaultAiConnectorId = useDefaultAIConnectorId();
-
+  const { defaultConnectorId } = useDefaultAIConnectorId();
 
   const hasEnterpriseLicence = licenseService.isEnterprise();
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
@@ -53,11 +51,11 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
     },
   });
   const fetchInsight = useCallback(async () => {
-    if (lensResponse && defaultAiConnectorId && prompts !== null) {
+    if (lensResponse && defaultConnectorId && prompts !== null) {
       try {
         const prompt = getPrompt(JSON.stringify(lensResponse), prompts);
         const result = await inference.chatComplete({
-          connectorId: defaultAiConnectorId,
+          connectorId: defaultConnectorId,
           messages: [{ role: MessageRole.User, content: prompt }],
         });
         setInsightResult(result.content);
@@ -67,7 +65,7 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
         );
       }
     }
-  }, [defaultAiConnectorId, lensResponse, inference, prompts]);
+  }, [defaultConnectorId, lensResponse, inference, prompts]);
 
   useEffect(() => {
     fetchInsight();
