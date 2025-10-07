@@ -80,12 +80,8 @@ const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.donutHole', {
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { state, setState, frame } = props;
   const layer = state.layers[0];
-  const {
-    categoryOptions,
-    numberOptions,
-    emptySizeRatioOptions,
-    isDisabled: isToolbarPopoverDisabled,
-  } = PartitionChartsMeta[state.shape].toolbarPopover;
+  const { emptySizeRatioOptions, isDisabled: isToolbarPopoverDisabled } =
+    PartitionChartsMeta[state.shape].toolbarPopover;
 
   const legendSize = layer.legendSize;
 
@@ -99,23 +95,6 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
       });
     },
     [layer, state, setState]
-  );
-
-  const onCategoryDisplayChange = useCallback(
-    (option: unknown) => onStateChange({ categoryDisplay: option }),
-    [onStateChange]
-  );
-
-  const onNumberDisplayChange = useCallback(
-    (option: unknown) => onStateChange({ numberDisplay: option }),
-    [onStateChange]
-  );
-
-  const onPercentDecimalsChange = useCallback(
-    (option: unknown) => {
-      onStateChange({ percentDecimals: option });
-    },
-    [onStateChange]
   );
 
   const onLegendDisplayChange = useCallback(
@@ -157,21 +136,6 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
     [onStateChange]
   );
 
-  const onEmptySizeRatioChange = useCallback(
-    ([option]: Array<EuiComboBoxOptionOption<string>>) => {
-      if (option.value === 'none') {
-        setState({ ...state, shape: 'pie', layers: [{ ...layer, emptySizeRatio: undefined }] });
-      } else {
-        const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === option.value)?.value;
-        setState({
-          ...state,
-          shape: 'donut',
-          layers: [{ ...layer, emptySizeRatio }],
-        });
-      }
-    },
-    [emptySizeRatioOptions, layer, setState, state]
-  );
   const selectedOption = emptySizeRatioOptions
     ? emptySizeRatioOptions.find(
         ({ value }) =>
@@ -200,26 +164,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
             buttonDataTestSubj="lnsVisualOptionsButton"
             data-test-subj="lnsVisualOptionsPopover"
           >
-            <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
-              <EuiComboBox
-                fullWidth
-                compressed
-                data-test-subj="lnsEmptySizeRatioOption"
-                aria-label={i18n.translate('xpack.lens.pieChart.donutHole', {
-                  defaultMessage: 'Donut hole',
-                })}
-                onChange={onEmptySizeRatioChange}
-                isClearable={false}
-                options={emptySizeRatioOptions.map(({ id, label, icon }) => ({
-                  value: id,
-                  label,
-                  prepend: icon ? <EuiIcon type={icon} /> : undefined,
-                }))}
-                selectedOptions={[{ value: selectedOption.id, label: selectedOption.label }]}
-                singleSelection={{ asPlainText: true }}
-                prepend={selectedOption?.icon ? <EuiIcon type={selectedOption.icon} /> : undefined}
-              />
-            </EuiFormRow>
+            <PartitionAppearanceSettings {...props} />
           </ToolbarPopover>
         </EuiFlexItem>
       ) : null}
@@ -232,60 +177,9 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
           type="titlesAndText"
           panelStyle={PANEL_STYLE}
         >
-          {categoryOptions.length ? (
-            <EuiFormRow
-              label={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
-                defaultMessage: 'Slice labels',
-              })}
-              fullWidth
-              display="columnCompressed"
-            >
-              <EuiButtonGroup
-                legend={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
-                  defaultMessage: 'Slice labels',
-                })}
-                options={categoryOptions}
-                idSelected={layer.categoryDisplay}
-                onChange={onCategoryDisplayChange}
-                buttonSize="compressed"
-                isFullWidth
-              />
-            </EuiFormRow>
-          ) : null}
-
-          {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
-            <>
-              <EuiFormRow
-                label={i18n.translate('xpack.lens.pieChart.sliceValues', {
-                  defaultMessage: 'Slice values',
-                })}
-                fullWidth
-                display="columnCompressed"
-              >
-                <EuiButtonGroup
-                  legend={i18n.translate('xpack.lens.pieChart.sliceValues', {
-                    defaultMessage: 'Slice values',
-                  })}
-                  options={numberOptions}
-                  idSelected={layer.numberDisplay}
-                  onChange={onNumberDisplayChange}
-                  buttonSize="compressed"
-                  isFullWidth
-                />
-              </EuiFormRow>
-              {layer.numberDisplay === NumberDisplay.PERCENT && (
-                <EuiFormRow label=" " fullWidth display="columnCompressed">
-                  <DecimalPlaceInput
-                    value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-                    setValue={onPercentDecimalsChange}
-                  />
-                </EuiFormRow>
-              )}
-            </>
-          ) : null}
+          <PartitionTitlesAndTextSettings {...props} />
         </ToolbarPopover>
       </EuiFlexItem>
-      {/* legend */}
       <EuiFlexItem grow={false}>
         <LegendSettingsPopover<PartitionLegendValue>
           groupPosition={'none'}
@@ -449,27 +343,28 @@ export function PartitionTitlesAndTextSettings(
 
   return (
     <>
-      <EuiFormRow
-        label={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
-          defaultMessage: 'Slice labels',
-        })}
-        fullWidth
-        display="columnCompressed"
-        isDisabled={!categoryOptions.length}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
+      {categoryOptions.length ? (
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
             defaultMessage: 'Slice labels',
           })}
-          options={categoryOptions}
-          idSelected={layer.categoryDisplay}
-          onChange={onCategoryDisplayChange}
-          buttonSize="compressed"
-          isFullWidth
-        />
-      </EuiFormRow>
+          fullWidth
+          display="columnCompressed"
+        >
+          <EuiButtonGroup
+            legend={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
+              defaultMessage: 'Slice labels',
+            })}
+            options={categoryOptions}
+            idSelected={layer.categoryDisplay}
+            onChange={onCategoryDisplayChange}
+            buttonSize="compressed"
+            isFullWidth
+          />
+        </EuiFormRow>
+      ) : null}
 
-      {/* TODO?: Hide this or show disabled  */}
+      {/* TODO: Instead of hidding the setting, we can disable it as we did with the metric appearance options */}
       {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
         <>
           <EuiFormRow
