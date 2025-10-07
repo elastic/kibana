@@ -46,22 +46,18 @@ const getIntervalAndType = (
 };
 
 export const useIngestionRate = ({
-  definition,
   stats,
   timeState,
-  isFailureStore = false,
+  isLoading,
+  aggregations,
+  error,
 }: {
-  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats | FailureStoreStats;
   timeState: TimeState;
-  isFailureStore?: boolean;
+  isLoading: boolean;
+  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
+  error: Error | undefined;
 }) => {
-  const { aggregations, isLoading, error } = useAggregations({
-    definition,
-    timeState,
-    isFailureStore,
-  });
-
   const ingestionRate = useMemo(() => {
     if (!aggregations) {
       return undefined;

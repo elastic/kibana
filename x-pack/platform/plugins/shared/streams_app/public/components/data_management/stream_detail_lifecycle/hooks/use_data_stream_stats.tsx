@@ -8,10 +8,10 @@
 import moment from 'moment';
 import type { Streams } from '@kbn/streams-schema';
 import type { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { TimeState } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { useAggregations } from './use_ingestion_rate';
+import type { useAggregations } from './use_ingestion_rate';
 
 export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][number] & {
   bytesPerDoc: number;
@@ -20,18 +20,16 @@ export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][
 
 export const useDataStreamStats = ({
   definition,
+  timeState,
+  aggregations,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  timeState: TimeState;
+  aggregations: ReturnType<typeof useAggregations>['aggregations'];
 }) => {
   const {
     services: { dataStreamsClient },
   } = useKibana();
-  const { timeState } = useTimefilter();
-  const { aggregations } = useAggregations({
-    definition,
-    timeState,
-    isFailureStore: false,
-  });
 
   const statsFetch = useStreamsAppFetch(
     async () => {
@@ -47,10 +45,7 @@ export const useDataStreamStats = ({
         return undefined;
       }
 
-      const rangeInDays = Math.max(
-        1,
-        Math.round(moment(timeState.end).diff(moment(timeState.start), 'days'))
-      );
+      const rangeInDays = moment(timeState.end).diff(moment(timeState.start), 'days', true);
 
       const countRange = aggregations?.buckets?.reduce((sum, bucket) => sum + bucket.doc_count, 0);
 

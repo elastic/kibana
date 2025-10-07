@@ -8,10 +8,10 @@
 import moment from 'moment';
 import type { Streams } from '@kbn/streams-schema';
 import type { FailureStoreStatsResponse } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { TimeState } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { useAggregations } from './use_ingestion_rate';
+import type { useAggregations } from './use_ingestion_rate';
 
 export type FailureStoreStats = FailureStoreStatsResponse & {
   bytesPerDay: number;
@@ -20,8 +20,12 @@ export type FailureStoreStats = FailureStoreStatsResponse & {
 
 export const useFailureStoreStats = ({
   definition,
+  timeState,
+  aggregations,
 }: {
   definition: Streams.ingest.all.GetResponse;
+  timeState: TimeState;
+  aggregations: ReturnType<typeof useAggregations>['aggregations'];
 }) => {
   const {
     dependencies: {
@@ -30,12 +34,6 @@ export const useFailureStoreStats = ({
       },
     },
   } = useKibana();
-  const { timeState } = useTimefilter();
-  const { aggregations } = useAggregations({
-    definition,
-    timeState,
-    isFailureStore: true,
-  });
 
   const statsFetch = useStreamsAppFetch(
     async ({ signal }) => {
@@ -56,10 +54,7 @@ export const useFailureStoreStats = ({
         };
       }
 
-      const rangeInDays = Math.max(
-        1,
-        Math.round(moment(timeState.end).diff(moment(timeState.start), 'days'))
-      );
+      const rangeInDays = moment(timeState.end).diff(moment(timeState.start), 'days', true);
 
       const countRange = aggregations?.buckets?.reduce((sum, bucket) => sum + bucket.doc_count, 0);
 

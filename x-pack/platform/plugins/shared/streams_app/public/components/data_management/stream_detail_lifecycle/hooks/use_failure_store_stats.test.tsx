@@ -5,35 +5,19 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
-import moment from 'moment';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useFailureStoreStats } from './use_failure_store_stats';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { useAggregations } from './use_ingestion_rate';
+import type { TimeState } from '@kbn/es-query';
+import { of } from 'rxjs';
 
-// Mock the dependencies
 jest.mock('../../../../hooks/use_kibana');
 jest.mock('../../../../hooks/use_timefilter');
-jest.mock('../../../../hooks/use_streams_app_fetch');
 jest.mock('./use_ingestion_rate');
-
-// Mock moment to ensure consistent behavior
-jest.mock('moment', () => {
-  const actualMoment = jest.requireActual('moment');
-  const mockMoment = jest.fn(() => ({
-    diff: jest.fn(() => 7), // Mock 7 days difference
-  }));
-  // Copy all the methods from actual moment to preserve functionality
-  Object.assign(mockMoment, actualMoment);
-  return mockMoment;
-});
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseTimefilter = useTimefilter as jest.MockedFunction<typeof useTimefilter>;
-const mockUseStreamsAppFetch = useStreamsAppFetch as jest.MockedFunction<typeof useStreamsAppFetch>;
-const mockUseAggregations = useAggregations as jest.MockedFunction<typeof useAggregations>;
 
 describe('useFailureStoreStats', () => {
   const mockStreamsRepositoryClient = {
@@ -46,13 +30,27 @@ describe('useFailureStoreStats', () => {
     },
   } as any;
 
-  const mockTimeState = {
-    start: '2023-01-01T00:00:00Z',
-    end: '2023-01-08T00:00:00Z',
+  const mockTimeState: TimeState = {
+    timeRange: {
+      from: '2023-01-01T00:00:00Z',
+      to: '2023-01-08T00:00:00Z',
+    },
+    asAbsoluteTimeRange: {
+      from: '2023-01-01T00:00:00Z',
+      to: '2023-01-08T00:00:00Z',
+      mode: 'absolute',
+    },
+    start: new Date('2023-01-01T00:00:00Z').getTime(),
+    end: new Date('2023-01-08T00:00:00Z').getTime(),
   };
 
   const mockAggregations = {
-    buckets: [{ doc_count: 100 }, { doc_count: 200 }, { doc_count: 150 }],
+    buckets: [
+      { key: 1, doc_count: 50 },
+      { key: 2, doc_count: 75 },
+      { key: 3, doc_count: 25 },
+    ],
+    interval: '1d',
   };
 
   const mockFailureStoreConfig = {
@@ -77,17 +75,26 @@ describe('useFailureStoreStats', () => {
           },
         },
       },
+      core: {
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+          },
+        },
+      },
     } as any);
 
     mockUseTimefilter.mockReturnValue({
       timeState: mockTimeState,
+      timeState$: of({ kind: 'initial' }),
     } as any);
 
-    mockUseAggregations.mockReturnValue({
-      aggregations: mockAggregations,
-    } as any);
+    const mockFetchResponse = {
+      config: mockFailureStoreConfig,
+      stats: mockFailureStoreStats,
+    };
 
-    // Moment is already mocked at the module level
+    mockStreamsRepositoryClient.fetch.mockResolvedValue(mockFetchResponse);
   });
 
   describe('successful data fetching', () => {
@@ -99,29 +106,28 @@ describe('useFailureStoreStats', () => {
 
       mockStreamsRepositoryClient.fetch.mockResolvedValue(mockFetchResponse);
 
-      const mockFetchResult = {
-        value: {
-          config: mockFailureStoreConfig,
-          stats: {
-            ...mockFailureStoreStats,
-            bytesPerDoc: 5000,
-            bytesPerDay: 321428.57142857142,
-          },
-        },
-        loading: false,
-        refresh: jest.fn(),
-        error: undefined,
-      };
+      const { result } = renderHook(() =>
+        useFailureStoreStats({
+          definition: mockDefinition,
+          timeState: mockTimeState,
+          aggregations: mockAggregations,
+        })
+      );
 
-      mockUseStreamsAppFetch.mockReturnValue(mockFetchResult);
-
-      const { result } = renderHook(() => useFailureStoreStats({ definition: mockDefinition }));
-
+      await waitFor(() => {
+        expect(result.current.data).toBeDefined();
+      });
       expect(result.current.data?.config).toEqual(mockFailureStoreConfig);
+
+      // Total doc count from aggregations: 50 + 75 + 25 = 150
+      // Range in days: 7 (Jan 1 to Jan 8)
+      // Per day docs: 150 / 7 ≈ 21.43
+      // Bytes per doc: 2500000 / 500 = 5000
+      // Bytes per day: 5000 * 21.43 ≈ 107143
       expect(result.current.data?.stats).toEqual({
         ...mockFailureStoreStats,
         bytesPerDoc: 5000,
-        bytesPerDay: 321428.57142857142,
+        bytesPerDay: 107142.85714285713,
       });
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeUndefined();
@@ -140,24 +146,17 @@ describe('useFailureStoreStats', () => {
         stats: statsWithZeroDocs,
       });
 
-      const mockFetchResult = {
-        value: {
-          config: mockFailureStoreConfig,
-          stats: {
-            ...statsWithZeroDocs,
-            bytesPerDoc: 0,
-            bytesPerDay: 0,
-          },
-        },
-        loading: false,
-        refresh: jest.fn(),
-        error: undefined,
-      };
+      const { result } = renderHook(() =>
+        useFailureStoreStats({
+          definition: mockDefinition,
+          timeState: mockTimeState,
+          aggregations: mockAggregations,
+        })
+      );
 
-      mockUseStreamsAppFetch.mockReturnValue(mockFetchResult);
-
-      const { result } = renderHook(() => useFailureStoreStats({ definition: mockDefinition }));
-
+      await waitFor(() => {
+        expect(result.current.data).toBeDefined();
+      });
       expect(result.current.data?.stats?.bytesPerDoc).toBe(0);
       expect(result.current.data?.stats?.bytesPerDay).toBe(0);
     });
@@ -170,20 +169,17 @@ describe('useFailureStoreStats', () => {
         stats: null,
       });
 
-      const mockFetchResult = {
-        value: {
-          config: mockFailureStoreConfig,
-          stats: undefined,
-        },
-        loading: false,
-        refresh: jest.fn(),
-        error: undefined,
-      };
+      const { result } = renderHook(() =>
+        useFailureStoreStats({
+          definition: mockDefinition,
+          timeState: mockTimeState,
+          aggregations: mockAggregations,
+        })
+      );
 
-      mockUseStreamsAppFetch.mockReturnValue(mockFetchResult);
-
-      const { result } = renderHook(() => useFailureStoreStats({ definition: mockDefinition }));
-
+      await waitFor(() => {
+        expect(result.current.data).toBeDefined();
+      });
       expect(result.current.data?.config).toEqual(mockFailureStoreConfig);
       expect(result.current.data?.stats).toBeUndefined();
     });
@@ -199,152 +195,52 @@ describe('useFailureStoreStats', () => {
         stats: statsWithoutCreationDate,
       });
 
-      const mockFetchResult = {
-        value: {
-          config: mockFailureStoreConfig,
-          stats: undefined,
-        },
-        loading: false,
-        refresh: jest.fn(),
-        error: undefined,
-      };
+      const { result } = renderHook(() =>
+        useFailureStoreStats({
+          definition: mockDefinition,
+          timeState: mockTimeState,
+          aggregations: mockAggregations,
+        })
+      );
 
-      mockUseStreamsAppFetch.mockReturnValue(mockFetchResult);
-
-      const { result } = renderHook(() => useFailureStoreStats({ definition: mockDefinition }));
-
+      await waitFor(() => {
+        expect(result.current.data).toBeDefined();
+      });
       expect(result.current.data?.config).toEqual(mockFailureStoreConfig);
       expect(result.current.data?.stats).toBeUndefined();
     });
 
-    it('should handle fetch errors', async () => {
+    it('should handle error', async () => {
       const mockError = new Error('Failed to fetch failure store stats');
+      mockStreamsRepositoryClient.fetch.mockRejectedValue(mockError);
 
-      const mockFetchResult = {
-        value: undefined,
-        loading: false,
-        refresh: jest.fn(),
-        error: mockError,
-      };
+      const { result } = renderHook(() =>
+        useFailureStoreStats({
+          definition: mockDefinition,
+          timeState: mockTimeState,
+          aggregations: mockAggregations,
+        })
+      );
 
-      mockUseStreamsAppFetch.mockReturnValue(mockFetchResult);
-
-      const { result } = renderHook(() => useFailureStoreStats({ definition: mockDefinition }));
-
-      expect(result.current.data).toBeUndefined();
+      await waitFor(() => {
+        expect(result.current.error).toBeDefined();
+      });
       expect(result.current.error).toBe(mockError);
-    });
-
-    it('should handle API fetch rejection', async () => {
-      const apiError = new Error('API request failed');
-      mockStreamsRepositoryClient.fetch.mockRejectedValue(apiError);
-
-      const mockFetchResult = {
-        value: undefined,
-        loading: false,
-        refresh: jest.fn(),
-        error: apiError,
-      };
-
-      mockUseStreamsAppFetch.mockReturnValue(mockFetchResult);
-
-      const { result } = renderHook(() => useFailureStoreStats({ definition: mockDefinition }));
-
-      expect(result.current.error).toBe(apiError);
     });
   });
 
   describe('loading states', () => {
     it('should return loading state correctly', () => {
-      const mockFetchResult = {
-        value: undefined,
-        loading: true,
-        refresh: jest.fn(),
-        error: undefined,
-      };
-
-      mockUseStreamsAppFetch.mockReturnValue(mockFetchResult);
-
-      const { result } = renderHook(() => useFailureStoreStats({ definition: mockDefinition }));
+      const { result } = renderHook(() =>
+        useFailureStoreStats({
+          definition: mockDefinition,
+          timeState: mockTimeState,
+          aggregations: mockAggregations,
+        })
+      );
 
       expect(result.current.isLoading).toBe(true);
       expect(result.current.data).toBeUndefined();
-    });
-  });
-
-  describe('calculations', () => {
-    it('should calculate bytesPerDay correctly with aggregations', async () => {
-      const customAggregations = {
-        buckets: [{ doc_count: 50 }, { doc_count: 75 }, { doc_count: 25 }],
-      };
-
-      mockUseAggregations.mockReturnValue({
-        aggregations: customAggregations,
-      } as any);
-
-      mockUseStreamsAppFetch.mockImplementation(() => {
-        const rangeInDays = Math.max(
-          1,
-          Math.round(moment(mockTimeState.end).diff(moment(mockTimeState.start), 'days'))
-        );
-        const countRange = customAggregations.buckets.reduce(
-          (sum, bucket) => sum + bucket.doc_count,
-          0
-        );
-        const bytesPerDoc = mockFailureStoreStats.size / mockFailureStoreStats.count;
-        const perDayDocs = countRange / rangeInDays;
-        const bytesPerDay = bytesPerDoc * perDayDocs;
-
-        return {
-          value: {
-            config: mockFailureStoreConfig,
-            stats: {
-              ...mockFailureStoreStats,
-              bytesPerDoc,
-              bytesPerDay,
-            },
-          },
-          loading: false,
-          refresh: jest.fn(),
-          error: undefined,
-        } as any;
-      });
-
-      const { result } = renderHook(() => useFailureStoreStats({ definition: mockDefinition }));
-
-      // Total doc count from aggregations: 50 + 75 + 25 = 150
-      // Range in days: 7 (mocked)
-      // Per day docs: 150 / 7 ≈ 21.43
-      // Bytes per doc: 2500000 / 500 = 5000
-      // Bytes per day: 5000 * 21.43 ≈ 107143
-      expect(result.current.data?.stats?.bytesPerDay).toBeCloseTo(107142.857, 2);
-    });
-
-    it('should handle missing aggregations gracefully', () => {
-      mockUseAggregations.mockReturnValue({
-        aggregations: undefined,
-      } as any);
-
-      mockUseStreamsAppFetch.mockImplementation((callback) => {
-        // When aggregations are undefined, countRange should be 0, leading to bytesPerDay = 0
-        return {
-          value: {
-            config: mockFailureStoreConfig,
-            stats: {
-              ...mockFailureStoreStats,
-              bytesPerDoc: 5000,
-              bytesPerDay: 0,
-            },
-          },
-          loading: false,
-          refresh: jest.fn(),
-          error: undefined,
-        } as any;
-      });
-
-      const { result } = renderHook(() => useFailureStoreStats({ definition: mockDefinition }));
-
-      expect(result.current.data?.stats?.bytesPerDay).toBe(0);
     });
   });
 });
