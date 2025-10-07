@@ -97,9 +97,12 @@ export async function runStackMonitor(
       }
     }
 
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       const timeout = setTimeout(resolve, 500);
-      monitorAbortController.signal.addEventListener('abort', () => clearTimeout(timeout));
+      monitorAbortController.signal.addEventListener('abort', () => {
+        clearTimeout(timeout);
+        resolve();
+      });
     });
   }
 }

@@ -11,7 +11,6 @@ import type { NodeWithErrorCatching } from '../step/node_implementation';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
-import { stringifyStackFrames } from '../utils';
 
 /**
  * Handles workflow execution errors by bubbling them up through the scope hierarchy
@@ -85,15 +84,10 @@ export async function catchError(
       );
       const scopeEntry = workflowScopeStack.getCurrentScope()!;
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
-
-      const beforeExitScopePath = stringifyStackFrames(workflowScopeStack.stackFrames);
       params.workflowExecutionState.updateWorkflowExecution({
         currentNodeId: scopeEntry.nodeId,
         scopeStack: newWorkflowScopeStack.stackFrames,
       });
-
-      const afterExitScopePath = stringifyStackFrames(newWorkflowScopeStack.stackFrames);
-
       params.workflowRuntime.navigateToNode(scopeEntry.nodeId);
 
       const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({

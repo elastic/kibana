@@ -136,12 +136,6 @@ export class StepExecutionRuntime {
 
   public async finishStep(stepOutput?: Record<string, any>): Promise<void> {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
-
-    if (startedStepExecution?.error) {
-      await this.failStep(startedStepExecution.error);
-      return;
-    }
-
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
       status: ExecutionStatus.COMPLETED,
