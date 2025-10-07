@@ -56,7 +56,7 @@ export class UnifiedTabsPageObject extends FtrService {
 
     return await this.testSubjects.exists(tabChangesIndicator);
   }
-  
+
   public async getSelectedTabLabel() {
     const selectedTab = await this.getSelectedTab();
     return selectedTab?.label;
