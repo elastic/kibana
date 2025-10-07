@@ -9,10 +9,10 @@
   "plugin": {
     "id": "observabilityShared",
     "browser": true,
-    "server": true,
+    "server": false,
     "configPath": [
       "xpack",
-      "observabilityShared"
+      "observability_shared"
     ],
     "requiredPlugins": [
       "uiActions",
