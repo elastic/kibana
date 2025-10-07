@@ -638,21 +638,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('scripted metric based risk scoring', () => {
       before(async () => {
-        await kibanaServer.uiSettings.update(
-          {
-            ['securitySolution:enableEsqlRiskScoring']: false,
-          },
-          { space }
-        );
+        await kibanaServer.uiSettings.update({
+          ['securitySolution:enableEsqlRiskScoring']: false,
+        });
       });
 
       after(async () => {
-        await kibanaServer.uiSettings.update(
-          {
-            ['securitySolution:enableEsqlRiskScoring']: true,
-          },
-          { space }
-        );
+        await kibanaServer.uiSettings.update({
+          ['securitySolution:enableEsqlRiskScoring']: true,
+        });
       });
 
       doTests();
