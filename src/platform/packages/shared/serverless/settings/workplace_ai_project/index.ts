@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const CHAT_PROJECT_SETTINGS = [];
+export const WORKPLACE_AI_PROJECT_SETTINGS = [];
