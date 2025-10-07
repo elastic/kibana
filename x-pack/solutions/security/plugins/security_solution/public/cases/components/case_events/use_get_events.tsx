@@ -25,7 +25,13 @@ export const useGetEvents = (
   const toasts = useToasts();
 
   return useQuery(
-    [dataView.getIndexPattern(), parameters.eventIds, parameters.sort],
+    [
+      dataView.getIndexPattern(),
+      parameters.eventIds,
+      parameters.sort,
+      parameters.pageIndex,
+      parameters.itemsPerPage,
+    ],
     ({ signal }) => searchEvents(signal, dataView, parameters),
     {
       onError: (error: Error) => {

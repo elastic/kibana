@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import useAsync from 'react-use/lib/useAsync';
 import { useMemo } from 'react';

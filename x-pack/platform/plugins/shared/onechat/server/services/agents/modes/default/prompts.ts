@@ -168,13 +168,13 @@ function renderVisualizationPrompt() {
       * If the user does NOT specify a chart type in their message, you MUST omit the \`chart-type\` attribute. The system will choose an appropriate chart type automatically.
       * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
       * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.
-      * You must not include any other attributes or content within the \`<${tagName}>\` element.      
+      * You must not include any other attributes or content within the \`<${tagName}>\` element.
 
       **Example Usage:**
 
       Tool response includes:
       {
-        "tool_result_id": "LiDo",
+        "tool_result_id": "LiDoF1",
         "type": "${tabularData}",
         "data": {
           "source": "esql",
@@ -184,8 +184,8 @@ function renderVisualizationPrompt() {
       }
 
       To visualize this response your reply should be:
-      <${tagName} ${attributes.toolResultId}="LiDo"/>
-            
+      <${tagName} ${attributes.toolResultId}="LiDoF1"/>
+
       To visualize this response as a bar chart your reply should be:
-      <${tagName} ${attributes.toolResultId}="LiDo" ${attributes.chartType}="${ChartType.Bar}"/>`;
+      <${tagName} ${attributes.toolResultId}="LiDoF1" ${attributes.chartType}="${ChartType.Bar}"/>`;
 }

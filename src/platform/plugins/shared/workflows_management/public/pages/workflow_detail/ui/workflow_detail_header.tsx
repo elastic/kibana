@@ -45,7 +45,6 @@ export interface WorkflowDetailHeaderProps {
   isEnabled: boolean;
   handleToggleWorkflow: () => void;
   canTestWorkflow: boolean;
-  handleTestClick: () => void;
   isValid: boolean;
   hasUnsavedChanges: boolean;
   // TODO: manage it in a workflow state context
@@ -65,7 +64,6 @@ export const WorkflowDetailHeader = ({
   isEnabled,
   handleToggleWorkflow,
   canTestWorkflow,
-  handleTestClick,
   handleTabChange,
   isValid,
   hasUnsavedChanges,

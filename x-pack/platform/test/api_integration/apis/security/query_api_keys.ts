@@ -124,6 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           from: 0,
           size: 1,
+          sort: { field: 'name', direction: 'asc' },
         })
         .expect(200);
       expect(keys.apiKeys.length).to.be(1);
@@ -136,6 +137,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           from: 1,
           size: 1,
+          sort: { field: 'name', direction: 'asc' },
         })
         .expect(200);
       expect(keys.apiKeys.length).to.be(1);

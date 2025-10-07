@@ -1500,7 +1500,6 @@ describe('Response actions', () => {
 
       testSetup.endpointAppContextMock.experimentalFeatures = {
         ...testSetup.endpointAppContextMock.experimentalFeatures,
-        responseActionsSentinelOneV1Enabled: true,
       };
 
       httpHandlerContextMock.actions = Promise.resolve({
