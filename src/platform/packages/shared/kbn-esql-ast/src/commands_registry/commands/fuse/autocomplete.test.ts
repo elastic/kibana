@@ -89,5 +89,18 @@ describe('FUSE Autocomplete', () => {
         mockCallbacks
       );
     });
+
+    it('suggests partial numeric fields after SCORE BY', async () => {
+      const expectedNumericFields = getFieldNamesByType(ESQL_NUMBER_TYPES);
+      const mockCallbacks = getMockCallbacks();
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedNumericFields.map((name) => ({ label: name, text: name }))
+      );
+      await fuseExpectSuggestions(
+        'FROM a | FUSE linear SCORE BY fi/',
+        expectedNumericFields,
+        mockCallbacks
+      );
+    });
   });
 });

@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { ESQL_NUMBER_TYPES, withAutoSuggest } from '../../../..';
 import { isOptionNode } from '../../../ast/is';
 import type {
@@ -36,27 +37,43 @@ export async function autocomplete(
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
   const fuseCommand = command as ESQLAstFuseCommand;
-  const position = getPosition(query, fuseCommand);
+
+  const innerText = query.substring(0, cursorPosition);
+
+  const position = getPosition(innerText, fuseCommand);
 
   switch (position) {
     case FusePosition.BEFORE_NEW_ARGUMENT:
       return getFuseArgumentsSuggestions(fuseCommand);
     case FusePosition.SCORE_BY:
-      return (
-        (await callbacks?.getByType?.(ESQL_NUMBER_TYPES, [], {
-          advanceCursor: true,
-          openSuggestions: true,
-        })) ?? []
+      const numericFields = await callbacks?.getByType?.(ESQL_NUMBER_TYPES, [], {
+        advanceCursor: true,
+        openSuggestions: true,
+      });
+      return await handleFragment(
+        innerText,
+        (fragment) => columnExists(fragment, context),
+        (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+          return (
+            numericFields?.map((suggestion) => {
+              return {
+                ...suggestion,
+                rangeToReplace,
+              };
+            }) ?? []
+          );
+        },
+        () => []
       );
   }
 
   return [pipeCompleteItem];
 }
 
-function getPosition(query: string, command: ESQLAstFuseCommand): FusePosition {
+function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
   const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
 
-  if (scoreBy && scoreBy.incomplete) {
+  if ((scoreBy && scoreBy.incomplete) || /SCORE BY\s*\S*$/i.test(innerText)) {
     return FusePosition.SCORE_BY;
   }
 
