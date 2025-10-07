@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiComboBoxWrapper } from './combo_box';
-import { EuiSelectableWrapper } from './selectable';
-import { EuiCheckBoxWrapper } from './check_box';
-import { EuiDataGridWrapper } from './data_grid';
-import { EuiToastWrapper } from './toast';
+import type { NEW_TAB_ID } from './constants';
 
-export {
-  EuiComboBoxWrapper,
-  EuiSelectableWrapper,
-  EuiCheckBoxWrapper,
-  EuiDataGridWrapper,
-  EuiToastWrapper,
-};
+export interface TabsUrlState {
+  /**
+   * Syncing the selected tab id with the URL
+   */
+  tabId?: typeof NEW_TAB_ID | string;
+  /**
+   * (Optional) Label for the tab, used when creating a new tab via locator URL or opening a shared link.
+   */
+  tabLabel?: string;
+}
