@@ -14,7 +14,7 @@ test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, 
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     const currentTime = Date.now();
     await apiServices.streams.enable();
-    // Generate logs for the last 2 minutes for two streams with different ingestion rates
+    // Generate logs for the last 5 minutes for two streams with different ingestion rates
     await generateLogsData(logsSynthtraceEsClient)({
       index: 'logs-10-docs-per-minute',
       startTime: new Date(currentTime - INGESTION_DURATION_MINUTES * 60 * 1000).toISOString(),
@@ -165,13 +165,21 @@ test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, 
     await pageObjects.streams.verifyDataQuality('logs-20-docs-per-minute', 'Poor');
   });
 
-  test('should display correct retention in the table', async ({ pageObjects }) => {
+  test('should display correct retention in the table', async ({ pageObjects, config }) => {
     // Wait for the streams table to load
     await pageObjects.streams.expectStreamsTableVisible();
 
+    const isServerless = config.serverless ?? false;
+
     // Verify the retention for each log stream is the 'logs' ILM policy
-    await pageObjects.streams.verifyRetention('logs-10-docs-per-minute', 'logs');
-    await pageObjects.streams.verifyRetention('logs-20-docs-per-minute', 'logs');
+    await pageObjects.streams.verifyRetention(
+      'logs-10-docs-per-minute',
+      isServerless ? 'Indefinite' : 'logs'
+    );
+    await pageObjects.streams.verifyRetention(
+      'logs-20-docs-per-minute',
+      isServerless ? 'Indefinite' : 'logs'
+    );
   });
 
   test('should provide Discover actions with correct ESQL queries', async ({ pageObjects }) => {

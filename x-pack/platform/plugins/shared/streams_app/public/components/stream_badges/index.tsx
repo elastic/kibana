@@ -63,7 +63,13 @@ export function ClassicStreamBadge() {
         `,
       }}
     >
-      <EuiBadge color="hollow" iconType={iconStreamClassic} iconSide="left" tabIndex={0}>
+      <EuiBadge
+        color="hollow"
+        iconType={iconStreamClassic}
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj="classicStreamBadge"
+      >
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
           defaultMessage: 'Classic',
         })}
@@ -74,7 +80,12 @@ export function ClassicStreamBadge() {
 
 export function WiredStreamBadge() {
   return (
-    <EuiBadge color="hollow" iconType={iconStreamWired} iconSide="left">
+    <EuiBadge
+      color="hollow"
+      iconType={iconStreamWired}
+      iconSide="left"
+      data-test-subj="wiredStreamBadge"
+    >
       {i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
         defaultMessage: 'Wired',
       })}
@@ -82,7 +93,13 @@ export function WiredStreamBadge() {
   );
 }
 
-export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
+export function LifecycleBadge({
+  lifecycle,
+  testSubj,
+}: {
+  lifecycle: IngestStreamEffectiveLifecycle;
+  testSubj: string;
+}) {
   const {
     dependencies: {
       start: { share },
@@ -96,7 +113,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     badge = (
       <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
         <EuiLink
-          data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
+          data-test-subj={testSubj}
           color="text"
           target="_blank"
           href={ilmLocator?.getRedirectUrl({
@@ -114,7 +131,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     );
   } else if (isErrorLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0}>
+      <EuiBadge color="hollow" tabIndex={0} data-test-subj={testSubj}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel', {
           defaultMessage: 'Error: {message}',
           values: { message: lifecycle.error.message },
@@ -123,7 +140,13 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     );
   } else if (isDslLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
+      <EuiBadge
+        color="hollow"
+        iconType="clockCounter"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj={testSubj}
+      >
         {lifecycle.dsl.data_retention ??
           i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel', {
             defaultMessage: 'Indefinite',
@@ -132,7 +155,7 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     );
   } else {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0}>
+      <EuiBadge color="hollow" tabIndex={0} data-test-subj={testSubj}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel', {
           defaultMessage: 'Retention: Disabled',
         })}

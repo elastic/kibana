@@ -144,6 +144,21 @@ export class StreamsApp {
     }
   }
 
+  // Streams header utility methods
+  async verifyLifecycleBadge(streamName: string, expectedLabel: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="lifecycleBadge-${streamName}"]`)
+    ).toContainText(expectedLabel);
+  }
+
+  async verifyClassicBadge() {
+    await expect(this.page.locator(`[data-test-subj="classicStreamBadge"]`)).toBeVisible();
+  }
+
+  async verifyWiredBadge() {
+    await expect(this.page.locator(`[data-test-subj="wiredStreamBadge"]`)).toBeVisible();
+  }
+
   // Routing-specific utility methods
   async clickCreateRoutingRule() {
     await this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
