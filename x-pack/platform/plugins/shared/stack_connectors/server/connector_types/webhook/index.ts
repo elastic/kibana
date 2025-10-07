@@ -106,10 +106,8 @@ export async function executor(
   const { body: data } = params;
 
   try {
-    logger.error(`KURWAAAAAA ${method}, ${data}`);
     validateParamsForMethod({ method, data });
   } catch {
-    logger.error(`RETURNING`);
     return errorInvalidParamsForMethod(actionId, method);
   }
 
