@@ -5,11 +5,14 @@
  * 2.0.
  */
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { hasUnclosedQuote } from 'src/platform/plugins/shared/console/public/application/containers/editor/utils/autocomplete_utils';
-import { parseBody } from 'src/platform/plugins/shared/console/public/application/containers/editor/utils/tokens_utils';
+import { hasUnclosedQuote } from '@kbn/console-plugin/public/application/containers/editor/utils/autocomplete_utils';
+import { parseBody } from '@kbn/console-plugin/public/application/containers/editor/utils/tokens_utils';
 
 import type { JsonValue } from '@kbn/utility-types';
-export type ProcessorSuggestion = { name: string; template?: JsonValue };
+export interface ProcessorSuggestion {
+  name: string;
+  template?: JsonValue;
+}
 
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
   if (!v) {
@@ -71,10 +74,7 @@ const formatXJsonString = (input: string) => {
   return formattedJsonString;
 };
 
-
-
 export const hasOddQuoteCount = (text: string) => hasUnclosedQuote(text);
-
 
 export const buildProcessorInsertText = (
   name: string,

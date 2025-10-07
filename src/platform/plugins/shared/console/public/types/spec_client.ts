@@ -13,5 +13,3 @@ export interface ConsoleSpecClientContract {
   getEsSpec: () => Promise<{ es?: { endpoints?: Record<string, unknown> } }>;
   getIngestProcessorSuggestions: () => Promise<Array<{ name: string; template?: JsonValue }>>;
 }
-
-

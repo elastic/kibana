@@ -16,7 +16,10 @@ export interface EsSpecResponse {
   };
 }
 
-export type ProcessorSuggestion = { name: string; template?: JsonValue };
+export interface ProcessorSuggestion {
+  name: string;
+  template?: JsonValue;
+}
 
 export class ConsoleSpecClient {
   private esSpecCache?: EsSpecResponse;
@@ -49,7 +52,11 @@ export class ConsoleSpecClient {
     const res = await this.getEsSpec();
     const endpoints = res?.es?.endpoints ?? {};
     const ingest = endpoints['ingest.put_pipeline'] as
-      | { data_autocomplete_rules?: { processors?: Array<{ __one_of?: Array<Record<string, { __template?: JsonValue }>> }> } }
+      | {
+          data_autocomplete_rules?: {
+            processors?: Array<{ __one_of?: Array<Record<string, { __template?: JsonValue }>> }>;
+          };
+        }
       | undefined;
     const oneOf = ingest?.data_autocomplete_rules?.processors?.[0]?.__one_of ?? [];
     if (!Array.isArray(oneOf) || oneOf.length === 0) {
@@ -65,4 +72,3 @@ export class ConsoleSpecClient {
       .filter((s): s is ProcessorSuggestion => Boolean(s));
   }
 }
-
