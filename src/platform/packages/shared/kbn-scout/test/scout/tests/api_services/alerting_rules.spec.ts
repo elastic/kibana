@@ -8,7 +8,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { apiTest, expect } from '../../../src/playwright';
+import { apiTest, expect } from '../../../../src/playwright';
 import { createAlertRuleParams } from '../../fixtures/constants';
 
 apiTest.describe(`Alerting Rules helpers`, { tag: ['@svlSecurity', '@ess'] }, () => {
