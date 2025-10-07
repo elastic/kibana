@@ -4,7 +4,7 @@
 plugins.allowlistPluginGroups: ['platform', 'workplace_ai']
 
 ## Enable the Serverless Workplace AI plugin
-xpack.serverless.workplace_ai.enabled: true
+xpack.serverless.workplaceAI.enabled: true
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: workplace_ai
@@ -13,7 +13,7 @@ xpack.cloud.serverless.project_type: workplace_ai
 uiSettings.overrides.defaultRoute: /app/workplace_ai
 
 ## Enable workplace_ai plugins
-xpack.workplace_ai.enabled: true
+xpack.workplaceAIApp.enabled: true
 
 # Disable spaces
 xpack.spaces.maxSpaces: 1

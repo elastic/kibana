@@ -2388,7 +2388,7 @@
       "enabled": true
     },
     {
-      "groupName": "workchat gen-ai dependencies",
+      "groupName": "workplace-ai gen-ai dependencies",
       "matchDepNames": [
         "@a2a-js/sdk",
         "@modelcontextprotocol/sdk",
