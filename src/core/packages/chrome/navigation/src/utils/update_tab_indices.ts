@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useState } from 'react';
-
 /**
- * Hook for persisting popover on trigger click.
+ * Updates the tab indices for a given set of elements.
+ *
+ * @param elements - The elements to update the tab indices for.
  */
-export const usePersistentPopover = () => {
-  const [isPersistent, setIsPersistent] = useState(false);
-
-  const setPersistent = useCallback(() => setIsPersistent(true), []);
-  const clearPersistent = useCallback(() => setIsPersistent(false), []);
-
-  return { isPersistent, setPersistent, clearPersistent };
+export const updateTabIndices = (elements: HTMLElement[]) => {
+  elements.forEach((el, idx) => {
+    el.tabIndex = idx === 0 ? 0 : -1;
+  });
 };
