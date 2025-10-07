@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getKibanaModuleData, type KibanaModuleMetadata } from './read_manifest';
-export { excapeHtmlCharacters, stripFilePath, parseStdout } from './text_processing';
-export { getRunTarget, stripRunCommand } from './cli_processing';
-export { getTestIDForTitle, generateTestRunId } from './test_id_generator';
+export enum TestSuiteType {
+  FTR = 'ftr-suite',
+  SCOUT = 'scout-suite',
+  CYPRESS = 'cypress-suite',
+  SYNTHETICS = 'synthetics-suite',
+}
+
+export const TEST_SUITE_TYPES = Object.values(TestSuiteType);
