@@ -12,8 +12,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('../test_suites/discover/context_awareness'));
-    // loadTestFile(require.resolve('../test_suites/discover/logs'));
-    // loadTestFile(require.resolve('../test_suites/discover/embeddables'));
-    // loadTestFile(require.resolve('../test_suites/ml'));
+    loadTestFile(require.resolve('../test_suites/discover/logs'));
+    loadTestFile(require.resolve('../test_suites/discover/embeddables'));
+    loadTestFile(require.resolve('../test_suites/ml'));
   });
 }

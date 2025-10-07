@@ -12,10 +12,10 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('../test_suites/navigation'));
-    // loadTestFile(require.resolve('../test_suites/dataset_quality'));
-    // loadTestFile(require.resolve('../test_suites/onboarding'));
-    // loadTestFile(require.resolve('../test_suites/role_management'));
-    // loadTestFile(require.resolve('../test_suites/advanced_settings'));
-    // loadTestFile(require.resolve('../test_suites/privileges'));
+    loadTestFile(require.resolve('../test_suites/dataset_quality'));
+    loadTestFile(require.resolve('../test_suites/onboarding'));
+    loadTestFile(require.resolve('../test_suites/role_management'));
+    loadTestFile(require.resolve('../test_suites/advanced_settings'));
+    loadTestFile(require.resolve('../test_suites/privileges'));
   });
 }

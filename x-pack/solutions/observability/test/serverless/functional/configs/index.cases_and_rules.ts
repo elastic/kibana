@@ -12,8 +12,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     this.tags(['esGate']);
 
     loadTestFile(require.resolve('../test_suites/rules/rules_list'));
-    // loadTestFile(require.resolve('../test_suites/rules/custom_threshold_consumer'));
-    // loadTestFile(require.resolve('../test_suites/rules/es_query_consumer'));
-    // loadTestFile(require.resolve('../test_suites/cases'));
+    loadTestFile(require.resolve('../test_suites/rules/custom_threshold_consumer'));
+    loadTestFile(require.resolve('../test_suites/rules/es_query_consumer'));
+    loadTestFile(require.resolve('../test_suites/cases'));
   });
 }
