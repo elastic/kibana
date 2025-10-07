@@ -44,10 +44,11 @@ export const RulesDataInput = React.memo<RulesDataInputProps>(
                   titleSize="xs"
                   number={DataInputStep.Rules}
                   status={dataInputStatus}
+                  data-test-subj="rulesDataInputStepNumber"
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
+                <EuiTitle size="xs" data-test-subj="rulesDataInputTitle">
                   <b>{i18n.RULES_DATA_INPUT_TITLE}</b>
                 </EuiTitle>
               </EuiFlexItem>
@@ -143,7 +144,7 @@ export const RulesDataInputSubSteps = React.memo<RulesDataInputSubStepsProps>(
       [nameStep, copyStep, uploadStep, resourcesStep]
     );
 
-    return <SubSteps steps={steps} />;
+    return <SubSteps steps={steps} data-test-subj="migrationsSubSteps" />;
   }
 );
 RulesDataInputSubSteps.displayName = 'RulesDataInputActive';
