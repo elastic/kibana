@@ -241,10 +241,10 @@ describe('createAgentPolicyWithPackages', () => {
       expect.objectContaining({ skipDeploy: true })
     );
 
-    expect(appContextService.getLogger().debug).toHaveBeenCalledWith(
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
       'Disabling system monitoring for agentless policy [Agent policy 1]'
     );
-    expect(appContextService.getLogger().debug).toHaveBeenCalledWith(
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
       'Disabling monitoring for agentless policy [Agent policy 1]'
     );
 

@@ -161,7 +161,9 @@ export async function createAgentPolicyWithPackages({
     logger.info(`Disabling system monitoring for agentless policy [${newPolicy.name}]`);
   }
   const monitoringEnabled =
-    newPolicy.supports_agentless && monitoringEnabledParams ? [] : monitoringEnabledParams;
+    newPolicy.supports_agentless && monitoringEnabledParams?.length
+      ? []
+      : (monitoringEnabledParams as NewAgentPolicy['monitoring_enabled']);
 
   if (monitoringEnabledParams?.length && !monitoringEnabled?.length) {
     logger.info(`Disabling monitoring for agentless policy [${newPolicy.name}]`);
@@ -191,7 +193,7 @@ export async function createAgentPolicyWithPackages({
   const agentPolicy = await agentPolicyService.create(
     soClient,
     esClient,
-    { ...policy, monitoring_enabled: monitoringEnabled as NewAgentPolicy['monitoring_enabled'] },
+    { ...policy, monitoring_enabled: monitoringEnabled },
     {
       user,
       id: agentPolicyId,
