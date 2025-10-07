@@ -232,7 +232,12 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         render: (value: any, item: WorkflowListItemDto) => (
           <EuiFlexGroup direction="column" gutterSize="xs">
             <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
-            <NextExecutionTime triggers={item.definition?.triggers ?? []} />
+            <NextExecutionTime
+              triggers={item.definition?.triggers ?? []}
+              history={item.history}
+              refetch={refetch}
+              updateInterval={1}
+            />
           </EuiFlexGroup>
         ),
       },
@@ -245,7 +250,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           const lastRun = item.history[0];
           return (
             <EuiText size="s">
-              <FormattedRelative value={lastRun.finishedAt} />
+              <FormattedRelative value={lastRun.finishedAt} updateIntervalInSeconds={1} />
             </EuiText>
           );
         },
@@ -395,16 +400,16 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       },
     ],
     [
+      refetch,
+      canUpdateWorkflow,
+      handleToggleWorkflow,
+      canExecuteWorkflow,
+      handleRunWorkflow,
       application,
       canCreateWorkflow,
-      canDeleteWorkflow,
-      canExecuteWorkflow,
-      canUpdateWorkflow,
       handleCloneWorkflow,
+      canDeleteWorkflow,
       handleDeleteWorkflow,
-      handleRunWorkflow,
-      setExecuteWorkflow,
-      handleToggleWorkflow,
     ]
   );
 
