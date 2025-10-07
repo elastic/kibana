@@ -70,6 +70,7 @@ export class TelemetryConfigWatcher {
     };
     let updated = 0;
     let failed = 0;
+    let conflicts = 0;
     const isSpacesEnabled =
       this.endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
 
@@ -165,16 +166,32 @@ export class TelemetryConfigWatcher {
             }
           );
 
-          if (updateResult.failedPolicies.length) {
+          // Conflicts are expected on Serverless environments with multiple Kibana instances trying to do the same update, hence it's debug only.
+          const failedPolicies = updateResult.failedPolicies.filter(
+            (entry) => !('statusCode' in entry.error && entry.error.statusCode === 409)
+          );
+          if (failedPolicies.length) {
             this.logger.warn(
-              `Cannot update telemetry flag in the following policies:\n${updateResult.failedPolicies
+              `Cannot update telemetry flag in the following policies:\n${failedPolicies
+                .map((entry) => `- id: ${entry.packagePolicy.id}, error: ${stringify(entry.error)}`)
+                .join('\n')}`
+            );
+          }
+
+          const conflictedPolicies = updateResult.failedPolicies.filter(
+            (entry) => 'statusCode' in entry.error && entry.error.statusCode === 409
+          );
+          if (conflictedPolicies.length) {
+            this.logger.debug(
+              `Following policies are conflicted:\n${conflictedPolicies
                 .map((entry) => `- id: ${entry.packagePolicy.id}, error: ${stringify(entry.error)}`)
                 .join('\n')}`
             );
           }
 
           updated += updateResult.updatedPolicies?.length ?? 0;
-          failed += updateResult.failedPolicies.length;
+          failed += failedPolicies.length;
+          conflicts += conflictedPolicies.length;
         } catch (e) {
           this.logger.warn(
             `Unable to update telemetry config state to ${isTelemetryEnabled} in space [${spaceId}] for policies: ${spaceUpdates.map(
@@ -191,7 +208,7 @@ export class TelemetryConfigWatcher {
 
     if (updated > 0 || failed > 0) {
       this.logger.info(
-        `Finished updating global_telemetry_enabled flag to ${isTelemetryEnabled} in Defend package policies: ${updated} succeeded, ${failed} failed.`
+        `Finished updating global_telemetry_enabled flag to ${isTelemetryEnabled} in Defend package policies: ${updated} succeeded, ${failed} failed, ${conflicts} conflicts.`
       );
     } else {
       this.logger.debug(
