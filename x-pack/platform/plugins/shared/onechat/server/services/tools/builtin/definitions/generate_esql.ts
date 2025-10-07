@@ -9,7 +9,7 @@ import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { indexExplorer, generateEsql } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const nlToEsqlToolSchema = z.object({
@@ -62,7 +62,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         events,
       });
 
-      const toolResults: ToolResult[] = [];
+      const toolResults: ToolHandlerResult[] = [];
 
       if (esqlResponse.error) {
         toolResults.push({
