@@ -28,6 +28,7 @@ export class DiscoverPageObject extends FtrService {
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
   private readonly toasts = this.ctx.getService('toasts');
+  private readonly timeToVisualize = this.ctx.getPageObject('timeToVisualize');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -844,5 +845,27 @@ export class DiscoverPageObject extends FtrService {
     await this.browser.pressKeys(this.browser.keys.RIGHT);
     await this.browser.pressKeys(this.browser.keys.ENTER);
     await this.waitForDropToFinish();
+  }
+
+  /**
+   * Saves the Discover chart to a new dashboard
+   * It doesn't save to library
+   * @param title
+   */
+  public async saveHistogramToDashboard(title: string) {
+    await this.timeToVisualize.setSaveModalValues(title, {
+      saveAsNew: true,
+      redirectToOrigin: false,
+      addToDashboard: 'new',
+      saveToLibrary: false,
+    });
+
+    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+      this.testSubjects
+        .missingOrFail('confirmSaveSavedObjectButton')
+        .then(() => true)
+        .catch(() => false)
+    );
   }
 }
