@@ -36,7 +36,7 @@ describe('AWSSetupInfoContent', () => {
   });
 
   it('should render horizontal rule separator', () => {
-    const mockInfo = <span>Test info</span>;
+    const mockInfo = <span>{'Test info'}</span>;
 
     render(
       <TestWrapper>
@@ -52,11 +52,11 @@ describe('AWSSetupInfoContent', () => {
   it('should handle complex info content', () => {
     const complexInfo = (
       <div>
-        <p>Step 1: Create IAM role</p>
-        <p>Step 2: Configure permissions</p>
+        <p>{'Step 1: Create IAM role'}</p>
+        <p>{'Step 2: Configure permissions'}</p>
         <ul>
-          <li>CloudFormation access</li>
-          <li>EC2 read permissions</li>
+          <li>{'CloudFormation access'}</li>
+          <li>{'EC2 read permissions'}</li>
         </ul>
       </div>
     );
@@ -75,7 +75,7 @@ describe('AWSSetupInfoContent', () => {
   });
 
   it('should have proper styling and structure', () => {
-    const mockInfo = <span>Info content</span>;
+    const mockInfo = <span>{'Info content'}</span>;
 
     render(
       <TestWrapper>
@@ -116,8 +116,8 @@ describe('AWSSetupInfoContent', () => {
   it('should work with Azure-style content (cross-provider compatibility)', () => {
     const azureStyleInfo = (
       <div>
-        <p>Azure tenant setup</p>
-        <p>Service principal configuration</p>
+        <p>{'Azure tenant setup'}</p>
+        <p>{'Service principal configuration'}</p>
       </div>
     );
 
@@ -136,8 +136,8 @@ describe('AWSSetupInfoContent', () => {
   it('should work with GCP-style content (cross-provider compatibility)', () => {
     const gcpStyleInfo = (
       <div>
-        <p>Service account setup</p>
-        <p>Project configuration</p>
+        <p>{'Service account setup'}</p>
+        <p>{'Project configuration'}</p>
       </div>
     );
 

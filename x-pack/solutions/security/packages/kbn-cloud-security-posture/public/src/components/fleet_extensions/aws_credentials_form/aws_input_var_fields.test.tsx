@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AwsInputVarFields } from './aws_input_var_fields';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
 // Create simple inline mock to avoid import scope issues
 const createMockPackageInfo = () => ({
   name: 'cloud_security_posture',
@@ -38,7 +39,7 @@ jest.mock('../utils', () => ({
 }));
 
 describe('AwsInputVarFields', () => {
-  const mockPackageInfo = createMockPackageInfo() as any;
+  const mockPackageInfo = createMockPackageInfo() as unknown as PackageInfo;
   const mockOnChange = jest.fn();
 
   beforeEach(() => {
