@@ -9,16 +9,20 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup } from '@elastic/eui';
+
 import { ToolbarPopover } from '../../../shared_components';
+
 import type { VisualizationToolbarProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
+
 import { DatatableAppearanceSettings } from './toolbar/appearance_settings';
 
-export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
-  const { state, setState } = props;
+// TODO: Move this component into x-pack/platform/plugins/shared/lens/public/visualizations/datatable/components/toolbar folder
 
+export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+      {/* Appearance settings popover */}
       <ToolbarPopover
         title={i18n.translate('xpack.lens.table.valuesVisualOptions', {
           defaultMessage: 'Visual options',
@@ -28,7 +32,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
         buttonDataTestSubj="lnsVisualOptionsButton"
         data-test-subj="lnsVisualOptionsPopover"
       >
-        <DatatableAppearanceSettings state={state} setState={setState} />
+        <DatatableAppearanceSettings {...props} />
       </ToolbarPopover>
     </EuiFlexGroup>
   );
