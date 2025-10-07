@@ -11,7 +11,6 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import constate from 'constate';
 import { useFetchSuggestedPartitions } from './use_fetch_suggested_partitions';
 import { useStreamsRoutingActorRef } from '../state_management/stream_routing_state_machine';
-export { FormProvider } from 'react-hook-form';
 
 const [ReviewSuggestionsFormProvider, useReviewSuggestionsFormContext] = constate(
   (props: { form: ReturnType<typeof useReviewSuggestionsForm> }) => props.form
