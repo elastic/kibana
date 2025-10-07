@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { AgentPolicyInfo } from '../../../../common/types';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { getAgentPolicyInfo } from './helpers';
 
 export const getAgentPoliciesRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -44,5 +43,13 @@ export const getAgentPoliciesAsInternalUser = async ({
     spaceId: spaceId || ALL_SPACES_ID,
   });
 
-  return agentPolicies.items.map(getAgentPolicyInfo);
+  return agentPolicies.items.map((agentPolicy) => ({
+    id: agentPolicy.id,
+    name: agentPolicy.name,
+    agents: agentPolicy.agents ?? 0,
+    status: agentPolicy.status,
+    description: agentPolicy.description,
+    namespace: agentPolicy.namespace,
+    spaceIds: agentPolicy.space_ids || [DEFAULT_SPACE_ID],
+  }));
 };

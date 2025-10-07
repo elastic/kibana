@@ -36,7 +36,3 @@ export const deleteSyntheticsPrivateLocations = async (
     version: INITIAL_REST_VERSION,
   });
 };
-
-export const fetchLegacyAgentPolicy = async (agentPolicyId: string): Promise<AgentPolicyInfo> => {
-  return apiService.get(`${SYNTHETICS_API_URLS.LEGACY_AGENT_POLICIES}/${agentPolicyId}`);
-};

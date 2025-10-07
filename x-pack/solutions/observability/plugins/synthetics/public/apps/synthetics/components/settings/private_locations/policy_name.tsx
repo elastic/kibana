@@ -6,14 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiIconTip,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiTextColor,
-} from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
@@ -21,26 +14,15 @@ import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 import { useFleetPermissions } from '../../../hooks';
 import { selectAgentPolicies } from '../../../state/agent_policies';
-import { useLegacyAgentPolicy } from '../../../hooks/use_legacy_agent_policy';
 
 export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
   const { canReadAgentPolicies } = useFleetPermissions();
   const { space: currentSpace } = useKibanaSpace();
   const { basePath } = useSyntheticsSettingsContext();
 
-  const { data: policies, loading: isLoadingSpacePolicies } = useSelector(selectAgentPolicies);
+  const { data: policies, loading } = useSelector(selectAgentPolicies);
 
-  const maybeSpacePolicy = policies?.find((policyT) => policyT.id === agentPolicyId);
-
-  // Only fetch legacy policy if not found in regular policies and not loading
-  const shouldFetchLegacy = !isLoadingSpacePolicies && !maybeSpacePolicy && agentPolicyId;
-  const { data: legacyPolicy, loading: legacyLoading } = useLegacyAgentPolicy(
-    shouldFetchLegacy ? agentPolicyId : null
-  );
-
-  const policy = maybeSpacePolicy || legacyPolicy;
-  const isLegacyPolicy = !maybeSpacePolicy && legacyPolicy?.id !== undefined;
-  const loading = isLoadingSpacePolicies || legacyLoading;
+  const policy = policies?.find((policyT) => policyT.id === agentPolicyId);
 
   const agentPolicyUrl = useMemo(() => {
     const spaceId =
@@ -61,23 +43,9 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
       {canReadAgentPolicies ? (
         <EuiTextColor color="subdued">
           {policy ? (
-            <>
-              <EuiLink
-                data-test-subj="syntheticsPolicyNameLink"
-                href={agentPolicyUrl}
-                css={{ marginRight: '4px' }}
-              >
-                {policy?.name}
-              </EuiLink>
-              {isLegacyPolicy && (
-                <EuiIconTip
-                  content={LEGACY_POLICY_TOOLTIP}
-                  type="warning"
-                  color="warning"
-                  size="s"
-                />
-              )}
-            </>
+            <EuiLink data-test-subj="syntheticsPolicyNameLink" href={agentPolicyUrl}>
+              {policy?.name}
+            </EuiLink>
           ) : (
             <EuiText color="danger" size="s" className="eui-displayInline">
               {POLICY_IS_DELETED}
@@ -107,11 +75,3 @@ const POLICY_IS_DELETED = i18n.translate('xpack.synthetics.monitorManagement.del
 const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agents', {
   defaultMessage: 'Agents: ',
 });
-
-const LEGACY_POLICY_TOOLTIP = i18n.translate(
-  'xpack.synthetics.monitorManagement.legacyPolicyTooltip',
-  {
-    defaultMessage:
-      "This policy is only available in the default space. Update the policy's space settings to include this space.",
-  }
-);
