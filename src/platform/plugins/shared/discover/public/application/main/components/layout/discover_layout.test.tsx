@@ -111,6 +111,7 @@ async function mountComponent(
         timeRangeAbsolute: time,
         timeRangeRelative: time,
         searchSessionId: '123',
+        isSearchSessionRestored: false,
       },
     })
   );

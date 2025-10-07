@@ -44,7 +44,6 @@ examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/unified_tabs_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
-examples/workflows @elastic/workflows-eng
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
@@ -58,7 +57,6 @@ packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
-packages/kbn-eslint-plugin-eui-a11y @elastic/obs-ux-infra_services-team
 packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
 packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
@@ -499,6 +497,7 @@ src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-es
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-event-annotation-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-expect @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-field-formats-common @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
@@ -924,7 +923,6 @@ x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-inf
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver @elastic/security-generative-ai
-x-pack/platform/packages/shared/kbn-page-attachment-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
@@ -2287,7 +2285,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/solutions/chat/test/serverless/api_integration/configs/config.ts @elastic/search-kibana @elastic/appex-qa
 /x-pack/solutions/chat/test/serverless/functional/configs/config.ts @elastic/search-kibana @elastic/appex-qa
 /x-pack/platform/test/onechat_api_integration @elastic/search-kibana @elastic/workchat-eng
-
+/x-pack/platform/test/onechat_functional @elastic/search-kibana @elastic/workchat-eng
 
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
