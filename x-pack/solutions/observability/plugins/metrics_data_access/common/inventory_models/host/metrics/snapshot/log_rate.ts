@@ -31,3 +31,38 @@ export const logRate: MetricsUIAggregation = {
     },
   },
 };
+
+// Single-bucket version for snapshot API refactor
+// Uses document counts over time range to calculate log rate
+export const logRateSingleBucket: MetricsUIAggregation = {
+  logRate_min_timestamp: {
+    min: {
+      field: '@timestamp',
+    },
+  },
+  logRate_max_timestamp: {
+    max: {
+      field: '@timestamp',
+    },
+  },
+  logRate: {
+    bucket_script: {
+      buckets_path: {
+        count: '_count',
+        minTime: 'logRate_min_timestamp',
+        maxTime: 'logRate_max_timestamp',
+      },
+      script: {
+        source: `
+          if (params.count == null || params.minTime == null || params.maxTime == null) {
+            return 0;
+          }
+          double timeDiff = (params.maxTime - params.minTime) / 1000.0;
+          return timeDiff > 0 ? params.count / timeDiff : 0;
+        `,
+        lang: 'painless',
+      },
+      gap_policy: 'skip',
+    },
+  },
+};

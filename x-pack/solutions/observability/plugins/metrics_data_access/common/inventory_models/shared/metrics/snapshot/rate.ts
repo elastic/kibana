@@ -29,3 +29,45 @@ export const rate = (id: string, field: string): MetricsUIAggregation => {
     },
   };
 };
+
+// Single-bucket version for snapshot API refactor
+// Uses min/max timestamps to calculate rate over the query time range
+export const rateSingleBucket = (id: string, field: string): MetricsUIAggregation => {
+  return {
+    [`${id}_sum`]: {
+      sum: {
+        field,
+      },
+    },
+    [`${id}_min_timestamp`]: {
+      min: {
+        field: '@timestamp',
+      },
+    },
+    [`${id}_max_timestamp`]: {
+      max: {
+        field: '@timestamp',
+      },
+    },
+    [id]: {
+      bucket_script: {
+        buckets_path: {
+          value: `${id}_sum`,
+          minTime: `${id}_min_timestamp`,
+          maxTime: `${id}_max_timestamp`,
+        },
+        script: {
+          source: `
+            if (params.value == null || params.minTime == null || params.maxTime == null) {
+              return 0;
+            }
+            double timeDiff = (params.maxTime - params.minTime) / 1000.0;
+            return timeDiff > 0 ? params.value / timeDiff : 0;
+          `,
+          lang: 'painless',
+        },
+        gap_policy: 'skip',
+      },
+    },
+  };
+};
