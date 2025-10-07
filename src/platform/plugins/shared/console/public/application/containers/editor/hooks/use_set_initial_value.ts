@@ -67,7 +67,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
           parsedURL.hostname === 'www.elastic.co' &&
           ALLOWED_PATHS.some((path) => parsedURL.pathname.startsWith(path))
         ) {
-          const resp = await fetch(parsedURL.href);
+          const resp = await fetch(parsedURL);
           const data = await resp.text();
           setValue(`${localStorageValue ?? ''}\n\n${data}`);
         } else {
