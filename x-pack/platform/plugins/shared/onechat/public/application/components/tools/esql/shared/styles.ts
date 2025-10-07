@@ -31,4 +31,3 @@ export const actionsContainer = (euiTheme: UseEuiTheme['euiTheme']) =>
     display: 'inline-flex',
     gap: 0,
   });
-

@@ -154,9 +154,9 @@ export function createVisualizationRenderer({
       toolResult = steps
         .filter((s) => s.type === 'tool_call')
         .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-        .find((r) => r.type === ToolResultType.visualization && r.tool_result_id === toolResultId) as
-        | VisualizationResult
-        | undefined;
+        .find(
+          (r) => r.type === ToolResultType.visualization && r.tool_result_id === toolResultId
+        ) as VisualizationResult | undefined;
     }
 
     if (!toolResult) {

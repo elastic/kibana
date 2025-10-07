@@ -438,7 +438,7 @@ This tool will:
               type: ToolResultType.error,
               data: {
                 message: `Failed to create visualization: ${error.message}`,
-                metadata: {nlQuery, esql, chartType}
+                metadata: { nlQuery, esql, chartType },
               },
             },
           ],
