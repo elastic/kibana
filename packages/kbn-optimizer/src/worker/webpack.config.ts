@@ -48,7 +48,7 @@ export function getWebpackConfig(
       [bundle.id]: ENTRY_CREATOR,
     },
 
-    devtool: worker.dist ? false : 'cheap-source-map',
+    devtool: 'cheap-source-map',
     profile: worker.profileWebpack,
 
     target: 'web',
