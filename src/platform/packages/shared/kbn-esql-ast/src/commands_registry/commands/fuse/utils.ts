@@ -42,6 +42,28 @@ export function findCommandOptionByName(
   );
 }
 
+/**
+ * Checks if we are immediately after a field that belongs to an option.
+ * This is useful for being able to decide we are still in the SCORE BY position.
+ *
+ * Example: "SCORE BY field_name/"  returns true
+ *          "SCORE BY field_name /" returns false
+ */
+export function immediatelyAfterOptionField(innerText: string, optionName: string): boolean {
+  const regex = new RegExp(`${optionName}\\s+\\S*$`, 'i');
+  return regex.test(innerText);
+}
+
+/**
+ * Checks if we are immediately after a field in a list of fields that belongs to an option
+ * Example: "KEY BY field1, field2/"  returns true
+ *          "KEY BY field1, field2 /" returns false
+ */
+export function immediatelyAfterOptionFieldsList(innerText: string, optionName: string): boolean {
+  const regex = new RegExp(`${optionName}(\\s+\\S+,?)+$`, 'i');
+  return regex.test(innerText);
+}
+
 export function buildMissingMetadataMessage(
   command: ESQLCommand,
   metadataField: string

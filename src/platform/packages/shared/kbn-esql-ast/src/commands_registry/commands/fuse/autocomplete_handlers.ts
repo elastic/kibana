@@ -33,20 +33,28 @@ export async function scoreByAutocomplete(
     advanceCursor: true,
     openSuggestions: true,
   });
+
+  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
+  const getSuggestionsForIncomplete = (
+    _fragment: string,
+    rangeToReplace?: { start: number; end: number }
+  ) => {
+    return (
+      numericFields?.map((suggestion) => {
+        return {
+          ...suggestion,
+          rangeToReplace,
+        };
+      }) ?? []
+    );
+  };
+  const getSuggestionsForComplete = () => [];
+
   return await handleFragment(
     innerText,
-    (fragment) => columnExists(fragment, context),
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      return (
-        numericFields?.map((suggestion) => {
-          return {
-            ...suggestion,
-            rangeToReplace,
-          };
-        }) ?? []
-      );
-    },
-    () => []
+    isFragmentComplete,
+    getSuggestionsForIncomplete,
+    getSuggestionsForComplete
   );
 }
 
@@ -63,20 +71,28 @@ export async function groupByAutocomplete(
     advanceCursor: true,
     openSuggestions: true,
   });
+
+  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
+  const getSuggestionsForIncomplete = (
+    _fragment: string,
+    rangeToReplace?: { start: number; end: number }
+  ) => {
+    return (
+      stringFields?.map((suggestion) => {
+        return {
+          ...suggestion,
+          rangeToReplace,
+        };
+      }) ?? []
+    );
+  };
+  const getSuggestionsForComplete = () => [];
+
   return await handleFragment(
     innerText,
-    (fragment) => columnExists(fragment, context),
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      return (
-        stringFields?.map((suggestion) => {
-          return {
-            ...suggestion,
-            rangeToReplace,
-          };
-        }) ?? []
-      );
-    },
-    () => []
+    isFragmentComplete,
+    getSuggestionsForIncomplete,
+    getSuggestionsForComplete
   );
 }
 
@@ -101,35 +117,45 @@ export async function keyByAutocomplete(
       openSuggestions: true,
     })) ?? [];
 
+  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
+  const getSuggestionsForComplete = (
+    fragment: string,
+    rangeToReplace: { start: number; end: number }
+  ) => {
+    const finalSuggestions = fuseArgumentsAutocomplete(command).map((s) => ({
+      ...s,
+      text: ` ${s.text}`,
+    }));
+    if (allFields.length > 0) {
+      finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
+    }
+
+    return finalSuggestions.map<ISuggestionItem>((s) =>
+      withAutoSuggest({
+        ...s,
+        filterText: fragment,
+        text: fragment + s.text,
+        rangeToReplace,
+      })
+    );
+  };
+  const getSuggestionsForIncomplete = (
+    _fragment: string,
+    rangeToReplace?: { start: number; end: number }
+  ) => {
+    return allFields.map((suggestion) =>
+      withAutoSuggest({
+        ...suggestion,
+        rangeToReplace,
+      })
+    );
+  };
+
   return handleFragment(
     innerText,
-    (fragment) => columnExists(fragment, context),
-    (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
-      return allFields.map((suggestion) =>
-        withAutoSuggest({
-          ...suggestion,
-          rangeToReplace,
-        })
-      );
-    },
-    (fragment: string, rangeToReplace: { start: number; end: number }) => {
-      const finalSuggestions = fuseArgumentsAutocomplete(command).map((s) => ({
-        ...s,
-        text: ` ${s.text}`,
-      }));
-      if (allFields.length > 0) {
-        finalSuggestions.push({ ...commaCompleteItem, text: ', ' });
-      }
-
-      return finalSuggestions.map<ISuggestionItem>((s) =>
-        withAutoSuggest({
-          ...s,
-          filterText: fragment,
-          text: fragment + s.text,
-          rangeToReplace,
-        })
-      );
-    }
+    isFragmentComplete,
+    getSuggestionsForIncomplete,
+    getSuggestionsForComplete
   );
 }
 

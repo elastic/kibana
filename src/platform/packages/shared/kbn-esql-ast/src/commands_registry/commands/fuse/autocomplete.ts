@@ -15,7 +15,11 @@ import {
   keyByAutocomplete,
   fuseArgumentsAutocomplete,
 } from './autocomplete_handlers';
-import { extractFuseArgs } from './utils';
+import {
+  extractFuseArgs,
+  immediatelyAfterOptionField,
+  immediatelyAfterOptionFieldsList,
+} from './utils';
 
 export enum FusePosition {
   BEFORE_NEW_ARGUMENT = 'before_new_argument',
@@ -28,15 +32,15 @@ export enum FusePosition {
 export function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
   const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
 
-  if ((scoreBy && scoreBy.incomplete) || /SCORE BY\s+\S*$/i.test(innerText)) {
+  if ((scoreBy && scoreBy.incomplete) || immediatelyAfterOptionField(innerText, 'SCORE BY')) {
     return FusePosition.SCORE_BY;
   }
 
-  if ((groupBy && groupBy.incomplete) || /GROUP BY\s+\S*$/i.test(innerText)) {
+  if ((groupBy && groupBy.incomplete) || immediatelyAfterOptionField(innerText, 'GROUP BY')) {
     return FusePosition.GROUP_BY;
   }
 
-  if ((keyBy && keyBy.incomplete) || /KEY BY(\s+\S+,?)+$/i.test(innerText)) {
+  if ((keyBy && keyBy.incomplete) || immediatelyAfterOptionFieldsList(innerText, 'KEY BY')) {
     return FusePosition.KEY_BY;
   }
 
