@@ -61,7 +61,7 @@ export interface VisualOptionsPopoverProps {
   datasourceLayers: FramePublicAPI['datasourceLayers'];
 }
 
-export function VisualOptionsPopover(props: VisualOptionsPopoverProps) {
+export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = (props) => {
   const { state, datasourceLayers } = props;
   const dataLayers = getDataLayers(state.layers);
   const isAreaPercentage = dataLayers.some(
@@ -98,7 +98,7 @@ export function VisualOptionsPopover(props: VisualOptionsPopoverProps) {
       </ToolbarPopover>
     </TooltipWrapper>
   );
-}
+};
 
 export const XyAppearanceSettings: React.FC<VisualOptionsPopoverProps> = ({ state, setState }) => {
   const dataLayers = getDataLayers(state.layers);
