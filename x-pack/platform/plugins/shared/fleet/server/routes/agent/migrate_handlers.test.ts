@@ -36,9 +36,7 @@ jest.mock('../../services/agents', () => {
 
 // Mock the license service
 jest.mock('../../services', () => {
-  const actual = jest.requireActual('../../services');
   return {
-    ...actual,
     licenseService: {
       hasAtLeast: jest.fn(),
     },
