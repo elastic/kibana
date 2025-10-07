@@ -115,7 +115,6 @@ export const createPatternMatcherService = (
         const privUserAgg = response.aggregations?.privileged_user_status_since_last_run;
         const buckets = privUserAgg?.buckets ?? [];
 
-        // process current page TODO: this is where AD users are setting not privileged
         if (buckets.length && aggregations) {
           const { users: privMonUsers, maxTimestamp } = await parseAggregationResponse(
             aggregations,
