@@ -12,15 +12,18 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { EnhancedIndexExplorerAnnotation } from './state';
 import {
   EXPLORE_INDICES,
-  ANALYZE_INDEX_RELEVANCE,
+  GET_SHORTLIST_INDEX_PATTERNS,
+  BRIDGE_SHORTLIST_TO_ANALYZED,
   SELECT_BEST_INDICES,
   VALIDATE_INDEX_ACCESS,
 } from './constants';
 import { exploreIndices } from './nodes/explore_indices/explore_indices';
-import { analyzeIndexRelevance } from './nodes/analyze_index_relevance/analyze_index_relevance';
+// import { getShortlistIndexPatterns } from './nodes/get_shortlist_index_patterns/get_shortlist_index_patterns';
 import { selectBestIndices } from './nodes/select_best_indices/select_best_indices';
 import { validateIndexAccess } from './nodes/validate_index_access/validate_index_access';
 import type { CreateLlmInstance } from '../../utils/common';
+import { getShortlistIndexPatterns } from '../select_index_pattern/nodes/shortlist_index_patterns/shortlist_index_patterns';
+import { bridgeShortlistToAnalyzed } from './nodes/bridge_shortlist_to_analyzed/bridge_shortlist_to_analyzed';
 
 export const getEnhancedIndexExplorerGraph = async ({
   createLlmInstance,
@@ -37,6 +40,9 @@ export const getEnhancedIndexExplorerGraph = async ({
   connectorId: string;
   logger: Logger;
 }) => {
+  const shortlistIndexPatterns = await getShortlistIndexPatterns({
+    createLlmInstance,
+  });
   const graph = new StateGraph(EnhancedIndexExplorerAnnotation)
     .addNode(
       EXPLORE_INDICES,
@@ -45,14 +51,13 @@ export const getEnhancedIndexExplorerGraph = async ({
         retryPolicy: { maxAttempts: 3 },
       }
     )
-    .addNode(
-      ANALYZE_INDEX_RELEVANCE,
-      analyzeIndexRelevance({ esClient, createLlmInstance, logger }),
-      {
-        retryPolicy: { maxAttempts: 3 },
-      }
-    )
-    .addNode(SELECT_BEST_INDICES, selectBestIndices({ createLlmInstance, logger }), {
+    .addNode(GET_SHORTLIST_INDEX_PATTERNS, shortlistIndexPatterns, {
+      retryPolicy: { maxAttempts: 3 },
+    })
+    .addNode(BRIDGE_SHORTLIST_TO_ANALYZED, bridgeShortlistToAnalyzed(), {
+      retryPolicy: { maxAttempts: 3 },
+    })
+    .addNode(SELECT_BEST_INDICES, selectBestIndices({ logger }), {
       retryPolicy: { maxAttempts: 3 },
     })
     .addNode(VALIDATE_INDEX_ACCESS, validateIndexAccess({ esClient }), {
@@ -60,8 +65,9 @@ export const getEnhancedIndexExplorerGraph = async ({
     })
 
     .addEdge(START, EXPLORE_INDICES)
-    .addEdge(EXPLORE_INDICES, ANALYZE_INDEX_RELEVANCE)
-    .addEdge(ANALYZE_INDEX_RELEVANCE, SELECT_BEST_INDICES)
+    .addEdge(EXPLORE_INDICES, GET_SHORTLIST_INDEX_PATTERNS)
+    .addEdge(GET_SHORTLIST_INDEX_PATTERNS, BRIDGE_SHORTLIST_TO_ANALYZED)
+    .addEdge(BRIDGE_SHORTLIST_TO_ANALYZED, SELECT_BEST_INDICES)
     .addEdge(SELECT_BEST_INDICES, VALIDATE_INDEX_ACCESS)
     .addEdge(VALIDATE_INDEX_ACCESS, END)
     .compile();

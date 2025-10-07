@@ -82,8 +82,16 @@ export const exploreIndices = ({
       reason: resource.reason,
     }));
 
+    // Extract index pattern names for the shortlist function
+    const indexPatterns = discoveredResources.map((resource) => resource.name);
+
     return {
       discoveredResources,
+      indexPatterns,
+      input: {
+        question: input.query,
+        indexPattern: input.indexPattern,
+      },
     };
   };
 };

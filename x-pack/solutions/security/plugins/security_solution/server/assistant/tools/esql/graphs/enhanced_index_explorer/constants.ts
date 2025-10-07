@@ -6,6 +6,7 @@
  */
 
 export const EXPLORE_INDICES = 'exploreIndices';
-export const ANALYZE_INDEX_RELEVANCE = 'analyzeIndexRelevance';
+export const GET_SHORTLIST_INDEX_PATTERNS = 'getShortlistIndexPatterns';
+export const BRIDGE_SHORTLIST_TO_ANALYZED = 'bridgeShortlistToAnalyzed';
 export const SELECT_BEST_INDICES = 'selectBestIndices';
 export const VALIDATE_INDEX_ACCESS = 'validateIndexAccess';

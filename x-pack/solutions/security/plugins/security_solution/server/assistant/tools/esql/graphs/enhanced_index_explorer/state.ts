@@ -22,11 +22,21 @@ export const EnhancedIndexExplorerAnnotation = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
-  input: Annotation<{ query: string; limit?: number; indexPattern?: string } | undefined>({
+  input: Annotation<
+    { query: string; limit?: number; indexPattern?: string; question?: string } | undefined
+  >({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => undefined,
   }),
   discoveredResources: Annotation<IndexResource[]>({
+    reducer: (currentValue, newValue) => newValue ?? currentValue,
+    default: () => [],
+  }),
+  indexPatterns: Annotation<string[]>({
+    reducer: (currentValue, newValue) => newValue ?? currentValue,
+    default: () => [],
+  }),
+  shortlistedIndexPatterns: Annotation<string[]>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => [],
   }),
