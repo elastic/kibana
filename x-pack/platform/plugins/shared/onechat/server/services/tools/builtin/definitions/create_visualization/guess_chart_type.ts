@@ -21,10 +21,7 @@ export async function getChartType(
 Respond with ONLY the chart type name, nothing else.
 
 Guidelines:
-- metric: For single numeric values, KPIs, or metrics with optional trend lines
-- gauge: For progress indicators, goals, or values with min/max ranges
-- tagcloud: For displaying word frequencies or categorical data
-- pie: For showing proportions or parts of a whole`,
+- metric: For single numeric values, KPIs, or metrics with optional trend line`,
     },
     {
       role: 'user',
