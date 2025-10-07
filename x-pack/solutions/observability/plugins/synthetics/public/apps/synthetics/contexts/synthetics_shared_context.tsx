@@ -56,7 +56,6 @@ export const SyntheticsSharedContext: React.FC<
         slo: startPlugins.slo,
         serverless: startPlugins.serverless,
         charts: startPlugins.charts,
-        security: startPlugins.security,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>

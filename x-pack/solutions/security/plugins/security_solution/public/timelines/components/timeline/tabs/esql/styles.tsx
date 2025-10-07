@@ -17,16 +17,17 @@ export const EmbeddedDiscoverContainer = styled.div`
 `;
 
 // TODO remember to remove the className added to discover/public/components/discover_grid_flyout/discover_grid_flyout.tsx when removing this
+// For its usage in the Security Solution timeline, we need Discover flyout to be above the timeline (which has a z-index of 1002)
 export const TimelineESQLGlobalStyles = createGlobalStyle`
   body:has(.timeline-portal-overlay-mask){
       .DiscoverFlyout {
-      z-index: 1002; // For its usage in the Security Solution timeline, we need Discover flyout to be above the timeline (which has a z-index of 1001)
+      z-index: 1003;
     }
     .esqlInlineDocumentationFlyout {
-      z-index: 1002 !important;
+      z-index: 1003 !important;
     }
     .euiOverlayMask {
-      z-index: 1001 !important;
+      z-index: 1002 !important;
     }
   }
 

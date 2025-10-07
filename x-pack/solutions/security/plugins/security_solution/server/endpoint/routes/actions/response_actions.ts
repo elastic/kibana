@@ -436,7 +436,6 @@ function isThirdPartyFeatureDisabled(
   }
 
   if (
-    (agentType === 'sentinel_one' && !experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
     (agentType === 'crowdstrike' &&
       !experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled) ||
     (agentType === 'microsoft_defender_endpoint' &&
