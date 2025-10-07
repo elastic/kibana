@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await supertest
         .post(`/api/saved_objects/search`)
         .send({
+          typeMigrationVersion: '10.8.0',
           attributes: {
             title: 'Legacy Discover Session',
             description: '',
