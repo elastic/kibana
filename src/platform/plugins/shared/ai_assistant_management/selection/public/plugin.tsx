@@ -129,7 +129,7 @@ export class AIAssistantManagementPlugin
     const aiAssistantType$ = new BehaviorSubject<AIAssistantType>(preferredAIAssistantType);
     // Keep aiAssistantType$ in sync with UI setting without page reload
     this.aiAssistantTypeSubscription = coreStart.uiSettings
-      .get$<AIAssistantType>(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY)
+      .get$<AIAssistantType>(PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY, AIAssistantType.Default)
       .subscribe((nextValue) => {
         aiAssistantType$.next(nextValue);
       });
