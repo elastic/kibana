@@ -62,4 +62,3 @@ export function VisualizationActions({
     </div>
   );
 }
-
