@@ -9,7 +9,6 @@ import { get, isNumber } from 'lodash';
 import type {
   MetricsAPIRequest,
   MetricsAPIResponse,
-  MetricsAPISeries,
   SnapshotMetricType,
 } from '@kbn/metrics-data-access-plugin/common';
 import type {
@@ -72,26 +71,12 @@ const getMetrics = (
       const numericValue = isNumber(value) && Number.isFinite(value) ? value : null;
 
       // For single bucket, max and avg are the same as the value
-      const timeseries = snapshotRequest.includeTimeseries
-        ? ({
-            id: name,
-            columns: [
-              { name: 'timestamp', type: 'date' },
-              { name: 'metric_0', type: 'number' },
-            ],
-            rows: series.rows.map((row) => ({
-              timestamp: row.timestamp,
-              metric_0: get(row, metric.id, null),
-            })),
-          } as MetricsAPISeries)
-        : undefined;
-
+      // Note: timeseries is always undefined in single-bucket mode (no date_histogram)
       return {
         name,
         value: numericValue,
         max: numericValue,
         avg: numericValue,
-        timeseries,
       };
     });
 };
