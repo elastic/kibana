@@ -14258,19 +14258,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.8.4":
-  version "12.8.4"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.4.tgz#db0eabd9e356c25f5ebf427413a8c5dd46113394"
-  integrity sha512-bqUu4T5QSHiCFPkoH+b+LROKwQJdLvcjhGbNW9c1dLafCBRjmH1IYz0zPE+lRDXCtQ9kRyFxz3tG19+8VORJ1w==
+"@xyflow/react@^12.8.5":
+  version "12.8.6"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.6.tgz#4cb80abe1bf7123dd989f2c8554bff679980bd8b"
+  integrity sha512-SksAm2m4ySupjChphMmzvm55djtgMDPr+eovPDdTnyGvShf73cvydfoBfWDFllooIQ4IaiUL5yfxHRwU0c37EA==
   dependencies:
-    "@xyflow/system" "0.0.68"
+    "@xyflow/system" "0.0.70"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.68":
-  version "0.0.68"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.68.tgz#980b8185743147a454bfb24a98f6bddc55a703e6"
-  integrity sha512-QDG2wxIG4qX+uF8yzm1ULVZrcXX3MxPBoxv7O52FWsX87qIImOqifUhfa/TwsvLdzn7ic2DDBH1uI8TKbdNTYA==
+"@xyflow/system@0.0.70":
+  version "0.0.70"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.70.tgz#c397d2a802e250fe852717dd55b5be5d306d7c1c"
+  integrity sha512-PpC//u9zxdjj0tfTSmZrg3+sRbTz6kop/Amky44U2Dl51sxzDTIUfXMwETOYpmr2dqICWXBIJwXL2a9QWtX2XA==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-interpolate" "^3.0.4"
@@ -29291,10 +29291,10 @@ ripemd160@=2.0.1, ripemd160@^2.0.0, ripemd160@^2.0.1:
     hash-base "^2.0.0"
     inherits "^2.0.1"
 
-rison-node@1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/rison-node/-/rison-node-1.0.2.tgz#b7b5f37f39f5ae2a51a973a33c9aa17239a33e4b"
-  integrity sha1-t7Xzfzn1ripRqXOjPJqhcjmjPks=
+rison-node@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/rison-node/-/rison-node-2.1.1.tgz#3db68c6a736442a5494826f86fc8d675933934a5"
+  integrity sha512-GuV0OnSL2erZJ0j/9YUsrAdfSh3mGcrq+4wM4PqRftOYT7+TRhxbMrpVZaGC5YIPwncIoOM7PPnskDku5Ywg1Q==
 
 robots-parser@^3.0.1:
   version "3.0.1"
