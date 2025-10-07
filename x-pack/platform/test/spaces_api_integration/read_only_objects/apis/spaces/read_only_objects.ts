@@ -224,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ id: objectId, type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(403);
 
-        expect(overwriteResponse.body).to.have.property('error', 'Bad Request');
+        expect(overwriteResponse.body).to.have.property('error', 'Forbidden');
         expect(overwriteResponse.body).to.have.property(
           'message',
           'Unable to create read_only_type'
