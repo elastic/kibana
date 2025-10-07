@@ -9,113 +9,40 @@ import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
 
 const INGESTION_DURATION_MINUTES = 5;
+const INGESTION_RATE = 10;
+const GOOD_QUALITY_STREAM = 'logs-good-quality';
+const DEGRADED_QUALITY_STREAM = 'logs-degraded-quality';
+const POOR_QUALITY_STREAM = 'logs-poor-quality';
 
 test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
-    const currentTime = Date.now();
     await apiServices.streams.enable();
-    // Generate logs for the last 5 minutes for two streams with different ingestion rates
-    await generateLogsData(logsSynthtraceEsClient)({
-      index: 'logs-10-docs-per-minute',
-      startTime: new Date(currentTime - INGESTION_DURATION_MINUTES * 60 * 1000).toISOString(),
-      endTime: new Date(currentTime).toISOString(),
-      docsPerMinute: 10,
-    });
-    await generateLogsData(logsSynthtraceEsClient)({
-      index: 'logs-20-docs-per-minute',
-      startTime: new Date(currentTime - INGESTION_DURATION_MINUTES * 60 * 1000).toISOString(),
-      endTime: new Date(currentTime).toISOString(),
-      docsPerMinute: 20,
-    });
-  });
-
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
-    await pageObjects.streams.gotoStreamMainPage();
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.streams.deleteStream('logs-10-docs-per-minute');
-    await apiServices.streams.deleteStream('logs-20-docs-per-minute');
-    await apiServices.streams.disable();
-  });
-
-  test('should display correct doc count in the table', async ({ pageObjects }) => {
-    // Wait for the streams table to load
-    await pageObjects.streams.expectStreamsTableVisible();
-
-    // Verify the document count for each stream in the default time range - last 15 minutes
-    await pageObjects.streams.verifyDocCount(
-      'logs-10-docs-per-minute',
-      INGESTION_DURATION_MINUTES * 10
-    );
-    await pageObjects.streams.verifyDocCount(
-      'logs-20-docs-per-minute',
-      INGESTION_DURATION_MINUTES * 20
-    );
-  });
-
-  test('should display Good data quality when there are no failed or degraded docs', async ({
-    pageObjects,
-  }) => {
-    // Initial data quality should be good
-    await pageObjects.streams.verifyDataQuality('logs-10-docs-per-minute', 'Good');
-    await pageObjects.streams.verifyDataQuality('logs-20-docs-per-minute', 'Good');
-  });
-
-  test('should display Degraded or Poor data quality when there are degraded docs', async ({
-    pageObjects,
-    page,
-    logsSynthtraceEsClient,
-  }) => {
     const currentTime = Date.now();
-    // Ingest 1 doc with a malformed messaege to have 1 degraded document
+    // Stream 1: Good quality stream - no failed or degraded docs, 50 docs total
     await generateLogsData(logsSynthtraceEsClient)({
-      index: 'logs-10-docs-per-minute',
+      index: GOOD_QUALITY_STREAM,
+      startTime: new Date(currentTime - INGESTION_DURATION_MINUTES * 60 * 1000).toISOString(),
+      endTime: new Date(currentTime).toISOString(),
+      docsPerMinute: INGESTION_RATE,
+    });
+
+    // Stream 2: Degraded quality stream - 52 docs in total,1 failed (< 3%) and 1 degraded doc (< 3%)
+    await generateLogsData(logsSynthtraceEsClient)({
+      index: DEGRADED_QUALITY_STREAM,
+      startTime: new Date(currentTime - INGESTION_DURATION_MINUTES * 60 * 1000).toISOString(),
+      endTime: new Date(currentTime).toISOString(),
+      docsPerMinute: INGESTION_RATE,
+    });
+    // Add 1 degraded doc
+    await generateLogsData(logsSynthtraceEsClient)({
+      index: DEGRADED_QUALITY_STREAM,
       startTime: new Date(currentTime - 60 * 1000).toISOString(),
       endTime: new Date(currentTime).toISOString(),
       docsPerMinute: 1,
       isMalformed: true,
     });
-
-    // Refresh the page to reflect the processor changes
-    await page.reload();
-
-    // We should have 51 documents in total now, 1 degraded -> ~1.96% degraded docs -> < 3% so Degraded quality
-    await pageObjects.streams.verifyDocCount(
-      'logs-10-docs-per-minute',
-      INGESTION_DURATION_MINUTES * 10 + 1
-    );
-    await pageObjects.streams.verifyDataQuality('logs-10-docs-per-minute', 'Degraded');
-
-    // Ingest 4 more malformed docs to have 5 degraded documents
-    await generateLogsData(logsSynthtraceEsClient)({
-      index: 'logs-10-docs-per-minute',
-      startTime: new Date(currentTime - 60 * 1000).toISOString(),
-      endTime: new Date(currentTime).toISOString(),
-      docsPerMinute: 4,
-      isMalformed: true,
-    });
-
-    // Refresh the page to reflect the processor changes
-    await page.reload();
-
-    // We should have 55 documents in total now, 5 degraded -> ~9.09% degraded docs -> > 3% so Poor quality
-    await pageObjects.streams.verifyDocCount(
-      'logs-10-docs-per-minute',
-      INGESTION_DURATION_MINUTES * 10 + 5
-    );
-    await pageObjects.streams.verifyDataQuality('logs-10-docs-per-minute', 'Poor');
-  });
-
-  test('should display Degraded or Poor data quality when there are failed docs', async ({
-    apiServices,
-    pageObjects,
-    page,
-    logsSynthtraceEsClient,
-  }) => {
-    // Create a processor that always fails
-    await apiServices.streams.updateStreamProcessors('logs-20-docs-per-minute', {
+    // Add a processor that always fails
+    await apiServices.streams.updateStreamProcessors(DEGRADED_QUALITY_STREAM, {
       steps: [
         {
           action: 'rename',
@@ -126,67 +53,93 @@ test.describe('Stream list view - table values', { tag: ['@ess', '@svlOblt'] }, 
         },
       ],
     });
-
-    const currentTime = Date.now();
-    // Ingest 1 doc to have 1 failed document
+    // Add 1 failed doc
     await generateLogsData(logsSynthtraceEsClient)({
-      index: 'logs-20-docs-per-minute',
+      index: DEGRADED_QUALITY_STREAM,
       startTime: new Date(currentTime - 60 * 1000).toISOString(),
       endTime: new Date(currentTime).toISOString(),
       docsPerMinute: 1,
     });
 
-    // Refresh the page to reflect the processor changes
-    await page.reload();
-
-    // We should have 101 documents in total now, 1 failed -> ~0.99% failed docs -> < 3% so Degraded quality
-    await pageObjects.streams.verifyDocCount(
-      'logs-20-docs-per-minute',
-      INGESTION_DURATION_MINUTES * 20 + 1
-    );
-    await pageObjects.streams.verifyDataQuality('logs-20-docs-per-minute', 'Degraded');
-
-    // Ingest 4 more docs to have 5 failed documents
+    // Stream 3: Poor quality stream - 60 docs in total, 5 failed (> 3%) and 5 degraded (> 3%) docs
     await generateLogsData(logsSynthtraceEsClient)({
-      index: 'logs-20-docs-per-minute',
+      index: POOR_QUALITY_STREAM,
+      startTime: new Date(currentTime - INGESTION_DURATION_MINUTES * 60 * 1000).toISOString(),
+      endTime: new Date(currentTime).toISOString(),
+      docsPerMinute: INGESTION_RATE,
+    });
+    // Add 5 degraded doc
+    await generateLogsData(logsSynthtraceEsClient)({
+      index: POOR_QUALITY_STREAM,
       startTime: new Date(currentTime - 60 * 1000).toISOString(),
       endTime: new Date(currentTime).toISOString(),
-      docsPerMinute: 4,
+      docsPerMinute: 5,
+      isMalformed: true,
     });
+    // Add a processor that always fails
+    await apiServices.streams.updateStreamProcessors(POOR_QUALITY_STREAM, {
+      steps: [
+        {
+          action: 'rename',
+          from: 'non_existent_field',
+          to: 'renamed_field',
+          ignore_missing: false,
+          override: false,
+        },
+      ],
+    });
+    // Add 5 failed doc
+    await generateLogsData(logsSynthtraceEsClient)({
+      index: POOR_QUALITY_STREAM,
+      startTime: new Date(currentTime - 60 * 1000).toISOString(),
+      endTime: new Date(currentTime).toISOString(),
+      docsPerMinute: 5,
+    });
+  });
 
-    // Refresh the page to reflect the processor changes
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.streams.gotoStreamMainPage();
+    // Wait for the streams table to load
+    await pageObjects.streams.expectStreamsTableVisible();
+  });
+
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.streams.deleteStream(GOOD_QUALITY_STREAM);
+    await apiServices.streams.deleteStream(DEGRADED_QUALITY_STREAM);
+    await apiServices.streams.deleteStream(POOR_QUALITY_STREAM);
+    await apiServices.streams.disable();
+  });
+
+  test('should display correct doc count in the table', async ({ pageObjects, page }) => {
+    // In serverless, indexing the failed docs takes longer, so we need to wait to ensure the doc counts are correct
+    await page.waitForTimeout(30000);
     await page.reload();
 
-    // We should have 105 documents in total now, 5 failed -> ~4.76% failed docs -> > 3% so Poor quality
-    await pageObjects.streams.verifyDocCount(
-      'logs-20-docs-per-minute',
-      INGESTION_DURATION_MINUTES * 20 + 5
-    );
-    await pageObjects.streams.verifyDataQuality('logs-20-docs-per-minute', 'Poor');
+    // Verify the document count for each stream in the default time range - last 15 minutes
+    await pageObjects.streams.verifyDocCount(GOOD_QUALITY_STREAM, 50);
+    await pageObjects.streams.verifyDocCount(DEGRADED_QUALITY_STREAM, 52);
+    await pageObjects.streams.verifyDocCount(POOR_QUALITY_STREAM, 60);
+  });
+
+  test('should display correct data quality badge', async ({ pageObjects }) => {
+    await pageObjects.streams.verifyDataQuality(GOOD_QUALITY_STREAM, 'Good');
+    await pageObjects.streams.verifyDataQuality(DEGRADED_QUALITY_STREAM, 'Degraded');
+    await pageObjects.streams.verifyDataQuality(POOR_QUALITY_STREAM, 'Poor');
   });
 
   test('should display correct retention in the table', async ({ pageObjects, config }) => {
-    // Wait for the streams table to load
-    await pageObjects.streams.expectStreamsTableVisible();
-
     const isServerless = config.serverless ?? false;
-
     // Verify the retention for each log stream is the 'logs' ILM policy
-    await pageObjects.streams.verifyRetention(
-      'logs-10-docs-per-minute',
-      isServerless ? 'Indefinite' : 'logs'
-    );
-    await pageObjects.streams.verifyRetention(
-      'logs-20-docs-per-minute',
-      isServerless ? 'Indefinite' : 'logs'
-    );
+    const streamNames = [GOOD_QUALITY_STREAM, DEGRADED_QUALITY_STREAM, POOR_QUALITY_STREAM];
+
+    for (const name of streamNames) {
+      await pageObjects.streams.verifyRetention(name, isServerless ? 'Indefinite' : 'logs');
+    }
   });
 
   test('should provide Discover actions with correct ESQL queries', async ({ pageObjects }) => {
-    // Wait for the streams table to load
-    await pageObjects.streams.expectStreamsTableVisible();
-
-    const streamNames = ['logs-10-docs-per-minute', 'logs-20-docs-per-minute'];
+    const streamNames = [GOOD_QUALITY_STREAM, DEGRADED_QUALITY_STREAM, POOR_QUALITY_STREAM];
 
     for (const name of streamNames) {
       await pageObjects.streams.verifyDiscoverButtonLink(name);
