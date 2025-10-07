@@ -684,6 +684,9 @@
       "total_comments": {
         "type": "integer"
       },
+      "total_events": {
+        "type": "integer"
+      },
       "updated_at": {
         "type": "date"
       },

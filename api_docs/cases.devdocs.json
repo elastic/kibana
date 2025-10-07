@@ -119,20 +119,7 @@
       }
     ],
     "interfaces": [],
-    "enums": [
-      {
-        "parentPluginId": "cases",
-        "id": "def-public.AttachmentActionType",
-        "type": "Enum",
-        "tags": [],
-        "label": "AttachmentActionType",
-        "description": [],
-        "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "cases",
@@ -3680,7 +3667,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".NUMBER; value: number | null; })[]; }; } | { type: \"comment\"; payload: { comment: { comment: string; type: ",
+          ".NUMBER; value: number | null; })[]; }; } | { type: \"observables\"; payload: { observables: { count: number; actionType: \"update\" | \"delete\" | \"add\"; }; }; } | { type: \"comment\"; payload: { comment: { comment: string; type: ",
           {
             "pluginId": "cases",
             "scope": "common",
