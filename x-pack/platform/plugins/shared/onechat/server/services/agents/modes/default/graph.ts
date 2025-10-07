@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
+import { ToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
+import { tool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
-import { getActPrompt } from './prompts';
+import type { AgentEventEmitter } from '@kbn/onechat-server';
+import { createReasoningEvent } from '@kbn/onechat-genai-utils/langchain';
+import { getActPrompt, getAnswerPrompt } from './prompts';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -28,6 +33,34 @@ const StateAnnotation = Annotation.Root({
   }),
 });
 
+const answerToolId = 'to_answer';
+
+const answerTool = tool(
+  async () => {
+    throw new Error('Answer tool should not be called');
+  },
+  {
+    name: answerToolId,
+    schema: z.object({
+      handoverReason: z
+        .string()
+        .optional()
+        .describe(
+          'Brief explanation of the reason why you are handing the conversation over to the answering agent'
+        ),
+      /*
+      researchSummary: z
+        .string()
+        .optional()
+        .describe(
+          '(optional) A brief summary of the key pieces of information discovered. This will be used by the answering agent in addition to the conversation history to answer the question.'
+        ),
+       */
+    }),
+    description: 'Use this tool to notify that you are ready to answer the question.',
+  }
+);
+
 export type StateType = typeof StateAnnotation.State;
 
 export const createAgentGraph = ({
@@ -36,20 +69,24 @@ export const createAgentGraph = ({
   customInstructions,
   capabilities,
   logger,
+  events,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
   capabilities: ResolvedAgentCapabilities;
   customInstructions?: string;
   logger: Logger;
+  events: AgentEventEmitter;
 }) => {
-  const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
+  const allTools = [...tools, answerTool];
+  const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(allTools);
 
-  const model = chatModel.bindTools(tools).withConfig({
+  const model = chatModel.bindTools(allTools, { tool_choice: 'any' }).withConfig({
     tags: ['onechat-agent'],
   });
 
   const callModel = async (state: StateType) => {
+    events.emit(createReasoningEvent('Thinking about my next action'));
     const response = await model.invoke(
       getActPrompt({
         customInstructions,
@@ -66,7 +103,12 @@ export const createAgentGraph = ({
     const messages = state.addedMessages;
     const lastMessage: AIMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.tool_calls?.length) {
-      return 'tools';
+      const toolCall = lastMessage.tool_calls[0];
+      if (toolCall.name === answerToolId) {
+        return 'prepareToAnswer';
+      } else {
+        return 'tools';
+      }
     }
     return '__end__';
   };
@@ -79,16 +121,55 @@ export const createAgentGraph = ({
     };
   };
 
+  const prepareToAnswer = async (state: StateType) => {
+    const messages = state.addedMessages;
+    const lastMessage: AIMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.tool_calls?.length) {
+      return {
+        addedMessages: [
+          new ToolMessage({
+            content: JSON.stringify({}),
+            tool_call_id: lastMessage.tool_calls[0].id!,
+          }),
+        ],
+      };
+    }
+    return {};
+  };
+
+  const answeringModel = chatModel.withConfig({
+    tags: ['onechat-agent', 'answering-step'],
+  });
+
+  const generateAnswer = async (state: StateType) => {
+    events.emit(createReasoningEvent('Summarizing my findings'));
+    const response = await answeringModel.invoke(
+      getAnswerPrompt({
+        customInstructions,
+        capabilities,
+        discussion: [...state.initialMessages, ...state.addedMessages],
+      })
+    );
+    return {
+      addedMessages: [response],
+    };
+  };
+
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
     .addNode('agent', callModel)
     .addNode('tools', toolHandler)
+    .addNode('prepareToAnswer', prepareToAnswer)
+    .addNode('answer', generateAnswer)
     .addEdge('__start__', 'agent')
     .addEdge('tools', 'agent')
     .addConditionalEdges('agent', shouldContinue, {
       tools: 'tools',
+      prepareToAnswer: 'prepareToAnswer',
       __end__: '__end__',
     })
+    .addEdge('prepareToAnswer', 'answer')
+    .addEdge('answer', '__end__')
     .compile();
 
   return graph;

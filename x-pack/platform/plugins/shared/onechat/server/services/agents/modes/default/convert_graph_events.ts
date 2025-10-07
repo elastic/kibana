@@ -72,7 +72,10 @@ export const convertGraphEvents = ({
         }
 
         // emit tool calls or full message on each agent step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
+        if (
+          matchEvent(event, 'on_chain_end') &&
+          (matchName(event, 'agent') || matchName(event, 'answer'))
+        ) {
           const events: ConvertedEvents[] = [];
 
           // process last emitted message
