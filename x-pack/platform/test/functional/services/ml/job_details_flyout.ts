@@ -11,15 +11,11 @@ export function MachineLearningJobDetailsFlyoutProvider({ getService }: FtrProvi
   const testSubjects = getService('testSubjects');
 
   return {
-    async assertJobDetailsFlyoutExists() {
+    async assertAnalyticsDetailsFlyoutExists() {
       await testSubjects.existOrFail('analyticsDetailsFlyout');
     },
-    async assertJobDetailsFlyoutIdExists(id: string) {
+    async assertAnalyticsDetailsFlyoutIdExists(id: string) {
       await testSubjects.existOrFail(`analyticsDetailsFlyout-${id}`);
-    },
-    async closeDetailsPanel() {
-      await testSubjects.click('euiFlyoutCloseButton');
-      await testSubjects.missingOrFail('analyticsDetailsFlyout');
     },
   };
 }
