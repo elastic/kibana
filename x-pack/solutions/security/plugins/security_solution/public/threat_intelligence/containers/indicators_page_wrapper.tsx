@@ -6,35 +6,18 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { CasesPermissions } from '@kbn/cases-plugin/common';
+import React, { memo } from 'react';
 import { IndicatorsPage } from '../modules/indicators/pages/indicators';
 import { IntegrationsGuard } from './integrations_guard';
-import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugin_template_wrapper';
-import { useKibana } from '../../common/lib/kibana';
-
-export const APP_ID = 'securitySolution';
-
-const queryClient = new QueryClient();
-
-const casesContextOwner = [APP_ID];
+import { SecuritySolutionTemplateWrapper } from '../../app/home/template_wrapper';
 
 export const IndicatorsPageWrapper: FC = () => {
-  const { cases } = useKibana().services;
-  const CasesContext = useMemo(() => cases.ui.getCasesContext(), [cases.ui]);
-  const permissions: CasesPermissions = useMemo(() => cases.helpers.canUseCases(), [cases.helpers]);
-
   return (
-    <CasesContext owner={casesContextOwner} permissions={permissions}>
-      <QueryClientProvider client={queryClient}>
-        <IntegrationsGuard>
-          <SecuritySolutionPluginTemplateWrapper>
-            <IndicatorsPage />
-          </SecuritySolutionPluginTemplateWrapper>
-        </IntegrationsGuard>
-      </QueryClientProvider>
-    </CasesContext>
+    <IntegrationsGuard>
+      <SecuritySolutionTemplateWrapper>
+        <IndicatorsPage />
+      </SecuritySolutionTemplateWrapper>
+    </IntegrationsGuard>
   );
 };
 
