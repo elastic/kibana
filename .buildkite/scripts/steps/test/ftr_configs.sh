@@ -47,12 +47,18 @@ fi
 failedConfigs=""
 results=()
 
-echo "--- Test checking for existing scout event for config x-pack/solutions/observability/test/serverless/functional/configs/config.logs_essentials.ts"
-node scripts/scout check-event --buildNumber 348122 --testConfig "x-pack/solutions/observability/test/serverless/functional/configs/config.logs_essentials.ts" --dontFailOnError
-
 while read -r config; do
   if [[ ! "$config" ]]; then
     continue;
+  fi
+
+  echo "--- Checking for existing scout event for config $config"
+  # We do not use --dontFailOnError here because we need a real exit code to determine if we should skip
+  if node scripts/scout check-event --buildNumber "${BUILDKITE_BUILD_NUMBER:-}" --testConfig "$config"; then
+    echo "--- Scout event found for config $config, skipping"
+    continue
+  else
+    echo "--- Scout event not found for config $config, running tests"
   fi
 
   FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
@@ -88,17 +94,10 @@ while read -r config; do
   if [ -n "$REPORT_DIR" ]; then
     EVENT_LOG_FILE="${REPORT_DIR}event-log.ndjson"
     if [ -f "$EVENT_LOG_FILE" ]; then
-      # Check if event exists BEFORE upload
-      echo "--- Checking for existing scout event for config $config"
-      node scripts/scout check-event --buildNumber "${BUILDKITE_BUILD_NUMBER:-}" --testConfig "$config" --dontFailOnError
-
+      # Upload events after running each config
       export SCOUT_EVENT_LOG_PATH="$EVENT_LOG_FILE"
       source .buildkite/scripts/steps/test/scout_upload_report_events.sh
       unset SCOUT_EVENT_LOG_PATH
-
-      # Check if event exists AFTER upload
-      echo "--- Verifying scout event exists for config $config after upload"
-      node scripts/scout check-event --buildNumber "${BUILDKITE_BUILD_NUMBER:-}" --testConfig "$config" --dontFailOnError
     else
       echo "Could not find event log file for config $config"
     fi

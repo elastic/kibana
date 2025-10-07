@@ -61,33 +61,6 @@ export const checkEventCommand: Command<void> = {
     log.info(`Checking for event with buildNumber: ${buildNumber} and testConfig: ${testConfig}`);
 
     try {
-      log.info(`Index ${SCOUT_TEST_EVENTS_DATA_STREAM_NAME}`);
-      // await es.indices.refresh({ index: indexName });
-
-      log.info(
-        `Query: ${JSON.stringify(
-          {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: 'now-1d/d',
-                      lte: 'now',
-                    },
-                  },
-                },
-              ],
-              must: [
-                { term: { 'buildkite.build.number': buildNumber } },
-                { term: { 'test_run.config.file.path': testConfig } },
-              ],
-            },
-          },
-          null,
-          2
-        )}`
-      );
       const result = await es.search({
         index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME,
         query: {
@@ -110,7 +83,7 @@ export const checkEventCommand: Command<void> = {
         },
       });
 
-      console.log('Search result:', JSON.stringify(result, null, 2));
+      console.log('Search result:', JSON.stringify(result));
       if ((result.hits.total as any).value > 0) {
         log.success('Event found!');
       } else {
