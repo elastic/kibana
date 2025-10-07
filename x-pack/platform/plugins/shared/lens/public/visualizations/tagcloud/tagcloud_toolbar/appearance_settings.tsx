@@ -19,7 +19,6 @@ import { FontSizeInput } from './font_size_input';
 export function TagcloudAppearanceSettings(props: VisualizationToolbarProps<TagcloudState>) {
   return (
     <>
-      {' '}
       <EuiFormRow
         display="columnCompressed"
         label={i18n.translate('xpack.lens.label.tagcloud.fontSizeLabel', {
