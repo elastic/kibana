@@ -78,7 +78,7 @@ export const checkEventCommand: Command<void> = {
             ],
             must: [
               { term: { 'buildkite.build.number': buildNumber } },
-              { term: { 'test_run.config.file.path.keyword': testConfig } },
+              { term: { 'test_run.config.file.path': testConfig } },
             ],
           },
         },
