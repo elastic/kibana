@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: Post Attack discovery API endpoint (deprecated, use public API instead)
+  version: '1'
+components:
+  x-codegen-enabled: true
+
+paths:
+  /internal/elastic_assistant/attack_discovery:
+    post:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: AttackDiscoveryPostInternal
+      description: Generate attack discoveries from alerts
+      summary: Generate attack discoveries from alerts via the Elastic Assistant
+      deprecated: true
+      tags:
+        - attack_discovery
+        - alerts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '../../../common_attributes.schema.yaml#/components/schemas/AttackDiscoveryGenerationConfig'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../common_attributes.schema.yaml#/components/schemas/AttackDiscoveryResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string

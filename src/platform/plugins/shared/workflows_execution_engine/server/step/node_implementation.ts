@@ -37,8 +37,12 @@ export interface NodeImplementation {
   run(): Promise<void>;
 }
 
-export interface StepErrorCatcher {
+export interface NodeWithErrorCatching {
   catchError(): Promise<void>;
+}
+
+export interface MonitorableNode {
+  monitor(monitoredContext: WorkflowContextManager): Promise<void>;
 }
 
 export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>

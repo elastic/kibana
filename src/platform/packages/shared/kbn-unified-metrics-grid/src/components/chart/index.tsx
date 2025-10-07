@@ -33,7 +33,7 @@ export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestPar
     filters?: Array<{ field: string; value: string }>;
     discoverFetch$: Observable<UnifiedHistogramInputMessage>;
     metric: MetricField;
-    onViewDetails: (esqlQuery: string) => void;
+    onViewDetails: (esqlQuery: string, metric: MetricField) => void;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -66,13 +66,11 @@ export const Chart = ({
       return '';
     }
     return createESQLQuery({
-      metricField: metric.name,
-      instrument: metric.instrument,
-      index: metric.index,
+      metric,
       dimensions,
       filters,
     });
-  }, [metric.type, metric.name, metric.instrument, metric.index, dimensions, filters]);
+  }, [metric, dimensions, filters]);
 
   const lensProps = useLensProps({
     title: metric.name,
@@ -89,8 +87,8 @@ export const Chart = ({
   });
 
   const handleViewDetails = useCallback(() => {
-    onViewDetails(esqlQuery);
-  }, [onViewDetails, esqlQuery]);
+    onViewDetails(esqlQuery, metric);
+  }, [onViewDetails, esqlQuery, metric]);
 
   return (
     <div

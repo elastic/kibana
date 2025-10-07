@@ -29,15 +29,10 @@ const DefaultComponent = () => {
   return (
     <>
       <div>
-        <SearchSessionIndicator
-          hasBackgroundSearchEnabled={false}
-          state={SearchSessionState.Loading}
-          startedTime={new Date()}
-        />
+        <SearchSessionIndicator state={SearchSessionState.Loading} startedTime={new Date()} />
       </div>
       <div>
         <SearchSessionIndicator
-          hasBackgroundSearchEnabled={false}
           state={SearchSessionState.Completed}
           startedTime={new Date()}
           completedTime={new Date()}
@@ -45,7 +40,6 @@ const DefaultComponent = () => {
       </div>
       <div>
         <SearchSessionIndicator
-          hasBackgroundSearchEnabled={false}
           state={SearchSessionState.BackgroundLoading}
           searchSessionName={searchSessionName}
           saveSearchSessionNameFn={saveSearchSessionNameFn}
@@ -54,7 +48,6 @@ const DefaultComponent = () => {
       </div>
       <div>
         <SearchSessionIndicator
-          hasBackgroundSearchEnabled={false}
           state={SearchSessionState.BackgroundCompleted}
           searchSessionName={searchSessionName}
           saveSearchSessionNameFn={saveSearchSessionNameFn}
@@ -64,7 +57,6 @@ const DefaultComponent = () => {
       </div>
       <div>
         <SearchSessionIndicator
-          hasBackgroundSearchEnabled={false}
           state={SearchSessionState.Restored}
           searchSessionName={searchSessionName}
           saveSearchSessionNameFn={saveSearchSessionNameFn}
@@ -74,7 +66,6 @@ const DefaultComponent = () => {
       </div>
       <div>
         <SearchSessionIndicator
-          hasBackgroundSearchEnabled={false}
           state={SearchSessionState.Canceled}
           startedTime={new Date()}
           canceledTime={new Date()}
@@ -82,13 +73,12 @@ const DefaultComponent = () => {
       </div>
       <div>
         <SearchSessionIndicator
-          hasBackgroundSearchEnabled={false}
           state={SearchSessionState.Completed}
           saveDisabled={true}
           startedTime={new Date()}
           completedTime={new Date()}
           saveDisabledReasonText={
-            'Search results have expired and it is no longer possible to save this search session'
+            'Search results have expired and it is no longer possible to save this background search'
           }
         />
       </div>
