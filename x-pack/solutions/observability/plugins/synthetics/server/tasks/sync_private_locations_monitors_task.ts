@@ -38,7 +38,7 @@ import { SyntheticsPrivateLocation } from '../synthetics_service/private_locatio
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-const TASK_SCHEDULE = '5m';
+const TASK_SCHEDULE = '10m';
 
 interface TaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -63,8 +63,8 @@ export class SyncPrivateLocationMonitorsTask {
         title: 'Synthetics Sync Global Params Task',
         description:
           'This task is executed so that we can sync private location monitors for example when global params are updated',
-        timeout: '3m',
-        maxAttempts: 3,
+        timeout: '5m',
+        maxAttempts: 1,
         createTaskRunner: ({ taskInstance }) => {
           return {
             run: async () => {
@@ -149,10 +149,9 @@ export class SyncPrivateLocationMonitorsTask {
 
   start = async () => {
     const {
-      logger,
       pluginsStart: { taskManager },
     } = this.serverSetup;
-    logger.debug(`Scheduling private location task`);
+    this.debugLog(`Scheduling private location task`);
     await taskManager.ensureScheduled({
       id: PRIVATE_LOCATIONS_SYNC_TASK_ID,
       state: {},
@@ -162,7 +161,7 @@ export class SyncPrivateLocationMonitorsTask {
       taskType: TASK_TYPE,
       params: {},
     });
-    logger.debug(`Sync private location monitors task scheduled successfully`);
+    this.debugLog(`Sync private location monitors task scheduled successfully`);
   };
 
   hasAnyDataChanged = async ({
