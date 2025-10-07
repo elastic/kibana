@@ -13,6 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   // Failing: See https://github.com/elastic/kibana/issues/237708
+  // Failing: See https://github.com/elastic/kibana/issues/237035
   describe.skip('security solution', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
