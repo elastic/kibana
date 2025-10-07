@@ -1609,7 +1609,8 @@ export class CstToAstConverter {
         args.push(map);
       }
 
-      const incomplete = args.length === 0 || map.incomplete;
+      const incomplete =
+        args.length === 0 || map.incomplete || !textExistsAndIsValid(configCtx.getText());
       return this.toOption('with', configCtx, args, incomplete);
     }
 

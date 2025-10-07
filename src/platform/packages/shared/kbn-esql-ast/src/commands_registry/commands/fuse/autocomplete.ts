@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import {
   ESQL_STRING_TYPES,
@@ -133,20 +132,7 @@ export async function autocomplete(
         }
       );
     case FusePosition.WITH:
-      const rrfParameters = {
-        rank_constant: [],
-        weights: [],
-      };
-      const linearParameters = {
-        normalizer: [noneValueCompleteItem, minMaxValueCompleteItem],
-        weights: [],
-      };
-      const mapParameters =
-        !fuseCommand.fuseType || fuseCommand.fuseType.text === 'rrf'
-          ? rrfParameters
-          : linearParameters;
-
-      return getCommandMapExpressionSuggestions(innerText, mapParameters);
+      return [];
   }
 
   return [pipeCompleteItem];
@@ -261,19 +247,3 @@ function getFuseArgumentsSuggestions(command: ESQLAstFuseCommand): ISuggestionIt
 
   return suggestions.map((s) => withAutoSuggest(s));
 }
-
-const minMaxValueCompleteItem: ISuggestionItem = {
-  label: 'minmax',
-  text: 'minmax',
-  kind: 'Value',
-  detail: 'minmax',
-  sortText: '1',
-};
-
-const noneValueCompleteItem: ISuggestionItem = {
-  label: 'none',
-  text: 'none',
-  kind: 'Value',
-  detail: 'none',
-  sortText: '1',
-};

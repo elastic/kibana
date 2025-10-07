@@ -43,7 +43,7 @@ describe('FUSE Autocomplete', () => {
         'SCORE BY ',
         'KEY BY ',
         'GROUP BY ',
-        'WITH ',
+        'WITH { $0 }',
         '| ',
       ]);
     });
@@ -53,7 +53,7 @@ describe('FUSE Autocomplete', () => {
         'SCORE BY ',
         'KEY BY ',
         'GROUP BY ',
-        'WITH ',
+        'WITH { $0 }',
         '| ',
       ]);
     });
@@ -61,16 +61,25 @@ describe('FUSE Autocomplete', () => {
     it('does not suggest already used arguments', async () => {
       await fuseExpectSuggestions('FROM a | FUSE linear SCORE BY x KEY BY y ', [
         'GROUP BY ',
-        'WITH ',
+        'WITH { $0 }',
         '| ',
       ]);
+    });
+
+    // A bug in the parser makes it to missbehave if the map is not the last argument
+    // - unskip when fixed in ES side.
+    it.skip('allows WITH map to be at any configuration place', async () => {
+      await fuseExpectSuggestions(
+        'FROM a | FUSE WITH { "item": "value", "item2": 33 } SCORE BY duration ',
+        ['GROUP BY ', 'KEY BY ', '| ']
+      );
     });
 
     it('does not suggest FUSE type if another argument has been added', async () => {
       await fuseExpectSuggestions('FROM a | FUSE SCORE BY x /', [
         'KEY BY ',
         'GROUP BY ',
-        'WITH ',
+        'WITH { $0 }',
         '| ',
       ]);
     });
@@ -207,7 +216,7 @@ describe('FUSE Autocomplete', () => {
       await fuseExpectSuggestions('FROM a | FUSE KEY BY keywordField, textField ', [
         'SCORE BY ',
         'GROUP BY ',
-        'WITH ',
+        'WITH { $0 }',
         '| ',
       ]);
     });
@@ -223,7 +232,7 @@ describe('FUSE Autocomplete', () => {
         [
           'textField GROUP BY ',
           'textField SCORE BY ',
-          'textField WITH ',
+          'textField WITH { $0 }',
           'textField | ',
           'textField, ',
         ],
@@ -242,6 +251,16 @@ describe('FUSE Autocomplete', () => {
         expectedStringFields,
         mockCallbacks
       );
+    });
+  });
+
+  describe('WITH', () => {
+    it('suggests nothing when inside the WITH MapExpression', async () => {
+      await fuseExpectSuggestions('FROM a | FUSE WITH { ', []);
+      await fuseExpectSuggestions('FROM a | FUSE WITH { "', []);
+      await fuseExpectSuggestions('FROM a | FUSE WITH { "item"', []);
+      await fuseExpectSuggestions('FROM a | FUSE WITH { "item": "', []);
+      await fuseExpectSuggestions('FROM a | FUSE WITH { "item": "value" ', []);
     });
   });
 });
