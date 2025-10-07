@@ -7,12 +7,7 @@
 
 import type { Subscription } from 'rxjs';
 
-import type {
-  ElasticsearchClient,
-  ElasticsearchServiceStart,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, ElasticsearchServiceStart, Logger } from '@kbn/core/server';
 import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
@@ -77,9 +72,6 @@ export class TelemetryConfigWatcher {
     let failed = 0;
     const isSpacesEnabled =
       this.endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled;
-    let soClient: SavedObjectsClientContract =
-      this.endpointAppContextService.savedObjects.createInternalUnscopedSoClient(false);
-    // const fleetServices = this.endpointAppContextService.getInternalFleetServices();
 
     this.logger.debug(
       `Checking Endpoint policies to update due to changed global telemetry config setting. (New value: ${isTelemetryEnabled})`
@@ -89,7 +81,7 @@ export class TelemetryConfigWatcher {
       try {
         response = await pRetry(
           (attemptCount) => {
-            soClient =
+            const soClient =
               this.endpointAppContextService.savedObjects.createInternalUnscopedSoClient(false);
 
             return this.policyService
@@ -110,9 +102,7 @@ export class TelemetryConfigWatcher {
             onFailedAttempt: (error) =>
               this.logger.debug(
                 () =>
-                  `Failed to fetch list of package policies. Attempt [${
-                    error.attemptNumber
-                  }] for page [${page}] returned error: ${stringify(error)}\n${error.stack}`
+                  `Failed to fetch list of package policies. Attempt [${error.attemptNumber}] for page [${page}] returned error: ${error.name}, ${error.message}`
               ),
             ...this.retryOptions,
           }
@@ -159,7 +149,7 @@ export class TelemetryConfigWatcher {
               spaceId,
               readonly: false,
             })
-          : soClient;
+          : this.endpointAppContextService.savedObjects.createInternalUnscopedSoClient(false);
 
         try {
           const updateResult = await pRetry(
