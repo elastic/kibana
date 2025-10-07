@@ -109,17 +109,19 @@ export function defineCommonRoutes({
     redirectURL: string,
     params: T extends 'basic' | 'token' ? TypeOf<typeof basicParamsSchema> : {}
   ) {
-    if (providerType === SAMLAuthenticationProvider.type) {
+    const normalizedProviderType = providerType.toLowerCase();
+    
+    if (normalizedProviderType === SAMLAuthenticationProvider.type) {
       return { type: SAMLLogin.LoginInitiatedByUser, redirectURL };
     }
 
-    if (providerType === OIDCAuthenticationProvider.type) {
+    if (normalizedProviderType === OIDCAuthenticationProvider.type) {
       return { type: OIDCLogin.LoginInitiatedByUser, redirectURL };
     }
 
     if (
-      providerType === BasicAuthenticationProvider.type ||
-      providerType === TokenAuthenticationProvider.type
+      normalizedProviderType === BasicAuthenticationProvider.type ||
+      normalizedProviderType === TokenAuthenticationProvider.type
     ) {
       return params;
     }
