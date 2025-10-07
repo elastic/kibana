@@ -38,8 +38,10 @@ type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string,
   /**
    * The draft mode callout content to be shown when there are unsaved changes.
    * - `true`: Shows the default callout.
-   * - `DraftModeCalloutProps`: Shows a callout with the provided content overriding the defaults.
    * - `false` or `undefined`: Shows no callout.
+   * - `DraftModeCalloutProps`:
+   *   - `isEmbed`: indicates callout type (embed vs link)
+   *   - `message`: callout message custom content
    */
   draftModeCallOut?: boolean | DraftModeCalloutProps;
   helpText?: ReactNode;

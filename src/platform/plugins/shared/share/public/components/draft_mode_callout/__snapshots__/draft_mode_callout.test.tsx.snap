@@ -27,20 +27,6 @@ exports[`DraftModeCallout Custom content case renders a callout with custom cont
     >
       Custom message
     </p>
-    <button
-      class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-fill-warning"
-      type="button"
-    >
-      <span
-        class="emotion-euiButtonDisplayContent"
-      >
-        <span
-          class="eui-textTruncate"
-        >
-          Save changes
-        </span>
-      </span>
-    </button>
   </div>
 </div>
 `;
