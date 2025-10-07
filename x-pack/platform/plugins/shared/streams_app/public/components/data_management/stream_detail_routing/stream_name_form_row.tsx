@@ -16,18 +16,28 @@ interface StreamNameFormRowProps {
   autoFocus?: boolean;
 }
 
+const MAX_NAME_LENGTH = 200;
+
 export function StreamNameFormRow({
   value,
   onChange = () => {},
   disabled = false,
   autoFocus = false,
 }: StreamNameFormRowProps) {
+  const helpText =
+    value.length >= MAX_NAME_LENGTH
+      ? i18n.translate('xpack.streams.streamDetailRouting.nameHelpText', {
+          defaultMessage: `Stream name cannot be longer than ${MAX_NAME_LENGTH} characters.`,
+        })
+      : undefined;
+
   return (
     <EuiFormRow
       fullWidth
       label={i18n.translate('xpack.streams.streamDetailRouting.name', {
         defaultMessage: 'Stream name',
       })}
+      helpText={helpText}
     >
       <EuiFieldText
         data-test-subj="streamsAppRoutingStreamEntryNameField"
@@ -37,6 +47,7 @@ export function StreamNameFormRow({
         disabled={disabled}
         autoFocus={autoFocus}
         onChange={(e) => onChange(e.target.value)}
+        maxLength={200}
       />
     </EuiFormRow>
   );

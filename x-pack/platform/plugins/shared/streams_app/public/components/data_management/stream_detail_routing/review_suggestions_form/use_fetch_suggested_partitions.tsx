@@ -52,6 +52,10 @@ export function useFetchSuggestedPartitions() {
           },
         })
       ).catch((error) => {
+        if (error.name === 'AbortError') {
+          return;
+        }
+
         showErrorToast(notifications, error);
         throw error;
       });

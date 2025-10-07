@@ -115,6 +115,7 @@ export function IdleRoutingStreamEntry({
             </EuiFlexItem>
           )}
           <EuiLink
+            className="eui-textTruncate"
             href={router.link('/{key}/management/{tab}', {
               path: { key: routingRule.destination, tab: 'partitioning' },
             })}

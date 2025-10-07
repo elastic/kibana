@@ -21,6 +21,7 @@ export const useMatchRate = (
   const { data } = useKibana().dependencies.start;
   const { timeState } = useTimefilter();
 
+  // Re-use logic from the machine definition to retrieve the match rate for the partitions
   const actorInstance = useMemo(
     () => {
       const actor = createActor(createDocumentsCountCollectorActor({ data }), {
