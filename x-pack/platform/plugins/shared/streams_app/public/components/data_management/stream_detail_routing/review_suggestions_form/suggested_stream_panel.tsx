@@ -19,7 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
-import { type ReviewSuggestionsInputs } from './use_review_suggestions_form';
+import type { PartitionSuggestion } from './use_review_suggestions_form';
 import { useMatchRate } from './use_match_rate';
 import {
   useStreamRoutingEvents,
@@ -35,7 +35,7 @@ export function SuggestedStreamPanel({
   onPreview,
 }: {
   definition: Streams.WiredStream.GetResponse;
-  partition: ReviewSuggestionsInputs['suggestions'][number];
+  partition: PartitionSuggestion;
   onDismiss(): void;
   onPreview(toggle: boolean): void;
 }) {

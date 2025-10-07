@@ -6,17 +6,17 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useSelector } from '@xstate5/react';
 import { createActor } from 'xstate5';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
-import type { ReviewSuggestionsInputs } from './use_review_suggestions_form';
+import type { PartitionSuggestion } from './use_review_suggestions_form';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { createDocumentsCountCollectorActor } from '../state_management/stream_routing_state_machine/routing_samples_state_machine';
 
 export const useMatchRate = (
   definition: Streams.WiredStream.GetResponse,
-  partition: ReviewSuggestionsInputs['suggestions'][number]
+  partition: PartitionSuggestion
 ) => {
   const { data } = useKibana().dependencies.start;
   const { timeState } = useTimefilter();
@@ -36,6 +36,12 @@ export const useMatchRate = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, partition.condition, definition, timeState.start, timeState.end] // Actor restarts when these change
   );
+
+  useEffect(() => {
+    return () => {
+      actorInstance.stop();
+    };
+  }, [actorInstance]);
 
   const value = useSelector(actorInstance, (snapshot) =>
     snapshot.status === 'done' ? snapshot.context : undefined

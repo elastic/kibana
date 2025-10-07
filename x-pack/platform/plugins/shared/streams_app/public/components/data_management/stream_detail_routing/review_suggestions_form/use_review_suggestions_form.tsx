@@ -7,8 +7,8 @@
 
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import type { Condition } from '@kbn/streamlang';
-import { useForm, useFieldArray } from 'react-hook-form';
 import constate from 'constate';
+import { useState } from 'react';
 import { useFetchSuggestedPartitions } from './use_fetch_suggested_partitions';
 import { useStreamsRoutingActorRef } from '../state_management/stream_routing_state_machine';
 
@@ -18,24 +18,21 @@ const [ReviewSuggestionsFormProvider, useReviewSuggestionsFormContext] = constat
 
 export { ReviewSuggestionsFormProvider, useReviewSuggestionsFormContext };
 
-export interface ReviewSuggestionsInputs {
-  suggestions: Array<{
-    name: string;
-    condition: Condition;
-    selected?: boolean;
-  }>;
+export interface PartitionSuggestion {
+  name: string;
+  condition: Condition;
+  selected?: boolean;
 }
 
 export function useReviewSuggestionsForm() {
   const streamsRoutingActorRef = useStreamsRoutingActorRef();
   const [suggestedPartitionsState, fetchSuggestions] = useFetchSuggestedPartitions();
-  const reviewSuggestionsForm = useForm<ReviewSuggestionsInputs>({
-    defaultValues: { suggestions: [] },
-  });
-  const { fields: suggestions, remove: removeSuggestion } = useFieldArray({
-    control: reviewSuggestionsForm.control,
-    name: 'suggestions',
-  });
+
+  const [suggestions, setSuggestions] = useState<PartitionSuggestion[]>([]);
+
+  const removeSuggestion = (index: number) => {
+    setSuggestions((prevSuggestions) => prevSuggestions.toSpliced(index, 1));
+  };
 
   const resetForm = () => {
     fetchSuggestions(null);
@@ -52,9 +49,9 @@ export function useReviewSuggestionsForm() {
   // Update form values when suggestions are fetched or reset
   useUpdateEffect(() => {
     if (suggestedPartitionsState.value) {
-      reviewSuggestionsForm.setValue('suggestions', suggestedPartitionsState.value.partitions);
+      setSuggestions(suggestedPartitionsState.value.partitions);
     } else {
-      reviewSuggestionsForm.reset();
+      setSuggestions([]);
     }
   }, [suggestedPartitionsState.value]);
 
@@ -66,7 +63,6 @@ export function useReviewSuggestionsForm() {
   }, [suggestions.length]);
 
   return {
-    reviewSuggestionsForm,
     suggestions,
     removeSuggestion,
     isEmpty,
