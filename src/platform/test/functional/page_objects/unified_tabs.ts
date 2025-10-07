@@ -56,15 +56,10 @@ export class UnifiedTabsPageObject extends FtrService {
 
     return await this.testSubjects.exists(tabChangesIndicator);
   }
-
-  public async getTabUnsavedIndicatorTestSubj(
-    tabElement: WebElementWrapper | undefined
-  ): Promise<string> {
-    const tab = (await tabElement?.getAttribute('data-test-subj')) || '';
-    const tabId = tab.replace(/^unifiedTabs_tab_/, '');
-    const tabChangesIndicator = `unifiedTabs__tabChangesIndicator-${tabId}`;
-
-    return tabChangesIndicator;
+  
+  public async getSelectedTabLabel() {
+    const selectedTab = await this.getSelectedTab();
+    return selectedTab?.label;
   }
 
   public async getTabWidths() {

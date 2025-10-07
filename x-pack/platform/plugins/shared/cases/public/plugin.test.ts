@@ -154,6 +154,7 @@ describe('Cases Ui Plugin', () => {
           getRuleIdFromEvent: expect.any(Function),
           getUICapabilities: expect.any(Function),
           groupAlertsByRule: expect.any(Function),
+          getObservablesFromEcs: expect.any(Function),
         },
         hooks: {
           useCasesAddToExistingCaseModal: expect.any(Function),

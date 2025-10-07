@@ -78,7 +78,7 @@ const sourceDoc = (doc: Partial<ReportSource>): Partial<ReportSource> => {
   return {
     ...doc,
     migration_version: MIGRATION_VERSION,
-    '@timestamp': new Date(0).toISOString(), // required for data streams compatibility
+    '@timestamp': doc.created_at || new Date().toISOString(),
   };
 };
 

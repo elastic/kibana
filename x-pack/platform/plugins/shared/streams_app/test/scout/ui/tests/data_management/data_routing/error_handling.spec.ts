@@ -8,8 +8,7 @@
 import { expect } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/236644
-test.describe.skip(
+test.describe(
   'Stream data routing - error handling and recovery',
   { tag: ['@ess', '@svlOblt'] },
   () => {
@@ -17,7 +16,7 @@ test.describe.skip(
       await apiServices.streams.enable();
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.streams.gotoPartitioningTab('logs');
     });
@@ -42,9 +41,9 @@ test.describe.skip(
       await pageObjects.streams.saveRoutingRule();
 
       // Should show error and stay in creating state
-      await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText('Failed to fetch')).toBeVisible();
-      await pageObjects.streams.closeToasts();
+      await pageObjects.toasts.waitFor();
+      expect(await pageObjects.toasts.getMessageText()).toBe('Failed to fetch');
+      await pageObjects.toasts.closeAll();
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
 
       // Restore network and retry
@@ -64,7 +63,7 @@ test.describe.skip(
       await pageObjects.streams.clickCreateRoutingRule();
       await pageObjects.streams.fillRoutingRuleName('logs.error-test');
       await pageObjects.streams.saveRoutingRule();
-      await pageObjects.streams.closeToasts();
+      await pageObjects.toasts.closeAll();
 
       // Edit the rule
       await pageObjects.streams.clickEditRoutingRule('logs.error-test');
@@ -75,17 +74,17 @@ test.describe.skip(
       await pageObjects.streams.updateRoutingRule();
 
       // Should show error and return to editing state
-      await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText('Failed to fetch')).toBeVisible();
-      await pageObjects.streams.closeToasts();
+      await pageObjects.toasts.waitFor();
+      expect(await pageObjects.toasts.getMessageText()).toBe('Failed to fetch');
+      await pageObjects.toasts.closeAll();
 
       // Restore network and retry
       await context.setOffline(false);
       await pageObjects.streams.updateRoutingRule();
 
       // Should succeed
-      await pageObjects.streams.expectToastVisible();
-      await expect(page.getByText('Stream saved')).toBeVisible();
+      await pageObjects.toasts.waitFor();
+      expect(await pageObjects.toasts.getHeaderText()).toBe('Stream saved');
     });
   }
 );
