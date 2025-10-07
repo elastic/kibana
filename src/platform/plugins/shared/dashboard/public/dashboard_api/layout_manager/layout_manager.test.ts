@@ -35,7 +35,7 @@ describe('layout manager', () => {
   const PANEL_ONE_ID = 'panelOne';
 
   const panel1 = {
-    grid: { w: 1, h: 1, x: 0, y: 0, i: PANEL_ONE_ID },
+    grid: { w: 1, h: 1, x: 0, y: 0 },
     type: 'testPanelType',
     config: { title: 'Panel One' },
     uid: PANEL_ONE_ID,
@@ -94,8 +94,6 @@ describe('layout manager', () => {
     expect(layout.panels.panelTwo).toEqual({
       grid: {
         h: 1,
-        i: 'panelTwo',
-        sectionId: undefined,
         w: 1,
         x: 1,
         y: 0,
@@ -120,8 +118,6 @@ describe('layout manager', () => {
       expect(layout.panels['54321']).toEqual({
         grid: {
           h: 1,
-          i: '54321',
-          sectionId: undefined,
           w: 1,
           x: 1,
           y: 0,
