@@ -110,7 +110,12 @@ export function RetentionColumn({
   }
 
   return (
-    <EuiText color="subdued" tabIndex={0} aria-label={NO_RETENTION_LABEL} data-test-subj={dataTestSubj}>
+    <EuiText
+      color="subdued"
+      tabIndex={0}
+      aria-label={NO_RETENTION_LABEL}
+      data-test-subj={dataTestSubj}
+    >
       {NO_DATA_SHORT_LABEL}
     </EuiText>
   );

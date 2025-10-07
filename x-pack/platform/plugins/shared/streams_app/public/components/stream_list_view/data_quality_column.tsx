@@ -63,5 +63,7 @@ export function DataQualityColumn({
   const isLoading =
     histogramQueryResult.loading || failedDocsResult?.loading || degradedDocsResult.loading;
 
-  return <DatasetQualityIndicator dataTestSubj={dataTestSubj} quality={quality} isLoading={isLoading} />;
+  return (
+    <DatasetQualityIndicator dataTestSubj={dataTestSubj} quality={quality} isLoading={isLoading} />
+  );
 }
