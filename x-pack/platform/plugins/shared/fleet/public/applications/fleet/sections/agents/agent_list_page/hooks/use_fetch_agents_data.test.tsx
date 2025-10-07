@@ -37,18 +37,16 @@ jest.mock('../../../../hooks', () => ({
       totalInactive: 2,
     },
   }),
-  sendBulkGetAgentPolicies: jest.fn().mockReturnValue({
-    data: {
-      items: [
-        { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
-        {
-          id: 'agent-policy-managed',
-          name: 'Managed Agent policy',
-          namespace: 'default',
-          managed: true,
-        },
-      ],
-    },
+  sendBulkGetAgentPoliciesForRq: jest.fn().mockReturnValue({
+    items: [
+      { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' },
+      {
+        id: 'agent-policy-managed',
+        name: 'Managed Agent policy',
+        namespace: 'default',
+        managed: true,
+      },
+    ],
   }),
   sendGetAgentPolicies: jest.fn().mockReturnValue({
     data: {

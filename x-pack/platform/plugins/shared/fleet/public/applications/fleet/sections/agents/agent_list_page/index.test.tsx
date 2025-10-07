@@ -47,13 +47,11 @@ jest.mock('../../../hooks', () => ({
   },
   useFleetStatus: jest.fn().mockReturnValue({}),
   sendGetAgentStatus: jest.fn(),
-  sendBulkGetAgentPolicies: jest.fn().mockResolvedValue({
-    data: {
-      items: [
-        { id: 'policy1', is_managed: false },
-        { id: 'managed_policy', is_managed: true },
-      ],
-    },
+  sendBulkGetAgentPoliciesForRq: jest.fn().mockResolvedValue({
+    items: [
+      { id: 'policy1', is_managed: false },
+      { id: 'managed_policy', is_managed: true },
+    ],
   }),
   sendGetAgentPolicies: jest.fn().mockResolvedValue({ data: { items: [] } }),
   sendGetAgentTagsForRq: jest.fn().mockReturnValue({ items: ['tag1', 'tag2'] }),

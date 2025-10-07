@@ -24,7 +24,7 @@ import {
   useStartServices,
   useIntraAppState,
   useUrlParams,
-  sendGetAgentTags,
+  sendGetAgentTagsForRq,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
@@ -129,13 +129,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     // Fetch all tags when the component mounts
     const fetchTags = async () => {
       try {
-        const agentTagsResponse = await sendGetAgentTags({
+        const agentTagsResponse = await sendGetAgentTagsForRq({
           showInactive: agent?.status === 'inactive',
         });
-        if (agentTagsResponse.error) {
-          throw agentTagsResponse.error;
-        }
-        const newAllTags = agentTagsResponse?.data?.items ?? [];
+        const newAllTags = agentTagsResponse?.items ?? [];
         setAllTags(newAllTags);
       } catch (err) {
         notifications.toasts.addError(err, {

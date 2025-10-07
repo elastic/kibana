@@ -22,9 +22,9 @@ import {
   sendGetAgentPolicies,
   useAuthz,
   sendGetActionStatus,
-  sendBulkGetAgentPolicies,
   sendGetAgentsForRq,
   sendGetAgentTagsForRq,
+  sendBulkGetAgentPoliciesForRq,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper } from '../../../../services';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
@@ -50,19 +50,15 @@ function useFullAgentPolicyFetcher() {
       }, [] as string[]);
 
       if (policiesToFetchIds.length) {
-        const bulkGetAgentPoliciesResponse = await sendBulkGetAgentPolicies(policiesToFetchIds, {
-          full: authz.fleet.readAgentPolicies,
-          ignoreMissing: true,
-        });
+        const bulkGetAgentPoliciesResponse = await sendBulkGetAgentPoliciesForRq(
+          policiesToFetchIds,
+          {
+            full: authz.fleet.readAgentPolicies,
+            ignoreMissing: true,
+          }
+        );
 
-        if (bulkGetAgentPoliciesResponse.error) {
-          throw bulkGetAgentPoliciesResponse.error;
-        }
-
-        if (!bulkGetAgentPoliciesResponse.data) {
-          throw new Error('Invalid bulk GET agent policies response');
-        }
-        bulkGetAgentPoliciesResponse.data.items.forEach((agentPolicy) => {
+        bulkGetAgentPoliciesResponse.items.forEach((agentPolicy) => {
           fetchedAgentPoliciesRef.current[agentPolicy.id] = agentPolicy;
         });
       }
@@ -195,12 +191,9 @@ export function useFetchAgentsData() {
     }
   }, [latestAgentActionErrors, actionErrors]);
 
-  const queryKeyPagination = JSON.stringify(pagination);
+  const queryKeyPagination = JSON.stringify({ pagination, sortField, sortOrder });
   const queryKeyFilters = JSON.stringify({
-    pagination,
     kuery,
-    sortField,
-    sortOrder,
     showAgentless,
     showInactive,
     showUpgradeable,
@@ -216,7 +209,7 @@ export function useFetchAgentsData() {
     refetch,
   } = useQuery({
     queryKey: ['get-agents-list', queryKeyFilters, queryKeyPagination],
-    keepPreviousData: true, // Keep previous data to avoid flashing when going through pages
+    keepPreviousData: true, // Keep previous data to avoid flashing when going through pages coulse
     queryFn: async (context, { refreshTags = false }: { refreshTags?: boolean } = {}) => {
       try {
         const [

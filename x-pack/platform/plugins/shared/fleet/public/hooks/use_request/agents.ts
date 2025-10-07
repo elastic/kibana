@@ -148,19 +148,6 @@ export function sendGetAgentStatus(
   });
 }
 
-/**
- * @deprecated use sendGetAgentTagsForRq instead
- */
-export function sendGetAgentTags(query: GetAgentsRequest['query'], options?: RequestOptions) {
-  return sendRequest<GetAgentTagsResponse>({
-    method: 'get',
-    path: agentRouteService.getListTagsPath(),
-    query,
-    version: API_VERSIONS.public.v1,
-    ...options,
-  });
-}
-
 export function sendGetAgentTagsForRq(query: GetAgentsRequest['query'], options?: RequestOptions) {
   return sendRequestForRq<GetAgentTagsResponse>({
     method: 'get',
