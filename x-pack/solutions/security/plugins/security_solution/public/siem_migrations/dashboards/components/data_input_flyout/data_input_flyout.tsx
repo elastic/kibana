@@ -46,6 +46,8 @@ interface MissingResourcesIndexed {
   lookups: string[];
 }
 
+const DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE = 'dashboardsMigrationDataInputFlyoutTitle';
+
 export const DashboardMigrationDataInputFlyout = React.memo(
   function DashboardMigrationDataInputFlyout({
     onClose,
@@ -53,7 +55,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
     setFlyoutMigrationStats,
   }: DashboardMigrationDataInputFlyoutProps) {
     const modalTitleId = useGeneratedHtmlId({
-      prefix: 'dashboardMigrationDataInputFlyoutTitle',
+      prefix: DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE,
     });
 
     const { closeFlyout } = useMigrationDataInputContext();
@@ -141,11 +143,12 @@ export const DashboardMigrationDataInputFlyout = React.memo(
           minWidth={500}
           data-test-subj="dashboardMigrationDataInputFlyout"
           aria-labelledby={modalTitleId}
-          aria-label={modalTitleId}
         >
           <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m" id={modalTitleId}>
-              <h2 id={modalTitleId}>{i18n.DATA_INPUT_FLYOUT_TITLE}</h2>
+            <EuiTitle size="m">
+              <h2 id={modalTitleId} aria-label={DASHBOARDS_MIGRATION_DATA_INPUT_FLYOUT_TITLE}>
+                {i18n.DATA_INPUT_FLYOUT_TITLE}
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
