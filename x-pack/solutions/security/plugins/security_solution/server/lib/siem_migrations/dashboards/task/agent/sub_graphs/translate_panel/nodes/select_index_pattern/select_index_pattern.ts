@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getEnhancedIndexExplorerGraph } from '../../../../../../../../../assistant/tools/esql/graphs/enhanced_index_explorer/enhanced_index_explorer';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import type { GraphNode, TranslatePanelGraphParams } from '../../types';
 import { SELECT_INDEX_PATTERN_PROMPT } from './prompts';
@@ -45,8 +46,6 @@ Specific Panel description: "${state.description}"`;
 
     const indexPattern =
       result.finalRecommendation?.primaryIndex ?? MISSING_INDEX_PATTERN_PLACEHOLDER;
-
-    console.log('indexPattern', indexPattern);
 
     const esqlQuery = state.esql_query.replace(
       `FROM ${TRANSLATION_INDEX_PATTERN}`, // Will always be at the beginning of the query
