@@ -197,12 +197,6 @@ export const esqlAsyncSearchStrategyProvider = (
      */
 
     cancel: async (id, options, deps) => {
-      if (options.isStored) {
-        logger.debug(`[esqlAsyncSearch] can't be canceled ${id} ${JSON.stringify(options)}`);
-        // cannot cancel a stored search
-        return;
-      }
-      logger.debug(`[esqlAsyncSearch] cancel ${id} ${JSON.stringify(options)}`);
       try {
         await cancelEsqlAsyncSearch(id, deps);
       } catch (e) {
