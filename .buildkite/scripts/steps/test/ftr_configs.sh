@@ -87,7 +87,7 @@ while read -r config; do
     if [ -f "$EVENT_LOG_FILE" ]; then
       # Check if event exists BEFORE upload
       echo "--- Checking for existing scout event for config $config"
-      node scripts/scout check-event --buildNumber "${$BUILDKITE_BUILD_NUMBER:-}" --testConfig "$config" --dontFailOnError
+      node scripts/scout check-event --buildNumber "${BUILDKITE_BUILD_NUMBER:-}" --testConfig "$config" --dontFailOnError
 
       export SCOUT_EVENT_LOG_PATH="$EVENT_LOG_FILE"
       source .buildkite/scripts/steps/test/scout_upload_report_events.sh
@@ -95,7 +95,7 @@ while read -r config; do
 
       # Check if event exists AFTER upload
       echo "--- Verifying scout event exists for config $config after upload"
-      node scripts/scout check-event --buildNumber "${$BUILDKITE_BUILD_NUMBER:-}" --testConfig "$config" --dontFailOnError
+      node scripts/scout check-event --buildNumber "${BUILDKITE_BUILD_NUMBER:-}" --testConfig "$config" --dontFailOnError
     else
       echo "Could not find event log file for config $config"
     fi
