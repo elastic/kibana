@@ -349,7 +349,7 @@ export function StreamsTreeTable({
             item.data_stream ? (
               <DataQualityColumn
                 histogramQueryFetch={getStreamDocCounts(item.stream.name)}
-                testId={`dataQualityIndicator-${item.stream.name}`}
+                dataTestSubj={`dataQualityIndicator-${item.stream.name}`}
               />
             ) : null,
         },
@@ -369,7 +369,7 @@ export function StreamsTreeTable({
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },
               })}
-              testId={`retentionColumn-${item.stream.name}`}
+              dataTestSubj={`retentionColumn-${item.stream.name}`}
             />
           ),
         },

@@ -95,10 +95,10 @@ export function WiredStreamBadge() {
 
 export function LifecycleBadge({
   lifecycle,
-  testSubj,
+  dataTestSubj,
 }: {
   lifecycle: IngestStreamEffectiveLifecycle;
-  testSubj: string;
+  dataTestSubj?: string;
 }) {
   const {
     dependencies: {
@@ -113,7 +113,7 @@ export function LifecycleBadge({
     badge = (
       <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
         <EuiLink
-          data-test-subj={testSubj}
+          data-test-subj={dataTestSubj}
           color="text"
           target="_blank"
           href={ilmLocator?.getRedirectUrl({
@@ -131,7 +131,7 @@ export function LifecycleBadge({
     );
   } else if (isErrorLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0} data-test-subj={testSubj}>
+      <EuiBadge color="hollow" tabIndex={0} data-test-subj={dataTestSubj}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel', {
           defaultMessage: 'Error: {message}',
           values: { message: lifecycle.error.message },
@@ -145,7 +145,7 @@ export function LifecycleBadge({
         iconType="clockCounter"
         iconSide="left"
         tabIndex={0}
-        data-test-subj={testSubj}
+        data-test-subj={dataTestSubj}
       >
         {lifecycle.dsl.data_retention ??
           i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel', {
@@ -155,7 +155,7 @@ export function LifecycleBadge({
     );
   } else {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0} data-test-subj={testSubj}>
+      <EuiBadge color="hollow" tabIndex={0} data-test-subj={dataTestSubj}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel', {
           defaultMessage: 'Retention: Disabled',
         })}

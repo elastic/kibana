@@ -151,7 +151,7 @@ export function Wrapper({
                     {Streams.ingest.all.GetResponse.is(definition) && (
                       <LifecycleBadge
                         lifecycle={definition.effective_lifecycle}
-                        testSubj={`lifecycleBadge-${streamId}`}
+                        dataTestSubj={`lifecycleBadge-${streamId}`}
                       />
                     )}
                     <DatasetQualityIndicator

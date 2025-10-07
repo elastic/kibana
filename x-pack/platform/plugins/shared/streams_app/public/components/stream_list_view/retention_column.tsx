@@ -23,10 +23,10 @@ import { getTimeSizeAndUnitLabel } from '../data_management/stream_detail_lifecy
 
 export function RetentionColumn({
   lifecycle,
-  testId,
+  dataTestSubj,
 }: {
   lifecycle: IngestStreamEffectiveLifecycle;
-  testId?: string;
+  dataTestSubj?: string;
 }) {
   const {
     dependencies: {
@@ -70,7 +70,7 @@ export function RetentionColumn({
             overflow: 'hidden',
             maxWidth: '150px',
           }}
-          data-test-subj={testId}
+          data-test-subj={dataTestSubj}
         >
           {lifecycle.ilm.policy}
         </EuiLink>
@@ -95,7 +95,7 @@ export function RetentionColumn({
             defaultMessage: 'Data retention period: {retention}',
             values: { retention: retentionValue },
           })}
-          data-test-subj={testId}
+          data-test-subj={dataTestSubj}
         >
           {retentionValue}
         </span>
@@ -103,14 +103,14 @@ export function RetentionColumn({
     }
 
     return (
-      <span tabIndex={0} aria-label={INDEFINITE_RETENTION_ARIA_LABEL} data-test-subj={testId}>
+      <span tabIndex={0} aria-label={INDEFINITE_RETENTION_ARIA_LABEL} data-test-subj={dataTestSubj}>
         {INDEFINITE_RETENTION_LABEL}
       </span>
     );
   }
 
   return (
-    <EuiText color="subdued" tabIndex={0} aria-label={NO_RETENTION_LABEL} data-test-subj={testId}>
+    <EuiText color="subdued" tabIndex={0} aria-label={NO_RETENTION_LABEL} data-test-subj={dataTestSubj}>
       {NO_DATA_SHORT_LABEL}
     </EuiText>
   );

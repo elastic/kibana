@@ -20,12 +20,12 @@ export const DatasetQualityIndicator = ({
   isLoading,
   quality,
   verbose = false,
-  testId,
+  dataTestSubj,
 }: {
   isLoading: boolean;
   quality: QualityIndicators;
   verbose?: boolean;
-  testId?: string;
+  dataTestSubj?: string;
 }) => {
   const QUALITY_LABELS: Record<QualityIndicators, string> = {
     good: summaryPanelQualityGoodText,
@@ -41,7 +41,7 @@ export const DatasetQualityIndicator = ({
   return (
     <EuiSkeletonRectangle width="50px" height="20px" borderRadius="m" isLoading={isLoading}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <QualityIndicator testId={testId} quality={quality} description={translatedQuality} />
+        <QualityIndicator dataTestSubj={dataTestSubj} quality={quality} description={translatedQuality} />
       </EuiFlexGroup>
     </EuiSkeletonRectangle>
   );
