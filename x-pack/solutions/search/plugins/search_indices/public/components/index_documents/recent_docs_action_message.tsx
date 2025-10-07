@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiCallOut,
+  EuiButton,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
 import { DEFAULT_DOCUMENT_PAGE_SIZE } from '../../constants';
 
@@ -18,38 +26,97 @@ export interface RecentDocsActionMessageProps {
 
 export const RecentDocsActionMessage: React.FC<RecentDocsActionMessageProps> = ({ indexName }) => {
   const {
-    services: { share },
+    services: { share, docLinks },
   } = useKibana();
-
   const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
 
-  const onClick = async () => {
-    await discoverLocator?.navigate({ dataViewSpec: { title: indexName } });
+  const viewInDiscover = async (useESQL: boolean) => {
+    await discoverLocator?.navigate({
+      dataViewSpec: { title: indexName },
+      query: useESQL
+        ? { esql: `from ${indexName} | limit ${DEFAULT_DOCUMENT_PAGE_SIZE}` }
+        : { query: '', language: 'kql' },
+    });
+  };
+  const CALLOUT_KEY = 'searchIndices.indexDocuments.recentDocsActionMessage';
+  const [showCallOut, setShowCallOut] = useState(sessionStorage.getItem(CALLOUT_KEY) !== 'hidden');
+
+  const onDismiss = () => {
+    setShowCallOut(false);
+    sessionStorage.setItem(CALLOUT_KEY, 'hidden');
   };
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} color="subdued" borderRadius="none">
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="calendar" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <p>
-            {i18n.translate('xpack.searchIndices.indexDocuments.recentDocsActionMessage', {
+    <>
+      {showCallOut && (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.searchIndices.indexDocuments.recentDocsActionMessage.title',
+            {
               defaultMessage:
-                'You are viewing the {pageSize} most recently ingested documents in this index. To see all documents, view in',
+                'You are viewing the {pageSize} most recently ingested documents in this index.',
               values: {
                 pageSize: DEFAULT_DOCUMENT_PAGE_SIZE,
               },
-            })}{' '}
-            <EuiLink onClick={onClick}>
-              {i18n.translate('xpack.searchIndices.indexDocuments.recentDocsActionMessageLink', {
-                defaultMessage: 'Discover.',
-              })}
-            </EuiLink>
+            }
+          )}
+          iconType="iInCircle"
+          color="primary"
+          size="m"
+          onDismiss={onDismiss}
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.searchIndices.indexDocuments.recentDocsActionMessage.content"
+              defaultMessage="To view all your documents or shorten your time to insights by creating aggregations, visualizations, and alerts try out {esqlInfo} (Elasticsearch Query Language)."
+              values={{
+                esqlInfo: (
+                  <EuiLink
+                    data-test-subj="searchIndicesRecentDocsActionMessageLinkText"
+                    href={docLinks?.links?.query?.queryESQL}
+                    target="_blank"
+                  >
+                    {i18n.translate(
+                      'xpack.searchIndices.indexDocuments.recentDocsActionMessage.linkText',
+                      { defaultMessage: 'ES|QL' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
           </p>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+          <EuiFlexGroup direction="row">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                data-test-subj="searchIndicesRecentDocsActionMessageDiscoverButton"
+                onClick={() => viewInDiscover(false)}
+              >
+                {i18n.translate(
+                  'xpack.searchIndices.indexDocuments.recentDocsActionMessage.viewInDiscoverButton',
+                  {
+                    defaultMessage: 'View in Discover',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                data-test-subj="searchIndicesRecentDocsActionMessageDiscoverWithEsqlButton"
+                onClick={() => viewInDiscover(true)}
+              >
+                {i18n.translate(
+                  'xpack.searchIndices.indexDocuments.recentDocsActionMessage.viewInDiscoverWithEsQlButton',
+                  {
+                    defaultMessage: 'View in Discover with ES|QL',
+                  }
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiCallOut>
+      )}
+    </>
   );
 };
