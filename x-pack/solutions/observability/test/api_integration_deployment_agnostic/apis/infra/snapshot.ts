@@ -68,7 +68,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'container',
           groupBy: [],
-          includeTimeseries: true,
+          includeTimeseries: false,
         });
 
         expect(snapshot).to.have.property('nodes');
@@ -84,43 +84,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             '242fddb9d376bbf0e38025d81764847ee5ec0308adfa095918fd3266f9d06c6a'
           );
           expect(firstNode).to.have.property('metrics');
+          // In single-bucket mode, max and avg equal the value (no timeseries)
           expect(firstNode.metrics).to.eql([
             {
               name: 'cpu',
               value: 0,
               max: 0,
               avg: 0,
-              timeseries: {
-                columns: [
-                  {
-                    name: 'timestamp',
-                    type: 'date',
-                  },
-                  {
-                    name: 'metric_0',
-                    type: 'number',
-                  },
-                ],
-                id: 'cpu',
-                rows: [
-                  {
-                    metric_0: 0,
-                    timestamp: 1547578849952,
-                  },
-                  {
-                    metric_0: 0,
-                    timestamp: 1547578909952,
-                  },
-                  {
-                    metric_0: 0,
-                    timestamp: 1547578969952,
-                  },
-                  {
-                    metric_0: 0,
-                    timestamp: 1547579029952,
-                  },
-                ],
-              },
             },
           ]);
         }
@@ -268,9 +238,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           includeTimeseries: false,
         });
 
+        // In single-bucket mode, value, max, and avg are all the same
         const expected = {
           name: 'cpu',
-          value: null,
+          value: 0.47105555555555556,
           max: 0.47105555555555556,
           avg: 0.47105555555555556,
         };
@@ -337,7 +308,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
           groupBy: [],
-          includeTimeseries: true,
+          includeTimeseries: false,
         });
 
         expect(snapshot).to.have.property('nodes');
@@ -350,45 +321,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
           expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
           expect(firstNode).to.have.property('metrics');
-          expect(firstNode.metrics).to.eql([
-            {
-              name: 'cpu',
-              value: 0.0032,
-              max: 0.0038333333333333336,
-              avg: 0.003341666666666667,
-              timeseries: {
-                columns: [
-                  {
-                    name: 'timestamp',
-                    type: 'date',
-                  },
-                  {
-                    name: 'metric_0',
-                    type: 'number',
-                  },
-                ],
-                id: 'cpu',
-                rows: [
-                  {
-                    metric_0: 0.003166666666666667,
-                    timestamp: 1547571590967,
-                  },
-                  {
-                    metric_0: 0.003166666666666667,
-                    timestamp: 1547571650967,
-                  },
-                  {
-                    metric_0: 0.0038333333333333336,
-                    timestamp: 1547571710967,
-                  },
-                  {
-                    metric_0: 0.0032,
-                    timestamp: 1547571770967,
-                  },
-                ],
-              },
-            },
-          ]);
+          // In single-bucket mode, value, max, and avg are the same
+          expect(firstNode.metrics[0]).to.have.property('name', 'cpu');
+          expect(firstNode.metrics[0]).to.have.property('value');
+          expect(firstNode.metrics[0].value).to.be.a('number');
+          expect(firstNode.metrics[0].max).to.equal(firstNode.metrics[0].value);
+          expect(firstNode.metrics[0].avg).to.equal(firstNode.metrics[0].value);
+          // No timeseries in single-bucket mode
+          expect(firstNode.metrics[0]).to.not.have.property('timeseries');
         }
       });
 
@@ -405,7 +345,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
           groupBy: [],
-          includeTimeseries: true,
+          includeTimeseries: false,
         });
 
         expect(snapshot).to.have.property('nodes');
@@ -438,7 +378,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
           groupBy: [],
-          includeTimeseries: true,
+          includeTimeseries: false,
         });
 
         expect(snapshot).to.have.property('nodes');
@@ -474,7 +414,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ] as SnapshotMetricInput[],
           nodeType: 'host',
           groupBy: [],
-          includeTimeseries: true,
+          includeTimeseries: false,
         });
 
         if (snapshot) {
@@ -592,7 +532,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           metrics: [{ type: 'cpu' }],
           nodeType: 'host',
           groupBy: [{ field: 'service.type' }],
-          includeTimeseries: true,
+          includeTimeseries: false,
         });
 
         const expected = {
@@ -669,7 +609,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             metrics: Array(21).fill({ type: 'cpu' }),
             nodeType: 'host',
             groupBy: [{ field: 'service.type' }],
-            includeTimeseries: true,
+            includeTimeseries: false,
           },
           400
         );

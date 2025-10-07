@@ -67,20 +67,18 @@ describe('createAggregations(options)', () => {
     });
   });
 
-  it('should return just histogram aggregation without groupBy', () => {
-    expect(createAggregations(options)).toMatchSnapshot();
-  });
-
-  it('should return add offset to histogram', () => {
-    const optionsWithAlignDataToEnd = {
-      ...options,
-      timerange: {
-        ...options.timerange,
-        from: moment('2020-01-01T00:00:00Z').subtract(28, 'minutes').valueOf(),
-        to: moment('2020-01-01T01:00:00Z').subtract(28, 'minutes').valueOf(),
+  it('should return direct metric aggregations without groupBy (no histogram wrapper)', () => {
+    expect(createAggregations(options)).toEqual({
+      metric_0: {
+        avg: {
+          field: 'system.cpu.user.pct',
+        },
       },
-      alignDataToEnd: true,
-    };
-    expect(createAggregations(optionsWithAlignDataToEnd)).toMatchSnapshot();
+      metricsets: {
+        terms: {
+          field: 'metricset.name',
+        },
+      },
+    });
   });
 });
