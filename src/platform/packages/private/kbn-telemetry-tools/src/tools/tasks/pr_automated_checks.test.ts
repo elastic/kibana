@@ -9,7 +9,6 @@
 
 jest.mock('fs/promises');
 
-import { UPSTREAM_BRANCH } from '@kbn/repo-info';
 import { prAutomatedChecks } from './pr_automated_checks';
 import { createTaskContext, type TelemetryRoot } from './task_context';
 
@@ -22,7 +21,7 @@ const BASE_ROOT: TelemetryRoot = {
 };
 
 describe('prAutomatedChecks', () => {
-  const context = createTaskContext();
+  const context = createTaskContext('06102025MERGEBASESHA');
 
   beforeEach(() => {
     context.reporter.errors.length = 0; // Empty the errors
@@ -30,7 +29,40 @@ describe('prAutomatedChecks', () => {
   });
 
   describe('Download schema from main branch', () => {
-    test(`downloads the file from the ${UPSTREAM_BRANCH} branch`, async () => {
+    test(`fails the comparison if called without a SHA`, async () => {
+      const missingSha = createTaskContext();
+      missingSha.roots.push({ ...BASE_ROOT });
+      const [downloadSchemas] = prAutomatedChecks(missingSha);
+
+      expect(missingSha.roots[0].upstreamMapping).toBeUndefined();
+
+      // @ts-expect-error We know that the method doesn't use the arguments
+      await expect(downloadSchemas.task()).rejects.toMatchInlineSnapshot(
+        `[Error: Cannot fetch the baseline for comparison, no SHA specified.]`
+      );
+    });
+
+    test(`fails to download the merge-base commit version of the file from the Kibana repo`, async () => {
+      const fetchSpy = jest.spyOn(global, 'fetch');
+
+      context.roots.push({ ...BASE_ROOT });
+      const [downloadSchemas] = prAutomatedChecks(context);
+
+      expect(context.roots[0].upstreamMapping).toBeUndefined();
+
+      fetchSpy.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        statusText: 'Who checks the checker?',
+      } as Partial<Response> as Response);
+
+      // @ts-expect-error We know that the method doesn't use the arguments
+      await expect(downloadSchemas.task()).rejects.toMatchInlineSnapshot(
+        `[Error: Failed to fetch https://raw.githubusercontent.com/elastic/kibana/06102025MERGEBASESHA/test.json: 404 Who checks the checker?]`
+      );
+    });
+
+    test(`downloads the merge-base commit version of the file from the Kibana repo`, async () => {
       const fetchSpy = jest.spyOn(global, 'fetch');
 
       context.roots.push({ ...BASE_ROOT });
@@ -49,26 +81,6 @@ describe('prAutomatedChecks', () => {
       await downloadSchemas.task();
 
       expect(context.roots[0].upstreamMapping).toEqual(upstreamMappings);
-    });
-
-    test(`fails to download the file from the ${UPSTREAM_BRANCH} branch`, async () => {
-      const fetchSpy = jest.spyOn(global, 'fetch');
-
-      context.roots.push({ ...BASE_ROOT });
-      const [downloadSchemas] = prAutomatedChecks(context);
-
-      expect(context.roots[0].upstreamMapping).toBeUndefined();
-
-      fetchSpy.mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        statusText: 'Who checks the checker?',
-      } as Partial<Response> as Response);
-
-      // @ts-expect-error We know that the method doesn't use the arguments
-      await expect(downloadSchemas.task()).rejects.toMatchInlineSnapshot(
-        `[Error: Failed to fetch https://raw.githubusercontent.com/elastic/kibana/refs/heads/main/test.json: 404 Who checks the checker?]`
-      );
     });
   });
   describe('Schema PR checks', () => {
