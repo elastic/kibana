@@ -362,7 +362,7 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
                     content={riskScoreItem.field}
                     data-test-subj={`riskScoreOverrideField${index}`}
                   >
-                    <>{riskScoreItem.field}</>
+                    <span tabIndex={0}>{riskScoreItem.field}</span>
                   </EuiToolTip>
                 </OverrideColumn>
                 <EuiFlexItem grow={false}>
