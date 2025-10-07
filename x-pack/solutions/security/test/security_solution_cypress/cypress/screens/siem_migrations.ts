@@ -30,7 +30,6 @@ export const ONBOARDING_RULE_MIGRATIONS_LIST = getDataTestSubjectSelectorStartWi
 
 export const ONBOARDING_TRANSLATIONS_RESULT_TABLE = {
   TABLE: getDataTestSubjectSelector('translationsResults'),
-  TRANSLATION_STATUS: (status: string) => getDataTestSubjectSelector(`translationStatus-${status}`),
   TRANSLATION_STATUS_COUNT: (status: string) =>
     getDataTestSubjectSelector(`translationStatusCount-${status}`),
 };
@@ -49,8 +48,6 @@ export const TRANSLATED_RULE_DETAILS_FLYOUT = getDataTestSubjectSelector(
 export const TRANSLATED_RULE_QUERY_EDITOR_PARENT = `${getDataTestSubjectSelector(
   'kibanaCodeEditor'
 )}`;
-
-export const TRANSLATED_RULE_QUERY_EDITOR_QUERY_CONTAINER = `${TRANSLATED_RULE_QUERY_EDITOR_PARENT} .view-lines`;
 
 export const TRANSLATED_RULE_QUERY_EDITOR_INPUT = `${TRANSLATED_RULE_QUERY_EDITOR_PARENT} textarea`;
 
