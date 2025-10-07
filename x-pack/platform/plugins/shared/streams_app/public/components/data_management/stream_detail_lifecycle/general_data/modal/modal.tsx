@@ -27,6 +27,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import { IlmField } from './ilm';
 import { DslField, DEFAULT_RETENTION_UNIT, DEFAULT_RETENTION_VALUE } from './dsl';
 import { useKibana } from '../../../../../hooks/use_kibana';
@@ -61,7 +62,7 @@ export function EditLifecycleModal({
   const [isInheritToggleOn, setIsInheritToggleOn] = useState<boolean>(isCurrentLifecycleInherit);
   const [selectedAction, setSelectedAction] = useState<LifecycleEditAction>(initialSelectedAction);
   const [lifecycle, setLifecycle] = useState<IngestStreamLifecycle>(
-    definition.effective_lifecycle as IngestStreamLifecycle
+    omit(definition.effective_lifecycle, 'from') as IngestStreamLifecycle
   );
 
   const [isSaveButtonDisabled, setIsSaveButtonDisabled] = useState<boolean>(
@@ -155,7 +156,9 @@ export function EditLifecycleModal({
                 onChange={(event) => {
                   if (event.target.checked) {
                     if (isCurrentLifecycleInherit) {
-                      setLifecycle(definition.effective_lifecycle as IngestStreamLifecycle);
+                      setLifecycle(
+                        omit(definition.effective_lifecycle, 'from') as IngestStreamLifecycle
+                      );
                       setSelectedAction(initialSelectedAction);
                     }
                     setIsInheritToggleOn(true);
