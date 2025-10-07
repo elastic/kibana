@@ -21,15 +21,9 @@ interface NextExecutionTimeProps {
   triggers: WorkflowTrigger[];
   history: WorkflowExecutionHistoryModel[];
   updateInterval?: number;
-  refetch: () => void;
 }
 
-export function NextExecutionTime({
-  triggers,
-  history,
-  refetch,
-  updateInterval,
-}: NextExecutionTimeProps) {
+export function NextExecutionTime({ triggers, history, updateInterval }: NextExecutionTimeProps) {
   const nextExecutionTime = getWorkflowNextExecutionTime(triggers, history);
   const getFormattedDateTime = useGetFormattedDateTime();
 

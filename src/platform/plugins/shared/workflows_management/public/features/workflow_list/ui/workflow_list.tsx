@@ -235,7 +235,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
             <NextExecutionTime
               triggers={item.definition?.triggers ?? []}
               history={item.history}
-              refetch={refetch}
               updateInterval={1}
             />
           </EuiFlexGroup>
@@ -400,7 +399,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       },
     ],
     [
-      refetch,
       canUpdateWorkflow,
       handleToggleWorkflow,
       canExecuteWorkflow,
