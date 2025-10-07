@@ -30,7 +30,11 @@ export const AddRoutingRuleControls = () => {
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center" wrap responsive={false}>
       <CancelButton isDisabled={isForking} onClick={cancelChanges} />
       <PrivilegesTooltip hasPrivileges={hasPrivileges}>
-        <SaveButton isLoading={isForking} isDisabled={!canForkRouting} onClick={forkStream} />
+        <SaveButton
+          isLoading={isForking}
+          isDisabled={!canForkRouting}
+          onClick={() => forkStream()}
+        />
       </PrivilegesTooltip>
     </EuiFlexGroup>
   );
