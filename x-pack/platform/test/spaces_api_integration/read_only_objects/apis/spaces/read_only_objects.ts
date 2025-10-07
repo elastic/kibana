@@ -7,11 +7,10 @@
 import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
-// import { READ_ONLY_TYPE } from '@kbn/read-only-objects-test-plugin/server';
+import { READ_ONLY_TYPE } from '@kbn/read-only-objects-test-plugin/server';
 import { adminTestUser } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../../../functional/ftr_provider_context';
-const READ_ONLY_TYPE = 'read_only_type';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
