@@ -7,24 +7,21 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-
 import { omit } from 'lodash';
-
 import pMap from 'p-map';
 
 import type { Agent } from '../../types';
-
 import { packagePolicyService } from '../package_policy';
-
 import { FleetUnauthorizedError } from '../../errors';
-
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS } from '../../constants';
+import {
+  MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
+  isAgentPrivilegeLevelChangeSupported,
+} from '../../../common/services';
 
 import { ActionRunner } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
-
 import { createAgentAction, createErrorActionResults } from './actions';
-
 import { getPackagesWithRootAccess } from './change_privilege_level';
 
 export class ChangePrivilegeActionRunner extends ActionRunner {
@@ -71,10 +68,16 @@ export async function bulkChangePrivilegeAgentsBatch(
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 
-  // Fail fast if agents contain integrations that require root access.
+  // Fail fast if agent is on an unsupported version or contains an integration that requires root access.
   await pMap(
     agents,
     async (agent) => {
+      if (!isAgentPrivilegeLevelChangeSupported(agent)) {
+        errors[agent.id] = new FleetUnauthorizedError(
+          `Cannot remove root access. Privilege level change is supported from version ${MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION}.`
+        );
+        return;
+      }
       if (agent?.policy_id) {
         const allPackagePolicies =
           (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id)) || [];

@@ -33,6 +33,10 @@ export {
   MINIMUM_MIGRATE_AGENT_VERSION,
 } from './is_agent_migrate_supported';
 export {
+  isAgentPrivilegeLevelChangeSupported,
+  MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
+} from './is_agent_privilege_level_change_supported';
+export {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,

@@ -317,3 +317,33 @@ export interface PostRetrieveAgentsByActionsRequest {
 export interface PostRetrieveAgentsByActionsResponse {
   items: string[];
 }
+
+export interface ChangeAgentPrivilegeLevelRequest {
+  agentId: string;
+  body: {
+    user_info?: {
+      username?: string;
+      groupname?: string;
+      password?: string;
+    };
+  } | null;
+}
+
+export interface ChangeAgentPrivilegeLevelResponse {
+  actionId: string;
+}
+
+export interface BulkChangeAgentPrivilegeLevelRequest {
+  body: {
+    agents: string[] | string;
+    user_info?: {
+      username?: string;
+      groupname?: string;
+      password?: string;
+    };
+  };
+}
+
+export interface BulkChangeAgentPrivilegeLevelResponse {
+  actionId: string;
+}

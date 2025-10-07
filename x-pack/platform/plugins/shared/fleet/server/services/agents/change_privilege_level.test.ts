@@ -46,9 +46,31 @@ const soClientMock = savedObjectsClientMock.create();
 describe('changeAgentPrivilegeLevel', () => {
   const agentId = 'agent-id';
   const policyId = 'policy-id';
-  (getAgentById as jest.Mock).mockResolvedValue({ policy_id: policyId } as any);
+
+  it('should throw an error if the agent does not exist', async () => {
+    (getAgentById as jest.Mock).mockRejectedValue(new Error(`Agent ${agentId} does not exist`));
+    await expect(
+      changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
+    ).rejects.toThrowError(`Agent ${agentId} does not exist`);
+  });
+
+  it('should throw an error if the agent is on an unsupported version', async () => {
+    (getAgentById as jest.Mock).mockResolvedValue({
+      agent: { version: '9.1.0' },
+      policy_id: policyId,
+    } as any);
+    await expect(
+      changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
+    ).rejects.toThrowError(
+      'Cannot remove root access. Privilege level change is supported from version 9.2.0.'
+    );
+  });
 
   it('should throw an error if the agent needs root access', async () => {
+    (getAgentById as jest.Mock).mockResolvedValue({
+      agent: { version: '9.3.0' },
+      policy_id: policyId,
+    } as any);
     mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
       {
         id: 'package-1',
@@ -68,6 +90,10 @@ describe('changeAgentPrivilegeLevel', () => {
   });
 
   it('should create a PRIVILEGE_LEVEL_CHANGE action with minimal options if the agent can become unprivileged', async () => {
+    (getAgentById as jest.Mock).mockResolvedValue({
+      agent: { version: '9.3.0' },
+      policy_id: policyId,
+    } as any);
     mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
       {
         id: 'package-1',
@@ -99,6 +125,10 @@ describe('changeAgentPrivilegeLevel', () => {
   });
 
   it('should create a PRIVILEGE_LEVEL_CHANGE action with additional options if the agent can become unprivileged', async () => {
+    (getAgentById as jest.Mock).mockResolvedValue({
+      agent: { version: '9.3.0' },
+      policy_id: policyId,
+    } as any);
     mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([
       {
         id: 'package-1',

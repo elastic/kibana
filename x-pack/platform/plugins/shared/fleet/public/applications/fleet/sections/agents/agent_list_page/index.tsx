@@ -10,7 +10,11 @@ import { EuiSpacer, EuiPortal } from '@elastic/eui';
 
 import { isStuckInUpdating } from '../../../../../../common/services/agent_status';
 import { FLEET_SERVER_PACKAGE } from '../../../../../../common';
-import { isAgentMigrationSupported } from '../../../../../../common/services';
+import {
+  isAgentMigrationSupported,
+  isAgentPrivilegeLevelChangeSupported,
+  isRootPrivilegeRequired,
+} from '../../../../../../common/services';
 import type { Agent } from '../../../types';
 
 import {
@@ -48,6 +52,7 @@ import {
 } from './components';
 import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
+import { ChangeAgentPrivilegeLevelFlyout } from './components/change_agent_privilege_level_flyout.tsx';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { cloud } = useStartServices();
@@ -83,11 +88,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
     undefined
   );
+  const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
+  const [agentToChangePrivilege, setAgentToChangePrivilege] = useState<Agent | undefined>(
+    undefined
+  );
 
   const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
-
-  // migrateAgentState
-  const [agentToMigrate, setAgentToMigrate] = useState<Agent | undefined>(undefined);
 
   const {
     allTags,
@@ -198,6 +204,27 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return [...protectedAgents, ...fleetAgents, ...unsupportedVersionAgents];
   }, [selectedAgents, agentPoliciesIndexedById]);
 
+  const unsupportedPrivilegeLevelChangeAgents = useMemo(() => {
+    const rootAccessNeededAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          isRootPrivilegeRequired(
+            agentPoliciesIndexedById[agent.policy_id as string]?.package_policies || []
+          )
+        )
+      : [];
+    const fleetServerAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) =>
+          agentPoliciesIndexedById[agent.policy_id as string]?.package_policies?.some(
+            (p) => p.package?.name === FLEET_SERVER_PACKAGE
+          )
+        )
+      : [];
+    const unsupportedVersionAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) => !isAgentPrivilegeLevelChangeSupported(agent))
+      : [];
+    return [...rootAccessNeededAgents, ...fleetServerAgents, ...unsupportedVersionAgents];
+  }, [selectedAgents, agentPoliciesIndexedById]);
+
   const renderActions = (agent: Agent) => {
     const agentPolicy =
       typeof agent.policy_id === 'string' ? agentPoliciesIndexedById[agent.policy_id] : undefined;
@@ -221,6 +248,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onGetUninstallCommandClick={() => setAgentToGetUninstallCommand(agent)}
         onRequestDiagnosticsClick={() => setAgentToRequestDiagnostics(agent)}
         onMigrateAgentClick={() => setAgentToMigrate(agent)}
+        onChangeAgentPrivilegeLevelClick={() => setAgentToChangePrivilege(agent)}
       />
     );
   };
@@ -444,6 +472,22 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
+      {agentToChangePrivilege && (
+        <EuiPortal>
+          <ChangeAgentPrivilegeLevelFlyout
+            agents={[agentToChangePrivilege]}
+            agentCount={1}
+            unsupportedAgents={unsupportedPrivilegeLevelChangeAgents}
+            onClose={() => {
+              setAgentToChangePrivilege(undefined);
+            }}
+            onSave={() => {
+              setAgentToChangePrivilege(undefined);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
       {showUnhealthyCallout && (
         <>
           {cloud?.deploymentUrl ? (
@@ -497,6 +541,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         sortField={sortField}
         sortOrder={sortOrder}
         unsupportedMigrateAgents={unsupportedMigrateAgents}
+        unsupportedPrivilegeLevelChangeAgents={unsupportedPrivilegeLevelChangeAgents}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

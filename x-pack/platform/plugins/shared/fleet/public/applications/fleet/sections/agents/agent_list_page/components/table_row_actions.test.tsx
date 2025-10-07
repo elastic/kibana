@@ -44,6 +44,7 @@ function renderTableRowActions({
       onUpgradeClick={jest.fn()}
       onGetUninstallCommandClick={jest.fn()}
       onMigrateAgentClick={jest.fn()}
+      onChangeAgentPrivilegeLevelClick={jest.fn()}
     />
   );
 
@@ -53,7 +54,10 @@ function renderTableRowActions({
 }
 describe('TableRowActions', () => {
   beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({ enableAgentMigrations: true } as any); // mock the flag as true so the test runs and the table action item renders
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      enableAgentMigrations: true,
+      enableAgentPrivilegeLevelChange: true,
+    } as any);
     mockedUseAuthz.mockReturnValue({
       fleet: {
         all: true,
@@ -382,6 +386,129 @@ describe('TableRowActions', () => {
 
       expect(res).not.toBe(null);
       expect(res).toBeEnabled();
+    });
+  });
+
+  describe('Agent privilege level change action', () => {
+    function renderAndGetChangePrivilegeLevelButton({
+      agent,
+      agentPolicy,
+    }: {
+      agent: Agent;
+      agentPolicy?: AgentPolicy;
+    }) {
+      const { utils } = renderTableRowActions({
+        agent,
+        agentPolicy,
+      });
+
+      return utils.queryByTestId('changeAgentPrivilegeLevelMenuItem');
+    }
+
+    it('should render an active action button when agent is not a fleet server agent and does not require root access', async () => {
+      const res = renderAndGetChangePrivilegeLevelButton({
+        agent: {
+          active: true,
+          status: 'online',
+          agent: { version: '9.3.0' },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          package_policies: [{ package: { name: 'some-integration', requires_root: false } }],
+        } as AgentPolicy,
+      });
+
+      expect(res).not.toBe(null);
+      expect(res).toBeEnabled();
+    });
+
+    it('should not render an action button when agent requires root access', async () => {
+      const res = renderAndGetChangePrivilegeLevelButton({
+        agent: {
+          active: true,
+          status: 'online',
+          agent: { version: '9.3.0' },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          package_policies: [{ package: { name: 'some-integration', requires_root: true } }],
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
+
+    it('should not render an action button when agent is a fleet server agent', async () => {
+      const res = renderAndGetChangePrivilegeLevelButton({
+        agent: {
+          active: true,
+          status: 'online',
+          agent: { version: '9.3.0' },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          package_policies: [{ package: { name: 'fleet_server', requires_root: false } }],
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
+
+    it('should not render an action button when agent feature flag is disabled', async () => {
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        enableAgentMigrations: false,
+      } as any);
+      const res = renderAndGetChangePrivilegeLevelButton({
+        agent: {
+          active: true,
+          status: 'online',
+          agent: { version: '9.3.0' },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          package_policies: [{ package: { name: 'some-integration', requires_root: false } }],
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
+
+    it('should not render an action button when agent is on an unsupported version', async () => {
+      const res = renderAndGetChangePrivilegeLevelButton({
+        agent: {
+          active: true,
+          status: 'online',
+          agent: { version: '9.1.0' },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          package_policies: [{ package: { name: 'some-integration', requires_root: false } }],
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
+
+    it('should not render an action button when user only has read permissions', async () => {
+      mockedUseAuthz.mockReturnValue({
+        fleet: {
+          allAgents: false,
+        },
+        integrations: {},
+      } as any);
+      const res = renderAndGetChangePrivilegeLevelButton({
+        agent: {
+          active: true,
+          status: 'online',
+          agent: { version: '9.3.0' },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          package_policies: [{ package: { name: 'some-integration', requires_root: false } }],
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
     });
   });
 });

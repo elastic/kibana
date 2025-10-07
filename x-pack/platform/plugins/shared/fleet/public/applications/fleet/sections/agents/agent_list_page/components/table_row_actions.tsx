@@ -10,9 +10,12 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FLEET_SERVER_PACKAGE } from '../../../../../../../common';
+
 import {
   isAgentMigrationSupported,
+  isAgentPrivilegeLevelChangeSupported,
   isAgentRequestDiagnosticsSupported,
+  isRootPrivilegeRequired,
 } from '../../../../../../../common/services';
 
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
@@ -34,6 +37,7 @@ export const TableRowActions: React.FunctionComponent<{
   onAddRemoveTagsClick: (button: HTMLElement) => void;
   onRequestDiagnosticsClick: () => void;
   onMigrateAgentClick: () => void;
+  onChangeAgentPrivilegeLevelClick: () => void;
 }> = ({
   agent,
   agentPolicy,
@@ -44,12 +48,15 @@ export const TableRowActions: React.FunctionComponent<{
   onAddRemoveTagsClick,
   onRequestDiagnosticsClick,
   onMigrateAgentClick,
+  onChangeAgentPrivilegeLevelClick,
 }) => {
   const { getHref } = useLink();
   const authz = useAuthz();
   const isFleetServerAgent =
     agentPolicy?.package_policies?.some((p) => p.package?.name === FLEET_SERVER_PACKAGE) ?? false;
   const agentMigrationsEnabled = ExperimentalFeaturesService.get().enableAgentMigrations;
+  const agentPrivilegeLevelChangeEnabled =
+    ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
   const isUnenrolling = agent.status === 'unenrolling';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
@@ -71,7 +78,7 @@ export const TableRowActions: React.FunctionComponent<{
     menuItems.push(
       <EuiContextMenuItem
         icon="cluster"
-        onClick={(e) => {
+        onClick={() => {
           onMigrateAgentClick();
           setIsMenuOpen(false);
         }}
@@ -187,6 +194,32 @@ export const TableRowActions: React.FunctionComponent<{
         </EuiContextMenuItem>
       );
     }
+  }
+
+  if (
+    authz.fleet.allAgents &&
+    isAgentPrivilegeLevelChangeSupported(agent) &&
+    !isRootPrivilegeRequired(agentPolicy?.package_policies || []) &&
+    !isFleetServerAgent &&
+    agentPrivilegeLevelChangeEnabled
+  ) {
+    menuItems.push(
+      <EuiContextMenuItem
+        icon="wrench"
+        onClick={() => {
+          onChangeAgentPrivilegeLevelClick();
+          setIsMenuOpen(false);
+        }}
+        disabled={!agent.active}
+        key="changeAgentPrivilegeLevel"
+        data-test-subj="changeAgentPrivilegeLevelMenuItem"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentList.changeAgentPrivilegeLevelActionText"
+          defaultMessage="Remove root access"
+        />
+      </EuiContextMenuItem>
+    );
   }
 
   if (authz.fleet.readAgents) {

@@ -8,8 +8,12 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { omit } from 'lodash';
 
-import { FleetUnauthorizedError } from '../../errors';
+import { FleetError, FleetUnauthorizedError } from '../../errors';
 import { packagePolicyService } from '../package_policy';
+import {
+  MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
+  isAgentPrivilegeLevelChangeSupported,
+} from '../../../common/services';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
@@ -37,8 +41,15 @@ export async function changeAgentPrivilegeLevel(
     };
   } | null
 ) {
-  // Fail fast if agent contains an integration that requires root access.
+  // Fail fast if agent is on an unsupported version or contains an integration that requires root access.
   const agent = await getAgentById(esClient, soClient, agentId);
+
+  if (!isAgentPrivilegeLevelChangeSupported(agent)) {
+    throw new FleetError(
+      `Cannot remove root access. Privilege level change is supported from version ${MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION}.`
+    );
+  }
+
   const packagePolicies =
     (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id || '')) || [];
   const packagesWithRootAccess = getPackagesWithRootAccess(packagePolicies);

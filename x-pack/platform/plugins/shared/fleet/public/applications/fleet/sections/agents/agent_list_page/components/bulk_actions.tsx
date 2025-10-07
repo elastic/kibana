@@ -39,6 +39,7 @@ import { AgentExportCSVModal } from '../../components/agent_export_csv_modal';
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 import { AgentMigrateFlyout } from './migrate_agent_flyout';
+import { ChangeAgentPrivilegeLevelFlyout } from './change_agent_privilege_level_flyout.tsx';
 
 export interface Props {
   nAgentsInTable: number;
@@ -53,6 +54,7 @@ export interface Props {
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   unsupportedMigrateAgents: Agent[];
+  unsupportedPrivilegeLevelChangeAgents: Agent[];
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -68,11 +70,14 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   sortField,
   sortOrder,
   unsupportedMigrateAgents,
+  unsupportedPrivilegeLevelChangeAgents,
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
   const agentMigrationsEnabled = ExperimentalFeaturesService.get().enableAgentMigrations;
+  const agentPrivilegeLevelChangeEnabled =
+    ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -91,6 +96,8 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     useState<boolean>(false);
   const [isExportCSVModalOpen, setIsExportCSVModalOpen] = useState<boolean>(false);
   const [isMigrateModalOpen, setIsMigrateModalOpen] = useState<boolean>(false);
+  const [isAgentPrivilegeChangeModalOpen, setIsAgentPrivilegeChangeModalOpen] =
+    useState<boolean>(false);
 
   // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
   const selectionQuery = useMemo(() => {
@@ -274,6 +281,26 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       },
     });
   }
+  if (agentPrivilegeLevelChangeEnabled) {
+    menuItems.push({
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.bulkChangeAgentsPrivilegeLevel"
+          data-test-subj="agentBulkActionsBulkChangeAgentsPrivilegeLevel"
+          defaultMessage="Remove root access for {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="wrench" size="m" />,
+      disabled: !authz.fleet.allAgents,
+      onClick: () => {
+        closeMenu();
+        setIsAgentPrivilegeChangeModalOpen(true);
+      },
+    });
+  }
   const panels = [
     {
       id: 0,
@@ -379,6 +406,22 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             }}
             onSave={() => {
               setIsMigrateModalOpen(false);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isAgentPrivilegeChangeModalOpen && (
+        <EuiPortal>
+          <ChangeAgentPrivilegeLevelFlyout
+            agents={agents}
+            agentCount={agentCount}
+            unsupportedAgents={unsupportedPrivilegeLevelChangeAgents}
+            onClose={() => {
+              setIsAgentPrivilegeChangeModalOpen(false);
+            }}
+            onSave={() => {
+              setIsAgentPrivilegeChangeModalOpen(false);
               refreshAgents();
             }}
           />
