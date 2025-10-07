@@ -31,9 +31,7 @@ export async function suggestForExpression(
   const ctx = { ...baseCtx, position };
   const suggestions = await dispatchStates(ctx, position);
 
-  attachRanges(ctx, suggestions);
-
-  return suggestions;
+  return attachRanges(ctx, suggestions);
 }
 
 /** Derives innerText and option flags from the incoming params.*/
@@ -58,22 +56,30 @@ export function buildContext(params: SuggestForExpressionParams): ExpressionCont
   };
 }
 
-/** Range policy: NULL-check → overlap; else replace last word if non-space, insert otherwise. */
-function attachRanges(ctx: ExpressionContext, suggestions: ISuggestionItem[]) {
+/** Returns new suggestions array with range information */
+function attachRanges(ctx: ExpressionContext, suggestions: ISuggestionItem[]): ISuggestionItem[] {
   const { innerText } = ctx;
   const lastChar = innerText[innerText.length - 1];
   const hasNonWhitespacePrefix = !WHITESPACE_REGEX.test(lastChar);
 
-  suggestions.forEach((suggestion) => {
+  return suggestions.map((suggestion) => {
     if (isNullCheckOperator(suggestion.text)) {
-      suggestion.rangeToReplace = getOverlapRange(innerText, suggestion.text);
-
-      return;
+      return {
+        ...suggestion,
+        rangeToReplace: getOverlapRange(innerText, suggestion.text),
+      };
     }
 
     if (hasNonWhitespacePrefix) {
-      const lastNonWhitespaceIndex = innerText.search(LAST_WORD_BOUNDARY_REGEX);
-      suggestion.rangeToReplace = { start: lastNonWhitespaceIndex, end: innerText.length };
+      return {
+        ...suggestion,
+        rangeToReplace: {
+          start: innerText.search(LAST_WORD_BOUNDARY_REGEX),
+          end: innerText.length,
+        },
+      };
     }
+
+    return { ...suggestion };
   });
 }
