@@ -37,9 +37,8 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
 
       const { editor, openActionsPopover, save, run, saveAndRun } = params;
 
-      // CMD+K shortcut, while focus is on the editor
       actionsMenuAction.current = [
-        // Comment line action
+        // Toggle comments action
         // This addresses keyboard layout issues where Ctrl+/ doesn't work on non-US layouts
         // See: https://github.com/microsoft/monaco-editor/issues/1233
         // Solution: Register multiple keybindings to cover different keyboard layouts

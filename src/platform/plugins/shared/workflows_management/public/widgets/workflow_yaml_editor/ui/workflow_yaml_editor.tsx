@@ -412,7 +412,8 @@ export const WorkflowYAMLEditor = ({
 
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
 
-  // onSave updates on every yaml change, we need a stable reference to pass to the keyboard handler
+  // YML dependant callbacks (save, run, save&run) update on every yaml string change,
+  // we need stable references to use in the keyboard action handlers.
   const saveRef = useRef(onSave);
   useEffect(() => {
     saveRef.current = onSave;

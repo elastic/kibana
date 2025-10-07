@@ -66,7 +66,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             }
             notifications?.toasts.addError(err, {
               toastLifeTimeMs: 3000,
-              title: 'Failed to save workflow',
+              title: i18n.translate('workflows.detail.error.workflowSaveFailed', {
+                defaultMessage: 'Failed to save workflow',
+              }),
             });
           },
         }
@@ -92,7 +94,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       if (!workflow) {
         notifications?.toasts.addError(new Error('Workflow is not loaded'), {
           toastLifeTimeMs: 3000,
-          title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
+          title: i18n.translate('workflows.detail.error.workflowNotLoaded', {
             defaultMessage: 'Workflow is not loaded',
           }),
         });
@@ -115,7 +117,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           onError: (err: unknown) => {
             notifications?.toasts.addError(err as Error, {
               toastLifeTimeMs: 3000,
-              title: i18n.translate('workflows.workflowDetailHeader.error.workflowRunFailed', {
+              title: i18n.translate('workflows.detail.error.workflowRunFailed', {
                 defaultMessage: 'Failed to run workflow',
               }),
             });
@@ -145,7 +147,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           onError: (err: unknown) => {
             notifications?.toasts.addError(err as Error, {
               toastLifeTimeMs: 3000,
-              title: i18n.translate('workflows.workflowDetailHeader.error.workflowTestRunFailed', {
+              title: i18n.translate('workflows.detail.error.workflowTestRunFailed', {
                 defaultMessage: 'Failed to test workflow',
               }),
             });
@@ -192,7 +194,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     if (!workflow) {
       notifications?.toasts.addError(new Error('Workflow is not loaded'), {
         toastLifeTimeMs: 3000,
-        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
+        title: i18n.translate('workflows.detail.error.workflowNotLoaded', {
           defaultMessage: 'Workflow is not loaded',
         }),
       });
