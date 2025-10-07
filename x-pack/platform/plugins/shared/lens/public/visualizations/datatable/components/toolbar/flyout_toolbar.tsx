@@ -7,11 +7,13 @@
 
 import React from 'react';
 
-import type { VisualizationToolbarProps } from '../../../../types';
-import type { DatatableVisualizationState } from '../../visualization';
-import { DatatableAppearanceSettings } from './appearance_settings';
 import type { ContentMap } from '../../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../../shared_components/flyout_toolbar';
+
+import type { VisualizationToolbarProps } from '../../../../types';
+import type { DatatableVisualizationState } from '../../visualization';
+
+import { DatatableAppearanceSettings } from './appearance_settings';
 
 export function DatatableFlyoutToolbar(
   props: VisualizationToolbarProps<DatatableVisualizationState>
