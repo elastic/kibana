@@ -38,7 +38,7 @@ export interface ExpressionRendererParams extends IExpressionLoaderParams {
    * An observable which can be used to re-run the expression without destroying the component
    */
   reload$?: Observable<unknown>;
-  abortController?: AbortController;
+  abortController: AbortController | undefined;
 }
 
 interface ExpressionRendererState {
@@ -83,9 +83,9 @@ export function useExpressionRenderer(
 
   useEffect(() => {
     if (abortController?.signal)
-      abortController.signal.onabort = () => {
+      abortController.signal.addEventListener('abort', () => {
         expressionLoaderRef.current?.cancel();
-      };
+      });
   }, [abortController]);
 
   /* eslint-disable react-hooks/exhaustive-deps */
@@ -166,6 +166,8 @@ export function useExpressionRenderer(
     };
   }, [expressionLoaderRef.current, onRender$]);
   /* eslint-enable react-hooks/exhaustive-deps */
+
+  console.log('isAborted in expressions:', abortController?.signal.aborted);
 
   useEffect(() => {
     const subscription = reload$?.subscribe(() => {

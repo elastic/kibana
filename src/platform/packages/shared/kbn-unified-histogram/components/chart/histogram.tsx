@@ -101,6 +101,7 @@ export function Histogram({
       transform: translate(-50%, -50%);
     }
   `;
+  console.log('isAborted in histogram', abortController?.signal.aborted);
   return (
     <>
       <div
