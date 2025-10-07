@@ -19,6 +19,9 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       hidden: false,
       namespaceType: 'multiple-isolated',
       supportsAccessControl: true,
+      management: {
+        importableAndExportable: true,
+      },
       mappings: {
         dynamic: false,
         properties: {
@@ -31,6 +34,9 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       name: NON_READ_ONLY_TYPE,
       hidden: false,
       namespaceType: 'multiple-isolated',
+      management: {
+        importableAndExportable: true,
+      },
       mappings: {
         dynamic: false,
         properties: {

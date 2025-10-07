@@ -19,7 +19,7 @@ import type {
   SavedObjectsImportHook,
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   checkReferenceOrigins,
   validateReferences,

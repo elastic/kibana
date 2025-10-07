@@ -17,7 +17,7 @@ import type {
   SavedObjectsResolveImportErrorsOptions,
   SavedObjectsImportHook,
 } from '@kbn/core-saved-objects-server';
-import { AccessControlImportTransformsFactory } from '@kbn/core-saved-objects-server/src/import';
+import type { AccessControlImportTransformsFactory } from '@kbn/core-saved-objects-server/src/import';
 import { importSavedObjectsFromStream } from './import_saved_objects';
 import { resolveSavedObjectsImportErrors } from './resolve_import_errors';
 
