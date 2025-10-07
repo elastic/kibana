@@ -6,8 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
-import { ESQL_STRING_TYPES, commaCompleteItem, withAutoSuggest } from '../../../..';
+import {
+  ESQL_STRING_TYPES,
+  commaCompleteItem,
+  withAutoSuggest,
+  withCompleteItem,
+} from '../../../..';
 import { isColumn, isOptionNode } from '../../../ast/is';
 import type {
   ESQLAstFuseCommand,
@@ -126,6 +132,21 @@ export async function autocomplete(
           );
         }
       );
+    case FusePosition.WITH:
+      const rrfParameters = {
+        rank_constant: [],
+        weights: [],
+      };
+      const linearParameters = {
+        normalizer: [noneValueCompleteItem, minMaxValueCompleteItem],
+        weights: [],
+      };
+      const mapParameters =
+        !fuseCommand.fuseType || fuseCommand.fuseType.text === 'rrf'
+          ? rrfParameters
+          : linearParameters;
+
+      return getCommandMapExpressionSuggestions(innerText, mapParameters);
   }
 
   return [pipeCompleteItem];
@@ -205,52 +226,54 @@ function getFuseArgumentsSuggestions(command: ESQLAstFuseCommand): ISuggestionIt
   }
 
   if (!scoreBy) {
-    suggestions.push(
-      withAutoSuggest({
-        label: 'SCORE BY',
-        kind: 'Reference',
-        detail: 'score by <field>',
-        text: 'SCORE BY ',
-        sortText: '1',
-      })
-    );
-  }
-
-  if (!keyBy) {
-    suggestions.push(
-      withAutoSuggest({
-        label: 'KEY BY',
-        kind: 'Reference',
-        detail: 'key by <field>',
-        text: 'KEY BY ',
-        sortText: '2',
-      })
-    );
+    suggestions.push({
+      label: 'SCORE BY',
+      kind: 'Reference',
+      detail: 'score by <field>',
+      text: 'SCORE BY ',
+      sortText: '1',
+    });
   }
 
   if (!groupBy) {
-    suggestions.push(
-      withAutoSuggest({
-        label: 'GROUP BY',
-        kind: 'Reference',
-        detail: 'group by <field>',
-        text: 'GROUP BY ',
-        sortText: '3',
-      })
-    );
+    suggestions.push({
+      label: 'GROUP BY',
+      kind: 'Reference',
+      detail: 'group by <field>',
+      text: 'GROUP BY ',
+      sortText: '2',
+    });
+  }
+
+  if (!keyBy) {
+    suggestions.push({
+      label: 'KEY BY',
+      kind: 'Reference',
+      detail: 'key by <field>',
+      text: 'KEY BY ',
+      sortText: '3',
+    });
   }
 
   if (!withOption) {
-    suggestions.push(
-      withAutoSuggest({
-        label: 'WITH',
-        kind: 'Reference',
-        detail: 'with <option>',
-        text: 'WITH ',
-        sortText: '4',
-      })
-    );
+    suggestions.push(withCompleteItem); // //HD modify details...
   }
 
-  return suggestions;
+  return suggestions.map((s) => withAutoSuggest(s));
 }
+
+const minMaxValueCompleteItem: ISuggestionItem = {
+  label: 'minmax',
+  text: 'minmax',
+  kind: 'Value',
+  detail: 'minmax',
+  sortText: '1',
+};
+
+const noneValueCompleteItem: ISuggestionItem = {
+  label: 'none',
+  text: 'none',
+  kind: 'Value',
+  detail: 'none',
+  sortText: '1',
+};
