@@ -21,7 +21,7 @@ import {
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Global, css } from '@emotion/react';
@@ -30,17 +30,15 @@ import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
 import { MANUAL_TRIGGERS_DESCRIPTIONS } from '../../../../common/translations';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 
 type TriggerType = 'manual' | 'index' | 'alert';
 
 export function WorkflowExecuteModal({
-  workflowYaml,
+  definition,
   onClose,
   onSubmit,
 }: {
-  workflowYaml: string;
+  definition: WorkflowYaml | null;
   onClose: () => void;
   onSubmit: (data: Record<string, any>) => void;
 }) {
@@ -62,14 +60,6 @@ export function WorkflowExecuteModal({
     setExecutionInput('');
     setSelectedTrigger(trigger);
   };
-
-  const definition: WorkflowYaml | null = useMemo(() => {
-    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
-    if (!parsingResult.success) {
-      return null;
-    }
-    return parsingResult.data as WorkflowYaml;
-  }, [workflowYaml]);
 
   return (
     <>

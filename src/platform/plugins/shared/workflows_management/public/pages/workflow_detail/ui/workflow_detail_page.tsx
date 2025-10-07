@@ -11,6 +11,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
@@ -22,6 +24,7 @@ import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
 import { WorkflowEditor } from './workflow_editor';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
+import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { WorkflowEditorStoreProvider } from '../../../widgets/workflow_yaml_editor/lib/store';
 
 export function WorkflowDetailPage({ id }: { id: string }) {
@@ -76,6 +79,15 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
 
+  const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
+    const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+
+    if (!parsingResult.success) {
+      return null;
+    }
+    return parsingResult.data as WorkflowYaml;
+  }, [workflowYaml]);
+
   const handleRun = useCallback(() => {
     setWorkflowExecuteModalOpen(true);
   }, [setWorkflowExecuteModalOpen]);
@@ -98,7 +110,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             if (err.body?.message) {
               err.message = err.body.message; // Extract message from HTTP error body and update the error message
             }
-            notifications?.toasts.addError(err, {
+            notifications?.toasts.addError(err as Error, {
               toastLifeTimeMs: 3000,
               title: i18n.translate('workflows.workflowDetailHeader.error.workflowTestRunFailed', {
                 defaultMessage: 'Failed to test workflow',
@@ -223,9 +235,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           />
         </EuiFlexItem>
 
-        {workflowExecuteModalOpen && workflowYaml && (
+        {workflowExecuteModalOpen && workflow && (
           <WorkflowExecuteModal
-            workflowYaml={workflowYaml}
+            definition={definitionFromCurrentYaml}
             onClose={() => setWorkflowExecuteModalOpen(false)}
             onSubmit={handleRunWorkflow}
           />
