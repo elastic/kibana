@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
-import type { Conversation } from '@kbn/onechat-common';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/onechat-common';
 import type {
   ListConversationsResponse,
   DeleteConversationResponse,
@@ -293,7 +293,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
-        let conversationIds = listResponse.body.results.map((c: any) => c.id);
+        let conversationIds = listResponse.body.results.map((c: ConversationWithoutRounds) => c.id);
         expect(conversationIds).to.contain(conversationId);
 
         // 3. Get the full conversation
@@ -317,7 +317,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
-        conversationIds = listResponse.body.results.map((c: any) => c.id);
+        conversationIds = listResponse.body.results.map((c: ConversationWithoutRounds) => c.id);
         expect(conversationIds).to.not.contain(conversationId);
 
         // 6. Verify GET returns 404
