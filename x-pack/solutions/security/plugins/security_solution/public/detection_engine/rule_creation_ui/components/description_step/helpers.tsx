@@ -316,6 +316,7 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
                   <EuiToolTip
                     content={severityItem.field}
                     data-test-subj={`severityOverrideField${index}`}
+                    disableScreenReaderOutput
                   >
                     <span tabIndex={0}>{`${severityItem.field}:`}</span>
                   </EuiToolTip>
@@ -324,6 +325,7 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
                   <EuiToolTip
                     content={severityItem.value}
                     data-test-subj={`severityOverrideValue${index}`}
+                    disableScreenReaderOutput
                   >
                     <span tabIndex={0}>{defaultToEmptyTag(severityItem.value)}</span>
                   </EuiToolTip>
@@ -361,6 +363,7 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
                   <EuiToolTip
                     content={riskScoreItem.field}
                     data-test-subj={`riskScoreOverrideField${index}`}
+                    disableScreenReaderOutput
                   >
                     <span tabIndex={0}>{riskScoreItem.field}</span>
                   </EuiToolTip>
