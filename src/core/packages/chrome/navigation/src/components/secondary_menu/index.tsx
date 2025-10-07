@@ -9,21 +9,14 @@
 
 import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import type { FC, ReactNode } from 'react';
-import React, { createContext } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 import { BetaBadge } from '../beta_badge';
-import { useScrollToActive } from '../../hooks/use_scroll_to_active_item';
 import type { BadgeType } from '../../../types';
-
-export const SecondaryMenuContext = createContext<{
-  activeItemRef: React.RefObject<HTMLLIElement>;
-}>({
-  activeItemRef: { current: null },
-});
 
 export interface SecondaryMenuProps {
   badgeType?: BadgeType;
@@ -48,7 +41,6 @@ export const SecondaryMenu: SecondaryMenuComponent = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const headerStyle = useMenuHeaderStyle();
-  const { containerRef, activeItemRef } = useScrollToActive<HTMLLIElement>();
 
   const titleWithBadgeStyles = css`
     display: flex;
@@ -57,26 +49,24 @@ export const SecondaryMenu: SecondaryMenuComponent = ({
   `;
 
   return (
-    <SecondaryMenuContext.Provider value={{ activeItemRef }}>
-      <div ref={containerRef}>
-        <EuiTitle
-          css={css`
-            ${headerStyle}
-            background: ${isPanel
-              ? euiTheme.colors.backgroundBaseSubdued
-              : euiTheme.colors.backgroundBasePlain};
-            border-radius: ${euiTheme.border.radius.medium};
-          `}
-          size="xs"
-        >
-          <div css={titleWithBadgeStyles}>
-            <h4>{title}</h4>
-            {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
-          </div>
-        </EuiTitle>
-        {children}
-      </div>
-    </SecondaryMenuContext.Provider>
+    <>
+      <EuiTitle
+        css={css`
+          ${headerStyle}
+          background: ${isPanel
+            ? euiTheme.colors.backgroundBaseSubdued
+            : euiTheme.colors.backgroundBasePlain};
+          border-radius: ${euiTheme.border.radius.medium};
+        `}
+        size="xs"
+      >
+        <div css={titleWithBadgeStyles}>
+          <h4>{title}</h4>
+          {badgeType && <BetaBadge type={badgeType} alignment="text-bottom" />}
+        </div>
+      </EuiTitle>
+      {children}
+    </>
   );
 };
 
