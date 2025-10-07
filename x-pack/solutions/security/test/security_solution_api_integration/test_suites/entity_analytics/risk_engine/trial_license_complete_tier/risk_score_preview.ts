@@ -469,7 +469,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       context('with global risk weights', () => {
-        it.skip('weights host scores differently when host risk weight is configured', async () => {
+        it('weights host scores differently when host risk weight is configured', async () => {
           const documentId = uuidv4();
           const doc = buildDocument({ host: { name: 'host-1' } }, documentId);
           await indexListOfDocuments(Array(100).fill(doc));
@@ -486,8 +486,8 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(sanitizeScores(scores.host!)).to.eql([
             {
               calculated_level: 'Moderate',
-              calculated_score: 120.6437049351858,
-              calculated_score_norm: 46.537457543274876,
+              calculated_score: 120.6437049352,
+              calculated_score_norm: 46.5374575433,
               category_1_count: 100,
               category_1_score: 93.0749150865,
               id_field: 'host.name',
@@ -496,7 +496,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it.skip('weights user scores differently if user risk weight is configured', async () => {
+        it('weights user scores differently if user risk weight is configured', async () => {
           const documentId = uuidv4();
           const doc = buildDocument({ user: { name: 'user-1' } }, documentId);
           await indexListOfDocuments(Array(100).fill(doc));
@@ -513,8 +513,8 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(sanitizeScores(scores.user!)).to.eql([
             {
               calculated_level: 'Moderate',
-              calculated_score: 168.9011869092601,
-              calculated_score_norm: 65.15244056058482,
+              calculated_score: 168.9011869093,
+              calculated_score_norm: 65.1524405606,
               category_1_count: 100,
               category_1_score: 93.0749150865,
               id_field: 'user.name',
@@ -523,7 +523,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
-        it.skip('weights entity scores differently when host and user risk weights are configured', async () => {
+        it('weights entity scores differently when host and user risk weights are configured', async () => {
           const usersId = uuidv4();
           const hostsId = uuidv4();
           const userDocs = buildDocument({ 'user.name': 'user-1' }, usersId);
@@ -542,8 +542,8 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(sanitizeScores(scores.host!)).to.eql([
             {
               calculated_level: 'Low',
-              calculated_score: 93.23759116471251,
-              calculated_score_norm: 35.965742618697,
+              calculated_score: 93.2375911647,
+              calculated_score_norm: 35.9657426187,
               category_1_count: 50,
               category_1_score: 89.9143565467,
               id_field: 'host.name',
@@ -632,7 +632,7 @@ export default ({ getService }: FtrProviderContext): void => {
   };
 
   describe('@ess @serverless Risk Scoring Preview API', () => {
-    describe.only('ESQL based risk scoring', () => {
+    describe('ESQL based risk scoring', () => {
       doTests();
     });
 
