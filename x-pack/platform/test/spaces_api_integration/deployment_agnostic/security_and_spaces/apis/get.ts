@@ -26,7 +26,6 @@ export default function getSpaceTestSuite(context: DeploymentAgnosticFtrProvider
         otherSpaceId: SPACES.SPACE_1.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
@@ -42,7 +41,6 @@ export default function getSpaceTestSuite(context: DeploymentAgnosticFtrProvider
         otherSpaceId: SPACES.DEFAULT.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
@@ -58,7 +56,6 @@ export default function getSpaceTestSuite(context: DeploymentAgnosticFtrProvider
         otherSpaceId: SPACES.DEFAULT.spaceId,
         users: {
           noAccess: AUTHENTICATION.NOT_A_KIBANA_USER,
-          superuser: AUTHENTICATION.SUPERUSER,
           allGlobally: AUTHENTICATION.KIBANA_RBAC_USER,
           readGlobally: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
           allAtSpace: AUTHENTICATION.KIBANA_RBAC_SPACE_3_ALL_USER,
@@ -78,18 +75,6 @@ export default function getSpaceTestSuite(context: DeploymentAgnosticFtrProvider
           default: {
             statusCode: 403,
             response: createExpectRbacForbidden(scenario.spaceId),
-          },
-        },
-      });
-
-      getTest(`superuser`, {
-        currentSpaceId: scenario.spaceId,
-        spaceId: scenario.spaceId,
-        user: scenario.users.superuser,
-        tests: {
-          default: {
-            statusCode: 200,
-            response: createExpectResults(scenario.spaceId),
           },
         },
       });
