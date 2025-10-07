@@ -377,6 +377,7 @@ export default function ({ getService }: FtrProviderContext) {
             objects,
           })
           .expect(403);
+
         expect(res.body).to.have.property('error', 'Forbidden');
         expect(res.body).to.have.property('message', 'Unable to bulk_create read_only_type');
 

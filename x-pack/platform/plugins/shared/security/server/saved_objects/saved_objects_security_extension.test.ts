@@ -6392,7 +6392,41 @@ describe(`#auditObjectsForSpaceDeletion`, () => {
   });
 });
 
-describe('access control', () => {
+describe('#authorizeChangeAccessControl', () => {
+  const namespace = 'x';
+  const objectsWithExistingNamespaces = [
+    {
+      type: 'dashboard',
+      id: '1',
+      existingNamespaces: [],
+      accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
+    },
+    {
+      type: 'visualization',
+      id: '2',
+      existingNamespaces: [],
+      accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
+    },
+  ];
+
+  beforeEach(() => {
+    // Reset spies and mocks
+    accessControlServiceMock.setUserForOperation.mockReset();
+    accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReset();
+    accessControlServiceMock.enforceAccessControl.mockReset();
+    checkAuthorizationSpy.mockReset();
+
+    // Default: no types require access control
+    accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValue({
+      typesRequiringAccessControl: new Set(),
+    });
+
+    // Default: current user is not owner/admin
+    getCurrentUser.mockReturnValue({
+      profile_uid: 'different_profile_id',
+      username: 'test_user',
+    });
+  });
   afterEach(() => {
     checkAuthorizationSpy.mockClear();
     enforceAuthorizationSpy.mockClear();
@@ -6402,11 +6436,170 @@ describe('access control', () => {
     addAuditEventSpy.mockClear();
   });
 
-  describe('#authorizeChangeAccessControl', () => {
-    const namespace = 'x';
-    const objectsWithExistingNamespaces = [
+  test('throws an error when `namespace` is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    await expect(
+      securityExtension.authorizeChangeAccessControl(
+        {
+          namespace: '',
+          objects: objectsWithExistingNamespaces,
+        },
+        'changeOwnership'
+      )
+    ).rejects.toThrowError('namespace cannot be an empty string');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('throws an error when objects array is empty', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    await expect(
+      securityExtension.authorizeChangeAccessControl(
+        {
+          namespace,
+          objects: [],
+        },
+        'changeOwnership'
+      )
+    ).rejects.toThrowError('No objects specified for manage_access_control authorization');
+    expect(checkPrivileges).not.toHaveBeenCalled();
+  });
+
+  test('calls checkAuthorization with expected options when types require access control', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
+      typesRequiringAccessControl: new Set(['dashboard']),
+    });
+    setupSimpleCheckPrivsMockResolve(
+      checkPrivileges,
+      'dashboard',
+      MANAGE_ACCESS_CONTROL_ACTION,
+      false
+    );
+    checkAuthorizationSpy.mockResolvedValue({
+      status: 'fully_authorized',
+      typeMap: new Map().set('dashboard', {
+        manage_access_control: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        ['login:']: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      }),
+    });
+
+    await securityExtension.authorizeChangeAccessControl(
       {
-        type: 'dashboard',
+        namespace,
+        objects: objectsWithExistingNamespaces,
+      },
+      'changeOwnership'
+    );
+
+    expect(checkAuthorizationSpy).toHaveBeenCalledWith({
+      types: new Set(['dashboard']),
+      spaces: new Set([namespace]),
+      actions: new Set([]),
+      options: {
+        allowGlobalResource: true,
+        typesRequiringAccessControl: new Set(['dashboard']),
+      },
+    });
+  });
+
+  test('throws forbidden error when access is unauthorized', async () => {
+    const { securityExtension, checkPrivileges } = setup();
+    accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
+      typesRequiringAccessControl: new Set(['dashboard']),
+    });
+    setupSimpleCheckPrivsMockResolve(
+      checkPrivileges,
+      'dashboard',
+      MANAGE_ACCESS_CONTROL_ACTION,
+      false
+    );
+    checkAuthorizationSpy.mockResolvedValue({
+      status: 'unauthorized',
+      typeMap: new Map(),
+    });
+
+    expect(
+      await securityExtension.authorizeChangeAccessControl(
+        {
+          namespace,
+          objects: objectsWithExistingNamespaces,
+        },
+        'changeOwnership'
+      )
+    ).rejects.toThrow();
+
+    expect(addAuditEventSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: AuditAction.UPDATE_OBJECTS_OWNER,
+        error: expect.any(Error),
+        unauthorizedTypes: ['dashboard'],
+        unauthorizedSpaces: [namespace],
+      })
+    );
+  });
+
+  test('allows operation when user is admin but not owner', async () => {
+    const currentUser = {
+      username: 'admin_user',
+      profile_uid: 'u_admin_version',
+    };
+    const { securityExtension, checkPrivileges } = setup();
+
+    getCurrentUser.mockReturnValue(currentUser);
+    setupSimpleCheckPrivsMockResolve(
+      checkPrivileges,
+      'dashboard',
+      MANAGE_ACCESS_CONTROL_ACTION,
+      true
+    );
+
+    expect(
+      await securityExtension.authorizeChangeAccessControl(
+        {
+          namespace,
+          objects: objectsWithExistingNamespaces,
+        },
+        'changeOwnership'
+      )
+    ).toEqual({
+      status: 'fully_authorized',
+      typeMap: new Map(),
+    });
+  });
+
+  test('allows operation when user is not admin but owner', async () => {
+    const currentUser = {
+      username: 'fake_owner',
+      profile_uid: 'fake_owner_id',
+    };
+    const { securityExtension, checkPrivileges } = setup();
+    getCurrentUser.mockReturnValue(currentUser);
+    setupSimpleCheckPrivsMockResolve(
+      checkPrivileges,
+      'dashboard',
+      MANAGE_ACCESS_CONTROL_ACTION,
+      false
+    );
+
+    expect(
+      await securityExtension.authorizeChangeAccessControl(
+        {
+          namespace,
+          objects: objectsWithExistingNamespaces,
+        },
+        'changeOwnership'
+      )
+    ).toEqual({
+      status: 'fully_authorized',
+      typeMap: new Map(),
+    });
+  });
+
+  test('throws error if all objects are non access-control objects', async () => {
+    const { securityExtension } = setup();
+    const objects = [
+      {
+        type: 'non_read_only',
         id: '1',
         existingNamespaces: [],
         accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
@@ -6419,202 +6612,22 @@ describe('access control', () => {
       },
     ];
 
-    beforeEach(() => {
-      // Reset spies and mocks
-      accessControlServiceMock.setUserForOperation.mockReset();
-      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReset();
-      accessControlServiceMock.enforceAccessControl.mockReset();
-      checkAuthorizationSpy.mockReset();
-
-      // Default: no types require access control
-      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValue({
-        typesRequiringAccessControl: new Set(),
-      });
-
-      // Default: current user is not owner/admin
-      getCurrentUser.mockReturnValue({
-        profile_uid: 'different_profile_id',
-        username: 'test_user',
-      });
-    });
-
-    test('throws an error when `namespace` is empty', async () => {
-      const { securityExtension, checkPrivileges } = setup();
-      await expect(
-        securityExtension.authorizeChangeAccessControl(
-          {
-            namespace: '',
-            objects: objectsWithExistingNamespaces,
-          },
-          'changeOwnership'
-        )
-      ).rejects.toThrowError('namespace cannot be an empty string');
-      expect(checkPrivileges).not.toHaveBeenCalled();
-    });
-
-    test('throws an error when objects array is empty', async () => {
-      const { securityExtension, checkPrivileges } = setup();
-      await expect(
-        securityExtension.authorizeChangeAccessControl(
-          {
-            namespace,
-            objects: [],
-          },
-          'changeOwnership'
-        )
-      ).rejects.toThrowError('No objects specified for manage_access_control authorization');
-      expect(checkPrivileges).not.toHaveBeenCalled();
-    });
-
-    test('calls checkAuthorization with expected options when types require access control', async () => {
-      const { securityExtension } = setup();
-      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
-        typesRequiringAccessControl: new Set(['dashboard']),
-      });
-      checkAuthorizationSpy.mockResolvedValue({
-        status: 'fully_authorized',
-        typeMap: new Map(),
-      });
-
-      await securityExtension.authorizeChangeAccessControl(
+    await expect(
+      securityExtension.authorizeChangeAccessControl(
         {
           namespace,
-          objects: objectsWithExistingNamespaces,
+          objects,
         },
         'changeOwnership'
-      );
-
-      expect(checkAuthorizationSpy).toHaveBeenCalledWith({
-        types: new Set(['dashboard']),
-        spaces: new Set([namespace]),
-        actions: new Set([]),
-        options: {
-          allowGlobalResource: true,
-          typesRequiringAccessControl: new Set(['dashboard']),
+      )
+    ).rejects.toMatchObject({
+      output: {
+        payload: {
+          message: expect.stringContaining(
+            'Unable to manage_access_control for types non_read_only, visualization'
+          ),
         },
-      });
-    });
-
-    test('throws forbidden error when access is unauthorized', async () => {
-      const { securityExtension } = setup();
-      accessControlServiceMock.getTypesRequiringPrivilegeCheck.mockReturnValueOnce({
-        typesRequiringAccessControl: new Set(['dashboard']),
-      });
-      checkAuthorizationSpy.mockResolvedValue({
-        status: 'unauthorized',
-        typeMap: new Map(),
-      });
-
-      await expect(
-        securityExtension.authorizeChangeAccessControl(
-          {
-            namespace,
-            objects: objectsWithExistingNamespaces,
-          },
-          'changeOwnership'
-        )
-      ).rejects.toThrow();
-
-      expect(addAuditEventSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: AuditAction.UPDATE_OBJECTS_OWNER,
-          error: expect.any(Error),
-          unauthorizedTypes: ['dashboard'],
-          unauthorizedSpaces: [namespace],
-        })
-      );
-    });
-
-    test('allows operation when user is admin but not owner', async () => {
-      const currentUser = {
-        username: 'admin_user',
-        profile_uid: 'u_admin_version',
-      };
-      const { securityExtension, checkPrivileges } = setup();
-      getCurrentUser.mockReturnValue(currentUser);
-      setupSimpleCheckPrivsMockResolve(
-        checkPrivileges,
-        'dashboard',
-        MANAGE_ACCESS_CONTROL_ACTION,
-        true
-      );
-
-      expect(
-        await securityExtension.authorizeChangeAccessControl(
-          {
-            namespace,
-            objects: objectsWithExistingNamespaces,
-          },
-          'changeOwnership'
-        )
-      ).toEqual({
-        status: 'fully_authorized',
-        typeMap: new Map(),
-      });
-    });
-
-    test('allows operation when user is not admin but owner', async () => {
-      const currentUser = {
-        username: 'fake_owner',
-        profile_uid: 'fake_owner_id',
-      };
-      const { securityExtension, checkPrivileges } = setup();
-      getCurrentUser.mockReturnValue(currentUser);
-      setupSimpleCheckPrivsMockResolve(
-        checkPrivileges,
-        'dashboard',
-        MANAGE_ACCESS_CONTROL_ACTION,
-        false
-      );
-
-      expect(
-        await securityExtension.authorizeChangeAccessControl(
-          {
-            namespace,
-            objects: objectsWithExistingNamespaces,
-          },
-          'changeOwnership'
-        )
-      ).toEqual({
-        status: 'fully_authorized',
-        typeMap: new Map(),
-      });
-    });
-
-    test('throws error if all objects are non access-control objects', async () => {
-      const { securityExtension } = setup();
-      const objects = [
-        {
-          type: 'non_read_only',
-          id: '1',
-          existingNamespaces: [],
-          accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
-        },
-        {
-          type: 'visualization',
-          id: '2',
-          existingNamespaces: [],
-          accessControl: { owner: 'fake_owner_id', accessMode: 'read_only' as const },
-        },
-      ];
-
-      await expect(
-        securityExtension.authorizeChangeAccessControl(
-          {
-            namespace,
-            objects,
-          },
-          'changeOwnership'
-        )
-      ).rejects.toMatchObject({
-        output: {
-          payload: {
-            message: expect.stringContaining(
-              'Unable to manage_access_control for types non_read_only, visualization'
-            ),
-          },
-        },
-      });
+      },
     });
   });
 });
