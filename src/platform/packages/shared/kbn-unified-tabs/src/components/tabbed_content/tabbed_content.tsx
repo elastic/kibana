@@ -40,6 +40,7 @@ export interface TabbedContentProps
   hideTabsBar?: boolean;
   renderContent: (selectedItem: TabItem) => React.ReactNode;
   createItem: () => TabItem;
+  createItemElement?: React.ReactElement;
   onChanged: (state: TabbedContentState) => void;
   getPreviewData: (item: TabItem) => TabPreviewData;
   onEBTEvent: (event: TabsEBTEvent) => void;
