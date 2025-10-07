@@ -98,12 +98,14 @@ export const applyPrivilegedUpdates = async ({
     for (let start = 0; start < users.length; start += chunkSize) {
       const chunk = users.slice(start, start + chunkSize);
       const operations = opsForIntegration(chunk, source);
-      const resp = await esClient.bulk({
-        refresh: 'wait_for',
-        body: operations,
-      });
-      const errors = getErrorFromBulkResponse(resp);
-      dataClient.log('error', errorsMsg(errors));
+      if (operations.length > 0) {
+        const resp = await esClient.bulk({
+          refresh: 'wait_for',
+          body: operations,
+        });
+        const errors = getErrorFromBulkResponse(resp);
+        dataClient.log('error', errorsMsg(errors));
+      }
     }
   } catch (error) {
     dataClient.log('error', `Error applying privileged updates: ${error.message}`);
