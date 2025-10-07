@@ -165,7 +165,7 @@ export function StreamExistingSystemsTable({
             <EuiButtonEmpty
               disabled={systems.length === 0}
               iconType="crosshairs"
-              size='xs'
+              size="xs"
               aria-label={GENERATE_SIGNIFICANT_EVENTS}
             >
               {GENERATE_SIGNIFICANT_EVENTS}
@@ -175,7 +175,7 @@ export function StreamExistingSystemsTable({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="cross"
-            size='xs'
+            size="xs"
             aria-label={CLEAR_SELECTION}
             isDisabled={selectedSystems.length === 0 || isLoading}
             onClick={() => {
@@ -188,7 +188,7 @@ export function StreamExistingSystemsTable({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             isLoading={isDeleting}
-            size='xs'
+            size="xs"
             iconType="trash"
             color="danger"
             aria-label={DELETE_ALL}

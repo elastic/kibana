@@ -193,7 +193,9 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
       </EuiPanel>
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
         <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiText size="s" color='subdued'>{STREAM_DESCRIPTION_HELP}</EuiText>
+          <EuiText size="s" color="subdued">
+            {STREAM_DESCRIPTION_HELP}
+          </EuiText>
           <EuiMarkdownEditor
             value={description}
             onChange={(next) => {
