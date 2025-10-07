@@ -13,6 +13,7 @@ import {
   EuiFormRow,
   EuiText,
   EuiIconTip,
+  EuiCheckbox,
   useEuiTheme,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
@@ -37,6 +38,9 @@ import {
   selectIsFullscreenDatasource,
   selectResolvedDateRange,
   selectDatasourceStates,
+  selectTabType,
+  setTabType,
+  useLensDispatch,
 } from '../../../state_management';
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
@@ -92,6 +96,8 @@ export function LayerPanel(props: LayerPanelProps) {
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
   const isSaveable = useLensSelector((state) => state.lens.isSaveable);
+  const tabType = useLensSelector(selectTabType);
+  const dispatch = useLensDispatch();
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
@@ -883,6 +889,17 @@ export function LayerPanel(props: LayerPanelProps) {
           </div>
         }
       />
+      <div>
+        <EuiCheckbox
+          id="lensUseUnifiedTabs"
+          label="Unified Tabs"
+          checked={tabType === 'unified'}
+          onChange={(e) => {
+            const newTabType = e.target.checked ? 'unified' : 'eui';
+            dispatch(setTabType(newTabType));
+          }}
+        />
+      </div>
     </>
   );
 }

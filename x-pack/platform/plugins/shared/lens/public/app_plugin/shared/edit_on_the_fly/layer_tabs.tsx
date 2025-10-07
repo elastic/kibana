@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 
 import { EuiTabs, EuiTab, EuiSpacer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
@@ -17,7 +17,7 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { TabStatus, UnifiedTabs, useNewTabProps, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import { TabStatus, UnifiedTabs, useNewTabProps } from '@kbn/unified-tabs';
 
 import {
   addLayer as addLayerAction,
@@ -67,7 +67,7 @@ export function LayerTabs(
   const { datasourceMap } = useEditorFrameService();
   const { euiTheme } = useEuiTheme();
 
-  const { isSaveable, visualization, datasourceStates, query } = useLensSelector(
+  const { isSaveable, visualization, datasourceStates, query, tabType } = useLensSelector(
     (state) => state.lens
   );
   const selectedLayerId = useLensSelector(selectSelectedLayerId);
@@ -383,8 +383,6 @@ export function LayerTabs(
     visualization.activeId,
     visualization.state,
   ]);
-
-  const tabType: 'unified' | 'eui' = 'unified';
 
   console.log('managedItems', managedItems);
 
