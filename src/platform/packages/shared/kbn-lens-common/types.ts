@@ -1389,6 +1389,9 @@ export interface LensAppState extends EditorFrameState {
 
   // Whether the current visualization is managed by the system
   managed: boolean;
+
+  // TODO remove after tab type decision
+  tabType: 'unified' | 'eui';
 }
 
 export interface LensState {
