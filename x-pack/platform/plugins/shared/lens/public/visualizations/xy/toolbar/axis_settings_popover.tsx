@@ -208,9 +208,6 @@ export const AxisSettingsPopover: React.FC<AxisSettingsPopoverProps> = (props) =
   );
 };
 
-/**
- * Extract the toolbar popover content. Does not depend on the wrapper
- */
 export const XyAxisSettings: React.FC<AxisSettingsPopoverProps> = ({
   axis,
   axisTitle,

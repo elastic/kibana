@@ -21,13 +21,13 @@ import type { ContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { XYState } from '../types';
-import { XyAppearanceSettings } from './visual_options_popover/visual_options_popover';
+import { XyAppearanceSettings } from './visual_options_popover';
 import { XyTitlesAndTextSettings } from './titles_and_text_popover';
 import { XyAxisSettings, popoverConfig } from './axis_settings_popover';
 import { getAxesConfiguration, getXDomain } from '../axes_configuration';
 import { getDataLayers } from '../visualization_helpers';
 import { hasBarSeries, isHorizontalChart } from '../state_helpers';
-import { axisKeyToTitleMapping, getDataBounds, hasPercentageAxis } from './toolbar';
+import { axisKeyToTitleMapping, getDataBounds, hasPercentageAxis } from '.';
 import { getScaleType } from '../to_expression';
 
 type Props = VisualizationToolbarProps<XYState>;
@@ -52,6 +52,7 @@ const XyStyleSettings: React.FC<Props> = (props) => {
     yLeft: state?.tickLabelsVisibilitySettings?.yLeft ?? true,
     yRight: state?.tickLabelsVisibilitySettings?.yRight ?? true,
   };
+
   const onTickLabelsVisibilitySettingsChange = (optionId: AxesSettingsConfigKeys): void => {
     const newTickLabelsVisibilitySettings = {
       ...tickLabelsVisibilitySettings,

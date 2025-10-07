@@ -22,12 +22,25 @@ import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../../sh
 import { AxisSettingsPopover } from './axis_settings_popover';
 import type { AxisGroupConfiguration } from '../axes_configuration';
 import { getAxesConfiguration, getXDomain } from '../axes_configuration';
-import { VisualOptionsPopover } from './visual_options_popover/visual_options_popover';
+import { VisualOptionsPopover } from './visual_options_popover';
 import { TextPopover } from './titles_and_text_popover';
 import { getScaleType } from '../to_expression';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
 import type { AxesSettingsConfigKeys } from '../../../shared_components';
+
+type UnwrapArray<T> = T extends Array<infer P> ? P : T;
+
+export function updateLayer(
+  state: State,
+  layer: UnwrapArray<State['layers']>,
+  index: number
+): State {
+  return {
+    ...state,
+    layers: state.layers.map((l, i) => (i === index ? layer : l)),
+  };
+}
 
 const legendOptions: Array<{
   id: string;
@@ -500,7 +513,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      {/* Appearance popover */}
       <EuiFlexItem grow={false}>
         <VisualOptionsPopover
           state={state}
@@ -508,8 +520,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
           datasourceLayers={frame.datasourceLayers}
         />
       </EuiFlexItem>
-
-      {/* Titles and text popover */}
       {hasBarSeries(state.layers) && (
         <EuiFlexItem grow={false}>
           <TextPopover
@@ -520,10 +530,8 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
         </EuiFlexItem>
       )}
 
-      {/* Axis settings */}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-          {/* Axis 1 */}
           <TooltipWrapper
             tooltipContent={
               shouldRotate
@@ -564,7 +572,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             />
           </TooltipWrapper>
 
-          {/* Axis 2 */}
           <AxisSettingsPopover
             axis="x"
             layers={state?.layers}
@@ -589,7 +596,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
             dataBounds={xDataBounds}
           />
 
-          {/* Axis 3 */}
           <TooltipWrapper
             tooltipContent={
               shouldRotate
@@ -633,7 +639,6 @@ export const XyToolbar = memo(function XyToolbar(props: VisualizationToolbarProp
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      {/* Legend settings */}
       <EuiFlexItem grow={false}>
         <LegendSettingsPopover
           legendOptions={legendOptions}

@@ -44,8 +44,9 @@ import {
   getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
-import { XyFlyoutToolbar, XyToolbar } from './toolbar';
-import { updateLayer } from './xy_config_panel';
+import { XyToolbar } from './toolbar';
+import { XyFlyoutToolbar } from './toolbar/flyout_toolbar'; // TODO: Update import
+import { updateLayer } from './toolbar'; // TODO: Update this import
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
