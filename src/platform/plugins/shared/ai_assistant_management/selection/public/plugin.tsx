@@ -164,7 +164,10 @@ export class AIAssistantManagementPlugin
       PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
     );
 
+    const isServerless = this.buildFlavor === 'serverless';
+
     if (
+      !isServerless && // for serverless, never show the AI assistant selector
       isUntouchedUiSetting &&
       (isObservabilityAIAssistantEnabled || isSecurityAIAssistantEnabled)
     ) {
