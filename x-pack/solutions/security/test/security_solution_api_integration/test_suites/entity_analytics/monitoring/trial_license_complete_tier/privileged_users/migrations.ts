@@ -175,6 +175,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(names).toEqual([
             `.entity_analytics.monitoring.users-${namespace}`,
             `.entity_analytics.monitoring.sources.entityanalytics_okta-${namespace}`,
+            `.entity_analytics.monitoring.sources.entityanalytics_ad-${namespace}`,
           ]);
         });
 
