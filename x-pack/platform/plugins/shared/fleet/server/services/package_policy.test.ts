@@ -4267,13 +4267,29 @@ describe('Package policy service', () => {
   });
 
   describe('delete', () => {
-    // TODO: Add tests
-    it('should allow to delete a package policy', async () => {});
+    beforeEach(() => {});
+
+    it('should allow to delete package policies from ES index', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockAgentPolicyGet();
+     packagePolicyService.getByIDs.mockResolvedValue([
+        {
+          id: 'test-package-policy',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {},
+          references: [],
+        },
+      ]);
+
+      await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith();
+    });
 
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
       const mockPackagePolicy = {
         id: 'test-package-policy',
         type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -4300,6 +4316,13 @@ describe('Package policy service', () => {
         id: 'test-package-policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should return empty array if no package policies are found', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const res = await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
+      expect(res).toEqual([]);
     });
   });
 

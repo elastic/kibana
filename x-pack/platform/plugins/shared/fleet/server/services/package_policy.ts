@@ -2004,7 +2004,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (!agentPolicy) {
           throw new AgentPolicyNotFoundError('Agent policy not found');
         }
-
         validateIsNotHostedPolicy(
           agentPolicy,
           options?.force,
@@ -2015,7 +2014,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           agentlessAgentPolicies.push(agentPolicyId);
         }
       } catch (e) {
-        hostedAgentPolicies.push(agentPolicyId);
+        // in case of orphaned policies don't add the id to the hostedAgentPolicies array
+        logger.error(
+          `An error occurred while checking if policies are hosted: ${e?.output?.payload?.message}`
+        );
+        if (e?.output?.statusCode !== 404) hostedAgentPolicies.push(agentPolicyId);
       }
     }
 
