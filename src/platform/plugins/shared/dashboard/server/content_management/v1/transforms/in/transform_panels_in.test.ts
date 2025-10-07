@@ -141,7 +141,7 @@ describe('transformPanelsIn', () => {
       const panels = [
         {
           config: {
-            lessThan10: 7, // 11 is less then 10 so validation should pass
+            lessThan10: 7, // 7 is less then 10 so validation should pass
           },
           grid: {
             h: 15,
