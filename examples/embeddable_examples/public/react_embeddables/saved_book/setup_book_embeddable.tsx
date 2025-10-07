@@ -23,9 +23,9 @@ export function setupBookEmbeddable(
     return getSavedBookEmbeddableFactory(coreStart);
   });
 
-  embeddable.registerTransforms(BOOK_EMBEDDABLE_TYPE, async () => {
+  embeddable.registerLegacyURLTransform(BOOK_EMBEDDABLE_TYPE, async () => {
     const { bookTransforms } = await import('../../../common/book/transforms');
-    return bookTransforms;
+    return bookTransforms.transformOut;
   });
 
   contentManagement.registry.register({

@@ -15,7 +15,7 @@ import type {
   MigrateFunctionsObject,
   PersistableState,
 } from '@kbn/kibana-utils-plugin/common';
-import type { Type } from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
 import type { EmbeddableFactoryRegistry, EmbeddableRegistryDefinition } from './types';
 import type { EmbeddableStateWithType } from './persistable_state/types';
 import {
@@ -31,14 +31,8 @@ import type { EnhancementRegistryDefinition } from '../common/enhancements/types
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
-  /**
-   * Use registerEmbeddableSchema to register schemas for an embeddable type.
-   * Embeddable containers that include embeddable state in REST APIs, such as dashboard,
-   * use this registry to include embeddable state schemas in their OpenAPI Specification (OAS) documenation.
-   */
-  registerEmbeddableSchema: (type: string, schema: Type<object>) => void;
-  /* 
-   * Use registerTransforms to register transforms for an embeddable type.
+  /*
+   * Use registerTransforms to register transforms and schema for an embeddable type.
    * Transforms decouple REST API state from stored state,
    * allowing embeddables to have one shape for REST APIs and another for storage.
    * Embeddable containers, such as dashboard, use transforms to convert EmbeddableState into StoreEmbeddableState and vice versa.
@@ -54,16 +48,15 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> & {
   /**
-   * Returns all embeddable schemas registered with registerEmbeddableSchema.
+   * Returns all embeddable schemas registered with registerTransforms.
    */
-  getEmbeddableSchemas: () => Type<object>[];
+  getEmbeddableSchemas: () => ObjectType[];
 
   getTransforms: (type: string) => EmbeddableTransforms | undefined;
 };
 
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
-  private readonly embeddableSchemas: { [key: string]: Type<object> } = {};
   private enhancementsRegistry = new EnhancementsRegistry();
   private migrateFn: PersistableStateMigrateFn | undefined;
   private transformsRegistry: { [key: string]: EmbeddableTransforms<any, any> } = {};
@@ -75,12 +68,6 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     );
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
-      registerEmbeddableSchema: (type: string, schema: Type<Object>) => {
-        if (this.embeddableSchemas[type]) {
-          throw new Error(`Embeddable schema already registered for type: ${type}.`);
-        }
-        this.embeddableSchemas[type] = schema;
-      },
       registerTransforms: (type: string, transforms: EmbeddableTransforms<any, any>) => {
         if (this.transformsRegistry[type]) {
           throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
@@ -114,7 +101,10 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public start(core: CoreStart) {
     return {
-      getEmbeddableSchemas: () => Object.values(this.embeddableSchemas),
+      getEmbeddableSchemas: () =>
+        Object.values(this.transformsRegistry)
+          .map((transforms) => transforms.schema)
+          .filter((schema) => Boolean(schema)) as ObjectType[],
       getTransforms: (type: string) => {
         return this.transformsRegistry[type];
       },

@@ -15,7 +15,9 @@ import { markdownEmbeddableSchema } from './schemas';
 
 export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
-    plugins.embeddable.registerEmbeddableSchema(MARKDOWN_EMBEDDABLE_TYPE, markdownEmbeddableSchema);
+    plugins.embeddable.registerTransforms(MARKDOWN_EMBEDDABLE_TYPE, {
+      schema: markdownEmbeddableSchema
+    });
   }
 
   start(core: CoreStart, plugins: StartDeps) {}

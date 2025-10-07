@@ -44,10 +44,9 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
     getIconForSavedObject: () => APP_ICON,
   });
 
-  embeddableSetup.registerTransforms(MAP_SAVED_OBJECT_TYPE, async () => {
-    const { getTransforms } = await import('./embeddable_module');
-    return getTransforms(
-      embeddableSetup.transformEnhancementsIn,
+  embeddableSetup.registerLegacyURLTransform(MAP_SAVED_OBJECT_TYPE, async () => {
+    const { getTransformOut } = await import('./embeddable_module');
+    return getTransformOut(
       embeddableSetup.transformEnhancementsOut
     );
   });
