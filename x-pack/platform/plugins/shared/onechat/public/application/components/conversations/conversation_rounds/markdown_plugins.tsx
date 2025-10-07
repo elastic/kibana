@@ -13,6 +13,7 @@ import {
   type VisualizationElementAttributes,
   type TabularDataResult,
   type VisualizationResult,
+  ToolResultType,
 } from '@kbn/onechat-common/tools/tool_result';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import classNames from 'classnames';

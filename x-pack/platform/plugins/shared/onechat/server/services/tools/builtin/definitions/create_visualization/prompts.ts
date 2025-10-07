@@ -43,6 +43,13 @@ ${nlQuery}
 
 Generate the ${chartType} visualization configuration.
 
+IMPORTANT: Return ONLY the JSON configuration wrapped in a markdown code block like this:
+\`\`\`json
+{
+  // your configuration here
+}
+\`\`\`
+
 ${additionalContext}`,
     ],
   ];

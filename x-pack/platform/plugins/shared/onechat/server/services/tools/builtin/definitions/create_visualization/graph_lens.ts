@@ -9,6 +9,7 @@ import type { ScopedModel } from '@kbn/onechat-server';
 import type { Logger } from '@kbn/logging';
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { generateEsql } from '@kbn/onechat-genai-utils';
+import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { type JsonSchema, SupportedChartType, type VisualizationConfig } from './types';
 import {
@@ -24,6 +25,9 @@ import {
   isValidateConfigAction,
 } from './actions_lens';
 import { createGenerateConfigPrompt } from './prompts';
+
+// Regex to extract JSON from markdown code blocks
+const INLINE_JSON_REGEX = /```(?:json)?\s*([\s\S]*?)\s*```/gm;
 
 const VisualizationStateAnnotation = Annotation.Root({
   // inputs
@@ -102,6 +106,13 @@ export const createVisualizationGraph = (
       `Generating visualization configuration (attempt ${attempt}/${MAX_RETRY_ATTEMPTS})`
     );
 
+    // Extract ES|QL query from previous actions
+    const lastGenerateEsqlAction = state.actions
+      .filter((action): action is GenerateEsqlAction => action.type === 'generate_esql')
+      .filter((action) => action.success && action.query)
+      .pop();
+    const esqlQuery = lastGenerateEsqlAction?.query || state.esqlQuery;
+
     // Build context from previous actions for retry attempts
     const previousActionContext = state.actions
       .filter((action) => isGenerateConfigAction(action) || isValidateConfigAction(action))
@@ -122,7 +133,7 @@ export const createVisualizationGraph = (
       .join('\n');
 
     const additionalInstructions = `IMPORTANT RULES:
-1. The 'dataset' field must contain: { type: "esql", query: "${state.esqlQuery}" }
+1. The 'dataset' field must contain: { type: "esql", query: "${esqlQuery}" }
 2. Always use { operation: 'value', column: '<esql column name>', ...other options } for operations
 3. All field names must match those available in the ES|QL query result
 4. Follow the schema definition strictly`;
@@ -142,10 +153,25 @@ export const createVisualizationGraph = (
 
     let action: GenerateConfigAction;
     try {
-      const structuredModel = model.chatModel.withStructuredOutput(state.schema, {
-        name: 'extract',
-      });
-      const configResponse = await structuredModel.invoke(prompt);
+      // Invoke model without schema validation
+      const response = await model.chatModel.invoke(prompt);
+      const responseText = extractTextContent(response);
+
+      // Try to extract JSON from markdown code blocks
+      const jsonMatches = Array.from(responseText.matchAll(INLINE_JSON_REGEX));
+      let configResponse: any;
+
+      if (jsonMatches.length > 0) {
+        const jsonText = jsonMatches[0][1].trim();
+        configResponse = JSON.parse(jsonText);
+      } else {
+        configResponse = JSON.parse(responseText);
+      }
+
+      // Verify it's a valid object
+      if (!configResponse || typeof configResponse !== 'object') {
+        throw new Error('Response is not a valid JSON object');
+      }
 
       action = {
         type: 'generate_config',
@@ -154,8 +180,9 @@ export const createVisualizationGraph = (
         attempt,
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       logger.warn(
-        `Structured output generation failed (attempt ${attempt}/${MAX_RETRY_ATTEMPTS}): ${error.message}`
+        `Config generation failed (attempt ${attempt}/${MAX_RETRY_ATTEMPTS}): ${errorMessage}`
       );
       logger.debug(`Full error details: ${JSON.stringify(error, null, 2)}`);
 
@@ -163,7 +190,7 @@ export const createVisualizationGraph = (
         type: 'generate_config',
         success: false,
         attempt,
-        error: error.message,
+        error: errorMessage,
       };
     }
 
@@ -250,7 +277,7 @@ export const createVisualizationGraph = (
     return {
       validatedConfig: lastValidateAction?.success ? lastValidateAction.config : null,
       error: lastValidateAction?.success ? null : lastValidateAction?.error || null,
-      esqlQuery: lastGenerateEsqlAction?.query || state.esqlQuery,
+      esqlQuery: lastGenerateEsqlAction?.query,
     };
   };
 
