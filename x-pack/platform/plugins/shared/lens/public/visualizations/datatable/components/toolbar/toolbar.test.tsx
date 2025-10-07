@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
-import { DataTableToolbar } from './toolbar';
+import { DataTableToolbar } from '../toolbar';
 import type { DatatableVisualizationState } from '../../visualization';
 import type { FramePublicAPI, VisualizationToolbarProps } from '../../../../types';
 import type { PagingState } from '../../../../../common/expressions';
