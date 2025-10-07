@@ -12,6 +12,7 @@ import {
   SCOUT_REPORTER_ES_URL,
   SCOUT_REPORTER_ES_API_KEY,
   SCOUT_REPORTER_ES_VERIFY_CERTS,
+  SCOUT_TEST_EVENTS_DATA_STREAM_NAME,
 } from '@kbn/scout-info';
 import { getValidatedESClient } from '../helpers/elasticsearch';
 
@@ -59,11 +60,9 @@ export const checkEventCommand: Command<void> = {
 
     log.info(`Checking for event with buildNumber: ${buildNumber} and testConfig: ${testConfig}`);
 
-    const indexName = '.ds-scout-events-v1-*-*';
-
     try {
-      log.info(`Refreshing index ${indexName}`);
-      await es.indices.refresh({ index: indexName });
+      log.info(`Index ${SCOUT_TEST_EVENTS_DATA_STREAM_NAME}`);
+      // await es.indices.refresh({ index: indexName });
 
       log.info(
         `Query: ${JSON.stringify(
@@ -90,7 +89,7 @@ export const checkEventCommand: Command<void> = {
         )}`
       );
       const result = await es.search({
-        index: indexName,
+        index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME,
         query: {
           bool: {
             filter: [
@@ -111,6 +110,7 @@ export const checkEventCommand: Command<void> = {
         },
       });
 
+      console.log('Search result:', JSON.stringify(result, null, 2));
       if ((result.hits.total as any).value > 0) {
         log.success('Event found!');
       } else {

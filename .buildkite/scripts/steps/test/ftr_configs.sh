@@ -47,6 +47,9 @@ fi
 failedConfigs=""
 results=()
 
+echo "--- Test checking for existing scout event for config x-pack/solutions/observability/test/serverless/functional/configs/config.logs_essentials.ts"
+node scripts/scout check-event --buildNumber 348122 --testConfig "x-pack/solutions/observability/test/serverless/functional/configs/config.logs_essentials.ts" --dontFailOnError
+
 while read -r config; do
   if [[ ! "$config" ]]; then
     continue;
