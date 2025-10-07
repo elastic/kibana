@@ -24,11 +24,12 @@ import type { KibanaContextExtra } from '../types';
 
 export const QueryBar = () => {
   const {
-    services: { share, data, indexUpdateService },
+    services: { share, data, indexUpdateService, indexEditorTelemetryService },
   } = useKibana<KibanaContextExtra>();
 
   const dataView = useObservable(indexUpdateService.dataView$);
   const esqlDiscoverQuery = useObservable(indexUpdateService.esqlDiscoverQuery$, '');
+  const searchQuery = useObservable(indexUpdateService.qstr$, '');
   const isIndexCreated = useObservable(
     indexUpdateService.indexCreated$,
     indexUpdateService.isIndexCreated()
@@ -85,6 +86,7 @@ export const QueryBar = () => {
           color={'text'}
           isDisabled={!discoverLink}
           href={discoverLink ?? undefined}
+          onClick={() => indexEditorTelemetryService.trackQueryThisIndexClicked(searchQuery)}
           target="_blank"
           iconType={'discoverApp'}
         >
