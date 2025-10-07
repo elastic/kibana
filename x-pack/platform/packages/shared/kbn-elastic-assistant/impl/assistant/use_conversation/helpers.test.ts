@@ -347,5 +347,55 @@ describe('useConversation helpers', () => {
         },
       });
     });
+
+    test('should prioritize connector defaultModel over stored conversation model', () => {
+      const connectorsWithModel: AIConnector[] = [
+        {
+          id: '123',
+          actionTypeId: '.gen-ai',
+          apiProvider: OpenAiProviderType.OpenAi,
+          config: {
+            provider: OpenAiProviderType.OpenAi,
+            defaultModel: 'gpt-4-turbo',
+          },
+        },
+      ] as unknown as AIConnector[];
+
+      const result = getConversationApiConfig({
+        allSystemPrompts,
+        conversation, // has stored model: 'gpt-3'
+        connectors: connectorsWithModel,
+        defaultConnector,
+      });
+
+      expect(result).toEqual({
+        apiConfig: {
+          connectorId: '123',
+          actionTypeId: '.gen-ai',
+          provider: OpenAiProviderType.OpenAi,
+          defaultSystemPromptId: '2',
+          model: 'gpt-4-turbo', // Should use connector's defaultModel, not conversation's stored 'gpt-3'
+        },
+      });
+    });
+
+    test('should fall back to stored conversation model when connector has no defaultModel', () => {
+      const result = getConversationApiConfig({
+        allSystemPrompts,
+        conversation, // has stored model: 'gpt-3'
+        connectors, // connectors have no defaultModel set
+        defaultConnector,
+      });
+
+      expect(result).toEqual({
+        apiConfig: {
+          connectorId: '123',
+          actionTypeId: '.gen-ai',
+          provider: OpenAiProviderType.OpenAi,
+          defaultSystemPromptId: '2',
+          model: 'gpt-3', // Should fall back to conversation's stored model
+        },
+      });
+    });
   });
 });
