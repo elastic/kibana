@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { networkTrafficWithInterfaces } from '../../../shared/metrics/snapshot/network_traffic';
-export const rx = networkTrafficWithInterfaces(
+import { networkTrafficWithInterfacesSingleBucket } from '../../../shared/metrics/snapshot/network_traffic';
+export const rx = networkTrafficWithInterfacesSingleBucket(
   'rx',
   'docker.network.inbound.bytes',
   'docker.network.interface'

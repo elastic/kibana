@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-import { networkTraffic } from '../../../../shared/metrics/snapshot/network_traffic';
-export const rx = networkTraffic('rx', 'kubernetes.pod.network.rx.bytes');
+import { networkTrafficSingleBucket } from '../../../../shared/metrics/snapshot/network_traffic';
+export const rx = networkTrafficSingleBucket('rx', 'kubernetes.pod.network.rx.bytes');

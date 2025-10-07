@@ -9,7 +9,7 @@ import { cpuV2 } from './cpu_v2';
 import { cpu } from './cpu';
 import { diskSpaceUsage } from './disk_space_usage';
 import { load } from './load';
-import { logRate } from './log_rate';
+import { logRateSingleBucket } from './log_rate';
 import { memory } from './memory';
 import { memoryFree } from './memory_free';
 import { normalizedLoad1m } from './normalized_load_1m';
@@ -23,7 +23,7 @@ export const snapshot = {
   cpuV2,
   diskSpaceUsage,
   load,
-  logRate,
+  logRate: logRateSingleBucket,
   memory,
   memoryFree,
   normalizedLoad1m,
