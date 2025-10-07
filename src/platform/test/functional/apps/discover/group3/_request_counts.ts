@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -47,7 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await common.navigateToApp('discover');
     });
 
     after(async () => {
@@ -82,25 +81,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           window.fetch = async (input, init) => {
             const originalFetch = (window as any).__originalFetch__ as typeof fetch;
-            const url = input instanceof Request ? input.url : input.toString();
 
-            if (!url.endsWith(searchEndpoint)) {
+            if (!(input instanceof Request) || !input.url.endsWith(searchEndpoint)) {
               return originalFetch(input, init);
             }
 
+            const clonedRequest = input.clone();
             let requestBody: Record<string, unknown> | undefined;
 
-            if (typeof init?.body === 'string') {
-              try {
-                requestBody = JSON.parse(init.body);
-              } catch {
-                // ignore
-              }
+            try {
+              requestBody = await clonedRequest.json();
+            } catch {
+              // ignore
             }
 
             const response = await originalFetch(input, init);
             const clonedResponse = response.clone();
-
             let responseBody: Record<string, unknown> | undefined;
 
             try {
@@ -110,8 +106,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             }
 
             networkLogs.push({
-              url,
-              method: init?.method ?? 'GET',
+              url: input.url,
+              method: input.method,
               status: response.status,
               requestBody,
               responseBody,
@@ -146,7 +142,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(filteredNetworkLogs.length).to.equal(
         expected,
-        `expected ${type} request count to be ${expected}, but got ${filteredNetworkLogs.length}`
+        `expected ${type} request count to be ${expected}, but got ${
+          filteredNetworkLogs.length
+        }: ${JSON.stringify(
+          filteredNetworkLogs.map((l) => omit(l, 'responseBody')),
+          null,
+          2
+        )}`
       );
     };
 
@@ -262,7 +264,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       beforeEach(async () => {
         await common.navigateToApp('discover');
-        await header.waitUntilLoadingHasFinished();
+        await waitForLoadingToFinish();
       });
 
       getSharedTests({
@@ -318,15 +320,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const type = 'esql';
 
       before(async () => {
-        await kibanaServer.uiSettings.update({
-          'discover:searchOnPageLoad': false,
-        });
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
-      });
-
-      beforeEach(async () => {
-        await monacoEditor.setCodeEditorValue('from logstash-* | where bytes > 1000 ');
+        await waitForLoadingToFinish();
       });
 
       getSharedTests({
