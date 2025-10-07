@@ -264,6 +264,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
             const value = await input.getAttribute('value');
             return Boolean(value);
           });
+          await testSubjects.waitForEnabled(ui.pages.kbManagementTab.bulkImportSaveButton);
         } catch (error) {
           log.debug(`Error uploading file: ${error}`);
           throw error;
