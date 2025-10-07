@@ -41,7 +41,7 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     'metricbeat*',
   ];
 
-  const REFRESH_INTERVAL = '1ms';
+  const refreshInterval = config.get('indexRefreshInterval');
 
   function wrap<T, U extends keyof T>(obj: T, prop: U, cb: (m: T[U]) => T[U]) {
     const original = obj[prop];
@@ -52,7 +52,7 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     name: 'fast_refresh',
     template: {
       settings: {
-        refresh_interval: REFRESH_INTERVAL,
+        refresh_interval: refreshInterval,
       },
     },
   });
@@ -64,7 +64,7 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
       expand_wildcards: ['all'],
       settings: {
         index: {
-          refresh_interval: REFRESH_INTERVAL,
+          refresh_interval: refreshInterval,
         },
       },
     });
@@ -105,7 +105,7 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
           ...indexTemplateRequest.template,
           settings: {
             ...indexTemplateRequest.template?.settings,
-            refresh_interval: REFRESH_INTERVAL,
+            refresh_interval: refreshInterval,
           },
         },
       };

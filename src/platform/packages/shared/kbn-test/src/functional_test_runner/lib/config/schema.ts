@@ -355,5 +355,7 @@ export const schema = Joi.object()
       .default(),
 
     dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
+
+    indexRefreshInterval: Joi.string().optional().default('50ms'),
   })
   .default();
