@@ -32,6 +32,7 @@ export const mountRedirectApp = (
         history={history}
         screenshotMode={screenshotMode}
         share={share}
+        core={coreStart}
       />
     ),
     element

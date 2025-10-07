@@ -10,7 +10,7 @@ import { render, waitFor, screen } from '@testing-library/react';
 import { RedirectApp } from './redirect_app';
 import { EuiProvider } from '@elastic/eui';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { scopedHistoryMock } from '@kbn/core/public/mocks';
+import { scopedHistoryMock, coreMock } from '@kbn/core/public/mocks';
 
 const mockApiClient = {
   getInfo: jest.fn(),
@@ -24,6 +24,7 @@ const historyMock = scopedHistoryMock.create();
 function setLocationSearch(search: string) {
   window.history.pushState({}, '', search);
 }
+const coreStart = coreMock.createStart();
 
 describe('RedirectApp', () => {
   beforeEach(() => {
@@ -47,6 +48,7 @@ describe('RedirectApp', () => {
           screenshotMode={mockScreenshotMode as any}
           share={mockShare}
           history={historyMock}
+          core={coreStart}
         />
       </EuiProvider>
     );
@@ -54,6 +56,7 @@ describe('RedirectApp', () => {
     await waitFor(() => {
       expect(mockApiClient.getInfo).toHaveBeenCalledWith('happy');
       expect(mockShare.navigate).toHaveBeenCalledWith(locatorParams);
+      expect(coreStart.chrome.setIsVisible).toHaveBeenCalledWith(false);
     });
   });
 
@@ -71,6 +74,7 @@ describe('RedirectApp', () => {
           screenshotMode={mockScreenshotMode as any}
           share={mockShare}
           history={historyMock}
+          core={coreStart}
         />
       </EuiProvider>
     );
@@ -78,6 +82,7 @@ describe('RedirectApp', () => {
     await waitFor(() => {
       expect(mockApiClient.getScheduledReportInfo).toHaveBeenCalledWith('happy', 2, 50);
       expect(mockShare.navigate).toHaveBeenCalledWith(locatorParams);
+      expect(coreStart.chrome.setIsVisible).toHaveBeenCalledWith(false);
     });
   });
 
@@ -95,6 +100,7 @@ describe('RedirectApp', () => {
           screenshotMode={mockScreenshotMode as any}
           share={mockShare}
           history={historyMock}
+          core={coreStart}
         />
       </EuiProvider>
     );
@@ -106,6 +112,7 @@ describe('RedirectApp', () => {
         expect.stringContaining('Redirect page error:'),
         error.message
       );
+      expect(coreStart.chrome.setIsVisible).not.toHaveBeenCalled();
     });
 
     consoleErrorSpy.mockRestore();
@@ -125,6 +132,7 @@ describe('RedirectApp', () => {
           screenshotMode={mockScreenshotMode as any}
           share={mockShare}
           history={historyMock}
+          core={coreStart}
         />
       </EuiProvider>
     );
@@ -136,6 +144,7 @@ describe('RedirectApp', () => {
         expect.stringContaining('Redirect page error:'),
         error.message
       );
+      expect(coreStart.chrome.setIsVisible).not.toHaveBeenCalled();
     });
 
     consoleErrorSpy.mockRestore();
@@ -157,6 +166,7 @@ describe('RedirectApp', () => {
             screenshotMode={mockScreenshotMode as any}
             share={mockShare}
             history={historyMock}
+            core={coreStart}
           />
         </EuiProvider>
       );
@@ -186,6 +196,7 @@ describe('RedirectApp', () => {
         'Report job execution can only redirect using a locator for an expected analytical app'
       );
       consoleErrorSpy.mockRestore();
+      expect(coreStart.chrome.setIsVisible).not.toHaveBeenCalled();
     });
 
     it('throws error when screenshotMode context returns info with legacy locator', async () => {
@@ -203,6 +214,7 @@ describe('RedirectApp', () => {
             screenshotMode={mockScreenshotMode as any}
             share={mockShare}
             history={historyMock}
+            core={coreStart}
           />
         </EuiProvider>
       );
@@ -222,6 +234,7 @@ describe('RedirectApp', () => {
         'Report job execution can only redirect using a locator for an expected analytical app'
       );
       consoleErrorSpy.mockRestore();
+      expect(coreStart.chrome.setIsVisible).not.toHaveBeenCalled();
     });
   });
 });

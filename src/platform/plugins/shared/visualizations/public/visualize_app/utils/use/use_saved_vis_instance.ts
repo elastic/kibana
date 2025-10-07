@@ -157,7 +157,16 @@ export const useSavedVisInstance = (
               );
             }
           } else {
-            embeddableHandler.render(visEditorRef.current);
+            // this state used both for embed mode and for reporting mode
+            const div = document.createElement('div');
+            div.setAttribute('data-shared-items-container', 'true');
+            div.setAttribute('data-title', savedVis.title);
+            div.setAttribute('data-description', savedVis.description || '');
+            div.setAttribute('data-shared-items-count', '1');
+            div.style.display = 'flex';
+            div.style.flex = '1 1';
+            visEditorRef.current.appendChild(div);
+            embeddableHandler.render(div);
           }
         }
         setState({

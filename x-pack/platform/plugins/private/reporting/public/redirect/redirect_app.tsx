@@ -14,7 +14,7 @@ import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import type { ScopedHistory } from '@kbn/core/public';
+import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES,
@@ -30,6 +30,7 @@ interface Props {
   history: ScopedHistory;
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
+  core: CoreStart;
 }
 
 const i18nTexts = {
@@ -44,7 +45,12 @@ const i18nTexts = {
   ),
 };
 
-export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMode, share }) => {
+export const RedirectApp: FunctionComponent<Props> = ({
+  apiClient,
+  screenshotMode,
+  share,
+  core,
+}) => {
   const [error, setError] = useState<undefined | Error>();
 
   useEffect(() => {
@@ -83,6 +89,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
           );
         }
 
+        core.chrome.setIsVisible(false);
         share.navigate(locatorParams);
       } catch (e) {
         setError(e);
@@ -90,7 +97,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
         console.error(i18nTexts.consoleMessagePrefix, e.message);
       }
     })();
-  }, [apiClient, screenshotMode, share]);
+  }, [apiClient, screenshotMode, share, core.chrome]);
 
   return (
     <div

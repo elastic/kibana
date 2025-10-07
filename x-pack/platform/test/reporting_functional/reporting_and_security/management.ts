@@ -53,6 +53,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const [, dashboardWindowHandle] = await browser.getAllWindowHandles();
         await browser.switchToWindow(dashboardWindowHandle);
 
+        await browser.refresh(); // refresh to get around hidden chrome after navigating to report link
         await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
       });
 
