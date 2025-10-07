@@ -109,7 +109,6 @@ async function getCompatibleControlType(
   fieldName: string,
   uiActionsService: UiActionsStart
 ): Promise<StickyControlState['type'] | undefined> {
-  console.log({ uiActionsService });
   const controlTypes = (await uiActionsService.getTriggerActions(
     CONTROL_MENU_TRIGGER
   )) as CreateControlTypeAction[];

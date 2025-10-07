@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
+import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';

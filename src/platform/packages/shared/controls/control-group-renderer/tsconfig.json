@@ -9,13 +9,12 @@
   "kbn_references": [
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
-    "@kbn/controls-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/i18n",
     "@kbn/ui-actions-plugin",
     "@kbn/controls-renderer",
     "@kbn/data-views-plugin",
     "@kbn/esql-types",
-    "@kbn/presentation-publishing",
+    "@kbn/presentation-publishing"
   ]
 }
