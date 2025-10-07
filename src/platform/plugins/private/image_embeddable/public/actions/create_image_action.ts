@@ -32,11 +32,10 @@ export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
     openLazyFlyout({
       core: coreServices,
       parentApi,
-      loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+      loadContent: async ({ closeFlyout }) => {
         const { getImageEditor } = await import('../components/image_editor/get_image_editor');
         return await getImageEditor({
           closeFlyout,
-          ariaLabelledBy,
           onSave: (imageConfig: ImageConfig) => {
             parentApi.addNewPanel<ImageEmbeddableSerializedState>({
               panelType: IMAGE_EMBEDDABLE_TYPE,

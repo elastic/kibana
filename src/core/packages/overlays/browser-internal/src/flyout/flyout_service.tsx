@@ -10,16 +10,16 @@
 /* eslint-disable max-classes-per-file */
 
 import { EuiFlyout, EuiFlyoutResizable } from '@elastic/eui';
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { OverlayFlyoutOpenOptions, OverlayFlyoutStart } from '@kbn/core-overlays-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import React, { useEffect, useState } from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { Subject } from 'rxjs';
 import { OverlayMountWrapper } from '../overlay_mount_wrapper';
 
 /**
@@ -86,7 +86,7 @@ export class FlyoutService {
 
     return {
       open: (mount: MountPoint, options: OverlayFlyoutOpenOptions = {}): OverlayRef => {
-        const { isResizable, ...restOptions } = options;
+        const { isResizable, flyoutTitle: _flyoutTitle, ...restOptions } = options;
         // If there is an active flyout session close it before opening a new one.
         if (this.activeFlyout) {
           this.activeFlyout.close();
@@ -112,18 +112,53 @@ export class FlyoutService {
           }
         };
 
-        const getWrapper = (children: JSX.Element) => {
+        // React component to handle flyoutTitle as string or Promise
+        const FlyoutWrapper: React.FC<{ children: JSX.Element }> = ({ children }) => {
+          const [resolvedTitle, setResolvedTitle] = useState<string>('Default Flyout Title');
+
+          useEffect(() => {
+            const handleTitle = async () => {
+              if (!_flyoutTitle) {
+                setResolvedTitle('Unknown Flyout');
+                return;
+              }
+
+              if (typeof _flyoutTitle === 'string') {
+                setResolvedTitle(_flyoutTitle);
+              } else {
+                try {
+                  const title = await _flyoutTitle;
+                  setResolvedTitle(title);
+                } catch (error) {
+                  // Fallback to default title if promise rejects
+                  setResolvedTitle('Erroneous Flyout');
+                }
+              }
+            };
+
+            handleTitle();
+          }, []);
+
           return isResizable ? (
             <EuiFlyoutResizable
               {...restOptions}
               onClose={onCloseFlyout}
               ref={React.createRef()}
               maxWidth={Number(options?.maxWidth)}
+              session={true}
+              flyoutMenuProps={{ title: resolvedTitle }}
+              size={'m'}
             >
               {children}
             </EuiFlyoutResizable>
           ) : (
-            <EuiFlyout {...restOptions} onClose={onCloseFlyout}>
+            <EuiFlyout
+              {...restOptions}
+              onClose={onCloseFlyout}
+              session={true}
+              flyoutMenuProps={{ title: resolvedTitle }}
+              size={'m'}
+            >
               {children}
             </EuiFlyout>
           );
@@ -136,7 +171,9 @@ export class FlyoutService {
             theme={theme}
             userProfile={userProfile}
           >
-            {getWrapper(<OverlayMountWrapper mount={mount} />)}
+            <FlyoutWrapper>
+              <OverlayMountWrapper mount={mount} />
+            </FlyoutWrapper>
           </KibanaRenderContextProvider>,
           this.targetDomElement
         );

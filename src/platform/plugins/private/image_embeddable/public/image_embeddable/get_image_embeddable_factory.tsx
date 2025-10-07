@@ -92,22 +92,24 @@ export const getImageEmbeddableFactory = ({
         supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
 
         onEdit: async () => {
+          const isEditing = !!imageConfig$.getValue();
+
           openLazyFlyout({
             core: coreServices,
             parentApi,
-            loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+            loadContent: async ({ closeFlyout }) => {
               const { getImageEditor } = await import(
                 '../components/image_editor/get_image_editor'
               );
               return await getImageEditor({
                 closeFlyout,
-                ariaLabelledBy,
                 initialImageConfig: imageConfig$.getValue(),
                 onSave: (newImageConfig: ImageConfig) => {
                   imageConfig$.next(newImageConfig);
                 },
               });
             },
+            flyoutTitle: isEditing ? 'Edit image' : 'Add image',
           });
         },
         isEditingEnabled: () => true,

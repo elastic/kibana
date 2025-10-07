@@ -53,6 +53,7 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
   ...props
 }) => {
   const hasEuiProvider = useIsNestedEuiProvider();
+  console.log('KibanaRootContextProvider hasEuiProvider', hasEuiProvider);
   const rootContextProvider = (
     <SharedUXRouterContext.Provider value={{ services: { executionContext } }}>
       <i18n.Context>{children}</i18n.Context>
@@ -68,7 +69,7 @@ export const KibanaRootContextProvider: FC<PropsWithChildren<KibanaRootContextPr
     const { theme, userProfile, globalStyles, colorMode, modify } = props;
     return (
       <KibanaEuiProvider {...{ theme, userProfile, globalStyles, colorMode, modify }}>
-        {rootContextProvider}
+        ABCDEF12345{rootContextProvider}
       </KibanaEuiProvider>
     );
   }

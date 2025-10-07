@@ -14,10 +14,8 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiTab,
   EuiTabs,
-  EuiTitle,
   EuiSpacer,
   EuiLink,
   EuiEmptyPrompt,
@@ -60,11 +58,9 @@ export interface ImageEditorFlyoutProps {
   onSave: (imageConfig: ImageConfig) => void;
   initialImageConfig?: ImageConfig;
   user?: AuthenticatedUser;
-  ariaLabelledBy: string;
 }
 
 export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
-  const isEditing = !!props.initialImageConfig;
   const { euiTheme } = useEuiTheme();
   const { validateUrl } = useImageViewerContext();
   const [fileId, setFileId] = useState<undefined | string>(() =>
@@ -122,24 +118,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
 
   return (
     <>
-      <EuiFlyoutHeader hasBorder={true} data-test-subj="createImageEmbeddableFlyout">
-        <EuiTitle size="s">
-          <h2 id={props.ariaLabelledBy}>
-            {isEditing ? (
-              <FormattedMessage
-                id="imageEmbeddable.imageEditor.editImagetitle"
-                defaultMessage="Edit image"
-              />
-            ) : (
-              <FormattedMessage
-                id="imageEmbeddable.imageEditor.addImagetitle"
-                defaultMessage="Add image"
-              />
-            )}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="createImageEmbeddableFlyout">
         <EuiTabs size="s" bottomBorder={false}>
           <EuiTab onClick={() => setSrcType('file')} isSelected={srcType === 'file'}>
             <FormattedMessage
