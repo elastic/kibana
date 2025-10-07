@@ -44,7 +44,7 @@ export const DraftModeCallout = ({
     <EuiCallOut
       data-test-subj={dataTestSubj}
       color="warning"
-      iconType="info"
+      iconType="warning"
       title={i18n.translate('share.draftModeCallout.title', {
         defaultMessage: 'You have unsaved changes',
       })}
