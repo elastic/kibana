@@ -25,8 +25,10 @@ import {
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import { RulesDataInput } from './steps/rules/rules_data_input';
-import { DataInputStep } from './steps/constants';
-import { MacrosDataInput } from './steps/macros/macros_data_input';
+import {
+  DataInputStep,
+  MacrosDataInput,
+} from '../../../common/components/migration_steps/macros/macros_data_input';
 import { LookupsDataInput } from './steps/lookups/lookups_data_input';
 import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import type { RuleMigrationSettings, RuleMigrationStats } from '../../types';
@@ -53,7 +55,7 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
     >();
     const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
-    const [dataInputStep, setDataInputStep] = useState<DataInputStep>(DataInputStep.Rules);
+    const [dataInputStep, setDataInputStep] = useState<DataInputStep>(DataInputStep.Items);
 
     const onMigrationCreated = useCallback((createdMigrationStats: RuleMigrationStats) => {
       setMigrationStats(createdMigrationStats);

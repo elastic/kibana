@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DashboardMigrationDataInputWrapper } from '../../../../../../../siem_migrations/dashboards/components/data_input_flyout/wrapper';
-import { UploadDashboardsSectionPanel } from '../../../../../../../siem_migrations/dashboards/components/status_panels/upload_panel';
+import { UploadDashboardsSectionPanel } from '../../../../../../../siem_migrations/dashboards/components/migration_status_panels/upload_panel';
 import {
   BasicMissingPrivilegesCallOut,
   MissingPrivilegesDescription,
