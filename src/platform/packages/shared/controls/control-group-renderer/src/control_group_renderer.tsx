@@ -20,6 +20,7 @@ import {
   type EmbeddableApiContext,
   type ViewMode,
 } from '@kbn/presentation-publishing';
+import { asyncForEach } from '@kbn/std';
 import type { ActionExecutionMeta, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type {
@@ -146,7 +147,7 @@ export const ControlGroupRenderer = ({
           };
         });
         lastSavedState$Ref.current.next(newState);
-        Object.values(parentApi.children$.getValue()).forEach((child) => {
+        asyncForEach(Object.values(parentApi.children$.getValue()), async (child) => {
           if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
         });
       },
@@ -168,7 +169,6 @@ export const ControlGroupRenderer = ({
         },
       } as EmbeddableApiContext & ActionExecutionMeta); // casting because we don't need a trigger for this action
     };
-
     onApiAvailable({
       ...publicApi,
       openAddDataControlFlyout,

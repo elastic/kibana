@@ -3,7 +3,6 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "extraPublicDirs": ["common"],
   "include": [
     "common/**/*",
     "public/**/*",

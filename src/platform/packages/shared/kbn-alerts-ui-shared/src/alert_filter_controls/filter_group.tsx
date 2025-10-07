@@ -221,8 +221,8 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       return;
     }
 
-    const inputSubscription = controlGroup.getInput$().subscribe((test) => {
-      handleStateUpdates(test);
+    const inputSubscription = controlGroup.getInput$().subscribe({
+      next: handleStateUpdates,
     });
 
     return () => {
@@ -312,7 +312,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
           String(idx)
         );
       });
-
       return {
         initialState,
       } as ControlGroupCreationOptions;
@@ -332,7 +331,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const upsertPersistableControls = useCallback(async () => {
     if (!controlGroup) return;
-
     const currentPanels = getFilterItemObjListFromControlState(controlGroup.getInput());
 
     const reorderedControls = reorderControlsWithDefaultControls({
@@ -398,7 +396,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     [defaultControlsObj]
   );
 
-  const addControlsHandler = useCallback(async () => {
+  const addControlsHandler = useCallback(() => {
     controlGroup?.openAddDataControlFlyout({
       controlStateTransform: newControlStateTransform,
       editorConfig: {

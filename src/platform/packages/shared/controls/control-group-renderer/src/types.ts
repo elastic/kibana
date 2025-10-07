@@ -53,6 +53,15 @@ export type ControlGroupRendererApi = ControlsRendererParentApi &
     }) => void;
   };
 
+/**
+ * ----------------------------------------------------------------
+ * Data control editor customization
+ * ----------------------------------------------------------------
+ */
+
+/**
+ * The editor config allows the consumer to hide different parts of the data control editor
+ */
 interface HasEditorConfig {
   getEditorConfig: () => ControlGroupEditorConfig | undefined;
 }
@@ -61,21 +70,6 @@ export const apiHasEditorConfig = (parentApi: unknown): parentApi is HasEditorCo
   return Boolean((parentApi as HasEditorConfig).getEditorConfig);
 };
 
-/**
- * ----------------------------------------------------------------
- * Control group state
- * ----------------------------------------------------------------
- */
-
-/**
- *
- */
-export type ControlStateTransform<State extends DataControlState = DataControlState> = (
-  newState: Partial<State>,
-  controlType: string
-) => Partial<State>;
-
-export type FieldFilterPredicate = (f: DataViewField) => boolean;
 export interface ControlGroupEditorConfig {
   hideDataViewSelector?: boolean;
   hideAdditionalSettings?: boolean;
@@ -84,6 +78,19 @@ export interface ControlGroupEditorConfig {
   controlStateTransform?: ControlStateTransform;
 }
 
+export type ControlStateTransform<State extends DataControlState = DataControlState> = (
+  newState: Partial<State>,
+  controlType: string
+) => Partial<State>;
+
+export type FieldFilterPredicate = (f: DataViewField) => boolean;
+
+/**
+ * ----------------------------------------------------------------
+ * Control group state
+ * ----------------------------------------------------------------
+ */
+
 export interface ControlGroupRuntimeState<State extends StickyControlState = StickyControlState> {
   initialChildControlState: ControlPanelsState<State>;
   ignoreParentSettings?: StoredControlGroupInput['ignoreParentSettings']; // these will be translated to panel-level settings
@@ -91,16 +98,9 @@ export interface ControlGroupRuntimeState<State extends StickyControlState = Sti
 
 export interface ControlGroupCreationOptions {
   initialState?: Partial<ControlGroupRuntimeState>;
-  // editorConfig?: ControlGroupEditorConfig;
 }
 
 export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;
-
-/**
- * ----------------------------------------------------------------
- * Control group panel state
- * ----------------------------------------------------------------
- */
 
 export interface ControlPanelsState<State extends StickyControlState = StickyControlState> {
   [panelId: string]: ControlPanelState<State>;
