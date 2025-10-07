@@ -110,19 +110,21 @@ export function Histogram({
         data-suggestion-type={visContext.suggestionType}
         css={chartCss}
       >
-        <lens.EmbeddableComponent
-          {...lensProps}
-          // forceDSL is set to true to ensure that the Lens always uses DSL to fetch the data
-          // as some consumers (discover) rely on the total hits count which is not provided by ESQL
-          forceDSL={true}
-          abortController={abortController}
-          disableTriggers={disableTriggers}
-          disabledActions={disabledActions}
-          onFilter={onFilter}
-          onBrushEnd={onBrushEnd}
-          withDefaultActions={withDefaultActions}
-          esqlVariables={esqlVariables}
-        />
+        {!abortController?.signal?.aborted && (
+          <lens.EmbeddableComponent
+            {...lensProps}
+            // forceDSL is set to true to ensure that the Lens always uses DSL to fetch the data
+            // as some consumers (discover) rely on the total hits count which is not provided by ESQL
+            forceDSL={true}
+            abortController={abortController}
+            disableTriggers={disableTriggers}
+            disabledActions={disabledActions}
+            onFilter={onFilter}
+            onBrushEnd={onBrushEnd}
+            withDefaultActions={withDefaultActions}
+            esqlVariables={esqlVariables}
+          />
+        )}
       </div>
       {timeRangeDisplay}
     </>
