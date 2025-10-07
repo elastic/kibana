@@ -46,10 +46,12 @@ const setDeviceControlMode = ({
   windowsDeviceControl.enabled = enabled;
   macDeviceControl.enabled = enabled;
 
-  // When enabling, we set a default `usb_storage` level
   if (enabled) {
     windowsDeviceControl.usb_storage = DeviceControlAccessLevelEnum.deny_all;
     macDeviceControl.usb_storage = DeviceControlAccessLevelEnum.deny_all;
+  } else {
+    windowsDeviceControl.usb_storage = DeviceControlAccessLevelEnum.audit;
+    macDeviceControl.usb_storage = DeviceControlAccessLevelEnum.audit;
   }
 
   policy.windows.popup.device_control = { enabled, message: '' };

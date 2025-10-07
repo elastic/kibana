@@ -42,8 +42,7 @@ export const DeviceControlSettingCardSwitch = React.memo(
           // Disable device control for Windows and Mac
           newPayload.windows.device_control = {
             enabled: false,
-            usb_storage:
-              newPayload.windows.device_control?.usb_storage || DeviceControlAccessLevelEnum.audit,
+            usb_storage: DeviceControlAccessLevelEnum.audit,
           };
           newPayload.windows.popup.device_control = {
             enabled: false,
@@ -52,8 +51,7 @@ export const DeviceControlSettingCardSwitch = React.memo(
 
           newPayload.mac.device_control = {
             enabled: false,
-            usb_storage:
-              newPayload.mac.device_control?.usb_storage || DeviceControlAccessLevelEnum.audit,
+            usb_storage: DeviceControlAccessLevelEnum.audit,
           };
           newPayload.mac.popup.device_control = {
             enabled: false,
