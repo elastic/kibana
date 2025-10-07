@@ -6,9 +6,6 @@
  */
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
-import { updateAgentPolicySpaces } from '@kbn/fleet-plugin/server/services/spaces/agent_policy';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { PackagePolicyClientGetByIdsOptions } from '@kbn/fleet-plugin/server/services/package_policy_service';
 import type { SyntheticsServerSetup } from '../../types';
 
 export class PackagePolicyService {
@@ -26,57 +23,6 @@ export class PackagePolicyService {
 
   private getInternalEsClient() {
     return this.server.coreStart.elasticsearch.client.asInternalUser;
-  }
-
-  /**
-   * Ensures that all legacy agent policies referenced by the given package policies
-   * have the current space in their spaces array.
-   */
-  private async migrateLegacyAgentPolicies({
-    packagePolicies,
-    spaceId,
-  }: {
-    packagePolicies: NewPackagePolicyWithId[];
-    spaceId: string;
-  }) {
-    if (packagePolicies.length === 0) {
-      return;
-    }
-
-    // Extract all unique agent policy IDs from the package policies
-    const agentPolicyIds = Array.from(
-      new Set(packagePolicies.flatMap((policy) => policy.policy_ids || []))
-    );
-
-    if (agentPolicyIds.length === 0) {
-      return;
-    }
-
-    // Get all legacy agent policies, they are stored in the default space
-    const agentPolicies = await this.server.fleet.agentPolicyService.getByIds(
-      this.getSpaceSoClient(DEFAULT_SPACE_ID),
-      agentPolicyIds,
-      { ignoreMissing: true }
-    );
-
-    // For each agent policy that doesn't have the current space, add it
-    for (const agentPolicy of agentPolicies) {
-      if (!agentPolicy.space_ids?.includes(spaceId)) {
-        const newSpaceIds = [...(agentPolicy.space_ids || []), spaceId];
-        try {
-          await updateAgentPolicySpaces({
-            agentPolicyId: agentPolicy.id,
-            currentSpaceId: DEFAULT_SPACE_ID,
-            newSpaceIds,
-            authorizedSpaces: newSpaceIds,
-          });
-        } catch (error) {
-          this.server.logger.warn(
-            `Failed to add space ${spaceId} to agent policy ${agentPolicy.id}: ${error.message}`
-          );
-        }
-      }
-    }
   }
 
   async buildPackagePolicyFromPackage({ spaceId }: { spaceId: string }) {
@@ -97,11 +43,6 @@ export class PackagePolicyService {
     spaceId: string;
     packagePolicy: NewPackagePolicyWithId;
   }) {
-    await this.migrateLegacyAgentPolicies({
-      packagePolicies: [packagePolicy],
-      spaceId,
-    });
-
     return this.server.fleet.packagePolicyService.inspect(
       this.getSpaceSoClient(spaceId),
       packagePolicy
@@ -109,30 +50,13 @@ export class PackagePolicyService {
   }
 
   async getByIds({ spaceId, listOfPolicies }: { spaceId: string; listOfPolicies: string[] }) {
-    const options: PackagePolicyClientGetByIdsOptions = { ignoreMissing: true };
-    const packagePolicies = (
-      await Promise.all([
-        this.server.fleet.packagePolicyService.getByIDs(
-          this.getSpaceSoClient(spaceId),
-          listOfPolicies,
-          options
-        ),
-        spaceId !== DEFAULT_SPACE_ID
-          ? this.server.fleet.packagePolicyService.getByIDs(
-              this.getSpaceSoClient(DEFAULT_SPACE_ID),
-              listOfPolicies,
-              options
-            )
-          : Promise.resolve([]),
-      ])
-    ).flat();
-
-    await this.migrateLegacyAgentPolicies({
-      packagePolicies,
-      spaceId,
-    });
-
-    return packagePolicies;
+    return this.server.fleet.packagePolicyService.getByIDs(
+      this.getSpaceSoClient(spaceId),
+      listOfPolicies,
+      {
+        ignoreMissing: true,
+      }
+    );
   }
 
   async bulkCreate({
@@ -145,11 +69,6 @@ export class PackagePolicyService {
     const soClient = this.getSpaceSoClient(spaceId);
 
     if (newPolicies.length > 0) {
-      await this.migrateLegacyAgentPolicies({
-        packagePolicies: newPolicies,
-        spaceId,
-      });
-
       return this.server.fleet.packagePolicyService.bulkCreate(
         soClient,
         this.getInternalEsClient(),
@@ -171,11 +90,6 @@ export class PackagePolicyService {
     const soClient = this.getSpaceSoClient(spaceId);
 
     if (policiesToUpdate.length > 0) {
-      await this.migrateLegacyAgentPolicies({
-        packagePolicies: policiesToUpdate,
-        spaceId,
-      });
-
       const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
         soClient,
         this.getInternalEsClient(),
@@ -199,11 +113,6 @@ export class PackagePolicyService {
     const soClient = this.getSpaceSoClient(spaceId);
 
     if (policyIdsToDelete.length > 0) {
-      await this.migrateLegacyAgentPolicies({
-        packagePolicies: await this.getByIds({ spaceId, listOfPolicies: policyIdsToDelete }),
-        spaceId,
-      });
-
       try {
         return this.server.fleet.packagePolicyService.delete(
           soClient,
