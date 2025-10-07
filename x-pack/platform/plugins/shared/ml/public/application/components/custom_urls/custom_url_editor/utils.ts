@@ -476,12 +476,12 @@ async function getAnomalyDetectionJobTestUrl(
     let { datafeed_config: datafeedConfig } = jobConfig;
     try {
       // attempt load the non-combined job and datafeed so they can be used in the datafeed preview
-      const [{ jobs }, { datafeeds }] = await Promise.all([
-        mlApi.getJobs({ jobId: job.job_id }),
-        mlApi.getDatafeeds({ datafeedId: job.datafeed_config?.datafeed_id ?? '' }),
-      ]);
-      datafeedConfig = datafeeds[0];
-      jobConfig = jobs[0];
+      // use jobForCloning to omit fields that shouldn't be included in datafeed preview requests
+      const response = await mlApi.jobs.jobForCloning(job.job_id);
+      if (response?.job && response?.datafeed) {
+        datafeedConfig = response.datafeed;
+        jobConfig = response.job;
+      }
     } catch (error) {
       // jobs may not exist as this might be called from the AD job wizards
       // ignore this error as the outer function call will raise a toast

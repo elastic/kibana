@@ -13,8 +13,6 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiLink,
-  EuiIcon,
-  EuiToolTip,
   EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
@@ -204,24 +202,26 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
   columns.push({
     field: 'lifecycle',
     name: (
-      <EuiToolTip
-        content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
-          defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. {canDisableDataRetention, plural, one {If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.} other {}}`,
-          values: {
-            // ILM is not applicable on serverless, so when the user isnt able to
-            // disable data retention (which is only for serverless) we want to
-            // tweak the copy of the tooltip to hide any references to it.
-            canDisableDataRetention: config.enableTogglingDataRetention ? 1 : 0,
-          },
-        })}
-      >
-        <span>
-          {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
-            defaultMessage: 'Data retention',
-          })}{' '}
-          <EuiIcon size="s" color="subdued" type="question" />
-        </span>
-      </EuiToolTip>
+      <span>
+        {i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTitle', {
+          defaultMessage: 'Data retention',
+        })}{' '}
+        <EuiIconTip
+          content={i18n.translate('xpack.idxMgmt.dataStreamList.table.dataRetentionColumnTooltip', {
+            defaultMessage: `Data is kept at least this long before being automatically deleted. The data retention value only applies to the data managed directly by the data stream. {canDisableDataRetention, plural, one {If some data is subject to an index lifecycle management policy, then the data retention value set for the data stream doesn't apply to that data.} other {}}`,
+            values: {
+              // ILM is not applicable on serverless, so when the user isnt able to
+              // disable data retention (which is only for serverless) we want to
+              // tweak the copy of the tooltip to hide any references to it.
+              canDisableDataRetention: config.enableTogglingDataRetention ? 1 : 0,
+            },
+          })}
+          position="top"
+          type="question"
+          size="s"
+          color="subdued"
+        />
+      </span>
     ),
     truncateText: true,
     sortable: true,
@@ -236,7 +236,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           {lifecycle?.retention_determined_by === MAX_DATA_RETENTION && (
             <>
               {' '}
-              <EuiToolTip
+              <EuiIconTip
                 content={i18n.translate(
                   'xpack.idxMgmt.dataStreamList.table.usingEffectiveRetentionTooltip',
                   {
@@ -246,9 +246,12 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
                     },
                   }
                 )}
-              >
-                <EuiIcon size="s" color="subdued" type="info" data-test-subj="usingMaxRetention" />
-              </EuiToolTip>
+                position="top"
+                type="info"
+                size="s"
+                color="subdued"
+                iconProps={{ 'data-test-subj': 'usingMaxRetention' }}
+              />
             </>
           )}
         </>

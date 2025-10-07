@@ -54,10 +54,9 @@ export const AlertsDataGrid = typedMemo(
     const {
       ruleTypeIds,
       query,
-      visibleColumns,
+      columnVisibility,
       onToggleColumn,
       onResetColumns,
-      onChangeVisibleColumns,
       onColumnResize,
       showInspectButton = false,
       leadingControlColumns: additionalLeadingControlColumns,
@@ -102,7 +101,11 @@ export const AlertsDataGrid = typedMemo(
     } = renderContext;
 
     const { colorMode } = useEuiTheme();
-    const { sortingColumns, onSort } = useSorting(onSortChange, visibleColumns, sortingFields);
+    const { sortingColumns, onSort } = useSorting(
+      onSortChange,
+      columnVisibility.visibleColumns,
+      sortingFields
+    );
     const {
       isBulkActionsColumnActive,
       bulkActionsState,
@@ -313,10 +316,6 @@ export const AlertsDataGrid = typedMemo(
     const sortProps = useMemo(() => {
       return { columns: sortingColumns, onSort };
     }, [sortingColumns, onSort]);
-
-    const columnVisibility = useMemo(() => {
-      return { visibleColumns, setVisibleColumns: onChangeVisibleColumns };
-    }, [visibleColumns, onChangeVisibleColumns]);
 
     const rowStyles = useMemo(
       () => css`

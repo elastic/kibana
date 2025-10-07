@@ -12,7 +12,6 @@ import {
   FeaturesPluginSetup,
   // PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { FEATURE_PRIVILEGES_PLUGIN_ID } from '../common';
 
 export interface FeatureControlExampleDeps {
@@ -28,7 +27,6 @@ export class FeatureControlsPluginExample
       name: 'Feature Plugin Examples',
       category: DEFAULT_APP_CATEGORIES.management,
       app: ['FeaturePluginExample'],
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           app: ['FeaturePluginExample'],
