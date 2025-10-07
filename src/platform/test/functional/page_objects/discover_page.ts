@@ -173,6 +173,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickSaveSearchButton() {
+    await this.testSubjects.moveMouseTo('discoverSaveButton');
     await this.testSubjects.click('discoverSaveButton');
   }
 

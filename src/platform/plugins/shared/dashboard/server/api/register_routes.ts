@@ -18,12 +18,10 @@ import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import type { DashboardItem } from '../content_management/v1';
 import { dashboardAPIGetResultSchema } from '../content_management/v1';
 import {
-  dashboardAttributesSchemaRequest,
-  dashboardCreateRequestAttributesSchema,
+  dashboardDataSchema,
   dashboardAPICreateResultSchema,
   dashboardListResultAPISchema,
   dashboardUpdateResultSchema,
-  getDashboardCreateRequestAttributesSchema,
 } from '../content_management/v1/schema';
 
 interface RegisterAPIRoutesArgs {
@@ -108,7 +106,7 @@ export function registerAPIRoutes({
               })
             ),
           }),
-          body: getDashboardCreateRequestAttributesSchema(),
+          body: dashboardDataSchema,
         },
         response: {
           200: {
@@ -171,7 +169,7 @@ export function registerAPIRoutes({
               meta: { description: 'A unique identifier for the dashboard.' },
             }),
           }),
-          body: dashboardAttributesSchemaRequest,
+          body: dashboardDataSchema,
         },
         response: {
           200: {

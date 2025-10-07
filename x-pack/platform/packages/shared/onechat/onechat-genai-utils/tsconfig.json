@@ -28,5 +28,6 @@
     "@kbn/es-errors",
     "@kbn/i18n",
     "@kbn/std",
+    "@kbn/esql-ast",
   ]
 }

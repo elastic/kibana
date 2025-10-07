@@ -6,7 +6,7 @@
  */
 
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
-import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import type { ToolDefinition, ToolDefinitionWithSchema } from '@kbn/onechat-common';
 
 export interface ExecuteToolParams {
   toolId: string;
@@ -29,7 +29,7 @@ export interface ToolServiceStartContract {
   /**
    * List all tools available in the current context.
    */
-  list(): Promise<ToolDefinitionWithSchema[]>;
+  list(): Promise<ToolDefinition[]>;
   /**
    * Execute a tool and returns the results.
    */

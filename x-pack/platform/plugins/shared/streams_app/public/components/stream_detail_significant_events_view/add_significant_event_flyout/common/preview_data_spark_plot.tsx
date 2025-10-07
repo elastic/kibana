@@ -37,10 +37,20 @@ export function PreviewDataSparkPlot({
   query,
   definition,
   isQueryValid,
+  showTitle = true,
+  compressed = false,
+  hideAxis = false,
+  height,
+  noOfBuckets,
 }: {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   isQueryValid: boolean;
+  showTitle?: boolean;
+  compressed?: boolean;
+  hideAxis?: boolean;
+  height?: number;
+  noOfBuckets?: number;
 }) {
   const { timeState } = useTimefilter();
   const { euiTheme } = useEuiTheme();
@@ -51,6 +61,7 @@ export function PreviewDataSparkPlot({
     kqlQuery: query.kql.query,
     timeState,
     isQueryValid,
+    noOfBuckets,
   });
 
   const xFormatter = useMemo(() => {
@@ -106,6 +117,10 @@ export function PreviewDataSparkPlot({
     }
 
     if (previewFetch.error) {
+      if (compressed) {
+        return <EuiIcon type="cross" color="danger" size="l" />;
+      }
+
       return (
         <>
           <EuiIcon type="cross" color="danger" size="xl" />
@@ -122,6 +137,10 @@ export function PreviewDataSparkPlot({
     }
 
     if (noOccurrencesFound) {
+      if (compressed) {
+        return <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" />;
+      }
+
       return (
         <>
           <AssetImage type="barChart" size="xs" />
@@ -144,28 +163,33 @@ export function PreviewDataSparkPlot({
 
     return (
       <>
-        <EuiFlexGroup justifyContent="spaceBetween" css={{ width: '100%' }}>
-          <EuiFlexItem>
-            <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
-              {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
-                {
-                  defaultMessage: 'Detected event occurrences',
-                }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              aria-label={openInDiscoverLabel}
-              iconType="discoverApp"
-              href={discoverLink}
-              target="_blank"
-            >
-              {openInDiscoverLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {showTitle && (
+          <EuiFlexGroup justifyContent="spaceBetween" css={{ width: '100%' }}>
+            <EuiFlexItem>
+              <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+                {i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
+                  {
+                    defaultMessage: 'Detected event occurrences ({count})',
+                    values: {
+                      count: sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0),
+                    },
+                  }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                aria-label={openInDiscoverLabel}
+                iconType="discoverApp"
+                href={discoverLink}
+                target="_blank"
+              >
+                {openInDiscoverLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
         <SparkPlot
           id="query_preview"
           name={i18n.translate(
@@ -176,14 +200,21 @@ export function PreviewDataSparkPlot({
           timeseries={sparkPlotData.timeseries}
           annotations={sparkPlotData.annotations}
           xFormatter={xFormatter}
-          compressed={false}
+          compressed={compressed}
+          hideAxis={hideAxis}
+          height={height}
         />
       </>
     );
   }
 
   return (
-    <EuiPanel hasBorder={true} css={{ height: '200px' }}>
+    <EuiPanel
+      hasBorder={!compressed}
+      hasShadow={false}
+      css={{ height: height ? height : '200px' }}
+      paddingSize={compressed ? 'none' : 'm'}
+    >
       <EuiFlexGroup
         direction="column"
         gutterSize="s"

@@ -218,39 +218,3 @@ export const WORKFLOW_ZOD_SCHEMA_LOOSE = generateYamlSchemaFromConnectors(static
 
 // Partially recreated from x-pack/platform/plugins/shared/alerting/server/connector_adapters/types.ts
 // TODO: replace with dynamic schema
-
-// TODO: import AlertSchema from from '@kbn/alerts-as-data-utils' once it exported, now only type is exported
-const AlertSchema = z.object({
-  _id: z.string(),
-  _index: z.string(),
-  kibana: z.object({
-    alert: z.any(),
-  }),
-  '@timestamp': z.string(),
-});
-
-const SummarizedAlertsChunkSchema = z.object({
-  count: z.number(),
-  data: z.array(z.union([AlertSchema, z.any()])),
-});
-
-const RuleSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  tags: z.array(z.string()),
-  consumer: z.string(),
-  producer: z.string(),
-  ruleTypeId: z.string(),
-});
-
-export const EventSchema = z.object({
-  alerts: z.object({
-    new: SummarizedAlertsChunkSchema,
-    ongoing: SummarizedAlertsChunkSchema,
-    recovered: SummarizedAlertsChunkSchema,
-    all: SummarizedAlertsChunkSchema,
-  }),
-  rule: RuleSchema,
-  spaceId: z.string(),
-  params: z.any(),
-});

@@ -87,7 +87,7 @@ describe('createInitialisationSourcesService', () => {
   it('should update sources when they already exist', async () => {
     const existingSources = [
       { id: '1', name: '.entity_analytics.monitoring.users-default' },
-      { id: '2', name: '.entity_analytics.monitoring.sources.okta-default' },
+      { id: '2', name: '.entity_analytics.monitoring.sources.entityanalytics_okta-default' },
       { id: '3', name: '.entity_analytics.monitoring.sources.ad-default' },
     ];
     (monitoringDescriptorClient.findAll as jest.Mock).mockResolvedValue(existingSources);

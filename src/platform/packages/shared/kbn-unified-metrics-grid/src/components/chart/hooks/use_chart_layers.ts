@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import useAsync from 'react-use/lib/useAsync';
 import { useMemo } from 'react';
@@ -49,6 +49,10 @@ export const useChartLayers = ({
   );
 
   const layers = useMemo<LensSeriesLayer[]>(() => {
+    if (columns.length === 0) {
+      return [];
+    }
+
     const xAxisColumn = columns.find((col) => col.meta.type === 'date');
     const xAxis: LensSeriesLayer['xAxis'] = {
       type: 'dateHistogram',

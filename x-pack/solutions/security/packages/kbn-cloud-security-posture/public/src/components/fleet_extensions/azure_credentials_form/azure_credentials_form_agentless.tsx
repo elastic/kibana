@@ -18,7 +18,11 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { SetupTechnology } from '@kbn/fleet-plugin/common/types';
 import { AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
-import { ARM_TEMPLATE_EXTERNAL_DOC_URL, AZURE_PROVIDER } from '../constants';
+import {
+  ARM_TEMPLATE_EXTERNAL_DOC_URL,
+  AZURE_CREDENTIALS_TYPE,
+  AZURE_PROVIDER,
+} from '../constants';
 import { getCloudCredentialVarsConfig, updatePolicyWithInputs } from '../utils';
 import type { AzureOptions } from './get_azure_credentials_form_options';
 import {
@@ -75,6 +79,36 @@ export const AzureCredentialsFormAgentless = ({
 
   const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);
 
+  //  TODO: remove this patch when the Azure cloud connector reusability components are added
+  if (
+    azureCredentialsType &&
+    azureCredentialsType === 'cloud_connectors' &&
+    (!newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id)
+  ) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: true,
+
+        cloud_connector_id: undefined,
+      },
+    });
+  }
+
+  if (
+    azureCredentialsType &&
+    azureCredentialsType !== 'cloud_connectors' &&
+    (newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id)
+  ) {
+    updatePolicy({
+      updatedPolicy: {
+        ...newPolicy,
+        supports_cloud_connector: false,
+        cloud_connector_id: undefined,
+      },
+    });
+  }
+
   const agentlessOptions = isAzureCloudConnectorEnabled
     ? getAzureCloudConnectorsCredentialsFormOptions()
     : getAzureAgentlessCredentialFormOptions();
@@ -94,7 +128,10 @@ export const AzureCredentialsFormAgentless = ({
             onChange={(optionId) => {
               updatePolicy({
                 updatedPolicy: updatePolicyWithInputs(
-                  newPolicy,
+                  {
+                    ...newPolicy,
+                    supports_cloud_connector: optionId === AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+                  },
                   azurePolicyType,
                   getCloudCredentialVarsConfig({
                     setupTechnology,

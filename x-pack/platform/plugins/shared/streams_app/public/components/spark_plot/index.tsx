@@ -21,7 +21,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { euiPaletteWarm } from '@elastic/eui';
+import { EuiIcon, euiPaletteWarm } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsChartTooltip } from '../streams_chart_tooltip';
 
@@ -41,6 +41,8 @@ export function SparkPlot({
   annotations,
   compressed,
   xFormatter: givenXFormatter,
+  hideAxis = false,
+  height,
 }: {
   id: string;
   name?: string;
@@ -49,6 +51,8 @@ export function SparkPlot({
   annotations?: SparkPlotAnnotation[];
   compressed?: boolean;
   xFormatter?: TickFormatter;
+  hideAxis?: boolean;
+  height?: number;
 }) {
   const {
     dependencies: {
@@ -65,10 +69,15 @@ export function SparkPlot({
       vizColors: euiPaletteWarm(1),
     },
     chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
-    chartPaddings: {
-      top: 12,
-      bottom: 12,
-    },
+    chartPaddings: hideAxis
+      ? {
+          top: 0,
+          bottom: 0,
+        }
+      : {
+          top: 12,
+          bottom: 12,
+        },
     lineSeriesStyle: {
       point: { opacity: 0 },
     },
@@ -87,6 +96,7 @@ export function SparkPlot({
       },
       gridLine: {
         vertical: {
+          visible: !compressed,
           dash: [5],
         },
         horizontal: {
@@ -109,7 +119,7 @@ export function SparkPlot({
     <Chart
       size={{
         width: '100%',
-        height: !compressed ? 144 : 48,
+        height: height ? height : !compressed ? 144 : 48,
       }}
     >
       <Tooltip
@@ -117,13 +127,26 @@ export function SparkPlot({
           return xFormatter(data.value);
         }}
       />
-      <Axis id="y_axis" position="left" hide={compressed} domain={{ min: 0, max: NaN }} />
-      <Axis id="x_axis" position="bottom" hide={compressed} />
+      <Axis
+        id="y_axis"
+        position="left"
+        hide={compressed || hideAxis}
+        domain={{ min: 0, max: NaN }}
+      />
+      <Axis id="x_axis" position="bottom" hide={compressed || hideAxis} />
       <Settings
         theme={[sparkplotChartTheme, baseTheme]}
         baseTheme={defaultTheme}
         showLegend={false}
         locale={i18n.getLocale()}
+        noResults={
+          <EuiIcon
+            type="visLine"
+            aria-label={i18n.translate('xpack.streams.columns.euiIcon.noOccurrencesLabel', {
+              defaultMessage: 'No occurrences',
+            })}
+          />
+        }
       />
       {type && type === 'bar' ? (
         <BarSeries

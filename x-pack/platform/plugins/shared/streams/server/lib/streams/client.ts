@@ -28,7 +28,7 @@ import {
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import type { StreamsStorageClient } from './service';
+import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
@@ -522,6 +522,7 @@ export class StreamsClient {
       'monitor',
       'manage_data_stream_lifecycle',
       'read_failure_store',
+      'manage_failure_store',
     ];
     if (!isServerless) {
       REQUIRED_INDEX_PRIVILEGES.push('manage_ilm');
@@ -558,6 +559,7 @@ export class StreamsClient {
       // text structure is always available for the internal user, but not for the current user
       text_structure: isServerless ? true : privileges.cluster.monitor_text_structure,
       read_failure_store: names.every((name) => privileges.index[name].read_failure_store),
+      manage_failure_store: names.every((name) => privileges.index[name].manage_failure_store),
     };
   }
 

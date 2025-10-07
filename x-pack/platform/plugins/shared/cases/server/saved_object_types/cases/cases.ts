@@ -23,6 +23,7 @@ import {
   modelVersion3,
   modelVersion4,
   modelVersion5,
+  modelVersion6,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 
@@ -185,6 +186,9 @@ export const createCaseSavedObjectType = (
           syncAlerts: {
             type: 'boolean',
           },
+          extractObservables: {
+            type: 'boolean',
+          },
         },
       },
       severity: {
@@ -194,6 +198,9 @@ export const createCaseSavedObjectType = (
         type: 'integer',
       },
       total_comments: {
+        type: 'integer',
+      },
+      total_events: {
         type: 'integer',
       },
       category: {
@@ -265,6 +272,7 @@ export const createCaseSavedObjectType = (
     3: modelVersion3,
     4: modelVersion4,
     5: modelVersion5,
+    6: modelVersion6,
   },
   management: {
     importableAndExportable: true,

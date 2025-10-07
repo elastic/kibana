@@ -9,23 +9,21 @@ import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import {
-  UseArray,
   UseField,
   useFormContext,
   useFormData,
+  useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   ToggleField,
-  TextField,
   CardRadioGroupField,
   HiddenField,
   FilePickerField,
@@ -33,9 +31,12 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { AuthType, SSLCertType } from '../../../common/auth/constants';
+import { isEqual } from 'lodash';
+import { useSecretHeaders } from './use_secret_headers';
+import { AuthType, SSLCertType, MAX_HEADERS } from '../../../common/auth/constants';
 import { SSLCertFields } from './ssl_cert_fields';
 import { BasicAuthFields } from './basic_auth_fields';
+import { HeaderFields } from './header_fields';
 import { OAuth2Fields } from './oauth2_fields';
 import * as i18n from './translations';
 
@@ -43,6 +44,12 @@ interface Props {
   readOnly: boolean;
   isOAuth2Enabled?: boolean;
   isPfxEnabled?: boolean;
+}
+
+export interface InternalFormData {
+  key: string;
+  value: string;
+  type: string;
 }
 
 const { emptyField } = fieldValidators;
@@ -54,8 +61,9 @@ export const AuthConfig: FunctionComponent<Props> = ({
   isPfxEnabled = true,
   isOAuth2Enabled = false,
 }) => {
-  const { setFieldValue, getFieldDefaultValue } = useFormContext();
-  const [{ config, __internal__ }] = useFormData({
+  const isModified = useFormIsModified();
+  const { setFieldValue, getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
+  const [{ config, __internal__, id: connectorId }] = useFormData({
     watch: [
       'config.hasAuth',
       'config.authType',
@@ -63,13 +71,22 @@ export const AuthConfig: FunctionComponent<Props> = ({
       'config.verificationMode',
       '__internal__.hasHeaders',
       '__internal__.hasCA',
+      '__internal__.headers',
     ],
   });
+  const {
+    data: secretHeaderKeys = [],
+    isLoading: isLoadingHeaders,
+    isFetching: isFetchingHeaders,
+  } = useSecretHeaders(connectorId);
 
+  const loadingHeaders = isLoadingHeaders || isFetchingHeaders;
   const authType = config == null ? AuthType.Basic : config.authType;
   const certType = config == null ? SSLCertType.CRT : config.certType;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
   const hasCA = __internal__ != null ? __internal__.hasCA : false;
+
+  // Default Values
   const hasInitialCA = !!getFieldDefaultValue<boolean | undefined>('config.ca');
   const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
   const authTypeDefaultValue =
@@ -83,6 +100,48 @@ export const AuthConfig: FunctionComponent<Props> = ({
     getFieldDefaultValue('config.verificationMode') === 'none';
 
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
+
+  useEffect(() => {
+    if (loadingHeaders) return;
+
+    const formData = getFormData();
+    const currentHeaders: Array<InternalFormData> = formData.__internal__?.headers ?? [];
+    const configHeaders = currentHeaders.filter((header) => header.type === 'config');
+    const secretHeaders = secretHeaderKeys.map((key) => ({
+      key,
+      value: '',
+      type: 'secret',
+    }));
+    let mergedHeaders: Array<InternalFormData> = [...configHeaders, ...secretHeaders];
+
+    if (mergedHeaders.length === 0 && hasHeaders) {
+      mergedHeaders = [{ key: '', value: '', type: 'config' }];
+    }
+
+    if (!isEqual(currentHeaders, mergedHeaders)) {
+      updateFieldValues({
+        __internal__: {
+          ...formData.__internal__,
+          /*
+           * If the user modifies the form, whatever is returned from useSecretHeaders
+           * might not be up to date.
+           *
+           * Has headers can only be uptaded on first render or after the form is submitted.
+           * */
+          ...(!isModified && { hasHeaders: mergedHeaders.length > 0 }),
+          headers: mergedHeaders,
+        },
+      });
+    }
+  }, [
+    connectorId,
+    getFormData,
+    secretHeaderKeys,
+    updateFieldValues,
+    hasHeaders,
+    loadingHeaders,
+    isModified,
+  ]);
 
   const options = [
     {
@@ -140,6 +199,11 @@ export const AuthConfig: FunctionComponent<Props> = ({
       />
       <EuiSpacer size="m" />
       <UseField
+        /*
+         * This has to be "hidden". Not rendering when loading headers
+         * was affecting the form value when submitting
+         * */
+        style={{ visibility: loadingHeaders ? 'hidden' : 'visible' }}
         path="__internal__.hasHeaders"
         component={ToggleField}
         config={{
@@ -153,70 +217,14 @@ export const AuthConfig: FunctionComponent<Props> = ({
           },
         }}
       />
-      {hasHeaders && (
-        <UseArray path="config.headers" initialNumberOfItems={1}>
-          {({ items, addItem, removeItem }) => {
-            return (
-              <>
-                <EuiTitle size="xxs" data-test-subj="webhookHeaderText">
-                  <h5>{i18n.HEADERS_TITLE}</h5>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                {items.map((item) => (
-                  <EuiFlexGroup key={item.id}>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.key`}
-                        config={{
-                          label: i18n.KEY_LABEL,
-                        }}
-                        component={TextField}
-                        // This is needed because when you delete
-                        // a row and add a new one, the stale values will appear
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: { readOnly, ['data-test-subj']: 'webhookHeadersKeyInput' },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.value`}
-                        config={{ label: i18n.VALUE_LABEL }}
-                        component={TextField}
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: {
-                            readOnly,
-                            ['data-test-subj']: 'webhookHeadersValueInput',
-                          },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="danger"
-                        onClick={() => removeItem(item.id)}
-                        iconType="minusInCircle"
-                        aria-label={i18n.DELETE_BUTTON}
-                        css={{ marginTop: '28px' }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ))}
-                <EuiSpacer size="m" />
-                <EuiButtonEmpty
-                  iconType="plusInCircle"
-                  onClick={addItem}
-                  data-test-subj="webhookAddHeaderButton"
-                >
-                  {i18n.ADD_BUTTON}
-                </EuiButtonEmpty>
-                <EuiSpacer />
-              </>
-            );
-          }}
-        </UseArray>
+      {loadingHeaders ? (
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <>{hasHeaders && <HeaderFields maxHeaders={MAX_HEADERS} readOnly={readOnly} />}</>
       )}
       <EuiSpacer size="m" />
       <UseField
@@ -289,7 +297,12 @@ export const AuthConfig: FunctionComponent<Props> = ({
           {hasInitialCA && (
             <>
               <EuiSpacer size="s" />
-              <EuiCallOut size="s" iconType="document" title={i18n.EDIT_CA_CALLOUT} />
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                iconType="document"
+                title={i18n.EDIT_CA_CALLOUT}
+              />
             </>
           )}
         </>

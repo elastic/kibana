@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DataTypeDefinition } from '@kbn/chat-data-registry-plugin/server';
-import type { ChatDataRegistryPluginSetup } from '@kbn/chat-data-registry-plugin/server';
+import type { DataTypeDefinition } from '@kbn/data-sources-registry-plugin/server';
+import type { DataSourcesRegistryPluginSetup } from '@kbn/data-sources-registry-plugin/server';
 
 export const workChatDataTypes: DataTypeDefinition[] = [
   {
@@ -24,11 +24,11 @@ export const workChatDataTypes: DataTypeDefinition[] = [
 ];
 
 export const registerWorkChatDataTypes = ({
-  chatDataRegistry,
+  dataSourcesRegistry,
 }: {
-  chatDataRegistry: ChatDataRegistryPluginSetup;
+  dataSourcesRegistry: DataSourcesRegistryPluginSetup;
 }) => {
   workChatDataTypes.forEach((dataType) => {
-    chatDataRegistry.register(dataType);
+    dataSourcesRegistry.register(dataType);
   });
 };

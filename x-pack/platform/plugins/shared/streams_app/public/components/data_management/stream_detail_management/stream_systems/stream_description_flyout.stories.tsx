@@ -44,5 +44,21 @@ The editor also ships with some built in plugins. For example it can handle chec
 It can also handle emojis! :smile:
 And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip content!)}
 `;
-  return <StreamSystemsFlyout systems={systems} closeFlyout={() => {}} isLoading={false} />;
+  return (
+    <StreamSystemsFlyout
+      systems={systems}
+      closeFlyout={() => {}}
+      isLoading={false}
+      definition={{
+        name: 'synthetics-http-default',
+        description: '',
+        ingest: {
+          settings: {},
+          lifecycle: { inherit: {} },
+          processing: { steps: [] },
+          classic: {},
+        },
+      }}
+    />
+  );
 };
