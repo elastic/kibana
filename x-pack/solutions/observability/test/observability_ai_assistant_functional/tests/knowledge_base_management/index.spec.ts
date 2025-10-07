@@ -305,7 +305,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         const entries = await prepareBulkImportData();
         await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
 
-        await testSubjects.clickWhenNotDisabled(ui.pages.kbManagementTab.bulkImportSaveButton);
+        await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
         await testSubjects.waitForDeleted(ui.pages.kbManagementTab.bulkImportFlyout);
         const toastText = await toasts.getTitleAndDismiss();
         expect(toastText).to.eql('Successfully imported ' + entries.length + ' items');
