@@ -145,6 +145,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   isClearable?: boolean;
   isDirty: boolean;
   isLoading?: boolean;
+  isSendingToBackground?: boolean;
   isRefreshPaused?: boolean;
   nonKqlMode?: 'lucene' | 'text';
   onChange: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
@@ -322,7 +323,8 @@ export const QueryBarTopRow = React.memo(
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const backgroundSearchState = useObservable(data.search.session.state$);
-    const canSendToBackground = backgroundSearchState === SearchSessionState.Loading;
+    const canSendToBackground =
+      backgroundSearchState === SearchSessionState.Loading && !props.isSendingToBackground;
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
     const queryRef = useRef<Query | QT | undefined>(props.query);
@@ -628,6 +630,7 @@ export const QueryBarTopRow = React.memo(
             data-test-subj="queryCancelButton"
             iconType="cross"
             isSecondaryButtonDisabled={!canSendToBackground}
+            isSecondaryButtonLoading={props.isSendingToBackground}
             onClick={onClickCancelButton}
             onSecondaryButtonClick={onClickSendToBackground}
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
@@ -692,6 +695,7 @@ export const QueryBarTopRow = React.memo(
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
           isSecondaryButtonDisabled={!canSendToBackground}
+          isSecondaryButtonLoading={props.isSendingToBackground}
           onClick={onClickSubmitButton}
           onSecondaryButtonClick={onClickSendToBackground}
           secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
