@@ -8,5 +8,6 @@
  */
 
 export interface ESQLTelemetryCallbacks {
-  onDecorationHoverShown: (hoverMessage: string) => void;
+  onDecorationHoverShown?: (hoverMessage: string) => void;
+  onSuggestionsWithCustomCommandShown?: (commandNames: string[]) => void;
 }
