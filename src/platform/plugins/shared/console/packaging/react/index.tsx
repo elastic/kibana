@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { noop } from 'lodash';
 // import 'monaco-editor/min/vs/editor/editor.main.css';
 
@@ -71,11 +71,9 @@ const translations = {
   'zh-CN': require('./translations/zh-CN.json'),
 };
 
-export const OneConsole = ({
-  lang = 'en',
-  http: customHttp,
-  notifications: customNotifications,
-}: OneConsoleProps) => {
+export const OneConsole = ({ lang = 'en', http: customHttp, notifications: customNotifications }: OneConsoleProps) => {
+  const [apiLoaded, setApiLoaded] = useState(false);
+
   // Get the translations for the selected language, fallback to English
   const selectedTranslations = translations[lang] || translations.en;
 
@@ -86,31 +84,86 @@ export const OneConsole = ({
     messages: selectedTranslations.messages,
   });
 
-  const docLinksService = new DocLinksService(coreContext as CoreContext);
-  docLinksService.setup();
-  const docLinks = docLinksService.start({ injectedMetadata });
+  // Create all services once using useRef - they should never be recreated
+  const servicesRef = useRef<any>(null);
 
-  const i18nService = new I18nService();
+  if (!servicesRef.current) {
+    const docLinksService = new DocLinksService(coreContext as CoreContext);
+    docLinksService.setup();
+    const docLinks = docLinksService.start({ injectedMetadata });
 
-  const themeService = new ThemeService();
-  const theme = themeService.setup({ injectedMetadata });
+    const i18nService = new I18nService();
 
-  const analyticsService = new AnalyticsService(coreContext as CoreContext);
-  const analytics = analyticsService.setup({ injectedMetadata });
+    const themeService = new ThemeService();
+    const theme = themeService.setup({ injectedMetadata });
 
-  const rootDomElement = document.getElementById('root')!;
-  const fatalErrorsService = new FatalErrorsService(rootDomElement, () => {
-    console.log('FATAL ERROR OCURRED');
-  });
-  const fatalErrors = fatalErrorsService.setup({
-    injectedMetadata,
-    analytics,
-    theme,
-    i18n: i18nService.getContext(),
-  });
+    const analyticsService = new AnalyticsService(coreContext as CoreContext);
+    const analytics = analyticsService.setup({ injectedMetadata });
+
+    const rootDomElement = document.getElementById('root')!;
+    const fatalErrorsService = new FatalErrorsService(rootDomElement, () => {
+      console.log('FATAL ERROR OCURRED');
+    });
+    const fatalErrors = fatalErrorsService.setup({
+      injectedMetadata,
+      analytics,
+      theme,
+      i18n: i18nService.getContext(),
+    });
+
+    const executionContextService = new ExecutionContextService();
+    const executionContext = executionContextService.setup({ analytics });
+
+    const httpService = new HttpService();
+    const originalHttp = httpService.setup({
+      injectedMetadata,
+      fatalErrors,
+      executionContext,
+    });
+
+    const http = {
+      ...originalHttp,
+      ...customHttp,
+    } as HttpSetup;
+
+    const storage = createStorage({
+      engine: window.localStorage,
+      prefix: 'sense:',
+    });
+    setStorage(storage);
+
+    const storageHistory = createHistory({ storage });
+    const settings = createSettings({ storage });
+    const objectStorageClient = localStorageObjectClient.create(storage);
+    const api = createApi({ http });
+    const esHostService = createEsHostService({ api });
+
+    // Initialize autocompleteInfo like in the plugin
+    const autocompleteInfo = new AutocompleteInfo();
+    autocompleteInfo.setup(http);
+    autocompleteInfo.mapping.setup(http, settings);
+
+    // IMPORTANT: Set the global autocompleteInfo so getAutocompleteInfo() works
+    setAutocompleteInfo(autocompleteInfo);
+
+    servicesRef.current = {
+      http,
+      docLinks,
+      theme,
+      i18nService,
+      storage,
+      storageHistory,
+      settings,
+      objectStorageClient,
+      esHostService,
+      autocompleteInfo,
+    };
+  }
+
+  const { http, docLinks, theme, i18nService, storage, storageHistory, settings, objectStorageClient, esHostService, autocompleteInfo } = servicesRef.current;
 
   // Use the custom notifications provided by the consumer
-  const notifications = {
+  const notifications = useMemo(() => ({
     toasts: {
       addSuccess: customNotifications.addSuccess || noop,
       addWarning: customNotifications.addWarning || noop,
@@ -118,55 +171,26 @@ export const OneConsole = ({
       addError: customNotifications.addError || noop,
       add: customNotifications.add || noop,
       remove: customNotifications.remove || noop,
-    },
-  };
-
-  const executionContextService = new ExecutionContextService();
-  const executionContext = executionContextService.setup({ analytics });
-
-  const httpService = new HttpService();
-  const originalHttp = httpService.setup({
-    injectedMetadata,
-    fatalErrors,
-    executionContext,
-  });
-
-  const http = {
-    ...originalHttp,
-    ...customHttp,
-  } as HttpSetup;
+    }
+  }), [customNotifications]);
 
   useEffect(() => {
     const loadApi = async () => {
       try {
         await loadActiveApi(http);
+        setApiLoaded(true);
       } catch (error) {
-        console.error('[DEBUG] Error loading active API:', error);
+        setApiLoaded(true);
       }
     };
 
     loadApi();
-  }, []);
+  }, [http]);
 
-  const storage = createStorage({
-    engine: window.localStorage,
-    prefix: 'sense:',
-  });
-  setStorage(storage);
-
-  const storageHistory = createHistory({ storage });
-  const settings = createSettings({ storage });
-  const objectStorageClient = localStorageObjectClient.create(storage);
-  const api = createApi({ http });
-  const esHostService = createEsHostService({ api });
-
-  // Initialize autocompleteInfo like in the plugin
-  const autocompleteInfo = new AutocompleteInfo();
-  autocompleteInfo.setup(http);
-  autocompleteInfo.mapping.setup(http, settings);
-
-  // IMPORTANT: Set the global autocompleteInfo so getAutocompleteInfo() works
-  setAutocompleteInfo(autocompleteInfo);
+  // Don't render until API is loaded
+  if (!apiLoaded) {
+    return null;
+  }
 
   return (
     <IntlProvider locale={lang} messages={selectedTranslations.messages}>

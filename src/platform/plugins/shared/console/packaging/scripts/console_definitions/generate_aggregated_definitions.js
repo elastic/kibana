@@ -151,9 +151,36 @@ class StandaloneSpecDefinitionsService {
   loadJSDefinitions() {
     const jsIndexPath = path.join(this.versionPath, 'js', 'index.ts');
 
-    // For now, we'll skip JS definitions as they require TypeScript compilation
-    // and complex module resolution. This can be added later if needed.
-    console.log(`Skipping JS definitions for version folder: ${this.versionPath}`);
+    // Check if JS definitions exist
+    if (!fs.existsSync(jsIndexPath)) {
+      console.log(`No JS definitions found at: ${jsIndexPath}`);
+      return;
+    }
+
+    try {
+      // Register TypeScript loader
+      require('@kbn/babel-register').install();
+
+      // Load the JS spec loaders
+      const { jsSpecLoaders } = require(jsIndexPath);
+
+      if (!jsSpecLoaders || !Array.isArray(jsSpecLoaders)) {
+        console.log(`Invalid jsSpecLoaders export in: ${jsIndexPath}`);
+        return;
+      }
+
+      // Execute each loader function with this service instance
+      jsSpecLoaders.forEach((loader) => {
+        if (typeof loader === 'function') {
+          loader(this);
+        }
+      });
+
+      console.log(`✓ Loaded ${jsSpecLoaders.length} JS definition loaders`);
+    } catch (error) {
+      console.error(`Error loading JS definitions from ${jsIndexPath}:`, error.message);
+      console.error('Stack:', error.stack);
+    }
   }
 }
 

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Import the original Console parser from our local copy
 import { createParser } from './console_parser';
 
 interface ParsedRequest {
@@ -28,9 +27,7 @@ interface ParseResult {
   errors: ParseError[];
 }
 
-// Use the original Console parser directly (no custom implementation needed!)
 export const createStandaloneConsoleParser = () => {
-  // Create the original parser
   const originalParser = createParser();
 
   return (text: string): ParseResult => {
@@ -39,7 +36,6 @@ export const createStandaloneConsoleParser = () => {
     }
 
     try {
-      // Use the original parser - it returns { errors, requests }
       const result = originalParser(text);
       return {
         requests: result.requests || [],
