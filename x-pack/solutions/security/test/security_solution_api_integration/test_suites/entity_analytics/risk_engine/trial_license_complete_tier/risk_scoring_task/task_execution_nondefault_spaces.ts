@@ -105,10 +105,15 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
         });
 
         const scores = await readRiskScores(es, index);
-        expect(normalizeScores(scores).map(({ id_value: idValue }) => idValue)).to.eql(
+        expect(
+          normalizeScores(scores)
+            .map(({ id_value: idValue }) => idValue)
+            .sort()
+        ).to.eql(
           Array(10)
             .fill(0)
             .map((_, _index) => `host-${_index}`)
+            .sort()
         );
       });
     });
