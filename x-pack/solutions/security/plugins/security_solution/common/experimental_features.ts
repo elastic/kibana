@@ -116,7 +116,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enable resetting risk scores to zero for outdated entities
    */
-  enableRiskScoreResetToZero: false,
+  enableRiskScoreResetToZero: true,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
