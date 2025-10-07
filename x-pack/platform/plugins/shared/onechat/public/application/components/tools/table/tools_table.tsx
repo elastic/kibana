@@ -64,6 +64,9 @@ export const OnechatToolsTable = memo(() => {
         pageSize: 10,
         showPerPageOptions: false,
       }}
+      rowProps={(tool) => ({
+        'data-test-subj': `agentBuilderToolsTableRow-${tool.id}`,
+      })}
       selection={{
         selectable: (tool) => !tool.readonly,
         onSelectionChange: (selectedItems: ToolDefinition[]) => {

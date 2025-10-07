@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 const APP_ID = 'agent_builder';
@@ -40,7 +41,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await descriptionTextarea.type('FTR updated description');
 
       await testSubjects.click('toolFormSaveButton');
-      await testSubjects.existOrFail('toastCloseButton');
+      await testSubjects.click('toastCloseButton');
+
+      // Navigate back to the tool details page and verify edited fields
+      await common.navigateToApp(APP_ID, { path: `tools/${toolId}` });
+      await testSubjects.existOrFail('agentBuilderToolFormPage');
+      const idValue = await testSubjects.getAttribute('agentBuilderToolIdInput', 'value');
+      expect(idValue).to.be(toolId);
+      const descriptionValue = await testSubjects.getAttribute(
+        'euiMarkdownEditorTextArea',
+        'value'
+      );
+      expect(descriptionValue).to.contain('FTR updated description');
     });
 
     it('should clone a tool from the tool details page', async () => {
@@ -61,8 +73,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('agentBuilderToolContextMenuButton');
       await testSubjects.click('agentBuilderToolCloneButton');
       await testSubjects.existOrFail('agentBuilderToolFormPage');
+
+      // Save the cloned tool ID
+      const clonedToolId = await testSubjects.getAttribute('agentBuilderToolIdInput', 'value');
+
       await testSubjects.click('toolFormSaveButton');
-      await testSubjects.existOrFail('toastCloseButton');
+      await testSubjects.click('toastCloseButton');
+
+      // After cloning, navigate to the cloned tool details and verify fields
+      await common.navigateToApp(APP_ID, { path: `tools/${clonedToolId!}` });
+      await testSubjects.existOrFail('agentBuilderToolFormPage');
+      const clonedIdValue = await testSubjects.getAttribute('agentBuilderToolIdInput', 'value');
+      expect(clonedIdValue).to.be(clonedToolId);
+      const clonedDescriptionValue = await testSubjects.getAttribute(
+        'euiMarkdownEditorTextArea',
+        'value'
+      );
+      expect(clonedDescriptionValue).to.contain('FTR clone source');
     });
 
     it('should test a tool from the tool details page', async () => {
@@ -114,6 +141,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('agentBuilderToolDeleteButton');
       await testSubjects.click('confirmModalConfirmButton');
       await testSubjects.existOrFail('agentBuilderToolsPage');
+      await testSubjects.missingOrFail(`agentBuilderToolsTableRow-${toolId}`);
     });
 
     it('views built-in as read-only', async () => {

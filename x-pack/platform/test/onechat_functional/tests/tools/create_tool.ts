@@ -41,30 +41,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should create an esql tool', async () => {
+      const toolId = `ftr.esql.${Date.now()}`;
       await common.navigateToApp(APP_ID, { path: 'tools/new' });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await testSubjects.setValue('agentBuilderToolIdInput', `ftr.esql.${Date.now()}`);
+      await testSubjects.setValue('agentBuilderToolIdInput', toolId);
 
       await testSubjects.existOrFail('agentBuilderToolTypeSelect');
       await testSubjects.selectValue('agentBuilderToolTypeSelect', 'esql');
 
+      await testSubjects.setValue('euiMarkdownEditorTextArea', 'FTR created ES|QL tool');
+
       await testSubjects.existOrFail('agentBuilderEsqlEditor');
       await monacoEditor.setCodeEditorValue('FROM .kibana | LIMIT 1');
 
-      const descriptionEditor = await testSubjects.find('agentBuilderToolDescriptionEditor');
-      const descriptionTextarea = await descriptionEditor.findByCssSelector(
-        'textarea.euiMarkdownEditorTextArea'
-      );
-      await descriptionTextarea.type('FTR created ES|QL tool');
-
       await testSubjects.click('toolFormSaveButton');
-      await testSubjects.existOrFail('toastCloseButton');
+      await testSubjects.click('toastCloseButton');
+
+      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${toolId}`);
     });
 
     it('should create an index search tool', async () => {
+      const toolId = `ftr.index.${Date.now()}`;
       await common.navigateToApp(APP_ID, { path: 'tools/new' });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await testSubjects.setValue('agentBuilderToolIdInput', `ftr.index.${Date.now()}`);
+      await testSubjects.setValue('agentBuilderToolIdInput', toolId);
 
       await testSubjects.existOrFail('agentBuilderToolTypeSelect');
       await testSubjects.selectValue('agentBuilderToolTypeSelect', 'index_search');
@@ -79,7 +79,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await descriptionTextarea.type('FTR created Index Search tool');
 
       await testSubjects.click('toolFormSaveButton');
-      await testSubjects.existOrFail('toastCloseButton');
+      await testSubjects.click('toastCloseButton');
+
+      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${toolId}`);
     });
   });
 }
