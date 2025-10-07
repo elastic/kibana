@@ -26,6 +26,20 @@ is_auto_commit_disabled() {
   is_pr_with_label "ci:no-auto-commit"
 }
 
+stash_changed_files() {
+  SCRIPT_NAME="$1"
+  SHOULD_STASH="${2:-true}"
+  GIT_STASH_MESSAGE="${3:-Stashed files from $SCRIPT_NAME}"
+
+  GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
+
+  if [ "$GIT_CHANGES" ] && [[ "$SHOULD_STASH" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
+    echo "'$1' caused changes to the following files, stashing them now:"
+    echo "$GIT_CHANGES"
+    git stash push -u -am "$GIT_STASH_MESSAGE"
+  fi
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -35,7 +49,9 @@ check_for_changed_files() {
   CUSTOM_FIX_MESSAGE="${3:-}"
   GIT_CHANGES="$(git status --porcelain -- . ':!:config/node.options' ':!config/kibana.yml')"
 
-  if [ "$GIT_CHANGES" ]; then
+  if [[ "${STASH_QUICKCHECK_CHANGES:-}" == "true" ]]; then
+    stash_changed_files "$1" "$SHOULD_AUTO_COMMIT_CHANGES" "$CUSTOM_FIX_MESSAGE"
+  elif [ "$GIT_CHANGES" ]; then
     if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
       NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
       PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
