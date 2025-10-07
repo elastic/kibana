@@ -18,8 +18,15 @@ import {
   type SerializedPanelState,
 } from '@kbn/presentation-publishing';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import { isTextBasedLanguage } from '../helper';
-import type { GetStateType, LensEmbeddableStartServices, LensRuntimeState } from '../types';
+import { isTextBasedLanguage, transformOutputState } from '../helper';
+import type {
+  GetStateType,
+  LensByRefSerializedAPIConfig,
+  LensByValueSerializedAPIConfig,
+  LensEmbeddableStartServices,
+  LensRuntimeState,
+  LensSerializedAPIConfig,
+} from '../types';
 import type { IntegrationCallbacks } from '../types';
 import { DOC_TYPE } from '../../../common/constants';
 
@@ -52,7 +59,7 @@ export function initializeIntegrations(
     | 'updateDataLoading'
     | 'getTriggerCompatibleActions'
   > &
-    HasSerializableState;
+    HasSerializableState<LensSerializedAPIConfig>;
 } {
   return {
     api: {
@@ -60,7 +67,7 @@ export function initializeIntegrations(
        * This API is used by the parent to serialize the panel state to save it into its saved object.
        * Make sure to remove the attributes when the panel is by reference.
        */
-      serializeState: () => {
+      serializeState: (): SerializedPanelState<LensSerializedAPIConfig> => {
         const currentState = getLatestState();
         const cleanedState = cleanupSerializedState(
           attributeService.extractReferences(currentState)
@@ -83,15 +90,19 @@ export function initializeIntegrations(
                 id: savedObjectId,
               },
             ],
-          };
+          } satisfies SerializedPanelState<LensByRefSerializedAPIConfig>;
         }
+
+        const { rawState: transformedState, references: transformedReferences = [] } =
+          transformOutputState(cleanedState);
+
         return {
           rawState: {
-            ...cleanedState.rawState,
+            ...transformedState,
             ...dynamicActionsState,
           },
-          references: [...cleanedState.references, ...(dynamicActionsReferences ?? [])],
-        };
+          references: [...transformedReferences, ...(dynamicActionsReferences ?? [])],
+        } satisfies SerializedPanelState<LensByValueSerializedAPIConfig>;
       },
       // TODO: workout why we have this duplicated
       getFullAttributes: () => getLatestState().attributes,

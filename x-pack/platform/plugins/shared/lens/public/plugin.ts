@@ -141,6 +141,7 @@ import {
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/constants';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
+import { setLensFeatureFlags } from './get_feature_flags';
 
 export type { SaveProps } from './app_plugin';
 
@@ -388,6 +389,17 @@ export class LensPlugin {
           import('./async_services'),
         ]);
         return createLensEmbeddableFactory(deps);
+      });
+
+      core.getStartServices().then(async ([{ featureFlags }]) => {
+        const flags = await setLensFeatureFlags(featureFlags);
+
+        embeddable.registerTransforms(LENS_EMBEDDABLE_TYPE, async () => {
+          const { getLensPublicTransforms } = await import('./react_embeddable/transforms');
+          const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils/config_builder');
+          const builder = new LensConfigBuilder(undefined, flags.apiFormat);
+          return getLensPublicTransforms(builder);
+        });
       });
 
       // Let Dashboard know about the Lens panel type

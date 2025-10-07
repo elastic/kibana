@@ -6,7 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ViewMode } from '@kbn/presentation-publishing';
+import type { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
@@ -19,9 +19,12 @@ import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import type {
+  LensByValueSerializedAPIConfig,
   LensEmbeddableStartServices,
   LensRuntimeState,
+  LensSerializedAPIConfig,
   LensSerializedState,
   StructuredDatasourceStates,
 } from './types';
@@ -32,6 +35,8 @@ import type { FormBasedPersistedState } from '../datasources/form_based/types';
 import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import { DOC_TYPE } from '../../common/constants';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
+import { getLensPublicTransforms } from './transforms';
+import { getLensFeatureFlags } from '../get_feature_flags';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -69,7 +74,7 @@ export async function deserializeState(
     attributeService,
     ...services
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
-  rawState: LensSerializedState,
+  rawState: LensSerializedAPIConfig,
   references?: Reference[]
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
@@ -80,16 +85,26 @@ export async function deserializeState(
     try {
       const { attributes, managed, sharingSavedObjectProps } =
         await attributeService.loadFromLibrary(savedObjectId);
-      return { ...rawState, savedObjectId, attributes, managed, sharingSavedObjectProps };
+      return {
+        ...rawState,
+        savedObjectId,
+        attributes,
+        managed,
+        sharingSavedObjectProps,
+      } satisfies LensRuntimeState;
     } catch (e) {
       // return an empty Lens document if no saved object is found
       return { ...rawState, attributes: fallbackAttributes };
     }
   }
 
+  const transformedState = transformInitialState(rawState, references);
+
   // Inject applied only to by-value SOs
   const newState = attributeService.injectReferences(
-    ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState,
+    ('attributes' in transformedState
+      ? transformedState
+      : { attributes: transformedState }) as LensRuntimeState,
     references?.length ? references : undefined
   );
 
@@ -161,5 +176,54 @@ export function getStructuredDatasourceStates(
     textBased: ((datasourceStates as DatasourceStates)?.textBased?.state ??
       datasourceStates?.textBased ??
       undefined) as TextBasedPersistedState,
+  };
+}
+
+export function transformInitialState(
+  initialState: LensSerializedAPIConfig,
+  references?: Reference[]
+): LensSerializedState {
+  const enableAPITransforms = getLensFeatureFlags().apiFormat;
+  const builder = new LensConfigBuilder(undefined, enableAPITransforms);
+  const transforms = getLensPublicTransforms(builder);
+
+  if (!transforms.transformIn) {
+    throw new Error('transformIn missing');
+  }
+
+  return transforms.transformIn({
+    ...initialState,
+    // Why are there 2 references?
+    references: initialState.references ?? references ?? [],
+  }).state;
+}
+
+export function transformOutputState(
+  outputState: SerializedPanelState<LensSerializedState>
+): SerializedPanelState<LensByValueSerializedAPIConfig> {
+  const enableAPITransforms = getLensFeatureFlags().apiFormat;
+  const builder = new LensConfigBuilder(undefined, enableAPITransforms);
+  const transforms = getLensPublicTransforms(builder);
+
+  if (!transforms.transformOut) {
+    throw new Error('transformOut missing');
+  }
+
+  const transformedState = transforms.transformOut(
+    {
+      ...outputState.rawState,
+    },
+    // Why are there 2 references?
+    outputState.rawState.references ?? outputState?.references ?? []
+  );
+
+  if (!transformedState.attributes) {
+    // This should only ever handle by-value state.
+    throw new Error('attributes are missing');
+  }
+
+  return {
+    ...outputState,
+    rawState: transformedState,
   };
 }
