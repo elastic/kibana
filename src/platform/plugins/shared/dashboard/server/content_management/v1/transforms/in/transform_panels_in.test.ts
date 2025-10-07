@@ -130,10 +130,11 @@ describe('transformPanelsIn', () => {
             y: 0,
           },
           type: TEST_EMBEDDABLE_TYPE,
+          uid: 'panel1'
         },
       ];
       expect(() => transformPanelsIn(panels)).toThrowErrorMatchingInlineSnapshot(
-        `"Panel config validation failed. Panel uid: undefined, type: test, validation error: [lessThan10]: Value must be equal to or lower than [10]."`
+        `"Panel config validation failed. Panel uid: panel1, type: test, validation error: [lessThan10]: Value must be equal to or lower than [10]."`
       );
     });
 
@@ -153,7 +154,11 @@ describe('transformPanelsIn', () => {
         },
       ];
       const results = transformPanelsIn(panels);
-      expect(JSON.parse(results.panelsJSON).embeddableConfig).toMatchInlineSnapshot(`undefined`);
+      expect(JSON.parse(results.panelsJSON)[0].embeddableConfig).toMatchInlineSnapshot(`
+        Object {
+          "lessThan10": 7,
+        }
+      `);
     });
   });
 });
