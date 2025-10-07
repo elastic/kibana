@@ -58,11 +58,12 @@ export const checkEventCommand: Command<void> = {
       { log, cli: true }
     );
 
-    log.info(`Checking for event with buildNumber: ${buildNumber} and testConfig: ${testConfig}`);
+    log.info(`Checking for events with buildNumber: ${buildNumber} and testConfig: ${testConfig}`);
 
     try {
       const result = await es.search({
         index: SCOUT_TEST_EVENTS_DATA_STREAM_NAME,
+        size: 0,
         query: {
           bool: {
             filter: [
@@ -83,17 +84,20 @@ export const checkEventCommand: Command<void> = {
         },
       });
 
-      console.log('Search result:', JSON.stringify(result));
       if ((result.hits.total as any).value > 0) {
-        log.success('Event found!');
+        log.success(`Found events for buildNumber: ${buildNumber} and testConfig: ${testConfig}`);
       } else {
-        log.error('Event not found.');
+        log.info(
+          `No events was found for buildNumber: ${buildNumber} and testConfig: ${testConfig}`
+        );
         if (!dontFailOnError) {
           process.exitCode = 1;
         }
       }
     } catch (error) {
-      log.error('Error checking for event:');
+      log.error(
+        `Error checking events for buildNumber: ${buildNumber} and testConfig: ${testConfig}`
+      );
       log.error(error);
       if (!dontFailOnError) {
         process.exitCode = 1;
