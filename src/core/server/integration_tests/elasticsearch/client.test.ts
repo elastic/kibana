@@ -9,7 +9,7 @@
 
 import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
-import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { ReplaySubject, firstValueFrom, skip } from 'rxjs';
 
 import type { Root } from '@kbn/core-root-server-internal';
 import {
@@ -28,6 +28,16 @@ describe('elasticsearch clients', () => {
   beforeAll(async () => {
     const { startES, startKibana } = createTestServers({
       adjustTimeout: jest.setTimeout,
+      settings: {
+        kbn: {
+          elasticsearch: {
+            // required to adjust the requestTimeout for the test
+            requestTimeout: 120000,
+            // Set to 1 for faster testing
+            bufferThreshold: 1,
+          },
+        },
+      },
     });
 
     esServer = await startES();
@@ -77,18 +87,23 @@ describe('fake elasticsearch', () => {
   let esStatus$: ReplaySubject<ServiceStatus<ElasticsearchStatusMeta>>;
 
   beforeAll(async () => {
-    kibanaServer = createRootWithCorePlugins({ status: { allowAnonymous: true } });
+    kibanaServer = createRootWithCorePlugins({
+      status: { allowAnonymous: true },
+      elasticsearch: {
+        bufferThreshold: 1, // Set to 1 for faster testing
+      },
+    });
     esServer = createFakeElasticsearchServer();
 
     await kibanaServer.preboot();
     const { elasticsearch } = await kibanaServer.setup();
-    esStatus$ = new ReplaySubject(1);
+    esStatus$ = new ReplaySubject(10); // Increase buffer to capture more status changes
     elasticsearch.status$.subscribe(esStatus$);
 
     // give kibanaServer's status Observables enough time to bootstrap
     // and emit a status after the initial "unavailable: Waiting for Elasticsearch"
     // see https://github.com/elastic/kibana/issues/129754
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
   });
 
   afterAll(async () => {
@@ -99,8 +114,8 @@ describe('fake elasticsearch', () => {
   });
 
   test('should return unknown product when it cannot perform the Product check (503 response)', async () => {
-    const esStatus = await firstValueFrom(esStatus$);
-    expect(esStatus.level.toString()).toBe('critical');
+    const esStatus = await firstValueFrom(esStatus$.pipe(skip(1))); // need to use take(3)
+    expect(esStatus.level.toString()).toBe('critical'); // getting "unavailable"
     expect(esStatus.summary).toBe(
       'Unable to retrieve version information from Elasticsearch nodes. The client noticed that the server is not Elasticsearch and we do not support this unknown product.'
     );
