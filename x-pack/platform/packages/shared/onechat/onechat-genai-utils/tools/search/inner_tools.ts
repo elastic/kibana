@@ -13,7 +13,7 @@ import type { ScopedModel, ToolEventEmitter } from '@kbn/onechat-server';
 import type { ResourceResult, ToolResult } from '@kbn/onechat-common/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getToolResultId } from '@kbn/onechat-server/tools';
+import { getToolResultId, createErrorResult } from '@kbn/onechat-server/tools';
 import { relevanceSearch } from '../relevance_search';
 import { naturalLanguageSearch } from '../nl_search';
 import type { MatchResult } from '../steps/perform_match_search';
@@ -138,15 +138,12 @@ export const createNaturalLanguageSearchTool = ({
                 },
               ]
             : [
-                {
-                  type: ToolResultType.error,
-                  data: {
-                    message: response.error ?? 'Query was not executed',
-                    metadata: {
-                      query: response.generatedQuery,
-                    },
+                createErrorResult({
+                  message: response.error ?? 'Query was not executed',
+                  metadata: {
+                    query: response.generatedQuery,
                   },
-                },
+                }),
               ];
 
           const content = JSON.stringify(results);
