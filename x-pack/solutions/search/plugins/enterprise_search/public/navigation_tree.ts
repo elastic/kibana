@@ -74,7 +74,7 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   badgeTypeV2: 'techPreview',
-                  iconV2: agentsIcon,
+                  icon: agentsIcon,
                   link: 'agent_builder',
                   withBadge: true,
                 },
@@ -97,7 +97,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     {
                       breadcrumbStatus: 'hidden',
-                      iconV2: playgroundIcon,
+                      icon: playgroundIcon,
                       link: 'searchPlayground',
                     },
                   ],
@@ -151,7 +151,7 @@ export const getNavigationTreeDefinition = ({
                       ],
                     },
                   ],
-                  iconV2: 'machineLearningApp',
+                  icon: 'machineLearningApp',
                   id: 'machine_learning',
                   renderAs: 'panelOpener',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.machineLearning', {
@@ -174,7 +174,7 @@ export const getNavigationTreeDefinition = ({
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
                   },
-                  iconV2: 'code',
+                  icon: 'code',
                   id: 'dev_tools',
                   link: 'dev_tools',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
@@ -233,7 +233,7 @@ export const getNavigationTreeDefinition = ({
                       ),
                     },
                   ],
-                  iconV2: 'database',
+                  icon: 'database',
                   id: DATA_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to anchor the tour step
                   renderAs: 'panelOpener',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.dataManagement', {
@@ -244,7 +244,7 @@ export const getNavigationTreeDefinition = ({
                   breadcrumbStatus: 'hidden',
                   children: [
                     {
-                      iconV2: 'managementApp',
+                      icon: 'managementApp',
                       children: [
                         {
                           children: [
