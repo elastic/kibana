@@ -34,9 +34,12 @@ export const SecretFormRow: React.FC<{
       {secretLabelTitle}
       &nbsp;
       <EuiIconTip
-        content={i18n.translate('xpack.fleet.settings.editOutputFlyout.sslKeySecretInputTooltip', {
-          defaultMessage: 'This value will be stored as a secret.',
-        })}
+        content={i18n.translate(
+          'xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.secretFormRow.secretLabelTooltip',
+          {
+            defaultMessage: 'This value will be stored as a secret.',
+          }
+        )}
         type="question"
       />
     </>
