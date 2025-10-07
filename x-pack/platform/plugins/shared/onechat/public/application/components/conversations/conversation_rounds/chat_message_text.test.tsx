@@ -75,6 +75,7 @@ function createStartDependencies() {
     dataViews: {},
     cloud: {},
     share: {},
+    uiActions: {},
   } as OnechatStartDependencies;
 }
 
@@ -198,6 +199,7 @@ describe('chat_message_text', () => {
         esqlQuery: toolResult.data.query,
         lens: startDependencies.lens,
         dataViews: startDependencies.dataViews,
+        uiActions: startDependencies.uiActions,
       });
     });
 

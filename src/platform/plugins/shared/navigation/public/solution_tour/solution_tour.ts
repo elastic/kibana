@@ -41,27 +41,12 @@ export class SolutionNavigationTourManager {
     const hasCompletedTour = await checkTourCompletion(this.deps.userProfile);
     if (hasCompletedTour) return;
 
-    const canShowDataManagement = hasAccessToDataManagement(this.deps.capabilities);
-    this.deps.navigationTourManager.startTour(
-      canShowDataManagement ? ['sidenav-home', 'sidenav-manage-data'] : ['sidenav-home']
-    );
+    this.deps.navigationTourManager.startTour();
     await this.deps.navigationTourManager.waitForTourEnd();
 
     await preserveTourCompletion(this.deps.userProfile);
   }
 }
-
-// We try to determine if the user has access to any data management features
-// TODO: this probably needs to be more robust and can check for navigation tree and if data management node exists for the current user
-const hasAccessToDataManagement = (capabilities: ApplicationStart['capabilities']) => {
-  try {
-    const dataManagement = capabilities.management?.data ?? {};
-    const indexManagement = capabilities.management?.index_management ?? {};
-    return [...Object.values(dataManagement), ...Object.values(indexManagement)].some((v) => v);
-  } catch (e) {
-    return false;
-  }
-};
 
 const SOLUTION_NAVIGATION_TOUR_KEY = 'solutionNavigationTour:completed';
 

@@ -52,7 +52,9 @@ const styles = {
   button: css`
     &:hover {
       text-decoration: none !important;
-      .languageSelector {
+
+      /* Target the language selector when the button is hovered */
+      .consoleEditorContextMenu__languageSelector {
         text-decoration: underline;
       }
     }
@@ -251,7 +253,12 @@ export const ContextMenu = ({
     >
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" className="languageSelector">
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            className="consoleEditorContextMenu__languageSelector"
+            data-test-subj="language-selector"
+          >
             <EuiFlexItem grow={false}>
               <FormattedMessage
                 tagName="span"

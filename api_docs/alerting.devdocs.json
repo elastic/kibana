@@ -5740,6 +5740,39 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.getMaxAlertLimit",
+        "type": "Function",
+        "tags": [],
+        "label": "getMaxAlertLimit",
+        "description": [],
+        "signature": [
+          "(maxAlerts: number) => number"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/max_alert_limit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.getMaxAlertLimit.$1",
+            "type": "number",
+            "tags": [],
+            "label": "maxAlerts",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/common/max_alert_limit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.getRuleCircuitBreakerErrorMessage",
         "type": "Function",
         "tags": [],
@@ -10375,6 +10408,21 @@
           "\"allQueryDelaySettings\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/rules_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.ALLOWED_MAX_ALERTS",
+        "type": "number",
+        "tags": [],
+        "label": "ALLOWED_MAX_ALERTS",
+        "description": [],
+        "signature": [
+          "5000"
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/max_alert_limit.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

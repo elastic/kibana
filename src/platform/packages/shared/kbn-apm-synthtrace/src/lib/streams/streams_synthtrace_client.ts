@@ -133,7 +133,9 @@ function streamsRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<StreamsDocument>, encoding, callback) {
-      document._index = 'logs';
+      if (!document._index) {
+        document._index = 'logs';
+      }
       callback(null, document);
     },
   });

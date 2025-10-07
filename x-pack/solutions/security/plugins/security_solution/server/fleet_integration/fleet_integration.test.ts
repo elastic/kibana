@@ -1440,6 +1440,10 @@ describe('Fleet integrations', () => {
         // @ts-expect-error
         endpointServicesMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
 
+        (
+          endpointServicesMock.getInternalFleetServices().isEndpointPackageInstalled as jest.Mock
+        ).mockResolvedValue(true);
+
         const packagePolicyGenerator = new FleetPackagePolicyGenerator('seed');
         const packageNames = Object.values(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES).flat();
 

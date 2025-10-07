@@ -29,6 +29,11 @@ export type ConnectorFormSchema<
 > &
   Partial<Pick<UserConfiguredActionConnector<Config, Secrets>, 'id' | 'name'>>;
 
+export type InternalConnectorForm = ConnectorFormSchema & {
+  __internal__?: {
+    headers?: Array<{ key: string; value: string; type: string }>;
+  };
+};
 export interface InferenceConnectorProviderConfig {
   [key: string]: unknown;
   max_number_of_allocations?: number;

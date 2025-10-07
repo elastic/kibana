@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const TableTitle = ({
@@ -23,24 +23,20 @@ export const TableTitle = ({
   const start = Math.min(pageIndex * pageSize + 1, total);
   const end = Math.min(start + pageSize - 1, total);
   return (
-    <>
-      <EuiText size="xs">
-        <FormattedMessage
-          id="xpack.streams.tableTitle.showing"
-          defaultMessage="Showing {count} of {total} {label}"
-          values={{
-            count: (
-              <strong>
-                {start}-{end}
-              </strong>
-            ),
-            total,
-            label: <strong>{label}</strong>,
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiHorizontalRule margin="none" style={{ height: 2 }} />
-    </>
+    <EuiText size="xs">
+      <FormattedMessage
+        id="xpack.streams.tableTitle.showing"
+        defaultMessage="Showing {count} of {total} {label}"
+        values={{
+          count: (
+            <strong>
+              {start}-{end}
+            </strong>
+          ),
+          total,
+          label: <strong>{label}</strong>,
+        }}
+      />
+    </EuiText>
   );
 };

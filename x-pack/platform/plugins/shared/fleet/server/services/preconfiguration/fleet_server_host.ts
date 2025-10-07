@@ -226,6 +226,13 @@ async function hashSecrets(preconfiguredFleetServerHost: FleetServerHost) {
       ssl: { es_key: esKey },
     };
   }
+  if (typeof preconfiguredFleetServerHost.secrets?.ssl?.agent_key === 'string') {
+    const agentKey = await hashSecret(preconfiguredFleetServerHost.secrets?.ssl?.agent_key);
+    secrets = {
+      ...(secrets ? secrets : {}),
+      ssl: { agent_key: agentKey },
+    };
+  }
   return secrets;
 }
 
@@ -242,7 +249,11 @@ async function isPreconfiguredFleetServerHostDifferentFromCurrent(
       preconfiguredFleetServerHost.secrets?.ssl?.es_key,
       existingFleetServerHost.secrets?.ssl?.es_key
     );
-    return sslKeyHashIsDifferent || sslESKeyHashIsDifferent;
+    const sslAgentKeyHashIsDifferent = await isSecretDifferent(
+      preconfiguredFleetServerHost.secrets?.ssl?.agent_key,
+      existingFleetServerHost.secrets?.ssl?.agent_key
+    );
+    return sslKeyHashIsDifferent || sslESKeyHashIsDifferent || sslAgentKeyHashIsDifferent;
   };
 
   return (
