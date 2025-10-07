@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getKibanaModuleData, type KibanaModuleMetadata } from './read_manifest';
-export { excapeHtmlCharacters, stripFilePath, parseStdout } from './text_processing';
-export { getRunTarget, stripRunCommand } from './cli_processing';
-export { getTestIDForTitle, generateTestRunId } from './test_id_generator';
+import { createPlaywrightConfig } from '../..';
+
+// eslint-disable-next-line import/no-default-export
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

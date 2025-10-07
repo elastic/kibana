@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test, expect } from '../../../src/playwright';
-import { EuiCheckBoxWrapper } from '../../../src/playwright/eui_components';
+import { test, expect } from '../../../../src/playwright';
+import { EuiCheckBoxWrapper } from '../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
 test.describe('EUI testing wrapper: EuiCheckBox', { tag: ['@svlSecurity', '@ess'] }, () => {

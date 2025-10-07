@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig } from '..';
+export enum TestSuiteType {
+  FTR = 'ftr-suite',
+  SCOUT = 'scout-suite',
+  CYPRESS = 'cypress-suite',
+}
 
-// eslint-disable-next-line import/no-default-export
-export default createPlaywrightConfig({
-  testDir: './tests',
-});
+export const TEST_SUITE_TYPES = Object.values(TestSuiteType);
