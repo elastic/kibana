@@ -62,6 +62,33 @@ export const checkEventCommand: Command<void> = {
     const indexName = '.ds-scout-events-v1-*-*';
 
     try {
+      log.info(`Refreshing index ${indexName}`);
+      await es.indices.refresh({ index: indexName });
+
+      log.info(
+        `Query: ${JSON.stringify(
+          {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-1d/d',
+                      lte: 'now',
+                    },
+                  },
+                },
+              ],
+              must: [
+                { term: { 'buildkite.build.number': buildNumber } },
+                { term: { 'test_run.config.file.path': testConfig } },
+              ],
+            },
+          },
+          null,
+          2
+        )}`
+      );
       const result = await es.search({
         index: indexName,
         query: {
