@@ -127,7 +127,7 @@ export const FileContents: FC<Props> = ({
 
   return (
     <>
-      <EuiFlexGroup data-test-subj={`dataVisualizerFileContentsPanel_${index}`}>
+      <EuiFlexGroup data-test-subj={`dataVisualizerFileContentsPanel-${index}`}>
         <EuiFlexItem>
           {showTitle ? (
             <EuiTitle size="s">
