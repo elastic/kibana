@@ -317,7 +317,7 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
                     content={severityItem.field}
                     data-test-subj={`severityOverrideField${index}`}
                   >
-                    <>{`${severityItem.field}:`}</>
+                    <span tabIndex={0}>{`${severityItem.field}:`}</span>
                   </EuiToolTip>
                 </OverrideColumn>
                 <OverrideValueColumn>
@@ -325,11 +325,11 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
                     content={severityItem.value}
                     data-test-subj={`severityOverrideValue${index}`}
                   >
-                    {defaultToEmptyTag(severityItem.value)}
+                    <span tabIndex={0}>{defaultToEmptyTag(severityItem.value)}</span>
                   </EuiToolTip>
                 </OverrideValueColumn>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={'sortRight'} />
+                  <EuiIcon type="sortRight" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <SeverityBadge
