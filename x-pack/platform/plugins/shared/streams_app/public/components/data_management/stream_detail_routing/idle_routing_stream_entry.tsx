@@ -53,16 +53,14 @@ export function IdleRoutingStreamEntry({
   isEditingEnabled,
   onEditIconClick,
   routingRule,
-  totalRoutingRules,
-  isEditMode,
+  canReorder,
 }: {
   availableStreams: string[];
   draggableProvided: DraggableProvided;
   isEditingEnabled: boolean;
   onEditIconClick: (id: string) => void;
   routingRule: RoutingDefinitionWithUIAttributes;
-  totalRoutingRules: number;
-  isEditMode: boolean;
+  canReorder: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
@@ -97,7 +95,7 @@ export function IdleRoutingStreamEntry({
           alignItems="center"
           responsive={false}
         >
-          {totalRoutingRules > 1 && !isEditMode && (
+          {canReorder && (
             <EuiFlexItem grow={false}>
               <EuiPanel
                 className="streamsDragHandle"

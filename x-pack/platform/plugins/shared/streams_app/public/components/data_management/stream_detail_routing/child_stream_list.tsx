@@ -63,7 +63,6 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
   const aiFeatures = useAIFeatures();
   const reviewSuggestionForm = useReviewSuggestionsForm();
   const { timeState } = useTimefilter();
-  const isEditMode = routingSnapshot.matches({ ready: 'editingRule' });
   const { currentRuleId, definition, routing } = routingSnapshot.context;
   const canCreateRoutingRules = routingSnapshot.can({ type: 'routingRule.create' });
   const canReorderRoutingRules = routingSnapshot.can({ type: 'routingRule.reorder', routing });
@@ -195,8 +194,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                               })}
                               onEditIconClick={editRule}
                               routingRule={routingRule}
-                              totalRoutingRules={routing.length}
-                              isEditMode={isEditMode}
+                              canReorder={canReorderRoutingRules}
                             />
                           )}
                         </NestedView>
