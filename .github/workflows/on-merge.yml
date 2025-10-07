@@ -13,30 +13,46 @@ jobs:
   on-merge:
     name: 'Label and Backport'
     runs-on: ubuntu-latest
-    if: |
-      github.event.pull_request.merged == true && (
-        (
-          github.event.action == 'closed'
-        ) || (
-          github.event.action == 'labeled' && (
-            github.event.label.name == 'backport:all-open' ||
-            github.event.label.name == 'backport:version'
-          )
-        ) || (
-          github.event.action == 'labeled' && contains(github.event.pull_request.labels.*.name, 'backport:version') && (
-            startsWith(github.event.label.name,'v7') ||
-            startsWith(github.event.label.name,'v8') ||
-            startsWith(github.event.label.name,'v9')
-          )
-        ) || (
-          github.event.action == 'unlabeled' && github.event.label.name == 'backport:skip' && (
-            contains(github.event.pull_request.labels.*.name, 'backport:all-open') ||
-            contains(github.event.pull_request.labels.*.name, 'backport:version')
-          )
-        )
-      )
+    if: github.event.pull_request.merged == true
     steps:
+      - name: Check out versions.json
+        uses: actions/checkout@v5
+        with:
+          repository: 'elastic/kibana-versions'
+          ref: main
+          sparse-checkout: |
+            versions.json
+      - name: Check Event Qualifies
+        id: check_event
+        run: |
+          let shouldRun = false;
+          const { pull_request: pr, action, label } = event;
+          const backportLabels = { skip: 'backport:skip', allOpen: 'backport:all-open', version: 'backport:version' };
+          const event = process.env.GITHUB_EVENT_PATH ? require(process.env.GITHUB_EVENT_PATH) : {};
+          const validVersionLabels = require('./versions.json').versions
+            .map(v => v.version.split('.').slice(0,2).join('.'))
+            .map(v => RegExp(`^v${v.version}\.[0-9]{1,2}$`));
+          const labelsWarrantBackport = labels.includes(backportLabels.allOpen) || (
+            labels.includes(backportLabels.version) &&
+            labels.some(label => validVersionLabels.some(v => v.test(label)))
+          );
+
+          if (action === 'closed') {
+            console.log('PR was merged, proceeding');
+            shouldRun = true;
+          } else if ((action === 'labeled' || action === 'unlabeled') && labelsWarrantBackport) {
+            console.log('labelling action warrants backport, proceeding');
+            shouldRun = true;
+          } else {
+            shouldRun = false;
+          }
+          console.log(`should_run_onmerge=${shouldRun}`);
+          // Set output for subsequent steps
+          require('fs').appendFileSync(process.env.GITHUB_OUTPUT, `should_run_onmerge=${shouldRun}\n`);
+        shell: node
+
       - name: Checkout Actions
+        if: ${{ steps.check_event.outputs.should_run_onmerge == 'true' }}
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           repository: 'elastic/kibana-github-actions'
@@ -44,9 +60,11 @@ jobs:
           path: ./actions
 
       - name: Install Actions
+        if: ${{ steps.check_event.outputs.should_run_onmerge == 'true' }}
         run: npm install --production --prefix ./actions
 
       - name: Run On-Merge
+        if: ${{ steps.check_event.outputs.should_run_onmerge == 'true' }}
         uses: ./actions/on-merge
         with:
           github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
