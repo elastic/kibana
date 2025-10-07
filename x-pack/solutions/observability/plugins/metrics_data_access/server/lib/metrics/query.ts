@@ -104,7 +104,7 @@ export const fetchMetrics = async (
 
     const aggregations = decodeOrThrow(AggregationResponseRT)(response.aggregations);
     return {
-      series: getSeriesFromHistogram(aggregations, options, bucketSize * 1000),
+      series: getSeriesFromAggregations(aggregations, options, bucketSize * 1000),
       info: {
         afterKey: null,
         interval: bucketSize,
@@ -115,14 +115,25 @@ export const fetchMetrics = async (
   }
 };
 
-const getSeriesFromHistogram = (
+const getSeriesFromAggregations = (
   aggregations: AggregationResponse,
   options: MetricsAPIRequest,
   bucketSize: number
 ): MetricsAPIResponse['series'] => {
-  return [
-    convertBucketsToMetricsApiSeries(['*'], options, aggregations.histogram.buckets, bucketSize),
-  ];
+  // Check if this is the new single-bucket response (no histogram wrapper)
+  if ('histogram' in aggregations) {
+    return [
+      convertBucketsToMetricsApiSeries(
+        ['*'],
+        options,
+        aggregations.histogram.buckets,
+        bucketSize
+      ),
+    ];
+  } else {
+    // Single bucket response - treat the root aggregation as a single bucket
+    return [convertBucketsToMetricsApiSeries(['*'], options, [aggregations], bucketSize)];
+  }
 };
 
 const getSeriesFromCompositeAggregations = (
@@ -133,12 +144,9 @@ const getSeriesFromCompositeAggregations = (
   return groupings.buckets.map((bucket) => {
     const keys = Object.values(bucket.key);
     const metricsetNames = bucket.metricsets.buckets.map((m) => m.key);
-    const metrics = convertBucketsToMetricsApiSeries(
-      keys,
-      options,
-      HistogramBucketRT.is(bucket) ? bucket.histogram.buckets : [bucket],
-      bucketSize
-    );
+    // Since we removed the histogram wrapper, all buckets are now single-bucket (MetricsBucketRT)
+    // Just pass the bucket itself as a single-item array
+    const metrics = convertBucketsToMetricsApiSeries(keys, options, [bucket], bucketSize);
     return { ...metrics, metricsets: metricsetNames };
   });
 };

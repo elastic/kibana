@@ -88,6 +88,9 @@ export const HistogramRT = rt.type({
   metricsets: MetricsetRT,
 });
 
+// Single-bucket response type (no histogram wrapper)
+export const SingleBucketResponseRT = rt.intersection([BucketRT, rt.type({ metricsets: MetricsetRT })]);
+
 export const MetricsBucketRT = rt.intersection([BucketRT, rt.type({ metricsets: MetricsetRT })]);
 export const HistogramBucketRT = rt.intersection([
   rt.type({
@@ -97,12 +100,12 @@ export const HistogramBucketRT = rt.intersection([
   HistogramRT,
 ]);
 
-export const AggregationResponseRT = HistogramRT;
+export const AggregationResponseRT = rt.union([HistogramRT, SingleBucketResponseRT]);
 
 export const CompositeResponseRT = rt.type({
   groupings: rt.intersection([
     rt.type({
-      buckets: rt.array(rt.union([HistogramBucketRT, MetricsBucketRT])),
+      buckets: rt.array(MetricsBucketRT),
     }),
     rt.partial({
       after_key: rt.record(rt.string, rt.string),

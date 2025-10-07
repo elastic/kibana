@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { get, max, sum, last, isNumber } from 'lodash';
+import { get, isNumber } from 'lodash';
 import type {
   MetricsAPIRequest,
   MetricsAPIResponse,
-  MetricsAPIRow,
   MetricsAPISeries,
   SnapshotMetricType,
 } from '@kbn/metrics-data-access-plugin/common';
@@ -21,27 +20,6 @@ import type {
 } from '../../../../common/http_api';
 import { META_KEY } from './constants';
 import { applyMetadataToLastPath } from './apply_metadata_to_last_path';
-
-const getMetricValue = (row: MetricsAPIRow) => {
-  if (!isNumber(row.metric_0)) return null;
-  const value = row.metric_0;
-  return Number.isFinite(value) ? value : null;
-};
-
-const calculateMax = (rows: MetricsAPIRow[]) => {
-  return max(rows.map(getMetricValue)) || 0;
-};
-
-const calculateAvg = (rows: MetricsAPIRow[]): number => {
-  const values = rows.map(getMetricValue).filter(Number.isFinite);
-  return sum(values) / Math.max(values.length, 1);
-};
-
-const getLastValue = (rows: MetricsAPIRow[]) => {
-  const row = last(rows);
-  if (!row) return null;
-  return getMetricValue(row);
-};
 
 export const transformMetricsApiResponseToSnapshotResponse = (
   options: MetricsAPIRequest,
@@ -88,11 +66,12 @@ const getMetrics = (
     .map((metric) => {
       const name = metric.id as SnapshotMetricType;
 
-      const metrics = series.rows.map((row) => ({
-        timestamp: row.timestamp,
-        metric_0: get(row, metric.id, null),
-      }));
+      // In single-bucket mode, we have only one row
+      const singleRow = series.rows.length > 0 ? series.rows[0] : null;
+      const value = singleRow ? get(singleRow, metric.id, null) : null;
+      const numericValue = isNumber(value) && Number.isFinite(value) ? value : null;
 
+      // For single bucket, max and avg are the same as the value
       const timeseries = snapshotRequest.includeTimeseries
         ? ({
             id: name,
@@ -100,15 +79,18 @@ const getMetrics = (
               { name: 'timestamp', type: 'date' },
               { name: 'metric_0', type: 'number' },
             ],
-            rows: [...metrics],
+            rows: series.rows.map((row) => ({
+              timestamp: row.timestamp,
+              metric_0: get(row, metric.id, null),
+            })),
           } as MetricsAPISeries)
         : undefined;
 
       return {
         name,
-        value: getLastValue(metrics),
-        max: calculateMax(metrics),
-        avg: calculateAvg(metrics),
+        value: numericValue,
+        max: numericValue,
+        avg: numericValue,
         timeseries,
       };
     });
