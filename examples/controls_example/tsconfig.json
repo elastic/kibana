@@ -18,15 +18,11 @@
     "@kbn/data-plugin",
     "@kbn/controls-plugin",
     "@kbn/navigation-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
-    "@kbn/presentation-containers",
-    "@kbn/presentation-publishing",
     "@kbn/ui-actions-plugin",
-    "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-render",
     "@kbn/controls-constants",
-    "@kbn/controls-schemas",
+    "@kbn/kibana-react-plugin",
+    "@kbn/control-group-renderer",
   ]
 }
