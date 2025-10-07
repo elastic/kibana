@@ -63,20 +63,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.canvasExists();
     };
 
-    const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
-      interface NetworkLog {
-        url: string;
-        method: string;
-        status: number;
-        requestBody: Record<string, unknown> | undefined;
-        responseBody: Record<string, unknown> | undefined;
-      }
+    interface SearchLog {
+      url: string;
+      method: string;
+      status: number;
+      requestBody: Record<string, unknown> | undefined;
+      responseBody: Record<string, unknown> | undefined;
+    }
 
+    const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
       await browser.execute(
         async (searchEndpoint: string) => {
-          const networkLogs: NetworkLog[] = [];
+          const searchLogs: SearchLog[] = [];
 
-          (window as any).__networkLogs__ = networkLogs;
+          (window as any).__searchLogs__ = searchLogs;
           (window as any).__originalFetch__ ??= window.fetch.bind(window);
 
           window.fetch = async (input, init) => {
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               // ignore
             }
 
-            networkLogs.push({
+            searchLogs.push({
               url: input.url,
               method: input.method,
               status: response.status,
@@ -122,15 +122,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await cb();
       await waitForLoadingToFinish();
 
-      const rawNetworkLogs = await browser.execute(() => {
-        return (window as any).__networkLogs__ as NetworkLog[];
+      const rawSearchLogs = await browser.execute(() => {
+        return (window as any).__searchLogs__ as SearchLog[];
       });
-      const filteredNetworkLogs = rawNetworkLogs.filter((networkLog) => {
+      const filteredSearchLogs = rawSearchLogs.filter((searchLog) => {
         if (type === 'ese') {
           return true;
         }
 
-        const query = get(networkLog.requestBody, 'params.query');
+        const query = get(searchLog.requestBody, 'params.query');
 
         if (typeof query !== 'string') {
           return true;
@@ -140,12 +140,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return !query.endsWith('| limit 0');
       });
 
-      expect(filteredNetworkLogs.length).to.equal(
+      expect(filteredSearchLogs.length).to.equal(
         expected,
         `expected ${type} request count to be ${expected}, but got ${
-          filteredNetworkLogs.length
+          filteredSearchLogs.length
         }: ${JSON.stringify(
-          filteredNetworkLogs.map((l) => omit(l, 'responseBody')),
+          filteredSearchLogs.map((l) => omit(l, 'responseBody')),
           null,
           2
         )}`
