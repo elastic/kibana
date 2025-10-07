@@ -80,6 +80,11 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep> imple
     try {
       const result = await this._run(input);
 
+      // Don't update step execution runtime if abort was initiated
+      if (this.stepExecutionRuntime.abortController.signal.aborted) {
+        return;
+      }
+
       if (result.error) {
         await this.stepExecutionRuntime.failStep(result.error);
       } else {
