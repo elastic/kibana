@@ -285,14 +285,9 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         );
 
         // Other snapshots should not have the flag
-        expect(response.body.snapshots).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              snapshot: 'snapshot1',
-              isLastSuccessfulSnapshot: undefined,
-            }),
-          ])
-        );
+        const snapshot1 = response.body.snapshots.find((s: any) => s.snapshot === 'snapshot1');
+        expect(snapshot1).toBeDefined();
+        expect(snapshot1.isLastSuccessfulSnapshot).toBeUndefined();
       });
 
       test('does not mark snapshots in non-managed repositories', async () => {
@@ -357,14 +352,11 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
           ])
         );
 
-        expect(response.body.snapshots).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              snapshot: 'regular_snapshot',
-              isLastSuccessfulSnapshot: undefined,
-            }),
-          ])
+        const regularSnapshot = response.body.snapshots.find(
+          (s: any) => s.snapshot === 'regular_snapshot'
         );
+        expect(regularSnapshot).toBeDefined();
+        expect(regularSnapshot.isLastSuccessfulSnapshot).toBeUndefined();
       });
 
       test('handles case when managed repository has no successful snapshots', async () => {
@@ -404,14 +396,9 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         const response = await router.runRequest(mockRequest);
 
         // No snapshots should be marked
-        expect(response.body.snapshots).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              snapshot: 'snapshot1',
-              isLastSuccessfulSnapshot: undefined,
-            }),
-          ])
-        );
+        const snapshot1 = response.body.snapshots.find((s: any) => s.snapshot === 'snapshot1');
+        expect(snapshot1).toBeDefined();
+        expect(snapshot1.isLastSuccessfulSnapshot).toBeUndefined();
       });
 
       test('handles case when there is no managed repository', async () => {
@@ -442,14 +429,9 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         const response = await router.runRequest(mockRequest);
 
         // No snapshots should be marked
-        expect(response.body.snapshots).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              snapshot: 'snapshot1',
-              isLastSuccessfulSnapshot: undefined,
-            }),
-          ])
-        );
+        const snapshot1 = response.body.snapshots.find((s: any) => s.snapshot === 'snapshot1');
+        expect(snapshot1).toBeDefined();
+        expect(snapshot1.isLastSuccessfulSnapshot).toBeUndefined();
       });
 
       test('continues to work if fetching last successful snapshot fails', async () => {
