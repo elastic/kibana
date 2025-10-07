@@ -94,19 +94,19 @@ tags:
     x-displayName: Elastic Agent actions
   - name: Elastic Agent binary download sources
     description: |
-      Elastic Agent binary download sources APIs enable you to manage download sources for Elastic Agent binaries, including creating, updating, and deleting custom download sources for agent installations.
+      Elastic Agent binary download sources APIs enable you to manage download sources for Elastic Agent binaries, including creating, updating, and deleting custom download sources for agent binaries.
     x-displayName: Elastic Agent binary download sources
   - name: Elastic Agent policies
     description: |
-      Elastic Agent policies APIs enable you to manage agent policies, including creating, updating, and deleting policies, as well as managing policy outputs, manifests, and auto-upgrade settings.
+      Elastic Agent policies APIs enable you to manage agent policies, including creating, updating, and deleting policies, as well as to retrieve agent policy outputs, manifests, and auto-upgrade status information.
     x-displayName: Elastic Agent policies
   - name: Elastic Agent status
     description: |
-      Elastic Agent status APIs enable you to retrieve status information about Elastic Agents, including health summaries and operational status.
+      Enables you to retrieve status information about Elastic Agents, including health summaries and operational status.
     x-displayName: Elastic Agent status
   - name: Elastic Agents
     description: |
-      Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and configuring agent setup.
+      Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and initiating agent setup.
     x-displayName: Elastic Agents
   - name: Elastic Package Manager (EPM)
     description: |
@@ -118,7 +118,7 @@ tags:
     x-displayName: Fleet cloud connectors
   - name: Fleet enrollment API keys
     description: |
-      Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking keys used for agent enrollment.
+      Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
     x-displayName: Fleet enrollment API keys
   - name: Fleet internals
     description: |
@@ -126,7 +126,7 @@ tags:
     x-displayName: Fleet internals
   - name: Fleet outputs
     description: |
-      Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating API keys, and monitoring output health.
+      Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating Logstash API keys, and monitoring output health.
     x-displayName: Fleet outputs
   - name: Fleet package policies
     description: |
@@ -142,7 +142,7 @@ tags:
     x-displayName: Fleet Server hosts
   - name: Fleet uninstall tokens
     description: |
-      Enables you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
+      Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
     x-displayName: Fleet uninstall tokens
   - name: maintenance-window
     description: |
