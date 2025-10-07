@@ -46,8 +46,6 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
 
   embeddableSetup.registerLegacyURLTransform(MAP_SAVED_OBJECT_TYPE, async () => {
     const { getTransformOut } = await import('./embeddable_module');
-    return getTransformOut(
-      embeddableSetup.transformEnhancementsOut
-    );
+    return getTransformOut(embeddableSetup.transformEnhancementsOut);
   });
 }

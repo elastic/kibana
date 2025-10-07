@@ -130,7 +130,7 @@ describe('transformPanelsIn', () => {
             y: 0,
           },
           type: TEST_EMBEDDABLE_TYPE,
-          uid: 'panel1'
+          uid: 'panel1',
         },
       ];
       expect(() => transformPanelsIn(panels)).toThrowErrorMatchingInlineSnapshot(
