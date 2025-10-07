@@ -7,7 +7,6 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [
-      "controls",
       "data",
       "developerExamples",
       "embeddable",
