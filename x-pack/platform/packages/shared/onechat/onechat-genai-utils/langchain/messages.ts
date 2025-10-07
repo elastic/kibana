@@ -8,8 +8,8 @@
 import type { BaseMessage, MessageContentComplex, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage } from '@langchain/core/messages';
 import type { RunToolReturn } from '@kbn/onechat-server';
+import { createErrorResult } from '@kbn/onechat-server';
 import { isArray } from 'lodash';
-import { ToolResultType } from '@kbn/onechat-common';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -76,7 +76,7 @@ export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
     const content = extractTextContent(message);
     if (content.startsWith('Error:')) {
       return {
-        results: [{ type: ToolResultType.error, data: { message: content } }],
+        results: [createErrorResult(content)],
       };
     } else {
       throw new Error(`No artifact attached to tool message: ${JSON.stringify(message)}`);

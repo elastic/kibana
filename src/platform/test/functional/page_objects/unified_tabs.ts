@@ -37,6 +37,11 @@ export class UnifiedTabsPageObject extends FtrService {
     }
   }
 
+  public async getSelectedTabLabel() {
+    const selectedTab = await this.getSelectedTab();
+    return selectedTab?.label;
+  }
+
   public async getTabWidths() {
     const tabElements = await this.getTabElements();
     return await Promise.all(
@@ -212,6 +217,21 @@ export class UnifiedTabsPageObject extends FtrService {
 
   public async isTabsBarVisible() {
     return await this.testSubjects.exists('unifiedTabs_tabsBar');
+  }
+
+  public async isTabPreviewVisible() {
+    const tabPreview = await this.find.byCssSelector('[data-test-subj^="unifiedTabs_tabPreview_"]');
+
+    return tabPreview ? await tabPreview.isDisplayed() : false;
+  }
+
+  public async closeTabPreviewWithEsc() {
+    if (await this.isTabPreviewVisible()) {
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
+      await this.retry.waitFor('tab preview to close', async () => {
+        return !(await this.isTabPreviewVisible());
+      });
+    }
   }
 
   public async openTabsBarMenu() {

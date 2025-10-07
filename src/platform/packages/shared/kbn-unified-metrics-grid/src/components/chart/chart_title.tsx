@@ -6,69 +6,73 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  EuiTextTruncate,
-  type EuiTextTruncationTypes,
-  useEuiTheme,
-  EuiHighlight,
-} from '@elastic/eui';
+import { useEuiTheme, EuiHighlight, EuiTextTruncate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getHighlightColors } from '@kbn/data-grid-in-table-search/src/get_highlight_colors';
 import React, { useMemo } from 'react';
 
 export const ChartTitle = ({
   searchTerm,
-  text,
-  truncation,
+  title,
 }: {
   searchTerm: string;
-  text: string;
-  truncation: EuiTextTruncationTypes;
+  title: string;
 }): React.ReactNode => {
   const { euiTheme } = useEuiTheme();
   const colors = useMemo(() => getHighlightColors(euiTheme), [euiTheme]);
 
-  const chartTitleCss = css`
-    min-height: ${euiTheme.size.l};
-    max-height: ${euiTheme.size.l};
-    max-width: 90%;
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    z-index: 9000;
-    padding: ${euiTheme.size.s};
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-weight: ${euiTheme.font.weight.semiBold};
-  `;
+  const { headerStyles, chartTitleCss } = useMemo(() => {
+    return {
+      headerStyles: css`
+        position: absolute;
+        width: 100%;
+        max-height: ${euiTheme.size.l};
+        z-index: ${Number(euiTheme.levels.content) + 1};
+        transition: outline-color ${euiTheme.animation.extraFast},
+          z-index ${euiTheme.animation.extraFast};
+        transition-delay: ${euiTheme.animation.fast};
 
-  if (!searchTerm) {
-    return (
-      <h3 css={chartTitleCss}>
-        <EuiTextTruncate truncation={truncation} text={text} />
-      </h3>
-    );
-  }
+        overflow: hidden;
+        height: 100%;
+        line-height: ${euiTheme.size.l};
+        padding: 0px ${euiTheme.size.s};
+
+        pointer-events: none;
+      `,
+      chartTitleCss: css`
+        font-weight: ${euiTheme.font.weight.bold};
+      `,
+    };
+  }, [
+    euiTheme.size.l,
+    euiTheme.size.s,
+    euiTheme.levels.content,
+    euiTheme.animation.extraFast,
+    euiTheme.animation.fast,
+    euiTheme.font.weight.bold,
+  ]);
 
   return (
-    <h3 css={chartTitleCss}>
-      <EuiHighlight
-        css={css`
-          & mark {
-            color: ${colors.highlightColor};
-            background-color: ${colors.highlightBackgroundColor};
-          }
-          overflow: ellipsis;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        `}
-        strict={false}
-        highlightAll
-        search={searchTerm}
-      >
-        {text}
-      </EuiHighlight>
-    </h3>
+    <div css={headerStyles} className="metricsExperienceChartTitle">
+      <span css={chartTitleCss}>
+        {searchTerm ? (
+          <EuiHighlight
+            css={css`
+              & mark {
+                color: ${colors.highlightColor};
+                background-color: ${colors.highlightBackgroundColor};
+              }
+            `}
+            strict={false}
+            highlightAll
+            search={searchTerm}
+          >
+            {title}
+          </EuiHighlight>
+        ) : (
+          <EuiTextTruncate text={title} />
+        )}
+      </span>
+    </div>
   );
 };

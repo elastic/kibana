@@ -54,7 +54,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
         />
       }
       paddingSize="m"
-      data-test-subj="dataVisualizerPageAdvancedSettings"
+      data-test-subj="dataVisualizerAdvancedSettingsAccordion"
     >
       <SectionTitle>
         <FormattedMessage id="xpack.dataVisualizer.file.mappingsTitle" defaultMessage="Mappings" />
@@ -94,6 +94,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
 
           <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
             <EuiSwitch
+              data-test-subj="dataVisualizerCreateDataViewSwitch"
               id="createDataView"
               label={
                 <FormattedMessage
@@ -126,6 +127,7 @@ export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
             error={[dataViewNameError]}
           >
             <EuiFieldText
+              data-test-subj="dataVisualizerDataViewNameInput"
               disabled={dataViewName === null}
               placeholder={dataViewName === null ? '' : indexName}
               value={dataViewName ?? ''}

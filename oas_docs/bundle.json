@@ -25030,6 +25030,9 @@
                                 "nullable": true,
                                 "type": "string"
                               },
+                              "rolled_back": {
+                                "type": "boolean"
+                              },
                               "type": {
                                 "type": "string"
                               },
@@ -27216,6 +27219,9 @@
                               "nullable": true,
                               "type": "string"
                             },
+                            "rolled_back": {
+                              "type": "boolean"
+                            },
                             "type": {
                               "type": "string"
                             },
@@ -28180,6 +28186,9 @@
                             "previous_version": {
                               "nullable": true,
                               "type": "string"
+                            },
+                            "rolled_back": {
+                              "type": "boolean"
                             },
                             "type": {
                               "type": "string"
@@ -29304,6 +29313,25 @@
                               "ssl": {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "agent_key": {
+                                    "anyOf": [
+                                      {
+                                        "additionalProperties": false,
+                                        "properties": {
+                                          "id": {
+                                            "type": "string"
+                                          }
+                                        },
+                                        "required": [
+                                          "id"
+                                        ],
+                                        "type": "object"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
                                   "es_key": {
                                     "anyOf": [
                                       {
@@ -29352,6 +29380,18 @@
                             "additionalProperties": false,
                             "nullable": true,
                             "properties": {
+                              "agent_certificate": {
+                                "type": "string"
+                              },
+                              "agent_certificate_authorities": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
+                              "agent_key": {
+                                "type": "string"
+                              },
                               "certificate": {
                                 "type": "string"
                               },
@@ -29509,6 +29549,25 @@
                       "ssl": {
                         "additionalProperties": false,
                         "properties": {
+                          "agent_key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
                           "es_key": {
                             "anyOf": [
                               {
@@ -29557,6 +29616,18 @@
                     "additionalProperties": false,
                     "nullable": true,
                     "properties": {
+                      "agent_certificate": {
+                        "type": "string"
+                      },
+                      "agent_certificate_authorities": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "agent_key": {
+                        "type": "string"
+                      },
                       "certificate": {
                         "type": "string"
                       },
@@ -29646,6 +29717,25 @@
                             "ssl": {
                               "additionalProperties": false,
                               "properties": {
+                                "agent_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
                                 "es_key": {
                                   "anyOf": [
                                     {
@@ -29694,6 +29784,18 @@
                           "additionalProperties": false,
                           "nullable": true,
                           "properties": {
+                            "agent_certificate": {
+                              "type": "string"
+                            },
+                            "agent_certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "agent_key": {
+                              "type": "string"
+                            },
                             "certificate": {
                               "type": "string"
                             },
@@ -29919,6 +30021,25 @@
                             "ssl": {
                               "additionalProperties": false,
                               "properties": {
+                                "agent_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
                                 "es_key": {
                                   "anyOf": [
                                     {
@@ -29967,6 +30088,18 @@
                           "additionalProperties": false,
                           "nullable": true,
                           "properties": {
+                            "agent_certificate": {
+                              "type": "string"
+                            },
+                            "agent_certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "agent_key": {
+                              "type": "string"
+                            },
                             "certificate": {
                               "type": "string"
                             },
@@ -30110,6 +30243,25 @@
                       "ssl": {
                         "additionalProperties": false,
                         "properties": {
+                          "agent_key": {
+                            "anyOf": [
+                              {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ],
+                                "type": "object"
+                              },
+                              {
+                                "type": "string"
+                              }
+                            ]
+                          },
                           "es_key": {
                             "anyOf": [
                               {
@@ -30158,6 +30310,18 @@
                     "additionalProperties": false,
                     "nullable": true,
                     "properties": {
+                      "agent_certificate": {
+                        "type": "string"
+                      },
+                      "agent_certificate_authorities": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "agent_key": {
+                        "type": "string"
+                      },
                       "certificate": {
                         "type": "string"
                       },
@@ -30246,6 +30410,25 @@
                             "ssl": {
                               "additionalProperties": false,
                               "properties": {
+                                "agent_key": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "id": {
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    {
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
                                 "es_key": {
                                   "anyOf": [
                                     {
@@ -30294,6 +30477,18 @@
                           "additionalProperties": false,
                           "nullable": true,
                           "properties": {
+                            "agent_certificate": {
+                              "type": "string"
+                            },
+                            "agent_certificate_authorities": {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            },
+                            "agent_key": {
+                              "type": "string"
+                            },
                             "certificate": {
                               "type": "string"
                             },

@@ -8,7 +8,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 
-import { EuiBasicTable, EuiSkeletonText, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiInMemoryTable, EuiSkeletonText, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
 import type { Observable, ObservableType } from '../../../common/types/domain';
@@ -17,16 +17,16 @@ import * as i18n from './translations';
 import { AddObservable } from './add_observable';
 import { ObservableActionsPopoverButton } from './observable_actions_popover_button';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { ObservablesUtilityBar } from './observables_utility_bar';
 
 const getColumns = (
   caseData: CaseUI,
   observableTypes: ObservableType[]
 ): Array<EuiBasicTableColumn<Observable>> => [
   {
-    name: i18n.DATE_ADDED,
-    field: 'createdAt',
-    'data-test-subj': 'cases-observables-table-date-added',
-    dataType: 'date',
+    name: i18n.OBSERVABLE_VALUE,
+    field: 'value',
+    'data-test-subj': 'cases-observables-table-value',
   },
   {
     name: i18n.OBSERVABLE_TYPE,
@@ -36,9 +36,15 @@ const getColumns = (
       observableTypes.find((observableType) => observableType.key === typeKey)?.label || '-',
   },
   {
-    name: i18n.OBSERVABLE_VALUE,
-    field: 'value',
-    'data-test-subj': 'cases-observables-table-value',
+    name: i18n.OBSERVABLE_DESCRIPTION,
+    field: 'description',
+    'data-test-subj': 'cases-observables-table-description',
+  },
+  {
+    name: i18n.DATE_ADDED,
+    field: 'createdAt',
+    'data-test-subj': 'cases-observables-table-date-added',
+    dataType: 'date',
   },
   {
     name: i18n.OBSERVABLE_ACTIONS,
@@ -70,9 +76,14 @@ EmptyObservablesTable.displayName = 'EmptyObservablesTable';
 export interface ObservablesTableProps {
   caseData: CaseUI;
   isLoading: boolean;
+  onExtractObservablesChanged: (isOn: boolean) => void;
 }
 
-export const ObservablesTable = ({ caseData, isLoading }: ObservablesTableProps) => {
+export const ObservablesTable = ({
+  caseData,
+  isLoading,
+  onExtractObservablesChanged,
+}: ObservablesTableProps) => {
   const filesTableRowProps = useCallback(
     (observable: Observable) => ({
       'data-test-subj': `cases-observables-table-row-${observable.id}`,
@@ -82,11 +93,11 @@ export const ObservablesTable = ({ caseData, isLoading }: ObservablesTableProps)
 
   const { data: currentConfiguration, isLoading: loadingCaseConfigure } = useGetCaseConfiguration();
 
-  const columns = useMemo(
-    () =>
-      getColumns(caseData, [...OBSERVABLE_TYPES_BUILTIN, ...currentConfiguration.observableTypes]),
-    [caseData, currentConfiguration.observableTypes]
+  const observableTypes = useMemo(
+    () => [...OBSERVABLE_TYPES_BUILTIN, ...currentConfiguration.observableTypes],
+    [currentConfiguration.observableTypes]
   );
+  const columns = useMemo(() => getColumns(caseData, observableTypes), [caseData, observableTypes]);
 
   return isLoading || loadingCaseConfigure ? (
     <>
@@ -95,16 +106,13 @@ export const ObservablesTable = ({ caseData, isLoading }: ObservablesTableProps)
     </>
   ) : (
     <>
-      {caseData.observables.length > 0 && (
-        <>
-          <EuiSpacer size="xl" />
-          <EuiText size="xs" color="subdued" data-test-subj="cases-observables-table-results-count">
-            {i18n.SHOWING_OBSERVABLES(caseData.observables.length)}
-          </EuiText>
-        </>
-      )}
-      <EuiSpacer size="s" />
-      <EuiBasicTable
+      <ObservablesUtilityBar
+        caseData={caseData}
+        isLoading={isLoading}
+        onExtractObservablesChanged={onExtractObservablesChanged}
+      />
+      <EuiSpacer size="xs" />
+      <EuiInMemoryTable
         tableCaption={i18n.OBSERVABLES_TABLE}
         items={caseData.observables}
         rowHeader="id"
