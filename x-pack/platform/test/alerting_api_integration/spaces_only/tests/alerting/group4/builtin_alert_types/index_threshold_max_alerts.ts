@@ -8,10 +8,10 @@
 import expect from '@kbn/expect';
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { Spaces } from '../../../../../scenarios';
-import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
-import { createEsDocumentsWithGroups } from '../../../create_test_data';
+import { Spaces } from '../../../../scenarios';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../common/lib';
+import { createEsDocumentsWithGroups } from '../../create_test_data';
 
 const RULE_INTERVAL_SECONDS = 6;
 const RULE_INTERVALS_TO_WRITE = 1;
@@ -23,17 +23,17 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/193876
-  describe.skip('index threshold rule that hits max alerts circuit breaker', () => {
+  describe('index threshold rule that hits max alerts circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
-
       await esTestIndexTool.setup();
+      await deleteDocs();
     });
 
     afterEach(async () => {
+      await deleteDocs();
       await objectRemover.removeAll();
       await esTestIndexTool.destroy();
     });
@@ -71,7 +71,11 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
       // this should trigger the circuit breaker and while we'd expect groups 0 and 1
       // to recover under normal conditions, they should stay active because the
       // circuit breaker hit
-      await createEsDocumentsInGroups(112, getEndDate(), 2);
+      await deleteDocs();
+      await createEsDocumentsInGroups(22, getEndDate(), 2);
+
+      // trigger the rule to run
+      await runSoon(ruleId);
 
       // get the events we're expecting
       const events = await retry.try(async () => {
@@ -143,7 +147,14 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
       // it looks like alerts were reported in reverse order (group-23, 22, 21, down to 9)
       // so all the 15 new alerts will recover, leading to 17 recovered alerts
       // so our active alerts will be groups 2, 3, 4, 5 and 6 with groups 5 and 6 as new alerts
+      await deleteDocs();
       await createEsDocumentsInGroups(5, getEndDate(), 2);
+
+      // get the first execution to have recovered alerts
+      for (let i = 0; i < 5; i++) {
+        const done = await getRecoveredEvents(ruleId, 3 + i);
+        if (done) break;
+      }
 
       const recoveredEvents = await retry.try(async () => {
         return await getEventLog({
@@ -221,7 +232,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
           consumer: 'alerts',
           enabled: true,
           rule_type_id: '.index-threshold',
-          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          schedule: { interval: '1d' },
           actions: [],
           notify_when: 'onActiveAlert',
           params: {
@@ -232,8 +243,8 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
             groupBy: params.groupBy,
             termField: params.termField,
             termSize: params.termSize,
-            timeWindowSize: params.timeWindowSize ?? RULE_INTERVAL_SECONDS * 5,
-            timeWindowUnit: 's',
+            timeWindowSize: 1,
+            timeWindowUnit: 'h',
             thresholdComparator: params.thresholdComparator,
             threshold: params.threshold,
           },
@@ -262,6 +273,48 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
         indexName: ES_TEST_INDEX_NAME,
         groupOffset,
       });
+    }
+
+    async function runSoon(ruleId: string) {
+      await retry.try(async () => {
+        // Sometimes the rule may already be running, which returns a 200. Try until it isn't
+        const runSoonResponse = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(runSoonResponse.status).to.eql(204);
+      });
+    }
+
+    async function deleteDocs() {
+      await es.deleteByQuery({
+        index: ES_TEST_INDEX_NAME,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
+    }
+
+    async function getRecoveredEvents(ruleId: string, numExecutions: number) {
+      await runSoon(ruleId);
+
+      const events = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { gte: numExecutions }]]),
+        });
+      });
+
+      // check num recovered events in latest execution
+      if (
+        events[events.length - 1]?.kibana?.alert?.rule?.execution?.metrics?.alert_counts
+          ?.recovered === 17
+      ) {
+        return true;
+      }
+      return false;
     }
 
     function getEndDate() {
