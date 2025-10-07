@@ -809,17 +809,33 @@ export function getCompletionItemProvider(
         const word = model.getWordAtPosition(position) || wordUntil;
         const { startColumn, endColumn } = word;
 
-        const range = {
-          startLineNumber: lineNumber,
-          endLineNumber: lineNumber,
-          startColumn,
-          endColumn,
-        };
+        let range: monaco.IRange;
+
+        if (completionContext.triggerCharacter === ' ') {
+          // When triggered by space, set range to start at current position
+          // This tells Monaco there's no prefix to filter against
+          range = {
+            startLineNumber: lineNumber,
+            endLineNumber: lineNumber,
+            startColumn: position.column,
+            endColumn: position.column,
+          };
+        } else {
+          // Normal range calculation
+          range = {
+            startLineNumber: lineNumber,
+            endLineNumber: lineNumber,
+            startColumn,
+            endColumn,
+          };
+        }
+
         const absolutePosition = model.getOffsetAt(position);
         const suggestions: monaco.languages.CompletionItem[] = [];
         const value = model.getValue();
 
         const yamlDocument = parseDocument(value);
+        // const yamlDocument = useSelector(selectYamlDocument);
 
         // Try to parse with the strict schema first
         const result = parseWorkflowYamlToJSON(value, workflowYamlSchema);
@@ -1006,9 +1022,11 @@ export function getCompletionItemProvider(
             );
           }
 
+          // console.log('typeSuggestions[0]', typeSuggestions[0]);
+
           return {
             suggestions: typeSuggestions,
-            incomplete: false, // Prevent other providers from adding suggestions
+            incomplete: true, // Prevent other providers from adding suggestions
           };
         }
 

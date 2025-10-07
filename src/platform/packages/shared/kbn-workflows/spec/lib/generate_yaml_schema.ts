@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
+import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
   BaseConnectorStepSchema,
@@ -135,7 +136,7 @@ export function generateYamlSchemaFromConnectors(
   });
 }
 
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
+export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type {
   try {
     // Generate the full schema - this should work and give us the full schema
     const jsonSchema = zodToJsonSchema(yamlSchema, {

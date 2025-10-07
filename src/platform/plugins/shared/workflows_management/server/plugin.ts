@@ -165,17 +165,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
         .getStartServices()
         .then(([, pluginsStart]) => (pluginsStart as any).workflowsExecutionEngine);
 
-    this.workflowsService = new WorkflowsService(
-      esClientPromise,
-      this.logger,
-      WORKFLOWS_EXECUTIONS_INDEX,
-      WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      WORKFLOWS_EXECUTION_LOGS_INDEX,
-      this.config.logging.console
-    );
-    this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
-    this.spaces = plugins.spaces?.spacesService;
-
     // Create function to get actions client (available after start)
     const getActionsClient = () =>
       core
@@ -196,15 +185,21 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           ).actions.getActionsClientWithRequest(request)
         );
 
-    // Register server side APIs
-    defineRoutes(
-      router,
-      this.api,
+    this.workflowsService = new WorkflowsService(
+      esClientPromise,
       this.logger,
-      this.spaces!,
+      WORKFLOWS_EXECUTIONS_INDEX,
+      WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      WORKFLOWS_EXECUTION_LOGS_INDEX,
+      this.config.logging.console,
       getActionsClient,
       getActionsClientWithRequest
     );
+    this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
+    this.spaces = plugins.spaces?.spacesService;
+
+    // Register server side APIs
+    defineRoutes(router, this.api, this.logger, this.spaces!);
 
     return {
       management: this.api,

@@ -716,27 +716,7 @@ function generateKibanaConnectors(): ConnectorContract[] {
  * Convert dynamic connector data from actions client to ConnectorContract format
  */
 export function convertDynamicConnectorsToContracts(
-  connectorTypes: Record<
-    string,
-    {
-      actionTypeId: string;
-      displayName: string;
-      instances: Array<{
-        id: string;
-        name: string;
-        isPreconfigured: boolean;
-        isDeprecated: boolean;
-      }>;
-      enabled?: boolean;
-      enabledInConfig?: boolean;
-      enabledInLicense?: boolean;
-      minimumLicenseRequired?: string;
-      subActions?: Array<{
-        name: string;
-        displayName: string;
-      }>;
-    }
-  >
+  connectorTypes: Record<string, ConnectorTypeInfo>
 ): ConnectorContract[] {
   const connectorContracts: ConnectorContract[] = [];
 
@@ -804,11 +784,34 @@ export function convertDynamicConnectorsToContracts(
   return connectorContracts;
 }
 
+export interface ConnectorSubAction {
+  name: string;
+  displayName: string;
+}
+
+export interface ConnectorInstance {
+  id: string;
+  name: string;
+  isPreconfigured: boolean;
+  isDeprecated: boolean;
+}
+
+export interface ConnectorTypeInfo {
+  actionTypeId: string;
+  displayName: string;
+  instances: ConnectorInstance[];
+  enabled: boolean;
+  enabledInConfig: boolean;
+  enabledInLicense: boolean;
+  minimumLicenseRequired: string;
+  subActions: ConnectorSubAction[];
+}
+
 // Global cache for all connectors (static + generated + dynamic)
 let allConnectorsCache: ConnectorContract[] | null = null;
 
 // Global cache for dynamic connector types (with instances)
-let dynamicConnectorTypesCache: Record<string, any> | null = null;
+let dynamicConnectorTypesCache: Record<string, ConnectorTypeInfo> | null = null;
 
 // Track the last processed connector types to avoid unnecessary re-processing
 let lastProcessedConnectorTypesHash: string | null = null;
@@ -818,27 +821,7 @@ let lastProcessedConnectorTypesHash: string | null = null;
  * Call this when dynamic connector data is fetched from the API
  */
 export function addDynamicConnectorsToCache(
-  dynamicConnectorTypes: Record<
-    string,
-    {
-      actionTypeId: string;
-      displayName: string;
-      instances: Array<{
-        id: string;
-        name: string;
-        isPreconfigured: boolean;
-        isDeprecated: boolean;
-      }>;
-      enabled?: boolean;
-      enabledInConfig?: boolean;
-      enabledInLicense?: boolean;
-      minimumLicenseRequired?: string;
-      subActions?: Array<{
-        name: string;
-        displayName: string;
-      }>;
-    }
-  >
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
 ) {
   // Create a simple hash of the connector types to detect changes
   const currentHash = JSON.stringify(Object.keys(dynamicConnectorTypes).sort());
@@ -877,7 +860,7 @@ export function addDynamicConnectorsToCache(
  * Get cached dynamic connector types (with instances)
  * Used by completion provider to access connector instances
  */
-export function getCachedDynamicConnectorTypes(): Record<string, any> | null {
+export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeInfo> | null {
   return dynamicConnectorTypesCache;
 }
 
@@ -921,27 +904,7 @@ export const getOutputSchemaForStepType = (stepType: string) => {
  * Get all connectors including dynamic ones from actions client
  */
 export function getAllConnectorsWithDynamic(
-  dynamicConnectorTypes?: Record<
-    string,
-    {
-      actionTypeId: string;
-      displayName: string;
-      instances: Array<{
-        id: string;
-        name: string;
-        isPreconfigured: boolean;
-        isDeprecated: boolean;
-      }>;
-      enabled?: boolean;
-      enabledInConfig?: boolean;
-      enabledInLicense?: boolean;
-      minimumLicenseRequired?: string;
-      subActions?: Array<{
-        name: string;
-        displayName: string;
-      }>;
-    }
-  >
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): ConnectorContract[] {
   const staticAndGeneratedConnectors = getAllConnectors();
 
@@ -970,12 +933,14 @@ export function getAllConnectorsWithDynamic(
 
 // Dynamic schemas that include all connectors (static + Elasticsearch + dynamic)
 // These use lazy loading to keep large generated files out of the main bundle
-export const getWorkflowZodSchema = (dynamicConnectorTypes?: Record<string, any>) => {
+export const getWorkflowZodSchema = (dynamicConnectorTypes: Record<string, ConnectorTypeInfo>) => {
   const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors);
 };
 
-export const getWorkflowZodSchemaLoose = (dynamicConnectorTypes?: Record<string, any>) => {
+export const getWorkflowZodSchemaLoose = (
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo>
+) => {
   const allConnectors = getAllConnectorsWithDynamic(dynamicConnectorTypes);
   return generateYamlSchemaFromConnectors(allConnectors, true);
 };

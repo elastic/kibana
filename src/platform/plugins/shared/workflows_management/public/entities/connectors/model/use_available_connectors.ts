@@ -10,23 +10,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-
-export interface ConnectorInstance {
-  id: string;
-  name: string;
-  isPreconfigured: boolean;
-  isDeprecated: boolean;
-}
-
-export interface ConnectorTypeInfo {
-  actionTypeId: string;
-  displayName: string;
-  instances: ConnectorInstance[];
-  enabled: boolean;
-  enabledInConfig: boolean;
-  enabledInLicense: boolean;
-  minimumLicenseRequired: string;
-}
+import { useRef, useEffect } from 'react';
+import type { ConnectorInstance, ConnectorTypeInfo } from '../../../../common/schema';
+import { addDynamicConnectorsToCache } from '../../../../common/schema';
 
 export interface ConnectorsResponse {
   connectorTypes: Record<string, ConnectorTypeInfo>;
@@ -49,15 +35,14 @@ export function useAvailableConnectors(): UseAvailableConnectorsResult {
     services: { http },
   } = useKibana<CoreStart>();
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery<ConnectorsResponse>({
     queryKey: ['workflows', 'connectors'],
-    queryFn: async (): Promise<ConnectorsResponse> => {
+    queryFn: async () => {
       try {
-        const response = await http.get('/api/workflows/connectors');
-        return response;
+        return await http.get<ConnectorsResponse>('/api/workflows/connectors');
       } catch (err) {
         // Log error for debugging but don't throw - let React Query handle retries
-        console.warn('Failed to fetch connectors:', err);
+        // console.warn('Failed to fetch connectors:', err);
         throw err;
       }
     },
@@ -66,10 +51,36 @@ export function useAvailableConnectors(): UseAvailableConnectorsResult {
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     // Provide fallback data on error
-    onError: (error) => {
-      console.error('Error fetching connectors:', error);
+    onError: (_error) => {
+      // console.error('Error fetching connectors:', error);
     },
   });
+
+  // Add dynamic connectors to cache when data is fetched
+  // Use a ref to track the last processed connector types to avoid unnecessary re-processing
+  const lastConnectorTypesRef = useRef<Record<string, any> | null>(null);
+
+  useEffect(() => {
+    if (data?.connectorTypes) {
+      // Only process if the connector types have actually changed
+      const currentConnectorTypes = data.connectorTypes;
+      const lastConnectorTypes = lastConnectorTypesRef.current;
+
+      // Simple check: compare the number of connector types and their keys
+      const hasChanged =
+        !lastConnectorTypes ||
+        Object.keys(currentConnectorTypes).length !== Object.keys(lastConnectorTypes).length ||
+        !Object.keys(currentConnectorTypes).every((key) => key in lastConnectorTypes);
+
+      if (hasChanged) {
+        addDynamicConnectorsToCache(currentConnectorTypes);
+        // use this algorithm to return stable data, e.g. mutate object only when data actually changes
+
+        // Update the ref to track this version
+        lastConnectorTypesRef.current = currentConnectorTypes;
+      }
+    }
+  }, [data?.connectorTypes]);
 
   return {
     data,

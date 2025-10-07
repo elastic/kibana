@@ -48,6 +48,7 @@ interface YamlValidationResultBase {
   endLineNumber: number;
   endColumn: number;
   hoverMessage: string | null;
+  afterMessage?: string | null;
 }
 
 interface YamlValidationResultNonUniqueStepName extends YamlValidationResultBase {
@@ -76,6 +77,13 @@ interface YamlValidationResultMonacoYaml extends YamlValidationResultBase {
   hoverMessage: null;
 }
 
+interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase {
+  severity: null;
+  message: null;
+  source: 'connector-id-validation';
+  after: string | null;
+}
+
 interface YamlValidationResultConnectorIdError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
@@ -87,4 +95,5 @@ export type YamlValidationResult =
   | YamlValidationResultVariableError
   | YamlValidationResultVariableValid
   | YamlValidationResultMonacoYaml
-  | YamlValidationResultConnectorIdError;
+  | YamlValidationResultConnectorIdError
+  | YamlValidationResultConnectorIdValid;

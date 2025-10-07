@@ -15,7 +15,7 @@ export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
   dynamicConnectorTypes: Record<string, any> | null
 ): YamlValidationResult[] {
-  const errors: YamlValidationResult[] = [];
+  const results: YamlValidationResult[] = [];
 
   if (!dynamicConnectorTypes) {
     return [
@@ -39,12 +39,12 @@ export function validateConnectorIds(
       dynamicConnectorTypes
     );
 
-    if (
-      !instances.some(
-        (instance) => instance.id === connectorIdItem.key || instance.name === connectorIdItem.key
-      )
-    ) {
-      errors.push({
+    const instance = instances.find(
+      (ins) => ins.id === connectorIdItem.key || ins.name === connectorIdItem.key
+    );
+
+    if (!instance) {
+      results.push({
         id: connectorIdItem.id,
         severity: 'error',
         message: `Connector id "${connectorIdItem.key}" not found for connector type ${connectorIdItem.connectorType}`,
@@ -57,8 +57,21 @@ export function validateConnectorIds(
           connectorIdItem.connectorType
         )} connector](http://localhost:5601/app/management/ingest-management/connectors/types/create)`,
       });
+    } else {
+      results.push({
+        id: connectorIdItem.id,
+        severity: null,
+        message: null,
+        source: 'connector-id-validation',
+        startLineNumber: connectorIdItem.startLineNumber,
+        startColumn: connectorIdItem.startColumn,
+        endLineNumber: connectorIdItem.endLineNumber,
+        endColumn: connectorIdItem.endColumn,
+        after: `(${instance.name})`,
+        hoverMessage: null,
+      });
     }
   }
 
-  return errors;
+  return results;
 }

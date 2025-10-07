@@ -154,7 +154,10 @@ export function useYamlValidation(
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
           },
         });
-      } else if (validationResult.source === 'connector-id-validation') {
+      } else if (
+        validationResult.source === 'connector-id-validation' &&
+        validationResult.severity !== null
+      ) {
         markers.push({
           severity: SEVERITY_MAP[validationResult.severity],
           message: validationResult.message,
@@ -176,6 +179,39 @@ export function useYamlValidation(
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
             hoverMessage: validationResult.hoverMessage
               ? createMarkdownContent(validationResult.hoverMessage)
+              : null,
+            after: validationResult.afterMessage
+              ? {
+                  content: validationResult.afterMessage,
+                  cursorStops: monaco.editor.InjectedTextCursorStops.None,
+                  inlineClassName: `after-text`,
+                }
+              : null,
+          },
+        });
+      } else if (
+        validationResult.source === 'connector-id-validation' &&
+        validationResult.severity === null
+      ) {
+        decorations.push({
+          range: new monaco.Range(
+            validationResult.startLineNumber,
+            validationResult.startColumn,
+            validationResult.endLineNumber,
+            validationResult.endColumn
+          ),
+          options: {
+            inlineClassName: `template-variable-valid`,
+            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            hoverMessage: validationResult.hoverMessage
+              ? createMarkdownContent(validationResult.hoverMessage)
+              : null,
+            after: validationResult.after
+              ? {
+                  content: validationResult.after,
+                  cursorStops: monaco.editor.InjectedTextCursorStops.None,
+                  inlineClassName: `after-text`,
+                }
               : null,
           },
         });
