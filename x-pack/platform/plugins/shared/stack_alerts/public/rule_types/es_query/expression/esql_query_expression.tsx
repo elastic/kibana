@@ -16,6 +16,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiRadioGroup,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
@@ -35,7 +36,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { EsqlQuery } from '@kbn/esql-ast';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
+
+import type { EsQueryRuleMetaData, EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
@@ -99,10 +101,369 @@ const keepRecommendedWarning = i18n.translate(
   }
 );
 
+const observabilityRuleOptions = [
+  {
+    value: 'metrics.alert.threshold',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.metricThreshold', {
+      defaultMessage: 'Metric threshold',
+    }),
+    esqlQuery:
+      'FROM metrics-* | WHERE @timestamp >= NOW() - 5 minutes | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY host.name | WHERE avg_cpu > 0.8',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.metricThreshold', {
+            defaultMessage: 'Metric threshold',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.metricThresholdDescription', {
+            defaultMessage: 'Alert when metrics reach a threshold',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM metrics-* | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY host.name
+        </div>
+      </>
+    ),
+  },
+  {
+    value: 'metrics.alert.inventory.threshold',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.inventoryThreshold', {
+      defaultMessage: 'Inventory',
+    }),
+    esqlQuery:
+      'FROM metrics-* | WHERE @timestamp >= NOW() - 1 minute AND host.name IS NOT NULL | STATS avg_memory = AVG(system.memory.used.pct) BY host.name | WHERE avg_memory > 0.9',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.inventoryThreshold', {
+            defaultMessage: 'Inventory',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.inventoryThresholdDescription', {
+            defaultMessage: 'Alert on inventory metrics for hosts, pods, and containers',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM metrics-* | STATS AVG(system.memory.used.pct) BY host.name
+        </div>
+      </>
+    ),
+  },
+  {
+    value: 'logs.alert.document.count',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.logThreshold', {
+      defaultMessage: 'Log threshold',
+    }),
+    esqlQuery:
+      'FROM logs-* | WHERE @timestamp >= NOW() - 5 minutes AND log.level == "error" | STATS error_count = COUNT(*)',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.logThreshold', {
+            defaultMessage: 'Log threshold',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.logThresholdDescription', {
+            defaultMessage: 'Alert when log document count reaches a threshold',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM logs-* | WHERE log.level == &quot;error&quot; | STATS COUNT(*)
+        </div>
+      </>
+    ),
+  },
+  {
+    value: 'apm.error_rate',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.errorCountThreshold', {
+      defaultMessage: 'Error count threshold',
+    }),
+    esqlQuery:
+      'FROM traces-apm* | WHERE @timestamp >= NOW() - 5 minutes AND processor.event == "error" | STATS error_count = COUNT(*) BY service.name, service.environment | WHERE error_count > 10',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.errorCountThreshold', {
+            defaultMessage: 'Error count threshold',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.errorCountThresholdDescription', {
+            defaultMessage: 'Alert when APM error count exceeds threshold',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM traces-apm* | WHERE processor.event == &quot;error&quot; | STATS COUNT(*) BY
+          service.name, service.environment
+        </div>
+      </>
+    ),
+  },
+  {
+    value: 'apm.transaction_error_rate',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.transactionErrorRate', {
+      defaultMessage: 'Failed transaction rate',
+    }),
+    esqlQuery:
+      'FROM traces-apm* | WHERE @timestamp >= NOW() - 5 minutes AND processor.event == "transaction" | EVAL is_failure = CASE(event.outcome == "failure", 1, 0) | STATS total = COUNT(*), failures = SUM(is_failure) BY service.name, service.environment, transaction.type | EVAL error_rate = failures / total | WHERE error_rate > 0.05',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.transactionErrorRate', {
+            defaultMessage: 'Failed transaction rate',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.transactionErrorRateDescription', {
+            defaultMessage: 'Alert when APM transaction error rate exceeds threshold',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM traces-apm* | EVAL is_failure = CASE(event.outcome == &quot;failure&quot;, 1, 0) |
+          STATS SUM(is_failure) BY service.name, service.environment, transaction.type
+        </div>
+      </>
+    ),
+  },
+  {
+    value: 'apm.transaction_duration',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.latencyThreshold', {
+      defaultMessage: 'Latency threshold',
+    }),
+    esqlQuery:
+      'FROM traces-apm* | WHERE @timestamp >= NOW() - 5 minutes AND processor.event == "transaction" | STATS avg_duration = AVG(transaction.duration.us) BY service.name, service.environment, transaction.type | WHERE avg_duration > 1000000',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.latencyThreshold', {
+            defaultMessage: 'Latency threshold',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.latencyThresholdDescription', {
+            defaultMessage: 'Alert when APM transaction duration exceeds threshold',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM traces-apm* | STATS AVG(transaction.duration.us) BY service.name,
+          service.environment, transaction.type
+        </div>
+      </>
+    ),
+  },
+  {
+    value: 'apm.anomaly',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.apmAnomaly', {
+      defaultMessage: 'APM Anomaly',
+    }),
+    esqlQuery:
+      'FROM .ml-anomalies-* | WHERE @timestamp >= NOW() - 15 minutes AND result_type == "record" AND job_id LIKE "*apm*" | STATS max_score = MAX(record_score) BY job_id | WHERE max_score > 75',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.apmAnomaly', {
+            defaultMessage: 'APM Anomaly',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.apmAnomalyDescription', {
+            defaultMessage: 'Alert on APM anomaly detection',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM .ml-anomalies-* | STATS MAX(record_score) BY job_id
+        </div>
+      </>
+    ),
+  },
+  {
+    value: 'observability.rules.custom_threshold',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.customThreshold', {
+      defaultMessage: 'Custom threshold',
+    }),
+    esqlQuery:
+      'FROM metrics-* | WHERE @timestamp >= NOW() - 5 minutes | STATS avg_value = AVG(system.network.in.bytes) BY host.name | WHERE avg_value > 100000',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.customThreshold', {
+            defaultMessage: 'Custom threshold',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.customThresholdDescription', {
+            defaultMessage: 'Alert when any Observability data type reaches or exceeds a threshold',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM metrics-* | STATS avg_value = AVG(field) BY dimension
+        </div>
+      </>
+    ),
+  },
+  {
+    value: 'slo.rules.burnRate',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.sloBurnRate', {
+      defaultMessage: 'SLO burn rate',
+    }),
+    esqlQuery:
+      'FROM .slo-observability.sli-* | WHERE @timestamp >= NOW() - 1 hour | STATS good = SUM(slo.numerator), total = SUM(slo.denominator) BY slo.id | EVAL sli = good / total, error_budget_remaining = 1 - sli | WHERE error_budget_remaining < 0.02',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.sloBurnRate', {
+            defaultMessage: 'SLO burn rate',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.sloBurnRateDescription', {
+            defaultMessage: 'Alert when SLO burn rate exceeds threshold',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM .slo-observability.sli-* | EVAL sli = good / total
+        </div>
+      </>
+    ),
+  },
+  {
+    value: 'xpack.synthetics.alerts.monitorStatus',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.syntheticsMonitorStatus', {
+      defaultMessage: 'Synthetics monitor status',
+    }),
+    esqlQuery:
+      'FROM synthetics-* | WHERE @timestamp >= NOW() - 5 minutes AND monitor.status == "down" | STATS down_count = COUNT(*) BY monitor.name | WHERE down_count >= 3',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.syntheticsMonitorStatus', {
+            defaultMessage: 'Synthetics monitor status',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.syntheticsMonitorStatusDescription', {
+            defaultMessage: 'Alert when a Synthetics monitor is down',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM synthetics-* | WHERE monitor.status == &quot;down&quot;
+        </div>
+      </>
+    ),
+  },
+  {
+    value: 'xpack.synthetics.alerts.tls',
+    inputDisplay: i18n.translate('xpack.stackAlerts.esQuery.ui.syntheticsTls', {
+      defaultMessage: 'Synthetics TLS certificate',
+    }),
+    esqlQuery:
+      'FROM synthetics-* | WHERE @timestamp >= NOW() - 15 minutes AND tls.certificate.not_after IS NOT NULL | EVAL days_until_expiry = (tls.certificate.not_after - @timestamp) / 86400000 | WHERE days_until_expiry < 30 | STATS min_days = MIN(days_until_expiry) BY monitor.name',
+    dropdownDisplay: (
+      <>
+        <strong>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.syntheticsTls', {
+            defaultMessage: 'Synthetics TLS certificate',
+          })}
+        </strong>
+        <div>
+          {i18n.translate('xpack.stackAlerts.esQuery.ui.syntheticsTlsDescription', {
+            defaultMessage: 'Alert when TLS certificate is about to expire',
+          })}
+        </div>
+        <div
+          style={{
+            fontSize: '0.85em',
+            color: '#69707D',
+            marginTop: '4px',
+            fontFamily: 'monospace',
+          }}
+        >
+          FROM synthetics-* | EVAL days_until_expiry = (tls.certificate.not_after - @timestamp)
+        </div>
+      </>
+    ),
+  },
+];
+
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
-  const { http, isServerless, dataViews, uiSettings } = useTriggerUiActionServices();
+  const services = useTriggerUiActionServices();
+  const { http, isServerless, dataViews, uiSettings } = services;
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
   const isEdit = !!metadata?.isEdit;
 
@@ -132,6 +493,9 @@ export const EsqlQueryExpression: React.FC<
   const [radioIdSelected, setRadioIdSelected] = useState(groupBy ?? ALL_DOCUMENTS);
   const [keepWarning, setKeepWarning] = useState<string | undefined>(undefined);
   const [touched, setTouched] = useState<boolean>(false);
+  const [selectedObservabilityRule, setSelectedObservabilityRule] = useState<string>(
+    observabilityRuleOptions[0].value
+  );
 
   useDebounce(
     () => {
@@ -287,6 +651,41 @@ export const EsqlQueryExpression: React.FC<
 
   return (
     <Fragment>
+      <EuiFormRow
+        id="observabilityRuleType"
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.selectObservabilityRulePrompt"
+            defaultMessage="Observability rule templates"
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.observabilityRuleHelpText"
+            defaultMessage="Select an observability rule type for reference"
+          />
+        }
+      >
+        <EuiSuperSelect
+          options={observabilityRuleOptions}
+          valueOfSelected={selectedObservabilityRule}
+          onChange={(value) => {
+            setSelectedObservabilityRule(value);
+            const selectedOption = observabilityRuleOptions.find(
+              (option) => option.value === value
+            );
+            if (selectedOption && selectedOption.esqlQuery) {
+              const newQuery = { esql: selectedOption.esqlQuery };
+              setQuery(newQuery);
+              setParam('esqlQuery', newQuery);
+              refreshTimeFields(newQuery);
+            }
+          }}
+          data-test-subj="observabilityRuleTypeSelect"
+          fullWidth
+        />
+      </EuiFormRow>
       <EuiFormRow id="queryEditor" data-test-subj="queryEsqlEditor" fullWidth>
         <ESQLLangEditor
           query={query}
