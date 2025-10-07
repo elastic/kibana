@@ -210,7 +210,7 @@ export function useFetchAgentsData() {
   } = useQuery({
     queryKey: ['get-agents-list', queryKeyFilters, queryKeyPagination],
     keepPreviousData: true, // Keep previous data to avoid flashing when going through pages coulse
-    queryFn: async (context, { refreshTags = false }: { refreshTags?: boolean } = {}) => {
+    queryFn: async () => {
       try {
         const [
           agentsResponse,
@@ -340,7 +340,7 @@ export function useFetchAgentsData() {
 
   const fetchData = useCallback(
     async ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
-      refetch();
+      return refetch();
     },
     [refetch]
   );
