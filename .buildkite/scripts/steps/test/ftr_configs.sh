@@ -99,10 +99,10 @@ while read -r config; do
       source .buildkite/scripts/steps/test/scout_upload_report_events.sh
       unset SCOUT_EVENT_LOG_PATH
     else
-      echo "Could not find event log file for config $config"
+      echo "Could not find event log file '$EVENT_LOG_FILE' for config $config"
     fi
   else
-    echo "Could not find any scout report directory."
+    echo "Could not find any scout report directory '$EVENT_LOG_FILE'."
   fi
 
   timeSec=$(($(date +%s)-start))
