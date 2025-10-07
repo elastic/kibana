@@ -21,7 +21,7 @@ import type {
   ToolEventHandlerFn,
   ToolProvider,
 } from '@kbn/onechat-server';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { createErrorResult } from '@kbn/onechat-server';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -138,12 +138,7 @@ export const toolToLangchain = async ({
         logger.debug(e.stack);
 
         const errorToolReturn: RunToolReturn = {
-          results: [
-            {
-              type: ToolResultType.error,
-              data: { message: e.message },
-            },
-          ],
+          results: [createErrorResult(e.message)],
         };
 
         return [`${e}`, errorToolReturn];

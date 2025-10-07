@@ -17,7 +17,7 @@ const updatedDashboard = {
   panels: [
     {
       type: 'visualization',
-      grid: { x: 0, y: 0, w: 48, h: 60, i: '1' },
+      grid: { x: 0, y: 0, w: 48, h: 60 },
       uid: '1',
       version: '7.3.0',
     },

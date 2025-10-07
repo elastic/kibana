@@ -81,5 +81,6 @@
     "@kbn/controls-schemas",
     "@kbn/field-formats-common",
     "@kbn/ai-assistant-management-plugin",
+    "@kbn/core-chrome-navigation-tour",
   ]
 }

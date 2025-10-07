@@ -118,6 +118,20 @@
                     "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/evals",
+                    "id": "def-common.KibanaPhoenixClient.Unnamed.$1.repetitions",
+                    "type": "number",
+                    "tags": [],
+                    "label": "repetitions",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/kbn-evals/src/kibana_phoenix_client/client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }

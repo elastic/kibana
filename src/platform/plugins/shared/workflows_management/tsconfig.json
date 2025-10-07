@@ -50,6 +50,7 @@
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/serverless",
+    "@kbn/rrule",
     "@kbn/resizable-layout"
   ],
   "exclude": ["target/**/*"]
