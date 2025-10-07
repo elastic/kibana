@@ -9,7 +9,6 @@
     "requiredPlugins": [
       "data",
       "developerExamples",
-      "embeddable",
       "navigation",
       "presentationUtil",
       "uiActions",
