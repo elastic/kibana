@@ -74,7 +74,6 @@ export class NodesFactory {
   constructor(
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
-    private workflowExecutionState: WorkflowExecutionState,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
     private workflowTaskManager: WorkflowTaskManager,
     private urlValidator: UrlValidator,

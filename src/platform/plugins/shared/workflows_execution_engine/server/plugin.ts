@@ -89,6 +89,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const {
                 workflowRuntime,
+                stepExecutionRuntimeFactory,
                 workflowExecutionState,
                 workflowLogger,
                 nodesFactory,
@@ -112,6 +113,7 @@ export class WorkflowsExecutionEnginePlugin
 
               await workflowExecutionLoop({
                 workflowRuntime,
+                stepExecutionRuntimeFactory,
                 workflowExecutionState,
                 workflowExecutionRepository,
                 workflowLogger,
@@ -153,6 +155,7 @@ export class WorkflowsExecutionEnginePlugin
 
               const {
                 workflowRuntime,
+                stepExecutionRuntimeFactory,
                 workflowExecutionState,
                 workflowLogger,
                 nodesFactory,
@@ -176,6 +179,7 @@ export class WorkflowsExecutionEnginePlugin
 
               await workflowExecutionLoop({
                 workflowRuntime,
+                stepExecutionRuntimeFactory,
                 workflowExecutionState,
                 workflowExecutionRepository,
                 workflowLogger,
@@ -242,6 +246,7 @@ export class WorkflowsExecutionEnginePlugin
 
         const {
           workflowRuntime,
+          stepExecutionRuntimeFactory,
           workflowExecutionState,
           workflowLogger,
           nodesFactory,
@@ -265,6 +270,7 @@ export class WorkflowsExecutionEnginePlugin
         await workflowRuntime.start();
         await workflowExecutionLoop({
           workflowRuntime,
+          stepExecutionRuntimeFactory,
           workflowExecutionState,
           workflowExecutionRepository,
           workflowLogger,
@@ -510,6 +516,7 @@ async function createContainer(
   return {
     workflowExecutionGraph,
     workflowRuntime,
+    stepExecutionRuntimeFactory,
     workflowExecutionState,
     connectorExecutor,
     workflowLogger,
