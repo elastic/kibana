@@ -18,18 +18,13 @@ import {
 import { css } from '@emotion/react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { MessageRole } from '@kbn/inference-common';
-import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
-import {
-  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-  DEFAULT_AI_CONNECTOR,
-} from '../../../../common/constants';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
 import { useKibana } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 import { licenseService } from '../../../common/hooks/use_license';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { useFindCostSavingsPrompts } from '../../hooks/use_find_cost_savings_prompts';
-import { useAIConnectors } from '../../../common/hooks/use_ai_connectors';
+import { useDefaultAIConnectorId } from '@kbn/security-solution-plugin/public/common/hooks/use_default_ai_connector_id';
 
 interface Props {
   isLoading: boolean;
@@ -41,26 +36,11 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
     euiTheme: { size },
   } = useEuiTheme();
 
-  const { http, notifications, inference, settings, uiSettings, featureFlags } =
+  const { http, notifications, inference } =
     useKibana().services;
-  const [newDefaultConnectorId, setNewDefaultConnectorId] = useState<string | undefined>(undefined);
   const [insightResult, setInsightResult] = useState<string>('');
-  const { aiConnectors: connectors } = useAIConnectors();
-  const legacyDefaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
-  const useNewDefaultConnector = featureFlags.getBooleanValue(
-    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-    false
-  );
+  const defaultAiConnectorId = useDefaultAIConnectorId();
 
-  const defaultConnectorId = useNewDefaultConnector
-    ? newDefaultConnectorId
-    : legacyDefaultConnectorId;
-
-  useEffect(() => {
-    if (connectors) {
-      setNewDefaultConnectorId(getDefaultConnector(connectors, settings)?.id);
-    }
-  }, [connectors, settings]);
 
   const hasEnterpriseLicence = licenseService.isEnterprise();
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
@@ -73,11 +53,11 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
     },
   });
   const fetchInsight = useCallback(async () => {
-    if (lensResponse && defaultConnectorId && prompts !== null) {
+    if (lensResponse && defaultAiConnectorId && prompts !== null) {
       try {
         const prompt = getPrompt(JSON.stringify(lensResponse), prompts);
         const result = await inference.chatComplete({
-          connectorId: defaultConnectorId,
+          connectorId: defaultAiConnectorId,
           messages: [{ role: MessageRole.User, content: prompt }],
         });
         setInsightResult(result.content);
@@ -87,7 +67,7 @@ export const CostSavingsKeyInsight: React.FC<Props> = ({ isLoading, lensResponse
         );
       }
     }
-  }, [defaultConnectorId, lensResponse, inference, prompts]);
+  }, [defaultAiConnectorId, lensResponse, inference, prompts]);
 
   useEffect(() => {
     fetchInsight();

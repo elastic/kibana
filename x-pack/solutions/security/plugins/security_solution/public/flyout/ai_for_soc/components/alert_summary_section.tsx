@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { type PromptContext } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
-import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
-import {
-  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-  DEFAULT_AI_CONNECTOR,
-} from '../../../../common/constants';
 import { AlertSummary } from './alert_summary';
 import { AlertSummaryOptionsMenu } from './settings_menu';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAIForSOCDetailsContext } from '../context';
-import { useAIConnectors } from '../../../common/hooks/use_ai_connectors';
+import { useDefaultAIConnectorId } from '@kbn/security-solution-plugin/public/common/hooks/use_default_ai_connector_id';
 export const ALERT_SUMMARY_SECTION_TEST_ID = 'ai-for-soc-alert-flyout-alert-summary-section';
 
 const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummarySection.title', {
@@ -41,27 +36,12 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
 
   const {
     application: { capabilities },
-    settings,
-    uiSettings,
-    featureFlags,
   } = useKibana().services;
 
   const { eventId, showAnonymizedValues } = useAIForSOCDetailsContext();
-  const { aiConnectors: connectors } = useAIConnectors();
-  const [newDefaultConnectorId, setNewDefaultConnectorId] = useState<string | undefined>(undefined);
+  const defaultAiConnectorId = useDefaultAIConnectorId();
 
   const canSeeAdvancedSettings = capabilities.management.kibana.settings ?? false;
-  const legacyDefaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
-  const useNewDefaultConnector = featureFlags.getBooleanValue(
-    AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-    false
-  );
-
-  useEffect(() => {
-    if (connectors) {
-      setNewDefaultConnectorId(getDefaultConnector(connectors, settings)?.id);
-    }
-  }, [connectors, settings]);
 
   const promptContext: PromptContext = useMemo(
     () => ({
@@ -73,10 +53,6 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
     }),
     [eventId, getPromptContext]
   );
-
-  if (!newDefaultConnectorId) {
-    return null;
-  }
 
   return (
     <>
@@ -95,7 +71,7 @@ export const AlertSummarySection = memo(({ getPromptContext }: AlertSummarySecti
         alertId={eventId}
         canSeeAdvancedSettings={canSeeAdvancedSettings}
         defaultConnectorId={
-          useNewDefaultConnector ? newDefaultConnectorId : legacyDefaultConnectorId
+          defaultAiConnectorId
         }
         promptContext={promptContext}
         setHasAlertSummary={setHasAlertSummary}
