@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import type { VisualizationToolbarProps } from '../../../types';
 import {
   ValueLabelsSettings,
@@ -76,6 +77,8 @@ export function HeatmapHorizontalAxisSettings({
   state,
   setState,
 }: VisualizationToolbarProps<HeatmapVisualizationState>) {
+  const isXAxisLabelVisible = state?.gridConfig.isXAxisLabelVisible;
+
   return (
     <>
       <ToolbarTitleSettings
@@ -104,9 +107,10 @@ export function HeatmapHorizontalAxisSettings({
             },
           });
         }}
-        isAxisLabelVisible={state?.gridConfig.isXAxisLabelVisible}
+        isAxisLabelVisible={isXAxisLabelVisible}
       />
-      {state?.gridConfig.isXAxisLabelVisible && (
+
+      {isXAxisLabelVisible && (
         <AxisLabelOrientationSelector
           axis="x"
           selectedLabelOrientation={

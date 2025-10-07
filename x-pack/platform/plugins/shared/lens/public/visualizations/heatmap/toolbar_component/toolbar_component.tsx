@@ -45,7 +45,7 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
   },
 ];
 
-export const HeatmapPopoverToolbar = memo(
+export const HeatmapToolbar = memo(
   (props: VisualizationToolbarProps<HeatmapVisualizationState>) => {
     const { state, setState, frame } = props;
 
@@ -61,7 +61,6 @@ export const HeatmapPopoverToolbar = memo(
 
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        {/* titles ans text */}
         <EuiFlexItem grow={false}>
           <ToolbarPopover
             title={i18n.translate('xpack.lens.shared.titlesAndTextLabel', {
@@ -75,10 +74,8 @@ export const HeatmapPopoverToolbar = memo(
             <HeatmapTitlesAndTextSettings {...props} />
           </ToolbarPopover>
         </EuiFlexItem>
-        {/* axis */}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-            {/* vertical axis */}
             <TooltipWrapper
               tooltipContent={i18n.translate('xpack.lens.heatmap.verticalAxisDisabledHelpText', {
                 defaultMessage: 'This setting only applies when vertical axis is enabled.',
@@ -98,7 +95,6 @@ export const HeatmapPopoverToolbar = memo(
                 <HeatmapVerticalAxisSettings {...props} />
               </ToolbarPopover>
             </TooltipWrapper>
-            {/* horizontal axis */}
             <TooltipWrapper
               tooltipContent={i18n.translate('xpack.lens.heatmap.horizontalAxisDisabledHelpText', {
                 defaultMessage: 'This setting only applies when horizontal axis is enabled.',
@@ -120,7 +116,6 @@ export const HeatmapPopoverToolbar = memo(
             </TooltipWrapper>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {/* legend */}
         <EuiFlexItem grow={false}>
           <LegendSettingsPopover
             legendOptions={legendOptions}
