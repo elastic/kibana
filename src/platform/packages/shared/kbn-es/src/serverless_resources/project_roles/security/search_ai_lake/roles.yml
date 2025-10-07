@@ -133,4 +133,5 @@ _search_ai_lake_soc_manager:
         - "feature_savedQueryManagement.all"
         - "feature_ml.all"
         - "feature_fleetv2.all"
+        - "feature_advancedSettings.all"
       resources: "*"
