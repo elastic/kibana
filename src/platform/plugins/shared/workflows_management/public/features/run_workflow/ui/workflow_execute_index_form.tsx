@@ -23,7 +23,6 @@ import {
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { buildEsQuery, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import { take } from 'rxjs';
 import type { SearchHit } from '@kbn/es-types';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
@@ -42,17 +41,6 @@ interface WorkflowExecuteEventFormProps {
   errors: string | null;
   setErrors: (errors: string | null) => void;
 }
-
-const getCurrentUser = async (security: SecurityServiceStart) => {
-  try {
-    if (security) {
-      return await security.authc.getCurrentUser();
-    }
-  } catch (error) {
-    // console.error(error);
-  }
-  return null;
-};
 
 export const WorkflowExecuteIndexForm = ({
   value,
