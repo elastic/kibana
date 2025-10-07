@@ -23,7 +23,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
         'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_async/async_search'
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
-      await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
+      await kibanaServer.uiSettings.unset('search:timeout');
       await common.navigateToApp('dashboard');
     });
 

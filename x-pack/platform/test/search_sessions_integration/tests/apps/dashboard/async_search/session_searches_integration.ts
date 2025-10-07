@@ -11,7 +11,6 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
-  const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const { common, dashboard, searchSessionsManagement } = getPageObjects([
     'common',
@@ -136,7 +135,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Slow lens with other bucket', () => {
       before(async function () {
-        await kibanaServer.uiSettings.unset('search:timeout');
         await common.navigateToApp('dashboard', { insertTimestamp: false });
         await browser.execute(() => {
           window.ELASTIC_LENS_DELAY_SECONDS = 25;
@@ -148,7 +146,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.execute(() => {
           window.ELASTIC_LENS_DELAY_SECONDS = undefined;
         });
-        await kibanaServer.uiSettings.replace({ 'search:timeout': 10000 });
       });
 
       it('Other bucket should be added to a session when restoring', async () => {
