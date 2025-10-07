@@ -10,7 +10,6 @@
 import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiButton, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
@@ -18,16 +17,10 @@ import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type YAML from 'yaml';
-import { type Pair, type Scalar, isPair, isScalar } from 'yaml';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHandleMarkersChanged } from '../../../features/validate_workflow_yaml/lib/use_handle_markers_changed';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
-import {
-  getStepNodesWithType,
-  getTriggerNodes,
-  getTriggerNodesWithType,
-} from '../../../../common/lib/yaml_utils';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
@@ -41,7 +34,7 @@ import {
   registerUnifiedHoverProvider,
 } from '../lib/monaco_providers';
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
-import { getMonacoRangeFromYamlNode, navigateToErrorPosition } from '../lib/utils';
+import { navigateToErrorPosition } from '../lib/utils';
 import { StepActions } from './step_actions';
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
@@ -59,12 +52,19 @@ import {
   setStepExecutions,
   setYamlString,
 } from '../lib/store';
-import { useFocusedStepOutline, useStepDecorationsInExecution } from '../lib/hooks';
+import {
+  useFocusedStepOutline,
+  useStepDecorationsInExecution,
+  useTriggerTypeDecorations,
+  useConnectorTypeDecorations,
+  useLineDifferencesDecorations,
+  useAlertTriggerDecorations,
+} from '../lib/hooks';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useWorkflowsMonacoTheme } from './use_workflows_monaco_theme';
 import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
 import { useMonacoWorkflowStyles } from '../styles/use_monaco_workflow_styles';
-import { registerWorkflowYamlLanguage } from '../monaco/workflow_yaml';
+import { registerWorkflowYamlLanguage } from '../lib/monaco_language/workflow_yaml';
 import { useDynamicConnectorIcons } from './use_dynamic_connector_icons';
 import { getMonacoMarkerInterceptor } from '../lib/get_monaco_marker_interceptor';
 
@@ -117,25 +117,48 @@ export const WorkflowYAMLEditor = ({
     services: { http, notifications },
   } = useKibana<CoreStart>();
 
-  // Register the workflow YAML language on first render
+  // Register the workflow YAML language (mostly theme) on first render
+  // TODO: should we move this to a plugin setup?
   useEffect(() => {
     registerWorkflowYamlLanguage();
   }, []);
 
-  // Use the new styling hooks
+  // Refs
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
+
+  // Refs / Keep stepExecutionsRef in sync
+  useEffect(() => {
+    stepExecutionsRef.current = stepExecutions;
+  }, [stepExecutions]);
+
+  // Refs / Disposables for Monaco providers
+  const disposablesRef = useRef<monaco.IDisposable[]>([]);
+  const dispatch = useDispatch();
+  const focusedStepInfo = useSelector(selectFocusedStepInfo);
+  const yamlDocument = useSelector(selectYamlDocument);
+  const yamlDocumentRef = useRef<YAML.Document | null>(null);
+  yamlDocumentRef.current = yamlDocument || null;
+
+  const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
+  focusedStepInfoRef.current = focusedStepInfo;
+
+  // Styles
   const styles = useWorkflowEditorStyles();
   useMonacoWorkflowStyles();
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
+  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
+  const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
+
+  // Data
+  const { data: connectorsData } = useAvailableConnectors();
+
   // Only show debug features in development
   const isDevelopment = process.env.NODE_ENV !== 'production';
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-
-  const { data: connectorsData } = useAvailableConnectors();
-
+  // Validation
   const workflowJsonSchemaStrict = useWorkflowJsonSchema({ loose: false });
-
   const schemas: SchemasSettings[] = useMemo(() => {
     return [
       {
@@ -147,54 +170,13 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchemaStrict]);
 
-  const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
-
-  // Keep stepExecutionsRef in sync
-  useEffect(() => {
-    stepExecutionsRef.current = stepExecutions;
-  }, [stepExecutions]);
-
-  // REMOVED: highlightStepDecorationCollectionRef - now handled by UnifiedActionsProvider
-  const alertTriggerDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const triggerTypeDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const connectorTypeDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-
-  const connectorIdShadowDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
-  const unifiedProvidersRef = useRef<{
-    hover: any;
-    actions: any;
-    stepExecution: any;
-  } | null>(null);
-
-  // Disposables for Monaco providers
-  const disposablesRef = useRef<monaco.IDisposable[]>([]);
-  const dispatch = useDispatch();
-  const focusedStepInfo = useSelector(selectFocusedStepInfo);
-  const yamlDocument = useSelector(selectYamlDocument);
-  const yamlDocumentRef = useRef<YAML.Document | null>(null);
-  yamlDocumentRef.current = yamlDocument || null;
-
-  const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
-  focusedStepInfoRef.current = focusedStepInfo;
-
-  const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
-  const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
-
-  // Memoize the schema to avoid re-generating it on every render
+  // TODO: move the schema generation up to detail page or some wrapper component
   const workflowYamlSchemaLoose = useMemo(() => {
     if (!connectorsData?.connectorTypes) {
-      // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       return getWorkflowZodSchemaLoose({});
     }
     return getWorkflowZodSchemaLoose(connectorsData.connectorTypes);
   }, [connectorsData?.connectorTypes]);
-
-  const changesHighlightDecorationCollectionRef =
-    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
 
   const { error: errorValidating } = useYamlValidation(editorRef.current);
 
@@ -203,20 +185,36 @@ export const WorkflowYAMLEditor = ({
     onValidationErrors,
   });
 
+  // State
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
-  // Helper to compute diff lines
-  // TODO: use builtin monaco diff editor
-  const calculateLineDifferences = useCallback((original: string, current: string) => {
-    const originalLines = (original ?? '').split('\n');
-    const currentLines = (current ?? '').split('\n');
-    const changed: number[] = [];
-    const max = Math.max(originalLines.length, currentLines.length);
-    for (let i = 0; i < max; i++) {
-      if ((originalLines[i] ?? '') !== (currentLines[i] ?? '')) changed.push(i + 1);
-    }
-    return changed;
-  }, []);
+  // Decorations
+  useTriggerTypeDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+  });
+
+  useConnectorTypeDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+  });
+
+  useLineDifferencesDecorations({
+    editor: editorRef.current,
+    isEditorMounted,
+    highlightDiff,
+    originalValue,
+    currentValue: props.value,
+  });
+
+  useAlertTriggerDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+    readOnly,
+  });
 
   const updateContainerPosition = (
     stepInfo: StepInfo,
@@ -269,105 +267,27 @@ export const WorkflowYAMLEditor = ({
     return () => disposable.dispose();
   }, [isEditorMounted, dispatch]);
 
-  // Apply diff highlight when toggled
-  useEffect(() => {
-    if (!highlightDiff || !originalValue || !editorRef.current || !isEditorMounted) {
-      if (changesHighlightDecorationCollectionRef.current) {
-        changesHighlightDecorationCollectionRef.current.clear();
-      }
-      return;
-    }
-    const model = editorRef.current.getModel();
-    if (!model) return;
-    if (changesHighlightDecorationCollectionRef.current) {
-      changesHighlightDecorationCollectionRef.current.clear();
-    }
-    const changedLines = calculateLineDifferences(originalValue, props.value ?? '');
-    if (changedLines.length === 0) return;
-    const decorations = changedLines.map((lineNumber) => ({
-      range: new monaco.Range(lineNumber, 1, lineNumber, model.getLineMaxColumn(lineNumber)),
-      options: {
-        className: 'changed-line-highlight',
-        isWholeLine: true,
-        marginClassName: 'changed-line-margin',
-      },
-    }));
-    changesHighlightDecorationCollectionRef.current =
-      editorRef.current.createDecorationsCollection(decorations);
-    return () => {
-      changesHighlightDecorationCollectionRef.current?.clear();
-    };
-  }, [highlightDiff, originalValue, isEditorMounted, props.value, calculateLineDifferences]);
-
-  // Add a ref to track if the last change was just typing
-  const lastChangeWasTypingRef = useRef(false);
-
   // Track the last value we set internally to distinguish from external changes
   const lastInternalValueRef = useRef<string | undefined>(props.value);
 
-  // Helper function to clear all decorations
-  const clearAllDecorations = useCallback(() => {
-    if (alertTriggerDecorationCollectionRef.current) {
-      alertTriggerDecorationCollectionRef.current.clear();
-    }
-    if (triggerTypeDecorationCollectionRef.current) {
-      triggerTypeDecorationCollectionRef.current.clear();
-    }
-    if (connectorTypeDecorationCollectionRef.current) {
-      connectorTypeDecorationCollectionRef.current.clear();
-    }
+  const changeSideEffects = useCallback(() => {
+    if (editorRef.current) {
+      const model = editorRef.current.getModel();
 
-    if (connectorIdShadowDecorationCollectionRef.current) {
-      connectorIdShadowDecorationCollectionRef.current.clear();
-    }
-
-    // Also clear step execution decorations
-    if (unifiedProvidersRef.current?.stepExecution) {
-      unifiedProvidersRef.current.stepExecution.dispose();
-      unifiedProvidersRef.current.stepExecution = null;
-    }
-    // Clear unified actions provider highlighting
-    if (unifiedProvidersRef.current?.actions) {
-      // The actions provider will clear its own decorations on next update
-    }
-  }, []);
-
-  // ... existing code ...
-
-  const changeSideEffects = useCallback(
-    (isTypingChange = false) => {
-      if (editorRef.current) {
-        const model = editorRef.current.getModel();
-
-        if (!model) {
-          return;
-        }
-        dispatch(setYamlString(model.getValue()));
+      if (!model) {
+        return;
       }
-    },
-    [dispatch]
-  );
-
-  useEffect(() => {
-    if (yamlDocument) {
-      return;
+      dispatch(setYamlString(model.getValue()));
     }
-    clearAllDecorations();
-  }, [yamlDocument, clearAllDecorations]);
+  }, [dispatch]);
 
   const handleChange = useCallback(
     (value: string | undefined) => {
-      // Track this as an internal change BEFORE calling onChange
-      lastInternalValueRef.current = value;
-
       if (onChange) {
         onChange(value);
       }
 
-      // Pass the typing flag to changeSideEffects
-      changeSideEffects(lastChangeWasTypingRef.current);
-      // Reset the flag
-      lastChangeWasTypingRef.current = false;
+      changeSideEffects();
     },
     [onChange, changeSideEffects]
   );
@@ -402,10 +322,6 @@ export const WorkflowYAMLEditor = ({
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
 
-    editor.updateOptions({
-      glyphMargin: true,
-    });
-
     registerKeyboardCommands({
       editor,
       openActionsPopover,
@@ -414,16 +330,6 @@ export const WorkflowYAMLEditor = ({
     // Listen to content changes to detect typing
     const model = editor.getModel();
     if (model) {
-      model.onDidChangeContent((e) => {
-        // Check if this was a simple typing change
-        const isSimpleTyping =
-          e.changes.length === 1 &&
-          e.changes[0].text.length <= 1 && // Single character or deletion
-          !e.changes[0].text.includes('\n'); // No line breaks
-
-        lastChangeWasTypingRef.current = isSimpleTyping;
-      });
-
       // Initial YAML parsing from main
       const value = model.getValue();
       if (value && value.trim() !== '') {
@@ -479,6 +385,7 @@ export const WorkflowYAMLEditor = ({
         },
       };
 
+      // TODO: do not intercept 'setModelMarkers' twice
       // Intercept and modify markers at the source to fix connector validation messages
       // This prevents Monaco from ever seeing the problematic numeric enum messages
       const originalSetModelMarkers = monaco.editor.setModelMarkers;
@@ -517,7 +424,7 @@ export const WorkflowYAMLEditor = ({
     if (isEditorMounted && editorRef.current) {
       const model = editorRef.current.getModel();
       if (model && model.getValue() !== '') {
-        changeSideEffects(false); // Initial validation, not typing
+        changeSideEffects();
       }
     }
   }, [changeSideEffects, isEditorMounted, workflowId]);
@@ -529,9 +436,6 @@ export const WorkflowYAMLEditor = ({
       const isExternalChange = props.value !== lastInternalValueRef.current;
 
       if (isExternalChange) {
-        // Always clear decorations first when switching executions/revisions
-        clearAllDecorations();
-
         // Check if Monaco editor content matches props.value
         const model = editorRef.current.getModel();
         if (model) {
@@ -539,12 +443,12 @@ export const WorkflowYAMLEditor = ({
           if (currentContent !== props.value) {
             // Wait a bit longer for Monaco to update its content, then force re-parse
             setTimeout(() => {
-              changeSideEffects(false); // External change, not typing
+              changeSideEffects();
             }, 50); // Longer delay to ensure Monaco editor content is updated
           } else {
             // Content matches, just force re-parse to be safe
             setTimeout(() => {
-              changeSideEffects(false); // External change, not typing
+              changeSideEffects();
             }, 10);
           }
         }
@@ -553,424 +457,17 @@ export const WorkflowYAMLEditor = ({
         lastInternalValueRef.current = props.value;
       }
     }
-  }, [props.value, isEditorMounted, changeSideEffects, clearAllDecorations]);
+  }, [props.value, isEditorMounted, changeSideEffects]);
 
   // Force decoration refresh specifically when switching to readonly mode (executions view)
   useEffect(() => {
     if (isEditorMounted) {
       // Small delay to ensure all state is settled
       setTimeout(() => {
-        changeSideEffects(false); // Mode change, not typing
+        changeSideEffects();
       }, 50);
     }
   }, [isEditorMounted, changeSideEffects]);
-
-  useEffect(() => {
-    const model = editorRef.current?.getModel() ?? null;
-    if (alertTriggerDecorationCollectionRef.current) {
-      // clear existing decorations
-      alertTriggerDecorationCollectionRef.current.clear();
-    }
-
-    // Don't show alert dots when in executions view or when prerequisites aren't met
-    if (!model || !yamlDocument || !isEditorMounted || readOnly || !editorRef.current) {
-      return;
-    }
-
-    const triggerNodes = getTriggerNodes(yamlDocument);
-    const alertTriggers = triggerNodes.filter(({ triggerType }) => triggerType === 'alert');
-
-    if (alertTriggers.length === 0) {
-      return;
-    }
-
-    const decorations = alertTriggers
-      .map(({ node, typePair }) => {
-        // Try to get the range from the typePair first, fallback to searching within the trigger node
-        let typeRange = getMonacoRangeFromYamlNode(model, typePair);
-
-        if (!typeRange) {
-          // Fallback: use the trigger node range and search for the type line
-          const triggerRange = getMonacoRangeFromYamlNode(model, node);
-          if (!triggerRange) {
-            return null;
-          }
-
-          // Find the specific line that contains "type:" and "alert" within this trigger
-          let typeLineNumber = triggerRange.startLineNumber;
-          for (
-            let lineNum = triggerRange.startLineNumber;
-            lineNum <= triggerRange.endLineNumber;
-            lineNum++
-          ) {
-            const lineContent = model.getLineContent(lineNum);
-            if (lineContent.includes('type:') && lineContent.includes('alert')) {
-              typeLineNumber = lineNum;
-              break;
-            }
-          }
-
-          typeRange = new monaco.Range(
-            typeLineNumber,
-            1,
-            typeLineNumber,
-            model.getLineMaxColumn(typeLineNumber)
-          );
-        }
-
-        const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
-          range: new monaco.Range(
-            typeRange!.startLineNumber,
-            1,
-            typeRange!.startLineNumber,
-            model.getLineMaxColumn(typeRange!.startLineNumber)
-          ),
-          options: {
-            glyphMarginClassName: 'alert-trigger-glyph',
-            glyphMarginHoverMessage: {
-              value: i18n.translate(
-                'workflows.workflowDetail.yamlEditor.alertTriggerGlyphTooltip',
-                {
-                  defaultMessage:
-                    'Alert trigger: This workflow will be executed automatically only when connected to a rule via the "Run Workflow" action.',
-                }
-              ),
-            },
-          },
-        };
-
-        const lineHighlightDecoration: monaco.editor.IModelDeltaDecoration = {
-          range: new monaco.Range(
-            typeRange!.startLineNumber,
-            1,
-            typeRange!.startLineNumber,
-            model.getLineMaxColumn(typeRange!.startLineNumber)
-          ),
-          options: {
-            className: 'alert-trigger-highlight',
-            marginClassName: 'alert-trigger-highlight',
-            isWholeLine: true,
-          },
-        };
-
-        return [glyphDecoration, lineHighlightDecoration];
-      })
-      .flat()
-      .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
-
-    // Ensure we have a valid editor reference before creating decorations
-    if (decorations.length > 0 && editorRef.current) {
-      // Small delay to ensure Monaco editor is fully ready for decorations
-      // This addresses race conditions where the editor is mounted but not fully initialized
-      const createDecorations = () => {
-        if (editorRef.current) {
-          alertTriggerDecorationCollectionRef.current =
-            editorRef.current.createDecorationsCollection(decorations);
-        }
-      };
-
-      // Try immediately, and if that fails, try again with a small delay
-      try {
-        createDecorations();
-      } catch (error) {
-        setTimeout(createDecorations, 10);
-      }
-    }
-  }, [isEditorMounted, yamlDocument, readOnly]);
-
-  // Handle connector type decorations (GitLens-style inline icons)
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (!isEditorMounted || !editorRef.current || !yamlDocument) {
-        return;
-      }
-
-      const editor = editorRef.current;
-      const model = editor.getModel();
-      if (!model) {
-        return;
-      }
-
-      // Clear existing decorations first
-      if (connectorTypeDecorationCollectionRef.current) {
-        connectorTypeDecorationCollectionRef.current.clear();
-        connectorTypeDecorationCollectionRef.current = null;
-      }
-
-      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-
-      // Find all steps with connector types
-      const stepNodes = getStepNodesWithType(yamlDocument);
-      // console.log('🎨 Connector decorations: Found step nodes:', stepNodes.length);
-
-      for (const stepNode of stepNodes) {
-        // Find the main step type (not nested inside 'with' or other blocks)
-        const typePair = stepNode.items.find((item): item is Pair<Scalar, Scalar> => {
-          // Must be a direct child of the step node (not nested)
-          return isPair(item) && isScalar(item.key) && item.key.value === 'type';
-        });
-
-        if (!typePair || !isScalar(typePair.value)) {
-          continue;
-        }
-
-        const connectorType = typePair.value.value;
-
-        if (typeof connectorType !== 'string') {
-          continue;
-        }
-
-        // console.log('🎨 Processing connector type:', connectorType);
-
-        // Skip decoration for very short connector types to avoid false matches
-        // allow "if" as a special case
-        if (connectorType.length < 3 && connectorType !== 'if') {
-          // console.log('🎨 Skipping short connector type:', connectorType);
-          continue; // Skip this iteration
-        }
-
-        const typeRange = typePair.value.range;
-
-        if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) continue;
-
-        // Get icon and class based on connector type
-        const { className } = getConnectorIcon(connectorType);
-
-        if (className) {
-          // typeRange format: [startOffset, valueStartOffset, endOffset]
-          const valueStartOffset = typeRange[1]; // Start of the value (after quotes if present)
-          const valueEndOffset = typeRange[2]; // End of the value
-
-          // Convert character offsets to Monaco positions
-          const startPosition = model.getPositionAt(valueStartOffset);
-          const endPosition = model.getPositionAt(valueEndOffset);
-
-          // Get the line content to check if "type:" is at the beginning
-          const currentLineContent = model.getLineContent(startPosition.lineNumber);
-          const trimmedLine = currentLineContent.trimStart();
-
-          // Check if this line starts with "type:" (after whitespace)
-          if (!trimmedLine.startsWith('type:')) {
-            continue; // Skip this decoration
-          }
-
-          // Try to find the connector type in the start position line first
-          let targetLineNumber = startPosition.lineNumber;
-          let lineContent = model.getLineContent(targetLineNumber);
-          let typeIndex = lineContent.indexOf(connectorType);
-
-          // If not found on start line, check end line
-          if (typeIndex === -1 && endPosition.lineNumber !== startPosition.lineNumber) {
-            targetLineNumber = endPosition.lineNumber;
-            lineContent = model.getLineContent(targetLineNumber);
-            typeIndex = lineContent.indexOf(connectorType);
-          }
-
-          let actualStartColumn;
-          let actualEndColumn;
-          if (typeIndex !== -1) {
-            // Found the connector type in the line
-            actualStartColumn = typeIndex + 1; // +1 for 1-based indexing
-            actualEndColumn = typeIndex + connectorType.length + 1; // +1 for 1-based indexing
-          } else {
-            // Fallback to calculated position
-            targetLineNumber = startPosition.lineNumber;
-            actualStartColumn = startPosition.column;
-            actualEndColumn = endPosition.column;
-          }
-
-          // Background highlighting and after content (working version)
-          const decorationsToAdd = [
-            // Background highlighting on the connector type text
-            {
-              range: {
-                startLineNumber: targetLineNumber,
-                startColumn: actualStartColumn,
-                endLineNumber: targetLineNumber,
-                endColumn: actualEndColumn,
-              },
-              options: {
-                inlineClassName: `connector-inline-highlight connector-${className}`,
-              },
-            },
-          ];
-
-          decorations.push(...decorationsToAdd);
-        }
-      }
-
-      // console.log('🎨 Final decorations count:', decorations.length);
-      if (decorations.length > 0) {
-        connectorTypeDecorationCollectionRef.current =
-          editor.createDecorationsCollection(decorations);
-        // console.log('🎨 Applied connector decorations successfully');
-      } else {
-        // console.log('🎨 No decorations to apply');
-      }
-    }, 100); // Small delay to avoid multiple rapid executions
-
-    return () => clearTimeout(timeoutId);
-  }, [isEditorMounted, yamlDocument]);
-
-  // Trigger type decorations effect
-  useEffect(() => {
-    if (!isEditorMounted || !editorRef.current || !yamlDocument) {
-      return;
-    }
-
-    const timeoutId = setTimeout(() => {
-      const editor = editorRef.current!;
-      const model = editor.getModel();
-      if (!model) return;
-
-      // Clear existing trigger decorations
-      if (triggerTypeDecorationCollectionRef.current) {
-        triggerTypeDecorationCollectionRef.current.clear();
-        triggerTypeDecorationCollectionRef.current = null;
-      }
-
-      const decorations: monaco.editor.IModelDeltaDecoration[] = [];
-
-      // Find all triggers with type
-      const triggerNodes = getTriggerNodesWithType(yamlDocument);
-
-      for (const triggerNode of triggerNodes) {
-        const typePair = triggerNode.items.find(
-          (item): item is Pair<Scalar, Scalar> =>
-            isPair(item) && isScalar(item.key) && isScalar(item.value) && item.key.value === 'type'
-        );
-        if (!typePair?.value?.value) {
-          continue;
-        }
-
-        const triggerType = typePair.value.value;
-
-        if (typeof triggerType !== 'string') {
-          continue;
-        }
-
-        // Skip decoration for very short trigger types to avoid false matches
-        if (triggerType.length < 3) {
-          continue; // Skip this iteration
-        }
-
-        const typeRange = typePair.value.range;
-
-        if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) {
-          continue;
-        }
-
-        // Get icon and class based on trigger type
-        const { className } = getTriggerIcon(triggerType);
-
-        if (className) {
-          // typeRange format: [startOffset, valueStartOffset, endOffset]
-          const valueStartOffset = typeRange[1]; // Start of the value (after quotes if present)
-          const valueEndOffset = typeRange[2]; // End of the value
-
-          // Convert character offsets to Monaco positions
-          const startPosition = model.getPositionAt(valueStartOffset);
-          const endPosition = model.getPositionAt(valueEndOffset);
-
-          // Get the line content to check if "type:" is at the beginning
-          const currentLineContent = model.getLineContent(startPosition.lineNumber);
-          const trimmedLine = currentLineContent.trimStart();
-
-          // Check if this line contains "type:" (after whitespace and optional dash for array items)
-          if (!trimmedLine.startsWith('type:') && !trimmedLine.startsWith('- type:')) {
-            continue; // Skip this decoration
-          }
-
-          // Try to find the trigger type in the start position line first
-          let targetLineNumber = startPosition.lineNumber;
-          let lineContent = model.getLineContent(targetLineNumber);
-          let typeIndex = lineContent.indexOf(triggerType);
-
-          // If not found on start line, check end line
-          if (typeIndex === -1 && endPosition.lineNumber !== startPosition.lineNumber) {
-            targetLineNumber = endPosition.lineNumber;
-            lineContent = model.getLineContent(targetLineNumber);
-            typeIndex = lineContent.indexOf(triggerType);
-          }
-
-          let actualStartColumn;
-          let actualEndColumn;
-          if (typeIndex !== -1) {
-            // Found the trigger type in the line
-            actualStartColumn = typeIndex + 1; // +1 for 1-based indexing
-            actualEndColumn = typeIndex + triggerType.length + 1; // +1 for 1-based indexing
-          } else {
-            // Fallback to calculated position
-            targetLineNumber = startPosition.lineNumber;
-            actualStartColumn = startPosition.column;
-            actualEndColumn = endPosition.column;
-          }
-
-          // Background highlighting for trigger types
-          const decorationsToAdd = [
-            // Background highlighting on the trigger type text
-            {
-              range: {
-                startLineNumber: targetLineNumber,
-                startColumn: actualStartColumn,
-                endLineNumber: targetLineNumber,
-                endColumn: actualEndColumn,
-              },
-              options: {
-                inlineClassName: `trigger-inline-highlight trigger-${className}`,
-              },
-            },
-          ];
-
-          decorations.push(...decorationsToAdd);
-        }
-      }
-
-      if (decorations.length > 0) {
-        triggerTypeDecorationCollectionRef.current =
-          editor.createDecorationsCollection(decorations);
-      }
-    }, 100); // Small delay to avoid multiple rapid executions
-
-    return () => clearTimeout(timeoutId);
-  }, [isEditorMounted, yamlDocument]);
-
-  // Helper function to get connector icon and class
-  const getConnectorIcon = (connectorType: string): { className: string } => {
-    if (connectorType.startsWith('elasticsearch.')) {
-      return { className: 'elasticsearch' };
-    } else if (connectorType.startsWith('kibana.')) {
-      return { className: 'kibana' };
-    } else {
-      // Handle connectors with dot notation properly
-      let className: string;
-      if (connectorType.startsWith('.')) {
-        // For connectors like ".jira", remove the leading dot
-        className = connectorType.substring(1);
-      } else if (connectorType.includes('.')) {
-        // For connectors like "thehive.createAlert", use base name
-        className = connectorType.split('.')[0];
-      } else {
-        // For simple connectors like "slack", use as-is
-        className = connectorType;
-      }
-      return { className };
-    }
-  };
-
-  // Helper function to get trigger icon and class
-  const getTriggerIcon = (triggerType: string): { className: string } => {
-    switch (triggerType) {
-      case 'alert':
-        return { className: 'alert' };
-      case 'scheduled':
-        return { className: 'scheduled' };
-      case 'manual':
-        return { className: 'manual' };
-      default:
-        return { className: triggerType };
-    }
-  };
 
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(workflowYamlSchemaLoose, connectorsData?.connectorTypes);
@@ -978,7 +475,6 @@ export const WorkflowYAMLEditor = ({
 
   useWorkflowsMonacoTheme();
 
-  // Apply dynamic connector icons via CSS injection
   useDynamicConnectorIcons(connectorsData);
 
   const editorOptions = useMemo<monaco.editor.IStandaloneEditorConstructionOptions>(
@@ -1028,8 +524,6 @@ export const WorkflowYAMLEditor = ({
     [readOnly]
   );
 
-  // Styles are now handled by the useWorkflowEditorStyles hook above
-
   // Clean up the monaco model and editor on unmount
   useEffect(() => {
     const editor = editorRef.current;
@@ -1037,11 +531,6 @@ export const WorkflowYAMLEditor = ({
       // Dispose of Monaco providers
       disposablesRef.current.forEach((disposable) => disposable.dispose());
       disposablesRef.current = [];
-
-      // Dispose of decorations and actions provider
-      unifiedProvidersRef.current?.actions?.dispose();
-      unifiedProvidersRef.current?.stepExecution?.dispose();
-      unifiedProvidersRef.current = null;
 
       editor?.dispose();
     };
