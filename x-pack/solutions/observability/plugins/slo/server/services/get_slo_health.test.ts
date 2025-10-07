@@ -16,11 +16,8 @@ import {
   aSummaryDocument,
 } from './fixtures/summary_search_document';
 import { GetSLOHealth } from './get_slo_health';
-import { createSLORepositoryMock } from './mocks';
-import type { SLORepository } from './slo_repository';
 
 describe('GetSLOHealth', () => {
-  let mockRepository: jest.Mocked<SLORepository>;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let getSLOHealth: GetSLOHealth;
 
@@ -59,7 +56,6 @@ describe('GetSLOHealth', () => {
   }
 
   beforeEach(() => {
-    mockRepository = createSLORepositoryMock();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     getSLOHealth = new GetSLOHealth(mockScopedClusterClient);
   });
@@ -110,7 +106,7 @@ describe('GetSLOHealth', () => {
           },
         ],
         "page": 0,
-        "perPage": 500,
+        "perPage": 100,
         "total": 1,
       }
     `);
@@ -202,7 +198,7 @@ describe('GetSLOHealth', () => {
             },
           ],
           "page": 0,
-          "perPage": 500,
+          "perPage": 100,
           "total": 1,
         }
       `);
@@ -265,7 +261,7 @@ describe('GetSLOHealth', () => {
             },
           ],
           "page": 0,
-          "perPage": 500,
+          "perPage": 100,
           "total": 1,
         }
       `);

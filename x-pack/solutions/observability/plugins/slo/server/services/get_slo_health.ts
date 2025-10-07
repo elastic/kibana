@@ -47,7 +47,9 @@ export class GetSLOHealth {
 
     const page = typeof params.page === 'number' && params.page >= 0 ? params.page : 0;
     const perPage =
-      typeof params.perPage === 'number' && params.perPage >= 1 ? params.perPage : 500;
+      typeof params.perPage === 'number' && params.perPage >= 1 && params.perPage <= 100
+        ? params.perPage
+        : 100;
 
     do {
       const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
