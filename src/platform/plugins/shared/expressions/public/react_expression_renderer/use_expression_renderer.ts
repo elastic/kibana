@@ -167,7 +167,7 @@ export function useExpressionRenderer(
   }, [expressionLoaderRef.current, onRender$]);
   /* eslint-enable react-hooks/exhaustive-deps */
 
-  console.log('isAborted in expressions:', abortController?.signal.aborted);
+  // console.log('isAborted in Lens embeddable:', abortController?.signal.aborted);
 
   useEffect(() => {
     const subscription = reload$?.subscribe(() => {
