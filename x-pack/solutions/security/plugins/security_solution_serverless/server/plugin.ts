@@ -20,6 +20,7 @@ import {
   getDefaultValueReportSettings,
 } from '@kbn/security-solution-plugin/server/ui_settings';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '@kbn/security-solution-plugin/common/constants';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -43,7 +44,6 @@ import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task
 import { telemetryEvents } from './telemetry/event_based_telemetry';
 import { UsageReportingService } from './common/services/usage_reporting_service';
 import { ai4SocMeteringService } from './ai4soc/services';
-import { AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED } from '@kbn/security-solution-plugin/common/constants';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -100,16 +100,22 @@ export class SecuritySolutionServerlessPlugin
     coreSetup
       .getStartServices()
       .then(async ([coreStart, depsStart]) => {
-        const isNewDefaultConnectorEnabled = await coreStart.featureFlags.getBooleanValue(AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED, false);
+        const isNewDefaultConnectorEnabled = await coreStart.featureFlags.getBooleanValue(
+          AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+          false
+        );
         try {
           const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
           // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
           const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
             (connector: Connector) => isSupportedConnector(connector)
           );
-          
+
           // hide the setting if the new default connector feature is enabled
-          const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors, isNewDefaultConnectorEnabled ? 'ui' : undefined);
+          const defaultAIConnectorSetting = getDefaultAIConnectorSetting(
+            aiConnectors,
+            isNewDefaultConnectorEnabled ? 'ui' : undefined
+          );
           coreSetup.uiSettings.register({
             ...(defaultAIConnectorSetting !== null ? defaultAIConnectorSetting : {}),
             ...getDefaultValueReportSettings(),
