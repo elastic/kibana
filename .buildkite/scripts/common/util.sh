@@ -36,7 +36,8 @@ stash_changed_files() {
   if [ "$GIT_CHANGES" ] && [[ "$SHOULD_STASH" == "true" && "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
     echo "'$1' caused changes to the following files, stashing them now:"
     echo "$GIT_CHANGES"
-    git stash push -u -am "$GIT_STASH_MESSAGE"
+    git add .
+    git stash push -am "$GIT_STASH_MESSAGE"
   fi
 }
 

@@ -241,7 +241,22 @@ function validateScriptPath(scriptPath: string) {
 async function commitStashedContents() {
   let commitsMade = 0;
   let stashMessage;
+  const configGitOnce = (() => {
+    let configured = false;
+    return () => {
+      if (configured) return;
+      configured = true;
+      execFileSync('git', ['config', 'user.name', 'kibanamachine']);
+      execFileSync('git', [
+        'config',
+        'user.email',
+        '42973632+kibanamachine@users.noreply.github.com',
+      ]);
+      return true;
+    };
+  })();
   while ((stashMessage = execFileSync('git', ['stash', 'list', '-1']).toString().trim())) {
+    configGitOnce();
     const messageWithoutContext = stashMessage.split(': ').slice(2).join(': ');
     logger.info('Committing: ' + messageWithoutContext);
     execFileSync('git', ['stash', 'pop'], { stdio: 'inherit' });
