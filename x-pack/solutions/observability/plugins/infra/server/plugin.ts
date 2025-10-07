@@ -100,15 +100,15 @@ export class InfraServerPlugin
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
     const metricsClient = plugins.metricsDataAccess.client;
+    const sources = new InfraSources({
+      metricsClient,
+    });
     metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
       const sourceConfiguration = await sources.getInfraSourceConfiguration(
         options.savedObjectsClient,
         'default'
       );
       return sourceConfiguration.configuration.metricAlias;
-    });
-    const sources = new InfraSources({
-      metricsClient,
     });
 
     const sourceStatus = new InfraSourceStatus(

@@ -42,7 +42,7 @@ const source: InfraSource = {
   configuration: {
     name: 'Default',
     description: '',
-    metricAlias: 'metrics-*,metrics-system*,metricbeat-*',
+    metricAlias: 'metrics-*,metricbeat-*',
     logIndices: {
       type: 'index_pattern',
       indexPatternId: 'kibana_index_pattern',
@@ -72,7 +72,7 @@ const snapshotRequest: SnapshotRequest = {
 };
 
 const metricsApiRequest: MetricsAPIRequest = {
-  indexPattern: 'metrics-*,metrics-system*,metricbeat-*',
+  indexPattern: 'metrics-*,metricbeat-*',
   timerange: { from: 1605705900000, to: 1605706200000, interval: '60s' },
   metrics: [
     {
