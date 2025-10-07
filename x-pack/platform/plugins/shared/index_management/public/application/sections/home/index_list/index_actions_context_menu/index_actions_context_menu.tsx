@@ -6,27 +6,14 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { Fragment, useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { every } from 'lodash';
 import type { EuiPopoverProps, EuiButtonProps } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiContextMenu,
-  EuiFieldNumber,
-  EuiForm,
-  EuiFormRow,
-  EuiPopover,
-  EuiSpacer,
-  EuiConfirmModal,
-  htmlIdGenerator,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { ConvertToLookupIndexModalContainer } from '../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container';
 import { flattenPanelTree } from '../../../../lib/flatten_panel_tree';
 import {
   INDEX_OPEN,
@@ -35,9 +22,9 @@ import {
   MAX_SHARDS_FOR_CONVERT_TO_LOOKUP_INDEX,
 } from '../../../../../../common/constants';
 import { getIndexDetailsLink, navigateToIndexDetailsPage } from '../../../../services/routing';
-import { notificationService } from '../../../../services/notification';
 import { useAppContext } from '../../../../app_context';
 import type { Index } from '../../../../../../common';
+import { ModalHost, type ModalHostHandles } from './modal_host/modal_host';
 
 export interface IndexActionsContextMenuProps {
   // either an array of indices selected in the list view or an array of 1 index name on the details panel/page
@@ -120,15 +107,7 @@ export const IndexActionsContextMenu = ({
   } = useAppContext();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
-  const [renderConfirmModal, setRenderConfirmModal] = useState<((props: any) => ReactNode) | null>(
-    null
-  );
-  const [forcemergeSegments, setForcemergeSegments] = useState<string | null>(null);
-
-  const closeConfirmModal = () => {
-    setRenderConfirmModal(null);
-    resetSelection?.();
-  };
+  const modalRef = useRef<ModalHostHandles | null>(null);
 
   const onButtonClick = () => {
     setIsPopoverOpen((prevState) => !prevState);
@@ -136,222 +115,12 @@ export const IndexActionsContextMenu = ({
 
   const closePopoverAndExecute = (func: () => void) => {
     setIsPopoverOpen(false);
-    setRenderConfirmModal(null);
     func();
     resetSelection?.();
   };
 
   const closePopover = () => {
     setIsPopoverOpen(false);
-  };
-
-  const forcemergeSegmentsError = () => {
-    if (!forcemergeSegments || forcemergeSegments.match(/^([1-9][0-9]*)?$/)) {
-      return;
-    } else {
-      return i18n.translate('xpack.idxMgmt.indexActionsMenu.segmentsNumberErrorMessage', {
-        defaultMessage: 'The number of segments must be greater than zero.',
-      });
-    }
-  };
-
-  const renderForcemergeSegmentsModal = () => {
-    const helpText = i18n.translate(
-      'xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeSegmentsHelpText',
-      {
-        defaultMessage:
-          'Merge the segments in an index until the number is reduced to this or fewer segments. The default is 1.',
-      }
-    );
-    const selectedIndexCount = indexNames.length;
-    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
-
-    return (
-      <EuiConfirmModal
-        aria-labelledby={confirmModalTitleId}
-        title={i18n.translate('xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.modalTitle', {
-          defaultMessage: 'Force merge',
-        })}
-        titleProps={{ id: confirmModalTitleId }}
-        onCancel={closeConfirmModal}
-        onConfirm={() => {
-          if (forcemergeSegments && !forcemergeSegmentsError()) {
-            closePopoverAndExecute(() => {
-              forcemergeIndices(forcemergeSegments);
-              setForcemergeSegments(null);
-            });
-          }
-        }}
-        cancelButtonText={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.cancelButtonText',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.forceMerge.confirmModal.confirmButtonText',
-          {
-            defaultMessage: 'Force merge',
-          }
-        )}
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeDescription"
-            defaultMessage="You are about to force merge {selectedIndexCount, plural, one {this index} other {these indices} }:"
-            values={{ selectedIndexCount }}
-          />
-        </p>
-
-        <ul>
-          {indexNames.map((indexName) => (
-            <li key={indexName}>{indexName}</li>
-          ))}
-        </ul>
-
-        <EuiCallOut
-          title={i18n.translate(
-            'xpack.idxMgmt.indexActionsMenu.forceMerge.proceedWithCautionCallOutTitle',
-            {
-              defaultMessage: 'Proceed with caution!',
-            }
-          )}
-          color="warning"
-          iconType="question"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.idxMgmt.indexActionsMenu.forceMerge.forceMergeWarningDescription"
-              defaultMessage="
-                  Don't force-merge indices to which you're still writing, or to which you'll write
-                  again in the future. Instead, rely on the automatic background merge process to
-                  perform merges as needed to keep the index running smoothly. If you write to
-                  a force-merged index then its performance may become much worse.
-                "
-            />
-          </p>
-        </EuiCallOut>
-
-        <EuiSpacer size="m" />
-
-        <EuiForm isInvalid={!!forcemergeSegmentsError()} error={forcemergeSegmentsError()}>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.idxMgmt.indexActionsMenu.forceMerge.maximumNumberOfSegmentsFormRowLabel',
-              {
-                defaultMessage: 'Maximum number of segments per shard',
-              }
-            )}
-            helpText={helpText}
-          >
-            <EuiFieldNumber
-              data-test-subj="indexActionsForcemergeNumSegments"
-              onChange={(event) => {
-                setForcemergeSegments(event.target.value);
-              }}
-              min={1}
-              name="maxNumberSegments"
-            />
-          </EuiFormRow>
-        </EuiForm>
-      </EuiConfirmModal>
-    );
-  };
-
-  const renderConfirmDeleteModal = () => {
-    const selectedIndexCount = indexNames.length;
-    const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
-
-    const standardIndexModalBody = (
-      <Fragment>
-        <p>
-          <FormattedMessage
-            id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteDescription"
-            defaultMessage="You are about to delete {selectedIndexCount, plural, one {this index} other {these indices} }:"
-            values={{ selectedIndexCount }}
-          />
-        </p>
-
-        <ul>
-          {indexNames.map((indexName) => (
-            <li key={indexName}>{indexName}</li>
-          ))}
-        </ul>
-
-        <p>
-          <FormattedMessage
-            id="xpack.idxMgmt.indexActionsMenu.deleteIndex.deleteWarningDescription"
-            defaultMessage="You can't recover a deleted index. Make sure you have appropriate backups. Deleting an index currently being reindexed will stop the reindex operation."
-          />
-        </p>
-      </Fragment>
-    );
-
-    return (
-      <EuiConfirmModal
-        aria-labelledby={confirmModalTitleId}
-        title={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.modalTitle',
-          {
-            defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {# indices} }',
-            values: { selectedIndexCount },
-          }
-        )}
-        titleProps={{ id: confirmModalTitleId }}
-        onCancel={() => {
-          closeConfirmModal();
-        }}
-        onConfirm={() => closePopoverAndExecute(deleteIndices)}
-        buttonColor="danger"
-        confirmButtonDisabled={false}
-        cancelButtonText={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.cancelButtonText',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.idxMgmt.indexActionsMenu.deleteIndex.confirmModal.confirmButtonText',
-          {
-            defaultMessage: 'Delete {selectedIndexCount, plural, one {index} other {indices} }',
-            values: { selectedIndexCount },
-          }
-        )}
-      >
-        {standardIndexModalBody}
-      </EuiConfirmModal>
-    );
-  };
-
-  const renderConvertToLookupIndexModal = () => {
-    const sourceIndexName = indexNames[0];
-
-    return (
-      <ConvertToLookupIndexModalContainer
-        onCloseModal={() => closeConfirmModal()}
-        onSuccess={(lookupIndexName) => {
-          navigateToIndexDetailsPage(
-            lookupIndexName,
-            indicesListURLParams,
-            extensionsService,
-            application,
-            http,
-            IndexDetailsSection.Overview
-          );
-
-          notificationService.showSuccessToast(
-            i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastTitle', {
-              defaultMessage: 'Index successfully converted to lookup mode',
-            }),
-            i18n.translate('xpack.idxMgmt.convertToLookupIndexAction.indexConvertedToastMessage', {
-              defaultMessage: 'The {lookupIndexName} lookup index has been created.',
-              values: { lookupIndexName },
-            })
-          );
-        }}
-        sourceIndexName={sourceIndexName}
-      />
-    );
   };
 
   const isConvertableToLookupIndex = (indexName: string) => {
@@ -465,7 +234,7 @@ export const IndexActionsContextMenu = ({
         }),
         onClick: () => {
           closePopover();
-          setRenderConfirmModal(() => renderForcemergeSegmentsModal);
+          modalRef.current?.openModal({ kind: 'forcemerge' });
         },
       });
       items.push({
@@ -518,22 +287,18 @@ export const IndexActionsContextMenu = ({
       }),
       onClick: () => {
         closePopover();
-        setRenderConfirmModal(() => renderConfirmDeleteModal);
+        modalRef.current?.openModal({ kind: 'delete' });
       },
     });
-    extensionsService.actions.forEach((actionExtension) => {
+    extensionsService.actions.forEach((actionExtension, actionIndex) => {
       const actionExtensionDefinition = actionExtension({
         indices,
         reloadIndices,
         getUrlForApp,
       });
       if (actionExtensionDefinition) {
-        const {
-          buttonLabel,
-          requestMethod,
-          successMessage,
-          renderConfirmModal: actionRenderConfirmModal,
-        } = actionExtensionDefinition;
+        const { buttonLabel, requestMethod, successMessage, renderConfirmModal } =
+          actionExtensionDefinition;
         if (requestMethod) {
           items.push({
             name: buttonLabel,
@@ -543,12 +308,12 @@ export const IndexActionsContextMenu = ({
               });
             },
           });
-        } else {
+        } else if (renderConfirmModal) {
           items.push({
             name: buttonLabel,
             onClick: () => {
               closePopover();
-              setRenderConfirmModal(() => actionRenderConfirmModal);
+              modalRef.current?.openModal({ kind: 'extension', actionIndex });
             },
           });
         }
@@ -589,7 +354,7 @@ export const IndexActionsContextMenu = ({
           disabled: !isConvertable,
           onClick: () => {
             closePopover();
-            setRenderConfirmModal(() => renderConvertToLookupIndexModal);
+            modalRef.current?.openModal({ kind: 'convertToLookup' });
           },
         });
       }
@@ -636,7 +401,20 @@ export const IndexActionsContextMenu = ({
 
   return (
     <div>
-      {renderConfirmModal ? renderConfirmModal(closeConfirmModal) : null}
+      <ModalHost
+        ref={modalRef}
+        indexNames={indexNames}
+        indices={indices}
+        indicesListURLParams={indicesListURLParams}
+        resetSelection={resetSelection}
+        forcemergeIndices={forcemergeIndices}
+        deleteIndices={deleteIndices}
+        reloadIndices={reloadIndices}
+        extensionsService={extensionsService}
+        getUrlForApp={getUrlForApp}
+        application={application}
+        http={http}
+      />
       <EuiPopover
         id="contextMenuIndices"
         button={button}
