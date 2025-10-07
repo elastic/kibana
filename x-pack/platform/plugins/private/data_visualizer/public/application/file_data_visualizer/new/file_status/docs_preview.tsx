@@ -55,7 +55,7 @@ export const ResultsPreview: FC<ResultsPreviewProps> = ({ sampleDocs, mappings, 
     <>
       {sampleDocs?.length ? (
         <EuiBasicTable
-          data-test-subj={`dataVisualizerFilePreviewPanel-${index}`} // this needs to be added for pdf files
+          data-test-subj={`dataVisualizerFilePreviewPanel-${index}`}
           tableLayout="auto"
           columns={columns}
           items={items}
