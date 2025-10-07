@@ -358,10 +358,16 @@
                 "type": "keyword"
               },
               "supports_cloud_connector": {
-                "type": "boolean"
+                "type": "boolean",
+                "_meta": {
+                  "description": "Whether the package policy supports cloud connector"
+                }
               },
               "cloud_connector_id": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "Cloud connector ID"
+                }
               }
             }
           }
@@ -512,28 +518,49 @@
           "items": {
             "properties": {
               "id": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "Cloud connector ID"
+                }
               },
               "created_at": {
-                "type": "date"
+                "type": "date",
+                "_meta": {
+                  "description": "Cloud connector created at"
+                }
               },
               "updated_at": {
-                "type": "date"
+                "type": "date",
+                "_meta": {
+                  "description": "Cloud connector updated at"
+                }
               },
               "hasCredentials": {
-                "type": "boolean"
+                "type": "boolean",
+                "_meta": {
+                  "description": "Whether the cloud connector has valid credentials"
+                }
               },
               "cloud_provider": {
-                "type": "keyword"
+                "type": "keyword",
+                "_meta": {
+                  "description": "Cloud connector cloud provider"
+                }
               },
               "packagePolicyIds": {
                 "type": "array",
                 "items": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "Package policy ID"
+                  }
                 }
               },
               "packagePolicyCount": {
-                "type": "long"
+                "type": "long",
+                "_meta": {
+                  "description": "Number of package policies using the cloud connector"
+                }
               }
             }
           }
