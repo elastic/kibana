@@ -6,12 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 
 import {
   registerReactEmbeddableFactory,
   type EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
+import type { Filter } from '@kbn/es-query';
 import type { PublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { act, render, waitFor } from '@testing-library/react';
 
@@ -56,21 +58,25 @@ const getTestEmbeddableFactory = () =>
     },
   } as EmbeddableFactory<{ selection?: string }>);
 
+// defined in the outer scope so that its reference doesn't change on rerender
+const mockGetCreationOptions = jest
+  .fn()
+  .mockResolvedValue({ initialState: { initialChildControlState: {} } });
+
 describe('control group renderer', () => {
   beforeAll(() => {
     registerReactEmbeddableFactory('testControl', getTestEmbeddableFactory);
   });
 
   const mountControlGroupRenderer = async (
-    props: Omit<ControlGroupRendererProps, 'onApiAvailable'> = {
-      getCreationOptions: jest
-        .fn()
-        .mockResolvedValue({ initialState: { initialChildControlState: {} } }),
+    props: Omit<ControlGroupRendererProps, 'onApiAvailable' | 'getCreationOptions'> & {
+      getCreationOptions?: ControlGroupRendererProps['getCreationOptions'];
     }
   ) => {
     let controlGroupApi: ControlGroupRendererApi | undefined;
     const component = render(
       <ControlGroupRenderer
+        getCreationOptions={mockGetCreationOptions}
         {...props}
         onApiAvailable={(newApi) => {
           controlGroupApi = newApi;
@@ -80,16 +86,6 @@ describe('control group renderer', () => {
     await waitFor(() => {
       expect(controlGroupApi).toBeDefined();
     });
-    //     await waitFor(
-    //   async () =>
-    //     await new Promise<void>((resolve) => {
-    //       api.children$.subscribe((children) => {
-    //         if (Object.keys(children).length === 1) {
-    //           resolve();
-    //         }
-    //       });
-    //     })
-    // );
     return { component, api: controlGroupApi! as ControlGroupRendererApi };
   };
 
@@ -123,43 +119,55 @@ describe('control group renderer', () => {
     expect(resetSpy).toBeCalledTimes(1);
   });
 
-  // test('filter changes are dispatched to control group if they are different', async () => {
-  //   const initialFilters: Filter[] = [
-  //     { meta: { alias: 'test', disabled: false, negate: false, index: 'test' } },
-  //   ];
-  //   const updatedFilters: Filter[] = [
-  //     { meta: { alias: 'test', disabled: false, negate: true, index: 'test' } },
-  //   ];
+  test('filter changes are dispatched to control parent API if they are different', async () => {
+    const initialFilters: Filter[] = [
+      { meta: { alias: 'test', disabled: false, negate: false, index: 'test' } },
+    ];
+    const updatedFilters: Filter[] = [
+      { meta: { alias: 'test', disabled: false, negate: true, index: 'test' } },
+    ];
 
-  //   const { component, api } = await mountControlGroupRenderer({ filters: initialFilters });
-  //   expect((api.parentApi as ParentApiType).unifiedSearchFilters$?.getValue()).toEqual(
-  //     initialFilters
-  //   );
-  //   component.rerender(
-  //     <ControlGroupRenderer onApiAvailable={jest.fn()} filters={updatedFilters} />
-  //   );
-  //   expect((api.parentApi as ParentApiType).unifiedSearchFilters$?.getValue()).toEqual(
-  //     updatedFilters
-  //   );
-  // });
+    const { component, api } = await mountControlGroupRenderer({ filters: initialFilters });
+    expect(api.filters$?.getValue()).toEqual(initialFilters);
+    component.rerender(
+      <ControlGroupRenderer
+        onApiAvailable={jest.fn()}
+        getCreationOptions={mockGetCreationOptions}
+        filters={updatedFilters}
+      />
+    );
+    expect(api.filters$?.getValue()).toEqual(updatedFilters);
+  });
 
-  // test('query changes are dispatched to control group if they are different', async () => {
-  //   const initialQuery = { language: 'kql', query: 'query' };
-  //   const updatedQuery = { language: 'kql', query: 'super query' };
+  test('query changes are dispatched to control parent API if they are different', async () => {
+    const initialQuery = { language: 'kql', query: 'query' };
+    const updatedQuery = { language: 'kql', query: 'super query' };
 
-  //   const { component, api } = await mountControlGroupRenderer({ query: initialQuery });
-  //   expect((api.parentApi as ParentApiType).query$.getValue()).toEqual(initialQuery);
-  //   component.rerender(<ControlGroupRenderer onApiAvailable={jest.fn()} query={updatedQuery} />);
-  //   expect((api.parentApi as ParentApiType).query$.getValue()).toEqual(updatedQuery);
-  // });
+    const { component, api } = await mountControlGroupRenderer({ query: initialQuery });
+    expect(api.query$?.getValue()).toEqual(initialQuery);
+    component.rerender(
+      <ControlGroupRenderer
+        onApiAvailable={jest.fn()}
+        getCreationOptions={mockGetCreationOptions}
+        query={updatedQuery}
+      />
+    );
+    expect(api.query$?.getValue()).toEqual(updatedQuery);
+  });
 
-  // test('time range changes are dispatched to control group if they are different', async () => {
-  //   const initialTime = { from: new Date().toISOString(), to: new Date().toISOString() };
-  //   const updatedTime = { from: new Date().toISOString() + 10, to: new Date().toISOString() + 20 };
+  test('time range changes are dispatched to control parent API if they are different', async () => {
+    const initialTime = { from: new Date().toISOString(), to: new Date().toISOString() };
+    const updatedTime = { from: new Date().toISOString() + 10, to: new Date().toISOString() + 20 };
 
-  //   const { component, api } = await mountControlGroupRenderer({ timeRange: initialTime });
-  //   expect((api.parentApi as ParentApiType).timeRange$.getValue()).toEqual(initialTime);
-  //   component.rerender(<ControlGroupRenderer onApiAvailable={jest.fn()} timeRange={updatedTime} />);
-  //   expect((api.parentApi as ParentApiType).timeRange$.getValue()).toEqual(updatedTime);
-  // });
+    const { component, api } = await mountControlGroupRenderer({ timeRange: initialTime });
+    expect(api.timeRange$?.getValue()).toEqual(initialTime);
+    component.rerender(
+      <ControlGroupRenderer
+        onApiAvailable={jest.fn()}
+        getCreationOptions={mockGetCreationOptions}
+        timeRange={updatedTime}
+      />
+    );
+    expect(api.timeRange$?.getValue()).toEqual(updatedTime);
+  });
 });

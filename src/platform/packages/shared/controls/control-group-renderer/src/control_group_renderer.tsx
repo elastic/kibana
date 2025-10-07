@@ -173,7 +173,8 @@ export const ControlGroupRenderer = ({
       ...publicApi,
       openAddDataControlFlyout,
     } as unknown as ControlGroupRendererApi);
-  }, [parentApi, onApiAvailable, input$, uiActions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parentApi, input$, uiActions]);
 
   /** Wait for parent API, which relies on the async creation options, before rendering */
   return !parentApi ? null : (
