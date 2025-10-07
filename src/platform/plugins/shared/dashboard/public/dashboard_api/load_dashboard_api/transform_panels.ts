@@ -35,7 +35,7 @@ export async function transformPanels(
       };
     }
 
-    return await transformPanel(panel, filterReferences(panel.uid));
+    return await transformPanel(panel as DashboardPanel, filterReferences(panel.uid));
   });
 }
 

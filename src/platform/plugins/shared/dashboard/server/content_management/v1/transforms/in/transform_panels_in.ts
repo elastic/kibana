@@ -43,7 +43,7 @@ export function transformPanelsIn(widgets: DashboardAttributes['panels'] | undef
       });
     } else {
       // widget is a panel
-      const { storedPanel, references } = transformPanelIn(widget);
+      const { storedPanel, references } = transformPanelIn(widget as DashboardPanel);
       panels.push(storedPanel);
       panelReferences.push(...references);
     }
