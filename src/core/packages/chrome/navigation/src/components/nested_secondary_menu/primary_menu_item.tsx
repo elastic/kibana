@@ -23,28 +23,27 @@ export interface PrimaryMenuItemProps
   isCurrent?: boolean;
   isCollapsed: boolean;
   onClick?: () => void;
-  submenuPanelId?: string;
 }
 
 export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
+  id,
   children,
   hasSubmenu = false,
   isHighlighted = false,
   isCurrent,
   onClick,
-  submenuPanelId,
   ...props
 }) => {
   const { goToPanel } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
 
   const handleClick = useCallback(() => {
-    if (hasSubmenu && submenuPanelId) {
-      goToPanel(submenuPanelId);
+    if (hasSubmenu) {
+      goToPanel(id, id);
     } else {
       onClick?.();
     }
-  }, [onClick, hasSubmenu, submenuPanelId, goToPanel]);
+  }, [hasSubmenu, id, goToPanel, onClick]);
 
   const arrowStyle = css`
     opacity: 0.6;
@@ -63,6 +62,7 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
   return (
     <div css={wrapperStyle}>
       <SideNav.PrimaryMenuItem
+        id={id}
         isHorizontal
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}

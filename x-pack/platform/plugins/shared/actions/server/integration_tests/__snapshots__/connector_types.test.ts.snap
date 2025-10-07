@@ -47372,6 +47372,42 @@ Object {
             "type": "any",
           },
         },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "patch",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "get",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "delete",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
       ],
       "type": "alternatives",
     },

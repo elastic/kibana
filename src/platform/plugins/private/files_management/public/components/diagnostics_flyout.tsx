@@ -23,7 +23,7 @@ import {
   EuiFlexItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { Chart, Axis, Position, HistogramBarSeries, ScaleType, Settings } from '@elastic/charts';
+import { Chart, Axis, Position, BarSeries, ScaleType, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import type { FunctionComponent } from 'react';
 import React from 'react';
@@ -104,7 +104,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 <Settings baseTheme={chartBaseTheme} />
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                <HistogramBarSeries
+                <BarSeries
                   data={Object.entries(data.countByStatus).map(([key, count]) => ({
                     key,
                     count,
@@ -126,7 +126,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 <Settings baseTheme={chartBaseTheme} />
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                <HistogramBarSeries
+                <BarSeries
                   data={Object.entries(data.countByExtension).map(([key, count]) => ({
                     key,
                     count,

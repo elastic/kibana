@@ -101,7 +101,7 @@ export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigr
       data-test-subj="dashboardDetailsFlyout"
     >
       <EuiFlyoutHeader>
-        <EuiTitle size="m">
+        <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
           <h2 id={migrationsDashboardsFlyoutTitleId}>
             {migrationDashboard.elastic_dashboard?.title ||
               migrationDashboard.original_dashboard.title}
@@ -129,7 +129,11 @@ export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigr
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="detailsFlyoutCloseButton"
+            >
               {CLOSE_BUTTON_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>

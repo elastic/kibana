@@ -380,6 +380,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
 
         <EuiSkeletonLoading
+          data-test-subj="migrationRulesTableSkeleton"
           isLoading={isStatsLoading}
           loadingContent={
             <>
