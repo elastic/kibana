@@ -141,6 +141,7 @@ export const simulationMachine = setup({
     steps: input.steps,
     samples: [],
     streamName: input.streamName,
+    streamType: input.streamType,
   }),
   initial: 'idle',
   on: {

@@ -15,6 +15,7 @@ import { IndexConfiguration } from './advanced_view/index_configuration';
 import { DeleteStreamPanel } from './advanced_view/delete_stream';
 import { ImportExportPanel } from './advanced_view/import_export';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { StreamDescription } from './stream_description';
 
 export function WiredAdvancedView({
   definition,
@@ -36,7 +37,13 @@ export function WiredAdvancedView({
         </>
       )}
 
-      {significantEvents?.available && <StreamSystemConfiguration definition={definition.stream} />}
+      {significantEvents?.available && (
+        <>
+          <StreamDescription definition={definition} />
+          <EuiSpacer />
+          <StreamSystemConfiguration definition={definition.stream} />
+        </>
+      )}
       <EuiSpacer size="m" />
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
         <EuiCallOut
