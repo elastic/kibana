@@ -158,13 +158,13 @@ export async function createAgentPolicyWithPackages({
 
   const withSysMonitoring = withSysMonitoringParams && !newPolicy.supports_agentless;
   if (!withSysMonitoring && withSysMonitoringParams) {
-    logger.debug(`Disabling system monitoring for agentless policy [${newPolicy.name}]`);
+    logger.info(`Disabling system monitoring for agentless policy [${newPolicy.name}]`);
   }
   const monitoringEnabled =
     newPolicy.supports_agentless && monitoringEnabledParams ? [] : monitoringEnabledParams;
 
   if (monitoringEnabledParams?.length && !monitoringEnabled?.length) {
-    logger.debug(`Disabling monitoring for agentless policy [${newPolicy.name}]`);
+    logger.info(`Disabling monitoring for agentless policy [${newPolicy.name}]`);
   }
 
   if (withSysMonitoring) {
