@@ -16,7 +16,7 @@ describe('Navigation Tree', () => {
     expect(body.length).toBeGreaterThan(0);
     const firstNavGroup = body[0] as GroupDefinition<AppDeepLinkId, string, string>;
     expect(firstNavGroup.children[0]).toMatchObject({
-      title: 'Overview',
+      title: 'Observability',
       link: 'observability-overview',
     });
   });
