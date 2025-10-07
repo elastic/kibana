@@ -35,8 +35,11 @@ import type {
   RiskScoreCompositeBuckets,
 } from '../types';
 import { RIEMANN_ZETA_S_VALUE, RIEMANN_ZETA_VALUE } from './constants';
-import { filterFromRange, processScores } from './calculate_risk_scores';
-
+import {
+  filterFromRange,
+  getGlobalWeightForIdentifierType,
+  processScores,
+} from './calculate_risk_scores';
 type ESQLResults = Array<
   [EntityType, { scores: EntityRiskScoreRecord[]; afterKey: EntityAfterKey }, string[]]
 >;
@@ -102,11 +105,14 @@ export const calculateScoresWithESQL = async (
           upper: afterKey?.[EntityTypeToIdentifierField[entityType]],
         };
 
+        const weight = getGlobalWeightForIdentifierType(entityType as EntityType, params.weights);
+
         const query = getESQL(
           entityType as EntityType,
           bounds,
           params.alertSampleSizePerShard || 10000,
-          params.pageSize
+          params.pageSize,
+          weight
         );
 
         return esClient.esql
@@ -114,7 +120,9 @@ export const calculateScoresWithESQL = async (
             query,
             filter: { bool: { filter } },
           })
-          .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
+          .then((rs) =>
+            rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index, weight))
+          )
 
           .then((riskScoreBuckets) => {
             return processScores({
@@ -238,7 +246,8 @@ export const getESQL = (
     upper?: string;
   },
   sampleSize: number,
-  pageSize: number
+  pageSize: number,
+  weight: number = 1
 ) => {
   const identifierField = EntityTypeToIdentifierField[entityType];
 
@@ -261,7 +270,7 @@ export const getESQL = (
     | EVAL input = CONCAT(""" {"score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name": """", rule_name, """\", "category": """", category, """\", "id": \"""", alert_id, """\" } """)
     | STATS
         alert_count = count(risk_score),
-        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        scores = ${weight} * MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = TOP(input, 10, "desc")
     BY ${identifierField}
     | SORT scores DESC, ${identifierField} ASC
@@ -272,7 +281,7 @@ export const getESQL = (
 };
 
 export const buildRiskScoreBucket =
-  (entityType: EntityType, index: string) =>
+  (entityType: EntityType, index: string, weight: number = 1) =>
   (row: FieldValue[]): RiskScoreBucket => {
     const [count, score, _inputs, entity] = row as [
       number,
@@ -303,7 +312,7 @@ export const buildRiskScoreBucket =
             score,
             normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
             notes: [],
-            category_1_score: score,
+            category_1_score: score / weight, // category score before global weight applied and normalization
             category_1_count: count,
             risk_inputs: inputs,
           },
