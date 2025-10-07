@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_SPACES_ID, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { AgentPolicyInfo } from '../../../../common/types';
 import type { SyntheticsServerSetup } from '../../../types';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -27,7 +27,7 @@ export const getAgentPoliciesAsInternalUser = async ({
 }: {
   server: SyntheticsServerSetup;
   withAgentCount?: boolean;
-  spaceId?: string;
+  spaceId: string;
 }) => {
   const soClient = server.coreStart.savedObjects.createInternalRepository();
   const esClient = server.coreStart.elasticsearch.client.asInternalUser;
@@ -40,7 +40,7 @@ export const getAgentPoliciesAsInternalUser = async ({
     kuery: 'ingest-agent-policies.is_managed : false',
     esClient,
     withAgentCount,
-    spaceId: spaceId || ALL_SPACES_ID,
+    spaceId,
   });
 
   return agentPolicies.items.map((agentPolicy) => ({

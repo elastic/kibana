@@ -9,6 +9,7 @@ import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/p
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
 import {
   BROWSER_TEST_NOW_RUN,
@@ -414,7 +415,7 @@ export class SyntheticsPrivateLocation {
   }
 
   async getAgentPolicies() {
-    return getAgentPoliciesAsInternalUser({ server: this.server });
+    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
   }
 
   async getPolicyNamespace(configNamespace: string) {
