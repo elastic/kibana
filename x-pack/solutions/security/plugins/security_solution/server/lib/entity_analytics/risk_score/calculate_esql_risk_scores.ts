@@ -242,7 +242,7 @@ export const getESQL = (
 ) => {
   const identifierField = EntityTypeToIdentifierField[entityType];
 
-  const lower = afterKeys.lower ? `${identifierField} >= ${afterKeys.lower}` : undefined;
+  const lower = afterKeys.lower ? `${identifierField} > ${afterKeys.lower}` : undefined;
   const upper = afterKeys.upper ? `${identifierField} <= ${afterKeys.upper}` : undefined;
   if (!lower && !upper) {
     throw new Error('Either lower or upper after key must be provided for pagination');
