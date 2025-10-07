@@ -51,6 +51,7 @@ export const buildMatcherScript = (matcher?: Matcher): estypes.Script => {
 export const buildPrivilegedSearchBody = (
   script: estypes.Script,
   timeGte: string,
+  matchersField: string,
   afterKey?: AfterKey,
   pageSize: number = 100
 ): Omit<estypes.SearchRequest, 'index'> => ({
@@ -71,7 +72,7 @@ export const buildPrivilegedSearchBody = (
             size: 1,
             sort: [{ '@timestamp': { order: 'desc' as estypes.SortOrder } }],
             script_fields: { 'user.is_privileged': { script } },
-            _source: { includes: ['user', 'roles', '@timestamp'] },
+            _source: { includes: ['user', matchersField, '@timestamp'] },
           },
         },
       },

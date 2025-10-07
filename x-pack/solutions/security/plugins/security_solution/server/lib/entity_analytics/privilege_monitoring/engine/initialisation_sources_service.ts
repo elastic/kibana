@@ -31,10 +31,9 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
   });
 
   const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType) => {
-    // When using AD, will use the users index: TODO in: https://github.com/elastic/security-team/issues/13990
-    /* if (integration === 'ad') {
+    if (integration === 'ad') {
       return getStreamPatternFor(integration, namespace);
-    }*/
+    }
     // okta has a dedicated index for last full sync markers
     return oktaLastFullSyncMarkersIndex(namespace);
   };

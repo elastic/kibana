@@ -75,7 +75,7 @@ export const createDeletionDetectionService = (
       const staleUsers = await findStaleUsers(
         source.id,
         allIntegrationsUserNames,
-        'entity_analytics_integration' // TODO: confirm index/type constant
+        'entity_analytics_integration'
       );
       const ops = bulkUtilsService.bulkSoftDeleteOperations(
         staleUsers,

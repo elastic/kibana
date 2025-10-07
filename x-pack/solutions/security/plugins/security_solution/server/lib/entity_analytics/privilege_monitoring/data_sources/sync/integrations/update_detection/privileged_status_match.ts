@@ -102,14 +102,20 @@ export const createPatternMatcherService = (
       while (fetchMore) {
         const response = await esClient.search<never, PrivMatchersAggregation>({
           index: source.indexPattern,
-          ...buildPrivilegedSearchBody(script, lastProcessedTimeStamp, afterKey, pageSize),
+          ...buildPrivilegedSearchBody(
+            script,
+            lastProcessedTimeStamp,
+            source.matchers[0].fields[0],
+            afterKey,
+            pageSize
+          ),
         });
 
         const aggregations = response.aggregations;
         const privUserAgg = response.aggregations?.privileged_user_status_since_last_run;
         const buckets = privUserAgg?.buckets ?? [];
 
-        // process current page
+        // process current page TODO: this is where AD users are setting not privileged
         if (buckets.length && aggregations) {
           const { users: privMonUsers, maxTimestamp } = await parseAggregationResponse(
             aggregations,
