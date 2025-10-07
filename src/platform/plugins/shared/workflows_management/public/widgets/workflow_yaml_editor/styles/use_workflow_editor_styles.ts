@@ -165,17 +165,12 @@ export const useWorkflowEditorStyles = () => {
 
     downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>
       css({
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px',
-        padding: '4px 6px',
         color: euiTheme.colors.textSubdued,
-        cursor: 'pointer',
-        borderRadius: euiTheme.border.radius.small,
-        fontSize: '12px',
         '&:hover': {
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
           color: euiTheme.colors.primaryText,
+        },
+        '&:hover:not(:disabled)::before': {
+          backgroundColor: 'transparent',
         },
       }),
   });

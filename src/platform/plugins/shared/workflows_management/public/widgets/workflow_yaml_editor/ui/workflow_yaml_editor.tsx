@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiButton, EuiIcon } from '@elastic/eui';
+import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { monaco } from '@kbn/monaco';
@@ -596,21 +596,21 @@ export const WorkflowYAMLEditor = ({
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             {/* Debug: Download Schema Button - Only show in development */}
             <EuiFlexItem grow={false}>
-              <div
+              <EuiButtonEmpty
                 css={styles.downloadSchemaButton}
+                iconType="download"
+                size="xs"
+                aria-label="Download JSON schema for debugging"
                 onClick={downloadSchema}
-                role="button"
                 tabIndex={0}
-                title="Download JSON schema for debugging"
-                onKeyDown={(e) => {
+                onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.currentTarget.click();
                   }
                 }}
               >
-                <EuiIcon type="download" size="s" />
-                <span>Schema</span>
-              </div>
+                Schema
+              </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
