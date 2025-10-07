@@ -43,6 +43,7 @@ import type {
 import type { AppEventTypes, AppTelemetryEventsMap } from './events/app/types';
 import type {
   SiemMigrationsEventTypes,
+  SiemMigrationsDashboardEventTypes,
   SiemMigrationsTelemetryEventsMap,
 } from './events/siem_migrations/types';
 import type {
@@ -107,4 +108,5 @@ export type TelemetryEventTypes =
   | NotesEventTypes
   | AppEventTypes
   | SiemMigrationsEventTypes
+  | SiemMigrationsDashboardEventTypes
   | RuleUpgradeEventTypes;

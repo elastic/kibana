@@ -11,23 +11,37 @@ import type {
   SiemMigrationsTelemetryEvent,
   SiemMigrationsTelemetryEventsMap,
 } from './types';
-import { SiemMigrationsEventTypes } from './types';
+import { SiemMigrationsEventTypes, SiemMigrationsDashboardEventTypes } from './types';
 
 export const siemMigrationEventNames = {
   [SiemMigrationsEventTypes.SetupConnectorSelected]: 'Connector Selected',
+  [SiemMigrationsDashboardEventTypes.SetupConnectorSelected]: 'Connector Selected',
   [SiemMigrationsEventTypes.SetupMigrationOpenNew]: 'Open new rules migration',
+  [SiemMigrationsDashboardEventTypes.SetupMigrationOpenNew]: 'Open new dashboard migration',
   [SiemMigrationsEventTypes.SetupMigrationCreated]: 'Create new rules migration',
+  [SiemMigrationsDashboardEventTypes.SetupMigrationCreated]: 'Create new dashboard migration',
   [SiemMigrationsEventTypes.SetupMigrationDeleted]: 'Migration deleted',
+  [SiemMigrationsDashboardEventTypes.SetupMigrationDeleted]: 'Migration deleted',
   [SiemMigrationsEventTypes.SetupResourcesUploaded]: 'Upload rule resources',
+  [SiemMigrationsDashboardEventTypes.SetupResourcesUploaded]: 'Upload dashboard resources',
   [SiemMigrationsEventTypes.SetupMigrationOpenResources]: 'Rules Open Resources',
-  [SiemMigrationsEventTypes.SetupRulesQueryCopied]: 'Copy rules query',
+  [SiemMigrationsDashboardEventTypes.SetupMigrationOpenResources]: 'Dashboard Open Resources',
+  [SiemMigrationsEventTypes.SetupQueryCopied]: 'Copy rules query',
+  [SiemMigrationsDashboardEventTypes.SetupQueryCopied]: 'Copy dashboard query',
   [SiemMigrationsEventTypes.SetupMacrosQueryCopied]: 'Copy macros query',
+  [SiemMigrationsDashboardEventTypes.SetupMacrosQueryCopied]: 'Copy macros query',
   [SiemMigrationsEventTypes.SetupLookupNameCopied]: 'Copy lookup name',
+  [SiemMigrationsDashboardEventTypes.SetupLookupNameCopied]: 'Copy lookup name',
   [SiemMigrationsEventTypes.StartMigration]: 'Start rule migration',
+  [SiemMigrationsDashboardEventTypes.StartMigration]: 'Start dashboard migration',
   [SiemMigrationsEventTypes.StopMigration]: 'Stop rule migration',
-  [SiemMigrationsEventTypes.TranslatedRuleUpdate]: 'Update translated rule',
-  [SiemMigrationsEventTypes.TranslatedRuleInstall]: 'Install translated rule',
-  [SiemMigrationsEventTypes.TranslatedRuleBulkInstall]: 'Bulk install translated rules',
+  [SiemMigrationsDashboardEventTypes.StopMigration]: 'Stop dashboard migration',
+  [SiemMigrationsEventTypes.TranslatedItemUpdate]: 'Update translated rule',
+  [SiemMigrationsDashboardEventTypes.TranslatedItemUpdate]: 'Update translated dashboard',
+  [SiemMigrationsEventTypes.TranslatedItemInstall]: 'Install translated rule',
+  [SiemMigrationsDashboardEventTypes.TranslatedItemInstall]: 'Install translated dashboard',
+  [SiemMigrationsEventTypes.TranslatedBulkInstall]: 'Bulk install translated rules',
+  [SiemMigrationsDashboardEventTypes.TranslatedBulkInstall]: 'Bulk install translated dashboards',
 };
 
 const baseResultActionSchema: RootSchema<BaseResultActionParams> = {
@@ -134,7 +148,7 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
     ...baseResultActionSchema,
     ...eventNameSchema,
   },
-  [SiemMigrationsEventTypes.SetupRulesQueryCopied]: {
+  [SiemMigrationsEventTypes.SetupQueryCopied]: {
     ...eventNameSchema,
     migrationId: {
       ...migrationIdSchema.migrationId,
@@ -212,40 +226,40 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
 
   // Translated Rule Events
 
-  [SiemMigrationsEventTypes.TranslatedRuleUpdate]: {
+  [SiemMigrationsEventTypes.TranslatedItemUpdate]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     ...eventNameSchema,
     ruleMigrationId: {
       type: 'keyword',
       _meta: {
-        description: 'Rule migration ID',
+        description: 'Migration ID',
         optional: false,
       },
     },
   },
-  [SiemMigrationsEventTypes.TranslatedRuleInstall]: {
+  [SiemMigrationsEventTypes.TranslatedItemInstall]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     ...eventNameSchema,
     ruleMigrationId: {
       type: 'keyword',
       _meta: {
-        description: 'Rule migration ID',
+        description: 'Migration ID',
         optional: false,
       },
     },
     author: {
       type: 'keyword',
       _meta: {
-        description: 'The source of the translated rule. Can be one of elastic` or `custom`',
+        description: 'The source of the translated item. Can be one of elastic` or `custom`',
         optional: false,
       },
     },
     enabled: {
       type: 'boolean',
       _meta: {
-        description: 'Is installed rule enabled',
+        description: 'Is installed item enabled',
         optional: false,
       },
     },
@@ -272,7 +286,7 @@ const eventSchemas: SiemMigrationsTelemetryEventSchemas = {
       },
     },
   },
-  [SiemMigrationsEventTypes.TranslatedRuleBulkInstall]: {
+  [SiemMigrationsEventTypes.TranslatedBulkInstall]: {
     ...baseResultActionSchema,
     ...migrationIdSchema,
     ...eventNameSchema,
