@@ -367,12 +367,15 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ];
 
-        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+        const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
+          'test_user',
+          'changeme'
+        );
 
         const res = await supertestWithoutAuth
           .post('/read_only_objects/bulk_create?overwrite=true')
           .set('kbn-xsrf', 'true')
-          .set('cookie', objectOwnerCookie.cookieString())
+          .set('cookie', notObjectOwnerCookieCookie.cookieString())
           .send({
             objects,
           })
@@ -382,6 +385,21 @@ export default function ({ getService }: FtrProviderContext) {
         expect(res.body).to.have.property('message', 'Unable to bulk_create read_only_type');
 
         // ToDo: read back objects and confirm the owner has not changed
+        const getResponse = await supertestWithoutAuth
+          .get(`/read_only_objects/${objectId1}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+        expect(getResponse.body.accessControl).to.have.property('owner', adminProfileUid);
+        expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+
+        const getResponse2 = await supertestWithoutAuth
+          .get(`/read_only_objects/${objectId2}`)
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .expect(200);
+        expect(getResponse2.body.accessControl).to.have.property('owner', adminProfileUid);
+        expect(getResponse2.body.accessControl).to.have.property('accessMode', 'read_only');
       });
     });
 
