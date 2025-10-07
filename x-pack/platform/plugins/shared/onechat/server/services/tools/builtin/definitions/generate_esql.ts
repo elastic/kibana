@@ -6,10 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { generateEsql } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolHandlerResult } from '@kbn/onechat-server/tools';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const nlToEsqlToolSchema = z.object({
@@ -29,6 +29,7 @@ const nlToEsqlToolSchema = z.object({
 export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
   return {
     id: platformCoreTools.generateEsql,
+    type: ToolType.builtin,
     description: 'Generate an ES|QL query from a natural language query.',
     schema: nlToEsqlToolSchema,
     handler: async ({ query: nlQuery, index, context }, { esClient, modelProvider }) => {
@@ -41,7 +42,7 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         esClient: esClient.asCurrentUser,
       });
 
-      const toolResults: ToolResult[] = esqlResponse.queries.map((esqlQuery) => ({
+      const toolResults: ToolHandlerResult[] = esqlResponse.queries.map((esqlQuery) => ({
         type: ToolResultType.query,
         data: {
           esql: esqlQuery,
