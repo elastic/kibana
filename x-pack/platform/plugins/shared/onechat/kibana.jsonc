@@ -15,13 +15,15 @@
     "requiredPlugins": [
       "data",
       "dataViews",
+      "uiActions",
       "esql",
       "features",
       "inference",
       "kibanaUtils",
       "lens",
       "management",
-      "share"
+      "share",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaReact"

@@ -59,9 +59,10 @@ export const SideNavLogoComponent = ({
   `;
 
   const menuItem = (
-    <div css={wrapperStyles}>
+    <div data-test-subj="side-nav-logo-wrapper" css={wrapperStyles}>
       <MenuItem
         aria-label={`${label} homepage`}
+        // TODO: Change to `side-nav-logo`, might affect tests
         data-test-subj="sideNavLogo"
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}

@@ -365,15 +365,11 @@ export function Header({
 }
 
 export function Footer({
-  isControlInEditMode,
-  variableName,
   onCancelControl,
   isSaveDisabled,
   closeFlyout,
   onCreateControl,
 }: {
-  isControlInEditMode: boolean;
-  variableName: string;
   isSaveDisabled: boolean;
   closeFlyout: () => void;
   onCreateControl: () => void;

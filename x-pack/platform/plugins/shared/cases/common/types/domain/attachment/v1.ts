@@ -289,13 +289,12 @@ export type ExternalReferenceAttachment = rt.TypeOf<typeof ExternalReferenceAtta
 /**
  * Persistable state
  */
-export const PersistableStateAttachmentStateRt = rt.record(rt.string, jsonValueRt);
 
 export const PersistableStateAttachmentPayloadRt = rt.strict({
   type: rt.literal(AttachmentType.persistableState),
   owner: rt.string,
   persistableStateAttachmentTypeId: rt.string,
-  persistableStateAttachmentState: PersistableStateAttachmentStateRt,
+  persistableStateAttachmentState: rt.record(rt.string, jsonValueRt),
 });
 
 const PersistableStateAttachmentAttributesRt = rt.intersection([
@@ -314,7 +313,6 @@ export const PersistableStateAttachmentRt = rt.intersection([
 export type PersistableStateAttachmentPayload = rt.TypeOf<
   typeof PersistableStateAttachmentPayloadRt
 >;
-export type PersistableStateAttachmentState = rt.TypeOf<typeof PersistableStateAttachmentStateRt>;
 export type PersistableStateAttachment = rt.TypeOf<typeof PersistableStateAttachmentRt>;
 export type PersistableStateAttachmentAttributes = rt.TypeOf<
   typeof PersistableStateAttachmentAttributesRt

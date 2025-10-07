@@ -304,6 +304,7 @@ export interface DocLinks {
   readonly securitySolution: {
     readonly aiAssistant: {
       home: string;
+      knowledgeBaseHome: string;
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;

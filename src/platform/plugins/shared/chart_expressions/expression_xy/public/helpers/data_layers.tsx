@@ -126,28 +126,22 @@ export type DatatablesWithFormatInfo = Record<string, DatatableWithFormatInfo>;
 
 export type FormattedDatatables = Record<string, Datatable>;
 
-const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
-
 export const getFormattedRow = (
   row: Datatable['rows'][number],
   columns: Datatable['columns'],
   columnsFormatters: Record<string, IFieldFormat>,
   xAccessor: string | undefined,
-  splitColumnAccessor: string | undefined,
-  splitRowAccessor: string | undefined,
+  categoricalAccessors: string[],
   xScaleType: XScaleType,
   invertedRawValueMap: InvertedRawValueMap
 ): { row: Datatable['rows'][number]; formattedColumns: Record<string, true> } =>
   columns.reduce(
     (formattedInfo, { id }) => {
       const record = formattedInfo.row[id];
+      // format only values used as categorical: ordinal X accessor or any other accessor used to split the data
       if (
-        record != null &&
-        // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
-        (!isPrimitive(record) ||
-          (id === xAccessor && xScaleType === 'ordinal') ||
-          id === splitColumnAccessor ||
-          id === splitRowAccessor)
+        (id === xAccessor && xScaleType === 'ordinal') ||
+        (id !== xAccessor && categoricalAccessors.includes(id))
       ) {
         const formattedValue = columnsFormatters[id]?.convert(record) ?? '';
         invertedRawValueMap.get(id)?.set(formattedValue, record);
@@ -165,8 +159,6 @@ export const getFormattedTable = (
   table: Datatable,
   formatFactory: FormatFactory,
   xAccessor: string | ExpressionValueVisDimension | undefined,
-  splitColumnAccessor: string | ExpressionValueVisDimension | undefined,
-  splitRowAccessor: string | ExpressionValueVisDimension | undefined,
   accessors: Array<string | ExpressionValueVisDimension>,
   xScaleType: XScaleType
 ): DatatableWithFormatInfo => {
@@ -200,8 +192,7 @@ export const getFormattedTable = (
       table.columns,
       columnsFormatters,
       xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
-      splitColumnAccessor ? getAccessorByDimension(splitColumnAccessor, table.columns) : undefined,
-      splitRowAccessor ? getAccessorByDimension(splitRowAccessor, table.columns) : undefined,
+      accessors.map((a) => getAccessorByDimension(a, table.columns)),
       xScaleType,
       invertedRawValueMap
     );
@@ -226,18 +217,13 @@ export const getFormattedTablesByLayers = (
   splitRowAccessor?: string | ExpressionValueVisDimension
 ): DatatablesWithFormatInfo =>
   layers.reduce(
-    (
-      formattedDatatables,
-      { layerId, table, xAccessor, splitAccessors = [], accessors, xScaleType }
-    ) => ({
+    (formattedDatatables, { layerId, table, xAccessor, splitAccessors = [], xScaleType }) => ({
       ...formattedDatatables,
       [layerId]: getFormattedTable(
         table,
         formatFactory,
         xAccessor,
-        splitColumnAccessor,
-        splitRowAccessor,
-        [xAccessor, ...splitAccessors, ...accessors, splitColumnAccessor, splitRowAccessor].filter<
+        [xAccessor, ...splitAccessors, splitColumnAccessor, splitRowAccessor].filter<
           string | ExpressionValueVisDimension
         >((a): a is string | ExpressionValueVisDimension => a !== undefined),
         xScaleType
