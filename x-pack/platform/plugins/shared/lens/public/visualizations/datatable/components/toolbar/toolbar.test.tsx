@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { getSelectedButtonInGroup } from '@kbn/test-eui-helpers';
-import { Toolbar } from './toolbar';
+import { DataTableToolbar } from './toolbar';
 import type { DatatableVisualizationState } from '../../visualization';
 import type { FramePublicAPI, VisualizationToolbarProps } from '../../../../types';
 import type { PagingState } from '../../../../../common/expressions';
@@ -48,7 +48,7 @@ describe('datatable toolbar', () => {
     const HEADER_HEIGHT_SETTINGS_TEST_ID = 'lnsHeaderHeightSettings';
     const DENSITY_SETTINGS_TEST_ID = 'lnsDensitySettings';
 
-    const rtlRender = render(<Toolbar {...defaultProps} {...overrides} />);
+    const rtlRender = render(<DataTableToolbar {...defaultProps} {...overrides} />);
 
     const togglePopover = async () => {
       await userEvent.click(screen.getByRole('button', { name: /visual options/i }));

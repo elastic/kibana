@@ -14,7 +14,7 @@ import type { VisualizationToolbarProps } from '../../../../types';
 import type { DatatableVisualizationState } from '../../visualization';
 import { DatatableAppearanceSettings } from './appearance_settings';
 
-export function Toolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
+export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
 
   return (
