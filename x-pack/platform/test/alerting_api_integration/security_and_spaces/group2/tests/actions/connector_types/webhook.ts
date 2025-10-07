@@ -354,7 +354,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .post(`/api/actions/connector/${webhookActionId}/_execute`)
         .set('kbn-xsrf', 'test')
         .send({ params: {} })
-        .expect(204);
+        .expect(200);
 
       expect(proxyHaveBeenCalled).to.equal(true);
       expect(result.status).to.eql('ok');
