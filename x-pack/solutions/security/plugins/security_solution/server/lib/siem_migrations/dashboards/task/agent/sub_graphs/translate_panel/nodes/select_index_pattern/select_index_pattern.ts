@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
-import { getEnhancedIndexExplorerGraph } from '../../../../../../../../../assistant/tools/esql/graphs/enhanced_index_explorer/enhanced_index_explorer';
 import type { GraphNode, TranslatePanelGraphParams } from '../../types';
 import { SELECT_INDEX_PATTERN_PROMPT } from './prompts';
 import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
