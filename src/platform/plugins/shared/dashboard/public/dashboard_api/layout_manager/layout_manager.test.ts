@@ -149,8 +149,6 @@ describe('layout manager', () => {
     expect(layout.panels.panelTwo).toEqual({
       grid: {
         h: 1,
-        i: 'panelTwo',
-        sectionId: undefined,
         w: 1,
         x: 1,
         y: 0,
@@ -160,8 +158,6 @@ describe('layout manager', () => {
     expect(layout.panels.panelThree).toEqual({
       grid: {
         h: 1,
-        i: 'panelThree',
-        sectionId: undefined,
         w: 1,
         x: 2,
         y: 0,
