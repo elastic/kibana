@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { AggregationOptionsByType } from '@kbn/es-types';
-
 import Boom from '@hapi/boom';
 import { afterKeyObjectRT } from '../../../../common/http_api';
-import { TIMESTAMP } from '../../../../common/constants';
 import type { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
-import { calculateDateHistogramOffset } from './calculate_date_histogram_offset';
 import { createMetricsAggregations } from './create_metrics_aggregations';
-import { calculateBucketSize } from './calculate_bucket_size';
 
 const DEFAULT_LIMIT = 9;
 const METRICSET_AGGS = {
@@ -22,32 +17,6 @@ const METRICSET_AGGS = {
       field: 'metricset.name',
     },
   },
-};
-
-type MetricsAggregation = ReturnType<typeof createMetricsAggregations>;
-interface HistogramAggregation {
-  histogram: {
-    date_histogram: AggregationOptionsByType['date_histogram'];
-    aggregations: MetricsAggregation;
-  };
-}
-
-const createMetricHistogramAggs = (options: MetricsAPIRequest): HistogramAggregation => {
-  const { intervalString } = calculateBucketSize(options.timerange);
-  return {
-    histogram: {
-      date_histogram: {
-        field: TIMESTAMP,
-        fixed_interval: intervalString,
-        offset: options.alignDataToEnd ? calculateDateHistogramOffset(options.timerange) : '0s',
-        extended_bounds: {
-          min: options.timerange.from,
-          max: options.timerange.to,
-        },
-      },
-      aggregations: createMetricsAggregations(options),
-    },
-  };
 };
 
 const getAfterKey = (options: MetricsAPIRequest) => {
@@ -65,10 +34,6 @@ export const createCompositeAggregations = (options: MetricsAPIRequest) => {
     throw Boom.badRequest('groupBy must be informed.');
   }
 
-  if (!options.includeTimeseries && !!options.metrics.find((p) => p.id === 'logRate')) {
-    throw Boom.badRequest('logRate metric is not supported without time series');
-  }
-
   const after = getAfterKey(options);
 
   return {
@@ -81,9 +46,7 @@ export const createCompositeAggregations = (options: MetricsAPIRequest) => {
         ...(after ? { after } : {}),
       },
       aggs: {
-        ...(options.includeTimeseries
-          ? createMetricHistogramAggs(options)
-          : createMetricsAggregations(options)),
+        ...createMetricsAggregations(options),
         ...METRICSET_AGGS,
       },
     },
@@ -92,7 +55,7 @@ export const createCompositeAggregations = (options: MetricsAPIRequest) => {
 
 export const createAggregations = (options: MetricsAPIRequest) => {
   return {
-    ...createMetricHistogramAggs(options),
+    ...createMetricsAggregations(options),
     ...METRICSET_AGGS,
   };
 };

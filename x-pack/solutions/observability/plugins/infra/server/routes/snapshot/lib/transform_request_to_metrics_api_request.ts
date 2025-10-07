@@ -17,7 +17,6 @@ import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import type { SnapshotRequest } from '../../../../common/http_api';
 import type { InfraSource } from '../../../lib/sources';
-import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 import { transformSnapshotMetricsToMetricsAPIMetrics } from './transform_snapshot_metrics_to_metrics_api_metrics';
 import { META_KEY } from './constants';
 import type { SourceOverrides } from './get_nodes';
@@ -35,12 +34,14 @@ export const transformRequestToMetricsAPIRequest = async ({
   compositeSize: number;
   sourceOverrides?: SourceOverrides;
 }): Promise<MetricsAPIRequest> => {
-  const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(client, {
-    ...snapshotRequest,
-    sourceConfiguration: source.configuration,
-  });
-
   const transformed = await transformSnapshotMetricsToMetricsAPIMetrics(snapshotRequest);
+
+  // Use the user-specified interval directly for single-bucket query
+  const timerange = {
+    from: snapshotRequest.timerange.from,
+    to: snapshotRequest.timerange.to,
+    interval: snapshotRequest.timerange.interval,
+  };
 
   const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
 
@@ -61,9 +62,7 @@ export const transformRequestToMetricsAPIRequest = async ({
 
   const metricsApiRequest: MetricsAPIRequest = {
     indexPattern: sourceOverrides?.indexPattern ?? source.configuration.metricAlias,
-    timerange: {
-      ...timeRangeWithIntervalApplied,
-    },
+    timerange,
     metrics: transformed,
     limit: snapshotRequest.overrideCompositeSize
       ? snapshotRequest.overrideCompositeSize
