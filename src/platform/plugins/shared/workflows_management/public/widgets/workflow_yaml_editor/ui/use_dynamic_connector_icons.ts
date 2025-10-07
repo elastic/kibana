@@ -17,11 +17,9 @@ export function useDynamicConnectorIcons(connectorsData: Record<string, any> | u
     if (connectorsData?.connectorTypes) {
       addDynamicConnectorsToCache(connectorsData.connectorTypes);
       // Inject dynamic CSS for connector icons
-      // Note: We don't await this to avoid blocking the UI
-      // The icon functions don't actually use the services, so we pass null
-      injectDynamicConnectorIcons(connectorsData.connectorTypes, null);
+      injectDynamicConnectorIcons(connectorsData.connectorTypes);
       // Inject dynamic CSS for shadow icons (::after pseudo-elements)
-      injectDynamicShadowIcons(connectorsData.connectorTypes, null);
+      injectDynamicShadowIcons(connectorsData.connectorTypes);
     }
   }, [connectorsData?.connectorTypes]);
 }
@@ -30,13 +28,7 @@ export function useDynamicConnectorIcons(connectorsData: Record<string, any> | u
  * Inject dynamic CSS for connector icons in Monaco autocompletion
  * This creates CSS rules for each connector type to show custom icons
  */
-async function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, services: any) {
-  // console.log(
-  //   '🎯 injectDynamicConnectorIcons called with:',
-  //   Object.keys(connectorTypes).length,
-  //   'connectors'
-  // );
-
+function injectDynamicConnectorIcons(connectorTypes: Record<string, any>) {
   const styleId = 'dynamic-connector-icons';
 
   // Remove existing dynamic styles
@@ -58,13 +50,13 @@ async function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, 
     }
 
     try {
-      // Generate CSS rule for this connector - try multiple targeting strategies
-      const iconBase64 = await getConnectorIconBase64(connectorType, services);
+      // Generate CSS rule for this connector
+      const iconBase64 = getConnectorIconBase64(connectorType);
 
       // Only inject CSS if we successfully generated an icon
       if (iconBase64) {
         cssToInject += `
-          /* Strategy 1: Target by aria-label content - be more specific to avoid conflicts */
+          /* Target by aria-label content */
           .monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon:before,
           .monaco-list .monaco-list-row[aria-label$=", ${connectorType}"] .suggest-icon:before,
           .monaco-list .monaco-list-row[aria-label*=", ${connectorType},"] .suggest-icon:before,
@@ -79,29 +71,10 @@ async function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, 
             height: 16px !important;
             display: block !important;
           }
-          
-          /* Strategy 2: Target by detail text (fallback) - be more specific */
-          .monaco-list .monaco-list-row .suggest-detail:contains("${connectorType}") ~ .suggest-icon:before {
-            background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
-          }
-          
-          /* Strategy 3: Target connector-id suggestions by detail text containing connector type */
-          .monaco-list .monaco-list-row[data-detail*="${connectorType}"] .suggest-icon:before,
-          .monaco-list .monaco-list-row .suggest-detail:contains("${connectorType}") ~ .suggest-icon:before,
-          .monaco-list .monaco-list-row:has(.suggest-detail:contains("${connectorType}")) .suggest-icon:before {
-            background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
-            background-size: 16px 16px !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
-            content: " " !important;
-            width: 16px !important;
-            height: 16px !important;
-            display: block !important;
-          }
         `;
       }
     } catch (error) {
-      // console.warn('🔍 Failed to generate icon for connector:', connectorType, error);
+      // Silently skip if icon generation fails
     }
   }
 
@@ -118,9 +91,7 @@ async function injectDynamicConnectorIcons(connectorTypes: Record<string, any>, 
  * Inject dynamic CSS for connector shadow icons (::after pseudo-elements)
  * This creates CSS rules for each connector type to show custom icons in the editor
  */
-async function injectDynamicShadowIcons(connectorTypes: Record<string, any>, services: any) {
-  // console.log('🎯 injectDynamicShadowIcons called with:', Object.keys(connectorTypes).length, 'connectors');
-
+function injectDynamicShadowIcons(connectorTypes: Record<string, any>) {
   const styleId = 'dynamic-shadow-icons';
 
   // Remove existing dynamic shadow styles
@@ -154,11 +125,11 @@ async function injectDynamicShadowIcons(connectorTypes: Record<string, any>, ser
 
     try {
       // Generate CSS rule for this connector shadow icon
-      const iconBase64 = await getConnectorIconBase64(connectorType, services);
+      const iconBase64 = getConnectorIconBase64(connectorType);
 
       // Only inject CSS if we successfully generated an icon
       if (iconBase64) {
-        // Get the class name for this connector (same logic as getConnectorIcon)
+        // Get the class name for this connector
         let className = connectorType;
         if (connectorType.startsWith('elasticsearch.')) {
           className = 'elasticsearch';
@@ -184,10 +155,10 @@ async function injectDynamicShadowIcons(connectorTypes: Record<string, any>, ser
             background-size: contain;
             background-repeat: no-repeat;
           }
-          `;
+        `;
       }
     } catch (error) {
-      // console.warn('🔍 Failed to generate shadow icon for connector:', connectorType, error);
+      // Silently skip if icon generation fails
     }
   }
 
@@ -197,7 +168,6 @@ async function injectDynamicShadowIcons(connectorTypes: Record<string, any>, ser
     style.id = styleId;
     style.textContent = cssToInject;
     document.head.appendChild(style);
-    // console.log('✅ Dynamic shadow icon CSS injected:', cssToInject.length, 'characters');
   }
 }
 
@@ -210,20 +180,17 @@ const DEFAULT_CONNECTOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16
   </svg>`;
 
 /**
- * Get base64 encoded SVG icon for a connector type (super simplified!)
- * Uses regular imports - much cleaner!
+ * Get base64 encoded SVG icon for a connector type
  */
-async function getConnectorIconBase64(connectorType: string, services: any): Promise<string> {
-  // console.log('🔍 getConnectorIconBase64 called for:', connectorType);
-
+function getConnectorIconBase64(connectorType: string): string {
   try {
-    // First, try to get the logo directly from stack connectors (regular import!)
+    // First, try to get the logo directly from stack connectors
     if (connectorType in STACK_CONNECTOR_LOGOS) {
       const LogoComponent =
         STACK_CONNECTOR_LOGOS[connectorType as keyof typeof STACK_CONNECTOR_LOGOS];
 
       // Render the actual logo component to HTML string
-      const logoElement = React.createElement(LogoComponent, { width: 32, height: 32 });
+      const logoElement = React.createElement(LogoComponent, { width: 16, height: 16 });
       let htmlString = renderToStaticMarkup(logoElement);
 
       // Check if it's an <img> tag (imported SVG) or direct <svg>
@@ -249,7 +216,6 @@ async function getConnectorIconBase64(connectorType: string, services: any): Pro
           }
 
           // If it's a regular URL/path, we can't easily convert it here
-          // console.warn('🔍 Cannot convert external image URL to base64:', srcValue);
         }
       } else {
         // It's a direct SVG - handle as before
@@ -265,7 +231,6 @@ async function getConnectorIconBase64(connectorType: string, services: any): Pro
       }
 
       const base64 = btoa(htmlString);
-
       return base64;
     }
 
@@ -283,7 +248,6 @@ async function getConnectorIconBase64(connectorType: string, services: any): Pro
     // Fallback to default icon for other connector types
     return btoa(DEFAULT_CONNECTOR_SVG);
   } catch (error) {
-    // console.warn('🔍 Failed to generate icon for', connectorType, ':', error);
     // Fallback to default static icon
     return btoa(DEFAULT_CONNECTOR_SVG);
   }
