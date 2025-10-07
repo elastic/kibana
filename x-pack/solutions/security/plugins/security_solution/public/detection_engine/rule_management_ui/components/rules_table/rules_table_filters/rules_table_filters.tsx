@@ -56,23 +56,33 @@ const RulesTableFiltersComponent = () => {
 
   const handleElasticRulesClick = useCallback(() => {
     startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-    setFilterOptions({ showElasticRules: !showElasticRules, showCustomRules: false });
-  }, [setFilterOptions, showElasticRules, startTransaction]);
+    setFilterOptions((prevOptions) => ({
+      showElasticRules: !prevOptions.showElasticRules,
+      showCustomRules: false,
+    }));
+  }, [setFilterOptions, startTransaction]);
 
   const handleCustomRulesClick = useCallback(() => {
     startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-    setFilterOptions({ showCustomRules: !showCustomRules, showElasticRules: false });
-  }, [setFilterOptions, showCustomRules, startTransaction]);
+    setFilterOptions((prevOptions) => ({
+      showCustomRules: !prevOptions.showCustomRules,
+      showElasticRules: false,
+    }));
+  }, [setFilterOptions, startTransaction]);
 
   const handleShowEnabledRulesClick = useCallback(() => {
     startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-    setFilterOptions(enabled === true ? { enabled: undefined } : { enabled: true });
-  }, [setFilterOptions, enabled, startTransaction]);
+    setFilterOptions((prevOptions) => ({
+      enabled: prevOptions.enabled === true ? undefined : true,
+    }));
+  }, [setFilterOptions, startTransaction]);
 
   const handleShowDisabledRulesClick = useCallback(() => {
     startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-    setFilterOptions(enabled === false ? { enabled: undefined } : { enabled: false });
-  }, [setFilterOptions, enabled, startTransaction]);
+    setFilterOptions((prevOptions) => ({
+      enabled: prevOptions.enabled === false ? undefined : false,
+    }));
+  }, [setFilterOptions, startTransaction]);
 
   const handleSelectedTags = useCallback(
     (newTags: string[]) => {
