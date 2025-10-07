@@ -673,7 +673,7 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
   const onKeyDown = useCallback((event: KeyboardEvent<HTMLElement>) => {
     if (event.key === keys.ESCAPE) {
       event.preventDefault();
-      event.stopPropagation();
+      // event.stopPropagation();
       setIsFullScreen(false);
     }
   }, []);
