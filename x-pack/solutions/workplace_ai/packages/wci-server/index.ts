@@ -24,6 +24,6 @@ export {
 } from './src/utils';
 export type {
   IntegrationContext,
-  WorkChatIntegration,
-  WorkchatIntegrationDefinition,
+  WorkplaceAIIntegration,
+  WorkplaceAIIntegrationDefinition,
 } from './src/integration';

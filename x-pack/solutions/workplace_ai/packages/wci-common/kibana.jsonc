@@ -5,6 +5,6 @@
     "@elastic/search-kibana",
     "@elastic/workchat-eng"
   ],
-  "group": "chat",
+  "group": "workplace_ai",
   "visibility": "private"
 }

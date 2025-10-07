@@ -10,13 +10,13 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { IntegrationType, IntegrationConfiguration } from '@kbn/wci-common';
 import type { McpClientProvider } from './mcp';
 /**
- * Represents the definition of a type of integration for WorkChat.
+ * Represents the definition of a type of integration for Workplace AI.
  *
  * This is the top level entity for integration, which is the source
  * of all things related to this integration type, such as being
  * able to create an actual integration instance.
  */
-export interface WorkchatIntegrationDefinition<
+export interface WorkplaceAIIntegrationDefinition<
   T extends IntegrationConfiguration = IntegrationConfiguration
 > {
   /**
@@ -27,7 +27,7 @@ export interface WorkchatIntegrationDefinition<
   /**
    * Creates an integration instance based on the provided context
    */
-  createIntegration(context: IntegrationContext<T>): MaybePromise<WorkChatIntegration>;
+  createIntegration(context: IntegrationContext<T>): MaybePromise<WorkplaceAIIntegration>;
 }
 
 export interface IntegrationContext<T extends IntegrationConfiguration> {
@@ -40,7 +40,7 @@ export interface IntegrationContext<T extends IntegrationConfiguration> {
 /**
  * Represents an instance of an integration type, bound to a specific context
  */
-export interface WorkChatIntegration {
+export interface WorkplaceAIIntegration {
   /** connect to the MCP client */
   connect: McpClientProvider['connect'];
 }
