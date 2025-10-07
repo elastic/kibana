@@ -22,7 +22,7 @@ import xpackPlatformTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin
 import xpackObservabilityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_observability.json';
 import xpackSearchTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_search.json';
 import xpackSecurityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_security.json';
-import xpackChatTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_chat.json';
+import xpackWorkplaceAITelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_workplace_ai.json';
 import type { UnencryptedTelemetryPayload } from '@kbn/telemetry-plugin/common/types';
 import type {
   UsageStatsPayload,
@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
           xpackObservabilityTelemetrySchema,
           xpackSearchTelemetrySchema,
           xpackSecurityTelemetrySchema,
-          xpackChatTelemetrySchema,
+          xpackWorkplaceAITelemetrySchema,
         ] as TelemetrySchemaObject[];
         const plugins = schemas.reduce((acc, schema) => deepmerge(acc, schema));
 

@@ -32,8 +32,8 @@
     "exclude": []
   },
   {
-    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_chat.json",
-    "root": "solutions/chat",
+    "output": "platform/plugins/private/telemetry_collection_xpack/schema/xpack_workplace_ai.json",
+    "root": "solutions/workplace_ai",
     "exclude": []
   }
 ]
