@@ -150,7 +150,7 @@ export function UnifiedHistogramChart({
     beforeFetch: updateTimeRange,
   });
 
-  useTotalHits({
+  const { onAbort: onAbortTotalHits } = useTotalHits({
     services,
     dataView,
     request,
@@ -163,6 +163,17 @@ export function UnifiedHistogramChart({
     onTotalHitsChange,
     isPlainRecord,
   });
+
+  useEffect(() => {
+    const onAbort = () => {
+      onAbortTotalHits();
+    };
+
+    histogramProps.abortController?.signal.addEventListener('abort', onAbort);
+    return () => {
+      histogramProps.abortController?.signal.removeEventListener('abort', onAbort);
+    };
+  }, [histogramProps.abortController, onAbortTotalHits]);
 
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const onLoad = useStableCallback(

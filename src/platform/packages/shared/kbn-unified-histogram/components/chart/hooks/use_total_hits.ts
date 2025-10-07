@@ -13,7 +13,7 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { MutableRefObject } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import type { Observable } from 'rxjs';
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import type {
@@ -71,6 +71,14 @@ export const useTotalHits = ({
     const subscription = fetch$.subscribe(fetch);
     return () => subscription.unsubscribe();
   }, [fetch, fetch$]);
+
+  const onAbort = useCallback(() => {
+    abortController.current?.abort();
+  }, [abortController]);
+
+  return {
+    onAbort,
+  };
 };
 
 const fetchTotalHits = async ({
