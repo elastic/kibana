@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { HeatmapPopoverToolbar } from './toolbar';
+export { HeatmapToolbar } from './toolbar_component';
 export { HeatmapFlyoutToolbar } from './flyout_toolbar';
