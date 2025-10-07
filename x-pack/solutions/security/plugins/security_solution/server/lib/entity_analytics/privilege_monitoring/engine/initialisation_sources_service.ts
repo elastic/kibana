@@ -31,7 +31,7 @@ export const createInitialisationSourcesService = (dataClient: PrivilegeMonitori
   });
 
   const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType) => {
-    if (integration === 'ad') {
+    if (integration === 'entityanalytics_ad') {
       return getStreamPatternFor(integration, namespace);
     }
     // okta has a dedicated index for last full sync markers
