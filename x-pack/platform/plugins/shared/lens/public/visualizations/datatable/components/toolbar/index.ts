@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { DataTableToolbar } from '../toolbar';
+export { DataTableToolbar } from './toolbar';
 export { DatatableFlyoutToolbar } from './flyout_toolbar';

@@ -47,8 +47,7 @@ import {
   type DatatableColumnFn,
   type DatatableExpressionFunction,
 } from '../../../common/expressions';
-import { DatatableFlyoutToolbar } from './components/toolbar/flyout_toolbar';
-import { DataTableToolbar } from './components/toolbar';
+import { DataTableToolbar, DatatableFlyoutToolbar } from './components/toolbar';
 import {
   DEFAULT_HEADER_ROW_HEIGHT,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,

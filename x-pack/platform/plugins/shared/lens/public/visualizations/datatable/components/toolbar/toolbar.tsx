@@ -9,10 +9,10 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup } from '@elastic/eui';
-import { ToolbarPopover } from '../../../shared_components';
-import type { VisualizationToolbarProps } from '../../../types';
-import type { DatatableVisualizationState } from '../visualization';
-import { DatatableAppearanceSettings } from './toolbar/appearance_settings';
+import { ToolbarPopover } from '../../../../shared_components';
+import type { VisualizationToolbarProps } from '../../../../types';
+import type { DatatableVisualizationState } from '../../visualization';
+import { DatatableAppearanceSettings } from './appearance_settings';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
