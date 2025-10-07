@@ -238,7 +238,7 @@ describe.skip('AzureCredentialsFormAgentless', () => {
       });
 
       it('shows cloud connector credential type', () => {
-        render(<AzureCredentialsFormAgentlessWrapper cloud={cloudMocker} />);
+        render(<AzureCredentialsFormAgentlessCloudConnectorWrapper cloud={cloudMocker} />);
         expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toHaveValue(
           AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS
         );
@@ -295,7 +295,11 @@ describe.skip('AzureCredentialsFormAgentless', () => {
           AZURE_PROVIDER,
           GCP_PROVIDER
         );
-        render(<AzureCredentialsFormAgentlessWrapper cloud={cloudMockerWithDifferentHost} />);
+        render(
+          <AzureCredentialsFormAgentlessCloudConnectorWrapper
+            cloud={cloudMockerWithDifferentHost}
+          />
+        );
         expect(screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toHaveValue(
           AZURE_CREDENTIALS_TYPE.CLOUD_CONNECTORS
         );
@@ -310,14 +314,30 @@ describe.skip('AzureCredentialsFormAgentless', () => {
 
   describe('Component Behavior Tests', () => {
     const serverlessMock = createCloudServerlessMock(true, AZURE_PROVIDER, AZURE_PROVIDER);
-
+    const regularCloudMock = createCloudServerlessMock(false, AZURE_PROVIDER, AZURE_PROVIDER);
     beforeEach(() => {
-      uiSettingsClient.get = jest.fn().mockReturnValue(false);
+      uiSettingsClient.get = jest.fn().mockImplementation((key: string) => {
+        if (key === 'securitySolution:enableCloudConnector') {
+          return false;
+        }
+        return true; // default for other settings
+      });
     });
 
     describe('rendering with different configurations', () => {
       it('renders without credential type selector when cloud connectors are disabled', () => {
-        render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
+        // Use a lower version package to disable cloud connectors functionality
+        const packageInfoWithLowerVersion = getPackageInfoMock({
+          includeAzureTemplates: true,
+        }) as PackageInfo;
+        packageInfoWithLowerVersion.version = '1.0.0'; // Lower than CLOUD_CONNECTOR_ENABLED_VERSION (3.0.0)
+
+        render(
+          <AzureCredentialsFormAgentlessWrapper
+            cloud={regularCloudMock}
+            packageInfo={packageInfoWithLowerVersion}
+          />
+        );
 
         expect(
           screen.queryByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)
@@ -341,7 +361,7 @@ describe.skip('AzureCredentialsFormAgentless', () => {
 
       it('handles hasInvalidRequiredVars prop correctly', () => {
         render(
-          <AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} hasInvalidRequiredVars />
+          <AzureCredentialsFormAgentlessWrapper cloud={regularCloudMock} hasInvalidRequiredVars />
         );
 
         // The component should still render all expected fields even with invalid vars
@@ -355,7 +375,7 @@ describe.skip('AzureCredentialsFormAgentless', () => {
       it('renders with different setup technologies', () => {
         render(
           <AzureCredentialsFormAgentlessWrapper
-            cloud={serverlessMock}
+            cloud={regularCloudMock}
             setupTechnology={SetupTechnology.AGENTLESS}
           />
         );
@@ -394,7 +414,7 @@ describe.skip('AzureCredentialsFormAgentless', () => {
 
       it('maintains form state when credential type changes', async () => {
         uiSettingsClient.get = jest.fn().mockReturnValue(true);
-        render(<AzureCredentialsFormAgentlessWrapper cloud={serverlessMock} />);
+        render(<AzureCredentialsFormAgentlessCloudConnectorWrapper cloud={serverlessMock} />);
 
         const credentialSelector = screen.getByTestId(AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
 
@@ -438,8 +458,6 @@ describe.skip('AzureCredentialsFormAgentless', () => {
       });
 
       it('handles serverless vs regular cloud environments', () => {
-        const regularCloudMock = createCloudServerlessMock(false, AZURE_PROVIDER, AZURE_PROVIDER);
-
         render(<AzureCredentialsFormAgentlessWrapper cloud={regularCloudMock} />);
 
         // Regular cloud should show standard Azure fields
