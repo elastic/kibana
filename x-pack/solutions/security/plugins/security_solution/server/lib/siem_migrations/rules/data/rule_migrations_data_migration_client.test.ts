@@ -219,6 +219,26 @@ describe('RuleMigrationsDataMigrationClient', () => {
     it('should update `finished_at` when called saveAsEnded', async () => {
       const migrationId = 'testId';
 
+      (
+        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
+      ).mockResolvedValueOnce({
+        _index: '.kibana-siem-rule-migrations',
+        found: true,
+        _source: {
+          created_by: currentUser.profile_uid,
+          created_at: new Date().toISOString(),
+          last_execution: {
+            started_at: new Date().toISOString(),
+            is_stopped: false,
+            error: null,
+            finished_at: null,
+            connector_id: connectorId,
+            skip_prebuilt_rules_matching: false,
+          },
+        },
+        _id: migrationId,
+      });
+
       await ruleMigrationsDataMigrationClient.saveAsFinished({ id: migrationId });
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
@@ -227,6 +247,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         refresh: 'wait_for',
         doc: {
           last_execution: {
+            total_execution_time_ms: expect.any(Number),
             finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
           },
         },
@@ -255,6 +276,26 @@ describe('RuleMigrationsDataMigrationClient', () => {
     it('should update `error` params correctly when called saveAsFailed', async () => {
       const migrationId = 'testId';
 
+      (
+        esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
+      ).mockResolvedValueOnce({
+        _index: '.kibana-siem-rule-migrations',
+        found: true,
+        _source: {
+          created_by: currentUser.profile_uid,
+          created_at: new Date().toISOString(),
+          last_execution: {
+            started_at: new Date().toISOString(),
+            is_stopped: false,
+            error: null,
+            finished_at: null,
+            connector_id: connectorId,
+            skip_prebuilt_rules_matching: false,
+          },
+        },
+        _id: migrationId,
+      });
+
       await ruleMigrationsDataMigrationClient.saveAsFailed({
         id: migrationId,
         error: 'Test error',
@@ -267,6 +308,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
         doc: {
           last_execution: {
             error: 'Test error',
+            total_execution_time_ms: expect.any(Number),
             finished_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
           },
         },

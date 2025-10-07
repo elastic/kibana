@@ -15,9 +15,10 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import type { Version } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexOperation } from '../../../common';
 import type { ReindexSavedObject } from './types';
-import { ReindexStatus, ReindexStep } from '../../../common';
+import { ReindexStep } from '../../../common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
@@ -108,10 +109,6 @@ describe('reindexService', () => {
             names: ['anIndex'],
             allow_restricted_indices: true,
             privileges: ['all'],
-          },
-          {
-            names: ['.tasks'],
-            privileges: ['read'],
           },
         ],
       });

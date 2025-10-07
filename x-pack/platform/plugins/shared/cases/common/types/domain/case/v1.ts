@@ -49,9 +49,16 @@ export const CaseSeverityRt = rt.union([
  * Case
  */
 
-export const CaseSettingsRt = rt.strict({
-  syncAlerts: rt.boolean,
-});
+export const CaseSettingsRt = rt.intersection([
+  rt.strict({
+    syncAlerts: rt.boolean,
+  }),
+  rt.exact(
+    rt.partial({
+      extractObservables: rt.boolean,
+    })
+  ),
+]);
 
 const CaseBaseFields = {
   /**

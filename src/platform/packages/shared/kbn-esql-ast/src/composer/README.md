@@ -388,6 +388,9 @@ const query = esql`FROM ${sources}`;
 
 // Using convenience method
 const query = esql.from('logs-app1-*', 'logs-app2-*');
+
+// Using convenience method with metadata fields
+const query = esql.from(['logs-app1-*', 'logs-app2-*'], ['_id', '_index']);
 ```
 
 ### Column References

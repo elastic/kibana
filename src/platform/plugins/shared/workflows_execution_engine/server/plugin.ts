@@ -26,6 +26,7 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import type {
+  ExecuteWorkflowStepResponse,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
   WorkflowsExecutionEnginePluginStart,
@@ -38,7 +39,6 @@ import { UrlValidator } from './lib/url_validator';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { NodesFactory } from './step/nodes_factory';
-import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
@@ -73,6 +73,7 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          const taskAbortController = new AbortController();
           return {
             async run() {
               const { workflowRunId, spaceId } =
@@ -91,6 +92,9 @@ export class WorkflowsExecutionEnginePlugin
                 workflowLogger,
                 nodesFactory,
                 workflowExecutionGraph,
+                clientToUse,
+                fakeRequest: fakeRequestFromContainer,
+                coreStart: coreStartFromContainer,
               } = await createContainer(
                 workflowRunId,
                 spaceId,
@@ -105,16 +109,21 @@ export class WorkflowsExecutionEnginePlugin
               );
               await workflowRuntime.start();
 
-              await workflowExecutionLoop(
+              await workflowExecutionLoop({
                 workflowRuntime,
                 workflowExecutionState,
+                workflowExecutionRepository,
                 workflowLogger,
                 nodesFactory,
-                workflowExecutionGraph
-              );
+                workflowExecutionGraph,
+                esClient: clientToUse,
+                fakeRequest: fakeRequestFromContainer,
+                coreStart: coreStartFromContainer,
+                taskAbortController,
+              });
             },
             async cancel() {
-              // Cancel function for the task
+              taskAbortController.abort();
             },
           };
         },
@@ -127,6 +136,8 @@ export class WorkflowsExecutionEnginePlugin
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }) => {
+          const taskAbortController = new AbortController();
+
           return {
             async run() {
               const { workflowRunId, spaceId } =
@@ -145,6 +156,9 @@ export class WorkflowsExecutionEnginePlugin
                 workflowLogger,
                 nodesFactory,
                 workflowExecutionGraph,
+                clientToUse,
+                fakeRequest: fakeRequestFromContainer,
+                coreStart: coreStartFromContainer,
               } = await createContainer(
                 workflowRunId,
                 spaceId,
@@ -159,15 +173,22 @@ export class WorkflowsExecutionEnginePlugin
               );
               await workflowRuntime.resume();
 
-              await workflowExecutionLoop(
+              await workflowExecutionLoop({
                 workflowRuntime,
                 workflowExecutionState,
+                workflowExecutionRepository,
                 workflowLogger,
                 nodesFactory,
-                workflowExecutionGraph
-              );
+                workflowExecutionGraph,
+                esClient: clientToUse,
+                fakeRequest: fakeRequestFromContainer,
+                coreStart: coreStartFromContainer,
+                taskAbortController,
+              });
             },
-            async cancel() {},
+            async cancel() {
+              taskAbortController.abort();
+            },
           };
         },
       },
@@ -191,7 +212,7 @@ export class WorkflowsExecutionEnginePlugin
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
-      const workflowExecution = {
+      const workflowExecution: Partial<EsWorkflowExecution> = {
         id: generateUuid(),
         spaceId: context.spaceId,
         workflowId: workflow.id,
@@ -202,10 +223,8 @@ export class WorkflowsExecutionEnginePlugin
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
         createdBy: context.createdBy || '', // TODO: set if available
-        lastUpdatedAt: workflowCreatedAt.toISOString(),
-        lastUpdatedBy: context.createdBy || '', // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
-      } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
+      };
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
       // AUTO-DETECT: Check if we're already running in a Task Manager context
@@ -226,6 +245,9 @@ export class WorkflowsExecutionEnginePlugin
           workflowLogger,
           nodesFactory,
           workflowExecutionGraph,
+          fakeRequest,
+          clientToUse,
+          coreStart,
         } = await createContainer(
           workflowExecution.id!,
           workflowExecution.spaceId!,
@@ -240,13 +262,18 @@ export class WorkflowsExecutionEnginePlugin
         );
 
         await workflowRuntime.start();
-        await workflowExecutionLoop(
+        await workflowExecutionLoop({
           workflowRuntime,
           workflowExecutionState,
+          workflowExecutionRepository,
           workflowLogger,
           nodesFactory,
-          workflowExecutionGraph
-        );
+          workflowExecutionGraph,
+          esClient: clientToUse,
+          fakeRequest,
+          coreStart,
+          taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
+        });
       } else {
         // Normal manual execution - schedule a task
         const taskInstance = {
@@ -283,6 +310,58 @@ export class WorkflowsExecutionEnginePlugin
       };
     };
 
+    const executeWorkflowStep = async (
+      workflow: WorkflowExecutionEngineModel,
+      stepId: string,
+      contextOverride: Record<string, any>
+    ): Promise<ExecuteWorkflowStepResponse> => {
+      const workflowCreatedAt = new Date();
+
+      // Get ES client and create repository for this execution
+      const esClient = core.elasticsearch.client.asInternalUser as Client;
+      const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+      const context: Record<string, any> = {
+        contextOverride,
+      };
+
+      const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
+      const workflowExecution: Partial<EsWorkflowExecution> = {
+        id: generateUuid(),
+        spaceId: workflow.spaceId,
+        stepId,
+        workflowId: workflow.id,
+        isTestRun: workflow.isTestRun,
+        workflowDefinition: workflow.definition,
+        yaml: workflow.yaml,
+        context,
+        status: ExecutionStatus.PENDING,
+        createdAt: workflowCreatedAt.toISOString(),
+        createdBy: context.createdBy || '', // TODO: set if available
+        triggeredBy, // <-- new field for scheduled workflows
+      };
+      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
+      const taskInstance = {
+        id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
+        taskType: 'workflow:run',
+        params: {
+          workflowRunId: workflowExecution.id,
+          spaceId: workflowExecution.spaceId,
+        } as StartWorkflowExecutionParams,
+        state: {
+          lastRunAt: null,
+          lastRunStatus: null,
+          lastRunError: null,
+        },
+        scope: ['workflows'],
+        enabled: true,
+      };
+
+      await plugins.taskManager.schedule(taskInstance);
+      return {
+        workflowExecutionId: workflowExecution.id!,
+      };
+    };
+
     const cancelWorkflowExecution = async (workflowExecutionId: string, spaceId: string) => {
       const esClient = core.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
@@ -308,6 +387,7 @@ export class WorkflowsExecutionEnginePlugin
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
         cancelRequested: true,
+        cancellationReason: 'Cancelled by user',
         cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
       });
@@ -324,6 +404,7 @@ export class WorkflowsExecutionEnginePlugin
 
     return {
       executeWorkflow,
+      executeWorkflowStep,
       cancelWorkflowExecution,
     };
   }
@@ -352,9 +433,14 @@ async function createContainer(
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
   }
 
-  const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
+  let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
     workflowExecution.workflowDefinition
   );
+
+  // If the execution is for a specific step, narrow the graph to that step
+  if (workflowExecution.stepId) {
+    workflowExecutionGraph = workflowExecutionGraph.getStepGraph(workflowExecution.stepId);
+  }
 
   const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
   const stepExecutionRepository = new StepExecutionRepository(esClient);
@@ -395,18 +481,6 @@ async function createContainer(
     clientToUse = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
   }
 
-  // fakeRequest is automatically created by Task Manager from taskInstance.apiKey
-  // Will be undefined if no API key was provided when scheduling the workflow task
-
-  const contextManager = new WorkflowContextManager({
-    workflowExecutionGraph,
-    workflowExecutionRuntime: workflowRuntime,
-    workflowExecutionState,
-    esClient: clientToUse, // Either user-scoped or fallback client
-    fakeRequest, // Will be undefined if no API key provided
-    coreStart, // For accessing Kibana's internal services
-  });
-
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
 
   const urlValidator = new UrlValidator({
@@ -414,9 +488,9 @@ async function createContainer(
   });
 
   const nodesFactory = new NodesFactory(
-    contextManager,
     connectorExecutor,
     workflowRuntime,
+    workflowExecutionState,
     workflowLogger,
     workflowTaskManager,
     urlValidator,
@@ -427,12 +501,14 @@ async function createContainer(
     workflowExecutionGraph,
     workflowRuntime,
     workflowExecutionState,
-    contextManager,
     connectorExecutor,
     workflowLogger,
     taskManagerPlugin,
     workflowExecutionRepository,
     workflowTaskManager,
     nodesFactory,
+    fakeRequest,
+    clientToUse,
+    coreStart,
   };
 }

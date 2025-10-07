@@ -12,14 +12,14 @@
  *
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
- * Registry groups: 134
- * Metric groups: 404
+ * Registry groups: 136
+ * Metric groups: 420
  * Hardcoded fields: 34
- * Total fields: 1120
+ * Total fields: 1142
  *
  * @internal
  *
- * WARNING: This object contains 1120+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1142+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -1562,7 +1562,7 @@ export const semconvFlat = {
     name: 'file.accessed',
     description: 'Time when the file was last accessed, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'file.attributes': {
     name: 'file.attributes',
@@ -1574,13 +1574,13 @@ export const semconvFlat = {
     name: 'file.changed',
     description: 'Time when the file attributes or metadata was last changed, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'file.created': {
     name: 'file.created',
     description: 'Time when the file was created, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'file.directory': {
     name: 'file.directory',
@@ -1629,7 +1629,7 @@ export const semconvFlat = {
     name: 'file.modified',
     description: 'Time when the file content was last modified, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Fri Jan 01 2021 12:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'file.name': {
     name: 'file.name',
@@ -2140,7 +2140,7 @@ export const semconvFlat = {
     name: 'heroku.release.creation_timestamp',
     description: 'Time and date the release was created',
     type: 'keyword',
-    example: 'Sun Oct 23 2022 20:00:42 GMT+0200 (Central European Summer Time)',
+    example: 'Sun Oct 23 2022 18:00:42 GMT+0000 (Coordinated Universal Time)',
   },
   'host.arch': {
     name: 'host.arch',
@@ -2307,7 +2307,7 @@ export const semconvFlat = {
   'http.route': {
     name: 'http.route',
     description:
-      'The matched route, that is, the path template in the format used by the respective server framework.',
+      'The matched route template for the request. This MUST be low-cardinality and include all static path segments, with dynamic path segments represented with placeholders.',
     type: 'keyword',
     example: '/users/:userID?',
   },
@@ -4674,6 +4674,88 @@ export const semconvFlat = {
     description: 'Duration of processing operation.',
     type: 'double',
   },
+  'metrics.nfs.client.net.count': {
+    name: 'metrics.nfs.client.net.count',
+    description: 'Reports the count of kernel NFS client TCP segments and UDP datagrams handled.',
+    type: 'double',
+  },
+  'metrics.nfs.client.net.tcp.connection.accepted': {
+    name: 'metrics.nfs.client.net.tcp.connection.accepted',
+    description: 'Reports the count of kernel NFS client TCP connections accepted.',
+    type: 'double',
+  },
+  'metrics.nfs.client.operation.count': {
+    name: 'metrics.nfs.client.operation.count',
+    description: 'Reports the count of kernel NFSv4+ client operations.',
+    type: 'double',
+  },
+  'metrics.nfs.client.procedure.count': {
+    name: 'metrics.nfs.client.procedure.count',
+    description: 'Reports the count of kernel NFS client procedures.',
+    type: 'double',
+  },
+  'metrics.nfs.client.rpc.authrefresh.count': {
+    name: 'metrics.nfs.client.rpc.authrefresh.count',
+    description: 'Reports the count of kernel NFS client RPC authentication refreshes.',
+    type: 'double',
+  },
+  'metrics.nfs.client.rpc.count': {
+    name: 'metrics.nfs.client.rpc.count',
+    description:
+      "Reports the count of kernel NFS client RPCs sent, regardless of whether they're accepted/rejected by the server.",
+    type: 'double',
+  },
+  'metrics.nfs.client.rpc.retransmit.count': {
+    name: 'metrics.nfs.client.rpc.retransmit.count',
+    description: 'Reports the count of kernel NFS client RPC retransmits.',
+    type: 'double',
+  },
+  'metrics.nfs.server.fh.stale.count': {
+    name: 'metrics.nfs.server.fh.stale.count',
+    description: 'Reports the count of kernel NFS server stale file handles.',
+    type: 'double',
+  },
+  'metrics.nfs.server.io': {
+    name: 'metrics.nfs.server.io',
+    description:
+      'Reports the count of kernel NFS server bytes returned to receive and transmit (read and write) requests.',
+    type: 'double',
+  },
+  'metrics.nfs.server.net.count': {
+    name: 'metrics.nfs.server.net.count',
+    description: 'Reports the count of kernel NFS server TCP segments and UDP datagrams handled.',
+    type: 'double',
+  },
+  'metrics.nfs.server.net.tcp.connection.accepted': {
+    name: 'metrics.nfs.server.net.tcp.connection.accepted',
+    description: 'Reports the count of kernel NFS server TCP connections accepted.',
+    type: 'double',
+  },
+  'metrics.nfs.server.operation.count': {
+    name: 'metrics.nfs.server.operation.count',
+    description: 'Reports the count of kernel NFSv4+ server operations.',
+    type: 'double',
+  },
+  'metrics.nfs.server.procedure.count': {
+    name: 'metrics.nfs.server.procedure.count',
+    description: 'Reports the count of kernel NFS server procedures.',
+    type: 'double',
+  },
+  'metrics.nfs.server.repcache.requests': {
+    name: 'metrics.nfs.server.repcache.requests',
+    description: 'Reports the kernel NFS server reply cache request count by cache hit status.',
+    type: 'double',
+  },
+  'metrics.nfs.server.rpc.count': {
+    name: 'metrics.nfs.server.rpc.count',
+    description: 'Reports the count of kernel NFS server RPCs handled.',
+    type: 'double',
+  },
+  'metrics.nfs.server.thread.count': {
+    name: 'metrics.nfs.server.thread.count',
+    description: 'Reports the count of kernel NFS server available threads.',
+    type: 'double',
+  },
   'metrics.nodejs.eventloop.delay.max': {
     name: 'metrics.nodejs.eventloop.delay.max',
     description: 'Event loop maximum delay.',
@@ -5290,6 +5372,19 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'ipv4',
   },
+  'nfs.operation.name': {
+    name: 'nfs.operation.name',
+    description: 'NFSv4+ operation name.',
+    type: 'keyword',
+    example: 'OPEN',
+  },
+  'nfs.server.repcache.status': {
+    name: 'nfs.server.repcache.status',
+    description:
+      'Linux: one of "hit" (NFSD_STATS_RC_HITS), "miss" (NFSD_STATS_RC_MISSES), or "nocache" (NFSD_STATS_RC_NOCACHE -- uncacheable)',
+    type: 'keyword',
+    example: 'h',
+  },
   'nodejs.eventloop.state': {
     name: 'nodejs.eventloop.state',
     description: 'The state of event loop time.',
@@ -5306,6 +5401,28 @@ export const semconvFlat = {
       'The digest of the OCI image manifest. For container images specifically is the digest by which the container image is known.',
     type: 'keyword',
     example: 'sha256:e4ca62c0d62f3e886e684806dfe9d4e0cda60d54986898173c1083856cfda0f4',
+  },
+  'onc_rpc.procedure.name': {
+    name: 'onc_rpc.procedure.name',
+    description: 'ONC/Sun RPC procedure name.',
+    type: 'keyword',
+    example: 'OPEN',
+  },
+  'onc_rpc.procedure.number': {
+    name: 'onc_rpc.procedure.number',
+    description: 'ONC/Sun RPC procedure number.',
+    type: 'long',
+  },
+  'onc_rpc.program.name': {
+    name: 'onc_rpc.program.name',
+    description: 'ONC/Sun RPC program name.',
+    type: 'keyword',
+    example: 'portmapper',
+  },
+  'onc_rpc.version': {
+    name: 'onc_rpc.version',
+    description: 'ONC/Sun RPC program version.',
+    type: 'long',
   },
   'openai.request.service_tier': {
     name: 'openai.request.service_tier',
@@ -5491,7 +5608,7 @@ export const semconvFlat = {
     name: 'process.creation.time',
     description: 'The date and time the process was created, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Tue Nov 21 2023 10:25:34 GMT+0100 (Central European Standard Time)',
+    example: 'Tue Nov 21 2023 09:25:34 GMT+0000 (Coordinated Universal Time)',
   },
   'process.environment_variable': {
     name: 'process.environment_variable',
@@ -5543,7 +5660,7 @@ export const semconvFlat = {
     name: 'process.exit.time',
     description: 'The date and time the process exited, in ISO 8601 format.',
     type: 'keyword',
-    example: 'Tue Nov 21 2023 10:26:12 GMT+0100 (Central European Standard Time)',
+    example: 'Tue Nov 21 2023 09:26:12 GMT+0000 (Coordinated Universal Time)',
   },
   'process.group_leader.pid': {
     name: 'process.group_leader.pid',
@@ -6161,13 +6278,13 @@ export const semconvFlat = {
     name: 'tls.client.not_after',
     description: 'Date/Time indicating when client certificate is no longer considered valid.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 01:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Fri Jan 01 2021 00:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'tls.client.not_before': {
     name: 'tls.client.not_before',
     description: 'Date/Time indicating when client certificate is first considered valid.',
     type: 'keyword',
-    example: 'Thu Jan 01 1970 01:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Thu Jan 01 1970 00:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'tls.client.subject': {
     name: 'tls.client.subject',
@@ -6273,13 +6390,13 @@ export const semconvFlat = {
     name: 'tls.server.not_after',
     description: 'Date/Time indicating when server certificate is no longer considered valid.',
     type: 'keyword',
-    example: 'Fri Jan 01 2021 01:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Fri Jan 01 2021 00:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'tls.server.not_before': {
     name: 'tls.server.not_before',
     description: 'Date/Time indicating when server certificate is first considered valid.',
     type: 'keyword',
-    example: 'Thu Jan 01 1970 01:00:00 GMT+0100 (Central European Standard Time)',
+    example: 'Thu Jan 01 1970 00:00:00 GMT+0000 (Coordinated Universal Time)',
   },
   'tls.server.subject': {
     name: 'tls.server.subject',

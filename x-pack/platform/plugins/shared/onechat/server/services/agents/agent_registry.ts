@@ -32,6 +32,7 @@ export interface AgentRegistry {
 
 interface CreateAgentRegistryOpts {
   request: KibanaRequest;
+  space: string;
   persistedProvider: WritableAgentProvider;
   builtinProvider: ReadonlyAgentProvider;
 }
@@ -41,8 +42,8 @@ export const createAgentRegistry = (opts: CreateAgentRegistryOpts): AgentRegistr
 };
 
 class AgentRegistryImpl implements AgentRegistry {
-  private persistedProvider: WritableAgentProvider;
-  private builtinProvider: ReadonlyAgentProvider;
+  private readonly persistedProvider: WritableAgentProvider;
+  private readonly builtinProvider: ReadonlyAgentProvider;
 
   constructor({ persistedProvider, builtinProvider }: CreateAgentRegistryOpts) {
     this.persistedProvider = persistedProvider;

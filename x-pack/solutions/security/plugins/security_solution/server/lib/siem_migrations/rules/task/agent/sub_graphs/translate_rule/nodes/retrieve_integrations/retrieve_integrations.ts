@@ -23,7 +23,7 @@ interface GetRetrieveIntegrationsNodeParams {
 }
 
 interface GetMatchedIntegrationResponse {
-  match: string;
+  id: string;
   summary: string;
 }
 
@@ -49,6 +49,7 @@ export const getRetrieveIntegrationsNode = ({
     const mostRelevantIntegration = MATCH_INTEGRATION_PROMPT.pipe(model).pipe(outputParser);
 
     const integrationsInfo = integrations.map((integration) => ({
+      id: integration.id,
       title: integration.title,
       description: integration.description,
     }));
@@ -69,8 +70,8 @@ export const getRetrieveIntegrationsNode = ({
       ? [generateAssistantComment(cleanMarkdown(response.summary))]
       : undefined;
 
-    if (response.match) {
-      const matchedIntegration = integrations.find((r) => r.title === response.match);
+    if (response.id) {
+      const matchedIntegration = integrations.find((r) => r.id === response.id);
       telemetryClient.reportIntegrationsMatch({
         preFilterIntegrations: integrations,
         postFilterIntegration: matchedIntegration,

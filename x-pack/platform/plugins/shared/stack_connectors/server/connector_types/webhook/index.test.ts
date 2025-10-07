@@ -29,6 +29,7 @@ import type {
 import { getConnectorType } from '.';
 import { AuthType, SSLCertType, WebhookMethods } from '../../../common/auth/constants';
 import { PFX_FILE, CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 
 jest.mock('axios', () => ({
   create: jest.fn(),
@@ -1003,52 +1004,58 @@ describe('execute()', () => {
     expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
   });
 
-  test('404 response returns user error', async () => {
-    const config: ConnectorTypeConfigType = {
-      url: 'https://abc.def/my-webhook',
-      method: WebhookMethods.POST,
-      headers: {
-        aheader: 'a value',
-      },
-      authType: AuthType.Basic,
-      hasAuth: true,
-    };
-
-    requestMock.mockRejectedValueOnce({
-      tag: 'err',
-      response: {
-        status: 404,
-        statusText: 'Not Found',
-        data: {
-          message:
-            'The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.',
+  test.each([400, 404, 405, 406, 410, 411, 414, 428, 431])(
+    'forwards user error source in result for %s error responses',
+    async (status) => {
+      const config: ConnectorTypeConfigType = {
+        url: 'https://abc.def/my-webhook',
+        method: WebhookMethods.POST,
+        headers: {
+          aheader: 'a value',
         },
-      },
-    });
-    const result = await connectorType.executor({
-      actionId: 'some-id',
-      services,
-      config,
-      secrets: {
-        user: 'abc',
-        password: '123',
-        key: null,
-        crt: null,
-        pfx: null,
-        clientSecret: null,
-        secretHeaders: null,
-      },
-      params: { body: 'some data' },
-      configurationUtilities,
-      logger: mockedLogger,
-      connectorUsageCollector,
-    });
+        authType: AuthType.Basic,
+        hasAuth: true,
+      };
 
-    expect(result.errorSource).toBe('user');
-    expect(result.serviceMessage).toBe(
-      '[404] Not Found: The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.'
-    );
-  });
+      requestMock.mockRejectedValueOnce(
+        createTaskRunError(
+          {
+            tag: 'err',
+            isAxiosError: true,
+            response: {
+              status,
+              statusText: 'Not Found',
+              data: {
+                message:
+                  'The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.',
+              },
+            },
+          } as unknown as Error,
+          TaskErrorSource.USER
+        )
+      );
+      const result = await connectorType.executor({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: {
+          user: 'abc',
+          password: '123',
+          key: null,
+          crt: null,
+          pfx: null,
+          clientSecret: null,
+          secretHeaders: null,
+        },
+        params: { body: 'some data' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result.errorSource).toBe('user');
+    }
+  );
 
   describe('oauth2 client credentials', () => {
     it('throws if refresh token fails', async () => {

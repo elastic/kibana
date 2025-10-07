@@ -75,6 +75,7 @@ function getStateContainer({
           to: '2020-05-14T11:20:13.590',
         },
         searchSessionId,
+        isSearchSessionRestored: false,
       },
     })
   );
@@ -130,7 +131,6 @@ const mountComponent = async ({
     searchSessionId: noSearchSessionId ? undefined : mockSearchSessionId,
   });
   stateContainer.dataState.data$ = savedSearchData$;
-  stateContainer.actions.undoSavedSearchChanges = jest.fn();
 
   const props: DiscoverMainContentProps = {
     dataView,

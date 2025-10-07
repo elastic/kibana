@@ -7,9 +7,9 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { appContextService } from '../../services';
+import { appContextService, packagePolicyService } from '../../services';
 import type {
   BulkRollbackPackagesRequestSchema,
   BulkUninstallPackagesRequestSchema,
@@ -123,6 +123,25 @@ export const getOneBulkOperationPackagesHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
+export const getPackagePolicyIdsForCurrentUser = async (
+  request: KibanaRequest,
+  packages: { name: string }[]
+): Promise<{ [packageName: string]: string[] }> => {
+  const soClient = appContextService.getInternalUserSOClient(request);
+
+  const packagePolicyIdsByPackageName: { [packageName: string]: string[] } = {};
+  for (const pkg of packages) {
+    const packagePolicySORes = await packagePolicyService.getPackagePolicySavedObjects(soClient, {
+      searchFields: ['package.name'],
+      search: pkg.name,
+      spaceIds: ['*'],
+      fields: ['id', 'name'],
+    });
+    packagePolicyIdsByPackageName[pkg.name] = packagePolicySORes.saved_objects.map((so) => so.id);
+  }
+  return packagePolicyIdsByPackageName;
+};
+
 export const postBulkRollbackPackagesHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -138,6 +157,10 @@ export const postBulkRollbackPackagesHandler: FleetRequestHandler<
   const taskId = await scheduleBulkRollback(taskManagerStart, {
     packages: request.body.packages,
     spaceId,
+    packagePolicyIdsForCurrentUser: await getPackagePolicyIdsForCurrentUser(
+      request,
+      request.body.packages
+    ),
   });
 
   const body: BulkOperationPackagesResponse = {

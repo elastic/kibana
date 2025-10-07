@@ -9,11 +9,23 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout';
+import { EuiComboBoxWrapper } from '@kbn/scout';
 import type { ProcessorType } from '@kbn/streamlang';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly processorFieldComboBox;
+  public readonly conditionEditorFieldComboBox;
+  constructor(private readonly page: ScoutPage) {
+    this.processorFieldComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppProcessorFieldSelectorComboFieldText'
+    );
+    this.conditionEditorFieldComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppConditionEditorFieldText'
+    );
+  }
 
   async goto() {
     await this.page.gotoApp('streams');
@@ -34,6 +46,10 @@ export class StreamsApp {
 
   async gotoDataRetentionTab(streamName: string) {
     await this.gotoStreamManagementTab(streamName, 'retention');
+  }
+
+  async gotoDataQualityTab(streamName: string) {
+    await this.gotoStreamManagementTab(streamName, 'dataQuality');
   }
 
   async gotoProcessingTab(streamName: string) {
@@ -71,7 +87,7 @@ export class StreamsApp {
       await expect(
         this.page.getByTestId(`streamsNameLink-${name}`),
         `Stream ${name} should not be present in the table`
-      ).not.toBeVisible();
+      ).toBeHidden();
     }
   }
 
@@ -163,7 +179,7 @@ export class StreamsApp {
     operator?: string;
   }) {
     if (field) {
-      await this.page.getByTestId('streamsAppConditionEditorFieldText').fill(field);
+      await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
     }
     if (value) {
       await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
@@ -200,7 +216,7 @@ export class StreamsApp {
     const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
     let absoluteSteps = Math.abs(steps);
     while (absoluteSteps > 0) {
-      this.page.keyboard.press(arrowButton);
+      await this.page.keyboard.press(arrowButton);
       absoluteSteps--;
     }
     // Release DnD
@@ -216,7 +232,7 @@ export class StreamsApp {
     const arrowButton = steps > 0 ? 'ArrowDown' : 'ArrowUp';
     let absoluteSteps = Math.abs(steps);
     while (absoluteSteps > 0) {
-      this.page.keyboard.press(arrowButton);
+      await this.page.keyboard.press(arrowButton);
       absoluteSteps--;
     }
     // Release DnD
@@ -257,11 +273,6 @@ export class StreamsApp {
     await expect(this.page.getByTestId('routingPreviewPanelWithResults')).toBeVisible();
   }
 
-  async expectToastVisible() {
-    // Check if at least one element appears and is visible.
-    await expect(this.page.getByTestId('toastCloseButton').first()).toBeVisible();
-  }
-
   async saveRuleOrder() {
     await this.page.getByRole('button', { name: 'Change routing' }).click();
   }
@@ -274,15 +285,31 @@ export class StreamsApp {
   /**
    * Utility for data processing
    */
-  async clickAddProcessor() {
-    await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+  async clickAddProcessor(handleContextMenuClick: boolean = true) {
+    if (handleContextMenuClick) {
+      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+    }
     await this.page
       .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
       .click();
   }
 
+  async clickAddCondition() {
+    await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+    await this.page
+      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition')
+      .click();
+  }
+  async getProcessorPatternText() {
+    return await this.page.getByTestId('fullText').locator('.euiText').textContent();
+  }
+
   async clickSaveProcessor() {
     await this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton').click();
+  }
+
+  async clickSaveCondition() {
+    await this.page.getByTestId('streamsAppConditionConfigurationSaveConditionButton').click();
   }
 
   async clickCancelProcessorChanges() {
@@ -292,6 +319,11 @@ export class StreamsApp {
   async clickEditProcessor(pos: number) {
     const processorEditButton = await this.getProcessorEditButton(pos);
     await processorEditButton.click();
+  }
+
+  async clickEditCondition(pos: number) {
+    const conditionEditButton = await this.getConditionEditButton(pos);
+    await conditionEditButton.click();
   }
 
   async clickManageDataSourcesButton() {
@@ -310,7 +342,14 @@ export class StreamsApp {
   async getProcessorEditButton(pos: number) {
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[pos];
-    await targetProcessor.getByRole('button', { name: 'Step context menu' }).click();
+    await targetProcessor.getByRole('button', { name: 'Step context menu' }).first().click();
+    return this.page.getByTestId('stepContextMenuEditItem');
+  }
+
+  async getConditionEditButton(pos: number) {
+    const conditions = await this.getConditionsListItems();
+    const targetCondition = conditions[pos];
+    await targetCondition.getByRole('button', { name: 'Step context menu' }).first().click();
     return this.page.getByTestId('stepContextMenuEditItem');
   }
 
@@ -318,6 +357,42 @@ export class StreamsApp {
     const processors = await this.getProcessorsListItems();
     const targetProcessor = processors[pos];
     return targetProcessor.getByRole('button', { name: 'Step context menu' });
+  }
+
+  async getConditionAddStepMenuButton(pos: number) {
+    const conditions = await this.getConditionsListItems();
+    const targetCondition = conditions[pos];
+    return targetCondition.getByRole('button', { name: 'Create nested step' });
+  }
+
+  // Gets the first level of nested steps under a condition at position 'pos'
+  async getConditionNestedStepsList(pos: number) {
+    const conditions = await this.getConditionsListItems();
+    const targetCondition = conditions[pos];
+    const connectedNodesList = targetCondition.getByTestId(
+      'streamsAppStreamDetailEnrichmentConnectedNodesList'
+    );
+    // Get all <li> elements inside the connected nodes list
+    const listItems = await connectedNodesList.locator('li').all();
+
+    // For each <li>, get the first child that matches either processor or condition block
+    const firstBlocks = await Promise.all(
+      listItems.map(async (li) => {
+        const processorBlock = li.getByTestId('streamsAppProcessorBlock').first();
+        if (await processorBlock.isVisible()) {
+          return processorBlock;
+        }
+        const conditionBlock = li.getByTestId('streamsAppConditionBlock').first();
+        if (await conditionBlock.isVisible()) {
+          return conditionBlock;
+        }
+        return null;
+      })
+    );
+
+    // Filter out any nulls (where neither block was found)
+    const validBlocks = firstBlocks.filter(Boolean);
+    return validBlocks;
   }
 
   async confirmDiscardInModal() {
@@ -330,10 +405,12 @@ export class StreamsApp {
     await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
   }
 
-  async fillFieldInput(value: string) {
-    const comboBoxInput = this.page.getByTestId('streamsAppProcessorFieldSelectorComboFieldText');
-    await comboBoxInput.click();
-    await comboBoxInput.pressSequentially(value, { delay: 50 });
+  async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
+    const isCustomValue = options?.isCustomValue || false;
+    if (isCustomValue) {
+      return await this.processorFieldComboBox.setCustomSingleOption(value);
+    }
+    await this.processorFieldComboBox.selectSingleOption(value);
   }
 
   async fillGrokPatternInput(value: string) {
@@ -357,25 +434,51 @@ export class StreamsApp {
       .fill(value);
   }
 
+  async fillCondition(field: string, operator: string, value: string) {
+    await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
+    await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
+    await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
+  }
+
   async removeProcessor(pos: number) {
     await this.clickEditProcessor(pos);
     await this.page.getByRole('button', { name: 'Delete processor' }).click();
   }
 
-  async saveProcessorsListChanges() {
+  async saveStepsListChanges() {
     await this.page.getByRole('button', { name: 'Save changes' }).click();
   }
 
-  async getProcessorsListItems() {
+  private async getStepListItems(testId: string, expectItems: boolean = true) {
+    const timeout = expectItems ? 15_000 : 2_000;
+
     try {
       await expect(this.page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible({
-        timeout: 15_000,
+        timeout,
       });
     } catch {
       // If the list is not visible, it might be empty or not rendered yet
       return [];
     }
-    return this.page.getByTestId('streamsAppProcessorBlock').all();
+    return this.page.getByTestId(testId).all();
+  }
+
+  async getProcessorsListItems(expectProcessors: boolean = true) {
+    return this.getStepListItems('streamsAppProcessorBlock', expectProcessors);
+  }
+
+  async getProcessorsListItemsFast() {
+    // Fast method for when no processors are expected - uses minimal timeout
+    return this.getProcessorsListItems(false);
+  }
+
+  async getConditionsListItems(expectConditions: boolean = true) {
+    return this.getStepListItems('streamsAppConditionBlock', expectConditions);
+  }
+
+  async getConditionsListItemsFast() {
+    // Fast method for when no conditions are expected - uses minimal timeout
+    return this.getConditionsListItems(false);
   }
 
   async expectProcessorsOrder(expectedOrder: string[]) {
@@ -397,6 +500,10 @@ export class StreamsApp {
 
   getDataSourcesListItems() {
     return this.getDataSourcesList().getByTestId('streamsAppProcessingDataSourceListItem');
+  }
+
+  async confirmChangesInReviewModal() {
+    await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
   }
 
   /**
@@ -442,7 +549,7 @@ export class StreamsApp {
       .getByTestId('streamsAppSchemaEditorControls')
       .getByRole('searchbox');
     await expect(searchBox).toBeVisible();
-    searchBox.clear();
+    await searchBox.clear();
     await searchBox.focus();
     await this.page.keyboard.type(searchTerm);
   }
@@ -482,9 +589,8 @@ export class StreamsApp {
   }
 
   async setFieldMappingType(type: FieldTypeOption) {
-    const typeSelector = this.page.getByTestId('streamsAppFieldFormTypeSelect');
-    await expect(typeSelector).toBeVisible();
-    await typeSelector.selectOption(type);
+    await this.page.getByTestId('streamsAppFieldFormTypeSelect').click();
+    await this.page.getByTestId(`option-type-${type}`).click();
   }
 
   async stageFieldMappingChanges() {
@@ -512,21 +618,13 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppSchemaChangesReviewModalSubmitButton').click();
   }
 
+  async checkDraggingOver() {
+    await expect(this.page.getByTestId('droppable')).not.toHaveAttribute('class', /isDragging/);
+  }
+
   /**
    * Share utility methods
    */
-  async closeToasts() {
-    await this.expectToastVisible();
-    // Check if at least one element appears and is visible.
-
-    // Get an array of all locators and loop through them
-    const allCloseButtons = this.page.getByTestId('toastCloseButton');
-    for (const button of await allCloseButtons.all()) {
-      await button.click();
-    }
-
-    await expect(this.page.getByTestId('toastCloseButton')).toHaveCount(0);
-  }
 
   async closeFlyout() {
     await this.page.getByTestId('euiFlyoutCloseButton').click();

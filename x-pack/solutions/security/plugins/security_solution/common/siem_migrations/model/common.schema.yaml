@@ -90,6 +90,9 @@ components:
       type: object
       description: The last execution of a migration task.
       properties:
+        total_execution_time_ms:
+          type: integer
+          description: The total execution time in milliseconds for the migration. This includes duration of last_execution and any previous executions.
         started_at:
           type: string
           description: The moment the last execution started.

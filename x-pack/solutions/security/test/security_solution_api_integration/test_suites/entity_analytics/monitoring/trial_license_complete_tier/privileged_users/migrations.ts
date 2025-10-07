@@ -20,7 +20,7 @@ export default ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
   const entityAnalyticsRoutes = entityAnalyticsRouteHelpersFactory(supertest, log);
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const spacesService = getService('spaces');
 
   const createDeprecatedPrivMonUser = (
@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     afterEach(async () => {
       await asyncForEach(SPACES, async (space) => {
-        await api.deleteMonitoringEngine({ query: { data: true } }, space);
+        await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } }, space);
         await disablePrivmonSetting(kibanaServer, space);
         if (space !== 'default') {
           await spacesService.delete(space);
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`should run the migration when users have source_index field for space ${namespace}`, async () => {
         const indexPattern = 'INDEX1';
 
-        await api.createEntitySource(
+        await entityAnalyticsApi.createEntitySource(
           {
             body: {
               type: 'index',
@@ -86,11 +86,10 @@ export default ({ getService }: FtrProviderContext) => {
         await createDeprecatedPrivMonUser(namespace, indexPattern);
         await entityAnalyticsRoutes.runMigrations();
 
-        const res = await api.listPrivMonUsers({ query: {} }, namespace);
+        const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} }, namespace);
         const listed = res.body as ListPrivMonUsersResponse;
 
         expect(listed.length).toEqual(1);
-
         expect(listed[0]?.labels?.source_ids).toBeDefined();
         expect((listed[0]?.labels as any).source_indices).not.toBeDefined(); // Type Assertion required because source_indices is not defined in the schema anymore
       });
@@ -98,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`should run the migration and delete stale users when the index was updated for space ${namespace}`, async () => {
         const indexPattern = 'INDEX2';
 
-        await api.createEntitySource(
+        await entityAnalyticsApi.createEntitySource(
           {
             body: {
               type: 'index',
@@ -113,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await entityAnalyticsRoutes.runMigrations();
 
-        const res = await api.listPrivMonUsers({ query: {} }, namespace);
+        const res = await entityAnalyticsApi.listPrivMonUsers({ query: {} }, namespace);
         const listed = res.body as ListPrivMonUsersResponse;
 
         expect(listed.length).toEqual(1);
@@ -124,7 +123,7 @@ export default ({ getService }: FtrProviderContext) => {
       it(`should not run the migration if engine is disable for space ${namespace}`, async () => {
         const indexPattern = 'INDEX4';
 
-        await api.createEntitySource(
+        await entityAnalyticsApi.createEntitySource(
           {
             body: {
               type: 'index',
@@ -136,7 +135,7 @@ export default ({ getService }: FtrProviderContext) => {
         );
         await createDeprecatedPrivMonUser(namespace, indexPattern);
 
-        await api.deleteMonitoringEngine({ query: { data: true } }, namespace);
+        await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } }, namespace);
         await entityAnalyticsRoutes.runMigrations(); // should return 200
       });
     });

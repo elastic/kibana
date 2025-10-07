@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -21,6 +21,7 @@ import type { SiemMigrationResourceBase } from '../../../../../common/siem_migra
 import { PanelText } from '../../../../common/components/panel_text';
 import * as i18n from './translations';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
+import { useMigrationDataInputContext } from '../../../common/components/migration_data_input_flyout_context';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import type { DashboardMigrationStats } from '../../types';
 
@@ -65,6 +66,7 @@ const DashboardMigrationsUploadMissingPanelContent =
       const { euiTheme } = useEuiTheme();
       const { data: translationStats, isLoading: isLoadingTranslationStats } =
         useGetMigrationTranslationStats(migrationStats.id);
+      const { openFlyout } = useMigrationDataInputContext();
 
       const totalDashboardsToRetry = useMemo(() => {
         if (!translationStats) return 0;
@@ -76,9 +78,9 @@ const DashboardMigrationsUploadMissingPanelContent =
         );
       }, [translationStats]);
 
-      const onOpenFlyout = () => {
-        // TODO: Implement dashboard-specific flyout logic when available
-      };
+      const onOpenFlyout = useCallback(() => {
+        openFlyout(migrationStats);
+      }, [migrationStats, openFlyout]);
 
       return (
         <>

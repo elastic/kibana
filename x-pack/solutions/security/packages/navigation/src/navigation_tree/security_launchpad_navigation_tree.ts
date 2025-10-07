@@ -61,6 +61,6 @@ export const createLaunchpadNavigationTree = (
     icon: 'launch',
     iconV2: 'launch',
     sideNavVersion,
-    children,
+    children: [{ children }],
   };
 };
