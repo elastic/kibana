@@ -19,9 +19,9 @@ _search_ai_lake_analyst:
       privileges:
         - "index"
         - "read"
-        - "view_index_metadata"
         - "write"
         - "maintenance"
+        - "view_index_metadata"
     - names:
         - ".siem-signals-*"
         - ".preview.alerts-security*"
