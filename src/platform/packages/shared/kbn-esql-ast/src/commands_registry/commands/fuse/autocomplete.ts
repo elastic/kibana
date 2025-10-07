@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { columnExists, handleFragment } from '../../../definitions/utils/autocomplete/helpers';
-import { ESQL_NUMBER_TYPES, withAutoSuggest } from '../../../..';
+import { ESQL_STRING_TYPES, withAutoSuggest } from '../../../..';
 import { isOptionNode } from '../../../ast/is';
 import type {
   ESQLAstFuseCommand,
@@ -46,7 +46,7 @@ export async function autocomplete(
     case FusePosition.BEFORE_NEW_ARGUMENT:
       return getFuseArgumentsSuggestions(fuseCommand);
     case FusePosition.SCORE_BY:
-      const numericFields = await callbacks?.getByType?.(ESQL_NUMBER_TYPES, [], {
+      const numericFields = await callbacks?.getByType?.('double', [], {
         advanceCursor: true,
         openSuggestions: true,
       });
@@ -56,6 +56,26 @@ export async function autocomplete(
         (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
           return (
             numericFields?.map((suggestion) => {
+              return {
+                ...suggestion,
+                rangeToReplace,
+              };
+            }) ?? []
+          );
+        },
+        () => []
+      );
+    case FusePosition.GROUP_BY:
+      const stringFields = await callbacks?.getByType?.(ESQL_STRING_TYPES, [], {
+        advanceCursor: true,
+        openSuggestions: true,
+      });
+      return await handleFragment(
+        innerText,
+        (fragment) => columnExists(fragment, context),
+        (_fragment: string, rangeToReplace?: { start: number; end: number }) => {
+          return (
+            stringFields?.map((suggestion) => {
               return {
                 ...suggestion,
                 rangeToReplace,
@@ -77,12 +97,12 @@ function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePositi
     return FusePosition.SCORE_BY;
   }
 
-  if (keyBy && keyBy.incomplete) {
-    return FusePosition.KEY_BY;
+  if ((groupBy && groupBy.incomplete) || /GROUP BY\s*\S*$/i.test(innerText)) {
+    return FusePosition.GROUP_BY;
   }
 
-  if (groupBy && groupBy.incomplete) {
-    return FusePosition.GROUP_BY;
+  if (keyBy && keyBy.incomplete) {
+    return FusePosition.KEY_BY;
   }
 
   if (withOption && withOption.incomplete) {

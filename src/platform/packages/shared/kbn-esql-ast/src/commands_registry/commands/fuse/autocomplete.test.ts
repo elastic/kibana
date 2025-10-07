@@ -10,7 +10,7 @@ import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtur
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
-import { ESQL_NUMBER_TYPES } from '../../../definitions/types';
+import { ESQL_STRING_TYPES } from '../../../definitions/types';
 
 const fuseExpectSuggestions = (
   query: string,
@@ -77,28 +77,56 @@ describe('FUSE Autocomplete', () => {
   });
 
   describe('SCORE BY', () => {
-    it('suggests numeric fields after SCORE BY', async () => {
-      const expectedNumericFields = getFieldNamesByType(ESQL_NUMBER_TYPES);
+    it('suggests double fields after SCORE BY', async () => {
+      const expectedDoubleFields = getFieldNamesByType('double');
       const mockCallbacks = getMockCallbacks();
       (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-        expectedNumericFields.map((name) => ({ label: name, text: name }))
+        expectedDoubleFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
         'FROM a | FUSE linear SCORE BY /',
-        expectedNumericFields,
+        expectedDoubleFields,
         mockCallbacks
       );
     });
 
-    it('suggests partial numeric fields after SCORE BY', async () => {
-      const expectedNumericFields = getFieldNamesByType(ESQL_NUMBER_TYPES);
+    it('suggests partial double fields after SCORE BY', async () => {
+      const expectedDoubleFields = getFieldNamesByType('double');
       const mockCallbacks = getMockCallbacks();
       (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-        expectedNumericFields.map((name) => ({ label: name, text: name }))
+        expectedDoubleFields.map((name) => ({ label: name, text: name }))
       );
       await fuseExpectSuggestions(
-        'FROM a | FUSE linear SCORE BY fi/',
-        expectedNumericFields,
+        'FROM a | FUSE linear SCORE BY doubleFi/',
+        expectedDoubleFields,
+        mockCallbacks
+      );
+    });
+  });
+
+  describe('GROUP BY', () => {
+    it('suggests string fields after GROUP BY', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      const mockCallbacks = getMockCallbacks();
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
+      );
+      await fuseExpectSuggestions(
+        'FROM a | FUSE linear GROUP BY /',
+        expectedStringFields,
+        mockCallbacks
+      );
+    });
+
+    it('suggests partial string fields after GROUP BY', async () => {
+      const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
+      const mockCallbacks = getMockCallbacks();
+      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+        expectedStringFields.map((name) => ({ label: name, text: name }))
+      );
+      await fuseExpectSuggestions(
+        'FROM a | FUSE linear GROUP BY textFi/',
+        expectedStringFields,
         mockCallbacks
       );
     });
