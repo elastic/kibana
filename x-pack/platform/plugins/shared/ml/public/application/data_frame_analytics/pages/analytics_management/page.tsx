@@ -7,24 +7,29 @@
 
 import type { FC } from 'react';
 import React, { useState, useCallback } from 'react';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, type ListingPageUrlState } from '@kbn/ml-url-state';
-import { DataFrameAnalyticsList } from './components/analytics_list';
-import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
+import { useMlManagementLocator } from '../../../contexts/kibana/use_create_url';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
-import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
-import { ML_PAGES } from '../../../../../common/constants/locator';
 import { HelpMenu } from '../../../components/help_menu';
-import { useMlKibana, useMlManagementLocator } from '../../../contexts/kibana';
-import { useRefreshAnalyticsList } from '../../common';
 import { MlPageHeader } from '../../../components/page_header';
-import { CreateAnalyticsButton } from './components/create_analytics_button/create_analytics_button';
-import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../components/import_export_jobs';
 import { SynchronizeSavedObjectsButton } from '../../../jobs/jobs_list/components/top_level_actions/synchronize_saved_objects_button';
 import { PageTitle } from '../../../components/page_title';
+
+import { useRefreshAnalyticsList } from '../../common';
+
+import { CreateAnalyticsButton } from './components/create_analytics_button/create_analytics_button';
+import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
+import { DataFrameAnalyticsList } from './components/analytics_list';
+import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL;

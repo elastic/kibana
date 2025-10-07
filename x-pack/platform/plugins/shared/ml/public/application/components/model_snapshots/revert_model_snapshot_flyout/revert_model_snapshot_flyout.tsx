@@ -33,14 +33,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { timeFormatter } from '@kbn/ml-date-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
-import type {
-  ModelSnapshot,
-  CombinedJobWithStats,
-} from '../../../../../common/types/anomaly_detection_jobs';
-import { useMlApi, useNotifications } from '../../../contexts/kibana';
+import { mlResultsServiceProvider } from '@kbn/ml-services/results_service';
+import { useNotifications } from '../../../contexts/kibana';
 import { chartLoaderProvider } from './chart_loader';
-import { mlResultsServiceProvider } from '../../../services/results_service';
 import type { LineChartPoint } from '../../../jobs/new_job/common/chart_loader';
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import type { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';

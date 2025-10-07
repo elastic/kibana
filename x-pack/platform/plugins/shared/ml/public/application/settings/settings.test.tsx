@@ -11,6 +11,7 @@ import { screen } from '@testing-library/react';
 
 import { Settings } from './settings';
 
+jest.mock('@kbn/ml-kibana-context/kibana_context');
 jest.mock('../contexts/kibana');
 jest.mock('../contexts/kibana/use_notifications_context', () => {
   return {

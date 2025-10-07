@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { type BehaviorSubject } from 'rxjs';
+
 import type { CoreStart } from '@kbn/core/public';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -22,27 +24,26 @@ import type {
   PublishesDataViews,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
-import { type BehaviorSubject } from 'rxjs';
-import type { SeverityThreshold } from '../../common/types/anomalies';
-import type { JobId } from '../../common/types/anomaly_detection_jobs';
-import type { MlDependencies } from '../application/app';
-import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
-import type { SwimlaneType } from '../application/explorer/explorer_constants';
-import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
-import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
-import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
-import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
-import type { MlFieldFormatService } from '../application/services/field_format_service';
-import type { MlApi } from '../application/services/ml_api_service';
-import type { MlResultsService } from '../application/services/results_service';
-import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
-import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
-import type { ToastNotificationService } from '../application/services/toast_notification_service';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type {
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
-} from './constants';
+} from '@kbn/ml-embeddables/constants';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import type { MlCapabilitiesService } from '@kbn/ml-services/capabilities/check_capabilities';
+import type { MlFieldFormatService } from '@kbn/ml-services/field_format_service';
+import type { MlResultsService } from '@kbn/ml-services/results_service';
+
+import type { MlDependencies } from '../application/app';
+import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
+import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
+import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
+import type { AnomalyTimelineService } from '../application/services/anomaly_timeline_service';
+import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
+import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
+import type { ToastNotificationService } from '../application/services/toast_notification_service';
 
 export type {
   AnomalySwimLaneEmbeddableState,
@@ -57,26 +58,6 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
     PublishesTimeRange {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
-
-/** Manual input by the user */
-export interface AnomalySwimlaneEmbeddableUserInput {
-  jobIds: JobId[];
-  panelTitle?: string;
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-}
-
-export interface AnomalySwimlaneEmbeddableCustomInput
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  perPage?: number;
-
-  // Embeddable inputs which are not included in the default interface
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange?: TimeRange;
-}
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;

@@ -13,7 +13,7 @@ import {
   ANOMALY_DETECTION_ENABLE_TIME_RANGE,
   DEFAULT_AD_RESULTS_TIME_FILTER,
   DEFAULT_ENABLE_AD_RESULTS_TIME_FILTER,
-} from '../../common/constants/settings';
+} from '@kbn/ml-common-constants/settings';
 
 export function registerKibanaSettings(coreSetup: CoreSetup) {
   coreSetup.uiSettings.register({

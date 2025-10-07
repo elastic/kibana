@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type { MlApi } from './ml_api_service';
-import type { MlServerDefaults, MlServerLimits } from '../../../common/types/ml_server_info';
-
-export interface CloudInfo {
-  cloudId: string | null;
-  isCloud: boolean;
-  isCloudTrial: boolean;
-  deploymentId: string | null;
-  cloudUrl: string | null;
-  isMlAutoscalingEnabled: boolean;
-}
+import type {
+  CloudInfo,
+  MlServerDefaults,
+  MlServerLimits,
+} from '@kbn/ml-common-types/ml_server_info';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { extractDeploymentId } from '@kbn/ml-common-utils/extract_deployment_id';
 
 let defaults: MlServerDefaults = {
   anomaly_detectors: {},
@@ -70,14 +66,4 @@ export function isCloudTrial(): boolean {
 
 export function getCloudDeploymentId(): string | null {
   return cloudInfo.deploymentId;
-}
-
-export function extractDeploymentId(cloudId: string) {
-  const tempCloudId = cloudId.replace(/^(.+)?:/, '');
-  try {
-    const matches = atob(tempCloudId).match(/^.+\$(.+)(?=\$)/);
-    return matches !== null && matches.length === 2 ? matches[1] : null;
-  } catch (error) {
-    return null;
-  }
 }

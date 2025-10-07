@@ -7,6 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
+
+import type { MlJobState } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -18,6 +20,7 @@ import {
   EuiPopover,
   htmlIdGenerator,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
@@ -26,16 +29,18 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
-import type { MlJobState } from '@elastic/elasticsearch/lib/api/types';
-import { CASES_TOAST_MESSAGES_TITLES } from '../../../../cases/constants';
-import type { CombinedJobWithStats } from '../../../../../server/shared';
-import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
-import { useMlKibana } from '../../../contexts/kibana';
-import { useCasesModal } from '../../../contexts/kibana/use_cases_modal';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/single_metric_viewer/get_default_panel_title';
-import type { MlEntity } from '../../../../embeddables';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../../embeddables/constants';
+import type { MlEntity } from '../../../../embeddables/types';
 import type { SingleMetricViewerEmbeddableState } from '../../../../embeddables/types';
+
+import { CASES_TOAST_MESSAGES_TITLES } from '../../../../cases/constants';
+import { useCasesModal } from '../../../contexts/kibana/use_cases_modal';
+
 import { ForecastingModal } from '../forecasting_modal/forecasting_modal';
 import type { Entity } from '../entity_control/entity_control';
 
@@ -210,7 +215,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
   return (
     <>
       <EuiFlexGroup
-        style={{ float: 'right' }}
+        css={{ float: 'right' }}
         alignItems="center"
         justifyContent="flexEnd"
         gutterSize="s"

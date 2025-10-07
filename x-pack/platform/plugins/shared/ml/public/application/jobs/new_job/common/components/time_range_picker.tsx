@@ -11,7 +11,7 @@ import type { Moment } from 'moment';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { EuiDatePicker, EuiDatePickerRange } from '@elastic/eui';
-import { useMlKibana } from '../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 const WIDTH = '512px';
 

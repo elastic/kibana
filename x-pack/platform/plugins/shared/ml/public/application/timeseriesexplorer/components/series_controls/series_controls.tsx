@@ -7,37 +7,37 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiSelectProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, useEuiTheme } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+
+import type { EuiSelectProps } from '@elastic/eui';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, useEuiTheme } from '@elastic/eui';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
-import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
-import { EntityControl } from '../entity_control';
-import { useMlJobService } from '../../../services/job_service';
-import type {
-  CombinedJob,
-  Detector,
-  JobId,
-} from '../../../../../common/types/anomaly_detection_jobs';
-import { useMlKibana } from '../../../contexts/kibana';
-import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
-import type { ComboBoxOption, Entity, EntityControlProps } from '../entity_control/entity_control';
-import { EMPTY_FIELD_VALUE_LABEL } from '../entity_control/entity_control';
-import { getControlsForDetector } from '../../get_controls_for_detector';
+import type { Detector, JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import {
   ML_ENTITY_FIELDS_CONFIG,
   type PartitionFieldConfig,
   type PartitionFieldsConfig,
   type MlStorageKey,
   type TMlStorageMapped,
-} from '../../../../../common/types/storage';
-import type { FieldDefinition } from '../../../services/results_service/result_service_rx';
+} from '@kbn/ml-common-types/storage';
+import { useMlJobService } from '@kbn/ml-hooks/jobs/use_ml_job_service';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { FieldDefinition } from '@kbn/ml-services/results_service/result_service_rx';
+
+import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
+import type { ComboBoxOption, Entity, EntityControlProps } from '../entity_control/entity_control';
+import { EntityControl } from '../entity_control';
+import { EMPTY_FIELD_VALUE_LABEL } from '../entity_control/entity_control';
+import { getControlsForDetector } from '../../get_controls_for_detector';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 import { PlotByFunctionControls } from '../plot_function_controls';
-import type { MlEntity } from '../../../../embeddables';
+import type { MlEntity } from '../../../../embeddables/types';
 
 function getEntityControlOptions(fieldValues: FieldDefinition['values']): ComboBoxOption[] {
   if (!Array.isArray(fieldValues)) {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import { mlAnomalyDetectionAlertPreviewRequest } from '@kbn/ml-server-api-schemas/alerting_schema';
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
-import { mlAnomalyDetectionAlertPreviewRequest } from './schemas/alerting_schema';
 import type { SharedServices } from '../shared_services';
 
 export function alertingRoutes(

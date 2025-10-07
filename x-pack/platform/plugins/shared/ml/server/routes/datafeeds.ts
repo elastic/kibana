@@ -6,15 +6,15 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { wrapError } from '../client/error_wrapper';
-import type { RouteInitialization } from '../types';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import {
   startDatafeedSchema,
   datafeedConfigSchema,
   datafeedIdSchema,
   deleteDatafeedQuerySchema,
-} from './schemas/datafeeds_schema';
+} from '@kbn/ml-server-api-schemas/datafeeds_schema';
+import { wrapError } from '../client/error_wrapper';
+import type { RouteInitialization } from '../types';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 
 /**

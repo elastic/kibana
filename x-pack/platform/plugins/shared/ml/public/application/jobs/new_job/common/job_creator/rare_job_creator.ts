@@ -6,22 +6,15 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
-  type Field,
-  type SplitField,
-  type Aggregation,
-  ML_JOB_AGGREGATION,
-} from '@kbn/ml-anomaly-utils';
+import type { Field, SplitField, Aggregation } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils/aggregation_types';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { MlApi } from '../../../../services/ml_api_service';
+import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { JOB_TYPE, CREATED_BY_LABEL } from '@kbn/ml-common-constants/new_job';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
 import type { NewJobCapsService } from '../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { JobCreator } from './job_creator';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-} from '../../../../../../common/types/anomaly_detection_jobs';
-import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors, isSparseDataJob } from './util/general';
 
 export class RareJobCreator extends JobCreator {

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
 import { useEffect, useReducer, useCallback } from 'react';
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-plugin/public';
+
+import type { Filter } from '@kbn/es-query';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '@kbn/ml-ui-actions';
+
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface ReducerState {

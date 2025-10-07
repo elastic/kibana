@@ -7,15 +7,19 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { EuiAccordion, EuiLink, EuiSpacer } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { DeepPartial } from '@kbn/utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { CustomUrlsDescription } from '../../../../../components/custom_urls/custom_urls_description';
 import { CustomUrlsWrapper } from '../../../../../components/custom_urls';
+
 import {
   getJobConfigFromFormState,
   type State,

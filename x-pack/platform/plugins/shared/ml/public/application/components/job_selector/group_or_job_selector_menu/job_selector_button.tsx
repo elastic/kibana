@@ -7,12 +7,16 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
+
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+
 import { useUrlState } from '@kbn/ml-url-state';
-import { ML_PAGES, type MlPages } from '../../../../../common/constants/locator';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { ML_PAGES, type MlPages } from '@kbn/ml-common-types/locator_ml_pages';
+
 import { useJobInfoFlyouts } from '../../../jobs/components/job_details_flyout';
-import { useMlKibana } from '../../../contexts/kibana';
+
 import { getOptionsForJobSelectorMenuItems } from './get_options_for_job_selector_menu';
 
 interface Props {

@@ -9,9 +9,10 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { ML_PAGES } from '../../../../locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { MlManagementLocatorInternal } from '@kbn/ml-locator/ml_management_locator';
+
 import type { CategorizationType } from './quick_create_job';
-import { MlManagementLocatorInternal } from '../../../../locator/ml_management_locator';
 
 export async function redirectToADJobWizards(
   categorizationType: CategorizationType,

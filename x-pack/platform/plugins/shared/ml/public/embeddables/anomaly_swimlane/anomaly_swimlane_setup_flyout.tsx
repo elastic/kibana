@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
+import { HttpService } from '@kbn/ml-services/http_service';
+import { jobsApiProvider } from '@kbn/ml-services/ml_api_service/jobs';
+import type { AnomalySwimlaneEmbeddableUserInput } from '@kbn/ml-common-types/anomaly_swim_lane';
+
 import type { MlDependencies } from '../../application/app';
-import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
-import { HttpService } from '../../application/services/http_service';
-import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
-import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 import type { MlStartDependencies } from '../../plugin';
+
+import type { AnomalySwimLaneEmbeddableState } from '../types';
+
+import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
 
 export function AnomalySwimlaneUserInput({
   coreStart,

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
-import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
-
 import React, { useCallback } from 'react';
 
 import { EuiButton } from '@elastic/eui';
+
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+
+import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import { useMlManagementLocator } from '../../../../contexts/kibana';
 
 export function NewJobButton({ size = 's' }) {

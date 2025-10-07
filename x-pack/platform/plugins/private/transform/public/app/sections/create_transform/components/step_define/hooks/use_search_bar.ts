@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 import { toElasticsearchQuery, fromKueryExpression, luceneStringToDsl } from '@kbn/es-query';
 import type { Query } from '@kbn/es-query';
-import type { QueryErrorMessage } from '@kbn/ml-error-utils';
+import type { QueryErrorMessage } from '@kbn/ml-common-types/errors';
 
 import { getTransformConfigQuery } from '../../../../../common';
 

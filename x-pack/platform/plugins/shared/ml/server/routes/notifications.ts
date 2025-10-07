@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
-import { NotificationsService } from '../models/notifications_service';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
 import {
   getNotificationsCountQuerySchema,
   getNotificationsQuerySchema,
-} from './schemas/notifications_schema';
+} from '@kbn/ml-server-api-schemas/notifications_schema';
+
+import { NotificationsService } from '../models/notifications_service';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 

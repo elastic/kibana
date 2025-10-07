@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import * as CheckPrivilige from '../../../../../capabilities/check_capabilities';
+
+import * as CheckPrivilige from '@kbn/ml-services/capabilities/check_capabilities';
 import mockAnalyticsListItem from '../analytics_list/__mocks__/analytics_list_item.json';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock as mockCoreServices, i18nServiceMock } from '@kbn/core/public/mocks';
@@ -16,16 +17,20 @@ import { DeleteActionName } from './delete_action_name';
 import { DeleteActionModal } from './delete_action_modal';
 import { useDeleteAction } from './use_delete_action';
 
-jest.mock('../../../../../capabilities/check_capabilities', () => ({
+jest.mock('@kbn/ml-services/capabilities/check_capabilities', () => ({
   checkPermission: jest.fn(() => false),
   createPermissionFailureMessage: jest.fn(),
 }));
 
-jest.mock('../../../../../contexts/kibana', () => ({
+jest.mock('@kbn/ml-hooks/use_ml_api', () => ({
   useMlApi: jest.fn(),
+}));
+jest.mock('@kbn/ml-kibana-context/kibana_context', () => ({
   useMlKibana: () => ({
     services: { ...mockCoreServices.createStart(), data: { data_view: { find: jest.fn() } } },
   }),
+}));
+jest.mock('../../../../../contexts/kibana', () => ({
   useNotifications: () => {
     return {
       toasts: { addSuccess: jest.fn(), addDanger: jest.fn(), addError: jest.fn() },

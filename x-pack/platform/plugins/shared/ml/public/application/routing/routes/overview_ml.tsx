@@ -10,14 +10,15 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import type { FC } from 'react';
 import React, { Suspense } from 'react';
 import { Redirect } from 'react-router-dom';
-import { ML_PAGES } from '../../../locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { NavigateToPath } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
 import { getMlNodeCount } from '../../ml_nodes_check';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import type { MlRoute, PageProps } from '../router';
-import { createPath, PageLoader } from '../router';
+import { PageLoader } from '../page_loader';
+import { createPath } from '../create_path';
 import { useRouteResolver } from '../use_resolver';
 import { initSavedObjects } from '../resolvers';
 

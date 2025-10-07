@@ -13,12 +13,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import { itemTypeLiterals } from '@kbn/ml-server-api-schemas/saved_objects';
+
 import type { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
-
 import { MemoryUsageService } from '../models/model_management';
-import { itemTypeLiterals } from './schemas/saved_objects';
 
 export function modelManagementRoutes({
   router,

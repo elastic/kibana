@@ -19,7 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { getTitle } from '@kbn/presentation-publishing';
+import { getTitle } from '@kbn/presentation-publishing/interfaces/titles/publishes_title';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { Layer } from './layer';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';

@@ -11,10 +11,9 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app';
-import type { AnomalyChartsEmbeddableApi } from '../embeddables';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
+import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '@kbn/ml-common-constants/app';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import type { AnomalyChartsEmbeddableApi } from '../embeddables/types';
 import type { MlCoreSetup } from '../plugin';
 import { EmbeddableAnomalyChartsUserInput } from '../embeddables/anomaly_charts/anomaly_charts_setup_flyout';
 
@@ -58,6 +57,8 @@ export function createAddAnomalyChartsPanelAction(
       return Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {
+      const { IncompatibleActionError } = await import('@kbn/ui-actions-plugin/public');
+
       const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 

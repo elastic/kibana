@@ -7,6 +7,7 @@
 
 import type { FC, ReactEventHandler } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
+
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
@@ -25,6 +26,7 @@ import {
   formatDate,
   htmlIdGenerator,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
@@ -39,16 +41,17 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { escapeKueryForEmbeddableFieldValuePair } from '@kbn/ml-common-utils/string_utils/escape_kuery_for_embeddable_field_value_pair';
+
 import { useTableSeverity } from '../components/controls/select_severity';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/anomaly_charts_initializer';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
-import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
-import type { AnomalyChartsEmbeddableState } from '../../embeddables';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
-import { useMlKibana } from '../contexts/kibana';
+import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service_constants';
+import type { AnomalyChartsEmbeddableState } from '../../embeddables/types';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
 import { getSelectionInfluencers, getSelectionTimeRange } from './explorer_utils';
 import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/utils';

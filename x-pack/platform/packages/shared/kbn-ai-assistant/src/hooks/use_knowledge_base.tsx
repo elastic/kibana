@@ -118,8 +118,9 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
             retries: 5,
           }
         );
-        if (ml.mlApi?.savedObjects.syncSavedObjects) {
-          await ml.mlApi.savedObjects.syncSavedObjects();
+        if (ml.getMlApi) {
+          const mlApi = await ml.getMlApi();
+          await mlApi.savedObjects.syncSavedObjects();
         }
 
         // Refresh status after installation

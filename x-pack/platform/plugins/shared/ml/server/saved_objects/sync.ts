@@ -6,21 +6,21 @@
  */
 
 import Boom from '@hapi/boom';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { JobObject, MLSavedObjectService, TrainedModelObject } from './service';
 import type {
   JobType,
   SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
   MlSavedObjectType,
-} from '../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
+import type { MLSavedObjectService } from '@kbn/ml-saved-objects';
+import { getSavedObjectClientError, mlFunctionsFactory } from '@kbn/ml-saved-objects/util';
+import { getJobDetailsFromTrainedModel } from '@kbn/ml-client';
+import type { JobObject, TrainedModelObject } from '@kbn/ml-saved-objects/service';
+
 import { checksFactory } from './checks';
 import type { JobStatus } from './checks';
-import {
-  getSavedObjectClientError,
-  getJobDetailsFromTrainedModel,
-  mlFunctionsFactory,
-} from './util';
 
 export interface JobSpaceOverrides {
   overrides: {

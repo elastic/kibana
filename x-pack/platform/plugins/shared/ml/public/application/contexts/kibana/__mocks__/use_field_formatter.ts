@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-jest.mock('./kibana_context');
+
+jest.mock('@kbn/ml-kibana-context/kibana_context');
 
 export const useFieldFormatter = jest.fn();

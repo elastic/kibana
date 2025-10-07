@@ -8,12 +8,10 @@
 import { difference, without } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
-
 import type { ToastsStart } from '@kbn/core/public';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
-import { isTimeSeriesViewJob } from '../../../../common/util/job_utils';
-
-import type { MlJobService } from '../../services/job_service';
+import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import type { MlJobService } from '@kbn/ml-services/job_service';
+import { isTimeSeriesViewJob } from '@kbn/ml-common-utils/job_utils/is_time_series_view_job';
 
 import type { GetJobSelection } from '../../contexts/ml/use_job_selection_flyout';
 

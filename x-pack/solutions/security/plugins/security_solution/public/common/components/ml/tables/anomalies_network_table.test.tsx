@@ -16,13 +16,13 @@ import { FlowTarget } from '../../../../../common/search_strategy';
 import { fireEvent, render } from '@testing-library/react';
 import { mockAnomalies } from '../mock';
 import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
-import { useMlHref } from '@kbn/ml-plugin/public';
+import { useMlHref } from '@kbn/ml-locator/use_ml_href';
 
 jest.mock('../../../containers/query_toggle');
 jest.mock('../anomaly/use_anomalies_table_data');
 jest.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 jest.mock('../hooks/use_installed_security_jobs');
-jest.mock('@kbn/ml-plugin/public');
+jest.mock('@kbn/ml-locator/use_ml_href');
 
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
 const mockUseAnomaliesTableData = useAnomaliesTableData as jest.Mock;

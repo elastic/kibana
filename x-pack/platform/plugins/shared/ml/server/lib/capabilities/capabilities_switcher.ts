@@ -8,15 +8,18 @@
 import { cloneDeep } from 'lodash';
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
+
 import type { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
-import type { MlFeatures } from '../../../common/constants/app';
-import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import {
   type MlCapabilities,
   basicLicenseMlCapabilities,
   featureCapabilities,
-} from '../../../common/types/capabilities';
+} from '@kbn/ml-common-types/capabilities';
+import { isFullLicense } from '@kbn/ml-license/is_full_license';
+import { isMinimumLicense } from '@kbn/ml-license/is_minimum_license';
+import { isMlEnabled } from '@kbn/ml-license/is_ml_enabled';
 
 export const setupCapabilitiesSwitcher = (
   coreSetup: CoreSetup,

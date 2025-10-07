@@ -7,13 +7,17 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { EuiButton } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ML_PAGES } from '../../../locator';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+
 import dfaImage from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/data_frame_analytics_kibana.png';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
+import { useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { mlNodesAvailable } from '../../ml_nodes_check';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
 import { AnalyticsEmptyPrompt } from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/empty_prompt';

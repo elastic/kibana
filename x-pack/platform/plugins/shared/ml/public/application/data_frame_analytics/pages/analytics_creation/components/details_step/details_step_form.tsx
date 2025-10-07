@@ -14,8 +14,9 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 
-import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
 import type { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';

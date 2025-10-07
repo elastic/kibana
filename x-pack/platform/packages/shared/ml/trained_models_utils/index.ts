@@ -22,6 +22,7 @@ export {
   type InferenceAPIConfigResponse,
   type GetModelDownloadConfigOptions,
   type ElasticCuratedModelName,
+  type IElasticModels,
   ELSER_ID_V1,
   ELASTIC_MODEL_TAG,
   ELASTIC_MODEL_TYPE,

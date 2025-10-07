@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { Fragment, useContext, useState, useEffect } from 'react';
 import type { Subscription } from 'rxjs';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,11 +17,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { useNavigateToManagementMlLink } from '../../../../../contexts/kibana/use_create_url';
 import { createResultsUrl } from '../../../../../util/results_url';
-import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
+import { useNavigateToPath } from '../../../../../contexts/kibana';
 import { PreviousButton } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
@@ -34,7 +38,7 @@ import { DetectorChart } from './components/detector_chart';
 import { JobProgress } from './components/job_progress';
 import { PostSaveOptions } from './components/post_save_options';
 import { StartDatafeedSwitch } from './components/start_datafeed_switch';
-import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
+import { NewJobAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning/new_job_awaiting_node';
 import { toastNotificationServiceProvider } from '../../../../../services/toast_notification_service';
 import {
   convertToAdvancedJob,

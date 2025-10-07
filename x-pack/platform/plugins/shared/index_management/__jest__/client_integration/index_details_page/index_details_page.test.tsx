@@ -161,46 +161,47 @@ describe('<IndexDetailsPage />', () => {
             },
             plugins: {
               ml: {
-                mlApi: {
-                  trainedModels: {
-                    getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
-                    getTrainedModels: jest.fn().mockResolvedValue([
-                      {
-                        model_id: '.elser_model_2',
-                        model_type: 'pytorch',
-                        model_package: {
-                          packaged_model_id: '.elser_model_2',
-                          model_repository: 'https://ml-models.elastic.co',
-                          minimum_version: '11.0.0',
-                          size: 438123914,
-                          sha256: '',
-                          metadata: {},
-                          tags: [],
-                          vocabulary_file: 'elser_model_2.vocab.json',
-                        },
-                        description: 'Elastic Learned Sparse EncodeR v2',
-                        tags: ['elastic'],
-                      },
-                    ]),
-                    getTrainedModelStats: jest.fn().mockResolvedValue({
-                      count: 1,
-                      trained_model_stats: [
+                getMlApi: () =>
+                  Promise.resolve({
+                    trainedModels: {
+                      getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
+                      getTrainedModels: jest.fn().mockResolvedValue([
                         {
                           model_id: '.elser_model_2',
-
-                          deployment_stats: {
-                            deployment_id: '.elser_model_2',
-                            model_id: '.elser_model_2',
-                            threads_per_allocation: 1,
-                            number_of_allocations: 1,
-                            queue_capacity: 1024,
-                            state: 'started',
+                          model_type: 'pytorch',
+                          model_package: {
+                            packaged_model_id: '.elser_model_2',
+                            model_repository: 'https://ml-models.elastic.co',
+                            minimum_version: '11.0.0',
+                            size: 438123914,
+                            sha256: '',
+                            metadata: {},
+                            tags: [],
+                            vocabulary_file: 'elser_model_2.vocab.json',
                           },
+                          description: 'Elastic Learned Sparse EncodeR v2',
+                          tags: ['elastic'],
                         },
-                      ],
-                    }),
-                  },
-                },
+                      ]),
+                      getTrainedModelStats: jest.fn().mockResolvedValue({
+                        count: 1,
+                        trained_model_stats: [
+                          {
+                            model_id: '.elser_model_2',
+
+                            deployment_stats: {
+                              deployment_id: '.elser_model_2',
+                              model_id: '.elser_model_2',
+                              threads_per_allocation: 1,
+                              number_of_allocations: 1,
+                              queue_capacity: 1024,
+                              state: 'started',
+                            },
+                          },
+                        ],
+                      }),
+                    },
+                  }),
               },
             },
           },
@@ -871,58 +872,59 @@ describe('<IndexDetailsPage />', () => {
                     },
                   },
                   ml: {
-                    mlApi: {
-                      trainedModels: {
-                        getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
-                        getTrainedModels: jest.fn().mockResolvedValue([
-                          {
-                            model_id: '.elser_model_2',
-                            model_type: 'pytorch',
-                            model_package: {
-                              packaged_model_id: customInferenceModel,
-                              model_repository: 'https://ml-models.elastic.co',
-                              minimum_version: '11.0.0',
-                              size: 438123914,
-                              sha256: '',
-                              metadata: {},
-                              tags: [],
-                              vocabulary_file: 'elser_model_2.vocab.json',
-                            },
-                            description: 'Elastic Learned Sparse EncodeR v2',
-                            tags: ['elastic'],
-                          },
-                        ]),
-                        getTrainedModelStats: jest.fn().mockResolvedValue({
-                          count: 1,
-                          trained_model_stats: [
+                    getMlApi: () =>
+                      Promise.resolve({
+                        trainedModels: {
+                          getModelsDownloadStatus: jest.fn().mockResolvedValue({}),
+                          getTrainedModels: jest.fn().mockResolvedValue([
                             {
                               model_id: '.elser_model_2',
-
-                              deployment_stats: {
-                                deployment_id: customInferenceModel,
-                                model_id: '.elser_model_2',
-                                threads_per_allocation: 1,
-                                number_of_allocations: 1,
-                                queue_capacity: 1024,
-                                state: 'started',
+                              model_type: 'pytorch',
+                              model_package: {
+                                packaged_model_id: customInferenceModel,
+                                model_repository: 'https://ml-models.elastic.co',
+                                minimum_version: '11.0.0',
+                                size: 438123914,
+                                sha256: '',
+                                metadata: {},
+                                tags: [],
+                                vocabulary_file: 'elser_model_2.vocab.json',
                               },
+                              description: 'Elastic Learned Sparse EncodeR v2',
+                              tags: ['elastic'],
                             },
-                            {
-                              model_id: '.elser_model_2',
-
-                              deployment_stats: {
-                                deployment_id: '.elser_model_2',
+                          ]),
+                          getTrainedModelStats: jest.fn().mockResolvedValue({
+                            count: 1,
+                            trained_model_stats: [
+                              {
                                 model_id: '.elser_model_2',
-                                threads_per_allocation: 1,
-                                number_of_allocations: 1,
-                                queue_capacity: 1024,
-                                state: 'started',
+
+                                deployment_stats: {
+                                  deployment_id: customInferenceModel,
+                                  model_id: '.elser_model_2',
+                                  threads_per_allocation: 1,
+                                  number_of_allocations: 1,
+                                  queue_capacity: 1024,
+                                  state: 'started',
+                                },
                               },
-                            },
-                          ],
-                        }),
-                      },
-                    },
+                              {
+                                model_id: '.elser_model_2',
+
+                                deployment_stats: {
+                                  deployment_id: '.elser_model_2',
+                                  model_id: '.elser_model_2',
+                                  threads_per_allocation: 1,
+                                  number_of_allocations: 1,
+                                  queue_capacity: 1024,
+                                  state: 'started',
+                                },
+                              },
+                            ],
+                          }),
+                        },
+                      }),
                   },
                   share: {
                     url: {

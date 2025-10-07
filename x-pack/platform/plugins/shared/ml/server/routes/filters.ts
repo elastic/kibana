@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/app';
+import {
+  createFilterSchema,
+  filterIdSchema,
+  updateFilterSchema,
+} from '@kbn/ml-server-api-schemas/filters_schema';
+import type { MlClient } from '@kbn/ml-client';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
-import { createFilterSchema, filterIdSchema, updateFilterSchema } from './schemas/filters_schema';
 import type { FormFilter, UpdateFilter } from '../models/filter';
 import { FilterManager } from '../models/filter';
-import type { MlClient } from '../lib/ml_client';
 
 // TODO - add function for returning a list of just the filter IDs.
 // TODO - add function for returning a list of filter IDs plus item count.

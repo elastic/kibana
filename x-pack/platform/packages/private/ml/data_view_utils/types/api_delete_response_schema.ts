@@ -7,7 +7,7 @@
 
 import type Boom from '@hapi/boom';
 
-import type { EsErrorBody } from '@kbn/ml-error-utils';
+import type { EsErrorBody } from '@kbn/ml-common-types/errors';
 
 /**
  * Interface for data view API response for deletion status

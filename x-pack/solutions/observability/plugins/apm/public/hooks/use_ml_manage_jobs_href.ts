@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ML_PAGES, useMlManagementHref } from '@kbn/ml-plugin/public';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlManagementHref } from '@kbn/ml-locator/use_ml_management_href';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../context/url_params_context/use_url_params';
 

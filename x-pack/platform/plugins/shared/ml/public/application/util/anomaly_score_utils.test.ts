@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+
 import { shouldIncludePointByScore } from './anomaly_score_utils';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
 
 describe('anomaly_score_utils', () => {
   describe('shouldIncludePointByScore', () => {

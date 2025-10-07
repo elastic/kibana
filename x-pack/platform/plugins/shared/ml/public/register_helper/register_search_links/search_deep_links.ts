@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { LinkId } from '@kbn/deeplinks-ml';
 
-import { type AppDeepLink } from '@kbn/core/public';
-import type { MlCapabilities } from '../../../common/types/capabilities';
-import { ML_PAGES } from '../../../common/constants/locator';
+import type { AppDeepLink } from '@kbn/core/public';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 
 function createDeepLinks(
   mlCapabilities: MlCapabilities,

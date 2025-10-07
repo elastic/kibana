@@ -27,7 +27,7 @@ import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FleetStartContract as FleetPluginStart } from '@kbn/fleet-plugin/server';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
-import type { MlPluginSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup } from '@kbn/ml-plugin/server';
 import type {
   RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
@@ -58,7 +58,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   eventLog: IEventLogService;
   features: FeaturesPluginSetup;
   lists?: ListPluginSetup;
-  ml?: MlPluginSetup;
+  ml?: MlServerPluginSetup;
   ruleRegistry: RuleRegistryPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;

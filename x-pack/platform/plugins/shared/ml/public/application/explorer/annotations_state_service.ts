@@ -15,20 +15,22 @@ import {
   Subscription,
   lastValueFrom,
 } from 'rxjs';
+
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
-import type { AnnotationsTable } from '../../../common/types/annotations';
-import type { Annotations } from '../../../common/types/annotations';
+import type { Annotations, AnnotationsTable } from '@kbn/ml-common-types/annotations';
+import type { MlApi } from '@kbn/ml-services/ml_api_service';
+import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '@kbn/ml-common-constants/search';
+
+import { StateService } from '../services/state_service';
+import type { Refresh } from '../routing/use_refresh';
+
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';
-import type { MlApi } from '../services/ml_api_service';
-import { StateService } from '../services/state_service';
-import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getSelectionTimeRange, type ExplorerJob } from './explorer_utils';
 import { loadAnnotationsTableData } from './explorer_utils';
-import type { Refresh } from '../routing/use_refresh';
 
 /**
  * Dedicated state service for annotations.

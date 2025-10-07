@@ -19,20 +19,20 @@ import useMount from 'react-use/lib/useMount';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '@kbn/ml-common-types/notifications';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import type {
+  MlNotificationMessageLevel,
+  NotificationItem,
+} from '@kbn/ml-common-types/notifications';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 import { EntityFilter } from './entity_filter';
 import { useMlNotifications } from '../../contexts/ml/ml_notifications_context';
-import { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../../../../common/constants/notifications';
 import { SavedObjectsWarning } from '../../components/saved_objects_warning';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { ML_PAGES } from '../../../../common/constants/locator';
-import type {
-  MlNotificationMessageLevel,
-  NotificationItem,
-} from '../../../../common/types/notifications';
-import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
 
 const levelBadgeMap: Record<MlNotificationMessageLevel, IconColor> = {

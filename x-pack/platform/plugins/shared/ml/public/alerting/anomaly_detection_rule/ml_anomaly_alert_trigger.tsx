@@ -7,32 +7,36 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiSpacer, EuiForm } from '@elastic/eui';
 import useMount from 'react-use/lib/useMount';
+
+import { EuiSpacer, EuiForm } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isDefined } from '@kbn/ml-is-defined';
-import { ML_ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils/constants';
+import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
-import type { MlCapabilities } from '../../../common/types/capabilities';
-import { ML_PAGES } from '../../../common/constants/locator';
-import type { MlCoreSetup } from '../../plugin';
-import { JobSelectorControl } from '../job_selector';
-import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
-import { HttpService } from '../../application/services/http_service';
-import { useToastNotificationService } from '../../application/services/toast_notification_service';
-import { SeverityControl } from '../../application/components/severity_control';
-import { ResultTypeSelector } from './result_type_selector';
-import { alertingApiProvider } from '../../application/services/ml_api_service/alerting';
-import { PreviewAlertCondition } from './preview_alert_condition';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type {
   MlAnomalyDetectionAlertAdvancedSettings,
   MlAnomalyDetectionAlertParams,
-} from '../../../common/types/alerts';
+} from '@kbn/ml-common-types/alerts';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import { HttpService } from '@kbn/ml-services/http_service';
+import { jobsApiProvider } from '@kbn/ml-services/ml_api_service/jobs';
+import { alertingApiProvider } from '@kbn/ml-services/ml_api_service/alerting';
+
+import type { MlCoreSetup } from '../../plugin';
+import { JobSelectorControl } from '../job_selector';
+import { useToastNotificationService } from '../../application/services/toast_notification_service';
+import { SeverityControl } from '../../application/components/severity_control';
+import { ResultTypeSelector } from './result_type_selector';
+import { PreviewAlertCondition } from './preview_alert_condition';
 import { InterimResultsControl } from './interim_results_control';
 import { ConfigValidator } from './config_validator';
-import { type CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts';
 
@@ -63,17 +67,22 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
     if (!mlCapabilities.canCreateJob) return;
 
-    getStartServices().then((startServices) => {
+    async function initNewJobUrl() {
+      const startServices = await getStartServices();
       const { managementLocator } = startServices[2];
+
       if (!managementLocator) return;
-      managementLocator
-        .getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB }, 'anomaly_detection')
-        .then(({ url }) => {
-          if (mounted) {
-            setNewJobUrl(url);
-          }
-        });
-    });
+
+      const { url } = await managementLocator.getUrl(
+        { page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB },
+        'anomaly_detection'
+      );
+      if (mounted) {
+        setNewJobUrl(url);
+      }
+    }
+
+    initNewJobUrl();
 
     return () => {
       mounted = false;

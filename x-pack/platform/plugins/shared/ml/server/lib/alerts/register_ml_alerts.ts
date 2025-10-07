@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AlertingPlugin } from '@kbn/alerting-plugin/server';
-import type { MlFeatures } from '../../../common/constants/app';
+import type { MlFeatures } from '@kbn/ml-common-constants/app';
 import { registerAnomalyDetectionAlertType } from './register_anomaly_detection_alert_type';
 import type { SharedServices } from '../../shared_services';
 import { registerJobsMonitoringRuleType } from './register_jobs_monitoring_rule_type';

@@ -6,13 +6,11 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { JobStats } from '@kbn/ml-common-types/anomaly_detection_jobs/job_stats';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';
 import type { GetGuards } from '../shared_services';
-import type {
-  Job,
-  JobStats,
-  Datafeed,
-  DatafeedStats,
-} from '../../../common/types/anomaly_detection_jobs';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(

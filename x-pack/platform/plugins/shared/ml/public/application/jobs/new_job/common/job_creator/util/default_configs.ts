@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { type Field, type Aggregation, EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils';
-import type { IndexPatternTitle } from '../../../../../../../common/types/kibana';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-} from '../../../../../../../common/types/anomaly_detection_jobs';
-import { splitIndexPatternNames } from '../../../../../../../common/util/job_utils';
+import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
+import { EVENT_RATE_FIELD_ID } from '@kbn/ml-anomaly-utils/fields_constants';
+import type { IndexPatternTitle } from '@kbn/ml-common-types/kibana';
+import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import { splitIndexPatternNames } from '@kbn/ml-common-utils/job_utils/split_index_pattern_names';
 
 export function createEmptyJob(): Job {
   // @ts-expect-error incomplete job

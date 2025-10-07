@@ -25,6 +25,7 @@ import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
 import { useEffect, useMemo, useState } from 'react';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { i18n } from '@kbn/i18n';
 import { isSemanticTextField } from '../../../../components/mappings_editor/lib/utils';
 import { deNormalize } from '../../../../components/mappings_editor/lib';
@@ -41,7 +42,6 @@ export interface TrainedModelsDeploymentModalProps {
   >;
 }
 
-const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 const TRAINED_MODELS_MANAGE = 'trained_models';
 
 export function TrainedModelsDeploymentModal({

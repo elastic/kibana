@@ -53,16 +53,18 @@ const mockLogCategoriesDependencies: Omit<
 
 const mockLogEventsDependencies: Omit<LogEventsDependencies, keyof typeof commonDependencies> = {};
 
-const mockMlApi: LogsOverviewDependencies['mlApi'] = {
+const mockMlApi = {
   checkMlCapabilities: jest.fn(),
 };
+const mockGetMlApi = (async () =>
+  Promise.resolve(mockMlApi)) as unknown as LogsOverviewDependencies['getMlApi'];
 
 const mockDependencies: LogsOverviewDependencies = {
   ...commonDependencies,
   ...mockLogCategoriesDependencies,
   ...mockLogEventsDependencies,
   logsDataAccess: logsDataAccessPluginMock.createStartContract(),
-  mlApi: mockMlApi,
+  getMlApi: mockGetMlApi,
 };
 
 describe('LogsOverview', () => {

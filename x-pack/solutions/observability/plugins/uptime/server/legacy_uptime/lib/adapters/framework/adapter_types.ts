@@ -17,7 +17,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { MlPluginSetup as MlSetup } from '@kbn/ml-plugin/server';
+import type { MlServerPluginSetup as MlSetup } from '@kbn/ml-plugin/server';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';

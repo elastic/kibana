@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMlKibana } from './kibana_context';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 export const useNotifications = () => {
   return useMlKibana().services.notifications;

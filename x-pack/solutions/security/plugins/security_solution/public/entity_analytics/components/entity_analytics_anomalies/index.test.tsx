@@ -36,14 +36,11 @@ const mockUseAggregatedAnomaliesByJob = jest.fn().mockReturnValue({
   refetch: jest.fn(),
 });
 
-jest.mock(
-  '@kbn/ml-plugin/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader',
-  () => {
-    return {
-      MLJobsAwaitingNodeWarning: () => <></>,
-    };
-  }
-);
+jest.mock('@kbn/ml-node-checks/ml_jobs_awaiting_node_warning', () => {
+  return {
+    MLJobsAwaitingNodeWarning: () => <></>,
+  };
+});
 
 jest.mock('../../../common/components/ml/anomaly/use_anomalies_search', () => {
   const original = jest.requireActual('../../../common/components/ml/anomaly/use_anomalies_search');

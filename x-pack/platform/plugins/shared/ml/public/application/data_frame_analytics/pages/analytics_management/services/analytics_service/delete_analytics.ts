@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
-import { useMlApi } from '../../../../../contexts/kibana';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
 import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';

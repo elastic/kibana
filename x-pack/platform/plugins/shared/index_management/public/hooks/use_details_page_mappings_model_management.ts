@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ModelDownloadState,
-  TrainedModelStat,
-} from '@kbn/ml-plugin/common/types/trained_models';
+import type { ModelDownloadState, TrainedModelStat } from '@kbn/ml-common-types/trained_models';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { ElserVersion } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
@@ -75,9 +72,10 @@ async function getCuratedModelConfig(
   model: string,
   version?: ElserVersion
 ) {
-  if (ml?.mlApi) {
+  if (ml?.getMlApi) {
     try {
-      const result = await ml.mlApi.trainedModels.getCuratedModelConfig(
+      const mlApi = await ml.getMlApi();
+      const result = await mlApi.trainedModels.getCuratedModelConfig(
         model,
         version ? { version } : undefined
       );
@@ -98,8 +96,9 @@ export const useDetailsPageMappingsModelManagement = () => {
 
   const fetchInferenceToModelIdMap = useCallback<() => Promise<InferenceToModelIdMap>>(async () => {
     const inferenceModels = await getInferenceEndpoints();
-    const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
-    const downloadStates = await ml?.mlApi?.trainedModels.getModelsDownloadStatus();
+    const mlApi = await ml?.getMlApi();
+    const trainedModelStats = await mlApi?.trainedModels.getTrainedModelStats();
+    const downloadStates = await mlApi?.trainedModels.getModelsDownloadStatus();
     const elser = await getCuratedModelConfig(ml, 'elser', LATEST_ELSER_VERSION);
     const e5 = await getCuratedModelConfig(ml, 'e5');
     const modelStatsById =

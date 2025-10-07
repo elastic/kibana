@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,15 +25,16 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import {
-  usePermissionCheck,
-  createPermissionFailureMessage,
-} from '../../capabilities/check_capabilities';
-import type { Module, RecognizeModuleResult } from '../../../../common/types/modules';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import type { Module, RecognizeModuleResult } from '@kbn/ml-common-types/modules';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { usePermissionCheck } from '@kbn/ml-hooks/capabilities/use_permission_check';
+import { createPermissionFailureMessage } from '@kbn/ml-services/capabilities/check_capabilities';
+
 import { useEnabledFeatures } from '../../contexts/ml/serverless_context';
-import { useMlKibana } from '../../contexts/kibana';
 import type { TabIdType, KibanaAssetType } from './flyout';
 import { TAB_IDS } from './flyout';
 import { DataViewsTable } from './data_views_table';

@@ -7,12 +7,8 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import {
-  type Aggregation,
-  type Field,
-  type NewJobCapsResponse,
-  _DOC_COUNT,
-} from '@kbn/ml-anomaly-utils';
+import type { Aggregation, Field, NewJobCapsResponse } from '@kbn/ml-anomaly-utils';
+import { _DOC_COUNT } from '@kbn/ml-anomaly-utils/field_types';
 import { fieldServiceProvider } from './field_service';
 
 export function newJobCapsProvider(client: IScopedClusterClient) {

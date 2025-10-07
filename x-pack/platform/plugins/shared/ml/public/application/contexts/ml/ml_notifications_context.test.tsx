@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react';
 import { of, throwError } from 'rxjs';
 import { useMlNotifications, MlNotificationsContextProvider } from './ml_notifications_context';
 import { useStorage } from '@kbn/ml-local-storage';
-import { useMlKibana } from '../kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 const mockCountMessages = jest.fn(() => {
   return of({ info: 1, error: 0, warning: 0 });
@@ -36,7 +36,7 @@ const mockKibana = {
   },
 };
 
-jest.mock('../kibana', () => ({
+jest.mock('@kbn/ml-kibana-context/kibana_context', () => ({
   useMlKibana: jest.fn(() => {
     return mockKibana;
   }),

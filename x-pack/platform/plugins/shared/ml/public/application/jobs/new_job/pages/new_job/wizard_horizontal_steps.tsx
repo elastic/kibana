@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiStepStatus } from '@elastic/eui';
 import { EuiStepsHorizontal } from '@elastic/eui';
+import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
 import { WIZARD_STEPS } from '../components/step_types';
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 interface Props {
   currentStep: WIZARD_STEPS;

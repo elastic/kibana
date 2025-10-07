@@ -12,17 +12,12 @@ import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishin
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-embeddables/constants';
+import type { AnomalySwimLaneProps } from '@kbn/ml-common-types/anomaly_swim_lane';
 import type {
   AnomalySwimLaneEmbeddableApi,
-  AnomalySwimlaneEmbeddableCustomInput,
   AnomalySwimLaneEmbeddableState,
-} from '../embeddables';
-import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
-
-export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInput {
-  id?: string;
-  executionContext: KibanaExecutionContext;
-}
+} from '../embeddables/types';
 
 export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   id,
@@ -44,8 +39,9 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
       swimlaneType,
       refreshConfig,
       viewBy,
+      timeRange,
     };
-  }, [jobIds, refreshConfig, swimlaneType, viewBy]);
+  }, [jobIds, refreshConfig, swimlaneType, viewBy, timeRange]);
 
   useEffect(
     function syncState() {

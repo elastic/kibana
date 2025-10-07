@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import React, { useState, type FC, useEffect, useMemo, useCallback, useRef } from 'react';
-import { usePageUrlState } from '@kbn/ml-url-state';
-import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { get, isEqual } from 'lodash';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
+
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import type { MlAnomaliesTableRecordExtended } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import type { FilterAction } from '@kbn/ml-common-constants/explorer';
+
 import type {
   AnomaliesTableData,
   ExplorerJob,
   SourceIndicesWithGeoFields,
 } from '../../explorer/explorer_utils';
-import type { FilterAction } from '../../explorer/explorer_constants';
-import { useMlKibana } from '../../contexts/kibana';
 import { ANOMALIES_TABLE_TABS, INFLUENCERS_LIMIT, MAX_CHARS } from './anomalies_table_constants';
 import { AnomalyDetails } from './anomaly_details';
 import { mlTableService } from '../../services/table_service';

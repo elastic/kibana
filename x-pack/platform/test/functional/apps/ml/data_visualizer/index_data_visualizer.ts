@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils';
+import { ML_JOB_FIELD_TYPES } from '@kbn/ml-anomaly-utils/field_types';
+
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+
 import type { TestData, MetricFieldVisConfig } from './types';
 import {
   farequoteDataViewTestData,

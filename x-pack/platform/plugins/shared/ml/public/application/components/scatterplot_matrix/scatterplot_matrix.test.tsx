@@ -20,10 +20,12 @@ const mockEsSearch = jest.fn((body) => ({
   hits: { hits: [{ fields: { x: [1], y: [2] } }, { fields: { x: [2], y: [3] } }] },
 }));
 
-jest.mock('../../contexts/kibana', () => ({
+jest.mock('@kbn/ml-hooks/use_ml_api', () => ({
   useMlApi: () => ({
     esSearch: mockEsSearch,
   }),
+}));
+jest.mock('@kbn/ml-kibana-context/kibana_context', () => ({
   useMlKibana: () => ({
     services: {
       application: {

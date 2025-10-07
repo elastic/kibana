@@ -7,15 +7,20 @@
 
 import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
+
 import { useStorage } from '@kbn/ml-local-storage';
-import { ML_SCHEDULED_MODEL_DEPLOYMENTS } from '../../../../common/types/storage';
-import type { ScheduledDeployment, TrainedModelsService } from '../trained_models_service';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+import { ML_SCHEDULED_MODEL_DEPLOYMENTS } from '@kbn/ml-common-types/storage';
+import { DeploymentParamsMapper } from '@kbn/ml-services/model_management/deployment_params_mapper';
+import type {
+  ScheduledDeployment,
+  TrainedModelsService,
+} from '@kbn/ml-services/model_management/trained_models_service';
+import { useCloudCheck } from '@kbn/ml-node-checks/node_available_warning/hooks';
+
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useMlServerInfo } from '../../contexts/ml';
-import { useCloudCheck } from '../../components/node_available_warning/hooks';
 import { getNewJobLimits } from '../../services/ml_server_info';
-import { DeploymentParamsMapper } from '../deployment_params_mapper';
 import { useMlTelemetryClient } from '../../contexts/ml/ml_telemetry_context';
 
 /**

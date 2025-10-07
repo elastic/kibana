@@ -7,18 +7,10 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { ML_JOB_AGGREGATION, KIBANA_AGGREGATION, ES_AGGREGATION } from './aggregation_types';
+import type { ML_JOB_AGGREGATION, KIBANA_AGGREGATION } from './aggregation_types';
+import type { ES_AGGREGATION } from './es_aggregation';
 import { MLCATEGORY } from './field_types';
-
-/**
- * EVENT_RATE_FIELD_ID
- */
-export const EVENT_RATE_FIELD_ID = '__ml_event_rate_count__';
-
-/**
- * METRIC_AGG_TYPE
- */
-export const METRIC_AGG_TYPE = 'metrics';
+import type { METRIC_AGG_TYPE } from './fields_constants';
 
 /**
  * Field id

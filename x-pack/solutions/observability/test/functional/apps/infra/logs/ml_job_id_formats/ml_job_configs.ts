@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { setupModuleBodySchema } from '@kbn/ml-plugin/server/routes/schemas/modules';
+import type { setupModuleBodySchema } from '@kbn/ml-server-api-schemas/modules';
 
 export interface MlJob {
   jobId: string;

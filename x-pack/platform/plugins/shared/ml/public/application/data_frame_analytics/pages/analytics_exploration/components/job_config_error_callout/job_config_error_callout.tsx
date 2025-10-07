@@ -12,7 +12,7 @@ import { EuiCallOut, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useMlKibana } from '../../../../../contexts/kibana';
+import { useMlKibana } from '@kbn/ml-kibana-context';
 
 const jobConfigErrorTitle = i18n.translate('xpack.ml.dataframe.analytics.jobConfig.errorTitle', {
   defaultMessage: 'Unable to fetch results. An error occurred loading the job configuration data.',

@@ -6,8 +6,9 @@
  */
 
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+
 import { resolveSeverityFormat } from './severity_format_resolver';
-import type { SeverityThreshold } from '../../../../../common/types/anomalies';
 
 describe('severity_format_resolver', () => {
   describe('resolveSeverityFormat', () => {

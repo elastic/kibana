@@ -7,15 +7,7 @@
 
 export { MLRequestFailure } from './src/request_error';
 export { extractErrorMessage, extractErrorProperties } from './src/process_errors';
-export type {
-  ErrorType,
-  ErrorMessage,
-  EsErrorBody,
-  EsErrorRootCause,
-  MLErrorObject,
-  MLHttpFetchError,
-  MLHttpFetchErrorBase,
-  MLResponseError,
-  QueryErrorMessage,
-} from './src/types';
 export { isBoomError, isErrorString, isEsErrorBody, isMLResponseError } from './src/types';
+export { MLJobNotFound, MLModelNotFound } from './src/ml_errors';
+export { isRequestTimeout } from './src/is_request_timeout';
+export { fillResultsWithTimeouts } from './src/fill_results_with_timeouts';

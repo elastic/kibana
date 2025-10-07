@@ -10,19 +10,16 @@ import type { Observable } from 'rxjs';
 import { combineLatest, ReplaySubject, Subject } from 'rxjs';
 import { map, startWith, tap } from 'rxjs';
 import { CATEGORY_EXAMPLES_VALIDATION_STATUS } from '@kbn/ml-category-validator';
-import {
-  basicJobValidation,
-  basicDatafeedValidation,
-  basicJobAndDatafeedValidation,
-} from '../../../../../../common/util/job_utils';
+import { JOB_TYPE } from '@kbn/ml-common-constants/new_job';
+import { basicJobValidation } from '@kbn/ml-common-utils/job_utils/basic_job_validation';
+import { basicDatafeedValidation } from '@kbn/ml-common-utils/job_utils/basic_datafeed_validation';
+import { basicJobAndDatafeedValidation } from '@kbn/ml-common-utils/job_utils/basic_job_and_datafeed_validation';
 import { getNewJobLimits } from '../../../../services/ml_server_info';
 import type { JobCreator, JobCreatorType } from '../job_creator';
 import { isCategorizationJobCreator } from '../job_creator';
 import { populateValidationMessages } from './util';
 import type { CardinalityValidatorResult, JobExistsResult, GroupsExistResult } from './validators';
 import { cardinalityValidator, jobIdValidator, groupIdsValidator } from './validators';
-
-import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 // delay start of validation to allow the user to make changes
 // e.g. if they are typing in a new value, try not to validate

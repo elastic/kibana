@@ -8,13 +8,18 @@
 import { parse } from 'query-string';
 import type { FC } from 'react';
 import React from 'react';
+
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlApi } from '@kbn/ml-hooks/use_ml_api';
+import { useMlKibana } from '@kbn/ml-kibana-context';
+
 import { basicResolvers } from '../../resolvers';
-import { ML_PAGES } from '../../../../locator';
-import { useMlApi, useMlKibana, useNavigateToPath } from '../../../contexts/kibana';
+import { useNavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute, PageProps } from '../../router';
-import { createPath, PageLoader } from '../../router';
+import { PageLoader } from '../../page_loader';
+import { createPath } from '../../create_path';
 import { useRouteResolver } from '../../use_resolver';
 import type { NavigateToApp } from '../../breadcrumbs';
 import { getMlManagementBreadcrumb, getStackManagementBreadcrumb } from '../../breadcrumbs';
