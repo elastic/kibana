@@ -126,7 +126,7 @@ export const FileContents: FC<Props> = ({
   }, [fileContents, semiStructureTextData, grokHighlighter, isSemiStructureTextData, isMounted]);
 
   return (
-    <div data-test-subj={`dataVisualizerFileContentsPanel_${index}`}>
+    <div data-test-subj={`dataVisualizerFileContentsPanel-${index}`}>
       <EuiFlexGroup>
         <EuiFlexItem>
           {showTitle ? (
@@ -176,7 +176,7 @@ export const FileContents: FC<Props> = ({
 
       <EuiSpacer size="s" />
 
-      <div data-test-subj={`dataVisualizerFileContents_${index}`}>
+      <div data-test-subj={`dataVisualizerFileContents-${index}`}>
         {highlightedLines === null || showHighlights === false ? (
           <JsonEditor mode={mode} readOnly={true} value={formattedData} height="200px" />
         ) : (
