@@ -37,19 +37,10 @@ interface Props {
     sslESKey: boolean;
     sslAgentKey: boolean;
   };
-  onToggleOutputSecretAndClearValue: (secretEnabled: boolean) => void;
-  onToggleSSLSecretAndClearValue: (secretEnabled: boolean) => void;
 }
 
 export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
-  const {
-    inputs,
-    useOutputSecretsStorage,
-    useSSLSecretsStorage,
-    isConvertedToSecret,
-    onToggleOutputSecretAndClearValue,
-    onToggleSSLSecretAndClearValue,
-  } = props;
+  const { inputs, useOutputSecretsStorage, useSSLSecretsStorage, isConvertedToSecret } = props;
 
   const clientAuthenticationsOptions = [
     {
@@ -151,7 +142,6 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               }
               {...inputs.sslKeyInput.formRowProps}
               useSecretsStorage={useSSLSecretsStorage}
-              onToggleSecretStorage={onToggleSSLSecretAndClearValue}
               disabled={!useSSLSecretsStorage}
               secretType="ssl"
             >
@@ -180,7 +170,6 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               {...inputs.sslKeySecretInput.formRowProps}
               useSecretsStorage={useSSLSecretsStorage}
               isConvertedToSecret={isConvertedToSecret.sslKey}
-              onToggleSecretStorage={onToggleSSLSecretAndClearValue}
               cancelEdit={inputs.sslKeySecretInput.cancelEdit}
               secretType="ssl"
             >
@@ -251,7 +240,6 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               }
               {...inputs.sslESKeyInput.formRowProps}
               useSecretsStorage={useOutputSecretsStorage}
-              onToggleSecretStorage={onToggleOutputSecretAndClearValue}
               disabled={!useOutputSecretsStorage}
               secretType="output"
             >
@@ -260,7 +248,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
                 rows={5}
                 {...inputs.sslESKeyInput.props}
                 placeholder={i18n.translate(
-                  'xpack.fleet.settings.fleetServerHosts.sslKeyInputPlaceholder',
+                  'xpack.fleet.settings.fleetServerHosts.sslEsKeyInputPlaceholder',
                   {
                     defaultMessage:
                       'Specify the SSL key that the Fleet Server should use when connecting to Elasticsearch. Only needed for mTLS between Fleet Server and Elasticsearch.',
@@ -279,8 +267,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               )}
               {...inputs.sslESKeySecretInput.formRowProps}
               useSecretsStorage={useOutputSecretsStorage}
-              isConvertedToSecret={isConvertedToSecret.sslKey}
-              onToggleSecretStorage={onToggleOutputSecretAndClearValue}
+              isConvertedToSecret={isConvertedToSecret.sslESKey}
               cancelEdit={inputs.sslESKeySecretInput.cancelEdit}
               secretType="output"
             >
@@ -351,7 +338,6 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               }
               {...inputs.sslAgentKeyInput.formRowProps}
               useSecretsStorage={useSSLSecretsStorage}
-              onToggleSecretStorage={onToggleSSLSecretAndClearValue}
               disabled={!useSSLSecretsStorage}
               secretType="ssl"
             >
@@ -379,8 +365,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
               )}
               {...inputs.sslAgentKeySecretInput.formRowProps}
               useSecretsStorage={useSSLSecretsStorage}
-              isConvertedToSecret={isConvertedToSecret.sslKey}
-              onToggleSecretStorage={onToggleSSLSecretAndClearValue}
+              isConvertedToSecret={isConvertedToSecret.sslAgentKey}
               cancelEdit={inputs.sslAgentKeySecretInput.cancelEdit}
               secretType="ssl"
             >

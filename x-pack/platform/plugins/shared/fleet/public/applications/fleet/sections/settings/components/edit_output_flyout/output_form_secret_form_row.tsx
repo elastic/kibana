@@ -35,7 +35,7 @@ export const SecretFormRow: React.FC<{
   children: EuiFormRowProps['children'];
   useSecretsStorage: boolean;
   isConvertedToSecret?: boolean;
-  onToggleSecretStorage: (secretEnabled: boolean) => void;
+  onToggleSecretStorage?: (secretEnabled: boolean) => void;
   error?: string[];
   isInvalid?: boolean;
   title?: string;
@@ -189,7 +189,7 @@ export const SecretFormRow: React.FC<{
       defaultMessage="This field should be stored as a secret, currently it is set to be stored as plain text. {enableSecretLink}"
       values={{
         enableSecretLink: (
-          <EuiLink onClick={() => onToggleSecretStorage(true)} color="primary">
+          <EuiLink onClick={() => onToggleSecretStorage?.(true)} color="primary">
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.revertToSecretStorageLink"
               defaultMessage="Click to use secret storage instead"

@@ -59,7 +59,9 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
   );
 
   const [isFirstLoad, setIsFirstLoad] = React.useState(true);
-  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(true);
+  const [secretsToggleState, setSecretsToggleState] = useState<'disabled' | true | false>(
+    'disabled'
+  );
   const useSecretsStorage = secretsToggleState === true;
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     sslKey: false,

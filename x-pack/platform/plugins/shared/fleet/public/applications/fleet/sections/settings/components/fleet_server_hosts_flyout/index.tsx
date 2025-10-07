@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -67,52 +67,19 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   );
 
   const { enableSSLSecrets } = ExperimentalFeaturesService.get();
-  const [isFirstLoad, setIsFirstLoad] = React.useState(true);
   const [isConvertedToSecret, setIsConvertedToSecret] = React.useState({
     sslKey: false,
     sslESKey: false,
     sslAgentKey: false,
   });
-  const [outputSecretsToggleState, setOutputSecretsToggleState] = useState<
-    'disabled' | true | false
-  >(true);
-  const useOutputSecretsStorage = outputSecretsToggleState === true;
-  const [sslSecretsToggleState, setSSLSecretsToggleState] = useState<'disabled' | true | false>(
-    true
-  );
-  const useSSLSecretsStorage = sslSecretsToggleState === true;
 
   const fleetStatus = useFleetStatus();
-  if (
-    fleetStatus.isSSLSecretsStorageEnabled !== undefined &&
-    sslSecretsToggleState === 'disabled'
-  ) {
-    setSSLSecretsToggleState(fleetStatus.isSSLSecretsStorageEnabled);
-  }
-  if (
-    fleetStatus.isSecretsStorageEnabled !== undefined &&
-    outputSecretsToggleState === 'disabled'
-  ) {
-    setOutputSecretsToggleState(fleetStatus.isSecretsStorageEnabled);
-  }
-
-  const onToggleOutputSecretStorage = (secretEnabled: boolean) => {
-    if (outputSecretsToggleState === 'disabled') {
-      return;
-    }
-    setOutputSecretsToggleState(secretEnabled);
-  };
-
-  const onToggleSSLSecretStorage = (secretEnabled: boolean) => {
-    if (sslSecretsToggleState === 'disabled') {
-      return;
-    }
-    setSSLSecretsToggleState(secretEnabled);
-  };
+  const useOutputSecretsStorage = fleetStatus.isSecretsStorageEnabled ?? false;
+  const useSSLSecretsStorage = enableSSLSecrets
+    ? fleetStatus.isSSLSecretsStorageEnabled ?? false
+    : false;
 
   useEffect(() => {
-    if (!isFirstLoad) return;
-    setIsFirstLoad(false);
     // populate the secret input with the value of the plain input in order to re-save the key with secret storage
     if (useSSLSecretsStorage && enableSSLSecrets) {
       if (inputs.sslKeyInput.value && !inputs.sslKeySecretInput.value) {
@@ -136,48 +103,15 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   }, [
     inputs.sslKeyInput,
     inputs.sslKeySecretInput,
-    isFirstLoad,
-    setIsFirstLoad,
     isConvertedToSecret,
     inputs.sslESKeyInput,
     inputs.sslESKeySecretInput,
     inputs.sslAgentKeyInput,
     inputs.sslAgentKeySecretInput,
-    setOutputSecretsToggleState,
-    setSSLSecretsToggleState,
     useSSLSecretsStorage,
     useOutputSecretsStorage,
     enableSSLSecrets,
   ]);
-
-  const onToggleOutputSecretAndClearValue = (secretEnabled: boolean) => {
-    if (secretEnabled) {
-      inputs.sslESKeyInput.clear();
-    } else {
-      inputs.sslESKeySecretInput.setValue('');
-    }
-    setIsConvertedToSecret({
-      ...isConvertedToSecret,
-      sslESKey: false,
-    });
-    onToggleOutputSecretStorage(secretEnabled);
-  };
-
-  const onToggleSSLSecretAndClearValue = (secretEnabled: boolean) => {
-    if (secretEnabled) {
-      inputs.sslKeyInput.clear();
-      inputs.sslAgentKeyInput.clear();
-    } else {
-      inputs.sslKeySecretInput.setValue('');
-      inputs.sslAgentKeySecretInput.setValue('');
-    }
-    setIsConvertedToSecret({
-      ...isConvertedToSecret,
-      sslKey: false,
-      sslAgentKey: false,
-    });
-    onToggleSSLSecretStorage(secretEnabled);
-  };
 
   return (
     <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={modalTitleId}>
@@ -355,8 +289,6 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
             inputs={inputs}
             useSSLSecretsStorage={enableSSLSecrets && useSSLSecretsStorage}
             useOutputSecretsStorage={useOutputSecretsStorage}
-            onToggleOutputSecretAndClearValue={onToggleOutputSecretAndClearValue}
-            onToggleSSLSecretAndClearValue={onToggleSSLSecretAndClearValue}
             isConvertedToSecret={isConvertedToSecret}
           />
         </EuiForm>
