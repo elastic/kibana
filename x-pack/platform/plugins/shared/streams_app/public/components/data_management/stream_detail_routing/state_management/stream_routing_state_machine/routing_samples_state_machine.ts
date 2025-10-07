@@ -49,6 +49,7 @@ export interface RoutingSamplesContext {
     | { type: 'suggestion'; name: string; index: number }
     | { type: 'createStream' }
     | { type: 'updateStream'; name: string };
+  accumulatedDocuments: SampleDocument[];
 }
 
 export type RoutingSamplesEvent =
@@ -110,6 +111,9 @@ export const routingSamplesMachine = setup({
         selectedPreview: params.preview,
       })
     ),
+    resetSuggestions: assign(() => ({
+      accumulatedDocuments: [],
+    })),
   },
   delays: {
     conditionUpdateDebounceTime: 500,
@@ -130,6 +134,7 @@ export const routingSamplesMachine = setup({
     approximateMatchingPercentageError: undefined,
     selectedPreview: undefined,
     documentMatchFilter: 'matched',
+    accumulatedDocuments: [],
   }),
   initial: 'fetching',
   invoke: {
@@ -140,6 +145,7 @@ export const routingSamplesMachine = setup({
     'routingSamples.refresh': {
       target: '.fetching',
       reenter: true,
+      actions: [{ type: 'resetSuggestions', params: ({ event }) => event }],
     },
     'routingSamples.updateCondition': {
       target: '.debouncingCondition',
@@ -163,6 +169,15 @@ export const routingSamplesMachine = setup({
         {
           type: 'setSelectedPreview',
           params: ({ event }) => event,
+        },
+      ],
+    },
+    'routingSamples.resetSuggestions': {
+      target: '.fetching',
+      reenter: true,
+      actions: [
+        {
+          type: 'resetSuggestions',
         },
       ],
     },
@@ -203,6 +218,14 @@ export const routingSamplesMachine = setup({
                 },
                 onDone: {
                   target: 'done',
+                  actions: [
+                    ({ context }) => {
+                      context.accumulatedDocuments = [
+                        ...context.accumulatedDocuments,
+                        ...(context.documents ?? []),
+                      ];
+                    },
+                  ],
                 },
                 onError: {
                   target: 'done',
