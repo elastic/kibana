@@ -23,7 +23,8 @@ describe('saved_objects_count_collector', () => {
     registerSavedObjectsCountUsageCollector(
       usageCollectionMock,
       () => Promise.resolve(['type_one', 'type_two', 'type-three', 'type-four']),
-      mockGetSoClientWithHiddenIndices
+      mockGetSoClientWithHiddenIndices,
+      () => Promise.resolve(['type_one', 'type-three'])
     )
   );
   afterAll(() => jest.clearAllTimers());

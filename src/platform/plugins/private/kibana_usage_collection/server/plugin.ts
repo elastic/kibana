@@ -159,10 +159,16 @@ export class KibanaUsageCollectionPlugin implements Plugin {
       return coreStart.savedObjects.createInternalRepository(allSoTypes);
     };
 
+    const getAllTypesWithAccessControl = async () => {
+      const coreStart = await coreStartPromise;
+      return coreStart.savedObjects.getTypeRegistry().getAllTypesWithAccessControl();
+    };
+
     registerSavedObjectsCountUsageCollector(
       usageCollection,
       getAllSavedObjectTypes,
-      getSoClientWithHiddenIndices
+      getSoClientWithHiddenIndices,
+      getAllTypesWithAccessControl
     );
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
