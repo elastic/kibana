@@ -12,7 +12,7 @@ exports[`DraftModeCallout Custom content case renders a callout with custom cont
       aria-hidden="true"
       class="emotion-euiCallOut__icon"
       color="inherit"
-      data-euiicon-type="info"
+      data-euiicon-type="warning"
     />
     You have unsaved changes
   </p>
@@ -43,7 +43,7 @@ exports[`DraftModeCallout Default case renders a default callout when custom pro
       aria-hidden="true"
       class="emotion-euiCallOut__icon"
       color="inherit"
-      data-euiicon-type="info"
+      data-euiicon-type="warning"
     />
     You have unsaved changes
   </p>
