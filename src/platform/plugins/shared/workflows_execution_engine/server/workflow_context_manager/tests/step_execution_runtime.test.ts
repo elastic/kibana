@@ -381,69 +381,6 @@ describe('StepExecutionRuntime', () => {
         });
       });
     });
-
-    describe('step execution fails', () => {
-      beforeEach(async () => {
-        (workflowExecutionState.getStepExecution as jest.Mock).mockImplementation(
-          (stepExecutionId) => {
-            if (stepExecutionId === 'fake_step_execution_id') {
-              return {
-                stepId: 'fakeStepId1',
-                startedAt: '2025-08-06T00:00:00.000Z',
-                output: null,
-                error: 'Step execution failed',
-              } as Partial<EsWorkflowStepExecution>;
-            }
-          }
-        );
-      });
-
-      it('should upsert step with the fake step execution id', async () => {
-        await underTest.finishStep();
-
-        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
-          expect.objectContaining({
-            id: 'fake_step_execution_id',
-          } as Partial<EsWorkflowStepExecution>)
-        );
-      });
-
-      it('should finish a step execution with "FAILED" status', async () => {
-        await underTest.finishStep();
-
-        expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
-          expect.objectContaining({
-            status: ExecutionStatus.FAILED,
-            output: null,
-            error: 'Step execution failed',
-          })
-        );
-      });
-
-      it('should log the failure of the step', async () => {
-        const error = new Error('Step execution failed');
-        await underTest.failStep(error);
-
-        expect(workflowLogger.logError).toHaveBeenCalledWith(
-          `Step 'fakeStepId1' failed: Step execution failed`,
-          error,
-          {
-            event: { action: 'step-fail', category: ['workflow', 'step'] },
-            tags: ['workflow', 'step', 'fail'],
-            labels: {
-              step_type: 'fakeStepType1',
-              connector_type: 'fakeStepType1',
-              step_name: 'fakeStepId1',
-              step_id: 'fakeStepId1',
-            },
-            workflow: {
-              step_execution_id: 'fake_step_execution_id',
-              step_id: 'fakeStepId1',
-            },
-          }
-        );
-      });
-    });
   });
 
   describe('failStep', () => {

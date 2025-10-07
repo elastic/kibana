@@ -118,8 +118,30 @@ export class WorkflowExecutionRuntimeManager {
     return [...this.workflowExecution.scopeStack];
   }
 
+  /**
+   * Enters a new scope in the workflow execution context.
+   *
+   * This method creates a new scope frame and pushes it onto the scope stack, establishing
+   * a new execution context for nested workflow operations. Scopes are used to track
+   * hierarchical execution contexts such as loops, conditionals, or sub-workflows.
+   *
+   * @param subScopeId - Optional identifier for the sub-scope being entered
+   *
+   * @remarks
+   * This method includes a guard condition that prevents scope entry if the current node
+   * is not an appropriate "enter" node. The scope update will be silently ignored if:
+   * - The current node type does not start with 'enter' (e.g., 'enter-foreach', 'enter-if', etc)
+   *
+   * This guard ensures that scopes are only created at the correct workflow execution points,
+   * maintaining the integrity of the execution context hierarchy.
+   */
   public enterScope(subScopeId?: string): void {
     const currentNode = this.getCurrentNode()!;
+
+    if (!currentNode.type.startsWith('enter-')) {
+      return;
+    }
+
     this.workflowExecutionState.updateWorkflowExecution({
       scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).enterScope({
         nodeId: currentNode.id,
@@ -130,15 +152,33 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
+  /**
+   * Exits the current scope in the workflow execution context.
+   *
+   * This method pops the top scope frame from the scope stack, returning to the previous
+   * execution context. This is typically called when leaving nested workflow operations
+   * such as loops, conditionals, or sub-workflows.
+   *
+   * @remarks
+   * This method includes multiple guard conditions that prevent scope exit if the current
+   * execution state is not appropriate. The scope update will be silently ignored if:
+   * - The current node type does not start with 'exit' (e.g., 'exit-foreach', 'exit-if', etc)
+   * - The current node's corresponding enter type doesn't match the current scope's node type
+   *   (e.g., trying to exit a loop scope from a conditional exit node)
+   *
+   * These guards ensure that scopes are only exited at the correct workflow execution points
+   * and maintain proper nesting hierarchy, preventing scope stack corruption and ensuring
+   * the integrity of the execution context.
+   */
   public exitScope(): void {
     const currentNode = this.getCurrentNode();
 
-    if (!currentNode?.type.startsWith('exit')) {
+    if (!currentNode?.type.startsWith('exit-')) {
       return;
     }
 
     const scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
-    const entered = currentNode.type.replace('exit', 'enter');
+    const entered = currentNode.type.replace(/^exit-/, 'enter-');
 
     if (entered !== scopeStack.getCurrentScope()?.nodeType) {
       return;

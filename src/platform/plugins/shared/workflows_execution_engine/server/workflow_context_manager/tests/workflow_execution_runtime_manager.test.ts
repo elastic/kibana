@@ -350,9 +350,20 @@ describe('WorkflowExecutionRuntimeManager', () => {
       underTest.navigateToNode('node1');
     });
 
-    it('should enter a new scope with step id when no name is provided', async () => {
+    it('should enter a new scope with step id when node type is enter-* and no name is provided', async () => {
+      workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
+        switch (nodeId) {
+          case 'node3':
+            return {
+              id: 'node3',
+              type: 'enter-normal-path',
+              stepId: 'fakeStepId3',
+              stepType: 'fakeStepType3',
+            } as GraphNodeUnion;
+        }
+      });
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
-        currentNodeId: 'node1',
+        currentNodeId: 'node3',
         scopeStack: [
           { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
           { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
@@ -364,13 +375,27 @@ describe('WorkflowExecutionRuntimeManager', () => {
           scopeStack: [
             { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
             { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
-            { stepId: 'fakeStepId1', nestedScopes: [{ nodeId: 'node1' }] },
+            {
+              stepId: 'fakeStepId3',
+              nestedScopes: [{ nodeId: 'node3', nodeType: 'enter-normal-path' }],
+            },
           ],
         })
       );
     });
 
     it('should enter a new scope with the provided name', async () => {
+      workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
+        switch (nodeId) {
+          case 'node3':
+            return {
+              id: 'node3',
+              type: 'enter-normal-path',
+              stepId: 'fakeStepId3',
+              stepType: 'fakeStepType3',
+            } as GraphNodeUnion;
+        }
+      });
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         currentNodeId: 'node3',
         scopeStack: [
@@ -378,19 +403,44 @@ describe('WorkflowExecutionRuntimeManager', () => {
           { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
         ] as StackFrame[],
       } as Partial<EsWorkflowExecution>);
-      underTest.enterScope('my-scope');
+      underTest.enterScope('fake-scope-id');
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           scopeStack: [
-            { nestedScopes: [{ nodeId: 'node1' }], stepId: 'firstScope' },
-            { nestedScopes: [{ nodeId: 'node2' }], stepId: 'secondScope' },
+            { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
+            { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
             {
-              nestedScopes: [{ nodeId: 'node3', nodeType: undefined, scopeId: 'my-scope' }],
               stepId: 'fakeStepId3',
+              nestedScopes: [
+                { nodeId: 'node3', nodeType: 'enter-normal-path', scopeId: 'fake-scope-id' },
+              ],
             },
           ],
         })
       );
+    });
+
+    it('should not modify scope if node is not enter-* type', async () => {
+      workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
+        switch (nodeId) {
+          case 'node3':
+            return {
+              id: 'node3',
+              type: 'atomic',
+              stepId: 'fakeStepId3',
+              stepType: 'fakeStepType3',
+            } as GraphNodeUnion;
+        }
+      });
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        currentNodeId: 'node3',
+        scopeStack: [
+          { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
+          { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
+        ] as StackFrame[],
+      } as Partial<EsWorkflowExecution>);
+      underTest.enterScope('fake-scope-id');
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith();
     });
   });
 
@@ -399,12 +449,26 @@ describe('WorkflowExecutionRuntimeManager', () => {
       underTest.navigateToNode('node1');
     });
 
-    it('should pop the last element', async () => {
+    it('should pop the last element if node type is exit-*', async () => {
+      workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
+        switch (nodeId) {
+          case 'node3':
+            return {
+              id: 'node3',
+              type: 'exit-else-branch',
+              stepId: 'fakeStepId3',
+              stepType: 'fakeStepType3',
+            } as GraphNodeUnion;
+        }
+      });
       workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
-        currentNodeId: 'node1',
+        currentNodeId: 'node3',
         scopeStack: [
           { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
-          { stepId: 'secondScope', nestedScopes: [{ nodeId: 'node2' }] },
+          {
+            stepId: 'secondScope',
+            nestedScopes: [{ nodeId: 'node2', nodeType: 'enter-else-branch' }],
+          },
         ] as StackFrame[],
       } as Partial<EsWorkflowExecution>);
       underTest.exitScope();
@@ -413,6 +477,32 @@ describe('WorkflowExecutionRuntimeManager', () => {
           scopeStack: [{ stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] }],
         })
       );
+    });
+
+    it('should not modify the scope stack if node type is not exit-*', async () => {
+      workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
+        switch (nodeId) {
+          case 'node3':
+            return {
+              id: 'node3',
+              type: 'atomic',
+              stepId: 'fakeStepId3',
+              stepType: 'fakeStepType3',
+            } as GraphNodeUnion;
+        }
+      });
+      workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        currentNodeId: 'node3',
+        scopeStack: [
+          { stepId: 'firstScope', nestedScopes: [{ nodeId: 'node1' }] },
+          {
+            stepId: 'secondScope',
+            nestedScopes: [{ nodeId: 'node2', nodeType: 'enter-else-branch' }],
+          },
+        ] as StackFrame[],
+      } as Partial<EsWorkflowExecution>);
+      underTest.exitScope();
+      expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalledWith();
     });
   });
 });

@@ -44,12 +44,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     return;
   }
 
-  // Exit the scope of the current node if it's an exit node
-  // It should be done before creating StepExecutionRuntime to ensure the scope stack for the node is correct
-  // e.g. the same as for enter-* nodes
-  if (node?.type.startsWith('exit')) {
-    params.workflowRuntime.exitScope();
-  }
+  params.workflowRuntime.exitScope();
   const stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
     nodeId: node.id,
     stackFrames: params.workflowRuntime.getCurrentNodeScope(),
@@ -69,9 +64,7 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
   try {
     await Promise.race([runMonitorPromise, runStepPromise]);
-    if (node.type.startsWith('enter')) {
-      params.workflowRuntime.enterScope();
-    }
+    params.workflowRuntime.enterScope();
     monitorAbortController.abort();
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error);
