@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { modelVersion1, modelVersion2, modelVersion3, modelVersion4, modelVersion5 } from '.';
+import {
+  modelVersion1,
+  modelVersion2,
+  modelVersion3,
+  modelVersion4,
+  modelVersion5,
+  modelVersion6,
+} from '.';
 
 describe('Model versions', () => {
   describe('version 1', () => {
@@ -144,6 +151,27 @@ describe('Model versions', () => {
                     "type": "boolean",
                   },
                 },
+              },
+            },
+            "type": "mappings_addition",
+          },
+          Object {
+            "backfillFn": [Function],
+            "type": "data_backfill",
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('version 6', () => {
+    it('returns version 6 changes correctly', () => {
+      expect(modelVersion6.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "total_events": Object {
+                "type": "integer",
               },
             },
             "type": "mappings_addition",
