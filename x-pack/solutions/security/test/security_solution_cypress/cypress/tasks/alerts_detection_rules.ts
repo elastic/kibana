@@ -170,6 +170,7 @@ export const exportRule = (name: string) => {
 };
 
 export const filterBySearchTerm = (term: string) => {
+  cy.log(`Filter rules by search term: "${term}"`);
   cy.get(RULE_SEARCH_FIELD).type(term, { force: true });
   withRulesTableRefresh(() => {
     cy.get(RULE_SEARCH_FIELD).trigger('search', { waitForAnimations: true });

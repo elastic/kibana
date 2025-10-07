@@ -341,7 +341,7 @@ describe(
         });
 
         it('persists after clearing the url state', () => {
-          changeRulesTableState(); //
+          changeRulesTableState();
           goToTablePage(2);
 
           visit(RULES_MANAGEMENT_URL);
