@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 
 import { EuiTabs, EuiTab, EuiSpacer, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
@@ -15,6 +15,7 @@ import {
   UPDATE_FILTER_REFERENCES_TRIGGER,
 } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import { TabStatus, UnifiedTabs, useNewTabProps, type UnifiedTabsProps } from '@kbn/unified-tabs';
 
 import { getLayerTypeDisplayName } from '../../../../common/layer_types';
 
@@ -74,6 +75,8 @@ export function LayerTabs(
     datasource?.isTextBasedLanguage() ||
     isOfAggregateQueryType(props.attributes?.state.query) ||
     false;
+
+  const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
 
   const dispatchLens = useLensDispatch();
 
@@ -207,6 +210,15 @@ export function LayerTabs(
       removeLayerRef,
     ]
   );
+
+  const managedItems = useMemo(() => {
+    return layerConfigs
+      .filter((layer) => !layer.config.hidden)
+      .map((layer) => ({
+        id: layer.layerId,
+        label: layerLabels.get(layer.layerId) || 'Unknown',
+      }));
+  }, [layerConfigs, layerLabels]);
 
   const renderTabs = useCallback(() => {
     const visibleLayerConfigs = layerConfigs.filter((layer) => !layer.config.hidden);
@@ -370,6 +382,10 @@ export function LayerTabs(
     visualization.state,
   ]);
 
+  const tabType: 'unified' | 'eui' = 'unified';
+
+  console.log('managedItems', managedItems);
+
   /**
    * Render layer tabs only if the chart type supports multiple layers.
    *
@@ -392,12 +408,42 @@ export function LayerTabs(
   return !hideAddLayerButton ? (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" css={{ padding: `0 ${euiTheme.size.base}` }}>
-        <EuiFlexItem grow={false} style={{ overflow: 'hidden', minWidth: 0 }}>
-          <EuiTabs bottomBorder={false}>{renderTabs()}</EuiTabs>
-        </EuiFlexItem>
-        {addLayerButton && <EuiFlexItem grow={true}>{addLayerButton}</EuiFlexItem>}
-      </EuiFlexGroup>
+      {tabType === 'unified' && (
+        <UnifiedTabs
+          items={managedItems}
+          selectedItemId={selectedLayerId ?? undefined}
+          recentlyClosedItems={[]}
+          onClearRecentlyClosed={() => {}} // not implemented in this example
+          maxItemsCount={25}
+          services={{
+            core: { chrome: coreStart.chrome },
+          }}
+          onChanged={(updatedState) => {
+            dispatchLens(setSelectedLayerId({ layerId: updatedState.selectedItem?.id ?? null }));
+          }}
+          createItem={getNewTabDefaultProps}
+          getPreviewData={() => ({
+            query: { esql: 'FROM CAN HAZ' },
+            status: TabStatus.SUCCESS,
+          })}
+          onEBTEvent={() => {}}
+          renderContent={({ label }) => {
+            return null;
+          }}
+        />
+      )}
+      {tabType === 'eui' && (
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          css={{ padding: `0 ${euiTheme.size.base}` }}
+        >
+          <EuiFlexItem grow={false} style={{ overflow: 'hidden', minWidth: 0 }}>
+            <EuiTabs bottomBorder={false}>{renderTabs()}</EuiTabs>
+          </EuiFlexItem>
+          {addLayerButton && <EuiFlexItem grow={true}>{addLayerButton}</EuiFlexItem>}
+        </EuiFlexGroup>
+      )}
       <div ref={layerActionsFlyoutRef} />
     </>
   ) : null;
