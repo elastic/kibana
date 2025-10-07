@@ -44,6 +44,7 @@ import * as AgentService from '../../services/agents';
 import type { FleetConfigType } from '../..';
 
 import {
+  BulkChangeAgentsPrivilegeLevelRequestSchema,
   ChangeAgentPrivilegeLevelRequestSchema,
   ChangeAgentPrivilegeLevelResponseSchema,
   DeleteAgentResponseSchema,
@@ -96,7 +97,10 @@ import {
   requestDiagnosticsHandler,
 } from './request_diagnostics_handler';
 import { bulkMigrateAgentsHandler, migrateSingleAgentHandler } from './migrate_handlers';
-import { changeAgentPrivilegeLevelHandler } from './change_privilege_level_handlers';
+import {
+  bulkChangeAgentsPrivilegeLevelHandler,
+  changeAgentPrivilegeLevelHandler,
+} from './change_privilege_level_handlers';
 
 export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
@@ -999,6 +1003,44 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
 
         changeAgentPrivilegeLevelHandler
+      );
+  }
+  if (experimentalFeatures.enableAgentPrivilegeLevelChange) {
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Bulk change agent privilege level`,
+        description: `Change multiple agents' privilege level to unprivileged.`,
+        options: {
+          tags: ['oas-tag:Elastic Agents'],
+          availability: {
+            since: '9.3.0',
+            stability: 'experimental',
+          },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: BulkChangeAgentsPrivilegeLevelRequestSchema,
+            response: {
+              200: {
+                body: () => ChangeAgentPrivilegeLevelResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+
+        bulkChangeAgentsPrivilegeLevelHandler
       );
   }
 };
