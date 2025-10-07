@@ -11,7 +11,7 @@ import { test, expect } from '../../../../src/playwright';
 import { EuiComboBoxWrapper } from '../../../../src/playwright/eui_components';
 import { navigateToEuiTestPage } from '../../fixtures/eui_helpers';
 
-test.describe.only('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'] }, () => {
+test.describe('EUI testing wrapper: EuiComboBox', { tag: ['@svlSecurity', '@ess'] }, () => {
   test(`with multiple selections (pills)`, async ({ page }) => {
     const dataTestSubj = 'demoComboBox';
     await navigateToEuiTestPage(page, 'docs/components/forms/selection/combo-box/');
