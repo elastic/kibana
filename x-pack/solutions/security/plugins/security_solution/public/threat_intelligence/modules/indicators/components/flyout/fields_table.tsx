@@ -82,11 +82,12 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
 
   const items = useMemo(() => {
     return fields.toSorted().reduce<TableItem[]>((acc, field) => {
+      const value = unwrapValue(indicator, field);
       return [
         ...acc,
         {
           key: field,
-          value: unwrapValue(indicator, field),
+          value: (!Array.isArray(value) && value) || '',
         },
       ];
     }, []);
