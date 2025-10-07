@@ -206,7 +206,7 @@ export const ChartsGridContainer: FC<ChartsGridProps> = ({ changePoints: changeP
               activePage={pagination.activePage}
               onPageClick={pagination.updatePagination}
               aria-label={i18n.translate('xpack.aiops.changePointDetection.paginationAriaLabel', {
-                defaultMessage: 'Charts pagination',
+                defaultMessage: 'Change point detection charts pagination',
               })}
             />
           </EuiFlexItem>
