@@ -40,6 +40,7 @@ import { SeverityHealth } from '../severity/config';
 import { AssigneesColumn } from './assignees_column';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { IncrementalIdText } from '../incremental_id';
 
 type CasesColumns =
   | EuiTableActionsColumnType<CaseUI>
@@ -112,9 +113,14 @@ export const useCasesColumns = ({
             const caseDetailsLinkComponent = isSelectorView ? (
               theCase.title
             ) : (
-              <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
-                <TruncatedText text={theCase.title} />
-              </CaseDetailsLink>
+              <div>
+                <CaseDetailsLink detailName={theCase.id} title={theCase.title}>
+                  <TruncatedText text={theCase.title} />
+                </CaseDetailsLink>
+                {typeof theCase.incrementalId === 'number' ? (
+                  <IncrementalIdText incrementalId={theCase.incrementalId} />
+                ) : null}
+              </div>
             );
 
             return caseDetailsLinkComponent;

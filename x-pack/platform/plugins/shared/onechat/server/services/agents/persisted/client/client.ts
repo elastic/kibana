@@ -25,6 +25,7 @@ import type {
   AgentUpdateRequest,
 } from '../../../../../common/agents';
 import type { ToolsServiceStart } from '../../../tools';
+import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { PersistedAgentDefinition } from '../types';
 import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
@@ -41,12 +42,14 @@ export interface AgentClient {
 }
 
 export const createClient = async ({
+  space,
   request,
   elasticsearch,
   security,
   toolsService,
   logger,
 }: {
+  space: string;
   request: KibanaRequest;
   security: SecurityServiceStart;
   elasticsearch: ElasticsearchServiceStart;
@@ -62,10 +65,11 @@ export const createClient = async ({
   const storage = createStorage({ logger, esClient });
   const user = { id: authUser.profile_uid!, username: authUser.username };
 
-  return new AgentClientImpl({ storage, user, request, toolsService });
+  return new AgentClientImpl({ storage, user, request, space, toolsService });
 };
 
 class AgentClientImpl implements AgentClient {
+  private readonly space: string;
   private readonly request: KibanaRequest;
   private readonly storage: AgentProfileStorage;
   private readonly toolsService: ToolsServiceStart;
@@ -76,16 +80,19 @@ class AgentClientImpl implements AgentClient {
     toolsService,
     user,
     request,
+    space,
   }: {
     storage: AgentProfileStorage;
     toolsService: ToolsServiceStart;
     user: UserIdAndName;
     request: KibanaRequest;
+    space: string;
   }) {
     this.storage = storage;
     this.toolsService = toolsService;
     this.request = request;
     this.user = user;
+    this.space = space;
   }
 
   async get(agentId: string): Promise<PersistedAgentDefinition> {
@@ -110,15 +117,14 @@ class AgentClientImpl implements AgentClient {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1000,
-      // no filtering options for now
       query: {
-        match_all: {},
+        bool: {
+          filter: [createSpaceDslFilter(this.space)],
+        },
       },
     });
 
-    const agents = response.hits.hits.map((hit) => fromEs(hit as Document));
-
-    return agents;
+    return response.hits.hits.map((hit) => fromEs(hit as Document));
   }
 
   async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
@@ -137,6 +143,7 @@ class AgentClientImpl implements AgentClient {
 
     const attributes = createRequestToEs({
       profile,
+      space: this.space,
       creationDate: now,
     });
 
@@ -224,6 +231,7 @@ class AgentClientImpl implements AgentClient {
       query: {
         bool: {
           filter: [
+            createSpaceDslFilter(this.space),
             {
               bool: {
                 // BWC compatibility with M1 - agentId was stored as the _id

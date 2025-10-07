@@ -85,6 +85,7 @@ export const getCaseResponse = (): Case => ({
   customFields: [],
   settings: {
     syncAlerts: false,
+    extractObservables: false,
   },
   connector: {
     id: 'none',

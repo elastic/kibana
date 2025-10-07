@@ -14,7 +14,7 @@ import { Conversation } from './conversation';
 import { ConversationHeader } from './conversation_header';
 import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
 import { useConversationList } from '../../hooks/use_conversation_list';
-import { SendMessageProvider } from '../../context/send_message_context';
+import { SendMessageProvider } from '../../context/send_message/send_message_context';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);

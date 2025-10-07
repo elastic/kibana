@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
+import { useEuiTheme, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
 import type { Condition, FilterCondition } from '@kbn/streamlang';
 import {
   getFilterOperator,
@@ -19,6 +19,22 @@ import {
   isNotCondition,
   operatorToHumanReadableNameMap,
 } from '@kbn/streamlang';
+import { css } from '@emotion/css';
+
+export const ConditionPanel = ({ condition }: { condition: Condition }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiPanel
+      color="subdued"
+      paddingSize="s"
+      className={css`
+        border-radius: ${euiTheme.size.s};
+      `}
+    >
+      <ConditionDisplay condition={condition} showKeyword={true} keyword="WHERE" />
+    </EuiPanel>
+  );
+};
 
 interface ConditionDisplayProps {
   condition: Condition;

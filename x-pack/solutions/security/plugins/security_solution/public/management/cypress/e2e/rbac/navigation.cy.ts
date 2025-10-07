@@ -11,7 +11,6 @@ import { login, ROLE } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 import type { SiemVersion } from '../../common/constants';
 import { SIEM_VERSIONS } from '../../common/constants';
-import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 describe(
   'Navigation RBAC',
@@ -52,7 +51,7 @@ describe(
         name: 'Trusted devices',
         privilegePrefix: 'trusted_devices_',
         selector: Selectors.TRUSTED_DEVICES,
-        siemVersions: [SECURITY_FEATURE_ID as SiemVersion], // Only available in siemV3
+        siemVersions: ['siemV3', 'siemV4'], // Only available starting siemV3
       },
       {
         name: 'Event filters',

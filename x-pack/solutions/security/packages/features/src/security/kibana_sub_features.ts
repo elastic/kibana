@@ -142,8 +142,7 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices.description',
     {
-      defaultMessage:
-        'Allows management of trusted USB and external devices that bypass device control protections.',
+      defaultMessage: 'Manage security exceptions for USB and external devices.',
     }
   ),
   privilegeGroups: [
@@ -663,7 +662,10 @@ export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
   ),
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.description',
-    { defaultMessage: 'Manage Endpoint Exceptions.' }
+    {
+      defaultMessage:
+        'Reduce false positive alerts, and keep Elastic Defend from blocking standard processes.',
+    }
   ),
   privilegeGroups: [
     {
@@ -671,25 +673,31 @@ export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
       privileges: [
         {
           id: 'endpoint_exceptions_all',
-          includeIn: 'all',
+          includeIn: 'none',
           name: TRANSLATIONS.all,
           savedObject: {
-            all: [],
+            all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
           },
           ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
-          api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
+          api: [
+            'lists-all',
+            'lists-read',
+            'lists-summary',
+            `${APP_ID}-showEndpointExceptions`,
+            `${APP_ID}-crudEndpointExceptions`,
+          ],
         },
         {
           id: 'endpoint_exceptions_read',
-          includeIn: 'read',
+          includeIn: 'none',
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
           },
           ui: ['showEndpointExceptions'],
-          api: [`${APP_ID}-showEndpointExceptions`],
+          api: ['lists-read', 'lists-summary', `${APP_ID}-showEndpointExceptions`],
         },
       ],
     },

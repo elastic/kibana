@@ -163,6 +163,29 @@ describe('TableRowActions', () => {
 
       expect(res).toBe(null);
     });
+
+    it('should not render action when user only has read permissions', async () => {
+      mockedUseAuthz.mockReturnValue({
+        fleet: {
+          allAgents: false,
+        },
+        integrations: {},
+      } as any);
+
+      const res = renderAndGetMigrateButton({
+        agent: {
+          active: true,
+          status: 'online',
+          local_metadata: { elastic: { agent: { version: '8.8.0' } } },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          is_protected: false,
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
   });
 
   describe('Request Diagnotics action', () => {

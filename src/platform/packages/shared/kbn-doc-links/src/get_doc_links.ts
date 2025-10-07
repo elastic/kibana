@@ -487,6 +487,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       detectionEngineOverview: `${ELASTIC_DOCS}solutions/security/detect-and-alert`,
       aiAssistant: {
         home: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant`,
+        knowledgeBaseHome: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant-knowledge-base`,
         knowledgeBaseIndexEntries: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant-knowledge-base#knowledge-base-add-knowledge-index`,
       },
       signalsMigrationApi: isServerless
@@ -693,6 +694,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     spaces: {
       kibanaLegacyUrlAliases: `${ELASTIC_DOCS}extend/kibana/legacy-url-aliases`,
       kibanaDisableLegacyUrlAliasesApi: `${KIBANA_APIS}operation/operation-post-spaces-disable-legacy-url-aliases`,
+      kibanaManageSpaces: `${ELASTIC_DOCS}deploy-manage/manage-spaces`,
     },
     watcher: {
       jiraAction: `${ELASTIC_DOCS}explore-analyze/alerts-cases/watcher/actions-jira`,

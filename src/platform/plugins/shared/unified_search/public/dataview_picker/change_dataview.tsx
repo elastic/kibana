@@ -8,22 +8,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import type { EuiContextMenuPanelProps } from '@elastic/eui';
 import {
-  EuiPopover,
-  EuiHorizontalRule,
-  EuiContextMenuPanel,
+  EuiButtonEmpty,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiPopover,
+  EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
   useIsWithinBreakpoints,
-  EuiIcon,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -135,20 +135,15 @@ export function ChangeDataView({
         size="s"
         {...rest}
       >
-        <>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           {/* we don't want to display the adHoc icon on text based mode */}
           {isAdHocSelected && (
-            <EuiIcon
-              type={adhoc}
-              color="primary"
-              css={css`
-                margin-right: ${euiTheme.size.s};
-              `}
-              size="s"
-            />
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={adhoc} color="primary" size="s" />
+            </EuiFlexItem>
           )}
-          {trigger.label}
-        </>
+          <EuiFlexItem grow={false}>{trigger.label}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiButtonEmpty>
     );
   };

@@ -15,7 +15,7 @@ export const EntityStoreUtils = (
   getService: FtrProviderContext['getService'],
   namespace: string = 'default'
 ) => {
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
@@ -35,7 +35,7 @@ export const EntityStoreUtils = (
   log.debug(`EntityStoreUtils namespace: ${namespace}`);
 
   const cleanEngines = async () => {
-    const { body } = await api.listEntityEngines(namespace).expect(200);
+    const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
 
     // @ts-expect-error body is any
     const engineTypes = body.engines.map((engine) => engine.type);
@@ -44,7 +44,10 @@ export const EntityStoreUtils = (
     try {
       await Promise.all(
         engineTypes.map((entityType: 'user' | 'host') =>
-          api.deleteEntityEngine({ params: { entityType }, query: { data: true } }, namespace)
+          entityAnalyticsApi.deleteEntityEngine(
+            { params: { entityType }, query: { data: true } },
+            namespace
+          )
         )
       );
     } catch (e) {
@@ -56,7 +59,7 @@ export const EntityStoreUtils = (
     log.info(
       `Initializing engine for entity type ${entityType} in namespace ${namespace || 'default'}`
     );
-    const res = await api.initEntityEngine(
+    const res = await entityAnalyticsApi.initEntityEngine(
       {
         params: { entityType },
         body: {},
@@ -79,7 +82,7 @@ export const EntityStoreUtils = (
       `Engines to start for entity types: ${entityTypes.join(', ')}`,
       60_000,
       async () => {
-        const { body } = await api.listEntityEngines(namespace).expect(200);
+        const { body } = await entityAnalyticsApi.listEntityEngines(namespace).expect(200);
         if (body.engines.every((engine: any) => engine.status === 'started')) {
           return true;
         }
@@ -96,7 +99,7 @@ export const EntityStoreUtils = (
       `Engine for entity type ${entityType} to be in status ${status}`,
       60_000,
       async () => {
-        const { body } = await api
+        const { body } = await entityAnalyticsApi
           .getEntityEngine({ params: { entityType } }, namespace)
           .expect(200);
         log.debug(`Engine status for ${entityType}: ${body.status}`);
@@ -112,7 +115,7 @@ export const EntityStoreUtils = (
   };
 
   const enableEntityStore = async (body: InitEntityStoreRequestBodyInput = {}) => {
-    const res = await api.initEntityStore({ body }, namespace);
+    const res = await entityAnalyticsApi.initEntityStore({ body }, namespace);
     if (res.status !== 200) {
       log.error(`Failed to enable entity store`);
       log.error(JSON.stringify(res.body));

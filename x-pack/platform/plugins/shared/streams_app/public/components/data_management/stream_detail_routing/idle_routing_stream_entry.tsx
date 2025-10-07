@@ -24,7 +24,7 @@ import { isDescendantOf, isRoutingEnabled } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import styled from '@emotion/styled';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { ConditionDisplay } from '../shared';
+import { ConditionPanel } from '../shared';
 import type { RoutingDefinitionWithUIAttributes } from './types';
 
 function VerticalRule() {
@@ -174,15 +174,7 @@ export function IdleRoutingStreamEntry({
             padding: ${euiTheme.size.xs} 0px;
           `}
         >
-          <EuiPanel
-            color="subdued"
-            paddingSize="s"
-            className={css`
-              border-radius: ${euiTheme.size.s};
-            `}
-          >
-            <ConditionDisplay condition={routingRule.where} showKeyword={true} keyword="WHERE" />
-          </EuiPanel>
+          <ConditionPanel condition={routingRule.where} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

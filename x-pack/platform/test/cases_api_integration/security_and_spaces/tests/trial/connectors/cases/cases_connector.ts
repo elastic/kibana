@@ -340,6 +340,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'low',
             status: 'open',
@@ -454,6 +455,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'high',
             status: 'open',
@@ -826,6 +828,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -875,6 +878,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1343,6 +1347,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1392,6 +1397,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1441,6 +1447,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1901,6 +1908,10 @@ const createCaseWithId = async ({
         name: 'none',
         type: ConnectorTypes.none,
         fields: null,
+      },
+      settings: {
+        syncAlerts: req?.settings?.syncAlerts ?? false,
+        extractObservables: req?.settings?.extractObservables ?? false,
       },
       // @ts-ignore
       status: STATUS_EXTERNAL_TO_ESMODEL[req?.status ?? CaseStatuses.open],
