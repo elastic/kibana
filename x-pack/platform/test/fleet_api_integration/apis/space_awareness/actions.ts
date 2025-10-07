@@ -16,6 +16,7 @@ import {
   cleanFleetAgentPolicies,
   cleanFleetIndices,
   createFleetAgent,
+  createTestSpace,
 } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -62,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
       testSpaceAgent1 = _testSpaceAgent1;
       testSpaceAgent2 = _testSpaceAgent2;
 
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     beforeEach(async () => {

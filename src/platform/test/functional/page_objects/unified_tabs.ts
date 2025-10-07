@@ -37,6 +37,11 @@ export class UnifiedTabsPageObject extends FtrService {
     }
   }
 
+  public async getSelectedTabLabel() {
+    const selectedTab = await this.getSelectedTab();
+    return selectedTab?.label;
+  }
+
   public async getTabWidths() {
     const tabElements = await this.getTabElements();
     return await Promise.all(

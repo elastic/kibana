@@ -8,6 +8,8 @@
  */
 
 const { BaseReporter } = require('@jest/reporters');
+const fs = require('fs');
+const path = require('path');
 
 const COLORS = {
   YELLOW: '\x1b[33m',
@@ -58,6 +60,23 @@ class SlowTestReporter extends BaseReporter {
   }
 
   onRunComplete() {
+    if (process.env.SLOW_TESTS_OUTPUT_PATH && this._slowTests.length > 0) {
+      try {
+        const outputPath = process.env.SLOW_TESTS_OUTPUT_PATH;
+
+        // Ensure directory exists
+        const dir = path.dirname(outputPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+
+        fs.writeFileSync(outputPath, JSON.stringify(this._slowTests, null, 2));
+      } catch (error) {
+        // Silent fail - don't break Jest if file writing fails
+        console.error('Failed to write slow tests output:', error.message);
+      }
+    }
+
     if (this._slowTests.length === 0) return;
 
     this.log('');

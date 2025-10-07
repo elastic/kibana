@@ -6,12 +6,30 @@
  */
 
 import { randomInt } from 'crypto';
+import type { ErrorResult } from '@kbn/onechat-common';
+import { ToolResultType } from '@kbn/onechat-common';
 
 const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const idRegex = /^[a-zA-Z0-9]{6}$/;
 
 /**
  * Generate a random id which can be used for tool result id.
  */
-export function getToolResultId(len = 4): string {
-  return Array.from({ length: len }, () => charset[randomInt(charset.length)]).join('');
+export function getToolResultId(): string {
+  return Array.from({ length: 6 }, () => charset[randomInt(charset.length)]).join('');
 }
+
+/**
+ * Check if the provided string is a valid tool result id.
+ */
+export function isToolResultId(id: string): boolean {
+  return idRegex.test(id);
+}
+
+export const createErrorResult = (message: string | ErrorResult['data']): ErrorResult => {
+  return {
+    tool_result_id: getToolResultId(),
+    type: ToolResultType.error,
+    data: typeof message === 'string' ? { message } : message,
+  };
+};

@@ -26,8 +26,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.1.5 [kibana-9.1.5-release-notes]
 
-% ::::{NOTE}
-% ::::
+:::{important}
+The 9.1.5 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
 
 
 ### Features and enhancements [kibana-9.1.5-features-enhancements]
@@ -458,8 +460,9 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 
 ## 9.0.8 [kibana-9.0.8-release-notes]
 
-% ::::{NOTE}
-% ::::
+:::{important}
+The 9.0.8 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
 
 ### Fixes [kibana-9.0.8-fixes]
 

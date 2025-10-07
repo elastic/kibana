@@ -35,7 +35,7 @@ import { useGetSecuritySolutionLinkProps } from '../../../../common/components/l
 import type { MigrationSettingsBase } from '../../types';
 import * as i18n from './translations';
 
-interface StartMigrationModalProps {
+export interface StartMigrationModalProps {
   /** Modals title */
   title: string;
   /** Modals description message */

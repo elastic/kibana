@@ -38,7 +38,6 @@ describe('Isolation Flyout PanelHeader', () => {
     const appContextMock = createAppRootMockRenderer();
 
     appContextMock.setExperimentalFlag({
-      responseActionsSentinelOneV1Enabled: true,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
     });
 

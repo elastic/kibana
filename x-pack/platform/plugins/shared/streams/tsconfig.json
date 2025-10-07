@@ -65,6 +65,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/otel-semantic-conventions",
     "@kbn/streams-ai",
-    "@kbn/spaces-plugin"
+    "@kbn/spaces-plugin",
+    "@kbn/usage-collection-plugin"
   ]
 }

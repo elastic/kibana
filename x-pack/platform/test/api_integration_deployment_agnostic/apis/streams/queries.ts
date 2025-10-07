@@ -45,6 +45,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   };
 
   describe('Queries API', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/237572
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);

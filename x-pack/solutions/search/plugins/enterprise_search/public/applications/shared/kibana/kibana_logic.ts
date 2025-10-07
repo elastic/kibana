@@ -28,9 +28,9 @@ import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { IndexMappingProps } from '@kbn/index-management-shared-types';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import type { ConnectorDefinition } from '@kbn/search-connectors';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
+import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-shared-ui';
 import type { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 

@@ -63,11 +63,9 @@ export const SecondaryMenuSectionComponent = ({
       )}
       <ul
         css={css`
-          --list-width: 236px;
-
           display: flex;
           flex-direction: column;
-          width: var(--list-width);
+          width: 100%;
           gap: ${euiTheme.size.xxs};
         `}
       >

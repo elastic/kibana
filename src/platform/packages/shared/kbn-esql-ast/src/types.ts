@@ -19,7 +19,7 @@ export type ESQLAstCommand =
   | ESQLAstRerankCommand
   | ESQLAstCompletionCommand;
 
-export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
+export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
  * Represents an *expression* in the AST.
@@ -72,7 +72,7 @@ export type ESQLAstNodeWithChildren = ESQLAstNodeWithArgs | ESQLList;
  * of the nodes which are plain arrays, all nodes will be *proper* and we can
  * remove this type.
  */
-export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand;
+export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand | ESQLAstHeaderCommand;
 
 export interface ESQLLocation {
   min: number;
@@ -136,6 +136,41 @@ export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   inferenceId: ESQLLiteral | undefined;
 }
 
+/**
+ * Represents a header pseudo-command, such as SET.
+ *
+ * Example:
+ *
+ * ```
+ * SET setting1 = "value1", setting2 = "value2";
+ * ```
+ */
+export interface ESQLAstHeaderCommand<Name extends string = string, Arg = ESQLAstExpression>
+  extends ESQLAstBaseItem {
+  type: 'header-command';
+
+  /** Name of the command */
+  name: Name;
+
+  /**
+   * Represents the arguments for the command. It has to be a list, because
+   * even the SET command was initially designed to accept multiple
+   * assignments.
+   *
+   * Example:
+   *
+   * ```
+   * SET setting1 = "value1", setting2 = "value2"
+   * ```
+   */
+  args: Arg[];
+}
+
+export type ESQLAstSetHeaderCommand = ESQLAstHeaderCommand<
+  'set',
+  ESQLBinaryExpression<BinaryExpressionAssignmentOperator>
+>;
+
 export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
@@ -145,6 +180,7 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
 
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {
   type: 'query';
+  header?: ESQLAstHeaderCommand[];
   commands: ESQLAstCommand[];
 }
 
