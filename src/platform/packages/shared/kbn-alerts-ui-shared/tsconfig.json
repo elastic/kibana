@@ -36,5 +36,6 @@
     "@kbn/response-ops-rules-apis",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
+    "@kbn/control-group-renderer",
   ]
 }
