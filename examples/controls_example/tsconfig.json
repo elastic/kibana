@@ -22,6 +22,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/controls-constants",
     "@kbn/kibana-react-plugin",
-    "@kbn/control-group-renderer"
+    "@kbn/control-group-renderer",
+    "@kbn/controls-plugin"
   ]
 }
