@@ -76,5 +76,6 @@
     "@kbn/spaces-plugin",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
+    "@kbn/lens-embeddable-utils",
   ]
 }
