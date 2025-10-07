@@ -27,7 +27,7 @@ import {
   Chart,
   Axis,
   Position,
-  HistogramBarSeries,
+  BarSeries,
   ScaleType,
   Settings,
   LEGACY_LIGHT_THEME,
@@ -113,7 +113,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 />
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                <HistogramBarSeries
+                <BarSeries
                   data={Object.entries(data.countByStatus).map(([key, count]) => ({
                     key,
                     count,
@@ -134,7 +134,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
               <Chart size={{ height: 200, width: '100%' }}>
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
-                <HistogramBarSeries
+                <BarSeries
                   data={Object.entries(data.countByExtension).map(([key, count]) => ({
                     key,
                     count,
