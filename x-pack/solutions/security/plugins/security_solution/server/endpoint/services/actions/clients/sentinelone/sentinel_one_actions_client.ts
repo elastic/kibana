@@ -590,15 +590,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: ResponseActionGetFileRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
-    if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
-    ) {
-      throw new ResponseActionsClientError(
-        `get-file not supported for ${this.agentType} agent type. Feature disabled`,
-        400
-      );
-    }
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       ResponseActionGetFileParameters,
       ResponseActionGetFileOutputContent,
@@ -693,13 +684,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     } = await this.fetchActionRequestEsDoc(actionId);
 
     const {
-      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
       responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
       responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
     } = this.options.endpointService.experimentalFeatures;
 
     if (
-      (command === 'get-file' && !isGetFileEnabled) ||
       (command === 'running-processes' && !isRunningProcessesEnabled) ||
       (command === 'runscript' && !isRunScriptEnabled)
     ) {
@@ -806,13 +795,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     } = await this.fetchActionRequestEsDoc(actionId);
 
     const {
-      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
       responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
       responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
     } = this.options.endpointService.experimentalFeatures;
 
     if (
-      (command === 'get-file' && !isGetFileEnabled) ||
       (command === 'running-processes' && !isRunningProcessesEnabled) ||
       (command === 'runscript' && !isRunScriptEnabled)
     ) {

@@ -7,9 +7,7 @@
 
 import { EXECUTE_CONNECTOR_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/common';
 import type { ActionConnector } from '@kbn/alerts-ui-shared/src/common/types';
-import { evaluate as base } from '../../src/evaluate';
-import type { EvaluateConnectorDataset } from './evaluate_connector_dataset';
-import { createEvaluateConnectorDataset } from './evaluate_connector_dataset';
+import { evaluate } from '../../src/evaluate';
 
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
@@ -27,50 +25,30 @@ const EMAIL_EVAL_CRITERIA = [
   'Does not include irrelevant or unrelated information in the response.',
 ];
 
-const evaluate = base.extend<{
-  evaluateConnectorDataset: EvaluateConnectorDataset;
-}>({
-  evaluateConnectorDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
-      use(
-        createEvaluateConnectorDataset({
-          chatClient,
-          evaluators,
-          phoenixClient,
-        })
-      );
-    },
-    { scope: 'test' },
-  ],
-});
-
 evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
   evaluate.describe('no email connector available', () => {
-    evaluate(
-      'does not send an email and fails gracefully',
-      async ({ evaluateConnectorDataset }) => {
-        await evaluateConnectorDataset({
-          dataset: {
-            name: 'connector: no email connector',
-            description: 'Validate behavior when no Actions email connector exists.',
-            examples: [
-              {
-                input: { prompt: EMAIL_PROMPT },
-                output: {
-                  criteria: [
-                    `Does not use ${EXECUTE_CONNECTOR_FUNCTION_NAME} function.`,
-                    'Explains that no connectors are available to send the email.',
-                    'Does not attempt to send an email.',
-                    'Mentions that sending the email was unsuccessful.',
-                  ],
-                },
-                metadata: {},
+    evaluate('does not send an email and fails gracefully', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'connector: no email connector',
+          description: 'Validate behavior when no Actions email connector exists.',
+          examples: [
+            {
+              input: { question: EMAIL_PROMPT },
+              output: {
+                criteria: [
+                  `Does not use ${EXECUTE_CONNECTOR_FUNCTION_NAME} function.`,
+                  'Explains that no connectors are available to send the email.',
+                  'Does not attempt to send an email.',
+                  'Mentions that sending the email was unsuccessful.',
+                ],
               },
-            ],
-          },
-        });
-      }
-    );
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
   });
 
   evaluate.describe('with email connector', () => {
@@ -98,15 +76,15 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
       emailConnectorId = data.id;
     });
 
-    evaluate('sends an email (basic)', async ({ evaluateConnectorDataset }) => {
-      await evaluateConnectorDataset({
+    evaluate('sends an email (basic)', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'connector: with email connector (basic)',
           description:
             'Validates that the assistant uses execute_connector and summarizes correctly.',
           examples: [
             {
-              input: { prompt: EMAIL_PROMPT },
+              input: { question: EMAIL_PROMPT },
               output: { criteria: EMAIL_EVAL_CRITERIA },
               metadata: {},
             },
@@ -115,10 +93,8 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
       });
     });
 
-    evaluate(
-      'sends an email using user instructions',
-      async ({ evaluateConnectorDataset, kbnClient }) => {
-        const instructions = `<email_instructions>
+    evaluate('sends an email using user instructions', async ({ evaluateDataset, kbnClient }) => {
+      const instructions = `<email_instructions>
       If the user's query requires sending an email:
       1. Use the email connector type ".email" with ID "${emailConnectorId}".
       2. Prepare the email parameters:
@@ -143,27 +119,26 @@ evaluate.describe('execute_connector function', { tag: '@svlOblt' }, () => {
       5. Check the response and confirm if the email was sent successfully.
   </email_instructions>`;
 
-        await kbnClient.request({
-          method: 'PUT',
-          path: '/internal/observability_ai_assistant/kb/user_instructions',
-          body: { id: 'send_email', text: instructions, public: false },
-        });
+      await kbnClient.request({
+        method: 'PUT',
+        path: '/internal/observability_ai_assistant/kb/user_instructions',
+        body: { id: 'send_email', text: instructions, public: false },
+      });
 
-        await evaluateConnectorDataset({
-          dataset: {
-            name: 'connector: with email connector (user instructions)',
-            description: 'Validates connector usage guided by user instructions.',
-            examples: [
-              {
-                input: { prompt: EMAIL_PROMPT },
-                output: { criteria: EMAIL_EVAL_CRITERIA },
-                metadata: {},
-              },
-            ],
-          },
-        });
-      }
-    );
+      await evaluateDataset({
+        dataset: {
+          name: 'connector: with email connector (user instructions)',
+          description: 'Validates connector usage guided by user instructions.',
+          examples: [
+            {
+              input: { question: EMAIL_PROMPT },
+              output: { criteria: EMAIL_EVAL_CRITERIA },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
 
     evaluate.afterAll(async ({ kbnClient, log }) => {
       // Delete the email connector
