@@ -25,9 +25,6 @@ export class ReadOnlyObjectsPlugin implements Plugin {
           description: { type: 'text' },
         },
       },
-      management: {
-        importableAndExportable: true,
-      },
     });
 
     core.savedObjects.registerType({
@@ -40,13 +37,9 @@ export class ReadOnlyObjectsPlugin implements Plugin {
           description: { type: 'text' },
         },
       },
-      management: {
-        importableAndExportable: true,
-      },
     });
 
     const router = core.http.createRouter();
-
     // Create
     router.post(
       {
@@ -76,6 +69,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         const soClient = (await context.core).savedObjects.getClient();
         const objType = request.body.type || READ_ONLY_TYPE;
         const { isReadOnly } = request.body;
+
         const options = {
           overwrite: request.query.overwrite ?? false,
           ...(request.body.id ? { id: request.body.id } : {}),
@@ -172,7 +166,6 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       }
     );
 
-    // FIND READ_ONLY_TYPE
     router.get(
       {
         path: '/read_only_objects/_find',
@@ -194,8 +187,6 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         });
       }
     );
-
-    // Get READ_ONLY_TYPE
     router.get(
       {
         path: '/read_only_objects/{objectId}',
@@ -232,7 +223,6 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       }
     );
 
-    // Update
     router.put(
       {
         path: '/read_only_objects/update',
@@ -276,8 +266,6 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
-
-    // Transfer
     router.put(
       {
         path: '/read_only_objects/change_owner',
@@ -325,8 +313,6 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
-
-    // Change access mode
     router.put(
       {
         path: '/read_only_objects/change_access_mode',
@@ -374,7 +360,6 @@ export class ReadOnlyObjectsPlugin implements Plugin {
       }
     );
 
-    // Delete
     router.delete(
       {
         path: '/read_only_objects/{objectId}',
@@ -507,7 +492,6 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
-
     // Get NON_READ_ONLY_TYPE
     router.get(
       {
