@@ -86,7 +86,7 @@ export async function runStackMonitor(
       const scopeStepExecutionRuntime =
         params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
           nodeId: scopeData.nodeId,
-          stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+          stackFrames: nodeStack.stackFrames,
         });
 
       const nodeImplementation = params.nodesFactory.create(scopeStepExecutionRuntime);
