@@ -162,5 +162,21 @@ export const useWorkflowEditorStyles = () => {
         borderRadius: euiTheme.border.radius.small,
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
       }),
+
+    downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>
+      css({
+        display: 'flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '4px 6px',
+        color: euiTheme.colors.textSubdued,
+        cursor: 'pointer',
+        borderRadius: euiTheme.border.radius.small,
+        fontSize: '12px',
+        '&:hover': {
+          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+          color: euiTheme.colors.primaryText,
+        },
+      }),
   });
 };

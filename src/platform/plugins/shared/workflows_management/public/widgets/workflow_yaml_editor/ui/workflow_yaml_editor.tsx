@@ -70,6 +70,46 @@ import { getMonacoMarkerInterceptor } from '../lib/get_monaco_marker_interceptor
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
+const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
+  minimap: { enabled: false },
+  automaticLayout: true,
+  lineNumbers: 'on',
+  glyphMargin: true,
+  scrollBeyondLastLine: false,
+  tabSize: 2,
+  lineNumbersMinChars: 2,
+  insertSpaces: true,
+  fontSize: 14,
+  renderWhitespace: 'none',
+  wordWrap: 'on',
+  wordWrapColumn: 80,
+  wrappingIndent: 'indent',
+  theme: 'workflows-subdued',
+  padding: {
+    top: 24,
+    bottom: 16,
+  },
+  quickSuggestions: {
+    other: true,
+    comments: false,
+    strings: true,
+  },
+  suggest: {
+    snippetsPreventQuickSuggestions: false,
+    showSnippets: true,
+    filterGraceful: true, // Better filtering
+    localityBonus: true, // Prioritize matches near cursor
+  },
+  wordBasedSuggestions: false,
+  hover: {
+    enabled: true,
+    delay: 300,
+    sticky: true,
+    above: false, // Force hover below cursor to avoid clipping
+  },
+  formatOnType: true,
+};
+
 export interface WorkflowYAMLEditorProps {
   workflowId?: string;
   filename?: string;
@@ -144,6 +184,9 @@ export const WorkflowYAMLEditor = ({
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
 
+  // Data
+  const { data: connectorsData } = useAvailableConnectors();
+
   // Styles
   const styles = useWorkflowEditorStyles();
   useMonacoWorkflowStyles();
@@ -151,8 +194,8 @@ export const WorkflowYAMLEditor = ({
   const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
-  // Data
-  const { data: connectorsData } = useAvailableConnectors();
+  useWorkflowsMonacoTheme();
+  useDynamicConnectorIcons(connectorsData);
 
   // Only show debug features in development
   const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -185,57 +228,15 @@ export const WorkflowYAMLEditor = ({
     onValidationErrors,
   });
 
-  // State
+  const handleErrorClick = useCallback((error: YamlValidationResult) => {
+    if (!editorRef.current) {
+      return;
+    }
+    navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
+  }, []);
+
+  // Lifecycle
   const [isEditorMounted, setIsEditorMounted] = useState(false);
-
-  // Decorations
-  useTriggerTypeDecorations({
-    editor: editorRef.current,
-    yamlDocument: yamlDocument || null,
-    isEditorMounted,
-  });
-
-  useConnectorTypeDecorations({
-    editor: editorRef.current,
-    yamlDocument: yamlDocument || null,
-    isEditorMounted,
-  });
-
-  useLineDifferencesDecorations({
-    editor: editorRef.current,
-    isEditorMounted,
-    highlightDiff,
-    originalValue,
-    currentValue: props.value,
-  });
-
-  useAlertTriggerDecorations({
-    editor: editorRef.current,
-    yamlDocument: yamlDocument || null,
-    isEditorMounted,
-    readOnly,
-  });
-
-  const updateContainerPosition = (
-    stepInfo: StepInfo,
-    _editor: monaco.editor.IStandaloneCodeEditor
-  ) => {
-    if (!_editor || !stepInfo) {
-      return;
-    }
-
-    setPositionStyles({
-      top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
-      right: '0px',
-    });
-  };
-
-  useEffect(() => {
-    if (!focusedStepInfo) {
-      return;
-    }
-    updateContainerPosition(focusedStepInfo, editorRef.current!);
-  }, [isEditorMounted, focusedStepInfo, setPositionStyles]);
 
   useEffect(() => {
     if (!isEditorMounted) {
@@ -249,73 +250,7 @@ export const WorkflowYAMLEditor = ({
 
       updateContainerPosition(focusedStepInfoRef.current, editorRef.current!);
     });
-  }, [isEditorMounted, setPositionStyles]);
-
-  useEffect(() => {
-    dispatch(setStepExecutions({ stepExecutions }));
-  }, [stepExecutions, dispatch]);
-
-  useEffect(() => {
-    if (!isEditorMounted) {
-      return;
-    }
-
-    const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
-      dispatch(setCursorPosition({ lineNumber: event.position.lineNumber }));
-    });
-
-    return () => disposable.dispose();
-  }, [isEditorMounted, dispatch]);
-
-  // Track the last value we set internally to distinguish from external changes
-  const lastInternalValueRef = useRef<string | undefined>(props.value);
-
-  const changeSideEffects = useCallback(() => {
-    if (editorRef.current) {
-      const model = editorRef.current.getModel();
-
-      if (!model) {
-        return;
-      }
-      dispatch(setYamlString(model.getValue()));
-    }
-  }, [dispatch]);
-
-  const handleChange = useCallback(
-    (value: string | undefined) => {
-      if (onChange) {
-        onChange(value);
-      }
-
-      changeSideEffects();
-    },
-    [onChange, changeSideEffects]
-  );
-
-  const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
-
-  const openActionsPopover = () => {
-    setActionsPopoverOpen(true);
-  };
-  const closeActionsPopover = () => {
-    setActionsPopoverOpen(false);
-  };
-
-  const onActionSelected = (action: ActionOptionData) => {
-    const model = editorRef.current?.getModel();
-    const yamlDocumentCurrent = yamlDocumentRef.current;
-    const cursorPosition = editorRef.current?.getPosition();
-    const editor = editorRef.current;
-    if (!model || !yamlDocumentCurrent || !editor) {
-      return;
-    }
-    if (isTriggerType(action.id)) {
-      insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
-    } else {
-      insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
-    }
-    closeActionsPopover();
-  };
+  }, [isEditorMounted]);
 
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
 
@@ -419,6 +354,28 @@ export const WorkflowYAMLEditor = ({
     unregisterKeyboardCommands();
   };
 
+  const changeSideEffects = useCallback(() => {
+    if (editorRef.current) {
+      const model = editorRef.current.getModel();
+
+      if (!model) {
+        return;
+      }
+      dispatch(setYamlString(model.getValue()));
+    }
+  }, [dispatch]);
+
+  const handleChange = useCallback(
+    (value: string | undefined) => {
+      if (onChange) {
+        onChange(value);
+      }
+
+      changeSideEffects();
+    },
+    [onChange, changeSideEffects]
+  );
+
   useEffect(() => {
     // After editor is mounted or workflowId changes, validate the initial content
     if (isEditorMounted && editorRef.current) {
@@ -429,6 +386,20 @@ export const WorkflowYAMLEditor = ({
     }
   }, [changeSideEffects, isEditorMounted, workflowId]);
 
+  // Clean up the monaco model and editor on unmount
+  useEffect(() => {
+    const editor = editorRef.current;
+    return () => {
+      // Dispose of Monaco providers
+      disposablesRef.current.forEach((disposable) => disposable.dispose());
+      disposablesRef.current = [];
+
+      editor?.dispose();
+    };
+  }, []);
+
+  // Track the last value we set internally to distinguish from external changes
+  const lastInternalValueRef = useRef<string | undefined>(props.value);
   // Force refresh of decorations when props.value changes externally (e.g., switching executions)
   useEffect(() => {
     if (isEditorMounted && editorRef.current && props.value !== undefined) {
@@ -469,72 +440,98 @@ export const WorkflowYAMLEditor = ({
     }
   }, [isEditorMounted, changeSideEffects]);
 
+  // Decorations
+  useTriggerTypeDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+  });
+
+  useConnectorTypeDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+  });
+
+  useLineDifferencesDecorations({
+    editor: editorRef.current,
+    isEditorMounted,
+    highlightDiff,
+    originalValue,
+    currentValue: props.value,
+  });
+
+  useAlertTriggerDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    isEditorMounted,
+    readOnly,
+  });
+
+  const updateContainerPosition = (
+    stepInfo: StepInfo,
+    _editor: monaco.editor.IStandaloneCodeEditor
+  ) => {
+    if (!_editor || !stepInfo) {
+      return;
+    }
+
+    setPositionStyles({
+      top: `${_editor.getTopForLineNumber(stepInfo.lineStart, true) - _editor.getScrollTop()}px`,
+      right: '0px',
+    });
+  };
+
+  useEffect(() => {
+    if (!focusedStepInfo) {
+      return;
+    }
+    updateContainerPosition(focusedStepInfo, editorRef.current!);
+  }, [isEditorMounted, focusedStepInfo, setPositionStyles]);
+
+  useEffect(() => {
+    dispatch(setStepExecutions({ stepExecutions }));
+  }, [stepExecutions, dispatch]);
+
+  useEffect(() => {
+    if (!isEditorMounted) {
+      return;
+    }
+
+    const disposable = editorRef.current!.onDidChangeCursorPosition((event) => {
+      dispatch(setCursorPosition({ lineNumber: event.position.lineNumber }));
+    });
+
+    return () => disposable.dispose();
+  }, [isEditorMounted, dispatch]);
+
+  // Actions
+  const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);
+  const openActionsPopover = () => {
+    setActionsPopoverOpen(true);
+  };
+  const closeActionsPopover = () => {
+    setActionsPopoverOpen(false);
+  };
+  const onActionSelected = (action: ActionOptionData) => {
+    const model = editorRef.current?.getModel();
+    const yamlDocumentCurrent = yamlDocumentRef.current;
+    const cursorPosition = editorRef.current?.getPosition();
+    const editor = editorRef.current;
+    if (!model || !yamlDocumentCurrent || !editor) {
+      return;
+    }
+    if (isTriggerType(action.id)) {
+      insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
+    } else {
+      insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
+    }
+    closeActionsPopover();
+  };
+
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(workflowYamlSchemaLoose, connectorsData?.connectorTypes);
   }, [workflowYamlSchemaLoose, connectorsData?.connectorTypes]);
-
-  useWorkflowsMonacoTheme();
-
-  useDynamicConnectorIcons(connectorsData);
-
-  const editorOptions = useMemo<monaco.editor.IStandaloneEditorConstructionOptions>(
-    () => ({
-      readOnly,
-      minimap: { enabled: false },
-      automaticLayout: true,
-      lineNumbers: 'on',
-      glyphMargin: true,
-      scrollBeyondLastLine: false,
-      tabSize: 2,
-      lineNumbersMinChars: 2,
-      insertSpaces: true,
-      fontSize: 14,
-      renderWhitespace: 'none',
-      wordWrap: 'on',
-      wordWrapColumn: 80,
-      wrappingIndent: 'indent',
-      theme: 'workflows-subdued',
-      padding: {
-        top: 24,
-        bottom: 16,
-      },
-      quickSuggestions: {
-        other: true,
-        comments: false,
-        strings: true,
-      },
-      suggest: {
-        snippetsPreventQuickSuggestions: false,
-        showSnippets: true,
-        triggerCharacters: true,
-        minWordLength: 0, // Show suggestions after 1 character
-        filterGraceful: true, // Better filtering
-        localityBonus: true, // Prioritize matches near cursor
-        suggestOnTriggerCharacters: true,
-      },
-      wordBasedSuggestions: false,
-      hover: {
-        enabled: true,
-        delay: 300,
-        sticky: true,
-        above: false, // Force hover below cursor to avoid clipping
-      },
-      formatOnType: true,
-    }),
-    [readOnly]
-  );
-
-  // Clean up the monaco model and editor on unmount
-  useEffect(() => {
-    const editor = editorRef.current;
-    return () => {
-      // Dispose of Monaco providers
-      disposablesRef.current.forEach((disposable) => disposable.dispose());
-      disposablesRef.current = [];
-
-      editor?.dispose();
-    };
-  }, []);
 
   useEffect(() => {
     // Monkey patching to set the initial markers
@@ -552,6 +549,28 @@ export const WorkflowYAMLEditor = ({
       monaco.editor.setModelMarkers = setModelMarkers;
     };
   }, [handleMarkersChanged]);
+
+  // Debug
+  const downloadSchema = useCallback(() => {
+    try {
+      const blob = new Blob([JSON.stringify(workflowJsonSchemaStrict, null, 2)], {
+        type: 'application/json',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'workflow-schema.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      // to download schema:', error);
+      notifications?.toasts.addError(error as Error, {
+        title: 'Failed to download schema',
+      });
+    }
+  }, [workflowJsonSchemaStrict, notifications]);
 
   return (
     <div css={css([styles.container, stepOutlineStyles, stepExecutionStyles])} ref={containerRef}>
@@ -578,40 +597,8 @@ export const WorkflowYAMLEditor = ({
             {/* Debug: Download Schema Button - Only show in development */}
             <EuiFlexItem grow={false}>
               <div
-                css={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '4px 6px',
-                  color: euiTheme.colors.textSubdued,
-                  cursor: 'pointer',
-                  borderRadius: euiTheme.border.radius.small,
-                  fontSize: '12px',
-                  '&:hover': {
-                    backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                    color: euiTheme.colors.primaryText,
-                  },
-                }}
-                onClick={() => {
-                  try {
-                    const blob = new Blob([JSON.stringify(workflowJsonSchemaStrict, null, 2)], {
-                      type: 'application/json',
-                    });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'workflow-schema.json';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                  } catch (error) {
-                    // to download schema:', error);
-                    notifications?.toasts.addError(error as Error, {
-                      title: 'Failed to download schema',
-                    });
-                  }
-                }}
+                css={styles.downloadSchemaButton}
+                onClick={downloadSchema}
                 role="button"
                 tabIndex={0}
                 title="Download JSON schema for debugging"
@@ -633,7 +620,7 @@ export const WorkflowYAMLEditor = ({
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
           onChange={handleChange}
-          options={editorOptions}
+          options={{ ...editorOptions, readOnly }}
           schemas={schemas}
           suggestionProvider={completionProvider}
           {...props}
@@ -644,12 +631,7 @@ export const WorkflowYAMLEditor = ({
           isMounted={isEditorMounted}
           error={errorValidating}
           validationErrors={validationErrors}
-          onErrorClick={(error) => {
-            if (!editorRef.current) {
-              return;
-            }
-            navigateToErrorPosition(editorRef.current, error.startLineNumber, error.startColumn);
-          }}
+          onErrorClick={handleErrorClick}
           rightSide={<WorkflowYAMLEditorShortcuts />}
         />
       </div>
