@@ -64,7 +64,7 @@ export const ConnectorMissingCallout = memo(
         navigateTo({
           appId: 'management',
           path: useNewDefaultConnector
-            ? 'ai/genAiSettings'
+            ? '/ai/genAiSettings'
             : '/kibana/settings?query=defaultAIConnector',
         }),
       [navigateTo, useNewDefaultConnector]

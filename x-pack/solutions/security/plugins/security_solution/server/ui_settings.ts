@@ -496,158 +496,158 @@ export const initUiSettings = (
     ...(experimentalFeatures.disableESQLRiskScoring
       ? {}
       : {
-        [ENABLE_ESQL_RISK_SCORING]: {
-          name: i18n.translate('xpack.securitySolution.uiSettings.enableEsqlRiskScoringLabel', {
-            defaultMessage: 'Enable ESQL-based risk scoring',
-          }),
-          value: true,
-          description: i18n.translate(
-            'xpack.securitySolution.uiSettings.enableEsqlRiskScoringDescription',
-            {
-              defaultMessage:
-                '<p>Enables risk scoring based on ESQL queries. Disabling this will revert to using scripted metrics</p>',
-              values: { p: (chunks) => `<p>${chunks}</p>` },
-            }
-          ),
-          type: 'boolean',
-          category: [APP_ID],
-          requiresPageReload: true,
-          schema: schema.boolean(),
-          solutionViews: ['classic', 'security'],
-        },
-      }),
+          [ENABLE_ESQL_RISK_SCORING]: {
+            name: i18n.translate('xpack.securitySolution.uiSettings.enableEsqlRiskScoringLabel', {
+              defaultMessage: 'Enable ESQL-based risk scoring',
+            }),
+            value: true,
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.enableEsqlRiskScoringDescription',
+              {
+                defaultMessage:
+                  '<p>Enables risk scoring based on ESQL queries. Disabling this will revert to using scripted metrics</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
+              }
+            ),
+            type: 'boolean',
+            category: [APP_ID],
+            requiresPageReload: true,
+            schema: schema.boolean(),
+            solutionViews: ['classic', 'security'],
+          },
+        }),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
-        [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
-          name: i18n.translate(
-            'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledLabel',
-            {
-              defaultMessage: 'Extended rule execution logging',
-            }
-          ),
-          description: i18n.translate(
-            'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledDescription',
-            {
-              defaultMessage:
-                '<p>Enables extended rule execution logging to .kibana-event-log-* indices. Shows plain execution events on the Rule Details page.</p>',
-              values: { p: (chunks) => `<p>${chunks}</p>` },
-            }
-          ),
-          type: 'boolean',
-          schema: schema.boolean(),
-          value: true,
-          category: [APP_ID],
-          requiresPageReload: false,
-          solutionViews: ['classic', 'security'],
-        },
-        [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
-          name: i18n.translate(
-            'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelLabel',
-            {
-              defaultMessage: 'Extended rule execution logging: min level',
-            }
-          ),
-          description: i18n.translate(
-            'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDescription',
-            {
-              defaultMessage:
-                '<p>Sets minimum log level starting from which rules will write extended logs to .kibana-event-log-* indices. This affects only events of type Message, other events are being written to .kibana-event-log-* regardless of this setting and their log level.</p>',
-              values: { p: (chunks) => `<p>${chunks}</p>` },
-            }
-          ),
-          type: 'select',
-          schema: schema.oneOf([
-            schema.literal(LogLevelSetting.off),
-            schema.literal(LogLevelSetting.error),
-            schema.literal(LogLevelSetting.warn),
-            schema.literal(LogLevelSetting.info),
-            schema.literal(LogLevelSetting.debug),
-            schema.literal(LogLevelSetting.trace),
-          ]),
-          value: LogLevelSetting.error,
-          options: [
-            LogLevelSetting.off,
-            LogLevelSetting.error,
-            LogLevelSetting.warn,
-            LogLevelSetting.info,
-            LogLevelSetting.debug,
-            LogLevelSetting.trace,
-          ],
-          optionLabels: {
-            [LogLevelSetting.off]: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelOff',
+          [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledLabel',
               {
-                defaultMessage: 'Off',
+                defaultMessage: 'Extended rule execution logging',
               }
             ),
-            [LogLevelSetting.error]: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelError',
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingEnabledDescription',
               {
-                defaultMessage: 'Error',
+                defaultMessage:
+                  '<p>Enables extended rule execution logging to .kibana-event-log-* indices. Shows plain execution events on the Rule Details page.</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
               }
             ),
-            [LogLevelSetting.warn]: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelWarn',
-              {
-                defaultMessage: 'Warn',
-              }
-            ),
-            [LogLevelSetting.info]: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelInfo',
-              {
-                defaultMessage: 'Info',
-              }
-            ),
-            [LogLevelSetting.debug]: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDebug',
-              {
-                defaultMessage: 'Debug',
-              }
-            ),
-            [LogLevelSetting.trace]: i18n.translate(
-              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelTrace',
-              {
-                defaultMessage: 'Trace',
-              }
-            ),
+            type: 'boolean',
+            schema: schema.boolean(),
+            value: true,
+            category: [APP_ID],
+            requiresPageReload: false,
+            solutionViews: ['classic', 'security'],
           },
-          category: [APP_ID],
-          requiresPageReload: false,
-          solutionViews: ['classic', 'security'],
-        },
-      }
+          [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelLabel',
+              {
+                defaultMessage: 'Extended rule execution logging: min level',
+              }
+            ),
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDescription',
+              {
+                defaultMessage:
+                  '<p>Sets minimum log level starting from which rules will write extended logs to .kibana-event-log-* indices. This affects only events of type Message, other events are being written to .kibana-event-log-* regardless of this setting and their log level.</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
+              }
+            ),
+            type: 'select',
+            schema: schema.oneOf([
+              schema.literal(LogLevelSetting.off),
+              schema.literal(LogLevelSetting.error),
+              schema.literal(LogLevelSetting.warn),
+              schema.literal(LogLevelSetting.info),
+              schema.literal(LogLevelSetting.debug),
+              schema.literal(LogLevelSetting.trace),
+            ]),
+            value: LogLevelSetting.error,
+            options: [
+              LogLevelSetting.off,
+              LogLevelSetting.error,
+              LogLevelSetting.warn,
+              LogLevelSetting.info,
+              LogLevelSetting.debug,
+              LogLevelSetting.trace,
+            ],
+            optionLabels: {
+              [LogLevelSetting.off]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelOff',
+                {
+                  defaultMessage: 'Off',
+                }
+              ),
+              [LogLevelSetting.error]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelError',
+                {
+                  defaultMessage: 'Error',
+                }
+              ),
+              [LogLevelSetting.warn]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelWarn',
+                {
+                  defaultMessage: 'Warn',
+                }
+              ),
+              [LogLevelSetting.info]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelInfo',
+                {
+                  defaultMessage: 'Info',
+                }
+              ),
+              [LogLevelSetting.debug]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelDebug',
+                {
+                  defaultMessage: 'Debug',
+                }
+              ),
+              [LogLevelSetting.trace]: i18n.translate(
+                'xpack.securitySolution.uiSettings.extendedRuleExecutionLoggingMinLevelTrace',
+                {
+                  defaultMessage: 'Trace',
+                }
+              ),
+            },
+            category: [APP_ID],
+            requiresPageReload: false,
+            solutionViews: ['classic', 'security'],
+          },
+        }
       : {}),
   };
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
 
-export const getDefaultAIConnectorSetting = (connectors: Connector[], readonlyMode?: ReadonlyModeType): SettingsConfig | null =>
+export const getDefaultAIConnectorSetting = (connectors: Connector[], readonlyMode?:ReadonlyModeType ): SettingsConfig | null =>
   connectors.length > 0
     ? {
-      [DEFAULT_AI_CONNECTOR]: {
-        name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
-          defaultMessage: 'Default AI Connector',
-        }),
-        // TODO, make Elastic LLM the default value once fully available in serverless
-        value: connectors[0].id,
-        description: i18n.translate(
-          'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
-          {
-            defaultMessage:
-              'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
-          }
-        ),
-        type: 'select',
-        options: connectors.map(({ id }) => id),
-        optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
-        category: [APP_ID],
-        requiresPageReload: true,
-        schema: schema.string(),
-        solutionViews: ['classic', 'security'],
-        readonlyMode: readonlyMode
-      },
-    }
+        [DEFAULT_AI_CONNECTOR]: {
+          name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
+            defaultMessage: 'Default AI Connector',
+          }),
+          // TODO, make Elastic LLM the default value once fully available in serverless
+          value: connectors[0].id,
+          description: i18n.translate(
+            'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
+            {
+              defaultMessage:
+                'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
+            }
+          ),
+          type: 'select',
+          options: connectors.map(({ id }) => id),
+          optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
+          category: [APP_ID],
+          requiresPageReload: true,
+          schema: schema.string(),
+          solutionViews: ['classic', 'security'],
+          readonlyMode: readonlyMode
+        },
+      }
     : null;
 
 export const getDefaultValueReportSettings = (): SettingsConfig => ({
