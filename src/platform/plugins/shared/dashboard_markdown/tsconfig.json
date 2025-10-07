@@ -13,6 +13,8 @@
     "@kbn/presentation-containers",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
+    "@kbn/config-schema",
+    "@kbn/presentation-publishing-schemas",
   ],
   "exclude": ["target/**/*"]
 }
