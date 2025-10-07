@@ -99,7 +99,6 @@
     "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility",
     "@kbn/esql-utils",
-    "@kbn/esql-editor",
     "@kbn/managed-content-badge",
     "@kbn/sort-predicates",
     "@kbn/presentation-publishing",
