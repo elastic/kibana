@@ -170,16 +170,19 @@ export const exportRule = (name: string) => {
 };
 
 export const filterBySearchTerm = (term: string) => {
-  cy.log(`Filter rules by search term: "${term}"`);
   cy.get(RULE_SEARCH_FIELD).type(term, { force: true });
-  cy.get(RULE_SEARCH_FIELD).trigger('search', { waitForAnimations: true });
+  withRulesTableRefresh(() => {
+    cy.get(RULE_SEARCH_FIELD).trigger('search', { waitForAnimations: true });
+  });
 };
 
 export const filterByTags = (tags: string[]) => {
   cy.get(RULES_TAGS_FILTER_BTN).click();
 
   for (const tag of tags) {
-    cy.get(RULES_TAGS_FILTER_POPOVER).contains(tag).click();
+    withRulesTableRefresh(() => {
+      cy.get(RULES_TAGS_FILTER_POPOVER).contains(tag).click();
+    });
   }
 
   // close the popover
@@ -248,19 +251,27 @@ export const withRulesTableRefresh = (action: () => void) => {
 };
 
 export const filterByElasticRules = () => {
-  withRulesTableRefresh(() => cy.get(ELASTIC_RULES_BTN).click());
+  withRulesTableRefresh(() => {
+    cy.get(ELASTIC_RULES_BTN).click();
+  });
 };
 
 export const filterByCustomRules = () => {
-  withRulesTableRefresh(() => cy.get(CUSTOM_RULES_BTN).click());
+  withRulesTableRefresh(() => {
+    cy.get(CUSTOM_RULES_BTN).click();
+  });
 };
 
 export const filterByEnabledRules = () => {
-  withRulesTableRefresh(() => cy.get(ENABLED_RULES_BTN).click());
+  withRulesTableRefresh(() => {
+    cy.get(ENABLED_RULES_BTN).click();
+  });
 };
 
 export const filterByDisabledRules = () => {
-  withRulesTableRefresh(() => cy.get(DISABLED_RULES_BTN).click());
+  withRulesTableRefresh(() => {
+    cy.get(DISABLED_RULES_BTN).click();
+  });
 };
 
 export const goToRuleDetailsOf = (ruleName: string) => {
