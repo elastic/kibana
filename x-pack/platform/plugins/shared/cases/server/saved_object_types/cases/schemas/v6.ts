@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
+import { casesSchema as casesSchemaV5 } from './v5';
 
-import { createFieldTestingConfig } from '../../base.jest.integration.config';
-
-export default createFieldTestingConfig({
-  testsDirectory: 'type_specific',
-  groupNumber: 2,
-  totalGroups: 2,
+export const casesSchema = casesSchemaV5.extends({
+  total_events: schema.number(),
 });
