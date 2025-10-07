@@ -21,7 +21,7 @@ import { getColumnsByTypeFromCtx, getLicenseCheckerFromCtx } from '../utils';
  * Delegates to special case handlers first, then suggests appropriate right-hand values
  */
 export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
-  const { expressionRoot, innerText } = ctx;
+  const { expressionRoot, innerText, options } = ctx;
 
   if (!expressionRoot) {
     return [];
@@ -42,14 +42,13 @@ export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISug
     queryText: innerText,
     location: ctx.location,
     rootOperator: rightmostOperator,
-    preferredExpressionType: ctx.options.preferredExpressionType,
+    preferredExpressionType: options.preferredExpressionType,
     getExpressionType: (expression) => getExpressionType(expression, ctx.context?.columns),
-    getColumnsByType: (types, ignored, options) =>
-      getColumnsByTypeFromCtx(ctx, types, ignored, options),
+    getColumnsByType: (types, ignored, opts) => getColumnsByTypeFromCtx(ctx, types, ignored, opts),
     context: ctx.context,
     callbacks: { hasMinimumLicenseRequired: getLicenseCheckerFromCtx(ctx) },
-    addSpaceAfterOperator: ctx.options.addSpaceAfterOperator,
-    openSuggestions: ctx.options.openSuggestions,
-    functionParameterContext: ctx.options.functionParameterContext,
+    addSpaceAfterOperator: options.addSpaceAfterOperator,
+    openSuggestions: options.openSuggestions,
+    functionParameterContext: options.functionParameterContext,
   });
 }

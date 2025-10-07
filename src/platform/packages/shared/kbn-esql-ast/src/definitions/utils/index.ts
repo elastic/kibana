@@ -16,7 +16,10 @@ export {
   getSafeInsertText,
   pushItUpInTheList,
 } from './autocomplete/helpers';
-export { suggestForExpression } from './autocomplete/expressions';
+export {
+  suggestForExpression,
+  buildExpresionFunctionParameterContext,
+} from './autocomplete/expressions';
 export {
   buildColumnSuggestions as buildFieldsDefinitionsWithMetadata,
   getFunctionSignatures,

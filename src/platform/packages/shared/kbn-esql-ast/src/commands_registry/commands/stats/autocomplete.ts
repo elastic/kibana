@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
+import type { FunctionParameterContext } from '../../../definitions/utils/autocomplete/expressions/types';
 import { Walker } from '../../../walker';
 import { isAssignment, isColumn } from '../../../ast/is';
 import type { ICommandCallbacks } from '../../types';
@@ -28,11 +29,7 @@ import {
   getNewUserDefinedColumnSuggestion,
   getDateHistogramCompletionItem,
 } from '../../complete_items';
-import {
-  columnExists as _columnExists,
-  buildFunctionParameterContext,
-  type FunctionParameterContext,
-} from '../../../definitions/utils/autocomplete/helpers';
+import { columnExists as _columnExists } from '../../../definitions/utils/autocomplete/helpers';
 import { suggestForExpression } from '../../../definitions/utils';
 import {
   getFunctionsToIgnoreForStats,
@@ -46,6 +43,7 @@ import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode, findAstPosition } from '../../../definitions/utils/ast';
 import { within } from '../../../ast/location';
 import { inOperators, nullCheckOperators } from '../../../definitions/all_operators';
+import { buildExpresionFunctionParameterContext } from '../../../definitions/utils';
 
 export async function autocomplete(
   query: string,
@@ -402,7 +400,7 @@ function buildCustomFilteringContext(
     return undefined;
   }
 
-  const basicContext = buildFunctionParameterContext(foundFunction, context);
+  const basicContext = buildExpresionFunctionParameterContext(foundFunction, context);
 
   if (!basicContext) {
     return undefined;

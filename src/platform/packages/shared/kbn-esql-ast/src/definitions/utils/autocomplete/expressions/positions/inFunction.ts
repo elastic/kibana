@@ -8,11 +8,8 @@
  */
 
 import { suggestForExpression } from '../suggestionEngine';
-import type { ExpressionContext } from '../types';
-import {
-  getValidSignaturesAndTypesToSuggestNext,
-  type FunctionParameterContext,
-} from '../../helpers';
+import type { ExpressionContext, FunctionParameterContext } from '../types';
+import { getValidSignaturesAndTypesToSuggestNext } from '../../helpers';
 import { getFunctionDefinition } from '../../../functions';
 import type { ISuggestionItem } from '../../../../../commands_registry/types';
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../../../types';
@@ -47,7 +44,7 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
     functionDefinition
   );
 
-  const paramContext = buildFunctionParameterContext(
+  const paramContext = buildInFunctionParameterContext(
     validSignatures,
     functionExpression.name,
     functionDefinition,
@@ -72,7 +69,7 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
 }
 
 /** Builds function parameter context, adding current function to ignore list */
-function buildFunctionParameterContext(
+function buildInFunctionParameterContext(
   validationResult: ReturnType<typeof getValidSignaturesAndTypesToSuggestNext>,
   functionName: string,
   functionDefinition: ReturnType<typeof getFunctionDefinition>,
@@ -83,11 +80,15 @@ function buildFunctionParameterContext(
     ? existingIgnored
     : [...existingIgnored, functionName];
 
+  const firstArgumentType = validationResult.enrichedArgs[0]?.dataType;
+
   return {
     paramDefinitions: validationResult.compatibleParamDefs,
     functionsToIgnore,
     hasMoreMandatoryArgs: validationResult.hasMoreMandatoryArgs,
     functionDefinition,
+    firstArgumentType,
+    currentParameterIndex: validationResult.argIndex,
   };
 }
 

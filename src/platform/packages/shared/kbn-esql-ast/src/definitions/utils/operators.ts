@@ -16,7 +16,6 @@ import type {
   Location,
 } from '../../commands_registry/types';
 import { listCompleteItem, commaCompleteItem } from '../../commands_registry/complete_items';
-import type { FunctionParameterContext } from './autocomplete/helpers';
 import {
   withAutoSuggest,
   getFieldsSuggestions,
@@ -42,6 +41,7 @@ import {
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from './shared';
 import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { getTestFunctions } from './test_functions';
+import type { FunctionParameterContext } from './autocomplete/expressions/types';
 
 export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
   const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
@@ -203,8 +203,16 @@ export async function getSuggestionsToRightOfOperatorExpression({
       })
     );
 
-    // Add comma if we're in a function with more mandatory args
-    if (operatorReturnType === 'boolean' && functionParameterContext?.hasMoreMandatoryArgs) {
+    // Add comma if we're in a function with more mandatory args OR if it's a variadic function
+    // Example: COALESCE(field < field ▌) → suggest AND/OR and comma
+    const isVariadicFunction = functionParameterContext?.functionDefinition?.signatures?.some(
+      (sig) => sig.minParams != null
+    );
+
+    if (
+      operatorReturnType === 'boolean' &&
+      (functionParameterContext?.hasMoreMandatoryArgs || isVariadicFunction)
+    ) {
       suggestions.push(commaCompleteItem);
     }
   } else {
@@ -322,6 +330,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
       }
     }
   }
+
   return suggestions.map<ISuggestionItem>((s) => {
     const overlap = getOverlapRange(queryText, s.text);
     return {

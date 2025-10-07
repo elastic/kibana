@@ -32,22 +32,36 @@ export function hasBooleanConditionParam(
 /**
  * Computes accepted types for next-argument suggestions within a function context.
  * - If the context is an unconstrained boolean condition (e.g., condition param) or
- *   the signature allows an unconstrained first arg (e.g., empty param set for special syntaxes), return ['any'].
+ * the signature allows an unconstrained first arg (e.g., empty param set for special syntaxes), return ['any'].
+ * - Special case: For homogeneous functions where first param is boolean, suggest ['any']
+ * because user can type any field and add operators to produce boolean (e.g., COALESCE(bool1, textField > "x"))
  * - Otherwise, prefer non-constant param types; fallback to all param types; final fallback ['any'].
  */
 export function getAcceptedTypesForParamContext(
   functionName: string | undefined,
   paramDefinitions: Array<{ type: FunctionParameterType; constantOnly?: boolean; name?: string }>,
-  options: { isCaseWithEmptyParams?: boolean } = {}
+  options: { isCaseWithEmptyParams?: boolean; firstArgumentType?: string } = {}
 ): ('any' | FunctionParameterType)[] {
   const nonConstantParamDefs = paramDefinitions.filter(({ constantOnly }) => !constantOnly);
   const isCaseWithEmptyParams = Boolean(options.isCaseWithEmptyParams);
   const isBooleanCondition = hasBooleanConditionParam(functionName, paramDefinitions);
 
+  // Special case: if first parameter is boolean in homogeneous functions,
+  // suggest all types (user can build boolean expressions with operators)
+  // Example: COALESCE(bool1, textField▌) should suggest all fields, not just boolean
+  const firstParamIsBoolean = options.firstArgumentType === 'boolean';
+
   if (nonConstantParamDefs.length > 0 || isCaseWithEmptyParams) {
-    return isBooleanCondition || isCaseWithEmptyParams
-      ? ['any']
-      : ensureKeywordAndText(nonConstantParamDefs.map(({ type }) => type));
+    const computedTypes =
+      isBooleanCondition || isCaseWithEmptyParams
+        ? ['any']
+        : ensureKeywordAndText(nonConstantParamDefs.map(({ type }) => type));
+
+    if (firstParamIsBoolean && computedTypes.length === 1 && computedTypes[0] === 'boolean') {
+      return ['any'];
+    }
+
+    return computedTypes;
   }
 
   if (paramDefinitions.length > 0) {

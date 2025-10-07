@@ -20,15 +20,10 @@ import type {
 import { Location } from '../../../commands_registry/types';
 import type { ESQLAstItem, ESQLFunction } from '../../../types';
 import { EDITOR_MARKER } from '../../constants';
-import type { FunctionDefinition, Signature } from '../../types';
+import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType } from '../expressions';
-import {
-  allFunctions,
-  filterFunctionDefinitions,
-  getFunctionDefinition,
-  getFunctionSuggestion,
-} from '../functions';
+import { allFunctions, filterFunctionDefinitions, getFunctionSuggestion } from '../functions';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
 
@@ -286,15 +281,6 @@ export function getLastNonWhitespaceChar(text: string) {
 
 export const columnExists = (col: string, context?: ICommandContext) =>
   Boolean(context ? getColumnByName(col, context) : undefined);
-
-export interface FunctionParameterContext {
-  paramDefinitions: Signature['params'];
-  functionsToIgnore: string[];
-  // Flag to suggest comma after function parameters when more mandatory args exist
-  hasMoreMandatoryArgs?: boolean;
-  // Function definition for function-specific parameter handling (e.g., CASE function)
-  functionDefinition?: FunctionDefinition;
-}
 
 export function getControlSuggestion(
   type: ESQLVariableType,
@@ -569,30 +555,4 @@ export function getLookupIndexCreateSuggestion(
 
     incomplete: true,
   } as ISuggestionItem;
-}
-
-// ============================================================================
-// Helper Functions: Function Parameter Context
-// ============================================================================
-
-// Builds function parameter context for suggestions
-// Commands with special filtering (like STATS) can extend with command-specific functionsToIgnore
-export function buildFunctionParameterContext(
-  fn: ESQLFunction,
-  context?: ICommandContext
-): FunctionParameterContext | null {
-  const fnDefinition = getFunctionDefinition(fn.name);
-
-  if (!fnDefinition || !context) {
-    return null;
-  }
-
-  const validationResult = getValidSignaturesAndTypesToSuggestNext(fn, context, fnDefinition);
-
-  return {
-    paramDefinitions: validationResult.compatibleParamDefs,
-    functionsToIgnore: [fn.name], // Basic recursion prevention
-    hasMoreMandatoryArgs: validationResult.hasMoreMandatoryArgs,
-    functionDefinition: fnDefinition,
-  };
 }

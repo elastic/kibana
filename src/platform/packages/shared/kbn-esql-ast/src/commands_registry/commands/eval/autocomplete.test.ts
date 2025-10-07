@@ -504,8 +504,8 @@ describe('EVAL Autocomplete', () => {
           { operators: true, skipAssign: true, agg: false, scalar: false },
           ['text']
         ),
-        ',',
       ]);
+
       await evalExpectSuggestions('from a | eval case( doubleField ', [
         ...getFunctionSignaturesByReturnType(
           Location.EVAL,
@@ -513,8 +513,8 @@ describe('EVAL Autocomplete', () => {
           { operators: true, skipAssign: true, agg: false, scalar: false },
           ['double']
         ),
-        ',',
       ]);
+
       await evalExpectSuggestions('from a | eval case( booleanField ', [
         ...getFunctionSignaturesByReturnType(
           Location.EVAL,

@@ -15,9 +15,8 @@ import { logicalOperators as allLogicalOperators } from '../../../../all_operato
 import { getCompatibleLiterals, getTimeUnitLiterals } from '../../../literals';
 import { getOperatorSuggestions } from '../../../operators';
 import { isParamExpressionType } from '../../../shared';
-import type { FunctionParameterContext } from '../../helpers';
 import { getFieldsSuggestions, getFunctionsSuggestions } from '../../helpers';
-import type { ExpressionContext } from '../types';
+import type { ExpressionContext, FunctionParameterContext } from '../types';
 import { matchesSpecialFunction } from '../utils';
 import { isLiteral } from '../../../../../ast/is';
 import { isNumericType, FunctionDefinitionTypes } from '../../../../types';
@@ -57,14 +56,19 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
       return [] as ISuggestionItem[];
     }
 
-    // TODO: reintroduce this check to only show time units for functions that accept time params? it measn it doesn't work for functions like DATE_PARSE that want stings
-    // const acceptedTypes = paramCtx.paramDefinitions.map(({ type }) => type);
-    // const acceptsTimeParam =
-    // acceptedTypes.includes('time_duration') || acceptedTypes.includes('date_period');
+    // Check if function accepts time_duration or date_period parameters
+    const acceptedTypes = paramCtx.paramDefinitions.map(({ type }) => type);
+    const acceptsTimeParam =
+      acceptedTypes.includes('time_duration') || acceptedTypes.includes('date_period');
 
-    // if (!acceptsTimeParam) {
-    // return [] as ISuggestionItem[];
-    // }
+    // Special case: DATE_PARSE accepts keyword but supports time units for epoch time
+    // Example: DATE_PARSE(1, "days") means "1 day from epoch"
+    const functionName = paramCtx.functionDefinition?.name?.toLowerCase();
+    const isDateParseSpecialCase = functionName === 'date_parse';
+
+    if (!acceptsTimeParam && !isDateParseSpecialCase) {
+      return [] as ISuggestionItem[];
+    }
 
     const hasMoreMandatory = Boolean(paramCtx.hasMoreMandatoryArgs);
     const fnType = paramCtx.functionDefinition?.type;
@@ -85,8 +89,6 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     context?.columns
   );
 
-  const operatorSuggestions = getStandardOperatorSuggestions(ctx, expressionType);
-
   // If it's a literal that matches type and there are more params available: only suggest comma
   // (e.g., CONCAT("first" ▌) - literal complete, can't extend, need 2nd param)
   // (e.g., COALESCE("first" ▌) - literal complete, can add optional params)
@@ -100,10 +102,23 @@ export async function suggestAfterComplete(ctx: ExpressionContext): Promise<ISug
     return [];
   }
 
+  // Check if operators make sense in this context (intelligent filtering)
+  const shouldSuggestOperators = shouldSuggestOperatorsForContext(
+    ctx,
+    functionParameterContext,
+    expressionType
+  );
+
+  // Get operator suggestions only if they make sense
+  const operatorSuggestions = shouldSuggestOperators
+    ? getStandardOperatorSuggestions(ctx, expressionType)
+    : [];
+
   // For field references that match type: can extend with operators OR move to next param
   // (e.g., CASE(booleanField ▌) - can add AND/OR, or comma for next param)
-  // (e.g., COALESCE(textField ▌) - can add ==, LIKE, etc., or comma for optional params)
-  if (paramState.hasMoreParams) {
+  // (e.g., COALESCE(textField ▌) - operators filtered out, only comma)
+  // (e.g., COALESCE(field < field ▌) - operators (AND/OR) and comma)
+  if (paramState.hasMoreParams && paramState.typeMatches) {
     return [...operatorSuggestions, commaCompleteItem];
   }
 
@@ -126,12 +141,21 @@ function analyzeParameterState(
   }
 
   const hasMoreMandatoryArgs = Boolean(functionParameterContext.hasMoreMandatoryArgs);
-  const hasOptionalParams = functionParameterContext.paramDefinitions.some(
-    (param) => param.optional === true
+  const hasOptionalParams = functionParameterContext.functionDefinition?.signatures?.some(
+    (signature) => signature.params.some((param) => param.optional === true)
+  );
+  // Check if this is a variadic function (unlimited params, like CASE, CONCAT, COALESCE)
+  // Variadic functions have minParams defined, indicating they accept unlimited parameters
+  const isVariadicFunction = functionParameterContext.functionDefinition?.signatures?.some(
+    (sig) => sig.minParams != null
   );
 
-  // hasMoreParams is true if there are more mandatory args OR if the function accepts optional params
-  const hasMoreParams = hasMoreMandatoryArgs || hasOptionalParams;
+  // hasMoreParams is true if:
+  // - there are more mandatory args, OR
+  // - the function accepts optional params, OR
+  // - the function is variadic (accepts unlimited params)
+  const hasMoreParams =
+    hasMoreMandatoryArgs || Boolean(hasOptionalParams) || Boolean(isVariadicFunction);
 
   const isLiteralExpression = expressionRoot && isLiteral(expressionRoot);
   const typeMatchesParam = functionParameterContext.paramDefinitions.some((def) =>
@@ -143,6 +167,137 @@ function analyzeParameterState(
     isLiteral: Boolean(isLiteralExpression),
     hasMoreParams,
   };
+}
+
+/**
+ * Determines if operators should be suggested based on the current context.
+ *
+ * Core logic: For functions with type homogeneity (COALESCE, CONCAT, etc.),
+ * operators should be suggested based on the type of the FIRST parameter.
+ *
+ * Key insight: comparison operators (>, ==, LIKE) produce boolean values.
+ *
+ * Examples:
+ * - WHERE bytes > 1 (expects boolean, > produces boolean)
+ * - COALESCE(agent > agent, agent ...)  (first param is boolean, so second param can use operators)
+ * - COALESCE(textField, agent ...)  (first param is text, so second param should NOT use comparison operators)
+ * - CONCAT(text, ...)  (first param is text, NO comparison operators)
+ * - CASE(cond, value > 5, ...) (value accepts 'any', can be boolean expression)
+ *
+ * Multi-signature handling:
+ * Functions like COALESCE have multiple signatures for different types.
+ * We check the first parameter's type to determine which signature is active.
+ * If first param is boolean, all params must be boolean → suggest operators
+ * If first param is NOT boolean and function requires homogeneity → DON'T suggest comparison operators
+ */
+function shouldSuggestOperatorsForContext(
+  ctx: ExpressionContext,
+  functionParameterContext: FunctionParameterContext | undefined,
+  expressionType: SupportedDataType | 'unknown'
+): boolean {
+  if (!functionParameterContext) {
+    return true;
+  }
+
+  const paramDefs = functionParameterContext.paramDefinitions;
+
+  if (!paramDefs || paramDefs.length === 0) {
+    return true;
+  }
+
+  // If parameter accepts 'any' type, operators are useful (can build any expression)
+  const acceptsAny = paramDefs.some((def) => def.type === 'any');
+
+  if (acceptsAny) {
+    return true;
+  }
+
+  // If the expression already typed is boolean, operators make sense
+  // (logical operators for boolean, comparison operators produce boolean)
+  if (expressionType === 'boolean') {
+    return true;
+  }
+
+  const signatures = functionParameterContext.functionDefinition?.signatures;
+
+  if (!signatures || signatures.length === 0) {
+    return true;
+  }
+
+  // Check if function requires type homogeneity
+  const requiresHomogeneity = signatures.every((sig) => {
+    const isVariadic = sig.minParams != null;
+
+    if (!isVariadic && sig.params.length < 2) {
+      return false;
+    }
+
+    const firstParamType = sig.params[0].type;
+
+    if (firstParamType === 'any') {
+      return false;
+    }
+
+    return sig.params.every((param) => {
+      if (param.type === firstParamType) {
+        return true;
+      }
+
+      // keyword and text are interchangeable in ES|QL
+      if (
+        (firstParamType === 'keyword' || firstParamType === 'text') &&
+        (param.type === 'keyword' || param.type === 'text')
+      ) {
+        return true;
+      }
+
+      return false;
+    });
+  });
+
+  if (!requiresHomogeneity) {
+    return true;
+  }
+
+  // Function requires homogeneity - check the first parameter's type
+  const firstParamType = functionParameterContext.firstArgumentType;
+
+  // If we can't determine first param type, be permissive (suggest operators)
+  if (!firstParamType || firstParamType === 'unknown') {
+    return true;
+  }
+
+  // Special case: editing the first parameter (expressionType matches firstParamType)
+  if (firstParamType === expressionType) {
+    const isEditingFirstParam = functionParameterContext.currentParameterIndex === 0;
+
+    if (isEditingFirstParam) {
+      // COALESCE(textField ▌) - still at first param, user can still change signature
+      // Suggest operators if function has boolean signature (user can add "> 'x'" to switch)
+      const hasBooleanSignature = signatures.some((sig) => {
+        if (sig.params.length === 0) {
+          return false;
+        }
+
+        return sig.params[0].type === 'boolean';
+      });
+
+      return hasBooleanSignature;
+    }
+
+    // COALESCE(textField, textField ▌) - at second+ param, signature already chosen
+    // Only suggest operators if first param was boolean (logical operators AND/OR)
+    return firstParamType === 'boolean';
+  }
+
+  // If first param is boolean, all params must be boolean → suggest operators
+  if (firstParamType === 'boolean') {
+    return true;
+  }
+
+  // First param is NOT boolean, function requires homogeneity
+  // → DON'T suggest comparison operators (they would produce boolean, breaking homogeneity)
+  return false;
 }
 
 /** Handles suggestions for expressions with unknown types within function parameters */
@@ -184,11 +339,19 @@ async function handleUnknownType(ctx: ExpressionContext): Promise<ISuggestionIte
 
   // Add field and function suggestions for non-constant parameters
   if (nonConstantParamDefs.length > 0 || isCaseWithEmptyParams) {
-    const acceptedTypes = getAcceptedTypesForParamContext(
-      functionDefinition.name,
-      paramDefinitions,
-      { isCaseWithEmptyParams }
-    );
+    let acceptedTypes = getAcceptedTypesForParamContext(functionDefinition.name, paramDefinitions, {
+      isCaseWithEmptyParams,
+    });
+
+    // Special case: for functions with homogeneity where first param is boolean,
+    // suggest ALL field types (not just boolean) because user can add operators
+    // Example: COALESCE(agent < agent, ▌) - should suggest all fields, not just boolean
+    const firstParamIsBoolean = functionParameterContext.firstArgumentType === 'boolean';
+
+    if (firstParamIsBoolean && acceptedTypes.length === 1 && acceptedTypes[0] === 'boolean') {
+      // Suggest all types - user can build boolean expressions with operators
+      acceptedTypes = ['any'];
+    }
 
     // Add field suggestions
     suggestions.push(

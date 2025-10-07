@@ -120,7 +120,8 @@ async function handleFunctionParameterContext(
     functionParamContext,
     paramDefinitions,
     functionDefinition,
-    isCursorFollowedByComma
+    isCursorFollowedByComma,
+    functionParamContext.firstArgumentType
   );
 
   const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
@@ -277,15 +278,15 @@ function getParamSuggestionConfig(
   functionParamContext: NonNullable<ExpressionContext['options']['functionParameterContext']>,
   paramDefinitions: ParamDefinition[],
   functionDefinition: FunctionDef,
-  isCursorFollowedByComma: boolean
+  isCursorFollowedByComma: boolean,
+  firstArgumentType?: string
 ) {
   const nonConstantParams = paramDefinitions.filter(({ constantOnly }) => !constantOnly);
   const isBooleanCondition = hasBooleanConditionParam(functionDefinition.name, paramDefinitions);
 
-  const acceptedTypes = getAcceptedTypesForParamContext(
-    functionDefinition.name,
-    paramDefinitions
-  ) as FunctionParameterType[];
+  const acceptedTypes = getAcceptedTypesForParamContext(functionDefinition.name, paramDefinitions, {
+    firstArgumentType,
+  }) as FunctionParameterType[];
 
   const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
   const shouldAddComma = shouldAddCommaAfterParam(

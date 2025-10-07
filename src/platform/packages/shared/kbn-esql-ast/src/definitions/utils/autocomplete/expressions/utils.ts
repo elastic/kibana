@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLFunction } from '../../../../types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
-import type { ExpressionContext } from './types';
-import type { GetColumnsByTypeFn } from '../../../../commands_registry/types';
+import type { ExpressionContext, FunctionParameterContext } from './types';
+import type { GetColumnsByTypeFn, ICommandContext } from '../../../../commands_registry/types';
 import { FunctionDefinitionTypes } from '../../../types';
+import { getFunctionDefinition, getValidSignaturesAndTypesToSuggestNext } from '../..';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
 
@@ -107,4 +109,30 @@ export function getFunctionParamContextFromCtx(ctx: ExpressionContext) {
 /** Checks if cursor is followed by comma */
 export function isCursorFollowedByCommaFromCtx(ctx: ExpressionContext): boolean {
   return ctx.options.isCursorFollowedByComma ?? false;
+}
+
+// ============================================================================
+// Helper Functions: Function Parameter Context
+// ============================================================================
+
+// Builds function parameter context for suggestions
+// Commands with special filtering (like STATS) can extend with command-specific functionsToIgnore
+export function buildExpresionFunctionParameterContext(
+  fn: ESQLFunction,
+  context?: ICommandContext
+): FunctionParameterContext | null {
+  const fnDefinition = getFunctionDefinition(fn.name);
+
+  if (!fnDefinition || !context) {
+    return null;
+  }
+
+  const validationResult = getValidSignaturesAndTypesToSuggestNext(fn, context, fnDefinition);
+
+  return {
+    paramDefinitions: validationResult.compatibleParamDefs,
+    functionsToIgnore: [fn.name], // Basic recursion prevention
+    hasMoreMandatoryArgs: validationResult.hasMoreMandatoryArgs,
+    functionDefinition: fnDefinition,
+  };
 }
