@@ -25,7 +25,7 @@ export const AD_ADMIN_GROUPS: string[] = ['Domain Admins', 'Enterprise Admins'];
 
 export const INTEGRATION_MATCHERS_DETAILED: Record<IntegrationType, Matcher> = {
   entityanalytics_okta: { fields: ['user.roles'], values: OKTA_ADMIN_ROLES },
-  ad: { fields: ['user.group'], values: AD_ADMIN_GROUPS },
+  ad: { fields: ['user.group.name'], values: AD_ADMIN_GROUPS },
 };
 
 export const getMatchersFor = (integration: IntegrationType): Matcher[] => [
