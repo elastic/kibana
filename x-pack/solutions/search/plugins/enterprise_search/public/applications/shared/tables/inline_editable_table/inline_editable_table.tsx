@@ -105,14 +105,21 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   const { editingItemId, isEditing, isEditingUnsavedItem, rowErrors } =
     useValues(InlineEditableTableLogic);
   const { editNewItem, reorderItems } = useActions(InlineEditableTableLogic);
-  const addButtonRef = useRef<HTMLButtonElement>(null);
+
+  // A11y - restore focus when editing ends
+  const prevFocusRef = useRef<HTMLElement | null>(null);
 
   useUpdateEffect(() => {
-    if (!isEditing) {
-      // Editing just ended, focus the add button
-      addButtonRef.current?.focus();
+    if (!isEditing && prevFocusRef.current) {
+      prevFocusRef.current.focus();
+      prevFocusRef.current = null;
     }
   }, [isEditing]);
+
+  const handleEditNewItem = () => {
+    prevFocusRef.current = document.activeElement as HTMLElement;
+    editNewItem();
+  };
 
   // TODO These two things shoud just be selectors
   const isEditingItem = (item: Item) => item.id === editingItemId;
@@ -133,6 +140,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
     canRemoveLastItem,
     isLoading,
     lastItemWarning,
+    prevFocusRef,
     uneditableItems,
   });
 
@@ -143,11 +151,10 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
         title={title || ''}
         actions={[
           <EuiButton
-            buttonRef={addButtonRef}
             size="s"
             iconType="plusInCircle"
             disabled={isEditing}
-            onClick={editNewItem}
+            onClick={handleEditNewItem}
             color="primary"
             data-test-subj="inlineEditableTableActionButton"
           >
@@ -170,7 +177,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
           }),
         })}
         rowErrors={(item) => (isActivelyEditing(item) ? rowErrors : undefined)}
-        noItemsMessage={noItemsMessage(editNewItem)}
+        noItemsMessage={noItemsMessage(handleEditNewItem)}
         onReorder={reorderItems}
         disableDragging={isEditing}
         {...rest}
