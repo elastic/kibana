@@ -21,6 +21,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   ];
 
+  // readOnly settings with readonlyMode set to ui are not available on the advanced settings page
+  const READ_ONLY_SETTINGS: string[] = [
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
+  ];
+
   describe('Security advanced settings', function () {
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
@@ -44,6 +50,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
         // settings behind feature flags are not available in a general setup
         if (featureFlaggedSettings.includes(settingId)) {
+          continue;
+        }
+        // readOnly settings wont appear on the advanced settings page
+        if (READ_ONLY_SETTINGS.includes(settingId)) {
           continue;
         }
         it('renders ' + settingId + ' edit field', async () => {
