@@ -32,15 +32,15 @@ export enum FusePosition {
 export function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePosition {
   const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
 
-  if ((scoreBy && scoreBy.incomplete) || immediatelyAfterOptionField(innerText, 'SCORE BY')) {
+  if ((scoreBy && scoreBy.incomplete) || immediatelyAfterOptionField(innerText, 'score by')) {
     return FusePosition.SCORE_BY;
   }
 
-  if ((groupBy && groupBy.incomplete) || immediatelyAfterOptionField(innerText, 'GROUP BY')) {
+  if ((groupBy && groupBy.incomplete) || immediatelyAfterOptionField(innerText, 'group by')) {
     return FusePosition.GROUP_BY;
   }
 
-  if ((keyBy && keyBy.incomplete) || immediatelyAfterOptionFieldsList(innerText, 'KEY BY')) {
+  if ((keyBy && keyBy.incomplete) || immediatelyAfterOptionFieldsList(innerText, 'key by')) {
     return FusePosition.KEY_BY;
   }
 

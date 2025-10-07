@@ -16,6 +16,9 @@ import type {
   ESQLMessage,
 } from '../../../types';
 
+export const FUSE_OPTIONS = ['score by', 'key by', 'group by', 'with'] as const;
+export type FuseOption = (typeof FUSE_OPTIONS)[number];
+
 export function extractFuseArgs(command: ESQLAstFuseCommand): Partial<{
   fuseType: ESQLIdentifier;
   scoreBy: ESQLCommandOption;
@@ -34,7 +37,7 @@ export function extractFuseArgs(command: ESQLAstFuseCommand): Partial<{
 
 export function findCommandOptionByName(
   command: ESQLCommand,
-  name: string
+  name: FuseOption
 ): ESQLCommandOption | undefined {
   return command.args.find(
     (arg): arg is ESQLCommandOption =>
@@ -49,7 +52,7 @@ export function findCommandOptionByName(
  * Example: "SCORE BY field_name/"  returns true
  *          "SCORE BY field_name /" returns false
  */
-export function immediatelyAfterOptionField(innerText: string, optionName: string): boolean {
+export function immediatelyAfterOptionField(innerText: string, optionName: FuseOption): boolean {
   const regex = new RegExp(`${optionName}\\s+\\S+$`, 'i');
   return regex.test(innerText);
 }
@@ -59,7 +62,10 @@ export function immediatelyAfterOptionField(innerText: string, optionName: strin
  * Example: "KEY BY field1, field2/"  returns true
  *          "KEY BY field1, field2 /" returns false
  */
-export function immediatelyAfterOptionFieldsList(innerText: string, optionName: string): boolean {
+export function immediatelyAfterOptionFieldsList(
+  innerText: string,
+  optionName: FuseOption
+): boolean {
   const regex = new RegExp(`${optionName}(\\s+\\S+,?)+$`, 'i');
   return regex.test(innerText);
 }
