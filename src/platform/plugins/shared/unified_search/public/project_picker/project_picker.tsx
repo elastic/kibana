@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import type { EuiSelectOption, EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -42,70 +42,131 @@ const strings = {
 };
 
 interface Project {
-  id: string;
-  server: string;
+  _id: string;
+  _alias: string;
+  _type: string;
+  _csp: string;
+  _region: string;
   tags?: string[];
-  solution: string;
 }
 
 const getSolutionIcon = (solution: string) => {
   switch (solution) {
-    case 'es':
+    case 'elasticsearch':
       return 'logoElasticsearch';
-    case 'sec':
+    case 'security':
       return 'logoSecurity';
-    case 'oblt':
+    case 'observability':
       return 'logoObservability';
     default:
       return 'empty';
   }
 };
 
+const getCSPLabel = (csp: string) => {
+  switch (csp) {
+    case 'aws':
+      return 'AWS';
+    case 'azure':
+      return 'Azure';
+    case 'gcp':
+      return 'GCP';
+  }
+};
+
+const response: { origin: Record<string, Project>; linked_projects: Record<string, Project> } = {
+  origin: {
+    c56c4f8849c64cc6ae59c261f40bd195: {
+      _id: 'c56c4f8849c64cc6ae59c261f40bd195',
+      _csp: 'aws',
+      _alias: 'my-project-b72b95',
+      _region: 'N. Virginia (us-east-1)',
+      tags: ['tag1', 'tag2', 'tag3', 'tag4'],
+      _type: 'security',
+    },
+  },
+  linked_projects: {
+    a3b88ea3f195a336ae59c261f40bd195: {
+      _id: 'a3b88ea3f195a336ae59c261f40bd195',
+      _alias: 'customer-alias-a3b88e',
+      _type: 'security',
+      _csp: 'azure',
+      _region: 'eu-central-2',
+      mytag1: 'foo',
+      mytag2: 'bar',
+    },
+    f40bd195389s3761023ca7aa8a3r0932: {
+      _id: 'f40bd195389s3761023ca7aa8a3r0932',
+      _alias: 'customer-alias-f40bd',
+      _type: 'observability',
+      _csp: 'aws',
+      _region: 'us-west-1',
+    },
+    g023ca7aa8a3r0932f40bd195389s376: {
+      _id: 'g023ca7aa8a3r0932f40bd195389s376',
+      _alias: 'big-query-analytics-616b96',
+      _csp: 'azure',
+      _region: 'Virginia (eastus2)',
+      tags: ['tag1', 'tag2'],
+      _type: 'observability',
+    },
+    h8a3r0932f40bd195389s3761023ca7aa: {
+      _id: 'h8a3r0932f40bd195389s3761023ca7aa',
+      _alias: 'cloud-backup-c91q12',
+      _csp: 'azure',
+      _region: 'Virginia (eastus2)',
+      tags: ['tag1', 'tag2'],
+      _type: 'security',
+    },
+    r0932f40bd195389s3761023ca7aa8a3: {
+      _id: 'customer-portal-p61068',
+      _alias: 'customer-portal-p61068',
+      _csp: 'aws',
+      _region: 'AWS, N. Virginia (us-east-1)',
+      _type: 'observability',
+    },
+    j023ca7aa8a3r0932f40bd195389s376: {
+      _id: 'data-analysis-platform-j4962a',
+      _alias: 'data-analysis-platform-j4962a',
+      _csp: 'azure',
+      _region: 'Virginia (eastus2)',
+      tags: ['tag1', 'tag2'],
+      _type: 'observability',
+    },
+    k40bd195389s3761023ca7aa8a3r0932: {
+      _id: 'dev-environment-b19a81',
+      _alias: 'dev-environment-b19a81',
+      _csp: 'azure',
+      _region: 'Virginia (eastus2)',
+      _type: 'security',
+    },
+    eaa8a3r0932f40bd195389s3761023ca: {
+      _id: 'engineering-dev-ops-k416e1',
+      _alias: 'engineering-dev-ops-k416e1',
+      _csp: 'aws',
+      _region: 'AWS, N. Virginia (us-east-1)',
+      tags: ['tag1', 'tag2', 'tag3', 'tag4'],
+      _type: 'es',
+    },
+    t40bd195389s3761023ca7aa8a3r0932: {
+      _id: 'feature-beta-t149a4',
+      _alias: 'feature-beta-t149a4',
+      _csp: 'aws',
+      _region: 'AWS, N. Virginia (us-east-1)',
+      tags: ['tag1', 'tag2', 'tag3'],
+      _type: 'es',
+    },
+  },
+};
+
 export const ProjectPicker = (currentProjectId = 'my-project-b72b95') => {
   const [crossProjectSearchScope, setCrossProjectSearchScope] = useState<string>('all');
   const [showProjectPickerPopover, setShowProjectPickerPopover] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: 'my-project-b72b95',
-      server: 'AWS, N. Virginia (us-east-1)',
-      tags: ['tag1', 'tag2', 'tag3', 'tag4'],
-      solution: 'sec',
-    },
-    {
-      id: 'big-query-analytics-616b96',
-      server: 'Azure, Virginia (eastus2)',
-      tags: ['tag1', 'tag2'],
-      solution: 'oblt',
-    },
-    {
-      id: 'cloud-backup-c91q12',
-      server: 'Azure, Virginia (eastus2)',
-      tags: ['tag1', 'tag2'],
-      solution: 'sec',
-    },
-    { id: 'customer-portal-p61068', server: 'AWS, N. Virginia (us-east-1)', solution: 'oblt' },
-    {
-      id: 'data-analysis-platform-j4962a',
-      server: 'Azure, Virginia (eastus2)',
-      tags: ['tag1', 'tag2'],
-      solution: 'oblt',
-    },
-    { id: 'dev-environment-b19a81', server: 'Azure, Virginia (eastus2)', solution: 'sec' },
-    {
-      id: 'engineering-dev-ops-k416e1',
-      server: 'AWS, N. Virginia (us-east-1)',
-      tags: ['tag1', 'tag2', 'tag3', 'tag4'],
-      solution: 'es',
-    },
-    {
-      id: 'feature-beta-t149a4',
-      server: 'AWS, N. Virginia (us-east-1)',
-      tags: ['tag1', 'tag2', 'tag3'],
-      solution: 'es',
-    },
-  ]);
+  const [linkedProjects, setProjects] = useState<Project[]>(
+    Object.values(response.linked_projects)
+  );
 
-  const currentProject = projects.filter((project) => project.id === currentProjectId);
+  const originProject: Project = Object.values(response.origin)[0];
 
   const button = (
     <EuiToolTip
@@ -128,14 +189,14 @@ export const ProjectPicker = (currentProjectId = 'my-project-b72b95') => {
   const closePopover = () => setShowProjectPickerPopover(false);
 
   const options: EuiSelectableOption[] = (
-    crossProjectSearchScope === 'origin' ? currentProject : projects
-  ).map((project) => ({
-    label: project.id,
-    prepend: <EuiIcon type={getSolutionIcon(project.solution)} />,
+    crossProjectSearchScope === 'origin' ? [originProject] : [originProject, ...linkedProjects]
+  ).map((project: Project) => ({
+    label: project._id,
+    prepend: <EuiIcon type={getSolutionIcon(project._type)} />,
     append: (
       <>
         <EuiText size="s">
-          {project.server}
+          {`${getCSPLabel(project._csp)}, ${project._region}`}
           {project.tags?.length ? (
             <EuiBadge color="hollow" iconType="tag" css={{ marginLeft: '4px' }}>
               {project.tags.length}
@@ -211,8 +272,12 @@ export const ProjectPicker = (currentProjectId = 'my-project-b72b95') => {
         options={[
           {
             label: i18n.translate('projectPicker.numberOfProjectsDescription', {
-              defaultMessage: 'Searching across {numberOfProjects} projects',
-              values: { numberOfProjects: projects.length },
+              defaultMessage:
+                'Searching across {numberOfProjects, plural, one {# project} other {# projects}}',
+              values: {
+                numberOfProjects:
+                  crossProjectSearchScope === 'origin' ? 1 : linkedProjects.length + 1,
+              },
             }),
             isGroupLabel: true,
           },
