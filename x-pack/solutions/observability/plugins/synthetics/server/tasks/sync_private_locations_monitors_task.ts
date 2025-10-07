@@ -12,7 +12,11 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type {
+  ConcreteTaskInstance,
+  IntervalSchedule,
+  RruleSchedule,
+} from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/common';
 import pRetry from 'p-retry';
@@ -80,7 +84,7 @@ export class SyncPrivateLocationMonitorsTask {
     taskInstance,
   }: {
     taskInstance: CustomTaskInstance;
-  }): Promise<{ state: TaskState; error?: Error }> {
+  }): Promise<{ state: TaskState; error?: Error; schedule?: IntervalSchedule | RruleSchedule }> {
     const {
       coreStart: { savedObjects },
       encryptedSavedObjects,
@@ -140,10 +144,16 @@ export class SyncPrivateLocationMonitorsTask {
       return {
         error,
         state: taskState,
+        schedule: {
+          interval: TASK_SCHEDULE,
+        },
       };
     }
     return {
       state: taskState,
+      schedule: {
+        interval: TASK_SCHEDULE,
+      },
     };
   }
 
@@ -402,7 +412,7 @@ export class SyncPrivateLocationMonitorsTask {
   }
 
   debugLog = (message: string) => {
-    this.serverSetup.logger.debug(`[SyncPrivateLocationMonitorsTask] ${message} `);
+    this.serverSetup.logger.debug(`[SyncPrivateLocationMonitorsTask] ${message}`);
   };
 
   async cleanUpDuplicatedPackagePolicies(
