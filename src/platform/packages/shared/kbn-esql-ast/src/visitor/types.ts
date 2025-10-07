@@ -149,6 +149,7 @@ export interface VisitorMethods<
 > {
   visitQuery?: Visitor<contexts.QueryVisitorContext<Visitors, Data>, any, any>;
   visitCommand?: Visitor<contexts.CommandVisitorContext<Visitors, Data>, any, any>;
+  visitHeaderCommand?: Visitor<contexts.HeaderCommandVisitorContext<Visitors, Data>, any, any>;
   visitFromCommand?: Visitor<contexts.FromCommandVisitorContext<Visitors, Data>, any, any>;
   visitLimitCommand?: Visitor<contexts.LimitCommandVisitorContext<Visitors, Data>, any, any>;
   visitExplainCommand?: Visitor<contexts.ExplainCommandVisitorContext<Visitors, Data>, any, any>;
@@ -243,6 +244,8 @@ export interface VisitorMethods<
  */
 export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQLAstQueryNode
   ? 'visitQuery'
+  : Node extends ast.ESQLAstHeaderCommand
+  ? 'visitHeaderCommand'
   : Node extends ast.ESQLCommand
   ? 'visitCommand'
   : Node extends ast.ESQLCommandOption
