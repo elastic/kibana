@@ -82,7 +82,7 @@ export const convertBucketsToRows = (
 
     // For single-bucket mode (no date_histogram), use the query end time as timestamp
     const timestamp = (bucket.key as number) ?? options.timerange.to;
-    
+
     return { timestamp, ...metrics };
   });
 };

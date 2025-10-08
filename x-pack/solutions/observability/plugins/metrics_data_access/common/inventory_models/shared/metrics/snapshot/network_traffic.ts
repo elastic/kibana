@@ -109,10 +109,7 @@ export const networkTrafficWithInterfacesWithFilter = (
 
 // Single-bucket version for snapshot API refactor
 // Uses min/max timestamps to calculate rate over the query time range
-export const networkTrafficSingleBucket = (
-  id: string,
-  field: string
-): MetricsUIAggregation => ({
+export const networkTrafficSingleBucket = (id: string, field: string): MetricsUIAggregation => ({
   [`${id}_sum`]: {
     sum: {
       field,

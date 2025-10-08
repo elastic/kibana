@@ -16,7 +16,7 @@ import type {
   AggregationResponse,
   CompositeResponse,
 } from './types';
-import { CompositeResponseRT, AggregationResponseRT, HistogramBucketRT } from './types';
+import { CompositeResponseRT, AggregationResponseRT } from './types';
 import { EMPTY_RESPONSE } from './constants';
 import { createAggregations, createCompositeAggregations } from './lib/create_aggregations';
 import { convertBucketsToMetricsApiSeries } from './lib/convert_buckets_to_metrics_series';
@@ -123,12 +123,7 @@ const getSeriesFromAggregations = (
   // Check if this is the new single-bucket response (no histogram wrapper)
   if ('histogram' in aggregations) {
     return [
-      convertBucketsToMetricsApiSeries(
-        ['*'],
-        options,
-        aggregations.histogram.buckets,
-        bucketSize
-      ),
+      convertBucketsToMetricsApiSeries(['*'], options, aggregations.histogram.buckets, bucketSize),
     ];
   } else {
     // Single bucket response - treat the root aggregation as a single bucket

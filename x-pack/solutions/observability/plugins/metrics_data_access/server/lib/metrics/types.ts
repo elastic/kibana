@@ -89,7 +89,10 @@ export const HistogramRT = rt.type({
 });
 
 // Single-bucket response type (no histogram wrapper)
-export const SingleBucketResponseRT = rt.intersection([BucketRT, rt.type({ metricsets: MetricsetRT })]);
+export const SingleBucketResponseRT = rt.intersection([
+  BucketRT,
+  rt.type({ metricsets: MetricsetRT }),
+]);
 
 export const MetricsBucketRT = rt.intersection([BucketRT, rt.type({ metricsets: MetricsetRT })]);
 export const HistogramBucketRT = rt.intersection([

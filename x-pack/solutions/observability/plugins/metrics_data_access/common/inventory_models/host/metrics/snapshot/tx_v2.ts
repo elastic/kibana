@@ -13,9 +13,14 @@ import type { SchemaBasedAggregations } from '../../../shared/metrics/types';
 
 export const txV2: SchemaBasedAggregations = {
   ecs: networkTrafficSingleBucket('txV2', 'host.network.egress.bytes'),
-  semconv: networkTrafficWithInterfacesWithFilterSingleBucket('txV2', 'system.network.io', 'device', {
-    term: {
-      direction: 'transmit',
-    },
-  }),
+  semconv: networkTrafficWithInterfacesWithFilterSingleBucket(
+    'txV2',
+    'system.network.io',
+    'device',
+    {
+      term: {
+        direction: 'transmit',
+      },
+    }
+  ),
 };
