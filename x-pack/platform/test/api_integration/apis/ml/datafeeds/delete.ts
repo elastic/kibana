@@ -55,6 +55,10 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.cleanMLSavedObjects();
     });
 
+    it('should not be deletable by ml viewer user', async () => {
+      await deleteDatafeed(datafeedIdSpace1, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
+    });
+
     it('should delete datafeed with correct space', async () => {
       await deleteDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 200, idSpace1);
 
@@ -65,10 +69,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not delete datafeed with incorrect space', async () => {
       await deleteDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 404, idSpace2);
-    });
-
-    it('should not be deletable by ml viewer user', async () => {
-      await deleteDatafeed(datafeedIdSpace1, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
     });
   });
 };
