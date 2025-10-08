@@ -76,7 +76,7 @@ module.exports = (_, argv) => {
         'redux',
         'react-redux',
         'immer',
-        '@kbn/react-query',
+        '@tanstack/react-query',
         '@tanstack/react-query-devtools',
         'classnames',
         'fastest-levenshtein',
