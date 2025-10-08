@@ -165,13 +165,9 @@ export function UnifiedHistogramChart({
   });
 
   useEffect(() => {
-    const onAbort = () => {
-      onAbortTotalHits();
-    };
-
-    histogramProps.abortController?.signal.addEventListener('abort', onAbort);
+    histogramProps.abortController?.signal.addEventListener('abort', onAbortTotalHits);
     return () => {
-      histogramProps.abortController?.signal.removeEventListener('abort', onAbort);
+      histogramProps.abortController?.signal.removeEventListener('abort', onAbortTotalHits);
     };
   }, [histogramProps.abortController, onAbortTotalHits]);
 

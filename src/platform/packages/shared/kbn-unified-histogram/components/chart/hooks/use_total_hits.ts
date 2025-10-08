@@ -74,7 +74,7 @@ export const useTotalHits = ({
 
   const onAbort = useCallback(() => {
     abortController.current?.abort();
-  }, [abortController]);
+  }, []);
 
   return {
     onAbort,
