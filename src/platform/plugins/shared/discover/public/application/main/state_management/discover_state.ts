@@ -50,6 +50,7 @@ import {
 } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
+import { sendLoadingMsg } from '../hooks/use_saved_search_messages';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -213,6 +214,14 @@ export interface DiscoverStateContainer {
      * Updates the ES|QL query string
      */
     updateESQLQuery: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+
+    /**
+     * Triggered when the user changes the grouping of the cascade layout
+     */
+    onCascadeGroupingChange: (payload: {
+      query: AggregateQuery;
+      cascadeGrouping: string[];
+    }) => void;
   };
 }
 
@@ -560,6 +569,48 @@ export function getDiscoverStateContainer({
   };
 
   /**
+   * Triggered when user changes grouping in the cascade experience
+   */
+  const onCascadeGroupingChange = (({ query, cascadeGrouping }) => {
+    // Set documents loading to true immediately on state changes since there's a delay
+    // on the fetch and we don't want to see state changes reflected in the data cascade
+    // until the fetch is complete
+    sendLoadingMsg(
+      dataStateContainer.data$.documents$,
+      dataStateContainer.data$.documents$.getValue()
+    );
+
+    trackQueryFields(query);
+
+    const internalStateStore = internalState.getState();
+    const currentTabState = internalStateStore.tabs.byId[internalStateStore.tabs.unsafeCurrentId];
+
+    // if no grouping is selected, user has opted out of cascade view
+    // reset the cascade state in the store and return
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.setLayoutUiState)({
+        layoutUiState: {
+          ...(currentTabState.uiState?.layout ?? {}),
+          supportsCascade: Boolean(cascadeGrouping.length),
+        },
+      })
+    );
+
+    internalState.dispatch(
+      injectCurrentTab(internalStateActions.setCascadeUiState)({
+        cascadeUiState: {
+          availableCascadeGroups: currentTabState.uiState.cascade!.availableCascadeGroups,
+          selectedCascadeGroups: cascadeGrouping,
+        },
+      })
+    );
+
+    addLog('[getDiscoverStateContainer] onCascadeGroupingChange triggers data fetching');
+
+    dataStateContainer.fetch();
+  }) satisfies DiscoverStateContainer['actions']['onCascadeGroupingChange'];
+
+  /**
    * Function e.g. triggered when user changes data view in the sidebar
    */
   const onChangeDataView = async (dataViewId: string | DataView) => {
@@ -664,6 +715,7 @@ export function getDiscoverStateContainer({
       undoSavedSearchChanges,
       updateAdHocDataViewId,
       updateESQLQuery,
+      onCascadeGroupingChange,
     },
   };
 }

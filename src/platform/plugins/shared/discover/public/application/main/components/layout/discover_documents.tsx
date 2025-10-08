@@ -15,8 +15,6 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
-  EuiFilterButton,
-  EuiFilterGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -25,7 +23,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
@@ -85,7 +82,6 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { getESQLStatsQueryMeta } from './cascaded_documents';
 import {
   useGetDocumentViewRenderer,
   type DiscoverGridFlyoutProps,
@@ -173,12 +169,6 @@ function DiscoverDocumentsComponent({
   const isEmptyDataResult =
     isEsqlMode || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
-
-  // Determine the cascade groups from the query if it's of ESQL type
-  const cascadeGroups = useMemo(() => {
-    if (!isOfAggregateQueryType(query)) return [];
-    return getESQLStatsQueryMeta(query.esql).groupByFields.map((group) => group.field);
-  }, [query]);
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
     stateContainer,
@@ -357,15 +347,9 @@ function DiscoverDocumentsComponent({
     [dispatch, setDataGridUiState]
   );
 
-  const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
-
-  const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
-
-  // support cascade layout unless explicitly disabled
-  const supportsCascadeLayout = useMemo(
-    () => layoutUiState?.supportsCascade ?? true,
-    [layoutUiState]
-  );
+  const [cascadeConfig, supportsCascadeLayout] = useCurrentTabSelector((state) => {
+    return [state.uiState.cascade, state.uiState.layout?.supportsCascade ?? true];
+  });
 
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
   const cellRendererDensity = useMemo(
@@ -402,32 +386,6 @@ function DiscoverDocumentsComponent({
   }, [cellRendererParams, customCellRenderer, getCellRenderersAccessor]);
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
-
-  const renderCascadeLayoutCallout = useCallback(() => {
-    return !supportsCascadeLayout && Boolean(cascadeGroups?.length) ? (
-      <EuiFilterGroup compressed>
-        <EuiFilterButton
-          iconSide="left"
-          iconType="inspect"
-          color="text"
-          badgeColor="subdued"
-          onClick={() => {
-            dispatch(
-              setLayoutUiState({
-                layoutUiState: { supportsCascade: true },
-              })
-            );
-          }}
-          data-test-subj="discoverEnableCascadeLayoutSwitch"
-        >
-          <FormattedMessage
-            id="discover.enableCascadeLayoutSwitchLabel"
-            defaultMessage="Group By"
-          />
-        </EuiFilterButton>
-      </EuiFilterGroup>
-    ) : null;
-  }, [cascadeGroups?.length, dispatch, setLayoutUiState, supportsCascadeLayout]);
 
   const callouts = useMemo(
     () => (
@@ -552,8 +510,9 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             viewModeToggle={viewModeToggle}
-            cascadeGroups={supportsCascadeLayout ? cascadeGroups : null}
-            externalAdditionalControls={renderCascadeLayoutCallout()}
+            isCascadeLayoutEnabled={supportsCascadeLayout}
+            cascadeConfig={cascadeConfig}
+            onCascadeGroupingChange={stateContainer.actions.onCascadeGroupingChange}
           />
         </CellActionsProvider>
       </div>

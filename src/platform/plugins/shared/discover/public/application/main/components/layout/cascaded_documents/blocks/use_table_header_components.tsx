@@ -18,97 +18,107 @@ import {
 } from '@elastic/eui';
 import type { DataCascadeProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  useCurrentTabSelector,
-  internalStateActions,
-  useInternalStateDispatch,
-  useCurrentTabAction,
-} from '../../../../state_management/redux';
 import type { ESQLDataGroupNode, DataTableRecord } from './types';
 
 interface UseTableHeaderProps {
   viewModeToggle: React.ReactNode;
+  cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
 }
 
-export function useEsqlDataCascadeHeaderComponent({ viewModeToggle }: UseTableHeaderProps) {
-  const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
-  const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
-  const dispatch = useInternalStateDispatch();
+interface GroupBySelectorRendererProps {
+  width?: number;
+  cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
+}
 
+const NONE_GROUP_OPTION = 'none';
+
+/**
+ * Renders the "Group By" selector used in the data cascade header.
+ */
+export function useGetGroupBySelectorRenderer({
+  cascadeGroupingChangeHandler,
+  width = 300,
+}: GroupBySelectorRendererProps) {
   const [cascadeSelectOpen, setCascadeSelectOpen] = useState(false);
 
-  const disableCascadeSupport = useCallback(() => {
-    dispatch(
-      setLayoutUiState({
-        layoutUiState: {
-          ...layoutUiState,
-          supportsCascade: false,
-        },
-      })
-    );
-  }, [dispatch, layoutUiState, setLayoutUiState]);
+  return useCallback(
+    (availableColumns: string[], currentSelectedColumns: string[]) => (
+      <EuiPopover
+        isOpen={cascadeSelectOpen}
+        closePopover={() => setCascadeSelectOpen(false)}
+        panelPaddingSize="none"
+        button={
+          <EuiFilterGroup compressed>
+            <EuiFilterButton
+              iconSide="left"
+              iconType="inspect"
+              color="text"
+              badgeColor="subdued"
+              onClick={() => setCascadeSelectOpen(true)}
+              hasActiveFilters={true}
+              numFilters={currentSelectedColumns.length}
+              data-test-subj="discoverEnableCascadeLayoutSwitch"
+            >
+              <FormattedMessage
+                id="discover.enableCascadeLayoutSwitchLabel"
+                defaultMessage="Group By"
+              />
+            </EuiFilterButton>
+          </EuiFilterGroup>
+        }
+      >
+        <EuiSelectable
+          searchable={false}
+          listProps={{
+            isVirtualized: false,
+          }}
+          data-test-subj="discoverGroupBySelector"
+          options={[NONE_GROUP_OPTION].concat(availableColumns).map((field) => ({
+            label: field,
+            checked:
+              (field === NONE_GROUP_OPTION && !currentSelectedColumns.length) ||
+              currentSelectedColumns.includes(field)
+                ? 'on'
+                : undefined,
+          }))}
+          singleSelection="always"
+          onActiveOptionChange={(option) => {
+            if (option) {
+              cascadeGroupingChangeHandler([option.label].filter((o) => o !== NONE_GROUP_OPTION));
+            }
+
+            setCascadeSelectOpen(false);
+          }}
+        >
+          {(list) => <div style={{ width }}>{list}</div>}
+        </EuiSelectable>
+      </EuiPopover>
+    ),
+    [cascadeSelectOpen, cascadeGroupingChangeHandler, width]
+  );
+}
+
+export function useEsqlDataCascadeHeaderComponent({
+  viewModeToggle,
+  cascadeGroupingChangeHandler,
+}: UseTableHeaderProps) {
+  const groupBySelectorRenderer = useGetGroupBySelectorRenderer({
+    cascadeGroupingChangeHandler,
+  });
 
   return useCallback<
     NonNullable<DataCascadeProps<ESQLDataGroupNode, DataTableRecord>['customTableHeader']>
   >(
-    ({ currentSelectedColumns, availableColumns, onGroupSelection }) => {
+    ({ currentSelectedColumns, availableColumns }) => {
       return (
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>{viewModeToggle}</EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiPopover
-              isOpen={cascadeSelectOpen}
-              closePopover={() => setCascadeSelectOpen(false)}
-              panelPaddingSize="none"
-              button={
-                <EuiFilterGroup compressed>
-                  <EuiFilterButton
-                    iconSide="left"
-                    iconType="inspect"
-                    color="text"
-                    badgeColor="subdued"
-                    onClick={() => setCascadeSelectOpen(true)}
-                    hasActiveFilters={true}
-                    numFilters={currentSelectedColumns.length}
-                    data-test-subj="discoverEnableCascadeLayoutSwitch"
-                  >
-                    <FormattedMessage
-                      id="discover.enableCascadeLayoutSwitchLabel"
-                      defaultMessage="Group By"
-                    />
-                  </EuiFilterButton>
-                </EuiFilterGroup>
-              }
-            >
-              <EuiSelectable
-                searchable={false}
-                listProps={{
-                  isVirtualized: false,
-                }}
-                options={['none'].concat(availableColumns).map((field) => ({
-                  label: field,
-                  checked: currentSelectedColumns.includes(field) ? 'on' : undefined,
-                }))}
-                singleSelection="always"
-                onActiveOptionChange={(option) => {
-                  if (option) {
-                    if (option.label === 'none') {
-                      disableCascadeSupport();
-                    } else {
-                      onGroupSelection([option.label]);
-                    }
-                  }
-
-                  setCascadeSelectOpen(false);
-                }}
-              >
-                {(list) => <div style={{ width: 300 }}>{list}</div>}
-              </EuiSelectable>
-            </EuiPopover>
+            {groupBySelectorRenderer(availableColumns, currentSelectedColumns)}
           </EuiFlexItem>
         </EuiFlexGroup>
       );
     },
-    [cascadeSelectOpen, disableCascadeSupport, viewModeToggle]
+    [groupBySelectorRenderer, viewModeToggle]
   );
 }
