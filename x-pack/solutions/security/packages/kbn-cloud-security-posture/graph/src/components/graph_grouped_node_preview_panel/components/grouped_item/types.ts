@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+
 export interface BaseGroupedItemCommonFields {
   id?: string;
   /** raw timestamp */
@@ -34,13 +40,13 @@ export interface EntitySpecificFields extends BaseGroupedItemCommonFields {
 }
 
 export interface EventItem extends EventOrAlertSpecificFields {
-  itemType: 'event';
+  itemType: typeof DOCUMENT_TYPE_EVENT;
 }
 export interface AlertItem extends EventOrAlertSpecificFields {
-  itemType: 'alert';
+  itemType: typeof DOCUMENT_TYPE_ALERT;
 }
 export interface EntityItem extends EntitySpecificFields {
-  itemType: 'entity';
+  itemType: typeof DOCUMENT_TYPE_ENTITY;
   type?: string;
   subType?: string;
 }
