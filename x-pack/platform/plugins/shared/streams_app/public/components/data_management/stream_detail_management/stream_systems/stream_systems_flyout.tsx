@@ -58,7 +58,7 @@ export const StreamSystemsFlyout = ({
           <h2>
             <FormattedMessage
               id="xpack.streams.streamSystemsFlyout.title"
-              defaultMessage="Stream identification"
+              defaultMessage="Feature identification"
             />
           </h2>
         </EuiTitle>
