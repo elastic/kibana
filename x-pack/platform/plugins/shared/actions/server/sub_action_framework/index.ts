@@ -9,7 +9,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 
-import type { ActionTypeRegistry } from '../action_type_registry';
+import type { ConnectorTypeRegistry } from '../connector_type_registry';
 import { register } from './register';
 import type { SubActionConnectorType } from './types';
 import type { ActionTypeConfig, ActionTypeSecrets } from '../types';
@@ -19,7 +19,7 @@ export const createSubActionConnectorFramework = ({
   actionTypeRegistry,
   logger,
 }: {
-  actionTypeRegistry: PublicMethodsOf<ActionTypeRegistry>;
+  actionTypeRegistry: PublicMethodsOf<ConnectorTypeRegistry>;
   logger: Logger;
   actionsConfigUtils: ActionsConfigurationUtilities;
 }) => {

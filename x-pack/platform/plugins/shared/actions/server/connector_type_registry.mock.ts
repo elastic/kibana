@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ActionTypeRegistryContract } from './types';
+import type { ConnectorTypeRegistryContract } from './types';
 
-const createActionTypeRegistryMock = () => {
-  const mocked: jest.Mocked<ActionTypeRegistryContract> = {
+const createConnectorTypeRegistryMock = () => {
+  const mocked: jest.Mocked<ConnectorTypeRegistryContract> = {
     has: jest.fn(),
     register: jest.fn(),
     get: jest.fn(),
@@ -25,6 +25,6 @@ const createActionTypeRegistryMock = () => {
   return mocked;
 };
 
-export const actionTypeRegistryMock = {
-  create: createActionTypeRegistryMock,
+export const connectorTypeRegistryMock = {
+  create: createConnectorTypeRegistryMock,
 };

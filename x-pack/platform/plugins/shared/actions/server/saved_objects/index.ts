@@ -19,7 +19,7 @@ import { getActionTaskParamsMigrations } from './action_task_params_migrations';
 import type { InMemoryConnector, RawAction } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { transformConnectorsForExport } from './transform_connectors_for_export';
-import type { ActionTypeRegistry } from '../action_type_registry';
+import type { ConnectorTypeRegistry } from '../connector_type_registry';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
@@ -34,7 +34,7 @@ import {
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-  actionTypeRegistry: ActionTypeRegistry,
+  connectorTypeRegistry: ConnectorTypeRegistry,
   taskManagerIndex: string,
   inMemoryConnectors: InMemoryConnector[]
 ) {
@@ -57,7 +57,7 @@ export function setupSavedObjects(
         context: SavedObjectsExportTransformContext,
         objects: Array<SavedObject<RawAction>>
       ) {
-        return transformConnectorsForExport(objects, actionTypeRegistry);
+        return transformConnectorsForExport(objects, connectorTypeRegistry);
       },
       onImport(connectors) {
         return {

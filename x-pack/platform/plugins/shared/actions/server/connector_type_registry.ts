@@ -16,14 +16,14 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import type { TaskRunnerFactory, ILicenseState, ActionExecutionSourceType } from './lib';
 import { getActionTypeFeatureUsageName } from './lib';
 import type {
-  ActionType,
+  ActionType as ConnectorType,
   InMemoryConnector,
-  ActionTypeConfig,
-  ActionTypeSecrets,
-  ActionTypeParams,
+  ActionTypeConfig as ConnectorTypeConfig,
+  ActionTypeSecrets as ConnectorTypeSecrets,
+  ActionTypeParams as ConnectorTypeParams,
 } from './types';
 
-export interface ActionTypeRegistryOpts {
+export interface ConnectorTypeRegistryOpts {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   taskRunnerFactory: TaskRunnerFactory;
@@ -32,16 +32,16 @@ export interface ActionTypeRegistryOpts {
   inMemoryConnectors: InMemoryConnector[];
 }
 
-export class ActionTypeRegistry {
+export class ConnectorTypeRegistry {
   private readonly taskManager: TaskManagerSetupContract;
-  private readonly actionTypes: Map<string, ActionType> = new Map();
+  private readonly connectorTypes: Map<string, ConnectorType> = new Map();
   private readonly taskRunnerFactory: TaskRunnerFactory;
   private readonly actionsConfigUtils: ActionsConfigurationUtilities;
   private readonly licenseState: ILicenseState;
   private readonly inMemoryConnectors: InMemoryConnector[];
   private readonly licensing: LicensingPluginSetup;
 
-  constructor(constructorParams: ActionTypeRegistryOpts) {
+  constructor(constructorParams: ConnectorTypeRegistryOpts) {
     this.taskManager = constructorParams.taskManager;
     this.taskRunnerFactory = constructorParams.taskRunnerFactory;
     this.actionsConfigUtils = constructorParams.actionsConfigUtils;
@@ -51,14 +51,14 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns if the action type registry has the given action type registered
+   * Returns if the connector type registry has the given connector type registered
    */
   public has(id: string) {
-    return this.actionTypes.has(id);
+    return this.connectorTypes.has(id);
   }
 
   /**
-   * Throws error if action type is not enabled.
+   * Throws error if connector type is not enabled.
    */
   public ensureActionTypeEnabled(id: string) {
     this.actionsConfigUtils.ensureActionTypeEnabled(id);
@@ -68,7 +68,7 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns true if action type is enabled in the config and a valid license is used.
+   * Returns true if connector type is enabled in the config and a valid license is used.
    */
   public isActionTypeEnabled(
     id: string,
@@ -81,112 +81,112 @@ export class ActionTypeRegistry {
   }
 
   /**
-   * Returns true if action type is enabled or preconfigured.
-   * An action type can be disabled but used with a preconfigured action.
-   * This does not apply to system actions as those can be disabled.
+   * Returns true if connector type is enabled or preconfigured.
+   * A connector type can be disabled but used with a preconfigured connector.
+   * This does not apply to system connectors as those can be disabled.
    */
   public isActionExecutable(
     actionId: string,
-    actionTypeId: string,
+    connectorTypeId: string,
     options: { notifyUsage: boolean } = { notifyUsage: false }
   ) {
     const validLicense = this.licenseState.isLicenseValidForActionType(
-      this.get(actionTypeId),
+      this.get(connectorTypeId),
       options
     ).isValid;
     if (validLicense === false) return false;
 
-    const actionTypeEnabled = this.isActionTypeEnabled(actionTypeId, options);
+    const connectorTypeEnabled = this.isActionTypeEnabled(connectorTypeId, options);
     const inMemoryConnector = this.inMemoryConnectors.find(
       (connector) => connector.id === actionId
     );
 
     return (
-      actionTypeEnabled ||
-      (!actionTypeEnabled &&
+      connectorTypeEnabled ||
+      (!connectorTypeEnabled &&
         (inMemoryConnector?.isPreconfigured === true || inMemoryConnector?.isSystemAction === true))
     );
   }
 
   /**
-   * Returns true if the action type is a system action type
+   * Returns true if the connector type is a system connector type
    */
-  public isSystemActionType = (actionTypeId: string): boolean =>
-    Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
+  public isSystemActionType = (connectorTypeId: string): boolean =>
+    Boolean(this.connectorTypes.get(connectorTypeId)?.isSystemActionType);
 
   /**
    * Returns true if the connector type has a sub-feature type defined
    */
-  public hasSubFeature = (actionTypeId: string): boolean =>
-    Boolean(this.actionTypes.get(actionTypeId)?.subFeature);
+  public hasSubFeature = (connectorTypeId: string): boolean =>
+    Boolean(this.connectorTypes.get(connectorTypeId)?.subFeature);
 
   /**
    * Returns the kibana privileges
    */
-  public getActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
-    actionTypeId: string,
+  public getActionKibanaPrivileges<Params extends ConnectorTypeParams = ConnectorTypeParams>(
+    connectorTypeId: string,
     params?: Params,
     source?: ActionExecutionSourceType
   ): string[] {
-    const actionType = this.actionTypes.get(actionTypeId);
+    const connectorType = this.connectorTypes.get(connectorTypeId);
 
-    if (!actionType?.isSystemActionType && !actionType?.subFeature) {
+    if (!connectorType?.isSystemActionType && !connectorType?.subFeature) {
       return [];
     }
-    return actionType?.getKibanaPrivileges?.({ params, source }) ?? [];
+    return connectorType?.getKibanaPrivileges?.({ params, source }) ?? [];
   }
 
   /**
    * Registers an action type to the action type registry
    */
   public register<
-    Config extends ActionTypeConfig = ActionTypeConfig,
-    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-    Params extends ActionTypeParams = ActionTypeParams,
+    Config extends ConnectorTypeConfig = ConnectorTypeConfig,
+    Secrets extends ConnectorTypeSecrets = ConnectorTypeSecrets,
+    Params extends ConnectorTypeParams = ConnectorTypeParams,
     ExecutorResultData = void
-  >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>) {
-    if (this.has(actionType.id)) {
+  >(connectorType: ConnectorType<Config, Secrets, Params, ExecutorResultData>) {
+    if (this.has(connectorType.id)) {
       throw new Error(
         i18n.translate(
           'xpack.actions.actionTypeRegistry.register.duplicateActionTypeErrorMessage',
           {
             defaultMessage: 'Action type "{id}" is already registered.',
             values: {
-              id: actionType.id,
+              id: connectorType.id,
             },
           }
         )
       );
     }
 
-    if (!actionType.supportedFeatureIds || actionType.supportedFeatureIds.length === 0) {
+    if (!connectorType.supportedFeatureIds || connectorType.supportedFeatureIds.length === 0) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.missingSupportedFeatureIds', {
           defaultMessage:
             'At least one "supportedFeatureId" value must be supplied for connector type "{connectorTypeId}".',
           values: {
-            connectorTypeId: actionType.id,
+            connectorTypeId: connectorType.id,
           },
         })
       );
     }
 
-    if (!areValidFeatures(actionType.supportedFeatureIds)) {
+    if (!areValidFeatures(connectorType.supportedFeatureIds)) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidConnectorFeatureIds', {
           defaultMessage: 'Invalid feature ids "{ids}" for connector type "{connectorTypeId}".',
           values: {
-            connectorTypeId: actionType.id,
-            ids: actionType.supportedFeatureIds.join(','),
+            connectorTypeId: connectorType.id,
+            ids: connectorType.supportedFeatureIds.join(','),
           },
         })
       );
     }
 
     if (
-      !actionType.isSystemActionType &&
-      !actionType.subFeature &&
-      actionType.getKibanaPrivileges
+      !connectorType.isSystemActionType &&
+      !connectorType.subFeature &&
+      connectorType.getKibanaPrivileges
     ) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
@@ -197,24 +197,24 @@ export class ActionTypeRegistry {
     }
 
     const maxAttempts = this.actionsConfigUtils.getMaxAttempts({
-      actionTypeId: actionType.id,
-      actionTypeMaxAttempts: actionType.maxAttempts,
+      actionTypeId: connectorType.id,
+      actionTypeMaxAttempts: connectorType.maxAttempts,
     });
 
-    this.actionTypes.set(actionType.id, { ...actionType } as unknown as ActionType);
+    this.connectorTypes.set(connectorType.id, { ...connectorType } as unknown as ConnectorType);
     this.taskManager.registerTaskDefinitions({
-      [`actions:${actionType.id}`]: {
-        title: actionType.name,
+      [`actions:${connectorType.id}`]: {
+        title: connectorType.name,
         maxAttempts,
         cost: TaskCost.Tiny,
         createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
     // No need to notify usage on basic action types
-    if (actionType.minimumLicenseRequired !== 'basic') {
+    if (connectorType.minimumLicenseRequired !== 'basic') {
       this.licensing.featureUsage.register(
-        getActionTypeFeatureUsageName(actionType as unknown as ActionType),
-        actionType.minimumLicenseRequired
+        getActionTypeFeatureUsageName(connectorType as unknown as ConnectorType),
+        connectorType.minimumLicenseRequired
       );
     }
   }
@@ -223,11 +223,11 @@ export class ActionTypeRegistry {
    * Returns an action type, throws if not registered
    */
   public get<
-    Config extends ActionTypeConfig = ActionTypeConfig,
-    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-    Params extends ActionTypeParams = ActionTypeParams,
+    Config extends ConnectorTypeConfig = ConnectorTypeConfig,
+    Secrets extends ConnectorTypeSecrets = ConnectorTypeSecrets,
+    Params extends ConnectorTypeParams = ConnectorTypeParams,
     ExecutorResultData = void
-  >(id: string): ActionType<Config, Secrets, Params, ExecutorResultData> {
+  >(id: string): ConnectorType<Config, Secrets, Params, ExecutorResultData> {
     if (!this.has(id)) {
       throw Boom.badRequest(
         i18n.translate('xpack.actions.actionTypeRegistry.get.missingActionTypeErrorMessage', {
@@ -238,27 +238,32 @@ export class ActionTypeRegistry {
         })
       );
     }
-    return this.actionTypes.get(id)! as ActionType<Config, Secrets, Params, ExecutorResultData>;
+    return this.connectorTypes.get(id)! as ConnectorType<
+      Config,
+      Secrets,
+      Params,
+      ExecutorResultData
+    >;
   }
 
   /**
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(featureId?: string): CommonActionType[] {
-    return Array.from(this.actionTypes)
-      .filter(([_, actionType]) => {
-        return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
+    return Array.from(this.connectorTypes)
+      .filter(([_, connectorType]) => {
+        return featureId ? connectorType.supportedFeatureIds.includes(featureId) : true;
       })
-      .map(([actionTypeId, actionType]) => ({
-        id: actionTypeId,
-        name: actionType.name,
-        minimumLicenseRequired: actionType.minimumLicenseRequired,
-        enabled: this.isActionTypeEnabled(actionTypeId),
-        enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-        enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-        supportedFeatureIds: actionType.supportedFeatureIds,
-        isSystemActionType: !!actionType.isSystemActionType,
-        subFeature: actionType.subFeature,
+      .map(([connectorTypeId, connectorType]) => ({
+        id: connectorTypeId,
+        name: connectorType.name,
+        minimumLicenseRequired: connectorType.minimumLicenseRequired,
+        enabled: this.isActionTypeEnabled(connectorTypeId),
+        enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(connectorTypeId),
+        enabledInLicense: !!this.licenseState.isLicenseValidForActionType(connectorType).isValid,
+        supportedFeatureIds: connectorType.supportedFeatureIds,
+        isSystemActionType: !!connectorType.isSystemActionType,
+        subFeature: connectorType.subFeature,
       }));
   }
 

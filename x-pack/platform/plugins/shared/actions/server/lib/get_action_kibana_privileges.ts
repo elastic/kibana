@@ -17,9 +17,9 @@ export function getActionKibanaPrivileges(
 ) {
   const additionalPrivileges =
     actionTypeId &&
-    (context.actionTypeRegistry.isSystemActionType(actionTypeId) ||
-      context.actionTypeRegistry.hasSubFeature(actionTypeId))
-      ? context.actionTypeRegistry.getActionKibanaPrivileges(actionTypeId, params, source)
+    (context.connectorTypeRegistry.isSystemActionType(actionTypeId) ||
+      context.connectorTypeRegistry.hasSubFeature(actionTypeId))
+      ? context.connectorTypeRegistry.getActionKibanaPrivileges(actionTypeId, params, source)
       : [];
 
   return additionalPrivileges;

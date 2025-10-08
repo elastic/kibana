@@ -62,8 +62,8 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     await context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
   const { actionTypeId } = attributes;
   const { name, config, secrets } = action;
-  const actionType = context.actionTypeRegistry.get(actionTypeId);
-  const configurationUtilities = context.actionTypeRegistry.getUtils();
+  const actionType = context.connectorTypeRegistry.get(actionTypeId);
+  const configurationUtilities = context.connectorTypeRegistry.getUtils();
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
   });
@@ -74,7 +74,7 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     validateConnector(actionType, { config, secrets });
   }
 
-  context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  context.connectorTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
   const hookServices: HookServices = {
     scopedClusterClient: context.scopedClusterClient,

@@ -48,7 +48,7 @@ import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
 import { ActionsClient } from './actions_client/actions_client';
-import { ActionTypeRegistry } from './action_type_registry';
+import { ConnectorTypeRegistry } from './connector_type_registry';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
 import type { ILicenseState } from './lib';
@@ -146,7 +146,7 @@ export interface PluginStartContract {
     options?: { notifyUsage: boolean }
   ): boolean;
 
-  getAllTypes: ActionTypeRegistry['getAllTypes'];
+  getAllTypes: ConnectorTypeRegistry['getAllTypes'];
 
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
 
@@ -204,7 +204,7 @@ export class ActionsPlugin
   private readonly logger: Logger;
   private readonly actionsConfig: ActionsConfig;
   private taskRunnerFactory?: TaskRunnerFactory;
-  private actionTypeRegistry?: ActionTypeRegistry;
+  private connectorTypeRegistry?: ConnectorTypeRegistry;
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
@@ -282,7 +282,7 @@ export class ActionsPlugin
       }
     }
 
-    const actionTypeRegistry = new ActionTypeRegistry({
+    const connectorTypeRegistry = new ConnectorTypeRegistry({
       licensing: plugins.licensing,
       taskRunnerFactory,
       taskManager: plugins.taskManager,
@@ -291,14 +291,14 @@ export class ActionsPlugin
       inMemoryConnectors: this.inMemoryConnectors,
     });
     this.taskRunnerFactory = taskRunnerFactory;
-    this.actionTypeRegistry = actionTypeRegistry;
+    this.connectorTypeRegistry = connectorTypeRegistry;
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
 
     setupSavedObjects(
       core.savedObjects,
       plugins.encryptedSavedObjects,
-      this.actionTypeRegistry!,
+      this.connectorTypeRegistry!,
       plugins.taskManager.index,
       this.inMemoryConnectors
     );
@@ -352,7 +352,7 @@ export class ActionsPlugin
     }
 
     const subActionFramework = createSubActionConnectorFramework({
-      actionTypeRegistry,
+      actionTypeRegistry: connectorTypeRegistry,
       logger: this.logger,
       actionsConfigUtils,
     });
@@ -375,7 +375,7 @@ export class ActionsPlugin
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         ensureSufficientLicense(actionType);
-        actionTypeRegistry.register(actionType);
+        connectorTypeRegistry.register(actionType);
       },
       registerSubActionConnectorType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
@@ -414,7 +414,7 @@ export class ActionsPlugin
         }
       },
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
-        return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
+        return this.connectorTypeRegistry!.isActionTypeEnabled(id, options);
       },
     };
   }
@@ -424,7 +424,7 @@ export class ActionsPlugin
       logger,
       licenseState,
       actionExecutor,
-      actionTypeRegistry,
+      connectorTypeRegistry,
       taskRunnerFactory,
       isESOCanEncrypt,
       instantiateAuthorization,
@@ -470,7 +470,7 @@ export class ActionsPlugin
       return new ActionsClient({
         logger,
         unsecuredSavedObjectsClient,
-        actionTypeRegistry: actionTypeRegistry!,
+        actionTypeRegistry: connectorTypeRegistry!,
         kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
@@ -479,7 +479,7 @@ export class ActionsPlugin
         actionExecutor: actionExecutor!,
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
-          actionTypeRegistry: actionTypeRegistry!,
+          actionTypeRegistry: connectorTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
@@ -509,7 +509,7 @@ export class ActionsPlugin
         clusterClient: core.elasticsearch.client,
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
-          connectorTypeRegistry: actionTypeRegistry!,
+          connectorTypeRegistry: connectorTypeRegistry!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
         }),
@@ -563,7 +563,7 @@ export class ActionsPlugin
         () => this.getUnsecuredSavedObjectsClientWithFakeRequest(core.savedObjects)
       ),
       encryptedSavedObjectsClient,
-      actionTypeRegistry: actionTypeRegistry!,
+      actionTypeRegistry: connectorTypeRegistry!,
       inMemoryConnectors: this.inMemoryConnectors,
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
@@ -573,7 +573,7 @@ export class ActionsPlugin
 
     taskRunnerFactory!.initialize({
       logger,
-      actionTypeRegistry: actionTypeRegistry!,
+      actionTypeRegistry: connectorTypeRegistry!,
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
@@ -601,16 +601,16 @@ export class ActionsPlugin
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
-        return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
+        return this.connectorTypeRegistry!.isActionTypeEnabled(id, options);
       },
       isActionExecutable: (
         actionId: string,
         actionTypeId: string,
         options = { notifyUsage: false }
       ) => {
-        return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
+        return this.connectorTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
-      getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
+      getAllTypes: connectorTypeRegistry!.getAllTypes.bind(connectorTypeRegistry),
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
@@ -618,7 +618,7 @@ export class ActionsPlugin
       getUnsecuredActionsClient,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
-        renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),
+        renderActionParameterTemplates(this.logger, connectorTypeRegistry, ...args),
       isSystemActionConnector: (connectorId: string): boolean => {
         return this.inMemoryConnectors.some(
           (inMemoryConnector) =>
@@ -703,14 +703,14 @@ export class ActionsPlugin
   private getInMemoryConnectors = () => this.inMemoryConnectors;
 
   private setSystemActions = () => {
-    const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
+    const systemConnectors = createSystemConnectors(this.connectorTypeRegistry?.list() ?? []);
     this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
   };
 
   private throwIfSystemActionsInConfig = () => {
     const hasSystemActionAsPreconfiguredInConfig = this.inMemoryConnectors
       .filter((connector) => connector.isPreconfigured)
-      .some((connector) => this.actionTypeRegistry!.isSystemActionType(connector.actionTypeId));
+      .some((connector) => this.connectorTypeRegistry!.isSystemActionType(connector.actionTypeId));
 
     if (hasSystemActionAsPreconfiguredInConfig) {
       throw new Error('Setting system action types in preconfigured connectors are not allowed');
@@ -722,7 +722,7 @@ export class ActionsPlugin
     actionsConfigUtils: ActionsConfigurationUtilities
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
-      actionTypeRegistry,
+      connectorTypeRegistry,
       isESOCanEncrypt,
       getInMemoryConnectors,
       actionExecutor,
@@ -753,7 +753,7 @@ export class ActionsPlugin
           return new ActionsClient({
             logger,
             unsecuredSavedObjectsClient,
-            actionTypeRegistry: actionTypeRegistry!,
+            actionTypeRegistry: connectorTypeRegistry!,
             kibanaIndices: savedObjects.getAllIndices(),
             scopedClusterClient: coreContext.elasticsearch.client,
             inMemoryConnectors,
@@ -762,7 +762,7 @@ export class ActionsPlugin
             actionExecutor: actionExecutor!,
             bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
               taskManager,
-              actionTypeRegistry: actionTypeRegistry!,
+              actionTypeRegistry: connectorTypeRegistry!,
               isESOCanEncrypt: isESOCanEncrypt!,
               inMemoryConnectors,
               configurationUtilities: actionsConfigUtils,
@@ -782,7 +782,7 @@ export class ActionsPlugin
             },
           });
         },
-        listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),
+        listTypes: connectorTypeRegistry!.list.bind(connectorTypeRegistry!),
       };
     };
   };
@@ -795,7 +795,7 @@ export class ActionsPlugin
     ) {
       this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
         // Throws error if action type doesn't exist
-        this.actionTypeRegistry?.get(connectorType);
+        this.connectorTypeRegistry?.get(connectorType);
       });
     }
   };
@@ -809,13 +809,13 @@ export class ActionsPlugin
 
 export function renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
   logger: Logger,
-  actionTypeRegistry: ActionTypeRegistry | undefined,
+  connectorTypeRegistry: ConnectorTypeRegistry | undefined,
   actionTypeId: string,
   actionId: string,
   params: Params,
   variables: Record<string, unknown>
 ): Params {
-  const actionType = actionTypeRegistry?.get(actionTypeId);
+  const actionType = connectorTypeRegistry?.get(actionTypeId);
   if (actionType?.renderParameterTemplates) {
     return actionType.renderParameterTemplates(logger, params, variables, actionId) as Params;
   } else {

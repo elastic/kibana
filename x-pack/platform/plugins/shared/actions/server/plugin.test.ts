@@ -18,7 +18,11 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
-import type { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
+import type {
+  ActionType as ConnectorType,
+  ActionsApiRequestHandlerContext,
+  ExecutorType,
+} from './types';
 import type { ActionsConfig } from './config';
 import type { ActionsPluginsSetup, ActionsPluginsStart, PluginSetupContract } from './plugin';
 import { ActionsPlugin } from './plugin';
@@ -279,7 +283,7 @@ describe('Actions Plugin', () => {
 
     describe('registerType()', () => {
       let setup: PluginSetupContract;
-      const sampleActionType: ActionType = {
+      const sampleConnectorType: ConnectorType = {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
@@ -303,7 +307,7 @@ describe('Actions Plugin', () => {
       it('should throw error when license type is invalid', async () => {
         expect(() =>
           setup.registerType({
-            ...sampleActionType,
+            ...sampleConnectorType,
             // we're faking an invalid value, this requires stripping the typing
 
             minimumLicenseRequired: 'foo' as any,
@@ -314,7 +318,7 @@ describe('Actions Plugin', () => {
       it('should throw error when license type is less than gold', async () => {
         expect(() =>
           setup.registerType({
-            ...sampleActionType,
+            ...sampleConnectorType,
             minimumLicenseRequired: 'basic',
           })
         ).toThrowErrorMatchingInlineSnapshot(
@@ -324,14 +328,14 @@ describe('Actions Plugin', () => {
 
       it('should not throw when license type is gold', async () => {
         setup.registerType({
-          ...sampleActionType,
+          ...sampleConnectorType,
           minimumLicenseRequired: 'gold',
         });
       });
 
       it('should not throw when license type is higher than gold', async () => {
         setup.registerType({
-          ...sampleActionType,
+          ...sampleConnectorType,
           minimumLicenseRequired: 'platinum',
         });
       });

@@ -44,7 +44,7 @@ export async function create({
   );
 
   if (
-    context.actionTypeRegistry.isSystemActionType(actionTypeId) ||
+    context.connectorTypeRegistry.isSystemActionType(actionTypeId) ||
     foundInMemoryConnector?.isSystemAction
   ) {
     throw Boom.badRequest(
@@ -68,8 +68,8 @@ export async function create({
     );
   }
 
-  const actionType = context.actionTypeRegistry.get(actionTypeId);
-  const configurationUtilities = context.actionTypeRegistry.getUtils();
+  const actionType = context.connectorTypeRegistry.get(actionTypeId);
+  const configurationUtilities = context.connectorTypeRegistry.getUtils();
   const validatedActionTypeConfig = validateConfig(actionType, config, {
     configurationUtilities,
   });
@@ -79,7 +79,7 @@ export async function create({
   if (actionType.validate?.connector) {
     validateConnector(actionType, { config, secrets });
   }
-  context.actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
+  context.connectorTypeRegistry.ensureActionTypeEnabled(actionTypeId);
 
   const hookServices: HookServices = {
     scopedClusterClient: context.scopedClusterClient,
