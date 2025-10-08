@@ -9,17 +9,17 @@ const getLatestTimeStamp = (reduceSeconds: number) => {
 };
 
 export const timeSeriesDataStreamTutorialCommands: string = `# Welcome to the tutorial on setting up time series data! 🎉
-# 🚀 This tutorial will guide you through setting up timeseries data stream, ingest sample data and run a query from the Kibana dev Console.
+# 🚀 This tutorial will guide you through setting up timeseries data stream, ingest sample data and run a query from the Kibana Console.
 # After selecting a command, execute it by clicking the ▶️ button or pressing Ctrl+Enter or Cmd+Enter.
 # A time series data stream (TSDS) stores timestamped data and one or more metrics data in real time. TSDS helps to store data at regular interval which can then used to real time monitoring.
 # -----------------------------------------------
 # Step 1: Create an index template
-# Requirement in matching index template:
-#  * a "data_stream" object
+# Requirements in matching index template:
+#  * A "data_stream" object
 #  * index.mode field set as "time_series"
-#  * Atleast one timestamp field with type date
+#  * At least one timestamp field with type date
 #  * One or more dimension fields
-#  * one or more metric fields
+#  * One or more metric fields
 # -----------------------------------------------
 POST _index_template/kibana_sample_weather_index_template
 {

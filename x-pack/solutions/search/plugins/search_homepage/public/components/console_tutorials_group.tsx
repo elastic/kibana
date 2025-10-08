@@ -61,12 +61,12 @@ export const ConsoleTutorialsGroup = () => {
     },
     {
       title: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsTitle', {
-        defaultMessage: 'Time Series Data stream',
+        defaultMessage: 'Time Series Data streams',
       }),
       dataTestSubj: 'console_tutorials_tsds',
       description: i18n.translate('xpack.searchHomepage.consoleTutorials.tsdsDescription', {
         defaultMessage:
-          'Learn how to use time series data stream (TSDS) to store timestamped metrics data.',
+          'Learn how to use a time series data stream (TSDS) to store timestamped metrics data.',
       }),
       request: consoleTutorials.timeSeriesDataStreams,
       duration: 3,
