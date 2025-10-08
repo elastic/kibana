@@ -6,57 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  DEFAULT_OPENAI_MODEL,
-  OpenAiProviderType,
-  ReasoningEffort,
-  ReasoningSummary,
-} from './constants';
+import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
 export const TelemtryMetadataSchema = schema.object({
   pluginId: schema.maybe(schema.string()),
   aggregateBy: schema.maybe(schema.string()),
 });
 
-export const ReasoningEffortSchema = schema.maybe(
-  schema.oneOf(
-    [
-      schema.literal(ReasoningEffort.MINIMAL),
-      schema.literal(ReasoningEffort.LOW),
-      schema.literal(ReasoningEffort.MEDIUM),
-      schema.literal(ReasoningEffort.HIGH),
-    ],
-    { defaultValue: ReasoningEffort.MEDIUM }
-  )
-);
-
-export const ReasoningSummarySchema = schema.maybe(
-  schema.oneOf(
-    [
-      schema.literal(ReasoningSummary.AUTO),
-      schema.literal(ReasoningSummary.CONCISE),
-      schema.literal(ReasoningSummary.DETAILED),
-    ],
-    {
-      defaultValue: ReasoningSummary.AUTO,
-    }
-  )
-);
-
-const AdvancedReasoningSchema = schema.maybe(schema.boolean({ defaultValue: false }));
-
 // Connector schema
 export const ConfigSchema = schema.oneOf([
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
     apiUrl: schema.string(),
-    defaultModel: schema.maybe(schema.string()),
-    temperature: schema.maybe(schema.number()),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     contextWindowLength: schema.maybe(schema.number({})),
-    advancedReasoning: AdvancedReasoningSchema,
-    reasoningEffort: ReasoningEffortSchema,
-    reasoningSummary: ReasoningSummarySchema,
   }),
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
@@ -67,9 +30,6 @@ export const ConfigSchema = schema.oneOf([
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     contextWindowLength: schema.maybe(schema.number({})),
     temperature: schema.maybe(schema.number()),
-    advancedReasoning: AdvancedReasoningSchema,
-    reasoningEffort: ReasoningEffortSchema,
-    reasoningSummary: ReasoningSummarySchema,
   }),
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.Other)]),
@@ -84,9 +44,6 @@ export const ConfigSchema = schema.oneOf([
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     contextWindowLength: schema.maybe(schema.number({})),
     enableNativeFunctionCalling: schema.maybe(schema.boolean()),
-    advancedReasoning: AdvancedReasoningSchema,
-    reasoningEffort: ReasoningEffortSchema,
-    reasoningSummary: ReasoningSummarySchema,
     temperature: schema.maybe(schema.number()),
   }),
 ]);
@@ -214,9 +171,6 @@ export const InvokeAIActionParamsSchema = schema.object({
   ),
   temperature: schema.maybe(schema.number()),
   response_format: schema.maybe(schema.any()),
-  advancedReasoning: AdvancedReasoningSchema,
-  reasoningEffort: ReasoningEffortSchema,
-  reasoningSummary: ReasoningSummarySchema,
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
@@ -225,15 +179,16 @@ export const InvokeAIActionParamsSchema = schema.object({
 
 export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
-  usage: schema.maybe(schema.any()),
-  // usage: schema.maybe(schema.object(
-  //   {
-  //     prompt_tokens: schema.number(),
-  //     completion_tokens: schema.number(),
-  //     total_tokens: schema.number(),
-  //   },
-  //   { unknowns: 'ignore' }
-  // )),
+  usage: schema.maybe(
+    schema.object(
+      {
+        prompt_tokens: schema.number(),
+        completion_tokens: schema.number(),
+        total_tokens: schema.number(),
+      },
+      { unknowns: 'ignore' }
+    )
+  ),
 });
 
 // Execute action schema
@@ -254,15 +209,14 @@ export const RunActionResponseSchema = schema.object(
     object: schema.maybe(schema.string()),
     created: schema.maybe(schema.number()),
     model: schema.maybe(schema.string()),
-    usage: schema.maybe(schema.any()),
-    // usage: schema.object(
-    //   {
-    //     prompt_tokens: schema.number(),
-    //     completion_tokens: schema.number(),
-    //     total_tokens: schema.number(),
-    //   },
-    //   { unknowns: 'ignore' }
-    // ),
+    usage: schema.object(
+      {
+        prompt_tokens: schema.number(),
+        completion_tokens: schema.number(),
+        total_tokens: schema.number(),
+      },
+      { unknowns: 'ignore' }
+    ),
     choices: schema.maybe(
       schema.arrayOf(
         schema.object(
@@ -283,7 +237,7 @@ export const RunActionResponseSchema = schema.object(
       )
     ),
   },
-  { unknowns: 'allow' }
+  { unknowns: 'ignore' }
 );
 
 // Run action schema

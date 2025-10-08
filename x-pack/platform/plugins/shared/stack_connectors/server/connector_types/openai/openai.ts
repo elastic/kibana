@@ -68,30 +68,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   private headers: Record<string, string>;
   private sslOverrides?: SSLSettings;
 
-  /**
-   * Applies reasoning effort configuration to request body and removes temperature if needed
-   */
-  private applyReasoningEffortConfig(
-    requestBody: any,
-    advancedReasoning?: boolean,
-    reasoningEffort?: string,
-    reasoningSummary?: string,
-    url: string
-  ): void {
-    advancedReasoning = advancedReasoning ?? this.config.advancedReasoning ?? false;
-    const effort = reasoningEffort ?? this.config.reasoningEffort ?? 'medium';
-    const summary = reasoningSummary ?? this.config.reasoningSummary ?? 'auto';
-
-    if (advancedReasoning) {
-      if (url.includes('/chat/completions')) {
-        requestBody.reasoning_effort = effort;
-      } else {
-        requestBody.reasoning = { effort, summary };
-      }
-      delete requestBody.temperature;
-    }
-  }
-
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
     this.url = this.config.apiUrl;
@@ -263,35 +239,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   ): Promise<RunActionResponse> {
     const parentSpan = trace.getActiveSpan();
 
-    console.error('this', this.config);
-
-    let sanitizedBody = sanitizeRequest(
+    const sanitizedBody = sanitizeRequest(
       this.provider,
       this.url,
       body,
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
-
-    if (this.config.defaultModel) {
-      const parsedBody = JSON.parse(sanitizedBody);
-      parsedBody.model = parsedBody.model || this.config.defaultModel;
-      sanitizedBody = JSON.stringify(parsedBody);
-    }
-
-    // Apply reasoning effort configuration if needed
-    if (this.config.advancedReasoning) {
-      const parsedBody = JSON.parse(sanitizedBody);
-      this.applyReasoningEffortConfig(
-        parsedBody,
-        this.config.advancedReasoning,
-        this.config.reasoningEffort,
-        this.config.reasoningSummary,
-        this.url
-      );
-      sanitizedBody = JSON.stringify(parsedBody);
-    }
-
-    console.error('body', sanitizedBody);
 
     parentSpan?.setAttribute('openai.raw_request', sanitizedBody);
 
@@ -342,26 +295,13 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   ): Promise<RunActionResponse> {
     const parentSpan = trace.getActiveSpan();
 
-    let executeBody = getRequestWithStreamOption(
+    const executeBody = getRequestWithStreamOption(
       this.provider,
       this.url,
       body,
       stream,
       ...('defaultModel' in this.config ? [this.config.defaultModel] : [])
     );
-
-    // Apply reasoning effort configuration if needed
-    if (this.config.advancedReasoning) {
-      const parsedBody = JSON.parse(executeBody);
-      this.applyReasoningEffortConfig(
-        parsedBody,
-        this.config.advancedReasoning,
-        this.config.reasoningEffort,
-        this.config.reasoningSummary,
-        this.url
-      );
-      executeBody = JSON.stringify(parsedBody);
-    }
 
     parentSpan?.setAttribute('openai.raw_request', executeBody);
 
