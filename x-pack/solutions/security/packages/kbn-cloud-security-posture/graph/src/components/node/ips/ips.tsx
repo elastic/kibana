@@ -35,7 +35,7 @@ export type UseIpPopoverReturn = UseNodeDetailsPopoverReturn & {
 };
 
 export const useIpPopover = (ips: string[], scopeId?: string): UseIpPopoverReturn => {
-  const items = scopeId 
+  const items = scopeId
     ? createPreviewItems('network-preview', ips, scopeId)
     : ips.map((ip, index) => ({
         key: `${index}-${ip}`,
@@ -95,7 +95,7 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
           data-test-subj={GRAPH_IPS_PLUS_COUNT_BUTTON_ID}
           onClick={onIpClick}
           aria-label={toolTipAriaLabel}
-          flush='both'
+          flush="both"
           css={css`
             font-weight: medium;
           `}

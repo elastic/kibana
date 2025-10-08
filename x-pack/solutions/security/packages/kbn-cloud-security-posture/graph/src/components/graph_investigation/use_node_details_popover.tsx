@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { EuiListGroup } from '@elastic/eui';
 import type { PopoverActions, PopoverState } from '../graph/use_graph_popover';
 import { useGraphPopover } from '../graph/use_graph_popover';
