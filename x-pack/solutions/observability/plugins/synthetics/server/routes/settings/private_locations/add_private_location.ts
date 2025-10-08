@@ -9,7 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { SyntheticsServerSetup } from '../../../types';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -65,7 +65,8 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     const agentPolicySpaces =
       agentPolicy.space_ids && agentPolicy.space_ids.length > 0
         ? agentPolicy.space_ids
-        : [DEFAULT_SPACE_ID];
+        : // If space_ids is not set, assume agent policy space awareness is disabled and return all spaces
+          await getAllSpaceIds(server);
 
     const newId = uuidV4();
     const repo = new PrivateLocationRepository(routeContext);
@@ -110,3 +111,14 @@ export const addPrivateLocationRoute: SyntheticsRestApiRouteFactory<PrivateLocat
     }
   },
 });
+
+const getAllSpaceIds = async (serverSetup: SyntheticsServerSetup) => {
+  const { saved_objects: spaceSO } = await serverSetup.coreStart.savedObjects
+    .createInternalRepository(['space'])
+    .find({
+      type: 'space',
+      page: 1,
+      perPage: 10_000,
+    });
+  return spaceSO.map((space) => space.id);
+};

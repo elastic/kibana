@@ -46,18 +46,22 @@ export const SpaceSelector = <T extends FieldValues>({
       selectedAgentPolicyId !== prevAgentPolicyId &&
       selectedAgentPolicyId &&
       agentPolicies &&
-      data?.spacesDataPromise &&
-      !isDisabled
+      data?.spacesDataPromise
     ) {
       const selectedPolicy = agentPolicies.find((policy) => policy.id === selectedAgentPolicyId);
       if (!selectedPolicy) {
         throw new Error('Selected agent policy not found, this should never happen');
       }
-      const policySpaceIds = selectedPolicy.spaceIds;
+      const policySpaceIds = selectedPolicy.spaceIds || [];
+
       data.spacesDataPromise.then((spacesData) => {
         const spacesArray = Array.from(spacesData.spacesMap);
         const formattedSpaces = spacesArray.flatMap(([spaceId, spaceData]) => {
-          return policySpaceIds.includes(spaceId)
+          if (!selectedPolicy.spaceIds) {
+            policySpaceIds.push(spaceId);
+            return [{ id: spaceId, label: spaceData.name }];
+          }
+          return selectedPolicy.spaceIds.includes(spaceId)
             ? [
                 {
                   id: spaceId,
@@ -67,7 +71,9 @@ export const SpaceSelector = <T extends FieldValues>({
             : [];
         });
         setSpacesList(formattedSpaces);
-        setValue(NAMESPACES_NAME, policySpaceIds as PathValue<T, Path<T>>);
+        if (!isDisabled) {
+          setValue(NAMESPACES_NAME, policySpaceIds as PathValue<T, Path<T>>);
+        }
       });
     }
   }, [

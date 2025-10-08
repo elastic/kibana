@@ -19,5 +19,5 @@ export interface AgentPolicyInfo {
   status: string;
   description?: string;
   namespace?: string;
-  spaceIds: string[];
+  spaceIds?: string[];
 }
