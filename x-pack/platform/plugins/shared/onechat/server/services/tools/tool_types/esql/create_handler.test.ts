@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createHandler } from './create_handler';
+import { createHandler, resolveToolParameters } from './create_handler';
 import type { EsqlToolConfig } from '@kbn/onechat-common';
 
 // Mock the ES client
@@ -102,6 +102,52 @@ describe('createHandler', () => {
         query: 'FROM users | WHERE status == ?status',
         params: [{ status: 'active' }, { name: null }],
       });
+    });
+  });
+});
+
+describe('resolveToolParameters', () => {
+  const mockParamDefinitions: EsqlToolConfig['params'] = {
+    status: {
+      type: 'keyword',
+      description: 'User status',
+      optional: true,
+      defaultValue: 'active',
+    },
+    name: {
+      type: 'text',
+      description: 'User name',
+      optional: true,
+    },
+  };
+
+  it('should use provided values when available', () => {
+    const providedParams = { status: 'inactive', name: 'Jane Smith' };
+    const result = resolveToolParameters(mockParamDefinitions, providedParams);
+
+    expect(result).toEqual({
+      status: 'inactive',
+      name: 'Jane Smith',
+    });
+  });
+
+  it('should apply default values for missing optional parameters', () => {
+    const providedParams = { name: 'Jane Smith' };
+    const result = resolveToolParameters(mockParamDefinitions, providedParams);
+
+    expect(result).toEqual({
+      status: 'active', // default value
+      name: 'Jane Smith',
+    });
+  });
+
+  it('should use null for missing optional parameters without defaults', () => {
+    const providedParams = { status: 'inactive' };
+    const result = resolveToolParameters(mockParamDefinitions, providedParams);
+
+    expect(result).toEqual({
+      status: 'inactive',
+      name: null, // no default, so null
     });
   });
 });

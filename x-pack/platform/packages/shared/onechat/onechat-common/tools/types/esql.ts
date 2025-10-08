@@ -35,7 +35,7 @@ export type EsqlToolParamValue =
   | Record<string, unknown>
   | Array<Record<string, unknown>>;
 
-export interface EsqlToolParamBase {
+export interface EsqlToolParam {
   /**
    * The data types of the parameter. Must be one of these
    */
@@ -44,32 +44,16 @@ export interface EsqlToolParamBase {
    * Description of the parameter's purpose or expected values.
    */
   description: string;
-}
-
-export interface EsqlToolParamRequired extends EsqlToolParamBase {
   /**
    * Whether the parameter is optional.
    */
-  optional?: false;
-  /**
-   * Default value is not allowed for required parameters.
-   */
-  defaultValue?: never;
-}
-
-export interface EsqlToolParamOptional extends EsqlToolParamBase {
-  /**
-   * Whether the parameter is optional.
-   */
-  optional: true;
+  optional?: boolean;
   /**
    * Default value for the parameter when it's optional and not provided.
    * Must be compatible with the parameter's type (see EsqlToolParamValue).
    */
   defaultValue?: EsqlToolParamValue;
 }
-
-export type EsqlToolParam = EsqlToolParamRequired | EsqlToolParamOptional;
 
 // To make compatible with ToolDefinition['configuration']
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
