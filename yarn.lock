@@ -2285,9 +2285,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_106.6.0_feat_flyout_system_0001.tgz":
+"@elastic/eui@file:./elastic_eui_106.6.0_feat_flyout_system_0013.tgz":
   version "106.6.0"
-  resolved "file:./elastic_eui_106.6.0_feat_flyout_system_0001.tgz#f8d022d9ba9ee14d9cb495781077fe4fcbeea4e2"
+  resolved "file:./elastic_eui_106.6.0_feat_flyout_system_0013.tgz#41c78e18c83ed39fccdcb18ca226337abb772981"
   dependencies:
     "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
@@ -2321,6 +2321,7 @@
     unified "^9.2.2"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
+    use-sync-external-store "^1.6.0"
     uuid "^8.3.0"
     vfile "^4.2.1"
 
@@ -32720,6 +32721,11 @@ use-sync-external-store@^1.0.0, use-sync-external-store@^1.2.0, use-sync-externa
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.4.0.tgz#adbc795d8eeb47029963016cefdf89dc799fcebc"
   integrity sha512-9WXSPC5fMv61vaupRkCKCxsPxBocVnwakBEkMIHHpkTTg6icbJtg6jzgtLDm4bl3cSHAca52rYWih0k4K3PfHw==
+
+use-sync-external-store@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
+  integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==
 
 use@^2.0.0:
   version "2.0.2"
