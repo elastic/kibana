@@ -11,6 +11,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { WebhookMethods } from '../../../common/auth/constants';
 import type { WebhookActionParams, WebhookConfig, WebhookSecrets } from '../types';
 
 export function getConnectorType(): ConnectorTypeModel<
@@ -28,17 +29,27 @@ export function getConnectorType(): ConnectorTypeModel<
       defaultMessage: 'Webhook data',
     }),
     validateParams: async (
-      actionParams: WebhookActionParams
+      actionParams: WebhookActionParams,
+      connectorConfig?: Record<string, unknown>
     ): Promise<GenericValidationResult<WebhookActionParams>> => {
+      const webhookMethod: WebhookMethods = connectorConfig?.method
+        ? (connectorConfig.method as unknown as WebhookMethods)
+        : WebhookMethods.POST;
+
       const translations = await import('./translations');
       const errors = {
         body: new Array<string>(),
       };
       const validationResult = { errors };
       validationResult.errors = errors;
-      if (!actionParams.body?.length) {
+
+      if (
+        ![WebhookMethods.GET, WebhookMethods.DELETE].includes(webhookMethod) &&
+        !actionParams.body?.length
+      ) {
         errors.body.push(translations.BODY_REQUIRED);
       }
+
       return validationResult;
     },
     actionConnectorFields: lazy(() => import('./webhook_connectors')),

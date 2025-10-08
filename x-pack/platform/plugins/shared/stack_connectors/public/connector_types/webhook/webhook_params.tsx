@@ -9,17 +9,42 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiCallOut } from '@elastic/eui';
+import { WebhookMethods } from '../../../common/auth/constants';
 import type { WebhookActionParams } from '../types';
 
 const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActionParams>> = ({
   actionParams,
+  actionConnector,
   editAction,
   index,
   messageVariables,
   errors,
 }) => {
   const { body } = actionParams;
-  return (
+  const webhookMethod: WebhookMethods | undefined =
+    actionConnector && 'config' in actionConnector
+      ? (actionConnector?.config.method as unknown as WebhookMethods)
+      : undefined;
+
+  return webhookMethod && [WebhookMethods.GET, WebhookMethods.DELETE].includes(webhookMethod) ? (
+    <EuiCallOut
+      announceOnMount
+      iconType="info"
+      title={i18n.translate('xpack.stackConnectors.components.webhook.noSetupRequiredCallout', {
+        values: { method: webhookMethod.toUpperCase() },
+        defaultMessage: 'This connector is configured to use the {method} method.',
+      })}
+      data-test-subj="placeholderCallout"
+    >
+      <p>
+        {i18n.translate('xpack.stackConnectors.components.webhook.noSetupRequiredCallout', {
+          defaultMessage:
+            'No additional setup is required - a request will automatically be sent to the configured url.',
+        })}
+      </p>
+    </EuiCallOut>
+  ) : (
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
       paramsProperty={'body'}

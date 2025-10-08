@@ -75,7 +75,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     return createdAction.id;
   }
 
-  describe.only('webhook action', () => {
+  describe('webhook action', () => {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';
