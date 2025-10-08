@@ -1216,7 +1216,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.accessControl).to.have.property('accessMode', 'read_only');
       });
 
-      it('allow owner to update after access mode change', async () => {
+      it('allow owner to update object data after access mode change', async () => {
         const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
@@ -1297,7 +1297,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('allows updates on removing read only access mode', async () => {
+      it('allows updates by non-owner after removing read only access mode', async () => {
         const { cookie: ownerCookie, profileUid } = await loginAsObjectOwner(
           'test_user',
           'changeme'
