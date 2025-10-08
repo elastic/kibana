@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +21,7 @@ import { EmptyState } from './empty_state/empty_state';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
 import { createESQLQuery } from '../common/utils';
+import { useChartLayers } from './chart/hooks/use_chart_layers';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
@@ -98,10 +99,91 @@ export const MetricsGrid = ({
     setExpandedMetric(undefined);
   }, []);
 
+  // TODO: find a better way to handle conflicts with other flyouts
+  // https://github.com/elastic/kibana/issues/237965
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
+        if (expandedMetric) {
+          handleCloseFlyout();
+        }
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, [expandedMetric, handleCloseFlyout]);
+
   const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
 
   if (rows.length === 0) {
     return <EmptyState />;
+  }
+
+  function ChartItem({ key, metric, index }: { key: string; metric: MetricField; index: number }) {
+    const { rowIndex, colIndex } = getRowColFromIndex(index);
+    const isFocused = focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
+
+    const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
+    const esqlQuery = isSupported
+      ? createESQLQuery({
+          metric,
+          dimensions,
+          filters,
+        })
+      : '';
+    const color = colorPalette[index % colorPalette.length];
+    const chartLayers = useChartLayers({ dimensions, metric, color });
+
+    return (
+      <EuiFlexItem key={key}>
+        <div
+          role="gridcell"
+          aria-rowindex={rowIndex + 1} // 1-based for ARIA
+          aria-colindex={colIndex + 1} // 1-based for ARIA
+          data-grid-cell={`${rowIndex}-${colIndex}`}
+          data-chart-index={index}
+          tabIndex={isFocused ? 0 : -1}
+          onClick={() => handleCellClick(rowIndex, colIndex)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleCellClick(rowIndex, colIndex);
+            }
+          }}
+          style={{
+            outline: 'none',
+            cursor: 'pointer',
+            ...(isFocused && {
+              boxShadow: `inset 0 0 0 2px ${euiTheme.colors.primary}`,
+              borderRadius: euiTheme.border.radius.medium,
+            }),
+          }}
+        >
+          <Chart
+            esqlQuery={esqlQuery}
+            size={chartSize}
+            color={color}
+            discoverFetch$={discoverFetch$}
+            requestParams={requestParams}
+            services={services}
+            abortController={abortController}
+            searchSessionId={searchSessionId}
+            onBrushEnd={onBrushEnd}
+            onFilter={onFilter}
+            onViewDetails={() => handleViewDetails(esqlQuery, metric)}
+            title={metric.name}
+            unit={metric.unit}
+            seriesType={metric.type === 'histogram' ? 'bar' : 'area'}
+          />
+        </div>
+      </EuiFlexItem>
+    );
   }
 
   return (
@@ -123,63 +205,7 @@ export const MetricsGrid = ({
       >
         <EuiFlexGrid columns={columns} gutterSize="s">
           {rows.map(({ key, metric }, index) => {
-            const { rowIndex, colIndex } = getRowColFromIndex(index);
-            const isFocused =
-              focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
-
-            const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
-            const esqlQuery = isSupported
-              ? createESQLQuery({
-                  metric,
-                  dimensions,
-                  filters,
-                })
-              : '';
-
-            return (
-              <EuiFlexItem key={key}>
-                <div
-                  role="gridcell"
-                  aria-rowindex={rowIndex + 1} // 1-based for ARIA
-                  aria-colindex={colIndex + 1} // 1-based for ARIA
-                  data-grid-cell={`${rowIndex}-${colIndex}`}
-                  data-chart-index={index}
-                  tabIndex={isFocused ? 0 : -1}
-                  onClick={() => handleCellClick(rowIndex, colIndex)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleCellClick(rowIndex, colIndex);
-                    }
-                  }}
-                  style={{
-                    outline: 'none',
-                    cursor: 'pointer',
-                    ...(isFocused && {
-                      boxShadow: `inset 0 0 0 2px ${euiTheme.colors.primary}`,
-                      borderRadius: euiTheme.border.radius.medium,
-                    }),
-                  }}
-                >
-                  <Chart
-                    esqlQuery={esqlQuery}
-                    size={chartSize}
-                    color={colorPalette[index % colorPalette.length]}
-                    discoverFetch$={discoverFetch$}
-                    requestParams={requestParams}
-                    services={services}
-                    abortController={abortController}
-                    searchSessionId={searchSessionId}
-                    onBrushEnd={onBrushEnd}
-                    onFilter={onFilter}
-                    onViewDetails={() => handleViewDetails(esqlQuery, metric)}
-                    title={metric.name}
-                    unit={metric.unit}
-                    seriesType={metric.type === 'histogram' ? 'bar' : 'area'}
-                  />
-                </div>
-              </EuiFlexItem>
-            );
+            return <ChartItem key={key} metric={metric} index={index} />;
           })}
         </EuiFlexGrid>
       </div>

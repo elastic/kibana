@@ -18,6 +18,11 @@ import type { Observable } from 'rxjs';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
+<<<<<<< HEAD
+=======
+import { useChartLayers } from './hooks/use_chart_layers';
+import { useLensProps } from './hooks/use_lens_props';
+>>>>>>> c809a954c20b6ab39780a65056b7a8c8ed7b6f16
 
 export const ChartSizes = {
   s: 230,
@@ -70,9 +75,9 @@ export const Chart = ({
     services,
     searchSessionId,
     discoverFetch$,
-    abortController,
     getTimeRange,
     chartRef,
+    chartLayers: [],
   });
 
   return (
