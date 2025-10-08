@@ -68,7 +68,6 @@ describe.skip('When using `upload` response action', () => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     const mockedContext = createAppRootMockRenderer();
 
-    mockedContext.setExperimentalFlag({ responseActionUploadEnabled: true });
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     endpointPrivileges = { ...getEndpointAuthzInitialStateMock(), loading: false };
     endpointCapabilities = [...ENDPOINT_CAPABILITIES];
