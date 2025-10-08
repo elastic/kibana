@@ -11,6 +11,7 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { last, merge, omit } from 'lodash';
+import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import {
   catchError,
   defer,
@@ -208,8 +209,13 @@ export class ObservabilityAIAssistantClient {
       const conversationId = persist ? predefinedConversationId || v4() : '';
 
       if (persist && !isConversationUpdate && kibanaPublicUrl) {
+        const { namespace } = this.dependencies;
+        const spaceAwarePath = addSpaceIdToPath('/', namespace, '/app/observabilityAIAssistant');
+
+        const conversationUrl = `${kibanaPublicUrl}${spaceAwarePath}/conversations/${conversationId}`;
+
         functionClient.registerInstruction(
-          `This conversation will be persisted in Kibana and available at this url: ${kibanaPublicUrl}/app/observabilityAIAssistant/conversations/${conversationId}.`
+          `This conversation will be persisted in Kibana and available at this url: ${conversationUrl}.`
         );
       }
 
