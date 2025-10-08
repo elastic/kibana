@@ -73,7 +73,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         const options = {
           overwrite: request.query.overwrite ?? false,
           ...(request.body.id ? { id: request.body.id } : {}),
-          ...(isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {}),
+          ...(isReadOnly ? { accessControl: { accessMode: 'write_restricted' as const } } : {}),
         };
         try {
           const result = await soClient.create(
@@ -143,7 +143,9 @@ export class ReadOnlyObjectsPlugin implements Plugin {
           const createObjects = request.body.objects.map((obj) => ({
             type: obj.type || READ_ONLY_TYPE,
             ...(obj.id ? { id: obj.id } : {}),
-            ...(obj.isReadOnly ? { accessControl: { accessMode: 'read_only' as const } } : {}),
+            ...(obj.isReadOnly
+              ? { accessControl: { accessMode: 'write_restricted' as const } }
+              : {}),
             attributes: {
               description: 'description',
             },
@@ -333,7 +335,10 @@ export class ReadOnlyObjectsPlugin implements Plugin {
                 ]),
               })
             ),
-            newAccessMode: schema.oneOf([schema.literal('read_only'), schema.literal('default')]),
+            newAccessMode: schema.oneOf([
+              schema.literal('write_restricted'),
+              schema.literal('default'),
+            ]),
           }),
         },
       },

@@ -22,6 +22,7 @@ import type {
   SavedObjectsChangeAccessControlOptions,
   SavedObjectsChangeAccessModeOptions,
   SavedObjectsChangeOwnershipOptions,
+  SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-api-server';
 
 import {
@@ -72,7 +73,7 @@ export const isSavedObjectsChangeOwnershipOptions = (
   return 'newOwnerProfileUid' in options;
 };
 
-const VALID_ACCESS_MODES = ['default', 'read_only'] as const;
+const VALID_ACCESS_MODES = ['default', 'write_restricted'] as const;
 type AccessMode = (typeof VALID_ACCESS_MODES)[number];
 
 const validateChangeAccessControlParams = ({
@@ -83,7 +84,7 @@ const validateChangeAccessControlParams = ({
 }: {
   actionType: ChangeAccessControlActionType;
   newOwnerProfileUid?: string;
-  accessMode?: 'default' | 'read_only';
+  accessMode?: SavedObjectAccessControl['accessMode'];
   objects: SavedObjectsChangeAccessControlObject[];
 }) => {
   if (actionType === 'changeOwnership') {

@@ -70,7 +70,7 @@ export class AccessControlService {
         // ToDo: This logic behaves strangely if accessControl.mode is undefined, which for some reason it can be?
         // Shouldn't we only need to check that accessControl is defined?
         this.typeRegistry?.supportsAccessControl(obj.type) &&
-        (obj.accessControl?.accessMode === 'read_only' || anyActionsForcingDefaultCheck) &&
+        (obj.accessControl?.accessMode === 'write_restricted' || anyActionsForcingDefaultCheck) &&
         obj.accessControl?.owner &&
         currentUser && // Sid - if we don't have a user, should't we ultimately throw?
         obj.accessControl.owner !== currentUser.profile_uid

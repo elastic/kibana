@@ -270,7 +270,7 @@ describe('changeObjectAccessControl', () => {
         await changeObjectAccessControl({
           ...params,
           securityExtension: params.securityExtension,
-          options: { accessMode: 'read_only', namespace: 'default' },
+          options: { accessMode: 'write_restricted', namespace: 'default' },
           actionType: 'changeAccessMode',
           currentUserProfileUid: mockUserProfileId,
         });

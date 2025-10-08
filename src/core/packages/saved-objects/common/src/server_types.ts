@@ -47,10 +47,10 @@ export interface SavedObjectAccessControl {
   /** The ID of the user who owns this object. */
   owner: string;
   /**
-   * The access mode of the object. `read_only` is editable only by the owner and admin users.
+   * The access mode of the object. `write_restricted` is editable only by the owner and admin users.
    * Access mode `default` is editable by all users with write access to the object.
    */
-  accessMode: 'read_only' | 'default';
+  accessMode: 'write_restricted' | 'default';
 }
 
 /**
