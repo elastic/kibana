@@ -27,7 +27,7 @@
       "features",
       "actions"
     ],
-    "optionalPlugins": ["security", "spaces", "usageCollection", "screenshotting", "fleet"],
+    "optionalPlugins": ["security", "spaces", "usageCollection", "screenshotting"],
     "requiredBundles": ["embeddable", "esUiShared", "kibanaReact"]
   }
 }
