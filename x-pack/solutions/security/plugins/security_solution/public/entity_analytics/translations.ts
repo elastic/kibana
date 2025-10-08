@@ -213,3 +213,39 @@ export const RISK_SCORE_ENGINE_RUN_FAILURE = i18n.translate(
     defaultMessage: 'Entity risk score engine failed to start',
   }
 );
+
+export const ALERT_TIME_WINDOW_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.alertTimeWindowLabel',
+  {
+    defaultMessage: 'Alert time window',
+  }
+);
+
+export const ALERT_FILTERS_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.alertFiltersLabel',
+  {
+    defaultMessage: 'Alert filters',
+  }
+);
+
+export const ALERT_FILTERS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.riskScore.alertFiltersPlaceholder',
+  {
+    defaultMessage: 'Filter out alerts using KQL syntax',
+  }
+);
+
+export const APPLIED_TO_RISK_SCORES_OF = i18n.translate(
+  'xpack.securitySolution.riskScore.appliedToRiskScoresOf',
+  {
+    defaultMessage: 'applied to risk scores of',
+  }
+);
+
+export const REMOVE_FILTER = i18n.translate('xpack.securitySolution.riskScore.removeFilter', {
+  defaultMessage: 'Remove filter',
+});
+
+export const SAVE_FILTERS = i18n.translate('xpack.securitySolution.riskScore.saveFilters', {
+  defaultMessage: 'Save changes',
+});

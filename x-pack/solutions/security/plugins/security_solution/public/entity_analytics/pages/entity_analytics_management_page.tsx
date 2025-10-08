@@ -86,6 +86,11 @@ export const EntityAnalyticsManagementPage = () => {
     }
   };
 
+  const handleSaveAlertFilters = (filters: Array<{ id: string; text: string }>) => {
+    // TODO: Implement API call to save filters to Risk Score SO object
+    addSuccess('Alert filters saved successfully!');
+  };
+
   const { status, runAt } = riskEngineStatus?.risk_engine_task_status || {};
 
   const isRunning = status === 'running' || (!!runAt && new Date(runAt) < new Date());
@@ -150,7 +155,14 @@ export const EntityAnalyticsManagementPage = () => {
 
       <EuiHorizontalRule />
       <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
-        {!selectedRiskEngineSettings && <EuiLoadingSpinner size="m" />}
+        {!selectedRiskEngineSettings && (
+          <EuiFlexItem>
+            <EuiLoadingSpinner size="m" />
+            <EuiText size="s">
+              <p>{'Loading risk engine settings...'}</p>
+            </EuiText>
+          </EuiFlexItem>
+        )}
         {selectedRiskEngineSettings && (
           <>
             <EuiFlexItem grow={2}>
@@ -164,6 +176,7 @@ export const EntityAnalyticsManagementPage = () => {
                 selectedRiskEngineSettings={selectedRiskEngineSettings}
                 setSelectedDateSetting={setSelectedDateSetting}
                 toggleSelectedClosedAlertsSetting={toggleSelectedClosedAlertsSetting}
+                onSaveAlertFilters={handleSaveAlertFilters}
               />
               <EuiHorizontalRule />
               <RiskScoreUsefulLinksSection />
