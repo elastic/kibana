@@ -12,10 +12,12 @@ import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
-  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectsErrorHelpers,
+  type SavedObjectsRawDocSource,
+} from '@kbn/core-saved-objects-server';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import type { PreflightCheckForBulkDeleteParams } from '../internals/repository_bulk_delete_internal_types';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
@@ -26,8 +28,15 @@ import {
   isFoundGetResponse,
   type GetResponseFound,
 } from '../utils';
-import type { PreflightCheckForCreateObject } from '../internals/preflight_check_for_create';
-import { preflightCheckForCreate } from '../internals/preflight_check_for_create';
+import {
+  preflightCheckForCreate,
+  type PreflightCheckForCreateObject,
+} from '../internals/preflight_check_for_create';
+import {
+  type AccessControlPreflightObject,
+  accessControlPreflightCheck,
+  accessControlBulkPreflightCheck,
+} from '../internals/preflight_check_access_control';
 
 export type IPreflightCheckHelper = PublicMethodsOf<PreflightCheckHelper>;
 
@@ -69,6 +78,32 @@ export class PreflightCheckHelper {
     });
   }
 
+  public async accessControlBulkPreflightCheck(
+    objects: AccessControlPreflightObject[],
+    namespace: string | undefined
+  ) {
+    return await accessControlBulkPreflightCheck({
+      objects,
+      client: this.client,
+      serializer: this.serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      namespace,
+    });
+  }
+
+  public async accessControlPreflightCheck(
+    object: AccessControlPreflightObject,
+    namespace: string | undefined
+  ) {
+    return await accessControlPreflightCheck({
+      object,
+      client: this.client,
+      serializer: this.serializer,
+      getIndexForType: this.getIndexForType.bind(this),
+      namespace,
+    });
+  }
+
   /**
    * Fetch multi-namespace saved objects
    * @returns MgetResponse
@@ -83,7 +118,7 @@ export class PreflightCheckHelper {
       .map(({ value: { type, id, fields } }) => ({
         _id: this.serializer.generateRawId(namespace, type, id),
         _index: this.getIndexForType(type),
-        _source: ['type', 'namespaces', ...(fields ?? [])],
+        _source: ['type', 'namespaces', 'accessControl', ...(fields ?? [])],
       }));
 
     const bulkGetMultiNamespaceDocsResponse = bulkGetMultiNamespaceDocs.length
@@ -307,6 +342,14 @@ export interface PreflightCheckNamespacesResult {
    * checkResult == not_found or checkResult == found_in_namespace
    */
   savedObjectNamespaces?: string[];
+  /** The source of the raw document, if the object already exists */
+  rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
+}
+
+/**
+ * @internal
+ */
+export interface PreflightAccessControlResult {
   /** The source of the raw document, if the object already exists */
   rawDocSource?: GetResponseFound<SavedObjectsRawDocSource>;
 }
