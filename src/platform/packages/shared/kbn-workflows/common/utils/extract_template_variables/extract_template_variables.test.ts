@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extractNunjucksVariables } from './extract_nunjucks_variables';
+import { extractTemplateVariables } from './extract_template_variables';
 
-describe('extractNunjucksVariables', () => {
-  it('should extract variables from a Nunjucks template string', () => {
+describe('extractTemplateVariables', () => {
+  it('should extract variables from a template string', () => {
     const template = `
       Hello {{ user.name }}!
       Your order {{ order.id }} is confirmed.
@@ -19,8 +19,25 @@ describe('extractNunjucksVariables', () => {
       {% endif %}
     `;
 
-    const variables = extractNunjucksVariables(template);
+    const variables = extractTemplateVariables(template);
     expect(variables).toEqual(['user.name', 'order.id', 'user.isMember']);
+  });
+
+  it('should return an empty array if the template is invalid', () => {
+    const template = `
+      Hello {{ user.name | unclosed
+    `;
+
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual([]);
+  });
+
+  it('should return the correct variables if the template contains an invalid filter', () => {
+    const template = `
+      Hello {{ user.name | invalidFilter }}!
+    `;
+    const variables = extractTemplateVariables(template);
+    expect(variables).toEqual(['user.name']);
   });
 
   it('should return an empty array if no variables are found', () => {
@@ -29,7 +46,7 @@ describe('extractNunjucksVariables', () => {
       This is a static template.
     `;
 
-    const variables = extractNunjucksVariables(template);
+    const variables = extractTemplateVariables(template);
     expect(variables).toEqual([]);
   });
 
@@ -39,15 +56,15 @@ describe('extractNunjucksVariables', () => {
       {{order.items[0].name}}
       {% if   user.isAdmin %}
         Admin Panel Access  {% endif %}
-        {{   user.getFullName()   }}
+        {{   user.FullName   }}
     `;
 
-    const variables = extractNunjucksVariables(template);
+    const variables = extractTemplateVariables(template);
     expect(variables).toEqual([
       'user.profile.firstName',
       'order.items[0].name',
       'user.isAdmin',
-      'user.getFullName()',
+      'user.FullName',
     ]);
   });
 
@@ -62,7 +79,7 @@ describe('extractNunjucksVariables', () => {
       Total: {{ order.total }}
     `;
 
-    const variables = extractNunjucksVariables(template);
+    const variables = extractTemplateVariables(template);
     expect(variables).toEqual([
       'order.items',
       'item.name',

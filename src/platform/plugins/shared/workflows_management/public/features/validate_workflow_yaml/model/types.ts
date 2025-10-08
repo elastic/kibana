@@ -64,8 +64,15 @@ interface YamlValidationResultMonacoYaml extends YamlValidationResultBase {
   hoverMessage: null;
 }
 
+interface YamlValidationResultLiquidTemplate extends YamlValidationResultBase {
+  severity: YamlValidationErrorSeverity;
+  message: string;
+  source: 'liquid-template-validation';
+}
+
 export type YamlValidationResult =
   | YamlValidationResultNonUniqueStepName
   | YamlValidationResultVariableError
   | YamlValidationResultVariableValid
-  | YamlValidationResultMonacoYaml;
+  | YamlValidationResultMonacoYaml
+  | YamlValidationResultLiquidTemplate;
