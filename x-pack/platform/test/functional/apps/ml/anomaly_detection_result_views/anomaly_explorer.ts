@@ -480,7 +480,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 tag: 'ml_swim_lane_case',
               });
 
-              const expectedAttachment = {
+              const attachmentData: Omit<AnomalySwimLaneEmbeddableState, 'id'> = {
                 swimlaneType: 'viewBy',
                 viewBy: 'airline',
                 jobIds: [testData.jobConfig.job_id],
@@ -490,9 +490,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               };
 
-              const expectedAttachmentId = stringHash(
-                JSON.stringify(expectedAttachment)
-              ).toString();
+              const expectedAttachmentId = stringHash(JSON.stringify(attachmentData)).toString();
+
+              const expectedAttachment: AnomalySwimLaneEmbeddableState = {
+                ...attachmentData,
+                id: expectedAttachmentId,
+              };
 
               await ml.cases.assertCaseWithAnomalySwimLaneAttachment(
                 {
@@ -501,10 +504,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   tag: 'ml_swim_lane_case',
                   reporter: USER.ML_POWERUSER,
                 },
-                {
-                  ...expectedAttachment,
-                  id: expectedAttachmentId,
-                } as AnomalySwimLaneEmbeddableState,
+                expectedAttachment,
                 {
                   yAxisLabelCount: 10,
                 }
