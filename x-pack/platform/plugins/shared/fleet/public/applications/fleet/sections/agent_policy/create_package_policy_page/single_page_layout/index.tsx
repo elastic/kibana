@@ -481,6 +481,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
               }}
+              isAgentlessDefault={isAgentlessDefault}
               showBetaBadge={!isAgentlessDefault}
             />
           )}
