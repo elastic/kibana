@@ -15,9 +15,11 @@ import type { QualityIndicators } from '../../../common/types';
 export function QualityIndicator({
   quality,
   description,
+  dataTestSubj,
 }: {
   quality: QualityIndicators;
   description: string | ReactNode;
+  dataTestSubj?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const qualityColors: Record<QualityIndicators, string> = {
@@ -46,10 +48,11 @@ export function QualityIndicator({
     <EuiBadge color={qualityColors[quality]} iconType={BadgeIconType}>
       <EuiText
         color={qualityTextColors[quality]}
-        size="s"
+        size="xs"
         css={css`
           margin-left: ${euiTheme.size.xs};
         `}
+        data-test-subj={dataTestSubj}
       >
         {description}
       </EuiText>

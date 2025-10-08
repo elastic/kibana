@@ -69,6 +69,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     cloud: {
       beatsAndLogstashConfiguration: `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/find-cloud-id`,
+      elasticsearchBillingManagingCosts: `${ELASTIC_DOCS}deploy-manage/cloud-organization/billing/elasticsearch-billing-dimensions#elasticsearch-billing-managing-elasticsearch-costs`,
       indexManagement: `${ELASTIC_DOCS}manage-data/lifecycle/index-lifecycle-management/migrate-index-management`,
     },
     console: {
@@ -616,6 +617,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       aiAssistant: `${ELASTIC_DOCS}solutions/observability/observability-ai-assistant`,
       elasticManagedLlm: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/elastic-managed-llm`,
       elasticManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing`,
+      elasticServerlessSearchManagedLlmUsageCost: `${ELASTIC_WEBSITE_URL}pricing/serverless-search`,
     },
     alerting: {
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
@@ -912,6 +914,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       remoteESOoutputTroubleshooting: `${ELASTIC_DOCS}reference/fleet/remote-elasticsearch-output#troubleshooting`,
       agentReleaseProcess: `${ELASTIC_DOCS}reference/fleet/fleet-agent-release-process`,
       fipsIngest: `${ELASTIC_DOCS}deploy-manage/security/fips-ingest`,
+      edotCollector: `${ELASTIC_DOCS}reference/edot-collector`,
     },
     integrationDeveloper: {
       upload: `${ELASTIC_DOCS}extend/integrations/upload-new-integration`,
