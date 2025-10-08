@@ -592,7 +592,7 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      it('does not allow non-owner to bulk update objects marked as read only', async () => {
+      it('does not allow non-owner to bulk update objects marked as read only if not admin', async () => {
         await activateSimpleUserProfile();
         const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
         const firstObject = await supertestWithoutAuth
@@ -632,6 +632,54 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(403);
         expect(res.body).to.have.property('message');
         expect(res.body.message).to.contain('Unable to bulk_update read_only_type');
+      });
+
+      it('allows non-owner non-admin to bulk update objects in default mode ', async () => {
+        const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+        const firstObject = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: 'read_only_type' })
+          .expect(200);
+        const { id: objectId1, type: type1 } = firstObject.body;
+
+        const secondObject = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({ type: 'read_only_type' })
+          .expect(200);
+        const { id: objectId2, type: type2 } = secondObject.body;
+
+        const objects = [
+          {
+            id: objectId1,
+            type: type1,
+          },
+          {
+            id: objectId2,
+            type: type2,
+          },
+        ];
+
+        await createSimpleUser(['kibana_savedobjects_editor']);
+        const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
+
+        const res = await supertestWithoutAuth
+          .post('/read_only_objects/bulk_update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', notOwnerCookie.cookieString())
+          .send({
+            objects,
+          })
+          .expect(200);
+        for (const { id, attributes, accessControl } of res.body.saved_objects) {
+          const object = objects.find((obj) => obj.id === id);
+          expect(object).to.not.be(undefined);
+          expect(attributes).to.have.property('description', 'updated description');
+          expect(accessControl).to.have.property('accessMode', 'default');
+        }
       });
     });
 
@@ -867,9 +915,8 @@ export default function ({ getService }: FtrProviderContext) {
           expect(res.body.message).to.equal('Unable to bulk_delete read_only_type');
         });
 
-        it('allows non-owner to bulk delete objects in default mode', async () => {
-          await activateSimpleUserProfile();
-          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('simple_user', 'changeme');
+        it('allows non-owner non-admin to bulk delete objects in default mode', async () => {
+          const { cookie: objectOwnerCookie } = await loginAsObjectOwner('test_user', 'changeme');
 
           const firstObject = await supertestWithoutAuth
             .post('/read_only_objects/create')
@@ -897,14 +944,27 @@ export default function ({ getService }: FtrProviderContext) {
               type: type2,
             },
           ];
+          await createSimpleUser(['kibana_savedobjects_editor']);
+          const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('simple_user', 'changeme');
 
-          const { cookie: notOwnerCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
           await supertestWithoutAuth
             .post('/read_only_objects/bulk_delete')
             .set('kbn-xsrf', 'true')
             .set('cookie', notOwnerCookie.cookieString())
             .send({ objects })
             .expect(200);
+
+          await supertestWithoutAuth
+            .get(`/read_only_objects/${objectId1}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', notOwnerCookie.cookieString())
+            .expect(404);
+
+          await supertestWithoutAuth
+            .get(`/read_only_objects/${objectId2}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', notOwnerCookie.cookieString())
+            .expect(404);
         });
       });
 
