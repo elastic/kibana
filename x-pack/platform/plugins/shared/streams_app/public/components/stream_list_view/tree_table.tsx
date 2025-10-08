@@ -349,7 +349,7 @@ export function StreamsTreeTable({
             item.data_stream ? (
               <DataQualityColumn
                 histogramQueryFetch={getStreamDocCounts(item.stream.name)}
-                dataTestSubj={`dataQualityIndicator-${item.stream.name}`}
+                streamName={item.stream.name}
               />
             ) : null,
         },

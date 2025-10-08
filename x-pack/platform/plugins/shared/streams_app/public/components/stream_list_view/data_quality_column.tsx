@@ -8,16 +8,18 @@
 import React from 'react';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
+import { EuiLink } from '@elastic/eui';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
 import type { StreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function DataQualityColumn({
   histogramQueryFetch,
-  dataTestSubj,
+  streamName,
 }: {
   histogramQueryFetch: StreamDocCountsFetch;
-  dataTestSubj?: string;
+  streamName: string;
 }) {
   const histogramQueryResult = useAsync(() => histogramQueryFetch.docCount, [histogramQueryFetch]);
   const failedDocsResult = useAsync(
@@ -63,7 +65,20 @@ export function DataQualityColumn({
   const isLoading =
     histogramQueryResult.loading || failedDocsResult?.loading || degradedDocsResult.loading;
 
+  const router = useStreamsAppRouter();
+
   return (
-    <DatasetQualityIndicator dataTestSubj={dataTestSubj} quality={quality} isLoading={isLoading} />
+    <EuiLink
+      href={router.link('/{key}/management/{tab}', {
+        path: { key: streamName, tab: 'dataQuality' },
+      })}
+      data-test-subj={`streamsDataQualityLink-${streamName}`}
+    >
+      <DatasetQualityIndicator
+        dataTestSubj={`dataQualityIndicator-${streamName}`}
+        quality={quality}
+        isLoading={isLoading}
+      />
+    </EuiLink>
   );
 }
