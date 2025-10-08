@@ -30,6 +30,10 @@ jest.mock('../hooks/use_missing_risk_engine_privileges', () => ({
   useMissingRiskEnginePrivileges: () => ({ isLoading: false, hasAllRequiredPrivileges: true }),
 }));
 
+jest.mock('../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => true,
+}));
+
 jest.mock('../api/hooks/use_risk_engine_status', () => ({
   useRiskEngineStatus: () => ({
     data: {
