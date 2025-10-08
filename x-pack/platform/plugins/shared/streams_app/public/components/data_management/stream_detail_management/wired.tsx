@@ -103,7 +103,7 @@ export function WiredStreamDetailManagement({
             defaultMessage: 'View details about this stream’s data quality',
           })}
         >
-          <span>
+          <span data-test-subj="dataQualityTab">
             {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
               defaultMessage: 'Data quality',
             })}
