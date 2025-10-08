@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMarkdownEditor,
@@ -66,9 +67,31 @@ const EDIT_DESCRIPTION_BUTTON_LABEL = i18n.translate(
   }
 );
 
+const MANUAL_ENTRY_BUTTON_LABEL = i18n.translate(
+  'xpack.streams.streamDetailView.streamDescription.manualEntryButtonLabel',
+  {
+    defaultMessage: 'Enter manually',
+  }
+);
+
+const CANCEL_LABEL = i18n.translate(
+  'xpack.streams.streamDetailView.streamDescription.cancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
 export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
-  const { save, generate, isGenerating, description, isUpdating, isEditing, setDescription } =
-    useStreamDescriptionApi({ definition });
+  const {
+    save,
+    generate,
+    isGenerating,
+    description,
+    isUpdating,
+    isEditing,
+    setIsEditing,
+    setDescription,
+  } = useStreamDescriptionApi({ definition });
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
@@ -78,9 +101,11 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
         </EuiText>
       </EuiPanel>
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
-        <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiText size="s" color="subdued">{STREAM_DESCRIPTION_HELP}</EuiText>
-          {definition.stream.description ? (
+        {definition.stream.description || description || isEditing ? (
+          <EuiFlexGroup direction="column" gutterSize="m">
+            <EuiText size="s" color="subdued">
+              {STREAM_DESCRIPTION_HELP}
+            </EuiText>
             <EuiMarkdownEditor
               value={description}
               onChange={(next) => {
@@ -97,6 +122,22 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
                     justifyContent="flexEnd"
                     alignItems="center"
                   >
+                    {isEditing && (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          aria-label={CANCEL_LABEL}
+                          size="s"
+                          isLoading={isUpdating}
+                          isDisabled={isUpdating || isGenerating}
+                          onClick={() => {
+                            setIsEditing(false);
+                            setDescription(definition.stream.description || '');
+                          }}
+                        >
+                          {CANCEL_LABEL}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    )}
                     <EuiFlexItem grow={false}>
                       <ConnectorListButton
                         buttonProps={{
@@ -105,6 +146,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
                           children: GENERATE_DESCRIPTION_BUTTON_LABEL,
                           onClick() {
                             generate();
+                            setIsEditing(false);
                           },
                           isDisabled: isGenerating || isUpdating,
                           isLoading: isGenerating,
@@ -120,7 +162,12 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
                         isLoading={isUpdating}
                         isDisabled={isUpdating || isGenerating}
                         onClick={() => {
-                          save(description);
+                          if (!isEditing) {
+                            setIsEditing(true);
+                          } else {
+                            save(description);
+                            setIsEditing(false);
+                          }
                         }}
                       >
                         {isEditing ? SAVE_DESCRIPTION_BUTTON_LABEL : EDIT_DESCRIPTION_BUTTON_LABEL}
@@ -130,8 +177,45 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
                 ),
               }}
             />
-          ) : null}
-        </EuiFlexGroup>
+          </EuiFlexGroup>
+        ) : (
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                {STREAM_DESCRIPTION_HELP}
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                isLoading={isUpdating}
+                isDisabled={isUpdating || isGenerating}
+                onClick={() => {
+                  setIsEditing(true);
+                }}
+              >
+                {MANUAL_ENTRY_BUTTON_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <ConnectorListButton
+                buttonProps={{
+                  fill: true,
+                  size: 's',
+                  iconType: 'sparkles',
+                  children: GENERATE_DESCRIPTION_BUTTON_LABEL,
+                  onClick() {
+                    generate();
+                    setIsEditing(true);
+                  },
+                  isDisabled: isGenerating || isUpdating,
+                  isLoading: isGenerating,
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiPanel>
     </EuiPanel>
   );
