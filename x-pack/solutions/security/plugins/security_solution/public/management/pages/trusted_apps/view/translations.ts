@@ -78,10 +78,10 @@ export const PROCESS_DESCENDANTS_TRUSTED_APP = i18n.translate(
   }
 );
 
-export const TRUSTED_APP_EVENTS = i18n.translate(
+export const TRUSTED_APPLICATIONS = i18n.translate(
   'xpack.securitySolution.trustedApps.processDescendants.label',
   {
-    defaultMessage: 'Events',
+    defaultMessage: 'Trusted Applications',
   }
 );
 
