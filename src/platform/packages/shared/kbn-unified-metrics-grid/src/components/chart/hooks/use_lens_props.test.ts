@@ -28,21 +28,14 @@ const servicesMock: Partial<UnifiedHistogramServices> = {
 };
 
 describe('useLensProps', () => {
-  const mockChartLayers: {
-    chartLayers: Array<LensSeriesLayer>;
-    loading: boolean;
-  } = {
-    chartLayers: [
-      {
-        type: 'series',
-        seriesType: 'line',
-        xAxis: { field: '@timestamp', type: 'dateHistogram', colorPalette: 'foo' },
-        yAxis: [{ value: 'foo' }],
-      },
-    ],
-    loading: false,
-  };
-
+  const mockChartLayers: Array<LensSeriesLayer> = [
+    {
+      type: 'series',
+      seriesType: 'line',
+      xAxis: { field: '@timestamp', type: 'dateHistogram', colorPalette: 'foo' },
+      yAxis: [{ value: 'foo' }],
+    },
+  ];
   const discoverFetch$ = new BehaviorSubject<UnifiedHistogramInputMessage>({ type: 'fetch' });
   const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
 
@@ -100,11 +93,11 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef,
+        chartLayers: mockChartLayers,
       })
     );
 
@@ -127,11 +120,11 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef,
+        chartLayers: mockChartLayers,
       })
     );
 
@@ -140,7 +133,7 @@ describe('useLensProps', () => {
         {
           chartType: 'xy',
           title: 'Test Chart',
-          layers: mockChartLayers.chartLayers,
+          layers: mockChartLayers,
           axisTitleVisibility: {
             showYRightAxisTitle: false,
             showXAxisTitle: false,
@@ -169,11 +162,11 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef,
+        chartLayers: mockChartLayers,
       })
     );
 
@@ -199,11 +192,11 @@ describe('useLensProps', () => {
       useLensProps({
         title: 'Test Chart',
         query: 'FROM metrics-*',
-        seriesType: 'line',
         services: servicesMock as UnifiedHistogramServices,
         getTimeRange,
         discoverFetch$,
         chartRef: { current: null },
+        chartLayers: mockChartLayers,
       })
     );
 

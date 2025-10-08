@@ -100,6 +100,8 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
           {
             iconV2: agentsIcon, // Temp svg until we have icon in EUI
             link: 'agent_builder',
+            withBadge: true,
+            badgeTypeV2: 'techPreview',
           },
           {
             link: 'workflows',
