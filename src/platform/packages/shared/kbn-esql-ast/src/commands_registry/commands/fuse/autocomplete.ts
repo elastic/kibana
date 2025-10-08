@@ -14,6 +14,7 @@ import {
   groupByAutocomplete,
   keyByAutocomplete,
   fuseArgumentsAutocomplete,
+  withOptionAutocomplete,
 } from './autocomplete_handlers';
 import {
   extractFuseArgs,
@@ -85,6 +86,6 @@ export async function autocomplete(
 
     // WITH suggests a map of options that depends on the <fuse_method>
     case FusePosition.WITH:
-      return [];
+      return await withOptionAutocomplete(innerText, fuseCommand, callbacks, context);
   }
 }

@@ -10,6 +10,15 @@
 import type { ISuggestionItem } from '../../../commands_registry/types';
 import { withAutoSuggest } from './helpers';
 
+type MapValueType = 'string' | 'number' | 'boolean' | 'map';
+export interface MapParameterValues {
+  type: MapValueType;
+  suggestions: ISuggestionItem[];
+  children?: Record<string, MapParameterValues>;
+}
+
+export type MapParameters = Record<string, MapParameterValues>;
+
 /**
  * This function provides suggestions for map expressions within a command.
  *
@@ -28,7 +37,7 @@ import { withAutoSuggest } from './helpers';
  */
 export function getCommandMapExpressionSuggestions(
   innerText: string,
-  availableParameters: Record<string, ISuggestionItem[]>
+  availableParameters: MapParameters
 ): ISuggestionItem[] {
   // Suggest a parameter entry after { or after a comma
   if (/{\s*$/i.test(innerText) || /,\s*$/.test(innerText)) {
@@ -43,16 +52,17 @@ export function getCommandMapExpressionSuggestions(
       (paramName) => !usedParams.has(paramName)
     );
 
-    return availableParamNames.map((paramName) =>
-      withAutoSuggest({
+    return availableParamNames.map((paramName) => {
+      const valueSnippet = SNIPPET_BY_VALUE_TYPE[availableParameters[paramName].type];
+      return withAutoSuggest({
         label: paramName,
         kind: 'Constant',
         asSnippet: true,
-        text: `"${paramName}": "$0"`,
+        text: `"${paramName}": ${valueSnippet}`,
         detail: paramName,
         sortText: '1',
-      })
-    );
+      });
+    });
   }
 
   // Suggest a parameter value if on the right side of a parameter entry, capture the parameter name
@@ -60,8 +70,15 @@ export function getCommandMapExpressionSuggestions(
     const match = innerText.match(/"([^"]+)"\s*:\s*"[^"]*$/);
     const paramName = match ? match[1] : undefined;
     if (paramName && availableParameters[paramName]) {
-      return availableParameters[paramName];
+      return availableParameters[paramName].suggestions;
     }
   }
   return [];
 }
+
+const SNIPPET_BY_VALUE_TYPE: Record<MapValueType, string> = {
+  string: '"$0"',
+  number: '',
+  boolean: '',
+  map: '{ $0 }',
+};

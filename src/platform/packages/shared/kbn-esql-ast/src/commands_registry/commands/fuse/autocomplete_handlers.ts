@@ -8,11 +8,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { MapParameters } from '../../../definitions/utils/autocomplete/map_expression';
+import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import {
   withAutoSuggest,
   commaCompleteItem,
   pipeCompleteItem,
   withCompleteItem,
+  noneValueCompleteItem,
+  minMaxValueCompleteItem,
 } from '../../../..';
 import { isColumn } from '../../../ast/is';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
@@ -158,6 +162,41 @@ export async function keyByAutocomplete(
     getSuggestionsForIncomplete,
     getSuggestionsForComplete
   );
+}
+
+/**
+ * Returns suggestions for the `WITH` argument of the `FUSE` command.
+ * The suggestions depend on the `<fuse_method>` used.
+ * The default fuse method is `rrf`.
+ * If `rrf`, it suggests `rank_constant` and `weights`.
+ * If `linear` method is used, it suggests `normalizer` and `weights`.
+ */
+export async function withOptionAutocomplete(
+  innerText: string,
+  command: ESQLAstFuseCommand,
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext
+) {
+  const rrfParameters: MapParameters = {
+    rank_constant: {
+      type: 'number',
+      suggestions: [],
+    },
+    weights: { type: 'map', suggestions: [] },
+  };
+
+  const linearParameters: MapParameters = {
+    normalizer: {
+      type: 'string',
+      suggestions: [noneValueCompleteItem, minMaxValueCompleteItem],
+    },
+    weights: { type: 'map', suggestions: [] },
+  };
+
+  const mapParameters =
+    !command.fuseType || command.fuseType.text === 'rrf' ? rrfParameters : linearParameters;
+
+  return getCommandMapExpressionSuggestions(innerText, mapParameters);
 }
 
 /**
