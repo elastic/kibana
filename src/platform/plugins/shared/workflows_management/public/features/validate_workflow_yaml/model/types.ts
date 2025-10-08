@@ -49,45 +49,57 @@ interface YamlValidationResultBase {
   endColumn: number;
   hoverMessage: string | null;
   afterMessage?: string | null;
+  source: string | undefined; // the source of the marker
 }
 
 interface YamlValidationResultNonUniqueStepName extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
-  source: 'step-name-validation';
+  owner: 'step-name-validation';
 }
 
 interface YamlValidationResultVariableError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
-  source: 'variable-validation';
+  owner: 'variable-validation';
 }
 
 // null means that the result is not an error
 interface YamlValidationResultVariableValid extends YamlValidationResultBase {
   severity: null;
   message: null;
-  source: 'variable-validation';
+  owner: 'variable-validation';
 }
 
 interface YamlValidationResultMonacoYaml extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
-  source: 'monaco-yaml';
+  owner: 'yaml';
   hoverMessage: null;
 }
 
 interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase {
   severity: null;
   message: null;
-  source: 'connector-id-validation';
+  owner: 'connector-id-validation';
   after: string | null;
 }
 
 interface YamlValidationResultConnectorIdError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
-  source: 'connector-id-validation';
+  owner: 'connector-id-validation';
+}
+
+export function isKnownYamlValidationResultOwner(
+  owner: string
+): owner is YamlValidationResult['owner'] {
+  return [
+    'step-name-validation',
+    'variable-validation',
+    'yaml',
+    'connector-id-validation',
+  ].includes(owner);
 }
 
 export type YamlValidationResult =

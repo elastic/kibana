@@ -120,7 +120,6 @@ export interface WorkflowYAMLEditorProps {
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
   onChange?: (value: string | undefined) => void;
-  onValidationErrors?: React.Dispatch<React.SetStateAction<YamlValidationResult[]>>;
   onSave?: (value: string) => void;
   esHost?: string;
   kibanaHost?: string;
@@ -141,7 +140,6 @@ export const WorkflowYAMLEditor = ({
   onMount,
   onChange,
   onSave,
-  onValidationErrors,
   esHost = 'http://localhost:9200',
   kibanaHost,
   selectedExecutionId,
@@ -233,7 +231,6 @@ export const WorkflowYAMLEditor = ({
     useMonacoMarkersChangedInterceptor({
       yamlDocumentRef,
       workflowYamlSchema: workflowYamlSchemaLoose,
-      onValidationErrors,
     });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
@@ -523,23 +520,19 @@ export const WorkflowYAMLEditor = ({
   }, [workflowYamlSchemaLoose, connectorsData?.connectorTypes]);
 
   useEffect(() => {
-    // Monkey patching to set the initial markers
-    // https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
-    // +
-    // Intercept and modify markers at the source to fix connector validation messages
-    // This prevents Monaco from ever seeing the problematic numeric enum messages
+    // Monkey patching
+    // 1. to set the initial markers https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
+    // 2. to intercept and format markers validation messages – this prevents Monaco from ever seeing the problematic numeric enum messages
     const setModelMarkers = monaco.editor.setModelMarkers;
     monaco.editor.setModelMarkers = function (model, owner, markers) {
-      // check if the model is the same as the editor model
+      // as we intercepted the setModelMarkers method, we need to check if the call is from the current editor to avoid setting markers which could come from other editors
       const editorUri = editorRef.current?.getModel()?.uri;
       if (model.uri.path !== editorUri?.path) {
         return;
       }
-      const transformedMarkers = transformMonacoMarkers(model, markers, owner);
+      const transformedMarkers = transformMonacoMarkers(model, owner, markers);
       setModelMarkers.call(monaco.editor, model, owner, transformedMarkers);
-      if (editorRef.current) {
-        handleMarkersChanged(model, transformedMarkers, owner);
-      }
+      handleMarkersChanged(model, owner, transformedMarkers);
     };
 
     return () => {
