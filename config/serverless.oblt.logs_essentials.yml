@@ -18,6 +18,8 @@ xpack.exploratoryView.enabled: false
 xpack.features.overrides:
   ### Machine Learning feature privilege should be hidden
   ml.hidden: true
+  ### Workflows Management feature privilege should be hidden
+  workflowsManagement.hidden: true
 
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations
