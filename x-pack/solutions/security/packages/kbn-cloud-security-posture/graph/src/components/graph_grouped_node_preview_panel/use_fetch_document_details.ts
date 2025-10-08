@@ -98,6 +98,8 @@ const buildItemFromHit = (hit: EsHitRecord): EventItem | AlertItem => {
       ? DOCUMENT_TYPE_ALERT
       : DOCUMENT_TYPE_EVENT,
     id: hitSource.event?.id,
+    docId: hit._id,
+    index: hit._index,
     timestamp: hitSource['@timestamp'],
     action: hitSource.event?.action,
     actor: { id: hitSource.actor?.entity?.id },
