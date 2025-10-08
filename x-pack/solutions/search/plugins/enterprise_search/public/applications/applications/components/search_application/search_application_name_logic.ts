@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 export interface SearchApplicationNameProps {
   searchApplicationName: string;
@@ -33,7 +34,6 @@ export const SearchApplicationNameLogic = kea<
       // Short-circuiting this to empty string is necessary to enable testing logics relying on this
       props.searchApplicationName ?? '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setSearchApplicationName: (_, { name }) => name,
       },
     ],

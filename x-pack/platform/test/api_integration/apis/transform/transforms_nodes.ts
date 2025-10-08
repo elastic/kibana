@@ -11,7 +11,7 @@ import type { GetTransformNodesResponseSchema } from '@kbn/transform-plugin/serv
 import { getCommonRequestHeader } from '../../services/ml/common_api';
 import { USER } from '../../services/transform/security_common';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');

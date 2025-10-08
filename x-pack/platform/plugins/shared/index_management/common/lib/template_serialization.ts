@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   TemplateDeserialized,
   LegacyTemplateSerialized,
   TemplateSerialized,
@@ -20,7 +20,7 @@ import {
   STANDARD_INDEX_MODE,
   LOGSDB_INDEX_MODE,
 } from '../constants';
-import { DataStreamOptions } from '../types/data_streams';
+import type { DataStreamOptions } from '../types/data_streams';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 

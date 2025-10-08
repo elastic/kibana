@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { flatten } from 'lodash';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTING_EXAMPLE_APP_ID, Craft, Operator } from '../../common/constants';
 
 export function registerNavigation(alerting: AlertingSetup) {

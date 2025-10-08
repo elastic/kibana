@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
-import { ReportViewType } from '../../types';
+import type { ReportViewType } from '../../types';
 
 import { useExploratoryView } from '../../contexts/exploratory_view_config';
 

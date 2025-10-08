@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ActionType } from '@kbn/actions-plugin/common';
-import { AIConnector } from '../connectorland/connector_selector';
+import type { ActionType } from '@kbn/actions-plugin/common';
+import type { AIConnector } from '../connectorland/connector_selector';
 
 export const mockActionTypes = [
   {

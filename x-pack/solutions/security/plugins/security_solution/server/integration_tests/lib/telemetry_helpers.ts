@@ -24,7 +24,7 @@ import {
   deleteExceptionList,
   deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
-import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common/constants';
+import { getAgentPolicySavedObjectType } from '@kbn/fleet-plugin/server/services/agent_policy';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { packagePolicyService } from '@kbn/fleet-plugin/server/services';
@@ -287,28 +287,38 @@ export async function createAgentPolicy(
     ],
   };
 
-  await soClient.get<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, id).catch(async (e) => {
+  const agentPolicyType = await getAgentPolicySavedObjectType();
+  await soClient.get<unknown>(agentPolicyType, id).catch(async (e) => {
     try {
-      return await soClient.create<unknown>(LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, {}, { id });
+      return await soClient.create<unknown>(agentPolicyType, {}, { id });
     } catch {
       logger.error(`>> Error searching for agent: ${e}`);
       throw Error(`>> Error searching for agent: ${e}`);
     }
   });
-
-  await packagePolicyService.get(soClient, id).catch(async () => {
-    try {
-      return await packagePolicyService.create(soClient, esClient, packagePolicy, {
-        id,
-        spaceId: 'default',
-        bumpRevision: false,
-        force: true,
+  // sometimes we can get an error from epr, e.g.
+  // 503 Service Temporarily Unavailable' error response from package registry at https://epr.elastic.co/package/endpoint/8.15.1/
+  // in case of error, retry up to 1 min, waiting 10 secs between attempts
+  // more info: https://github.com/elastic/kibana/issues/231535
+  await eventually(
+    async () => {
+      await packagePolicyService.get(soClient, id).catch(async () => {
+        try {
+          return await packagePolicyService.create(soClient, esClient, packagePolicy, {
+            id,
+            spaceId: 'default',
+            bumpRevision: false,
+            force: true,
+          });
+        } catch (e) {
+          logger.error(`>> Error creating package policy: ${e}`);
+          throw Error(`>> Error creating package policy: ${e}`);
+        }
       });
-    } catch (e) {
-      logger.error(`>> Error creating package policy: ${e}`);
-      throw Error(`>> Error creating package policy: ${e}`);
-    }
-  });
+    },
+    60000,
+    10000
+  );
 }
 
 export async function createMockedExceptionList(so: SavedObjectsServiceStart) {

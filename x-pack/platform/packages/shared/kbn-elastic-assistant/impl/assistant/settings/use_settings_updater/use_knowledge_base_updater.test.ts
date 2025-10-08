@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useKnowledgeBaseUpdater } from './use_knowledge_base_updater';
-import { AssistantTelemetry } from '../../../..';
+import type { AssistantTelemetry } from '../../../..';
 
 describe('useKnowledgeBaseUpdater', () => {
   const mockSetKnowledgeBase = jest.fn();

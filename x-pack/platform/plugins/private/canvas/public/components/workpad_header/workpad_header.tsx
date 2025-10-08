@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
-import { Action } from 'redux-actions';
+import type { Dispatch } from 'redux';
+import type { Action } from 'redux-actions';
 // @ts-expect-error untyped local
 import { elementsRegistry } from '../../lib/elements_registry';
 import { canUserWrite } from '../../state/selectors/app';
@@ -16,8 +16,9 @@ import { getSelectedPage, isWriteable } from '../../state/selectors/workpad';
 import { setWriteable } from '../../state/actions/workpad';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
-import { CommitFn, ElementSpec, State } from '../../../types';
-import { WorkpadHeader as Component, Props as ComponentProps } from './workpad_header.component';
+import type { CommitFn, ElementSpec, State } from '../../../types';
+import type { Props as ComponentProps } from './workpad_header.component';
+import { WorkpadHeader as Component } from './workpad_header.component';
 import { AddEmbeddablePanel } from '../embeddable_flyout';
 
 interface Props {

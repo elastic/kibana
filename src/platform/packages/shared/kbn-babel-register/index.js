@@ -61,6 +61,8 @@ const IGNORE_PATTERNS = [
 
   // ignore packages with "babel" in their names
   /[\/\\]packages[\/\\]([^\/\\]+-)?babel(-[^\/\\]+)?[\/\\]/,
+  // ignore babel plugins
+  /lazy_babel_plugin\.js$/,
 
   // ignore paths matching `/canvas/canvas_plugin/`
   /[\/\\]canvas[\/\\]canvas_plugin[\/\\]/,
@@ -134,7 +136,7 @@ function install(options = undefined) {
       return transform(path, code, cache);
     },
     {
-      exts: ['.js', '.ts', '.tsx', '.peggy'],
+      exts: ['.js', '.ts', '.tsx', '.text', '.peggy'],
       ignoreNodeModules: false,
       matcher(path) {
         if (options?.only && !match(path, options.only)) {

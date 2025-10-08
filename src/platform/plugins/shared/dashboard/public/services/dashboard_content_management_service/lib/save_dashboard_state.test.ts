@@ -10,7 +10,7 @@
 import { getSampleDashboardState } from '../../../mocks';
 import { contentManagementService, coreServices, dataService } from '../../kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
-import { DashboardPanel } from '../../../../server';
+import type { DashboardPanel } from '../../../../server';
 
 contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
   if (options.id === undefined) {
@@ -86,7 +86,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooThree',
-        panels: [{ type: 'boop', panelIndex: 'idOne' } as DashboardPanel],
+        panels: [{ type: 'boop', uid: 'idOne' } as DashboardPanel],
       },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
@@ -99,7 +99,7 @@ describe('Save dashboard state', () => {
         data: expect.objectContaining({
           panels: expect.arrayContaining([
             expect.objectContaining({
-              panelIndex: expect.not.stringContaining('aVerySpecialVeryUniqueId'),
+              uid: expect.not.stringContaining('aVerySpecialVeryUniqueId'),
             }),
           ]),
         }),
@@ -112,7 +112,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooFour',
-        panels: [{ type: 'boop', panelIndex: 'idOne' } as DashboardPanel],
+        panels: [{ type: 'boop', uid: 'idOne' } as DashboardPanel],
       },
       panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
       lastSavedId: 'Boogatoonie',
@@ -140,7 +140,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooThree',
-        panels: [{ type: 'boop', panelIndex: 'idOne' } as DashboardPanel],
+        panels: [{ type: 'boop', uid: 'idOne' } as DashboardPanel],
       },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },

@@ -9,9 +9,10 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import HeatmapOptions, { HeatmapOptionsProps } from './heatmap';
+import type { HeatmapOptionsProps } from './heatmap';
+import HeatmapOptions from './heatmap';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 

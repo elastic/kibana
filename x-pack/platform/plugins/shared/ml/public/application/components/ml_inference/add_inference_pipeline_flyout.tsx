@@ -15,6 +15,7 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -102,12 +103,18 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [model?.model_id]
   );
-
+  const titleId = useGeneratedHtmlId({ prefix: 'mlInferencePipelineFlyoutTitle' });
   return (
-    <EuiFlyout onClose={onClose} size="l" data-test-subj="mlTrainedModelsInferencePipelineFlyout">
+    <EuiFlyout
+      onClose={onClose}
+      size="l"
+      data-test-subj="mlTrainedModelsInferencePipelineFlyout"
+      includeFixedHeadersInFocusTrap={false}
+      aria-labelledby={titleId}
+    >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h3>
+          <h3 id={titleId}>
             {i18n.translate(
               'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.title',
               {

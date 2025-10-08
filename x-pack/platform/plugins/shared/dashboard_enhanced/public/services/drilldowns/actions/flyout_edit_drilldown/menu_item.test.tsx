@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
-import { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
-import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { SerializedEvent } from '@kbn/ui-actions-enhanced-plugin/common';
+import type { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { FlyoutEditDrilldownActionApi } from './flyout_edit_drilldown';
+import type { FlyoutEditDrilldownActionApi } from './flyout_edit_drilldown';
 import { MenuItem } from './menu_item';
 
 test('<MenuItem/>', () => {

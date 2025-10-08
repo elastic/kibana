@@ -6,31 +6,30 @@
  */
 import React, { useMemo } from 'react';
 import _ from 'lodash';
-import {
-  DataGridDensity,
+import type {
   UnifiedDataTableSettings,
   UnifiedDataTableSettingsColumn,
-  useColumns,
 } from '@kbn/unified-data-table';
+import { DataGridDensity, useColumns } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import { DataTableRecord } from '@kbn/discover-utils/types';
-import {
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
   EuiDataGridStyle,
-  EuiProgress,
 } from '@elastic/eui';
-import { AddFieldFilterHandler } from '@kbn/unified-field-list';
+import { EuiProgress } from '@elastic/eui';
+import type { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
 import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
+import type { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';

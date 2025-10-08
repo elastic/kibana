@@ -13,7 +13,10 @@ import type {
   SingleEventMetric,
   AlertSuppressionUsage,
   SpacesUsage,
+  FeatureTypeUsage,
   ResponseActionsUsage,
+  UpgradeableRulesSummary,
+  ThreatMatchFeatureTypeUsage,
 } from './types';
 
 export const initialAlertSuppression: AlertSuppressionUsage = {
@@ -44,127 +47,48 @@ export const getInitialSpacesUsage = (): SpacesUsage => ({
   rules_in_spaces: [],
 });
 
+export const getInitialFeatureTypeUsage = (): FeatureTypeUsage => ({
+  enabled: 0,
+  disabled: 0,
+  alerts: 0,
+  cases: 0,
+  legacy_notifications_enabled: 0,
+  legacy_notifications_disabled: 0,
+  notifications_enabled: 0,
+  notifications_disabled: 0,
+  legacy_investigation_fields: 0,
+  alert_suppression: initialAlertSuppression,
+  response_actions: initialResponseActionsUsage,
+  has_exceptions: 0,
+});
+
+export const getInitialThreatMatchFeatureTypeUsage = (): ThreatMatchFeatureTypeUsage => ({
+  ...getInitialFeatureTypeUsage(),
+  has_does_not_match_condition: 0,
+});
+
 /**
  * Default detection rule usage count, split by type + elastic/custom
  */
 export const getInitialRulesUsage = (): RulesTypeUsage => ({
-  query: {
-    enabled: 0,
-    disabled: 0,
-    alerts: 0,
-    cases: 0,
-    legacy_notifications_enabled: 0,
-    legacy_notifications_disabled: 0,
-    notifications_enabled: 0,
-    notifications_disabled: 0,
-    legacy_investigation_fields: 0,
-    alert_suppression: initialAlertSuppression,
-    response_actions: initialResponseActionsUsage,
-  },
-  threshold: {
-    enabled: 0,
-    disabled: 0,
-    alerts: 0,
-    cases: 0,
-    legacy_notifications_enabled: 0,
-    legacy_notifications_disabled: 0,
-    notifications_enabled: 0,
-    notifications_disabled: 0,
-    legacy_investigation_fields: 0,
-    alert_suppression: initialAlertSuppression,
-    response_actions: initialResponseActionsUsage,
-  },
-  eql: {
-    enabled: 0,
-    disabled: 0,
-    alerts: 0,
-    cases: 0,
-    legacy_notifications_enabled: 0,
-    legacy_notifications_disabled: 0,
-    notifications_enabled: 0,
-    notifications_disabled: 0,
-    legacy_investigation_fields: 0,
-    alert_suppression: initialAlertSuppression,
-    response_actions: initialResponseActionsUsage,
-  },
-  machine_learning: {
-    enabled: 0,
-    disabled: 0,
-    alerts: 0,
-    cases: 0,
-    legacy_notifications_enabled: 0,
-    legacy_notifications_disabled: 0,
-    notifications_enabled: 0,
-    notifications_disabled: 0,
-    legacy_investigation_fields: 0,
-    alert_suppression: initialAlertSuppression,
-    response_actions: initialResponseActionsUsage,
-  },
-  threat_match: {
-    enabled: 0,
-    disabled: 0,
-    alerts: 0,
-    cases: 0,
-    legacy_notifications_enabled: 0,
-    legacy_notifications_disabled: 0,
-    notifications_enabled: 0,
-    notifications_disabled: 0,
-    legacy_investigation_fields: 0,
-    alert_suppression: initialAlertSuppression,
-    response_actions: initialResponseActionsUsage,
-  },
-  new_terms: {
-    enabled: 0,
-    disabled: 0,
-    alerts: 0,
-    cases: 0,
-    legacy_notifications_enabled: 0,
-    legacy_notifications_disabled: 0,
-    notifications_enabled: 0,
-    notifications_disabled: 0,
-    legacy_investigation_fields: 0,
-    alert_suppression: initialAlertSuppression,
-    response_actions: initialResponseActionsUsage,
-  },
-  esql: {
-    enabled: 0,
-    disabled: 0,
-    alerts: 0,
-    cases: 0,
-    legacy_notifications_enabled: 0,
-    legacy_notifications_disabled: 0,
-    notifications_enabled: 0,
-    notifications_disabled: 0,
-    legacy_investigation_fields: 0,
-    alert_suppression: initialAlertSuppression,
-    response_actions: initialResponseActionsUsage,
-  },
-  elastic_total: {
-    enabled: 0,
-    disabled: 0,
-    alerts: 0,
-    cases: 0,
-    legacy_notifications_enabled: 0,
-    legacy_notifications_disabled: 0,
-    notifications_enabled: 0,
-    notifications_disabled: 0,
-    legacy_investigation_fields: 0,
-    alert_suppression: initialAlertSuppression,
-    response_actions: initialResponseActionsUsage,
-  },
-  custom_total: {
-    enabled: 0,
-    disabled: 0,
-    alerts: 0,
-    cases: 0,
-    legacy_notifications_enabled: 0,
-    legacy_notifications_disabled: 0,
-    notifications_enabled: 0,
-    notifications_disabled: 0,
-    legacy_investigation_fields: 0,
-    alert_suppression: initialAlertSuppression,
-    response_actions: initialResponseActionsUsage,
-  },
+  query: getInitialFeatureTypeUsage(),
+  query_custom: getInitialFeatureTypeUsage(),
+  threshold: getInitialFeatureTypeUsage(),
+  threshold_custom: getInitialFeatureTypeUsage(),
+  eql: getInitialFeatureTypeUsage(),
+  eql_custom: getInitialFeatureTypeUsage(),
+  machine_learning: getInitialFeatureTypeUsage(),
+  machine_learning_custom: getInitialFeatureTypeUsage(),
+  threat_match: getInitialThreatMatchFeatureTypeUsage(),
+  threat_match_custom: getInitialThreatMatchFeatureTypeUsage(),
+  new_terms: getInitialFeatureTypeUsage(),
+  new_terms_custom: getInitialFeatureTypeUsage(),
+  esql: getInitialFeatureTypeUsage(),
+  esql_custom: getInitialFeatureTypeUsage(),
+  elastic_total: getInitialFeatureTypeUsage(),
+  elastic_customized_total: getInitialFeatureTypeUsage(),
+  elastic_noncustomized_total: getInitialFeatureTypeUsage(),
+  custom_total: getInitialFeatureTypeUsage(),
 });
 
 /**
@@ -229,4 +153,23 @@ export const getInitialMaxAvgMin = (): MaxAvgMin => ({
   max: 0.0,
   avg: 0.0,
   min: 0.0,
+});
+
+/**
+ * Returns the initial usage statistics for rule upgrade status.
+ *
+ * The returned object contains default values for the total number of upgradeable rules,
+ * the number of customized rules, and the counts of enabled and disabled rules.
+ *
+ * @returns {UpgradeableRulesSummary} An object with initial values for rule upgrade status:
+ * - `total`: The total number of upgradeable rules (default is 0).
+ * - `customized`: The number of customized upgradeable rules (default is 0).
+ * - `enabled`: The number of enabled upgradeable rules (default is 0).
+ * - `disabled`: The number of disabled upgradeable rules (default is 0).
+ */
+export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
+  total: 0,
+  customized: 0,
+  enabled: 0,
+  disabled: 0,
 });

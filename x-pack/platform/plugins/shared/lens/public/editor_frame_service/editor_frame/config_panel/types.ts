@@ -7,14 +7,14 @@
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
-import { PublishingSubject } from '@kbn/presentation-publishing';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { LensInspector } from '../../../lens_inspector_service';
+import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { LensInspector } from '../../../lens_inspector_service';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { IndexPatternServiceAPI } from '../../../data_views_service/service';
 
-import {
+import type {
   Visualization,
   FramePublicAPI,
   DatasourceDimensionEditorProps,

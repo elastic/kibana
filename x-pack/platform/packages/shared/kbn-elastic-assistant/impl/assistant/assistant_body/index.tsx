@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import React, {
-  Dispatch,
-  FunctionComponent,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react';
+import type { Dispatch, FunctionComponent, SetStateAction } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -21,22 +15,26 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { css } from '@emotion/react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { ConversationSharedState } from '@kbn/elastic-assistant-common';
+import { SharedConversationOwnerCallout } from '../shared_conversation_callout/owner';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';
-import { Conversation } from '../../..';
+import type { Conversation } from '../../..';
 import { UpgradeLicenseCallToAction } from '../upgrade_license_cta';
 import * as i18n from '../translations';
 interface Props {
   allSystemPrompts: PromptResponse[];
   comments: JSX.Element;
+  conversationSharedState: ConversationSharedState;
   currentConversation: Conversation | undefined;
   currentSystemPromptId: string | undefined;
   handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
   isAssistantEnabled: boolean;
+  isConversationOwner: boolean;
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;
   isLoading: boolean;
@@ -49,12 +47,14 @@ interface Props {
 export const AssistantBody: FunctionComponent<Props> = ({
   allSystemPrompts,
   comments,
+  conversationSharedState,
   currentConversation,
   currentSystemPromptId,
   handleOnConversationSelected,
   setCurrentSystemPromptId,
   http,
   isAssistantEnabled,
+  isConversationOwner,
   isLoading,
   isSettingsModalVisible,
   isWelcomeSetup,
@@ -141,6 +141,14 @@ export const AssistantBody: FunctionComponent<Props> = ({
           >
             {comments}
           </EuiPanel>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {isConversationOwner && conversationSharedState !== ConversationSharedState.PRIVATE && (
+          <SharedConversationOwnerCallout
+            id={currentConversation?.id ?? ''}
+            isGloballyShared={conversationSharedState === ConversationSharedState.SHARED}
+          />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>

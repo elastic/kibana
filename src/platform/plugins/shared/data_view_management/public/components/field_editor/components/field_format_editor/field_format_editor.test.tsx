@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public/service';
+import type { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public/service';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { shallow } from 'enzyme';
 import React, { PureComponent } from 'react';

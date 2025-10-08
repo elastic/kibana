@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import type { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -17,9 +17,9 @@ import type {
   PartitionLegendValue,
 } from '@kbn/visualizations-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
+import type { ChartTypes } from './expression_functions';
 import {
   type AllowedPartitionOverrides,
-  ChartTypes,
   type ExpressionValuePartitionLabels,
 } from './expression_functions';
 

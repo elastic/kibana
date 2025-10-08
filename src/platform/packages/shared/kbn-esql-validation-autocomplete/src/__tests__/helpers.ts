@@ -6,36 +6,39 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { METADATA_FIELDS, fieldTypes } from '@kbn/esql-ast';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import { camelCase } from 'lodash';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
-import { ESQLFieldWithMetadata } from '../validation/types';
-import { fieldTypes } from '../definitions/types';
-import { ESQLCallbacks } from '../shared/types';
-import { METADATA_FIELDS } from '../shared/constants';
+import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type { ESQLCallbacks } from '../shared/types';
 
 export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
   name: field,
   type: 'keyword',
+  userDefined: false as false,
 }));
 
 export const fields: ESQLFieldWithMetadata[] = [
-  ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
-  { name: 'any#Char$Field', type: 'double' },
-  { name: 'kubernetes.something.something', type: 'double' },
-  { name: '@timestamp', type: 'date' },
+  ...fieldTypes.map((type) => ({
+    name: `${camelCase(type)}Field`,
+    type,
+    userDefined: false as false,
+  })),
+  { name: 'any#Char$Field', type: 'double', userDefined: false },
+  { name: 'kubernetes.something.something', type: 'double', userDefined: false },
+  { name: '@timestamp', type: 'date', userDefined: false },
 ];
 
 export const enrichFields: ESQLFieldWithMetadata[] = [
-  { name: 'otherField', type: 'text' },
-  { name: 'yetAnotherField', type: 'double' },
+  { name: 'otherField', type: 'text', userDefined: false },
+  { name: 'yetAnotherField', type: 'double', userDefined: false },
 ];
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const unsupported_field: ESQLFieldWithMetadata[] = [
-  { name: 'unsupported_field', type: 'unsupported' },
+  { name: 'unsupported_field', type: 'unsupported', userDefined: false },
 ];
 
 export const indexes = [
@@ -142,6 +145,7 @@ export function getCallbackMocks(): ESQLCallbacks {
           name: 'keywordField',
           type: 'unsupported',
           hasConflict: true,
+          userDefined: false,
         };
         return [field];
       }

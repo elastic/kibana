@@ -1,0 +1,249 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`transpile (Streamlang DSL to ingest pipeline) should handle manual_ingest_pipeline with nested and top-level if 1`] = `
+Object {
+  "processors": Array [
+    Object {
+      "set": Object {
+        "field": "foo",
+        "if": "ctx._source.active == true",
+        "ignore_failure": true,
+        "on_failure": Array [
+          Object {
+            "set": Object {
+              "field": "error",
+              "value": "failed",
+            },
+          },
+        ],
+        "tag": "custom-pipeline",
+        "value": "bar",
+      },
+    },
+    Object {
+      "rename": Object {
+        "field": "foo",
+        "if": "
+  try {
+  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "ignore_failure": true,
+        "on_failure": Array [
+          Object {
+            "set": Object {
+              "field": "error",
+              "value": "failed",
+            },
+          },
+        ],
+        "tag": "custom-pipeline",
+        "target_field": "baz",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "baz",
+        "if": "ctx._source.env == 'prod'",
+        "ignore_failure": true,
+        "on_failure": Array [
+          Object {
+            "set": Object {
+              "field": "error",
+              "value": "failed",
+            },
+          },
+        ],
+        "tag": "custom-pipeline",
+        "value": "qux",
+      },
+    },
+  ],
+}
+`;
+
+exports[`transpile (Streamlang DSL to ingest pipeline) should handle not conditions 1`] = `
+Object {
+  "processors": Array [
+    Object {
+      "set": Object {
+        "field": "attributes.not_flag",
+        "if": "
+  try {
+  if (!(($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\")))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "not-active",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.not_nested",
+        "if": "
+  try {
+  if (!((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == \\"1\\")) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == \\"2\\"))))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "not-a-or-b",
+      },
+    },
+  ],
+}
+`;
+
+exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variety of processor steps and where blocks 1`] = `
+Object {
+  "processors": Array [
+    Object {
+      "rename": Object {
+        "field": "attributes.old_name",
+        "target_field": "attributes.new_name",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.status",
+        "value": "active",
+      },
+    },
+    Object {
+      "grok": Object {
+        "ecs_compatibility": "v1",
+        "field": "body.message",
+        "patterns": Array [
+          "%{IP:attributes.client_ip} - %{WORD:attributes.method}",
+        ],
+      },
+    },
+    Object {
+      "date": Object {
+        "field": "attributes.timestamp",
+        "formats": Array [
+          "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+          "yyyy-MM-dd HH:mm:ss",
+        ],
+        "output_format": "yyyy-MM-dd",
+        "target_field": "attributes.parsed_time",
+      },
+    },
+    Object {
+      "dissect": Object {
+        "field": "body.log",
+        "pattern": "%{attributes.client} %{attributes.method} %{attributes.path}",
+      },
+    },
+    Object {
+      "append": Object {
+        "field": "attributes.tags",
+        "value": Array [
+          "new_tag",
+        ],
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.flag",
+        "if": "
+  try {
+  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "yes",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.prod_flag",
+        "if": "
+  try {
+  if (($('attributes.env', null) !== null && (($('attributes.env', null) instanceof Number && $('attributes.env', null).toString() == \\"prod\\") || $('attributes.env', null) == \\"prod\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "prod-env",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.prod_flag",
+        "if": "
+  try {
+  if (($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == \\"1\\")) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == \\"2\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "prod-env",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.department_flag",
+        "if": "
+  try {
+  if ((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == \\"1\\")) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == \\"2\\"))) && ($('attributes.department', null) !== null && (($('attributes.department', null) instanceof Number && $('attributes.department', null).toString() == \\"legal\\") || $('attributes.department', null) == \\"legal\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "legal-department",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.test",
+        "if": "
+  try {
+  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\")) || (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"inactive\\") || $('attributes.status', null) == \\"inactive\\")) && ($('attributes.read_only', null) !== null && (($('attributes.read_only', null) instanceof Number && $('attributes.read_only', null).toString() == \\"false\\") || $('attributes.read_only', null) == \\"false\\")))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "yes",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.my_field",
+        "ignore_failure": undefined,
+        "on_failure": undefined,
+        "tag": undefined,
+        "value": "my_value",
+      },
+    },
+  ],
+}
+`;

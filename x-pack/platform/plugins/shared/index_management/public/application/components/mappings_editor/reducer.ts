@@ -18,7 +18,7 @@ import {
   shouldDeleteChildFieldsAfterTypeChange,
   updateFieldsPathAfterFieldNameChange,
 } from './lib';
-import { Action, Field, NormalizedField, NormalizedFields, State } from './types';
+import type { Action, Field, NormalizedField, NormalizedFields, State } from './types';
 
 export const addFieldToState = (field: Field, state: State): State => {
   const updatedFields = { ...state.fields };

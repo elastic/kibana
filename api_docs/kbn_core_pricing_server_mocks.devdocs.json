@@ -22,9 +22,11 @@
         "label": "PricingServiceContract",
         "description": [],
         "signature": [
-          "{ start: () => { isFeatureAvailable: <TFeatureId extends string>(featureId: TFeatureId) => boolean; }; setup: ({ http }: SetupDeps) => Promise<{ registerProductFeatures: (features: ",
+          "{ start: () => { isFeatureAvailable: <TFeatureId extends string>(featureId: TFeatureId) => boolean; getActiveProduct: () => ",
+          "PricingProduct",
+          " | undefined; }; setup: ({ http }: SetupDeps) => Promise<{ evaluateProductFeatures: () => void; isFeatureAvailable: (featureId: string) => Promise<boolean>; registerProductFeatures: (features: ",
           "PricingProductFeature",
-          "[]) => void; }>; preboot: ({ http }: PrebootDeps) => void; }"
+          "[]) => void; }>; stop: () => void; preboot: ({ http }: PrebootDeps) => void; }"
         ],
         "path": "src/core/packages/pricing/server-mocks/src/pricing_service.mock.ts",
         "deprecated": false,

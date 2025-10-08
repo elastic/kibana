@@ -27,7 +27,7 @@ const DEFAULT_BUNDLED_PACKAGE_LOCATION = path.join(__dirname, '../target/bundled
 const DEFAULT_GPG_KEY_PATH = path.join(__dirname, '../target/keys/GPG-KEY-elasticsearch');
 
 const REGISTRY_SPEC_MIN_VERSION = '2.3';
-const REGISTRY_SPEC_MAX_VERSION = '3.4';
+const REGISTRY_SPEC_MAX_VERSION = '3.5';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -50,6 +50,7 @@ export const config: PluginConfigDescriptor = {
       fleetServerStandalone: true,
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
+      excludeDataStreamTypes: true,
     },
     integrationsHomeOverride: true,
     prereleaseEnabledByDefault: true,
@@ -276,6 +277,9 @@ export const config: PluginConfigDescriptor = {
               ]),
               { defaultValue: [] }
             ),
+            searchAiLakePackageAllowlistEnabled: schema.maybe(
+              schema.boolean({ defaultValue: false })
+            ),
           },
           {
             defaultValue: {
@@ -289,6 +293,9 @@ export const config: PluginConfigDescriptor = {
             },
           }
         ),
+        excludeDataStreamTypes: schema.arrayOf(schema.string(), {
+          defaultValue: () => [],
+        }),
       }),
       enabled: schema.boolean({ defaultValue: true }),
       /**
@@ -317,6 +324,16 @@ export const config: PluginConfigDescriptor = {
         })
       ),
       syncIntegrations: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      agentStatusChange: schema.maybe(
+        schema.object({
+          taskInterval: schema.maybe(schema.string()),
+        })
+      ),
+      autoInstallContentPackages: schema.maybe(
         schema.object({
           taskInterval: schema.maybe(schema.string()),
         })

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   ApiServicesFixture,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
 } from '@kbn/scout';
-import { SecurityPageObjects, SecurityBrowserAuthFixture } from './test';
-import { DetectionRuleApiService } from './worker';
+import type { SecurityPageObjects, SecurityBrowserAuthFixture } from './test';
+import type { DetectionRuleApiService } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
   detectionRule: DetectionRuleApiService;

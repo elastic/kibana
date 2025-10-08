@@ -7,9 +7,9 @@
 
 import { fromExpression, toExpression } from '@kbn/interpreter';
 import { handleActions } from 'redux-actions';
-import { State } from '../../../types';
+import type { State } from '../../../types';
 
-import { UpdateEmbeddableExpressionPayload } from '../actions/embeddable';
+import type { UpdateEmbeddableExpressionPayload } from '../actions/embeddable';
 
 // @ts-expect-error untyped local
 import { assignNodeProperties } from './elements';

@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart } from './types';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { CloudDataMigrationPluginSetup, CloudDataMigrationPluginStart } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { BreadcrumbService } from './application/services/breadcrumbs';
 

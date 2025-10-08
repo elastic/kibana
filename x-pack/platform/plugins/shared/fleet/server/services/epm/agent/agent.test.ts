@@ -248,7 +248,7 @@ text_var: {{escape_string text_var}}
         text_var: {
           type: 'text',
           value: `This is a text with
-New lines and \\n escaped values.`,
+New lines and\\n escaped values.`,
         },
       };
 
@@ -256,7 +256,7 @@ New lines and \\n escaped values.`,
       expect(output).toEqual({
         input: 'log',
         text_var: `This is a text with
-New lines and \\n escaped values.`,
+New lines and\\n escaped values.`,
       });
     });
   });
@@ -272,7 +272,7 @@ New lines and \\n escaped values.`,
         multiline_text: {
           type: 'textarea',
           value: `This is a text with
-New lines and \n escaped values.`,
+New lines and\n escaped values.`,
         },
       };
 
@@ -280,7 +280,7 @@ New lines and \n escaped values.`,
       expect(output).toEqual({
         input: 'log',
         multiline_text: `This is a text with
-New lines and 
+New lines and
 escaped values.`,
       });
     });
@@ -498,7 +498,7 @@ paths:
 describe('encode', () => {
   it('should correctly percent encode a string', () => {
     const streamTemplate = `
-    hosts: 
+    hosts:
       - sqlserver://{{url_encode username}}:{{url_encode password}}@{{hosts}}`;
 
     const vars = {
@@ -515,7 +515,7 @@ describe('encode', () => {
 
   it('should correctly encode parts of the URI of the form domain\\username', () => {
     const streamTemplate = `
-    hosts: 
+    hosts:
       - sqlserver://{{url_encode username}}:{{url_encode password}}@{{hosts}}`;
 
     const vars = {
@@ -532,7 +532,7 @@ describe('encode', () => {
 
   it('should handle special characters which are not encoded by default', () => {
     const streamTemplate = `
-    hosts: 
+    hosts:
       - sqlserver://{{url_encode username}}:{{url_encode password}}@{{hosts}}`;
 
     const vars = {

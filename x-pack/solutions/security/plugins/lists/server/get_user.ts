@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityRequestHandlerContext } from '@kbn/core-security-server';
+import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 
 export interface GetUserOptions {
   security: SecurityRequestHandlerContext;

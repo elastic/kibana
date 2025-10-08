@@ -8,6 +8,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { BaseActionRequestSchema } from '../../common/base';
+import type { DeepMutable } from '../../../../../endpoint/types';
 
 const { parameters, ...restBaseSchema } = BaseActionRequestSchema;
 const getNonEmptyString = (fieldName: string) =>
@@ -62,12 +63,16 @@ export const MSDefenderEndpointRunScriptActionRequestParamsSchema = schema.objec
   args: schema.maybe(getNonEmptyString('Args')),
 });
 
-export const MSDefenderEndpointRunScriptActionRequestSchema = {
-  body: schema.object({
-    ...restBaseSchema,
-    parameters: MSDefenderEndpointRunScriptActionRequestParamsSchema,
-  }),
-};
+const SentinelOneRunScriptActionRequestParamsSchema = schema.object({
+  /**
+   * The SentinelOne Script ID to be executed
+   */
+  scriptId: getNonEmptyString('ScriptName'),
+  /**
+   * Any input arguments for the selected script
+   */
+  scriptInput: schema.maybe(getNonEmptyString('scriptInput')),
+});
 
 export const RunScriptActionRequestSchema = {
   body: schema.object({
@@ -80,13 +85,31 @@ export const RunScriptActionRequestSchema = {
         schema.siblingRef('agent_type'),
         'microsoft_defender_endpoint',
         MSDefenderEndpointRunScriptActionRequestParamsSchema,
-        schema.never()
+        schema.conditional(
+          schema.siblingRef('agent_type'),
+          'sentinel_one',
+          SentinelOneRunScriptActionRequestParamsSchema,
+          schema.never()
+        )
       )
     ),
   }),
 };
 
+type RunScriptActionRequestParameters = DeepMutable<
+  TypeOf<typeof RunScriptActionRequestSchema.body>['parameters']
+>;
+
 export type MSDefenderRunScriptActionRequestParams = TypeOf<
   typeof MSDefenderEndpointRunScriptActionRequestParamsSchema
 >;
-export type RunScriptActionRequestBody = TypeOf<typeof RunScriptActionRequestSchema.body>;
+
+export type RunScriptActionRequestBody<
+  TParams extends RunScriptActionRequestParameters = RunScriptActionRequestParameters
+> = Omit<TypeOf<typeof RunScriptActionRequestSchema.body>, 'parameters'> & {
+  parameters: TParams;
+};
+
+export type SentinelOneRunScriptActionRequestParams = DeepMutable<
+  TypeOf<typeof SentinelOneRunScriptActionRequestParamsSchema>
+>;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GaugeTypeProps } from '../types';
+import type { GaugeTypeProps } from '../types';
 import { getGaugeVisTypeDefinition } from './gauge';
 import { getGoalVisTypeDefinition } from './goal';
 

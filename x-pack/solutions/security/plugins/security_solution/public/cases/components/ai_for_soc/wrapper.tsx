@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { type EuiDataGridColumn, EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Alert } from '@kbn/alerting-types';
-import { Table } from './table';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
+import type { AlertsTableOnLoadedProps } from '@kbn/response-ops-alerts-table/types';
+import React, { memo } from 'react';
+import { useCreateEaseAlertsDataView } from '../../../detections/hooks/alert_summary/use_create_data_view';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
-import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
-import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
+import { Table } from './table';
 
 const DATAVIEW_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.aiForSocTableTab.dataViewError',
@@ -39,7 +33,7 @@ interface AiForSOCAlertsTableProps {
   /**
    * Callback fired when the alerts have been first loaded
    */
-  onLoaded?: (alerts: Alert[], columns: EuiDataGridColumn[]) => void;
+  onLoaded?: (props: AlertsTableOnLoadedProps) => void;
   /**
    * Query that contains the id of the alerts to display in the table
    */
@@ -48,36 +42,13 @@ interface AiForSOCAlertsTableProps {
 
 /**
  * Component used in the Cases page under the Alerts tab, only in the AI4DSOC tier.
- * It fetches rules, packages (integrations) and creates a local dataView.
+ * It fetches packages (integrations) and creates a local dataView.
  * It renders a loading skeleton while packages are being fetched and while the dataView is being created.
  */
 export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlertsTableProps) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView, loading: dataViewLoading } = useCreateEaseAlertsDataView();
 
-  const spaceId = useSpaceId();
-  const dataViewSpec = useMemo(() => ({ title: `${DEFAULT_ALERTS_INDEX}-${spaceId}` }), [spaceId]);
-
-  const { dataView: oldDataView, loading: oldDataViewLoading } = useCreateDataView({
-    dataViewSpec,
-    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
-  });
-
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
-  const dataViewLoading = newDataViewPickerEnabled ? status !== 'ready' : oldDataViewLoading;
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
-
-  // Fetch all integrations
   const { installedPackages, isLoading: integrationIsLoading } = useFetchIntegrations();
-
-  // Fetch all rules. For the AI for SOC effort, there should only be one rule per integration (which means for now 5-6 rules total)
-  const { data: ruleData, isLoading: ruleIsLoading } = useFindRulesQuery({});
-  const ruleResponse = useMemo(
-    () => ({
-      rules: ruleData?.rules || [],
-      isLoading: ruleIsLoading,
-    }),
-    [ruleData, ruleIsLoading]
-  );
 
   return (
     <EuiSkeletonRectangle
@@ -87,7 +58,7 @@ export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlerts
       width="100%"
     >
       <>
-        {!dataView || !dataView.id ? (
+        {!dataView ? (
           <EuiEmptyPrompt
             color="danger"
             data-test-subj={ERROR_TEST_ID}
@@ -102,7 +73,6 @@ export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlerts
               onLoaded={onLoaded}
               packages={installedPackages}
               query={query}
-              ruleResponse={ruleResponse}
             />
           </div>
         )}

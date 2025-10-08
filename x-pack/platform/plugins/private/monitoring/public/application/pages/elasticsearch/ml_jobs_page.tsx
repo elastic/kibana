@@ -11,7 +11,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ElasticsearchTemplate } from './elasticsearch_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ElasticsearchMLJobs } from '../../../components/elasticsearch';
-import { ComponentProps } from '../../route_init';
+import type { ComponentProps } from '../../route_init';
 import { SetupModeRenderer } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useTable } from '../../hooks/use_table';
@@ -46,7 +46,7 @@ export const ElasticsearchMLJobsPage: React.FC<ComponentProps> = ({ clusters }) 
   const [data, setData] = useState({} as any);
 
   const title = i18n.translate('xpack.monitoring.elasticsearch.mlJobs.routeTitle', {
-    defaultMessage: 'Elasticsearch - Machine Learning Jobs',
+    defaultMessage: 'Elasticsearch - Machine learning jobs',
   });
 
   const pageTitle = i18n.translate('xpack.monitoring.elasticsearch.mlJobs.pageTitle', {

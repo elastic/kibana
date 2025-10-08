@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   AVG_ID,
@@ -25,7 +24,8 @@ import {
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
+import type { ValueFormatConfig } from '../../../../../common';
+import type { LayerSettingsFeatures, OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -33,11 +33,7 @@ import {
   getFilter,
   isColumnOfType,
 } from './helpers';
-import {
-  FieldBasedIndexPatternColumn,
-  BaseIndexPatternColumn,
-  ValueFormatConfig,
-} from './column_types';
+import type { FieldBasedIndexPatternColumn, BaseIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
@@ -160,7 +156,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         operationType: type,
         sourceField: field.name,
         isBucketed: false,
-        scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,
@@ -182,12 +177,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         sourceField: field.name,
       };
     },
-    getAdvancedOptions: ({
-      layer,
-      columnId,
-      currentColumn,
-      paramEditorUpdater,
-    }: ParamEditorProps<T>) => {
+    getAdvancedOptions: ({ layer, columnId, currentColumn, paramEditorUpdater, euiTheme }) => {
       if (!hideZeroOption) return [];
       return [
         {
@@ -203,7 +193,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
               }
               labelProps={{
                 style: {
-                  fontWeight: euiThemeVars.euiFontWeightMedium,
+                  fontWeight: euiTheme.font.weight.medium,
                 },
               }}
               checked={Boolean(currentColumn.params?.emptyAsNull)}

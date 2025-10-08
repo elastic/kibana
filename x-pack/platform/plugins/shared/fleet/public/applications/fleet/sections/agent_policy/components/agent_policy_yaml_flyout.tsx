@@ -22,6 +22,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { MAX_FLYOUT_WIDTH } from '../../../constants';
@@ -38,6 +39,8 @@ const FlyoutBody = styled(EuiFlyoutBody)`
 
 export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => void }>(
   ({ policyId, onClose }) => {
+    const flyoutTitleId = useGeneratedHtmlId();
+
     const core = useStartServices();
     const { isLoading: isLoadingYaml, data: yamlData, error } = useGetOneAgentPolicyFull(policyId);
     const { data: agentPolicyData } = useGetOneAgentPolicy(policyId);
@@ -72,10 +75,10 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
       `?apiVersion=${API_VERSIONS.public.v1}`;
 
     return (
-      <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
-        <EuiFlyoutHeader hasBorder aria-labelledby="IngestManagerAgentPolicyYamlFlyoutTitle">
+      <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={flyoutTitleId}>
+        <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id="IngestManagerAgentPolicyYamlFlyoutTitle">
+            <h2 id={flyoutTitleId}>
               {agentPolicyData?.item ? (
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.yamlflyoutTitleWithName"

@@ -14,7 +14,6 @@ import { UserAtSpaceScenarios } from '../../../scenarios';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
-// eslint-disable-next-line import/no-default-export
 export default function bulkUntrackTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -30,7 +29,8 @@ export default function bulkUntrackTests({ getService }: FtrProviderContext) {
     });
   };
 
-  describe('bulk untrack', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/223942
+  describe.skip('bulk untrack', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(async () => {

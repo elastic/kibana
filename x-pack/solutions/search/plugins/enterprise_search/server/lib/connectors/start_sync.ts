@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
-import {
-  ConnectorConfiguration,
-  SyncJobType,
-  startConnectorSync,
-  fetchConnectorById,
-} from '@kbn/search-connectors';
+import type { ConnectorConfiguration } from '@kbn/search-connectors';
+import { SyncJobType, startConnectorSync, fetchConnectorById } from '@kbn/search-connectors';
 
 import { isConfigEntry } from '../../../common/connectors/is_category_entry';
 

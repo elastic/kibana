@@ -51,7 +51,7 @@ export const PrivilegedUserMonitoringValidationStep: React.FC<PrivilegedUserMoni
     };
 
     return (
-      <>
+      <div data-test-subj="privileged-user-monitoring-validation-step">
         <b>
           <FormattedMessage
             defaultMessage="{fileName} preview"
@@ -72,7 +72,7 @@ export const PrivilegedUserMonitoringValidationStep: React.FC<PrivilegedUserMoni
                     <span data-test-subj="privileged-user-monitoring-validLinesMessage">
                       <FormattedMessage
                         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.validationStep.validLinesMessage"
-                        defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} user will be assigned} other {{validLinesCountBold} users will be assigned}}"
+                        defaultMessage="{validLinesCount, plural, one {{validLinesCountBold} user will be added} other {{validLinesCountBold} users will be added}}"
                         values={{
                           validLinesCount: validLines.count,
                           validLinesCountBold: <b>{validLines.count}</b>,
@@ -171,7 +171,11 @@ export const PrivilegedUserMonitoringValidationStep: React.FC<PrivilegedUserMoni
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onReturn} disabled={isLoading}>
+            <EuiButtonEmpty
+              onClick={onReturn}
+              disabled={isLoading}
+              data-test-subj="privileged-user-monitoring-modal-back-button"
+            >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.validationStep.backButtonText"
                 defaultMessage="Back"
@@ -194,8 +198,8 @@ export const PrivilegedUserMonitoringValidationStep: React.FC<PrivilegedUserMoni
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </>
+      </div>
     );
   });
 
-PrivilegedUserMonitoringValidationStep.displayName = 'privilegedUserMonitoring.validationStep';
+PrivilegedUserMonitoringValidationStep.displayName = 'PrivilegedUserMonitoringValidationStep';

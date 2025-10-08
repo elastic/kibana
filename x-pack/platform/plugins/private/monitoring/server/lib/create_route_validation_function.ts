@@ -8,7 +8,7 @@
 import type { RouteValidationFunction } from '@kbn/core/server';
 import { fold } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
-import { Errors, Type } from 'io-ts';
+import type { Errors, Type } from 'io-ts';
 import { formatErrors } from '../../common/runtime_types';
 
 type ValdidationResult<Value> = ReturnType<RouteValidationFunction<Value>>;

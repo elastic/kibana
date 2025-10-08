@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/check-mappings-update-cli');
+require('@kbn/check-saved-objects-cli').runCheckMappingsUpdateCli();

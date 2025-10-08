@@ -16,7 +16,11 @@ import {
 } from '@kbn/grouping';
 import { type ParsedGroupingAggregation, parseGroupingQuery } from '@kbn/grouping/src';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
+import type { ASSET_INVENTORY_COLUMN_ADDED_PREFIX } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import {
+  ASSET_INVENTORY_APP_NAME,
+  ASSET_INVENTORY_GROUP_BY_OPENED,
+  ASSET_INVENTORY_GROUP_BY_SELECTED_FIELD,
   GROUP_BY_CLICK,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
@@ -152,6 +156,19 @@ export const useAssetInventoryGrouping = ({
         groupBy: groupByFields,
       });
       uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GROUP_BY_CLICK);
+    },
+    tracker: (type, event, count) => {
+      const normalizedEvent = Array.isArray(event) ? event[0] : event;
+      const metricName =
+        `${ASSET_INVENTORY_GROUP_BY_SELECTED_FIELD}${normalizedEvent}` as ASSET_INVENTORY_COLUMN_ADDED_PREFIX;
+      uiMetricService.trackUiMetric(type, metricName, ASSET_INVENTORY_APP_NAME);
+    },
+    onOpenTracker: (type, event, count) => {
+      uiMetricService.trackUiMetric(
+        type,
+        ASSET_INVENTORY_GROUP_BY_OPENED,
+        ASSET_INVENTORY_APP_NAME
+      );
     },
   });
 

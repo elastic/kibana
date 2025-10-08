@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { DataControlFactory } from '../types';
+import type { DataControlFactory } from '../types';
 
 export const getMockedSearchControlFactory = (api: any) =>
   ({

@@ -11,8 +11,8 @@ import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageLoadDistChart } from '../charts/page_load_dist_chart';
 import { ResetPercentileZoom } from './reset_percentile_zoom';
-import { BreakdownItem } from '../../../../../typings/ui_filters';
-import { PercentileRange } from './types';
+import type { BreakdownItem } from '../../../../../typings/ui_filters';
+import type { PercentileRange } from './types';
 
 export function PageLoadDistribution() {
   const [percentileRange, setPercentileRange] = useState<PercentileRange>({

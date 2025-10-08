@@ -8,8 +8,9 @@
 import { useMemo } from 'react';
 import { useKibanaSpace } from '@kbn/observability-shared-plugin/public';
 import { useEuiTheme } from '@elastic/eui';
-import { ExploratoryEmbeddableComponentProps } from './embeddable';
-import { LayerConfig, LensAttributes } from '../configurations/lens_attributes';
+import type { ExploratoryEmbeddableComponentProps } from './embeddable';
+import type { LayerConfig } from '../configurations/lens_attributes';
+import { LensAttributes } from '../configurations/lens_attributes';
 import { getLayerConfigs } from '../hooks/use_lens_attributes';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { ReportTypes } from '../../../..';
@@ -20,7 +21,6 @@ export const useEmbeddableAttributes = ({
   dataViewState,
   reportType,
   reportConfigMap = {},
-  lensFormulaHelper,
   dslFilters,
 }: ExploratoryEmbeddableComponentProps) => {
   const spaceId = useKibanaSpace();
@@ -38,27 +38,13 @@ export const useEmbeddableAttributes = ({
       );
 
       if (reportType === ReportTypes.SINGLE_METRIC) {
-        const lensAttributes = new SingleMetricLensAttributes(
-          layerConfigs,
-          reportType,
-          lensFormulaHelper!,
-          dslFilters
-        );
+        const lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportType, dslFilters);
         return lensAttributes?.getJSON('lnsLegacyMetric');
       } else if (reportType === ReportTypes.HEATMAP) {
-        const lensAttributes = new HeatMapLensAttributes(
-          layerConfigs,
-          reportType,
-          lensFormulaHelper!
-        );
+        const lensAttributes = new HeatMapLensAttributes(layerConfigs, reportType);
         return lensAttributes?.getJSON('lnsHeatmap');
       } else {
-        const lensAttributes = new LensAttributes(
-          layerConfigs,
-          reportType,
-          lensFormulaHelper,
-          dslFilters
-        );
+        const lensAttributes = new LensAttributes(layerConfigs, reportType, dslFilters);
         return lensAttributes?.getJSON();
       }
     } catch (error) {
@@ -69,7 +55,6 @@ export const useEmbeddableAttributes = ({
     dataViewState,
     dslFilters,
     euiTheme,
-    lensFormulaHelper,
     reportConfigMap,
     reportType,
     spaceId.space?.id,

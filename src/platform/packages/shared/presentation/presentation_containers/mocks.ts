@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { PresentationContainer } from './interfaces/presentation_container';
+import type { PresentationContainer } from './interfaces/presentation_container';
 
 export const getMockPresentationContainer = (): PresentationContainer => {
   return {

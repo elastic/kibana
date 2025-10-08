@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { SerializedStyles } from '@emotion/serialize';
+import type { SerializedStyles } from '@emotion/serialize';
 
 type EmotionFn = (theme: UseEuiTheme) => SerializedStyles;
 

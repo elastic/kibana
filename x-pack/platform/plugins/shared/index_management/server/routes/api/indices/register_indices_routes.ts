@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 
 import { registerClearCacheRoute } from './register_clear_cache_route';
 import { registerCloseRoute } from './register_close_route';

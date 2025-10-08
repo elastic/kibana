@@ -11,11 +11,16 @@ import React from 'react';
 import * as i18n from './translations';
 
 interface Props {
-  closeModal: () => void;
   actionButtons?: React.ReactNode;
+  closeButtonText?: string;
+  closeModal: () => void;
 }
 
-const FooterComponent: React.FC<Props> = ({ closeModal, actionButtons }) => {
+const FooterComponent: React.FC<Props> = ({
+  actionButtons,
+  closeButtonText = i18n.CLOSE,
+  closeModal,
+}) => {
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -26,7 +31,7 @@ const FooterComponent: React.FC<Props> = ({ closeModal, actionButtons }) => {
     >
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty data-test-subj="close" onClick={closeModal} size="s">
-          {i18n.CLOSE}
+          {closeButtonText}
         </EuiButtonEmpty>
       </EuiFlexItem>
 

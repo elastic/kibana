@@ -7,9 +7,12 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { ReindexStatus, ReindexStep, ReindexStatusResponse } from '../../../common/types';
+import type { ReindexStatusResponse } from '@kbn/reindex-service-plugin/common';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { setupEnvironment } from '../helpers';
-import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
+import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupElasticsearchPage } from './es_deprecations.helpers';
 import {
   esDeprecationsMockResponse,
   MOCK_SNAPSHOT_ID,
@@ -19,7 +22,6 @@ import {
 
 const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
   indexName: 'foo',
-  reindexName: 'reindexed-foo',
   aliases: [],
   isFrozen: false,
   isReadonly: false,

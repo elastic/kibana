@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { Observable, OperatorFunction, filter, map } from 'rxjs';
+import type { Observable, OperatorFunction } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { v4 } from 'uuid';
-import {
-  ChatCompletionEvent as InferenceChatCompletionEvent,
-  ChatCompletionEventType as InferenceChatCompletionEventType,
-} from '@kbn/inference-common';
-import {
-  ChatCompletionChunkEvent,
-  ChatCompletionMessageEvent,
-  StreamingChatResponseEventType,
-} from '../../../../common';
+import type { ChatCompletionEvent as InferenceChatCompletionEvent } from '@kbn/inference-common';
+import { ChatCompletionEventType as InferenceChatCompletionEventType } from '@kbn/inference-common';
+import type { ChatCompletionChunkEvent, ChatCompletionMessageEvent } from '../../../../common';
+import { StreamingChatResponseEventType } from '../../../../common';
 
 export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
   InferenceChatCompletionEvent,
@@ -41,6 +37,8 @@ export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
                       }
                     : undefined,
               },
+              ...(event.deanonymized_input && { deanonymized_input: event.deanonymized_input }),
+              ...(event.deanonymized_output && { deanonymized_output: event.deanonymized_output }),
             } as ChatCompletionChunkEvent;
           case InferenceChatCompletionEventType.ChatCompletionMessage:
             // Convert to ChatCompletionMessageEvent
@@ -57,6 +55,8 @@ export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
                       }
                     : undefined,
               },
+              ...(event.deanonymized_input && { deanonymized_input: event.deanonymized_input }),
+              ...(event.deanonymized_output && { deanonymized_output: event.deanonymized_output }),
             } as ChatCompletionMessageEvent;
 
           default:

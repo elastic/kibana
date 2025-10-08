@@ -9,15 +9,18 @@
 
 import { isEmpty } from 'lodash';
 
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import {
   initializeControlGroupTelemetry,
   type ControlGroupTelemetry,
 } from '@kbn/controls-plugin/server';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import { DashboardSavedObjectAttributes, SavedDashboardPanel } from '../dashboard_saved_object';
+import type {
+  DashboardSavedObjectAttributes,
+  SavedDashboardPanel,
+} from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
 
@@ -40,6 +43,9 @@ export interface DashboardCollectorData {
     };
   };
   controls: ControlGroupTelemetry;
+  sections: {
+    total: number;
+  };
 }
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
@@ -50,6 +56,9 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
     by_type: {},
   },
   controls: initializeControlGroupTelemetry({}),
+  sections: {
+    total: 0,
+  },
 });
 
 export const getEmptyPanelTypeData = () => ({
@@ -92,6 +101,14 @@ export const collectPanelsByType = (
   }
 };
 
+export const collectDashboardSections = (
+  attributes: DashboardSavedObjectAttributes,
+  collectorData: DashboardCollectorData
+) => {
+  collectorData.sections.total += attributes.sections?.length ?? 0;
+  return collectorData;
+};
+
 export const controlsCollectorFactory =
   (embeddableService: EmbeddablePersistableStateService) =>
   (attributes: DashboardSavedObjectAttributes, collectorData: DashboardCollectorData) => {
@@ -99,7 +116,7 @@ export const controlsCollectorFactory =
       collectorData.controls = embeddableService.telemetry(
         {
           ...attributes.controlGroupInput,
-          type: CONTROL_GROUP_TYPE,
+          type: CONTROLS_GROUP_TYPE,
         },
         collectorData.controls
       ) as ControlGroupTelemetry;

@@ -7,9 +7,9 @@
 
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { DashboardAsset } from '../../../../common/assets';
+import type { DashboardAsset } from '../../../../common/assets';
 import { createServerRoute } from '../../create_server_route';
-import { SanitizedDashboardAsset } from '../../dashboards/route';
+import type { SanitizedDashboardAsset } from '../../dashboards/route';
 import { ASSET_ID } from '../../../lib/streams/assets/fields';
 
 export interface SuggestDashboardResponse {

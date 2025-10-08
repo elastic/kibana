@@ -19,6 +19,7 @@ exports[`should render EMS UI when left source is BOUNDARIES_SOURCE.EMS 1`] = `
     <EuiFormRow>
       <EuiRadioGroup
         idSelected="EMS"
+        name="boundariesSource"
         onChange={[Function]}
         options={
           Array [
@@ -64,6 +65,7 @@ exports[`should render elasticsearch UI when left source is BOUNDARIES_SOURCE.EL
     <EuiFormRow>
       <EuiRadioGroup
         idSelected="ELASTICSEARCH"
+        name="boundariesSource"
         onChange={[Function]}
         options={
           Array [

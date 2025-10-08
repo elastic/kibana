@@ -20,10 +20,10 @@ import {
   EuiHorizontalRule,
   useEuiTheme,
 } from '@elastic/eui';
-import { IExecutionLog } from '@kbn/alerting-plugin/common';
+import type { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { RuleErrorLogWithApi } from './rule_error_log';
 import { RuleActionErrorBadge } from './rule_action_error_badge';
-import { RefreshToken } from './types';
+import type { RefreshToken } from './types';
 
 export interface RuleActionErrorLogFlyoutProps {
   runLog: IExecutionLog;

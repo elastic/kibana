@@ -6,16 +6,18 @@
  */
 
 import { type QueryClient, useQuery, useQueryClient } from '@tanstack/react-query';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 
 import type { PlaygroundConnector, InferenceActionConnector, ActionConnector } from '../types';
+import { SearchPlaygroundQueryKeys } from '../../common';
 import { LLMs } from '../../common/types';
-import { LLMModel } from '../types';
+import type { LLMModel } from '../types';
 import { MODELS } from '../../common/models';
+import { isElasticConnector } from '../utils/playground_connectors';
 import { useKibana } from './use_kibana';
-import { LOAD_CONNECTORS_QUERY_KEY, LoadConnectorsQuery } from './use_load_connectors';
+import { LoadConnectorsQuery } from './use_load_connectors';
 
 const isInferenceActionConnector = (
   connector: ActionConnector
@@ -29,7 +31,8 @@ const mapLlmToModels: Record<
     icon: string | ((connector: PlaygroundConnector) => string);
     getModels: (
       connectorName: string,
-      includeName: boolean
+      includeName: boolean,
+      modelId?: string
     ) => Array<{ label: string; value?: string; promptTokenLimit?: number }>;
   }
 > = {
@@ -88,23 +91,20 @@ const mapLlmToModels: Record<
         ? SERVICE_PROVIDERS[connector.config.provider].icon
         : '';
     },
-    getModels: (connectorName) => [
+    getModels: (connectorName, _, modelId) => [
       {
-        label: i18n.translate('xpack.searchPlayground.inferenceModel', {
-          defaultMessage: '{name}',
-          values: { name: connectorName },
-        }),
+        label: connectorName,
+        value: modelId,
+        promptTokenLimit: MODELS.find((m) => m.model === modelId)?.promptTokenLimit,
       },
     ],
   },
 };
 
-export const LLMS_QUERY_KEY = ['search-playground', 'llms-models'];
-
 export const LLMsQuery =
   (http: HttpSetup, client: QueryClient) => async (): Promise<LLMModel[]> => {
     const connectors = await client.fetchQuery<PlaygroundConnector[]>({
-      queryKey: LOAD_CONNECTORS_QUERY_KEY,
+      queryKey: [SearchPlaygroundQueryKeys.LoadConnectors],
       queryFn: LoadConnectorsQuery(http),
       retry: false,
     });
@@ -128,7 +128,13 @@ export const LLMsQuery =
       const showConnectorName = Number(mapConnectorTypeToCount?.[connectorType]) > 1;
 
       llmParams
-        .getModels(connector.name, false)
+        .getModels(
+          connector.name,
+          false,
+          isInferenceActionConnector(connector)
+            ? connector.config?.providerConfig?.model_id
+            : undefined
+        )
         .map(({ label, value, promptTokenLimit }) => ({
           id: connector?.id + label,
           name: label,
@@ -140,6 +146,7 @@ export const LLMsQuery =
           disabled: !connector,
           connectorId: connector.id,
           promptTokenLimit,
+          isElasticConnector: isElasticConnector(connector),
         }))
         .forEach((model) => result.push(model));
 
@@ -155,7 +162,7 @@ export const useLLMsModels = (): LLMModel[] => {
     services: { http },
   } = useKibana();
 
-  const { data } = useQuery(LLMS_QUERY_KEY, LLMsQuery(http, client), {
+  const { data } = useQuery([SearchPlaygroundQueryKeys.LLMsQuery], LLMsQuery(http, client), {
     keepPreviousData: true,
     retry: false,
   });

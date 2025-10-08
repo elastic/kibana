@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
-import { Alert } from '@kbn/alerts-as-data-utils';
-import { PersistenceServices } from '@kbn/rule-registry-plugin/server';
+import type { Alert } from '@kbn/alerts-as-data-utils';
+import type { PersistenceServices } from '@kbn/rule-registry-plugin/server';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 import { MAX_ALERTS_PER_EXECUTION } from './common';
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
-import { EsqlRuleInstanceState, EsqlRuleParams } from './types';
+import type { EsqlRuleInstanceState, EsqlRuleParams } from './types';
 
 export async function getRuleExecutor(
   options: RuleExecutorOptions<

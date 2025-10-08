@@ -15,7 +15,11 @@ import type {
 } from '@kbn/cases-plugin/server/attachment_framework/types';
 import type { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
-import { CASES_TELEMETRY_TASK_NAME } from '@kbn/cases-plugin/common/constants';
+import {
+  ANALYTICS_BACKFILL_TASK_TYPE,
+  CASES_TELEMETRY_TASK_NAME,
+} from '@kbn/cases-plugin/common/constants';
+import { CAI_SCHEDULER_TASK_ID } from '@kbn/cases-plugin/server/cases_analytics/tasks/scheduler_task/constants';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
@@ -284,6 +288,97 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const [_, { taskManager }] = await core.getStartServices();
         return res.ok({ body: await taskManager.runSoon(taskId) });
       } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/analytics_index/scheduler/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async (context, req, res) => {
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+        logger.info(`Request to run scheduler task id: ${CAI_SCHEDULER_TASK_ID}`);
+        return res.ok({
+          body: await taskManager.runSoon(CAI_SCHEDULER_TASK_ID),
+        });
+      } catch (err) {
+        logger.error(`Error : ${err}`);
+        return res.ok({ body: { id: CAI_SCHEDULER_TASK_ID, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/analytics_index/backfill/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          taskId: schema.string(),
+          sourceIndex: schema.string(),
+          destIndex: schema.string(),
+          sourceQuery: schema.string(),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const { taskId, sourceIndex, destIndex, sourceQuery } = req.body;
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+
+        return res.ok({
+          body: await taskManager.ensureScheduled({
+            id: taskId,
+            taskType: ANALYTICS_BACKFILL_TASK_TYPE,
+            params: { sourceIndex, destIndex, sourceQuery: JSON.parse(sourceQuery) },
+            runAt: new Date(),
+            state: {},
+          }),
+        });
+      } catch (err) {
+        logger.error(`Error : ${err}`);
+        return res.ok({ body: { id: taskId, error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/analytics_index/synchronization/run_soon',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          taskId: schema.string(),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const { taskId } = req.body;
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        logger.error(`Error : ${err}`);
         return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }

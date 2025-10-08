@@ -8,16 +8,30 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCard, EuiScreenReaderOnly, EuiTextColor, EuiImage } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiButton, EuiPageTemplate, EuiTitle, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NoDataCardComponentProps as Props } from '@kbn/shared-ux-card-no-data-types';
+import type { NoDataCardComponentProps as Props } from '@kbn/shared-ux-card-no-data-types';
+import { ElasticAgentCardIllustration } from './elastic_agent_card_illustration';
 
-import { NoDataCardStyles } from './no_data_card.styles';
-import ElasticAgentCardIllustration from './assets/elastic_agent_card.svg';
+export const NO_DATA_CARD_MAX_WIDTH = 400;
+
+const defaultTitle = i18n.translate('sharedUXPackages.card.noData.title', {
+  defaultMessage: 'Add Data to get started',
+});
+
+const defaultDescription = i18n.translate('sharedUXPackages.card.noData.description', {
+  defaultMessage:
+    'Browse integration options to find the best way to add your data and start analyzing.',
+});
+
+const defaultButtonText = i18n.translate('sharedUXPackages.card.noData.buttonLabel', {
+  defaultMessage: 'Browse integrations',
+});
 
 const noPermissionTitle = i18n.translate('sharedUXPackages.card.noData.noPermission.title', {
-  defaultMessage: `Contact your administrator`,
+  defaultMessage: 'Contact your administrator',
 });
 
 const noPermissionDescription = i18n.translate(
@@ -27,91 +41,82 @@ const noPermissionDescription = i18n.translate(
   }
 );
 
-const defaultTitle = i18n.translate('sharedUXPackages.card.noData.title', {
-  defaultMessage: 'Add Elastic Agent',
-});
-
-const defaultDescription = i18n.translate('sharedUXPackages.card.noData.description', {
-  defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
-});
-
-const Image = () => (
-  <EuiImage
-    size="fullWidth"
-    style={{
-      width: 'max(100%, 360px)',
-      height: 240,
-      objectFit: 'cover',
-      background: 'aliceblue',
-    }}
-    url={ElasticAgentCardIllustration}
-    alt=""
-  />
-);
-
-/**
- * Creates a specific NoDataCard pointing users to Integrations when `canAccessFleet`
- */
 export const NoDataCard = ({
-  title: titleProp,
-  description: descriptionProp,
-  canAccessFleet,
-  button,
+  title,
+  description,
+  canAccessFleet = true,
   href,
-  ...props
+  buttonText,
+  buttonIsDisabled,
+  disabledButtonTooltipText,
+  docsLink: link,
+  onClick,
+  icon,
+  'data-test-subj': dataTestSubj = 'noDataCard',
 }: Props) => {
-  const styles = NoDataCardStyles();
-
-  const footer = () => {
-    // Don't render the footer action if disabled
-    if (!canAccessFleet) {
-      return;
-    }
-
-    // Render a custom footer action if the button is not a simple string
-    if (button && typeof button !== 'string') {
-      return button;
-    }
-
-    // Default footer action is a button with the provided or default string
-    return (
-      <EuiButton fill href={href} data-test-subj="noDataDefaultFooterAction">
-        {button || titleProp || defaultTitle}
-      </EuiButton>
-    );
-  };
-
-  const title = () => {
-    if (!canAccessFleet) {
-      return <EuiTextColor color="default">{noPermissionTitle}</EuiTextColor>;
-    }
-
-    return (
-      <EuiScreenReaderOnly>
-        <span>{titleProp || defaultTitle}</span>
-      </EuiScreenReaderOnly>
-    );
-  };
-
-  const description = () => {
-    if (!canAccessFleet) {
-      return <EuiTextColor color="default">{noPermissionDescription}</EuiTextColor>;
-    }
-
-    return descriptionProp || defaultDescription;
-  };
+  const cardIcon = icon ? icon : <ElasticAgentCardIllustration />;
+  const docsLink = link || 'https://www.elastic.co/kibana';
+  const isButtonDisabled = buttonIsDisabled || !!disabledButtonTooltipText;
 
   return (
-    <EuiCard
-      css={styles}
-      paddingSize="l"
-      title={title()}
-      description={description()}
-      footer={footer()}
-      isDisabled={!canAccessFleet}
-      href={href}
-      image={<Image />}
-      {...props}
+    <EuiPageTemplate.EmptyPrompt
+      data-test-subj={dataTestSubj}
+      css={css`
+        && {
+          max-width: ${NO_DATA_CARD_MAX_WIDTH}px;
+        }
+      `}
+      title={
+        <EuiTitle size="m">
+          <h2>{canAccessFleet ? title || defaultTitle : noPermissionTitle}</h2>
+        </EuiTitle>
+      }
+      icon={cardIcon}
+      body={<p>{canAccessFleet ? description || defaultDescription : noPermissionDescription}</p>}
+      actions={
+        canAccessFleet && href ? (
+          isButtonDisabled ? (
+            disabledButtonTooltipText ? (
+              <EuiToolTip position="right" content={disabledButtonTooltipText}>
+                <EuiButton disabled data-test-subj="noDataDefaultActionButton">
+                  {buttonText || defaultButtonText}
+                </EuiButton>
+              </EuiToolTip>
+            ) : (
+              <EuiButton disabled data-test-subj="noDataDefaultActionButton">
+                {buttonText || defaultButtonText}
+              </EuiButton>
+            )
+          ) : (
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiButton
+              color="primary"
+              fill
+              href={href}
+              data-test-subj="noDataDefaultActionButton"
+              onClick={onClick}
+            >
+              {buttonText || defaultButtonText}
+            </EuiButton>
+          )
+        ) : undefined
+      }
+      footer={
+        <>
+          <EuiTitle size="xxs">
+            <span>
+              {i18n.translate('sharedUXPackages.card.noData.learnMore', {
+                defaultMessage: 'Want to learn more?',
+              })}
+            </span>
+          </EuiTitle>{' '}
+          <EuiLink href={docsLink} target="_blank">
+            {i18n.translate('sharedUXPackages.card.noData.readDocs', {
+              defaultMessage: 'Read the docs',
+            })}
+          </EuiLink>
+        </>
+      }
     />
   );
 };

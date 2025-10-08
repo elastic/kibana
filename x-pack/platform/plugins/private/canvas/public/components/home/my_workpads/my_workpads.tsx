@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, createContext, Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import { useFindWorkpads } from '../hooks';
-import { FoundWorkpad } from '../../../services/canvas_workpad_service';
+import type { FoundWorkpad } from '../../../services/canvas_workpad_service';
 import { Loading } from '../loading';
 import { MyWorkpads as Component } from './my_workpads.component';
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-common';
+import type { InferenceClient } from '@kbn/inference-common';
 import { RCA_PROMPT_SIGNIFICANT_EVENTS, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
 import { toBlockquote } from '../../util/to_blockquote';
-import { LogPatternDescription } from '../describe_log_patterns';
+import type { LogPatternDescription } from '../describe_log_patterns';
 import { getInvestigateEntityTaskPrompt } from '../investigate_entity/prompts';
 
 export async function writeEntityInvestigationReport({

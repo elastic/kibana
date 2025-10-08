@@ -14,6 +14,7 @@ export type {
   ZdtAlgoIndexMappingMeta,
   IndexMappingMeta,
   IndexMapping,
+  IndexMappingSafe,
   IndexTypesMap,
   IndexMappingMigrationStateMeta,
 } from './types';

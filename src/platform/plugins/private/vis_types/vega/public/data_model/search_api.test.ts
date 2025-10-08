@@ -10,7 +10,7 @@
 import { extendSearchParamsWithRuntimeFields } from './search_api';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
-import { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
+import type { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 const mockComputedFields = (

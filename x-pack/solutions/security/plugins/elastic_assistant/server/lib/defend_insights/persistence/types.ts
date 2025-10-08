@@ -23,6 +23,7 @@ interface DefendInsightInsightEventSchema {
 interface DefendInsightInsightSchema {
   group: string;
   events?: DefendInsightInsightEventSchema[];
+  remediation?: Record<string, unknown>;
 }
 
 interface BaseDefendInsightSchema {

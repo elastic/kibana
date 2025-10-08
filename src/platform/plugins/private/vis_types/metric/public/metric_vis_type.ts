@@ -9,11 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { ColorSchemas, ColorMode } from '@kbn/charts-plugin/public';
-import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { MetricVisOptions } from './components';
 import { toExpressionAst } from './to_ast';
-import { VisParams } from './types';
+import type { VisParams } from './types';
 
 export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> => ({
   name: 'metric',

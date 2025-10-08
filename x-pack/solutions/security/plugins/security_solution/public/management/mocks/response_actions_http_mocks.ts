@@ -12,6 +12,8 @@ import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
   BASE_ENDPOINT_ACTION_ROUTE,
+  CANCEL_ROUTE,
+  CUSTOM_SCRIPTS_ROUTE,
   EXECUTE_ROUTE,
   GET_FILE_ROUTE,
   GET_PROCESSES_ROUTE,
@@ -35,6 +37,7 @@ import type {
   GetProcessesActionOutputContent,
   PendingActionsResponse,
   ResponseActionApiResponse,
+  ResponseActionCancelParameters,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
@@ -45,6 +48,8 @@ import type {
   ResponseActionUploadParameters,
   ResponseActionRunScriptOutputContent,
   ResponseActionRunScriptParameters,
+  ResponseActionScriptsApiResponse,
+  ResponseActionCancelOutputContent,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -77,7 +82,14 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
 
   scan: () => ActionDetailsApiResponse<ResponseActionScanOutputContent>;
 
+  fetchScriptList: () => ResponseActionScriptsApiResponse;
+
   runscript: () => ActionDetailsApiResponse<ResponseActionRunScriptOutputContent>;
+
+  cancel: () => ActionDetailsApiResponse<
+    ResponseActionCancelOutputContent,
+    ResponseActionCancelParameters
+  >;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -282,6 +294,16 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     },
   },
   {
+    id: 'fetchScriptList',
+    path: CUSTOM_SCRIPTS_ROUTE,
+    method: 'get',
+    handler: () => {
+      return {
+        data: [{ id: '1', name: 'Script 1', description: 'Test script 1' }],
+      };
+    },
+  },
+  {
     id: 'runscript',
     path: RUN_SCRIPT_ROUTE,
     method: 'post',
@@ -295,6 +317,25 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
         ResponseActionRunScriptParameters
       >({
         command: 'runscript',
+      });
+
+      return { data: response };
+    },
+  },
+  {
+    id: 'cancel',
+    path: CANCEL_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<
+      ResponseActionCancelOutputContent,
+      ResponseActionCancelParameters
+    > => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionCancelOutputContent,
+        ResponseActionCancelParameters
+      >({
+        command: 'cancel',
       });
 
       return { data: response };

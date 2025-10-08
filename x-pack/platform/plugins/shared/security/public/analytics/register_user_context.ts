@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { catchError, from, map, of } from 'rxjs';
+import { registerGlobalSessionContextProvider } from '@elastic/ebt/helpers/global_session';
+import { catchError, filter, from, map, of } from 'rxjs';
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { Sha256 } from '@kbn/crypto-browser';
@@ -28,10 +29,25 @@ export function registerUserContext(
   authc: AuthenticationServiceSetup,
   cloudId?: string
 ) {
+  const user$ = from(authc.getCurrentUser()).pipe(catchError(() => of(undefined)));
+
+  registerGlobalSessionContextProvider({
+    analyticsClient: analytics,
+    userId$: user$.pipe(
+      filter(Boolean),
+      map(({ username }) => username)
+    ),
+    organizationId: cloudId,
+  });
+
   analytics.registerContextProvider<UserIdContext>({
     name: 'user_id',
-    context$: from(authc.getCurrentUser()).pipe(
+    context$: user$.pipe(
       map((user) => {
+        if (!user) {
+          return { userId: undefined, isElasticCloudUser: false };
+        }
+
         if (user.elastic_cloud_user) {
           // If the user is managed by ESS, use the plain username as the user ID:
           // The username is expected to be unique for these users,
@@ -48,8 +64,10 @@ export function registerUserContext(
         };
       }),
       // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
-      map(({ userId, isElasticCloudUser }) => ({ userId: sha256(userId), isElasticCloudUser })),
-      catchError(() => of({ userId: undefined, isElasticCloudUser: false }))
+      map(({ userId, isElasticCloudUser }) => ({
+        userId: userId ? sha256(userId) : userId,
+        isElasticCloudUser,
+      }))
     ),
     schema: {
       userId: {

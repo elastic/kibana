@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { PieLayerState, PieVisualizationState } from '../..';
+import type { PieLayerState, PieVisualizationState } from '../..';
 import { LayerSettings } from './layer_settings';
-import { FramePublicAPI, VisualizationLayerSettingsProps } from '../../types';
+import type { FramePublicAPI, VisualizationLayerSettingsProps } from '../../types';
 import { render, screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

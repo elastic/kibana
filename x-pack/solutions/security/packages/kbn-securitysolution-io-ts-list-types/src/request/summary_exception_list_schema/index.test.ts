@@ -9,7 +9,8 @@ import { left } from 'fp-ts/Either';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getSummaryExceptionListSchemaMock } from './index.mock';
-import { SummaryExceptionListSchema, summaryExceptionListSchema } from '.';
+import type { SummaryExceptionListSchema } from '.';
+import { summaryExceptionListSchema } from '.';
 
 describe('summary_exception_list_schema', () => {
   test('it should validate a typical exception list request', () => {

@@ -10,8 +10,8 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { dynamicActionFactoriesCollector } from './dynamic_action_factories_collector';
-import { DynamicActionsState } from '../../common';
-import { ActionFactory } from '../types';
+import type { DynamicActionsState } from '../../common';
+import type { ActionFactory } from '../types';
 
 type GetActionFactory = (id: string) => undefined | ActionFactory;
 

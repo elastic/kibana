@@ -5,61 +5,41 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
-import { indexExplorer } from './index_explorer';
-import { flattenMappings } from './utils';
-import { getIndexMappings, performMatchSearch, PerformMatchSearchResponse } from './steps';
+import type { PerformMatchSearchResponse } from './steps';
+import { performMatchSearch } from './steps';
+import { resolveResource } from './utils/resources';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
 
 export const relevanceSearch = async ({
   term,
-  index,
-  fields = [],
+  target,
   size = 10,
   model,
   esClient,
 }: {
   term: string;
-  index?: string;
-  fields?: string[];
+  target: string;
   size?: number;
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<RelevanceSearchResponse> => {
-  let selectedIndex = index;
-  let selectedFields = fields;
+  const { fields } = await resolveResource({ resourceName: target, esClient });
 
-  if (!selectedIndex) {
-    const { indices } = await indexExplorer({
-      query: term,
-      esClient,
-      model,
-    });
-    if (indices.length === 0) {
-      return { results: [] };
-    }
-    selectedIndex = indices[0].indexName;
-  }
+  const selectedFields = fields.filter(
+    (field) => field.type === 'text' || field.type === 'semantic_text'
+  );
 
-  if (!fields.length) {
-    const mappings = await getIndexMappings({
-      indices: [selectedIndex],
-      esClient,
-    });
-
-    const flattenedFields = flattenMappings(mappings[selectedIndex]);
-
-    selectedFields = flattenedFields
-      .filter((field) => field.type === 'text' || field.type === 'semantic_text')
-      .map((field) => field.path);
+  if (selectedFields.length === 0) {
+    throw new Error('No text or semantic_text fields found, aborting search.');
   }
 
   return performMatchSearch({
     term,
+    index: target,
     fields: selectedFields,
-    index: selectedIndex,
     size,
     esClient,
   });

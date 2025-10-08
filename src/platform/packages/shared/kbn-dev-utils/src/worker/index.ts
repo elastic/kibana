@@ -8,11 +8,11 @@
  */
 
 import ChildProcess, { type ForkOptions } from 'child_process';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import * as Rx from 'rxjs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { SomeDevLog } from '@kbn/some-dev-log';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
 // import type { Result } from './kibana_worker';

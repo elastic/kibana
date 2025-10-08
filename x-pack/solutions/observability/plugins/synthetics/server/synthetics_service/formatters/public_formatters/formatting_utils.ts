@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
+import type { ConfigKey, MonitorFields } from '../../../../common/runtime_types';
 
 type FormatterFn = (
   fields: Partial<MonitorFields>,

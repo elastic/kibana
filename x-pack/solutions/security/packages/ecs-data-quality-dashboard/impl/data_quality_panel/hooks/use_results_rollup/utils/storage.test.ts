@@ -10,7 +10,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 import { mockPartitionedFieldMetadataWithSameFamily } from '../../../mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
 import { formatStorageResult, getStorageResults, postStorageResult } from './storage';
-import { StorageResult } from '../../../types';
+import type { StorageResult } from '../../../types';
 
 describe('formatStorageResult', () => {
   it('should correctly format the input data into a StorageResult object', () => {

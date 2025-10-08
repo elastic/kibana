@@ -5,22 +5,7 @@
  * 2.0.
  */
 
-export type {
-  LensSavedObject,
-  PartialLensSavedObject,
-  LensSavedObjectAttributes,
-  LensGetIn,
-  LensGetOut,
-  LensCreateIn,
-  LensCreateOut,
-  CreateOptions,
-  LensUpdateIn,
-  LensUpdateOut,
-  UpdateOptions,
-  LensDeleteIn,
-  LensDeleteOut,
-  LensSearchIn,
-  LensSearchOut,
-  LensSearchQuery,
-  LensCrudTypes,
-} from './types';
+export * from './transforms';
+
+export { LENS_ITEM_VERSION_V1 } from './constants';
+export type { LensSavedObjectV0, LensAttributesV0 } from './transforms';

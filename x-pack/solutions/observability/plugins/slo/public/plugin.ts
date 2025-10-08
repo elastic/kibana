@@ -4,29 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   App,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { DefaultClientOptions, createRepositoryClient } from '@kbn/server-route-repository-client';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
+import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { PLUGIN_NAME, sloAppId } from '../common';
-import { ExperimentalFeatures, SLOConfig } from '../common/config';
+import type { ExperimentalFeatures, SLOConfig } from '../common/config';
 import { SLOS_BASE_PATH } from '../common/locators/paths';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
-import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
+import type { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
@@ -39,6 +40,7 @@ import type {
 } from './types';
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
+import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
@@ -62,6 +64,9 @@ export class SLOPlugin
     const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
     const sloDetailsLocator = plugins.share.url.locators.create(new SloDetailsLocatorDefinition());
+    const sloDetailsHistoryLocator = plugins.share.url.locators.create(
+      new SloDetailsHistoryLocatorDefinition()
+    );
     const sloEditLocator = plugins.share.url.locators.create(new SloEditLocatorDefinition());
     const sloListLocator = plugins.share.url.locators.create(new SloListLocatorDefinition());
 
@@ -128,24 +133,21 @@ export class SLOPlugin
       if (hasPlatinumLicense) {
         const [coreStart, pluginsStart] = await core.getStartServices();
 
-        pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
+        pluginsStart.dashboard.registerDashboardPanelSettings(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           (serializedState?: SerializedPanelState<SloOverviewEmbeddableState>) => {
             if (
               serializedState?.rawState?.showAllGroupByInstances ||
               serializedState?.rawState?.groupFilters
             ) {
-              return { width: 24, height: 8 };
+              return { placementSettings: { width: 24, height: 8 } };
             }
-            return { width: 12, height: 8 };
+            return { placementSettings: { width: 12, height: 8 } };
           }
         );
-        pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
-          SLO_BURN_RATE_EMBEDDABLE_ID,
-          () => {
-            return { width: 14, height: 7 };
-          }
-        );
+        pluginsStart.dashboard.registerDashboardPanelSettings(SLO_BURN_RATE_EMBEDDABLE_ID, () => {
+          return { placementSettings: { width: 14, height: 7 } };
+        });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {
           const { getOverviewEmbeddableFactory } = await import(
@@ -191,6 +193,7 @@ export class SLOPlugin
 
     return {
       sloDetailsLocator,
+      sloDetailsHistoryLocator,
       sloEditLocator,
       sloListLocator,
     };

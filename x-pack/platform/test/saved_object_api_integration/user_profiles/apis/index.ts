@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {

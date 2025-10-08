@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../../../components/form_errors';
-import { IndexAction } from '../../../../../../../common/types/action_types';
+import type { IndexAction } from '../../../../../../../common/types/action_types';
 
 interface Props {
   action: IndexAction;

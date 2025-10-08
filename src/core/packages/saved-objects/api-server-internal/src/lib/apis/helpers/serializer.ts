@@ -14,7 +14,7 @@ import type {
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import {
+import type {
   SavedObject,
   SavedObjectsRawDoc,
   SavedObjectsRawDocParseOptions,

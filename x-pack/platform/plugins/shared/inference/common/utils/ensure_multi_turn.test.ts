@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AssistantMessage, MessageRole, UserMessage, ToolMessage } from '@kbn/inference-common';
+import type { AssistantMessage, UserMessage, ToolMessage } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { ensureMultiTurn } from './ensure_multi_turn';
 
 const assistantMessage: AssistantMessage = {

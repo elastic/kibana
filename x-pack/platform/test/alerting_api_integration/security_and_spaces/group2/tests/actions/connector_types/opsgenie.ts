@@ -16,7 +16,6 @@ import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export default function opsgenieTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
@@ -717,7 +716,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: opsgenieActionId,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message:
                 'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });
@@ -741,7 +740,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: opsgenieActionId,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message:
                 'Status code: 422. Message: Request failed with status code 422: {"message":"failed"}',
             });

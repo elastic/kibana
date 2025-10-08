@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
 import type { estypes } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { get } from 'lodash/fp';
 
 import { combineGenerationsWithSuccessMetadata } from '../combine_generations_with_success_metadata';

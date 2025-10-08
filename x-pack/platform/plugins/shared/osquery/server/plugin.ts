@@ -105,7 +105,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
     this.telemetryEventsSender.setup(this.telemetryReceiver, plugins.taskManager, core.analytics);
 
-    plugins.cases.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
+    plugins.cases?.attachmentFramework.registerExternalReference({ id: CASE_ATTACHMENT_TYPE_ID });
 
     return {
       createActionService: this.createActionService,
@@ -119,7 +119,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       ...plugins.fleet,
       ruleRegistryService: plugins.ruleRegistry,
       // @ts-expect-error update types
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       config: this.config!,
       logger: this.logger,
       registerIngestCallback,

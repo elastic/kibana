@@ -18,12 +18,13 @@ import {
   type EuiListGroupProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { MenuItemGroup } from '../types';
+import type { MenuItemGroup } from '../types';
 
 export function Group({ group }: { group: MenuItemGroup }) {
   const listItems: EuiListGroupProps['listItems'] = useMemo(
     () =>
       group.items.map((item) => ({
+        // default values for an item
         key: item.id,
         size: 's',
         toolTipText: item.description,
@@ -31,28 +32,33 @@ export function Group({ group }: { group: MenuItemGroup }) {
           position: 'right',
         },
         showToolTip: true,
-        label: !item.isDeprecated ? (
-          item.name
-        ) : (
-          <EuiFlexGroup wrap responsive={false} gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{item.name}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="warning">
-                <FormattedMessage
-                  id="dashboard.editorMenu.deprecatedTag"
-                  defaultMessage="Deprecated"
-                />
-              </EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
+        label: item.name,
         onClick: item.onClick,
         iconType: item.icon,
         isDisabled: item.isDisabled,
         'data-test-subj': item['data-test-subj'],
         role: 'menuitem',
+        // handle overrides for an item
+        ...(item.MenuItem && {
+          label: item.MenuItem,
+        }),
+        ...(item.isDeprecated && {
+          label: (
+            <EuiFlexGroup wrap responsive={false} gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{item.MenuItem ? item.MenuItem : item.name}</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">
+                  <FormattedMessage
+                    id="dashboard.editorMenu.deprecatedTag"
+                    defaultMessage="Deprecated"
+                  />
+                </EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        }),
       })),
     [group.items]
   );

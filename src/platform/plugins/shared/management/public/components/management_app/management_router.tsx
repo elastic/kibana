@@ -10,7 +10,7 @@
 import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import {
+import type {
   AnalyticsServiceStart,
   AppMountParameters,
   ChromeBreadcrumb,
@@ -20,7 +20,7 @@ import {
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
-import { ManagementSection } from '../../utils';
+import type { ManagementSection } from '../../utils';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];

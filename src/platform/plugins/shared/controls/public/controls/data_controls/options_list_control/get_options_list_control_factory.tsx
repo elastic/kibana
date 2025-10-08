@@ -20,11 +20,13 @@ import {
   Subject,
 } from 'rxjs';
 
-import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { Filter } from '@kbn/es-query';
+import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter } from '@kbn/es-query';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { OPTIONS_LIST_CONTROL } from '../../../../common';
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { isOptionsListESQLControlState } from '../../../../common/options_list/types';
 import type {
   OptionsListControlState,
   OptionsListSortingType,
@@ -49,11 +51,8 @@ import { initializeSelectionsManager, selectionComparators } from './selections_
 import { OptionsListStrings } from './options_list_strings';
 import type { OptionsListComponentApi, OptionsListControlApi } from './types';
 import { initializeTemporayStateManager } from './temporay_state_manager';
-import {
-  editorComparators,
-  EditorState,
-  initializeEditorStateManager,
-} from './editor_state_manager';
+import type { EditorState } from './editor_state_manager';
+import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
 
 export const getOptionsListControlFactory = (): DataControlFactory<
   OptionsListControlState,
@@ -73,6 +72,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
     },
     CustomOptionsComponent: OptionsListEditorOptions,
     buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
+      if (isOptionsListESQLControlState(initialState)) {
+        throw new Error('ES|QL control state handling not yet implemented');
+      }
+
       /** Serializable state - i.e. the state that is saved with the control */
       const editorStateManager = initializeEditorStateManager(initialState);
 
@@ -153,6 +156,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
 
       /** Fetch the suggestions and perform validation */
+      const suggestionLoadError$ = new BehaviorSubject<Error | undefined>(undefined);
       const loadMoreSubject = new Subject<void>();
       const fetchSubscription = fetchAndValidate$({
         api: {
@@ -169,13 +173,13 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         sort$,
         controlFetch$: (onReload: () => void) => controlGroupApi.controlFetch$(uuid, onReload),
       }).subscribe((result) => {
-        // if there was an error during fetch, set blocking error and return early
+        // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
-          dataControlManager.api.setBlockingError((result as { error: Error }).error);
+          suggestionLoadError$.next((result as { error: Error }).error);
           return;
-        } else if (dataControlManager.api.blockingError$.getValue()) {
+        } else if (suggestionLoadError$.getValue()) {
           // otherwise,  if there was a previous error, clear it
-          dataControlManager.api.setBlockingError(undefined);
+          suggestionLoadError$.next(undefined);
         }
 
         // fetch was successful so set all attributes from result
@@ -298,6 +302,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           existsSelected: false,
         },
         onReset: (lastSaved) => {
+          if (isOptionsListESQLControlState(lastSaved?.rawState)) {
+            throw new Error('ES|QL control state handling not yet implemented');
+          }
           dataControlManager.reinitializeState(lastSaved?.rawState);
           selectionsManager.reinitializeState(lastSaved?.rawState);
           editorStateManager.reinitializeState(lastSaved?.rawState);
@@ -305,9 +312,22 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         },
       });
 
+      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+      const errorsSubscription = combineLatest([
+        dataControlManager.api.blockingError$,
+        suggestionLoadError$,
+      ])
+        .pipe(
+          map(([controlError, suggestionError]) => {
+            return controlError ?? suggestionError;
+          })
+        )
+        .subscribe((error) => blockingError$.next(error));
+
       const api = finalizeApi({
         ...unsavedChangesApi,
         ...dataControlManager.api,
+        blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
         serializeState,
@@ -398,6 +418,34 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         setSort: (sort: OptionsListSortingType | undefined) => {
           sort$.next(sort);
         },
+        selectAll: (keys: string[]) => {
+          const field = api.field$.getValue();
+          if (keys.length < 1 || !field) {
+            api.setBlockingError(
+              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            );
+            return;
+          }
+
+          const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
+          const newSelections = keys.filter((key) => !selectedOptions.includes(key as string));
+          selectionsManager.api.setSelectedOptions([...selectedOptions, ...newSelections]);
+        },
+        deselectAll: (keys: string[]) => {
+          const field = api.field$.getValue();
+          if (keys.length < 1 || !field) {
+            api.setBlockingError(
+              new Error(OptionsListStrings.control.getInvalidSelectionMessage())
+            );
+            return;
+          }
+
+          const selectedOptions = selectionsManager.api.selectedOptions$.getValue() ?? [];
+          const remainingSelections = selectedOptions.filter(
+            (option) => !keys.includes(option as string)
+          );
+          selectionsManager.api.setSelectedOptions(remainingSelections);
+        },
       };
 
       if (selectionsManager.api.hasInitialSelections) {
@@ -418,6 +466,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
               validSearchStringSubscription.unsubscribe();
               hasSelectionsSubscription.unsubscribe();
               selectionsSubscription.unsubscribe();
+              errorsSubscription.unsubscribe();
             };
           }, []);
 

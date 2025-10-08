@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
   EnrichedDeprecationInfo,
   ESUpgradeStatus,
   FeatureSet,

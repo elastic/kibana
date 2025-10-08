@@ -11,7 +11,7 @@ import deepEqual from 'react-fast-compare';
 import { trackCanvasUiMetric, METRIC_TYPE } from '../../lib/ui_metric';
 import { getElementCounts } from '../../state/selectors/workpad';
 import { getArgs } from '../../state/selectors/resolved_args';
-import { State } from '../../../types';
+import type { State } from '../../../types';
 
 const WorkpadLoadedMetric = 'workpad-loaded';
 const WorkpadLoadedWithErrorsMetric = 'workpad-loaded-with-errors';

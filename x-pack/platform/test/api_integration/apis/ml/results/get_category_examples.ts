@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 
@@ -79,7 +79,9 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('get category_examples', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/module_sample_logs');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs'
+      );
       await ml.testResources.setKibanaTimeZoneToUTC();
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });

@@ -9,7 +9,7 @@
 
 import { parse } from '..';
 import { EsqlQuery } from '../../query';
-import { ESQLAstRerankCommand } from '../../types';
+import type { ESQLAstItem, ESQLAstRerankCommand, ESQLCommandOption, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
 
 describe('Comments', () => {
@@ -129,7 +129,7 @@ FROM index`;
     it('to an expression', () => {
       const text = `
         FROM
-  
+
         // "abc" is the best source
         abc`;
       const { ast } = parse(text, { withFormatting: true });
@@ -241,7 +241,7 @@ FROM index`;
     it('to first binary expression operand', () => {
       const text = `
         ROW
-        
+
         // 1
         1 +
         2`;
@@ -1054,16 +1054,12 @@ FROM a
   });
 
   describe('many comments', () => {
-    /**
-     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
-     * get back to it after 9.1 release.
-     */
-    test.skip('can attach all possible inline comments in basic RERANK command', () => {
+    test('can attach all possible inline comments in basic RERANK command', () => {
       const src = `
         FROM a
           | /*0*/ RERANK /*1*/ "query" /*2*/
                 ON /*3*/ field /*4*/
-                WITH /*5*/ id /*6*/`;
+                WITH /*5*/ { /*6*/ "inference_id" /*7*/ : /*8*/ "model" /*9*/, /*10*/ "scoreColumn" /*11*/ : /*12*/ "rank_score" /*13*/ } /*14*/`;
       const query = EsqlQuery.fromSrc(src, { withFormatting: true });
       const cmd = query.ast.commands[1] as ESQLAstRerankCommand;
 
@@ -1095,38 +1091,126 @@ FROM a
       });
 
       expect(cmd.fields[0].formatting).toMatchObject({
-        left: [
-          {
+        left: expect.arrayContaining([
+          expect.objectContaining({
             type: 'comment',
             subtype: 'multi-line',
             text: '3',
-          },
-        ],
-        right: [
-          {
+          }),
+        ]),
+        right: expect.arrayContaining([
+          expect.objectContaining({
             type: 'comment',
             subtype: 'multi-line',
             text: '4',
-          },
-        ],
+          }),
+        ]),
       });
 
-      expect(cmd.inferenceId.formatting).toMatchObject({
-        left: [
-          {
-            type: 'comment',
-            subtype: 'multi-line',
-            text: '5',
-          },
-        ],
-        right: [
-          {
-            type: 'comment',
-            subtype: 'multi-line',
-            text: '6',
-          },
-        ],
-      });
+      // Test WITH option with map parameters
+      const isWithOption = (arg: ESQLAstItem): arg is ESQLCommandOption =>
+        !!arg && !Array.isArray(arg) && arg.type === 'option' && arg.name === 'with';
+      const withOption = cmd.args.find(isWithOption);
+
+      expect(withOption).toBeDefined();
+
+      if (withOption) {
+        const map = withOption.args[0] as ESQLMap;
+        expect(map.type).toBe('map');
+
+        // Check comments around the map structure (/*5*/ and /*14*/)
+        expect(map.formatting).toMatchObject({
+          left: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'comment',
+              subtype: 'multi-line',
+              text: '5',
+            }),
+          ]),
+          right: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'comment',
+              subtype: 'multi-line',
+              text: '14',
+            }),
+          ]),
+        });
+
+        const entries = map.entries;
+        expect(entries).toHaveLength(2);
+
+        // "inference_id": "model" with comments /*6*/, /*7*/, /*8*/, /*9*/
+        const firstEntry = entries[0];
+        expect(firstEntry.key.formatting).toMatchObject({
+          left: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'comment',
+              subtype: 'multi-line',
+              text: '6',
+            }),
+          ]),
+          right: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'comment',
+              subtype: 'multi-line',
+              text: '7',
+            }),
+          ]),
+        });
+
+        expect(firstEntry.value.formatting).toMatchObject({
+          left: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'comment',
+              subtype: 'multi-line',
+              text: '8',
+            }),
+          ]),
+          right: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'comment',
+              subtype: 'multi-line',
+              text: '9',
+            }),
+          ]),
+        });
+
+        // "scoreColumn": "rank_score" with comments /*10*/, /*11*/, /*12*/, /*13*/
+        const secondEntry = entries[1];
+        expect(secondEntry.key.formatting).toMatchObject({
+          left: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'comment',
+              subtype: 'multi-line',
+              text: '10',
+            }),
+          ]),
+          right: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'comment',
+              subtype: 'multi-line',
+              text: '11',
+            }),
+          ]),
+        });
+
+        expect(secondEntry.value.formatting).toMatchObject({
+          left: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'comment',
+              subtype: 'multi-line',
+              text: '12',
+            }),
+          ]),
+          right: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'comment',
+              subtype: 'multi-line',
+              text: '13',
+            }),
+          ]),
+        });
+      }
     });
   });
 });

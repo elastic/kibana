@@ -15,7 +15,7 @@ import * as useNavigationModule from '@kbn/security-solution-navigation/src/navi
 import * as useGetIntegrationsModule from '../service/hooks/use_get_integrations';
 import * as useGetMigrationRulesModule from '../logic/use_get_migration_rules';
 import * as useGetMigrationTranslationStatsModule from '../logic/use_get_migration_translation_stats';
-import * as useMissingPrivilegesModule from '../../../detections/components/callouts/missing_privileges_callout/use_missing_privileges';
+import * as useMissingPrivilegesModule from '../../../common/hooks/use_missing_privileges';
 import * as useGetMigrationMissingPrivilegesModule from '../logic/use_get_migration_privileges';
 import * as useCallOutStorageModule from '../../../common/components/callouts/use_callout_storage';
 import { TestProviders } from '../../../common/mock';
@@ -25,7 +25,7 @@ import {
   mockedMigrationResultsObj,
   mockedMigrationTranslationStats,
 } from '../../common/mocks/migration_result.data';
-import * as useGetMissingResourcesModule from '../service/hooks/use_get_missing_resources';
+import * as useGetMissingResourcesModule from '../../common/hooks/use_get_missing_resources';
 
 jest.mock('../../../common/components/page_wrapper', () => {
   return {
@@ -112,9 +112,14 @@ function renderTestComponent(args?: { migrationId?: string; wrapper?: React.Comp
       },
     },
   };
-  return render(<MigrationRulesPage {...finalProps} />, {
-    wrapper: args?.wrapper,
-  });
+  return render(
+    <TestProviders>
+      <MigrationRulesPage {...finalProps} />
+    </TestProviders>,
+    {
+      wrapper: args?.wrapper,
+    }
+  );
 }
 
 const mockUseMigrationRuleTransationStats: typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats =

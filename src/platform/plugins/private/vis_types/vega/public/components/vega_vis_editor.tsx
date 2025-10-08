@@ -15,14 +15,15 @@ import React, { useCallback, useState } from 'react';
 import compactStringify from 'json-stringify-pretty-compact';
 import { i18n } from '@kbn/i18n';
 
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { CodeEditor, HJSON_LANG_ID } from '@kbn/code-editor';
+import { type UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { getNotifications } from '../services';
-import { VisParams } from '../vega_fn';
+import type { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
 import { VegaActionsMenu } from './vega_actions_menu';
-
-import './vega_editor.scss';
 
 function format(
   value: string,
@@ -48,7 +49,43 @@ function format(
   }
 }
 
+const vegaVisStyles = {
+  base: css({
+    '&.vgaEditor': {
+      width: '100%',
+      flexGrow: 1,
+
+      '.kibanaCodeEditor': {
+        width: '100%',
+      },
+    },
+  }),
+  editorActions: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      zIndex: euiTheme.levels.flyout,
+      top: euiTheme.size.s,
+      // Adjust for sidebar collapse button
+      right: euiTheme.size.xxl,
+      lineHeight: 1,
+    }),
+};
+
+const monacoOverride = {
+  override: ({ colorMode }: UseEuiTheme) =>
+    css({
+      // See discussion: https://github.com/elastic/kibana/issues/228296#issuecomment-3126033291
+      ...(colorMode === 'DARK' && {
+        '.monaco-editor': {
+          '--vscode-editor-inactiveSelectionBackground': '#3a3d41',
+        },
+      }),
+    }),
+};
+
 function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
+  const styles = useMemoCss(vegaVisStyles);
+  const monacoStyles = useMemoCss(monacoOverride);
   const [languageId, setLanguageId] = useState<string>();
 
   useMount(() => {
@@ -97,12 +134,13 @@ function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParam
   }
 
   return (
-    <div className="vgaEditor" data-test-subj="vega-editor">
-      <div className="vgaEditor__editorActions">
+    <div className="vgaEditor" data-test-subj="vega-editor" css={styles.base}>
+      <div className="vgaEditor__editorActions" css={styles.editorActions}>
         <VegaHelpMenu />
         <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
       </div>
       <CodeEditor
+        classNameCss={monacoStyles.override}
         width="100%"
         height="100%"
         languageId={languageId}

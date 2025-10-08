@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { screen, render, within } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { useParams } from 'react-router-dom';
@@ -13,6 +13,11 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { NetworkDetails } from '.';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import {
+  defaultImplementation,
+  withIndices,
+} from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn().mockReturnValue({
@@ -163,6 +168,8 @@ describe('Network Details', () => {
   });
 
   test('it renders ipv6 headline', async () => {
+    jest.mocked(useDataView).mockReturnValue(withIndices(['test-index']));
+
     const ip = 'fe80--24ce-f7ff-fede-a571';
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
@@ -186,6 +193,8 @@ describe('Network Details', () => {
   });
 
   test('it renders landing page component when no indices exist', () => {
+    jest.mocked(useDataView).mockReturnValue(defaultImplementation());
+
     const ip = '123.456.78.90';
     (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: false,
@@ -196,6 +205,7 @@ describe('Network Details', () => {
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
     });
+
     render(
       <TestProviders>
         <Router history={getMockHistory(ip)}>

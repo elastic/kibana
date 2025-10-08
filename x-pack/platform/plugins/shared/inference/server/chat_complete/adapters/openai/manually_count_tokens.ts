@@ -6,7 +6,7 @@
  */
 
 import { encode } from 'gpt-tokenizer';
-import { ChatCompletionChunkEvent } from '@kbn/inference-common';
+import type { ChatCompletionChunkEvent } from '@kbn/inference-common';
 import type { OpenAIRequest } from './types';
 import { mergeChunks } from '../../utils';
 

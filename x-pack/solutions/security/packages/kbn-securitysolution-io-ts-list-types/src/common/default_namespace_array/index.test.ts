@@ -7,7 +7,8 @@
 
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
-import { DefaultNamespaceArray, DefaultNamespaceArrayType } from '.';
+import type { DefaultNamespaceArrayType } from '.';
+import { DefaultNamespaceArray } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('default_namespace_array', () => {

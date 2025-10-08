@@ -10,7 +10,8 @@
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import { Type } from './type';
 import { ValidationError } from '../errors';
 
 export type Props = Record<string, Type<any>>;
@@ -227,11 +228,9 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
 
   /**
    * Return the schema for this object's underlying properties
-   *
-   * @internal should only be used internal for type reflection
    */
   public getPropSchemas(): P {
-    return this.props;
+    return { ...this.props };
   }
 
   validateKey(key: string, value: any) {

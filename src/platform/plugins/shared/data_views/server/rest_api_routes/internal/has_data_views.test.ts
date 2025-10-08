@@ -8,7 +8,7 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerHasDataViewsRoute, handler } from './has_data_views';
 

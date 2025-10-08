@@ -12,7 +12,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NumberList } from './components/number_list';
-import { AggParamEditorProps } from '../agg_param_props';
+import type { AggParamEditorProps } from '../agg_param_props';
 
 function PercentileRanksEditor({
   agg,

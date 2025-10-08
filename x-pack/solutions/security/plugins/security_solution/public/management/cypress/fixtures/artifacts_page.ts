@@ -508,4 +508,116 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       os_types: ['windows', 'linux', 'macos'],
     },
   },
+  {
+    title: 'Trusted devices',
+    pagePrefix: 'trustedDevicesList',
+    tabId: 'trustedDevices',
+    nextTabId: 'trustedApps',
+    artifactName: 'Trusted device name',
+    privilegePrefix: 'trusted_devices_',
+    create: {
+      formActions: [
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-nameTextField',
+          value: 'Trusted device name',
+        },
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-descriptionField',
+          value: 'This is the trusted device description',
+        },
+        {
+          type: 'click',
+          selector: 'trustedDevices-form-osSelectField',
+        },
+        {
+          type: 'click',
+          customSelector: '[role="option"]:contains("Windows and Mac")',
+        },
+        {
+          type: 'click',
+          selector: 'trustedDevices-form-fieldSelect',
+        },
+        {
+          type: 'click',
+          customSelector: '[role="option"]:contains("Host")',
+        },
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-valueField',
+          value: 'test-host',
+        },
+      ],
+      checkResults: [
+        {
+          selector: 'trustedDevicesList-card-criteriaConditions',
+          value: ' OSIS Windows, MacAND host.nameIS test-host',
+        },
+      ],
+    },
+    update: {
+      formActions: [
+        {
+          type: 'clear',
+          selector: 'trustedDevices-form-nameTextField',
+        },
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-nameTextField',
+          value: 'Trusted device name edited',
+        },
+        {
+          type: 'clear',
+          selector: 'trustedDevices-form-descriptionField',
+        },
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-descriptionField',
+          value: 'This is the trusted device description edited',
+        },
+        {
+          type: 'clear',
+          selector: 'trustedDevices-form-valueField',
+        },
+        {
+          type: 'input',
+          selector: 'trustedDevices-form-valueField',
+          value: 'updated-host',
+        },
+      ],
+      checkResults: [
+        {
+          selector: 'trustedDevicesList-card-criteriaConditions',
+          value: ' OSIS Windows, MacAND host.nameIS updated-host',
+        },
+        {
+          selector: 'trustedDevicesList-card-header-title',
+          value: 'Trusted device name edited',
+        },
+        {
+          selector: 'trustedDevicesList-card-description',
+          value: 'This is the trusted device description edited',
+        },
+      ],
+    },
+    delete: {
+      confirmSelector: 'trustedDevicesList-deleteModal-submitButton',
+      card: 'trustedDevicesList-card',
+    },
+    urlPath: 'trusted_devices',
+    emptyState: 'trustedDevicesList-emptyState',
+    createRequestBody: {
+      list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      entries: [
+        {
+          field: 'host.name',
+          operator: 'included',
+          type: 'match',
+          value: 'test-host',
+        },
+      ],
+      os_types: ['windows', 'macos'],
+    },
+  },
 ];

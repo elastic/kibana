@@ -32,8 +32,10 @@
     "optionalPlugins": [
       "cloud",
       "console",
+      "licenseManagement",
       "usageCollection",
       "searchNavigation",
+      "spaces",
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -12,9 +12,9 @@ import { createFilterDateHistogram } from './date_histogram';
 import { intervalOptions, autoInterval } from '../_interval_options';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry } from '../../test_helpers';
-import { IBucketDateHistogramAggConfig } from '../date_histogram';
+import type { IBucketDateHistogramAggConfig } from '../date_histogram';
 import { BUCKET_TYPES } from '../bucket_agg_types';
-import { RangeFilter } from '@kbn/es-query';
+import type { RangeFilter } from '@kbn/es-query';
 
 describe('AggConfig Filters', () => {
   describe('date_histogram', () => {

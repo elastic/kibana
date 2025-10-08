@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
-import { useAssistantContext } from '../../..';
+import { useVerticalBreakpoint } from './use_vertical_breakpoint';
 import { StarterPrompts } from './starter_prompts';
 import { SystemPrompt } from '../prompt_editor/system_prompt';
 import { SetupKnowledgeBaseButton } from '../../knowledge_base/setup_knowledge_base_button';
@@ -38,13 +39,15 @@ export const EmptyConvo: React.FC<Props> = ({
   setIsSettingsModalVisible,
   setUserPrompt,
 }) => {
-  const { assistantAvailability } = useAssistantContext();
+  const breakpoint = useVerticalBreakpoint();
+  const compressed = useMemo(() => breakpoint !== 'tall', [breakpoint]);
   return (
     <EuiFlexGroup
       alignItems="center"
       justifyContent="spaceBetween"
       data-test-subj="emptyConvo"
       direction="column"
+      gutterSize={compressed ? 'm' : 'l'}
     >
       <EuiFlexItem grow={false}>
         <EuiPanel
@@ -54,12 +57,17 @@ export const EmptyConvo: React.FC<Props> = ({
             text-align: center;
           `}
         >
-          <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="center"
+            direction="column"
+            gutterSize={compressed ? 'm' : 'l'}
+          >
             <EuiFlexItem grow={false}>
-              <AssistantBeacon backgroundColor="emptyShade" size="xl" />
+              <AssistantBeacon backgroundColor="emptyShade" size={compressed ? 'm' : 'xl'} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText>
+              <EuiText size={compressed ? 'xs' : 'relative'}>
                 <h3>{i18n.EMPTY_SCREEN_TITLE}</h3>
                 <p>{i18n.EMPTY_SCREEN_DESCRIPTION}</p>
               </EuiText>
@@ -71,19 +79,22 @@ export const EmptyConvo: React.FC<Props> = ({
                 isSettingsModalVisible={isSettingsModalVisible}
                 onSystemPromptSelectionChange={setCurrentSystemPromptId}
                 setIsSettingsModalVisible={setIsSettingsModalVisible}
+                compressed={compressed}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <SetupKnowledgeBaseButton />
+              <SetupKnowledgeBaseButton {...(compressed ? { display: 'mini' } : {})} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
-      {assistantAvailability.isStarterPromptsEnabled && (
-        <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
-          <StarterPrompts connectorId={connectorId} setUserPrompt={setUserPrompt} />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false} css={starterPromptWrapperClassName}>
+        <StarterPrompts
+          compressed={compressed}
+          connectorId={connectorId}
+          setUserPrompt={setUserPrompt}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

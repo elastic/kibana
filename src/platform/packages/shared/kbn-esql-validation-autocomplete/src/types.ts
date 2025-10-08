@@ -13,6 +13,6 @@ export interface EditorError {
   startColumn: number;
   endColumn: number;
   message: string;
-  code?: string;
+  code: string;
   severity: 'error' | 'warning' | number;
 }

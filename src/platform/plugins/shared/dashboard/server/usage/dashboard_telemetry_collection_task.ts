@@ -9,19 +9,20 @@
 
 import moment from 'moment';
 
-import {
+import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 import {
   controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
+  collectDashboardSections,
 } from './dashboard_telemetry';
 import type {
   DashboardSavedObjectAttributes,
@@ -102,6 +103,7 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
             // });
 
             dashboardData = controlsCollector(dashboard.attributes, dashboardData);
+            dashboardData = collectDashboardSections(dashboard.attributes, dashboardData);
 
             try {
               const panels = JSON.parse(

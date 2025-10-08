@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
-import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
+import type { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 import { querySavedObjectType } from '../saved_objects';
 import * as queryPersistableState from '../../common/query/persistable_state';
 import * as filtersPersistableState from '../../common/query/filters/persistable_state';
 import { registerSavedQueryRoutes } from './routes';
-import {
-  registerSavedQueryRouteHandlerContext,
-  SavedQueryRouteHandlerContext,
-} from './route_handler_context';
-import { QueryState } from '../../common';
+import type { SavedQueryRouteHandlerContext } from './route_handler_context';
+import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
+import type { QueryState } from '../../common';
 
 export interface QuerySetup extends PersistableStateService<QueryState> {
   filterManager: PersistableStateService<Filter[]>;

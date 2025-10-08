@@ -8,24 +8,27 @@
  */
 
 export type {
-  ControlGroupAttributes,
   GridData,
   DashboardPanel,
   DashboardSection,
   DashboardAttributes,
   DashboardItem,
   DashboardGetIn,
+  DashboardAPIGetOut,
   DashboardGetOut,
   DashboardCreateIn,
   DashboardCreateOut,
   DashboardCreateOptions,
   DashboardSearchIn,
   DashboardSearchOut,
+  DashboardSearchAPIResult,
   DashboardSearchOptions,
   DashboardUpdateIn,
   DashboardUpdateOut,
   DashboardUpdateOptions,
   DashboardOptions,
+  DashboardFilter,
+  DashboardQuery,
 } from './latest';
 
 export { DashboardStorage } from './dashboard_storage';

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreWindow, read } from './plugin_reader';
+import type { CoreWindow } from './plugin_reader';
+import { read } from './plugin_reader';
 
 const coreWindow: CoreWindow & {
   __kbnBundles__: { stub(key: string, value: any): void };
@@ -41,12 +42,19 @@ it('handles plugin exports with a "plugin" export that is not a function', () =>
 
   expect(() => {
     read('foo');
-  }).toThrowError(`Definition of plugin "foo" should be a function.`);
+  }).toThrowError(`Definition of plugin "foo" should either be a function or a module.`);
 });
 
-it('returns the plugin initializer when the "plugin" named export is a function', () => {
+it('returns the plugin definition when the "plugin" named export is a function', () => {
   const plugin = () => {};
   coreWindow.__kbnBundles__.stub('plugin/foo/public', { plugin });
 
-  expect(read('foo')).toBe(plugin);
+  expect(read('foo')).toEqual({ plugin });
+});
+
+it('returns the plugin definition when the "plugin" named export is a container module', () => {
+  const module = {};
+  coreWindow.__kbnBundles__.stub('plugin/foo/public', { module });
+
+  expect(read('foo')).toEqual({ module });
 });

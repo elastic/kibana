@@ -5,8 +5,8 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ApmApiSupertest } from '../../common/apm_api_supertest';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { ApmApiSupertest } from '../../common/apm_api_supertest';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
@@ -18,7 +18,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  registry.when('Storage Explorer privileges', { config: 'basic', archives: [] }, () => {
+  registry.when('Storage explorer privileges', { config: 'basic', archives: [] }, () => {
     it('returns true when the user has the required indices privileges', async () => {
       const { status, body } = await callApi(apmApiClient.monitorClusterAndIndicesUser);
       expect(status).to.be(200);

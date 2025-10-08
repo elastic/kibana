@@ -11,8 +11,8 @@ export enum QueryKeys {
   FetchOnboardingToken = 'fetchOnboardingToken',
   FetchSearchIndicesStatus = 'fetchSearchIndicesStatus',
   FetchUserStartPrivileges = 'fetchUserStartPrivileges',
+  FetchSampleDataStatus = 'fetchSampleDataStatus',
+  IngestSampleData = 'ingestSampleData',
   SearchDocuments = 'searchDocuments',
   ApiKey = 'apiKey',
 }
-
-export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';

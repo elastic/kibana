@@ -12,8 +12,8 @@ import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { EuiPanel } from '@elastic/eui';
-import { UiSettingsType } from '@kbn/core-ui-settings-common';
-import {
+import type { UiSettingsType } from '@kbn/core-ui-settings-common';
+import type {
   OnInputChangeFn,
   SettingType,
   UiSettingMetadata,
@@ -24,7 +24,7 @@ import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
 import { FieldInputProvider } from '../services';
 import { FieldInput } from '../field_input';
-import { InputProps } from '../types';
+import type { InputProps } from '../types';
 
 /**
  * Props for a {@link FieldInput} Storybook story.

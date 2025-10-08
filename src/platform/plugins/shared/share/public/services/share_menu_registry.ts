@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApplicationStart } from '@kbn/core/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type {
   BrowserUrlService,
   ShareContext,
@@ -19,6 +19,7 @@ import type {
   ShareIntegration,
   ShareRegistryApiStart,
   ShareMenuProviderLegacy,
+  RegisterShareIntegrationArgs,
 } from '../types';
 import type { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 
@@ -126,13 +127,17 @@ export class ShareRegistry implements ShareRegistryPublicApi {
   }
 
   private registerShareIntegration<I extends ShareIntegration>(
-    ...args: [string, Omit<I, 'shareType'>] | [Omit<I, 'shareType'>]
+    ...args: [string, RegisterShareIntegrationArgs<I>] | [RegisterShareIntegrationArgs<I>]
   ): void {
     const [shareObject, shareActionIntent] =
       args.length === 1 ? [this.globalMarker, args[0]] : args;
+
     this.registerShareIntentAction(shareObject, {
       shareType: 'integration',
-      ...shareActionIntent,
+      id: shareActionIntent.id,
+      groupId: shareActionIntent.groupId,
+      config: shareActionIntent.getShareIntegrationConfig,
+      prerequisiteCheck: shareActionIntent.prerequisiteCheck,
     });
   }
 
@@ -179,43 +184,52 @@ export class ShareRegistry implements ShareRegistryPublicApi {
     });
   }
 
-  private resolveShareItemsForShareContext({
+  private async resolveShareItemsForShareContext({
     objectType,
     isServerless,
     ...shareContext
-  }: ShareContext & { isServerless: boolean }): ShareConfigs[] {
+  }: ShareContext & { isServerless: boolean }): Promise<ShareConfigs[]> {
     if (!this.urlService || !this.anonymousAccessServiceProvider) {
       throw new Error('ShareOptionsManager#start was not invoked');
     }
 
-    return this.availableIntegrations(objectType)
-      .map((shareAction) => {
-        let config: ShareConfigs['config'] | null;
+    return (
+      await Promise.all(
+        this.availableIntegrations(objectType).map(async (shareAction) => {
+          let config: ShareConfigs['config'] | null;
 
-        if (shareAction.shareType === 'legacy') {
-          config = shareAction.config.call(null, {
-            objectType,
-            ...shareContext,
-          });
-        } else {
-          config = shareAction.config.call(null, {
-            urlService: this.urlService!,
-            anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
-            objectType,
-            ...shareContext,
-          });
-        }
+          if (shareAction.shareType === 'legacy') {
+            config = shareAction.config.call(null, {
+              objectType,
+              ...shareContext,
+            });
+          } else if (shareAction.shareType === 'integration') {
+            config = await shareAction.config.call(null, {
+              urlService: this.urlService!,
+              anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
+              objectType,
+              ...shareContext,
+            });
+          } else {
+            config = shareAction.config.call(null, {
+              urlService: this.urlService!,
+              anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
+              objectType,
+              ...shareContext,
+            });
+          }
 
-        return {
-          ...shareAction,
-          config,
-        } as ShareConfigs;
-      })
-      .filter((shareAction) => {
-        return isServerless
-          ? shareAction.shareType !== 'embed' && shareAction.config
-          : shareAction.config;
-      });
+          return {
+            ...shareAction,
+            config,
+          } as ShareConfigs;
+        })
+      )
+    ).filter((shareAction) => {
+      return isServerless
+        ? shareAction.shareType !== 'embed' && shareAction.config
+        : shareAction.config;
+    });
   }
 }
 

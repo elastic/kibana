@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
-import type { IndicesDataStream } from 'elasticsearch-8.x/lib/api/types';
+import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   NewPackagePolicy,

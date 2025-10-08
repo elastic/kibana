@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const chromeConfig = await readConfigFile(require.resolve('./config.base.ts'));
@@ -13,7 +13,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...chromeConfig.getAll(),
 
-    testFiles: [require.resolve('./apps/security'), require.resolve('./apps/spaces')],
+    testFiles: [
+      require.resolve('./apps/canvas'),
+      require.resolve('./apps/security'),
+      require.resolve('./apps/spaces'),
+      require.resolve('./apps/watcher'),
+    ],
 
     browser: {
       type: 'firefox',

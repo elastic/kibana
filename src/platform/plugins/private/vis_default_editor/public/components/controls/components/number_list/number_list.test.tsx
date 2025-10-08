@@ -11,7 +11,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { NumberList, NumberListProps } from './number_list';
+import type { NumberListProps } from './number_list';
+import { NumberList } from './number_list';
 import { NumberRow } from './number_row';
 
 jest.mock('./number_row', () => ({

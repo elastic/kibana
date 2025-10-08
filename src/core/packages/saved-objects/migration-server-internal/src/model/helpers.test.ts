@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FetchIndexResponse } from '../actions/fetch_indices';
-import { BaseState } from '../state';
+import type { FetchIndexResponse } from '../actions/fetch_indices';
+import type { BaseState } from '../state';
 import {
   addExcludedTypesToBoolQuery,
   addMustClausesToBoolQuery,
@@ -422,6 +422,45 @@ describe('createBulkIndexOperationTuple', () => {
         },
       ]
     `);
+  });
+
+  it('includes if_seq_no and if_primary_term when originId is not defined', () => {
+    const document = {
+      _id: 'doc1',
+      _seq_no: 10,
+      _primary_term: 20,
+      _source: { type: 'cases', title: 'no originId' },
+    };
+    const [operation] = createBulkIndexOperationTuple(document);
+    expect(operation.index).toBeDefined();
+    expect((operation.index as any).if_seq_no).toBe(10);
+    expect((operation.index as any).if_primary_term).toBe(20);
+  });
+
+  it('includes if_seq_no and if_primary_term when originId === _id', () => {
+    const document = {
+      _id: 'doc2',
+      _seq_no: 11,
+      _primary_term: 21,
+      _source: { type: 'cases', title: 'originId equals _id', originId: 'doc2' },
+    };
+    const [operation] = createBulkIndexOperationTuple(document);
+    expect(operation.index).toBeDefined();
+    expect((operation.index as any).if_seq_no).toBe(11);
+    expect((operation.index as any).if_primary_term).toBe(21);
+  });
+
+  it('does NOT include if_seq_no and if_primary_term when originId !== _id', () => {
+    const document = {
+      _id: 'doc3',
+      _seq_no: 12,
+      _primary_term: 22,
+      _source: { type: 'cases', title: 'originId not equal _id', originId: 'other-id' },
+    };
+    const [operation] = createBulkIndexOperationTuple(document);
+    expect(operation.index).toBeDefined();
+    expect((operation.index as any).if_seq_no).toBeUndefined();
+    expect((operation.index as any).if_primary_term).toBeUndefined();
   });
 });
 

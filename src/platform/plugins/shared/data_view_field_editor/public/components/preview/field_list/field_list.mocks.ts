@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocumentField } from './field_list';
+import type { DocumentField } from './field_list';
 
 export const documentFieldMock = (params: Partial<DocumentField> = {}): DocumentField => {
   return {

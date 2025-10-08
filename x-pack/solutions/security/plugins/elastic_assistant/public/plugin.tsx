@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -13,7 +13,8 @@ import { AssistantOverlay } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import {
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import type {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
   StartServices,
@@ -28,6 +29,9 @@ import { TelemetryService } from './src/common/lib/telemetry/telemetry_service';
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ConfigSchema {}
+
 export class ElasticAssistantPublicPlugin
   implements
     Plugin<
@@ -39,6 +43,11 @@ export class ElasticAssistantPublicPlugin
 {
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();
+  isServerless: boolean;
+
+  constructor(context: PluginInitializerContext<ConfigSchema>) {
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   public setup(coreSetup: CoreSetup) {
     this.telemetry.setup({ analytics: coreSetup.analytics });
@@ -84,6 +93,7 @@ export class ElasticAssistantPublicPlugin
     coreStart: CoreStart,
     services: StartServices
   ) {
+    const { openChat$, completeOpenChat } = services.aiAssistantManagementSelection;
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider
@@ -93,16 +103,22 @@ export class ElasticAssistantPublicPlugin
           }}
         >
           <KibanaThemeProvider {...coreStart}>
-            <ReactQueryClientProvider>
-              <AssistantSpaceIdProvider>
-                <AssistantProvider>
-                  <Suspense fallback={null}>
-                    <AssistantNavLink />
-                    <AssistantOverlay />
-                  </Suspense>
-                </AssistantProvider>
-              </AssistantSpaceIdProvider>
-            </ReactQueryClientProvider>
+            <NavigationProvider core={services}>
+              <ReactQueryClientProvider>
+                <AssistantSpaceIdProvider>
+                  <AssistantProvider
+                    isServerless={this.isServerless}
+                    openChatTrigger$={openChat$}
+                    completeOpenChat={completeOpenChat}
+                  >
+                    <Suspense fallback={null}>
+                      <AssistantNavLink />
+                      <AssistantOverlay />
+                    </Suspense>
+                  </AssistantProvider>
+                </AssistantSpaceIdProvider>
+              </ReactQueryClientProvider>
+            </NavigationProvider>
           </KibanaThemeProvider>
         </KibanaContextProvider>
       </I18nProvider>,

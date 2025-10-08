@@ -522,7 +522,7 @@ paths:
               schema:
                 type: array
                 items:
-                  - $ref: "#/components/schemas/getParameterResponse"
+                  $ref: "#/components/schemas/getParameterResponse"
               examples:
                 getParametersResponseExample1:
                   summary: Read access
@@ -1089,6 +1089,87 @@ paths:
           description: If the `label` is shorter than 1 character the API will return a 400 Bad Request response with a corresponding error message.
         '404':
           description: If the private location with the specified ID does not exist, the API will return a 404 Not Found response.
+  /api/synthetics/monitor/test/{monitorId}:
+    post:
+      summary: Trigger an on-demand test run for a monitor
+      operationId: post-synthetics-monitor-test
+      description: >
+        Trigger an immediate test execution for the specified monitor.
+        The response includes the generated `testRunId`. If the test encounters issues in one or more service locations, an `errors` array is also returned with details about the failures.
+      tags:
+        - synthetics
+      x-state: Generally available; added in 9.2.0
+      parameters:
+        - in: path
+          name: monitorId
+          required: true
+          description: The ID (config_id) of the monitor to test.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Test run triggered successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - testRunId
+                properties:
+                  testRunId:
+                    type: string
+                    description: Unique identifier for the triggered test run.
+                  errors:
+                    type: array
+                    description: >-
+                      Array of errors encountered while triggering the test, one
+                      per service location.
+                    items:
+                      type: object
+                      required:
+                        - locationId
+                        - error
+                      properties:
+                        locationId:
+                          type: string
+                          description: Identifier of the service location where the error occurred.
+                        error:
+                          type: object
+                          required:
+                            - status
+                            - reason
+                            - failed_monitors
+                          properties:
+                            status:
+                              type: integer
+                              description: HTTP status code returned by the agent.
+                            reason:
+                              type: string
+                              description: Human-readable explanation of the failure.
+                            failed_monitors:
+                              description: Optional list of monitors that failed at the location.
+                              nullable: true
+                              type: array
+                              items:
+                                type: object
+              examples:
+                testNowMonitorResponseExample1:
+                  value: |-
+                    {
+                      "testRunId": "2bd506e5-4f9a-4aa6-a019-7988500afba0",
+                      "errors": [
+                        {
+                          "locationId": "us_central_staging",
+                          "error": {
+                            "status": 401,
+                            "reason": "no auth credentials provided",
+                            "failed_monitors": null
+                          }
+                        }
+                      ]
+                    }
+        '404':
+          description: Monitor not found.
 components:
   schemas:
     commonMonitorFields:
@@ -1230,7 +1311,7 @@ components:
           additionalproperties: true
           properties:
             check:
-              type: objects
+              type: object
               description: The check request settings.
               properties:
                 request:

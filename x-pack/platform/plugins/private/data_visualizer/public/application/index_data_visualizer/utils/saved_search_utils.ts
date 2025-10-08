@@ -20,40 +20,6 @@ import { getDefaultDSLQuery } from '@kbn/ml-query-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { SavedSearchSavedObject } from '../../../../common/types';
-import { isSavedSearchSavedObject } from '../../../../common/types';
-
-/**
- * Parse the stringified searchSourceJSON
- * from a saved search or saved search object
- */
-export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObject | SavedSearch) {
-  if (!isSavedSearchSavedObject(savedSearch)) {
-    return savedSearch.searchSource.getSerializedFields();
-  }
-  const search =
-    savedSearch?.attributes?.kibanaSavedObjectMeta ?? // @ts-ignore
-    savedSearch?.kibanaSavedObjectMeta;
-
-  const parsed =
-    typeof search?.searchSourceJSON === 'string'
-      ? (JSON.parse(search.searchSourceJSON) as {
-          query: Query;
-          filter: Filter[];
-        })
-      : undefined;
-
-  // Remove indexRefName because saved search might no longer be relevant
-  // if user modifies the query or filter
-  // after opening a saved search
-  if (parsed && Array.isArray(parsed.filter)) {
-    parsed.filter.forEach((f) => {
-      // @ts-expect-error indexRefName does appear in meta for newly created saved search
-      f.meta.indexRefName = undefined;
-    });
-  }
-  return parsed;
-}
 
 function getSavedSearchSource(savedSearch?: SavedSearch | null) {
   return isDefined(savedSearch) &&

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { tEnum } from '../../utils/t_enum';
 import { ConfigKey } from '../../constants/monitor_management';
 export { ConfigKey } from '../../constants/monitor_management';

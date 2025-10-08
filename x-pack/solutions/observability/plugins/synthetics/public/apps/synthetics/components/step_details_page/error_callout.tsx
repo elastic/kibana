@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { JourneyStep } from '../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../common/runtime_types';
 
 export const ErrorCallOut = ({ step }: { step?: JourneyStep }) => {
   if (!step || step.synthetics.step?.status !== 'failed') {

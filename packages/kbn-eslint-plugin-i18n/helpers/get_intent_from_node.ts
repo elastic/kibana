@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
+import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 import { geti18nIdentifierFromString, lowerCaseFirstLetter } from './utils';
 
 const EXEMPTED_TAG_NAMES = ['EuiCode', 'EuiBetaBadge', 'FormattedMessage'];

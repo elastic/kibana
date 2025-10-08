@@ -1,0 +1,851 @@
+{
+  "id": "@kbn/upgrade-assistant-pkg-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.esIndicesStateCheck",
+        "type": "Function",
+        "tags": [],
+        "label": "esIndicesStateCheck",
+        "description": [],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", indices: string[]) => Promise<StatusCheckResult>"
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/es_indices_state_check.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.esIndicesStateCheck.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/es_indices_state_check.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.esIndicesStateCheck.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/es_indices_state_check.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.getIndexState",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexState",
+        "description": [
+          "\nThrows if the index name is not found in the resolved indices response\n"
+        ],
+        "signature": [
+          "(indexName: string, resolvedResponse: ",
+          {
+            "pluginId": "@kbn/upgrade-assistant-pkg-server",
+            "scope": "server",
+            "docId": "kibKbnUpgradeAssistantPkgServerPluginApi",
+            "section": "def-server.ResolveIndexResponseFromES",
+            "text": "ResolveIndexResponseFromES"
+          },
+          ") => \"open\" | \"closed\""
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/get_index_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.getIndexState.$1",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [
+              "Assume this is an index name, not an alias"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/get_index_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.getIndexState.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "resolvedResponse",
+            "description": [
+              "The response from _resolve/index/<indices>"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/upgrade-assistant-pkg-server",
+                "scope": "server",
+                "docId": "kibKbnUpgradeAssistantPkgServerPluginApi",
+                "section": "def-server.ResolveIndexResponseFromES",
+                "text": "ResolveIndexResponseFromES"
+              }
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/get_index_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.getReindexWarnings",
+        "type": "Function",
+        "tags": [],
+        "label": "getReindexWarnings",
+        "description": [
+          "\nReturns an array of warnings that should be displayed to user before reindexing begins."
+        ],
+        "signature": [
+          "(flatSettings: ",
+          {
+            "pluginId": "@kbn/upgrade-assistant-pkg-server",
+            "scope": "server",
+            "docId": "kibKbnUpgradeAssistantPkgServerPluginApi",
+            "section": "def-server.FlatSettings",
+            "text": "FlatSettings"
+          },
+          ", kibanaMajorVersion: number) => ",
+          {
+            "pluginId": "@kbn/upgrade-assistant-pkg-server",
+            "scope": "server",
+            "docId": "kibKbnUpgradeAssistantPkgServerPluginApi",
+            "section": "def-server.IndexWarning",
+            "text": "IndexWarning"
+          },
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/index_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.getReindexWarnings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "flatSettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/upgrade-assistant-pkg-server",
+                "scope": "server",
+                "docId": "kibKbnUpgradeAssistantPkgServerPluginApi",
+                "section": "def-server.FlatSettings",
+                "text": "FlatSettings"
+              }
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/index_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.getReindexWarnings.$2",
+            "type": "number",
+            "tags": [],
+            "label": "kibanaMajorVersion",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/index_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.getRollupJobByIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "getRollupJobByIndexName",
+        "description": [],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", log: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ", index: string) => Promise<string | undefined>"
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.getRollupJobByIndexName.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.getRollupJobByIndexName.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.getRollupJobByIndexName.$3",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/rollup_job.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.versionCheckHandlerWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "versionCheckHandlerWrapper",
+        "description": [],
+        "signature": [
+          "(kibanaMajorVersion: number) => <P, Q, B>(handler: ",
+          "RequestHandler",
+          "<P, Q, B, ",
+          "RequestHandlerContext",
+          ", any, ",
+          "KibanaResponseFactory",
+          ">) => (ctx: ",
+          "RequestHandlerContext",
+          ", request: ",
+          "KibanaRequest",
+          "<P, Q, B, any>, response: ",
+          "KibanaResponseFactory",
+          ") => Promise<",
+          "IKibanaResponse",
+          "<any>>"
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/es_version_precheck.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.versionCheckHandlerWrapper.$1",
+            "type": "number",
+            "tags": [],
+            "label": "kibanaMajorVersion",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/es_version_precheck.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.FlatSettings",
+        "type": "Interface",
+        "tags": [],
+        "label": "FlatSettings",
+        "description": [],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.FlatSettings.settings",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "IndicesIndexSettings",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.FlatSettings.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "signature": [
+              "{ properties?: ",
+              "MappingProperties",
+              " | undefined; _meta?: MetaProperties | undefined; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.IndexWarning",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexWarning",
+        "description": [],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.IndexWarning.warningType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "warningType",
+            "description": [],
+            "signature": [
+              "\"indexSetting\" | \"replaceIndexWithAlias\" | \"makeIndexReadonly\""
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.IndexWarning.flow",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "flow",
+            "description": [],
+            "signature": [
+              "\"reindex\" | \"all\" | \"readonly\""
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.IndexWarning.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nOptional metadata for deprecations\n"
+            ],
+            "signature": [
+              "{ [key: string]: string | boolean | string[]; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.ResolveIndexResponseFromES",
+        "type": "Interface",
+        "tags": [],
+        "label": "ResolveIndexResponseFromES",
+        "description": [],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.ResolveIndexResponseFromES.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "{ name: string; attributes: (\"hidden\" | \"open\" | \"closed\" | \"frozen\")[]; aliases?: string[] | undefined; data_stream?: string | undefined; }[]"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.ResolveIndexResponseFromES.aliases",
+            "type": "Array",
+            "tags": [],
+            "label": "aliases",
+            "description": [],
+            "signature": [
+              "{ name: string; indices: string[]; }[]"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.ResolveIndexResponseFromES.data_streams",
+            "type": "Array",
+            "tags": [],
+            "label": "data_streams",
+            "description": [],
+            "signature": [
+              "{ name: string; backing_indices: string[]; timestamp_field: string; }[]"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.IndexWarningType",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexWarningType",
+        "description": [],
+        "signature": [
+          "\"indexSetting\" | \"replaceIndexWithAlias\" | \"makeIndexReadonly\""
+        ],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.REINDEX_OP_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "REINDEX_OP_TYPE",
+        "description": [],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.mlSavedObjectType",
+        "type": "Object",
+        "tags": [],
+        "label": "mlSavedObjectType",
+        "description": [],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.mlSavedObjectType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.mlSavedObjectType.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.mlSavedObjectType.namespaceType",
+            "type": "string",
+            "tags": [],
+            "label": "namespaceType",
+            "description": [],
+            "signature": [
+              "\"agnostic\""
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.mlSavedObjectType.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                "id": "def-server.mlSavedObjectType.mappings.dynamic",
+                "type": "boolean",
+                "tags": [],
+                "label": "dynamic",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                "id": "def-server.mlSavedObjectType.mappings.properties",
+                "type": "Object",
+                "tags": [],
+                "label": "properties",
+                "description": [],
+                "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                    "id": "def-server.mlSavedObjectType.mappings.properties.snapshotId",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "snapshotId",
+                    "description": [],
+                    "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                        "id": "def-server.mlSavedObjectType.mappings.properties.snapshotId.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          "\"text\""
+                        ],
+                        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      },
+                      {
+                        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                        "id": "def-server.mlSavedObjectType.mappings.properties.snapshotId.fields",
+                        "type": "Object",
+                        "tags": [],
+                        "label": "fields",
+                        "description": [],
+                        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                        "deprecated": false,
+                        "trackAdoption": false,
+                        "children": [
+                          {
+                            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                            "id": "def-server.mlSavedObjectType.mappings.properties.snapshotId.fields.keyword",
+                            "type": "Object",
+                            "tags": [],
+                            "label": "keyword",
+                            "description": [],
+                            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                            "deprecated": false,
+                            "trackAdoption": false,
+                            "children": [
+                              {
+                                "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                                "id": "def-server.mlSavedObjectType.mappings.properties.snapshotId.fields.keyword.type",
+                                "type": "string",
+                                "tags": [],
+                                "label": "type",
+                                "description": [],
+                                "signature": [
+                                  "\"keyword\""
+                                ],
+                                "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                                "deprecated": false,
+                                "trackAdoption": false
+                              },
+                              {
+                                "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                                "id": "def-server.mlSavedObjectType.mappings.properties.snapshotId.fields.keyword.ignore_above",
+                                "type": "number",
+                                "tags": [],
+                                "label": "ignore_above",
+                                "description": [],
+                                "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/ml_upgrade_operation_saved_object_type.ts",
+                                "deprecated": false,
+                                "trackAdoption": false
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+        "id": "def-server.reindexOperationSavedObjectType",
+        "type": "Object",
+        "tags": [],
+        "label": "reindexOperationSavedObjectType",
+        "description": [],
+        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.reindexOperationSavedObjectType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.reindexOperationSavedObjectType.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [],
+            "signature": [
+              "true"
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.reindexOperationSavedObjectType.namespaceType",
+            "type": "string",
+            "tags": [],
+            "label": "namespaceType",
+            "description": [],
+            "signature": [
+              "\"agnostic\""
+            ],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+            "id": "def-server.reindexOperationSavedObjectType.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [],
+            "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                "id": "def-server.reindexOperationSavedObjectType.mappings.dynamic",
+                "type": "boolean",
+                "tags": [],
+                "label": "dynamic",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                "id": "def-server.reindexOperationSavedObjectType.mappings.properties",
+                "type": "Object",
+                "tags": [],
+                "label": "properties",
+                "description": [],
+                "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                    "id": "def-server.reindexOperationSavedObjectType.mappings.properties.indexName",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "indexName",
+                    "description": [],
+                    "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                        "id": "def-server.reindexOperationSavedObjectType.mappings.properties.indexName.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          "\"keyword\""
+                        ],
+                        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                    "id": "def-server.reindexOperationSavedObjectType.mappings.properties.status",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "status",
+                    "description": [],
+                    "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "children": [
+                      {
+                        "parentPluginId": "@kbn/upgrade-assistant-pkg-server",
+                        "id": "def-server.reindexOperationSavedObjectType.mappings.properties.status.type",
+                        "type": "string",
+                        "tags": [],
+                        "label": "type",
+                        "description": [],
+                        "signature": [
+                          "\"integer\""
+                        ],
+                        "path": "x-pack/platform/packages/private/upgrade-assistant/server/src/saved_object_types/reindex_operation_saved_object_type.ts",
+                        "deprecated": false,
+                        "trackAdoption": false
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

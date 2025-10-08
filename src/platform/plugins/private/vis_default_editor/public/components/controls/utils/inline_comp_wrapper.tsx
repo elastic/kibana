@@ -7,14 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentType } from 'react';
-import { AggParamEditorProps } from '../../agg_param_props';
+import type { ComponentType } from 'react';
+import React from 'react';
+import { css } from '@emotion/react';
+import { type UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { AggParamEditorProps } from '../../agg_param_props';
+
+const containerStyles = {
+  base: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      margin: `${euiTheme.size.m} 0`,
+      display: 'inline-block',
+      width: `calc(50% - ${euiTheme.size.s} / 2)`,
+    }),
+  size: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      marginLeft: `${euiTheme.size.s}`,
+    }),
+};
 
 export const wrapWithInlineComp =
   <T extends unknown>(WrapComponent: ComponentType<AggParamEditorProps<T>>) =>
-  (props: AggParamEditorProps<T>) =>
-    (
-      <div className={`visEditorAggParam--half visEditorAggParam--half-${props.aggParam.name}`}>
+  (props: AggParamEditorProps<T>) => {
+    const styles = useMemoCss(containerStyles);
+    const hasSize = props.aggParam.name === 'size';
+    return (
+      <div css={[styles.base, hasSize && styles.size]}>
         <WrapComponent {...props} />
       </div>
     );
+  };

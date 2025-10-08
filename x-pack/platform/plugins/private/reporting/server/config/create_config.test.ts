@@ -43,6 +43,17 @@ describe('Reporting server createConfig', () => {
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 
+  it('it logs a warning if the user-provided encryption key is less than 32 characters', () => {
+    const mockConfig = createMockConfigSchema({ encryptionKey: 'iiii', kibanaServer: {} });
+    const result = createConfig(mockCoreSetup, mockConfig, mockLogger);
+
+    expect(result.encryptionKey).toMatch('iiii');
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      'The xpack.reporting.encryptionKey config is shorter than the recommended minimum length of 32 characters. For enhanced security, please update the encryption key to be at least 32 characters long.'
+    );
+  });
+
   it('uses the user-provided encryption key, reporting kibanaServer settings to override server info', () => {
     const mockConfig = createMockConfigSchema({
       encryptionKey: 'iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii',

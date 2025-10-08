@@ -17,7 +17,7 @@ import { updateTranslationFile } from './update_translation_file';
 import { ErrorReporter } from '../../utils/error_reporter';
 import { getLocalesFromFiles } from './get_locale_from_file';
 
-import { TaskSignature } from '../../types';
+import type { TaskSignature } from '../../types';
 import { makeAbsolutePath } from '../../utils';
 
 export interface TaskOptions {

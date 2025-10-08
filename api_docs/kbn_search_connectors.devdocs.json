@@ -6950,7 +6950,7 @@
             "section": "def-common.ConnectorConfiguration",
             "text": "ConnectorConfiguration"
           },
-          "; index_name: string | null; deleted: boolean | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
+          "; deleted: boolean | null; index_name: string | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",

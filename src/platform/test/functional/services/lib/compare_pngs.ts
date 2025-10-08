@@ -10,7 +10,7 @@
 import { join, parse } from 'path';
 import sharp from 'sharp';
 import pixelmatch from 'pixelmatch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { promises as fs } from 'fs';
 import { PNG } from 'pngjs';
 export interface PngDescriptor {

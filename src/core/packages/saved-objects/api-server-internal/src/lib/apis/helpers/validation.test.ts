@@ -8,7 +8,7 @@
  */
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { type SavedObjectSanitizedDoc } from '@kbn/core-saved-objects-server';
 import { ValidationHelper } from './validation';
 import { typedef, typedef1, typedef2 } from './validation_fixtures';

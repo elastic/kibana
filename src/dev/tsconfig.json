@@ -29,7 +29,6 @@
     "@kbn/dev-utils",
     "@kbn/utils",
     "@kbn/optimizer",
-    "@kbn/bazel-runner",
     "@kbn/peggy",
     "@kbn/babel-transform",
     "@kbn/import-resolver",
@@ -47,5 +46,6 @@
     "@kbn/core-i18n-server-internal",
     "@kbn/code-owners",
     "@kbn/projects-solutions-groups",
+    "@kbn/dot-text",
   ]
 }

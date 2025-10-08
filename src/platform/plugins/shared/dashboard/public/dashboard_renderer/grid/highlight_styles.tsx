@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { highlightAnimationDuration } from '../../dashboard_api/track_panel';
 
@@ -87,9 +87,9 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
         'z-index': -1,
         width: 'calc(100% + 10px)',
         height: 'calc(100% + 10px)',
-        'background-image': rotatingGradient,
+        backgroundImage: rotatingGradient,
         filter: brightenInDarkMode(1.5),
-        'border-radius': euiTheme.border.radius.medium,
+        borderRadius: euiTheme.border.radius.medium,
         animation: `${borderSpinKeyframes} ${highlightAnimationDuration}ms ease-out`,
       },
       '&.dshDashboardGrid__item--highlighted .embPanel::after': {
@@ -101,7 +101,7 @@ export const getHighlightStyles = (context: UseEuiTheme) => {
         'z-index': -2,
         width: 'calc(100% + 30px)',
         height: 'calc(100% + 30px)',
-        'background-image': rotatingGradient,
+        backgroundImage: rotatingGradient,
         filter: `${brightenInDarkMode(1.3)} blur(25px)`,
         animation: `${shineKeyframes} ${highlightAnimationDuration}ms ease-out`,
       },

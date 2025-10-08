@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { isSubscriptionAllowed } from './subscription';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 

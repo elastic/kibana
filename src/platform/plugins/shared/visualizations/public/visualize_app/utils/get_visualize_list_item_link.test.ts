@@ -8,7 +8,7 @@
  */
 
 import { getVisualizeListItemLink } from './get_visualize_list_item_link';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { createHashHistory } from 'history';
 import { FilterStateStore } from '@kbn/es-query';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';

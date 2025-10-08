@@ -6,7 +6,7 @@
  */
 
 import { wrapWithSimulatedFunctionCalling } from '../../simulated_function_calling';
-import { OpenAIRequest } from '../openai/types';
+import type { OpenAIRequest } from '../openai/types';
 import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from '../openai';
 import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';

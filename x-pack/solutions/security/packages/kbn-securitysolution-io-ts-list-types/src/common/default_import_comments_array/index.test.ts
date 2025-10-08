@@ -8,7 +8,7 @@
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { ImportCommentsArray } from '../import_comment';
+import type { ImportCommentsArray } from '../import_comment';
 import { DefaultImportCommentsArray } from '.';
 import { getCommentsArrayMock } from '../comment/index.mock';
 import { getCreateCommentsArrayMock } from '../create_comment/index.mock';

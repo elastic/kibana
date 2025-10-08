@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/deeplinks-observability",
   "owner": [
-    "@elastic/obs-ux-management-team"
+    "@elastic/observability-ui"
   ],
   "group": "platform",
   "visibility": "shared"

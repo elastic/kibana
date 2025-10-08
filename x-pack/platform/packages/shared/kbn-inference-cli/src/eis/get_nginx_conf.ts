@@ -6,7 +6,7 @@
  */
 
 import dedent from 'dedent';
-import { EisGatewayConfig } from './get_eis_gateway_config';
+import type { EisGatewayConfig } from './get_eis_gateway_config';
 
 export function getNginxConf({ eisGatewayConfig }: { eisGatewayConfig: EisGatewayConfig }) {
   return dedent(`error_log /dev/stderr error; 

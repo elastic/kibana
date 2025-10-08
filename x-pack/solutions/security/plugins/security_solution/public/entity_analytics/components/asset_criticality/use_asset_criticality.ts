@@ -50,15 +50,17 @@ export const useAssetCriticalityPrivileges = (
 export const useAssetCriticalityFetchList = ({
   idField,
   idValues,
+  skip = false,
 }: {
   idField: string;
   idValues: string[];
+  skip?: boolean;
 }) => {
   const { fetchAssetCriticalityList } = useEntityAnalyticsRoutes();
   return useQuery<FindAssetCriticalityRecordsResponse>({
     queryKey: [ASSET_CRITICALITY_LIST_KEY],
     queryFn: () => fetchAssetCriticalityList({ idField, idValues }),
-    enabled: idValues.length > 0,
+    enabled: !skip && idValues.length > 0,
   });
 };
 

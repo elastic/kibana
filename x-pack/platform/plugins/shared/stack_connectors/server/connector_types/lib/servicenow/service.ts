@@ -24,7 +24,7 @@ import type {
 import * as i18n from './translations';
 import type { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import {
-  createServiceError,
+  addServiceMessageToError,
   getPushedDate,
   prepareIncident,
   throwIfAdditionalFieldsNotSupported,
@@ -141,7 +141,7 @@ export const createExternalService: ServiceFactory = ({
 
       return { ...res.data.result };
     } catch (error) {
-      throw createServiceError(error, 'Unable to get application version');
+      throw addServiceMessageToError(error, 'Unable to get application version');
     }
   };
 
@@ -173,7 +173,7 @@ export const createExternalService: ServiceFactory = ({
 
       return { ...res.data.result };
     } catch (error) {
-      throw createServiceError(error, `Unable to get incident with id ${id}`);
+      throw addServiceMessageToError(error, `Unable to get incident with id ${id}`);
     }
   };
 
@@ -191,7 +191,7 @@ export const createExternalService: ServiceFactory = ({
       checkInstance(res);
       return res.data.result.length > 0 ? { ...res.data.result } : undefined;
     } catch (error) {
-      throw createServiceError(error, 'Unable to find incidents by query');
+      throw addServiceMessageToError(error, 'Unable to find incidents by query');
     }
   };
 
@@ -228,7 +228,7 @@ export const createExternalService: ServiceFactory = ({
         url: getIncidentViewURL(insertedIncident.sys_id),
       };
     } catch (error) {
-      throw createServiceError(error, 'Unable to create incident');
+      throw addServiceMessageToError(error, 'Unable to create incident');
     }
   };
 
@@ -268,7 +268,7 @@ export const createExternalService: ServiceFactory = ({
         url: getIncidentViewURL(updatedIncident.sys_id),
       };
     } catch (error) {
-      throw createServiceError(error, `Unable to update incident with id ${incidentId}`);
+      throw addServiceMessageToError(error, `Unable to update incident with id ${incidentId}`);
     }
   };
 
@@ -294,7 +294,10 @@ export const createExternalService: ServiceFactory = ({
 
       return foundIncident;
     } catch (error) {
-      throw createServiceError(error, `Unable to get incident by correlation ID ${correlationId}`);
+      throw addServiceMessageToError(
+        error,
+        `Unable to get incident by correlation ID ${correlationId}`
+      );
     }
   };
 
@@ -353,7 +356,7 @@ export const createExternalService: ServiceFactory = ({
         return null;
       }
 
-      throw createServiceError(error, 'Unable to close incident');
+      throw addServiceMessageToError(error, 'Unable to close incident');
     }
   };
 
@@ -371,7 +374,7 @@ export const createExternalService: ServiceFactory = ({
 
       return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
-      throw createServiceError(error, 'Unable to get fields');
+      throw addServiceMessageToError(error, 'Unable to get fields');
     }
   };
 
@@ -387,7 +390,7 @@ export const createExternalService: ServiceFactory = ({
       checkInstance(res);
       return res.data.result;
     } catch (error) {
-      throw createServiceError(error, 'Unable to get choices');
+      throw addServiceMessageToError(error, 'Unable to get choices');
     }
   };
 

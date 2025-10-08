@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { ignoreElements, last, merge, Observable, shareReplay, tap } from 'rxjs';
-import { createFunctionNotFoundError, FunctionDefinition } from '../../../../common';
-import { ChatEvent } from '../../../../common/conversation_complete';
+import type { Observable } from 'rxjs';
+import { ignoreElements, last, merge, shareReplay, tap } from 'rxjs';
+import type { FunctionDefinition } from '../../../../common';
+import { createFunctionNotFoundError } from '../../../../common';
+import type { ChatEvent } from '../../../../common/conversation_complete';
 import { concatenateChatCompletionChunks } from '../../../../common/utils/concatenate_chat_completion_chunks';
 
 export function failOnNonExistingFunctionCall({

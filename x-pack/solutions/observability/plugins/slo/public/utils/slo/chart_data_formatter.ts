@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HistoricalSummaryResponse } from '@kbn/slo-schema';
-import { ChartData } from '../../typings/slo';
+import type { HistoricalSummaryResponse } from '@kbn/slo-schema';
+import type { ChartData } from '../../typings/slo';
 
 type DataType = 'error_budget_remaining' | 'error_budget_consumed' | 'sli_value';
 

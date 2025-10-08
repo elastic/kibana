@@ -6,15 +6,21 @@
  */
 import type { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
 import type { ProductFeatureCasesKey, CasesSubFeatureId } from '../product_features_keys';
-import type { ProductFeatureKibanaConfig } from '../types';
+import type { ProductFeaturesConfig } from '../types';
 
 export interface CasesFeatureParams {
-  uiCapabilities: CasesUiCapabilities;
-  apiTags: CasesApiTags;
+  apiTags: {
+    default: CasesApiTags;
+    connectors: Pick<CasesApiTags, 'all' | 'read'>;
+  };
+  uiCapabilities: {
+    default: CasesUiCapabilities;
+    connectors: Pick<CasesUiCapabilities, 'all' | 'read'>;
+  };
   savedObjects: { files: string[] };
 }
 
-export type DefaultCasesProductFeaturesConfig = Record<
+export type CasesProductFeaturesConfig = ProductFeaturesConfig<
   ProductFeatureCasesKey,
-  ProductFeatureKibanaConfig<CasesSubFeatureId>
+  CasesSubFeatureId
 >;

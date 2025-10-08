@@ -10,7 +10,7 @@ import type { ESFilter } from '@kbn/es-types';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { CursorPagination } from './types';
 import { CursorDirection, SortOrder } from '../../../../../common/runtime_types';
-import { UptimeEsClient } from '../../lib';
+import type { UptimeEsClient } from '../../lib';
 import { parseRelativeDate } from '../../../../../common/lib/get_histogram_interval';
 
 export class QueryContext {

@@ -34,4 +34,4 @@ export { convertToCounterRateColumn } from './counter_rate';
 export { convertToStandartDeviationColumn } from './std_deviation';
 export { convertVarianceToFormulaColumn } from './variance';
 
-export * from './types';
+export type * from './types';

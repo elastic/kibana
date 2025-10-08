@@ -10,7 +10,7 @@ import { createHash } from 'crypto';
 import { v5 as uuidv5 } from 'uuid';
 
 import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type {
   ThresholdNormalized,
   ThresholdWithCardinality,
@@ -103,7 +103,7 @@ export const searchResultHasAggs = <
  * basically, moving all fields(apart from _id & _index) from root node to _source property
  * { _id: 1, _index: "logs", field1, field2 } => { _id: 1, _index: "logs", _source: { field1, field2 } }
  */
-export const transformBulkCreatedItemsToHits = <T extends BaseFieldsLatest>(
+export const transformBulkCreatedItemsToHits = <T extends DetectionAlertLatest>(
   items: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>
 ) =>
   items.map((alert) => {

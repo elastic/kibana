@@ -8,7 +8,7 @@
  */
 
 import React, { Suspense } from 'react';
-import { DashboardTopNavProps } from './dashboard_top_nav_with_context';
+import type { DashboardTopNavProps } from './dashboard_top_nav_with_context';
 import { untilPluginStartServicesReady } from '../services/kibana_services';
 
 const LazyDashboardTopNav = React.lazy(async () => {

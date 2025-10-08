@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { embeddableFunctionFactory } from '../../../canvas_plugin_src/functions/external/embeddable';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory } from '../../../types';
+import type { FunctionHelp } from '../function_help';
+import type { FunctionFactory } from '../../../types';
 
 export const help: FunctionHelp<FunctionFactory<ReturnType<typeof embeddableFunctionFactory>>> = {
   help: i18n.translate('xpack.canvas.functions.embeddableHelpText', {

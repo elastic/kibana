@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiTokenProps } from '@elastic/eui';
+import type { EuiTokenProps } from '@elastic/eui';
 import { FieldIcon as KbnFieldIcon } from '@kbn/react-field';
 
 // Remappings from type to a supported `FieldIcon` type

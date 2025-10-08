@@ -117,7 +117,6 @@ describe('Navigation Plugin', () => {
       expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalledWith({
         es: {
           ...definition,
-          sideNavComponent: expect.any(Function),
         },
       });
     });

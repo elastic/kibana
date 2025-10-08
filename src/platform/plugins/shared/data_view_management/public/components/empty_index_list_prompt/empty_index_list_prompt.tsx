@@ -25,7 +25,7 @@ import {
   EuiFlexGroup,
   type UseEuiTheme,
 } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 export const EmptyIndexListPrompt = ({

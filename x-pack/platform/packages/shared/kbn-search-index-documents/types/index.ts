@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Pagination } from '@elastic/eui';
+import type { Pagination } from '@elastic/eui';
 
 export const DEFAULT_DOCS_PER_PAGE = 25;
 export const INDEX_DOCUMENTS_META_DEFAULT: Pagination = {

@@ -21,12 +21,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { CoreStart } from '@kbn/core/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import {
-  ScreenshotModePluginSetup,
-  KBN_SCREENSHOT_MODE_HEADER,
-} from '@kbn/screenshot-mode-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { KBN_SCREENSHOT_MODE_HEADER } from '@kbn/screenshot-mode-plugin/public';
 
 import { PLUGIN_NAME, BASE_API_ROUTE } from '../../common';
 

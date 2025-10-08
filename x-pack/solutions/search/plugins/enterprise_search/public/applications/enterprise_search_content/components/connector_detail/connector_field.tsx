@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import { EuiFlexItem, EuiInlineEditText, EuiInlineEditTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { Connector } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 
 import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 

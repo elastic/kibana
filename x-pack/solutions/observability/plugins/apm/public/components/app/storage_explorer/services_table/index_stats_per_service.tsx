@@ -108,7 +108,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
       <EuiPanel>
         <EuiInMemoryTable
           tableCaption={i18n.translate('xpack.apm.storageExplorer.indicesStats.table.caption', {
-            defaultMessage: 'Storage Explorer indices breakdown',
+            defaultMessage: 'Storage explorer indices breakdown',
           })}
           items={indicesStats}
           columns={columns}

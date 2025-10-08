@@ -7,13 +7,13 @@
 
 import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
+import type { LogQueryFields } from '@kbn/metrics-data-access-plugin/server';
 import { SNAPSHOT_API_MAX_METRICS } from '../../../common/constants';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { UsageCollector } from '../../usage/usage_collector';
 import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_api/snapshot_api';
 import { createSearchClient } from '../../lib/create_search_client';
 import { getNodes } from './lib/get_nodes';
-import type { LogQueryFields } from '../../lib/metrics/types';
 
 export const initSnapshotRoute = (libs: InfraBackendLibs) => {
   const validateBody = createRouteValidationFunction(SnapshotRequestRT);

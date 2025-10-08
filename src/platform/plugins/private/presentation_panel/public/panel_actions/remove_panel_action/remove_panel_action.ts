@@ -8,17 +8,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  apiCanAccessViewMode,
-  apiHasUniqueId,
+import type {
   EmbeddableApiContext,
-  getInheritedViewMode,
   HasParentApi,
   HasUniqueId,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { getContainerParentFromAPI, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  apiCanAccessViewMode,
+  apiHasUniqueId,
+  getInheritedViewMode,
+} from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { PresentationContainer } from '@kbn/presentation-containers';
+import { getContainerParentFromAPI } from '@kbn/presentation-containers';
 import { ACTION_REMOVE_PANEL } from './constants';
 
 export type RemovePanelActionApi = PublishesViewMode &

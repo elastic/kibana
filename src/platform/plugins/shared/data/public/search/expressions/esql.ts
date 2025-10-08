@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StartServicesAccessor } from '@kbn/core/public';
-import { UiSettingsCommon } from '../../../common';
-import { DataPublicPluginStart, DataStartDependencies } from '../../types';
+import type { StartServicesAccessor } from '@kbn/core/public';
+import type { UiSettingsCommon } from '../../../common';
+import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 import { getEsqlFn } from '../../../common/search/expressions/esql';
 
 /**

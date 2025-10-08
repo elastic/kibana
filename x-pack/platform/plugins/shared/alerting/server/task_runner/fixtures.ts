@@ -221,6 +221,7 @@ export const mockedRuleTypeSavedObject: Rule<RuleTypeParams> = {
   },
   monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
   revision: 0,
+  scheduledTaskId: '1',
 };
 
 export const mockedRawRuleSO: SavedObject<RawRule> = {
@@ -276,6 +277,7 @@ export const mockedRawRuleSO: SavedObject<RawRule> = {
     },
     monitoring: getDefaultMonitoring('2020-08-20T19:23:38Z'),
     revision: 0,
+    scheduledTaskId: '1',
   },
 };
 
@@ -311,7 +313,7 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
 };
 
 export const mockTaskInstance = () => ({
-  id: '',
+  id: '1',
   attempts: 0,
   status: TaskStatus.Running,
   version: '123',
@@ -379,31 +381,8 @@ export const generateRunnerResult = ({
   alertRecoveredInstances = {},
   summaryActions = {},
   taskRunError,
-  trackedExecutions = ['5f6aa57d-3e22-484e-bae8-cbed868f4d28'],
 }: GeneratorParams = {}) => {
   return {
-    monitoring: {
-      run: {
-        calculated_metrics: {
-          success_ratio: successRatio,
-        },
-        // @ts-ignore
-        history: history.map((success) => ({ success, timestamp: 0 })),
-        last_run: {
-          metrics: {
-            duration: 0,
-            gap_duration_s: null,
-            // TODO: uncomment after intermidiate release
-            // gap_range: null,
-            total_alerts_created: null,
-            total_alerts_detected: null,
-            total_indexing_duration_ms: null,
-            total_search_duration_ms: null,
-          },
-          timestamp: '1970-01-01T00:00:00.000Z',
-        },
-      },
-    },
     schedule: {
       interval,
     },
@@ -413,7 +392,6 @@ export const generateRunnerResult = ({
       ...(state && { alertTypeState: {} }),
       ...(state && { previousStartedAt: new Date('1970-01-01T00:00:00.000Z').toISOString() }),
       ...(state && { summaryActions }),
-      ...(state && { trackedExecutions }),
     },
     taskRunError,
   };

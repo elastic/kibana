@@ -24,6 +24,7 @@ import {
   EuiLink,
   EuiSwitch,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -109,11 +110,13 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
     onToggleSecretStorage(secretEnabled);
   };
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
-          <h2 id="FleetEditDownloadSourcesFlyoutTitle">
+          <h2 id={flyoutTitleId}>
             {!downloadSource ? (
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.createTitle"

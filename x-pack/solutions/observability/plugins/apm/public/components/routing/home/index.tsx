@@ -93,10 +93,10 @@ function serviceGroupPage<TPath extends string>({
 }
 
 export const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInventory.title', {
-  defaultMessage: 'Services',
+  defaultMessage: 'Service inventory',
 });
 export const ServiceMapTitle = i18n.translate('xpack.apm.views.serviceMap.title', {
-  defaultMessage: 'Service Map',
+  defaultMessage: 'Service map',
 });
 
 export const DependenciesOperationsTitle = i18n.translate(

@@ -12,8 +12,9 @@ import { useActions, useValues } from 'kea';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiButton, EuiPageTemplate, EuiTabProps } from '@elastic/eui';
-import { ChromeBreadcrumb } from '@kbn/core/public';
+import type { EuiTabProps } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../routes';
 import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
@@ -22,7 +23,6 @@ import { ConnectorConfiguration } from './connector_configuration';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDetailOverview } from './overview';
 import { generateEncodedPath } from '../shared/encode_path_params';
-import { useAppContext } from '../../app_context';
 import { SearchIndexDocuments } from '../search_index/documents';
 import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { ConnectorName } from './connector_name';
@@ -78,21 +78,6 @@ export const ConnectorDetail: React.FC = () => {
   const { tabId = ConnectorDetailTabId.OVERVIEW } = useParams<{
     tabId?: string;
   }>();
-
-  const {
-    plugins: { guidedOnboarding },
-  } = useAppContext();
-
-  useEffect(() => {
-    const subscription = guidedOnboarding?.guidedOnboardingApi
-      ?.isGuideStepActive$('databaseSearch', 'add_data')
-      .subscribe((isStepActive) => {
-        if (isStepActive && index?.count) {
-          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
-        }
-      });
-    return () => subscription?.unsubscribe();
-  }, [guidedOnboarding, index?.count]);
 
   const ALL_INDICES_TABS = [
     {
@@ -162,32 +147,29 @@ export const ConnectorDetail: React.FC = () => {
   ];
 
   const CONNECTOR_TABS = [
-    ...(hasFilteringFeature
-      ? [
-          {
-            content: <ConnectorSyncRules />,
-            disabled: !index,
-            id: ConnectorDetailTabId.SYNC_RULES,
-            isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
-            label: i18n.translate(
-              'xpack.contentConnectors.connectors.connectorDetail.syncRulesTabLabel',
-              {
-                defaultMessage: 'Sync rules',
-              }
-            ),
-            onClick: () =>
-              application?.navigateToUrl(
-                generateEncodedPath(
-                  `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
-                  {
-                    connectorId,
-                    tabId: ConnectorDetailTabId.SYNC_RULES,
-                  }
-                )
-              ),
-          },
-        ]
-      : []),
+    {
+      content: <ConnectorSyncRules />,
+      disabled: !index || !hasFilteringFeature,
+      id: ConnectorDetailTabId.SYNC_RULES,
+      isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
+      label: i18n.translate(
+        'xpack.contentConnectors.connectors.connectorDetail.syncRulesTabLabel',
+        {
+          defaultMessage: 'Sync rules',
+        }
+      ),
+      onClick: () =>
+        application?.navigateToUrl(
+          generateEncodedPath(
+            `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+            {
+              connectorId,
+              tabId: ConnectorDetailTabId.SYNC_RULES,
+            }
+          )
+        ),
+    },
+
     {
       content: <ConnectorScheduling />,
       disabled: !connector?.index_name,

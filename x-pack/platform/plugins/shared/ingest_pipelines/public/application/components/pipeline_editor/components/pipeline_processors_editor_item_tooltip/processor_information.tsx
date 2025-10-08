@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, memo } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { memo } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { ProcessorInternal } from '../../types';
+import type { ProcessorInternal } from '../../types';
 import { getProcessorDescriptor } from '../shared';
 
 interface Props {

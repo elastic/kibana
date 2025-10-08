@@ -7,6 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
+import type { BuildFlavor } from '@kbn/config';
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
@@ -45,6 +46,7 @@ export interface ConstructorOptions {
   license: SecurityLicense;
   applicationName: string;
   kibanaFeatures: KibanaFeature[];
+  buildFlavor?: BuildFlavor;
 }
 
 type GrantAPIKeyParams =
@@ -69,6 +71,7 @@ export class APIKeys implements APIKeysType {
   private readonly license: SecurityLicense;
   private readonly applicationName: string;
   private readonly kibanaFeatures: KibanaFeature[];
+  private readonly buildFlavor?: BuildFlavor;
 
   constructor({
     logger,
@@ -76,12 +79,14 @@ export class APIKeys implements APIKeysType {
     license,
     applicationName,
     kibanaFeatures,
+    buildFlavor,
   }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
     this.license = license;
     this.applicationName = applicationName;
     this.kibanaFeatures = kibanaFeatures;
+    this.buildFlavor = buildFlavor;
   }
 
   /**
@@ -112,7 +117,7 @@ export class APIKeys implements APIKeysType {
    * Determines if cross-cluster API Keys are enabled in Elasticsearch.
    */
   async areCrossClusterAPIKeysEnabled(): Promise<boolean> {
-    if (!this.license.isEnabled()) {
+    if (!this.license.isEnabled() || this.buildFlavor === 'serverless') {
       return false;
     }
 

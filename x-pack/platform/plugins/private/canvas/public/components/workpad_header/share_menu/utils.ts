@@ -6,10 +6,10 @@
  */
 
 import type { RedirectOptions } from '@kbn/share-plugin/public';
-import { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import type { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { CANVAS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { CanvasAppLocatorParams } from '../../../../common/locator';
-import { CanvasWorkpad } from '../../../../types';
+import type { CanvasAppLocatorParams } from '../../../../common/locator';
+import type { CanvasWorkpad } from '../../../../types';
 
 export interface CanvasWorkpadSharingData {
   workpad: Pick<CanvasWorkpad, 'id' | 'name' | 'height' | 'width'>;

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { ResolverOptions } from 'react-hook-form';
-import {
-  LLMs,
-  PlaygroundForm,
-  PlaygroundFormFields,
-  SavedPlaygroundForm,
-  SavedPlaygroundFormFields,
-} from '../types';
+import type { ResolverOptions } from 'react-hook-form';
+import type { PlaygroundForm, SavedPlaygroundForm } from '../types';
+import { LLMs, PlaygroundFormFields, SavedPlaygroundFormFields } from '../types';
 import { playgroundFormResolver, savedPlaygroundFormResolver } from './playground_form_resolver';
 
 describe('Form Resolvers', () => {

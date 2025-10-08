@@ -56,6 +56,7 @@ import { setupSavedObjects } from './saved_objects';
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
+import { UiamService } from './uiam';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStartInternal } from './user_profile';
@@ -407,10 +408,14 @@ export class SecurityPlugin
       http: core.http,
       loggers: this.initializerContext.logger,
       session,
+      uiam: config.uiam?.enabled
+        ? new UiamService(this.logger.get('uiam'), config.uiam)
+        : undefined,
       applicationName: this.authorizationSetup!.applicationName,
       kibanaFeatures: features.getKibanaFeatures(),
       isElasticCloudDeployment: () => cloud?.isCloudEnabled === true,
       customLogoutURL,
+      buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
     });
 
     this.authorizationService.start({

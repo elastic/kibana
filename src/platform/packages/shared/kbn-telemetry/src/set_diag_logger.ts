@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DiagLogLevel, DiagLogger, diag } from '@opentelemetry/api';
-import { LogLevelId, Logger } from '@kbn/logging';
+import type { DiagLogger } from '@opentelemetry/api';
+import { DiagLogLevel, diag } from '@opentelemetry/api';
+import type { LogLevelId, Logger } from '@kbn/logging';
 import { format } from 'util';
 
+/**
+ * Helper to make it easier to configure OTel's {@link DiagLogger}.
+ * @param logger {@link Logger}
+ * @param logLevel The {@link LogLevelId} to set the Diag logger to.
+ */
 export function setDiagLogger(logger: Logger, logLevel?: LogLevelId) {
   const diagLogger: DiagLogger = {
     debug: (message, ...args) => {

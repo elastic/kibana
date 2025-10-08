@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Trigger } from '.';
+import type { Trigger } from '.';
 
 export const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
 

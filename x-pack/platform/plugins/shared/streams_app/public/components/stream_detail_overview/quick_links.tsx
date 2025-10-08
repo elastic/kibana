@@ -10,7 +10,7 @@ import React from 'react';
 import { css } from '@emotion/css';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { AssetImage } from '../asset_image';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';

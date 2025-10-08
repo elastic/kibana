@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ValidationFuncArg } from '../../hook_form_lib';
+import type { ValidationFuncArg } from '../../hook_form_lib';
 import { isInteger } from './is_integer';
 
 describe('isInteger', () => {

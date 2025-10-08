@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './related_hosts';
-export * from './related_users';
+export type * from './related_hosts';
+export type * from './related_users';
 
 export { RelatedEntitiesQueries } from '../../../api/search_strategy';

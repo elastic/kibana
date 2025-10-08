@@ -23,13 +23,19 @@ import {
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
   getTrustedAppsListPath,
+  getTrustedDevicesListPath,
 } from '../../../../../common/routing';
 import {
   BLOCKLISTS_LABELS,
   EVENT_FILTERS_LABELS,
   HOST_ISOLATION_EXCEPTIONS_LABELS,
   TRUSTED_APPS_LABELS,
+  TRUSTED_DEVICES_LABELS,
 } from './translations';
+import { useLicense } from '../../../../../../common/hooks/use_license';
+
+import { TrustedDevicesApiClient } from '../../../../trusted_devices/service/api_client';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 const TrustedAppsArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
   const http = useHttp();
@@ -50,6 +56,25 @@ const TrustedAppsArtifactCard = memo<PackageCustomExtensionComponentProps>((prop
 });
 TrustedAppsArtifactCard.displayName = 'TrustedAppsArtifactCard';
 
+const TrustedDevicesArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
+  const http = useHttp();
+  const trustedDevicesApiClientInstance = useMemo(
+    () => TrustedDevicesApiClient.getInstance(http),
+    [http]
+  );
+
+  return (
+    <FleetArtifactsCard
+      {...props}
+      artifactApiClientInstance={trustedDevicesApiClientInstance}
+      getArtifactsPath={getTrustedDevicesListPath}
+      labels={TRUSTED_DEVICES_LABELS}
+      data-test-subj="trustedDevices"
+    />
+  );
+});
+TrustedDevicesArtifactCard.displayName = 'TrustedDevicesArtifactCard';
+
 const EventFiltersArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
   const http = useHttp();
   const eventFiltersApiClientInstance = useMemo(
@@ -67,6 +92,7 @@ const EventFiltersArtifactCard = memo<PackageCustomExtensionComponentProps>((pro
     />
   );
 });
+
 EventFiltersArtifactCard.displayName = 'EventFiltersArtifactCard';
 
 const HostIsolationExceptionsArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
@@ -115,9 +141,13 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
       canReadEventFilters,
       canReadTrustedApplications,
       canReadHostIsolationExceptions,
+      canReadTrustedDevices,
     } = useUserPrivileges().endpointPrivileges;
 
     const userCanAccessContent = useCanAccessSomeArtifacts();
+    const isEnterprise = useLicense().isEnterprise();
+    const trustedDevicesVisible =
+      useIsExperimentalFeatureEnabled('trustedDevices') && canReadTrustedDevices && isEnterprise;
 
     const artifactCards: ReactElement = useMemo(() => {
       if (loading) {
@@ -133,6 +163,13 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
           {canReadTrustedApplications && (
             <>
               <TrustedAppsArtifactCard {...props} />
+              <EuiSpacer />
+            </>
+          )}
+
+          {trustedDevicesVisible && (
+            <>
+              <TrustedDevicesArtifactCard {...props} />
               <EuiSpacer />
             </>
           )}
@@ -155,13 +192,14 @@ export const EndpointPackageCustomExtension = memo<PackageCustomExtensionCompone
         </div>
       );
     }, [
-      canReadBlocklist,
-      canReadEventFilters,
-      canReadTrustedApplications,
-      canReadHostIsolationExceptions,
       loading,
-      props,
       userCanAccessContent,
+      canReadTrustedApplications,
+      props,
+      trustedDevicesVisible,
+      canReadEventFilters,
+      canReadHostIsolationExceptions,
+      canReadBlocklist,
     ]);
 
     if (loading) {

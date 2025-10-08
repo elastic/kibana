@@ -13,7 +13,7 @@ import type { AppLinkItems, LinkItem } from '../../common/links/types';
 import { hasCapabilities, existCapabilities } from '../../common/lib/capabilities';
 import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures, SecurityPageName } from '../../../common';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 
 jest.mock('../../common/lib/capabilities', () => ({

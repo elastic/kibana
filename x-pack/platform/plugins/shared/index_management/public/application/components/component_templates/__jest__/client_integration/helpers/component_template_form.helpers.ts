@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { TestBed } from '@kbn/test-jest-helpers';
-import { DataRetention } from '../../../../../../../common';
+import type { TestBed } from '@kbn/test-jest-helpers';
+import type { DataRetention } from '../../../../../../../common';
 
 interface MappingField {
   name: string;

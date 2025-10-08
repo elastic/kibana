@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LIMITS, calculateWidthFromCharCount } from './calculate_width_from_char_count';
+import type { LIMITS } from './calculate_width_from_char_count';
+import { calculateWidthFromCharCount } from './calculate_width_from_char_count';
 
 type GenericObject<T = Record<string, any>> = T;
 

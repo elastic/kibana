@@ -6,10 +6,10 @@
  */
 
 import { JsonOutputParser } from '@langchain/core/output_parsers';
-import { CelInputState } from '../../types';
+import type { CelInputState } from '../../types';
 import { EX_ANSWER_STATE } from './constants';
 import { CEL_STATE_PROMPT } from './prompts';
-import { CelInputNodeParams } from './types';
+import type { CelInputNodeParams } from './types';
 
 export async function handleGetStateVariables({
   state,

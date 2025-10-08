@@ -6,14 +6,14 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
+import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { IndicesIndexTemplate, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import {
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
   CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
@@ -23,15 +23,16 @@ import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
-import { FindingsStatsTaskResult, ScoreAggregationResponse, VulnSeverityAggs } from './types';
+import type { FindingsStatsTaskResult, ScoreAggregationResponse, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
   CSPM_FINDINGS_STATS_INTERVAL,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
 import { scheduleTaskSafe, removeTaskSafe } from '../lib/task_manager_util';
-import { CspServerPluginStartServices } from '../types';
+import type { CspServerPluginStartServices } from '../types';
 import {
   stateSchemaByVersion,
   emptyState,
@@ -39,9 +40,140 @@ import {
   type TaskHealthStatus,
 } from './task_state';
 import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
+import { benchmarkScoreMapping } from '../create_indices/benchmark_score_mapping';
+import { createBenchmarkScoreIndex } from '../create_indices/create_indices';
+import type { CloudSecurityPostureConfig } from '../config';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
+
+// Default config for template fixing operations
+const DEFAULT_CONFIG: CloudSecurityPostureConfig = {
+  enabled: true,
+  serverless: { enabled: true },
+  enableExperimental: [],
+};
+
+const fetchBenchmarkScoreTemplate = async (esClient: ElasticsearchClient) => {
+  const templateResponse = await esClient.indices.getIndexTemplate({
+    name: BENCHMARK_SCORE_INDEX_TEMPLATE_NAME,
+  });
+  return templateResponse.index_templates[0]?.index_template;
+};
+
+const verifyTemplateStructure = (template: IndicesIndexTemplate, logger: Logger): boolean => {
+  if (!template?.template?.mappings?.properties) {
+    logger.error(`Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} has no mapping properties`);
+    return false;
+  }
+  return true;
+};
+
+const checkFieldMappings = (
+  templateProperties: any,
+  expectedProperties: any,
+  logger: Logger
+): string[] => {
+  const missingFields: string[] = [];
+
+  for (const [fieldName] of Object.entries(expectedProperties)) {
+    const templateField = templateProperties[fieldName];
+    if (!templateField) {
+      logger.warn(`${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} field missing '${fieldName}'`);
+      missingFields.push(fieldName);
+    }
+  }
+
+  return missingFields;
+};
+
+// Comprehensive template validation that checks all fields against benchmarkScoreMapping
+export const validateBenchmarkScoreTemplate = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<boolean> => {
+  try {
+    const template = await fetchBenchmarkScoreTemplate(esClient);
+
+    // Check if template has basic structure
+    if (!verifyTemplateStructure(template, logger)) {
+      logger.warn(
+        `Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} has no mapping properties, will trigger fixing`
+      );
+
+      try {
+        await createBenchmarkScoreIndex(esClient, DEFAULT_CONFIG, logger);
+      } catch (fixError) {
+        logger.error('Failed to fix template with missing properties:', fixError);
+        return false;
+      }
+
+      // Verify the fix worked
+      const verifyTemplate = await fetchBenchmarkScoreTemplate(esClient);
+      if (!verifyTemplateStructure(verifyTemplate, logger)) {
+        logger.error(`Template still has no mapping properties after fixing attempt`);
+        return false;
+      }
+
+      return true;
+    }
+
+    const templateProperties = template.template!.mappings!.properties;
+    const expectedProperties = benchmarkScoreMapping.properties;
+
+    if (!expectedProperties) {
+      logger.warn('Expected mapping has no properties');
+      return false;
+    }
+
+    const missingFields = checkFieldMappings(templateProperties, expectedProperties, logger);
+
+    if (missingFields.length > 0) {
+      logger.warn(
+        `Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} has field mapping issues. Will trigger fixing.`
+      );
+
+      try {
+        await createBenchmarkScoreIndex(esClient, DEFAULT_CONFIG, logger);
+      } catch (fixError) {
+        logger.error('Failed to fix template with field mapping issues:', fixError);
+        return false;
+      }
+
+      // Verify the fix worked by re-checking field mappings
+      const verifyTemplate = await fetchBenchmarkScoreTemplate(esClient);
+      if (!verifyTemplateStructure(verifyTemplate, logger)) {
+        return false;
+      }
+
+      const verifyTemplateProperties = verifyTemplate.template!.mappings!.properties;
+      const stillMissingFields = checkFieldMappings(
+        verifyTemplateProperties,
+        expectedProperties,
+        logger
+      );
+
+      if (stillMissingFields.length > 0) {
+        logger.error(
+          `Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} fields still missing after fixing: ${stillMissingFields.join(
+            ', '
+          )}`
+        );
+        return false;
+      }
+
+      return true;
+    }
+
+    logger.debug(
+      `Template ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME} mapping validation passed - all fields match expected mapping`
+    );
+    return true;
+  } catch (error) {
+    logger.error('Error during template validation:', error);
+    return false;
+  }
+};
 
 export async function scheduleFindingsStatsTask(
   taskManager: TaskManagerStartContract,
@@ -401,6 +533,16 @@ export const aggregateLatestFindings = async (
 ): Promise<TaskHealthStatus> => {
   try {
     const startAggTime = performance.now();
+
+    // Validate + attempting to fix benchmark score template mapping before aggregating findings
+    const templateValidationSuccess = await validateBenchmarkScoreTemplate(esClient, logger);
+
+    if (!templateValidationSuccess) {
+      logger.error(
+        'Template validation failed and could not be fixed. Stopping findings aggregation.'
+      );
+      return 'error';
+    }
 
     const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 

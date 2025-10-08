@@ -7,13 +7,14 @@
 
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { Repository } from '../../../../../common/types';
-import { PageLoading, PageError, Error, useExecutionContext } from '../../../../shared_imports';
+import type { Repository } from '../../../../../common/types';
+import type { Error } from '../../../../shared_imports';
+import { PageLoading, PageError, useExecutionContext } from '../../../../shared_imports';
 import { useDecodedParams } from '../../../lib';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppContext, useServices } from '../../../app_context';

@@ -17,7 +17,14 @@ import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { handleExport } from '../import_export/export';
 import { caseMigrations } from '../migrations';
-import { modelVersion1, modelVersion2, modelVersion3 } from './model_versions';
+import {
+  modelVersion1,
+  modelVersion2,
+  modelVersion3,
+  modelVersion4,
+  modelVersion5,
+  modelVersion6,
+} from './model_versions';
 import { handleImport } from '../import_export/import';
 
 export const createCaseSavedObjectType = (
@@ -179,6 +186,9 @@ export const createCaseSavedObjectType = (
           syncAlerts: {
             type: 'boolean',
           },
+          extractObservables: {
+            type: 'boolean',
+          },
         },
       },
       severity: {
@@ -188,6 +198,9 @@ export const createCaseSavedObjectType = (
         type: 'integer',
       },
       total_comments: {
+        type: 'integer',
+      },
+      total_events: {
         type: 'integer',
       },
       category: {
@@ -241,6 +254,14 @@ export const createCaseSavedObjectType = (
       },
       incremental_id: {
         type: 'unsigned_long',
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+          text: {
+            type: 'text',
+          },
+        },
       },
     },
   },
@@ -249,6 +270,9 @@ export const createCaseSavedObjectType = (
     1: modelVersion1,
     2: modelVersion2,
     3: modelVersion3,
+    4: modelVersion4,
+    5: modelVersion5,
+    6: modelVersion6,
   },
   management: {
     importableAndExportable: true,

@@ -20,7 +20,7 @@ import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 import { bulkCreateSuppressedNewTermsAlertsInMemory } from './bulk_create_suppressed_alerts_in_memory';
 import type { EventsAndTerms } from './types';
 import type { CreateAlertsHook } from './build_new_terms_aggregation';
-import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import {
   buildRecentTermsAgg,
   buildNewTermsAgg,
@@ -230,7 +230,7 @@ export const createNewTermsAlertType = (): SecurityAlertType<
           });
 
           let bulkCreateResult: Omit<
-            GenericBulkCreateResponse<NewTermsFieldsLatest>,
+            GenericBulkCreateResponse<NewTermsAlertLatest>,
             'suppressedItemsCount'
           > = {
             errors: [],

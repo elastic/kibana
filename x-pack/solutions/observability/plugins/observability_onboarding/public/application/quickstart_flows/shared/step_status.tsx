@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { EuiStepsProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiStepsProps,
   EuiPanel,
   EuiText,
   EuiCallOut,

@@ -11,8 +11,8 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 
 import { ActionsClientSimpleChatModel } from './simple_chat_model';
 import { mockActionResponse } from './mocks';
-import { BaseMessage } from '@langchain/core/messages';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import type { BaseMessage } from '@langchain/core/messages';
+import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { parseBedrockStream, parseBedrockStreamAsAsyncIterator } from '../utils/bedrock';
 import { parseGeminiStream, parseGeminiStreamAsAsyncIterator } from '../utils/gemini';
 

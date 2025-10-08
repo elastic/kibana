@@ -133,6 +133,7 @@ export const DocumentCountContent: FC<Props> = ({
                   content={i18n.translate('xpack.dataVisualizer.samplingOptionsButton', {
                     defaultMessage: 'Sampling options',
                   })}
+                  disableScreenReaderOutput
                 >
                   <EuiButtonIcon
                     size="xs"

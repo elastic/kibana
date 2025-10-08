@@ -6,24 +6,25 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import {
   alertsLocatorID,
-  AlertsLocatorParams,
   getAlertUrl,
   observabilityFeatureId,
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { asyncForEach } from '@kbn/std';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { uptimeTLSRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_tls';
 
 import { formatFilterString } from './status_check';
-import { UptimeAlertTypeFactory } from './types';
+import type { UptimeAlertTypeFactory } from './types';
 import {
   updateState,
   generateAlertMessage,
@@ -32,7 +33,7 @@ import {
 } from './common';
 import { CLIENT_ALERT_TYPES, TLS } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
-import { Cert, CertResult } from '../../../../common/runtime_types';
+import type { Cert, CertResult } from '../../../../common/runtime_types';
 import { commonStateTranslations, tlsTranslations } from './translations';
 import { TlsTranslations } from '../../../../common/rules/legacy_uptime/translations';
 
@@ -60,7 +61,7 @@ const mapCertsToSummaryString = (
 ): TLSContent => certLimitMessage(cert);
 
 const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
-  if (!date) return { summary: 'Error, missing `certificate_not_valid_after` date.' };
+  if (!date) return { summary: 'Error, missing `not_after` date.' };
   const relativeDate = moment().diff(date, 'days');
   const formattedDate = moment(date).format('MMM D, YYYY z');
   return relativeDate >= 0
@@ -75,7 +76,7 @@ const getValidAfter = ({ not_after: date }: Cert): TLSContent => {
 };
 
 const getValidBefore = ({ not_before: date }: Cert): TLSContent => {
-  if (!date) return { summary: 'Error, missing `certificate_not_valid_before` date.' };
+  if (!date) return { summary: 'Error, missing `not_before` date.' };
   const relativeDate = moment().diff(date, 'days');
   const formattedDate = moment(date).format('MMM D, YYYY z');
   return relativeDate >= 0

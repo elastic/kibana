@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
-import { EuiDataGridColumnCellActionProps, copyToClipboard } from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { IToasts } from '@kbn/core/public';
-import { FieldRow } from './field_row';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { IToasts } from '@kbn/core/public';
+import type { FieldRow } from './field_row';
 
 interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];

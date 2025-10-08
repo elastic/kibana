@@ -6,14 +6,14 @@
  */
 
 import type { IKibanaResponse, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   InferenceInferenceEndpointInfo,
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { InferenceServicesGetResponse } from '../types';
+import type { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
 import { inferenceEndpointExists } from '../lib/inference_endpoint_exists';
 import { unflattenObject } from '../utils/unflatten_object';

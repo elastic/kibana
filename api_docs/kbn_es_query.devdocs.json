@@ -1814,6 +1814,71 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.dateRangeQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "dateRangeQuery",
+        "description": [],
+        "signature": [
+          "(start: number | undefined, end: number | undefined, field: string) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/range_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.dateRangeQuery.$1",
+            "type": "number",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/range_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.dateRangeQuery.$2",
+            "type": "number",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/range_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.dateRangeQuery.$3",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/range_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.decorateQuery",
         "type": "Function",
         "tags": [],
@@ -2685,6 +2750,88 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getIsKqlFreeText",
+        "type": "Function",
+        "tags": [],
+        "label": "getIsKqlFreeText",
+        "description": [],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.KueryNode",
+            "text": "KueryNode"
+          },
+          ") => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/kuery/utils/get_is_kql_free_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getIsKqlFreeText.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.KueryNode",
+                "text": "KueryNode"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/kuery/utils/get_is_kql_free_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getIsKqlFreeTextExpression",
+        "type": "Function",
+        "tags": [],
+        "label": "getIsKqlFreeTextExpression",
+        "description": [
+          "\nReturns true whether the given expression contains at least one free text expression (e.g. `foo: \"bar\" AND my_free_text_query`)"
+        ],
+        "signature": [
+          "(expression: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/kuery/utils/get_is_kql_free_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getIsKqlFreeTextExpression.$1",
+            "type": "string",
+            "tags": [],
+            "label": "expression",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/kuery/utils/get_is_kql_free_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.getKqlFieldNames",
         "type": "Function",
         "tags": [],
@@ -2791,6 +2938,41 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.indexPatternToCcs",
+        "type": "Function",
+        "tags": [],
+        "label": "indexPatternToCcs",
+        "description": [
+          "\nAppends cross-cluster search equivalents for each specified index pattern.\nUse this when you want to query both local and cross-cluster indices automatically."
+        ],
+        "signature": [
+          "(index: string | string[]) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/indices/index_pattern_to_ccs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.indexPatternToCcs.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/indices/index_pattern_to_ccs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -3703,6 +3885,75 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.kqlQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "kqlQuery",
+        "description": [],
+        "signature": [
+          "(kql: string | undefined, parseOptions: Partial<",
+          "KueryParseOptions",
+          ">, esQueryOptions: Partial<ElasticsearchQueryOptions>) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/kql_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.kqlQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "kql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/kql_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.kqlQuery.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "parseOptions",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "KueryParseOptions",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/kql_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.kqlQuery.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "esQueryOptions",
+            "description": [],
+            "signature": [
+              "Partial<ElasticsearchQueryOptions>"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/kql_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.luceneStringToDsl",
         "type": "Function",
         "tags": [],
@@ -3906,6 +4157,71 @@
         "returnComment": [
           "A pinned (global) copy of the filter"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.termQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "termQuery",
+        "description": [],
+        "signature": [
+          "(field: T, value: string | number | boolean | null | undefined, opts: TermQueryOpts) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/term_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.termQuery.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/term_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.termQuery.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string | number | boolean | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/term_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.termQuery.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              "TermQueryOpts"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/term_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {

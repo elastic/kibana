@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Ast } from '@kbn/interpreter';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { CoreStart, SavedObjectReference, ResolvedSimpleSavedObject } from '@kbn/core/public';
+
+import type { Ast } from '@kbn/interpreter';
+import type { CoreStart } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
 import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -40,13 +43,13 @@ import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import type { estypes } from '@elastic/elasticsearch';
-import React from 'react';
-import { CellValueContext } from '@kbn/embeddable-plugin/public';
-import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type React from 'react';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
-import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
+import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -55,7 +58,7 @@ import type {
   LensPagesizeActionData,
 } from './visualizations/datatable/components/types';
 
-import {
+import type {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
@@ -64,8 +67,8 @@ import {
 import type { LensInspector } from './lens_inspector_service';
 import type { DataViewsState, GeneralDatasourceStates } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
-import type { LensDocument } from './persistence/saved_object_store';
-import { TableInspectorAdapter } from './editor_frame_service/types';
+import type { LensDocument } from './persistence';
+import type { TableInspectorAdapter } from './editor_frame_service/types';
 
 export type StartServices = Pick<
   CoreStart,
@@ -340,14 +343,14 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
   // datasources should validate their arguments
   initialize: (
     state?: P,
-    savedObjectReferences?: SavedObjectReference[],
+    references?: Reference[],
     initialContext?: VisualizeFieldContext | VisualizeEditorContext,
     indexPatternRefs?: IndexPatternRef[],
     indexPatterns?: IndexPatternMap
   ) => T;
 
   // Given the current state, which parts should be saved?
-  getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
+  getPersistableState: (state: T) => { state: P; references: Reference[] };
 
   insertLayer: (state: T, newLayerId: string, linkToLayers?: string[]) => T;
   createEmptyLayer: (indexPatternId: string) => T;
@@ -506,9 +509,9 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
    */
   isEqual: (
     persistableState1: P,
-    references1: SavedObjectReference[],
+    references1: Reference[],
     persistableState2: P,
-    references2: SavedObjectReference[]
+    references2: Reference[]
   ) => boolean;
   /**
    * Get RenderEventCounters events for telemetry
@@ -525,11 +528,11 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
 
   getDatasourceInfo: (
     state: T,
-    references?: SavedObjectReference[],
+    references?: Reference[],
     dataViewsService?: DataViewsPublicPluginStart
   ) => Promise<DataSourceInfo[]>;
 
-  injectReferencesToLayers?: (state: T, references?: SavedObjectReference[]) => T;
+  injectReferencesToLayers?: (state: T, references?: Reference[]) => T;
 }
 
 export interface DatasourceFixAction<T> {
@@ -1085,7 +1088,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
       mainPalette?: SuggestionRequest['mainPalette'],
       datasourceStates?: GeneralDatasourceStates,
       annotationGroups?: AnnotationGroups,
-      references?: SavedObjectReference[]
+      references?: Reference[]
     ): T;
   };
 
@@ -1126,7 +1129,7 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     state: T,
     datasource?: Datasource,
     datasourceState?: { state: unknown }
-  ) => { state: P; savedObjectReferences: SavedObjectReference[] };
+  ) => { state: P; references: Reference[] };
   /** Frame needs to know which layers the visualization is currently using */
   getLayerIds: (state: T) => string[];
   /** Reset button on each layer triggers this */
@@ -1363,9 +1366,9 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
 
   isEqual?: (
     state1: P,
-    references1: SavedObjectReference[],
+    references1: Reference[],
     state2: P,
-    references2: SavedObjectReference[],
+    references2: Reference[],
     annotationGroups: AnnotationGroups
   ) => boolean;
 
@@ -1473,9 +1476,9 @@ export interface ILensInterpreterRenderHandlers extends IInterpreterRenderHandle
 }
 
 export interface SharingSavedObjectProps {
-  outcome?: ResolvedSimpleSavedObject['outcome'];
-  aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+  outcome?: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
   sourceId?: string;
 }
 

@@ -10,11 +10,8 @@
 import { act } from 'react-dom/test-utils';
 import sinon from 'sinon';
 
-import {
-  UseRequestHelpers,
-  REQUEST_TIME,
-  createUseRequestHelpers,
-} from './use_request.test.helpers';
+import type { UseRequestHelpers } from './use_request.test.helpers';
+import { REQUEST_TIME, createUseRequestHelpers } from './use_request.test.helpers';
 
 describe('useRequest hook', () => {
   let helpers: UseRequestHelpers;

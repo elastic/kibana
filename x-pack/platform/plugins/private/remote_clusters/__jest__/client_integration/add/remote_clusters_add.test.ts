@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { TestBed } from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 
-import { setupEnvironment, RemoteClustersActions } from '../helpers';
+import type { RemoteClustersActions } from '../helpers';
+import { setupEnvironment } from '../helpers';
 import { setup } from './remote_clusters_add.helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './special_characters';
 import { MAX_NODE_CONNECTIONS } from '../../../common/constants';
@@ -150,13 +151,13 @@ describe('Create Remote cluster', () => {
         });
 
         describe('seeds', () => {
-          test('should only allow alpha-numeric characters and "-" (dash) in the node "host" part', async () => {
+          test('should only allow hostname, ipv4 and ipv6 format in the node "host" part', async () => {
             await actions.formStep.button.click(); // display form errors
 
             const expectInvalidChar = (char: string) => {
               actions.formStep.seedsInput.setValue(`192.16${char}:3000`);
               expect(actions.getErrorMessages()).toContain(
-                `Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`
+                `Seed node must use host:port format. Example: 127.0.0.1:9400, [::1]:9400 or localhost:9400. Hosts can only consist of letters, numbers, and dashes.`
               );
             };
 
@@ -288,7 +289,7 @@ describe('Create Remote cluster', () => {
             const expectInvalidChar = (char: string) => {
               actions.formStep.proxyAddressInput.setValue(`192.16${char}:3000`);
               expect(actions.getErrorMessages()).toContain(
-                'Address must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.'
+                'Address must use host:port format. Example: 127.0.0.1:9400, [::1]:9400 or localhost:9400. Hosts can only consist of letters, numbers, and dashes.'
               );
             };
 

@@ -10,10 +10,8 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
+import type { ILicense } from '@kbn/licensing-types';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -24,7 +22,7 @@ import type {
   RecommendedQuery,
   RecommendedField,
 } from '@kbn/esql-types';
-import { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
 
 export interface ControlsContext {
   /** The editor supports the creation of controls,
@@ -99,6 +97,10 @@ export interface ESQLEditorProps {
   expandToFitQueryOnMount?: boolean;
   /** Allows controlling the switch to toggle data errors in the UI. If not provided the switch will be hidden and data errors visible */
   dataErrorsControl?: DataErrorsControl;
+  /** Optional form field label to show above the query editor */
+  formLabel?: string;
+  /** Whether to merge external messages into the editor's message list */
+  mergeExternalMessages?: boolean;
 }
 
 interface ESQLVariableService {
@@ -111,7 +113,7 @@ interface ESQLVariableService {
 }
 
 export interface EsqlPluginStartBase {
-  getJoinIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
+  getJoinIndicesAutocomplete: (remoteClusters?: string) => Promise<IndicesAutocompleteResult>;
   getTimeseriesIndicesAutocomplete: () => Promise<IndicesAutocompleteResult>;
   getEditorExtensionsAutocomplete: (
     queryString: string,
@@ -126,11 +128,14 @@ export interface ESQLEditorDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
-  expressions: ExpressionsStart;
   storage: Storage;
   uiActions: UiActionsStart;
-  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esql?: EsqlPluginStartBase;
+}
+
+export enum HistoryTabId {
+  recentQueries = 'history-queries-tab',
+  standardQueries = 'starred-queries-tab',
 }

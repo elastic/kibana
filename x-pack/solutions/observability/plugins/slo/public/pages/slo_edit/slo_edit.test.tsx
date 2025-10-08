@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';

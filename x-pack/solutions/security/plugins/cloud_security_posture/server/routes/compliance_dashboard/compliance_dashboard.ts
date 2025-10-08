@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 import {
   getComplianceDashboardSchema,
@@ -22,11 +22,14 @@ import type {
 } from '../../../common/types_old';
 import { STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
-import { ClusterWithoutTrend, getClusters } from './get_clusters';
+import type { ClusterWithoutTrend } from './get_clusters';
+import { getClusters } from './get_clusters';
 import { getStats } from './get_stats';
-import { CspRouter } from '../../types';
-import { getTrends, TrendsDetails } from './get_trends';
-import { BenchmarkWithoutTrend, getBenchmarks } from './get_benchmarks';
+import type { CspRouter } from '../../types';
+import type { TrendsDetails } from './get_trends';
+import { getTrends } from './get_trends';
+import type { BenchmarkWithoutTrend } from './get_benchmarks';
+import { getBenchmarks } from './get_benchmarks';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
 import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
 

@@ -19,7 +19,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { type GroupedFieldsParams, useGroupedFields } from './use_grouped_fields';
 import * as ExistenceApi from './use_existing_fields';
 import { type ExistingFieldsReader } from './use_existing_fields';
-import { ExistenceFetchStatus, FieldListGroups, FieldsGroupNames } from '../types';
+import type { FieldListGroups } from '../types';
+import { ExistenceFetchStatus, FieldsGroupNames } from '../types';
 
 describe('UnifiedFieldList useGroupedFields()', () => {
   let mockedServices: GroupedFieldsParams<DataViewField>['services'];
@@ -122,7 +123,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-0',
-      'SmartFields-0',
     ]);
 
     expect(fieldGroups).toMatchSnapshot();
@@ -185,7 +185,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
-      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
@@ -257,7 +256,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-1',
       'EmptyFields-0',
       'MetaFields-3',
-      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
@@ -315,7 +313,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-28-28',
       'EmptyFields-0-0',
       'MetaFields-3-3',
-      'SmartFields-0-0',
     ]);
 
     act(() => {
@@ -339,7 +336,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-2-28',
       'EmptyFields-0-0',
       'MetaFields-0-3',
-      'SmartFields-0-0',
     ]);
 
     act(() => {
@@ -363,7 +359,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-1-28',
       'EmptyFields-0-0',
       'MetaFields-0-3',
-      'SmartFields-0-0',
     ]);
   });
 
@@ -417,7 +412,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
-      'SmartFields-0',
     ]);
   });
 
@@ -448,7 +442,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
-      'SmartFields-0',
     ]);
   });
 
@@ -475,7 +468,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'AvailableFields-56', // even unmapped fields fall into Available
       'UnmappedFields-0',
       'MetaFields-0',
-      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
@@ -515,7 +507,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-56',
       'MetaFields-0',
-      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
@@ -592,7 +583,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-23',
       'MetaFields-3',
-      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
@@ -620,7 +610,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'AvailableFields-8',
       'UnmappedFields-0',
       'MetaFields-0',
-      'SmartFields-0',
     ]);
 
     expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
@@ -659,7 +648,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
-      'SmartFields-0',
     ]);
 
     expect(fieldGroups.PopularFields?.fields.map((field) => field.name).join(',')).toBe(
@@ -708,7 +696,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-28',
       'EmptyFields-0',
       'MetaFields-3',
-      'SmartFields-0',
     ]);
   });
 
@@ -743,7 +730,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'UnmappedFields-0',
       'EmptyFields-0',
       'MetaFields-3',
-      'SmartFields-0',
     ]);
 
     expect(fieldGroups.SelectedFields?.fields).toBe(customSortedFields);
@@ -793,45 +779,167 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     );
   });
 
-  it('should include additional fields when additionalFieldGroups are provided', async () => {
-    const smartFields = [
-      new DataViewField({
-        name: 'mock_field',
-        type: 'mock_field',
-        searchable: false,
-        aggregatable: false,
-      }),
-    ];
+  describe('recommendedFields filtering', () => {
+    it('should filter recommendedFields to only include available fields', async () => {
+      // Create a field that is not in allFields (will be unavailable)
+      const unavailableField = 'unavailable_field';
 
-    const additionalFieldGroups = {
-      smartFields,
-    };
-    const { result } = renderHook(useGroupedFields, {
-      initialProps: {
+      const recommendedFields = ['bytes', unavailableField, 'extension'];
+
+      const props: GroupedFieldsParams<DataViewField> = {
+        dataViewId: dataView.id!,
+        allFields, // Use original allFields
+        services: mockedServices,
+        additionalFieldGroups: {
+          recommendedFields,
+        },
+      };
+
+      const { result } = renderHook(useGroupedFields, {
+        initialProps: props,
+      });
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+
+      // Should include RecommendedFields group
+      expect(fieldGroups.RecommendedFields).toBeDefined();
+      expect(fieldGroups.RecommendedFields?.fields).toHaveLength(2);
+
+      // Should only include available fields (not unavailableField)
+      const recommendedFieldNames = fieldGroups.RecommendedFields?.fields.map((f) => f.name);
+      expect(recommendedFieldNames).toContain('bytes');
+      expect(recommendedFieldNames).toContain('extension');
+      expect(recommendedFieldNames).not.toContain('unavailable_field');
+
+      // Field count should match filtered results
+      expect(fieldGroups.RecommendedFields?.fieldCount).toBe(2);
+    });
+
+    it('should not show RecommendedFields group when no recommended fields are available', async () => {
+      const recommendedFields = ['unavailable_field_1', 'unavailable_field_2'];
+
+      const props: GroupedFieldsParams<DataViewField> = {
+        dataViewId: dataView.id!,
+        allFields, // Original fields without the unavailable ones
+        services: mockedServices,
+        additionalFieldGroups: {
+          recommendedFields,
+        },
+      };
+
+      const { result } = renderHook(useGroupedFields, {
+        initialProps: props,
+      });
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+
+      // Should not include RecommendedFields group since no fields match
+      expect(fieldGroups.RecommendedFields).toBeUndefined();
+
+      // Other groups should still exist
+      expect(fieldGroups.AvailableFields).toBeDefined();
+      expect(fieldGroups.AvailableFields?.fields).toHaveLength(25);
+    });
+
+    it('should handle empty recommendedFields array', async () => {
+      const props: GroupedFieldsParams<DataViewField> = {
         dataViewId: dataView.id!,
         allFields,
         services: mockedServices,
-        additionalFieldGroups,
-      },
+        additionalFieldGroups: {
+          recommendedFields: [],
+        },
+      };
+
+      const { result } = renderHook(useGroupedFields, {
+        initialProps: props,
+      });
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+
+      // Should not include RecommendedFields group for empty array
+      expect(fieldGroups.RecommendedFields).toBeUndefined();
     });
 
-    await waitFor(() => new Promise((resolve) => resolve(null)));
-    const fieldListGroupedProps = result.current.fieldListGroupedProps;
-    const fieldGroups = fieldListGroupedProps.fieldGroups;
-    expect(fieldGroups.SmartFields?.fields?.length).toBe(1);
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-1',
-    ]);
+    it('should handle undefined additionalFieldGroups', async () => {
+      const props: GroupedFieldsParams<DataViewField> = {
+        dataViewId: dataView.id!,
+        allFields,
+        services: mockedServices,
+        // No additionalFieldGroups provided
+      };
+
+      const { result } = renderHook(useGroupedFields, {
+        initialProps: props,
+      });
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+
+      // Should not include RecommendedFields group
+      expect(fieldGroups.RecommendedFields).toBeUndefined();
+
+      // Other groups should still work correctly
+      expect(fieldGroups.AvailableFields).toBeDefined();
+      expect(fieldGroups.AvailableFields?.fields).toHaveLength(25);
+    });
+
+    it('should handle undefined recommendedFields in additionalFieldGroups', async () => {
+      const props: GroupedFieldsParams<DataViewField> = {
+        dataViewId: dataView.id!,
+        allFields,
+        services: mockedServices,
+        additionalFieldGroups: {
+          // recommendedFields is undefined
+        },
+      };
+
+      const { result } = renderHook(useGroupedFields, {
+        initialProps: props,
+      });
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+
+      // Should not include RecommendedFields group
+      expect(fieldGroups.RecommendedFields).toBeUndefined();
+    });
+
+    it('should show all recommended fields when they are all available', async () => {
+      const props: GroupedFieldsParams<DataViewField> = {
+        dataViewId: dataView.id!,
+        allFields,
+        services: mockedServices,
+        additionalFieldGroups: {
+          recommendedFields: ['bytes', 'extension', '@timestamp'],
+        },
+      };
+
+      const { result } = renderHook(useGroupedFields, {
+        initialProps: props,
+      });
+
+      await waitFor(() => new Promise((resolve) => resolve(null)));
+
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+
+      // Should include RecommendedFields group with all 3 fields
+      expect(fieldGroups.RecommendedFields).toBeDefined();
+      expect(fieldGroups.RecommendedFields?.fields).toHaveLength(3);
+      expect(fieldGroups.RecommendedFields?.fieldCount).toBe(3);
+
+      const recommendedFieldNames = fieldGroups.RecommendedFields?.fields.map((f) => f.name);
+      expect(recommendedFieldNames).toContain('bytes');
+      expect(recommendedFieldNames).toContain('extension');
+      expect(recommendedFieldNames).toContain('@timestamp');
+    });
   });
 });

@@ -5,27 +5,17 @@
  * 2.0.
  */
 
-import { OnechatPluginSetup, OnechatPluginStart, ScopedToolsStart } from './types';
-import {
-  createMockedExecutableTool,
-  createToolProviderMock,
-  createScopedPublicToolRegistryMock,
-} from './test_utils/tools';
-import { createAgentRegistryMock } from './test_utils/agents';
+import type { OnechatPluginSetup, OnechatPluginStart } from './types';
+import { createMockedExecutableTool, createToolRegistryMock } from './test_utils/tools';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   return {
+    agents: {
+      register: jest.fn(),
+    },
     tools: {
       register: jest.fn(),
-      registerProvider: jest.fn(),
     },
-  };
-};
-
-export const createScopedToolStartMock = (): jest.Mocked<ScopedToolsStart> => {
-  return {
-    execute: jest.fn(),
-    registry: createScopedPublicToolRegistryMock(),
   };
 };
 
@@ -33,12 +23,7 @@ const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
   return {
     tools: {
       execute: jest.fn(),
-      registry: createToolProviderMock(),
-      asScoped: jest.fn().mockImplementation(() => createScopedToolStartMock()),
-    },
-    agents: {
-      execute: jest.fn(),
-      registry: createAgentRegistryMock(),
+      getRegistry: jest.fn().mockImplementation(() => createToolRegistryMock()),
     },
   };
 };

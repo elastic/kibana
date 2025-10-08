@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IconType } from '@elastic/eui';
-import { CanAddNewPanel } from '@kbn/presentation-containers';
-import { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
+import type { IconType } from '@elastic/eui';
+import type { CanAddNewPanel } from '@kbn/presentation-containers';
+import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { useMemo } from 'react';
 
 export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = FinderAttributes> = {
@@ -23,6 +23,10 @@ export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = Finde
 
 const registry: Map<string, RegistryItem<any>> = new Map();
 
+/**
+ * Register saved object type in AddFromLibrary registry
+ * Registered saved objects types are displayed in "Add from library" UIs
+ */
 export const registerAddFromLibraryType = <TSavedObjectAttributes extends FinderAttributes>({
   onAdd,
   savedObjectType,
@@ -56,6 +60,10 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
   });
 };
 
+/**
+ * React use hook for accessing saved object types from AddFromLibrary registry
+ * @returns Array of saved object types from AddFromLibrary registry
+ */
 export function useAddFromLibraryTypes() {
   return useMemo(() => {
     return [...registry.entries()]
@@ -64,6 +72,11 @@ export function useAddFromLibraryTypes() {
   }, []);
 }
 
+/**
+ * Getter for accessing saved object type from AddFromLibrary registry
+ * @param type string
+ * @returns registry item for saved object type
+ */
 export const getAddFromLibraryType = (type: string) => {
   return registry.get(type);
 };

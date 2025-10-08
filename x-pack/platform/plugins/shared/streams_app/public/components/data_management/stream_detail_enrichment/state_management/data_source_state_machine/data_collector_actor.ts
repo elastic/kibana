@@ -6,17 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SampleDocument } from '@kbn/streams-schema';
-import { ErrorActorEvent, fromObservable } from 'xstate5';
+import type { SampleDocument } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromObservable } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
-import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { Observable, filter, map, of } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import { IEsSearchResponse } from '@kbn/search-types';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { pick } from 'lodash';
 import { getFormattedError } from '../../../../../util/errors';
-import { DataSourceMachineDeps } from './types';
-import { EnrichmentDataSourceWithUIAttributes } from '../../types';
+import type { DataSourceMachineDeps } from './types';
+import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export interface SamplesFetchInput {
   dataSource: EnrichmentDataSourceWithUIAttributes;

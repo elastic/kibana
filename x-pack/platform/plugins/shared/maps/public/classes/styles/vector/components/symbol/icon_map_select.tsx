@@ -11,13 +11,13 @@ import { EuiSuperSelect, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IconStops } from './icon_stops';
 import { getIconPaletteOptions, PREFERRED_ICONS } from '../../symbol_utils';
-import {
+import type {
   CustomIcon,
   IconDynamicOptions,
   IconStop,
 } from '../../../../../../common/descriptor_types';
 import { ICON_SOURCE } from '../../../../../../common/constants';
-import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
+import type { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
 
 const CUSTOM_MAP_ID = 'CUSTOM_MAP_ID';
 

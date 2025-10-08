@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiAnalysisState, ChatModels } from '../../types';
+import type { ApiAnalysisState, ChatModels } from '../../types';
 
 export interface ApiAnalysisBaseNodeParams {
   state: ApiAnalysisState;

@@ -25,10 +25,10 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
@@ -249,15 +249,21 @@ export function getDataStateContainer({
       .pipe(
         mergeMap(async ({ options }) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
-          const { scopedProfilesManager$, currentDataView$ } = selectTabRuntimeState(
-            runtimeStateManager,
-            currentTabId
-          );
+          const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
+            selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
+          const scopedEbtManager = scopedEbtManager$.getValue();
 
-          const searchSessionId =
-            (options.fetchMore && dataRequestParams.searchSessionId) ||
-            searchSessionManager.getNextSearchSessionId();
+          let searchSessionId: string;
+          let isSearchSessionRestored: boolean;
+
+          if (options.fetchMore && dataRequestParams.searchSessionId) {
+            searchSessionId = dataRequestParams.searchSessionId;
+            isSearchSessionRestored = dataRequestParams.isSearchSessionRestored;
+          } else {
+            ({ searchSessionId, isSearchSessionRestored } =
+              searchSessionManager.getNextSearchSessionId());
+          }
 
           const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
             dataSubjects,
@@ -269,6 +275,7 @@ export function getDataStateContainer({
             internalState,
             savedSearch: savedSearchContainer.getState(),
             scopedProfilesManager,
+            scopedEbtManager,
           };
 
           abortController?.abort();
@@ -276,17 +283,20 @@ export function getDataStateContainer({
 
           if (options.fetchMore) {
             abortControllerFetchMore = new AbortController();
-            const fetchMoreStartTime = window.performance.now();
+            const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
+
+            // Calculate query range in seconds
+            const timeRange = timefilter.getAbsoluteTime();
+            const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
 
             await fetchMoreDocuments({
               ...commonFetchParams,
               abortController: abortControllerFetchMore,
             });
 
-            const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
-            reportPerformanceMetricEvent(services.analytics, {
-              eventName: 'discoverFetchMore',
-              duration: fetchMoreDuration,
+            fetchMoreTracker.reportEvent({
+              key1: 'query_range_secs',
+              value1: queryRangeSeconds,
             });
 
             return;
@@ -298,6 +308,7 @@ export function getDataStateContainer({
                 timeRangeAbsolute: timefilter.getAbsoluteTime(),
                 timeRangeRelative: timefilter.getTime(),
                 searchSessionId,
+                isSearchSessionRestored,
               },
             })
           );
@@ -326,7 +337,11 @@ export function getDataStateContainer({
 
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
-          const fetchAllStartTime = window.performance.now();
+          const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
+
+          // Calculate query range in seconds
+          const timeRange = timefilter.getAbsoluteTime();
+          const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
 
           await fetchAll({
             ...commonFetchParams,
@@ -366,10 +381,9 @@ export function getDataStateContainer({
             },
           });
 
-          const fetchAllDuration = window.performance.now() - fetchAllStartTime;
-          reportPerformanceMetricEvent(services.analytics, {
-            eventName: 'discoverFetchAll',
-            duration: fetchAllDuration,
+          fetchAllTracker.reportEvent({
+            key1: 'query_range_secs',
+            value1: queryRangeSeconds,
           });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call

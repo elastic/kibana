@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiHealth, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import type { UnmanagedElasticsearchAssetDetails } from '@kbn/streams-plugin/server/lib/streams/stream_crud';
-import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
-import { LocatorPublic } from '@kbn/share-plugin/public';
-import { css } from '@emotion/css';
-import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 import { ManagedBadge } from './managed_badge';
 
 interface DataStreamDetailsProps {
@@ -45,36 +44,23 @@ export function DataStreamDetails({
   indexManagementLocator,
 }: DataStreamDetailsProps) {
   return (
-    <EuiPanel
-      hasShadow={false}
-      hasBorder
-      className={css`
-        min-width: 500px;
-        max-height: 100px;
-      `}
-    >
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiTitle size="xs">
+    <EuiFlexGroup direction="column" gutterSize="l">
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiTitle size="xxxs">
           <p>
-            {i18n.translate('xpack.streams.streamDetailView.dataStream', {
-              defaultMessage: 'Data stream',
+            {i18n.translate('xpack.streams.streamDetailView.dataStreamName', {
+              defaultMessage: 'Name',
             })}
           </p>
         </EuiTitle>
-        <EuiFlexGroup direction="row" gutterSize="xs">
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiTitle size="xxxs">
-              <p>
-                {i18n.translate('xpack.streams.streamDetailView.dataStreamName', {
-                  defaultMessage: 'Name',
-                })}
-              </p>
-            </EuiTitle>
-            <EuiLink onClick={() => onFlyoutOpen(dataStream?.name || '')}>
-              {dataStream ? dataStream.name : '-'}
-              <ManagedBadge meta={dataStream?._meta} />
-            </EuiLink>
-          </EuiFlexGroup>
+        <EuiLink onClick={() => onFlyoutOpen(dataStream?.name || '')}>
+          {dataStream ? dataStream.name : '-'}
+          <ManagedBadge meta={dataStream?._meta} />
+        </EuiLink>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup direction="row" gutterSize="l">
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiTitle size="xxxs">
               <p>
@@ -87,6 +73,9 @@ export function DataStreamDetails({
               <DataStreamHealth health={dataStream?.status} />
             </EuiText>
           </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiTitle size="xxxs">
               <p>
@@ -108,6 +97,9 @@ export function DataStreamDetails({
               {dataStream?.indices?.length || '-'}
             </EuiLink>
           </EuiFlexGroup>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiTitle size="xxxs">
               <p>
@@ -121,8 +113,8 @@ export function DataStreamDetails({
               {(dataStream as { index_mode?: string } | undefined)?.index_mode || '-'}
             </EuiText>
           </EuiFlexGroup>
-        </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiFlexGroup>
   );
 }

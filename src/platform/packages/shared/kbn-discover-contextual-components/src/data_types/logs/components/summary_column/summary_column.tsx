@@ -11,7 +11,7 @@ import { DataGridDensity, type DataGridCellValueElementProps } from '@kbn/unifie
 import React from 'react';
 import { EuiButtonIcon, EuiCodeBlock, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {

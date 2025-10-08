@@ -9,4 +9,4 @@
 
 export type { SavedObjectTypeMigrationInfo } from './src/extract_migration_info';
 export { extractMigrationInfo } from './src/extract_migration_info';
-export { getMigrationHash } from './src/get_migration_hash';
+export { getTypeHashes, getMigrationHash } from './src/get_migration_hash';

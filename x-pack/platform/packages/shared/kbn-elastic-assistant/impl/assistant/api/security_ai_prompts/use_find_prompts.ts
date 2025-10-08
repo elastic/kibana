@@ -6,13 +6,15 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { HttpHandler, IToasts } from '@kbn/core/public';
+import type { HttpHandler, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type {
+  FindSecurityAIPromptsRequestQuery,
+  FindSecurityAIPromptsResponse,
+} from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
-  FindSecurityAIPromptsRequestQuery,
-  FindSecurityAIPromptsResponse,
 } from '@kbn/elastic-assistant-common';
 
 export interface UseFindPromptsParams {
@@ -39,7 +41,7 @@ export const useFindPrompts = (payload: UseFindPromptsParams) => {
   const { isAssistantEnabled, httpFetch, toasts } = payload.context;
 
   const QUERY = {
-    connector_id: payload.params.connector_id,
+    ...(payload.params.connector_id ? { connector_id: payload.params.connector_id } : {}),
     prompt_ids: payload.params.prompt_ids,
     prompt_group_id: payload.params.prompt_group_id,
   };

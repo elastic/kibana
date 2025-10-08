@@ -75,6 +75,20 @@ describe('getServiceNameCell', () => {
     expect(screen.getByTestId('dataTableCellActionsPopover_service.name')).toBeInTheDocument();
   });
 
+  it('renders otel icon if otel sdk language is recognized', () => {
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          'service.name': 'test-service',
+          'resource.attributes.telemetry.sdk.language': 'nodejs',
+        },
+      },
+      dataViewMock
+    );
+    renderCell('service.name', record);
+    expect(screen.getByTestId('dataTableCellActionsPopover_service.name')).toBeInTheDocument();
+  });
+
   it('does render empty div if service name is missing', () => {
     const record = buildDataTableRecord({ fields: { 'agent.name': 'nodejs' } }, dataViewMock);
     renderCell('service.name', record);

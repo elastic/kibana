@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromKueryExpression, KueryNode } from '../../..';
+import type { KueryNode } from '../../..';
+import { fromKueryExpression } from '../../..';
 import { nodeTypes } from '../node_types';
 import { functions } from '../functions';
 

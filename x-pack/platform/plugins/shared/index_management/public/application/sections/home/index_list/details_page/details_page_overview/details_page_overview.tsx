@@ -19,10 +19,12 @@ import {
   EuiFlexGrid,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import {
-  CodeBox,
+import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
+} from '@kbn/search-api-panels';
+import {
+  CodeBox,
   getLanguageDefinitionCodeSnippet,
   getConsoleRequest,
 } from '@kbn/search-api-panels';

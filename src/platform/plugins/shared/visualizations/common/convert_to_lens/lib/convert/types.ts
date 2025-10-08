@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { SchemaConfig, SupportedAggregation } from '../../../types';
-import {
+import type { SchemaConfig, SupportedAggregation } from '../../../types';
+import type {
   Operation,
   BaseColumn as GenericBaseColumn,
   Column as BaseColumn,

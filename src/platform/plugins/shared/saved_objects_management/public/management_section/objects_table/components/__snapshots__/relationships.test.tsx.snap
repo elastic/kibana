@@ -2,6 +2,7 @@
 
 exports[`Relationships should render dashboards normally 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
 >
   <EuiFlyoutHeader
@@ -10,20 +11,16 @@ exports[`Relationships should render dashboards normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
-        <EuiToolTip
+      <h2
+        id="generated-id_relationshipsFlyoutTitle"
+      >
+        <EuiIconTip
+          aria-label="dashboard"
           content="dashboard"
-          delay="regular"
-          disableScreenReaderOutput={false}
-          display="inlineBlock"
           position="top"
-        >
-          <EuiIcon
-            aria-label="dashboard"
-            size="m"
-            type="dashboardApp"
-          />
-        </EuiToolTip>
+          size="m"
+          type="dashboardApp"
+        />
           
         MyDashboard
       </h2>
@@ -164,6 +161,7 @@ exports[`Relationships should render dashboards normally 1`] = `
 
 exports[`Relationships should render errors 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
 >
   <EuiFlyoutHeader
@@ -172,20 +170,16 @@ exports[`Relationships should render errors 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
-        <EuiToolTip
+      <h2
+        id="generated-id_relationshipsFlyoutTitle"
+      >
+        <EuiIconTip
+          aria-label="dashboard"
           content="dashboard"
-          delay="regular"
-          disableScreenReaderOutput={false}
-          display="inlineBlock"
           position="top"
-        >
-          <EuiIcon
-            aria-label="dashboard"
-            size="m"
-            type="dashboardApp"
-          />
-        </EuiToolTip>
+          size="m"
+          type="dashboardApp"
+        />
           
         MyDashboard
       </h2>
@@ -209,6 +203,7 @@ exports[`Relationships should render errors 1`] = `
 
 exports[`Relationships should render index patterns normally 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
 >
   <EuiFlyoutHeader
@@ -217,20 +212,16 @@ exports[`Relationships should render index patterns normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
-        <EuiToolTip
+      <h2
+        id="generated-id_relationshipsFlyoutTitle"
+      >
+        <EuiIconTip
+          aria-label="index-pattern"
           content="index-pattern"
-          delay="regular"
-          disableScreenReaderOutput={false}
-          display="inlineBlock"
           position="top"
-        >
-          <EuiIcon
-            aria-label="index-pattern"
-            size="m"
-            type="indexPatternApp"
-          />
-        </EuiToolTip>
+          size="m"
+          type="indexPatternApp"
+        />
           
         MyIndexPattern*
       </h2>
@@ -376,6 +367,7 @@ exports[`Relationships should render index patterns normally 1`] = `
 
 exports[`Relationships should render invalid relations 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
 >
   <EuiFlyoutHeader
@@ -384,20 +376,16 @@ exports[`Relationships should render invalid relations 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
-        <EuiToolTip
+      <h2
+        id="generated-id_relationshipsFlyoutTitle"
+      >
+        <EuiIconTip
+          aria-label="index-pattern"
           content="index-pattern"
-          delay="regular"
-          disableScreenReaderOutput={false}
-          display="inlineBlock"
           position="top"
-        >
-          <EuiIcon
-            aria-label="index-pattern"
-            size="m"
-            type="indexPatternApp"
-          />
-        </EuiToolTip>
+          size="m"
+          type="indexPatternApp"
+        />
           
         MyIndexPattern*
       </h2>
@@ -562,6 +550,7 @@ exports[`Relationships should render invalid relations 1`] = `
 
 exports[`Relationships should render searches normally 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
 >
   <EuiFlyoutHeader
@@ -570,20 +559,16 @@ exports[`Relationships should render searches normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
-        <EuiToolTip
+      <h2
+        id="generated-id_relationshipsFlyoutTitle"
+      >
+        <EuiIconTip
+          aria-label="search"
           content="search"
-          delay="regular"
-          disableScreenReaderOutput={false}
-          display="inlineBlock"
           position="top"
-        >
-          <EuiIcon
-            aria-label="search"
-            size="m"
-            type="search"
-          />
-        </EuiToolTip>
+          size="m"
+          type="search"
+        />
           
         MySearch
       </h2>
@@ -730,6 +715,7 @@ exports[`Relationships should render searches normally 1`] = `
 
 exports[`Relationships should render visualizations normally 1`] = `
 <EuiFlyout
+  aria-labelledby="generated-id_relationshipsFlyoutTitle"
   onClose={[MockFunction]}
 >
   <EuiFlyoutHeader
@@ -738,20 +724,16 @@ exports[`Relationships should render visualizations normally 1`] = `
     <EuiTitle
       size="m"
     >
-      <h2>
-        <EuiToolTip
+      <h2
+        id="generated-id_relationshipsFlyoutTitle"
+      >
+        <EuiIconTip
+          aria-label="visualization"
           content="visualization"
-          delay="regular"
-          disableScreenReaderOutput={false}
-          display="inlineBlock"
           position="top"
-        >
-          <EuiIcon
-            aria-label="visualization"
-            size="m"
-            type="visualizeApp"
-          />
-        </EuiToolTip>
+          size="m"
+          type="visualizeApp"
+        />
           
         MyViz
       </h2>

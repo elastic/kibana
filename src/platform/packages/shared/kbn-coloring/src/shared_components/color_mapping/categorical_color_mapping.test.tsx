@@ -14,12 +14,12 @@ import '@testing-library/jest-dom';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { getKbnPalettes } from '@kbn/palettes';
 
-import {
-  CategoricalColorMapping,
+import type {
   ColorMappingInputCategoricalData,
   ColorMappingInputData,
   ColorMappingProps,
 } from './categorical_color_mapping';
+import { CategoricalColorMapping } from './categorical_color_mapping';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from './config/default_color_mapping';
 
 const ASSIGNMENTS_LIST = 'lns-colorMapping-assignmentsList';

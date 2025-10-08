@@ -56,3 +56,16 @@ export function rangeQuery(
     },
   ];
 }
+
+export function isKqlQueryValid(kql?: string): boolean {
+  if (!kql) {
+    return false;
+  }
+
+  try {
+    fromKueryExpression(kql);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}

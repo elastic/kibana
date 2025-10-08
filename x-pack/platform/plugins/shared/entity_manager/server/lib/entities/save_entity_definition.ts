@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 
 export async function saveEntityDefinition(

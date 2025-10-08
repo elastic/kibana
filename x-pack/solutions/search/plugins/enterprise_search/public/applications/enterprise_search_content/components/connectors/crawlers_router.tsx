@@ -6,16 +6,18 @@
  */
 
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { CRAWLERS_PATH, CRAWLERS_ELASTIC_MANAGED_PATH } from '../../routes';
+import { CRAWLERS_PATH, CRAWLERS_ELASTIC_MANAGED_PATH, CRAWLERS_NEW_PATH } from '../../routes';
 
 import { Connectors } from './connectors';
 
 export const CrawlersRouter: React.FC = () => {
   return (
     <Routes>
+      <Redirect exact path={CRAWLERS_NEW_PATH} to={CRAWLERS_PATH} />
       <Route exact path={CRAWLERS_PATH}>
         <Connectors isCrawler isCrawlerSelfManaged />
       </Route>

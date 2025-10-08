@@ -60,12 +60,8 @@ import {
   packagePolicyToSimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
 
-import type {
-  SimplifiedInputs,
-  SimplifiedPackagePolicy,
-} from '../../../common/services/simplified_package_policy_helper';
+import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { runWithCache } from '../../services/epm/packages/cache';
-import { validateAgentlessInputs } from '../../../common/services/agentless_policy_helper';
 
 import {
   isSimplifiedCreatePackagePolicyRequest,
@@ -397,10 +393,6 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         pkgInfo,
         { experimental_data_stream_features: pkg.experimental_data_stream_features }
       );
-      validateAgentlessInputs(
-        body?.inputs as SimplifiedInputs,
-        body?.supports_agentless || newData.supports_agentless
-      );
     } else {
       // complete request
       const { overrides, ...restOfBody } = body as TypeOf<
@@ -424,16 +416,16 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
         supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
+        supports_cloud_connector:
+          restOfBody.supports_cloud_connector ?? packagePolicy.supports_cloud_connector,
+        cloud_connector_id: restOfBody.cloud_connector_id ?? packagePolicy.cloud_connector_id,
       } as NewPackagePolicy;
 
       if (overrides) {
         newData.overrides = overrides;
       }
     }
-    validateAgentlessInputs(
-      newData.inputs,
-      newData.supports_agentless || packagePolicy.supports_agentless
-    );
+
     newData.inputs = alignInputsAndStreams(newData.inputs);
 
     if (

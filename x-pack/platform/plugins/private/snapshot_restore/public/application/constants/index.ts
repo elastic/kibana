@@ -19,6 +19,8 @@ export enum SNAPSHOT_STATE {
   PARTIAL = 'PARTIAL',
 }
 
+export const SNAPSHOT_REPOSITORY_EXCEPTION_ERROR = 'repository_exception';
+
 export enum SLM_STATE {
   RUNNING = 'RUNNING',
   STOPPING = 'STOPPING',

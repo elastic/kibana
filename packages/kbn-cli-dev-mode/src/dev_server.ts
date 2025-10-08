@@ -12,8 +12,8 @@ import { map, tap, take, share, mergeMap, switchMap, scan, takeUntil, ignoreElem
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
 import { usingServerProcess } from './using_server_process';
-import { Watcher } from './watcher';
-import { Log } from './log';
+import type { Watcher } from './watcher';
+import type { Log } from './log';
 
 export interface Options {
   log: Log;

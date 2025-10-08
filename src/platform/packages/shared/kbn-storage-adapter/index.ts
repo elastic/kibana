@@ -18,8 +18,8 @@ import type {
   Result,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { InferSearchResponseOf } from '@kbn/es-types';
-import { StorageFieldTypeOf, StorageMappingProperty } from './types';
+import type { InferSearchResponseOf } from '@kbn/es-types';
+import type { StorageFieldTypeOf, StorageMappingProperty } from './types';
 
 interface StorageSchemaProperties {
   [x: string]: StorageMappingProperty;

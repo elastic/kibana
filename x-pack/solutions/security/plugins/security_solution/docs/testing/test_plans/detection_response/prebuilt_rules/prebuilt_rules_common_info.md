@@ -119,6 +119,8 @@ Terminology related to the "rule source" object:
 Terminology related to UI and UX:
 
 - **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
+- **INACTIVE CTA** - "Call to action" is visible but disabled like a disabled button
+- **ACTIVE CTA** - "Call to action" is visible and enabled. And this is the same as just using **CTA** acronym. **ACTIVE**/**INACTIVE** is used to highlight the state in test scenarios asserting **CTA** state based on the system's state.
 
 ## Common assumptions
 

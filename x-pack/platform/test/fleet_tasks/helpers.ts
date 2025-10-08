@@ -6,7 +6,7 @@
  */
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
 export async function createAgentDoc(
   providerContext: FtrProviderContext,

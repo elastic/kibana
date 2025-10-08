@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Token } from './token';
-import { Position } from './core_editor';
+import type { Token } from './token';
+import type { Position } from './core_editor';
 
 /**
  * Describes a kind of object that provides tokens.

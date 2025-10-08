@@ -8,11 +8,11 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   EuiListGroup,
   EuiFormRow,
   EuiSpacer,
-  EuiListGroupItemProps,
   EuiToolTip,
   EuiText,
   EuiIconTip,
@@ -25,7 +25,9 @@ import ReactDOM from 'react-dom';
 import { NameInput } from '@kbn/visualization-ui-components';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
-import { deleteColumn, GenericIndexPatternColumn } from '../form_based';
+import type { GenericIndexPatternColumn } from '../form_based';
+import { deleteColumn } from '../form_based';
+import type { FieldBasedIndexPatternColumn } from '../operations';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -34,7 +36,6 @@ import {
   updateColumnParam,
   updateDefaultLabels,
   resetIncomplete,
-  FieldBasedIndexPatternColumn,
   canTransition,
   adjustColumnReferencesForChangedColumn,
 } from '../operations';
@@ -43,9 +44,11 @@ import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { FormBasedLayer } from '../types';
-import { FormatSelector, FormatSelectorProps } from './format_selector';
+import type { FormatSelectorProps } from './format_selector';
+import { FormatSelector } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
-import { TimeScaling, TimeScalingProps } from './time_scaling';
+import type { TimeScalingProps } from './time_scaling';
+import { TimeScaling } from './time_scaling';
 import { Filtering } from './filtering';
 import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
@@ -60,13 +63,12 @@ import {
   formulaOperationName,
   DimensionEditorButtonGroups,
   CalloutWarning,
-  DimensionEditorGroupsOptions,
   isLayerChangingDueToDecimalsPercentile,
   isLayerChangingDueToOtherBucketChange,
 } from './dimensions_editor_helpers';
-import type { TemporaryState } from './dimensions_editor_helpers';
+import type { TemporaryState, DimensionEditorGroupsOptions } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
-import { ParamEditorProps } from '../operations/definitions';
+import type { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';
 import { isColumn } from '../operations/definitions/helpers';
 import type { FieldChoiceWithOperationType } from './field_select';
@@ -1156,9 +1158,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 />
               ) : null,
             },
-            ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.(
-              paramEditorProps
-            ) || []),
+            ...(operationDefinitionMap[selectedColumn.operationType].getAdvancedOptions?.({
+              ...paramEditorProps,
+              euiTheme,
+            }) || []),
           ]}
         />
       )}

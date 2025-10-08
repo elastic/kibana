@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { VectorScoreBase } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
-import { Vector } from '../types';
+import type { VectorScoreBase } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
+import type { Vector } from '../types';
 
 export const getVectorScoreList = (vectorBaseScore: VectorScoreBase) => {
   const result: Vector[] = [];

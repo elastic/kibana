@@ -13,7 +13,7 @@ import Fs from 'fs';
 import archiver from 'archiver';
 import del from 'del';
 
-import { TaskContext } from '../task_context';
+import type { TaskContext } from '../task_context';
 
 export async function createArchive({ kibanaVersion, plugin, log }: TaskContext) {
   const {

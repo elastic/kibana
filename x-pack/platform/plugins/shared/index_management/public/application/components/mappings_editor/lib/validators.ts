@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ValidationFunc } from '../shared_imports';
-import { NormalizedFields } from '../types';
+import type { ValidationFunc } from '../shared_imports';
+import type { NormalizedFields } from '../types';
 
 export const validateUniqueName = (
   { rootLevelFields, byId }: Pick<NormalizedFields, 'rootLevelFields' | 'byId'>,

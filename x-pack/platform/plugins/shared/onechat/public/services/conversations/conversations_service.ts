@@ -6,9 +6,17 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { toSerializedAgentIdentifier } from '@kbn/onechat-common';
-import type { ListConversationsResponse } from '../../../common/http_api/conversations';
-import type { ConversationListOptions } from '../../../common/conversations';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/onechat-common';
+import type {
+  ListConversationsResponse,
+  DeleteConversationResponse,
+} from '../../../common/http_api/conversations';
+import type {
+  ConversationListOptions,
+  ConversationGetOptions,
+  ConversationDeleteOptions,
+} from '../../../common/conversations';
+import { publicApiPath } from '../../../common/constants';
 
 export class ConversationsService {
   private readonly http: HttpSetup;
@@ -17,9 +25,25 @@ export class ConversationsService {
     this.http = http;
   }
 
-  async list({ agentId }: ConversationListOptions) {
-    return await this.http.post<ListConversationsResponse>('/internal/onechat/conversations', {
-      body: JSON.stringify({ agentId: agentId ? toSerializedAgentIdentifier(agentId) : undefined }),
-    });
+  async list({ agentId }: ConversationListOptions): Promise<ConversationWithoutRounds[]> {
+    const response = await this.http.get<ListConversationsResponse>(
+      `${publicApiPath}/conversations`,
+      {
+        query: {
+          agent_id: agentId,
+        },
+      }
+    );
+    return response.results;
+  }
+
+  async get({ conversationId }: ConversationGetOptions) {
+    return await this.http.get<Conversation>(`${publicApiPath}/conversations/${conversationId}`);
+  }
+
+  async delete({ conversationId }: ConversationDeleteOptions) {
+    return await this.http.delete<DeleteConversationResponse>(
+      `${publicApiPath}/conversations/${conversationId}`
+    );
   }
 }

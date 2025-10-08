@@ -16,7 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_BODY } from './constants';
 import * as i18n from './translations';
 import { DEFAULT_GEMINI_MODEL, SUB_ACTION } from '../../../common/gemini/constants';
-import { GeminiActionParams } from './types';
+import type { GeminiActionParams } from './types';
 
 const GeminiParamsFields: React.FunctionComponent<ActionParamsProps<GeminiActionParams>> = ({
   actionParams,

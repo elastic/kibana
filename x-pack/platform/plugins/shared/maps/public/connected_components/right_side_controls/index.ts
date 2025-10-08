@@ -8,7 +8,7 @@
 import { connect } from 'react-redux';
 import { RightSideControls } from './right_side_controls';
 import { getMapSettings } from '../../selectors/map_selectors';
-import { MapStoreState } from '../../reducers/store';
+import type { MapStoreState } from '../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {

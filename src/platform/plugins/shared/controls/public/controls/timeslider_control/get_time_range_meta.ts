@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiRangeTick } from '@elastic/eui';
-import { TimeRange } from '@kbn/es-query';
+import type { EuiRangeTick } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
 import { coreServices, dataService } from '../../services/kibana_services';
 import {
   FROM_INDEX,

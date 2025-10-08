@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import classNames from 'classnames';
+import { css } from '@emotion/react';
 import React, { useState, useEffect, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { ComponentTemplateListItem } from '../../../../../common';
+import type { ComponentTemplateListItem } from '../../../../../common';
 import { SectionError, SectionLoading, GlobalFlyout } from '../shared_imports';
+import type { ComponentTemplateDetailsProps } from '../component_template_details';
 import {
   ComponentTemplateDetailsFlyoutContent,
   defaultFlyoutProps,
-  ComponentTemplateDetailsProps,
 } from '../component_template_details';
 import { CreateButtonPopOver } from './components';
 import { ComponentTemplates } from './component_templates';
 import { ComponentTemplatesSelection } from './component_templates_selection';
 import { useApi } from '../component_templates_context';
-
-import './component_templates_selector.scss';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -37,6 +42,46 @@ interface Props {
     showCreateButton?: boolean;
   };
 }
+
+const useStyles = ({ hasSelection }: { hasSelection: boolean }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    selector: css`
+      height: 480px;
+    `,
+    selection: css`
+      border: ${euiTheme.border.thin};
+      border-radius: ${euiTheme.border.radius.medium};
+      padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
+      color: ${euiTheme.colors.darkShade};
+
+      ${!hasSelection &&
+      css`
+        align-items: center;
+        justify-content: center;
+      `}
+    `,
+    selectionHeader: css`
+      background-color: ${euiTheme.colors.lightestShade};
+      border-bottom: ${euiTheme.border.thin};
+      color: ${euiTheme.colors.fullShade};
+      height: ${euiTheme.size.xxl}; /* Height to align left and right column headers */
+      line-height: ${euiTheme.size.xxl}; /* Height to align left and right column headers */
+      font-size: ${euiTheme.size.m};
+      margin-bottom: ${euiTheme.size.s};
+      margin-left: calc(${euiTheme.size.base} * -1);
+      margin-right: calc(${euiTheme.size.base} * -1);
+      padding-left: ${euiTheme.size.base};
+    `,
+    selectionHeaderCount: css`
+      font-weight: 600;
+    `,
+    selectionContent: css`
+      mask-image: none;
+    `,
+  };
+};
 
 const i18nTexts = {
   icons: {
@@ -68,6 +113,7 @@ export const ComponentTemplatesSelector = ({
 
   const hasSelection = Object.keys(componentsSelected).length > 0;
   const hasComponents = components && components.length > 0 ? true : false;
+  const styles = useStyles({ hasSelection });
 
   const closeComponentTemplateDetails = () => {
     setSelectedComponent(null);
@@ -164,30 +210,20 @@ export const ComponentTemplatesSelector = ({
   );
 
   const renderSelector = () => (
-    <EuiFlexGroup className="componentTemplatesSelector">
-      {/* Selection */}
-      <EuiFlexItem
-        className={classNames('componentTemplatesSelector__selection', {
-          'componentTemplatesSelector__selection--is-empty': !hasSelection,
-        })}
-        data-test-subj="componentTemplatesSelection"
-      >
+    <EuiFlexGroup css={styles.selector}>
+      <EuiFlexItem css={styles.selection} data-test-subj="componentTemplatesSelection">
         {hasSelection ? (
           <>
-            <div className="componentTemplatesSelector__selection__header">
+            <div css={styles.selectionHeader}>
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplatesSelector.selectionHeader.componentsSelectedLabel"
                 defaultMessage="Components selected: {count}"
                 values={{
-                  count: (
-                    <span className="componentTemplatesSelector__selection__header__count">
-                      {componentsSelected.length}
-                    </span>
-                  ),
+                  count: <span css={styles.selectionHeaderCount}>{componentsSelected.length}</span>,
                 }}
               />
             </div>
-            <div className="eui-yScrollWithShadows componentTemplatesSelector__selection__content">
+            <div css={styles.selectionContent} className="eui-yScrollWithShadows">
               <ComponentTemplatesSelection
                 components={componentsSelected}
                 onReorder={onSelectionReorder}

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstBaseItem, ESQLProperNode } from '../types';
-import { Walker } from '../walker';
+import type { ESQLAstBaseItem } from '../types';
+import { Walker, type WalkerAstNode } from '../walker';
 
 export interface QueryPrettyPrintStats {
   /**
@@ -29,7 +29,7 @@ export interface QueryPrettyPrintStats {
  *
  * @param ast The part to compute the stats for.
  */
-export const getPrettyPrintStats = (ast: ESQLProperNode): QueryPrettyPrintStats => {
+export const getPrettyPrintStats = (ast: WalkerAstNode): QueryPrettyPrintStats => {
   const stats: QueryPrettyPrintStats = {
     hasLineBreakingDecorations: false,
     hasRightSingleLineComments: false,

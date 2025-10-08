@@ -22,7 +22,7 @@ export const cleanupRule = (id: string) => {
   });
 };
 
-export const loadRule = (body = {}, includeResponseActions = true) =>
+export const loadRule = (body: Record<string, unknown> = {}, includeResponseActions = true) =>
   request<RuleResponse>({
     method: 'POST',
     url: `/api/detection_engine/rules`,
@@ -41,7 +41,7 @@ export const loadRule = (body = {}, includeResponseActions = true) =>
       ],
       filters: [],
       language: 'kuery',
-      query: '_id:*',
+      query: body.query ?? `_id: *`,
       author: [],
       false_positives: [],
       references: [],
@@ -111,7 +111,7 @@ export const loadCase = (owner: string) =>
       description: 'Test security case',
       assignees: [],
       connector: { id: 'none', name: 'none', type: '.none', fields: null },
-      settings: { syncAlerts: true },
+      settings: { syncAlerts: true, extractObservables: true },
       owner,
     },
   }).then((response) => response.body);

@@ -11,7 +11,7 @@ import type {
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
-import { DateRangePickerValues } from '../components/filters/date_picker';
+import type { DateRangePickerValues } from '../components/filters/date_picker';
 import { DEFAULT_DATE_RANGE_OPTIONS, isDateRangeValid } from '../../../common/utils';
 
 export const useDateRangePicker = () => {

@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, common } = getPageObjects(['dashboard', 'header', 'common']);
@@ -216,7 +216,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('saves changes to dashboard metadata', async () => {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickCreateDashboardPrompt();
-        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.clickAddFromLibrary();
         await dashboardAddPanel.addEveryEmbeddableOnCurrentPage();
         await dashboardAddPanel.ensureAddPanelIsClosed();
         await dashboard.saveDashboard(`${dashboardName}-editMetaData`);

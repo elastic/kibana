@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/metrics-experience-plugin",
+  "owner": "@elastic/obs-ux-infra_services-team",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "metricsExperience",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "metricsExperience"
+    ],
+    "requiredPlugins": [
+      "data",
+      "dataViews",
+      "fieldsMetadata",
+      "esql",
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}
+

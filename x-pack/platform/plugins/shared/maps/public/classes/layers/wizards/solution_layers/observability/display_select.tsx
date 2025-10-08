@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
+import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { OBSERVABILITY_LAYER_TYPE } from './layer_select';
+import type { OBSERVABILITY_LAYER_TYPE } from './layer_select';
 
 export enum DISPLAY {
   CHOROPLETH = 'CHOROPLETH',

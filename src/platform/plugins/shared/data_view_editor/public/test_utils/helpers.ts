@@ -8,7 +8,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from './test_utils';
+import type { TestBed } from './test_utils';
 
 export const getCommonActions = (testBed: TestBed) => {
   const toggleFormRow = (row: 'customLabel' | 'value' | 'format', value: 'on' | 'off' = 'on') => {

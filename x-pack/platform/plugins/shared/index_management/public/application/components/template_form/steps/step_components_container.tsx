@@ -9,7 +9,7 @@ import React from 'react';
 
 import { Forms } from '../../../../shared_imports';
 import { documentationService } from '../../../services/documentation';
-import { WizardContent } from '../template_form';
+import type { WizardContent } from '../template_form';
 import { StepComponents } from './step_components';
 
 export const StepComponentContainer = () => {

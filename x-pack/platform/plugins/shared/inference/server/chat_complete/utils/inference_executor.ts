@@ -7,10 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type {
-  ActionsClient,
-  PluginStartContract as ActionsPluginStart,
-} from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { getConnectorById } from '../../util/get_connector_by_id';
 
@@ -33,14 +30,17 @@ export interface InferenceExecutor {
 
 export const createInferenceExecutor = ({
   connector,
-  actionsClient,
+  actions,
+  request,
 }: {
   connector: InferenceConnector;
-  actionsClient: ActionsClient;
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
 }): InferenceExecutor => {
   return {
     getConnector: () => connector,
     async invoke({ subAction, subActionParams }): Promise<InferenceInvokeResult<any>> {
+      const actionsClient = await actions.getActionsClientWithRequest(request);
       return await actionsClient.execute({
         actionId: connector.connectorId,
         params: {
@@ -61,7 +61,6 @@ export const getInferenceExecutor = async ({
   actions: ActionsPluginStart;
   request: KibanaRequest;
 }) => {
-  const actionsClient = await actions.getActionsClientWithRequest(request);
-  const connector = await getConnectorById({ connectorId, actionsClient });
-  return createInferenceExecutor({ actionsClient, connector });
+  const connector = await getConnectorById({ connectorId, actions, request });
+  return createInferenceExecutor({ actions, connector, request });
 };

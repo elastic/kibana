@@ -12,14 +12,14 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import { SynchronizationTaskRunner } from './synchronization_task_runner';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { isRetryableError } from '@kbn/task-manager-plugin/server/task_running';
-import { CAI_CASES_INDEX_NAME } from '../../cases_index/constants';
+import { getCasesDestinationIndexName, CAI_CASES_SYNC_TYPE } from '../../cases_index/constants';
 
 describe('SynchronizationTaskRunner', () => {
   const logger = loggingSystemMock.createLogger();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
   const sourceIndex = '.source-index';
-  const destIndex = CAI_CASES_INDEX_NAME;
+  const destIndex = getCasesDestinationIndexName('default', 'securitySolution');
 
   const painlessScriptId = 'painlessScriptId';
   const painlessScript = {
@@ -37,6 +37,9 @@ describe('SynchronizationTaskRunner', () => {
     params: {
       sourceIndex,
       destIndex,
+      owner: 'securitySolution',
+      spaceId: 'default',
+      syncType: CAI_CASES_SYNC_TYPE,
     },
     state: {
       lastSyncSuccess,
@@ -46,6 +49,12 @@ describe('SynchronizationTaskRunner', () => {
   } as unknown as ConcreteTaskInstance;
 
   let taskRunner: SynchronizationTaskRunner;
+
+  const analyticsConfig = {
+    index: {
+      enabled: true,
+    },
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -69,6 +78,8 @@ describe('SynchronizationTaskRunner', () => {
     esClient.reindex.mockResolvedValue({
       task: esReindexTaskId,
     });
+
+    esClient.indices.exists.mockResolvedValue(true);
   });
 
   afterAll(() => {
@@ -87,6 +98,7 @@ describe('SynchronizationTaskRunner', () => {
       logger,
       getESClient,
       taskInstance,
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -95,8 +107,7 @@ describe('SynchronizationTaskRunner', () => {
     expect(esClient.cluster.health).toBeCalledWith({
       index: destIndex,
       wait_for_status: 'green',
-      timeout: '300ms',
-      wait_for_active_shards: 'all',
+      timeout: '30s',
     });
     expect(esClient.indices.getMapping).toBeCalledWith({ index: destIndex });
     expect(esClient.getScript).toBeCalledWith({ id: painlessScriptId });
@@ -107,16 +118,28 @@ describe('SynchronizationTaskRunner', () => {
          * The previous attempt was successful so we will reindex with
          * a new time.
          *
-         * SYNCHRONIZATION_QUERIES_DICTIONARY[destIndex](lastSyncAttempt)
+         * SYNCHRONIZATION_QUERIES_DICTIONARY[syncType](lastSyncAttempt)
          */
         query: {
           bool: {
-            must: [
+            filter: [
               {
                 term: {
                   type: 'cases',
                 },
               },
+              {
+                term: {
+                  namespaces: 'default',
+                },
+              },
+              {
+                term: {
+                  'cases.owner': 'securitySolution',
+                },
+              },
+            ],
+            must: [
               {
                 bool: {
                   should: [
@@ -176,6 +199,7 @@ describe('SynchronizationTaskRunner', () => {
         ...taskInstance,
         state: {},
       },
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -187,16 +211,28 @@ describe('SynchronizationTaskRunner', () => {
          * The previous attempt was successful so we will reindex with
          * a new time.
          *
-         * SYNCHRONIZATION_QUERIES_DICTIONARY[destIndex](lastSyncAttempt)
+         * SYNCHRONIZATION_QUERIES_DICTIONARY[syncType](lastSyncAttempt)
          */
         query: {
           bool: {
-            must: [
+            filter: [
               {
                 term: {
                   type: 'cases',
                 },
               },
+              {
+                term: {
+                  namespaces: 'default',
+                },
+              },
+              {
+                term: {
+                  'cases.owner': 'securitySolution',
+                },
+              },
+            ],
+            must: [
               {
                 bool: {
                   should: [
@@ -238,28 +274,6 @@ describe('SynchronizationTaskRunner', () => {
     });
   });
 
-  it('returns the previous state if the previous task is still running', async () => {
-    esClient.tasks.get.mockResolvedValueOnce({
-      completed: false,
-      task: {} as TasksTaskInfo,
-    });
-
-    const getESClient = async () => esClient;
-
-    taskRunner = new SynchronizationTaskRunner({
-      logger,
-      getESClient,
-      taskInstance,
-    });
-
-    const result = await taskRunner.run();
-
-    expect(esClient.reindex).not.toBeCalled();
-    expect(result).toEqual({
-      state: taskInstance.state,
-    });
-  });
-
   it('reindexes when the previous sync task failed', async () => {
     esClient.tasks.get.mockResolvedValueOnce({
       completed: true,
@@ -273,6 +287,7 @@ describe('SynchronizationTaskRunner', () => {
       logger,
       getESClient,
       taskInstance,
+      analyticsConfig,
     });
 
     const result = await taskRunner.run();
@@ -284,16 +299,28 @@ describe('SynchronizationTaskRunner', () => {
          * The previous attempt was unsuccessful so we will reindex with
          * the old lastSyncSuccess. And updated the attempt time.
          *
-         * SYNCHRONIZATION_QUERIES_DICTIONARY[destIndex](lastSyncSuccess)
+         * SYNCHRONIZATION_QUERIES_DICTIONARY[syncType](lastSyncSuccess)
          */
         query: {
           bool: {
-            must: [
+            filter: [
               {
                 term: {
                   type: 'cases',
                 },
               },
+              {
+                term: {
+                  namespaces: 'default',
+                },
+              },
+              {
+                term: {
+                  'cases.owner': 'securitySolution',
+                },
+              },
+            ],
+            must: [
               {
                 bool: {
                   should: [
@@ -337,6 +364,54 @@ describe('SynchronizationTaskRunner', () => {
     });
   });
 
+  it('returns the previous state if the previous task is still running', async () => {
+    esClient.tasks.get.mockResolvedValueOnce({
+      completed: false,
+      task: {} as TasksTaskInfo,
+    });
+
+    const getESClient = async () => esClient;
+
+    taskRunner = new SynchronizationTaskRunner({
+      logger,
+      getESClient,
+      taskInstance,
+      analyticsConfig,
+    });
+
+    const result = await taskRunner.run();
+
+    expect(esClient.reindex).not.toBeCalled();
+    expect(result).toEqual({
+      state: taskInstance.state,
+    });
+  });
+
+  it('skips execution if the index does not exist', async () => {
+    esClient.indices.exists.mockResolvedValueOnce(false);
+
+    const getESClient = async () => esClient;
+
+    taskRunner = new SynchronizationTaskRunner({
+      logger,
+      getESClient,
+      taskInstance,
+      analyticsConfig,
+    });
+
+    const result = await taskRunner.run();
+
+    expect(esClient.cluster.health).not.toBeCalled();
+    expect(esClient.reindex).not.toBeCalled();
+    expect(result).toBe(undefined);
+
+    expect(logger.error).not.toBeCalled();
+    expect(logger.debug).toBeCalledWith(
+      '[.internal.cases.default-securitysolution] Destination index does not exist, skipping synchronization task.',
+      { tags: ['cai-synchronization', '.internal.cases.default-securitysolution'] }
+    );
+  });
+
   describe('Error handling', () => {
     it('calls throwRetryableError if the esClient throws a retryable error', async () => {
       esClient.tasks.get.mockRejectedValueOnce(new esErrors.ConnectionError('My retryable error'));
@@ -347,6 +422,7 @@ describe('SynchronizationTaskRunner', () => {
         logger,
         getESClient,
         taskInstance,
+        analyticsConfig,
       });
 
       try {
@@ -356,8 +432,14 @@ describe('SynchronizationTaskRunner', () => {
       }
 
       expect(logger.error).toBeCalledWith(
-        '[.internal.cases] Synchronization reindex failed. Error: My retryable error',
-        { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
+        '[.internal.cases.default-securitysolution] Synchronization reindex failed. Error: My retryable error',
+        {
+          tags: [
+            'cai-synchronization',
+            'cai-synchronization-error',
+            '.internal.cases.default-securitysolution',
+          ],
+        }
       );
     });
 
@@ -370,6 +452,7 @@ describe('SynchronizationTaskRunner', () => {
         logger,
         getESClient,
         taskInstance,
+        analyticsConfig,
       });
 
       try {
@@ -379,9 +462,40 @@ describe('SynchronizationTaskRunner', () => {
       }
 
       expect(logger.error).toBeCalledWith(
-        '[.internal.cases] Synchronization reindex failed. Error: My unrecoverable error',
-        { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
+        '[.internal.cases.default-securitysolution] Synchronization reindex failed. Error: My unrecoverable error',
+        {
+          tags: [
+            'cai-synchronization',
+            'cai-synchronization-error',
+            '.internal.cases.default-securitysolution',
+          ],
+        }
       );
+    });
+  });
+
+  describe('Analytics index disabled', () => {
+    const analyticsConfigDisabled = {
+      index: {
+        enabled: false,
+      },
+    };
+
+    it('does not call the reindex API if analytics is disabled', async () => {
+      const getESClient = async () => esClient;
+
+      taskRunner = new SynchronizationTaskRunner({
+        logger,
+        getESClient,
+        taskInstance,
+        analyticsConfig: analyticsConfigDisabled,
+      });
+
+      await taskRunner.run();
+
+      expect(esClient.tasks.get).not.toBeCalled();
+      expect(esClient.cluster.health).not.toBeCalled();
+      expect(esClient.reindex).not.toBeCalled();
     });
   });
 });

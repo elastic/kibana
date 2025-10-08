@@ -61,7 +61,7 @@ jest.mock('./rpc/procedures/all_procedures', () => {
   };
 
   return {
-    procedures: mockedProcedures,
+    getProcedures: jest.fn().mockReturnValue(mockedProcedures),
   };
 });
 

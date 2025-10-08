@@ -47,12 +47,19 @@ export interface UseEditForm {
 export interface UseEditFormProps {
   isLoading: boolean;
   initialValue?: AttackDiscoveryScheduleSchema;
+  onFormMutated?: () => void;
   onSave?: (scheduleData: AttackDiscoveryScheduleSchema) => void;
   saveButtonTitle?: string;
 }
 
 export const useEditForm = (props: UseEditFormProps): UseEditForm => {
-  const { isLoading, initialValue = defaultInitialValue, onSave, saveButtonTitle } = props;
+  const {
+    initialValue = defaultInitialValue,
+    isLoading,
+    onFormMutated,
+    onSave,
+    saveButtonTitle,
+  } = props;
   const { euiTheme } = useEuiTheme();
 
   const [formState, setFormState] = useState<FormState>({
@@ -84,8 +91,10 @@ export const useEditForm = (props: UseEditFormProps): UseEditForm => {
         />
       );
     }
-    return <EditForm initialValue={initialValue} onChange={setFormState} />;
-  }, [initialValue, isLoading]);
+    return (
+      <EditForm initialValue={initialValue} onChange={setFormState} onFormMutated={onFormMutated} />
+    );
+  }, [initialValue, isLoading, onFormMutated]);
 
   const actionButtons = useMemo(() => {
     return (
@@ -97,7 +106,7 @@ export const useEditForm = (props: UseEditFormProps): UseEditForm => {
           grow={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="save" fill size="s" onClick={onCreate} disabled={isLoading}>
+            <EuiButton data-test-subj="save" size="m" onClick={onCreate} disabled={isLoading}>
               {saveButtonTitle ?? i18n.SCHEDULE_SAVE_BUTTON_TITLE}
             </EuiButton>
           </EuiFlexItem>

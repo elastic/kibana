@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import { UnionToIntersection } from '@kbn/utility-types';
-import { CanvasFunction, FunctionFactory } from '../../types';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { UnionToIntersection } from '@kbn/utility-types';
+import type { CanvasFunction, FunctionFactory } from '../../types';
 
 import { help as all } from './dict/all';
 import { help as alterColumn } from './dict/alter_column';

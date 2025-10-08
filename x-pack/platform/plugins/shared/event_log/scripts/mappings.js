@@ -141,6 +141,9 @@ exports.EcsCustomPropertyMappings = {
                   in_progress_duration_ms: {
                     type: 'long',
                   },
+                  deleted: {
+                    type: 'boolean',
+                  },
                 },
               },
               execution: {

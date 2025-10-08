@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiSettingMetadata, Value } from '@kbn/management-settings-types';
+import type { UiSettingMetadata, Value } from '@kbn/management-settings-types';
 import { isEqual } from 'lodash';
 
 /**

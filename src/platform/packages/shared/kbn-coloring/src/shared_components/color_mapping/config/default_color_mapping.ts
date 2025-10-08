@@ -7,31 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnPalettes } from '@kbn/palettes';
-import { ColorMapping } from '.';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { ColorMapping } from '.';
 import { getColor, getGradientColorScale } from '../color/color_handling';
+import { getOtherAssignmentColor } from './utils';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
 export const DEFAULT_OTHER_ASSIGNMENT_INDEX = 0;
 
+export const DEFAULT_OTHER_ASSIGNMENT: ColorMapping.AssignmentBase<
+  ColorMapping.RuleOthers,
+  ColorMapping.LoopColor
+> = {
+  rules: [{ type: 'other' }],
+  color: { type: 'loop' },
+  touched: false,
+};
 /**
  * The default color mapping used in Kibana, starts with the EUI color palette
  */
 export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
   assignments: [],
-  specialAssignments: [
-    {
-      rules: [
-        {
-          type: 'other',
-        },
-      ],
-      color: {
-        type: 'loop',
-      },
-      touched: false,
-    },
-  ],
+  specialAssignments: [DEFAULT_OTHER_ASSIGNMENT],
   paletteId: 'default',
   colorMode: {
     type: 'categorical',
@@ -69,10 +66,11 @@ export function getColorsFromMapping(
     return Array.from({ length: 6 }, (d, i) => colorScale(i / 6));
   } else {
     const palette = palettes.get(paletteId);
-    const otherColors =
-      specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color.type === 'loop'
-        ? Array.from({ length: palette.colorCount }, (d, i) => palette.getColor(i))
-        : [getColor(specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color, palettes)];
+
+    const otherColor = getOtherAssignmentColor(specialAssignments, assignments);
+    const otherColors = otherColor.isLoop
+      ? Array.from({ length: palette.colorCount }, (d, i) => palette.getColor(i))
+      : [getColor(otherColor.color, palettes)];
     return [
       ...assignments.map((a) => {
         return a.color.type === 'gradient' ? '' : getColor(a.color, palettes);

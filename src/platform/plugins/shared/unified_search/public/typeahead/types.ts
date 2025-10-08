@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QuerySuggestion } from '../autocomplete';
+import type { QuerySuggestion } from '../autocomplete';
 
 export type SuggestionOnClick = (suggestion: QuerySuggestion, index: number) => void;
 

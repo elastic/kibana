@@ -13,10 +13,13 @@ import { EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 
 import { SelectOption, SwitchOption, TextInputOption } from '@kbn/vis-default-editor-plugin/public';
 
-import { ValueAxis } from '../../../../types';
-import { LabelOptions, SetAxisLabel } from './label_options';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { visEditorSidebarStyles } from '@kbn/vis-default-editor-plugin/public';
+import type { ValueAxis } from '../../../../types';
+import type { SetAxisLabel } from './label_options';
+import { LabelOptions } from './label_options';
 import { CustomExtentsOptions } from './custom_extents_options';
-import { SetParamByIndex } from '.';
+import type { SetParamByIndex } from '.';
 import { getConfigCollections } from '../../../collections';
 
 const collections = getConfigCollections();
@@ -43,6 +46,7 @@ export function ValueAxisOptions({
   setParamByIndex,
   setMultipleValidity,
 }: ValueAxisOptionsParams) {
+  const styles = useMemoCss(visEditorSidebarStyles);
   const setValueAxis = useCallback(
     <T extends keyof ValueAxis>(paramName: T, value: ValueAxis[T]) =>
       setParamByIndex('valueAxes', index, paramName, value),
@@ -181,6 +185,7 @@ export function ValueAxisOptions({
             defaultMessage: 'Toggle custom extents',
           }
         )}
+        css={[styles.section, styles.collapsible]}
       >
         <>
           <EuiSpacer size="m" />

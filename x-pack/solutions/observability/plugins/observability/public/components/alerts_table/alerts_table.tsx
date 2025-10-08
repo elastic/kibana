@@ -7,21 +7,19 @@
 
 import React from 'react';
 import { ALERT_START } from '@kbn/rule-data-utils';
-import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import { ObservabilityPublicStart } from '../..';
+import { AlertsTableExpandedAlertView } from '../alerts_flyout/alerts_table_expanded_alert_view';
+import type { ObservabilityPublicStart } from '../..';
 import AlertActions from '../alert_actions/alert_actions';
 import { useKibana } from '../../utils/kibana_react';
 import { casesFeatureId, observabilityFeatureId } from '../../../common';
-import {
+import type {
   GetObservabilityAlertsTableProp,
   ObservabilityAlertsTableContext,
   ObservabilityAlertsTableProps,
 } from './types';
 import { AlertsTableCellValue } from './common/cell_value';
-import { AlertsFlyoutBody } from '../alerts_flyout/alerts_flyout_body';
-import { AlertsFlyoutHeader } from '../alerts_flyout/alerts_flyout_header';
-import { AlertsFlyoutFooter } from '../alerts_flyout/alerts_flyout_footer';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { getColumns } from './common/get_columns';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../../../common/constants';
@@ -40,25 +38,15 @@ const caseConfiguration: GetObservabilityAlertsTableProp<'casesConfiguration'> =
   owner: [observabilityFeatureId],
 };
 
-export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTableProps, 'services'>) {
-  const {
-    data,
-    http,
-    notifications,
-    fieldFormats,
-    application,
-    licensing,
-    cases,
-    settings,
-    observability,
-  } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
+export function ObservabilityAlertsTable(props: ObservabilityAlertsTableProps) {
+  const { observability } = useKibana<{ observability?: ObservabilityPublicStart }>().services;
   const { observabilityRuleTypeRegistry, config } = usePluginContext();
 
   return (
     <AlertsTable<ObservabilityAlertsTableContext>
       columns={columns}
       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
-      initialSort={initialSort}
+      sort={initialSort}
       casesConfiguration={caseConfiguration}
       additionalContext={{
         observabilityRuleTypeRegistry:
@@ -68,20 +56,8 @@ export function ObservabilityAlertsTable(props: Omit<ObservabilityAlertsTablePro
       renderCellValue={AlertsTableCellValue}
       renderActionsCell={AlertActions}
       actionsColumnWidth={120}
-      renderFlyoutHeader={AlertsFlyoutHeader}
-      renderFlyoutBody={AlertsFlyoutBody}
-      renderFlyoutFooter={AlertsFlyoutFooter}
+      renderExpandedAlertView={AlertsTableExpandedAlertView}
       showAlertStatusWithFlapping
-      services={{
-        data,
-        http,
-        notifications,
-        fieldFormats,
-        application,
-        licensing,
-        cases,
-        settings,
-      }}
       {...props}
     />
   );

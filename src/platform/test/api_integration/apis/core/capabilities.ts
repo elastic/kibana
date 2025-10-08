@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body).to.eql({
         statusCode: 400,
         error: 'Bad Request',
-        message: '[request body.applications.2]: Invalid application id',
+        message: '[request body.applications.2]: Invalid application id: bad%app',
       });
     });
   });

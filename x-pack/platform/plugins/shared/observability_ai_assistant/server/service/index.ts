@@ -10,17 +10,14 @@ import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { once } from 'lodash';
 import pRetry from 'p-retry';
-import { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
+import type { ObservabilityAIAssistantScreenContextRequest } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
 import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
-import { ObservabilityAIAssistantConfig } from '../config';
+import type { ObservabilityAIAssistantConfig } from '../config';
 import { createOrUpdateConversationIndexAssets } from './index_assets/create_or_update_conversation_index_assets';
-import { AnonymizationService } from './anonymization';
-import { aiAssistantAnonymizationRules } from '../../common';
-import type { AnonymizationRule } from '../../common/types';
 
 export function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
@@ -98,14 +95,6 @@ export class ObservabilityAIAssistantService {
     const soClient = coreStart.savedObjects.getScopedClient(request);
     const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
 
-    // Read anonymization rules from advanced settings
-    let anonymizationRules: AnonymizationRule[] = [];
-    try {
-      const advSettingsRules = await uiSettingsClient.get<string>(aiAssistantAnonymizationRules);
-      anonymizationRules = JSON.parse(advSettingsRules ?? '[]');
-    } catch {
-      anonymizationRules = [];
-    }
     const basePath = coreStart.http.basePath.get(request);
 
     const { spaceId } = getSpaceIdFromPath(basePath, coreStart.http.basePath.serverBasePath);
@@ -121,13 +110,7 @@ export class ObservabilityAIAssistantService {
       esClient: {
         asInternalUser,
       },
-    });
-    const anonymizationService = new AnonymizationService({
-      logger: this.logger.get('anonymization'),
-      esClient: {
-        asCurrentUser,
-      },
-      anonymizationRules,
+      productDoc: plugins.productDocBase.management,
     });
 
     return new ObservabilityAIAssistantClient({
@@ -140,7 +123,6 @@ export class ObservabilityAIAssistantService {
         asInternalUser,
         asCurrentUser,
       },
-      anonymizationService,
       inferenceClient,
       logger: this.logger,
       user: user
@@ -169,12 +151,15 @@ export class ObservabilityAIAssistantService {
   }): Promise<ChatFunctionClient> {
     const fnClient = new ChatFunctionClient(screenContexts);
 
+    const [, pluginsStart] = await this.core.getStartServices();
+
     const params = {
       signal,
       functions: fnClient,
       resources,
       client,
       scopes,
+      pluginsStart,
     };
 
     await Promise.all(

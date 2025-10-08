@@ -48,6 +48,7 @@ const getCaseUpdateData = (id: string, version: string) => ({
   description: 'new desc',
   settings: {
     syncAlerts: false,
+    extractObservables: false,
   },
   tags: ['one', 'two'],
   connector: {
@@ -60,7 +61,6 @@ const getCaseUpdateData = (id: string, version: string) => ({
   version,
 });
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');

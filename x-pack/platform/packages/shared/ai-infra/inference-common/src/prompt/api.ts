@@ -5,24 +5,18 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { Overwrite, Assign } from 'utility-types';
-import {
-  ChatCompleteOptions,
-  Message,
-  ToolChoice,
-  ToolDefinition,
-  ToolOptions,
-} from '../chat_complete';
-import { Prompt, ToolOptionsOfPrompt } from './types';
-import {
+import type { z } from '@kbn/zod';
+import type { Assign } from 'utility-types';
+import type { ChatCompleteOptions, Message } from '../chat_complete';
+import type {
   ChatCompleteAPIResponse,
   ChatCompleteCompositeResponse,
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
 } from '../chat_complete/api';
+import type { Prompt, ToolOptionsOfPrompt } from './types';
 
-type PromptChatCompleteOptions = Omit<ChatCompleteOptions, 'messages' | 'system'>;
+type PromptChatCompleteOptions = Omit<ChatCompleteOptions, 'messages' | 'system' | 'tools'>;
 
 /**
  * Options for the {@link PromptAPI}
@@ -34,41 +28,32 @@ export interface PromptOptions<TPrompt extends Prompt = Prompt> extends PromptCh
 }
 
 /**
+ * Returns the chat complete options shape for the given prompt options.
+ * The main difference is that it will convert the tools specified in the prompt
+ * versions to a top-level `tools` type.
+ */
+export type ChatCompleteOptionsOfPromptOptions<
+  TPromptOptions extends PromptOptions = PromptOptions
+> = {
+  messages: Message[];
+} & TPromptOptions &
+  ToolOptionsOfPrompt<TPromptOptions['prompt']>;
+
+/**
  * Composite response type from the {@link PromptAPI},
  * which can be either an observable or a promise depending on
  * whether API was called with stream mode enabled or not.
  */
 export type PromptCompositeResponse<TPromptOptions extends PromptOptions = PromptOptions> =
-  ChatCompleteCompositeResponse<
-    Omit<TPromptOptions, 'tools' | 'toolChoice'> &
-      MergeToolOptions<ToolOptionsOfPrompt<TPromptOptions['prompt']>, TPromptOptions>
-  >;
+  ChatCompleteCompositeResponse<ChatCompleteOptionsOfPromptOptions<TPromptOptions>>;
 
-type MergeToolOptions<TLeft extends ToolOptions, TRight extends ToolOptions> = Overwrite<
-  Pick<TLeft, 'tools' | 'toolChoice'>,
-  {
-    toolChoice: TRight['toolChoice'] extends ToolChoice
-      ? TRight['toolChoice']
-      : TLeft['toolChoice'];
-    tools: TLeft['tools'] extends Record<string, ToolDefinition>
-      ? TRight['tools'] extends Record<string, ToolDefinition>
-        ? Assign<TLeft['tools'], TRight['tools']>
-        : TLeft['tools']
-      : TRight['tools'] extends Record<string, ToolDefinition>
-      ? TRight['tools']
-      : {};
-  }
->;
-
-type ChatCompleteOptionsOfPromptOptions<TPromptOptions extends PromptOptions = PromptOptions> = {
-  messages: Message[];
-} & Omit<TPromptOptions, 'tools' | 'toolChoice'> &
-  MergeToolOptions<ToolOptionsOfPrompt<TPromptOptions['prompt']>, TPromptOptions>;
-
+/**
+ * Returns the prompt response shape for the given {@link Prompt}
+ */
 export type PromptResponseOf<
   TPrompt extends Prompt,
   TStream extends boolean = false
-> = PromptCompositeResponse<Overwrite<PromptOptions<TPrompt>, { stream: TStream }>>;
+> = PromptCompositeResponse<Assign<PromptOptions<TPrompt>, { stream: TStream }>>;
 
 export type PromptAPIResponse<TPromptOptions extends PromptOptions = PromptOptions> =
   ChatCompleteAPIResponse<ChatCompleteOptionsOfPromptOptions<TPromptOptions>>;
@@ -85,6 +70,9 @@ export type PromptResponse<TPromptOptions extends PromptOptions = PromptOptions>
 export type PromptStreamResponse<TPromptOptions extends PromptOptions = PromptOptions> =
   ChatCompleteStreamResponse<ChatCompleteOptionsOfPromptOptions<TPromptOptions>>;
 
-export type PromptAPI = <TPrompt extends Prompt, TPromptOptions extends PromptOptions>(
+/**
+ * Type for the `prompt` API
+ */
+export type PromptAPI = <TPrompt extends Prompt, TPromptOptions extends PromptOptions<Prompt>>(
   options: PromptOptions<TPrompt> & TPromptOptions
 ) => PromptAPIResponse<TPromptOptions>;

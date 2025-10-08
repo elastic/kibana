@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { TaggingUsageData, ByTypeTaggingUsageData } from './types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { TaggingUsageData, ByTypeTaggingUsageData } from './types';
 
 /**
  * Manual type reflection of the `tagDataAggregations` resulting payload

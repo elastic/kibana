@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './resolved_rule';
+export type * from './resolved_rule';

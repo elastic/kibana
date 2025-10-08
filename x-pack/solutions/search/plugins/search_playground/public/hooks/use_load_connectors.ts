@@ -10,11 +10,11 @@ import { useQuery } from '@tanstack/react-query';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from './use_kibana';
+
+import { SearchPlaygroundQueryKeys } from '../../common';
 import { type PlaygroundConnector } from '../types';
 import { parsePlaygroundConnectors } from '../utils/playground_connectors';
-
-export const LOAD_CONNECTORS_QUERY_KEY = ['search-playground, load-connectors'];
+import { useKibana } from './use_kibana';
 
 export const LoadConnectorsQuery = (http: HttpSetup) => async () => {
   const queryResult = await loadConnectors({ http });
@@ -26,7 +26,7 @@ export const useLoadConnectors = (): UseQueryResult<PlaygroundConnector[], IHttp
     services: { http, notifications },
   } = useKibana();
 
-  return useQuery(LOAD_CONNECTORS_QUERY_KEY, LoadConnectorsQuery(http), {
+  return useQuery([SearchPlaygroundQueryKeys.LoadConnectors], LoadConnectorsQuery(http), {
     retry: false,
     keepPreviousData: true,
     onError: (error: IHttpFetchError<ResponseErrorBody>) => {

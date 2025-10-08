@@ -6,8 +6,10 @@
  */
 
 import { z } from '@kbn/zod';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { NonEmptyString } from '@kbn/zod-helpers';
+import type { Condition } from '@kbn/streamlang';
+import { conditionSchema } from '@kbn/streamlang';
 import { primitive } from '../shared/record_types';
 import { createIsNarrowSchema } from '../shared/type_guards';
 
@@ -17,22 +19,16 @@ interface StreamQueryBase {
 }
 
 export interface StreamQueryKql extends StreamQueryBase {
+  system?: {
+    name: string;
+    filter: Condition;
+  };
   kql: {
     query: string;
   };
 }
 
 export type StreamQuery = StreamQueryKql;
-
-export interface StreamGetResponseBase {
-  dashboards: string[];
-  queries: StreamQuery[];
-}
-
-export interface StreamUpsertRequestBase {
-  dashboards: string[];
-  queries: StreamQuery[];
-}
 
 const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
   id: NonEmptyString,
@@ -42,8 +38,14 @@ const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
 export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
   streamQueryBaseSchema,
   z.object({
+    system: z
+      .object({
+        name: NonEmptyString,
+        filter: conditionSchema,
+      })
+      .optional(),
     kql: z.object({
-      query: NonEmptyString,
+      query: z.string(),
     }),
   })
 );
@@ -56,8 +58,14 @@ export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;
 
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
+  system: z
+    .object({
+      name: NonEmptyString,
+      filter: conditionSchema,
+    })
+    .optional(),
   kql: z.object({
-    query: NonEmptyString,
+    query: z.string(),
   }),
 });
 

@@ -9,12 +9,14 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { useAlertPrevalenceFromProcessTree } from '../../shared/hooks/use_alert_prevalence_from_process_tree';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { DocumentDetailsContext } from '../../shared/context';
 import { AnalyzerPreview } from './analyzer_preview';
 import { ANALYZER_PREVIEW_TEST_ID } from './test_ids';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+
 import * as mock from '../mocks/mock_analyzer_data';
 
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
@@ -22,10 +24,8 @@ jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
 }));
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as jest.Mock;
 
-jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
-  useTimelineDataFilters: jest.fn(),
-}));
-const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
+jest.mock('../../../../data_view_manager/hooks/use_security_default_patterns');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const mockTreeValues = {
   loading: false,
@@ -48,7 +48,12 @@ const NO_DATA_MESSAGE = 'An error is preventing this alert from being analyzed.'
 describe('<AnalyzerPreview />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
+    (useEnableExperimental as jest.Mock).mockReturnValue({
+      newDataViewPickerEnabled: true,
+    });
+    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({
+      indexPatterns: ['index'],
+    });
   });
 
   it('shows analyzer preview correctly when documentId and index are present', () => {

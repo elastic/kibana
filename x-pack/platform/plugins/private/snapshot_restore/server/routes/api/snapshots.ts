@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { SnapshotSnapshotState } from '@elastic/elasticsearch/lib/api/types';
 import type { SnapshotDetailsEs } from '../../../common/types';
 import { deserializeSnapshotDetails } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
@@ -145,6 +147,9 @@ export function registerSnapshotsRoutes({
                   operator: searchOperator,
                 })
               : '*,_none',
+          ...(searchField === 'state' && searchValue
+            ? { state: searchValue as SnapshotSnapshotState }
+            : {}),
           order: sortDirection,
           // @ts-expect-error sortField: string is not compatible with SnapshotSnapshotSort type
           sort: sortField,

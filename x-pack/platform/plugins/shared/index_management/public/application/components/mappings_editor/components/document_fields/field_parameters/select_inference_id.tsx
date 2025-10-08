@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -16,7 +17,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
   EuiText,
   EuiIcon,
@@ -30,7 +30,7 @@ import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { UseField } from '../../../shared_imports';
-
+import { MlVcuUsageCostTour } from './ml_vcu_usage_cost_tour';
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
@@ -67,11 +67,12 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
 }) => {
   const {
     core: { application, http },
+    config: { enforceAdaptiveAllocations },
     services: {
       notificationService: { toasts },
     },
     docLinks,
-    plugins: { share },
+    plugins: { cloud, share },
   } = useAppContext();
   const config = getFieldConfig('inference_id');
 
@@ -272,7 +273,12 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       <EuiSpacer />
       <EuiFlexGroup data-test-subj="selectInferenceId" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
-          {inferencePopover()}
+          {cloud?.isServerlessEnabled ? (
+            <MlVcuUsageCostTour children={inferencePopover()} />
+          ) : (
+            inferencePopover()
+          )}
+
           {isInferenceFlyoutVisible ? (
             <Suspense fallback={<EuiLoadingSpinner size="l" />}>
               <InferenceFlyoutWrapper
@@ -281,6 +287,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 toasts={toasts}
                 isEdit={false}
                 onSubmitSuccess={onSubmitSuccess}
+                enforceAdaptiveAllocations={enforceAdaptiveAllocations}
               />
             </Suspense>
           ) : null}

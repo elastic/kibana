@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { LensXYConfigBase } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensXYConfigBase } from '@kbn/lens-embeddable-utils';
 
 export const DEFAULT_XY_FITTING_FUNCTION: Pick<LensXYConfigBase, 'fittingFunction'> = {
   fittingFunction: 'Linear',
@@ -154,13 +154,6 @@ export const DISK_SPACE_AVAILABLE_LABEL = i18n.translate(
   'xpack.metricsData.assetDetails.metrics.label.diskSpaceAvailable',
   {
     defaultMessage: 'Disk Space Available',
-  }
-);
-
-export const DISK_SPACE_AVAILABILITY_LABEL = i18n.translate(
-  'xpack.metricsData.assetDetails.metrics.label.diskSpaceAvailablity',
-  {
-    defaultMessage: 'Disk Space Availability',
   }
 );
 

@@ -8,7 +8,8 @@
  */
 
 import { EuiButton, EuiCallOut, useEuiTheme, EuiText, EuiSpacer } from '@elastic/eui';
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
@@ -26,13 +27,15 @@ interface Props {
 
 export const FeedbackBtn: FC<Props> = ({ solutionId }) => {
   const { euiTheme } = useEuiTheme();
-  const [showCallOut, setShowCallOut] = useState(
-    sessionStorage.getItem(FEEDBACK_BTN_KEY) !== 'hidden'
-  );
+  const [showCallOut, setShowCallOut] = useState(() => {
+    const storedValue =
+      localStorage.getItem(FEEDBACK_BTN_KEY) || sessionStorage.getItem(FEEDBACK_BTN_KEY);
+    return storedValue !== 'hidden';
+  });
 
   const onDismiss = () => {
     setShowCallOut(false);
-    sessionStorage.setItem(FEEDBACK_BTN_KEY, 'hidden');
+    localStorage.setItem(FEEDBACK_BTN_KEY, 'hidden');
   };
 
   const onClick = () => {

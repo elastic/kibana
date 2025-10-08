@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export async function getKibanaVersion(getService: FtrProviderContext['getService']) {
   const kibanaServer = getService('kibanaServer');

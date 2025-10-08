@@ -9,9 +9,10 @@ import React from 'react';
 import moment from 'moment';
 import { EuiProgress, useEuiTheme, VISUALIZATION_COLORS } from '@elastic/eui';
 
-import { TooltipTable, TooltipHeader, TooltipValue, TooltipContainer } from '@elastic/charts';
+import type { TooltipValue } from '@elastic/charts';
+import { TooltipTable, TooltipHeader, TooltipContainer } from '@elastic/charts';
 
-import { MonitorStatusTimeBin } from './monitor_status_data';
+import type { MonitorStatusTimeBin } from './monitor_status_data';
 import * as labels from './labels';
 
 export const MonitorStatusCellTooltip = ({

@@ -40,7 +40,8 @@ import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import type { SearchEmbeddableApi, SearchEmbeddableSerializedState } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
-import { BaseAppWrapper, ScopedProfilesManagerProvider } from '../context_awareness';
+import { BaseAppWrapper } from '../context_awareness';
+import { ScopedServicesProvider } from '../components/scoped_services_provider';
 
 export const getSearchEmbeddableFactory = ({
   startServices,
@@ -73,7 +74,10 @@ export const getSearchEmbeddableFactory = ({
         solutionNavId,
       });
       const AppWrapper = getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper;
-      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager();
+      const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
+      const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
+        scopedEbtManager,
+      });
 
       /** Specific by-reference state */
       const savedObjectId$ = new BehaviorSubject<string | undefined>(runtimeState?.savedObjectId);
@@ -100,26 +104,6 @@ export const getSearchEmbeddableFactory = ({
       const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
       const searchEmbeddable = await initializeSearchEmbeddableApi(runtimeState, {
         discoverServices,
-      });
-      const unsubscribeFromFetch = initializeFetch({
-        api: {
-          parentApi,
-          ...titleManager.api,
-          ...timeRangeManager.api,
-          defaultTitle$,
-          savedSearch$: searchEmbeddable.api.savedSearch$,
-          dataViews$: searchEmbeddable.api.dataViews$,
-          savedObjectId$,
-          dataLoading$,
-          blockingError$,
-          fetchContext$,
-          fetchWarnings$,
-        },
-        discoverServices,
-        stateManager: searchEmbeddable.stateManager,
-        scopedProfilesManager,
-        setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
-        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
 
       const serialize = (savedObjectId?: string) =>
@@ -160,7 +144,9 @@ export const getSearchEmbeddableFactory = ({
             savedObjectId: 'skip',
             timeRestore: 'skip',
             usesAdHocDataView: 'skip',
+            controlGroupJson: 'skip',
             visContext: 'skip',
+            tabs: 'skip',
           };
         },
         onReset: async (lastSaved) => {
@@ -232,6 +218,28 @@ export const getSearchEmbeddableFactory = ({
           // compatibilty check and ensure top-level drilldowns (e.g. URL) work as expected
           return [];
         },
+      });
+
+      const unsubscribeFromFetch = initializeFetch({
+        api: {
+          ...api,
+          parentApi,
+          ...titleManager.api,
+          ...timeRangeManager.api,
+          defaultTitle$,
+          savedSearch$: searchEmbeddable.api.savedSearch$,
+          dataViews$: searchEmbeddable.api.dataViews$,
+          savedObjectId$,
+          dataLoading$,
+          blockingError$,
+          fetchContext$,
+          fetchWarnings$,
+        },
+        discoverServices,
+        stateManager: searchEmbeddable.stateManager,
+        scopedProfilesManager,
+        setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
+        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
 
       return {
@@ -315,7 +323,10 @@ export const getSearchEmbeddableFactory = ({
           return (
             <KibanaRenderContextProvider {...discoverServices.core}>
               <KibanaContextProvider services={discoverServices}>
-                <ScopedProfilesManagerProvider scopedProfilesManager={scopedProfilesManager}>
+                <ScopedServicesProvider
+                  scopedProfilesManager={scopedProfilesManager}
+                  scopedEBTManager={scopedEbtManager}
+                >
                   <AppWrapper>
                     {renderAsFieldStatsTable ? (
                       <SearchEmbeddablFieldStatsTableComponent
@@ -353,7 +364,7 @@ export const getSearchEmbeddableFactory = ({
                       </CellActionsProvider>
                     )}
                   </AppWrapper>
-                </ScopedProfilesManagerProvider>
+                </ScopedServicesProvider>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>
           );

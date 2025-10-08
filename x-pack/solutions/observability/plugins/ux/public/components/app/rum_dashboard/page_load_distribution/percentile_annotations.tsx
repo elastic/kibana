@@ -6,13 +6,8 @@
  */
 
 import * as React from 'react';
-import {
-  AnnotationDomainType,
-  LineAnnotation,
-  LineAnnotationDatum,
-  LineAnnotationStyle,
-  Position,
-} from '@elastic/charts';
+import type { LineAnnotationDatum, LineAnnotationStyle } from '@elastic/charts';
+import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import { EuiToolTip } from '@elastic/eui';
 

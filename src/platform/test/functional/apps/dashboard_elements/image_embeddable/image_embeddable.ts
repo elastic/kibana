@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, dashboard, header } = getPageObjects(['common', 'dashboard', 'header']);
@@ -37,15 +37,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should create an image embeddable', async () => {
       // create an image embeddable
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Image');
       await testSubjects.exists(`createImageEmbeddableFlyout`);
       await common.setFileInputPath(require.resolve('./elastic_logo.png'));
       await testSubjects.clickWhenNotDisabled(`imageEmbeddableEditorSave`);
 
+      await dashboard.waitForRenderComplete();
       // check that it is added on the dashboard
       expect(await dashboard.getSharedItemsCount()).to.be('1');
-      await dashboard.waitForRenderComplete();
       const panel = (await dashboard.getDashboardPanels())[0];
       const img = await panel.findByCssSelector('img.euiImage');
       const imgSrc = await img.getAttribute('src');

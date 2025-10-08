@@ -5,22 +5,28 @@
  * 2.0.
  */
 
+import type { JsonSchema7ObjectType } from 'zod-to-json-schema';
+import zodToJsonSchema from 'zod-to-json-schema';
 import type { ZodObject } from '@kbn/zod';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ToolDescriptor } from '@kbn/onechat-common';
+import type { ToolDefinitionWithSchema, ToolDefinition, ToolType } from '@kbn/onechat-common';
 import type { Runner, ExecutableTool } from '@kbn/onechat-server';
-import type { RegisteredToolWithMeta } from '../types';
+import type { InternalToolDefinition } from '../tool_provider';
 
-export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
+export const toExecutableTool = <
+  TConfig extends object = {},
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  RunOutput = unknown
+>({
   tool,
   runner,
   request,
 }: {
-  tool: RegisteredToolWithMeta<RunInput, RunOutput>;
+  tool: InternalToolDefinition<ToolType, TConfig, RunInput>;
   runner: Runner;
   request: KibanaRequest;
-}): ExecutableTool<RunInput, RunOutput> => {
-  const { handler, ...toolParts } = tool;
+}): ExecutableTool<TConfig, RunInput> => {
+  const { getHandler, ...toolParts } = tool;
 
   return {
     ...toolParts,
@@ -35,7 +41,16 @@ export const toExecutableTool = <RunInput extends ZodObject<any>, RunOutput>({
  *
  * Can be used to convert/clean tool registration for public-facing APIs.
  */
-export const toolToDescriptor = <T extends ToolDescriptor>(tool: T): ToolDescriptor => {
-  const { id, description, meta } = tool;
-  return { id, description, meta };
+export const toDescriptorWithSchema = async (
+  tool: InternalToolDefinition
+): Promise<ToolDefinitionWithSchema> => {
+  const descriptor = toDescriptor(tool);
+  const schema = await tool.getSchema();
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchema7ObjectType;
+  return { ...descriptor, schema: jsonSchema };
+};
+
+export const toDescriptor = (tool: InternalToolDefinition): ToolDefinition => {
+  const { id, type, description, tags, configuration, readonly } = tool;
+  return { id, type, description, tags, configuration, readonly };
 };

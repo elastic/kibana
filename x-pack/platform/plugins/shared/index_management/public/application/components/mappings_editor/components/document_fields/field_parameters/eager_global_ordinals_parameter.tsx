@@ -9,7 +9,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { ParameterName } from '../../../types';
+import type { ParameterName } from '../../../types';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { documentationService } from '../../../../../services/documentation';
 

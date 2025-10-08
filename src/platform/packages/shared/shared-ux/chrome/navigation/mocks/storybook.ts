@@ -11,7 +11,7 @@ import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
 import { BehaviorSubject, of } from 'rxjs';
 import { EventTracker } from '../src/analytics';
-import { NavigationServices } from '../src/types';
+import type { NavigationServices } from '../src/types';
 
 type Arguments = NavigationServices;
 export type Params = Pick<Arguments, 'isSideNavCollapsed' | 'recentlyAccessed$' | 'activeNodes$'>;

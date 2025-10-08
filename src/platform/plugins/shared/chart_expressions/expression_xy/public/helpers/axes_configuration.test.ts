@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { DataLayerConfig, YAxisConfigResult, DataDecorationConfigResult } from '../../common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { DataLayerConfig, YAxisConfigResult, DataDecorationConfigResult } from '../../common';
 import { LayerTypes } from '../../common/constants';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
-import { LayersFieldFormats } from './layers';
+import type { LayersFieldFormats } from './layers';
 
 describe('axes_configuration', () => {
   const tables: Record<string, Datatable> = {

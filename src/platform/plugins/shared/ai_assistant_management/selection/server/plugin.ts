@@ -9,15 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  DEFAULT_APP_CATEGORIES,
-} from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -25,8 +18,9 @@ import type {
   AIAssistantManagementSelectionPluginServerSetup,
   AIAssistantManagementSelectionPluginServerStart,
 } from './types';
-import { AIAssistantType } from '../common/ai_assistant_type';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../common/ui_setting_keys';
+import { classicSetting } from './src/settings/classic_setting';
+import { AIAssistantType } from '../common/ai_assistant_type';
 
 export class AIAssistantManagementSelectionPlugin
   implements
@@ -47,56 +41,10 @@ export class AIAssistantManagementSelectionPlugin
     core: CoreSetup,
     plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
   ) {
-    core.uiSettings.register({
-      [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
-        name: i18n.translate('aiAssistantManagementSelection.preferredAIAssistantTypeSettingName', {
-          defaultMessage: 'AI Assistant for Observability and Search visibility',
-        }),
-        category: [DEFAULT_APP_CATEGORIES.observability.id],
-        value: this.config.preferredAIAssistantType,
-        description: i18n.translate(
-          'aiAssistantManagementSelection.preferredAIAssistantTypeSettingDescription',
-          {
-            defaultMessage:
-              '<em>[technical preview]</em> Whether to show the AI Assistant menu item in Observability and Search, everywhere, or nowhere.',
-            values: {
-              em: (chunks) => `<em>${chunks}</em>`,
-            },
-          }
-        ),
-        schema: schema.oneOf(
-          [
-            schema.literal(AIAssistantType.Default),
-            schema.literal(AIAssistantType.Observability),
-            schema.literal(AIAssistantType.Never),
-          ],
-          { defaultValue: this.config.preferredAIAssistantType }
-        ),
-        options: [AIAssistantType.Default, AIAssistantType.Observability, AIAssistantType.Never],
-        type: 'select',
-        optionLabels: {
-          [AIAssistantType.Default]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueDefault',
-            { defaultMessage: 'Observability and Search only (default)' }
-          ),
-          [AIAssistantType.Observability]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueObservability',
-            { defaultMessage: 'Everywhere' }
-          ),
-          [AIAssistantType.Never]: i18n.translate(
-            'aiAssistantManagementSelection.preferredAIAssistantTypeSettingValueNever',
-            { defaultMessage: 'Nowhere' }
-          ),
-        },
-        requiresPageReload: true,
-        solution: 'oblt',
-      },
-    });
-
     core.capabilities.registerProvider(() => {
       return {
         management: {
-          kibana: {
+          ai: {
             aiAssistantManagementSelection: true,
             observabilityAiAssistantManagement: true,
             securityAiAssistantManagement: true,
@@ -108,14 +56,13 @@ export class AIAssistantManagementSelectionPlugin
     plugins.features?.registerKibanaFeature({
       id: 'aiAssistantManagementSelection',
       name: i18n.translate('aiAssistantManagementSelection.featureRegistry.featureName', {
-        defaultMessage: 'AI Assistant',
+        defaultMessage: 'AI Assistant Settings',
       }),
       order: 8600,
       app: [],
       category: DEFAULT_APP_CATEGORIES.management,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       management: {
-        kibana: [
+        ai: [
           'aiAssistantManagementSelection',
           'securityAiAssistantManagement',
           'observabilityAiAssistantManagement',
@@ -125,7 +72,7 @@ export class AIAssistantManagementSelectionPlugin
       privileges: {
         all: {
           management: {
-            kibana: [
+            ai: [
               'aiAssistantManagementSelection',
               'securityAiAssistantManagement',
               'observabilityAiAssistantManagement',
@@ -139,7 +86,7 @@ export class AIAssistantManagementSelectionPlugin
         },
         read: {
           management: {
-            kibana: [
+            ai: [
               'aiAssistantManagementSelection',
               'securityAiAssistantManagement',
               'observabilityAiAssistantManagement',
@@ -154,7 +101,27 @@ export class AIAssistantManagementSelectionPlugin
       },
     });
 
+    this.registerUiSettings(core, plugins);
+
     return {};
+  }
+
+  private registerUiSettings(
+    core: CoreSetup,
+    plugins: AIAssistantManagementSelectionPluginServerDependenciesSetup
+  ) {
+    const { cloud } = plugins;
+    const serverlessProjectType = cloud?.serverless.projectType;
+
+    // Do not register the setting in a serverless project
+    if (!serverlessProjectType) {
+      core.uiSettings.register({
+        [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: {
+          ...classicSetting,
+          value: this.config.preferredAIAssistantType ?? AIAssistantType.Default,
+        },
+      });
+    }
   }
 
   public start(core: CoreStart) {

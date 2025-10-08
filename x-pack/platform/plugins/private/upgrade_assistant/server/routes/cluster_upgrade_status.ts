@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
-export function registerClusterUpgradeStatusRoutes({ router }: RouteDependencies) {
+export function registerClusterUpgradeStatusRoutes({ router, current }: RouteDependencies) {
   router.get(
     {
       path: `${API_BASE_PATH}/cluster_upgrade_status`,
@@ -23,7 +23,7 @@ export function registerClusterUpgradeStatusRoutes({ router }: RouteDependencies
     },
     // We're just depending on the version check to return a 426.
     // Otherwise we just return a 200.
-    versionCheckHandlerWrapper(async (context, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async (context, request, response) => {
       return response.ok();
     })
   );

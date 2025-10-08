@@ -7,14 +7,15 @@
 
 import React from 'react';
 import { DataPanelWrapper } from './data_panel_wrapper';
-import { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../../types';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../../types';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createMockFramePublicAPI, mockStoreDeps, renderWithReduxStore } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
-import { LensRootStore, selectTriggerApplyChanges } from '../../state_management';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensRootStore } from '../../state_management';
+import { selectTriggerApplyChanges } from '../../state_management';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
-import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
 describe('Data Panel Wrapper', () => {
   describe('Datasource data panel properties', () => {

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CustomIntegrationsServices } from '..';
+import type { CustomIntegrationsServices } from '..';
 import { findServiceFactory } from './find';
 import { platformServiceFactory } from './platform';
-import { KibanaPluginServiceFactory } from '../types';
-import { CustomIntegrationsStartDependencies } from '../../types';
+import type { KibanaPluginServiceFactory } from '../types';
+import type { CustomIntegrationsStartDependencies } from '../../types';
 
 export { findServiceFactory } from './find';
 export { platformServiceFactory } from './platform';

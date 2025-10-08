@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
+import type { MlInferenceHistoryResponse } from '../../../../../common/types/pipelines';
 
 export const fetchMlInferencePipelineHistory = async (
   client: ElasticsearchClient,

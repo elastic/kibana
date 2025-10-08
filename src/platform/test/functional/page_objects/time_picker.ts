@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export type CommonlyUsed =
@@ -120,6 +120,7 @@ export class TimePickerPageObject extends FtrService {
         timeout: 50,
       });
       if (isShowDatesButton) {
+        await this.testSubjects.moveMouseTo('superDatePickerShowDatesButton');
         await this.testSubjects.click('superDatePickerShowDatesButton', 50);
       }
       await this.testSubjects.exists('superDatePickerstartDatePopoverButton', { timeout: 1000 });

@@ -11,10 +11,10 @@ import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/
 import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from './util/audit';
-import { authz } from './util/authz';
-import { withLicense } from './util/with_license';
-import { MIGRATION_ID_NOT_FOUND } from './util/with_existing_migration_id';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { authz } from '../../common/api/util/authz';
+import { withLicense } from '../../common/api/util/with_license';
+import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
 
 export const registerSiemRuleMigrationsGetRoute = (
   router: SecuritySolutionPluginRouter,
@@ -36,17 +36,18 @@ export const registerSiemRuleMigrationsGetRoute = (
         },
       },
       withLicense(async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
-        const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+        const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+          context.securitySolution,
+          'rules'
+        );
 
         const { migration_id: migrationId } = req.params;
         try {
           const ctx = await context.resolve(['securitySolution']);
-          const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+          const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
           await siemMigrationAuditLogger.logGetMigration({ migrationId });
 
-          const storedMigration = await ruleMigrationsClient.data.migrations.get({
-            id: migrationId,
-          });
+          const storedMigration = await ruleMigrationsClient.data.migrations.get(migrationId);
 
           if (!storedMigration) {
             return res.notFound({

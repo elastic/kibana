@@ -12,6 +12,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  mathWithUnits,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -38,6 +39,17 @@ const useStyles = () => {
     `,
     image: css`
       align-items: center;
+      overflow: hidden;
+      width: ${mathWithUnits(euiTheme.size.xxxl, (x) => x * 5)};
+      height: ${mathWithUnits(euiTheme.size.xxxl, (x) => x * 3)};
+      border-radius: ${euiTheme.border.radius.medium};
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+      }
     `,
     content: css`
       padding-left: ${euiTheme.size.s};

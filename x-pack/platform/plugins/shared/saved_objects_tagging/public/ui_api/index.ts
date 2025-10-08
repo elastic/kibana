@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { TagsCapabilities } from '../../common';
-import { ITagsCache, ITagInternalClient } from '../services';
-import { StartServices } from '../types';
+import type { SavedObjectsTaggingApiUi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { TagsCapabilities } from '../../common';
+import type { ITagsCache, ITagInternalClient } from '../services';
+import type { StartServices } from '../types';
 import {
   getTagIdsFromReferences,
   replaceTagReferences,

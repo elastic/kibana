@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { ccrRoute } from './ccr';
 import { ccrShardRoute } from './ccr_shard';
 import { esIndexRoute } from './index_detail';

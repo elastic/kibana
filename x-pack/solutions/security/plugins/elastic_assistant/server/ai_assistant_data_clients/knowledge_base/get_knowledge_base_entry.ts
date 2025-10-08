@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
-import { EsKnowledgeBaseEntrySchema } from './types';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import type { EsKnowledgeBaseEntrySchema } from './types';
 import { transformESSearchToKnowledgeBaseEntry } from './transforms';
 
 export interface GetKnowledgeBaseEntryParams {

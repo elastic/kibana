@@ -6,14 +6,17 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
 import { generateId } from '../../id_generator';
 import type { LensApi } from '../../react_embeddable/types';
+import { mountInlinePanel } from '../../react_embeddable/mount';
 
 export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
@@ -41,17 +44,35 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable: api }: EmbeddableApiContext) {
     if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
-    const embeddable = await api.addNewPanel<object, LensApi>({
-      panelType: 'lens',
-      serializedState: {
-        rawState: {
-          id: generateId(),
-          isNewPanel: true,
-          attributes: { references: [] },
-        },
+    if (!api || !apiHasAppContext(api)) {
+      return;
+    }
+    const uuid = generateId();
+
+    mountInlinePanel({
+      core: this.core,
+      api,
+      loadContent: async ({ closeFlyout } = { closeFlyout: () => {} }) => {
+        const embeddable = await api.addNewPanel<object, LensApi>({
+          maybePanelId: uuid,
+          panelType: 'lens',
+          serializedState: {
+            rawState: {
+              id: uuid,
+              isNewPanel: true,
+              attributes: { references: [] },
+            },
+          },
+        });
+        if (!embeddable) {
+          throw new IncompatibleActionError();
+        }
+        return embeddable.getEditPanel?.({
+          closeFlyout,
+          showOnly: true,
+        });
       },
+      options: { uuid },
     });
-    // open the flyout if embeddable has been created successfully
-    embeddable?.onEdit?.();
   }
 }

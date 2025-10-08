@@ -18,8 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutBody } from './flyout_body';
-import { LayerDescriptor } from '../../../common/descriptor_types';
-import { LayerWizard } from '../../classes/layers';
+import type { LayerDescriptor } from '../../../common/descriptor_types';
+import type { LayerWizard } from '../../classes/layers';
 import {
   type LayerWizardStep,
   type RenderSecondaryActionButtonProps,

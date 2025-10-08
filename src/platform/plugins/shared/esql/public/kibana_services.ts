@@ -10,9 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -25,10 +23,8 @@ interface ServiceDeps {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
-  expressions: ExpressionsStart;
   storage: Storage;
   uiActions: UiActionsStart;
-  indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esql: EsqlPluginStart;
@@ -52,10 +48,8 @@ export const setKibanaServices = (
   kibanaCore: CoreStart,
   dataViews: DataViewsPublicPluginStart,
   data: DataPublicPluginStart,
-  expressions: ExpressionsStart,
   storage: Storage,
   uiActions: UiActionsStart,
-  indexManagement?: IndexManagementPluginSetup,
   fieldsMetadata?: FieldsMetadataPublicStart,
   usageCollection?: UsageCollectionStart
 ) => {
@@ -63,11 +57,9 @@ export const setKibanaServices = (
   servicesReady$.next({
     core,
     dataViews,
-    expressions,
     data,
     storage,
     uiActions,
-    indexManagementApiService: indexManagement?.apiService,
     fieldsMetadata,
     usageCollection,
     esql,

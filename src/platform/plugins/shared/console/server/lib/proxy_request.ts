@@ -9,10 +9,10 @@
 
 import http from 'http';
 import https from 'https';
-import net from 'net';
-import stream from 'stream';
+import type net from 'net';
+import type stream from 'stream';
 import Boom from '@hapi/boom';
-import { URL } from 'url';
+import type { URL } from 'url';
 import { sanitizeHostname } from './utils';
 
 interface Args {

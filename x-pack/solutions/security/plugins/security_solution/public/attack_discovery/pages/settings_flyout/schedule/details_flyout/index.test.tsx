@@ -18,6 +18,8 @@ import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useUpdateAttackDiscoverySchedule } from '../logic/use_update_schedule';
 import { useGetAttackDiscoverySchedule } from '../logic/use_get_schedule';
 import { mockAttackDiscoverySchedule } from '../../../mock/mock_attack_discovery_schedule';
+import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
+import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors');
 jest.mock('../logic/use_update_schedule');
@@ -47,7 +49,6 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
   typeof useSourcererDataView
 >;
-const getBooleanValueMock = jest.fn();
 const updateAttackDiscoveryScheduleMock = jest.fn();
 
 const defaultProps = {
@@ -65,33 +66,39 @@ const renderComponent = async () => {
   });
 };
 
+const setupUseKibana = (updateAttackDiscoverySchedule = true) => {
+  mockUseKibana.mockReturnValue({
+    services: {
+      application: {
+        capabilities: {
+          [ATTACK_DISCOVERY_FEATURE_ID]: {
+            updateAttackDiscoverySchedule,
+          },
+        },
+      },
+      lens: {
+        EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
+      },
+      triggersActionsUi: {
+        ...triggersActionsUiMock.createStart(),
+      },
+      uiSettings: {
+        get: jest.fn(),
+      },
+      unifiedSearch: {
+        ui: {
+          SearchBar: () => <div data-test-subj="mockSearchBar" />,
+        },
+      },
+    },
+  } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+};
+
 describe('DetailsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    getBooleanValueMock.mockReturnValue(true);
-
-    mockUseKibana.mockReturnValue({
-      services: {
-        featureFlags: {
-          getBooleanValue: getBooleanValueMock,
-        },
-        lens: {
-          EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
-        },
-        triggersActionsUi: {
-          ...triggersActionsUiMock.createStart(),
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-        unifiedSearch: {
-          ui: {
-            SearchBar: () => <div data-test-subj="mockSearchBar" />,
-          },
-        },
-      },
-    } as unknown as jest.Mocked<ReturnType<typeof useKibana>>);
+    setupUseKibana();
 
     mockUseSourcererDataView.mockReturnValue({
       sourcererDataView: {},
@@ -172,6 +179,88 @@ describe('DetailsFlyout', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('save')).toBeInTheDocument();
+    });
+  });
+
+  describe('confirmation modal', () => {
+    beforeEach(async () => {
+      await renderComponent();
+
+      // Enter edit mode
+      const editButton = screen.getByTestId('edit');
+      fireEvent.click(editButton);
+      // Simulate unsaved changes
+      const input = screen.getByTestId('alertsRange');
+      fireEvent.change(input, { target: { value: 'changed' } });
+      // Click the close button to trigger the confirmation modal
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    });
+
+    it('renders the confirmation modal when there are unsaved changes and close is clicked', () => {
+      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+    });
+
+    it('calls onClose when discard is clicked in confirmation modal', () => {
+      fireEvent.click(screen.getByTestId('discardChanges'));
+
+      expect(defaultProps.onClose).toHaveBeenCalled();
+    });
+
+    it('closes the confirmation modal when cancel is clicked', () => {
+      fireEvent.click(screen.getByTestId('cancel'));
+
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+    });
+
+    it('renders the confirmation modal when there are unsaved changes and escape key is pressed', () => {
+      // First, close the modal that was opened in beforeEach
+      fireEvent.click(screen.getByTestId('cancel'));
+
+      // Verify modal is closed
+      expect(screen.queryByTestId('confirmationModal')).not.toBeInTheDocument();
+
+      // Now press escape key on the flyout
+      const flyout = screen.getByTestId('scheduleDetailsFlyout');
+      fireEvent.keyDown(flyout, { key: 'Escape' });
+
+      // Verify the confirmation modal is shown
+      expect(screen.getByTestId('confirmationModal')).toBeInTheDocument();
+    });
+  });
+
+  describe('update schedule kibana privilege', () => {
+    it('should return enabled edit button if update schedule privilege is granted', async () => {
+      setupUseKibana(true);
+
+      await renderComponent();
+      await waitFor(() => {
+        expect(screen.getByTestId('edit')).toBeEnabled();
+      });
+    });
+
+    it('should return disabled edit button if update schedule privilege is missing', async () => {
+      setupUseKibana(false);
+
+      await renderComponent();
+      await waitFor(() => {
+        expect(screen.getByTestId('edit')).toBeDisabled();
+      });
+    });
+
+    it('should render missing privileges tooltip if update schedule privilege is missing', async () => {
+      setupUseKibana(false);
+
+      await renderComponent();
+      await waitFor(() => {
+        expect(screen.getByTestId('edit')).toBeInTheDocument();
+      });
+
+      const editButton = screen.getByTestId('edit');
+      fireEvent.mouseOver(editButton.parentElement as Node);
+      await waitForEuiToolTipVisible();
+
+      const tooltip = screen.getByRole('tooltip');
+      expect(tooltip).toHaveTextContent('Missing privileges');
     });
   });
 });

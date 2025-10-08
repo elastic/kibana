@@ -41,6 +41,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.METHOD]}
         >
           <EuiSelect
+            isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.METHOD] !== undefined}
             options={Object.values(OUTLIER_ANALYSIS_METHOD).map((outlierMethod) => ({
               value: outlierMethod,
               text: outlierMethod,
@@ -67,6 +68,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.N_NEIGHBORS]}
         >
           <EuiFieldNumber
+            isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.N_NEIGHBORS] !== undefined}
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.nNeighborsInputAriaLabel',
               {
@@ -97,6 +99,7 @@ export const OutlierHyperParameters: FC<Props> = ({ actions, state, advancedPara
           error={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.OUTLIER_FRACTION]}
         >
           <EuiFieldNumber
+            isInvalid={advancedParamErrors[ANALYSIS_ADVANCED_FIELDS.OUTLIER_FRACTION] !== undefined}
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analytics.create.outlierFractionInputAriaLabel',
               {

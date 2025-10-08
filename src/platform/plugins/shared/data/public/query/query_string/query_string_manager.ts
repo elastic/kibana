@@ -9,10 +9,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreStart } from '@kbn/core/public';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { CoreStart } from '@kbn/core/public';
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { isEqual } from 'lodash';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '../../../common';
 

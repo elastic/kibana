@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { BooleanRelation, extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
-import { QueryStart } from '../query';
-import { createFiltersFromMultiValueClickAction } from './filters/create_filters_from_multi_value_click';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { BooleanRelation } from '@kbn/es-query';
+import { extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
+import type { QueryStart } from '../query';
 
 export type MultiValueClickActionContext = MultiValueClickContext;
 export const ACTION_MULTI_VALUE_CLICK = 'ACTION_MULTI_VALUE_CLICK';
@@ -42,10 +42,12 @@ export function createMultiValueClickActionDefinition(
     id: ACTION_MULTI_VALUE_CLICK,
     shouldAutoExecute: async () => true,
     isCompatible: async (context: MultiValueClickContext) => {
+      const { createFiltersFromMultiValueClickAction } = await import('./filters');
       const filters = await createFiltersFromMultiValueClickAction(context.data);
       return Boolean(filters);
     },
     execute: async ({ data }: MultiValueClickActionContext) => {
+      const { createFiltersFromMultiValueClickAction } = await import('./filters');
       const filters = await createFiltersFromMultiValueClickAction(data);
       if (!filters || filters?.length === 0) return;
       const {

@@ -11,7 +11,7 @@ import { inpQuery, transformINPResponse } from '../services/data/inp_query';
 import { useDataView } from '../components/app/rum_dashboard/local_uifilters/use_data_view';
 import { callDateMath } from '../services/data/call_date_math';
 import { PERCENTILE_DEFAULT } from '../services/data/core_web_vitals_query';
-import { useUxQuery } from '../components/app/rum_dashboard/hooks/use_ux_query';
+import type { useUxQuery } from '../components/app/rum_dashboard/hooks/use_ux_query';
 
 export function useINPQuery(uxQuery: ReturnType<typeof useUxQuery>) {
   const { dataViewTitle } = useDataView();

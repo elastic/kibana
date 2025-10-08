@@ -26,8 +26,8 @@ import { isConfigSchema } from '@kbn/config-schema';
 import { isZod } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
 import type { DeepPartial } from '@kbn/utility-types';
-import { Request } from '@hapi/hapi';
-import { Mutable } from 'utility-types';
+import type { Request } from '@hapi/hapi';
+import type { Mutable } from 'utility-types';
 import type { InternalRouterRoute, RequestHandlerEnhanced, Router } from './router';
 import { CoreKibanaRequest } from './request';
 import { RouteValidator } from './validator';
@@ -115,10 +115,10 @@ export function validateHapiRequest(
 ): { ok: AnyKibanaRequest; error?: never } | { ok?: never; error: IKibanaResponse } {
   let kibanaRequest: Mutable<AnyKibanaRequest>;
   try {
-    kibanaRequest = CoreKibanaRequest.from(request, routeSchemas);
+    kibanaRequest = CoreKibanaRequest.from(request, routeSchemas) as Mutable<AnyKibanaRequest>;
     kibanaRequest.apiVersion = version;
   } catch (error) {
-    kibanaRequest = CoreKibanaRequest.from(request);
+    kibanaRequest = CoreKibanaRequest.from(request) as Mutable<AnyKibanaRequest>;
     kibanaRequest.apiVersion = version;
 
     log.error('400 Bad Request', formatErrorMeta(400, { request, error }));

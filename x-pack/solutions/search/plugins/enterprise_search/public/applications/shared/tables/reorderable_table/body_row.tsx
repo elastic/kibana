@@ -11,7 +11,7 @@ import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiToken } from '@elast
 
 import { Cell } from './cell';
 import { DRAGGABLE_UX_STYLE } from './constants';
-import { Column } from './types';
+import type { Column } from './types';
 
 export interface BodyRowProps<Item> {
   columns: Array<Column<Item>>;
@@ -67,6 +67,7 @@ export const BodyRow = <Item extends object>({
           {errors.map((errorMessage, errorMessageIndex) => (
             <EuiFlexItem key={errorMessageIndex}>
               <EuiCallOut
+                announceOnMount
                 role="alert"
                 aria-live="polite"
                 iconType="warning"

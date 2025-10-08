@@ -37,6 +37,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -84,6 +91,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -123,6 +137,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -154,6 +175,13 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
   });
 
@@ -181,6 +209,13 @@ describe('useHighlightedFields', () => {
       },
       'user.name': {
         values: ['user-name'],
+      },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
       },
     });
   });
@@ -223,6 +258,13 @@ describe('useHighlightedFields', () => {
         'user.name': {
           values: ['user-name'],
         },
+        'kibana.alert.ancestors.id': {
+          overrideField: {
+            field: 'Source event',
+            values: [],
+          },
+          values: ['ancestors-id'],
+        },
       });
     }
   );
@@ -263,6 +305,54 @@ describe('useHighlightedFields', () => {
       'user.name': {
         values: ['user-name'],
       },
+      'kibana.alert.ancestors.id': {
+        overrideField: {
+          field: 'Source event',
+          values: [],
+        },
+        values: ['ancestors-id'],
+      },
     });
+  });
+
+  it('should only include ancestors with depth 0 in the "source event" field', () => {
+    const hookResult = renderHook(() =>
+      useHighlightedFields({
+        dataFormattedForFieldBrowser: dataFormattedForFieldBrowser
+          .filter((item) => item.field !== 'kibana.alert.ancestors.id')
+          .concat([
+            {
+              category: 'kibana',
+              field: 'kibana.alert.ancestors.depth',
+              values: ['0', '1', '0', '1'],
+              originalValue: ['0', '1', '0', '1'],
+              isObjectArray: false,
+            },
+            {
+              category: 'kibana',
+              field: 'kibana.alert.ancestors.id',
+              values: [
+                'AZkupz0BWCNsCtptscaJ',
+                'e7f11264eb2dbcdd2588ebd64f3cdbfc04d47d364db700b817ded6503f995b75',
+                'AZkupz0BWCNsCtptscaU',
+                '3c8211dd158a96ef6884fc50267fd778ae36704fa8b8a448399d4832e93cac3b',
+              ],
+              originalValue: [
+                'AZkupz0BWCNsCtptscaJ',
+                'e7f11264eb2dbcdd2588ebd64f3cdbfc04d47d364db700b817ded6503f995b75',
+                'AZkupz0BWCNsCtptscaU',
+                '3c8211dd158a96ef6884fc50267fd778ae36704fa8b8a448399d4832e93cac3b',
+              ],
+              isObjectArray: false,
+            },
+          ]),
+        investigationFields: ['kibana.alert.ancestors.id'],
+      })
+    );
+
+    expect(hookResult.result.current['kibana.alert.ancestors.id'].values).toEqual([
+      'AZkupz0BWCNsCtptscaJ',
+      'AZkupz0BWCNsCtptscaU',
+    ]);
   });
 });

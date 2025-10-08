@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position, Token, TokensProvider } from '../../types';
+import type { Position, Token, TokensProvider } from '../../types';
 
 function isColumnInTokenRange(column: number, token: Token) {
   if (column < token.position.column) {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
   describe('usage collection', function () {

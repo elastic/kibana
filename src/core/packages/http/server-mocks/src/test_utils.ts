@@ -25,6 +25,7 @@ import {
   HttpService,
   config,
 } from '@kbn/core-http-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const coreId = Symbol('core');
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -114,18 +115,19 @@ export const createConfigService = ({
 };
 
 const createDefaultContext = (): CoreContext => {
-  return {
+  return lazyObject({
     coreId,
     env,
     logger,
     configService: createConfigService(),
-  };
+  });
 };
 
-export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreContext => ({
-  ...createDefaultContext(),
-  ...overrides,
-});
+export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreContext =>
+  lazyObject({
+    ...createDefaultContext(),
+    ...overrides,
+  });
 
 /**
  * A mock of the HttpService that can be used in tests.

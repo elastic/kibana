@@ -41,7 +41,7 @@ export class UpgradeActionRunner extends ActionRunner {
       agents,
       {},
       this.actionParams! as any,
-      this.actionParams?.spaceId
+      this.actionParams?.spaceId ? [this.actionParams?.spaceId] : undefined
     );
   }
 
@@ -74,9 +74,9 @@ export async function upgradeBatch(
     total?: number;
     isAutomatic?: boolean;
   },
-  spaceId?: string
+  spaceIds?: string[]
 ): Promise<{ actionId: string }> {
-  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+  const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceIds?.[0]);
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
   const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
@@ -181,9 +181,9 @@ export async function upgradeBatch(
 
   const actionId = options.actionId ?? uuidv4();
   const total = options.total ?? givenAgents.length;
-  const namespaces = spaceId ? [spaceId] : [];
+  const namespaces = spaceIds ? spaceIds : [];
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     created_at: now,
     data,

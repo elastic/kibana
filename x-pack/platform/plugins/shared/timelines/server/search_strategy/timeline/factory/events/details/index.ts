@@ -8,13 +8,13 @@
 import { merge } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
-import {
+import type { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
+import type {
   EventHit,
   TimelineEventsDetailsStrategyResponse,
 } from '../../../../../../common/search_strategy';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { TimelineFactory } from '../../types';
+import type { TimelineFactory } from '../../types';
 import { buildTimelineDetailsQuery } from './query.events_details.dsl';
 import { getDataFromFieldsHits } from '../../../../../../common/utils/field_formatters';
 import { buildEcsObjects } from '../../helpers/build_ecs_objects';

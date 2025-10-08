@@ -13,7 +13,7 @@
  *  https://www.elastic.co/guide/en/elasticsearch/reference/2.x/modules-node.html
  */
 import { isUndefined } from 'lodash';
-import { ElasticsearchLegacySource } from '../../../../common/types/es';
+import type { ElasticsearchLegacySource } from '../../../../common/types/es';
 
 export type Node = ElasticsearchLegacySource['source_node'] & {
   attributes?: Record<string, any>;

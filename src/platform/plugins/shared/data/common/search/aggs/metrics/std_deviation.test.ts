@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IStdDevAggConfig, getStdDeviationMetricAgg } from './std_deviation';
+import type { IStdDevAggConfig } from './std_deviation';
+import { getStdDeviationMetricAgg } from './std_deviation';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { METRIC_TYPES } from './metric_agg_types';

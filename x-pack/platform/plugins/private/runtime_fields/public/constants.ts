@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ComboBoxOption } from './types';
+import type { ComboBoxOption } from './types';
 
 export const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
 

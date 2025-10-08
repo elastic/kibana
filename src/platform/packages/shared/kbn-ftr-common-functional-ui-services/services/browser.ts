@@ -13,10 +13,11 @@ import { Key, Origin, type WebDriver } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import Url from 'url';
-import { Protocol } from 'devtools-protocol';
+import type { Protocol } from 'devtools-protocol';
 
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import sharp from 'sharp';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import {
   WebElementWrapper,
   Browsers,
@@ -704,22 +705,34 @@ class BrowserService extends FtrService {
   }
 
   public async getScrollTop() {
-    const scrollSize = await this.driver.executeScript<string>('return document.body.scrollTop');
+    const scrollSize = await this.driver.executeScript<string>(`
+      const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
+      return scrollContainer.scrollTop;
+    `);
     return parseInt(scrollSize, 10);
   }
 
   public async getScrollLeft() {
-    const scrollSize = await this.driver.executeScript<string>('return document.body.scrollLeft');
+    const scrollSize = await this.driver.executeScript<string>(`
+      const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
+      return scrollContainer.scrollLeft;
+    `);
     return parseInt(scrollSize, 10);
   }
 
   public async scrollTop() {
-    await this.driver.executeScript('document.documentElement.scrollTop = 0');
+    await this.driver.executeScript(`
+    const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
+    scrollContainer.scrollTop = 0;
+  `);
   }
 
   // return promise with REAL scroll position
   public async setScrollTop(scrollSize: number | string) {
-    await this.driver.executeScript('document.body.scrollTop = ' + scrollSize);
+    await this.driver.executeScript(`
+      const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
+      scrollContainer.scrollTop = ${scrollSize};
+    `);
     return this.getScrollTop();
   }
 
@@ -730,7 +743,10 @@ class BrowserService extends FtrService {
   }
 
   public async setScrollLeft(scrollSize: number | string) {
-    await this.driver.executeScript('document.body.scrollLeft = ' + scrollSize);
+    await this.driver.executeScript(`
+      const scrollContainer = document.getElementById("${APP_MAIN_SCROLL_CONTAINER_ID}") || document.documentElement;
+      scrollContainer.scrollLeft = ${scrollSize};
+    `);
     return this.getScrollLeft();
   }
 

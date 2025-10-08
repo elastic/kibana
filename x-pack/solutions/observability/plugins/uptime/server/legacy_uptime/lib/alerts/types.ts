@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
   RecoveredActionGroupId,
 } from '@kbn/alerting-plugin/common';
-import { RuleType } from '@kbn/alerting-plugin/server';
-import { DefaultAlert, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
-import { UMServerLibs } from '../lib';
-import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
+import type { RuleType } from '@kbn/alerting-plugin/server';
+import type { DefaultAlert, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import type { UMServerLibs } from '../lib';
+import type { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
 
 /**
  * Because all of our types are presumably going to list the `producer` as `'uptime'`,

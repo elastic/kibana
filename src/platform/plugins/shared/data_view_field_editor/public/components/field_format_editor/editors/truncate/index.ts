@@ -8,8 +8,8 @@
  */
 
 import { formatId } from './constants';
-import { FieldFormatEditorFactory } from '../types';
-import { TruncateFormatEditorFormatParams } from './truncate';
+import type { FieldFormatEditorFactory } from '../types';
+import type { TruncateFormatEditorFormatParams } from './truncate';
 
 export type { TruncateFormatEditor } from './truncate';
 export const truncateFormatEditorFactory: FieldFormatEditorFactory<

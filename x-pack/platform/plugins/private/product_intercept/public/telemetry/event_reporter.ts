@@ -23,9 +23,9 @@ export class PromptTelemetry {
     this.reportEvent = analytics.reportEvent;
 
     return {
-      reportInterceptInteraction: this.reportInterceptTermination,
-      reportInterceptInteractionProgress: this.reportInterceptInteractionProgress,
-      reportTriggerFetchError: this.reportTriggerFetchError,
+      reportInterceptInteractionTermination: this.reportInterceptTermination.bind(this),
+      reportInterceptInteractionProgress: this.reportInterceptInteractionProgress.bind(this),
+      reportTriggerFetchError: this.reportTriggerFetchError.bind(this),
     };
   }
 

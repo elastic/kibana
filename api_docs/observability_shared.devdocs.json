@@ -127,13 +127,15 @@
                 "section": "def-public.NavigationSection",
                 "text": "NavigationSection"
               },
-              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
+              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, pricing, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
               "AppDeepLink",
               "<string>[]; updater$: ",
               "Subject",
               "<",
               "AppUpdater",
-              ">; }) => void; }"
+              ">; pricing: ",
+              "PricingServiceStart",
+              "; }) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
             "deprecated": false,
@@ -544,7 +546,7 @@
         "label": "FeatureFeedbackButton",
         "description": [],
         "signature": [
-          "({ formUrl, formConfig, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, nodeType, surveyButtonText, }: FeatureFeedbackButtonProps) => React.JSX.Element"
+          "({ formUrl, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, nodeType, surveyButtonText, }: FeatureFeedbackButtonProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
         "deprecated": false,
@@ -555,7 +557,7 @@
             "id": "def-public.FeatureFeedbackButton.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  formUrl,\n  formConfig,\n  'data-test-subj': dts,\n  onClickCapture,\n  defaultButton,\n  kibanaVersion,\n  isCloudEnv,\n  isServerlessEnv,\n  sanitizedPath,\n  nodeType,\n  surveyButtonText = (\n    <FormattedMessage\n      id=\"xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink\"\n      defaultMessage=\"Tell us what you think!\"\n    />\n  ),\n}",
+            "label": "{\n  formUrl,\n  'data-test-subj': dts,\n  onClickCapture,\n  defaultButton,\n  kibanaVersion,\n  isCloudEnv,\n  isServerlessEnv,\n  sanitizedPath,\n  nodeType,\n  surveyButtonText = FEEDBACK_BUTTON_DEFAULT_TEXT,\n}",
             "description": [],
             "signature": [
               "FeatureFeedbackButtonProps"
@@ -779,13 +781,7 @@
                     "text": "FrequentCompatibilityChangeAction"
                   },
                   "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.UiActionsService",
-                    "text": "UiActionsService"
-                  },
+                  "UiActionsService",
                   "; }"
                 ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/services/get_context_menu_items_from_actions.ts",
@@ -840,9 +836,7 @@
         "label": "getSurveyFeedbackURL",
         "description": [],
         "signature": [
-          "({ formUrl, formConfig, kibanaVersion, sanitizedPath, isCloudEnv, isServerlessEnv, nodeType, }: { formUrl: string; formConfig?: ",
-          "FormConfig",
-          " | undefined; kibanaVersion?: string | undefined; deploymentType?: string | undefined; sanitizedPath?: string | undefined; mlJobType?: string | undefined; isCloudEnv?: boolean | undefined; isServerlessEnv?: boolean | undefined; nodeType?: ",
+          "({ formUrl, kibanaVersion, sanitizedPath, isCloudEnv, isServerlessEnv, nodeType, }: { formUrl: string; kibanaVersion?: string | undefined; deploymentType?: string | undefined; sanitizedPath?: string | undefined; mlJobType?: string | undefined; isCloudEnv?: boolean | undefined; isServerlessEnv?: boolean | undefined; nodeType?: ",
           "NodeType",
           " | undefined; }) => string"
         ],
@@ -855,7 +849,7 @@
             "id": "def-public.getSurveyFeedbackURL.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  formUrl,\n  formConfig,\n  kibanaVersion,\n  sanitizedPath,\n  isCloudEnv,\n  isServerlessEnv,\n  nodeType,\n}",
+            "label": "{\n  formUrl,\n  kibanaVersion,\n  sanitizedPath,\n  isCloudEnv,\n  isServerlessEnv,\n  nodeType,\n}",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
             "deprecated": false,
@@ -868,21 +862,6 @@
                 "tags": [],
                 "label": "formUrl",
                 "description": [],
-                "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "observabilityShared",
-                "id": "def-public.getSurveyFeedbackURL.$1.formConfig",
-                "type": "Object",
-                "tags": [],
-                "label": "formConfig",
-                "description": [],
-                "signature": [
-                  "FormConfig",
-                  " | undefined"
-                ],
                 "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2149,24 +2128,6 @@
             "isRequired": true
           }
         ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
-        "id": "def-public.useObservabilityTourContext",
-        "type": "Function",
-        "tags": [],
-        "label": "useObservabilityTourContext",
-        "description": [],
-        "signature": [
-          "() => ",
-          "ObservabilityTourContextValue"
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/tour/tour.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -3476,6 +3437,20 @@
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.prependChildren",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "prependChildren",
+            "description": [],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3820,7 +3795,13 @@
         "description": [],
         "signature": [
           "Pick<",
-          "KibanaPageTemplateProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-template-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaTemplateTypesPluginApi",
+            "section": "def-public.KibanaPageTemplateProps",
+            "text": "KibanaPageTemplateProps"
+          },
           ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
@@ -3889,7 +3870,13 @@
           "Omit<",
           "ObservabilityPageTemplateDependencies",
           ", \"isSidebarEnabled$\"> & Pick<",
-          "KibanaPageTemplateProps",
+          {
+            "pluginId": "@kbn/shared-ux-page-kibana-template-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageKibanaTemplateTypesPluginApi",
+            "section": "def-public.KibanaPageTemplateProps",
+            "text": "KibanaPageTemplateProps"
+          },
           ", \"data-test-subj\" | \"children\" | \"paddingSize\" | \"pageHeader\" | \"restrictWidth\" | \"isEmptyState\" | \"noDataConfig\"> & { showSolutionNav?: boolean | undefined; isPageDataLoaded?: boolean | undefined; pageSectionProps?: ",
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
@@ -3946,30 +3933,17 @@
             "section": "def-public.NavigationSection",
             "text": "NavigationSection"
           },
-          "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
+          "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, pricing, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
           "AppDeepLink",
           "<string>[]; updater$: ",
           "Subject",
           "<",
           "AppUpdater",
-          ">; }) => void; }"
+          ">; pricing: ",
+          "PricingServiceStart",
+          "; }) => void; }"
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/public/plugin.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityShared",
-        "id": "def-public.observTourStepStorageKey",
-        "type": "string",
-        "tags": [],
-        "label": "observTourStepStorageKey",
-        "description": [],
-        "signature": [
-          "\"guidedOnboarding.observability.tourStep\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/tour/tour.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5645,10 +5619,10 @@
         "children": [
           {
             "parentPluginId": "observabilityShared",
-            "id": "def-common.AssetDetailsLocatorParams.assetType",
+            "id": "def-common.AssetDetailsLocatorParams.entityType",
             "type": "string",
             "tags": [],
-            "label": "assetType",
+            "label": "entityType",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
             "deprecated": false,
@@ -5656,10 +5630,10 @@
           },
           {
             "parentPluginId": "observabilityShared",
-            "id": "def-common.AssetDetailsLocatorParams.assetId",
+            "id": "def-common.AssetDetailsLocatorParams.entityId",
             "type": "string",
             "tags": [],
-            "label": "assetId",
+            "label": "entityId",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
             "deprecated": false,
@@ -5695,6 +5669,8 @@
                 "section": "def-common.AlertStatus",
                 "text": "AlertStatus"
               },
+              " | undefined; preferredSchema?: ",
+              "DataSchemaFormat",
               " | undefined; } | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
@@ -5891,6 +5867,21 @@
           },
           {
             "parentPluginId": "observabilityShared",
+            "id": "def-common.HostsLocatorParams.preferredSchema",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "preferredSchema",
+            "description": [],
+            "signature": [
+              "DataSchemaFormat",
+              " | null | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/hosts_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
             "id": "def-common.HostsLocatorParams.tableProperties",
             "type": "Object",
             "tags": [],
@@ -6077,6 +6068,21 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/inventory_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-common.InventoryLocatorParams.preferredSchema",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "preferredSchema",
+            "description": [],
+            "signature": [
+              "DataSchemaFormat",
+              " | null | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/inventory_locator.ts",
             "deprecated": false,
@@ -6553,10 +6559,10 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.SupportedAssetTypes",
+        "id": "def-common.SupportedEntityTypes",
         "type": "Enum",
         "tags": [],
-        "label": "SupportedAssetTypes",
+        "label": "SupportedEntityTypes",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/locators/infra/asset_details_locator.ts",
         "deprecated": false,
@@ -8106,6 +8112,21 @@
           "\"profile.wall.us\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.RELATED_ALERTS_TABLE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "RELATED_ALERTS_TABLE_ID",
+        "description": [],
+        "signature": [
+          "\"xpack.observability.alerts.relatedAlerts\""
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_shared/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -8,7 +8,8 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { Entity, Fields } from '../entity';
+import type { Fields } from '../entity';
+import { Entity } from '../entity';
 import { Serializable } from '../serializable';
 import { k8sNode } from './k8s_node';
 import { pod } from './pod';
@@ -28,15 +29,22 @@ interface HostDocument extends Fields {
 }
 
 export class Host extends Entity<HostDocument> {
-  cpu({ cpuTotalValue }: { cpuTotalValue?: number } = {}) {
+  cpu(fields?: {
+    'system.cpu.total.norm.pct'?: number;
+    'system.cpu.user.pct'?: number;
+    'system.cpu.system.pct'?: number;
+    'system.cpu.cores'?: number;
+    'process.cpu.pct'?: number;
+    'system.cpu.nice.pct'?: number;
+  }) {
     return new HostMetrics({
       ...this.fields,
-      'system.cpu.total.norm.pct': cpuTotalValue ?? 0.98,
-      'system.cpu.user.pct': 0.805,
-      'system.cpu.system.pct': 0.704,
-      'system.cpu.cores': 16,
-      'process.cpu.pct': 0.1,
-      'system.cpu.nice.pct': 0.1,
+      'system.cpu.total.norm.pct': fields?.['system.cpu.total.norm.pct'] ?? 0.98,
+      'system.cpu.user.pct': fields?.['system.cpu.user.pct'] ?? 0.805,
+      'system.cpu.system.pct': fields?.['system.cpu.system.pct'] ?? 0.704,
+      'system.cpu.cores': fields?.['system.cpu.cores'] ?? 16,
+      'process.cpu.pct': fields?.['process.cpu.pct'] ?? 0.1,
+      'system.cpu.nice.pct': fields?.['system.cpu.nice.pct'] ?? 0.1,
       'metricset.period': 10000,
       'metricset.name': 'cpu',
     });
@@ -57,12 +65,16 @@ export class Host extends Entity<HostDocument> {
     });
   }
 
-  network() {
+  network(fields?: {
+    'host.network.ingress.bytes'?: number;
+    'host.network.egress.bytes'?: number;
+    'metricset.period'?: number;
+  }) {
     return new HostMetrics({
       ...this.fields,
-      'host.network.ingress.bytes': 2871285,
-      'host.network.egress.bytes': 2904987,
-      'metricset.period': 10000,
+      'host.network.ingress.bytes': fields?.['host.network.ingress.bytes'] ?? 2871285,
+      'host.network.egress.bytes': fields?.['host.network.egress.bytes'] ?? 2904987,
+      'metricset.period': fields?.['metricset.period'] ?? 10000,
       'metricset.name': 'network',
     });
   }
@@ -95,22 +107,27 @@ export class Host extends Entity<HostDocument> {
     });
   }
 
-  filesystem() {
+  filesystem(fields?: { 'system.filesystem.used.pct'?: number }) {
     return new HostMetrics({
       ...this.fields,
-      'system.filesystem.used.pct': 12.23,
+      'system.filesystem.used.pct': fields?.['system.filesystem.used.pct'] ?? 12.23,
       'metricset.period': 10000,
       'metricset.name': 'filesystem',
     });
   }
 
-  diskio() {
+  diskio(fields?: {
+    'system.diskio.read.count'?: number;
+    'system.diskio.write.count'?: number;
+    'system.diskio.read.bytes'?: number;
+    'system.diskio.write.bytes'?: number;
+  }) {
     return new HostMetrics({
       ...this.fields,
-      'system.diskio.read.count': 3538413,
-      'system.diskio.write.count': 4694333,
-      'system.diskio.read.bytes': 33147297792,
-      'system.diskio.write.bytes': 48595652608,
+      'system.diskio.read.count': fields?.['system.diskio.read.count'] ?? 3538413,
+      'system.diskio.write.count': fields?.['system.diskio.write.count'] ?? 4694333,
+      'system.diskio.read.bytes': fields?.['system.diskio.read.bytes'] ?? 33147297792,
+      'system.diskio.write.bytes': fields?.['system.diskio.write.bytes'] ?? 48595652608,
       'metricset.period': 10000,
       'metricset.name': 'diskio',
     });

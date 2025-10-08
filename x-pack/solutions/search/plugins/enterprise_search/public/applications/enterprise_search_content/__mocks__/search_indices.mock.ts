@@ -15,7 +15,7 @@ import {
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
-import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
+import type { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
 export const indices: ElasticsearchIndexWithIngestion[] = [
   {

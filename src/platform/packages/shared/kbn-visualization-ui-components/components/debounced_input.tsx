@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFieldTextProps } from '@elastic/eui';
+import type { EuiFieldTextProps } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 
 type Props = {

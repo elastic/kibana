@@ -22,21 +22,21 @@ export interface AlertsEsQuery {
 
 export const createAlertsEsQuery = ({
   dateRange,
-  assetIds,
+  entityIds,
   status,
-  assetType,
+  entityType,
 }: {
   dateRange: TimeRange;
-  assetIds: string[];
+  entityIds: string[];
   status?: AlertStatus;
-  assetType?: InventoryItemType;
+  entityType?: InventoryItemType;
 }): AlertsEsQuery => {
   const alertStatusFilter = createAlertStatusFilter(status);
 
   const dateFilter = createDateFilter(dateRange);
   const hostsFilter = buildCombinedAssetFilter({
-    field: findInventoryFields(assetType ?? 'host').id,
-    values: assetIds,
+    field: findInventoryFields(entityType ?? 'host').id,
+    values: entityIds,
   });
 
   const filters = [alertStatusFilter, dateFilter, hostsFilter].filter(Boolean) as Filter[];

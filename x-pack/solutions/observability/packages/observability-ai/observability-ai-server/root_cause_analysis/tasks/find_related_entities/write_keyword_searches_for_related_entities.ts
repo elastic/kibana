@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { InferenceClient } from '@kbn/inference-common';
-import { TruncatedDocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
+import type { FieldPatternResultWithChanges, TruncatedDocumentAnalysis } from '@kbn/ai-tools';
+import type { InferenceClient } from '@kbn/inference-common';
 import { RCA_PROMPT_ENTITIES, RCA_SYSTEM_PROMPT_BASE } from '../../prompts';
 import { formatEntity } from '../../util/format_entity';
 import { serializeKnowledgeBaseEntries } from '../../util/serialize_knowledge_base_entries';
 import { toBlockquote } from '../../util/to_blockquote';
-import { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
+import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 const SYSTEM_PROMPT_ADDENDUM = `# Guide: Constructing Keyword Searches to Find Related Entities
 

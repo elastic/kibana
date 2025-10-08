@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { CoreStart, SavedObjectsMigrationVersion } from '@kbn/core/public';
 import type {
-  CoreStart,
-  SavedObjectsMigrationVersion,
-  ResolvedSimpleSavedObject,
-} from '@kbn/core/public';
-import {
   IAggConfigs,
   SerializedSearchSourceFields,
   TimefilterContract,
   AggConfigSerialized,
 } from '@kbn/data-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
+import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
 import type { TableListTab } from '@kbn/content-management-tabbed-table-list-view';
 import type { Vis } from './vis';
@@ -55,9 +52,9 @@ export interface ISavedVis {
   savedSearchRefName?: string;
   savedSearchId?: string;
   sharingSavedObjectProps?: {
-    outcome?: ResolvedSimpleSavedObject['outcome'];
-    aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
-    aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+    outcome?: SavedObjectsResolveResponse['outcome'];
+    aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+    aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
     errorJSON?: string;
   };
 }

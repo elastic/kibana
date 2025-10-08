@@ -23,6 +23,8 @@ export interface PrintableStream {
 
 export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 
+export type StreamChanges = Record<string, boolean>;
+
 /**
  * The StreamActiveRecord is responsible for maintaining the change status of a stream
  * And routing change requests (with cascading changes), validation requests and requests to determine Elasticsearch actions
@@ -33,6 +35,7 @@ export abstract class StreamActiveRecord<
 > {
   protected dependencies: StateDependencies;
   protected _definition: TDefinition;
+  protected _changes: StreamChanges = {};
   private _changeStatus: StreamChangeStatus = 'unchanged';
 
   constructor(definition: TDefinition, dependencies: StateDependencies) {
@@ -52,7 +55,7 @@ export abstract class StreamActiveRecord<
     return this._changeStatus;
   }
 
-  // Used only when we try to rollback an existing stream or resync the stored State
+  // Used only when we try to resync the stored State
   markAsUpserted(): void {
     this._changeStatus = 'upserted';
   }
@@ -99,6 +102,7 @@ export abstract class StreamActiveRecord<
       startingState
     );
     this._changeStatus = changeStatus;
+
     return cascadingChanges;
   }
 
@@ -148,7 +152,7 @@ export abstract class StreamActiveRecord<
       if (startingStateStream) {
         return this.doDetermineUpdateActions(desiredState, startingState, startingStateStream);
       } else {
-        return this.doDetermineCreateActions();
+        return this.doDetermineCreateActions(desiredState);
       }
     } else if (this.changeStatus === 'deleted') {
       return this.doDetermineDeleteActions();
@@ -160,11 +164,28 @@ export abstract class StreamActiveRecord<
   toPrintable(): PrintableStream {
     return {
       changeStatus: this.changeStatus,
+      changes: this.getChanges(),
       definition: this.definition,
     };
   }
 
-  abstract clone(): StreamActiveRecord;
+  clone(): StreamActiveRecord<TDefinition> {
+    // Get a copy of the current definition
+    const clonedStream = this.doClone();
+    // Carry over any changes not included in the definition
+    clonedStream.setChanges(this.getChanges());
+    return clonedStream;
+  }
+
+  getChanges(): StreamChanges {
+    return this._changes;
+  }
+
+  setChanges(changes: StreamChanges) {
+    this._changes = { ...changes };
+  }
+
+  protected abstract doClone(): StreamActiveRecord<TDefinition>;
 
   protected abstract doHandleUpsertChange(
     definition: Streams.all.Definition,
@@ -188,7 +209,7 @@ export abstract class StreamActiveRecord<
     startingState: State
   ): Promise<ValidationResult>;
 
-  protected abstract doDetermineCreateActions(): Promise<ElasticsearchAction[]>;
+  protected abstract doDetermineCreateActions(desiredState: State): Promise<ElasticsearchAction[]>;
   protected abstract doDetermineUpdateActions(
     desiredState: State,
     startingState: State,

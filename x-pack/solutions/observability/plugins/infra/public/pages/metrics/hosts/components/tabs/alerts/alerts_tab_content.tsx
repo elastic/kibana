@@ -33,6 +33,9 @@ import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 export const AlertsTabContent = () => {
   const { featureFlags } = usePluginConfig();
   const { hostNodes } = useHostsViewContext();
+  const { services } = useKibanaContextForPlugin();
+  const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
+    services;
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
@@ -79,8 +82,18 @@ export const AlertsTabContent = () => {
               id={ALERTS_TABLE_ID}
               ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS}
               consumers={INFRA_ALERT_CONSUMERS}
-              initialPageSize={ALERTS_PER_PAGE}
+              pageSize={ALERTS_PER_PAGE}
               query={alertsEsQueryByStatus}
+              services={{
+                data,
+                http,
+                notifications,
+                fieldFormats,
+                application,
+                licensing,
+                cases,
+                settings,
+              }}
             />
           </EuiFlexItem>
         )}
@@ -90,6 +103,7 @@ export const AlertsTabContent = () => {
           nodeType="host"
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}
+          schema={searchCriteria.preferredSchema}
         />
       )}
     </HeightRetainer>

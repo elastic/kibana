@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields, ApmOtelFields, Serializable } from '@kbn/apm-synthtrace-client';
+import type { ApmFields, ApmOtelFields, Serializable } from '@kbn/apm-synthtrace-client';
 import { Transform } from 'stream';
 
 export function getSerializeTransform<TFields = ApmFields | ApmOtelFields>() {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Message } from './message';
+import type { Message } from './message';
 
 /**
  * An object which received ToolingLog `Messages` and sends them to

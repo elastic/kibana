@@ -11,17 +11,22 @@ import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutReportEvent } from './event';
+import type { ScoutReportEvent } from './event';
 import { ScoutReport, ScoutReportError } from '../base';
 
 /**
  *
  */
 export class ScoutEventsReport extends ScoutReport {
+  private readonly eventLogFileDescriptor: number;
+
   constructor(log?: ToolingLog) {
     super('Scout Events report', log);
     this.log = log || new ToolingLog();
     this.workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-report-'));
+
+    // Create a reusable event log file handle to reduce overhead with file open/close whenever an event is logged
+    this.eventLogFileDescriptor = fs.openSync(this.eventLogPath, 'w');
   }
 
   public get eventLogPath(): string {
@@ -40,7 +45,7 @@ export class ScoutEventsReport extends ScoutReport {
       event['@timestamp'] = new Date();
     }
 
-    fs.appendFileSync(this.eventLogPath, JSON.stringify(event) + '\n');
+    fs.appendFileSync(this.eventLogFileDescriptor, JSON.stringify(event) + '\n');
   }
 
   /**
@@ -50,6 +55,10 @@ export class ScoutEventsReport extends ScoutReport {
    */
   save(destination: string) {
     this.raiseIfConcluded('nothing to save because workdir has been cleared');
+
+    // Flush & close the event log file
+    fs.fsyncSync(this.eventLogFileDescriptor);
+    fs.closeSync(this.eventLogFileDescriptor);
 
     if (fs.existsSync(destination)) {
       throw new ScoutReportError(`Save destination path '${destination}' already exists`);

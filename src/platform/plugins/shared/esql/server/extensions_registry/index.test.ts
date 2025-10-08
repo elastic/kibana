@@ -225,6 +225,133 @@ describe('ESQLExtensionsRegistry', () => {
 
       expect(result).toEqual([]);
     });
+
+    it('should return all existing recommended queries if from * is used', () => {
+      const result = registry.getRecommendedQueries('FROM *', availableDatasources, 'oblt');
+
+      expect(result).toEqual([
+        { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' },
+        { name: 'Metrics Query', query: 'FROM metrics | STATS max(bytes)' },
+        { name: 'Wildcard Logs Query', query: 'FROM logs-* | LIMIT 5' },
+      ]);
+    });
+  });
+
+  // --- unsetRecommendedQueries tests ---
+
+  describe('unsetRecommendedQueries', () => {
+    beforeEach(() => {
+      availableDatasources = {
+        indices: [
+          { name: 'logs-2023' },
+          { name: 'logs-2024' },
+          { name: 'metrics-*' },
+          { name: 'other_index' },
+        ],
+        data_streams: [],
+        aliases: [],
+      };
+    });
+
+    it('should remove recommended queries from the registry', () => {
+      const solutionId: SolutionId = 'oblt';
+      const queries: RecommendedQuery[] = [
+        { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' },
+        { name: 'Metrics Query 1', query: `FROM metrics-* | STATS max(bytes)` },
+        { name: 'Metrics Query 2', query: `FROM metrics-* | STATS avg(cpu.usage)` },
+        { name: 'Other Query', query: 'FROM other_index | LIMIT 10' },
+      ];
+
+      registry.setRecommendedQueries(queries, solutionId);
+      registry.unsetRecommendedQueries(
+        [{ name: 'Metrics Query 1', query: `FROM metrics-* | STATS max(bytes)` }],
+        solutionId
+      );
+
+      // Metrics query should be removed
+      const metricsQueries = registry.getRecommendedQueries(
+        `FROM metrics-*`,
+        availableDatasources,
+        solutionId
+      );
+      expect(metricsQueries).toEqual([queries[2]]);
+
+      registry.unsetRecommendedQueries(
+        [{ name: 'Metrics Query 2', query: `FROM metrics-* | STATS avg(cpu.usage)` }],
+        solutionId
+      );
+
+      // Metrics query should be removed
+      const emptyMetricsQueries = registry.getRecommendedQueries(
+        `FROM metrics-*`,
+        availableDatasources,
+        solutionId
+      );
+      expect(emptyMetricsQueries).toEqual([]);
+
+      // Other queries should still exist
+      const logsQueries = registry.getRecommendedQueries(
+        `FROM logs-2023`,
+        availableDatasources,
+        solutionId
+      );
+      expect(logsQueries).toEqual([queries[0]]);
+
+      const otherQueries = registry.getRecommendedQueries(
+        'FROM other_index',
+        availableDatasources,
+        solutionId
+      );
+      expect(otherQueries).toEqual([queries[3]]);
+    });
+
+    it('should only remove queries for the specified solution ID', () => {
+      const obltSolutionId: SolutionId = 'oblt';
+      const securitySolutionId: SolutionId = 'security';
+      const metricsQuery = {
+        name: 'Metrics Query',
+        query: `FROM metrics-* | STATS max(bytes)`,
+      };
+
+      // Register the same query for two different solutions
+      registry.setRecommendedQueries([metricsQuery], obltSolutionId);
+      registry.setRecommendedQueries([metricsQuery], securitySolutionId);
+      registry.unsetRecommendedQueries([metricsQuery], obltSolutionId);
+
+      // Should be removed from oblt
+      const obltQueries = registry.getRecommendedQueries(
+        `FROM metrics-*`,
+        availableDatasources,
+        obltSolutionId
+      );
+      expect(obltQueries).toEqual([]);
+
+      // Should still exist for security
+      const securityQueries = registry.getRecommendedQueries(
+        `FROM metrics-*`,
+        availableDatasources,
+        securitySolutionId
+      );
+      expect(securityQueries).toEqual([metricsQuery]);
+    });
+
+    it('should handle unset for non-existent index pattern gracefully', () => {
+      const solutionId: SolutionId = 'oblt';
+      const logsQuery = { name: 'Logs Query', query: 'FROM logs-2023 | STATS count()' };
+
+      registry.setRecommendedQueries([logsQuery], solutionId);
+
+      // This should not throw an error
+      registry.unsetRecommendedQueries([{ name: 'non-existent-pattern', query: '' }], solutionId);
+
+      // Original query should still be available
+      const retrievedQueries = registry.getRecommendedQueries(
+        'FROM logs-2023',
+        availableDatasources,
+        solutionId
+      );
+      expect(retrievedQueries).toEqual([logsQuery]);
+    });
   });
 
   // --- setRecommendedFields tests ---

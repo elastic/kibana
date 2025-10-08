@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { CliOptions } from './types';
 import { createElasticAgentPolicy } from './lib/create_agent_policy';
 import { fetchAgentPolicyEnrollmentToken } from './lib/fetch_agent_policy_enrollment_token';

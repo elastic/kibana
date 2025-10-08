@@ -8,6 +8,7 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import type { ExperimentalFeatures } from '../../../common';
 import type { TelemetryConfigProvider } from '../../../common/telemetry_config/telemetry_config_provider';
 import {
   policyFactory as policyConfigFactory,
@@ -26,6 +27,7 @@ import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  removeDeviceControl,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
@@ -38,7 +40,8 @@ export const createDefaultPolicy = (
   cloud: CloudSetup,
   esClientInfo: InfoResponse,
   productFeatures: ProductFeaturesService,
-  telemetryConfigProvider: TelemetryConfigProvider
+  telemetryConfigProvider: TelemetryConfigProvider,
+  experimentalFeatures: ExperimentalFeatures
 ): PolicyConfig => {
   // Pass license and cloud information to use in Policy creation
   const factoryPolicy = policyConfigFactory({
@@ -63,6 +66,13 @@ export const createDefaultPolicy = (
   // If no Policy Protection allowed (ex. serverless)
   if (!productFeatures.isEnabled(ProductFeatureSecurityKey.endpointPolicyProtections)) {
     defaultPolicyPerType = ensureOnlyEventCollectionIsAllowed(defaultPolicyPerType);
+  }
+
+  if (
+    !productFeatures.isEnabled(ProductFeatureSecurityKey.endpointTrustedDevices) ||
+    !experimentalFeatures.trustedDevices
+  ) {
+    defaultPolicyPerType = removeDeviceControl(defaultPolicyPerType);
   }
 
   defaultPolicyPerType.meta.billable = isBillablePolicy(defaultPolicyPerType);

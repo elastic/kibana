@@ -11,7 +11,7 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 
 import '@kbn/core-provider-plugin/types';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 declare global {
   interface Window {
@@ -226,6 +226,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cases.files.maxSize (number?)',
         'xpack.cases.markdownPlugins.lens (boolean?)',
         'xpack.cases.stack.enabled (boolean?)',
+        'xpack.cases.resilient.additionalFields.enabled (boolean?)',
         'xpack.cases.incrementalId.enabled (boolean?)',
         'xpack.ccr.ui.enabled (boolean?)',
         'xpack.cloud.base_url (string?)',
@@ -256,8 +257,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (string?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|chat?)',
+        'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
+        'xpack.cloud.serverless.in_trial (boolean?)',
         'xpack.cloud.onboarding.default_solution (string?)',
         'xpack.contentConnectors.ui.enabled (boolean?)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean?)',
@@ -268,6 +271,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.agentless.customIntegrations.enabled (boolean?)',
         'xpack.fleet.enableExperimental (array?)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number?)',
+        'xpack.fleet.internal.excludeDataStreamTypes (array?)',
         'xpack.fleet.internal.fleetServerStandalone (boolean?)',
         'xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions (boolean?)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number?)',
@@ -317,12 +321,15 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.ml.nlp.modelDeployment.vCPURange.high.max (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.high.min (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.high.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.high.maxThreads (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.low.max (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.low.min (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.low.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.low.maxThreads (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.medium.max (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.medium.min (number)',
         'xpack.ml.nlp.modelDeployment.vCPURange.medium.static (number?)',
+        'xpack.ml.nlp.modelDeployment.vCPURange.medium.maxThreads (number)',
         'xpack.osquery.actionEnabled (boolean?)',
         'xpack.remote_clusters.ui.enabled (boolean?)',
         'xpack.ingest_pipelines.enableManageProcessors (boolean?|never)',
@@ -352,9 +359,19 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.securitySolution.enableExperimental (array?)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string?)',
         'xpack.securitySolution.offeringSettings (record?)',
+        'xpack.securitySolution.entityAnalytics.assetCriticality.csvUpload.errorRetries (number?)',
+        'xpack.securitySolution.entityAnalytics.assetCriticality.csvUpload.maxBulkRequestBodySizeBytes (number?)',
+        'xpack.securitySolution.entityAnalytics.entityStore.developer.pipelineDebugMode (boolean?)',
+        'xpack.securitySolution.entityAnalytics.entityStore.frequency (duration?)',
+        'xpack.securitySolution.entityAnalytics.entityStore.syncDelay (duration?)',
+        'xpack.securitySolution.entityAnalytics.monitoring.privileges.users.csvUpload.errorRetries (number?)',
+        'xpack.securitySolution.entityAnalytics.monitoring.privileges.users.csvUpload.maxBulkRequestBodySizeBytes (number?)',
+        'xpack.securitySolution.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed (number?)',
+        'xpack.securitySolution.entityAnalytics.riskEngine.alertSampleSizePerShard (number?)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean?)',
         'xpack.snapshot_restore.ui.enabled (boolean?)',
         'xpack.stack_connectors.enableExperimental (array?)',
+        'xpack.stack_connectors.resilient.additionalFields.enabled (boolean?)',
         'xpack.trigger_actions_ui.enableExperimental (array?)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean?)',
         'xpack.trigger_actions_ui.rules.enabled (boolean?)',
@@ -378,9 +395,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observabilityAIAssistant.scope (observability?|search?)',
         'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
-        'xpack.observabilityAiAssistantManagement.visibilityEnabled (boolean?)',
+        'xpack.observability.managedOtlpServiceUrl (string?)',
         'share.new_version.enabled (boolean?)',
-        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (default?|never?|observability?|security?)',
+        'xpack.genAiSettings.showAiBreadcrumb (boolean?)',
+        'xpack.genAiSettings.showSpacesIntegration (boolean?)',
+        'xpack.genAiSettings.showAiAssistantsVisibilitySetting (boolean?)',
         /**
          * Rule form V2 feature flags
          */

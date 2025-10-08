@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GlobalTask } from '../lib';
+import type { GlobalTask } from '../lib';
 
 export const VerifyEnv: GlobalTask = {
   global: true,

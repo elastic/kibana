@@ -11,8 +11,9 @@ import { last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 
-import { parseRange, NumberListRange } from './range';
-import { NumberRowModel } from './number_row';
+import type { NumberListRange } from './range';
+import { parseRange } from './range';
+import type { NumberRowModel } from './number_row';
 
 const EMPTY_STRING = '';
 const defaultRange = parseRange('[0,Infinity)');

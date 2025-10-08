@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogLevel, Logger } from '../../../lib/utils/create_logger';
+import type { Logger } from '../../../lib/utils/create_logger';
+import { LogLevel } from '../../../lib/utils/create_logger';
 
 export function logMessage(logger: Logger, [logLevel, msg]: [LogLevel, string]) {
   switch (logLevel) {

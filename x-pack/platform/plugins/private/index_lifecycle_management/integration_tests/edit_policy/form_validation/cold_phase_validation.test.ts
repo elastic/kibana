@@ -8,7 +8,8 @@
 import { act } from 'react-dom/test-utils';
 import { i18nTexts } from '../../../public/application/sections/edit_policy/i18n_texts';
 import { setupEnvironment } from '../../helpers';
-import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
+import type { ValidationTestBed } from './validation.helpers';
+import { setupValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> cold phase validation', () => {
   let testBed: ValidationTestBed;

@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
+ */
 export type ESQLAst = ESQLAstCommand[];
 
 export type ESQLAstCommand =
   | ESQLCommand
-  | ESQLAstTimeseriesCommand
   | ESQLAstJoinCommand
   | ESQLAstChangePointCommand
   | ESQLAstRerankCommand
   | ESQLAstCompletionCommand;
 
-export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
+export type ESQLAstNode = ESQLAstCommand | ESQLAstHeaderCommand | ESQLAstExpression | ESQLAstItem;
 
 /**
  * Represents an *expression* in the AST.
@@ -30,7 +32,8 @@ export type ESQLSingleAstItem =
   | ESQLCommandOption
   | ESQLSource
   | ESQLColumn
-  | ESQLTimeInterval
+  | ESQLDatePeriodLiteral
+  | ESQLTimeDurationLiteral
   | ESQLList
   | ESQLLiteral
   | ESQLIdentifier
@@ -40,7 +43,20 @@ export type ESQLSingleAstItem =
   | ESQLMap
   | ESQLMapEntry;
 
-export type ESQLAstField = ESQLFunction | ESQLColumn | ESQLParam;
+/**
+ * A field is either an index field `this.is.field`, or it is a field assignment
+ * `new_field = 123`, in which case it is a binary expression with "=" operator.
+ *
+ * Also, a field can be specified as a parameter.
+ *
+ * ```
+ * EVAL this.is.a.nested.field
+ * EVAL new_field = 123
+ * EVAL ?param
+ * EVAL ?param = 123
+ * ```
+ */
+export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
@@ -56,7 +72,7 @@ export type ESQLAstNodeWithChildren = ESQLAstNodeWithArgs | ESQLList;
  * of the nodes which are plain arrays, all nodes will be *proper* and we can
  * remove this type.
  */
-export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand;
+export type ESQLProperNode = ESQLAstExpression | ESQLAstCommand | ESQLAstHeaderCommand;
 
 export interface ESQLLocation {
   min: number;
@@ -94,10 +110,6 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   args: ESQLAstItem[];
 }
 
-export interface ESQLAstTimeseriesCommand extends ESQLCommand<'ts'> {
-  sources: ESQLSource[];
-}
-
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
   commandType: 'lookup' | 'left' | 'right';
 }
@@ -113,15 +125,51 @@ export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {
 
 export interface ESQLAstCompletionCommand extends ESQLCommand<'completion'> {
   prompt: ESQLAstExpression;
-  inferenceId: ESQLIdentifierOrParam;
+  inferenceId: ESQLLiteral;
   targetField?: ESQLColumn;
 }
 
 export interface ESQLAstRerankCommand extends ESQLCommand<'rerank'> {
   query: ESQLLiteral;
   fields: ESQLAstField[];
-  inferenceId: ESQLIdentifierOrParam;
+  targetField?: ESQLColumn;
+  inferenceId: ESQLLiteral | undefined;
 }
+
+/**
+ * Represents a header pseudo-command, such as SET.
+ *
+ * Example:
+ *
+ * ```
+ * SET setting1 = "value1", setting2 = "value2";
+ * ```
+ */
+export interface ESQLAstHeaderCommand<Name extends string = string, Arg = ESQLAstExpression>
+  extends ESQLAstBaseItem {
+  type: 'header-command';
+
+  /** Name of the command */
+  name: Name;
+
+  /**
+   * Represents the arguments for the command. It has to be a list, because
+   * even the SET command was initially designed to accept multiple
+   * assignments.
+   *
+   * Example:
+   *
+   * ```
+   * SET setting1 = "value1", setting2 = "value2"
+   * ```
+   */
+  args: Arg[];
+}
+
+export type ESQLAstSetHeaderCommand = ESQLAstHeaderCommand<
+  'set',
+  ESQLBinaryExpression<BinaryExpressionAssignmentOperator>
+>;
 
 export type ESQLIdentifierOrParam = ESQLIdentifier | ESQLParamLiteral;
 
@@ -132,6 +180,7 @@ export interface ESQLCommandOption extends ESQLAstBaseItem {
 
 export interface ESQLAstQueryExpression extends ESQLAstBaseItem<''> {
   type: 'query';
+  header?: ESQLAstHeaderCommand[];
   commands: ESQLAstCommand[];
 }
 
@@ -225,7 +274,8 @@ export type BinaryExpressionOperator =
   | BinaryExpressionRenameOperator
   | BinaryExpressionWhereOperator
   | BinaryExpressionMatchOperator
-  | BinaryExpressionIn;
+  | BinaryExpressionIn
+  | BinaryExpressionLogical;
 
 export type BinaryExpressionArithmeticOperator = '+' | '-' | '*' | '/' | '%';
 export type BinaryExpressionAssignmentOperator = '=';
@@ -235,6 +285,7 @@ export type BinaryExpressionRenameOperator = 'as';
 export type BinaryExpressionWhereOperator = 'where';
 export type BinaryExpressionMatchOperator = ':';
 export type BinaryExpressionIn = 'in' | 'not in';
+export type BinaryExpressionLogical = 'and' | 'or';
 
 // from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
 export type InlineCastingType =
@@ -278,13 +329,6 @@ export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem
  */
 export interface ESQLUnknownItem extends ESQLAstBaseItem {
   type: 'unknown';
-}
-
-export interface ESQLTimeInterval extends ESQLAstBaseItem {
-  /** @todo For consistency with other literals, this should be `literal`, not `timeInterval`. */
-  type: 'timeInterval';
-  unit: string;
-  quantity: number;
 }
 
 export interface ESQLSource extends ESQLAstBaseItem {
@@ -409,6 +453,8 @@ export type ESQLLiteral =
   | ESQLBooleanLiteral
   | ESQLNullLiteral
   | ESQLStringLiteral
+  | ESQLTimeDurationLiteral
+  | ESQLDatePeriodLiteral
   | ESQLParamLiteral<string>;
 
 // Exporting here to prevent TypeScript error TS4058
@@ -444,7 +490,6 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
 export interface ESQLStringLiteral extends ESQLAstBaseItem {
   type: 'literal';
 
-  /** This really should be `string`, not `keyword`. */
   literalType: 'keyword';
 
   value: string;
@@ -462,6 +507,18 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
    */
   unquoted?: boolean;
 }
+
+export interface ESQLBaseTimeSpanLiteral<T extends 'time_duration' | 'date_period'>
+  extends ESQLAstBaseItem {
+  type: 'literal';
+  literalType: T;
+  value: string;
+  unit: string;
+  quantity: number;
+}
+export type ESQLDatePeriodLiteral = ESQLBaseTimeSpanLiteral<'date_period'>;
+export type ESQLTimeDurationLiteral = ESQLBaseTimeSpanLiteral<'time_duration'>;
+export type ESQLTimeSpanLiteral = ESQLDatePeriodLiteral | ESQLTimeDurationLiteral;
 
 // @internal
 export interface ESQLParamLiteral<
@@ -532,7 +589,7 @@ export interface EditorError {
   startColumn: number;
   endColumn: number;
   message: string;
-  code?: string;
+  code: string;
   severity: 'error' | 'warning' | number;
 }
 

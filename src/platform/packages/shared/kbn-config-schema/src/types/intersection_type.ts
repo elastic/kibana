@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ObjectType, Props, ObjectTypeOptions } from './object_type';
+import type { Props, ObjectTypeOptions } from './object_type';
+import { ObjectType } from './object_type';
 
 export type IntersectionTypeOptions<T extends Props = any> = ObjectTypeOptions<T>;
 

@@ -5,22 +5,62 @@
  * 2.0.
  */
 
+export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
+export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
-  type ToolDescriptor,
-  type ToolDescriptorMeta,
-  type PlainIdToolIdentifier,
-  type SerializedToolIdentifier,
-  type StructuredToolIdentifier,
-  type ToolIdentifier,
-  type ToolProviderId,
-  isSerializedToolIdentifier,
-  isStructuredToolIdentifier,
-  isPlainToolIdentifier,
-  toStructuredToolIdentifier,
-  toSerializedToolIdentifier,
-  createBuiltinToolId,
-  toolDescriptorToIdentifier,
-  builtinToolProviderId,
-  unknownToolProviderId,
-} from './tools';
-export { BuiltinToolIds, BuiltinTags } from './constants';
+  platformCoreTools,
+  activeToolsCountWarningThreshold,
+  defaultAgentToolIds,
+  editableToolTypes,
+} from './constants';
+export {
+  type ByIdsToolSelection,
+  type ToolSelection,
+  type ToolSelectionRelevantFields,
+  isByIdsToolSelection,
+  toolMatchSelection,
+  filterToolsBySelection,
+  allToolsSelectionWildcard,
+  allToolsSelection,
+} from './tool_selection';
+export {
+  type EsqlToolConfig,
+  EsqlToolFieldType,
+  type EsqlToolFieldTypes,
+  type EsqlToolParam,
+  type EsqlToolDefinition,
+  type EsqlToolDefinitionWithSchema,
+  isEsqlTool,
+} from './types/esql';
+export {
+  isIndexSearchTool,
+  type IndexSearchToolDefinition,
+  type IndexSearchToolDefinitionWithSchema,
+  type IndexSearchToolConfig,
+} from './types/index_search';
+export {
+  isWorkflowTool,
+  type WorkflowToolConfig,
+  type WorkflowToolDefinition,
+  type WorkflowToolDefinitionWithSchema,
+} from './types/workflow';
+export {
+  isBuiltinTool,
+  type BuiltinToolConfig,
+  type BuiltinToolDefinition,
+  type BuiltinToolDefinitionWithSchema,
+} from './types/builtin';
+export {
+  ToolResultType,
+  type ToolResult,
+  type ErrorResult,
+  type QueryResult,
+  type ResourceResult,
+  type TabularDataResult,
+  type OtherResult,
+  isErrorResult,
+  isOtherResult,
+  isQueryResult,
+  isResourceResult,
+  isTabularDataResult,
+} from './tool_result';

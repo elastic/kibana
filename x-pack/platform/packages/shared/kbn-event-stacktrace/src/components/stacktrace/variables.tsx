@@ -9,7 +9,7 @@ import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { KeyValueTable, getFlattenedKeyValuePairs } from '@kbn/key-value-metadata-table';
-import { Stackframe } from '@kbn/apm-types';
+import type { Stackframe } from '@kbn/apm-types';
 import styled from '@emotion/styled';
 
 const VariablesContainer = styled.div`

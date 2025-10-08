@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ResolvedDocument } from '../../ref_resolver/resolved_document';
-import { ResolvedRef } from '../../ref_resolver/resolved_ref';
+import type { ResolvedDocument } from '../../ref_resolver/resolved_document';
+import type { ResolvedRef } from '../../ref_resolver/resolved_ref';
 
 export interface TraverseRootDocumentContext {
   /**

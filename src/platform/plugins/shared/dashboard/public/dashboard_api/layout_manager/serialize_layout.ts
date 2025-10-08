@@ -17,34 +17,21 @@ export function serializeLayout(
 ): Pick<DashboardState, 'panels' | 'references'> {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
-    sections[sectionId] = { ...sectionState, panels: [] };
+    sections[sectionId] = { ...sectionState, uid: sectionId, panels: [] };
   });
 
   const references: DashboardState['references'] = [];
   const panels: DashboardState['panels'] = [];
-  Object.entries(layout.panels).forEach(([panelId, { gridData, type }]) => {
-    const panelConfig = childState[panelId]?.rawState ?? {};
+  Object.entries(layout.panels).forEach(([panelId, { grid, type }]) => {
+    const config = childState[panelId]?.rawState ?? {};
     references.push(...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? []));
-    // TODO move savedObjectRef extraction into embeddable implemenations
-    const savedObjectId = (panelConfig as { savedObjectId?: string }).savedObjectId;
-    let panelRefName: string | undefined;
-    if (savedObjectId) {
-      panelRefName = `panel_${panelId}`;
 
-      references.push({
-        name: `${panelId}:panel_${panelId}`,
-        type,
-        id: savedObjectId,
-      });
-    }
-
-    const { sectionId, ...restOfGridData } = gridData; // drop section ID
+    const { sectionId, ...restOfGridData } = grid; // drop section ID
     const panelState = {
       type,
-      gridData: restOfGridData,
-      panelIndex: panelId,
-      panelConfig,
-      ...(panelRefName !== undefined && { panelRefName }),
+      grid: restOfGridData,
+      uid: panelId,
+      config,
     };
 
     if (sectionId) {

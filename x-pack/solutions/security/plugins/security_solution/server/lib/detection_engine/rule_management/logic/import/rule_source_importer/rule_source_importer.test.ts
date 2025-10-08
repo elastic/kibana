@@ -19,12 +19,14 @@ describe('ruleSourceImporter', () => {
   let ruleAssetsClientMock: ReturnType<typeof createPrebuiltRuleAssetsClientMock>;
   let ruleObjectsClientMock: ReturnType<typeof createPrebuiltRuleObjectsClientMock>;
   let context: ReturnType<typeof requestContextMock.create>['securitySolution'];
+  let { clients } = requestContextMock.createTools();
   let ruleToImport: RuleToImport;
   let subject: ReturnType<typeof createRuleSourceImporter>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     context = requestContextMock.create().securitySolution;
+    clients = requestContextMock.createTools().clients;
     ruleAssetsClientMock = createPrebuiltRuleAssetsClientMock();
     ruleAssetsClientMock.fetchLatestAssets.mockResolvedValue([{}]);
     ruleAssetsClientMock.fetchLatestVersions.mockResolvedValue([]);
@@ -37,6 +39,7 @@ describe('ruleSourceImporter', () => {
       context,
       prebuiltRuleAssetsClient: ruleAssetsClientMock,
       prebuiltRuleObjectsClient: ruleObjectsClientMock,
+      logger: clients.logger,
     });
   });
 

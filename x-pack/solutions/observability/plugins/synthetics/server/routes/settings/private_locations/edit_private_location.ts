@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
-import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
-import { SyntheticsRestApiRouteFactory } from '../../types';
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, updatePrivateLocationMonitors } from './helpers';
-import { PrivateLocation } from '../../../../common/runtime_types';
+import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
 
 const EditPrivateLocationSchema = schema.object({
@@ -62,6 +64,35 @@ const isPrivateLocationChanged = ({
   return isLabelChanged || areTagsChanged;
 };
 
+const checkPrivileges = async ({
+  routeContext,
+  monitorsSpaces,
+}: {
+  routeContext: RouteContext;
+  monitorsSpaces: string[];
+}) => {
+  const { request, response, server } = routeContext;
+
+  const checkSavedObjectsPrivileges =
+    server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
+
+  const { hasAllRequested } = await checkSavedObjectsPrivileges(
+    'saved_object:synthetics-monitor/bulk_update',
+    monitorsSpaces
+  );
+
+  if (!hasAllRequested) {
+    return response.forbidden({
+      body: {
+        message: i18n.translate('xpack.synthetics.editPrivateLocation.forbidden', {
+          defaultMessage:
+            'You do not have sufficient permissions to update monitors in all required spaces. This private location is used by monitors in spaces where you lack update privileges.',
+        }),
+      },
+    });
+  }
+};
+
 export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   PrivateLocation,
   TypeOf<typeof EditPrivateLocationQuery>,
@@ -79,7 +110,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { response, request, savedObjectsClient, server } = routeContext;
+    const { response, request, savedObjectsClient } = routeContext;
     const { locationId } = request.params;
     const { label: newLocationLabel, tags: newTags } = request.body;
 
@@ -103,27 +134,14 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
         isPrivateLocationChanged({ privateLocation: existingLocation, newParams: request.body })
       ) {
         // This privileges check is done only when changing the label, because changing the label will update also the monitors in that location
-        if (isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel)) {
-          const monitorsSpaces = monitorsInLocation.map(({ namespaces }) => namespaces![0]);
-
-          const checkSavedObjectsPrivileges =
-            server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
-
-          const { hasAllRequested } = await checkSavedObjectsPrivileges(
-            'saved_object:synthetics-monitor/bulk_update',
-            monitorsSpaces
-          );
-
-          if (!hasAllRequested) {
-            return response.forbidden({
-              body: {
-                message: i18n.translate('xpack.synthetics.editPrivateLocation.forbidden', {
-                  defaultMessage:
-                    'You do not have sufficient permissions to update monitors in all required spaces. This private location is used by monitors in spaces where you lack update privileges.',
-                }),
-              },
-            });
-          }
+        if (
+          isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel) &&
+          monitorsInLocation.length
+        ) {
+          await checkPrivileges({
+            routeContext,
+            monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
+          });
         }
 
         newLocation = await repo.editPrivateLocation(locationId, {

@@ -10,7 +10,7 @@ import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import { MwsCalloutContent } from './mws_callout_content';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { selectOverviewStatus } from '../../../state/overview_status';
 
 export const MonitorsMWsCallout = () => {

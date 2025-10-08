@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { CommonAlertStatus } from '../../common/types/alerts';
+import type React from 'react';
+import type { CommonAlertStatus } from '../../common/types/alerts';
 
 export interface AlertsByName {
   [name: string]: CommonAlertStatus[];

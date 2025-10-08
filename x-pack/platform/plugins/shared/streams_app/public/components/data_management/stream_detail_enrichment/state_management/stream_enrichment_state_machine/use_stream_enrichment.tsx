@@ -8,20 +8,24 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import { EnrichmentDataSource } from '../../../../../../common/url_schema';
+import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import { isActionBlock } from '@kbn/streamlang/types/streamlang';
+import type {
+  StreamlangProcessorDefinition,
+  StreamlangStepWithUIAttributes,
+} from '@kbn/streamlang';
+import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
-import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { ProcessorActorRef } from '../processor_state_machine';
-import {
+import type { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
+import type {
   PreviewDocsFilterOption,
   SimulationActorSnapshot,
   SimulationContext,
 } from '../simulation_state_machine';
-import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isGrokProcessor } from '../../utils';
 
 const consoleInspector = createConsoleInspector();
@@ -42,12 +46,24 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
-      addProcessor: (processor: ProcessorDefinitionWithUIAttributes) => {
-        service.send({ type: 'processors.add', processor });
+      addProcessor: (
+        step?: StreamlangProcessorDefinition,
+        options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
+      ) => {
+        service.send({ type: 'step.addProcessor', step, options });
       },
-      reorderProcessors: (processorsRefs: ProcessorActorRef[]) => {
-        service.send({ type: 'processors.reorder', processorsRefs });
+
+      addCondition: (
+        step?: StreamlangWhereBlock,
+        options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
+      ) => {
+        service.send({ type: 'step.addCondition', step, options });
       },
+
+      reorderStep: (stepId: string, direction: 'up' | 'down') => {
+        service.send({ type: 'step.reorder', stepId, direction });
+      },
+
       resetChanges: () => {
         service.send({ type: 'stream.reset' });
       },
@@ -136,9 +152,9 @@ const StreamEnrichmentCleanupOnUnmount = () => {
   useEffect(() => {
     return () => {
       const context = service.getSnapshot().context;
-      context.processorsRefs.forEach((procRef) => {
+      context.stepRefs.forEach((procRef) => {
         const procContext = procRef.getSnapshot().context;
-        if (isGrokProcessor(procContext.processor)) {
+        if (isActionBlock(procContext.step) && isGrokProcessor(procContext.step)) {
           const draftGrokExpressions = procContext.resources?.grokExpressions ?? [];
           draftGrokExpressions.forEach((expression) => {
             expression.destroy();
@@ -170,10 +186,6 @@ export const useSimulatorRef = () => {
 
 export const useSimulatorSelector = <T,>(selector: (snapshot: SimulationActorSnapshot) => T): T => {
   const simulationRef = useSimulatorRef();
-
-  if (!simulationRef) {
-    throw new Error('useSimulatorSelector must be used within a StreamEnrichmentContextProvider');
-  }
 
   return useSelector(simulationRef, selector);
 };

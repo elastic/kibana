@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -30,6 +31,7 @@ export enum InfraTelemetryEventTypes {
   ANOMALY_DETECTION_DATE_FIELD_CHANGE = 'Infra Anomaly Detection Job Date Field Change',
   ANOMALY_DETECTION_PARTITION_FIELD_CHANGE = 'Infra Anomaly Detection Job Partition Field Change',
   ANOMALY_DETECTION_FILTER_FIELD_CHANGE = 'Infra Anomaly Detection Job Filter Field Change',
+  SCHEMA_SELECTOR_INTERACTION = 'Schema Selector Interaction',
 }
 
 export interface HostsViewQuerySubmittedParams {
@@ -38,6 +40,7 @@ export interface HostsViewQuerySubmittedParams {
   interval: string;
   with_query: boolean;
   limit: number;
+  schema_selected?: DataSchemaFormat;
 }
 
 export interface HostEntryClickedParams {
@@ -53,12 +56,16 @@ export interface HostsViewQueryHostsCountRetrievedParams {
   total: number;
   with_query: boolean;
   with_filters: boolean;
+  schema_selected?: DataSchemaFormat | 'no schema available';
+  schemas_available?: DataSchemaFormat[] | 'no schema available'[];
+  schema_error?: boolean;
 }
 
 export interface AssetDetailsFlyoutViewedParams {
   assetType: string;
   componentName: string;
   tabId?: string;
+  schema_selected?: DataSchemaFormat;
 }
 export interface AssetDetailsPageViewedParams extends AssetDetailsFlyoutViewedParams {
   integrations?: string[];
@@ -93,6 +100,12 @@ export interface AnomalyDetectionFilterFieldChangeParams {
   filter_field?: string;
 }
 
+export interface SchemaSelectorParams {
+  interaction: 'open dropdown' | 'select schema';
+  schema_selected?: DataSchemaFormat | null;
+  schemas_available?: DataSchemaFormat[];
+}
+
 export type InfraTelemetryEventParams =
   | HostsViewQuerySubmittedParams
   | HostEntryClickedParams
@@ -104,7 +117,8 @@ export type InfraTelemetryEventParams =
   | AnomalyDetectionSetupParams
   | AnomalyDetectionDateFieldChangeParams
   | AnomalyDetectionPartitionFieldChangeParams
-  | AnomalyDetectionFilterFieldChangeParams;
+  | AnomalyDetectionFilterFieldChangeParams
+  | SchemaSelectorParams;
 
 export interface PerformanceMetricInnerEvents {
   key1?: string;
@@ -136,6 +150,7 @@ export interface ITelemetryClient {
     params: AnomalyDetectionPartitionFieldChangeParams
   ): void;
   reportAnomalyDetectionFilterFieldChange(params: AnomalyDetectionFilterFieldChangeParams): void;
+  reportSchemaSelectorInteraction(params: SchemaSelectorParams): void;
 }
 
 export type InfraTelemetryEvent =
@@ -202,4 +217,8 @@ export type InfraTelemetryEvent =
   | {
       eventType: InfraTelemetryEventTypes.ANOMALY_DETECTION_FILTER_FIELD_CHANGE;
       schema: RootSchema<AnomalyDetectionFilterFieldChangeParams>;
+    }
+  | {
+      eventType: InfraTelemetryEventTypes.SCHEMA_SELECTOR_INTERACTION;
+      schema: RootSchema<SchemaSelectorParams>;
     };

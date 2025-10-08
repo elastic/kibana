@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  createSessionStorageStateStorage,
-  ISessionStorageStateStorage,
-} from './create_session_storage_state_storage';
+import type { ISessionStorageStateStorage } from './create_session_storage_state_storage';
+import { createSessionStorageStateStorage } from './create_session_storage_state_storage';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 
 describe('SessionStorageStateStorage', () => {

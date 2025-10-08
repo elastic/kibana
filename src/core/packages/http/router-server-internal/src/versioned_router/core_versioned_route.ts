@@ -23,9 +23,9 @@ import type {
   RouteMethod,
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
-import { Request } from '@hapi/hapi';
-import { Logger } from '@kbn/logging';
-import { Env } from '@kbn/config';
+import type { Request } from '@hapi/hapi';
+import type { Logger } from '@kbn/logging';
+import type { Env } from '@kbn/config';
 import type { HandlerResolutionStrategy, Method, Options } from './types';
 
 import {
@@ -41,7 +41,7 @@ import { validRouteSecurity } from '../security_route_config_validator';
 import { resolvers } from './handler_resolvers';
 import { prepareVersionedRouteValidation, unwrapVersionedResponseBodyValidation } from './util';
 import type { RequestLike } from './route_version_utils';
-import { RequestHandlerEnhanced, Router } from '../router';
+import type { RequestHandlerEnhanced, Router } from '../router';
 import { kibanaResponseFactory as responseFactory } from '../response';
 import { validateHapiRequest } from '../route';
 import { RouteValidator } from '../validator';

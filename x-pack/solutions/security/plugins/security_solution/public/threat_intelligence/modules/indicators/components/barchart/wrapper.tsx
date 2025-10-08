@@ -70,7 +70,7 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
     }
 
     return (
-      <div style={{ position: 'relative' }}>
+      <div css={{ position: 'relative' }}>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem>
             <EuiTitle size={'s'}>

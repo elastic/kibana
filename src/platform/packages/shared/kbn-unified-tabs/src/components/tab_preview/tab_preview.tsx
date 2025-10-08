@@ -62,7 +62,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   tabItem,
   previewData,
   stopPreviewOnHover,
-  previewDelay = 500,
+  previewDelay = 1250, // as "long" EuiToolTip delay
 }) => {
   const { euiTheme } = useEuiTheme();
   const [previewTimer, setPreviewTimer] = useState<NodeJS.Timeout | null>(null);
@@ -114,6 +114,12 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
     };
   }, [previewTimer]);
 
+  useEffect(() => {
+    if (stopPreviewOnHover && previewTimer) {
+      clearTimeout(previewTimer);
+    }
+  }, [previewTimer, stopPreviewOnHover]);
+
   const handleMouseEnter = useCallback(() => {
     if (stopPreviewOnHover) return;
 
@@ -134,8 +140,8 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
   }, [previewTimer, setShowPreview]);
 
   return (
-    <div>
-      <span onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} ref={tabRef}>
+    <div onMouseLeave={handleMouseLeave}>
+      <span onMouseEnter={handleMouseEnter} ref={tabRef}>
         {children}
       </span>
       <EuiPortal>
@@ -151,6 +157,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
                   language={getQueryLanguage(tabPreviewData)}
                   transparentBackground
                   paddingSize="none"
+                  css={codeBlockCss}
                 >
                   {getPreviewQuery(tabPreviewData)}
                 </EuiCodeBlock>
@@ -159,6 +166,7 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
                 grow={false}
                 color="subdued"
                 paddingSize="none"
+                className="eui-textBreakWord"
                 css={getSplitPanelCss(euiTheme)}
               >
                 {tabPreviewData.status === TabStatus.RUNNING ? (
@@ -167,11 +175,11 @@ export const TabPreview: React.FC<TabPreviewProps> = ({
                       <EuiLoadingSpinner />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiText>{tabItem.label}</EuiText>
+                      <EuiText size="s">{tabItem.label}</EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ) : (
-                  <EuiHealth color={tabPreviewData.status} textSize="m">
+                  <EuiHealth color={tabPreviewData.status} textSize="s">
                     {tabItem.label}
                   </EuiHealth>
                 )}
@@ -200,6 +208,15 @@ const getPreviewContainerCss = (
     transition: opacity ${euiTheme.animation.normal} ease;
   `;
 };
+
+const codeBlockCss = css`
+  .euiCodeBlock__code {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+`;
 
 const getSplitPanelCss = (euiTheme: EuiThemeComputed) => {
   return css`

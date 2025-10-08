@@ -103,7 +103,7 @@ const SummaryCell: React.FC<{
     <EuiFlexGroup gutterSize="none" direction="column" className="eui-fullWidth">
       {rowRenderer && rowRender ? (
         <EventRenderedFlexItem className="eui-xScroll">
-          <div className="eui-displayInlineBlock" style={{ width: 'fit-content' }}>
+          <div className="eui-displayInlineBlock" css={{ width: 'fit-content' }}>
             {rowRender}
           </div>
         </EventRenderedFlexItem>

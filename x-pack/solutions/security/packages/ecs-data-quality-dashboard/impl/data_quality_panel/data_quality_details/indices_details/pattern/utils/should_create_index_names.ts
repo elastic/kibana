@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 
 import { isEqual } from 'lodash/fp';
-import { MeteringStatsIndex } from '../../../../types';
+import type { MeteringStatsIndex } from '../../../../types';
 
 export const shouldCreateIndexNames = ({
   ilmExplain,

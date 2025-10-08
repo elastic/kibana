@@ -9,9 +9,10 @@
 
 import React, { useCallback, useEffect } from 'react';
 
-import { AggParamEditorProps, AggParamCommonProps } from './agg_param_props';
-import { DefaultEditorAggCommonProps } from './agg_common_props';
-import { AGG_PARAMS_ACTION_KEYS, AggParamsAction } from './agg_params_state';
+import type { AggParamEditorProps, AggParamCommonProps } from './agg_param_props';
+import type { DefaultEditorAggCommonProps } from './agg_common_props';
+import type { AggParamsAction } from './agg_params_state';
+import { AGG_PARAMS_ACTION_KEYS } from './agg_params_state';
 
 interface DefaultEditorAggParamProps<T> extends AggParamCommonProps<T> {
   paramEditor: React.ComponentType<AggParamEditorProps<T>>;

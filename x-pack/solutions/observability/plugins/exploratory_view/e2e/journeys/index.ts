@@ -6,5 +6,5 @@
  */
 
 // export * from './exploratory_view';
-export * from './step_duration.journey';
+export type * from './step_duration.journey';
 // export * from './single_metric.journey';

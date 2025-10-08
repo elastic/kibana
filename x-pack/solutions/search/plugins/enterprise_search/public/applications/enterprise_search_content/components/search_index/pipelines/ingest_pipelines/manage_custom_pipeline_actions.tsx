@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
+import React, { useState } from 'react';
 
 import { css } from '@emotion/react';
 import { useActions } from 'kea';

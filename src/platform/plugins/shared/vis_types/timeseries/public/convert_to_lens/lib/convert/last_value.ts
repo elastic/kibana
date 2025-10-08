@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LastValueParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import { CommonColumnsConverterArgs, LastValueColumn } from './types';
+import type { LastValueParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { CommonColumnsConverterArgs, LastValueColumn } from './types';
 import type { Metric } from '../../../../common/types';
 import { createColumn, getFormat } from './column';
 

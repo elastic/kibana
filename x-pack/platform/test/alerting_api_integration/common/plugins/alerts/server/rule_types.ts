@@ -22,6 +22,12 @@ import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Dataset, createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
+import {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+} from '@kbn/data-plugin/common';
+import type { AsyncSearchStrategies } from '@kbn/alerting-plugin/server/types';
 import type { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export const EscapableStrings = {
@@ -765,7 +771,7 @@ function getPatternFiringAutoRecoverFalseRuleType() {
             throw new Error('rule executor error');
           } else if (scheduleByPattern === 'timeout') {
             // delay longer than the timeout
-            await new Promise((r) => setTimeout(r, 12000));
+            await new Promise((r) => setTimeout(r, 15000));
           } else if (scheduleByPattern === 'run_long') {
             // delay so rule runs a little longer
             await new Promise((r) => setTimeout(r, 4000));
@@ -922,6 +928,101 @@ function getCancellableRuleType() {
     },
     validate: {
       params: paramsSchema,
+    },
+  };
+  return result;
+}
+
+function getAsyncSearchRuleType() {
+  const result: RuleType<
+    { strategy: AsyncSearchStrategies },
+    never,
+    {},
+    {},
+    {},
+    'default',
+    'recovered',
+    { number_of_docs: number }
+  > = {
+    id: 'test.ruleWithAsyncSearch',
+    name: 'Test: Rule That uses async search client',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    ruleTaskTimeout: '3s',
+    alerts: {
+      context: 'test.async.search',
+      shouldWrite: true,
+      mappings: {
+        fieldMap: {
+          number_of_docs: {
+            required: false,
+            type: 'long',
+          },
+        },
+      },
+    },
+    async executor(ruleExecutorOptions) {
+      const { services, params } = ruleExecutorOptions;
+      const strategy = params.strategy || ENHANCED_ES_SEARCH_STRATEGY;
+      const client = services.getAsyncSearchClient(strategy);
+
+      const strategies = {
+        [ENHANCED_ES_SEARCH_STRATEGY]: {
+          request: {
+            params: {
+              query: { match_all: {} },
+            },
+          },
+          count: (response: any) => {
+            return response.hits.total;
+          },
+        },
+        [ESQL_ASYNC_SEARCH_STRATEGY]: {
+          request: {
+            params: {
+              query: `FROM ${ES_TEST_INDEX_NAME}`,
+            },
+          },
+          count: (response: any) => {
+            return response.documents_found;
+          },
+        },
+        [EQL_SEARCH_STRATEGY]: {
+          request: {
+            params: {
+              index: ES_TEST_INDEX_NAME,
+              query: `any where true`,
+            },
+          },
+          count: (response: any) => {
+            return response.hits.total.value;
+          },
+        },
+      };
+
+      const response = await client.search({
+        request: strategies[strategy].request,
+      });
+
+      const numberOfDocs = strategies[strategy].count(response);
+
+      if (numberOfDocs > 0) {
+        services.alertsClient?.report({
+          id: 'async-search-rule-alert-1',
+          actionGroup: 'default',
+          payload: { number_of_docs: numberOfDocs },
+        });
+      }
+
+      return { state: {} };
+    },
+    validate: {
+      params: schema.any(),
     },
   };
   return result;
@@ -1678,4 +1779,5 @@ export function defineRuleTypes(
   alerting.registerType(getInternalRuleType());
   alerting.registerType(dangerouslyCreateAlertsInAllSpacesPersistenceRuleType);
   alerting.registerType(dangerouslyCreateAlertsInAllSpacesRuleType);
+  alerting.registerType(getAsyncSearchRuleType());
 }

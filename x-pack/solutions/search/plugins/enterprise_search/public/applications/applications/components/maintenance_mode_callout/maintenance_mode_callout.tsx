@@ -20,7 +20,7 @@ export const MaintenanceModeCallout = () => {
       <p>
         {i18n.translate('xpack.enterpriseSearch.maintenanceModeCallout.description', {
           defaultMessage:
-            'Search Applications is in maintenance mode and will only receive security updates and bug fixes in future releases.',
+            'Search applications is in maintenance mode and will only receive security updates and bug fixes in future releases.',
         })}
       </p>
     </EuiCallOut>

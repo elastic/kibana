@@ -10,9 +10,9 @@ import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
 import { getTransposeId } from '@kbn/transpose-utils';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { DatatableArgs } from '../../../../common/expressions';
-import { DataContextType } from './types';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { DatatableArgs } from '../../../../common/expressions';
+import type { DataContextType } from './types';
 import { render, screen } from '@testing-library/react';
 
 describe('datatable cell renderer', () => {

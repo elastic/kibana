@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom, from, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { firstValueFrom, from } from 'rxjs';
 import type { ConnectionRequestParams } from '@elastic/transport';
 import { tap } from 'rxjs';
 import type { Logger, SharedGlobalConfig } from '@kbn/core/server';

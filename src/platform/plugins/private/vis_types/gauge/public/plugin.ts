@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { GaugePublicConfig } from '../server/config';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
-import { VisTypeGaugePluginSetup } from './types';
+import type { VisTypeGaugePluginSetup } from './types';
 import { gaugeVisType, goalVisType } from './vis_type';
 import { setDataViewsStart } from './services';
 

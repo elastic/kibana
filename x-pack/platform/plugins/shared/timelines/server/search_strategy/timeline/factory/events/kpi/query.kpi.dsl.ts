@@ -6,9 +6,9 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { TimelineKpiRequestOptions } from '../../../../../../common/api/search_strategy/timeline/kpi';
+import type { TimelineKpiRequestOptions } from '../../../../../../common/api/search_strategy/timeline/kpi';
 
-import { TimerangeFilter, TimerangeInput } from '../../../../../../common/search_strategy';
+import type { TimerangeFilter, TimerangeInput } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/filters';
 
 export const buildTimelineKpiQuery = ({

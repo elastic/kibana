@@ -10,7 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { IndexPatternsFetcher } from '.';
 import { elasticsearchServiceMock, uiSettingsServiceMock } from '@kbn/core/server/mocks';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { DataViewMissingIndices, DataViewType } from '../../common';
 
 const rollupResponse = {

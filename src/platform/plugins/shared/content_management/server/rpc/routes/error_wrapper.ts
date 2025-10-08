@@ -8,7 +8,7 @@
  */
 
 import { boomify, isBoom } from '@hapi/boom';
-import { ResponseError, CustomHttpResponseOptions } from '@kbn/core/server';
+import type { ResponseError, CustomHttpResponseOptions } from '@kbn/core/server';
 
 export function wrapError(error: any): CustomHttpResponseOptions<ResponseError> {
   const boom = isBoom(error)

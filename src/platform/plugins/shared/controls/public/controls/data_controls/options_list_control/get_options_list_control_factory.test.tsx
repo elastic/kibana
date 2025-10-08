@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { render as rtlRender, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

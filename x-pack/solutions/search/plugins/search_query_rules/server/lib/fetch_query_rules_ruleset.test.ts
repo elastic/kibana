@@ -7,7 +7,7 @@
 
 import { MOCK_QUERY_RULESET_RESPONSE_FIXTURE } from '../../common/__fixtures__/query_rules_ruleset';
 import { fetchQueryRulesRuleset } from './fetch_query_rules_ruleset';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 describe('fetch query rules rulesets lib function', () => {
   const mockClient = {

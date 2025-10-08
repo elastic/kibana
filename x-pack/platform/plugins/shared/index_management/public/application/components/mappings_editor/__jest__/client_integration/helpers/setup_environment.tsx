@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentType, MemoExoticComponent } from 'react';
+import type { ComponentType, MemoExoticComponent } from 'react';
+import React from 'react';
 import SemVer from 'semver/classes/semver';
 
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
@@ -14,7 +15,7 @@ import { MAJOR_VERSION } from '../../../../../../../common';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
 import { AppContextProvider } from '../../../../../app_context';
-import { Props as MappingsEditorProps } from '../../../mappings_editor';
+import type { Props as MappingsEditorProps } from '../../../mappings_editor';
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
 

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  generateShortId,
-  SyntheticsMonitorDocument,
-  syntheticsMonitor,
-} from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+/**
+ * Generates a mix of well-formed and malformed (overly long fields) synthetics monitor documents.
+ */
+
+import type { SyntheticsMonitorDocument } from '@kbn/apm-synthtrace-client';
+import { generateShortId, syntheticsMonitor } from '@kbn/apm-synthtrace-client';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { MORE_THAN_1024_CHARS, getIpAddress } from './helpers/logs_mock_data';
 import { getAtIndexOrRandom } from './helpers/get_at_index_or_random';

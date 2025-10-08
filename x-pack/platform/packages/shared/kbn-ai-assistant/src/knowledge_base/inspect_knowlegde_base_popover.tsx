@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
-import { UseKnowledgeBaseResult } from '../hooks';
+import type { UseKnowledgeBaseResult } from '../hooks';
 
 export const InspectKnowledgeBasePopover = ({
   knowledgeBase,

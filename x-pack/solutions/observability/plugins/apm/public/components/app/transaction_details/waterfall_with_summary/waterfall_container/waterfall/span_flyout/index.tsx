@@ -26,17 +26,16 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
+import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { OpenSpanInDiscoverLink } from '../../../../../../shared/links/discover_links/open_span_in_discover_link';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
-import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { Summary } from '../../../../../../shared/summary';
 import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
-import { DurationSummaryItem } from '../../../../../../shared/summary/duration_summary_item';
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
-import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
 import { SyncBadge } from '../badge/sync_badge';
 import { FailureBadge } from '../failure_badge';
 import { ResponsiveFlyout } from '../responsive_flyout';
@@ -134,7 +133,7 @@ export function SpanFlyout({
     <EuiPortal>
       <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle>
                 <h2>
@@ -146,12 +145,10 @@ export function SpanFlyout({
             </EuiFlexItem>
             {span && (
               <EuiFlexItem grow={false}>
-                <DiscoverSpanLink spanId={span.span.id}>
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    { defaultMessage: 'View span in Discover' }
-                  )}
-                </DiscoverSpanLink>
+                <OpenSpanInDiscoverLink
+                  dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
+                  spanId={spanId}
+                />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -266,12 +263,12 @@ function SpanFlyoutBody({
       <EuiSpacer size="m" />
       <Summary
         items={[
-          <TimestampTooltip time={span.timestamp.us / 1000} />,
+          <Timestamp timestamp={span.timestamp.us / 1000} renderMode="tooltip" />,
           <>
-            <DurationSummaryItem
+            <Duration
               duration={span.span.duration.us}
-              totalDuration={totalDuration}
-              parentType="transaction"
+              parent={{ duration: totalDuration, type: 'transaction', loading: false }}
+              showTooltip
             />
             {span.span.composite && (
               <CompositeSpanDurationSummaryItem

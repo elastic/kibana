@@ -1,0 +1,10 @@
+$schema: https://moonrepo.dev/schemas/tasks.json
+
+fileGroups:
+  sharedGlobals: [ ]
+  default:
+    - '**/*'
+  production: [ ]
+  src:
+    - 'src/**/*'
+

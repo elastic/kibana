@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow resetting column width in surrounding docs view', async () => {
       await unifiedFieldList.clickFieldListItemAdd('@message');
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surroundingActionEl] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [, surroundingActionEl] = await dataGrid.getRowActions();
       await surroundingActionEl.click();
       await header.waitUntilLoadingHasFinished();
       await testResizeColumn('@message');
@@ -117,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow resetting column width in Dashboard panel', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
       await header.waitUntilLoadingHasFinished();
       await testResizeColumn('_source');
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should use custom column width on Dashboard when specified', async () => {
       await common.navigateToApp('dashboard');
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.clickAddFromLibrary();
       await dashboardAddPanel.addSavedSearch('A Saved Search');
       await header.waitUntilLoadingHasFinished();
       const { originalWidth, newWidth } = await dataGrid.resizeColumn('_source', -100);

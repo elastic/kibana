@@ -14,7 +14,7 @@ import {
   conversationWithContentReferences,
   welcomeConvo,
 } from '../../mock/conversation';
-import { TourState } from '../knowledge_base';
+import type { TourState } from '../knowledge_base';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());

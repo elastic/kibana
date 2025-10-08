@@ -6,9 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { FilterOptions } from '../types';
-import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
+import type { MultiSelectFilterOption } from './multi_select_filter';
+import { MultiSelectFilter } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {

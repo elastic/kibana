@@ -68,6 +68,7 @@ export const stateSchemaByVersion = {
             })
           ),
         }),
+        sections: schema.object({ total: schema.number() }),
       }),
     }),
   },
@@ -91,6 +92,9 @@ export const emptyState: LatestTaskStateSchema = {
       ignore_settings: {},
       label_position: {},
       by_type: {},
+    },
+    sections: {
+      total: 0,
     },
   },
 };

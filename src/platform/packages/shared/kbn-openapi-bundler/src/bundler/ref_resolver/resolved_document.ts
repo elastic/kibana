@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Document } from '../document';
+import type { Document } from '../document';
 
 export interface ResolvedDocument {
   /**

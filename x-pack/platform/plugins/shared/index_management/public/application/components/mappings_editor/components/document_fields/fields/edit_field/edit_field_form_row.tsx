@@ -27,7 +27,7 @@ import {
   useFormContext,
 } from '../../../../shared_imports';
 
-import { ParameterName } from '../../../../types';
+import type { ParameterName } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
 
 type ChildrenFunc = (isOn: boolean) => React.ReactNode;
@@ -161,7 +161,7 @@ export const EditFieldFormRow = React.memo(
 
             {docLink ? (
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={docLink.text}>
+                <EuiToolTip content={docLink.text} disableScreenReaderOutput>
                   <EuiButtonIcon
                     href={docLink.href}
                     target="_blank"

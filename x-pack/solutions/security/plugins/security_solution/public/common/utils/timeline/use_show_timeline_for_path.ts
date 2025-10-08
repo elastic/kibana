@@ -8,6 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
 
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { NormalizedLink } from '../../links';
 import { useNormalizedAppLinks } from '../../links/links_hooks';
 import { useKibana } from '../../lib/kibana';
@@ -36,15 +37,21 @@ export const useShowTimelineForGivenPath = () => {
   const { capabilities } = useKibana().services.application;
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
-  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+  const { indicesExist: oldIndicesExist, dataViewId } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView } = useDataView(SourcererScopeName.timeline);
+
+  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
+
   const hiddenTimelineRoutes = useHiddenTimelineRoutes();
 
   const isTimelineAllowed = useMemo(() => {
     // NOTE: with new Data View Picker, data view is always defined
     if (newDataViewPickerEnabled) {
-      return userHasSecuritySolutionVisible;
+      return userHasSecuritySolutionVisible && indicesExist;
     }
 
     return userHasSecuritySolutionVisible && (indicesExist || dataViewId === null);

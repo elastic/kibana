@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WebDriver, WebElement, By, until } from 'selenium-webdriver';
+import type { WebDriver, WebElement } from 'selenium-webdriver';
+import { By, until } from 'selenium-webdriver';
 
-import { Browsers } from './remote/browsers';
+import type { Browsers } from './remote/browsers';
 import type { FtrProviderContext } from './ftr_provider_context';
 import { WebElementWrapper } from './web_element_wrapper';
-import { TimeoutOpt } from '../types';
+import type { TimeoutOpt } from '../types';
 
 import { FtrService } from './ftr_provider_context';
 
@@ -414,14 +415,14 @@ export class FindService extends FtrService {
   public async clickByCssSelector(
     selector: string,
     timeout: number = this.defaultFindTimeout,
-    topOffset?: number
+    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number }
   ): Promise<void> {
     this.log.debug(`Find.clickByCssSelector('${selector}') with timeout=${timeout}`);
     await this.retry.try(async () => {
       const element = await this.byCssSelector(selector, timeout);
       if (element) {
         // await element.moveMouseTo();
-        await element.click(topOffset);
+        await element.click(topOffsetOrOptions);
       } else {
         throw new Error(`Element with css='${selector}' is not found`);
       }

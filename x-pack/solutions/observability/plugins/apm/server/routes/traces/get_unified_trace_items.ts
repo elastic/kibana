@@ -24,11 +24,17 @@ import {
   TRANSACTION_DURATION,
   TRANSACTION_ID,
   TRANSACTION_NAME,
+  TIMESTAMP_US,
+  EVENT_OUTCOME,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  KIND,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
 import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
 import type { UnifiedTraceErrors } from './get_unified_trace_errors';
+import { parseOtelDuration } from '../../lib/helpers/parse_otel_duration';
 
 const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -43,26 +49,35 @@ const optionalFields = asMutableArray([
   PROCESSOR_EVENT,
   PARENT_ID,
   STATUS_CODE,
+  TIMESTAMP_US,
+  EVENT_OUTCOME,
+  STATUS_CODE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  KIND,
 ] as const);
 
-export function getErrorCountByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
-  const groupedErrorCountByDocId: Record<string, number> = {};
+export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
+  const groupedErrorsByDocId: Record<string, Array<{ errorDocId: string }>> = {};
 
-  function incrementErrorCount(id: string) {
-    if (!groupedErrorCountByDocId[id]) {
-      groupedErrorCountByDocId[id] = 0;
+  function addError(id: string, errorDocId: string) {
+    if (!groupedErrorsByDocId[id]) {
+      groupedErrorsByDocId[id] = [];
     }
-    groupedErrorCountByDocId[id] += 1;
+    groupedErrorsByDocId[id].push({ errorDocId });
   }
 
-  unifiedTraceErrors.apmErrors.forEach((doc) =>
-    doc.parent?.id ? incrementErrorCount(doc.parent.id) : undefined
-  );
-  unifiedTraceErrors.unprocessedOtelErrors.forEach((doc) =>
-    doc.id ? incrementErrorCount(doc.id) : undefined
+  unifiedTraceErrors.apmErrors.forEach((errorDoc) => {
+    const id = errorDoc.transaction?.id || errorDoc.span?.id;
+    if (id) {
+      addError(id, errorDoc.id);
+    }
+  });
+  unifiedTraceErrors.unprocessedOtelErrors.forEach((errorDoc) =>
+    errorDoc.spanId ? addError(errorDoc.spanId, errorDoc.id) : undefined
   );
 
-  return groupedErrorCountByDocId;
+  return groupedErrorsByDocId;
 }
 
 /**
@@ -133,8 +148,7 @@ export async function getUnifiedTraceItems({
     { skipProcessorEventFilter: true }
   );
 
-  const errorCountByDocId = getErrorCountByDocId(unifiedTraceErrors);
-
+  const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
   return response.hits.hits
     .map((hit) => {
       const event = unflattenKnownApmEventFields(hit.fields, fields);
@@ -144,20 +158,23 @@ export async function getUnifiedTraceItems({
         return undefined;
       }
 
-      const docErrorCount = errorCountByDocId[id] || 0;
+      const docErrors = errorsByDocId[id] || [];
       return {
         id: event.span?.id ?? event.transaction?.id,
-        timestamp: event[AT_TIMESTAMP],
+        timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
         name: event.span?.name ?? event.transaction?.name,
         traceId: event.trace.id,
         duration: resolveDuration(apmDuration, event.duration),
-        hasError:
-          docErrorCount > 0 ||
-          (event.status?.code && Array.isArray(event.status.code)
-            ? event.status.code[0] === 'Error'
-            : false),
+        ...((event.event?.outcome || event.status?.code) && {
+          status: {
+            fieldName: event.event?.outcome ? EVENT_OUTCOME : STATUS_CODE,
+            value: event.event?.outcome || event.status?.code,
+          },
+        }),
+        errors: docErrors,
         parentId: event.parent?.id,
         serviceName: event.service.name,
+        type: event.span?.subtype || event.span?.type || event.kind,
       } as TraceItem;
     })
     .filter((_) => _) as TraceItem[];
@@ -166,16 +183,7 @@ export async function getUnifiedTraceItems({
 /**
  * Resolve either an APM or OTEL duration and if OTEL, format the duration from nanoseconds to microseconds.
  */
-function resolveDuration(apmDuration?: number, otelDuration?: number[] | string): number {
-  if (apmDuration) {
-    return apmDuration;
-  }
+const resolveDuration = (apmDuration?: number, otelDuration?: number[] | string): number =>
+  apmDuration ?? parseOtelDuration(otelDuration);
 
-  const duration = Array.isArray(otelDuration)
-    ? otelDuration[0]
-    : otelDuration
-    ? parseFloat(otelDuration)
-    : 0;
-
-  return duration * 0.001;
-}
+const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us

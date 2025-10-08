@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RelatedSavedObject } from '@kbn/notifications-plugin/server/services/types';
-import { ReportingCore } from '../..';
+import type { RelatedSavedObject } from '@kbn/notifications-plugin/server/services/types';
+import type { ReportingCore } from '../..';
 
 export interface NotifyArgs {
   reporting: ReportingCore;

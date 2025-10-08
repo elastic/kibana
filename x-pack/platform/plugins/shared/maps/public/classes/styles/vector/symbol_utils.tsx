@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
+import React from 'react';
 import xml2js from 'xml2js';
 import { v4 as uuidv4 } from 'uuid';
 import { Canvg } from 'canvg';

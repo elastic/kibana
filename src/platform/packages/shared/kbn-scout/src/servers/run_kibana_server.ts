@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { parseRawFlags, getArgValue, remapPluginPaths, DedicatedTaskRunner } from '@kbn/test';
-import { Config } from '../config';
+import type { Config } from '../config';
 
 export async function runKibanaServer(options: {
   procs: ProcRunner;

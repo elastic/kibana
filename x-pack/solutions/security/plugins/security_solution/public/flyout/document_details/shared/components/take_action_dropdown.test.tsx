@@ -39,7 +39,6 @@ jest.mock('../../../../detections/components/user_info', () => ({
 }));
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
 
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
@@ -103,6 +102,7 @@ describe('take action dropdown', () => {
             helpers: {
               canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
               getRuleIdFromEvent: () => null,
+              getObservablesFromEcs: jest.fn().mockReturnValue([]),
             },
           },
           osquery: {
@@ -189,9 +189,9 @@ describe('take action dropdown', () => {
 
     test('should render "mark as close"', async () => {
       await waitFor(() => {
-        expect(wrapper.find('[data-test-subj="close-alert-status"]').first().text()).toEqual(
-          'Mark as closed'
-        );
+        expect(
+          wrapper.find('[data-test-subj="alert-close-context-menu-item"]').first().text()
+        ).toEqual('Mark as closed');
       });
     });
 

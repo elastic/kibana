@@ -33,7 +33,6 @@ const webhook = {
   secret: 'secret',
 };
 
-// eslint-disable-next-line import/no-default-export
 export default function tinesTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
@@ -571,7 +570,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
             const events: IValidatedEvent[] = await retry.try(async () => {
@@ -609,7 +608,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
           });
@@ -629,7 +628,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
           });

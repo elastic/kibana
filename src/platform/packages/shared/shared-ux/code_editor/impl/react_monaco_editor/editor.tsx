@@ -27,15 +27,17 @@
  * THE SOFTWARE.
  */
 
-import {
-  monaco as monacoEditor,
-  monaco,
-  defaultThemesResolvers,
-  initializeSupportedLanguages,
-} from '@kbn/monaco';
+import type { monaco as monacoEditor } from '@kbn/monaco';
+import { monaco, defaultThemesResolvers, initializeSupportedLanguages } from '@kbn/monaco';
 import { useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
+
+if (process.env.NODE_ENV !== 'production') {
+  import(
+    'monaco-editor/esm/vs/editor/standalone/browser/quickAccess/standaloneCommandsQuickAccess'
+  );
+}
 
 export type EditorConstructionOptions = monacoEditor.editor.IStandaloneEditorConstructionOptions;
 
@@ -211,6 +213,27 @@ export function MonacoEditor({
         ...(className ? { extraEditorClassName: className } : {}),
         ...finalOptions,
         ...(theme ? { theme } : {}),
+      });
+
+      monaco.editor.onDidChangeMarkers(() => {
+        let currentEditorModel: monaco.editor.ITextModel | null;
+
+        if (!editor.current || (currentEditorModel = editor.current?.getModel()) === null) {
+          return;
+        }
+
+        const markers = monaco.editor.getModelMarkers({
+          resource: currentEditorModel.uri,
+        });
+
+        const hasErrors = markers.some((m) => m.severity === monaco.MarkerSeverity.Error);
+
+        const $editor = editor.current.getDomNode();
+
+        if ($editor) {
+          const textbox = $editor.querySelector('textarea[aria-roledescription="editor"]');
+          textbox?.setAttribute('aria-invalid', hasErrors ? 'true' : 'false');
+        }
       });
       // After initializing monaco editor
       handleEditorDidMount();

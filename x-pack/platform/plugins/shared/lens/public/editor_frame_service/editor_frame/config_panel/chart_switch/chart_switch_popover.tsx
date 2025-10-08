@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { ChartSwitchTrigger } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import { useLensSelector, selectVisualization } from '../../../../state_management';
-import { ChartSwitch, ChartSwitchProps } from './chart_switch';
+import type { ChartSwitchProps } from './chart_switch';
+import { ChartSwitch } from './chart_switch';
 
 export const ChartSwitchPopover = memo(function ChartSwitchPopover(
   props: Omit<ChartSwitchProps, 'onChartSelect'>

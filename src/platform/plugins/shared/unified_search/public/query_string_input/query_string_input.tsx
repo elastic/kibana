@@ -11,28 +11,28 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 
+import type { EuiIconProps, PopoverAnchorPosition } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayoutIcons,
-  EuiIconProps,
   EuiLink,
   EuiOutsideClickDetector,
   EuiPortal,
   EuiTextArea,
   htmlIdGenerator,
-  PopoverAnchorPosition,
   toSentenceCase,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
-import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
-import type { Query } from '@kbn/es-query';
-import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
-import { type DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { PersistedLog } from '@kbn/data-plugin/public';
+import type { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
+import type { Query, Filter } from '@kbn/es-query';
+import { getQueryLog } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { type DataView } from '@kbn/data-views-plugin/public';
+import type { PersistedLog, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   getFieldSubtypeNested,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
@@ -41,7 +41,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { matchPairs } from './match_pairs';
 import { toUser } from './to_user';
 import { fromUser } from './from_user';
@@ -54,7 +54,8 @@ import type {
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import { AutocompleteService, QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import type { AutocompleteService, QuerySuggestion } from '../autocomplete';
+import { QuerySuggestionTypes } from '../autocomplete';
 import { getCoreStart } from '../services';
 import { StyledDiv } from './query_string_input.styles';
 
@@ -210,6 +211,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     this.props.appName
   );
   private componentIsUnmounting = false;
+  private hasScrollListener = false;
 
   /**
    * If any element within the container is currently focused
@@ -652,6 +654,11 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     }
   };
 
+  private handleResize = () => {
+    this.handleAutoHeight();
+    this.handleBlurOnScroll();
+  };
+
   private onClickSuggestion = (suggestion: QuerySuggestion, index: number) => {
     if (!this.inputRef) {
       return;
@@ -684,7 +691,9 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     this.fetchIndexPatterns();
     this.handleAutoHeight();
 
-    window.addEventListener('resize', this.handleAutoHeight);
+    window.addEventListener('resize', this.handleResize);
+
+    this.handleBlurOnScroll();
   }
 
   public componentDidUpdate(prevProps: QueryStringInputProps) {
@@ -722,13 +731,29 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     if (this.abortController) this.abortController.abort();
     if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
-    window.removeEventListener('resize', this.handleAutoHeight);
+    window.removeEventListener('resize', this.handleResize);
+    if (this.hasScrollListener) window.removeEventListener('scroll', this.onOutsideClick);
   }
 
   handleAutoHeight = onRaf(() => {
     if (this.inputRef !== null && document.activeElement === this.inputRef) {
       this.inputRef.classList.add('kbnQueryBar__textarea--autoHeight');
       this.inputRef.style.setProperty('height', `${this.inputRef.scrollHeight}px`, 'important');
+    }
+  });
+
+  handleBlurOnScroll = onRaf(() => {
+    // for small screens, unified search bar is no longer sticky,
+    // so we need to blur the input when it scrolls out of view
+    // TODO: replace screen width value with euiTheme breakpoint once this component is converted to a functional component
+    const isSmallScreen = window.innerWidth < 768;
+
+    if (isSmallScreen && !this.hasScrollListener) {
+      window.addEventListener('scroll', this.onOutsideClick);
+      this.hasScrollListener = true;
+    } else if (!isSmallScreen && this.hasScrollListener) {
+      window.removeEventListener('scroll', this.onOutsideClick);
+      this.hasScrollListener = false;
     }
   });
 
@@ -866,6 +891,11 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
                   clear={{
                     onClick: () => {
                       this.onQueryStringChange('');
+                      // Force close the dropdown/suggestions
+                      this.setState({
+                        isSuggestionsVisible: false,
+                        index: null,
+                      });
                       if (this.props.autoSubmit) {
                         this.onSubmit({ query: '', language: this.props.query.language });
                       }

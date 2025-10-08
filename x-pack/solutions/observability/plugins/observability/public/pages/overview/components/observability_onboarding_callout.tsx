@@ -14,12 +14,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback } from 'react';
-import { ObservabilityPublicPluginsStart } from '../../../plugin';
+import type { ObservabilityPublicPluginsStart } from '../../../plugin';
 import { useObservabilityOnboarding } from '../../../hooks/use_observability_onboarding';
 
 export function ObservabilityOnboardingCallout() {
@@ -37,7 +37,7 @@ export function ObservabilityOnboardingCallout() {
     trackMetric({ metric: 'observability_onboarding_dismiss' });
   }, [dismissObservabilityOnboarding, trackMetric]);
 
-  const getStarted = () => {
+  const addData = () => {
     trackMetric({ metric: 'observability_onboarding_get_started' });
     application?.navigateToUrl(onboardingHref!);
   };
@@ -51,7 +51,7 @@ export function ObservabilityOnboardingCallout() {
               <h2>
                 <FormattedMessage
                   id="xpack.observability.overview.observabilityOnboarding"
-                  defaultMessage="Collect and analyze logs in observability"
+                  defaultMessage="Want to observe more?"
                 />
               </h2>
             </EuiTitle>
@@ -59,7 +59,7 @@ export function ObservabilityOnboardingCallout() {
               <p>
                 <FormattedMessage
                   id="xpack.observability.overview.observabilityOnboarding.description"
-                  defaultMessage="Onboard your data in up to 5 minutes to start analyzing it straight away."
+                  defaultMessage="Add more data so you can detect and resolve problems with your systems."
                 />
               </p>
             </EuiText>
@@ -80,13 +80,13 @@ export function ObservabilityOnboardingCallout() {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButton
-                  data-test-subj="o11yObservabilityOnboardingGetStartedButton"
+                  data-test-subj="o11yObservabilityOnboardingAddDataButton"
                   size="s"
-                  onClick={getStarted}
+                  onClick={addData}
                 >
                   <FormattedMessage
-                    id="xpack.observability.overview.observabilityOnboarding.getStarted"
-                    defaultMessage="Get started"
+                    id="xpack.observability.overview.observabilityOnboarding.action"
+                    defaultMessage="Add data"
                   />
                 </EuiButton>
               </EuiFlexItem>

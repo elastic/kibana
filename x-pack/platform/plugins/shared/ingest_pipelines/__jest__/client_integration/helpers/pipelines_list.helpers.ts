@@ -6,14 +6,10 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
-import {
-  registerTestBed,
-  TestBed,
-  AsyncTestBedConfig,
-  findTestSubject,
-} from '@kbn/test-jest-helpers';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
 import { WithAppDependencies } from './setup_environment';
 import { getListPath, ROUTES } from '../../../public/application/services/navigation';
@@ -37,14 +33,14 @@ const createActions = (testBed: TestBed) => {
   };
 
   const clickPipelineAt = async (index: number) => {
-    const { component, table, router } = testBed;
+    const { component, table } = testBed;
     const { rows } = table.getMetaData('pipelinesTable');
     const pipelineLink = findTestSubject(rows[index].reactWrapper, 'pipelineDetailsLink');
 
-    await act(async () => {
-      const { href } = pipelineLink.props();
-      router.navigateTo(href!);
+    act(() => {
+      pipelineLink.simulate('click');
     });
+
     component.update();
   };
 
@@ -107,7 +103,7 @@ export type PipelineListTestSubjects =
   | 'createPipelineDropdown'
   | 'pipelinesTable'
   | 'pipelineDetails'
-  | 'pipelineDetails.title'
+  | 'detailsPanelTitle'
   | 'deletePipelinesConfirmation'
   | 'emptyList'
   | 'emptyList.title'
@@ -121,4 +117,5 @@ export type PipelineListTestSubjects =
   | 'pipelineError.cause'
   | 'missingCustomPipeline'
   | 'missingCustomPipeline.cause'
-  | 'createCustomPipeline';
+  | 'createCustomPipeline'
+  | 'pipelineTreePanel';

@@ -11,7 +11,7 @@ import React, { useRef } from 'react';
 import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
-import { ExpressionRenderError } from '../types';
+import type { ExpressionRenderError } from '../types';
 import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';
 

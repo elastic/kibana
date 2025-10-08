@@ -14,7 +14,7 @@ import {
   matchToken,
   matchTokens,
 } from './shared';
-import { monaco } from '../../../monaco_imports';
+import type { monaco } from '../../../monaco_imports';
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   ...consoleSharedLanguageConfiguration,

@@ -19,13 +19,16 @@ import type {
   IndicesGetMappingResponse,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { Owner } from '../../../../common/constants/types';
+import type { ConfigType } from '../../../config';
 import { isRetryableEsClientError } from '../../utils';
-import { SYNCHRONIZATION_QUERIES_DICTIONARY } from '../../constants';
+import { type CAISyncType, SYNCHRONIZATION_QUERIES_DICTIONARY } from '../../constants';
 
 interface SynchronizationTaskRunnerFactoryConstructorParams {
   taskInstance: ConcreteTaskInstance;
   getESClient: () => Promise<ElasticsearchClient>;
   logger: Logger;
+  analyticsConfig: ConfigType['analytics'];
 }
 
 interface SynchronizationTaskState {
@@ -46,10 +49,14 @@ const LOOKBACK_WINDOW = 5 * 60 * 1000;
 export class SynchronizationTaskRunner implements CancellableTask {
   private readonly sourceIndex: string;
   private readonly destIndex: string;
+  private readonly owner: Owner;
+  private readonly spaceId: string;
+  private readonly syncType: CAISyncType;
   private readonly getESClient: () => Promise<ElasticsearchClient>;
   private readonly logger: Logger;
   private readonly errorSource = TaskErrorSource.FRAMEWORK;
   private readonly esReindexTaskId: TaskId | undefined;
+  private readonly analyticsConfig: ConfigType['analytics'];
   private lastSyncSuccess: Date | undefined;
   private lastSyncAttempt: Date | undefined;
 
@@ -57,6 +64,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
     taskInstance,
     getESClient,
     logger,
+    analyticsConfig,
   }: SynchronizationTaskRunnerFactoryConstructorParams) {
     if (taskInstance.state.lastSyncSuccess)
       this.lastSyncSuccess = new Date(taskInstance.state.lastSyncSuccess);
@@ -65,14 +73,30 @@ export class SynchronizationTaskRunner implements CancellableTask {
     this.esReindexTaskId = taskInstance.state.esReindexTaskId;
     this.sourceIndex = taskInstance.params.sourceIndex;
     this.destIndex = taskInstance.params.destIndex;
+    this.owner = taskInstance.params.owner;
+    this.spaceId = taskInstance.params.spaceId;
+    this.syncType = taskInstance.params.syncType;
     this.getESClient = getESClient;
     this.logger = logger;
+    this.analyticsConfig = analyticsConfig;
   }
 
   public async run() {
+    if (!this.analyticsConfig.index.enabled) {
+      this.logDebug('Analytics index is disabled, skipping synchronization task.');
+      return;
+    }
+
     const esClient = await this.getESClient();
 
     try {
+      const destIndexExists = await esClient.indices.exists({ index: this.destIndex });
+
+      if (!destIndexExists) {
+        this.logDebug('Destination index does not exist, skipping synchronization task.');
+        return;
+      }
+
       const previousReindexStatus = await this.getPreviousReindexStatus(esClient);
       this.logDebug(`Previous synchronization task status: "${previousReindexStatus}".`);
 
@@ -178,11 +202,10 @@ export class SynchronizationTaskRunner implements CancellableTask {
     if (painlessScript.found) {
       this.logDebug(`Synchronizing with ${this.sourceIndex}.`);
 
-      const sourceQuery = this.buildSourceQuery();
       const reindexResponse = await esClient.reindex({
         source: {
           index: this.sourceIndex,
-          query: sourceQuery,
+          query: this.buildSourceQuery(),
         },
         dest: { index: this.destIndex },
         script: {
@@ -224,8 +247,10 @@ export class SynchronizationTaskRunner implements CancellableTask {
   }
 
   private buildSourceQuery(): QueryDslQueryContainer {
-    return SYNCHRONIZATION_QUERIES_DICTIONARY[this.destIndex](
-      new Date(this.lastSyncSuccess ? this.lastSyncSuccess : Date.now() - LOOKBACK_WINDOW)
+    return SYNCHRONIZATION_QUERIES_DICTIONARY[this.syncType](
+      new Date(this.lastSyncSuccess ? this.lastSyncSuccess : Date.now() - LOOKBACK_WINDOW),
+      this.spaceId,
+      this.owner
     );
   }
 
@@ -275,8 +300,7 @@ export class SynchronizationTaskRunner implements CancellableTask {
     return esClient.cluster.health({
       index: this.destIndex,
       wait_for_status: 'green',
-      timeout: '300ms', // this is probably too much
-      wait_for_active_shards: 'all',
+      timeout: '30s',
     });
   }
 

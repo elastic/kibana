@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import actionCreatorFactory, { Action } from 'typescript-fsa';
+import type { Action } from 'typescript-fsa';
+import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { takeLatest } from 'redux-saga/effects';
-import { GraphState, GraphStoreDependencies } from './store';
-import { AdvancedSettings } from '../types';
+import type { GraphState, GraphStoreDependencies } from './store';
+import type { AdvancedSettings } from '../types';
 import { reset } from './global';
 import { setDatasource, requestDatasource } from './datasource';
 

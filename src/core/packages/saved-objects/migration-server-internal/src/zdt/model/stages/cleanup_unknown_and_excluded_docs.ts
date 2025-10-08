@@ -38,17 +38,10 @@ export const cleanupUnknownAndExcludedDocs: ModelStage<
     };
   } else if (res.right.type === 'cleanup_not_needed') {
     // let's move to the step after CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK
-    if (state.hasDeletedDocs) {
-      return {
-        ...state,
-        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_REFRESH',
-      };
-    } else {
-      return {
-        ...state,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-      };
-    }
+    return {
+      ...state,
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+    };
   } else {
     throwBadResponse(state, res.right);
   }

@@ -10,7 +10,8 @@
 import React from 'react';
 
 import { buildMockDashboardApi } from '../../mocks';
-import { Item, Props as DashboardGridItemProps } from './dashboard_grid_item';
+import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
+import { Item } from './dashboard_grid_item';
 import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
 import { act, render } from '@testing-library/react';
@@ -37,16 +38,16 @@ const TEST_EMBEDDABLE = 'TEST_EMBEDDABLE';
 const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
   const panels = [
     {
-      gridData: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+      grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
       type: TEST_EMBEDDABLE,
-      panelConfig: {},
-      panelIndex: '1',
+      config: {},
+      uid: '1',
     },
     {
-      gridData: { x: 6, y: 6, w: 6, h: 6, i: '2' },
+      grid: { x: 6, y: 6, w: 6, h: 6, i: '2' },
       type: TEST_EMBEDDABLE,
-      panelConfig: {},
-      panelIndex: '2',
+      config: {},
+      uid: '2',
     },
   ];
   const { api, internalApi } = buildMockDashboardApi({ overrides: { panels } });

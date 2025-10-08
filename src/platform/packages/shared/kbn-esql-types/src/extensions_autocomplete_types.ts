@@ -22,13 +22,3 @@ export interface RecommendedField {
   // The associated index pattern for the field, used to match the field with the current query's index pattern
   pattern: string;
 }
-
-interface ResolveIndexResponseItem {
-  name: string;
-}
-
-export interface ResolveIndexResponse {
-  indices?: ResolveIndexResponseItem[];
-  aliases?: ResolveIndexResponseItem[];
-  data_streams?: ResolveIndexResponseItem[];
-}

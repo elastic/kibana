@@ -904,3 +904,65 @@ export const findInternalCaseUserActions = async ({
 
   return userActions;
 };
+
+export const deleteAllCaseAnalyticsItems = async (es: Client) => {
+  try {
+    await Promise.all([
+      deleteCasesAnalytics(es),
+      deleteAttachmentsAnalytics(es),
+      deleteCommentsAnalytics(es),
+      deleteActivityAnalytics(es),
+    ]);
+  } catch (_) {
+    // ignore errors, indexes might not exist yet
+  }
+};
+
+export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: ['.internal.cases.default-securitysolution', '.internal.cases.space1-securitysolution'],
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteAttachmentsAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: [
+      '.internal.cases-attachments.default-securitysolution',
+      '.internal.cases-attachments.space1-securitysolution',
+    ],
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: [
+      '.internal.cases-comments.default-securitysolution',
+      '.internal.cases-comments.space1-securitysolution',
+    ],
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};
+
+export const deleteActivityAnalytics = async (es: Client): Promise<void> => {
+  await es.deleteByQuery({
+    index: [
+      '.internal.cases-activity.default-securitysolution',
+      '.internal.cases-activity.space1-securitysolution',
+    ],
+    query: { match_all: {} },
+    wait_for_completion: true,
+    refresh: true,
+    conflicts: 'proceed',
+  });
+};

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OpenTelemetryAgentName } from '../../types/agent_names';
+import type { OpenTelemetryAgentName } from '../../types/agent_names';
 import { Entity } from '../entity';
-import { ApmFields } from './apm_fields';
+import type { ApmFields } from './apm_fields';
 import { Instance } from './instance';
-import { OtelService, OtelServiceParams } from './otel';
+import type { OtelServiceParams } from './otel';
+import { OtelService } from './otel';
 
 export class Service extends Entity<ApmFields> {
   instance(instanceName: string) {

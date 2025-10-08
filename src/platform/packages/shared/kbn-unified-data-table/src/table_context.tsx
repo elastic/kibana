@@ -10,7 +10,7 @@
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { ValueToStringConverter } from './types';
 import type { UseSelectedDocsState } from './hooks/use_selected_docs';
 

@@ -10,7 +10,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SuggestionComponent } from './suggestion_component';
-import { QuerySuggestion, QuerySuggestionTypes } from '../autocomplete';
+import type { QuerySuggestion } from '../autocomplete';
+import { QuerySuggestionTypes } from '../autocomplete';
 import { userEvent } from '@testing-library/user-event';
 
 const noop = () => {};

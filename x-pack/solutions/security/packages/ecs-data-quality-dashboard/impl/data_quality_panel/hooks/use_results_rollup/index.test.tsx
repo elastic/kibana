@@ -260,7 +260,7 @@ describe('useResultsRollup', () => {
 
         expect(mockTelemetryEvents.reportDataQualityIndexChecked).toHaveBeenCalledWith({
           batchId: 'test-batch',
-          ecsVersion: '8.11.0',
+          ecsVersion: '9.0.0',
           errorCount: 0,
           ilmPhase: 'hot',
           indexId: 'uuid-1',
@@ -282,7 +282,7 @@ describe('useResultsRollup', () => {
         });
         expect(mockTelemetryEvents.reportDataQualityCheckAllCompleted).toHaveBeenCalledWith({
           batchId: 'test-batch',
-          ecsVersion: '8.11.0',
+          ecsVersion: '9.0.0',
           isCheckAll: true,
           numberOfDocuments: 1000000,
           numberOfIncompatibleFields: 3,
@@ -370,10 +370,10 @@ describe('useResultsRollup', () => {
             '### .ds-packetbeat-1\n',
             '| Result | Index | Docs | Incompatible fields | ILM Phase | Size |\n|--------|-------|------|---------------------|-----------|------|\n| ❌ | .ds-packetbeat-1 | 1,000,000 (100.0%) | 3 | `hot` | 476.8MB |\n\n',
             '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
-            "#### 3 incompatible fields\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version 8.11.0.\n\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n",
+            "#### 3 incompatible fields\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version 9.0.0.\n\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n",
             '\n#### Incompatible field mappings - .ds-packetbeat-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text` |\n| source.ip | `ip` | `text` |\n\n#### Incompatible field values - .ds-packetbeat-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n',
           ],
-          ecsVersion: '8.11.0',
+          ecsVersion: '9.0.0',
           indexId: 'uuid-1',
           error: null,
         });
@@ -423,7 +423,7 @@ describe('useResultsRollup', () => {
 
           expect(mockTelemetryEvents.reportDataQualityIndexChecked).toHaveBeenCalledWith({
             batchId: 'test-batch',
-            ecsVersion: '8.11.0',
+            ecsVersion: '9.0.0',
             errorCount: 0,
             ilmPhase: undefined,
             indexId: 'uuid-1',
@@ -445,7 +445,7 @@ describe('useResultsRollup', () => {
           });
           expect(mockTelemetryEvents.reportDataQualityCheckAllCompleted).toHaveBeenCalledWith({
             batchId: 'test-batch',
-            ecsVersion: '8.11.0',
+            ecsVersion: '9.0.0',
             isCheckAll: true,
             numberOfDocuments: 1000000,
             numberOfIncompatibleFields: 3,
@@ -527,16 +527,15 @@ describe('useResultsRollup', () => {
             sameFamilyFieldItems: [],
             unallowedMappingFields: ['host.name', 'source.ip'],
             unallowedValueFields: ['event.category'],
-            ilmPhase: undefined,
             sizeInBytes: 0,
             markdownComments: [
               '### .ds-packetbeat-1\n',
               '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|\n| ❌ | .ds-packetbeat-1 | 1,000,000 (100.0%) | 3 |\n\n',
               '### **Incompatible fields** `3` **Same family** `0` **Custom fields** `4` **ECS compliant fields** `2` **All fields** `9`\n',
-              "#### 3 incompatible fields\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version 8.11.0.\n\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n",
+              "#### 3 incompatible fields\n\nFields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version 9.0.0.\n\n❌ Detection engine rules referencing these fields may not match them correctly\n❌ Pages may not display some events or fields due to unexpected field mappings or values\n❌ Mappings or field values that don't comply with ECS are not supported\n",
               '\n#### Incompatible field mappings - .ds-packetbeat-1\n\n\n| Field | ECS mapping type (expected) | Index mapping type (actual) | \n|-------|-----------------------------|-----------------------------|\n| host.name | `keyword` | `text` |\n| source.ip | `ip` | `text` |\n\n#### Incompatible field values - .ds-packetbeat-1\n\n\n| Field | ECS values (expected) | Document values (actual) | \n|-------|-----------------------|--------------------------|\n| event.category | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` | `an_invalid_category` (2), `theory` (1) |\n\n',
             ],
-            ecsVersion: '8.11.0',
+            ecsVersion: '9.0.0',
             indexId: 'uuid-1',
             error: null,
           });

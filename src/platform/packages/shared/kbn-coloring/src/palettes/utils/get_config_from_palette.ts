@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
-import { ColorMapping, DEFAULT_COLOR_MAPPING_CONFIG } from '../../shared_components';
+import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+import type { ColorMapping } from '../../shared_components';
+import { DEFAULT_COLOR_MAPPING_CONFIG } from '../../shared_components';
 import { isNotNull } from '../../shared_components/color_mapping/components/assignment/match';
 
 const singleColorGradientPalettes = new Set<string>([

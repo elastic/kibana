@@ -8,9 +8,9 @@
  */
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { convertToLens } from '.';
-import { HeatmapVisParams } from '../types';
+import type { HeatmapVisParams } from '../types';
 
 const mockGetColumnsFromVis = jest.fn();
 const mockGetConfiguration = jest.fn().mockReturnValue({});

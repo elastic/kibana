@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
+import type { RangeColumnParams, UpdateParamsFnType, MODES_TYPES } from './ranges';
 import { AdvancedRangeEditor } from './advanced_editor';
 import { TYPING_DEBOUNCE_TIME, MODES, MIN_HISTOGRAM_BARS } from './constants';
 import { useDebounceWithOptions } from '../../../../../shared_components';
@@ -148,7 +148,7 @@ const BaseRangeEditor = ({
       >
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={decreaseButtonLabel} delay="long">
+            <EuiToolTip content={decreaseButtonLabel} delay="long" disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="minusInCircle"
                 color="text"
@@ -174,7 +174,7 @@ const BaseRangeEditor = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={increaseButtonLabel} delay="long">
+            <EuiToolTip content={increaseButtonLabel} delay="long" disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="plusInCircle"
                 color="text"

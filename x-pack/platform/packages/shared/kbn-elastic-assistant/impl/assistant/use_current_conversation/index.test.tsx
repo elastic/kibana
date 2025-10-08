@@ -6,13 +6,15 @@
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { useCurrentConversation, Props } from '.';
+import type { Props } from '.';
+import { useCurrentConversation } from '.';
 import { useConversation } from '../use_conversation';
 import deepEqual from 'fast-deep-equal';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { Conversation } from '../../..';
+import type { Conversation } from '../../..';
 import { find } from 'lodash';
-import { AIConnector } from '../../connectorland/connector_selector';
+import type { AIConnector } from '../../connectorland/connector_selector';
+import { MOCK_CURRENT_USER } from '../../mock/conversation';
 
 // Mock dependencies
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
@@ -20,7 +22,8 @@ jest.mock('../use_conversation');
 jest.mock('../helpers');
 jest.mock('fast-deep-equal');
 jest.mock('lodash');
-const defaultConnector: AIConnector = {
+const MOCK_DATE = '2025-02-19T23:28:54.962Z';
+const defaultConnectorMock: AIConnector = {
   actionTypeId: '.gen-ai',
   isPreconfigured: false,
   isDeprecated: false,
@@ -47,6 +50,9 @@ const mockData = {
       defaultSystemPromptId: 'system-prompt-id',
     },
     replacements: {},
+    createdAt: MOCK_DATE,
+    createdBy: MOCK_CURRENT_USER,
+    users: [MOCK_CURRENT_USER],
   },
   electric_sheep_id: {
     id: 'electric_sheep_id',
@@ -55,9 +61,13 @@ const mockData = {
     messages: [],
     apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
     replacements: {},
+    createdAt: MOCK_DATE,
+    createdBy: MOCK_CURRENT_USER,
+    users: [MOCK_CURRENT_USER],
   },
 };
-const setLastConversation = jest.fn();
+const setLastConversationMock = jest.fn();
+
 describe('useCurrentConversation', () => {
   const mockUseConversation = {
     createConversation: jest.fn(),
@@ -65,7 +75,10 @@ describe('useCurrentConversation', () => {
     getConversation: jest.fn(),
     setApiConfig: jest.fn(),
   };
-
+  beforeAll(() => {
+    const mockDate = new Date(MOCK_DATE);
+    jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
+  });
   beforeEach(() => {
     (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
     (deepEqual as jest.Mock).mockReturnValue(false);
@@ -77,6 +90,10 @@ describe('useCurrentConversation', () => {
     jest.clearAllMocks();
   });
 
+  afterAll(() => {
+    (Date as unknown as jest.Mock).mockRestore();
+  });
+
   const defaultProps: Props = {
     // @ts-ignore not exact system prompt type, ok for test
     allSystemPrompts: [{ id: 'system-prompt-id' }, { id: 'something-crazy' }],
@@ -84,7 +101,7 @@ describe('useCurrentConversation', () => {
     conversations: {},
     mayUpdateConversations: true,
     refetchCurrentUserConversations: jest.fn().mockResolvedValue({ data: mockData }),
-    setLastConversation,
+    setLastConversation: setLastConversationMock,
     spaceId: 'default',
   };
 
@@ -101,6 +118,9 @@ describe('useCurrentConversation', () => {
       messages: [],
       replacements: {},
       title: '',
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
     expect(result.current.currentSystemPrompt).toBeUndefined();
   });
@@ -108,7 +128,7 @@ describe('useCurrentConversation', () => {
   it('should initialize with apiConfig if defaultConnector is provided', () => {
     (useLocalStorage as jest.Mock).mockReturnValue(['456', jest.fn()]);
     const { result } = setupHook({
-      defaultConnector,
+      defaultConnector: defaultConnectorMock,
     });
 
     expect(result.current.currentConversation).toEqual({
@@ -118,11 +138,72 @@ describe('useCurrentConversation', () => {
       replacements: {},
       title: '',
       apiConfig: {
-        actionTypeId: defaultConnector.actionTypeId,
-        connectorId: defaultConnector.id,
+        actionTypeId: defaultConnectorMock.actionTypeId,
+        connectorId: defaultConnectorMock.id,
       },
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
     expect(result.current.currentSystemPrompt).toBeUndefined();
+  });
+
+  it('should update apiConfig if defaultConnector goes from undefined to defined', async () => {
+    (useLocalStorage as jest.Mock).mockReturnValue(['456', jest.fn()]);
+    const initialProps = { ...defaultProps, defaultConnector: undefined };
+    const { result, rerender } = renderHook(
+      ({
+        allSystemPrompts,
+        lastConversation,
+        conversations,
+        mayUpdateConversations,
+        refetchCurrentUserConversations,
+        setLastConversation,
+        spaceId,
+        defaultConnector,
+      }: Props) =>
+        useCurrentConversation({
+          allSystemPrompts,
+          lastConversation,
+          conversations,
+          mayUpdateConversations,
+          refetchCurrentUserConversations,
+          setLastConversation,
+          spaceId,
+          defaultConnector,
+        }),
+      { initialProps }
+    );
+    expect(result.current.currentConversation).toEqual({
+      category: 'assistant',
+      id: '',
+      messages: [],
+      replacements: {},
+      title: '',
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
+    });
+
+    // @ts-ignore
+    rerender({ ...defaultProps, defaultConnector: defaultConnectorMock });
+
+    await waitFor(async () => {
+      expect(result.current.currentConversation).toEqual({
+        category: 'assistant',
+        id: '',
+        messages: [],
+        replacements: {},
+        title: '',
+        apiConfig: {
+          actionTypeId: defaultConnectorMock.actionTypeId,
+          connectorId: defaultConnectorMock.id,
+        },
+        createdAt: MOCK_DATE,
+        createdBy: {},
+        users: [{}],
+      });
+    });
   });
 
   it('should initialize with local storage connectorId if app is security solution and local storage connectorId exists', () => {
@@ -130,9 +211,9 @@ describe('useCurrentConversation', () => {
     const { result } = setupHook({
       currentAppId: 'securitySolutionUI',
       connectors: [
-        defaultConnector,
+        defaultConnectorMock,
         {
-          ...defaultConnector,
+          ...defaultConnectorMock,
           id: '456',
           actionTypeId: '.bedrock',
           name: 'My Bedrock',
@@ -150,6 +231,9 @@ describe('useCurrentConversation', () => {
         actionTypeId: '.bedrock',
         connectorId: '456',
       },
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
     expect(result.current.currentSystemPrompt).toBeUndefined();
   });
@@ -158,9 +242,9 @@ describe('useCurrentConversation', () => {
     const { result } = setupHook({
       currentAppId: 'securitySolutionUI',
       connectors: [
-        defaultConnector,
+        defaultConnectorMock,
         {
-          ...defaultConnector,
+          ...defaultConnectorMock,
           id: '456',
           actionTypeId: '.bedrock',
           name: 'My Bedrock',
@@ -174,6 +258,9 @@ describe('useCurrentConversation', () => {
       messages: [],
       replacements: {},
       title: '',
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
     expect(result.current.currentSystemPrompt).toBeUndefined();
   });
@@ -229,7 +316,7 @@ describe('useCurrentConversation', () => {
       }),
     });
 
-    expect(mockUseConversation.getConversation).toHaveBeenCalledWith(mockData.welcome_id.id, true);
+    expect(mockUseConversation.getConversation).toHaveBeenCalledWith(mockData.welcome_id.id, false);
 
     await act(async () => {
       await result.current.handleOnConversationSelected({
@@ -270,6 +357,9 @@ describe('useCurrentConversation', () => {
         },
         id: '',
         title: '',
+        createdAt: MOCK_DATE,
+        createdBy: {},
+        users: [{}],
       })
     );
     expect(result.current.currentSystemPrompt?.id).toBe('system-prompt-id');
@@ -300,6 +390,9 @@ describe('useCurrentConversation', () => {
         },
         id: '',
         title: '',
+        createdAt: MOCK_DATE,
+        createdBy: {},
+        users: [{}],
       })
     );
   });
@@ -328,12 +421,20 @@ describe('useCurrentConversation', () => {
       messages: [],
       replacements: {},
       title: '',
+      createdAt: MOCK_DATE,
+      createdBy: {},
+      users: [{}],
     });
   });
 
   it('should refetch the conversation multiple times if isStreamRefetch is true', async () => {
     const conversationId = 'test-id';
-    const conversation = { id: conversationId, messages: [{ role: 'user' }] } as Conversation;
+    const conversation = {
+      id: conversationId,
+      messages: [{ role: 'user' }],
+      users: [MOCK_CURRENT_USER],
+      createdBy: MOCK_CURRENT_USER,
+    } as Conversation;
     mockUseConversation.getConversation.mockResolvedValue(conversation);
 
     const { result } = setupHook({
@@ -349,5 +450,79 @@ describe('useCurrentConversation', () => {
     });
 
     expect(mockUseConversation.getConversation).toHaveBeenCalledTimes(7); // initial set + refetch call + 5 retries
+  });
+
+  it('should set isConversationOwner={true}', async () => {
+    const { result } = setupHook({
+      conversations: mockData,
+      currentUser: MOCK_CURRENT_USER,
+    });
+    await act(async () => {
+      await result.current.setCurrentConversation(mockData.welcome_id);
+    });
+
+    await waitFor(() => expect(result.current.isConversationOwner).toEqual(true));
+  });
+
+  it('should set isConversationOwner={false}', async () => {
+    const anotherUser = { name: 'another-user' };
+    const conversation = {
+      ...mockData.welcome_id,
+      users: [anotherUser],
+      createdBy: anotherUser,
+    } as Conversation;
+
+    const { result } = setupHook({
+      conversations: { ...mockData, welcome_id: conversation },
+      currentUser: { name: 'elastic' },
+    });
+    await act(async () => {
+      await result.current.setCurrentConversation(conversation);
+    });
+
+    await waitFor(() => expect(result.current.isConversationOwner).toEqual(false));
+  });
+
+  it('should set conversationSharedState={private}', async () => {
+    const { result } = setupHook({
+      conversations: mockData,
+    });
+    await act(async () => {
+      await result.current.setCurrentConversation(mockData.welcome_id);
+    });
+
+    await waitFor(() => expect(result.current.conversationSharedState).toEqual('private'));
+  });
+
+  it('should set conversationSharedState={restricted}', async () => {
+    const conversation = {
+      ...mockData.welcome_id,
+      users: [MOCK_CURRENT_USER, { name: 'another-user' }],
+    } as Conversation;
+
+    const { result } = setupHook({
+      conversations: { ...mockData, welcome_id: conversation },
+    });
+    await act(async () => {
+      await result.current.setCurrentConversation(conversation);
+    });
+
+    await waitFor(() => expect(result.current.conversationSharedState).toEqual('restricted'));
+  });
+
+  it('should set conversationSharedState={shared}', async () => {
+    const conversation = {
+      ...mockData.welcome_id,
+      users: [],
+    } as Conversation;
+
+    const { result } = setupHook({
+      conversations: { ...mockData, welcome_id: conversation },
+    });
+    await act(async () => {
+      await result.current.setCurrentConversation(conversation);
+    });
+
+    await waitFor(() => expect(result.current.conversationSharedState).toEqual('shared'));
   });
 });

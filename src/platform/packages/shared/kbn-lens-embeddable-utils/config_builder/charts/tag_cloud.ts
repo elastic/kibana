@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FormBasedPersistedState,
-  FormulaPublicApi,
-  TagcloudState,
-} from '@kbn/lens-plugin/public';
+import type { FormBasedPersistedState, TagcloudState } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensTagCloudConfig } from '../types';
+import type { BuildDependencies, LensAttributes, LensTagCloudConfig } from '../types';
+import { DEFAULT_LAYER_ID } from '../types';
 import {
   addLayerColumn,
   buildDatasourceStates,
@@ -50,12 +47,11 @@ function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
 function buildFormulaLayer(
   layer: LensTagCloudConfig,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView),
     },
   };
 
@@ -88,11 +84,11 @@ function getValueColumns(layer: LensTagCloudConfig) {
 
 export async function buildTagCloud(
   config: LensTagCloudConfig,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
+  { dataViewsAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensTagCloudConfig, i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as LensTagCloudConfig, i, dataView);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,

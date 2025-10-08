@@ -8,9 +8,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-import { EnrichedDeprecationInfo } from '../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../common/types';
 import { DEPRECATION_TYPE_MAP } from '../constants';
-import { DeprecationTableColumns } from '../types';
+import type { DeprecationTableColumns } from '../types';
 import { DeprecationBadge } from '../shared';
 
 interface Props {

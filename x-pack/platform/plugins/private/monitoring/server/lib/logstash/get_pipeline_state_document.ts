@@ -7,8 +7,8 @@
 
 import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
-import { LegacyRequest, PipelineVersion } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest, PipelineVersion } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 import { getIndexPatterns, getLogstashDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 

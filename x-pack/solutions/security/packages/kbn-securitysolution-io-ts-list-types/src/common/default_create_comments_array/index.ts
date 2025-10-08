@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
-import { createComment, CreateCommentsArray } from '../create_comment';
+import type { Either } from 'fp-ts/Either';
+import type { CreateCommentsArray } from '../create_comment';
+import { createComment } from '../create_comment';
 
 /**
  * Types the DefaultCreateComments as:

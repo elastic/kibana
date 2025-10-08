@@ -127,9 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const ruleName1 = data[0].rule.name;
 
-  // Failing: See https://github.com/elastic/kibana/issues/168991
-  // Failing: See https://github.com/elastic/kibana/issues/220375
-  describe.skip('Findings Page - Alerts', function () {
+  describe('Findings Page - Alerts', function () {
     this.tags(['cloud_security_posture_findings_alerts']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;

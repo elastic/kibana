@@ -21,13 +21,13 @@ import {
   EuiPageHeader,
   EuiLink,
 } from '@elastic/eui';
-import { AppMountParameters } from '@kbn/core/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
-import {
+import type { AppMountParameters } from '@kbn/core/public';
+import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type {
   HelloLocatorV1Params,
   HelloLocatorV2Params,
-  HELLO_LOCATOR,
 } from '@kbn/locator-examples-plugin/public';
+import { HELLO_LOCATOR } from '@kbn/locator-examples-plugin/public';
 
 interface Props {
   share: SharePluginSetup;

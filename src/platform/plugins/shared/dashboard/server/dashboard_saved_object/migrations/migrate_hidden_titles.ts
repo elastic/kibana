@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectMigrationFn } from '@kbn/core/server';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
 
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
 } from './dashboard_panel_converters';
-import { SavedDashboardPanel } from '../schema/v2';
+import type { SavedDashboardPanel } from '../schema/v2';
 
 /**
  * Before 7.10, hidden panel titles were stored as a blank string on the title attribute. In 7.10, this was replaced

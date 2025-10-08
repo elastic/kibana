@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApplicationStart, HttpStart } from '@kbn/core/public';
+import type { ApplicationStart, HttpStart } from '@kbn/core/public';
 
 export function getConnectorsManagementHref(http: HttpStart) {
   return http.basePath.prepend(

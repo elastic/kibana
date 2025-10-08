@@ -16,7 +16,7 @@ export interface Accumulator {
 }
 
 export const accumulateUpsertResults = (
-  acc: Accumulator,
+  acc: BulkProcessingResults,
   processed: BulkBatchProcessingResults
 ): BulkProcessingResults => {
   const { left: errors, right: users } = separate(processed.batch.uploaded);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XYExtendedLayerConfigResult } from '../types';
+import type { XYExtendedLayerConfigResult } from '../types';
 import { generateLayerId, appendLayerIds, getDataLayers } from './layers';
 
 describe('#generateLayerId', () => {

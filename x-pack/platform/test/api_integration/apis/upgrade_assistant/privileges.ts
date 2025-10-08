@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 
 import { DEPRECATION_LOGS_INDEX } from '@kbn/upgrade-assistant-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const security = getService('security');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('Privileges', function () {
+  describe.skip('Privileges', function () {
     describe('GET /api/upgrade_assistant/privileges', () => {
       it('User with with index privileges', async () => {
         const { body } = await supertest

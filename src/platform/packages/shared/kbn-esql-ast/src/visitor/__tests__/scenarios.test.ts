@@ -15,7 +15,7 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLAstItem, ESQLAstQueryExpression } from '../../types';
+import type { ESQLAstItem, ESQLAstQueryExpression } from '../../types';
 import { Visitor } from '../visitor';
 
 test('change LIMIT from 24 to 42', () => {
@@ -139,9 +139,6 @@ export const prettyPrint = (ast: ESQLAstQueryExpression | ESQLAstQueryExpression
     .on('visitListLiteralExpression', (ctx) => {
       return '<LIST>';
     })
-    .on('visitTimeIntervalLiteralExpression', (ctx) => {
-      return '<TIME_INTERVAL>';
-    })
     .on('visitInlineCastExpression', (ctx) => {
       return '<CAST>';
     })
@@ -189,6 +186,6 @@ test('can print a query to text', () => {
   const text = prettyPrint(ast);
 
   expect(text).toBe(
-    'FROM index METADATA _id, asdf, 123 | STATS FN(<LIST>, <TIME_INTERVAL>, <CAST>, IN(x, <LIST>)), =(a, b) | LIMIT 1000'
+    'FROM index METADATA _id, asdf, 123 | STATS FN(<LIST>, 1 d, <CAST>, IN(x, <LIST>)), =(a, b) | LIMIT 1000'
   );
 });

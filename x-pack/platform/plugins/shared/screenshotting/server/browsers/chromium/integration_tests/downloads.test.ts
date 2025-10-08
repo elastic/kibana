@@ -6,7 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { PackageInfo } from '@kbn/screenshotting-server';
+import type { PackageInfo } from '@kbn/screenshotting-server';
 import assert from 'assert';
 import axios from 'axios';
 import path from 'path';

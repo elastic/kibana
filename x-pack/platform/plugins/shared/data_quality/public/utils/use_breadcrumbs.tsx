@@ -8,9 +8,10 @@
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 
 import { useEffect } from 'react';
-import { Integration } from '@kbn/dataset-quality-plugin/common/data_streams_stats/integration';
+import type { Integration } from '@kbn/dataset-quality-plugin/common/data_streams_stats/integration';
 import { indexNameToDataStreamParts } from '@kbn/dataset-quality-plugin/common';
-import { DATA_QUALITY_LOCATOR_ID, DataQualityLocatorParams } from '@kbn/deeplinks-observability';
+import type { DataQualityLocatorParams } from '@kbn/deeplinks-observability';
+import { DATA_QUALITY_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { PLUGIN_NAME } from '../../common';
 import { useKibanaContextForPlugin } from './use_kibana';
 

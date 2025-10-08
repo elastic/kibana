@@ -17,7 +17,7 @@ import {
 } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
-import { ConfigType } from '../../config';
+import type { ConfigType } from '../../config';
 import { buildSiemResponse } from '../utils';
 import { createStreamFromBuffer } from '../utils/create_stream_from_buffer';
 import { getListClient } from '..';

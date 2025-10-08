@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 
-import { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import useMount from 'react-use/lib/useMount';
 import { DataViewPicker } from './data_view_picker';
 import { dataViewsService } from '../../services/kibana_services';

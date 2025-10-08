@@ -35,7 +35,6 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
@@ -59,9 +58,17 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
-import { TABS_ENABLED } from '../../../../constants';
+import {
+  internalStateActions,
+  useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
+  useInternalStateDispatch,
+  useInternalStateSelector,
+} from '../../state_management/redux';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
+import { useScopedServices } from '../../../../components/scoped_services_provider';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -89,9 +96,10 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     spaces,
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
-    ebtManager,
     fieldsMetadata,
+    discoverFeatureFlags,
   } = useDiscoverServices();
+  const { scopedEBTManager } = useScopedServices();
   const styles = useMemoCss(componentStyles);
 
   const globalQueryState = data.query.getState();
@@ -104,6 +112,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
+  const tabsEnabled = discoverFeatureFlags.getTabsEnabled();
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
@@ -115,7 +124,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataView = useCurrentDataView();
   const dataViewLoading = useCurrentTabSelector((state) => state.isDataViewLoading);
   const dataState: DataMainMsg = useDataState(main$);
-  const savedSearch = useSavedSearchInitial();
+  const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
+
   const fetchCounter = useRef<number>(0);
 
   useEffect(() => {
@@ -162,17 +172,17 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      void ebtManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableSelection({ fieldName: columnName, fieldsMetadata });
     },
-    [onAddColumn, ebtManager, fieldsMetadata]
+    [onAddColumn, scopedEBTManager, fieldsMetadata]
   );
 
   const onRemoveColumnWithTracking = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      void ebtManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
+      void scopedEBTManager.trackDataTableRemoval({ fieldName: columnName, fieldsMetadata });
     },
-    [onRemoveColumn, ebtManager, fieldsMetadata]
+    [onRemoveColumn, scopedEBTManager, fieldsMetadata]
   );
 
   // The assistant is getting the state from the url correctly
@@ -196,14 +206,22 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
       }
-      void ebtManager.trackFilterAddition({
+      void scopedEBTManager.trackFilterAddition({
         fieldName: fieldName === '_exists_' ? String(values) : fieldName,
         filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
         fieldsMetadata,
       });
       return filterManager.addFilters(newFilters);
     },
-    [filterManager, dataView, dataViews, trackUiMetric, capabilities, ebtManager, fieldsMetadata]
+    [
+      dataView,
+      dataViews,
+      capabilities,
+      filterManager,
+      trackUiMetric,
+      scopedEBTManager,
+      fieldsMetadata,
+    ]
   );
 
   const onPopulateWhereClause = useCallback<DocViewFilterFn>(
@@ -233,13 +251,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, 'esql_filter_added');
       }
-      void ebtManager.trackFilterAddition({
+      void scopedEBTManager.trackFilterAddition({
         fieldName: fieldName === '_exists_' ? String(values) : fieldName,
         filterOperation: fieldName === '_exists_' ? '_exists_' : operation,
         fieldsMetadata,
       });
     },
-    [data.query.queryString, query, trackUiMetric, ebtManager, fieldsMetadata]
+    [query, data.query.queryString, trackUiMetric, scopedEBTManager, fieldsMetadata]
   );
 
   const onFilter = isEsqlMode ? onPopulateWhereClause : onAddFilter;
@@ -294,9 +312,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     }
   }, [dataState.error, isEsqlMode]);
 
-  const [sidebarContainer, setSidebarContainer] = useState<HTMLDivElement | null>(null);
-  const [mainContainer, setMainContainer] = useState<HTMLDivElement | null>(null);
-
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
 
@@ -338,7 +353,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           viewMode={viewMode}
           onAddFilter={onFilter}
           onFieldEdited={onFieldEdited}
-          container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
           panelsToggle={panelsToggle}
         />
@@ -353,7 +367,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     viewMode,
     onFilter,
     onFieldEdited,
-    mainContainer,
     onDropFieldToTable,
     panelsToggle,
   ]);
@@ -368,6 +381,20 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     sendErrorMsg(stateContainer.dataState.data$.main$);
   }, [stateContainer.dataState]);
 
+  const dispatch = useInternalStateDispatch();
+  const layoutUiState = useCurrentTabSelector((state) => state.uiState.layout);
+  const setLayoutUiState = useCurrentTabAction(internalStateActions.setLayoutUiState);
+  const onInitialStateChange = useCallback(
+    (newLayoutUiState: Partial<DiscoverLayoutRestorableState>) => {
+      dispatch(
+        setLayoutUiState({
+          layoutUiState: newLayoutUiState,
+        })
+      );
+    },
+    [dispatch, setLayoutUiState]
+  );
+
   return (
     <EuiPage
       className="dscPage" // class is used in tests and other styles
@@ -377,7 +404,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss(TABS_ENABLED ? '32px' : undefined)}
+            ${kbnFullBodyHeightCss(tabsEnabled ? '32px' : undefined)}
           }
         `,
       ]}
@@ -387,11 +414,11 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         className="euiScreenReaderOnly"
         data-test-subj="discoverSavedSearchTitle"
       >
-        {savedSearch.title
+        {discoverSession?.title
           ? i18n.translate('discover.pageTitleWithSavedSearch', {
               defaultMessage: 'Discover - {savedSearchTitle}',
               values: {
-                savedSearchTitle: savedSearch.title,
+                savedSearchTitle: discoverSession.title,
               },
             })
           : i18n.translate('discover.pageTitleWithoutSavedSearch', {
@@ -408,19 +435,18 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         onCancelClick={onCancelClick}
       />
       <EuiPageBody aria-describedby="savedSearchTitle" css={styles.savedSearchTitle}>
-        <div ref={setSidebarContainer} css={styles.sidebarContainer}>
+        <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
               <EuiProgress size="xs" color="accent" position="absolute" />
             </EuiDelayRender>
           )}
           <SavedSearchURLConflictCallout
-            savedSearch={savedSearch}
+            discoverSession={discoverSession}
             spaces={spaces}
             history={history}
           />
           <DiscoverResizableLayout
-            container={sidebarContainer}
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
@@ -475,7 +501,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 ) : (
                   <EuiPanel
                     role="main"
-                    panelRef={setMainContainer}
                     paddingSize="none"
                     borderRadius="none"
                     hasShadow={false}
@@ -488,6 +513,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                 )}
               </div>
             }
+            initialState={layoutUiState}
+            onInitialStateChange={onInitialStateChange}
           />
         </div>
       </EuiPageBody>

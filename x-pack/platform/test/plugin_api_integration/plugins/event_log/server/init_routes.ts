@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   RequestHandlerContext,
   KibanaRequest,
@@ -15,11 +15,11 @@ import {
   Logger,
   RouteValidationResultFactory,
 } from '@kbn/core/server';
-import { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
+import type { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
 import { schema } from '@kbn/config-schema';
 import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
-import { EventLogFixtureStartDeps } from './plugin';
+import type { EventLogFixtureStartDeps } from './plugin';
 
 export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger: Logger) => {
   router.post(

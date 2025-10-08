@@ -7,10 +7,11 @@
 
 import type { Overwrite } from 'utility-types';
 import type { Observable } from 'rxjs';
-import type { ToolCallsOf, ToolChoiceType, ToolOptions } from './tools';
+import type { ToolChoiceType, ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
 import type { ChatCompleteMetadata } from './metadata';
+import type { ToolCallOfToolOptions } from './tools_of';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -199,7 +200,7 @@ export interface ChatCompleteResponse<
   /**
    * The eventual tool calls performed by the LLM.
    */
-  toolCalls: ToolCallsOf<TOptions>['toolCalls'];
+  toolCalls: ToolCallOfToolOptions<TOptions>[];
   /**
    * Token counts
    */

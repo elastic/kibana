@@ -11,7 +11,7 @@ import Path from 'path';
 
 import { v4 as uuidV4 } from 'uuid';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
+import type { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
 import { EsVersion } from '../../functional_test_runner';

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, FC } from 'react';
+import type { FC } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import {
   CIRCUIT_BREAKER_HIDE_FULL_ERROR_TEXT,

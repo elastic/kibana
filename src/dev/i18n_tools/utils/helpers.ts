@@ -12,7 +12,7 @@ import normalize from 'normalize-path';
 import type { MakeDirectoryOptions, PathLike } from 'fs';
 import { mkdir, writeFile as writeFileAsync } from 'fs/promises';
 import { constants } from 'os';
-import { MessageDescriptor } from '../types';
+import type { MessageDescriptor } from '../types';
 
 export function normalizePath(inputPath: string) {
   return normalize(path.relative('.', inputPath));

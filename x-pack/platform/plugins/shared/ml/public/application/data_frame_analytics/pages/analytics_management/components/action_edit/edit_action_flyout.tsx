@@ -279,6 +279,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
           }
         >
           <EuiFieldNumber
+            isInvalid={maxNumThreads === 0}
             aria-label={i18n.translate(
               'xpack.ml.dataframe.analyticsList.editFlyout.maxNumThreadsAriaLabel',
               {

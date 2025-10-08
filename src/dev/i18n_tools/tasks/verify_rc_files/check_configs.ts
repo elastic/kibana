@@ -11,7 +11,7 @@ import { join } from 'path';
 import { I18N_RC } from '../../constants';
 import { arrayify, ErrorReporter, makeAbsolutePath } from '../../utils';
 import { checkConfigNamespacePrefix } from './i18n_config';
-import { I18nCheckTaskContext } from '../../types';
+import type { I18nCheckTaskContext } from '../../types';
 
 export function checkConfigs(additionalConfigPaths: string | string[] = []) {
   const kibanaRC = makeAbsolutePath(I18N_RC);

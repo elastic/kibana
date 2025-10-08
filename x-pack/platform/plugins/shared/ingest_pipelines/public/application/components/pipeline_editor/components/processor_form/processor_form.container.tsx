@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useEffect, useRef } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
-import {
-  useForm,
-  OnFormUpdateArg,
-  FormData,
-  FormOptions,
-  useKibana,
-} from '../../../../../shared_imports';
-import { ProcessorInternal } from '../../types';
+import type { OnFormUpdateArg, FormData, FormOptions } from '../../../../../shared_imports';
+import { useForm, useKibana } from '../../../../../shared_imports';
+import type { ProcessorInternal } from '../../types';
 
 import { EditProcessorForm } from './edit_processor_form';
 import { AddProcessorForm } from './add_processor_form';

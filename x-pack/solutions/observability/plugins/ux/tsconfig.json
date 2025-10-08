@@ -50,7 +50,8 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/search-types",
     "@kbn/server-route-repository-utils",
-    "@kbn/core-chrome-browser"
+    "@kbn/react-kibana-mount",
+    "@kbn/core-rendering-browser",
   ],
   "exclude": ["target/**/*"]
 }

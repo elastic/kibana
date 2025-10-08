@@ -78,7 +78,7 @@ const DefaultComponent = () => {
           startedTime={new Date()}
           completedTime={new Date()}
           saveDisabledReasonText={
-            'Search results have expired and it is no longer possible to save this search session'
+            'Search results have expired and it is no longer possible to save this background search'
           }
         />
       </div>

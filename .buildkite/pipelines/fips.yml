@@ -4,7 +4,7 @@ env:
   TEST_BROWSER_HEADLESS: 1
 agents:
   provider: 'gcp'
-  image: 'family/kibana-fips-ubuntu-2004'
+  image: 'family/kibana-fips-ubuntu-2404'
   imageProject: 'elastic-images-prod'
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh

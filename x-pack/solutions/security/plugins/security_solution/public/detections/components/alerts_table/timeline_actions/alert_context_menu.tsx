@@ -14,6 +14,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { get, getOr } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { flattenObject } from '@kbn/object-utils';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/header_actions';
 import { isActiveTimeline } from '../../../../helpers';
@@ -95,16 +96,20 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleRuleId = get(0, ecsRowData?.kibana?.alert?.rule?.rule_id);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
-  const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
-    scopeId as TableId
-  );
+
+  const flattenedEcsData = useMemo(() => {
+    const flattened = flattenObject(ecsRowData);
+    return Object.entries(flattened).map(([key, value]) => ({
+      field: key,
+      value: value as string[],
+    }));
+  }, [ecsRowData]);
 
   const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,
+    nonEcsData: flattenedEcsData,
     onMenuItemClick,
-    isActiveTimelines: isActiveTimeline(scopeId ?? ''),
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
-    isInDetections,
     refetch,
   });
 
@@ -133,29 +138,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   );
 
   const onButtonClick = useCallback(() => {
-    setPopover(!isPopoverOpen);
-  }, [isPopoverOpen]);
+    setPopover((current) => !current);
+  }, []);
 
   const closePopover = useCallback((): void => {
     setPopover(false);
   }, []);
-
-  const button = useMemo(() => {
-    return (
-      <EuiToolTip position="top" content={i18n.MORE_ACTIONS}>
-        <EuiButtonIcon
-          aria-label={ariaLabel}
-          data-test-subj="timeline-context-menu-button"
-          size="s"
-          iconType="boxesHorizontal"
-          data-popover-open={isPopoverOpen}
-          onClick={onButtonClick}
-          isDisabled={disabled}
-          color={isPopoverOpen ? 'primary' : 'text'}
-        />
-      </EuiToolTip>
-    );
-  }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
   const refetchAll = useCallback(() => {
     const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
@@ -191,7 +179,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
   const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
     useEventFilterModal();
 
-  const { actionItems: statusActionItems } = useAlertsActions({
+  const { actionItems: statusActionItems, panels: statusActionPanels } = useAlertsActions({
     alertStatus,
     eventId: ecsRowData?._id,
     scopeId,
@@ -283,9 +271,30 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       },
       ...alertTagsPanels,
       ...alertAssigneesPanels,
+      ...statusActionPanels,
     ],
-    [alertTagsPanels, alertAssigneesPanels, items]
+    [items, alertTagsPanels, alertAssigneesPanels, statusActionPanels]
   );
+
+  const button = useMemo(() => {
+    const hasItems = !!items.length;
+    const tooltipContent = hasItems ? i18n.MORE_ACTIONS : i18n.INSUFFICIENT_PRIVILEGES;
+
+    return (
+      <EuiToolTip position="top" content={tooltipContent}>
+        <EuiButtonIcon
+          aria-label={ariaLabel}
+          data-test-subj="timeline-context-menu-button"
+          size="s"
+          iconType="boxesHorizontal"
+          data-popover-open={isPopoverOpen}
+          onClick={onButtonClick}
+          isDisabled={disabled || !hasItems}
+          color={isPopoverOpen ? 'primary' : 'text'}
+        />
+      </EuiToolTip>
+    );
+  }, [ariaLabel, isPopoverOpen, onButtonClick, disabled, items.length]);
 
   const osqueryFlyout = useMemo(() => {
     return (
@@ -300,28 +309,26 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 
   return (
     <>
-      {items.length > 0 && (
-        <div key="actions-context-menu">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EuiPopover
-              id="singlePanel"
-              button={button}
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downLeft"
-              repositionOnScroll
-            >
-              <EuiContextMenu
-                size="s"
-                initialPanelId={0}
-                panels={panels}
-                data-test-subj="actions-context-menu"
-              />
-            </EuiPopover>
-          </EventsTdContent>
-        </div>
-      )}
+      <div key="actions-context-menu">
+        <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+          <EuiPopover
+            id="singlePanel"
+            button={button}
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+            repositionOnScroll
+          >
+            <EuiContextMenu
+              size="s"
+              initialPanelId={0}
+              panels={panels}
+              data-test-subj="actions-context-menu"
+            />
+          </EuiPopover>
+        </EventsTdContent>
+      </div>
       {openAddExceptionFlyout &&
         ruleId &&
         ruleRuleId &&

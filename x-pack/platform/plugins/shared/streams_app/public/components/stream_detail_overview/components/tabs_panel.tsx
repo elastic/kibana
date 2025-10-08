@@ -6,7 +6,8 @@
  */
 import { EuiFlexGroup, EuiPanel, EuiTab, EuiTabs } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React, { useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 
 interface Tab {
   id: string;

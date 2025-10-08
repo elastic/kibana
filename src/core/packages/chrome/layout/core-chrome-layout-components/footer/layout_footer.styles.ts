@@ -8,13 +8,14 @@
  */
 
 import { css } from '@emotion/react';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 const root = css`
   position: sticky;
-  overflow: hidden;
   grid-area: footer;
-  width: var(--kbn-layout--footer-width);
-  height: var(--kbn-layout--footer-height);
+  width: ${layoutVar('footer.width')};
+  height: ${layoutVar('footer.height')};
+  z-index: ${layoutLevels.footer};
 `;
 
 export const styles = {

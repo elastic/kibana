@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
 import { DOC_TYPE } from '../../common/constants';
-import {
+import type {
   LensApi,
   LensEmbeddableStartServices,
   LensRuntimeState,

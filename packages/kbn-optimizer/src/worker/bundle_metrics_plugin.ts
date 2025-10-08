@@ -11,9 +11,9 @@ import Path from 'path';
 
 import webpack from 'webpack';
 import { RawSource } from 'webpack-sources';
-import { CiStatsMetric } from '@kbn/ci-stats-reporter';
+import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
 
-import { Bundle } from '../common';
+import type { Bundle } from '../common';
 
 interface Asset {
   name: string;

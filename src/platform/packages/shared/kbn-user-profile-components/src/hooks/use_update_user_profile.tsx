@@ -28,7 +28,7 @@ interface Props {
   };
   /** Predicate to indicate if the update requires a page reload */
   pageReloadChecker?: (
-    previsous: UserProfileData | null | undefined,
+    previous: UserProfileData | null | undefined,
     next: UserProfileData
   ) => boolean;
 }

@@ -9,7 +9,7 @@ import { sample } from 'lodash';
 import { faker } from '@faker-js/faker';
 import { ADMIN_CONSOLE, ADMIN_CONSOLE_QA_HOSTS, DOMAINS } from '../../../common/constants';
 import { getLoggedInUser } from '../login_cache';
-import { EventFunction } from '../../../../../types';
+import type { EventFunction } from '../../../../../types';
 import { createUpstreamTimeout } from '../../../nginx_proxy/lib/events/create_upstream_timedout';
 import { createNginxLog } from '../../../nginx_proxy/lib/events/create_nginx_log';
 

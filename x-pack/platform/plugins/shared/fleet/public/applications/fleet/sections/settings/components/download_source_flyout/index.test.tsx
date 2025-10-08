@@ -12,6 +12,11 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { EditDownloadSourceFlyout } from '.';
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useGeneratedHtmlId: () => 'mocked-id',
+}));
+
 function renderFlyout(downloadSource?: DownloadSource) {
   const renderer = createFleetTestRendererMock();
 

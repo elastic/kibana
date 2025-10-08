@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
   MetadataSummaryList,
   MetadataSummaryListCompact,
@@ -25,7 +26,7 @@ import { MetricsContent } from './metrics/metrics';
 
 export const Overview = () => {
   const { dateRange } = useDatePickerContext();
-  const { asset, renderMode } = useAssetDetailsRenderPropsContext();
+  const { entity, renderMode, schema } = useAssetDetailsRenderPropsContext();
   const {
     metadata,
     loading: metadataLoading,
@@ -33,14 +34,24 @@ export const Overview = () => {
   } = useMetadataStateContext();
   const { metrics } = useDataViewsContext();
   const isFullPageView = renderMode.mode === 'page';
+  const {
+    services: { application },
+  } = useKibanaContextForPlugin();
+  const hasApmPermissions = Boolean(application.capabilities.apm?.show);
 
   const metadataSummarySection = isFullPageView ? (
-    <MetadataSummaryList metadata={metadata} loading={metadataLoading} assetType={asset.type} />
+    <MetadataSummaryList
+      metadata={metadata}
+      loading={metadataLoading}
+      entityType={entity.type}
+      schema={schema}
+    />
   ) : (
     <MetadataSummaryListCompact
       metadata={metadata}
       loading={metadataLoading}
-      assetType={asset.type}
+      entityType={entity.type}
+      schema={schema}
     />
   );
 
@@ -48,33 +59,37 @@ export const Overview = () => {
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <KPIGrid
-          assetId={asset.id}
-          assetType={asset.type}
+          entityId={entity.id}
+          entityType={entity.type}
           dateRange={dateRange}
           dataView={metrics.dataView}
         />
-        {asset.type === 'host' ? <CpuProfilingPrompt /> : null}
+        {entity.type === 'host' ? <CpuProfilingPrompt /> : null}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
       </EuiFlexItem>
-      {asset.type === 'host' || asset.type === 'container' ? (
+      {entity.type === 'host' || entity.type === 'container' ? (
         <EuiFlexItem grow={false}>
-          <AlertsSummaryContent assetId={asset.id} assetType={asset.type} dateRange={dateRange} />
+          <AlertsSummaryContent
+            entityId={entity.id}
+            entityType={entity.type}
+            dateRange={dateRange}
+          />
           <SectionSeparator />
         </EuiFlexItem>
       ) : null}
-      {asset.type === 'host' ? (
+      {entity.type === 'host' && hasApmPermissions ? (
         <EuiFlexItem grow={false}>
-          <ServicesContent hostName={asset.id} dateRange={dateRange} />
+          <ServicesContent hostName={entity.id} dateRange={dateRange} />
           <SectionSeparator />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
         <MetricsContent
-          assetId={asset.id}
-          assetType={asset.type}
+          entityId={entity.id}
+          entityType={entity.type}
           dateRange={dateRange}
           dataView={metrics.dataView}
         />

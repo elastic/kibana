@@ -7,15 +7,14 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import { HttpError, Status } from '../../../../../common/types/api';
+import type { HttpError } from '../../../../../common/types/api';
+import { Status } from '../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../common/types/ml';
 
-import { MlModel } from '../../../../../common/types/ml';
+import type { MlModel } from '../../../../../common/types/ml';
 
-import {
-  CachedFetchModelsApiLogic,
-  CachedFetchModelsApiLogicValues,
-} from './cached_fetch_models_api_logic';
+import type { CachedFetchModelsApiLogicValues } from './cached_fetch_models_api_logic';
+import { CachedFetchModelsApiLogic } from './cached_fetch_models_api_logic';
 import { FetchModelsApiLogic } from './fetch_models_api_logic';
 
 const DEFAULT_VALUES: CachedFetchModelsApiLogicValues = {

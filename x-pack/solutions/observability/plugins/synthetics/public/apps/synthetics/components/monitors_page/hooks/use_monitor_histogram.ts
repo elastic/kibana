@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 
 import { getHistogramInterval } from '../common/get_histogram_interval';
-import {
+import type {
   Histogram,
   HistogramPoint,
   OverviewStatusMetaData,

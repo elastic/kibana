@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/indices-metadata-plugin",
+  "owner": [
+    "@elastic/security-solution"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Indices metadata plugin for managing and retrieving metadata about indices in Kibana.",
+  "plugin": {
+    "id": "indicesMetadata",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "xpack",
+      "indicesMetadata"
+    ],
+    "requiredPlugins": [
+      "taskManager"
+    ],
+    "requiredBundles": [],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}

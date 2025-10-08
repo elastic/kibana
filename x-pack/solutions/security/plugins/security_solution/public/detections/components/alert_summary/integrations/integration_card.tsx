@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import { useIntegrationLastAlertIngested } from '../../../hooks/alert_summary/use_integration_last_alert_ingested';
 import { IntegrationIcon } from '../common/integration_icon';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
@@ -28,6 +29,7 @@ const LAST_SYNCED = i18n.translate(
 );
 
 const MIN_WIDTH = 200;
+const REFRESH_INTERVAL = 30000; // 30 seconds
 
 export const LAST_ACTIVITY_LOADING_SKELETON_TEST_ID = '-last-activity-loading-skeleton';
 export const LAST_ACTIVITY_VALUE_TEST_ID = '-last-activity-value';
@@ -38,25 +40,28 @@ export interface IntegrationProps {
    */
   integration: PackageListItem;
   /**
-   * True while retrieving data streams to provide the last activity value
-   */
-  isLoading: boolean;
-  /**
-   * Timestamp of the last time the integration synced (via data streams)
-   */
-  lastActivity: number | undefined;
-  /**
    * Data test subject string for testing
    */
   ['data-test-subj']?: string;
 }
 
 /**
- * Rendered on the alert summary page. The card displays the icon, name and last sync value.
+ * Rendered on the alert summary page. The card displays the icon, name and last time the integration received alert data.
  */
 export const IntegrationCard = memo(
-  ({ 'data-test-subj': dataTestSubj, integration, isLoading, lastActivity }: IntegrationProps) => {
+  ({ 'data-test-subj': dataTestSubj, integration }: IntegrationProps) => {
     const { euiTheme } = useEuiTheme();
+
+    const { isLoading, lastAlertIngested, refetch } = useIntegrationLastAlertIngested({
+      integrationName: integration.name,
+    });
+
+    // force a refresh every 30 seconds to update the last activity time
+    useEffect(() => {
+      const interval = setInterval(() => refetch(), REFRESH_INTERVAL);
+      return () => clearInterval(interval);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
       <EuiPanel
@@ -101,7 +106,11 @@ export const IntegrationCard = memo(
                     size="xs"
                   >
                     {LAST_SYNCED}
-                    <FormattedRelativePreferenceDate value={lastActivity} />
+                    <FormattedRelativePreferenceDate
+                      value={lastAlertIngested}
+                      /* we use key here to force re-render of the relative time */
+                      key={Date.now()}
+                    />
                   </EuiText>
                 </EuiSkeletonText>
               </EuiFlexItem>

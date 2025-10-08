@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { downloadToDisk, GlobalTask } from '../../lib';
+import type { GlobalTask } from '../../lib';
+import { downloadToDisk } from '../../lib';
 import { getNodeShasums } from './node_shasums';
 import { getNodeDownloadInfo } from './node_download_info';
 

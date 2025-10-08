@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { journey, step, expect, before, Page } from '@elastic/synthetics';
+import type { Page } from '@elastic/synthetics';
+import { journey, step, expect, before } from '@elastic/synthetics';
 import { recordVideo } from '@kbn/observability-synthetics-test-data';
 import { byTestId, delay } from '../../../helpers/utils';
 import { makeChecksWithStatus } from '../../../helpers/make_checks';

@@ -12,11 +12,12 @@ import { findLast } from 'lodash';
 import { EuiSpacer } from '@elastic/eui';
 
 import type { TimeRange } from '@kbn/es-query';
-import { AggGroupNames, IAggConfig, IMetricAggType, search } from '@kbn/data-plugin/public';
+import type { IAggConfig, IMetricAggType } from '@kbn/data-plugin/public';
+import { AggGroupNames, search } from '@kbn/data-plugin/public';
 import type { ISchemas } from '@kbn/visualizations-plugin/public';
 import { DefaultEditorAggGroup } from '../agg_group';
+import type { EditorAction } from './state';
 import {
-  EditorAction,
   addNewAgg,
   removeAgg,
   reorderAggs,

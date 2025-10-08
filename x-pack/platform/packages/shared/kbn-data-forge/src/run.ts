@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Client } from '@elastic/elasticsearch';
 import { setupKibanaSystemUser } from './lib/setup_kibana_system_user';
 import type { Config } from './types';
 import { installAssets } from './lib/install_assets';

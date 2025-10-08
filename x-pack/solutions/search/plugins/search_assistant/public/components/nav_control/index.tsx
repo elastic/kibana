@@ -13,7 +13,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { useAIAssistantAppService, ChatFlyout } from '@kbn/ai-assistant';
 import { useKibana } from '@kbn/ai-assistant/src/hooks/use_kibana';
-import { AIAssistantPluginStartDependencies } from '@kbn/ai-assistant/src/types';
+import type { AIAssistantPluginStartDependencies } from '@kbn/ai-assistant/src/types';
 import { EuiErrorBoundary } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

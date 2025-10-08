@@ -6,7 +6,7 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { RuleMigrationResourceType } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationResourceType } from '../../../../../../common/siem_migrations/model/common.gen';
 import type { SiemMigrationRetryFilter } from '../../../../../../common/siem_migrations/constants';
 
 export enum SiemMigrationsEventTypes {
@@ -111,7 +111,7 @@ export interface ReportSetupLookupNameCopiedActionParams {
 export interface ReportSetupResourcesUploadedActionParams extends BaseResultActionParams {
   eventName: string;
   migrationId: string;
-  type: RuleMigrationResourceType;
+  type: SiemMigrationResourceType;
   count: number;
 }
 

@@ -8,7 +8,7 @@
  */
 
 import type { RecursiveReadonly } from '@kbn/utility-types';
-import moment from 'moment-timezone';
+import type moment from 'moment-timezone';
 
 /** @public */
 export type Freezable = { [k: string]: any } | any[];

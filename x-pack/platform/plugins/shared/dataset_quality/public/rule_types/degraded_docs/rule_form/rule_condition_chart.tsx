@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { COMPARATORS } from '@kbn/alerting-comparators';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
+import type { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
 import rison from '@kbn/rison';
 import React from 'react';
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { PreviewChartResponse } from '../../../../common/api_types';
+import type { PreviewChartResponse } from '../../../../common/api_types';
 import { useKibanaContextForPlugin } from '../../../utils';
 import { ChartPreview } from './chart_preview';
 import {

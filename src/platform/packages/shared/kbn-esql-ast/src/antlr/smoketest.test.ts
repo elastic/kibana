@@ -1,7 +1,6 @@
 import { CharStream, CommonTokenStream } from 'antlr4';
 import { default as ESQLLexer } from './esql_lexer';
 import { default as ESQLParser } from '../antlr/esql_parser';
-import { GRAMMAR_ROOT_RULE } from '../parser/constants';
 import { ESQLErrorListener } from '../parser';
 
 describe('ES|QL Lexer/Parser', () => {
@@ -37,7 +36,7 @@ describe('ES|QL Lexer/Parser', () => {
     parser.removeErrorListeners();
     parser.addErrorListener(errorListener);
 
-    parser[GRAMMAR_ROOT_RULE]();
+    parser.singleStatement();
 
     expect(errorListener.getErrors()).toHaveLength(0);
   });

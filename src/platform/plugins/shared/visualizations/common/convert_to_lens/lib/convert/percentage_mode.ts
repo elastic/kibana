@@ -8,10 +8,10 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { MinMax } from '../../types';
+import type { MinMax } from '../../types';
 import { getFormulaForAgg } from '../metrics/formula';
 import { createFormulaColumn } from './formula';
-import { ExtendedColumnConverterArgs } from './types';
+import type { ExtendedColumnConverterArgs } from './types';
 
 const getPercentageFormulaOverRange = (formula: string, { min, max }: MinMax) =>
   `((${formula}) - ${min}) / (${max} - ${min})`;

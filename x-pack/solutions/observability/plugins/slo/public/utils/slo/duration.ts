@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import { assertNever } from '@kbn/std';
-import { BrushEvent } from '@elastic/charts';
-import { Duration, DurationUnit } from '../../typings';
-import { TimeBounds } from '../../pages/slo_details/types';
+import type { BrushEvent } from '@elastic/charts';
+import type { Duration, DurationUnit } from '../../typings';
+import type { TimeBounds } from '../../pages/slo_details/types';
 
 export function toDuration(duration: string): Duration {
   const durationValue = duration.substring(0, duration.length - 1);

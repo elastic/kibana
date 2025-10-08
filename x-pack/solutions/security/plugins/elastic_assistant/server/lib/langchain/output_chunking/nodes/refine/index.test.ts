@@ -25,7 +25,7 @@ import {
   ATTACK_DISCOVERY_REFINE,
 } from '../../../../prompt/prompts';
 import { getAttackDiscoveriesGenerationSchema } from '../../../../attack_discovery/graphs/default_attack_discovery_graph/schemas';
-import { AttackDiscoveryGraphState } from '../../../graphs';
+import type { AttackDiscoveryGraphState } from '../../../graphs';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
 import { getRefineNode } from '.';
 

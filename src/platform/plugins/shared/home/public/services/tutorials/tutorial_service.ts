@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { HomeKibanaServices } from '../../application/kibana_services';
+import type React from 'react';
+import type { HomeKibanaServices } from '../../application/kibana_services';
 
 /** @public */
 export type TutorialVariables = Partial<Record<string, unknown>>;

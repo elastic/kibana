@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { metricCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.';
 import {
   getSLOPipelineId,
@@ -16,7 +16,7 @@ import {
   SLI_DESTINATION_INDEX_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
-import { MetricCustomIndicator, SLODefinition } from '../../domain/models';
+import type { MetricCustomIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { GetCustomMetricIndicatorAggregation } from '../aggregations';
 import { getFilterRange, getTimesliceTargetComparator } from './common';

@@ -6,8 +6,12 @@
  */
 
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { RuleStatusDropdown, ComponentOpts } from './rule_status_dropdown';
+import type { ComponentOpts } from './rule_status_dropdown';
+import { RuleStatusDropdown } from './rule_status_dropdown';
 
 const NOW_STRING = '2020-03-01T00:00:00.000Z';
 const SNOOZE_UNTIL = new Date('2020-03-04T00:00:00.000Z');
@@ -139,5 +143,50 @@ describe('RuleStatusDropdown', () => {
     expect(wrapper.find('[data-test-subj="statusDropdownReadonly"]').first().props().children).toBe(
       'Enabled'
     );
+  });
+
+  describe('autoRecoverAlerts', () => {
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
+      render(<RuleStatusDropdown {...{ ...props, autoRecoverAlerts: true }} />);
+
+      await userEvent.click(await screen.findByTestId('ruleStatusDropdownBadge'));
+      await waitForEuiPopoverOpen();
+      expect(await screen.findByTestId('statusDropdown')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('statusDropdownDisabledItem')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+    });
+
+    it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
+      render(<RuleStatusDropdown {...{ ...props, autoRecoverAlerts: undefined }} />);
+
+      await userEvent.click(await screen.findByTestId('ruleStatusDropdownBadge'));
+      await waitForEuiPopoverOpen();
+      expect(await screen.findByTestId('statusDropdown')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('statusDropdownDisabledItem')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+    });
+
+    it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
+      render(<RuleStatusDropdown {...{ ...props, autoRecoverAlerts: false }} />);
+
+      await userEvent.click(await screen.findByTestId('ruleStatusDropdownBadge'));
+      await waitForEuiPopoverOpen();
+      expect(await screen.findByTestId('statusDropdown')).toBeInTheDocument();
+
+      expect(await screen.findByTestId('statusDropdownDisabledItem')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+
+      expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(disableRule).toHaveBeenCalledWith(false);
+      });
+    });
   });
 });

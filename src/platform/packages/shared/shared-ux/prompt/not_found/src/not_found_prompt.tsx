@@ -8,13 +8,8 @@
  */
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiEmptyPromptProps,
-  EuiImage,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiEmptyPromptProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiImage, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const NOT_FOUND_TITLE = i18n.translate('sharedUXPackages.prompt.errors.notFound.title', {

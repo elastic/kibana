@@ -1044,6 +1044,10 @@
                 "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
               },
               {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/functional_with_es_ssl/plugins/alerts/public/application.tsx"
+              },
+              {
                 "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/public/authentication/logout/logout_app.test.ts"
               },
@@ -1058,10 +1062,6 @@
               {
                 "plugin": "@kbn/test-suites-src",
                 "path": "src/platform/test/plugin_functional/plugins/kbn_top_nav/public/application.tsx"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/public/mocks.ts"
               }
             ]
           },

@@ -8,14 +8,16 @@
 import { arrayToStringRt } from '@kbn/io-ts-utils';
 import { either } from 'fp-ts/Either';
 import * as rt from 'io-ts';
-import { ANY_DATASET } from '../common';
+import type { ANY_DATASET } from '../common';
 import { FetchFieldsMetadataError } from '../errors';
-import { FieldAttribute, fieldAttributeRT, FieldName, partialFieldMetadataPlainRT } from '../types';
+import type { FieldAttribute, FieldName, FieldSource } from '../types';
+import { fieldAttributeRT, fieldSourceRT, partialFieldMetadataPlainRT } from '../types';
 
 const baseFindFieldsMetadataRequestQueryRT = rt.exact(
   rt.partial({
     attributes: arrayToStringRt.pipe(rt.array(fieldAttributeRT)),
     fieldNames: arrayToStringRt.pipe(rt.array(rt.string)),
+    source: rt.union([fieldSourceRT, rt.array(fieldSourceRT)]),
     integration: rt.string,
     dataset: rt.string,
   })
@@ -50,12 +52,14 @@ export type FindFieldsMetadataRequestQuery =
   | {
       attributes?: FieldAttribute[];
       fieldNames?: FieldName[];
+      source?: FieldSource | FieldSource[];
       integration?: undefined;
       dataset?: undefined;
     }
   | {
       attributes?: FieldAttribute[];
       fieldNames?: FieldName[];
+      source?: FieldSource | FieldSource[];
       integration: string;
       dataset: typeof ANY_DATASET | (string & {});
     };

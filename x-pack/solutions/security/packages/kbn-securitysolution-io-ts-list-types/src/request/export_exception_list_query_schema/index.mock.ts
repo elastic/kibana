@@ -7,7 +7,7 @@
 
 import { ID, LIST_ID, NAMESPACE_TYPE } from '../../constants/index.mock';
 
-import { ExportExceptionListQuerySchema } from '.';
+import type { ExportExceptionListQuerySchema } from '.';
 
 export const getExportExceptionListQuerySchemaMock = (): ExportExceptionListQuerySchema => ({
   id: ID,

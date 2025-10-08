@@ -9,7 +9,7 @@
 
 import { mergeWith } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { MigrateFunctionsObject, MigrateFunction } from './types';
+import type { MigrateFunctionsObject, MigrateFunction } from './types';
 
 export const mergeMigrationFunctionMaps = (
   obj1: MigrateFunctionsObject,

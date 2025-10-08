@@ -17,17 +17,18 @@ import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 
-import { ReportingCore } from '../../../..';
+import type { ReportingCore } from '../../../..';
 import { reportingMock } from '../../../../mocks';
 import {
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import { ReportingRequestHandlerContext } from '../../../../types';
+import type { ReportingRequestHandlerContext } from '../../../../types';
 import { registerScheduleRoutesInternal } from '../schedule_from_jobparams';
-import { FakeRawRequest, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { FakeRawRequest, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { EventTracker } from '../../../../usage';
 
 const fakeRawRequest: FakeRawRequest = {
   headers: {
@@ -43,6 +44,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
   let mockExportTypesRegistry: ExportTypesRegistry;
   let reportingCore: ReportingCore;
   let soClient: SavedObjectsClientContract;
+  let eventTracker: EventTracker;
 
   const mockConfigSchema = createMockConfigSchema({
     queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
@@ -102,6 +104,9 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
       hasPermanentEncryptionKey: true,
       areNotificationsEnabled: true,
     });
+
+    eventTracker = new EventTracker(mockCoreSetup.analytics, 'jobId', 'exportTypeId', 'appId');
+    jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
     mockExportTypesRegistry = new ExportTypesRegistry();
     mockExportTypesRegistry.register(mockPdfExportType);
@@ -197,6 +202,28 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
         expect(body.message).toMatchInlineSnapshot(`
           "[request body.schedule.rrule]: types that failed validation:
           - [request body.schedule.rrule.0.freq]: expected value to equal [1]
+          - [request body.schedule.rrule.1.freq]: expected value to equal [2]
+          - [request body.schedule.rrule.2.freq]: expected value to equal [3]"
+        `)
+      );
+  });
+
+  it('returns 400 on invalid rrule.dtstart date', async () => {
+    registerScheduleRoutesInternal(reportingCore, mockLogger);
+
+    await server.start();
+
+    await supertest(httpSetup.server.listener)
+      .post(`${INTERNAL_ROUTES.SCHEDULE_PREFIX}/printablePdfV2`)
+      .send({
+        jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }),
+        schedule: { rrule: { dtstart: '2025-06-23T14:1719.765Z', freq: 1, interval: 2 } },
+      })
+      .expect(400)
+      .then(({ body }) =>
+        expect(body.message).toMatchInlineSnapshot(`
+          "[request body.schedule.rrule]: types that failed validation:
+          - [request body.schedule.rrule.0.dtstart]: Invalid date: 2025-06-23T14:1719.765Z
           - [request body.schedule.rrule.1.freq]: expected value to equal [2]
           - [request body.schedule.rrule.2.freq]: expected value to equal [3]"
         `)
@@ -333,7 +360,7 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
             bcc: ['single@email.com'],
           },
         },
-        schedule: { rrule: { freq: 1, interval: 2 } },
+        schedule: { rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2 } },
       })
       .expect(200)
       .then(({ body }) => {
@@ -351,9 +378,16 @@ describe(`POST ${INTERNAL_ROUTES.SCHEDULE_PREFIX}`, () => {
               title: 'abc',
               version: '7.14.0',
             },
-            schedule: { rrule: { freq: 1, interval: 2 } },
+            schedule: { rrule: { dtstart: '2025-06-23T14:17:19.765Z', freq: 1, interval: 2 } },
           },
         });
       });
+
+    expect(eventTracker.createReport).toHaveBeenCalledTimes(1);
+    expect(eventTracker.createReport).toHaveBeenCalledWith({
+      isDeprecated: false,
+      isPublicApi: false,
+      scheduleType: 'scheduled',
+    });
   });
 });

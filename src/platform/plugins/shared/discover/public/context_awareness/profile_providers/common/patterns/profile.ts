@@ -79,7 +79,7 @@ export const createPatternDataSourceProfileProvider = (
               }
 
               const pattern = extractCategorizeTokens(executeContext.value as string).join(' ');
-              const categoryField = getCategorizeField(executeContext.query.esql);
+              const categoryField = getCategorizeField(executeContext.query.esql)[0];
 
               if (!categoryField || !pattern) {
                 return;
@@ -103,7 +103,6 @@ export const createPatternDataSourceProfileProvider = (
     getDefaultAppState: (prev) => (params) => {
       return {
         ...prev(params),
-        hideChart: true,
         columns: [
           { name: 'Count', width: 150 },
           { name: 'Pattern', width: undefined },

@@ -8,11 +8,11 @@
  */
 
 import * as Rx from 'rxjs';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { LifecyclePhase } from './lifecycle_phase';
 
-import { Suite, Test } from '../fake_mocha_types';
+import type { Suite, Test } from '../fake_mocha_types';
 
 export class Lifecycle {
   /** root subscription to cleanup lifecycle phases when lifecycle completes */

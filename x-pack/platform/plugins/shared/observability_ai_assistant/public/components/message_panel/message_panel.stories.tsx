@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiPanel } from '@elastic/eui';
-import { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react';
 import dedent from 'dedent';
 import React from 'react';
 import { FeedbackButtons } from '../buttons/feedback_buttons';

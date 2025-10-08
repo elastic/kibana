@@ -6,18 +6,17 @@
  */
 
 import * as t from 'io-ts';
-import {
-  DefaultUuid,
-  DefaultVersionNumber,
-  DefaultVersionNumberDecoded,
-} from '@kbn/securitysolution-io-ts-types';
+import type { DefaultVersionNumberDecoded } from '@kbn/securitysolution-io-ts-types';
+import { DefaultUuid, DefaultVersionNumber } from '@kbn/securitysolution-io-ts-types';
 
 import { exceptionListType } from '../../common/exception_list';
-import { OsTypeArray, osTypeArrayOrUndefined } from '../../common/os_type';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import { Tags, tags } from '../../common/tags';
-import { ListId } from '../../common/list_id';
-import { NamespaceType } from '../../common/default_namespace';
+import type { OsTypeArray } from '../../common/os_type';
+import { osTypeArrayOrUndefined } from '../../common/os_type';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { Tags } from '../../common/tags';
+import { tags } from '../../common/tags';
+import type { ListId } from '../../common/list_id';
+import type { NamespaceType } from '../../common/default_namespace';
 import { name } from '../../common/name';
 import { description } from '../../common/description';
 import { namespace_type } from '../../common/namespace_type';

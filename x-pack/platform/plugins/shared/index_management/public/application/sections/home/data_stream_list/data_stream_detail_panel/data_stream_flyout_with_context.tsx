@@ -12,14 +12,15 @@
  */
 
 import React from 'react';
-import { DataStreamFlyoutWithContextProps } from './data_stream_flyout_with_context_types';
+import type { DataStreamFlyoutWithContextProps } from './data_stream_flyout_with_context_types';
 import { httpService } from '../../../../services/http';
 import { notificationService } from '../../../../services/notification';
 import { UiMetricService } from '../../../../services/ui_metric';
 import { documentationService } from '../../../../services';
 import { UIM_APP_NAME } from '../../../../../../common/constants/ui_metric';
 import { setUiMetricService } from '../../../../services/api';
-import { AppDependencies, IndexManagementAppContext } from '../../../..';
+import type { AppDependencies } from '../../../..';
+import { IndexManagementAppContext } from '../../../..';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 
 export const DataStreamFlyoutWithContext: React.FC<DataStreamFlyoutWithContextProps> = ({

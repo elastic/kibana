@@ -19,6 +19,9 @@ export { metricsDataSourceSavedObjectName } from './saved_objects/metrics_data_s
 export { MetricsDataClient } from './client';
 export { MetricsDataClientMock } from './client_mock';
 
+export type { ESSearchClient, LogQueryFields } from './lib/metrics';
+export { fetchMetrics, BasicMetricValueRT } from './lib/metrics';
+
 export async function plugin(context: PluginInitializerContext) {
   const { MetricsDataPlugin } = await import('./plugin');
   return new MetricsDataPlugin(context);

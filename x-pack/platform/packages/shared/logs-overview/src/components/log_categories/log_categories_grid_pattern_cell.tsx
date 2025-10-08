@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LogCategory } from '../../types';
+import type { LogCategory } from '../../types';
 import { LogCategoryPattern } from '../shared/log_category_pattern';
 
 export const logCategoriesGridPatternColumn = {

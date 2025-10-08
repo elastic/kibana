@@ -18,9 +18,10 @@ import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useQueryClient } from '@tanstack/react-query';
-import { DEFAULT_PAGINATION } from '../../../common';
+import { DEFAULT_PAGINATION, SearchPlaygroundQueryKeys } from '../../../common';
 import { ResultList } from './result_list';
-import { PlaygroundForm, PlaygroundFormFields, Pagination } from '../../types';
+import type { PlaygroundForm, Pagination } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
 import { getPaginationFromPage } from '../../utils/pagination_helper';
 import { useIndexMappings } from '../../hooks/use_index_mappings';
@@ -45,7 +46,7 @@ export const SearchMode: React.FC = () => {
 
   const queryClient = useQueryClient();
   const handleSearch = async (query = searchBarValue, paginationParam = DEFAULT_PAGINATION) => {
-    queryClient.resetQueries({ queryKey: ['search-preview-results'] });
+    queryClient.resetQueries({ queryKey: [SearchPlaygroundQueryKeys.SearchPreviewResults] });
     setSearchQuery({ query, pagination: paginationParam });
   };
 

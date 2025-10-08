@@ -30,10 +30,10 @@ import {
   ALERT_GROUP_INDEX,
 } from '../../../../../common/field_maps/field_names';
 import type {
-  BaseFieldsLatest,
-  EqlBuildingBlockFieldsLatest,
-  EqlShellFieldsLatest,
-  WrappedFieldsLatest,
+  DetectionAlertLatest,
+  EqlBuildingBlockAlertLatest,
+  EqlShellAlertLatest,
+  WrappedAlert,
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { SuppressionTerm } from '../utils';
 
@@ -54,8 +54,8 @@ export interface BuildAlertGroupFromSequence {
 
 // eql shell alerts can have a subAlerts property
 // when suppression is used in EQL sequence queries
-export type WrappedEqlShellOptionalSubAlertsType = WrappedFieldsLatest<EqlShellFieldsLatest> & {
-  subAlerts?: Array<WrappedFieldsLatest<EqlShellFieldsLatest>>;
+export type WrappedEqlShellOptionalSubAlertsType = WrappedAlert<EqlShellAlertLatest> & {
+  subAlerts?: Array<WrappedAlert<EqlShellAlertLatest>>;
 };
 
 /**
@@ -70,8 +70,8 @@ export const buildAlertGroupFromSequence = ({
   sequence,
   buildReasonMessage,
 }: BuildAlertGroupFromSequence): {
-  shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest> | undefined;
-  buildingBlocks: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
+  shellAlert: WrappedAlert<EqlShellAlertLatest> | undefined;
+  buildingBlocks: Array<WrappedAlert<EqlBuildingBlockAlertLatest>>;
 } => {
   const {
     alertTimestampOverride,
@@ -82,7 +82,10 @@ export const buildAlertGroupFromSequence = ({
     ruleExecutionLogger,
     publicBaseUrl,
   } = sharedParams;
-  const ancestors: Ancestor[] = sequence.events.flatMap((event) => buildAncestors(event));
+  const sequenceWithoutMissingEvents = sequence.events.filter((event) => event.missing !== true);
+  const ancestors: Ancestor[] = sequenceWithoutMissingEvents.flatMap((event) =>
+    buildAncestors(event)
+  );
   if (ancestors.some((ancestor) => ancestor?.rule === completeRule.alertId)) {
     return { shellAlert: undefined, buildingBlocks: [] };
   }
@@ -91,9 +94,9 @@ export const buildAlertGroupFromSequence = ({
   // We'll add the group ID and index fields
   // after creating the shell alert later on
   // since that's when the group ID is determined.
-  let baseAlerts: BaseFieldsLatest[] = [];
+  let baseAlerts: DetectionAlertLatest[] = [];
   try {
-    baseAlerts = sequence.events.map((event) =>
+    baseAlerts = sequenceWithoutMissingEvents.map((event) =>
       transformHitToAlert({
         sharedParams,
         doc: event,
@@ -110,8 +113,8 @@ export const buildAlertGroupFromSequence = ({
   // The ID of each building block alert depends on all of the other building blocks as well,
   // so we generate the IDs after making all the BaseFields
   const buildingBlockIds = generateBuildingBlockIds(baseAlerts);
-  const wrappedBaseFields: Array<WrappedFieldsLatest<BaseFieldsLatest>> = baseAlerts.map(
-    (block, i): WrappedFieldsLatest<BaseFieldsLatest> => ({
+  const wrappedBaseFields: Array<WrappedAlert<DetectionAlertLatest>> = baseAlerts.map(
+    (block, i): WrappedAlert<DetectionAlertLatest> => ({
       _id: buildingBlockIds[i],
       _index: '',
       _source: {
@@ -134,7 +137,7 @@ export const buildAlertGroupFromSequence = ({
     publicBaseUrl,
     intendedTimestamp,
   });
-  const sequenceAlert: WrappedFieldsLatest<EqlShellFieldsLatest> = {
+  const sequenceAlert: WrappedAlert<EqlShellAlertLatest> = {
     _id: shellAlert[ALERT_UUID],
     _index: '',
     _source: shellAlert,
@@ -142,7 +145,7 @@ export const buildAlertGroupFromSequence = ({
 
   // Finally, we have the group id from the shell alert so we can convert the BaseFields into EqlBuildingBlocks
   const wrappedBuildingBlocks = wrappedBaseFields.map(
-    (block, i): WrappedFieldsLatest<EqlBuildingBlockFieldsLatest> => {
+    (block, i): WrappedAlert<EqlBuildingBlockAlertLatest> => {
       const alertUrl = getAlertDetailsUrl({
         alertId: block._id,
         index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
@@ -168,7 +171,7 @@ export const buildAlertGroupFromSequence = ({
 };
 
 export interface BuildAlertRootParams {
-  wrappedBuildingBlocks: Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+  wrappedBuildingBlocks: Array<WrappedAlert<DetectionAlertLatest>>;
   completeRule: CompleteRule<RuleParams>;
   spaceId: string | null | undefined;
   buildReasonMessage: BuildReasonMessage;
@@ -187,7 +190,7 @@ export const buildAlertRoot = ({
   alertTimestampOverride,
   publicBaseUrl,
   intendedTimestamp,
-}: BuildAlertRootParams): EqlShellFieldsLatest => {
+}: BuildAlertRootParams): EqlShellAlertLatest => {
   const mergedAlerts = objectArrayIntersection(wrappedBuildingBlocks.map((alert) => alert._source));
   const reason = buildReasonMessage({
     name: completeRule.ruleConfig.name,

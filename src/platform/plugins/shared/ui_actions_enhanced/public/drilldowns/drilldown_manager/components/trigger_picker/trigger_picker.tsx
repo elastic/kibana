@@ -10,7 +10,8 @@
 import React from 'react';
 import { EuiText, EuiToolTip, EuiFormFieldset, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TriggerPickerItemDescription, TriggerPickerItem } from './trigger_picker_item';
+import type { TriggerPickerItemDescription } from './trigger_picker_item';
+import { TriggerPickerItem } from './trigger_picker_item';
 
 const txtTriggerPickerLabel = i18n.translate(
   'uiActionsEnhanced.components.actionWizard.triggerPickerLabel',

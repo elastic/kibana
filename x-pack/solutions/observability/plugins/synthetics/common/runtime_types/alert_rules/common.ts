@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { OverviewPingCodec } from '../monitor_management/synthetics_overview_status';
+import type { OverviewPingCodec } from '../monitor_management/synthetics_overview_status';
 
 export const SyntheticsCommonStateCodec = t.intersection([
   t.partial({
@@ -37,7 +37,7 @@ export interface AlertStatusMetaData {
   status: string;
   locationId: string;
   timestamp: string;
-  ping: t.TypeOf<typeof OverviewPingCodec>;
+  latestPing: t.TypeOf<typeof OverviewPingCodec>;
   checks: {
     downWithinXChecks: number;
     down: number;
@@ -92,7 +92,7 @@ export interface AlertPendingStatusMetaData {
   locationId: string;
   monitorInfo: MissingPingMonitorInfo;
   timestamp?: string;
-  ping?: t.TypeOf<typeof OverviewPingCodec>;
+  latestPing?: t.TypeOf<typeof OverviewPingCodec>;
 }
 
 export interface AlertOverviewStatus {

@@ -86,7 +86,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
 
   const defaultAlertActions = useMemo(
     () => (
-      <DefaultAlertActions
+      <DefaultAlertActions<{}>
         key="defaultRowActions"
         onActionExecuted={closeActionsPopover}
         isAlertDetailsEnabled={false}
@@ -144,7 +144,7 @@ export const AlertActions: GetAlertsTableProp<'renderActionsCell'> = (props) => 
       <EuiPopover
         anchorPosition="downLeft"
         button={
-          <EuiToolTip content={actionsToolTip}>
+          <EuiToolTip content={actionsToolTip} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={actionsToolTip}
               color="text"

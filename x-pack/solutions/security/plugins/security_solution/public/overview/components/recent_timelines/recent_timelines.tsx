@@ -57,6 +57,7 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
                   ? i18n.OPEN_AS_DUPLICATE
                   : i18n.OPEN_AS_DUPLICATE_TEMPLATE
               }
+              disableScreenReaderOutput
             >
               <EuiButtonIcon
                 aria-label={

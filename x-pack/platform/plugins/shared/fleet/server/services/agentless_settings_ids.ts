@@ -9,37 +9,21 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import pMap from 'p-map';
 
-import {
-  MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
-  SO_SEARCH_LIMIT,
-  ECH_AGENTLESS_OUTPUT_ID,
-  SERVERLESS_AGENTLESS_OUTPUT_ID,
-  ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
-  SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID,
-} from '../constants';
+import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS, SO_SEARCH_LIMIT } from '../constants';
 
 import type { AgentPolicySOAttributes } from '../types';
 
 import { getAgentPolicySavedObjectType, agentPolicyService } from './agent_policy';
+import { agentlessAgentService } from './agents/agentless_agent';
 import { fleetServerHostService } from './fleet_server_host';
 import { outputService } from './output';
 
 import { appContextService } from '.';
 
 export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchClient) {
-  const cloudSetup = appContextService.getCloud();
-  const isCloud = cloudSetup?.isCloudEnabled;
-  const isServerless = cloudSetup?.isServerlessEnabled;
-  const correctOutputId = isServerless
-    ? SERVERLESS_AGENTLESS_OUTPUT_ID
-    : isCloud
-    ? ECH_AGENTLESS_OUTPUT_ID
-    : undefined;
-  const correctFleetServerId = isServerless
-    ? SERVERLESS_AGENTLESS_FLEET_SERVER_HOST_ID
-    : isCloud
-    ? ECH_AGENTLESS_FLEET_SERVER_HOST_ID
-    : undefined;
+  const { outputId: correctOutputId, fleetServerId: correctFleetServerId } =
+    agentlessAgentService.getDefaultSettings();
+
   let fixOutput = false;
   let fixFleetServer = false;
 

@@ -26,6 +26,7 @@ import {
   getMvExpandUsage,
   updateExcludedDocuments,
   initiateExcludedDocuments,
+  getSourceDocument,
 } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
@@ -93,6 +94,14 @@ export const esqlExecutor = async ({
     // since pagination is not supported in ES|QL, we will use tuple.maxSignals + 1 to determine if search results are exhausted
     const size = tuple.maxSignals + 1;
 
+    const excludedDocuments: Record<string, ExcludedDocument[]> = initiateExcludedDocuments({
+      state,
+      isRuleAggregating,
+      tuple,
+      hasMvExpand,
+      query: ruleParams.query,
+    });
+
     /**
      * ES|QL returns results as a single page, max size of 10,000
      * To mitigate this, we will use the maxSignals as a page size
@@ -102,18 +111,14 @@ export const esqlExecutor = async ({
      * Since aggregating queries do not produce event ids, we will not exclude them.
      * All alerts for aggregating queries are unique anyway
      */
-    const excludedDocuments: ExcludedDocument[] = initiateExcludedDocuments({
-      state,
-      isRuleAggregating,
-      tuple,
-      hasMvExpand,
-      query: ruleParams.query,
-    });
-
     let iteration = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
-        if (excludedDocuments.length > MAX_EXCLUDED_DOCUMENTS) {
+        const totalExcludedDocumentsLength = Object.values(excludedDocuments).reduce(
+          (acc, docs) => acc + docs.length,
+          0
+        );
+        if (totalExcludedDocumentsLength > MAX_EXCLUDED_DOCUMENTS) {
           result.warningMessages.push(
             `Excluded documents exceeded the limit of ${MAX_EXCLUDED_DOCUMENTS}, some alerts might not have been created. Consider reducing the lookback time for the rule.`
           );
@@ -129,7 +134,7 @@ export const esqlExecutor = async ({
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
-          excludedDocumentIds: excludedDocuments.map(({ id }) => id),
+          excludedDocuments,
           ruleExecutionTimeout,
         });
 
@@ -176,6 +181,7 @@ export const esqlExecutor = async ({
           loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
           hasLoggedRequestsReachedLimit,
           runtimeMappings: sharedParams.runtimeMappings,
+          excludedDocuments,
         });
 
         const isAlertSuppressionActive = await getIsAlertSuppressionActive({
@@ -191,7 +197,7 @@ export const esqlExecutor = async ({
         const syntheticHits: Array<estypes.SearchHit<SignalSource>> = results.map((document) => {
           const { _id, _version, _index, ...esqlResult } = document;
 
-          const sourceDocument = _id ? sourceDocuments[_id] : undefined;
+          const sourceDocument = getSourceDocument(sourceDocuments, _id, _index);
           // when mv_expand command present we must clone source, since the reference will be used multiple times
           const source = hasMvExpand ? cloneDeep(sourceDocument?._source) : sourceDocument?._source;
 
@@ -239,6 +245,7 @@ export const esqlExecutor = async ({
             results,
             isRuleAggregating,
             aggregatableTimestampField: sharedParams.aggregatableTimestampField,
+            searchExhausted: results.length < size,
           });
 
           if (bulkCreateResult.alertsWereTruncated) {
@@ -269,6 +276,7 @@ export const esqlExecutor = async ({
             results,
             isRuleAggregating,
             aggregatableTimestampField: sharedParams.aggregatableTimestampField,
+            searchExhausted: results.length < size,
           });
 
           if (bulkCreateResult.alertsWereTruncated) {
@@ -290,6 +298,7 @@ export const esqlExecutor = async ({
           );
           break;
         }
+
         iteration++;
       }
     } catch (error) {

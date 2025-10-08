@@ -23,8 +23,6 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { getDiscoverHref } from '../links/discover_links/discover_link';
-import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
 import type { SectionRecord, Action } from './sections_helper';
 import { getNonEmptySections } from './sections_helper';
 import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
@@ -137,8 +135,8 @@ export const getSections = ({
       }),
       href: hasPodLink
         ? assetDetailsLocator.getRedirectUrl({
-            assetId: podId,
-            assetType: 'pod',
+            entityId: podId,
+            entityType: 'pod',
             assetDetails: {
               dateRange: infraMetricsQuery,
             },
@@ -164,8 +162,8 @@ export const getSections = ({
       }),
       href: hasContainerLink
         ? assetDetailsLocator.getRedirectUrl({
-            assetId: containerId,
-            assetType: 'container',
+            entityId: containerId,
+            entityType: 'container',
             assetDetails: { dateRange: infraMetricsQuery },
           })
         : undefined,
@@ -189,8 +187,8 @@ export const getSections = ({
       }),
       href: hasHostLink
         ? assetDetailsLocator.getRedirectUrl({
-            assetId: hostName,
-            assetType: 'host',
+            entityId: hostName,
+            entityType: 'host',
             assetDetails: {
               dateRange: infraMetricsQuery,
             },
@@ -252,22 +250,6 @@ export const getSections = ({
       }),
       href: uptimeLink,
       condition: !!transaction.url?.domain && !!uptimeLink,
-    },
-  ];
-
-  const kibanaActions: Action[] = [
-    {
-      key: 'sampleDocument',
-      label: i18n.translate('xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel', {
-        defaultMessage: 'View transaction in Discover',
-      }),
-      href: getDiscoverHref({
-        basePath,
-        query: getDiscoverQuery(transaction),
-        location,
-        dataViewId: dataViewId ?? '',
-      }),
-      condition: !!dataViewId,
     },
   ];
 
@@ -347,7 +329,7 @@ export const getSections = ({
       {
         key: 'serviceMap',
         title: i18n.translate('xpack.apm.transactionActionMenu.serviceMap.title', {
-          defaultMessage: 'Service Map',
+          defaultMessage: 'Service map',
         }),
         subtitle: i18n.translate('xpack.apm.transactionActionMenu.serviceMap.subtitle', {
           defaultMessage: 'View service map filtered by this trace.',
@@ -355,7 +337,6 @@ export const getSections = ({
         actions: serviceMapActions,
       },
     ],
-    kibana: [{ key: 'kibana', actions: kibanaActions }],
   };
 
   // Filter out actions that shouldnt be shown and sections without any actions.

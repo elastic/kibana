@@ -8,10 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
 import type { TimeIntervalTriggeringPolicyConfig } from '@kbn/core-logging-server';
-import { RollingFileContext } from '../../rolling_file_context';
-import { TriggeringPolicy } from '../policy';
+import type { RollingFileContext } from '../../rolling_file_context';
+import type { TriggeringPolicy } from '../policy';
 import { getNextRollingTime } from './get_next_rolling_time';
 import { isValidRolloverInterval } from './utils';
 

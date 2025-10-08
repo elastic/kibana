@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import { TYPE_DEFINITION } from '../../../../../constants';
-import { MainType, SubType, DataType, NormalizedFields } from '../../../../../types';
+import type { MainType, SubType, DataType, NormalizedFields } from '../../../../../types';
 
 import { AliasTypeRequiredParameters } from './alias_type';
 import { TokenCountTypeRequiredParameters } from './token_count_type';
@@ -32,7 +32,7 @@ export const getRequiredParametersFormForType = (
   if (subType) {
     const typeDefinition = TYPE_DEFINITION[type];
 
-    return typeDefinition.subTypes?.types.includes(subType)
+    return typeDefinition?.subTypes?.types.includes(subType)
       ? typeToParametersFormMap[subType]
       : undefined;
   }

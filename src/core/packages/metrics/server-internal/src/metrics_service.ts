@@ -18,15 +18,23 @@ import type {
   MetricsServiceSetup,
   MetricsServiceStart,
 } from '@kbn/core-metrics-server';
+import apm from 'elastic-apm-node';
+import { metrics, ValueType } from '@opentelemetry/api';
 import { OpsMetricsCollector } from './ops_metrics_collector';
 import { OPS_CONFIG_PATH, type OpsConfigType } from './ops_config';
 import { getEcsOpsMetricsLog } from './logging';
 import { registerEluHistoryRoute } from './routes/elu_history';
 import { exponentialMovingAverage } from './exponential_moving_average';
 
-const ELU_SHORT = 15000;
-const ELU_MEDIUM = 30000;
-const ELU_LONG = 60000;
+/**
+ * The period of time for the average ELU calculation.
+ * @public
+ */
+export enum EluTerm {
+  Short = 15000,
+  Medium = 30000,
+  Long = 60000,
+}
 
 export interface MetricsServiceSetupDeps {
   http: InternalHttpServiceSetup;
@@ -88,15 +96,16 @@ export class MetricsService
 
     this.metrics$
       .pipe(
-        map((metrics) => metrics.process.event_loop_utilization.utilization),
+        map((opsMetrics) => opsMetrics.process.event_loop_utilization.utilization),
         (elu$) =>
           zip(
-            elu$.pipe(exponentialMovingAverage(ELU_SHORT, collectionInterval)),
-            elu$.pipe(exponentialMovingAverage(ELU_MEDIUM, collectionInterval)),
-            elu$.pipe(exponentialMovingAverage(ELU_LONG, collectionInterval))
+            elu$.pipe(exponentialMovingAverage(EluTerm.Short, collectionInterval)),
+            elu$.pipe(exponentialMovingAverage(EluTerm.Medium, collectionInterval)),
+            elu$.pipe(exponentialMovingAverage(EluTerm.Long, collectionInterval))
           ).pipe(map(([short, medium, long]) => ({ short, medium, long })))
       )
       .subscribe(this.elu$);
+    this.registerEluHistoryMetrics();
     registerEluHistoryRoute(http.createRouter(''), () => this.elu$.value);
 
     this.service = {
@@ -117,13 +126,13 @@ export class MetricsService
   }
 
   private async refreshMetrics() {
-    const metrics = await this.metricsCollector!.collect();
+    const opsMetrics = await this.metricsCollector!.collect();
     if (this.opsMetricsLogger.isLevelEnabled('debug')) {
-      const { message, meta } = getEcsOpsMetricsLog(metrics);
+      const { message, meta } = getEcsOpsMetricsLog(opsMetrics);
       this.opsMetricsLogger.debug(message!, meta);
     }
     this.metricsCollector!.reset();
-    this.metrics$.next(metrics);
+    this.metrics$.next(opsMetrics);
   }
 
   public async stop() {
@@ -131,5 +140,30 @@ export class MetricsService
       clearInterval(this.collectInterval);
     }
     this.metrics$.complete();
+  }
+
+  private registerEluHistoryMetrics() {
+    // Report the same metrics to APM
+    apm.registerMetric('elu.history.short', () => this.elu$.value.short);
+    apm.registerMetric('elu.history.medium', () => this.elu$.value.medium);
+    apm.registerMetric('elu.history.long', () => this.elu$.value.long);
+
+    // Report the same metrics to OpenTelemetry
+    const meter = metrics.getMeter('kibana.process');
+    meter
+      // Not calling it 'nodejs.eventloop.utilization.history' to avoid potential issues with the existing metric `nodejs.eventloop.utilization`.
+      .createObservableGauge('nodejs.eventloop.history.utilization', {
+        description:
+          'The event loop utilization averaged over a set of sample buckets: short (3 samples), medium (6), long (12). Use `nodejs.eventloop.history.window` to select the correct window.',
+        unit: '1',
+        valueType: ValueType.DOUBLE,
+      })
+      .addCallback((result) => {
+        const { short, medium, long } = this.elu$.value;
+        // They categories defined by these attributes are subsets of each other, but since it's a gauge, we won't ever sum them.
+        result.observe(short, { 'nodejs.eventloop.history.window': 'short' });
+        result.observe(medium, { 'nodejs.eventloop.history.window': 'medium' });
+        result.observe(long, { 'nodejs.eventloop.history.window': 'long' });
+      });
   }
 }

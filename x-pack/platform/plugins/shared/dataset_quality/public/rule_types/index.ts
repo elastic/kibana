@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import { getRuleType as getDegradedDocsRuleType } from './degraded_docs';
 
 export function registerRuleTypes({

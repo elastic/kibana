@@ -13,7 +13,7 @@ import { ClassNames } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
-import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createPerformanceTracker,
@@ -28,8 +28,8 @@ import {
 } from '@kbn/chart-expressions-common';
 
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { ExpressionTagcloudRendererDependencies } from '../plugin';
-import { TagcloudRendererConfig } from '../../common/types';
+import type { ExpressionTagcloudRendererDependencies } from '../plugin';
+import type { TagcloudRendererConfig } from '../../common/types';
 import { EXPRESSION_NAME } from '../../common';
 
 export const strings = {

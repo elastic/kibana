@@ -13,7 +13,6 @@ import type { TaskManagerDoc } from '../../../../common/lib';
 import { getUrlPrefix, getEventLog, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createAlertingAndActionsTelemetryTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -164,6 +163,31 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             apiUrl,
           },
         });
+
+        // AAD rule
+        const ruleWithAadId = await createRule({
+          space: space.id,
+          ruleOverwrites: {
+            rule_type_id: 'test.always-firing-alert-as-data',
+            schedule: { interval: '1h' },
+            notify_when: 'onActiveAlert',
+            throttle: null,
+            params: {
+              index: 'kibana-alerting-test-data',
+              reference: 'test',
+            },
+            actions: [
+              {
+                id: noopConnectorId,
+                group: 'default',
+                params: {},
+              },
+            ],
+          },
+        });
+
+        rulesWithAAD.push(ruleWithAadId);
+
         await createRule({
           space: space.id,
           ruleOverwrites: {
@@ -291,30 +315,6 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
           },
         });
-
-        // AAD rule
-        const ruleWithAadId = await createRule({
-          space: space.id,
-          ruleOverwrites: {
-            rule_type_id: 'test.always-firing-alert-as-data',
-            schedule: { interval: '1h' },
-            notify_when: 'onActiveAlert',
-            throttle: null,
-            params: {
-              index: 'kibana-alerting-test-data',
-              reference: 'test',
-            },
-            actions: [
-              {
-                id: noopConnectorId,
-                group: 'default',
-                params: {},
-              },
-            ],
-          },
-        });
-
-        rulesWithAAD.push(ruleWithAadId);
 
         // ES query rule
         esQueryRuleId[space.id] = await createRule({

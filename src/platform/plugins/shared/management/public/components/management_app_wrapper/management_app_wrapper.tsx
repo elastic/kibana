@@ -9,7 +9,7 @@
 
 import React, { createRef, Component } from 'react';
 
-import {
+import type {
   ChromeBreadcrumb,
   AppMountParameters,
   ScopedHistory,
@@ -18,8 +18,8 @@ import {
 import classNames from 'classnames';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
-import { ManagementApp } from '../../utils';
-import { Unmount } from '../../types';
+import type { ManagementApp } from '../../utils';
+import type { Unmount } from '../../types';
 
 interface ManagementSectionWrapperProps {
   app: ManagementApp;

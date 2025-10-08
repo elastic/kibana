@@ -30,6 +30,7 @@ import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionContrib
 // import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionKeybindingResolver.js';
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionMenu.js';
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionModel.js';
+import 'monaco-editor/esm/vs/editor/contrib/comment/browser/comment.js'; // Needed for CMD+/ comment toggling
 
 import 'monaco-editor/esm/vs/editor/contrib/find/browser/findController'; // Needed for Search bar functionality
 import 'monaco-editor/esm/vs/editor/standalone/browser/inspectTokens/inspectTokens.js'; // Needed for inspect tokens functionality
@@ -82,16 +83,12 @@ Object.defineProperties(monaco.editor, {
    * @description Registers language theme definition for a language
    */
   registerLanguageThemeResolver: {
-    value: (
-      langId: string,
-      languageThemeDefinition: CustomLangModuleType['languageThemeResolver'],
-      forceOverride?: boolean
-    ) => {
+    value: ((langId, languageThemeDefinition, forceOverride) => {
       if (!forceOverride && languageThemeResolverDefinitions.has(langId)) {
         throw new Error(`Language theme resolver for ${langId} is already registered`);
       }
       languageThemeResolverDefinitions.set(langId, languageThemeDefinition);
-    },
+    }) satisfies typeof monaco.editor.registerLanguageThemeResolver,
     enumerable: true,
     configurable: false,
   },
@@ -99,7 +96,10 @@ Object.defineProperties(monaco.editor, {
    * @description Returns language theme definition for a language
    */
   getLanguageThemeResolver: {
-    value: (langId: string) => languageThemeResolverDefinitions.get(langId),
+    value: ((langId) =>
+      languageThemeResolverDefinitions.get(
+        langId
+      )) satisfies typeof monaco.editor.getLanguageThemeResolver,
     enumerable: true,
     configurable: false,
   },

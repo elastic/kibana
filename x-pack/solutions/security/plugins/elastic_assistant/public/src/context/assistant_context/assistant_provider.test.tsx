@@ -10,7 +10,8 @@ import { AssistantProvider } from './assistant_provider';
 import React from 'react';
 import { ElasticAssistantTestProviders } from '../../utils/elastic_assistant_test_providers.mock';
 import { elasticAssistantSharedStateMock } from '@kbn/elastic-assistant-shared-state-plugin/public/mocks';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
+import type { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import {
   applicationServiceMock,
   httpServiceMock,
@@ -27,8 +28,10 @@ describe('AssistantProvider', () => {
     const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
     const notifications = notificationServiceMock.createStartContract();
 
+    const openChatTrigger$ = new Subject<{ assistant: AIAssistantType }>();
+
     render(
-      <AssistantProvider>
+      <AssistantProvider openChatTrigger$={openChatTrigger$} completeOpenChat={() => {}}>
         <div data-test-subj="assistant-provider-test">{'Assistant Provider Test'}</div>
       </AssistantProvider>,
       {
@@ -66,12 +69,11 @@ describe('AssistantProvider', () => {
           hasSearchAILakeConfigurations: expect.any(Boolean),
           hasUpdateAIAssistantAnonymization: expect.any(Boolean),
           isAssistantEnabled: expect.any(Boolean),
-          isStarterPromptsEnabled: expect.any(Boolean),
+          isAssistantVisible: expect.any(Boolean),
         }),
         assistantFeatures: expect.objectContaining({
-          advancedEsqlGeneration: expect.any(Boolean),
           assistantModelEvaluation: expect.any(Boolean),
-          defendInsights: expect.any(Boolean),
+          defendInsightsPolicyResponseFailure: expect.any(Boolean),
         }),
         assistantStreamingEnabled: expect.any(Boolean),
         assistantTelemetry: expect.any(Object),

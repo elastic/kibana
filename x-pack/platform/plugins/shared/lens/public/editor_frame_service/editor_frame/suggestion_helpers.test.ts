@@ -7,14 +7,14 @@
 
 import type { PaletteOutput } from '@kbn/coloring';
 import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
+import type { DatasourceMock } from '../../mocks';
 import {
   createMockVisualization,
   createMockDatasource,
-  DatasourceMock,
   createMockFramePublicAPI,
 } from '../../mocks';
-import { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
-import { DatasourceStates, DataViewsState } from '../../state_management';
+import type { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
+import type { DatasourceStates, DataViewsState } from '../../state_management';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,

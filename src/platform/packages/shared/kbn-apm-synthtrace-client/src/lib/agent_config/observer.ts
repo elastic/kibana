@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AgentConfigFields } from './agent_config_fields';
+import type { AgentConfigFields } from './agent_config_fields';
 import { AgentConfig } from './agent_config';
 import { Entity } from '../entity';
 

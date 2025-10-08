@@ -8,10 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment, { unitOfTime, Duration } from 'moment';
+import type { unitOfTime, Duration } from 'moment';
+import moment from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
+import type { TextContextTypeConvert } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 import {
   DEFAULT_DURATION_INPUT_FORMAT,
   DEFAULT_DURATION_OUTPUT_FORMAT,

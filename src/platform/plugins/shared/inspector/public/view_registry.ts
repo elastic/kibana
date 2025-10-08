@@ -8,8 +8,8 @@
  */
 
 import { EventEmitter } from 'events';
-import { InspectorViewDescription } from './types';
-import { Adapters } from '../common';
+import type { InspectorViewDescription } from './types';
+import type { Adapters } from '../common';
 
 /**
  * @callback viewShouldShowFunc

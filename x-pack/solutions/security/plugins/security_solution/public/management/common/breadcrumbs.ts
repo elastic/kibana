@@ -7,7 +7,14 @@
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { AdministrationSubTab } from '../types';
-import { ENDPOINTS_TAB, EVENT_FILTERS_TAB, POLICIES_TAB, TRUSTED_APPS_TAB } from './translations';
+import {
+  ENDPOINTS_TAB,
+  EVENT_FILTERS_TAB,
+  POLICIES_TAB,
+  ENDPOINT_EXCEPTIONS_TAB,
+  TRUSTED_APPS_TAB,
+  TRUSTED_DEVICES_TAB,
+} from './translations';
 import type { AdministrationRouteSpyState } from '../../common/utils/route/types';
 import {
   HOST_ISOLATION_EXCEPTIONS,
@@ -20,7 +27,9 @@ import {
 const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.endpoints]: ENDPOINTS_TAB,
   [AdministrationSubTab.policies]: POLICIES_TAB,
+  [AdministrationSubTab.endpointExceptions]: ENDPOINT_EXCEPTIONS_TAB,
   [AdministrationSubTab.trustedApps]: TRUSTED_APPS_TAB,
+  [AdministrationSubTab.trustedDevices]: TRUSTED_DEVICES_TAB,
   [AdministrationSubTab.eventFilters]: EVENT_FILTERS_TAB,
   [AdministrationSubTab.hostIsolationExceptions]: HOST_ISOLATION_EXCEPTIONS,
   [AdministrationSubTab.blocklist]: BLOCKLIST,

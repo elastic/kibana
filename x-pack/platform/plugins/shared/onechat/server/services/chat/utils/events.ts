@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import {
-  ChatEventType,
+import type {
   ConversationCreatedEvent,
   ConversationUpdatedEvent,
   Conversation,
+  ConversationIdSetEvent,
 } from '@kbn/onechat-common';
+import { ChatEventType } from '@kbn/onechat-common';
 
 export const createConversationCreatedEvent = (
   conversation: Conversation
@@ -18,7 +19,7 @@ export const createConversationCreatedEvent = (
   return {
     type: ChatEventType.conversationCreated,
     data: {
-      conversationId: conversation.id,
+      conversation_id: conversation.id,
       title: conversation.title,
     },
   };
@@ -30,8 +31,19 @@ export const createConversationUpdatedEvent = (
   return {
     type: ChatEventType.conversationUpdated,
     data: {
-      conversationId: conversation.id,
+      conversation_id: conversation.id,
       title: conversation.title,
+    },
+  };
+};
+
+export const createConversationIdSetEvent = (
+  conversationId: Conversation['id']
+): ConversationIdSetEvent => {
+  return {
+    type: ChatEventType.conversationIdSet,
+    data: {
+      conversation_id: conversationId,
     },
   };
 };

@@ -9,10 +9,11 @@
 
 import * as Rx from 'rxjs';
 import exitHook from 'exit-hook';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 
-import { Proc, ProcOptions, startProc } from './proc';
+import type { Proc, ProcOptions } from './proc';
+import { startProc } from './proc';
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;

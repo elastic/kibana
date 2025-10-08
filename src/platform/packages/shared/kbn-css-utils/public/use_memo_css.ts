@@ -8,15 +8,14 @@
  */
 
 import { useMemo } from 'react';
-import { CSSInterpolation } from '@emotion/css';
-import { UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import type { CSSInterpolation } from '@emotion/css';
+import type { UseEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 
 export type EmotionStyles = Record<
   string,
   CSSInterpolation | ((theme: UseEuiTheme) => CSSInterpolation)
 >;
-
-type StaticEmotionStyles = Record<string, CSSInterpolation>;
 
 /**
  * Custom hook to reduce boilerplate when working with Emotion styles that may depend on
@@ -37,13 +36,20 @@ type StaticEmotionStyles = Record<string, CSSInterpolation>;
  *   }
  *   const styles = useMemoCss(componentStyles);
  */
-export const useMemoCss = (styleMap: EmotionStyles) => {
+export const useMemoCss = <T extends EmotionStyles>(
+  styleMap: T
+): { [K in keyof T]: CSSInterpolation } => {
   const euiThemeContext = useEuiTheme();
+
   const outputStyles = useMemo(() => {
-    return Object.entries(styleMap).reduce<StaticEmotionStyles>((acc, [key, value]) => {
-      acc[key] = typeof value === 'function' ? value(euiThemeContext) : value;
-      return acc;
-    }, {});
+    return Object.entries(styleMap).reduce<{ [K in keyof T]: CSSInterpolation }>(
+      (acc, [key, value]) => {
+        acc[key as keyof T] = typeof value === 'function' ? value(euiThemeContext) : value;
+        return acc;
+      },
+      {} as { [K in keyof T]: CSSInterpolation }
+    );
   }, [euiThemeContext, styleMap]);
+
   return outputStyles;
 };

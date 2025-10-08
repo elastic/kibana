@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs';
 
-import { OptimizerUpdate } from './run_optimizer';
+import type { OptimizerUpdate } from './run_optimizer';
 
 const PROGRESS_REPORT_INTERVAL = 10_000;
 

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ReactElement } from 'react';
-import { ImACommonType } from '../common';
-import { FooType, ImNotExportedFromIndex } from './foo';
+import type { ReactElement } from 'react';
+import type { ImACommonType } from '../common';
+import type { FooType, ImNotExportedFromIndex } from './foo';
 
 /**
  * How should a potentially undefined type show up.

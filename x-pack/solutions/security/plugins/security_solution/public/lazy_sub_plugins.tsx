@@ -18,6 +18,7 @@ import { Exceptions } from './exceptions';
 import { Explore } from './explore';
 import { Onboarding } from './onboarding';
 import { Overview } from './overview';
+import { Reports } from './reports';
 import { Rules } from './rules';
 import { Timelines } from './timelines';
 import { Management } from './management';
@@ -26,6 +27,7 @@ import { ThreatIntelligence } from './threat_intelligence';
 import { Dashboards } from './dashboards';
 import { EntityAnalytics } from './entity_analytics';
 import { SiemMigrations } from './siem_migrations';
+import { SiemReadiness } from './siem_readiness';
 import { Configurations } from './configurations';
 
 /**
@@ -49,5 +51,7 @@ const subPluginClasses = {
   EntityAnalytics,
   Configurations,
   SiemMigrations,
+  SiemReadiness,
+  Reports,
 };
 export { subPluginClasses };

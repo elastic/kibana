@@ -13,7 +13,7 @@ import { isLeft, isRight } from 'fp-ts/Either';
 
 import { errorReporter } from './error_reporter';
 import { ALL_DATA_TYPES, PARAMETERS_DEFINITION, MapperSizePluginId } from '../constants';
-import { FieldMeta } from '../types';
+import type { FieldMeta } from '../types';
 import { getFieldMeta } from './utils';
 
 const ALLOWED_FIELD_PROPERTIES = [

@@ -8,6 +8,15 @@
  */
 import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
+import { initMetrics } from '@kbn/metrics';
+
+import { resources } from '@elastic/opentelemetry-node/sdk';
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions';
+import {
+  ATTR_SERVICE_INSTANCE_ID,
+  ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
+} from '@opentelemetry/semantic-conventions/incubating';
+
 /**
  *
  * Initializes OpenTelemetry (currently only tracing)
@@ -27,23 +36,33 @@ export const initTelemetry = (
   const apmConfigLoader = loadConfiguration(argv, rootDir, isDistributable);
 
   const apmConfig = apmConfigLoader.getConfig(serviceName);
-
   const telemetryConfig = apmConfigLoader.getTelemetryConfig();
+  const monitoringCollectionConfig = apmConfigLoader.getMonitoringCollectionConfig();
 
-  // explicitly check for enabled == false, as the default in the schema
-  // is true, but it's not parsed through @kbn/config-schema, so the
-  // default value is not returned
-  const telemetryEnabled = telemetryConfig?.enabled !== false;
+  // attributes.resource.*
+  const resource = resources.resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: apmConfig.serviceName,
+    [ATTR_SERVICE_VERSION]: apmConfig.serviceVersion,
+    [ATTR_SERVICE_INSTANCE_ID]: apmConfig.serviceNodeName,
+    // Reverse-mapping APM Server transformations:
+    // https://github.com/elastic/apm-data/blob/2f9cdbf722e5be5bf77d99fbcaab7a70a7e83fff/input/otlp/metadata.go#L69-L74
+    [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: apmConfig.environment,
 
-  // tracing is enabled only when telemetry is enabled and tracing is not disabled
-  const tracingEnabled = telemetryEnabled && telemetryConfig?.tracing?.enabled;
+    // From https://opentelemetry.io/docs/specs/semconv/resource/process/
+    'process.pid': process.pid,
+    'process.runtime.name': 'nodejs',
+    'process.runtime.version': process.version,
 
-  if (!tracingEnabled) {
-    return async () => {};
-  }
-
-  return initTracing({
-    tracingConfig: telemetryConfig.tracing,
-    apmConfig,
+    ...(apmConfig.globalLabels as Record<string, unknown>),
   });
+
+  if (telemetryConfig.enabled) {
+    if (telemetryConfig.tracing.enabled) {
+      initTracing({ resource, tracingConfig: telemetryConfig.tracing });
+    }
+
+    if (telemetryConfig.metrics.enabled || monitoringCollectionConfig.enabled) {
+      initMetrics({ resource, metricsConfig: telemetryConfig.metrics, monitoringCollectionConfig });
+    }
+  }
 };

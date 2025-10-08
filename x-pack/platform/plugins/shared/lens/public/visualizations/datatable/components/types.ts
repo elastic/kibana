@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
 import type { Datatable, DatatableColumnMeta, RenderMode } from '@kbn/expressions-plugin/common';
@@ -14,7 +14,7 @@ import type {
   LensCellValueAction,
   LensEditEvent,
 } from '../../../types';
-import {
+import type {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,

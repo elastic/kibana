@@ -8,10 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { DataPluginRouter } from '../types';
-import {
+import type { DataPluginRouter } from '../types';
+import type {
   SearchSessionRestResponse,
   SearchSessionStatusRestResponse,
   SearchSessionsFindRestResponse,

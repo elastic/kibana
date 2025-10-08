@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
-import { ExpressionValueFilter } from '@kbn/expressions-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import type { ExpressionValueFilter } from '@kbn/expressions-plugin/common';
 
 function getGroupFromFilter(filter: Filter) {
   const { meta } = filter;

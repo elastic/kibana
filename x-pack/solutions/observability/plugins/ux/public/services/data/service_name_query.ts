@@ -7,7 +7,7 @@
 
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
 import { mergeProjection } from '../../../common/utils/merge_projection';
-import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { getRumPageLoadTransactionsProjection } from './projections';
 
 export function serviceNameQuery(start: number, end: number, uiFilters?: UxUIFilters) {

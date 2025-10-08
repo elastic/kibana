@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
-import { CoreSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreSetup, IUiSettingsClient } from '@kbn/core/public';
 import type {
   Datatable,
   DatatableColumnMeta,
@@ -18,7 +18,7 @@ import type {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import {
   createPerformanceTracker,
   PERFORMANCE_TRACKER_MARKS,

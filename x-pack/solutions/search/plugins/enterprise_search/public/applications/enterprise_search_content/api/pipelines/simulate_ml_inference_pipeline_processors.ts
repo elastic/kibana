@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestSimulateResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import type { MlInferencePipeline } from '../../../../../common/types/pipelines';
 

@@ -6,11 +6,6 @@
  */
 
 export type {
-  RegisteredToolMeta,
-  RegisteredTool,
-  RegisteredToolProvider,
-  ToolHandlerFn,
-  ToolHandlerContext,
   ToolProvider,
   ToolProviderHasOptions,
   ToolProviderGetOptions,
@@ -18,9 +13,10 @@ export type {
   ExecutableTool,
   ExecutableToolHandlerParams,
   ExecutableToolHandlerFn,
-} from './src/tools';
-export type { ModelProvider, ScopedModel } from './src/model_provider';
-export type {
+  LLmDescriptionHandlerParams,
+  LlmDescriptionHandler,
+  ModelProvider,
+  ScopedModel,
   ScopedRunner,
   ScopedRunToolFn,
   ScopedRunnerRunToolsParams,
@@ -30,37 +26,37 @@ export type {
   RunToolFn,
   Runner,
   RunToolReturn,
-} from './src/runner';
-export {
-  type OnechatToolEvent,
-  type ToolEventHandlerFn,
-  type ToolEventEmitter,
-  type ToolEventEmitterFn,
-  type InternalToolEvent,
-} from './src/events';
+  OnechatToolEvent,
+  ToolEventHandlerFn,
+  ToolEventEmitter,
+  ToolProgressEmitterFn,
+  ToolResultStore,
+  WritableToolResultStore,
+} from './runner';
+export type {
+  ToolHandlerFn,
+  ToolHandlerReturn,
+  ToolHandlerContext,
+  ToolHandlerResult,
+  BuiltinToolDefinition,
+  StaticToolRegistration,
+  StaticEsqlTool,
+  StaticWorkflowTool,
+  StaticIndexSearchTool,
+} from './tools';
+export { getToolResultId, createErrorResult, isToolResultId } from './tools';
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
   AgentHandlerReturn,
   AgentHandlerFn,
-  ConversationalAgentParams,
-  ConversationalAgentHandlerFn,
-  ConversationalAgentResponse,
   RunAgentFn,
   RunAgentParams,
   RunAgentReturn,
   ScopedRunAgentFn,
   ScopedRunnerRunAgentParams,
   AgentEventEmitter,
+  AgentEventEmitterFn,
   RunAgentOnEventFn,
-  AgentDefinitionBase,
-  ConversationalAgentDefinition,
-  AgentDefinition,
-  AgentProvider,
-  ExecutableAgent,
-  ExecutableAgentHandlerFn,
-  ExecutableAgentHandlerParams,
-  ExecutableAgentBase,
-  ExecutableConversationalAgent,
-  AgentRegistry,
 } from './agents';
+export { chatSystemIndex, chatSystemIndexPrefix } from './indices';

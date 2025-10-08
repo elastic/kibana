@@ -21,8 +21,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
 
   const openTabContextMenuWithKeyboard = async () => {
-    await browser.getActions().keyDown(Key.SHIFT).sendKeys(browser.keys.F10).perform();
-    await browser.getActions().keyUp(Key.SHIFT).perform();
+    await browser
+      .getActions()
+      .keyDown(Key.SHIFT)
+      .sendKeys(browser.keys.F10)
+      .keyUp(Key.SHIFT)
+      .perform();
+
     await retry.waitFor('open tab context menu', async () => {
       return await testSubjects.exists('unifiedTabs_tabMenuItem_enterRenamingMode');
     });
@@ -47,7 +52,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

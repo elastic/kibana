@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createWriteStream, WriteStream, mkdirSync } from 'fs';
+import type { WriteStream } from 'fs';
+import { createWriteStream, mkdirSync } from 'fs';
 import { dirname } from 'path';
-import { RollingFileContext } from './rolling_file_context';
+import type { RollingFileContext } from './rolling_file_context';
 
 /**
  * Delegate of the {@link RollingFileAppender} used to manage the log file access

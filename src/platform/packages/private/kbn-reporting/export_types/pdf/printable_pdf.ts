@@ -8,10 +8,11 @@
  */
 
 import apm from 'elastic-apm-node';
-import { Observable, fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
 
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -19,13 +20,14 @@ import {
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import { TaskRunResult } from '@kbn/reporting-common/types';
-import {
+import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type {
   JobParamsPDFDeprecated,
-  PDF_JOB_TYPE,
   TaskPayloadPDF,
 } from '@kbn/reporting-export-types-pdf-common';
-import { ExportType, REPORTING_TRANSACTION_TYPE, RunTaskOpts } from '@kbn/reporting-server';
+import { PDF_JOB_TYPE } from '@kbn/reporting-export-types-pdf-common';
+import type { RunTaskOpts } from '@kbn/reporting-server';
+import { ExportType, REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
 
 import { getCustomLogo } from './get_custom_logo';
 import { getFullUrls } from './get_full_urls';

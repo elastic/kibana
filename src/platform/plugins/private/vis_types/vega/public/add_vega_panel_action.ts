@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableApiContext, apiHasAppContext } from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { VegaPluginStartDependencies } from './plugin';
+import type { VegaPluginStartDependencies } from './plugin';
 import { vegaVisType } from './vega_type';
 
 export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {

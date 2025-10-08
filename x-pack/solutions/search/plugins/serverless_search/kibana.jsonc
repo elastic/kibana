@@ -30,14 +30,16 @@
       "serverless",
       "searchHomepage",
       "share",
-      "visualizations"
+      "visualizations",
     ],
     "optionalPlugins": [
+      "onechat",
       "indexManagement",
       "contentConnectors",
       "searchInferenceEndpoints",
       "searchPlayground",
-      "usageCollection"
+      "usageCollection",
+      "workflowsManagement",
     ],
     "requiredBundles": [
       "kibanaReact"

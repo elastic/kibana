@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 export type Links = ReturnType<typeof getLinks>;
 

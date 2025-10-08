@@ -6,7 +6,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { CliOptions } from './types';
+import type { CliOptions } from './types';
 import { cliOptionsToPartialConfig } from './lib/cli_to_partial_config';
 import { createConfig, readConfig } from './lib/create_config';
 import { getEsClient } from './lib/get_es_client';

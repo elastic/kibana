@@ -25,7 +25,6 @@ const secrets = {
 
 const defaultConfig = { apiProvider: 'OpenAI' };
 
-// eslint-disable-next-line import/no-default-export
 export default function genAiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
@@ -674,7 +673,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               connector_id: genAiActionId,
               message: 'an error occurred while running the action',
               retry: true,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource: TaskErrorSource.USER,
               service_message:
                 'Status code: 422. Message: API Error: Unprocessable Entity - The model `bad model` does not exist',
             });

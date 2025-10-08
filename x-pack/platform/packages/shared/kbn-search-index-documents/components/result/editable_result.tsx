@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { debounce } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ResultFieldProps } from './result_types';
+import type { ResultFieldProps } from './result_types';
 import { ResultFields } from './results_fields';
 
 export interface EditableResultProps {
@@ -63,7 +63,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
           {leftSideItem && <EuiFlexItem grow={false}>{leftSideItem}</EuiFlexItem>}
           <EuiFlexItem>
             <EuiFlexGroup>
-              <EuiFlexItem>
+              <EuiFlexItem grow={5}>
                 <EuiFieldText
                   data-test-subj="editableResultDocumentId"
                   value={documentId}
@@ -83,7 +83,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
                 />
               </EuiFlexItem>
               {hasIndexSelector && (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={5}>
                   <EuiComboBox
                     data-test-subj="editableResultIndexSelector"
                     placeholder={i18n.translate(

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TracksOverlays } from '@kbn/presentation-containers';
 import { inspector } from '../../kibana_services';
-import { InspectPanelActionApi, InspectPanelAction } from './inspect_panel_action';
+import type { InspectPanelActionApi } from './inspect_panel_action';
+import { InspectPanelAction } from './inspect_panel_action';
 
 describe('Inspect panel action', () => {
   let action: InspectPanelAction;
@@ -19,10 +19,12 @@ describe('Inspect panel action', () => {
     action = new InspectPanelAction();
     context = {
       embeddable: {
+        uuid: 'some-uuid',
+        title$: { value: 'some-title' },
         getInspectorAdapters: jest.fn().mockReturnValue({
           filters: `My filters are extremely interesting. Please inspect them.`,
         }),
-      },
+      } as unknown as InspectPanelActionApi,
     };
   });
 
@@ -64,13 +66,25 @@ describe('Inspect panel action', () => {
     expect(inspector.open).toHaveBeenCalledTimes(1);
   });
 
-  it('opens overlay on parent if parent is an overlay tracker', async () => {
+  it('props are passed to inspector', async () => {
     inspector.open = jest.fn().mockReturnValue({ onClose: Promise.resolve(undefined) });
     context.embeddable.parentApi = {
       openOverlay: jest.fn(),
       clearOverlays: jest.fn(),
     };
+
     await action.execute(context);
-    expect((context.embeddable.parentApi as TracksOverlays).openOverlay).toHaveBeenCalled();
+    expect(inspector.open).toHaveBeenCalledWith(
+      { filters: 'My filters are extremely interesting. Please inspect them.' },
+      {
+        options: { fileName: 'some-title' },
+        title: 'some-title',
+        flyoutProps: {
+          focusedPanelId: 'some-uuid',
+          type: 'push',
+        },
+      },
+      context.embeddable.parentApi
+    );
   });
 });

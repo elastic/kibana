@@ -92,8 +92,8 @@ export function getMenuSections({
       }),
       href: hasPodLink
         ? assetDetailsLocator.getRedirectUrl({
-            assetId: podId,
-            assetType: 'pod',
+            entityId: podId,
+            entityType: 'pod',
             assetDetails: { dateRange: infraMetricsQuery },
           })
         : undefined,
@@ -118,8 +118,8 @@ export function getMenuSections({
       ),
       href: hasContainerLink
         ? assetDetailsLocator.getRedirectUrl({
-            assetId: containerId,
-            assetType: 'container',
+            entityId: containerId,
+            entityType: 'container',
             assetDetails: { dateRange: infraMetricsQuery },
           })
         : undefined,

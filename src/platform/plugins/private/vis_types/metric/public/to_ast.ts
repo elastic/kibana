@@ -9,12 +9,13 @@
 
 import { get } from 'lodash';
 import { getStopsWithColorsFromRanges } from '@kbn/visualizations-plugin/common/utils';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import type { SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { getVisSchemas } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { inter } from '@kbn/expressions-plugin/common';
 
 import { ColorMode } from '@kbn/charts-plugin/public';
-import { VisParams } from './types';
+import type { VisParams } from './types';
 
 const prepareDimension = (params: SchemaConfig) => {
   const visdimension = buildExpressionFunction('visdimension', { accessor: params.accessor });

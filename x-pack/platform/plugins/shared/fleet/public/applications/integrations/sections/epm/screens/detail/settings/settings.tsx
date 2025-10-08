@@ -41,8 +41,11 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
 import { SideBarColumn } from '../../../components/side_bar_column';
+import { BulkActionContextProvider } from '../../installed_integrations/hooks/use_bulk_actions_context';
 import { KeepPoliciesUpToDateSwitch } from '../components';
 import { useChangelog } from '../hooks';
+
+import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
@@ -51,6 +54,7 @@ import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
 import { UpdateAvailableCallout } from './update_available_callout';
 import { BreakingChangesFlyout } from './breaking_changes_flyout';
+import { RollbackButton } from './rollback_button';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};
@@ -85,17 +89,18 @@ interface Props {
   packageInfo: PackageInfo;
   packageMetadata?: PackageMetadata;
   startServices: Pick<FleetStartServices, 'analytics' | 'i18n' | 'theme'>;
+  isCustomPackage: boolean;
 }
 
 export const SettingsPage: React.FC<Props> = memo(
-  ({ packageInfo, packageMetadata, startServices }: Props) => {
+  ({ packageInfo, packageMetadata, startServices, isCustomPackage }: Props) => {
     const authz = useAuthz();
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
     const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
     const [isBreakingChangesUnderstood, setIsBreakingChangesUnderstood] = useState(false);
     const [isBreakingChangesFlyoutOpen, setIsBreakingChangesFlyoutOpen] = useState(false);
-
+    const { enablePackageRollback } = ExperimentalFeaturesService.get();
     const toggleChangelogModal = useCallback(() => {
       setIsChangelogModalOpen(!isChangelogModalOpen);
     }, [isChangelogModalOpen]);
@@ -441,10 +446,45 @@ export const SettingsPage: React.FC<Props> = memo(
                                   ? packageInfo.installationInfo.install_source
                                   : ''
                               }
+                              isCustomPackage={isCustomPackage}
                             />
                           </div>
                         </EuiFlexItem>
                       </EuiFlexGroup>
+                      <EuiSpacer size="l" />
+                      {enablePackageRollback && (
+                        <>
+                          <EuiFlexGroup direction="column" gutterSize="m">
+                            <EuiFlexItem>
+                              <EuiTitle>
+                                <h4>
+                                  <FormattedMessage
+                                    id="xpack.fleet.integrations.settings.packageRollbackTitle"
+                                    defaultMessage="Rollback"
+                                  />
+                                </h4>
+                              </EuiTitle>
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <FormattedMessage
+                                id="xpack.fleet.integrations.settings.packageRollbackDescription"
+                                defaultMessage="Rollback integration to the previous version."
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <div>
+                                <BulkActionContextProvider>
+                                  <RollbackButton
+                                    packageInfo={packageInfo}
+                                    isCustomPackage={isCustomPackage}
+                                  />
+                                </BulkActionContextProvider>
+                              </div>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                          <EuiSpacer size="l" />
+                        </>
+                      )}
                     </>
                   )}
                 </div>

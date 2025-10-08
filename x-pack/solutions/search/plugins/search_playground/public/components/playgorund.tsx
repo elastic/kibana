@@ -15,12 +15,8 @@ import { SearchQueryMode } from './query_mode/search_query_mode';
 import { ChatSetupPage } from './setup_page/chat_setup_page';
 import { Header } from './header';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
-import {
-  PlaygroundForm,
-  PlaygroundFormFields,
-  PlaygroundPageMode,
-  PlaygroundViewMode,
-} from '../types';
+import type { PlaygroundForm, PlaygroundPageMode } from '../types';
+import { PlaygroundFormFields, PlaygroundViewMode } from '../types';
 import { Chat } from './chat';
 import { SearchMode } from './search_mode/search_mode';
 import { SearchPlaygroundSetupPage } from './setup_page/search_playground_setup_page';

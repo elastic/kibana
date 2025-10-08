@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import { ReportingAPIClient } from '@kbn/reporting-public';
-import { ReportTypeData, ScheduledReport } from '../../types';
+import type { ReportingAPIClient } from '@kbn/reporting-public';
+import type { ReportTypeData, ScheduledReport } from '../../types';
 import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
 
 export interface ScheduledReportFlyoutProps {

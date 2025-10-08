@@ -14,7 +14,7 @@ import type {
 import { getErrorsForDateReference } from './utils';
 import type { FieldBasedOperationErrorMessage, OperationDefinition } from '..';
 import { getFormatFromPreviousColumn } from '../helpers';
-import { FormBasedLayer } from '../../../types';
+import type { FormBasedLayer } from '../../../types';
 
 export type TimeScaleIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
@@ -78,7 +78,6 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
         dataType: 'number',
         operationType: NORMALIZE_BY_UNIT_ID,
         isBucketed: false,
-        scale: 'ratio',
         references: referenceIds,
         params: {
           ...getFormatFromPreviousColumn(previousColumn),

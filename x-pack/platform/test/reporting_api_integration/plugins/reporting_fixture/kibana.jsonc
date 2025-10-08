@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/reporting-fixture",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "reportingFixturePlugin",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "taskManager"
+    ]
+  }
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { Fragment, useRef, useState } from 'react';
 
@@ -36,6 +36,8 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
   children,
   notifications,
 }) => {
+  const confirmModalTitleId = useGeneratedHtmlId();
+
   const [roleMappings, setRoleMappings] = useState<RoleMapping[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteInProgress, setIsDeleteInProgress] = useState(false);
@@ -156,6 +158,8 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
 
     return (
       <EuiConfirmModal
+        aria-labelledby={confirmModalTitleId}
+        titleProps={{ id: confirmModalTitleId }}
         title={
           isSingle
             ? i18n.translate(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiCard, useEuiTheme } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
@@ -41,7 +41,7 @@ export interface IntegrationCardProps {
 export const IntegrationCard = memo(
   ({ integration, 'data-test-subj': dataTestSubj }: IntegrationCardProps) => {
     const { euiTheme } = useEuiTheme();
-    const iconStyle = useMemo(() => ({ marginInlineEnd: euiTheme.size.base }), [euiTheme]);
+    const iconStyle = { marginInlineEnd: euiTheme.size.base };
 
     const {
       services: { application },
@@ -69,7 +69,7 @@ export const IntegrationCard = memo(
         display="plain"
         hasBorder
         icon={
-          <div style={iconStyle}>
+          <div css={iconStyle}>
             <IntegrationIcon
               data-test-subj={dataTestSubj}
               iconSize="xl"

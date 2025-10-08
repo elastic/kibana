@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields, serviceMap } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
+/**
+ * Generates a complex, multi-service distributed trace specifically for populating the service map.
+ */
+
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import { serviceMap } from '@kbn/apm-synthtrace-client';
+import type { Scenario } from '../cli/scenario';
+import type { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 

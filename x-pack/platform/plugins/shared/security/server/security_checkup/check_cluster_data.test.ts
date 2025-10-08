@@ -113,7 +113,7 @@ function mockIndicesStatsResponseFactory(
 
   listOfIndicesWithCount.forEach((indexPair) => {
     result!.indices![indexPair.name] = {
-      total: { docs: { count: indexPair.count } },
+      total: { docs: { count: indexPair.count, total_size_in_bytes: 0 } },
     };
   });
 

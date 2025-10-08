@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { SearchSessionStatus, SearchStatus } from './status';
 
 export const SEARCH_SESSION_TYPE = 'search-session';

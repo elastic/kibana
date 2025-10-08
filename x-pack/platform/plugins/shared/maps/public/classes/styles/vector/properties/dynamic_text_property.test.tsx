@@ -15,11 +15,12 @@ import React from 'react';
 
 // @ts-ignore
 import { DynamicTextProperty } from './dynamic_text_property';
-import { RawValue, VECTOR_STYLES } from '../../../../../common/constants';
-import { IField } from '../../../fields/field';
+import type { RawValue } from '../../../../../common/constants';
+import { VECTOR_STYLES } from '../../../../../common/constants';
+import type { IField } from '../../../fields/field';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { MockLayer, MockStyle } from './test_helpers/test_util';
-import { IVectorLayer } from '../../../layers/vector_layer';
+import type { IVectorLayer } from '../../../layers/vector_layer';
 
 export class MockMbMap {
   _paintPropertyCalls: unknown[];

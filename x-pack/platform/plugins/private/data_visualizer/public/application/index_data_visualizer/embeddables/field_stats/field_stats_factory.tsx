@@ -40,6 +40,7 @@ import {
   distinctUntilChanged,
   merge,
 } from 'rxjs';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -264,24 +265,31 @@ export const getFieldStatsChartEmbeddableFactory = (
           }),
         isEditingEnabled: () => true,
         onEdit: async () => {
-          try {
-            const { resolveEmbeddableFieldStatsUserInput } = await import(
-              './resolve_field_stats_embeddable_input'
-            );
-            const chartState = serializeFieldStatsChartState();
-            const nextUpdate = await resolveEmbeddableFieldStatsUserInput(
-              coreStart,
-              pluginStart,
-              parentApi,
-              uuid,
-              false,
-              chartState,
-              fieldStatsControlsApi
-            );
-            fieldStatsControlsApi.updateUserInput(nextUpdate);
-          } catch (e) {
-            toasts.addError(e, { title: ERROR_MSG.UPDATE_CONFIG_ERROR });
-          }
+          openLazyFlyout({
+            core: coreStart,
+            parentApi,
+            flyoutProps: {
+              hideCloseButton: true,
+              'data-test-subj': 'fieldStatisticsInitializerFlyout',
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout }) => {
+              const { EmbeddableFieldStatsUserInput } = await import(
+                './field_stats_embeddable_input'
+              );
+              return (
+                <EmbeddableFieldStatsUserInput
+                  coreStart={coreStart}
+                  pluginStart={pluginStart}
+                  isNewPanel={false}
+                  initialState={serializeFieldStatsChartState()}
+                  fieldStatsControlsApi={fieldStatsControlsApi}
+                  onUpdate={fieldStatsControlsApi.updateUserInput}
+                  closeFlyout={closeFlyout}
+                />
+              );
+            },
+          });
         },
         dataViews$,
         serializeState,

@@ -24,6 +24,6 @@ export const CANCEL = i18n.translate(
 export const CREATE_ENDPOINT_TITLE = i18n.translate(
   'xpack.searchInferenceEndpoints.addInferenceEndpoint.createEndpointTitle',
   {
-    defaultMessage: 'Create Inference Endpoint',
+    defaultMessage: 'Create inference endpoint',
   }
 );

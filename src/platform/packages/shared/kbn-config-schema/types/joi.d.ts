@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Joi from 'joi';
+import type * as Joi from 'joi';
 import type { ByteSizeValue } from '../src/byte_size_value';
 import type { DurationValueType } from '../src/types/duration_type';
 

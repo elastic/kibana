@@ -8,10 +8,10 @@
  */
 
 import { css } from '@emotion/react';
+import { layoutVar, layoutLevels } from '@kbn/core-chrome-layout-constants';
 
 const root = css`
   position: sticky;
-  overflow: hidden;
   grid-area: sidebar;
   align-self: start;
   display: flex;
@@ -19,7 +19,8 @@ const root = css`
   flex-direction: column;
   align-items: center;
   height: 100%;
-  width: var(--kbn-layout--sidebar-width);
+  width: ${layoutVar('sidebar.width')};
+  z-index: ${layoutLevels.sidebar};
 `;
 
 export const styles = {

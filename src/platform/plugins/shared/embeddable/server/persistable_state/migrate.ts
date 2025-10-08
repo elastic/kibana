@@ -8,9 +8,9 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import { baseEmbeddableMigrations } from './migrate_base_input';
-import { EmbeddableStateWithType } from './types';
+import type { EmbeddableStateWithType } from './types';
 
 export type MigrateFunction = (state: SerializableRecord, version: string) => SerializableRecord;
 

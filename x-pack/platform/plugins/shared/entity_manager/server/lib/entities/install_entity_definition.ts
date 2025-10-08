@@ -6,11 +6,16 @@
  */
 
 import semver from 'semver';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
-import { Logger } from '@kbn/logging';
-import { generateLatestIndexTemplateId } from './helpers/generate_component_id';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import type { Logger } from '@kbn/logging';
+import {
+  generateLatestIndexTemplateId,
+  generateHistoryIndexTemplateId,
+  generateResetIndexTemplateId,
+  generateUpdatesIndexTemplateId,
+} from './helpers/generate_component_id';
 import { createAndInstallIngestPipelines } from './create_and_install_ingest_pipeline';
 import { createAndInstallTransforms } from './create_and_install_transform';
 import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
@@ -23,10 +28,11 @@ import {
   updateEntityDefinition,
 } from './save_entity_definition';
 import { createAndInstallTemplates, deleteTemplate } from '../manage_index_templates';
+import { getILMPoliciesStatus } from './manage_ilm_policies';
 import { EntityIdConflict } from './errors/entity_id_conflict_error';
 import { EntityDefinitionNotFound } from './errors/entity_not_found';
 import { mergeEntityDefinitionUpdate } from './helpers/merge_definition_update';
-import { EntityDefinitionWithState } from './types';
+import type { EntityDefinitionWithState } from './types';
 import { stopLatestTransform, stopTransforms } from './stop_transforms';
 import { deleteLatestTransform, deleteTransforms } from './delete_transforms';
 import { deleteIndices } from './delete_index';
@@ -34,6 +40,7 @@ import { deleteIndices } from './delete_index';
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
+  isServerless: boolean;
   definition: EntityDefinition;
   logger: Logger;
 }
@@ -44,6 +51,7 @@ export interface InstallDefinitionParams {
 export async function installEntityDefinition({
   esClient,
   soClient,
+  isServerless,
   definition,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
@@ -61,7 +69,13 @@ export async function installEntityDefinition({
       installedComponents: [],
     });
 
-    return await install({ esClient, soClient, logger, definition: entityDefinition });
+    return await install({
+      esClient,
+      soClient,
+      isServerless,
+      logger,
+      definition: entityDefinition,
+    });
   } catch (e) {
     logger.error(`Failed to install entity definition [${definition.id}]: ${e}`);
 
@@ -74,6 +88,21 @@ export async function installEntityDefinition({
       esClient,
       logger,
       name: generateLatestIndexTemplateId(definition),
+    });
+    await deleteTemplate({
+      esClient,
+      logger,
+      name: generateHistoryIndexTemplateId(definition),
+    });
+    await deleteTemplate({
+      esClient,
+      logger,
+      name: generateResetIndexTemplateId(definition),
+    });
+    await deleteTemplate({
+      esClient,
+      logger,
+      name: generateUpdatesIndexTemplateId(definition),
     });
 
     await deleteEntityDefinition(soClient, definition).catch((err) => {
@@ -90,10 +119,12 @@ export async function installEntityDefinition({
 export async function installBuiltInEntityDefinitions({
   esClient,
   soClient,
+  isServerless,
   logger,
   definitions,
 }: Omit<InstallDefinitionParams, 'definition' | 'esClient'> & {
   esClient: ElasticsearchClient;
+  isServerless: boolean;
   definitions: EntityDefinition[];
 }): Promise<EntityDefinition[]> {
   if (definitions.length === 0) return [];
@@ -115,6 +146,7 @@ export async function installBuiltInEntityDefinitions({
         definition: builtInDefinition,
         esClient,
         soClient,
+        isServerless,
         logger,
       });
     }
@@ -135,6 +167,7 @@ export async function installBuiltInEntityDefinitions({
     return await reinstallEntityDefinition({
       soClient,
       esClient,
+      isServerless,
       logger,
       definition: installedDefinition,
       definitionUpdate: builtInDefinition,
@@ -150,11 +183,20 @@ export async function installBuiltInEntityDefinitions({
 async function install({
   esClient,
   soClient,
+  isServerless,
   definition,
   logger,
 }: InstallDefinitionParams): Promise<EntityDefinition> {
   logger.debug(`Installing definition [${definition.id}] v${definition.version}`);
   logger.debug(() => JSON.stringify(definition, null, 2));
+
+  const ilmPolicies: Array<{ type: 'ilm_policy'; id: string }> = [];
+  if (!isServerless) {
+    logger.debug(`Checking ilm policies for definition [${definition.id}]`);
+    ilmPolicies.push(...(await getILMPoliciesStatus(esClient)));
+  } else {
+    logger.debug(`Skipping ilm policies because of Serverless deployment`);
+  }
 
   logger.debug(`Installing index templates for definition [${definition.id}]`);
   const templates = await createAndInstallTemplates(esClient, definition, logger);
@@ -167,7 +209,7 @@ async function install({
 
   const updatedProps = await updateEntityDefinition(soClient, definition.id, {
     installStatus: 'installed',
-    installedComponents: [...templates, ...pipelines, ...transforms],
+    installedComponents: [...templates, ...pipelines, ...transforms, ...ilmPolicies],
   });
   return { ...definition, ...updatedProps.attributes };
 }
@@ -176,6 +218,7 @@ async function install({
 export async function reinstallEntityDefinition({
   esClient,
   soClient,
+  isServerless,
   definition,
   definitionUpdate,
   logger,
@@ -210,9 +253,10 @@ export async function reinstallEntityDefinition({
 
     return await install({
       soClient,
-      logger,
       esClient,
+      isServerless,
       definition: updatedDefinition,
+      logger,
     });
   } catch (err) {
     await updateEntityDefinition(soClient, definition.id, {

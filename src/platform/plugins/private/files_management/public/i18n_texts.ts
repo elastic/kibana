@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FileStatus } from '@kbn/files-plugin/common';
+import type { FileStatus } from '@kbn/files-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {

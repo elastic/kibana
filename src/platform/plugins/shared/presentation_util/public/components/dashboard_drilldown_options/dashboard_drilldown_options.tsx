@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 
-import { DashboardDrilldownOptions } from './types';
+import type { DashboardDrilldownOptions } from './types';
 import { dashboardDrilldownConfigStrings } from '../../i18n/dashboard_drilldown_config';
 
 export interface DashboardDrilldownOptionsProps {

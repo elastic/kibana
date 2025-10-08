@@ -11,16 +11,23 @@ import React, { Component } from 'react';
 import { debounce, matches } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
-import { EuiSpacer, Query, CriteriaWithPagination } from '@elastic/eui';
+import type { CriteriaWithPagination } from '@elastic/eui';
+import { EuiSpacer, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpStart, OverlayStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
+import type {
+  HttpStart,
+  OverlayStart,
+  NotificationsStart,
+  ApplicationStart,
+} from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import { Subscription } from 'rxjs';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type { Subscription } from 'rxjs';
 import type { SavedObjectManagementTypeInfo, FindQueryHTTP } from '../../../common/types/latest';
+import type { SavedObjectsExportResultDetails } from '../../lib';
 import {
   parseQuery,
   getSavedObjectCounts,
@@ -31,12 +38,11 @@ import {
   bulkDeleteObjects,
   bulkGetObjects,
   extractExportDetails,
-  SavedObjectsExportResultDetails,
   getTagFindReferences,
 } from '../../lib';
 
-import { SavedObjectWithMetadata } from '../../types';
-import {
+import type { SavedObjectWithMetadata } from '../../types';
+import type {
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../../services';
@@ -107,6 +113,9 @@ const unableFindSavedObjectNotificationMessage = i18n.translate(
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
   private hasCustomBrandingSubscription?: Subscription;
+
+  // Ref for delete button for accessibility/focus
+  deleteButtonRef = React.createRef<HTMLButtonElement>();
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -342,7 +351,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   onSelectionChanged = (selection: SavedObjectWithMetadata[]) => {
-    this.setState({ selectedSavedObjects: selection });
+    this.setState({ selectedSavedObjects: selection }, () => {
+      if (selection.length > 0 && this.deleteButtonRef.current) {
+        if (this.deleteButtonRef.current && !this.deleteButtonRef.current.disabled) {
+          this.deleteButtonRef.current.focus();
+        }
+      }
+    });
   };
 
   onQueryChange = ({ query }: { query: Query }) => {
@@ -699,6 +714,20 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     return (
       <div>
+        {/* ARIA live region for selection changes (optional but a11y best practice) */}
+        <div aria-live="polite" style={{ position: 'absolute', left: '-9999px' }}>
+          {selectedSavedObjects.length > 0
+            ? i18n.translate(
+                'savedObjectsManagement.objectsTable.selected.selectedSavedObjectsLabel',
+                {
+                  defaultMessage: '{count, plural, one {# item} other {# items}} selected.',
+                  values: {
+                    count: selectedSavedObjects.length,
+                  },
+                }
+              )
+            : ''}
+        </div>
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
@@ -741,6 +770,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}
             canGoInApp={this.props.canGoInApp}
+            deleteButtonRef={this.deleteButtonRef}
           />
         </RedirectAppLinks>
       </div>

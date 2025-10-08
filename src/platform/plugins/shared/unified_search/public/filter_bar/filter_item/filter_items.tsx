@@ -10,14 +10,16 @@
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexItem } from '@elastic/eui';
-import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FilterItem, FilterItemProps } from './filter_item';
+import type { FilterItemProps } from './filter_item';
+import { FilterItem } from './filter_item';
 import type { IUnifiedSearchPluginServices } from '../../types';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 /**
  * Properties for the filter items component, which will render a single filter pill for every filter that is sent in

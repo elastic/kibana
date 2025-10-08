@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
 import { styles } from './layout_sidebar.styles';
 
@@ -22,5 +23,13 @@ export interface LayoutSidebarProps {
  * @returns The rendered LayoutSidebar component.
  */
 export const LayoutSidebar = ({ children }: LayoutSidebarProps) => {
-  return <nav css={styles.root}>{children}</nav>;
+  return (
+    <nav
+      css={styles.root}
+      className="kbnChromeLayoutSidebar"
+      data-test-subj="kbnChromeLayoutSidebar"
+    >
+      {children}
+    </nav>
+  );
 };

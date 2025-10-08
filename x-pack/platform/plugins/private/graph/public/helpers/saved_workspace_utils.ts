@@ -7,12 +7,14 @@
 
 import { cloneDeep, assign, defaults, forOwn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, IBasePath, SavedObjectAttributes } from '@kbn/core/public';
+import type { CoreStart, IBasePath } from '@kbn/core/public';
 
-import { SavedObjectSaveOpts, isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
+import { isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import { ContentClient } from '@kbn/content-management-plugin/public';
-import {
+import type { ContentClient } from '@kbn/content-management-plugin/public';
+import { CONTENT_ID } from '../../common/content_management';
+import type {
   GraphGetIn,
   GraphGetOut,
   GraphSearchIn,
@@ -24,23 +26,23 @@ import {
   GraphSavedObjectAttributes,
   GraphUpdateOut,
   GraphUpdateIn,
-  CONTENT_ID,
 } from '../../common/content_management';
 import {
   injectReferences,
   extractReferences,
 } from '../services/persistence/saved_workspace_references';
-import { GraphWorkspaceSavedObject } from '../types';
+import type { GraphWorkspaceSavedObject } from '../types';
 import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
 const savedWorkspaceType = 'graph-workspace';
-const mapping: Record<string, string> = {
+const mapping = {
   title: 'text',
   description: 'text',
   numLinks: 'integer',
   numVertices: 'integer',
   version: 'integer',
   wsState: 'json',
-};
+} satisfies Record<string, string>;
+
 const defaultsProps = {
   title: i18n.translate('xpack.graph.savedWorkspace.workspaceNameTitle', {
     defaultMessage: 'New Graph Workspace',
@@ -107,7 +109,7 @@ export async function getSavedWorkspace(contentClient: ContentClient, id: string
   const resp = resolveResult.item;
 
   if (!resp.attributes) {
-    throw new SavedObjectNotFound(savedWorkspaceType, id || '');
+    throw new SavedObjectNotFound({ type: savedWorkspaceType, id: id || '' });
   }
 
   const savedObject = {
@@ -169,15 +171,18 @@ export async function saveSavedWorkspace(
     contentClient: ContentClient;
   } & Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>
 ) {
-  let attributes: SavedObjectAttributes = {};
+  const partialAttributes: Record<string, string> = {};
 
   forOwn(mapping, (fieldType, fieldName) => {
     const savedObjectFieldVal = savedObject[fieldName as keyof GraphWorkspaceSavedObject] as string;
     if (savedObjectFieldVal != null) {
-      attributes[fieldName as keyof GraphWorkspaceSavedObject] =
+      partialAttributes[fieldName] =
         fieldName === 'wsState' ? JSON.stringify(savedObjectFieldVal) : savedObjectFieldVal;
     }
   });
+
+  // ts does not like built-up logic - assume full shape
+  let attributes = partialAttributes as unknown as GraphSavedObjectAttributes;
   const extractedRefs = extractReferences({ attributes, references: [] });
   const references = extractedRefs.references;
   attributes = extractedRefs.attributes;
@@ -209,16 +214,13 @@ export async function saveSavedWorkspace(
       services
     );
 
-    const createOpt = {
-      id: savedObject.id,
-      migrationVersion: savedObject.migrationVersion,
-      references,
-    };
     const resp = confirmOverwrite
       ? await saveWithConfirmation(
-          attributes as GraphSavedObjectAttributes,
+          attributes,
           savedObject,
-          createOpt,
+          {
+            references,
+          },
           services
         )
       : savedObject.id
@@ -226,7 +228,7 @@ export async function saveSavedWorkspace(
           contentTypeId: CONTENT_ID,
           id: savedObject.id,
           data: {
-            ...(extractedRefs.attributes as GraphSavedObjectAttributes),
+            ...extractedRefs.attributes,
           },
           options: {
             references: extractedRefs.references,
@@ -234,9 +236,9 @@ export async function saveSavedWorkspace(
         })
       : await services.contentClient.create<GraphCreateIn, GraphCreateOut>({
           contentTypeId: CONTENT_ID,
-          data: attributes as GraphSavedObjectAttributes,
+          data: attributes,
           options: {
-            references: createOpt.references,
+            references,
             overwrite: true,
           },
         });

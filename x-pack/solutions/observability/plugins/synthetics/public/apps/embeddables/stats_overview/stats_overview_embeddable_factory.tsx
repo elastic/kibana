@@ -8,28 +8,30 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
-import { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import {
-  initializeTitleManager,
-  useBatchedPublishingSubjects,
-  fetch$,
+import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type {
   PublishesWritableTitle,
   PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
   HasSupportedTriggers,
+} from '@kbn/presentation-publishing';
+import {
+  initializeTitleManager,
+  useBatchedPublishingSubjects,
+  fetch$,
   titleComparators,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { BehaviorSubject, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import {
+import type {
   DynamicActionsSerializedState,
   HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
-import { MonitorFilters } from '../monitors_overview/types';
+import type { MonitorFilters } from '../monitors_overview/types';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 import { StatsOverviewComponent } from './stats_overview_component';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 

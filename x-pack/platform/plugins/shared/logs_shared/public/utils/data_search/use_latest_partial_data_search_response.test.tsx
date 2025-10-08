@@ -7,8 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
-import { IKibanaSearchRequest } from '@kbn/search-types';
-import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
+import type { IKibanaSearchRequest } from '@kbn/search-types';
+import type { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';
 import { useLatestPartialDataSearchResponse } from './use_latest_partial_data_search_response';
 
 describe('useLatestPartialDataSearchResponse hook', () => {

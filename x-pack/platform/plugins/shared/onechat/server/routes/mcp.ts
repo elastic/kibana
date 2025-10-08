@@ -8,18 +8,16 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
+import { createToolIdMappings } from '@kbn/onechat-genai-utils/langchain';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { KibanaMcpHttpTransport } from '../utils/kibana_mcp_http_transport';
-import { ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../../common/constants';
-
-const TECHNICAL_PREVIEW_WARNING =
-  'Elastic MCP Server is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.';
+import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
+import { MCP_SERVER_PATH } from '../../common/mcp';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
-const MCP_SERVER_PATH = '/api/mcp';
 
 export function registerMCPRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
@@ -32,12 +30,14 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       },
       access: 'public',
       summary: 'MCP server',
-      description: TECHNICAL_PREVIEW_WARNING,
+      description:
+        'Communicate with the MCP server via JSON-RPC 2.0. MCP is designed for AI clients like Claude Desktop, Cursor, and VS Code extensions to access your Elastic tools. Use this endpoint for testing MCP connectivity or debugging protocol communication. This endpoint requires JSON-RPC formatting and will not work from the Dev Tools Console.',
       options: {
-        tags: ['mcp'],
+        tags: ['mcp', 'oas-tag:agent builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -45,19 +45,23 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
       {
         version: '2023-10-31',
         validate: {
-          request: { body: schema.object({}, { unknowns: 'allow' }) },
+          request: {
+            body: schema.object(
+              {},
+              {
+                unknowns: 'allow',
+                meta: { description: 'JSON-RPC 2.0 request payload for MCP server communication.' },
+              }
+            ),
+          },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/mcp_initialize.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
         let transport: KibanaMcpHttpTransport | undefined;
         let server: McpServer | undefined;
-
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_MCP_SERVER_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
 
         try {
           transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
@@ -70,17 +74,20 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
 
           const { tools: toolService } = getInternalServices();
 
-          const registry = toolService.registry.asScopedPublicRegistry({ request });
+          const registry = await toolService.getRegistry({ request });
           const tools = await registry.list({});
+
+          const idMapping = createToolIdMappings(tools);
 
           // Expose tools scoped to the request
           for (const tool of tools) {
+            const toolSchema = await tool.getSchema();
             server.tool(
-              tool.id,
+              idMapping.get(tool.id) ?? tool.id,
               tool.description,
-              tool.schema.shape,
+              toolSchema.shape,
               async (args: { [x: string]: any }) => {
-                const toolResult = await tool.execute({ toolParams: args });
+                const toolResult = await registry.execute({ toolId: tool.id, toolParams: args });
                 return {
                   content: [{ type: 'text' as const, text: JSON.stringify(toolResult) }],
                 };
@@ -130,87 +137,6 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
             },
           });
         }
-      })
-    );
-
-  router.versioned
-    .get({
-      path: MCP_SERVER_PATH,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
-      },
-      access: 'public',
-      summary: 'MCP server',
-      description: TECHNICAL_PREVIEW_WARNING,
-      options: {
-        tags: ['mcp'],
-        availability: {
-          stability: 'experimental',
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: false,
-      },
-      wrapHandler(async (ctx, _, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_MCP_SERVER_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
-        return response.customError({
-          statusCode: 405,
-          body: {
-            message: 'Method not allowed',
-            attributes: {
-              code: ErrorCode.ConnectionClosed,
-            },
-          },
-        });
-      })
-    );
-
-  router.versioned
-    .delete({
-      path: MCP_SERVER_PATH,
-      security: {
-        authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
-      },
-      access: 'public',
-      summary: 'MCP server',
-      description: TECHNICAL_PREVIEW_WARNING,
-      options: {
-        tags: ['mcp'],
-        xsrfRequired: false,
-        availability: {
-          stability: 'experimental',
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: '2023-10-31',
-        validate: false,
-      },
-      wrapHandler(async (ctx, _, response) => {
-        const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(ONECHAT_MCP_SERVER_UI_SETTING_ID);
-
-        if (!enabled) {
-          return response.notFound();
-        }
-        return response.customError({
-          statusCode: 405,
-          body: {
-            message: 'Method not allowed',
-            attributes: {
-              code: ErrorCode.ConnectionClosed,
-            },
-          },
-        });
       })
     );
 }

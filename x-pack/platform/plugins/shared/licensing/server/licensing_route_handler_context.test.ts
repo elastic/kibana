@@ -10,9 +10,9 @@ import { BehaviorSubject } from 'rxjs';
 import { licenseMock } from '../common/licensing.mock';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
 import { featureUsageMock } from './services/feature_usage_service.mock';
-import { FeatureUsageServiceStart } from './services';
-import { StartServicesAccessor } from '@kbn/core/server';
-import { LicensingPluginStart } from './types';
+import type { FeatureUsageServiceStart } from './services';
+import type { StartServicesAccessor } from '@kbn/core/server';
+import type { LicensingPluginStart } from './types';
 
 const createStartServices = (
   featureUsage: FeatureUsageServiceStart = featureUsageMock.createStart()

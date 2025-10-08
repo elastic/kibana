@@ -237,6 +237,7 @@ export function registerFleetUsageCollector(
           name: { type: 'keyword' },
           version: { type: 'keyword' },
           enabled: { type: 'boolean' },
+          agent_based: { type: 'boolean' },
         },
       },
       agentless_agents: {

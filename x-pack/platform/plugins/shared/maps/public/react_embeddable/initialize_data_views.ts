@@ -8,9 +8,9 @@
 import { BehaviorSubject } from 'rxjs';
 import type { DataView } from '@kbn/data-plugin/common';
 import { isEqual } from 'lodash';
-import { LayerDescriptor } from '../../common';
+import type { LayerDescriptor } from '../../common';
 import { replaceLayerList, updateLayerDescriptor } from '../actions';
-import { MapStore } from '../reducers/store';
+import type { MapStore } from '../reducers/store';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapSettings, getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { autoFitToBounds, syncDataForLayerId } from '../actions/data_request_actions';

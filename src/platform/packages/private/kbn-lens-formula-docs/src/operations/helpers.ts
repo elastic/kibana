@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDocumentationType } from './types';
+import type { OperationDocumentationType } from './types';
 
 function buildDocumentationDefinition({
   id,

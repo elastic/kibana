@@ -5,32 +5,20 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
-import { GenerationTiming } from './generation_timing';
-import { useKibanaFeatureFlags } from '../../../use_kibana_feature_flags';
 import * as i18n from './translations';
 
 interface Props {
-  connectorIntervals: GenerationInterval[];
   successfulGenerations?: number;
 }
 
-const LastTimesPopoverComponent: React.FC<Props> = ({
-  connectorIntervals,
-  successfulGenerations,
-}) => {
-  const { euiTheme } = useEuiTheme();
+const LastTimesPopoverComponent: React.FC<Props> = ({ successfulGenerations }) => {
   const isDarkMode = useKibanaIsDarkMode();
-  const { attackDiscoveryAlertsEnabled } = useKibanaFeatureFlags();
-
-  const calculatedBy = attackDiscoveryAlertsEnabled
-    ? successfulGenerations ?? 0
-    : connectorIntervals.length;
+  const calculatedBy = successfulGenerations ?? 0;
 
   return (
     <EuiFlexGroup
@@ -51,18 +39,6 @@ const LastTimesPopoverComponent: React.FC<Props> = ({
         </EuiText>
         <EuiSpacer size="s" />
       </EuiFlexItem>
-
-      {connectorIntervals.map((interval, index) => (
-        <EuiFlexItem
-          css={css`
-            margin-bottom: ${euiTheme.size.xs};
-          `}
-          grow={false}
-          key={index}
-        >
-          <GenerationTiming interval={interval} />
-        </EuiFlexItem>
-      ))}
     </EuiFlexGroup>
   );
 };

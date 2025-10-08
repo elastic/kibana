@@ -51,7 +51,10 @@ describe('When on the trusted applications page', () => {
       history.push(TRUSTED_APPS_PATH);
     });
 
-    mockedEndpointPrivileges = { canWriteTrustedApplications: true };
+    mockedEndpointPrivileges = {
+      canManageGlobalArtifacts: true,
+      canWriteTrustedApplications: true,
+    };
     mockUserPrivileges.mockReturnValue({ endpointPrivileges: mockedEndpointPrivileges });
   });
 

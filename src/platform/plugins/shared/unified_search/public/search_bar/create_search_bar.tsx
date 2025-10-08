@@ -245,6 +245,8 @@ export function createSearchBar({
             onCancel={props.onCancel}
             filters={filters}
             query={query}
+            draft={props.draft}
+            onDraftChange={props.onDraftChange}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
             onRefreshChange={
               !props.isAutoRefreshDisabled
@@ -274,6 +276,10 @@ export function createSearchBar({
             filtersForSuggestions={props.filtersForSuggestions}
             prependFilterBar={props.prependFilterBar}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
+            esqlEditorInitialState={props.esqlEditorInitialState}
+            onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
+            esqlVariablesConfig={props.esqlVariablesConfig}
+            useBackgroundSearchButton={props.useBackgroundSearchButton}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { RemoteClustersUIPlugin } from './plugin';
 
 export type { Cluster } from '../common/lib';

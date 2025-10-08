@@ -11,7 +11,7 @@ import type { NotificationsConfigType } from './config';
 import { NotificationsPlugin } from './plugin';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { EmailServiceProvider } from './services/connectors_email_service_provider';
-import { EmailServiceStart } from './services';
+import type { EmailServiceStart } from './services';
 
 jest.mock('./services/connectors_email_service_provider');
 

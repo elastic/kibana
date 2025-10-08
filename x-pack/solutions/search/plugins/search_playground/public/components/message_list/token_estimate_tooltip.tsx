@@ -22,7 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormContext } from 'react-hook-form';
 import { docLinks } from '../../../common/doc_links';
 import { useLLMsModels } from '../../hooks/use_llms_models';
-import { PlaygroundForm, PlaygroundFormFields } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 
 interface TokenEstimateTooltipProps {
   context: number;
@@ -164,6 +165,7 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
                     {clipped ? (
                       <EuiPanel paddingSize="s" hasShadow={false} color="warning">
                         <EuiCallOut
+                          announceOnMount
                           data-test-subj="clipped-tokens-callout"
                           title={
                             <FormattedMessage

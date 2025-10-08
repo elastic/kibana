@@ -7,7 +7,8 @@
 
 import { registerTemplateRoutes } from '.';
 import { addBasePath } from '..';
-import { RouterMock, routeDependencies, RequestMock } from '../../../test/helpers';
+import type { RequestMock } from '../../../test/helpers';
+import { RouterMock, routeDependencies } from '../../../test/helpers';
 
 describe('Component templates API', () => {
   const router = new RouterMock();

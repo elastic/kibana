@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   dataViewWithTimefieldMock,
@@ -189,6 +190,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
+          "version": 1,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -362,6 +364,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
+          "version": 1,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -517,6 +520,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
+          "version": 1,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -702,6 +706,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Heat map",
+          "version": 1,
           "visualizationType": "lnsHeatmap",
         },
         "requestData": Object {
@@ -735,10 +740,67 @@ describe('LensVisService attributes', () => {
           'index-pattern-with-timefield-id': {},
         },
       }),
+      version: 1,
       references: [],
       title: 'Heat map',
       visualizationType: 'lnsHeatmap',
     });
+  });
+
+  it('should allow modifying attributes with getModifiedVisAttributes', async () => {
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: false,
+      getModifiedVisAttributes: (attributes) => ({
+        ...attributes,
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      }),
+    });
+    expect(lensVis.visContext?.attributes).toEqual(
+      expect.objectContaining({
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      })
+    );
+  });
+
+  it('should not allow modifying attributes with getModifiedVisAttributes if externalVisContext is applied', async () => {
+    const lensVis = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: false,
+    });
+    const lensVis2 = await getLensVisMock({
+      filters,
+      query,
+      dataView,
+      timeInterval,
+      breakdownField: undefined,
+      columns: [],
+      isPlainRecord: false,
+      externalVisContext: lensVis.visContext,
+      getModifiedVisAttributes: (attributes) => ({
+        ...attributes,
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      }),
+    });
+    expect(lensVis2.visContext?.attributes).not.toEqual(
+      expect.objectContaining({
+        title: 'Modified title',
+        visualizationType: 'lnsHeatmap',
+      })
+    );
   });
 
   it('should return suggestion title', async () => {

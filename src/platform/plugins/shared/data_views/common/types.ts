@@ -13,7 +13,7 @@ import type { SavedObject } from '@kbn/core/server';
 import type { ErrorToastOptions, ToastInputFields } from '@kbn/core-notifications-browser';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { RUNTIME_FIELD_TYPES } from './constants';
+import type { RUNTIME_FIELD_TYPES } from './constants';
 
 export type { QueryDslQueryContainer };
 export type { SavedObject };
@@ -301,7 +301,7 @@ export interface PersistenceAPI {
   create: (
     attributes: DataViewAttributes,
     // SavedObjectsCreateOptions
-    options: { id?: string; initialNamespaces?: string[]; overwrite?: boolean }
+    options: { id?: string; initialNamespaces?: string[]; overwrite?: boolean; managed?: boolean }
   ) => Promise<SavedObject>;
   /**
    * Delete a saved object by id
@@ -485,6 +485,11 @@ export type FieldSpec = DataViewFieldBase & {
   parentName?: string;
 
   defaultFormatter?: string;
+
+  /**
+   * Indicates whether the field is a metadata field.
+   */
+  metadata_field?: boolean;
 };
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
@@ -557,6 +562,10 @@ export type DataViewSpec = {
    * Allow hidden and system indices when loading field list
    */
   allowHidden?: boolean;
+  /**
+   * Whether the data view is managed by the application.
+   */
+  managed?: boolean;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

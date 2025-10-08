@@ -9,8 +9,9 @@
 
 import * as t from 'io-ts';
 import { jsonRt } from '.';
-import { isRight, Either, isLeft, fold } from 'fp-ts/Either';
-import { Right } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
+import { isRight, isLeft, fold } from 'fp-ts/Either';
+import type { Right } from 'fp-ts/Either';
 import { pipe } from 'fp-ts/pipeable';
 import { identity } from 'fp-ts/function';
 

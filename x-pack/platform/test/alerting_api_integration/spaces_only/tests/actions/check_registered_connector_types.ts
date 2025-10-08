@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default function createRegisteredConnectorTypeTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
@@ -44,6 +43,7 @@ export default function createRegisteredConnectorTypeTests({ getService }: FtrPr
           '.servicenow-sir',
           '.servicenow-itom',
           '.jira',
+          '.jira-service-management',
           '.observability-ai-assistant',
           '.resilient',
           '.teams',

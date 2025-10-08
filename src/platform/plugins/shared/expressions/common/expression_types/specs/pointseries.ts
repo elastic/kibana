@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { $Values } from '@kbn/utility-types';
-import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
-import { Datatable, DatatableRow } from './datatable';
-import { ExpressionValueRender } from './render';
+import type { $Values } from '@kbn/utility-types';
+import type { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
+import type { Datatable, DatatableRow } from './datatable';
+import type { ExpressionValueRender } from './render';
 
 const name = 'pointseries';
 

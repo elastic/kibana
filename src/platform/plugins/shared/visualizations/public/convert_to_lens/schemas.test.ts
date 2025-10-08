@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  AggConfig,
-  AggConfigOptions,
-  AggConfigs,
-  AggConfigsOptions,
-  GetConfigFn,
-} from '@kbn/data-plugin/common';
+import type { AggConfigOptions, AggConfigsOptions, GetConfigFn } from '@kbn/data-plugin/common';
+import { AggConfig, AggConfigs } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { Vis } from '../vis';

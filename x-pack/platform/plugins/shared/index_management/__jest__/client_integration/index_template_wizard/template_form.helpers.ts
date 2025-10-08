@@ -7,8 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { TestBed, SetupFunc } from '@kbn/test-jest-helpers';
-import { TemplateDeserialized } from '../../../common';
+import type { TestBed, SetupFunc } from '@kbn/test-jest-helpers';
+import type { TemplateDeserialized } from '../../../common';
 
 export interface MappingField {
   name: string;

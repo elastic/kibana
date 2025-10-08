@@ -5,12 +5,21 @@
  * 2.0.
  */
 
-import { defer, Observable } from 'rxjs';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
-import { type ChatAgentEvent } from '@kbn/onechat-common';
-import type { CallAgentResponse } from '../../../common/http_api/agents';
-import { unwrapOnechatErrors } from '../utils/errors';
+import type { AgentDefinition } from '@kbn/onechat-common';
+import type {
+  AgentCreateRequest,
+  AgentListOptions,
+  AgentUpdateRequest,
+} from '../../../common/agents';
+import type {
+  CreateAgentResponse,
+  DeleteAgentResponse,
+  GetAgentResponse,
+  ListAgentResponse,
+  UpdateAgentResponse,
+} from '../../../common/http_api/agents';
+import { publicApiPath } from '../../../common/constants';
 
 export class AgentService {
   private readonly http: HttpSetup;
@@ -20,32 +29,42 @@ export class AgentService {
   }
 
   /**
-   * Call an agent and await the final execution result.
+   * List all agents
    */
-  async call({ agentId, agentParams }: { agentId: string; agentParams: Record<string, unknown> }) {
-    return await this.http.get<CallAgentResponse>('/internal/onechat/agents/invoke');
+  async list(options?: AgentListOptions): Promise<AgentDefinition[]> {
+    const res = await this.http.get<ListAgentResponse>(`${publicApiPath}/agents`);
+    return res.results;
   }
 
   /**
-   * Call an agent and stream the events.
+   * Get a single agent by id
    */
-  stream({
-    agentId,
-    agentParams,
-  }: {
-    agentId: string;
-    agentParams: Record<string, unknown>;
-  }): Observable<ChatAgentEvent> {
-    return defer(() => {
-      return this.http.post('/internal/onechat/agents/stream', {
-        asResponse: true,
-        rawResponse: true,
-        body: JSON.stringify({ agentId, agentParams }),
-      });
-    }).pipe(
-      // @ts-expect-error SseEvent mixin issue
-      httpResponseIntoObservable<ChatAgentEvent>(),
-      unwrapOnechatErrors()
-    );
+  async get(id: string): Promise<AgentDefinition> {
+    return await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
+  }
+
+  /**
+   * Create a new agent
+   */
+  async create(profile: AgentCreateRequest): Promise<AgentDefinition> {
+    return await this.http.post<CreateAgentResponse>(`${publicApiPath}/agents`, {
+      body: JSON.stringify(profile),
+    });
+  }
+
+  /**
+   * Update an existing agent
+   */
+  async update(id: string, update: AgentUpdateRequest): Promise<AgentDefinition> {
+    return await this.http.put<UpdateAgentResponse>(`${publicApiPath}/agents/${id}`, {
+      body: JSON.stringify(update),
+    });
+  }
+
+  /**
+   * Delete an agent by id
+   */
+  async delete(id: string): Promise<DeleteAgentResponse> {
+    return await this.http.delete<DeleteAgentResponse>(`${publicApiPath}/agents/${id}`);
   }
 }

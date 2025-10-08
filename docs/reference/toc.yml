@@ -25,6 +25,8 @@ toc:
       - file: configuration-reference/task-manager-settings.md
       - file: configuration-reference/telemetry-settings.md
       - file: configuration-reference/url-drilldown-settings.md
+      - file: configuration-reference/product-intercept-settings.md
+      - file: configuration-reference/share-settings.md
   - file: advanced-settings.md
   - file: kibana-audit-events.md
   - file: connectors-kibana.md
@@ -64,6 +66,7 @@ toc:
   - file: commands.md
     children:
       - file: commands/kibana-encryption-keys.md
+      - file: commands/kibana-setup.md
       - file: commands/kibana-verification-code.md
   - file: osquery-exported-fields.md
   - file: osquery-manager-prebuilt-packs.md

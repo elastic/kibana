@@ -17,12 +17,12 @@ import {
   EuiTitle,
   EuiSwitch,
 } from '@elastic/eui';
-import { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { v4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Duration, WindowSchema } from '../../typings';
+import type { Duration, WindowSchema } from '../../typings';
 import { BurnRate } from './burn_rate';
 import { LongWindowDuration } from './long_window_duration';
 import { toMinutes, toDuration } from '../../utils/slo/duration';
@@ -32,7 +32,7 @@ import {
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
 } from '../../../common/constants';
-import { WindowResult } from './validation';
+import type { WindowResult } from './validation';
 import { BudgetConsumed } from './budget_consumed';
 import { ShortWindowDuration } from './short_window_duration';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { AGENT_ID } from '../../../common/es_fields';

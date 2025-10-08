@@ -62,6 +62,7 @@ async function mountComponent(
           to: '2020-05-14T11:20:13.590',
         },
         searchSessionId: 'test',
+        isSearchSessionRestored: false,
       },
     })
   );
@@ -77,13 +78,15 @@ async function mountComponent(
   };
 
   profilesManager = profilesManager ?? services.profilesManager;
+  const scopedEbtManager = services.ebtManager.createScopedEBTManager();
 
   const component = mountWithIntl(
     <DiscoverTestProvider
       services={{ ...services, profilesManager }}
       stateContainer={stateContainer}
       customizationService={customisationService}
-      scopedProfilesManager={profilesManager.createScopedProfilesManager()}
+      scopedProfilesManager={profilesManager.createScopedProfilesManager({ scopedEbtManager })}
+      scopedEbtManager={scopedEbtManager}
     >
       <DiscoverDocuments {...props} />
     </DiscoverTestProvider>
@@ -154,7 +157,6 @@ describe('Discover documents layout', () => {
       customization.rowAdditionalLeadingControls
     );
     expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
-    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toBeDefined();
   });
 
   describe('context awareness', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './synthetics_monitor';
-export * from './monitor_validation';
-export * from './default_alerts';
-export * from './overview';
+export type * from './synthetics_monitor';
+export type * from './monitor_validation';
+export type * from './default_alerts';
+export type * from './overview';

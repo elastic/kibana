@@ -18,23 +18,28 @@ import {
 } from '../../../../../common/lib/api';
 import { arraysToEqual } from '../../../../../common/lib/validation';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  describe('case alert metrics', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/235446
+  // Failing: See https://github.com/elastic/kibana/issues/235449
+  describe.skip('case alert metrics', () => {
     describe('alert details', () => {
       let caseId: string;
 
       before(async () => {
         caseId = await createCaseWithAlerts();
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/hosts_users');
+        await esArchiver.load(
+          'x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/hosts_users');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users'
+        );
         await deleteAllCaseItems(es);
       });
 
@@ -106,11 +111,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
       before(async () => {
         caseId = await createCaseWithAlerts();
-        await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/hosts_users');
+        await esArchiver.load(
+          'x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/cases/signals/hosts_users');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/cases/signals/hosts_users'
+        );
         await deleteAllCaseItems(es);
       });
 

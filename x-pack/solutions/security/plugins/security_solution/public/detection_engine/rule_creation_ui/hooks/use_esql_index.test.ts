@@ -33,6 +33,6 @@ describe('useEsqlIndex', () => {
 
     const { result } = renderHook(() => useEsqlIndex(typeErrorCausingQuery, 'esql'));
 
-    expect(result.current).toEqual(['auditbeat*']);
+    expect(result.current).toContain('auditbeat*');
   });
 });

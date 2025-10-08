@@ -8,14 +8,15 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
-import { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import { getExpectedVersionProperties } from './utils';
-import { PreflightCheckNamespacesResult } from './helpers';
+import type { PreflightCheckNamespacesResult } from './helpers';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformDeleteParams<T = unknown> {

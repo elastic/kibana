@@ -29,16 +29,15 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../common/endpoint/service/response_actions/constants';
 
 describe('When using the `ResponseActionFileDownloadLink` component', () => {
+  let appTestContext: AppContextTestRender;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let renderProps: ResponseActionFileDownloadLinkProps;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
 
   beforeEach(() => {
-    const appTestContext = createAppRootMockRenderer();
-
+    appTestContext = createAppRootMockRenderer();
     apiMocks = responseActionsHttpMocks(appTestContext.coreStart.http);
-
     renderProps = {
       action: new EndpointActionGenerator('seed').generateActionDetails<
         ResponseActionGetFileOutputContent,
@@ -53,6 +52,8 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
       renderResult = appTestContext.render(<ResponseActionFileDownloadLink {...renderProps} />);
       return renderResult;
     };
+
+    jest.spyOn(appTestContext.coreStart.http.basePath, 'get').mockReturnValue('');
   });
 
   it('should show download button if file is available', async () => {
@@ -65,6 +66,26 @@ describe('When using the `ResponseActionFileDownloadLink` component', () => {
 
     expect(downlaodButton.getAttribute('href')).toEqual(
       '/api/endpoint/action/123/file/123.agent-a/download?apiVersion=2023-10-31'
+    );
+    expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
+      FILE_PASSCODE_INFO_MESSAGE(RESPONSE_ACTIONS_ZIP_PASSCODE.endpoint)
+    );
+    expect(renderResult.getByTestId('test-fileDeleteMessage')).toHaveTextContent(
+      FILE_DELETED_MESSAGE
+    );
+  });
+
+  it('should show space aware download link when in a space other than `default`', async () => {
+    (appTestContext.coreStart.http.basePath.get as jest.Mock).mockReturnValue('/s/some_space');
+    render();
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+    });
+
+    const downlaodButton = renderResult.getByTestId('test-downloadButton');
+
+    expect(downlaodButton.getAttribute('href')).toEqual(
+      '/s/some_space/api/endpoint/action/123/file/123.agent-a/download?apiVersion=2023-10-31'
     );
     expect(renderResult.getByTestId('test-passcodeMessage')).toHaveTextContent(
       FILE_PASSCODE_INFO_MESSAGE(RESPONSE_ACTIONS_ZIP_PASSCODE.endpoint)

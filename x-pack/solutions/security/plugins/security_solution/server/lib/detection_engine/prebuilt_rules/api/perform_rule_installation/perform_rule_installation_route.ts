@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import {
   PERFORM_RULE_INSTALLATION_URL,
   PerformRuleInstallationRequestBody,
@@ -18,7 +19,10 @@ import {
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import { performRuleInstallationHandler } from './perform_rule_installation_handler';
 
-export const performRuleInstallationRoute = (router: SecuritySolutionPluginRouter) => {
+export const performRuleInstallationRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .post({
       access: 'internal',
@@ -44,6 +48,8 @@ export const performRuleInstallationRoute = (router: SecuritySolutionPluginRoute
           },
         },
       },
-      performRuleInstallationHandler
+      (context, request, response) => {
+        return performRuleInstallationHandler(context, request, response, logger);
+      }
     );
 };

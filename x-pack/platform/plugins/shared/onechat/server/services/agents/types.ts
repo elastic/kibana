@@ -5,31 +5,16 @@
  * 2.0.
  */
 
-import type {
-  AgentProvider,
-  AgentRegistry,
-  AgentDefinition,
-  RunAgentFn,
-} from '@kbn/onechat-server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { RunAgentFn } from '@kbn/onechat-server';
+import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
+import type { AgentRegistry } from './agent_registry';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AgentsServiceSetup {}
-
-export interface AgentsServiceStart {
-  registry: InternalAgentRegistry;
-  execute: RunAgentFn;
+export interface AgentsServiceSetup {
+  register(agent: BuiltInAgentDefinition): void;
 }
 
-export type AgentProviderWithId = AgentProvider & {
-  id: string;
-};
-
-export type AgentDefinitionWithProviderId = AgentDefinition & {
-  providerId: string;
-};
-
-export type AgentWithIdProvider = AgentProvider<AgentDefinitionWithProviderId>;
-
-export type InternalAgentRegistry = AgentWithIdProvider & {
-  asPublicRegistry: () => AgentRegistry;
-};
+export interface AgentsServiceStart {
+  execute: RunAgentFn;
+  getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
+}

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { promptDictionary, getPromptsByGroupId } from '../../../../prompt';
 import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';

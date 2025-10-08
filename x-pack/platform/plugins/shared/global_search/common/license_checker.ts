@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 
 export type LicenseState = { valid: false; message: string } | { valid: true };
 

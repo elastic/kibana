@@ -8,10 +8,10 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataType, TermsParams } from '@kbn/visualizations-plugin/common';
+import type { DataType, TermsParams } from '@kbn/visualizations-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { excludeMetaFromColumn, getFormat, isColumnWithMeta } from './column';
-import { Column, TermsColumn, TermsSeries } from './types';
+import type { Column, TermsColumn, TermsSeries } from './types';
 
 interface OrderByWithAgg {
   orderAgg?: TermsParams['orderAgg'];

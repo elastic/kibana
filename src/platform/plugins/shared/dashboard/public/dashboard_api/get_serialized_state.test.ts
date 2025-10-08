@@ -50,22 +50,13 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
-      searchSourceReferences: [],
     });
 
     expect(result.attributes).toMatchInlineSnapshot(`
       Object {
         "controlGroupInput": undefined,
         "description": "",
-        "kibanaSavedObjectMeta": Object {
-          "searchSource": Object {
-            "filter": Array [],
-            "query": Object {
-              "language": "kuery",
-              "query": "hi",
-            },
-          },
-        },
+        "filters": Array [],
         "options": Object {
           "hidePanelTitles": false,
           "syncColors": false,
@@ -74,12 +65,15 @@ describe('getSerializedState', () => {
           "useMargins": true,
         },
         "panels": Array [],
+        "query": Object {
+          "language": "kuery",
+          "query": "hi",
+        },
         "refreshInterval": undefined,
-        "timeFrom": undefined,
+        "timeRange": undefined,
         "timeRestore": false,
-        "timeTo": undefined,
         "title": "My Dashboard",
-        "version": 3,
+        "version": 1,
       }
     `);
     expect(result.references).toEqual([]);
@@ -88,7 +82,7 @@ describe('getSerializedState', () => {
   it('should generate new IDs for panels and references when generateNewIds is true', () => {
     const dashboardState = {
       ...getSampleDashboardState(),
-      panels: [{ panelIndex: 'oldPanelId', type: 'visualization' } as DashboardPanel],
+      panels: [{ uid: 'oldPanelId', type: 'visualization' } as DashboardPanel],
     };
     const result = getSerializedState({
       controlGroupReferences: [],
@@ -101,17 +95,13 @@ describe('getSerializedState', () => {
           id: 'bizzbuzz',
         },
       ],
-      searchSourceReferences: [],
     });
 
     expect(result.attributes.panels).toMatchInlineSnapshot(`
       Array [
         Object {
-          "gridData": Object {
-            "i": "54321",
-          },
-          "panelIndex": "54321",
           "type": "visualization",
+          "uid": "54321",
         },
       ]
     `);
@@ -136,7 +126,6 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences: [],
-      searchSourceReferences: [],
     });
 
     expect(result.references).toEqual(controlGroupReferences);
@@ -152,7 +141,6 @@ describe('getSerializedState', () => {
       generateNewIds: false,
       dashboardState,
       panelReferences,
-      searchSourceReferences: [],
     });
 
     expect(result.references).toEqual(panelReferences);

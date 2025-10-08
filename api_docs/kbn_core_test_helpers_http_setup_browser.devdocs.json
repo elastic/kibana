@@ -118,11 +118,11 @@
             "label": "fatalErrors",
             "description": [],
             "signature": [
-              "{ add: jest.MockInstance<never, [error: string | Error, source?: string | undefined], unknown>; get$: jest.MockInstance<",
-              "Observable",
-              "<",
-              "FatalErrorInfo",
-              ">, [], unknown>; } & ",
+              "{ add: jest.MockInstance<never, [error: string | Error, source?: string | undefined], unknown>; catch: jest.MockInstance<void, [condition: (error: ",
+              "FatalError",
+              "<string | Error>) => boolean, handler: (errors: ",
+              "FatalError",
+              "<string | Error>[]) => React.ReactNode], unknown>; } & ",
               "FatalErrorsSetup"
             ],
             "path": "src/core/packages/test-helpers/http-setup-browser/src/http_test_setup.ts",

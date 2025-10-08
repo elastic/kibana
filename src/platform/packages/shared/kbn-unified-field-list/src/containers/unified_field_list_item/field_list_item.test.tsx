@@ -15,7 +15,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { getServicesMock } from '../../../__mocks__/services.mock';
-import { UnifiedFieldListItem, UnifiedFieldListItemProps } from './field_list_item';
+import type { UnifiedFieldListItemProps } from './field_list_item';
+import { UnifiedFieldListItem } from './field_list_item';
 import { FieldItemButton } from '../../components/field_item_button';
 import { createStateService } from '../services/state_service';
 
@@ -124,8 +125,9 @@ describe('UnifiedFieldListItem', function () {
       selected: true,
       field,
     });
-    const dscField = findTestSubject(comp, 'field-troubled_field-showDetails');
-    expect(dscField.find('.kbnFieldButton__infoIcon').length).toEqual(1);
+
+    const fieldInfoIcon = findTestSubject(comp, 'kbnFieldButton_fieldInfoIcon');
+    expect(fieldInfoIcon.exists()).toBe(true);
   });
   it('should not enable the popover if onAddFilter is not provided', async function () {
     const field = new DataViewField({

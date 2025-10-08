@@ -1925,6 +1925,21 @@
         "children": [
           {
             "parentPluginId": "contentManagement",
+            "id": "def-server.StorageContext.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/platform/plugins/shared/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
             "id": "def-server.StorageContext.requestHandlerContext",
             "type": "Object",
             "tags": [],

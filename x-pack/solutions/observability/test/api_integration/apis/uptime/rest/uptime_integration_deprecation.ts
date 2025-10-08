@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

@@ -44,6 +44,10 @@ export interface Doc {
   internalFields?: InternalFields;
 }
 
+export type DocWithOptionalId = Doc & {
+  id?: string;
+};
+
 type Wait = () => Promise<boolean>;
 
 export interface ConstructorOpts {
@@ -135,6 +139,7 @@ export interface QueryEventsBySavedObjectSearchAfterResult {
 export class ClusterClientAdapter<
   TDoc extends {
     body: AliasAny;
+    id?: string;
     index: string;
     internalFields?: InternalFields;
   } = Doc
@@ -241,7 +246,12 @@ export class ClusterClientAdapter<
     for (const doc of docs) {
       if (doc.body === undefined) continue;
 
-      bulkBody.push({ create: {} });
+      if (doc.id) {
+        bulkBody.push({ create: { _id: doc.id } });
+      } else {
+        bulkBody.push({ create: {} });
+      }
+
       bulkBody.push(doc.body);
     }
 
@@ -737,11 +747,16 @@ export class ClusterClientAdapter<
     try {
       const {
         hits: { hits, total },
+        pit_id: returnedPit,
       } = await esClient.search<IValidatedEventInternalDocInfo>({
         ...body,
         track_total_hits: true,
         seq_no_primary_term: true,
       });
+
+      if (returnedPit && returnedPit !== pitId) {
+        pitId = returnedPit;
+      }
 
       // Get the sort values from the last hit to use as search_after for next page
       const lastHit = hits[hits.length - 1];

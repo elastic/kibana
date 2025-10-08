@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   LicenseType,
   ILicense,
   LicenseStatus,
   LicenseCheck,
-  LICENSE_TYPE,
   PublicLicenseJSON,
   PublicLicense,
   PublicFeatures,
-} from './types';
+} from '@kbn/licensing-types';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
 
 /**
  * @public

@@ -9,7 +9,7 @@ import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib
 import { getRecurringScheduleFormSchema } from '@kbn/response-ops-recurring-schedule-form/schemas/recurring_schedule_form_schema';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { ReportTypeData, ReportTypeId } from '../../types';
+import type { ReportTypeData, ReportTypeId } from '../../types';
 import { getEmailsValidator } from '../validators/emails_validator';
 import * as i18n from '../translations';
 
@@ -38,6 +38,8 @@ export const getScheduledReportFormSchema = (
       },
     ],
   },
+  startDate: {},
+  timezone: {},
   recurringSchedule: getRecurringScheduleFormSchema({ allowInfiniteRecurrence: false }),
   sendByEmail: {
     type: FIELD_TYPES.TOGGLE,

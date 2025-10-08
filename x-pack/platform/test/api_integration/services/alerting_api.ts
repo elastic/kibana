@@ -12,7 +12,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { type Client } from '@elastic/elasticsearch';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const RETRY_COUNT = 10;
 const RETRY_DELAY = 1000;

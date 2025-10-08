@@ -81,6 +81,10 @@ export class Alert<
     return this.meta.uuid!;
   }
 
+  matchesUuid(uuid: string): boolean {
+    return this.meta.uuid === uuid || this.id === uuid;
+  }
+
   isAlertAsData() {
     return this.alertAsData !== undefined;
   }

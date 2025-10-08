@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { KibanaFeature, SubFeaturePrivilegeConfig } from '../../common';
 
 /**

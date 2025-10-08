@@ -12,47 +12,82 @@ import type {
   FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import type {
-  ProductFeaturesConfig,
-  AppSubFeaturesMap,
-  BaseKibanaFeatureConfig,
+  ProductFeatureParams,
+  ProductFeatureGroup,
+  ProductFeatureKeyType,
+  ProductFeaturesConfiguratorExtensions,
+  ProductFeatureKibanaConfig,
 } from '@kbn/security-solution-features';
+import { extendProductFeatureConfigs } from '@kbn/security-solution-features/utils';
 import { ProductFeaturesConfigMerger } from './product_features_config_merger';
 
-export class ProductFeatures<T extends string = string, S extends string = string> {
-  private featureConfigMerger: ProductFeaturesConfigMerger;
+export class ProductFeatures {
   private featuresSetup?: FeaturesPluginSetup;
+  private readonly groupVersions: Map<ProductFeatureGroup, ProductFeatureParams[]>;
   private readonly registeredActions: Set<string>;
 
-  constructor(
-    private readonly logger: Logger,
-    subFeaturesMap: AppSubFeaturesMap<S>,
-    private readonly baseKibanaFeature: BaseKibanaFeatureConfig,
-    private readonly baseKibanaSubFeatureIds: T[]
-  ) {
-    this.featureConfigMerger = new ProductFeaturesConfigMerger(this.logger, subFeaturesMap);
+  constructor(private readonly logger: Logger) {
+    this.groupVersions = new Map();
     this.registeredActions = new Set();
+  }
+
+  public create(featureGroup: ProductFeatureGroup, versions: ProductFeatureParams[]) {
+    this.groupVersions.set(featureGroup, versions);
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
     this.featuresSetup = featuresSetup;
   }
 
-  public setConfig(productFeatureConfig: ProductFeaturesConfig<S>) {
+  public register(
+    enabledProductFeatureKeys: ProductFeatureKeyType[],
+    extensions: ProductFeaturesConfiguratorExtensions = {}
+  ) {
     if (this.featuresSetup == null) {
-      throw new Error(
-        'Cannot sync kibana features as featuresSetup is not present. Did you call init?'
-      );
+      throw new Error('Cannot register product features. Service not initialized.');
     }
 
-    const completeProductFeatureConfig = this.featureConfigMerger.mergeProductFeatureConfigs(
-      this.baseKibanaFeature,
-      this.baseKibanaSubFeatureIds,
-      Array.from(productFeatureConfig.values())
-    );
+    const enabledKeys = new Set(enabledProductFeatureKeys);
 
-    this.logger.debug(() => JSON.stringify(completeProductFeatureConfig));
-    this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
-    this.addRegisteredActions(completeProductFeatureConfig);
+    for (const [featureGroup, featureGroupVersions] of this.groupVersions.entries()) {
+      const { allVersions: allVersionsExtensions = {}, version: versionsExtensions = {} } =
+        extensions[featureGroup] ?? {};
+
+      for (const featureVersion of featureGroupVersions) {
+        const versionExtensions = versionsExtensions[featureVersion.baseKibanaFeature.id] ?? {};
+
+        const extendedConfig = extendProductFeatureConfigs<ProductFeatureKeyType, string>(
+          featureVersion.productFeatureConfig ?? {},
+          allVersionsExtensions,
+          versionExtensions
+        );
+
+        // Filter to include only the configs of enabled keys
+        const filteredConfig = Object.entries(extendedConfig).reduce<ProductFeatureKibanaConfig[]>(
+          (acc, [key, value]) => {
+            if (enabledKeys.has(key as ProductFeatureKeyType)) {
+              acc.push(value);
+            }
+            return acc;
+          },
+          []
+        );
+
+        const featureConfigMerger = new ProductFeaturesConfigMerger(
+          this.logger,
+          featureVersion.subFeaturesMap ?? new Map()
+        );
+
+        const completeProductFeatureConfig = featureConfigMerger.mergeProductFeatureConfigs(
+          featureVersion.baseKibanaFeature,
+          featureVersion.baseKibanaSubFeatureIds ?? [],
+          filteredConfig
+        );
+
+        this.featuresSetup.registerKibanaFeature(completeProductFeatureConfig);
+        this.addRegisteredActions(completeProductFeatureConfig);
+      }
+    }
   }
 
   private addRegisteredActions(config: KibanaFeatureConfig) {

@@ -22,6 +22,7 @@ export const AddDataSourcesContextMenu = () => {
 
   return (
     <EuiPopover
+      data-test-subj="streamsAppProcessingAddDataSourcesContextMenu"
       id="data-sources-menu"
       button={
         <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={toggleMenu}>
@@ -42,6 +43,7 @@ export const AddDataSourcesContextMenu = () => {
               {
                 name: DATA_SOURCES_I18N.contextMenu.addKqlDataSource,
                 icon: 'search',
+                'data-test-subj': 'streamsAppProcessingAddKqlDataSource',
                 onClick: () => {
                   addDataSource(defaultKqlSamplesDataSource);
                   closeMenu();
@@ -50,6 +52,7 @@ export const AddDataSourcesContextMenu = () => {
               {
                 name: DATA_SOURCES_I18N.contextMenu.addCustomSamples,
                 icon: 'visText',
+                'data-test-subj': 'streamsAppProcessingAddCustomDataSource',
                 onClick: () => {
                   addDataSource(defaultCustomSamplesDataSource);
                   closeMenu();

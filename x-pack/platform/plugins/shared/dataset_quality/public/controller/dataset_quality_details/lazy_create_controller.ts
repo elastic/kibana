@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateDatasetQualityDetailsControllerFactory } from './create_controller';
+import type { CreateDatasetQualityDetailsControllerFactory } from './create_controller';
 
 export const createDatasetQualityDetailsControllerLazyFactory: CreateDatasetQualityDetailsControllerFactory =
   (dependencies) => async (args) => {

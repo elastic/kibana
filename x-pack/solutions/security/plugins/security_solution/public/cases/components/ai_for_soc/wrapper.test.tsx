@@ -10,18 +10,13 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AiForSOCAlertsTable, CONTENT_TEST_ID, ERROR_TEST_ID, SKELETON_TEST_ID } from './wrapper';
 import { TestProviders } from '../../../common/mock';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
-import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
-import { useCreateDataView } from '../../../common/hooks/use_create_data_view';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useCreateEaseAlertsDataView } from '../../../detections/hooks/alert_summary/use_create_data_view';
+
 jest.mock('./table', () => ({
   Table: () => <div />,
 }));
 jest.mock('../../../detections/hooks/alert_summary/use_fetch_integrations');
-jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
-jest.mock('../../../common/hooks/use_experimental_features');
-jest.mock('../../../data_view_manager/hooks/use_data_view');
-jest.mock('../../../common/hooks/use_create_data_view');
+jest.mock('../../../detections/hooks/alert_summary/use_create_data_view');
 
 const id = 'id';
 const query = { ids: { values: ['abcdef'] } };
@@ -35,14 +30,10 @@ describe('<AiForSOCAlertsTab />', () => {
       installedPackages: [],
       isLoading: false,
     });
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
-      data: [],
-      isLoading: false,
-    });
   });
 
   it('should render a loading skeleton while fetching packages (integrations)', async () => {
-    (useCreateDataView as jest.Mock).mockReturnValue({
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
       dataView: undefined,
       loading: false,
     });
@@ -56,116 +47,54 @@ describe('<AiForSOCAlertsTab />', () => {
     expect(await screen.findByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
   });
 
-  describe('when the newDataViewPickerEnabled feature flag is not enabled', () => {
-    beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+  it('should render a loading skeleton while creating the dataView', async () => {
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+      dataView: undefined,
+      loading: true,
     });
 
-    it('should render a loading skeleton while creating the dataView', async () => {
-      (useCreateDataView as jest.Mock).mockReturnValue({
-        dataView: undefined,
-        loading: true,
-      });
+    render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
 
-      render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
-      });
-    });
-
-    it('should render an error if the dataView fail to be created correctly', async () => {
-      (useCreateDataView as jest.Mock).mockReturnValue({
-        dataView: undefined,
-        loading: false,
-      });
-
-      jest.mock('react', () => ({
-        ...jest.requireActual('react'),
-        useEffect: jest.fn((f) => f()),
-      }));
-
-      render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
-
-      expect(await screen.findByTestId(ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to create data view'
-      );
-    });
-
-    it('should render the content', async () => {
-      (useCreateDataView as jest.Mock).mockReturnValue({
-        dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
-        loading: false,
-      });
-
-      jest.mock('react', () => ({
-        ...jest.requireActual('react'),
-        useEffect: jest.fn((f) => f()),
-      }));
-
-      render(
-        <TestProviders>
-          <AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />
-        </TestProviders>
-      );
-
-      expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
     });
   });
 
-  describe('when the newDataViewPickerEnabled feature flag is enabled', () => {
-    beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    });
-    it('should render a loading skeleton while creating the dataView', async () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        dataView: undefined,
-        status: 'loading',
-      });
-
-      render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
-      });
+  it('should render an error if the dataView fail to be created correctly', async () => {
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+      dataView: undefined,
+      loading: false,
     });
 
-    it('should render an error if the dataView fail to be created correctly', async () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        dataView: undefined,
-        status: 'ready',
-      });
+    jest.mock('react', () => ({
+      ...jest.requireActual('react'),
+      useEffect: jest.fn((f) => f()),
+    }));
 
-      jest.mock('react', () => ({
-        ...jest.requireActual('react'),
-        useEffect: jest.fn((f) => f()),
-      }));
+    render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
 
-      render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
+    expect(await screen.findByTestId(ERROR_TEST_ID)).toHaveTextContent(
+      'Unable to create data view'
+    );
+  });
 
-      expect(await screen.findByTestId(ERROR_TEST_ID)).toHaveTextContent(
-        'Unable to create data view'
-      );
+  it('should render the content', async () => {
+    (useCreateEaseAlertsDataView as jest.Mock).mockReturnValue({
+      dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
+      loading: false,
     });
 
-    it('should render the content', async () => {
-      (useDataView as jest.Mock).mockReturnValue({
-        dataView: { getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() },
-        status: 'ready',
-      });
+    jest.mock('react', () => ({
+      ...jest.requireActual('react'),
+      useEffect: jest.fn((f) => f()),
+    }));
 
-      jest.mock('react', () => ({
-        ...jest.requireActual('react'),
-        useEffect: jest.fn((f) => f()),
-      }));
+    render(
+      <TestProviders>
+        <AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />
+      </TestProviders>
+    );
 
-      render(
-        <TestProviders>
-          <AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />
-        </TestProviders>
-      );
-
-      expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
   });
 });

@@ -190,6 +190,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
           idSelected={frozenDataPreference}
           onChange={setPreference}
           compressed
+          name="frozenDataPreference"
         />
       </EuiPanel>
     ),

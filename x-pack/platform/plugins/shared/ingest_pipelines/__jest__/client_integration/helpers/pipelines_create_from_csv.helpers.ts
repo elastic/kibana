@@ -6,8 +6,9 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { HttpSetup } from '@kbn/core/public';
-import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import type { HttpSetup } from '@kbn/core/public';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 
 import { PipelinesCreateFromCsv } from '../../../public/application/sections/pipelines_create_from_csv';
 import { WithAppDependencies } from './setup_environment';

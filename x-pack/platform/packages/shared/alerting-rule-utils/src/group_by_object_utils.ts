@@ -6,29 +6,7 @@
  */
 
 import { unflattenObject } from '@kbn/object-utils';
-import { Group } from './types';
-
-// TODO: Remove after updating the group logic in the log threshold rule
-// https://github.com/elastic/kibana/issues/220006
-export const getGroupByObject = (
-  groupBy: string | string[] | undefined,
-  groupValueSet: Set<string>
-): Record<string, unknown> => {
-  const groupKeyValueMappingsObject: Record<string, unknown> = {};
-  if (groupBy) {
-    groupValueSet.forEach((groupValueStr) => {
-      const groupValueArray = groupValueStr.split(',');
-      groupKeyValueMappingsObject[groupValueStr] = unflattenObject(
-        Array.isArray(groupBy)
-          ? groupBy.reduce((result, groupKey, index) => {
-              return { ...result, [groupKey]: groupValueArray[index]?.trim() };
-            }, {})
-          : { [groupBy]: groupValueStr }
-      );
-    });
-  }
-  return groupKeyValueMappingsObject;
-};
+import type { Group } from './types';
 
 export const unflattenGrouping = (
   grouping?: Record<string, string> | undefined
@@ -38,34 +16,57 @@ export const unflattenGrouping = (
   }
 };
 
-// TODO: Remove after updating the group logic in the log threshold rule
-// https://github.com/elastic/kibana/issues/220006
-export const getFormattedGroupBy = (
-  groupBy: string | string[] | undefined,
-  groupSet: Set<string>
-): Record<string, Group[]> => {
-  const groupByKeysObjectMapping: Record<string, Group[]> = {};
-  if (groupBy) {
-    groupSet.forEach((group) => {
-      const groupSetKeys = group.split(',');
-      groupByKeysObjectMapping[group] = Array.isArray(groupBy)
-        ? groupBy.reduce((result: Group[], groupByItem, index) => {
-            result.push({ field: groupByItem, value: groupSetKeys[index]?.trim() });
-            return result;
-          }, [])
-        : [{ field: groupBy, value: group }];
-    });
-  }
-  return groupByKeysObjectMapping;
-};
-
-export const getFormattedGroups = (grouping?: Record<string, string>): Group[] | undefined => {
+export const getFormattedGroups = (grouping?: Record<string, unknown>): Group[] | undefined => {
   const groups: Group[] = [];
   if (grouping) {
     const groupKeys = Object.keys(grouping);
     groupKeys.forEach((group) => {
-      groups.push({ field: group, value: grouping[group] });
+      groups.push({ field: group, value: String(grouping[group]) });
     });
   }
   return groups.length ? groups : undefined;
+};
+
+/**
+ * Flattens a bucket key returned by Elasticsearch aggregations into an object whose
+ * keys correspond to the rule's `groupBy` fields and whose values come from the
+ * aggregation `bucketKey`.
+ *
+ * The contract is:
+ *  - `groupBy`            → the same field(s) that were sent in the alert rule params.
+ *  - `bucketKey`          → an object whose **first property** relates to the first
+ *                           `groupBy` field, the **second property** to the second
+ *                           `groupBy`, and so on. The property names coming from
+ *                           Elasticsearch (e.g. `key0`, `key1`, …) are irrelevant –
+ *                           only their insertion order matters.
+ *
+ * Example 1 – single group-by:
+ *   groupBy   = 'host.hostname'
+ *   bucketKey = { key0: 'web-01' }
+ *   returns   = { 'host.hostname': 'web-01' }
+ *
+ * Example 2 – multiple group-bys:
+ *   groupBy   = ['host.hostname', 'host.architecture']
+ *   bucketKey = { key0: 'web-01', key1: 'amd64' }
+ *   returns   = {
+ *     'host.hostname':      'web-01',
+ *     'host.architecture':  'amd64',
+ *   }
+ *
+ * NOTE: `bucketKey` **must** contain at least the same number of values as there
+ * are `groupBy` entries; extra properties will be ignored and missing properties
+ * will result in `undefined` values in the flattened object.
+ */
+export const getFlattenGrouping = ({
+  groupBy,
+  bucketKey,
+}: {
+  groupBy: string | string[] | undefined;
+  bucketKey: Record<string, string>;
+}) => {
+  if (!groupBy) return;
+  const internalGroupBy = typeof groupBy === 'string' ? [groupBy] : groupBy;
+  const keyValues = Object.values(bucketKey);
+
+  return Object.fromEntries(internalGroupBy.map((k, index) => [k, keyValues[index]]));
 };

@@ -5,49 +5,92 @@
  * 2.0.
  */
 
-import { builtinToolProviderId } from '@kbn/onechat-common';
-import type { Runner, RegisteredTool } from '@kbn/onechat-server';
-import { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
-import type { ToolsServiceSetup, ToolsServiceStart, RegisteredToolProviderWithId } from './types';
-import { createInternalRegistry } from './utils';
+import type { ElasticsearchServiceStart, Logger } from '@kbn/core/server';
+import type { Runner } from '@kbn/onechat-server';
+import type { WorkflowsPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { isAllowedBuiltinTool } from '@kbn/onechat-server/allow_lists';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { getCurrentSpaceId } from '../../utils/spaces';
+import {
+  createBuiltinToolRegistry,
+  registerBuiltinTools,
+  createBuiltinProviderFn,
+  type BuiltinToolRegistry,
+} from './builtin';
+import type { ToolsServiceSetup, ToolsServiceStart } from './types';
+import { getToolTypeDefinitions } from './tool_types';
+import { createPersistedProviderFn } from './persisted';
+import { createToolRegistry } from './tool_registry';
+import { getToolTypeInfo } from './utils';
+
+export interface ToolsServiceSetupDeps {
+  logger: Logger;
+  workflowsManagement?: WorkflowsPluginSetup;
+}
 
 export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
+  elasticsearch: ElasticsearchServiceStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class ToolsService {
+  private setupDeps?: ToolsServiceSetupDeps;
   private builtinRegistry: BuiltinToolRegistry;
-  private providers: Map<string, RegisteredToolProviderWithId> = new Map();
 
   constructor() {
     this.builtinRegistry = createBuiltinToolRegistry();
-    this.providers.set(builtinToolProviderId, this.builtinRegistry);
   }
 
-  setup(): ToolsServiceSetup {
+  setup(deps: ToolsServiceSetupDeps): ToolsServiceSetup {
+    this.setupDeps = deps;
+    registerBuiltinTools({ registry: this.builtinRegistry });
+
     return {
-      register: (reg) => this.register(reg),
-      registerProvider: (providerId, provider) => {
-        if (this.providers.has(providerId)) {
-          throw new Error(`Provider with id ${providerId} already registered`);
+      register: (reg) => {
+        if (!isAllowedBuiltinTool(reg.id)) {
+          throw new Error(
+            `Built-in tool with id "${reg.id}" is not in the list of allowed built-in tools.
+             Please add it to the list of allowed built-in tools in the "@kbn/onechat-server/allow_lists.ts" file.`
+          );
         }
-        this.providers.set(providerId, { ...provider, id: providerId });
+        return this.builtinRegistry.register(reg);
       },
     };
   }
 
-  start({ getRunner }: ToolsServiceStartDeps): ToolsServiceStart {
-    const registry = createInternalRegistry({
-      providers: [...this.providers.values()],
-      getRunner,
+  start({ getRunner, elasticsearch, spaces }: ToolsServiceStartDeps): ToolsServiceStart {
+    const { logger, workflowsManagement } = this.setupDeps!;
+
+    const toolTypes = getToolTypeDefinitions({ workflowsManagement });
+
+    const builtinProviderFn = createBuiltinProviderFn({
+      registry: this.builtinRegistry,
+      toolTypes,
+    });
+    const persistedProviderFn = createPersistedProviderFn({
+      logger,
+      esClient: elasticsearch.client.asInternalUser,
+      toolTypes,
     });
 
-    return {
-      registry,
-    };
-  }
+    const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
+      const space = getCurrentSpaceId({ request, spaces });
+      const builtinProvider = await builtinProviderFn({ request, space });
+      const persistedProvider = await persistedProviderFn({ request, space });
 
-  private register(toolRegistration: RegisteredTool<any, any>) {
-    this.builtinRegistry.register(toolRegistration);
+      return createToolRegistry({
+        getRunner,
+        space,
+        request,
+        builtinProvider,
+        persistedProvider,
+      });
+    };
+
+    return {
+      getRegistry,
+      getToolTypeInfo: () => getToolTypeInfo(toolTypes),
+    };
   }
 }

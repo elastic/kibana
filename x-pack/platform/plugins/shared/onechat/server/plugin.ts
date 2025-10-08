@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import { schema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
 import type { OnechatConfig } from './config';
+import { ServiceManager } from './services';
 import type {
   OnechatPluginSetup,
   OnechatPluginStart,
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { registerRoutes } from './routes';
-import { ServiceManager } from './services';
 import { registerFeatures } from './features';
-import { registerTools } from './tools';
-import { ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../common/constants';
+import { registerRoutes } from './routes';
+import { registerUISettings } from './ui_settings';
+import type { OnechatHandlerContext } from './request_handler_context';
+import { registerOnechatHandlerContext } from './request_handler_context';
 
 export class OnechatPlugin
   implements
@@ -43,36 +42,25 @@ export class OnechatPlugin
 
   setup(
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
-    pluginsSetup: OnechatSetupDependencies
+    setupDeps: OnechatSetupDependencies
   ): OnechatPluginSetup {
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
+      workflowsManagement: setupDeps.workflowsManagement,
     });
 
-    registerFeatures({ features: pluginsSetup.features });
+    registerFeatures({ features: setupDeps.features });
 
-    registerTools({ tools: serviceSetups.tools });
+    registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    coreSetup.uiSettings.register({
-      [ONECHAT_MCP_SERVER_UI_SETTING_ID]: {
-        description: i18n.translate('onechat.uiSettings.mcpServer.description', {
-          defaultMessage: 'Enables MCP server with access to tools.',
-        }),
-        name: i18n.translate('onechat.uiSettings.mcpServer.name', {
-          defaultMessage: 'MCP Server',
-        }),
-        schema: schema.boolean(),
-        value: false,
-        readonly: true,
-        readonlyMode: 'ui',
-      },
-    });
+    registerOnechatHandlerContext({ coreSetup });
 
-    const router = coreSetup.http.createRouter();
+    const router = coreSetup.http.createRouter<OnechatHandlerContext>();
     registerRoutes({
       router,
       coreSetup,
       logger: this.logger,
+      pluginsSetup: setupDeps,
       getInternalServices: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
@@ -85,44 +73,34 @@ export class OnechatPlugin
     return {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
-        registerProvider: serviceSetups.tools.registerProvider.bind(serviceSetups.tools),
+      },
+      agents: {
+        register: serviceSetups.agents.register.bind(serviceSetups.agents),
       },
     };
   }
 
   start(
-    { elasticsearch, security }: CoreStart,
-    { actions, inference }: OnechatStartDependencies
+    { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
+    { inference, spaces }: OnechatStartDependencies
   ): OnechatPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
-      actions,
       inference,
+      spaces,
+      uiSettings,
+      savedObjects,
     });
 
-    const { tools, agents, runnerFactory } = startServices;
+    const { tools, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
       tools: {
-        registry: tools.registry.asPublicRegistry(),
+        getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
-        asScoped: ({ request }) => {
-          return {
-            registry: tools.registry.asScopedPublicRegistry({ request }),
-            execute: (args) => {
-              return runner.runTool({ ...args, request });
-            },
-          };
-        },
-      },
-      agents: {
-        registry: agents.registry.asPublicRegistry(),
-        execute: async (args) => {
-          return agents.execute(args);
-        },
       },
     };
   }

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
-import { License } from './services';
-import { IndexLifecycleManagementConfig } from './config';
-import { handleEsError } from './shared_imports';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/server';
+import type { License } from './services';
+import type { IndexLifecycleManagementConfig } from './config';
+import type { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;

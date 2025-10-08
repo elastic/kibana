@@ -39,7 +39,7 @@ export type ExportRulesRequestBody = z.infer<typeof ExportRulesRequestBody>;
 export const ExportRulesRequestBody = z
   .object({
     /**
-     * Array of `rule_id` fields. Exports all rules when unspecified.
+     * Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
      */
     objects: z.array(
       z.object({

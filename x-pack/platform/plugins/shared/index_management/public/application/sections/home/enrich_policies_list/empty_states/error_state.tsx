@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
-import { useLoadEnrichPolicies } from '../../../../services/api';
+import type { useLoadEnrichPolicies } from '../../../../services/api';
 
 export const ErrorState = ({
   error,

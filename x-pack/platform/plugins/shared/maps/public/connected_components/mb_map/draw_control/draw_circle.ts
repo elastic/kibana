@@ -11,7 +11,7 @@
 import turfDistance from '@turf/distance';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
-import { Feature, GeoJSON, Position } from 'geojson';
+import type { Feature, GeoJSON, Position } from 'geojson';
 
 const DRAW_CIRCLE_RADIUS = 'draw-circle-radius';
 

@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_NAMESPACE_STRING } from '../../../../common/constants/monitor_defaults';
-import { MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
+import type { MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
 
 export interface DataStreamConfig {
   type: MonitorTypeEnum;

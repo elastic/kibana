@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { Filter } from '@kbn/es-query';
+import type React from 'react';
+import { useCallback } from 'react';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useNodeExpandGraphPopover } from './use_node_expand_graph_popover';
 import type { NodeProps } from '../../..';
@@ -15,8 +16,10 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
 } from '../test_ids';
-import {
+import type {
   ItemExpandPopoverListItemProps,
   SeparatorExpandPopoverListItemProps,
 } from './list_group_graph_popover';
@@ -38,7 +41,8 @@ type NodeToggleAction = 'show' | 'hide';
 export const useEntityNodeExpandPopover = (
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
   dataViewId: string,
-  searchFilters: Filter[]
+  searchFilters: Filter[],
+  onShowEntityDetailsClick?: (node: NodeProps) => void
 ) => {
   const onToggleExploreRelatedEntitiesClick = useCallback(
     (node: NodeProps, action: NodeToggleAction) => {
@@ -86,6 +90,8 @@ export const useEntityNodeExpandPopover = (
       const relatedEntitiesAction = containsFilter(searchFilters, RELATED_ENTITY, node.id)
         ? 'hide'
         : 'show';
+
+      const shouldDisableEntityDetailsListItem = !onShowEntityDetailsClick;
 
       return [
         {
@@ -154,12 +160,46 @@ export const useEntityNodeExpandPopover = (
             onToggleExploreRelatedEntitiesClick(node, relatedEntitiesAction);
           },
         },
-      ];
+        {
+          type: 'separator',
+        },
+        {
+          type: 'item',
+          iconType: 'expand',
+          testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
+          label: i18n.translate(
+            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',
+            {
+              defaultMessage: 'Show entity details',
+            }
+          ),
+          disabled: shouldDisableEntityDetailsListItem,
+          onClick: () => {
+            onShowEntityDetailsClick?.(node);
+          },
+          showToolTip: shouldDisableEntityDetailsListItem,
+          toolTipText: shouldDisableEntityDetailsListItem
+            ? i18n.translate(
+                'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetailsTooltipText',
+                {
+                  defaultMessage: 'Details not available',
+                }
+              )
+            : undefined,
+          toolTipProps: shouldDisableEntityDetailsListItem
+            ? {
+                position: 'bottom',
+                'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
+              }
+            : undefined,
+        },
+      ] satisfies Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps>;
     },
     [
       onToggleActionsByEntityClick,
       onToggleActionsOnEntityClick,
       onToggleExploreRelatedEntitiesClick,
+      onShowEntityDetailsClick,
       searchFilters,
     ]
   );

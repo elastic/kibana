@@ -14,13 +14,9 @@ import {
   TIMERANGE_OP_MISSING_TIME_RANGE,
 } from '../../../../../user_messages_ids';
 import { createMockedIndexPattern } from '../../../mocks';
-import { DateHistogramIndexPatternColumn } from '../date_histogram';
-import {
-  ConstantsIndexPatternColumn,
-  nowOperation,
-  intervalOperation,
-  timeRangeOperation,
-} from './context_variables';
+import type { DateHistogramIndexPatternColumn } from '../date_histogram';
+import type { ConstantsIndexPatternColumn } from './context_variables';
+import { nowOperation, intervalOperation, timeRangeOperation } from './context_variables';
 
 function createLayer<T extends ConstantsIndexPatternColumn>(
   type: 'interval' | 'now' | 'time_range'
@@ -34,7 +30,6 @@ function createLayer<T extends ConstantsIndexPatternColumn>(
         dataType: 'number',
         operationType: type,
         isBucketed: false,
-        scale: 'ratio',
         references: [],
       },
     },
@@ -112,7 +107,6 @@ describe('context variables', () => {
             operationType: 'date_histogram',
             sourceField: '@timestamp',
             isBucketed: true,
-            scale: 'interval',
             params: {
               interval: 'auto',
               includeEmptyRows: true,

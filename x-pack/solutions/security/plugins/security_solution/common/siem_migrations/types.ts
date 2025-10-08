@@ -5,17 +5,36 @@
  * 2.0.
  */
 
+import type {
+  DashboardMigration,
+  DashboardMigrationDashboard,
+  OriginalDashboardVendor,
+} from './model/dashboard_migration.gen';
+import type {
+  OriginalRuleVendor,
+  RuleMigration,
+  RuleMigrationRule,
+} from './model/rule_migration.gen';
 import type { SiemMigrationStatus } from './constants';
 
-export interface RuleMigrationFilters {
+export interface SiemMigrationFilters {
   status?: SiemMigrationStatus | SiemMigrationStatus[];
   ids?: string[];
-  installed?: boolean;
-  installable?: boolean;
-  prebuilt?: boolean;
   failed?: boolean;
   fullyTranslated?: boolean;
   partiallyTranslated?: boolean;
   untranslatable?: boolean;
   searchTerm?: string;
+  installed?: boolean;
+  installable?: boolean;
 }
+
+export type SiemMigrationVendor = OriginalRuleVendor | OriginalDashboardVendor;
+
+export type MigrationDocument = RuleMigration | DashboardMigration;
+export type ItemDocument = RuleMigrationRule | DashboardMigrationDashboard;
+export type OriginalItem<I> = I extends RuleMigrationRule
+  ? RuleMigrationRule['original_rule']
+  : DashboardMigrationDashboard['original_dashboard'];
+
+export type MigrationType = 'rule' | 'dashboard';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import type { ILayer } from '../../../../../classes/layers/layer';

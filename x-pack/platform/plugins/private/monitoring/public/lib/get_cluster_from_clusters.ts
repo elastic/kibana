@@ -6,7 +6,7 @@
  */
 
 import { find, first } from 'lodash';
-import { State } from '../application/contexts/global_state_context';
+import type { State } from '../application/contexts/global_state_context';
 
 export function getClusterFromClusters(
   clusters: any,

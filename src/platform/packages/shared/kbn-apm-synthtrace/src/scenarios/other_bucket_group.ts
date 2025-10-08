@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, ApmFields } from '@kbn/apm-synthtrace-client';
+/**
+ * Generates APM data with a high number of unique transaction and service names to test the "other" bucket.
+ */
+
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import { apm } from '@kbn/apm-synthtrace-client';
 import { range as lodashRange } from 'lodash';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 

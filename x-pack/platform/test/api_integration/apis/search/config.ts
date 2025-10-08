@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
@@ -15,10 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     kbnTestServer: {
       ...baseIntegrationTestsConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-        '--data.search.sessions.enabled=true', // enable search sessions
-      ],
+      serverArgs: [...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs')],
     },
   };
 }

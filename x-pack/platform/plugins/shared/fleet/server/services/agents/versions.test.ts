@@ -426,4 +426,76 @@ describe('getAvailableVersions', () => {
     expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
     expect(mockedFetch).not.toBeCalled();
   });
+
+  it('should filter out versions higher than kibana version but allow patch versions', async () => {
+    mockKibanaVersion = '8.10.2';
+    mockConfig = {};
+
+    // Include patch versions both higher and lower than kibana version
+    mockedReadFile.mockResolvedValue(`["8.10.4", "8.10.2", "8.10.1", "8.9.0", "7.17.0"]`);
+    mockedFetch.mockResolvedValueOnce({
+      status: 200,
+      text: jest.fn().mockResolvedValue(
+        JSON.stringify([
+          [
+            {
+              title: 'Elastic Agent 8.11.0', // Should be filtered (minor version higher)
+              version_number: '8.11.0',
+            },
+            {
+              title: 'Elastic Agent 8.10.3', // Should be included (patch version higher)
+              version_number: '8.10.3',
+            },
+            {
+              title: 'Elastic Agent 9.0.0', // Should be filtered (major version higher)
+              version_number: '9.0.0',
+            },
+          ],
+        ])
+      ),
+    } as any);
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    // Should include patch versions but filter out minor/major versions higher than kibana
+    expect(res).toEqual(['8.10.4', '8.10.3', '8.10.2', '8.10.1', '8.9.0', '7.17.0']);
+  });
+
+  it('should filter out versions higher than kibana version in air-gapped environments', async () => {
+    mockKibanaVersion = '8.10.2';
+    mockConfig = { isAirGapped: true };
+
+    // In air-gapped mode, only file data is used (no API calls)
+    mockedReadFile.mockResolvedValue(`["8.11.0", "8.10.4", "8.10.2", "8.10.1", "8.9.0", "7.17.0"]`);
+
+    // add in the api call just to make sure it doesnt contain anything on return
+    mockedFetch.mockResolvedValueOnce({
+      status: 200,
+      text: jest.fn().mockResolvedValue(
+        JSON.stringify([
+          [
+            {
+              title: 'Elastic Agent 8.11.0', // Should be filtered (minor version higher)
+              version_number: '8.11.0',
+            },
+            {
+              title: 'Elastic Agent 8.10.3', // Should be included (patch version higher), but since airgapped, it actually shouldnt
+              version_number: '8.10.3',
+            },
+            {
+              title: 'Elastic Agent 9.0.0', // Should be filtered (major version higher)
+              version_number: '9.0.0',
+            },
+          ],
+        ])
+      ),
+    } as any);
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    // Should include patch versions (8.10.4) but filter out minor versions (8.11.0)
+    // No API data should be included since air-gapped
+    expect(res).toEqual(['8.10.2', '8.10.4', '8.10.1', '8.9.0', '7.17.0']);
+    expect(mockedFetch).not.toHaveBeenCalled(); // Verify no API call was made
+  });
 });

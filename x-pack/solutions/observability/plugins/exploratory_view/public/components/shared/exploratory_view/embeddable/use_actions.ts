@@ -8,12 +8,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { createExploratoryViewRoutePath } from '../configurations/utils';
 import { createExploratoryViewUrl } from '../configurations/exploratory_view_url';
-import { ReportViewType } from '../types';
-import { AllSeries } from '../hooks/use_series_storage';
-import { ObservabilityAppServices } from '../../../../application/types';
+import type { ReportViewType } from '../types';
+import type { AllSeries } from '../hooks/use_series_storage';
+import type { ObservabilityAppServices } from '../../../../application/types';
 
 export type ActionTypes = 'explore' | 'save' | 'addToCase' | 'openInLens';
 

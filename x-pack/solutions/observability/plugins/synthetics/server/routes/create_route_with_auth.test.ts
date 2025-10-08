@@ -6,7 +6,7 @@
  */
 
 import { createSyntheticsRouteWithAuth } from './create_route_with_auth';
-import { SupportedMethod } from './types';
+import type { SupportedMethod } from './types';
 
 const methods: SupportedMethod[][] = [['GET'], ['POST'], ['PUT'], ['DELETE']];
 

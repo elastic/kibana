@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {

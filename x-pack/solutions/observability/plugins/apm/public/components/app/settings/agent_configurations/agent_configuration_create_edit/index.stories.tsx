@@ -67,3 +67,30 @@ export const WithConfig = {
     },
   },
 };
+
+export const WithAdvancedConfig = {
+  render: () => {
+    return (
+      <AgentConfigurationCreateEdit
+        pageStep="choose-settings-step"
+        existingConfigResult={{
+          status: FETCH_STATUS.SUCCESS,
+          data: {
+            agent_name: 'opentelemetry/java/elastic',
+            service: { name: 'opbeans-node', environment: 'production' },
+            settings: { customKey: 'customValue' },
+          } as unknown as AgentConfiguration,
+        }}
+      />
+    );
+  },
+
+  name: 'with advanced config',
+
+  parameters: {
+    info: {
+      propTablesExclude: [AgentConfigurationCreateEdit, ApmPluginContext.Provider],
+      source: false,
+    },
+  },
+};

@@ -9,7 +9,7 @@
 
 import React, { useRef, useState, useCallback } from 'react';
 import { RowCellsRenderer } from './row_cells_renderer';
-import { AllCellsProps, RowMatches } from '../types';
+import type { AllCellsProps, RowMatches } from '../types';
 
 // Processes rows in chunks:
 // - to don't block the main thread for too long
@@ -68,12 +68,13 @@ export function AllCellsRenderer(props: AllCellsProps) {
         setChunk({ chunkStartRowIndex: nextRowIndex, chunkSize: nextChunkSize });
       } else {
         onFinish({
+          term: inTableSearchTerm,
           matchesList: matchesListRef.current,
           totalMatchesCount: totalMatchesCountRef.current,
         });
       }
     },
-    [setChunk, chunkStartRowIndex, chunkSize, rowsCount, onFinish]
+    [setChunk, chunkStartRowIndex, chunkSize, rowsCount, onFinish, inTableSearchTerm]
   );
 
   // Iterating through rows one chunk at the time to avoid blocking the main thread.

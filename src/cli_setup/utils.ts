@@ -13,7 +13,7 @@ import { duration } from 'moment';
 import { merge } from 'lodash';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { AgentManager, ClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { configSchema } from '@kbn/core-elasticsearch-server-internal';
 import { ElasticsearchService } from '@kbn/interactive-setup-plugin/server/elasticsearch_service';

@@ -7,10 +7,7 @@
 
 import * as rt from 'io-ts';
 import { MetricsAPISeriesRT, type MetricsAPIRow } from '@kbn/metrics-data-access-plugin/common';
-
-const AggValueRT = rt.type({
-  value: rt.number,
-});
+import { DataSchemaFormatRT } from '../shared';
 
 export const ProcessListAPIRequestRT = rt.type({
   hostTerm: rt.record(rt.string, rt.string),
@@ -21,62 +18,7 @@ export const ProcessListAPIRequestRT = rt.type({
     isAscending: rt.boolean,
   }),
   searchFilter: rt.array(rt.record(rt.string, rt.record(rt.string, rt.unknown))),
-});
-
-export const ProcessListAPIQueryAggregationRT = rt.type({
-  summaryEvent: rt.type({
-    summary: rt.type({
-      hits: rt.type({
-        hits: rt.array(
-          rt.type({
-            _source: rt.type({
-              system: rt.type({
-                process: rt.type({
-                  summary: rt.record(rt.string, rt.number),
-                }),
-              }),
-            }),
-          })
-        ),
-      }),
-    }),
-  }),
-  processes: rt.type({
-    filteredProcs: rt.type({
-      buckets: rt.array(
-        rt.type({
-          key: rt.string,
-          cpu: AggValueRT,
-          memory: AggValueRT,
-          startTime: rt.type({
-            value_as_string: rt.string,
-          }),
-          meta: rt.type({
-            hits: rt.type({
-              hits: rt.array(
-                rt.type({
-                  _source: rt.type({
-                    process: rt.type({
-                      pid: rt.number,
-                      command_line: rt.string,
-                    }),
-                    system: rt.type({
-                      process: rt.type({
-                        state: rt.string,
-                      }),
-                    }),
-                    user: rt.type({
-                      name: rt.string,
-                    }),
-                  }),
-                })
-              ),
-            }),
-          }),
-        })
-      ),
-    }),
-  }),
+  schema: rt.union([DataSchemaFormatRT, rt.null]),
 });
 
 // string in case of 'N?A'
@@ -87,7 +29,7 @@ export const ProcessListAPIResponseRT = rt.type({
     rt.type({
       cpu: rt.union([rt.null, rt.number]),
       memory: rt.union([rt.null, rt.number]),
-      startTime: rt.number,
+      startTime: rt.union([rt.null, rt.number]),
       pid: rt.number,
       state: rt.string,
       user: rt.string,
@@ -108,8 +50,6 @@ export const ProcessListAPIResponseRT = rt.type({
   ),
 });
 
-export type ProcessListAPIQueryAggregation = rt.TypeOf<typeof ProcessListAPIQueryAggregationRT>;
-
 export type ProcessListAPIRequest = rt.TypeOf<typeof ProcessListAPIRequestRT>;
 
 export type ProcessListAPIResponse = rt.TypeOf<typeof ProcessListAPIResponseRT>;
@@ -119,36 +59,13 @@ export const ProcessListAPIChartRequestRT = rt.type({
   indexPattern: rt.string,
   to: rt.number,
   command: rt.string,
-});
-
-export const ProcessListAPIChartQueryAggregationRT = rt.type({
-  process: rt.type({
-    filteredProc: rt.type({
-      buckets: rt.array(
-        rt.type({
-          timeseries: rt.type({
-            buckets: rt.array(
-              rt.type({
-                key: rt.number,
-                memory: AggValueRT,
-                cpu: AggValueRT,
-              })
-            ),
-          }),
-        })
-      ),
-    }),
-  }),
+  schema: rt.union([DataSchemaFormatRT, rt.null]),
 });
 
 export const ProcessListAPIChartResponseRT = rt.type({
   cpu: MetricsAPISeriesRT,
   memory: MetricsAPISeriesRT,
 });
-
-export type ProcessListAPIChartQueryAggregation = rt.TypeOf<
-  typeof ProcessListAPIChartQueryAggregationRT
->;
 
 export type ProcessListAPIChartRequest = rt.TypeOf<typeof ProcessListAPIChartRequestRT>;
 

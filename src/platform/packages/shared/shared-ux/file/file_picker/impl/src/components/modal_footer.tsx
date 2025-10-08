@@ -17,7 +17,8 @@ import type { Props as FilePickerProps } from '../file_picker';
 import { useFilePickerContext } from '../context';
 import { i18nTexts } from '../i18n_texts';
 import { Pagination } from './pagination';
-import { SelectButton, Props as SelectButtonProps } from './select_button';
+import type { Props as SelectButtonProps } from './select_button';
+import { SelectButton } from './select_button';
 
 interface Props {
   kind: string;

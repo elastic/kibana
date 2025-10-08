@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ChromeNavLink, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
+import type { ChromeNavLink, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 import type { ClassicNavItem } from '@kbn/search-navigation/public';
 
 import type { GenerateNavLinkFromDeepLinkParameters, GenerateNavLinkParameters } from '../types';

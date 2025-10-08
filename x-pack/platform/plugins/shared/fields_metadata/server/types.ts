@@ -7,7 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 
-import {
+import type {
   FieldsMetadataServiceSetup,
   FieldsMetadataServiceStart,
 } from './services/fields_metadata/types';

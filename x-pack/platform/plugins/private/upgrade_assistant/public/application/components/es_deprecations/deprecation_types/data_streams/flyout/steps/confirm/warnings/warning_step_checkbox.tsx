@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiCheckableCard } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import { EuiCode, EuiSpacer } from '@elastic/eui';
 
 export const WarningCheckbox: React.FunctionComponent<{

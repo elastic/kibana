@@ -47,6 +47,7 @@ export const SemanticSearch: React.FC = () => {
       }
     ),
     dataTestSubj: 'createSemanticOptimizedIndexButton',
+    workflow: 'semantic',
   };
 
   return <AISearchWorkflow capability={semanticSearchText} />;

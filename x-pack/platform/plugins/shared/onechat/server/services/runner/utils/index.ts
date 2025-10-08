@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-export { getConnectorList } from './get_connector_list';
-export { getDefaultConnector } from './get_default_connector';
 export {
   createEmptyRunContext,
   forkContextForToolRun,
   forkContextForAgentRun,
 } from './run_context';
 export { createToolEventEmitter, createAgentEventEmitter } from './events';
+export { extractConversationToolResults } from './extract_conversation_tool_results';

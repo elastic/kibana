@@ -7,20 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
-import {
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
+import type {
   ScreenshotModePluginSetup,
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { imageClickTrigger } from './actions';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
-import { IMAGE_EMBEDDABLE_TYPE } from './image_embeddable/constants';
-import { registerCreateImageAction } from './actions/create_image_action';
+import {
+  ADD_IMAGE_EMBEDDABLE_ACTION_ID,
+  IMAGE_EMBEDDABLE_TYPE,
+} from './image_embeddable/constants';
 
 export interface ImageEmbeddableSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -77,7 +80,23 @@ export class ImageEmbeddablePlugin
     setKibanaServices(core, plugins);
 
     untilPluginStartServicesReady().then(() => {
-      registerCreateImageAction();
+      plugins.uiActions.addTriggerActionAsync(
+        ADD_PANEL_TRIGGER,
+        ADD_IMAGE_EMBEDDABLE_ACTION_ID,
+        async () => {
+          const { createImageAction } = await import('./actions/create_image_action');
+          return createImageAction;
+        }
+      );
+
+      if (plugins.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+        // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+        // the create action if the Canvas-specific trigger does indeed exist.
+        plugins.uiActions.attachAction(
+          'ADD_CANVAS_ELEMENT_TRIGGER',
+          ADD_IMAGE_EMBEDDABLE_ACTION_ID
+        );
+      }
     });
 
     return {};

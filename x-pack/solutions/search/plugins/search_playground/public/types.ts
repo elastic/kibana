@@ -29,6 +29,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type {
   ActionConnector,
   UserConfiguredActionConnector,
@@ -52,6 +53,7 @@ export interface SearchPlaygroundPluginStart {}
 export interface AppPluginSetupDependencies {
   cloud?: CloudSetup;
   share: SharePluginSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
 }
 
 export interface AppPluginStartDependencies {
@@ -69,7 +71,17 @@ export interface AppPluginStartDependencies {
   uiActions: UiActionsStart;
 }
 
-export type AppServicesContext = CoreStart & AppPluginStartDependencies;
+export interface PlaygroundLicenseStatus {
+  hasRequiredLicense: boolean;
+  hasExpiredLicense: boolean;
+}
+
+export type AppServices = AppPluginStartDependencies & {
+  licenseManagement?: LicenseManagementUIPluginSetup;
+  getLicenseStatus: () => PlaygroundLicenseStatus;
+};
+
+export type AppServicesContext = CoreStart & AppServices;
 
 export enum PlaygroundFormFields {
   question = 'question',
@@ -244,11 +256,18 @@ export interface LLMModel {
   icon: string;
   disabled: boolean;
   promptTokenLimit?: number;
+  isElasticConnector?: boolean;
 }
 
 export type { ActionConnector, UserConfiguredActionConnector };
 export type InferenceActionConnector = ActionConnector & {
-  config: { provider: ServiceProviderKeys; inferenceId: string };
+  config: {
+    providerConfig?: {
+      model_id?: string;
+    };
+    provider: ServiceProviderKeys;
+    inferenceId: string;
+  };
 };
 export type PlaygroundConnector = ActionConnector & { title: string; type: LLMs };
 
@@ -269,4 +288,9 @@ export interface SavedPlaygroundRouterParameters {
   playgroundId: string;
   pageMode?: PlaygroundPageMode;
   viewMode?: PlaygroundViewMode;
+}
+
+export interface SavedPlaygroundLoadErrors {
+  missingIndices: string[];
+  missingModel?: string;
 }

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import {
@@ -25,7 +26,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ClientConfigType, Job, useInternalApiClient } from '@kbn/reporting-public';
+import type { ClientConfigType, Job } from '@kbn/reporting-public';
+import { useInternalApiClient } from '@kbn/reporting-public';
 
 import { InspectInConsoleButton } from './inspect_in_console_button/inspect_in_console_button';
 import { ReportInfoFlyoutContent } from './report_info_flyout_content';

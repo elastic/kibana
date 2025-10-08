@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { CliSupportedServerModes } from '../../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { CliSupportedServerModes } from '../../types';
 import { getConfigFilePath } from './get_config_file';
 import { readConfigFile } from '../loader';
 import type { Config } from '../config';

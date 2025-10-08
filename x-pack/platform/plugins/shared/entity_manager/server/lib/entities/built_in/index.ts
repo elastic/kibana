@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { EntityDefinition } from '@kbn/entities-schema';
 export { BUILT_IN_ID_PREFIX } from './constants';
 
 export const builtInDefinitions: EntityDefinition[] = [];

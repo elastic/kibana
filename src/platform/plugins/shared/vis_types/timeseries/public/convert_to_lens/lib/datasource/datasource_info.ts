@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { isStringTypeIndexPattern } from '../../../../common/index_patterns_utils';
 import type { IndexPatternValue } from '../../../../common/types';
 

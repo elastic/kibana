@@ -7,7 +7,7 @@
 import type { Assign } from '@kbn/utility-types';
 import { useContext } from 'react';
 import { UrlParamsContext } from './url_params_context';
-import { UrlParams } from './types';
+import type { UrlParams } from './types';
 
 export function useUxUrlParams(): Assign<
   React.ContextType<typeof UrlParamsContext>,

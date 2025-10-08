@@ -9,7 +9,7 @@ import { EuiAccordion } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
-import { Stackframe } from '@kbn/apm-types';
+import type { Stackframe } from '@kbn/apm-types';
 import { Stackframe as StackframeComponent } from './stackframe';
 
 const LibraryStacktraceAccordion = styled(EuiAccordion)`

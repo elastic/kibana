@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
-import { MonitorLocations } from '../../common/runtime_types';
+import type { MonitorLocations } from '../../common/runtime_types';
 
 export const useCanEditSynthetics = () => {
   return !!useKibana().services?.application?.capabilities.uptime.save;

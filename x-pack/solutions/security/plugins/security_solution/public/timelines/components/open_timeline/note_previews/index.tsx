@@ -13,6 +13,7 @@ import {
   EuiScreenReaderOnly,
   EuiText,
   EuiConfirmModal,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiConfirmModalProps } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
@@ -103,9 +104,13 @@ const DeleteNoteConfirm = React.memo<{
   closeModal: EuiConfirmModalProps['onCancel'];
   confirmModal: EuiConfirmModalProps['onConfirm'];
 }>(({ closeModal, confirmModal }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18n.DELETE_NOTE_CONFIRM}
+      titleProps={{ id: modalTitleId }}
       onCancel={closeModal}
       onConfirm={confirmModal}
       cancelButtonText={i18n.CANCEL_DELETE_NOTE}

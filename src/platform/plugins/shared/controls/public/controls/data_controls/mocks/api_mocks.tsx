@@ -9,14 +9,14 @@
 
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 
 import type {
   OptionsListDisplaySettings,
   OptionsListSortingType,
 } from '../../../../common/options_list';
 import { initializeSelectionsManager } from '../options_list_control/selections_manager';
-import { OptionsListComponentApi } from '../options_list_control/types';
+import type { OptionsListComponentApi } from '../options_list_control/types';
 import { initializeTemporayStateManager } from '../options_list_control/temporay_state_manager';
 import { initializeEditorStateManager } from '../options_list_control/editor_state_manager';
 
@@ -46,7 +46,7 @@ export const getOptionsListContextMock = () => {
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
       loadMoreSubject: new Subject<void>(),
-    } as unknown as OptionsListComponentApi,
+    } as unknown as Required<OptionsListComponentApi>,
     displaySettings: {} as OptionsListDisplaySettings,
     testOnlyMethods: {
       setField: (next: DataViewField | undefined) => {

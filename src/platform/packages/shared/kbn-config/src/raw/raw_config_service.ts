@@ -8,7 +8,8 @@
  */
 
 import { cloneDeep, isPlainObject } from 'lodash';
-import { Observable, ReplaySubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { map } from 'rxjs';
 import typeDetect from 'type-detect';
 

@@ -9,7 +9,8 @@ import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolizeAsEditor } from './symbol/vector_style_symbolize_as_editor';
@@ -28,8 +29,9 @@ import {
   VECTOR_SHAPE_TYPE,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import { createStyleFieldsHelper, StyleField, StyleFieldsHelper } from '../style_fields_helper';
-import {
+import type { StyleField, StyleFieldsHelper } from '../style_fields_helper';
+import { createStyleFieldsHelper } from '../style_fields_helper';
+import type {
   ColorDynamicOptions,
   ColorStaticOptions,
   CustomIcon,
@@ -44,15 +46,15 @@ import {
   StylePropertyOptions,
   VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';
-import { IStyleProperty } from '../properties/style_property';
-import { SymbolizeAsProperty } from '../properties/symbolize_as_property';
-import { LabelBorderSizeProperty } from '../properties/label_border_size_property';
-import { StaticTextProperty } from '../properties/static_text_property';
-import { DynamicTextProperty } from '../properties/dynamic_text_property';
-import { StaticSizeProperty } from '../properties/static_size_property';
-import { LabelPositionProperty } from '../properties/label_position_property';
-import { LabelZoomRangeProperty } from '../properties/label_zoom_range_property';
-import { IVectorLayer } from '../../../layers/vector_layer';
+import type { IStyleProperty } from '../properties/style_property';
+import type { SymbolizeAsProperty } from '../properties/symbolize_as_property';
+import type { LabelBorderSizeProperty } from '../properties/label_border_size_property';
+import type { StaticTextProperty } from '../properties/static_text_property';
+import type { DynamicTextProperty } from '../properties/dynamic_text_property';
+import type { StaticSizeProperty } from '../properties/static_size_property';
+import type { LabelPositionProperty } from '../properties/label_position_property';
+import type { LabelZoomRangeProperty } from '../properties/label_zoom_range_property';
+import type { IVectorLayer } from '../../../layers/vector_layer';
 import { getHasLabel } from '../style_util';
 
 export interface StyleProperties {
@@ -75,8 +77,8 @@ interface Props {
 
 interface State {
   styleFields: StyleField[];
-  defaultDynamicProperties: VectorStylePropertiesDescriptor;
-  defaultStaticProperties: VectorStylePropertiesDescriptor;
+  defaultDynamicProperties: Required<VectorStylePropertiesDescriptor>;
+  defaultStaticProperties: Required<VectorStylePropertiesDescriptor>;
   supportedFeatures: VECTOR_SHAPE_TYPE[];
   selectedFeature: VECTOR_SHAPE_TYPE;
   styleFieldsHelper?: StyleFieldsHelper;

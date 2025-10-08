@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GetEventsOptions } from '@kbn/analytics-ftr-helpers-plugin/common/types';
+import type { GetEventsOptions } from '@kbn/analytics-ftr-helpers-plugin/common/types';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../services';
+import type { FtrProviderContext } from '../../../services';
 
 const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
 
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const SAVED_SEARCH_PANEL_TITLE = '[Flights] Flight Log';
       const VIS_PANEL_TITLE = '[Flights] Delay Buckets';
       const MAP_PANEL_TITLE = '[Flights] Origin Time Delayed';
-      const MARKDOWN_PANEL_TITLE = 'Matrix';
+      const VEGA_PANEL_TITLE = 'Vega vis';
 
       before(async () => {
         await PageObjects.common.navigateToApp('dashboards');
@@ -140,26 +140,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       /**
-       * Text embeddable
+       * Vega embeddable
        */
-      it('emits when markup is added', async () => {
-        await dashboardAddPanel.clickAddMarkdownPanel();
-        await PageObjects.visEditor.setMarkdownTxt('There is no spoon');
-        await PageObjects.visEditor.clickGo();
-        await PageObjects.visualize.saveVisualizationExpectSuccess(MARKDOWN_PANEL_TITLE, {
+      it('emits when a vega panel is added', async () => {
+        await dashboardAddPanel.clickAddCustomVisualization();
+        await PageObjects.visualize.saveVisualizationExpectSuccess(VEGA_PANEL_TITLE, {
           saveAsNew: false,
           redirectToOrigin: true,
         });
         await checkEmitsOnce();
       });
 
-      it('emits on markup refreshed', async () => {
+      it('emits on vega refreshed', async () => {
         await queryBar.clickQuerySubmitButton();
         await checkEmitsOnce();
       });
 
-      it("doesn't emit when removing markup panel", async () => {
-        await dashboardPanelActions.removePanelByTitle(MARKDOWN_PANEL_TITLE);
+      it("doesn't emit when removing vega panel", async () => {
+        await dashboardPanelActions.removePanelByTitle(VEGA_PANEL_TITLE);
         await checkDoesNotEmit();
       });
 

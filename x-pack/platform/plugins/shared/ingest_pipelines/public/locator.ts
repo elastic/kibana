@@ -6,8 +6,8 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ManagementAppLocator } from '@kbn/management-plugin/common';
-import { LocatorPublic, LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
+import type { ManagementAppLocator } from '@kbn/management-plugin/common';
+import type { LocatorPublic, LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
 import {
   getClonePath,
   getCreatePath,
@@ -76,7 +76,9 @@ export class IngestPipelinesLocatorDefinition implements LocatorDefinition<Inges
         });
         break;
       case INGEST_PIPELINES_PAGES.CREATE:
-        path = getCreatePath();
+        path = getCreatePath({
+          pipelineName: params.pipelineId,
+        });
         break;
       case INGEST_PIPELINES_PAGES.LIST:
         path = getListPath({

@@ -10,9 +10,9 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { Suspense, lazy } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
-import { SLOPublicPluginsStart } from '../../..';
+import type { SLOPublicPluginsStart } from '../../..';
 import { PluginContext } from '../../../context/plugin_context';
-import { SLORepositoryClient } from '../../../types';
+import type { SLORepositoryClient } from '../../../types';
 import type { EmbeddableSloProps } from './types';
 
 export async function openSloConfiguration(

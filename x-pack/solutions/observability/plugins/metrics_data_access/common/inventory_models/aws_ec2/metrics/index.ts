@@ -5,31 +5,25 @@
  * 2.0.
  */
 
-import { cpu } from './snapshot/cpu';
-import { rx } from './snapshot/rx';
-import { tx } from './snapshot/tx';
-import { diskIOReadBytes } from './snapshot/disk_io_read_bytes';
-import { diskIOWriteBytes } from './snapshot/disk_io_write_bytes';
-
 import { awsEC2CpuUtilization } from './tsvb/aws_ec2_cpu_utilization';
 import { awsEC2NetworkTraffic } from './tsvb/aws_ec2_network_traffic';
 import { awsEC2DiskIOBytes } from './tsvb/aws_ec2_diskio_bytes';
-
-import type { InventoryMetrics } from '../../types';
-
-const awsEC2SnapshotMetrics = { cpu, rx, tx, diskIOReadBytes, diskIOWriteBytes };
-
-export const awsEC2SnapshotMetricTypes = Object.keys(awsEC2SnapshotMetrics) as Array<
-  keyof typeof awsEC2SnapshotMetrics
->;
-
-export const metrics: InventoryMetrics = {
+import { MetricsCatalog } from '../../shared/metrics/metrics_catalog';
+import type { SQSAggregations } from './snapshot';
+import type { InventoryMetricsConfig } from '../../shared/metrics/types';
+export const metrics: InventoryMetricsConfig<SQSAggregations> = {
   tsvb: {
     awsEC2CpuUtilization,
     awsEC2NetworkTraffic,
     awsEC2DiskIOBytes,
   },
-  snapshot: awsEC2SnapshotMetrics,
+  requiredTsvb: ['awsEC2CpuUtilization', 'awsEC2NetworkTraffic', 'awsEC2DiskIOBytes'],
+  getAggregations: async (args) => {
+    const { snapshot } = await import('./snapshot');
+    const catalog = new MetricsCatalog(snapshot, args?.schema);
+    return catalog;
+  },
+  getWaffleMapTooltipMetrics: () => ['cpu', 'rx', 'tx'],
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 };

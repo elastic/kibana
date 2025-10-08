@@ -9,7 +9,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 
 import { LIST_ID, LIST_ITEM_INDEX, TYPE, VALUE } from '../../../common/constants.mock';
 
-import { DeleteListItemByValueOptions } from '.';
+import type { DeleteListItemByValueOptions } from '.';
 
 export const getDeleteListItemByValueOptionsMock = (): DeleteListItemByValueOptions => ({
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,

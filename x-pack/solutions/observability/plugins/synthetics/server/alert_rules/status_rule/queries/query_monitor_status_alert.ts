@@ -8,21 +8,22 @@
 import pMap from 'p-map';
 import { times } from 'lodash';
 import { intersection } from 'lodash';
-import { SavedObjectsFindResult } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
-import { MonitorData } from '../../../saved_objects/synthetics_monitor/process_monitors';
-import {
+import type { SavedObjectsFindResult } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { MonitorData } from '../../../saved_objects/synthetics_monitor/process_monitors';
+import type {
   AlertStatusConfigs,
   AlertStatusMetaData,
   AlertPendingStatusConfigs,
 } from '../../../../common/runtime_types/alert_rules/common';
-import {
+import type {
   EncryptedSyntheticsMonitorAttributes,
   OverviewPing,
 } from '../../../../common/runtime_types';
-import { SyntheticsEsClient } from '../../../lib';
+import type { SyntheticsEsClient } from '../../../lib';
 import { getSearchPingsParams } from './get_search_ping_params';
-import { ConfigStats, calculateIsValidPing, getConfigStats, getPendingConfigs } from './helpers';
+import type { ConfigStats } from './helpers';
+import { calculateIsValidPing, getConfigStats, getPendingConfigs } from './helpers';
 
 const DEFAULT_MAX_ES_BUCKET_SIZE = 10000;
 
@@ -120,7 +121,7 @@ export async function queryMonitorStatusAlert({
             });
 
             const meta: AlertStatusMetaData = {
-              ping: latestPing,
+              latestPing,
               configId,
               monitorQueryId,
               locationId: monLocationId,

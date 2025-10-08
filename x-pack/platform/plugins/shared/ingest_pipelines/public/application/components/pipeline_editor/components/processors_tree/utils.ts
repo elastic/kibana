@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessorInternal } from '../../types';
+import type { ProcessorInternal } from '../../types';
 
 // These values are tied to the style and heights following components:
 // Do not change these numbers without testing the component for visual

@@ -6,12 +6,13 @@
  */
 
 import React, { lazy, Suspense, useCallback, useState } from 'react';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ActionParamsProps,
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   SectionLoading,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiErrorBoundary,
   EuiFlexGroup,
@@ -19,14 +20,13 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
 } from '@elastic/eui';
 import type {
   OpsgenieActionParams,
   OpsgenieCreateAlertParams,
 } from '../../../../server/connector_types';
 import * as i18n from './translations';
-import { EditActionCallback } from '../types';
+import type { EditActionCallback } from '../types';
 import { DisplayMoreOptions } from '../display_more_options';
 import { AdditionalOptions } from './additional_options';
 import { Tags } from './tags';
@@ -62,6 +62,7 @@ const FormView: React.FC<FormViewProps> = ({
         error={errors['subActionParams.message'] as string}
         label={i18n.MESSAGE_FIELD_LABEL}
         isInvalid={isMessageInvalid}
+        aria-label={i18n.MESSAGE_FIELD_LABEL}
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -103,6 +104,7 @@ const FormView: React.FC<FormViewProps> = ({
         label={i18n.ALIAS_FIELD_LABEL}
         helpText={i18n.OPSGENIE_ALIAS_HELP}
         labelAppend={OptionalFieldLabel}
+        aria-label={i18n.ALIAS_FIELD_LABEL}
       >
         <TextFieldWithMessageVariables
           index={index}

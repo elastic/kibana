@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
@@ -29,5 +29,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./ecs_mapping'));
     loadTestFile(require.resolve('./categorization'));
     loadTestFile(require.resolve('./related'));
+    loadTestFile(require.resolve('./cel'));
+    loadTestFile(require.resolve('./analyze_logs'));
+    loadTestFile(require.resolve('./analyze_api'));
   });
 };

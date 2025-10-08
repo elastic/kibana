@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import Chance from 'chance';
-import { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import type { CspBenchmarkRule } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '@kbn/cloud-security-posture-plugin/common/constants';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
@@ -122,8 +122,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     return requestedBenchmarkRules.map((item) => item.attributes);
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/220423
-  describe.skip('Findings Page - DataTable', function () {
+  describe('Findings Page - DataTable', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
     let latestFindingsTable: typeof findings.latestFindingsTable;

@@ -5,109 +5,105 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiTitle,
-  EuiText,
-  EuiSpacer,
-  EuiButton,
-  EuiLink,
-} from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiTitle, EuiButton, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import useAsync from 'react-use/lib/useAsync';
 import { AssetImage } from '../asset_image';
 import { useKibana } from '../../hooks/use_kibana';
 
-interface Props {
-  onAddData?: () => void;
-}
-
-export const StreamsListEmptyPrompt: React.FC<Props> = ({ onAddData }) => {
+export const StreamsListEmptyPrompt = () => {
   const {
-    core: { docLinks },
+    core: { docLinks, http },
+    dependencies: {
+      start: { spaces, share, cloud },
+    },
   } = useKibana();
   const streamsDocsLink = docLinks.links.observability.logsStreams;
 
+  const observabilityOnboardingLocator =
+    share.url.locators.get<ObservabilityOnboardingLocatorParams>(OBSERVABILITY_ONBOARDING_LOCATOR);
+
+  // TODO: Replace with a locator when available
+  const securityOnboardingLink = `/app/security/${SecurityPageName.landing}`;
+  const agnosticOnboardingLink = '/app/integrations/browse';
+
+  const spaceObservable = useMemo(() => (spaces ? spaces.getActiveSpace$() : EMPTY), [spaces]);
+  const activeSpace = useObservable(spaceObservable);
+
+  const isObservabilitySpace =
+    cloud?.serverless?.projectType === 'observability' || activeSpace?.solution === 'oblt';
+  const isSecuritySpace =
+    cloud?.serverless?.projectType === 'security' || activeSpace?.solution === 'security';
+
+  const onboardingLink = useAsync(async () => {
+    if (observabilityOnboardingLocator && isObservabilitySpace) {
+      return await observabilityOnboardingLocator.getUrl({});
+    } else if (isSecuritySpace) {
+      return http.basePath.prepend(securityOnboardingLink);
+    }
+    return http.basePath.prepend(agnosticOnboardingLink);
+  }, [
+    observabilityOnboardingLocator,
+    isObservabilitySpace,
+    isSecuritySpace,
+    http.basePath,
+    securityOnboardingLink,
+  ]);
+
   return (
-    <EuiFlexGroup justifyContent="center" alignItems="center">
-      <EuiPanel
-        paddingSize="none"
-        hasBorder
-        css={{
-          maxWidth: 760,
-          border: `${euiThemeVars.euiBorderWidthThin} solid ${euiThemeVars.euiBorderColor}`,
-          borderRadius: euiThemeVars.euiBorderRadius,
-        }}
-      >
-        <EuiFlexItem css={{ padding: euiThemeVars.euiSizeL }}>
-          <EuiFlexGroup gutterSize="xl" alignItems="center">
-            <EuiFlexItem
-              grow={9}
-              css={{
-                paddingTop: euiThemeVars.euiSizeL,
-                paddingBottom: euiThemeVars.euiSizeL,
-              }}
-            >
-              <EuiTitle size="m">
-                <EuiText>
-                  {i18n.translate('xpack.streams.emptyState.title', {
-                    defaultMessage: 'Turn raw data into structured, manageable streams',
-                  })}
-                </EuiText>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiText size="m">
-                {i18n.translate('xpack.streams.emptyState.body', {
-                  defaultMessage:
-                    'Easily turn your data into clear, structured flows with simple tools for routing, field extraction, and retention. Just stream it into Elastic to get started and your new streams will appear here.',
-                })}
-              </EuiText>
-              <EuiSpacer size="m" />
-              <EuiButton
-                fill
-                minWidth={false}
-                css={{
-                  padding: `${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL}`,
-                  alignSelf: 'flex-start',
-                  fontWeight: 'normal',
-                  marginTop: euiThemeVars.euiSizeS,
-                }}
-                onClick={onAddData}
-              >
-                {i18n.translate('xpack.streams.emptyState.addDataButton', {
-                  defaultMessage: 'Add data',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={10}>
-              <AssetImage type="addStreams" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem
-          css={{
-            backgroundColor: euiThemeVars.euiColorBackgroundBaseSubdued,
-            padding: euiThemeVars.euiSizeL,
-            borderBottomLeftRadius: euiThemeVars.euiBorderRadius,
-            borderBottomRightRadius: euiThemeVars.euiBorderRadius,
-            border: 'none',
-          }}
-        >
-          <EuiText size="s" css={{ fontWeight: euiThemeVars.euiFontWeightMedium }}>
-            {i18n.translate('xpack.streams.emptyState.learnMore', {
-              defaultMessage: 'Want to learn more? ',
+    <EuiEmptyPrompt
+      css={{
+        maxInlineSize: '760px !important',
+      }}
+      icon={<AssetImage type="addStreams" />}
+      title={
+        <h2>
+          {i18n.translate('xpack.streams.emptyState.title', {
+            defaultMessage: 'Turn raw data into structured, manageable streams',
+          })}
+        </h2>
+      }
+      layout="horizontal"
+      color="plain"
+      body={
+        <p>
+          {i18n.translate('xpack.streams.emptyState.body', {
+            defaultMessage:
+              'Streams provides a centralized UI that streamlines common tasks like rerouting data, extracting fields, or setting data retention, so you don’t need to navigate to multiple applications or manually configure underlying Elasticsearch components.',
+          })}
+        </p>
+      }
+      actions={
+        onboardingLink.value ? (
+          <EuiButton color="primary" fill href={onboardingLink.value}>
+            {i18n.translate('xpack.streams.emptyState.addDataButton', {
+              defaultMessage: 'Add data',
             })}
-            <EuiLink href={streamsDocsLink} target="_blank">
-              {i18n.translate('xpack.streams.emptyState.learnMore.link', {
-                defaultMessage: ' Read our Streams documentation',
+          </EuiButton>
+        ) : undefined
+      }
+      footer={
+        <>
+          <EuiTitle size="xxs">
+            <span>
+              {i18n.translate('xpack.streams.emptyState.learnMore', {
+                defaultMessage: 'Want to learn more? ',
               })}
-            </EuiLink>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiPanel>
-    </EuiFlexGroup>
+            </span>
+          </EuiTitle>{' '}
+          <EuiLink href={streamsDocsLink} target="_blank">
+            {i18n.translate('xpack.streams.emptyState.learnMore.link', {
+              defaultMessage: ' Read our Streams documentation',
+            })}
+          </EuiLink>
+        </>
+      }
+    />
   );
 };

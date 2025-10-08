@@ -12,6 +12,7 @@ import {
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
@@ -41,7 +42,7 @@ const privMonLinks: LinkItem = {
       defaultMessage: 'Privileged user monitoring',
     }),
   ],
-  hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
+  uiSettingRequired: ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
@@ -77,7 +78,7 @@ export const entityAnalyticsLinks: LinkItem = {
   id: SecurityPageName.entityAnalyticsLanding,
   title: ENTITY_ANALYTICS,
   path: ENTITY_ANALYTICS_LANDING_PATH,
-  globalNavPosition: 10,
+  globalNavPosition: 7,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.landing', {
       defaultMessage: 'Entity analytics',
@@ -86,7 +87,7 @@ export const entityAnalyticsLinks: LinkItem = {
   links: [eaOverviewLinks, privMonLinks],
   hideTimeline: true,
   skipUrlState: true,
-  hideWhenExperimentalKey: 'privilegedUserMonitoringDisabled',
+  uiSettingRequired: ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };

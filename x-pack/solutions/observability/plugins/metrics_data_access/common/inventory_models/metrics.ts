@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { metrics as sharedMetrics } from './shared/metrics';
+import { sharedMetrics } from './shared/metrics';
 import { metrics as podMetrics } from './kubernetes/pod/metrics';
 import { metrics as awsEC2Metrics } from './aws_ec2/metrics';
 import { metrics as awsS3Metrics } from './aws_s3/metrics';

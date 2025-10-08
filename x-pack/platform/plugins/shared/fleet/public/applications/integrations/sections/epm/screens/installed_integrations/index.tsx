@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 
 import { Loading } from '../../../../../../components';
 import { useUrlPagination } from '../../../../../../hooks';
@@ -21,18 +21,13 @@ import { useInstalledIntegrationsActions } from './hooks/use_installed_integrati
 import { BulkActionContextProvider } from './hooks/use_bulk_actions_context';
 import { PackagePoliciesPanel } from './components/package_policies_panel';
 
-const ContentWrapper = styled.div`
-  max-width: 1200px;
-  margin: auto;
-  height: 100%;
-`;
-
 const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
   // State management
   const filters = useUrlFilters();
   const { selectedPackageViewPolicies } = useViewPolicies();
   const pagination = useUrlPagination();
-  const { upgradingIntegrations, uninstallingIntegrations } = useInstalledIntegrationsActions();
+  const { upgradingIntegrations, uninstallingIntegrations, rollingbackIntegrations } =
+    useInstalledIntegrationsActions();
   const {
     installedPackages,
     countPerStatus,
@@ -44,7 +39,8 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
     filters,
     pagination.pagination,
     upgradingIntegrations,
-    uninstallingIntegrations
+    uninstallingIntegrations,
+    rollingbackIntegrations
   );
 
   const [selectedItems, setSelectedItems] = useState<InstalledPackageUIPackageListItem[]>([]);
@@ -63,7 +59,12 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
 
   return (
     <>
-      <ContentWrapper>
+      <div
+        css={css`
+          margin: auto;
+          height: 100%;
+        `}
+      >
         <InstalledIntegrationsSearchBar
           filters={filters}
           customIntegrationsCount={customIntegrationsCount}
@@ -78,7 +79,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
           installedPackages={installedPackages}
           selection={{ selectedItems, setSelectedItems }}
         />
-      </ContentWrapper>
+      </div>
       {viewPoliciesSelectedItem ? (
         <PackagePoliciesPanel installedPackage={viewPoliciesSelectedItem} />
       ) : null}

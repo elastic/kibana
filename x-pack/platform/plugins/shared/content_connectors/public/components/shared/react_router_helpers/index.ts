@@ -21,4 +21,4 @@ export {
   EuiBadgeTo,
 } from './eui_components';
 
-export * from './types';
+export type * from './types';

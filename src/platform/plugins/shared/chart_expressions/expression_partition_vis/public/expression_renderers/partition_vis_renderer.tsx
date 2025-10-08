@@ -32,9 +32,9 @@ import {
   extractVisualizationType,
   isOnAggBasedEditor,
 } from '@kbn/chart-expressions-common';
-import { VisTypePieDependencies } from '../plugin';
+import type { VisTypePieDependencies } from '../plugin';
 import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
-import { CellValueAction, GetCompatibleCellValueActions } from '../types';
+import type { CellValueAction, GetCompatibleCellValueActions } from '../types';
 import { ChartTypes, type PartitionVisParams, type PartitionChartProps } from '../../common/types';
 
 export const strings = {

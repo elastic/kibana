@@ -12,7 +12,7 @@ import { promisify } from 'util';
 
 import del from 'del';
 
-import { TaskContext } from '../task_context';
+import type { TaskContext } from '../task_context';
 
 const asyncMkdir = promisify(Fs.mkdir);
 

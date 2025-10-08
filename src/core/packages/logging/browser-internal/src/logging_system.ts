@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogLevel, Logger, LoggerFactory, DisposableAppender } from '@kbn/logging';
+import type { Logger, LoggerFactory, DisposableAppender } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
+import type { BrowserLoggingConfig, BrowserLoggerConfig } from '@kbn/core-logging-common-internal';
 import {
   ROOT_CONTEXT_NAME,
   getLoggerContext,
   getParentLoggerContext,
-  BrowserLoggingConfig,
-  BrowserLoggerConfig,
 } from '@kbn/core-logging-common-internal';
 import type { LoggerConfigType } from './types';
 import { BaseLogger } from './logger';

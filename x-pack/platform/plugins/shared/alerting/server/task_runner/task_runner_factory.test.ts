@@ -149,14 +149,21 @@ describe('Task Runner Factory', () => {
   test(`throws an error if create is called when factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.create(ruleType, { taskInstance: mockedTaskInstance }, inMemoryMetrics)
+      factory.create(
+        ruleType,
+        { taskInstance: mockedTaskInstance, abortController: new AbortController() },
+        inMemoryMetrics
+      )
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 
   test(`throws an error if createAdHoc is called when factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.createAdHoc({ taskInstance: mockedTaskInstance })
+      factory.createAdHoc({
+        taskInstance: mockedTaskInstance,
+        abortController: new AbortController(),
+      })
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 });

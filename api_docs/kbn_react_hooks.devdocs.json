@@ -232,6 +232,27 @@
       },
       {
         "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useResizeChecker",
+        "type": "Function",
+        "tags": [],
+        "label": "useResizeChecker",
+        "description": [
+          "\nCustom resize detection hook that doesn't depend on external plugins\nUses native ResizeObserver API for efficient resize detection"
+        ],
+        "signature": [
+          "() => { containerRef: React.MutableRefObject<HTMLDivElement | null>; setupResizeChecker: (editor: ",
+          "editor",
+          ".IStandaloneCodeEditor, options?: { flyoutMode?: boolean | undefined; }) => void; destroyResizeChecker: () => void; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_resize_checker/use_resize_checker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
         "id": "def-common.useThrottleFn",
         "type": "Function",
         "tags": [

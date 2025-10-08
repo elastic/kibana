@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FunctionComponent, ReactNode } from 'react';
+import type { FunctionComponent, ReactNode } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { EuiBreadcrumb, EuiThemeComputed } from '@elastic/eui';
-import { Index } from './types';
+import type { EuiBreadcrumb, EuiThemeComputed } from '@elastic/eui';
+import type { Index } from './types';
 
 export enum Section {
   Indices = 'indices',

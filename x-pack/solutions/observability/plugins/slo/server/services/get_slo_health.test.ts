@@ -5,7 +5,8 @@
  * 2.0.
  */
 import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { ScopedClusterClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
@@ -16,7 +17,7 @@ import {
 } from './fixtures/summary_search_document';
 import { GetSLOHealth } from './get_slo_health';
 import { createSLORepositoryMock } from './mocks';
-import { SLORepository } from './slo_repository';
+import type { SLORepository } from './slo_repository';
 
 describe('GetSLOHealth', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -67,7 +68,7 @@ describe('GetSLOHealth', () => {
             "summary": "unhealthy",
           },
           "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-          "sloInstanceId": "*",
+          "sloName": "irrelevant",
           "sloRevision": 1,
           "state": "no_data",
         },
@@ -153,7 +154,7 @@ describe('GetSLOHealth', () => {
               "summary": "healthy",
             },
             "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-            "sloInstanceId": "*",
+            "sloName": "irrelevant",
             "sloRevision": 1,
             "state": "no_data",
           },
@@ -210,7 +211,7 @@ describe('GetSLOHealth', () => {
               "summary": "healthy",
             },
             "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-            "sloInstanceId": "*",
+            "sloName": "irrelevant",
             "sloRevision": 1,
             "state": "no_data",
           },

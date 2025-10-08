@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { MonitorConfigRepository } from '../services/monitor_config_repository';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 import { SyntheticsService } from '../synthetics_service/synthetics_service';
 import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getServerMock } from './server_mock';

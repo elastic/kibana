@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
 import { styles } from './layout_banner.styles';
 
@@ -22,5 +23,13 @@ export interface LayoutBannerProps {
  * @returns The rendered LayoutBanner component.
  */
 export const LayoutBanner = ({ children }: LayoutBannerProps) => {
-  return <section css={styles.root}>{children}</section>;
+  return (
+    <section
+      css={styles.root}
+      className="kbnChromeLayoutBanner"
+      data-test-subj="kbnChromeLayoutBanner"
+    >
+      {children}
+    </section>
+  );
 };

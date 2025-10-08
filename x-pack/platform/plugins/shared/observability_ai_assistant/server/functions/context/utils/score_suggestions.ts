@@ -5,15 +5,16 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import dedent from 'dedent';
 import { lastValueFrom } from 'rxjs';
 import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
 import { omit } from 'lodash';
-import { concatenateChatCompletionChunks, Message, MessageRole } from '../../../../common';
+import type { Message } from '../../../../common';
+import { concatenateChatCompletionChunks, MessageRole } from '../../../../common';
 import type { FunctionCallChatFunction } from '../../../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
-import { RecalledSuggestion } from './recall_and_score';
+import type { RecalledSuggestion } from './recall_and_score';
 import { ShortIdTable } from '../../../../common/utils/short_id_table';
 import { getLastUserMessage } from './get_last_user_message';
 

@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/cloud-security-posture-common",
+  "owner": [
+    "@elastic/contextual-security-apps"
+  ],
+  "group": "security",
+  "visibility": "private"
+}

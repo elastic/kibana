@@ -7,20 +7,30 @@
 
 import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
-import { CoreStart, DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import type { Space } from '@kbn/spaces-plugin/common';
+import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 interface UseIsNavControlVisibleProps {
   coreStart: CoreStart;
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
+  isServerless?: boolean;
 }
 
 function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
-  preferredAssistantType: AIAssistantType
+  preferredAssistantType: AIAssistantType,
+  space: Space,
+  isServerless?: boolean
 ) {
+  // If the app itself is enabled, always show the control in the solution view or serverless.
+  if (space.solution === 'es' || space.solution === 'oblt' || isServerless) {
+    return true;
+  }
+
   if (preferredAssistantType === AIAssistantType.Never) {
     return false;
   }
@@ -38,25 +48,40 @@ function getVisibility(
   ].includes(categoryId);
 }
 
-export function useIsNavControlVisible({ coreStart, pluginsStart }: UseIsNavControlVisibleProps) {
+export function useIsNavControlVisible({
+  coreStart,
+  pluginsStart,
+  isServerless,
+}: UseIsNavControlVisibleProps) {
   const [isVisible, setIsVisible] = useState(false);
 
   const { currentAppId$, applications$ } = coreStart.application;
-  const { aiAssistantManagementSelection } = pluginsStart;
+  const { aiAssistantManagementSelection, spaces } = pluginsStart;
+
+  const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
     const appSubscription = combineLatest([
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
+      space$,
     ]).subscribe({
-      next: ([appId, applications, preferredAssistantType]) => {
-        setIsVisible(getVisibility(appId, applications, preferredAssistantType));
+      next: ([appId, applications, preferredAssistantType, space]) => {
+        setIsVisible(
+          getVisibility(appId, applications, preferredAssistantType, space, isServerless)
+        );
       },
     });
 
     return () => appSubscription.unsubscribe();
-  }, [currentAppId$, applications$, aiAssistantManagementSelection.aiAssistantType$]);
+  }, [
+    currentAppId$,
+    applications$,
+    aiAssistantManagementSelection.aiAssistantType$,
+    space$,
+    isServerless,
+  ]);
 
   return {
     isVisible,

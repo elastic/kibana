@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from '@kbn/core/public';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ISessionsClient, SearchUsageCollector } from '../../..';
@@ -17,6 +17,9 @@ import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import type { SearchSessionsConfigSchema } from '../../../../server/config';
+
+export { openSearchSessionsFlyout } from './flyout/get_flyout';
+export type { BackgroundSearchOpenedHandler } from './types';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;
@@ -44,8 +47,8 @@ export interface AppDependencies {
 export const APP = {
   id: SEARCH_SESSIONS_MANAGEMENT_ID,
   getI18nName: (): string =>
-    i18n.translate('data.mgmt.searchSessions.appTitle', {
-      defaultMessage: 'Search Sessions',
+    i18n.translate('data.mgmt.backgroundSearch.appTitle', {
+      defaultMessage: 'Background Search',
     }),
 };
 
@@ -55,7 +58,7 @@ export function registerSearchSessionsMgmt(
   config: SearchSessionsConfigSchema,
   kibanaVersion: string
 ) {
-  deps.management.sections.section.kibana.registerApp({
+  return deps.management.sections.section.kibana.registerApp({
     id: APP.id,
     title: APP.getI18nName(),
     order: 1.75,

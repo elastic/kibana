@@ -12,7 +12,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import path from 'path';
-import { Journey } from './run_performance_cli';
+import type { Journey } from './run_performance_cli';
 
 run(
   async ({ log, flagsReader, procRunner }) => {

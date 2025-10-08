@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apm, Transaction } from '@elastic/apm-rum';
+import type { Transaction } from '@elastic/apm-rum';
+import { apm } from '@elastic/apm-rum';
 import { BehaviorSubject, filter, firstValueFrom, ReplaySubject } from 'rxjs';
 import { takeWhile, tap, toArray } from 'rxjs';
 import type { Plugin, CoreSetup, CoreStart, TelemetryCounter, Event } from '@kbn/core/server';

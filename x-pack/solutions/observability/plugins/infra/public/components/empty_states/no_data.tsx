@@ -6,14 +6,15 @@
  */
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import type { ReactNode } from 'react';
 import React from 'react';
 import styled from '@emotion/styled';
 
 interface NoDataProps {
   titleText: string;
-  bodyText: string;
-  refetchText: string;
-  onRefetch: () => void;
+  bodyText: string | ReactNode;
+  refetchText?: string;
+  onRefetch?: () => void;
   testString?: string;
 }
 
@@ -23,25 +24,31 @@ export const NoData: React.FC<NoDataProps> = ({
   refetchText,
   onRefetch,
   testString,
-}) => (
-  <CenteredEmptyPrompt
-    title={<h2>{titleText}</h2>}
-    titleSize="m"
-    body={<p>{bodyText}</p>}
-    actions={
-      <EuiButton
-        data-test-subj="infraNoDataButton"
-        iconType="refresh"
-        color="primary"
-        fill
-        onClick={onRefetch}
-      >
-        {refetchText}
-      </EuiButton>
-    }
-    data-test-subj={testString}
-  />
-);
+}) => {
+  const showRefetchButton = refetchText && onRefetch;
+
+  return (
+    <CenteredEmptyPrompt
+      title={<h2>{titleText}</h2>}
+      titleSize="m"
+      body={<p>{bodyText}</p>}
+      actions={
+        showRefetchButton ? (
+          <EuiButton
+            data-test-subj="infraNoDataButton"
+            iconType="refresh"
+            color="primary"
+            fill
+            onClick={onRefetch}
+          >
+            {refetchText}
+          </EuiButton>
+        ) : null
+      }
+      data-test-subj={testString}
+    />
+  );
+};
 
 const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center;

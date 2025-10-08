@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 
 class InferenceEndpointsDocLinks {
   public createInferenceEndpoint: string = '';
+  public elasticInferenceService: string = '';
   public semanticSearchElser: string = '';
   public semanticSearchE5: string = '';
 
@@ -16,6 +17,7 @@ class InferenceEndpointsDocLinks {
 
   setDocLinks(newDocLinks: DocLinks) {
     this.createInferenceEndpoint = newDocLinks.inferenceManagement.inferenceAPIDocumentation;
+    this.elasticInferenceService = newDocLinks.enterpriseSearch.elasticInferenceService;
     this.semanticSearchElser = newDocLinks.enterpriseSearch.elser;
     this.semanticSearchE5 = newDocLinks.enterpriseSearch.e5Model;
   }

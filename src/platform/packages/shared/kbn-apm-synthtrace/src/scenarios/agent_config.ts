@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { observer, AgentConfigFields } from '@kbn/apm-synthtrace-client';
-import { Scenario } from '../cli/scenario';
+/**
+ * Generates agent configuration documents at a regular interval.
+ */
+
+import type { AgentConfigFields } from '@kbn/apm-synthtrace-client';
+import { observer } from '@kbn/apm-synthtrace-client';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<AgentConfigFields> = async ({ logger }) => {

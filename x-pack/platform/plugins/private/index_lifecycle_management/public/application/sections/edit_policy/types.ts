@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SerializedPolicy } from '../../../../common/types';
+import type { SerializedPolicy } from '../../../../common/types';
 
 export type DataTierAllocationType = 'node_roles' | 'node_attrs' | 'none';
 

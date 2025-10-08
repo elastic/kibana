@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Fields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
-import { Readable } from 'stream';
-import { SynthtraceEsClient } from '../shared/base_client';
+import type { Fields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
+import type { Readable } from 'stream';
+import type { SynthtraceEsClient } from '../shared/base_client';
 
 export type SynthGenerator<TFields extends Fields> =
   | SynthtraceGenerator<TFields>

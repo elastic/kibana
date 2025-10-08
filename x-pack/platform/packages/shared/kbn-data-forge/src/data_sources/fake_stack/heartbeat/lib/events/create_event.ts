@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { random } from 'lodash';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { HEARTBEAT } from '../../../common/constants';
 
 export function createEvent(

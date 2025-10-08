@@ -15,10 +15,10 @@ import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { Reference } from '@kbn/content-management-utils';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { setKibanaServices } from './services/kibana_services';
-import { LinksParentApi, LinksSerializedState } from './types';
+import type { LinksParentApi } from './types';
+import type { LinksEmbeddableState } from '../common';
 
 export const setStubKibanaServices = () => {
   const mockCore = coreMock.createStart();
@@ -45,10 +45,7 @@ export const setStubKibanaServices = () => {
   });
 };
 
-export const getMockLinksParentApi = (
-  serializedState: LinksSerializedState,
-  references?: Reference[]
-): LinksParentApi => ({
+export const getMockLinksParentApi = (state: LinksEmbeddableState): LinksParentApi => ({
   ...getMockPresentationContainer(),
   type: 'dashboard',
   filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
@@ -62,5 +59,5 @@ export const getMockLinksParentApi = (
   hideTitle$: new BehaviorSubject<boolean | undefined>(false),
   title$: new BehaviorSubject<string | undefined>('My Dashboard'),
   description$: new BehaviorSubject<string | undefined>(''),
-  getSerializedStateForChild: () => ({ rawState: serializedState, references }),
+  getSerializedStateForChild: () => ({ rawState: state }),
 });

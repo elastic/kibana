@@ -13,7 +13,7 @@ import { map, sortBy, defaults, isObject, pick } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { flattenHit } from '@kbn/data-service/src/search/tabify';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { canProvideExamplesForField } from '../../utils/can_provide_stats';
 import { DEFAULT_SIMPLE_EXAMPLES_SIZE } from '../../constants';
 

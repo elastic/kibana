@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import type { DefendInsightsPostRequestBody, Message } from '@kbn/elastic-assistant-common';
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import {
-  AttackDiscoveryPostRequestBody,
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type {
+  DefendInsightsPostRequestBody,
+  Message,
+  AttackDiscoveryPostInternalRequestBody,
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
+import type { BaseMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 
 export const getLangChainMessage = (
   assistantMessage: Pick<Message, 'content' | 'role'>
@@ -36,7 +38,9 @@ export const requestHasRequiredAnonymizationParams = (
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+    | ExecuteConnectorRequestBody
+    | AttackDiscoveryPostInternalRequestBody
+    | DefendInsightsPostRequestBody
   >
 ): boolean => {
   const { replacements } = request?.body ?? {};

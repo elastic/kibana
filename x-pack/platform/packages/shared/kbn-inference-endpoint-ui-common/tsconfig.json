@@ -25,6 +25,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/core",
     "@kbn/core-http-browser-mocks",
-    "@kbn/core-notifications-browser-mocks"
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/spaces-plugin",
+    "@kbn/projects-solutions-groups"
   ]
 }

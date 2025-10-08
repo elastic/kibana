@@ -19,7 +19,7 @@ import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
 export * from './src/languages';
 
 export { BarePluginApi };
-export * from './src/types';
+export type * from './src/types';
 
 export {
   defaultThemesResolvers,

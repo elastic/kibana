@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { HttpStart as Http, ToastsSetup } from '@kbn/core/public';
-import { RouteComponentProps } from 'react-router-dom';
+import type { HttpStart as Http, ToastsSetup } from '@kbn/core/public';
+import type { RouteComponentProps } from 'react-router-dom';
 
-import { LicenseStatus } from '../../common';
+import type { LicenseStatus } from '../../common';
 import { KibanaRenderContextProvider } from '../shared_imports';
 import { App } from './app';
 import { AppContextProvider } from './contexts/app_context';
 import { ProfileContextProvider } from './contexts/profiler_context';
-import { SearchProfilerStartServices } from '../types';
+import type { SearchProfilerStartServices } from '../types';
 
 interface AppDependencies {
   el: HTMLElement;

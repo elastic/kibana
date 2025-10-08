@@ -116,7 +116,6 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
   const { services } = useDataVisualizerKibana();
   const {
     data: { dataViews, search },
-    savedObjects: { client: savedObjectsClient },
     notifications: { toasts },
     savedSearch: savedSearchService,
   } = services;
@@ -212,7 +211,7 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
       }
     };
     getDataView();
-  }, [savedObjectsClient, toasts, dataViews, urlSearchString, search, savedSearchService]);
+  }, [toasts, dataViews, urlSearchString, search, savedSearchService]);
 
   const setUrlState: SetUrlState = useCallback(
     (

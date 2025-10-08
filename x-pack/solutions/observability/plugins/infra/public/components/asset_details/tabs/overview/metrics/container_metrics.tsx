@@ -16,7 +16,7 @@ import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../../types';
 
 interface Props {
-  assetId: string;
+  entityId: string;
   dateRange: TimeRange;
   dataView?: DataView;
 }

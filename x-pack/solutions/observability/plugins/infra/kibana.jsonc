@@ -13,8 +13,8 @@
     "requiredPlugins": [
       "aiops",
       "alerting",
-      "cases",
       "charts",
+      "contentManagement",
       "data",
       "dataViews",
       "dataViewEditor",
@@ -29,6 +29,7 @@
       "observability",
       "observabilityShared",
       "ruleRegistry",
+      "savedSearch",
       "security",
       "share",
       "triggersActionsUi",
@@ -42,6 +43,7 @@
     ],
     "optionalPlugins": [
       "spaces",
+      "cases",
       "ml",
       "home",
       "osquery",
@@ -52,7 +54,6 @@
       "serverless"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "observability",
       "licenseManagement",
       "kibanaUtils",

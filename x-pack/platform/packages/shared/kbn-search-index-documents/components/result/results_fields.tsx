@@ -11,7 +11,7 @@ import { EuiTable, EuiTableBody, EuiTableHeader, EuiTableHeaderCell } from '@ela
 
 import { i18n } from '@kbn/i18n';
 import { ResultField } from './result_field';
-import { ResultFieldProps } from './result_types';
+import type { ResultFieldProps } from './result_types';
 
 interface Props {
   documentId: string;

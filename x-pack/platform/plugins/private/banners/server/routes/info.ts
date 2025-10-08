@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
-import { ILicense } from '@kbn/licensing-plugin/server';
-import { BannersConfigType } from '../config';
-import { BannerInfoResponse, BannerConfiguration, BannerPlacement } from '../../common';
-import { BannersRouter } from '../types';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import type { ILicense } from '@kbn/licensing-types';
+import type { BannersConfigType } from '../config';
+import type { BannerInfoResponse, BannerConfiguration, BannerPlacement } from '../../common';
+import type { BannersRouter } from '../types';
 
 export const registerInfoRoute = (router: BannersRouter, config: BannersConfigType) => {
   router.get(

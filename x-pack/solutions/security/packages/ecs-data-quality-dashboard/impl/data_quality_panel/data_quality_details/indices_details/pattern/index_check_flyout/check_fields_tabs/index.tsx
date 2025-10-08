@@ -6,17 +6,11 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  EuiBadge,
-  EuiButtonGroup,
-  EuiButtonGroupProps,
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { CheckFieldsTab, CheckFieldsTabId } from './types';
+import type { CheckFieldsTab, CheckFieldsTabId } from './types';
 
 const styles = {
   tabFlexGroup: css({

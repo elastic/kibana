@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { LayerConfig, LensAttributes } from './lens_attributes';
+import type { LayerConfig } from './lens_attributes';
+import { LensAttributes } from './lens_attributes';
 import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
@@ -20,9 +21,8 @@ import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
 import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FormulaPublicApi, XYState } from '@kbn/lens-plugin/public';
-import { Query } from '@kbn/es-query';
+import type { XYState } from '@kbn/lens-plugin/public';
+import type { Query } from '@kbn/es-query';
 
 describe('Lens Attribute', () => {
   mockAppDataView();
@@ -50,13 +50,8 @@ describe('Lens Attribute', () => {
     selectedMetricField: TRANSACTION_DURATION,
   };
 
-  const lensPluginMockStart = lensPluginMock.createStartContract();
-
-  let formulaHelper: FormulaPublicApi;
-
   beforeEach(async () => {
-    formulaHelper = (await lensPluginMockStart.stateHelperApi()).formula;
-    lnsAttr = new LensAttributes([layerConfig], reportViewConfig.reportType, formulaHelper);
+    lnsAttr = new LensAttributes([layerConfig], reportViewConfig.reportType);
   });
 
   it('should return expected json', function () {
@@ -129,7 +124,6 @@ describe('Lens Attribute', () => {
           interval: 'auto',
           includeEmptyRows: true,
         },
-        scale: 'interval',
         sourceField: '@timestamp',
       },
       ...PERCENTILE_RANKS.reduce((acc: Record<string, any>, rank, index) => {
@@ -146,7 +140,6 @@ describe('Lens Attribute', () => {
           params: {
             percentile: Number(rank.slice(0, 2)),
           },
-          scale: 'ratio',
           sourceField: 'transaction.duration.us',
         };
         return acc;
@@ -172,7 +165,7 @@ describe('Lens Attribute', () => {
           formula: 'count() / overall_sum(count())',
           isFormulaBroken: false,
         },
-        references: ['y-axis-column-layer0X3'],
+        references: [],
       },
     ]);
   });
@@ -228,7 +221,7 @@ describe('Lens Attribute', () => {
       selectedMetricField: TRANSACTION_DURATION,
     };
 
-    lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
+    lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
 
     expect(JSON.stringify(lnsAttr.getFieldMeta(REPORT_METRIC_FIELD, layerConfig1))).toEqual(
       JSON.stringify({
@@ -266,7 +259,6 @@ describe('Lens Attribute', () => {
         ],
         type: 'histogram',
       },
-      scale: 'interval',
       sourceField: 'transaction.duration.us',
     });
   });
@@ -288,7 +280,6 @@ describe('Lens Attribute', () => {
         ],
         type: 'histogram',
       },
-      scale: 'interval',
       sourceField: 'transaction.duration.us',
     });
   });
@@ -303,7 +294,6 @@ describe('Lens Attribute', () => {
         interval: 'auto',
         includeEmptyRows: true,
       },
-      scale: 'interval',
       sourceField: '@timestamp',
     });
   });
@@ -325,7 +315,6 @@ describe('Lens Attribute', () => {
         ],
         type: 'histogram',
       },
-      scale: 'interval',
       sourceField: 'transaction.duration.us',
     });
   });
@@ -333,8 +322,7 @@ describe('Lens Attribute', () => {
   it('should hide y axis when there are multiple series', function () {
     const lensAttrWithMultiSeries = new LensAttributes(
       [layerConfig, layerConfig],
-      reportViewConfig.reportType,
-      formulaHelper
+      reportViewConfig.reportType
     ).getJSON() as any;
     expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
       x: false,
@@ -346,8 +334,7 @@ describe('Lens Attribute', () => {
   it('should show y axis when there is a single series', function () {
     const lensAttrWithMultiSeries = new LensAttributes(
       [layerConfig],
-      reportViewConfig.reportType,
-      formulaHelper
+      reportViewConfig.reportType
     ).getJSON() as any;
     expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
       x: false,
@@ -446,8 +433,7 @@ describe('Lens Attribute', () => {
   it('should not use global filters when there is more than one series', function () {
     const multiSeriesLensAttr = new LensAttributes(
       [layerConfig, layerConfig],
-      reportViewConfig.reportType,
-      formulaHelper
+      reportViewConfig.reportType
     ).getJSON();
     expect((multiSeriesLensAttr.state.query as Query).query).toEqual(
       'transaction.duration.us < 60000000'
@@ -469,7 +455,7 @@ describe('Lens Attribute', () => {
         selectedMetricField: LCP_FIELD,
       };
 
-      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
+      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
 
       lnsAttr.getBreakdownColumn({
         layerConfig: layerConfig1,
@@ -491,15 +477,7 @@ describe('Lens Attribute', () => {
       ]);
 
       expect(lnsAttr.layers.layer0).toEqual({
-        columnOrder: [
-          'breakdown-column-layer0',
-          'x-axis-column-layer0',
-          'y-axis-column-layer0-0',
-          'y-axis-column-layer0X0',
-          'y-axis-column-layer0X1',
-          'y-axis-column-layer0X2',
-          'y-axis-column-layer0X3',
-        ],
+        columnOrder: ['breakdown-column-layer0', 'x-axis-column-layer0', 'y-axis-column-layer0-0'],
         columns: {
           'breakdown-column-layer0': {
             dataType: 'string',
@@ -513,7 +491,6 @@ describe('Lens Attribute', () => {
                 isBucketed: false,
                 label: 'Count of records',
                 operationType: 'count',
-                scale: 'ratio',
                 sourceField: '___records___',
               },
               orderBy: {
@@ -523,7 +500,6 @@ describe('Lens Attribute', () => {
               otherBucket: true,
               size: 10,
             },
-            scale: 'ordinal',
             sourceField: 'user_agent.name',
           },
           'x-axis-column-layer0': {
@@ -542,7 +518,6 @@ describe('Lens Attribute', () => {
               ],
               type: 'histogram',
             },
-            scale: 'interval',
             sourceField: LCP_FIELD,
           },
           'y-axis-column-layer0-0': {
@@ -567,71 +542,7 @@ describe('Lens Attribute', () => {
                 "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
               isFormulaBroken: false,
             },
-            references: ['y-axis-column-layer0X3'],
-          },
-          'y-axis-column-layer0X0': {
-            customLabel: true,
-            dataType: 'number',
-            filter: {
-              language: 'kuery',
-              query:
-                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
-            },
-            isBucketed: false,
-            label: 'Part of Pages loaded',
-            operationType: 'count',
-            params: {
-              emptyAsNull: false,
-            },
-            scale: 'ratio',
-            sourceField: RECORDS_FIELD,
-          },
-          'y-axis-column-layer0X1': {
-            customLabel: true,
-            dataType: 'number',
-            filter: {
-              language: 'kuery',
-              query:
-                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
-            },
-            isBucketed: false,
-            label: 'Part of Pages loaded',
-            operationType: 'count',
-            params: {
-              emptyAsNull: false,
-            },
-            scale: 'ratio',
-            sourceField: RECORDS_FIELD,
-          },
-          'y-axis-column-layer0X2': {
-            customLabel: true,
-            dataType: 'number',
-            isBucketed: false,
-            label: 'Part of Pages loaded',
-            operationType: 'overall_sum',
-            references: ['y-axis-column-layer0X1'],
-            scale: 'ratio',
-          },
-          'y-axis-column-layer0X3': {
-            customLabel: true,
-            dataType: 'number',
-            isBucketed: false,
-            label: 'Part of Pages loaded',
-            operationType: 'math',
-            params: {
-              tinymathAst: {
-                args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
-                location: {
-                  max: 212,
-                  min: 0,
-                },
-                name: 'divide',
-                text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
-                type: 'function',
-              },
-            },
-            references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
-            scale: 'ratio',
+            references: [],
           },
         },
         incompleteColumns: {},
@@ -678,7 +589,7 @@ describe('Lens Attribute', () => {
         selectedMetricField: TRANSACTION_DURATION,
       };
 
-      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
+      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
 
       const attributes = lnsAttr.getJSON();
 

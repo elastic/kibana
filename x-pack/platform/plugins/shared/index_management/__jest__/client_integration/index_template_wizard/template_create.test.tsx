@@ -18,7 +18,7 @@ import {
   INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
 } from './constants';
 import { setup } from './template_create.helpers';
-import { TemplateFormTestBed } from './template_form.helpers';
+import type { TemplateFormTestBed } from './template_form.helpers';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');

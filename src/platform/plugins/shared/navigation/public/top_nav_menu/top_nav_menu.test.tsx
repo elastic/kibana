@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { MountPoint } from '@kbn/core/public';
+import type { MountPoint } from '@kbn/core/public';
 import { TopNavMenu } from './top_nav_menu';
-import { TopNavMenuData } from './top_nav_menu_data';
+import type { TopNavMenuData } from './top_nav_menu_data';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiToolTipProps } from '@elastic/eui';
+import type { EuiToolTipProps } from '@elastic/eui';
 import type { TopNavMenuBadgeProps } from './top_nav_menu_badges';
 import { unifiedSearchMock } from '../mocks';
 

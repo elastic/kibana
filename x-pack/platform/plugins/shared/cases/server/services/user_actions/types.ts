@@ -40,6 +40,7 @@ import type {
   CasePostRequest,
   UserActionFindRequest,
 } from '../../../common/types/api';
+import type { ObservablesActionType } from '../../../common/types/domain/user_action/observables/v1';
 
 export interface BuilderParameters {
   title: {
@@ -95,6 +96,13 @@ export interface BuilderParameters {
   };
   customFields: {
     parameters: { payload: { customFields: CaseCustomFields } };
+  };
+  observables: {
+    parameters: {
+      payload: {
+        observables: { actionType: ObservablesActionType; count: number };
+      };
+    };
   };
 }
 
@@ -236,6 +244,15 @@ export interface UserActionsStatsAggsResult {
       key: string;
       doc_count: number;
     }>;
+  };
+  deletions: {
+    doc_count: number;
+    deletions: {
+      buckets: Array<{
+        key: string;
+        doc_count: number;
+      }>;
+    };
   };
 }
 

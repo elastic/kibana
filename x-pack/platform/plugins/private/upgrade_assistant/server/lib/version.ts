@@ -5,38 +5,8 @@
  * 2.0.
  */
 
-import SemVer from 'semver/classes/semver';
+import { Version } from '@kbn/upgrade-assistant-pkg-common';
 
-export interface IVersion {
-  setup(version: string): void;
-  getCurrentVersion(): SemVer;
-  getMajorVersion(): number;
-  getNextMajorVersion(): number;
-  getPrevMajorVersion(): number;
-}
+const versionService = new Version();
 
-export class Version implements IVersion {
-  private version!: SemVer;
-
-  public setup(version: string) {
-    this.version = new SemVer(version);
-  }
-
-  public getCurrentVersion() {
-    return this.version;
-  }
-
-  public getMajorVersion() {
-    return this.version?.major;
-  }
-
-  public getNextMajorVersion() {
-    return this.version?.major + 1;
-  }
-
-  public getPrevMajorVersion() {
-    return this.version?.major - 1;
-  }
-}
-
-export const versionService = new Version();
+export { versionService };

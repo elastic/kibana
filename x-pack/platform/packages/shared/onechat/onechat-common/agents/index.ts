@@ -7,41 +7,13 @@
 
 export {
   AgentType,
-  OneChatDefaultAgentId,
-  OneChatDefaultAgentProviderId,
-  type AgentDescriptor,
-} from './descriptor';
+  oneChatDefaultAgentId,
+  type AgentDefinition,
+  type AgentConfiguration,
+} from './definition';
+export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {
-  ChatAgentEventType,
-  type ChatAgentEvent,
-  type ChatAgentEventBase,
-  type ToolResultEvent,
-  type ToolResultEventData,
-  type ToolCallEvent,
-  type ToolCallEventData,
-  type ReasoningEvent,
-  type ReasoningEventData,
-  type MessageChunkEventData,
-  type MessageChunkEvent,
-  type MessageCompleteEventData,
-  type MessageCompleteEvent,
-  type RoundCompleteEventData,
-  type RoundCompleteEvent,
-  isToolCallEvent,
-  isToolResultEvent,
-  isReasoningEvent,
-  isMessageChunkEvent,
-  isMessageCompleteEvent,
-  isRoundCompleteEvent,
-} from './events';
-export {
-  type AgentIdentifier,
-  type PlainIdAgentIdentifier,
-  type SerializedAgentIdentifier,
-  type StructuredAgentIdentifier,
-  isSerializedAgentIdentifier,
-  isPlainAgentIdentifier,
-  isStructuredAgentIdentifier,
-  toSerializedAgentIdentifier,
-  toStructuredAgentIdentifier,
-} from './identifiers';
+  type AgentCapabilities,
+  type ResolvedAgentCapabilities,
+  getKibanaDefaultAgentCapabilities,
+} from './capabilities';

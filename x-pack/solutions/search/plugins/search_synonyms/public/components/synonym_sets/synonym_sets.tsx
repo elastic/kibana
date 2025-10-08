@@ -7,8 +7,9 @@
 
 import React, { useState } from 'react';
 
-import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import type { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';

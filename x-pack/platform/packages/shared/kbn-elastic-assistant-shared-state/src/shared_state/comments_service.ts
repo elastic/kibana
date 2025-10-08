@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs';
 import { sortBy } from 'lodash';
-import { ClientMessage } from '@kbn/elastic-assistant';
+import type { ClientMessage } from '@kbn/elastic-assistant';
 
 export interface CommentServiceActions {
   order?: number;

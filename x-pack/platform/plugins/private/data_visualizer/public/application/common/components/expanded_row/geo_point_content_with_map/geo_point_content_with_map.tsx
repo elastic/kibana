@@ -8,7 +8,11 @@ import type { FC } from 'react';
 import { useMemo } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import type {
+  ES_GEO_FIELD_TYPE,
+  LayerDescriptor,
+  VectorLayerDescriptor,
+} from '@kbn/maps-plugin/common';
 import { INITIAL_LOCATION } from '@kbn/maps-plugin/common';
 import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
@@ -86,7 +90,7 @@ export const GeoPointContentWithMap: FC<{
             narrowByGlobalSearch: true,
             narrowByGlobalTime: true,
             narrowByMapBounds: true,
-            id: searchLayerDescriptor.sourceDescriptor!.id,
+            id: (searchLayerDescriptor.sourceDescriptor as { id: string }).id,
             type: 'ESQL',
             applyForceRefresh: true,
           };
@@ -95,7 +99,7 @@ export const GeoPointContentWithMap: FC<{
             {
               ...searchLayerDescriptor,
               sourceDescriptor: esqlSourceDescriptor,
-            },
+            } as VectorLayerDescriptor,
           ]);
         } else {
           setLayerList([searchLayerDescriptor]);

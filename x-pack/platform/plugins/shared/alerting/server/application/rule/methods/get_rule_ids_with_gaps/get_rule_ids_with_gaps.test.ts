@@ -165,7 +165,7 @@ describe('getRuleIdsWithGaps', () => {
         RULE_SAVED_OBJECT_TYPE,
         filter,
         expect.objectContaining({
-          filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND (kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled)`,
+          filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND (kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled)`,
           aggs: {
             latest_gap_timestamp: { max: { field: '@timestamp' } },
             unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
@@ -198,7 +198,9 @@ describe('getRuleIdsWithGaps', () => {
         RULE_SAVED_OBJECT_TYPE,
         filter,
         expect.objectContaining({
-          filter: expect.stringContaining('event.action: gap AND event.provider: alerting'),
+          filter: expect.stringContaining(
+            'event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true'
+          ),
           aggs: {
             latest_gap_timestamp: { max: { field: '@timestamp' } },
             unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },
@@ -225,7 +227,7 @@ describe('getRuleIdsWithGaps', () => {
         RULE_SAVED_OBJECT_TYPE,
         filter,
         expect.objectContaining({
-          filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z"`,
+          filter: `event.action: gap AND event.provider: alerting AND not kibana.alert.rule.gap.deleted:true AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z"`,
           aggs: {
             latest_gap_timestamp: { max: { field: '@timestamp' } },
             unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TinymathAST } from '@kbn/tinymath';
+import type { TinymathAST } from '@kbn/tinymath';
 
 export function getFieldNames(names: string[], ast: TinymathAST): string[] {
   if (typeof ast === 'number') {

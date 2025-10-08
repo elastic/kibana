@@ -63,6 +63,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
@@ -124,7 +126,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
       ])) ||
       GITHUB_PR_LABELS.includes('ci:synthetics-runner-suites')
     ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/slo_plugin_e2e.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime_plugin.yml'));
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
@@ -178,7 +179,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-security')
+      GITHUB_PR_LABELS.includes('ci:project-deploy-log_essentials') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-security') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-ai4soc')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
     } else if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
@@ -224,8 +227,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
-        /^x-pack\/test\/defend_workflows_cypress/,
-        /^x-pack\/test\/security_solution_cypress/,
+        /^x-pack\/solutions\/security\/test\/defend_workflows_cypress/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
         /^fleet_packages\.json/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
@@ -259,7 +262,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
         /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
-        /^x-pack\/test\/security_solution_cypress/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -340,7 +343,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
-        /^x-pack\/test\/security_solution_cypress/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -403,7 +406,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
-        /^x-pack\/test\/security_solution_cypress/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -431,7 +434,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/packages\/kbn-cloud-security-posture/,
         /^x-pack\/solutions\/security\/plugins\/cloud_security_posture/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
-        /^x-pack\/test\/security_solution_cypress/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -440,25 +443,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
           '.buildkite/pipelines/pull_request/security_solution/cloud_security_posture.yml'
         )
       );
-    }
-
-    if (
-      (await doAnyChangesMatch([
-        /^src\/platform\/packages\/shared\/kbn-scout/,
-        /^src\/platform\/packages\/private\/kbn-scout-info/,
-        /^src\/platform\/packages\/private\/kbn-scout-reporting/,
-        /^x-pack\/platform\/plugins\/shared\/maps/,
-        /^x-pack\/platform\/plugins\/shared\/streams_app/,
-        /^x-pack\/platform\/plugins\/private\/discover_enhanced/,
-        /^x-pack\/solutions\/observability\/packages\/kbn-scout-oblt/,
-        /^x-pack\/solutions\/observability\/plugins\/apm/,
-        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
-        /^x-pack\/solutions\/security\/packages\/kbn-scout-security/,
-        /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/flyout/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
-    ) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
     }
 
     if (
@@ -473,13 +457,36 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/solutions\/security\/plugins\/security_solution\/public\/asset_inventory/,
-        /^x-pack\/test\/security_solution_cypress/,
+        /^x-pack\/solutions\/security\/test\/security_solution_cypress/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/asset_inventory.yml')
       );
+    }
+
+    // Check for prompt file changes and conditionally add pipeline step
+    if (
+      await doAnyChangesMatch([
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/local_prompt_object\.ts$/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/tool_prompts\.ts$/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/defend_insight_prompts\.ts$/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant\/server\/lib\/prompt\/prompts\.ts$/,
+      ])
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/prompt_changes.yml'));
+    }
+
+    // Run Saved Objects checks conditionally
+    if (
+      await doAnyChangesMatch([
+        /^packages\/kbn-check-saved-objects-cli\/current_fields.json/,
+        /^packages\/kbn-check-saved-objects-cli\/current_mappings.json/,
+        /^src\/core\/server\/integration_tests\/ci_checks\/saved_objects\/check_registered_types.test.ts/,
+      ])
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

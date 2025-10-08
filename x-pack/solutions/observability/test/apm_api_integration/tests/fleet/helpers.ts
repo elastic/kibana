@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PackagePolicy, NewPackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
-import { BetterTest } from '../../common/bettertest';
+import type { PackagePolicy, NewPackagePolicy, AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { BetterTest } from '../../common/bettertest';
 
 export function setupFleet(bettertest: BetterTest) {
   return bettertest({ pathname: '/api/fleet/setup', method: 'post' });
@@ -122,10 +122,12 @@ export async function deleteAgentPolicyAndPackagePolicyByName({
   const agentPolicyId = agentPolicy.id;
   // @ts-expect-error
   const packagePolicies = agentPolicy.package_policies as PackagePolicy[];
-  const packagePolicyId = packagePolicies.find(
-    (packagePolicy) => packagePolicy.name === packagePolicyName
-  )!.id;
+  const packagePolicyId = packagePolicies.find((packagePolicy) => {
+    return packagePolicy.name === packagePolicyName;
+  })?.id;
 
   await deleteAgentPolicy(bettertest, agentPolicyId);
-  await deletePackagePolicy(bettertest, packagePolicyId);
+  if (packagePolicyId) {
+    await deletePackagePolicy(bettertest, packagePolicyId);
+  }
 }

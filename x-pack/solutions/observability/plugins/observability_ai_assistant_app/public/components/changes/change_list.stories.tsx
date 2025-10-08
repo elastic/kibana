@@ -8,7 +8,8 @@
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
 
-import { ChangeListProps, ChangeList as Component, ChangeListItemImpact } from './change_list';
+import type { ChangeListProps } from './change_list';
+import { ChangeList as Component, ChangeListItemImpact } from './change_list';
 
 export default {
   component: Component,

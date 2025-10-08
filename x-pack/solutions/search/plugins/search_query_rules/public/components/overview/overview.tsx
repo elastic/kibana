@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { PLUGIN_TITLE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
@@ -33,10 +34,12 @@ import { CreateRulesetModal } from './create_ruleset_modal';
 import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { useQueryRulesBreadcrumbs } from '../../hooks/use_query_rules_breadcrumbs';
 
 export const QueryRulesOverview = () => {
   const usageTracker = useUsageTracker();
   const { colorMode } = useEuiTheme();
+  useQueryRulesBreadcrumbs();
 
   const { data: queryRulesData, isInitialLoading, isError, error } = useFetchQueryRulesSets();
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
@@ -58,7 +61,7 @@ export const QueryRulesOverview = () => {
     <QueryRulesPageTemplate restrictWidth={false}>
       {!isInitialLoading && !isError && queryRulesData?._meta.totalItemCount !== 0 && (
         <KibanaPageTemplate.Header
-          pageTitle="Query Rules"
+          pageTitle={PLUGIN_TITLE}
           restrictWidth
           color="primary"
           rightSideItems={[

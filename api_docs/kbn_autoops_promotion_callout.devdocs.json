@@ -1,0 +1,82 @@
+{
+  "id": "@kbn/autoops-promotion-callout",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/autoops-promotion-callout",
+        "id": "def-common.AutoOpsPromotionCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "AutoOpsPromotionCallout",
+        "description": [],
+        "signature": [
+          "({ ...overrideCalloutProps }: ",
+          "EuiCallOutProps",
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/autoops-promotion-callout",
+            "id": "def-common.AutoOpsPromotionCallout.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  ...overrideCalloutProps\n}",
+            "description": [],
+            "signature": [
+              "EuiCallOutProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/autoops-promotion-callout",
+        "id": "def-common.AutoOpsPromotionCalloutProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AutoOpsPromotionCalloutProps",
+        "description": [],
+        "signature": [
+          "CommonProps",
+          " & Omit<React.HTMLAttributes<HTMLDivElement>, \"title\" | \"color\"> & { title?: React.ReactNode; iconType?: ",
+          "IconType",
+          " | undefined; color?: \"success\" | \"warning\" | \"primary\" | \"accent\" | \"danger\" | undefined; size?: \"m\" | \"s\" | undefined; heading?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; onDismiss?: (() => void) | undefined; announceOnMount?: boolean | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

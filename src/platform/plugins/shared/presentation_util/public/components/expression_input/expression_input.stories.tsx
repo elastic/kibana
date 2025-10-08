@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { Meta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 
-import {
+import type {
   ExpressionFunction,
   ExpressionFunctionParameter,
   Style,

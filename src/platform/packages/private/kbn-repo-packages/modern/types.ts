@@ -11,10 +11,18 @@ import type { KibanaGroup, ModuleVisibility } from '@kbn/projects-solutions-grou
 import type { Package } from './package';
 import type { PLUGIN_CATEGORY } from './plugin_category_info';
 
-/**
- * Simple parsed representation of a package.json file, validated
- * by `assertParsedPackageJson()` and extensible as needed in the future
- */
+type ExportTarget = string | ConditionalExports | Array<string | ConditionalExports>;
+
+interface ConditionalExports {
+  [condition: string]: ExportTarget;
+}
+
+interface SubpathExports {
+  [subpath: string]: ExportTarget;
+}
+
+export type PackageExports = ExportTarget | SubpathExports | null;
+
 export interface ParsedPackageJson {
   /** The name of the package, usually `@kbn/`+something */
   name: string;
@@ -31,6 +39,7 @@ export interface ParsedPackageJson {
   scripts?: {
     [key: string]: string | undefined;
   };
+  exports?: PackageExports;
   /** All other fields in the package.json are typed as unknown as we don't care what they are */
   [key: string]: unknown;
 }

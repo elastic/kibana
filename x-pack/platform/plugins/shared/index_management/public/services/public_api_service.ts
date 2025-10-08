@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { INTERNAL_API_BASE_PATH } from '../../common';
 import { sendRequest } from '../shared_imports';
 

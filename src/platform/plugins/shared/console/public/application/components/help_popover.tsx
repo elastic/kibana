@@ -34,6 +34,10 @@ const styles = {
       background: transparent;
     }
   `,
+
+  fixedWidthText: css`
+    width: 300px;
+  `,
 };
 
 export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPopoverProps) => {
@@ -76,18 +80,18 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
         },
       },
       {
-        label: i18n.translate('console.helpPopover.rerunTourLabel', {
-          defaultMessage: 'Re-run feature tour',
+        label: i18n.translate('console.helpPopover.runTourLabel', {
+          defaultMessage: 'Start introduction tour',
         }),
         css: styles.listItem,
         onClick: resetTour,
         extraAction: {
-          iconType: 'refresh',
+          iconType: 'play',
           alwaysShow: true,
           onClick: resetTour,
-          'data-test-subj': 'consoleRerunTourButton',
-          'aria-label': i18n.translate('console.helpPopover.rerunTourButtonAriaLabel', {
-            defaultMessage: 'Re-run feature tour button',
+          'data-test-subj': 'consoleRunTourButton',
+          'aria-label': i18n.translate('console.helpPopover.runTourButtonAriaLabel', {
+            defaultMessage: 'Start introduction tour button',
           }),
         },
       },
@@ -117,7 +121,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
 
         <EuiSpacer size="s" />
 
-        <EuiText css={{ width: 300 }} color="subdued" size="s">
+        <EuiText css={styles.fixedWidthText} color="subdued" size="s">
           <p>
             {i18n.translate('console.helpPopover.description', {
               defaultMessage:

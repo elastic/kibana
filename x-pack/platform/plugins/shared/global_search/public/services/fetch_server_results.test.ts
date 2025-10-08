@@ -8,7 +8,7 @@
 import { lastValueFrom } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { GlobalSearchResult } from '../../common/types';
+import type { GlobalSearchResult } from '../../common/types';
 import { fetchServerResults } from './fetch_server_results';
 
 const getTestScheduler = () =>

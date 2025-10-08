@@ -2,6 +2,7 @@
 
 exports[`ML Confirm Job Delete shallow renders without errors 1`] = `
 <EuiConfirmModal
+  aria-labelledby="generated-id"
   buttonColor="danger"
   cancelButtonText="Cancel"
   confirmButtonText="Delete"
@@ -10,6 +11,11 @@ exports[`ML Confirm Job Delete shallow renders without errors 1`] = `
   onCancel={[MockFunction]}
   onConfirm={[MockFunction]}
   title="Delete anomaly detection job?"
+  titleProps={
+    Object {
+      "id": "generated-id",
+    }
+  }
 >
   <p>
     <MemoizedFormattedMessage
@@ -28,6 +34,7 @@ exports[`ML Confirm Job Delete shallow renders without errors 1`] = `
 
 exports[`ML Confirm Job Delete shallow renders without errors while loading 1`] = `
 <EuiConfirmModal
+  aria-labelledby="generated-id"
   buttonColor="danger"
   cancelButtonText="Cancel"
   confirmButtonText="Delete"
@@ -36,6 +43,11 @@ exports[`ML Confirm Job Delete shallow renders without errors while loading 1`] 
   onCancel={[MockFunction]}
   onConfirm={[MockFunction]}
   title="Delete anomaly detection job?"
+  titleProps={
+    Object {
+      "id": "generated-id",
+    }
+  }
 >
   <p>
     <MemoizedFormattedMessage

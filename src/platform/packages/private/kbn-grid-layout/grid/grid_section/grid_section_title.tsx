@@ -10,13 +10,13 @@ import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexItem,
   EuiInlineEditTitle,
   EuiTitle,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';

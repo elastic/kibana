@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView, DataViewField, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import type { DataView, IIndexPatternFieldList } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 import AnnotationEditorControls from './annotation_editor_controls';
 
 import React from 'react';
@@ -16,7 +17,7 @@ import type {
   EventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
-import { QueryInputServices } from '@kbn/visualization-ui-components';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import moment from 'moment';
 import { act } from 'react-dom/test-utils';
 import { EuiButtonGroup, EuiThemeProvider } from '@elastic/eui';

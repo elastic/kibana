@@ -8,12 +8,13 @@
 import { load } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
 import { join as joinPath } from 'path';
-import { Pipeline, ESProcessorItem } from '../../../common';
+import type { Pipeline, ESProcessorItem } from '../../../common';
 import type { EcsMappingState } from '../../types';
 import { ECS_TYPES } from './constants';
 import { deepCopy } from '../../util/util';
 import { type FieldPath, fieldPathToProcessorString } from '../../util/fields';
-import { fieldPathToPainlessExpression, SafePainlessExpression } from '../../util/painless';
+import type { SafePainlessExpression } from '../../util/painless';
+import { fieldPathToPainlessExpression } from '../../util/painless';
 
 interface ECSField {
   target: string;

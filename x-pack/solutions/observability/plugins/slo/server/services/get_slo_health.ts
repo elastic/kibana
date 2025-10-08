@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
-import {
-  FetchSLOHealthParams,
-  FetchSLOHealthResponse,
-  fetchSLOHealthResponseSchema,
-} from '@kbn/slo-schema';
-import { Dictionary, groupBy, keyBy } from 'lodash';
+import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
+import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
+import type { Dictionary } from 'lodash';
+import { groupBy, keyBy } from 'lodash';
 import moment from 'moment';
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '../../common/constants';
-import { SLODefinition } from '../domain/models';
-import { HealthStatus, State } from '../domain/models/health';
-import { SLORepository } from './slo_repository';
-import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import type { SLODefinition } from '../domain/models';
+import type { HealthStatus, State } from '../domain/models/health';
+import type { SLORepository } from './slo_repository';
+import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 const LAG_THRESHOLD_MINUTES = 10;
 const STALE_THRESHOLD_MINUTES = 2 * 24 * 60;
@@ -44,6 +42,7 @@ export class GetSLOHealth {
         sloId: item.sloId,
         sloInstanceId: item.sloInstanceId,
         sloRevision: sloById[item.sloId].revision,
+        sloName: sloById[item.sloId].name,
       }));
 
     const transformStatsById = await this.getTransformStats(sloList);
@@ -55,14 +54,23 @@ export class GetSLOHealth {
 
       return {
         sloId: item.sloId,
-        sloInstanceId: item.sloInstanceId,
         sloRevision: item.sloRevision,
+        sloName: item.sloName,
         state,
         health,
       };
     });
 
-    return fetchSLOHealthResponseSchema.encode(results);
+    /*
+     * Map results based on SLO ids since transforms represent all instances
+     * Since "state" is not being used in Kibana, we can group by SLO id and return only one result per SLO
+     * If needed in the future, we can return all instances by removing this mapping
+     * and adding sloInstanceId to the response schema
+     */
+    const mappedResults = Array.from(
+      new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
+    );
+    return fetchSLOHealthResponseSchema.encode(mappedResults);
   }
 
   private async getSummaryDocsById(

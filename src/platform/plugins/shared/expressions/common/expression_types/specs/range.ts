@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionTypeDefinition } from '../types';
-import { ExpressionValueRender } from '.';
+import type { ExpressionTypeDefinition } from '../types';
+import type { ExpressionValueRender } from '.';
 
 const name = 'range';
 

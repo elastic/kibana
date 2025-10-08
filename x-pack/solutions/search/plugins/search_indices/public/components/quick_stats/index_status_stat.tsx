@@ -11,11 +11,8 @@ import type { Index } from '@kbn/index-management-shared-types';
 import { i18n } from '@kbn/i18n';
 
 import { QuickStat, type QuickStatDefinition } from './quick_stat';
-import {
-  indexHealthToHealthColor,
-  HealthStatusStrings,
-  normalizeHealth,
-} from '../../utils/indices';
+import type { HealthStatusStrings } from '../../utils/indices';
+import { indexHealthToHealthColor, normalizeHealth } from '../../utils/indices';
 
 export const healthTitleMap: Record<HealthStatusStrings, string> = {
   red: i18n.translate('xpack.searchIndices.quickStats.indexHealth.red', { defaultMessage: 'Red' }),

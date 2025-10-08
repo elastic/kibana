@@ -894,6 +894,26 @@
           },
           {
             "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.contentManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "contentManagement",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "public",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-public.ContentManagementPublicStart",
+                "text": "ContentManagementPublicStart"
+              }
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
             "id": "def-public.DiscoverServices.core",
             "type": "Object",
             "tags": [],
@@ -941,6 +961,20 @@
                 "section": "def-public.DiscoverSharedPublicStart",
                 "text": "DiscoverSharedPublicStart"
               }
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.discoverFeatureFlags",
+            "type": "Object",
+            "tags": [],
+            "label": "discoverFeatureFlags",
+            "description": [],
+            "signature": [
+              "DiscoverFeatureFlags"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -1310,23 +1344,7 @@
               },
               "; setTime: (time: ",
               "InputTimeRange",
-              ") => void; getRefreshInterval: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              ">) => void; createFilter: (indexPattern: ",
+              ") => void; getRefreshInterval: () => Readonly<{} & { value: number; pause: boolean; }>; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<Readonly<{} & { value: number; pause: boolean; }>>) => void; createFilter: (indexPattern: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1434,15 +1452,7 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              "; getRefreshIntervalDefaults: () => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              "; }"
+              "; getRefreshIntervalDefaults: () => Readonly<{} & { value: number; pause: boolean; }>; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
@@ -2000,13 +2010,7 @@
                 "text": "FrequentCompatibilityChangeAction"
               },
               "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              },
+              "UiActionsService",
               "; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
@@ -2134,6 +2138,8 @@
             "signature": [
               "{ services: { logSourcesService: ",
               "LogSourcesService",
+              "; logDataService: ",
+              "LogDataService",
               "; }; } | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
@@ -2202,6 +2208,27 @@
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverServices.metricsExperience",
+            "type": "Object",
+            "tags": [],
+            "label": "metricsExperience",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "metricsExperience",
+                "scope": "public",
+                "docId": "kibMetricsExperiencePluginApi",
+                "section": "def-public.MetricsExperiencePluginStart",
+                "text": "MetricsExperiencePluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/build_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2217,22 +2244,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "discover",
-            "id": "def-public.DiscoverStateContainer.globalState",
-            "type": "Object",
-            "tags": [],
-            "label": "globalState",
-            "description": [
-              "\nGlobal State, the _g part of the URL"
-            ],
-            "signature": [
-              "DiscoverGlobalStateContainer"
-            ],
-            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverStateContainer.appState",
@@ -2288,7 +2299,9 @@
               "ThunkDispatch",
               "<unknown, unknown, ",
               "AnyAction",
-              ">, unknown>, ",
+              ">, ",
+              "InternalStateDependencies",
+              ">, ",
               "ThunkMiddleware",
               "<",
               "DiscoverInternalState",
@@ -2301,6 +2314,446 @@
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DiscoverStateContainer.internalStateActions",
+            "type": "Object",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "internalStateActions",
+            "description": [],
+            "signature": [
+              "{ loadDataViewList: ",
+              "AsyncThunk",
+              "<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewListItem",
+                "text": "DataViewListItem"
+              },
+              "[], void, { state: ",
+              "DiscoverInternalState",
+              "; dispatch: ((action: ",
+              "Action",
+              "<\"listenerMiddleware/add\">) => ",
+              "UnsubscribeListener",
+              ") & ",
+              "ThunkDispatch",
+              "<",
+              "DiscoverInternalState",
+              ", ",
+              "InternalStateDependencies",
+              ", ",
+              "AnyAction",
+              "> & ",
+              "Dispatch",
+              "<",
+              "AnyAction",
+              ">; extra: ",
+              "InternalStateDependencies",
+              "; rejectValue?: unknown; serializedErrorType?: unknown; pendingMeta?: unknown; fulfilledMeta?: unknown; rejectedMeta?: unknown; }>; setTabs: ",
+              "InternalStateThunkActionCreator",
+              "<[{ allTabs: ",
+              "TabState",
+              "[]; selectedTabId: string; recentlyClosedTabs: ",
+              "RecentlyClosedTabState",
+              "[]; updatedDiscoverSession?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; }], void>; updateTabs: ",
+              "InternalStateThunkActionCreator",
+              "<[{ items: ",
+              "TabState",
+              "[] | ",
+              {
+                "pluginId": "@kbn/unified-tabs",
+                "scope": "public",
+                "docId": "kibKbnUnifiedTabsPluginApi",
+                "section": "def-public.TabItem",
+                "text": "TabItem"
+              },
+              "[]; selectedItem: ",
+              "TabState",
+              " | ",
+              {
+                "pluginId": "@kbn/unified-tabs",
+                "scope": "public",
+                "docId": "kibKbnUnifiedTabsPluginApi",
+                "section": "def-public.TabItem",
+                "text": "TabItem"
+              },
+              " | null; updatedDiscoverSession?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; }, void], Promise<void>>; disconnectTab: ",
+              "InternalStateThunkActionCreator",
+              "<[{ tabId: string; }], void>; setDataView: ",
+              "InternalStateThunkActionCreator",
+              "<[",
+              "TabActionPayload",
+              "<{ dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "; }>], void>; setAdHocDataViews: ",
+              "InternalStateThunkActionCreator",
+              "<[",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]], void>; setDefaultProfileAdHocDataViews: ",
+              "InternalStateThunkActionCreator",
+              "<[",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]], void>; appendAdHocDataViews: ",
+              "InternalStateThunkActionCreator",
+              "<[",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[]], void>; replaceAdHocDataViewWithId: ",
+              "InternalStateThunkActionCreator",
+              "<[string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "], void>; initializeSingleTab: ",
+              "InternalStateThunkActionCreator",
+              "<[",
+              "TabActionPayload",
+              "<{ initializeSingleTabParams: ",
+              "InitializeSingleTabsParams",
+              "; }>], Promise<{ showNoDataPage: boolean; }>>; syncLocallyPersistedTabState: ",
+              "ActionCreatorWithPayload",
+              "<{ tabId: string; }, string>; restoreTab: ",
+              "InternalStateThunkActionCreator",
+              "<[{ restoreTabId: string; }], void>; openInNewTab: ",
+              "InternalStateThunkActionCreator",
+              "<[{ tabLabel?: string | undefined; appState?: ",
+              {
+                "pluginId": "discover",
+                "scope": "public",
+                "docId": "kibDiscoverPluginApi",
+                "section": "def-public.DiscoverAppState",
+                "text": "DiscoverAppState"
+              },
+              " | undefined; globalState?: ",
+              "TabStateGlobalState",
+              " | undefined; searchSessionId?: string | undefined; dataViewSpec?: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              " | undefined; }], void>; openSearchSessionInNewTab: ",
+              "InternalStateThunkActionCreator",
+              "<[{ searchSession: ",
+              "UISession",
+              "; }], void>; clearRecentlyClosedTabs: ",
+              "InternalStateThunkActionCreator",
+              "<[], void>; initializeTabs: ",
+              "AsyncThunk",
+              "<{ userId: string; spaceId: string; persistedDiscoverSession: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; }, { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean | undefined; }, { state: ",
+              "DiscoverInternalState",
+              "; dispatch: ((action: ",
+              "Action",
+              "<\"listenerMiddleware/add\">) => ",
+              "UnsubscribeListener",
+              ") & ",
+              "ThunkDispatch",
+              "<",
+              "DiscoverInternalState",
+              ", ",
+              "InternalStateDependencies",
+              ", ",
+              "AnyAction",
+              "> & ",
+              "Dispatch",
+              "<",
+              "AnyAction",
+              ">; extra: ",
+              "InternalStateDependencies",
+              "; rejectValue?: unknown; serializedErrorType?: unknown; pendingMeta?: unknown; fulfilledMeta?: unknown; rejectedMeta?: unknown; }>; saveDiscoverSession: ",
+              "AsyncThunk",
+              "<{ discoverSession: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; nextSelectedTabId: string; }, ",
+              "SaveDiscoverSessionThunkParams",
+              ", { state: ",
+              "DiscoverInternalState",
+              "; dispatch: ((action: ",
+              "Action",
+              "<\"listenerMiddleware/add\">) => ",
+              "UnsubscribeListener",
+              ") & ",
+              "ThunkDispatch",
+              "<",
+              "DiscoverInternalState",
+              ", ",
+              "InternalStateDependencies",
+              ", ",
+              "AnyAction",
+              "> & ",
+              "Dispatch",
+              "<",
+              "AnyAction",
+              ">; extra: ",
+              "InternalStateDependencies",
+              "; rejectValue?: unknown; serializedErrorType?: unknown; pendingMeta?: unknown; fulfilledMeta?: unknown; rejectedMeta?: unknown; }>; resetDiscoverSession: ",
+              "AsyncThunk",
+              "<void, { updatedDiscoverSession?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.DiscoverSession",
+                "text": "DiscoverSession"
+              },
+              " | undefined; nextSelectedTabId?: string | undefined; } | undefined, { state: ",
+              "DiscoverInternalState",
+              "; dispatch: ((action: ",
+              "Action",
+              "<\"listenerMiddleware/add\">) => ",
+              "UnsubscribeListener",
+              ") & ",
+              "ThunkDispatch",
+              "<",
+              "DiscoverInternalState",
+              ", ",
+              "InternalStateDependencies",
+              ", ",
+              "AnyAction",
+              "> & ",
+              "Dispatch",
+              "<",
+              "AnyAction",
+              ">; extra: ",
+              "InternalStateDependencies",
+              "; rejectValue?: unknown; serializedErrorType?: unknown; pendingMeta?: unknown; fulfilledMeta?: unknown; rejectedMeta?: unknown; }>; setInitializationState: ",
+              "ActionCreatorWithPayload",
+              "<{ hasESData: boolean; hasUserDataView: boolean; }, \"internalState/setInitializationState\">; setUnsavedChanges: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "HasUnsavedChangesResult",
+              ", \"internalState/setUnsavedChanges\">; setForceFetchOnSelect: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<Pick<",
+              "TabState",
+              ", \"forceFetchOnSelect\">>, \"internalState/setForceFetchOnSelect\">; setIsDataViewLoading: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<Pick<",
+              "TabState",
+              ", \"isDataViewLoading\">>, \"internalState/setIsDataViewLoading\">; setTabsBarVisibility: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabsBarVisibility",
+              ", \"internalState/setTabsBarVisibility\">; setExpandedDoc: ",
+              "ActionCreatorWithPayload",
+              "<{ expandedDoc: ",
+              {
+                "pluginId": "@kbn/discover-utils",
+                "scope": "common",
+                "docId": "kibKbnDiscoverUtilsPluginApi",
+                "section": "def-common.DataTableRecord",
+                "text": "DataTableRecord"
+              },
+              " | undefined; initialDocViewerTabId?: string | undefined; }, \"internalState/setExpandedDoc\">; discardFlyoutsOnTabChange: ",
+              "ActionCreatorWithoutPayload",
+              "<\"internalState/discardFlyoutsOnTabChange\">; setDataRequestParams: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<Pick<",
+              "TabState",
+              ", \"dataRequestParams\">>, \"internalState/setDataRequestParams\">; setGlobalState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<Pick<",
+              "TabState",
+              ", \"globalState\">>, \"internalState/setGlobalState\">; setOverriddenVisContextAfterInvalidation: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<Pick<",
+              "TabState",
+              ", \"overriddenVisContextAfterInvalidation\">>, \"internalState/setOverriddenVisContextAfterInvalidation\">; setControlGroupState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<{ controlGroupState: ",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlPanelsState",
+                "text": "ControlPanelsState"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlState",
+                "text": "ESQLControlState"
+              },
+              "> | undefined; }>, \"internalState/setControlGroupState\">; setEsqlVariables: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<{ esqlVariables: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined; }>, \"internalState/setEsqlVariables\">; setIsESQLToDataViewTransitionModalVisible: ",
+              "ActionCreatorWithPayload",
+              "<boolean, \"internalState/setIsESQLToDataViewTransitionModalVisible\">; setResetDefaultProfileState: ",
+              "ActionCreatorWithPreparedPayload",
+              "<[payload: ",
+              "TabActionPayload",
+              "<{ resetDefaultProfileState: Omit<{ resetId: string; columns: boolean; rowHeight: boolean; breakdownField: boolean; hideChart: boolean; }, \"resetId\">; }>], { resetDefaultProfileState: { resetId: string; columns: boolean; hideChart: boolean; rowHeight: boolean; breakdownField: boolean; }; tabId: string; }, \"internalState/setResetDefaultProfileState\", never, never>; resetOnSavedSearchChange: ",
+              "ActionCreatorWithPayload",
+              "<{ tabId: string; }, \"internalState/resetOnSavedSearchChange\">; setESQLEditorUiState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<{ esqlEditorUiState: Partial<Partial<",
+              {
+                "pluginId": "@kbn/esql-editor",
+                "scope": "public",
+                "docId": "kibKbnEsqlEditorPluginApi",
+                "section": "def-public.ESQLEditorRestorableState",
+                "text": "ESQLEditorRestorableState"
+              },
+              "> | undefined>; }>, \"internalState/setESQLEditorUiState\">; setDataGridUiState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<{ dataGridUiState: Partial<Partial<",
+              {
+                "pluginId": "@kbn/unified-data-table",
+                "scope": "public",
+                "docId": "kibKbnUnifiedDataTablePluginApi",
+                "section": "def-public.UnifiedDataTableRestorableState",
+                "text": "UnifiedDataTableRestorableState"
+              },
+              "> | undefined>; }>, \"internalState/setDataGridUiState\">; setFieldListUiState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<{ fieldListUiState: Partial<Partial<",
+              {
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "public",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-public.UnifiedFieldListRestorableState",
+                "text": "UnifiedFieldListRestorableState"
+              },
+              "> | undefined>; }>, \"internalState/setFieldListUiState\">; setLayoutUiState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<{ layoutUiState: Partial<Partial<",
+              "DiscoverLayoutRestorableState",
+              "> | undefined>; }>, \"internalState/setLayoutUiState\">; setSearchDraftUiState: ",
+              "ActionCreatorWithPayload",
+              "<",
+              "TabActionPayload",
+              "<{ searchDraftUiState: Partial<Partial<",
+              {
+                "pluginId": "unifiedSearch",
+                "scope": "public",
+                "docId": "kibUnifiedSearchPluginApi",
+                "section": "def-public.UnifiedSearchDraft",
+                "text": "UnifiedSearchDraft"
+              },
+              "> | undefined>; }>, \"internalState/setSearchDraftUiState\">; }"
+            ],
+            "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/discover_in_timeline/use_discover_in_timeline_actions.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/discover_in_timeline/use_discover_in_timeline_actions.tsx"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/tabs/esql/index.tsx"
+              }
+            ]
           },
           {
             "parentPluginId": "discover",
@@ -2381,7 +2834,9 @@
               "\nState manager for runtime state that can't be stored in Redux"
             ],
             "signature": [
-              "ReactiveRuntimeState<DiscoverRuntimeState, never> & { tabs: { byId: Record<string, ReactiveTabRuntimeState>; }; }"
+              "ReactiveRuntimeState<DiscoverRuntimeState, never> & { tabs: { byId: Record<string, ",
+              "ReactiveTabRuntimeState",
+              ">; }; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/application/main/state_management/discover_state.ts",
             "deprecated": false,
@@ -2507,7 +2962,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ") => void; onOpenSavedSearch: (savedSearchId: string) => void; onUpdateQuery: (payload: { dateRange: ",
+              ") => void; onOpenSavedSearch: (savedSearchId: string) => Promise<void>; onUpdateQuery: (payload: { dateRange: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -2670,25 +3125,25 @@
             "signature": [
               {
                 "pluginId": "@kbn/unified-doc-viewer",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnUnifiedDocViewerPluginApi",
-                "section": "def-common.DocViewsRegistry",
+                "section": "def-public.DocViewsRegistry",
                 "text": "DocViewsRegistry"
               },
               " | ((prevRegistry: ",
               {
                 "pluginId": "@kbn/unified-doc-viewer",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnUnifiedDocViewerPluginApi",
-                "section": "def-common.DocViewsRegistry",
+                "section": "def-public.DocViewsRegistry",
                 "text": "DocViewsRegistry"
               },
               ") => ",
               {
                 "pluginId": "@kbn/unified-doc-viewer",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnUnifiedDocViewerPluginApi",
-                "section": "def-common.DocViewsRegistry",
+                "section": "def-public.DocViewsRegistry",
                 "text": "DocViewsRegistry"
               },
               ") | undefined"
@@ -3789,7 +4244,7 @@
         "signature": [
           "Omit<",
           "SearchEmbeddableState",
-          ", \"rows\" | \"searchSource\" | \"inspectorAdapters\" | \"columnsMeta\" | \"totalHitCount\"> & Pick<",
+          ", \"rows\" | \"inspectorAdapters\" | \"searchSource\" | \"columnsMeta\" | \"totalHitCount\"> & Pick<",
           "SerializableSavedSearch",
           ", \"serializedSearchSource\"> & ",
           {
@@ -3817,9 +4272,7 @@
           },
           "> & { rawSavedObjectAttributes?: Partial<Pick<",
           "SavedSearchAttributes",
-          ", keyof ",
-          "SavedSearchAttributes",
-          ">> | undefined; savedObjectTitle?: string | undefined; savedObjectId?: string | undefined; savedObjectDescription?: string | undefined; nonPersistedDisplayOptions?: ",
+          ", \"sort\" | \"columns\" | \"grid\" | \"rowHeight\" | \"headerRowHeight\" | \"rowsPerPage\" | \"sampleSize\" | \"density\">> | undefined; savedObjectTitle?: string | undefined; savedObjectId?: string | undefined; savedObjectDescription?: string | undefined; nonPersistedDisplayOptions?: ",
           {
             "pluginId": "discover",
             "scope": "public",
@@ -3867,9 +4320,7 @@
           },
           "> & Partial<Pick<",
           "SavedSearchAttributes",
-          ", keyof ",
-          "SavedSearchAttributes",
-          ">> & { attributes?: (",
+          ", \"sort\" | \"columns\" | \"grid\" | \"rowHeight\" | \"headerRowHeight\" | \"rowsPerPage\" | \"sampleSize\" | \"density\">> & { attributes?: (",
           "SavedSearchAttributes",
           " & { references: ",
           "SavedObjectReference",
@@ -4596,15 +5047,7 @@
               "\nOptionally set the refresh interval."
             ],
             "signature": [
-              "(",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataQueryPluginApi",
-                "section": "def-common.RefreshInterval",
-                "text": "RefreshInterval"
-              },
-              " & ",
+              "(Readonly<{} & { value: number; pause: boolean; }> & ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -4699,6 +5142,22 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-common.DiscoverAppLocatorParams.tab",
+            "type": "Object",
+            "tags": [],
+            "label": "tab",
+            "description": [
+              "\nOptionally set Discover tab state.\nUse `new` as value for `id` to indicate that a new tab should be created.\nOnce created, the new tab will have a unique id which can be referenced too if necessary.\nUse `label` to set a fallback tab label if it was not defined before yet."
+            ],
+            "signature": [
+              "{ id: string; label?: string | undefined; } | undefined"
             ],
             "path": "src/platform/plugins/shared/discover/common/app_locator.ts",
             "deprecated": false,

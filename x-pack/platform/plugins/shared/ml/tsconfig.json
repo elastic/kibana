@@ -100,7 +100,6 @@
     "@kbn/monaco",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/presentation-containers",
-    "@kbn/presentation-panel-plugin",
     "@kbn/presentation-publishing",
     "@kbn/presentation-util-plugin",
     "@kbn/react-kibana-context-render",
@@ -142,5 +141,8 @@
     "@kbn/core-analytics-browser",
     "@kbn/deeplinks-analytics",
     "@kbn/core-user-profile-browser",
+    "@kbn/core-saved-objects-server",
+    "@kbn/presentation-util",
+    "@kbn/licensing-types",
   ]
 }

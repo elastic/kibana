@@ -7,9 +7,9 @@
 
 import { get } from 'lodash';
 import moment from 'moment-timezone';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { DeprecationLoggingStatus } from '../../common/types';
+import type { DeprecationLoggingStatus } from '../../common/types';
 import {
   DEPRECATION_LOGS_INDEX,
   DEPRECATION_LOGS_ORIGIN_FIELD,

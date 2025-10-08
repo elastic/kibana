@@ -9,10 +9,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { convertRangeFilterToTimeRange, extractTimeFilter } from '@kbn/es-query';
 import { getIndexPatterns } from '../../services';

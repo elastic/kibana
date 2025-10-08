@@ -8,6 +8,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
+import type { EuiComboBoxOptionOption, WithEuiThemeProps } from '@elastic/eui';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -15,17 +16,16 @@ import {
   EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBoxOptionOption,
   withEuiTheme,
-  WithEuiThemeProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { AddDeleteButtons } from './add_delete_buttons';
 import { collectionActions } from './lib/collection_actions';
-import { ColorPicker, ColorPickerProps } from './color_picker';
-import { TimeseriesVisParams } from '../../types';
+import type { ColorPickerProps } from './color_picker';
+import { ColorPicker } from './color_picker';
+import type { TimeseriesVisParams } from '../../types';
 import { Operator } from '../../../common/operators_utils';
 import { tsvbEditorRowStyles } from '../styles/common.styles';
 

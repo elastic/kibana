@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
-  ScopedClusterClientMock,
 } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
-import { UpdateSLOParams } from '@kbn/slo-schema';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import type { UpdateSLOParams } from '@kbn/slo-schema';
 import { cloneDeep, omit, pick } from 'lodash';
 
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
@@ -23,7 +23,7 @@ import {
   SLO_RESOURCES_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
-import { SLODefinition } from '../domain/models';
+import type { SLODefinition } from '../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
@@ -36,8 +36,8 @@ import {
   createSummaryTransformManagerMock,
   createTransformManagerMock,
 } from './mocks';
-import { SLORepository } from './slo_repository';
-import { TransformManager } from './transform_manager';
+import type { SLORepository } from './slo_repository';
+import type { TransformManager } from './transform_manager';
 import { UpdateSLO } from './update_slo';
 
 describe('UpdateSLO', () => {

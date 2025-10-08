@@ -68,7 +68,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
+} from '../../../../../common/utils/detections_response';
 import {
   createSecuritySolutionAlerts,
   getSecuritySolutionAlerts,
@@ -270,7 +270,7 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
           await createAlertsIndex(supertest, log);
           const signals = await createSecuritySolutionAlerts(supertest, log, 2);
           alerts = [signals.hits.hits[0] as Alerts[number], signals.hits.hits[1] as Alerts[number]];
@@ -279,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
         afterEach(async () => {
           await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
         });
 
         it('removes a case from the alert schema when deleting a case', async () => {
@@ -378,11 +378,11 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
         });
 
         afterEach(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
         });
 
         it('removes a case from the alert schema when deleting a case', async () => {

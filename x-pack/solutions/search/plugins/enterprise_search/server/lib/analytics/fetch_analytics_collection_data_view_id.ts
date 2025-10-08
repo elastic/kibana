@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
-import { AnalyticsCollectionDataViewId } from '../../../common/types/analytics';
+import type { AnalyticsCollectionDataViewId } from '../../../common/types/analytics';
 
 import { fetchAnalyticsCollections } from './fetch_analytics_collection';
 

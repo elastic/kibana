@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Request, ResponseToolkit, Server } from '@hapi/hapi';
+import type { Request, ResponseToolkit, Server } from '@hapi/hapi';
 import { format as formatUrl } from 'url';
 import { createServer, getServerOptions } from '@kbn/server-http-tools';
 import type { Logger } from '@kbn/logging';
 
-import { HttpConfig } from './http_config';
+import type { HttpConfig } from './http_config';
 
 export class HttpsRedirectServer {
   private server?: Server;

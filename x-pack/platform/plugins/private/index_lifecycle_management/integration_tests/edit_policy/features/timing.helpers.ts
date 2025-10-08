@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { createMinAgeActions, createTogglePhaseAction } from '../../helpers';
 import { initTestBed } from '../init_test_bed';
 

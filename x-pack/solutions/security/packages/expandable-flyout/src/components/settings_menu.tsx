@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiContextMenu,
-  EuiFlyoutProps,
-  EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
@@ -198,12 +198,14 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
               <h3>
                 {FLYOUT_TYPE_TITLE}{' '}
                 {flyoutCustomProps?.pushVsOverlay?.tooltip && (
-                  <EuiToolTip position="top" content={flyoutCustomProps?.pushVsOverlay?.tooltip}>
-                    <EuiIcon
-                      data-test-subj={SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID}
-                      type="info"
-                    />
-                  </EuiToolTip>
+                  <EuiIconTip
+                    content={flyoutCustomProps?.pushVsOverlay?.tooltip}
+                    type="info"
+                    iconProps={{
+                      'data-test-subj': SETTINGS_MENU_FLYOUT_TYPE_INFORMATION_ICON_TEST_ID,
+                    }}
+                    position="top"
+                  />
                 )}
               </h3>
             </EuiTitle>
@@ -221,12 +223,15 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
               <h3>
                 {FLYOUT_RESIZE_TITLE}{' '}
                 {flyoutCustomProps?.resize?.tooltip && (
-                  <EuiToolTip position="top" content={flyoutCustomProps?.resize?.tooltip}>
-                    <EuiIcon
-                      data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID}
-                      type="info"
-                    />
-                  </EuiToolTip>
+                  <EuiIconTip
+                    content={flyoutCustomProps?.resize?.tooltip}
+                    type="info"
+                    data-test-subj={SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID}
+                    position="top"
+                    iconProps={{
+                      'data-test-subj': SETTINGS_MENU_FLYOUT_RESIZE_INFORMATION_ICON_TEST_ID,
+                    }}
+                  />
                 )}
               </h3>
             </EuiTitle>

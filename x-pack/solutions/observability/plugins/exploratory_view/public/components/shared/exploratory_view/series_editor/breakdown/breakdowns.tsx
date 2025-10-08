@@ -16,7 +16,7 @@ import {
   RECORDS_FIELD,
   PERCENTILE,
 } from '../../configurations/constants';
-import { SeriesConfig, SeriesUrl } from '../../types';
+import type { SeriesConfig, SeriesUrl } from '../../types';
 import { SYNTHETICS_STEP_NAME } from '../../configurations/constants/field_names/synthetics';
 import { isStepLevelMetric } from '../../configurations/synthetics/kpi_over_time_config';
 

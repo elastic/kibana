@@ -21,7 +21,7 @@ import type {
   CompositeNewTermsAggResult,
   CreateAlertsHook,
 } from './build_new_terms_aggregation';
-import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import type { NewTermsAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import {
   getMaxSignalsWarning,
   getSuppressionMaxSignalsWarning,
@@ -72,7 +72,7 @@ interface LoggedRequestsProps {
 }
 
 type MultiTermsCompositeResult =
-  | (Omit<GenericBulkCreateResponse<NewTermsFieldsLatest>, 'suppressedItemsCount'> &
+  | (Omit<GenericBulkCreateResponse<NewTermsAlertLatest>, 'suppressedItemsCount'> &
       LoggedRequestsProps)
   | LoggedRequestsProps
   | undefined;

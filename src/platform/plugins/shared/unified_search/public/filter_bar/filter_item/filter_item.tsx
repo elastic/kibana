@@ -7,37 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiPopoverProps, UseEuiTheme } from '@elastic/eui';
+import { EuiContextMenu, EuiContextMenuPanel, EuiPopover, euiShadowMedium } from '@elastic/eui';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import type { Filter } from '@kbn/es-query';
 import {
-  EuiContextMenu,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiPopoverProps,
-  UseEuiTheme,
-  euiShadowMedium,
-} from '@elastic/eui';
-import { InjectedIntl } from '@kbn/i18n-react';
-import {
-  Filter,
   isFilterPinned,
   toggleFilterNegated,
   toggleFilterPinned,
   toggleFilterDisabled,
 } from '@kbn/es-query';
 import classNames from 'classnames';
-import React, { MouseEvent, useState, useEffect, HTMLAttributes, useCallback } from 'react';
+import type { MouseEvent, HTMLAttributes } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { type DocLinksStart, type IUiSettingsClient } from '@kbn/core/public';
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { css } from '@emotion/react';
 import { getIndexPatternFromFilter, getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 import { useMemoCss } from '../../use_memo_css';
 import { FilterEditor } from '../filter_editor/filter_editor';
 import { FilterView } from '../filter_view';
-import { FilterPanelOption } from '../../types';
-import {
-  withCloseFilterEditorConfirmModal,
-  WithCloseFilterEditorConfirmModalProps,
-} from '../filter_editor';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import type { FilterPanelOption } from '../../types';
+import type { WithCloseFilterEditorConfirmModalProps } from '../filter_editor';
+import { withCloseFilterEditorConfirmModal } from '../filter_editor';
+import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;

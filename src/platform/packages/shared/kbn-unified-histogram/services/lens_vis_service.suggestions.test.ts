@@ -8,7 +8,7 @@
  */
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { allSuggestionsMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
@@ -163,6 +163,44 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
+| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp`,
+    };
+
+    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+  });
+
+  test('should return histogramSuggestion with FROM for a timeseries user query', async () => {
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'TS metrics*' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: [],
+      isTransformationalESQL: false,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(
+      UnifiedHistogramSuggestionType.histogramForESQL
+    );
+    expect(lensVis.currentSuggestionContext?.suggestion).toBeDefined();
+
+    const histogramQuery = {
+      esql: `FROM metrics*
 | EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp`,
     };
 

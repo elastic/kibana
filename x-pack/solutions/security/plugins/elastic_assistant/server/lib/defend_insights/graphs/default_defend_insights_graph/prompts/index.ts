@@ -5,17 +5,34 @@
  * 2.0.
  */
 
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
-
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import {
-  getIncompatibleAntivirusPrompt,
-  DefendInsightsCombinedPrompts,
-} from './incompatible_antivirus';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { DefendInsightType } from '@kbn/elastic-assistant-common';
+
 import { InvalidDefendInsightTypeError } from '../../../errors';
+import { getIncompatibleAntivirusPrompt } from './incompatible_antivirus';
+import { getPolicyResponseFailurePrompt } from './policy_response_failure';
+
+export interface DefendInsightsPrompts {
+  default: string;
+  refine: string;
+  continue: string;
+}
+
+export interface DefendInsightsGenerationPrompts {
+  group: string;
+  events: string;
+  eventsId: string;
+  eventsEndpointId: string;
+  eventsValue: string;
+  remediation?: string;
+  remediationMessage?: string;
+  remediationLink?: string;
+}
+
+export type DefendInsightsCombinedPrompts = DefendInsightsPrompts & DefendInsightsGenerationPrompts;
 
 export function getDefendInsightsPrompt({
   type,
@@ -29,9 +46,12 @@ export function getDefendInsightsPrompt({
   provider?: string;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<DefendInsightsCombinedPrompts> {
-  if (type === DefendInsightType.Enum.incompatible_antivirus) {
-    return getIncompatibleAntivirusPrompt(args);
+  switch (type) {
+    case DefendInsightType.Enum.incompatible_antivirus:
+      return getIncompatibleAntivirusPrompt(args);
+    case DefendInsightType.Enum.policy_response_failure:
+      return getPolicyResponseFailurePrompt(args);
+    default:
+      throw new InvalidDefendInsightTypeError();
   }
-
-  throw new InvalidDefendInsightTypeError();
 }

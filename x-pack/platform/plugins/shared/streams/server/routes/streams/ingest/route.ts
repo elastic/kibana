@@ -7,16 +7,17 @@
 
 import { badData, badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod';
-import { StreamQuery, Streams } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { Ingest } from '@kbn/streams-schema/src/models/ingest';
 import { WiredIngest } from '@kbn/streams-schema/src/models/ingest/wired';
-import { UnwiredIngest } from '@kbn/streams-schema/src/models/ingest/unwired';
+import type { ClassicIngest } from '@kbn/streams-schema/src/models/ingest/classic';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_ID, ASSET_TYPE } from '../../../lib/streams/assets/fields';
-import { QueryAsset } from '../../../../common/assets';
-import { StreamsClient } from '../../../lib/streams/client';
-import { AssetClient } from '../../../lib/streams/assets/asset_client';
+import type { QueryAsset } from '../../../../common/assets';
+import type { StreamsClient } from '../../../lib/streams/client';
+import type { AssetClient } from '../../../lib/streams/assets/asset_client';
 
 async function getAssets({
   name,
@@ -24,7 +25,7 @@ async function getAssets({
 }: {
   name: string;
   assetClient: AssetClient;
-}): Promise<{ dashboards: string[]; queries: StreamQuery[] }> {
+}): Promise<{ dashboards: string[]; queries: StreamQuery[]; rules: string[] }> {
   const assets = await assetClient.getAssets(name);
 
   const dashboards = assets
@@ -35,9 +36,14 @@ async function getAssets({
     .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
     .map((asset) => asset.query);
 
+  const rules = assets
+    .filter((asset) => asset[ASSET_TYPE] === 'rule')
+    .map((asset) => asset[ASSET_ID]);
+
   return {
     dashboards,
     queries,
+    rules,
   };
 }
 
@@ -52,7 +58,7 @@ async function updateWiredIngest({
   name: string;
   ingest: WiredIngest;
 }) {
-  const { dashboards, queries } = await getAssets({
+  const { dashboards, queries, rules } = await getAssets({
     name,
     assetClient,
   });
@@ -72,6 +78,7 @@ async function updateWiredIngest({
       ...stream,
       ingest,
     },
+    rules,
   };
 
   return await streamsClient.upsertStream({
@@ -80,7 +87,7 @@ async function updateWiredIngest({
   });
 }
 
-async function updateUnwiredIngest({
+async function updateClassicIngest({
   streamsClient,
   assetClient,
   name,
@@ -89,28 +96,29 @@ async function updateUnwiredIngest({
   streamsClient: StreamsClient;
   assetClient: AssetClient;
   name: string;
-  ingest: UnwiredIngest;
+  ingest: ClassicIngest;
 }) {
-  const { dashboards, queries } = await getAssets({
+  const { dashboards, queries, rules } = await getAssets({
     name,
     assetClient,
   });
 
   const definition = await streamsClient.getStream(name);
 
-  if (!Streams.UnwiredStream.Definition.is(definition)) {
-    throw badData(`Can't update unwired capabilities of a non-unwired stream`);
+  if (!Streams.ClassicStream.Definition.is(definition)) {
+    throw badData(`Can't update classic capabilities of a non-classic stream`);
   }
 
   const { name: _name, ...stream } = definition;
 
-  const upsertRequest: Streams.UnwiredStream.UpsertRequest = {
+  const upsertRequest: Streams.ClassicStream.UpsertRequest = {
     dashboards,
     queries,
     stream: {
       ...stream,
       ingest,
     },
+    rules,
   };
 
   return await streamsClient.upsertStream({
@@ -199,7 +207,7 @@ const upsertIngestRoute = createServerRoute({
       return await updateWiredIngest({ streamsClient, assetClient, name, ingest });
     }
 
-    return await updateUnwiredIngest({ streamsClient, assetClient, name, ingest });
+    return await updateClassicIngest({ streamsClient, assetClient, name, ingest });
   },
 });
 

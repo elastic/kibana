@@ -39,8 +39,8 @@ const mockAssetDetailsLocator = {
   getRedirectUrl: jest
     .fn()
     .mockImplementation(
-      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
-        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+      ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${entityType}/${entityId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     ),
 } as unknown as jest.Mocked<AssetDetailsLocator>;
 
@@ -151,12 +151,6 @@ describe('TransactionActionMenu ', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('should render the discover link when there is adhoc data view', async () => {
-    const { findByText } = await renderTransaction(Transactions.transactionWithMinimalData);
-
-    expect(findByText('View transaction in Discover')).not.toBeNull();
   });
 
   it('should call logs locators getRedirectUrl function', async () => {

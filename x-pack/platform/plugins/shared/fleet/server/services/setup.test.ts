@@ -7,10 +7,7 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
 import { LockAcquisitionError } from '@kbn/lock-manager';
-
-import type { Logger } from '@kbn/core/server';
 
 import { MessageSigningError } from '../../common/errors';
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
@@ -54,8 +51,6 @@ jest.mock('./epm/kibana/assets/saved_objects');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
-let mockedLogger: jest.Mocked<Logger>;
-
 const mockedMethodThrowsError = (mockFn: jest.Mock) =>
   mockFn.mockImplementation(() => {
     throw new Error('SO method mocked to throw');
@@ -87,10 +82,11 @@ describe('setupFleet', () => {
   beforeEach(async () => {
     context = xpackMocks.createRequestHandlerContext();
     // prevents `Logger not set.` and other appContext errors
-    mockedAppContextService.start(createAppContextStartContractMock());
+    const startService = createAppContextStartContractMock();
+    mockedAppContextService.start(startService);
     esClient = context.core.elasticsearch.client.asInternalUser;
-    mockedLogger = loggerMock.create();
-    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+    mockedAppContextService.getLogger.mockReturnValue(startService.logger);
+    mockedAppContextService.getTaskManagerStart.mockReturnValue(startService.taskManagerStart);
 
     (getInstallations as jest.Mock).mockResolvedValueOnce({
       saved_objects: [],

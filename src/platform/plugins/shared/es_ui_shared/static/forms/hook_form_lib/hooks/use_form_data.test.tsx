@@ -10,10 +10,12 @@
 import React, { useEffect, useRef } from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { registerTestBed, TestBed } from '../shared_imports';
+import type { TestBed } from '../shared_imports';
+import { registerTestBed } from '../shared_imports';
 import { Form, UseField } from '../components';
 import { useForm } from './use_form';
-import { useFormData, HookReturn } from './use_form_data';
+import type { HookReturn } from './use_form_data';
+import { useFormData } from './use_form_data';
 
 interface Props<T extends object> {
   onHookValueChange(data: HookReturn<T>): void;

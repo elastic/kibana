@@ -18,7 +18,6 @@ import {
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { superUser } from '../../../common/lib/authentication/users';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
@@ -53,8 +52,14 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return the correct total number of alerts attached to cases', async () => {
-      const firstCase = await createCase(supertest, getPostCaseRequest());
-      const secondCase = await createCase(supertest, getPostCaseRequest());
+      const firstCase = await createCase(
+        supertest,
+        getPostCaseRequest({ owner: 'securitySolution' })
+      );
+      const secondCase = await createCase(
+        supertest,
+        getPostCaseRequest({ owner: 'securitySolution' })
+      );
 
       const firstCaseAlerts = [...Array(3).keys()].map((num) => `test-case-1-${num}`);
       const secondCaseAlerts = [...Array(2).keys()].map((num) => `test-case-2-${num}`);
@@ -67,6 +72,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCommentAlertReq,
             alertId: firstCaseAlerts,
             index: firstCaseAlerts,
+            owner: 'securitySolution',
           },
         ],
         expectedHttpCode: 200,
@@ -80,6 +86,7 @@ export default ({ getService }: FtrProviderContext): void => {
             ...postCommentAlertReq,
             alertId: secondCaseAlerts,
             index: secondCaseAlerts,
+            owner: 'securitySolution',
           },
         ],
         expectedHttpCode: 200,
@@ -88,7 +95,12 @@ export default ({ getService }: FtrProviderContext): void => {
       await createComment({
         supertest,
         caseId: secondCase.id,
-        params: { ...postCommentAlertReq, alertId: 'test-case-2-3', index: 'test-case-2-3' },
+        params: {
+          ...postCommentAlertReq,
+          alertId: 'test-case-2-3',
+          index: 'test-case-2-3',
+          owner: 'securitySolution',
+        },
       });
 
       await runTelemetryTask(supertest);

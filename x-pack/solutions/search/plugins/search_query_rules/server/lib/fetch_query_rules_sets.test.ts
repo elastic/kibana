@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { fetchQueryRulesSets } from './fetch_query_rules_sets';
 
 describe('fetch query rules sets lib function', () => {

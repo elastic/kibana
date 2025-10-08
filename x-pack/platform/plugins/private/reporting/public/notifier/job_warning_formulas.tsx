@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { CoreStart, ToastInput } from '@kbn/core/public';
+import type { CoreStart, ToastInput } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { JobId } from '@kbn/reporting-common/types';
+import type { JobId } from '@kbn/reporting-common/types';
 import { DownloadButton } from './job_download_button';
 
-import { JobSummary } from '../types';
+import type { JobSummary } from '../types';
 import { ReportLink } from './report_link';
 
 export const getWarningFormulasToast = (

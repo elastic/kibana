@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
+import type { EuiSearchBoxProps } from '@elastic/eui/src/components/search_bar/search_box';
 
-import { useLoadSnapshots } from '../../public/application/services/http';
+import { useLoadRepositories, useLoadSnapshots } from '../../public/application/services/http';
 import { DEFAULT_SNAPSHOT_LIST_PARAMS } from '../../public/application/lib';
 
 import * as fixtures from '../../test/fixtures';
-import { SnapshotListTestBed } from './helpers/snapshot_list.helpers';
+import type { SnapshotListTestBed } from './helpers/snapshot_list.helpers';
 import { REPOSITORY_NAME } from './helpers/constant';
 import { pageHelpers, getRandomString } from './helpers';
 
@@ -26,6 +26,7 @@ import { pageHelpers, getRandomString } from './helpers';
  */
 jest.mock('../../public/application/services/http', () => ({
   useLoadSnapshots: jest.fn(),
+  useLoadRepositories: jest.fn(),
   setUiMetricServiceSnapshot: () => {},
   setUiMetricService: () => {},
 }));
@@ -67,12 +68,23 @@ describe('<SnapshotList />', () => {
       isLoading: false,
       data: {
         snapshots,
-        repositories: [REPOSITORY_NAME],
         policies: [],
         errors: {},
         total: snapshots.length,
       },
       resendRequest: () => {},
+    });
+    (useLoadRepositories as jest.Mock).mockReturnValue({
+      error: null,
+      isInitialRequest: false,
+      isLoading: false,
+      data: {
+        repositories: [
+          {
+            name: REPOSITORY_NAME,
+          },
+        ],
+      },
     });
   });
 
@@ -308,6 +320,52 @@ describe('<SnapshotList />', () => {
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'policyName',
             searchValue: 'test_policy',
+            searchMatch: 'must_not',
+            searchOperator: 'exact',
+          });
+        });
+      });
+
+      describe('state', () => {
+        test('partial state search is parsed', async () => {
+          await setSearchText('state:SUCCESS');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'SUCCESS',
+            searchMatch: 'must',
+            searchOperator: 'eq',
+          });
+        });
+
+        test('excluding partial state search is parsed', async () => {
+          await setSearchText('-state:FAILED');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'FAILED',
+            searchMatch: 'must_not',
+            searchOperator: 'eq',
+          });
+        });
+
+        test('exact state search is parsed', async () => {
+          await setSearchText('state=IN_PROGRESS');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'IN_PROGRESS',
+            searchMatch: 'must',
+            searchOperator: 'exact',
+          });
+        });
+
+        test('excluding exact state search is parsed', async () => {
+          await setSearchText('-state=PARTIAL');
+          expect(useLoadSnapshots).lastCalledWith({
+            ...DEFAULT_SNAPSHOT_LIST_PARAMS,
+            searchField: 'state',
+            searchValue: 'PARTIAL',
             searchMatch: 'must_not',
             searchOperator: 'exact',
           });

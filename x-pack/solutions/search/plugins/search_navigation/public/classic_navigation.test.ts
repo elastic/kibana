@@ -9,24 +9,19 @@ import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
 import { classicNavigationFactory } from './classic_navigation';
-import { ClassicNavItem } from './types';
+import type { ClassicNavItem } from './types';
 
 describe('classicNavigationFactory', function () {
   const mockedNavLinks: Array<Partial<ChromeNavLink>> = [
     {
-      id: 'enterpriseSearch',
-      url: '/app/elasticsearch/overview',
-      title: 'Overview',
+      id: 'searchHomepage',
+      url: '/app/elasticsearch/home',
+      title: 'Home',
     },
     {
-      id: 'enterpriseSearchContent:connectors',
-      title: 'Connectors',
-      url: '/app/elasticsearch/content/connectors',
-    },
-    {
-      id: 'enterpriseSearchContent:webCrawlers',
-      title: 'Web Crawlers',
-      url: '/app/elasticsearch/content/crawlers',
+      id: 'enterpriseSearchApplications:searchApplications',
+      title: 'Search Applications',
+      url: '/app/elasticsearch/content/search_applications',
     },
   ];
   const mockedCoreStart = {
@@ -56,7 +51,7 @@ describe('classicNavigationFactory', function () {
       {
         id: 'unit-test',
         deepLink: {
-          link: 'enterpriseSearch',
+          link: 'searchHomepage',
         },
       },
     ];
@@ -64,10 +59,10 @@ describe('classicNavigationFactory', function () {
       icon: 'logoElasticsearch',
       items: [
         {
-          href: '/app/elasticsearch/overview',
+          href: '/app/elasticsearch/home',
           id: 'unit-test',
           isSelected: false,
-          name: 'Overview',
+          name: 'Home',
           onClick: expect.any(Function),
         },
       ],
@@ -77,13 +72,13 @@ describe('classicNavigationFactory', function () {
 
   it('will set isSelected', () => {
     mockHistory.location.pathname = '/overview';
-    mockHistory.createHref.mockReturnValue('/app/elasticsearch/overview');
+    mockHistory.createHref.mockReturnValue('/app/elasticsearch/home');
 
     const items: ClassicNavItem[] = [
       {
         id: 'unit-test',
         deepLink: {
-          link: 'enterpriseSearch',
+          link: 'searchHomepage',
         },
       },
     ];
@@ -91,10 +86,10 @@ describe('classicNavigationFactory', function () {
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/elasticsearch/overview',
+        href: '/app/elasticsearch/home',
         id: 'unit-test',
         isSelected: true,
-        name: 'Overview',
+        name: 'Home',
         onClick: expect.any(Function),
       },
     ]);
@@ -106,9 +101,9 @@ describe('classicNavigationFactory', function () {
         name: 'Content',
         items: [
           {
-            id: 'searchConnectors',
+            id: 'searchApplications',
             deepLink: {
-              link: 'enterpriseSearchContent:connectors',
+              link: 'enterpriseSearchApplications:searchApplications',
             },
           },
         ],
@@ -121,10 +116,10 @@ describe('classicNavigationFactory', function () {
         id: 'searchContent',
         items: [
           {
-            href: '/app/elasticsearch/content/connectors',
-            id: 'searchConnectors',
+            href: '/app/elasticsearch/content/search_applications',
+            id: 'searchApplications',
             isSelected: false,
-            name: 'Connectors',
+            name: 'Search Applications',
             onClick: expect.any(Function),
           },
         ],
@@ -135,20 +130,20 @@ describe('classicNavigationFactory', function () {
   it('returns name if provided over the deeplink title', () => {
     const items: ClassicNavItem[] = [
       {
-        id: 'searchConnectors',
+        id: 'searchApplications',
         deepLink: {
-          link: 'enterpriseSearchContent:connectors',
+          link: 'enterpriseSearchApplications:searchApplications',
         },
-        name: 'Date connectors',
+        name: 'Date Applications',
       },
     ];
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/elasticsearch/content/connectors',
-        id: 'searchConnectors',
+        href: '/app/elasticsearch/content/search_applications',
+        id: 'searchApplications',
         isSelected: false,
-        name: 'Date connectors',
+        name: 'Date Applications',
         onClick: expect.any(Function),
       },
     ]);
@@ -158,13 +153,7 @@ describe('classicNavigationFactory', function () {
       {
         id: 'unit-test',
         deepLink: {
-          link: 'enterpriseSearch',
-        },
-      },
-      {
-        id: 'serverlessElasticsearch',
-        deepLink: {
-          link: 'serverlessElasticsearch',
+          link: 'searchHomepage',
         },
       },
     ];
@@ -172,10 +161,10 @@ describe('classicNavigationFactory', function () {
     const solutionNav = classicNavigationFactory(items, core, history);
     expect(solutionNav!.items).toEqual([
       {
-        href: '/app/elasticsearch/overview',
+        href: '/app/elasticsearch/home',
         id: 'unit-test',
         isSelected: false,
-        name: 'Overview',
+        name: 'Home',
         onClick: expect.any(Function),
       },
     ]);

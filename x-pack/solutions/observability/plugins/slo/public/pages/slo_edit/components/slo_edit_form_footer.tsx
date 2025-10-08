@@ -17,13 +17,13 @@ import { sloEditFormFooterPortal } from '../shared_flyout/slo_add_form_flyout';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/use_create_slo';
 import { useUpdateSlo } from '../../../hooks/use_update_slo';
-import { BurnRateRuleParams } from '../../../typings';
+import type { BurnRateRuleParams } from '../../../typings';
 import { createBurnRateRuleRequestBody } from '../helpers/create_burn_rate_rule_request_body';
 import {
   transformCreateSLOFormToCreateSLOInput,
   transformValuesToUpdateSLOInput,
 } from '../helpers/process_slo_form_values';
-import { CreateSLOForm } from '../types';
+import type { CreateSLOForm } from '../types';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
 import { SLOInspect } from './common/slo_inspect/slo_inspect';
 

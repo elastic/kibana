@@ -15,7 +15,7 @@ import { LensVisService } from '../services/lens_vis_service';
 import { type QueryParams } from '../utils/external_vis_context';
 import { unifiedHistogramServicesMock } from './services';
 import { histogramESQLSuggestionMock } from './suggestions';
-import { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
+import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
 
 const TIME_RANGE: TimeRange = {
   from: '2022-11-17T00:00:00.000Z',
@@ -34,6 +34,8 @@ export const getLensVisMock = async ({
   allSuggestions,
   isTransformationalESQL,
   table,
+  externalVisContext,
+  getModifiedVisAttributes,
 }: {
   filters: QueryParams['filters'];
   query: QueryParams['query'];
@@ -46,6 +48,8 @@ export const getLensVisMock = async ({
   allSuggestions?: Suggestion[];
   isTransformationalESQL?: boolean;
   table?: Datatable;
+  externalVisContext?: UnifiedHistogramVisContext;
+  getModifiedVisAttributes?: Parameters<LensVisService['update']>[0]['getModifiedVisAttributes'];
 }): Promise<{
   lensService: LensVisService;
   visContext: UnifiedHistogramVisContext | undefined;
@@ -88,9 +92,10 @@ export const getLensVisMock = async ({
     },
     timeInterval,
     breakdownField,
-    externalVisContext: undefined,
+    externalVisContext,
     table,
     onSuggestionContextChange: () => {},
+    getModifiedVisAttributes,
   });
 
   return {

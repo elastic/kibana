@@ -13,7 +13,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useActionModal } from '../../../context/action_modal';
 

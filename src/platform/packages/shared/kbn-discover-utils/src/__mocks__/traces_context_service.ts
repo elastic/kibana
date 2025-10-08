@@ -13,4 +13,7 @@ import {
 } from '../data_types';
 
 export const createTracesContextServiceMock = () =>
-  getTracesContextService('traces-*', [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP]);
+  getTracesContextService({
+    tracesIndexPattern: 'traces-*',
+    allowedDataSources: [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP],
+  });

@@ -73,6 +73,17 @@ export interface FileAttachmentAggsResult {
   topMimeTypes: Buckets<string>;
 }
 
+export interface CasesTelemetryWithAlertsAggsByOwnerResults {
+  by_owner: {
+    buckets: Array<
+      ReferencesAggregation & {
+        key: string;
+        doc_count: number;
+      }
+    >;
+  };
+}
+
 export type FileAttachmentAggregationResults = Record<Owner, FileAttachmentAggsResult> &
   FileAttachmentAggsResult;
 
@@ -146,6 +157,8 @@ export interface AttachmentFramework {
 
 export interface SolutionTelemetry extends Count, AttachmentFramework {
   assignees: Assignees;
+  totalWithAlerts: number;
+  status: Status;
 }
 
 export interface Status {
@@ -191,7 +204,12 @@ export interface CasesTelemetry {
   };
   userActions: { all: Count & { maxOnACase: number } };
   comments: { all: Count & { maxOnACase: number } };
-  alerts: { all: Count & { maxOnACase: number } };
+  alerts: {
+    all: Count & { maxOnACase: number };
+    obs: Count & { maxOnACase: number };
+    sec: Count & { maxOnACase: number };
+    main: Count & { maxOnACase: number };
+  };
   connectors: {
     all: {
       all: { totalAttached: number };

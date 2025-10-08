@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import moment from 'moment-timezone';
 import { TimestampTooltip } from './timestamp_tooltip';
@@ -27,41 +27,52 @@ describe('TimestampTooltip', () => {
 
   afterAll(() => moment.tz.setDefault(''));
 
-  it('should render component with absolute time in body and absolute time in tooltip', () => {
-    expect(shallow(<TimestampTooltip time={timestamp} />)).toMatchInlineSnapshot(`
-      <EuiToolTip
-        content="Oct 10, 2019, 08:06:40.123 (UTC-7)"
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
-        position="top"
-      >
-        Oct 10, 2019, 08:06:40.123 (UTC-7)
-      </EuiToolTip>
-    `);
+  it('should render component with absolute time in body and absolute time in tooltip', async () => {
+    const { getByRole, getByText } = render(<TimestampTooltip time={timestamp} />);
+
+    const expectedDateString = 'Oct 10, 2019, 08:06:40.123 (UTC-7)';
+
+    const anchor = getByText(expectedDateString);
+
+    fireEvent.mouseOver(anchor);
+
+    await waitFor(() => {
+      const tooltip = getByRole('tooltip');
+      expect(tooltip.textContent).toBe(expectedDateString);
+    });
   });
 
-  it('should format with precision in milliseconds by default', () => {
-    expect(
-      shallow(<TimestampTooltip time={timestamp} />)
-        .find('EuiToolTip')
-        .prop('content')
-    ).toBe('Oct 10, 2019, 08:06:40.123 (UTC-7)');
+  it('should format with precision in seconds', async () => {
+    const { getByRole, getByText } = render(
+      <TimestampTooltip time={timestamp} timeUnit="seconds" />
+    );
+
+    const expectedDateString = 'Oct 10, 2019, 08:06:40 (UTC-7)';
+
+    const anchor = getByText(expectedDateString);
+
+    fireEvent.mouseOver(anchor);
+
+    await waitFor(() => {
+      const tooltip = getByRole('tooltip');
+      expect(tooltip.textContent).toBe(expectedDateString);
+    });
   });
 
-  it('should format with precision in seconds', () => {
-    expect(
-      shallow(<TimestampTooltip time={timestamp} timeUnit="seconds" />)
-        .find('EuiToolTip')
-        .prop('content')
-    ).toBe('Oct 10, 2019, 08:06:40 (UTC-7)');
-  });
+  it('should format with precision in minutes', async () => {
+    const { getByRole, getByText } = render(
+      <TimestampTooltip time={timestamp} timeUnit="minutes" />
+    );
 
-  it('should format with precision in minutes', () => {
-    expect(
-      shallow(<TimestampTooltip time={timestamp} timeUnit="minutes" />)
-        .find('EuiToolTip')
-        .prop('content')
-    ).toBe('Oct 10, 2019, 08:06 (UTC-7)');
+    const expectedDateString = 'Oct 10, 2019, 08:06 (UTC-7)';
+
+    const anchor = getByText(expectedDateString);
+
+    fireEvent.mouseOver(anchor);
+
+    await waitFor(() => {
+      const tooltip = getByRole('tooltip');
+      expect(tooltip.textContent).toBe(expectedDateString);
+    });
   });
 });

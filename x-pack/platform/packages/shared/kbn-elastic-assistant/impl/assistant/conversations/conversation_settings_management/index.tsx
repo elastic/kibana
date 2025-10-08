@@ -20,10 +20,10 @@ import { snakeCase } from 'lodash';
 import { css } from '@emotion/react';
 import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import { useConversationsUpdater } from '../../settings/use_settings_updater/use_conversations_updater';
-import { Conversation } from '../../../assistant_context/types';
+import type { Conversation } from '../../../assistant_context/types';
 import { useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
-import { AIConnector } from '../../../connectorland/connector_selector';
+import type { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
 
 import { useFetchCurrentUserConversations, useFetchPrompts } from '../../api';
@@ -39,7 +39,7 @@ import {
 } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bottom_bar';
 import { Toolbar } from './tool_bar_component';
-import { ConversationTableItem } from './types';
+import type { ConversationTableItem } from './types';
 import { useConversationSelection } from './use_conversation_selection';
 
 interface Props {
@@ -56,6 +56,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const {
     actionTypeRegistry,
     assistantAvailability: { isAssistantEnabled },
+    currentUser,
     http,
     nameSpace,
     toasts,
@@ -117,6 +118,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         { sortField: sorting.sort.field === 'Title' ? 'title' : snakeCase(sorting.sort.field) }
       : {}),
     ...(sorting?.sort?.direction ? { sortOrder: sorting.sort.direction } : {}),
+    fields: ['id', 'title', 'apiConfig', 'updatedAt', 'createdBy', 'users'],
+    isConversationOwner: true,
   });
 
   const refetchAll = useCallback(() => {
@@ -248,7 +251,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     onCancelClick();
   }, [closeConfirmModal, handleUnselectAll, onCancelClick]);
 
-  const { getConversationsList, getColumns } = useConversationsTable();
+  const { getConversationsList, getColumns } = useConversationsTable(currentUser);
 
   const conversationOptions = getConversationsList({
     allSystemPrompts,
@@ -288,19 +291,19 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
       }),
     [
       conversationOptions,
-      deletedConversations.length,
       deletedConversationsIds,
       excludedIds,
-      getColumns,
       handlePageChecked,
       handlePageUnchecked,
       handleRowChecked,
       handleRowUnChecked,
       isDeleteAll,
+      deletedConversations.length,
       isExcludedMode,
       onDeleteActionClicked,
       onEditActionClicked,
       totalItemCount,
+      getColumns,
     ]
   );
 
@@ -370,6 +373,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
               allSystemPrompts={allSystemPrompts}
               conversationSettings={conversations}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
+              currentUser={currentUser}
               http={http}
               isDisabled={isDisabled}
               selectedConversation={selectedConversation}

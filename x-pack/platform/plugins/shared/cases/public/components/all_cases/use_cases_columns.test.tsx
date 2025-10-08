@@ -45,7 +45,6 @@ describe('useCasesColumns ', () => {
     userProfiles: userProfilesMap,
     isSelectorView: false,
     selectedColumns: DEFAULT_SELECTED_COLUMNS,
-    settings: { displayIncrementalCaseId: true },
   };
 
   beforeEach(() => {

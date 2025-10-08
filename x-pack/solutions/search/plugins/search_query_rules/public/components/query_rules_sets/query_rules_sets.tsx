@@ -7,14 +7,9 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-} from '@elastic/eui';
+import type { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
@@ -40,7 +35,7 @@ export const QueryRulesSets = () => {
   const [rulesetToDelete, setRulesetToDelete] = useState<string | null>(null);
 
   const { queryRulesSetsFilteredData, pagination } = useQueryRulesSetsTableData(
-    queryRulesData?.data,
+    queryRulesData,
     searchKey,
     pageIndex,
     pageSize
@@ -132,6 +127,7 @@ export const QueryRulesSets = () => {
           icon: 'trash',
           color: 'danger',
           type: 'icon',
+          'data-test-subj': 'queryRulesSetDeleteButton',
           isPrimary: true,
           onClick: (ruleset: QueryRulesListRulesetsQueryRulesetListItem) => {
             useTracker?.click?.(AnalyticsEvents.deleteRulesetInlineDropdownClicked);

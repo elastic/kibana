@@ -75,6 +75,7 @@ export class ConcurrentInstallOperationError extends FleetError {}
 export class PackageSavedObjectConflictError extends FleetError {}
 export class KibanaSOReferenceError extends FleetError {}
 export class PackageAlreadyInstalledError extends FleetError {}
+export class PackageRollbackError extends FleetError {}
 
 export class AgentPolicyError extends FleetError {}
 export class AgentRequestInvalidError extends FleetError {}
@@ -106,6 +107,36 @@ export class AgentlessAgentConfigError extends FleetError {
 export class AgentlessPolicyExistsRequestError extends AgentPolicyError {
   constructor(message: string) {
     super(`Unable to create integration. ${message}`);
+  }
+}
+
+export class CloudConnectorCreateError extends FleetError {
+  constructor(message: string) {
+    super(`Error creating cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorGetListError extends FleetError {
+  constructor(message: string) {
+    super(`Error getting cloud connectors in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorInvalidVarsError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating cloud connector vars in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorDeleteError extends FleetError {
+  constructor(message: string) {
+    super(`Error deleting cloud connector in Fleet, ${message}`);
+  }
+}
+
+export class CloudConnectorUpdateError extends FleetError {
+  constructor(message: string) {
+    super(`Error updating cloud connector in Fleet, ${message}`);
   }
 }
 

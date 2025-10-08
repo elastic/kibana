@@ -193,9 +193,9 @@ export const getExecutionLogMetricsColumns = (
       <TableHeaderTooltipCell
         title={i18n.COLUMN_GAP_DURATION}
         customTooltip={
-          <div style={{ maxWidth: '20px' }}>
+          <div css={{ maxWidth: '20px' }}>
             <PopoverTooltip columnName={i18n.COLUMN_GAP_DURATION}>
-              <EuiText size={'s'} style={{ width: 350 }}>
+              <EuiText size={'s'} css={{ width: 350 }}>
                 <p>
                   <FormattedMessage
                     defaultMessage="Duration of gap in Rule execution (hh:mm:ss:SSS). Adjust Rule look-back or {seeDocs} for mitigating gaps."

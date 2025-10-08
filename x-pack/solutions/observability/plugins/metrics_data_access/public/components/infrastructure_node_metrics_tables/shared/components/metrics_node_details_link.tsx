@@ -28,8 +28,8 @@ export const MetricsNodeDetailsLink = ({
 }: MetricsNodeDetailsLinkProps) => {
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
   const linkProps = getAssetDetailUrl({
-    assetType: nodeType,
-    assetId: id,
+    entityType: nodeType,
+    entityId: id,
     search: {
       name: label,
       from: parse(timerange.from)?.valueOf(),

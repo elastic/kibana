@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewFieldBase } from '@kbn/es-query';
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 type IndexedFieldItemBase = Partial<DataViewField> & DataViewFieldBase;
 

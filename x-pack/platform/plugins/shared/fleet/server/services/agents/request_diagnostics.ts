@@ -13,8 +13,6 @@ import { SO_SEARCH_LIMIT, REQUEST_DIAGNOSTICS_TIMEOUT_MS } from '../../constants
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
-import { agentsKueryNamespaceFilter } from '../spaces/agent_namespaces';
-
 import type { GetAgentsOptions } from '.';
 import { getAgents, getAgentsByKuery } from './crud';
 import { createAgentAction } from './actions';
@@ -32,7 +30,7 @@ export async function requestDiagnostics(
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);
 
-  const response = await createAgentAction(esClient, {
+  const response = await createAgentAction(esClient, soClient, {
     agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'REQUEST_DIAGNOSTICS',
@@ -64,10 +62,10 @@ export async function bulkRequestDiagnostics(
   }
 
   const batchSize = options.batchSize ?? SO_SEARCH_LIMIT;
-  const namespaceFilter = await agentsKueryNamespaceFilter(currentSpaceId);
-  const kuery = namespaceFilter ? `${namespaceFilter} AND ${options.kuery}` : options.kuery;
+
   const res = await getAgentsByKuery(esClient, soClient, {
-    kuery,
+    kuery: options.kuery,
+    spaceId: currentSpaceId,
     showInactive: false,
     page: 1,
     perPage: batchSize,

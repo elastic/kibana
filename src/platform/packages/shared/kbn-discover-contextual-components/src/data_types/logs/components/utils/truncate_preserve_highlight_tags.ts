@@ -9,7 +9,7 @@
 
 function extractTextAndMarkTags(html: string) {
   const markTags: string[] = [];
-  const cleanText = html.replace(/<\/?mark>/g, (match) => {
+  const cleanText = html.replace(/<\/?mark[^>]*>/g, (match) => {
     markTags.push(match);
     return '';
   });

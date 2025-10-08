@@ -35,10 +35,11 @@ import type {
   AgentPolicy,
   OutputSoKafkaAttributes,
   OutputSoRemoteElasticsearchAttributes,
-  PolicySecretReference,
+  SecretReference,
+  OutputSoBaseAttributes,
 } from '../types';
 import {
-  LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DEFAULT_OUTPUT,
   DEFAULT_OUTPUT_ID,
@@ -152,13 +153,13 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${outputId}"`;
   if (outputId) {
     if (isDefault) {
-      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}" or not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
-      agentPoliciesKuery = `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
+      agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${outputId}"`;
     }
   } else {
     if (isDefault) {
-      agentPoliciesKuery = `not ${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
+      agentPoliciesKuery = `not ${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:*`;
     } else {
       return;
     }
@@ -474,6 +475,18 @@ class OutputService {
             !allowEditFields.includes(key) &&
             !deepEqual(originalOutput[key], data[key])
           ) {
+            // Allow editing the write_to_logs_streams field
+            if (key === 'write_to_logs_streams') {
+              continue;
+            }
+            // Allow ssl to differ if set to default empty values
+            if (
+              key === 'ssl' &&
+              originalOutput[key] === undefined &&
+              deepEqual(data[key], { certificate: '', certificate_authorities: [] })
+            ) {
+              continue;
+            }
             throw new OutputUnauthorizedError(
               `Preconfigured output ${id} ${key} cannot be updated outside of kibana config file.`
             );
@@ -905,7 +918,7 @@ class OutputService {
     const logger = appContextService.getLogger();
     logger.debug(`Updating output ${id}`);
 
-    let secretsToDelete: PolicySecretReference[] = [];
+    let secretsToDelete: SecretReference[] = [];
     const originalOutput = await this.get(soClient, id);
 
     this._validateFieldsAreEditable(originalOutput, data, id, fromPreconfiguration);
@@ -980,12 +993,22 @@ class OutputService {
         removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
       }
 
+      if (originalOutput.type === outputType.RemoteElasticsearch) {
+        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token = null;
+        (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key = null;
+      }
+
+      if (
+        originalOutput.type === outputType.Elasticsearch ||
+        originalOutput.type === outputType.RemoteElasticsearch
+      ) {
+        (updateData as Nullable<OutputSoBaseAttributes>).write_to_logs_streams = null;
+      }
+
       if (data.type === outputType.Logstash) {
         // remove ES specific field
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
-        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token;
-        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key;
       }
 
       if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {

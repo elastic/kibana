@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { CertificateList, CertSort } from './certificates_list';
+import type { CertSort } from './certificates_list';
+import { CertificateList } from './certificates_list';
 import { render } from '../../utils/testing';
-import { Cert } from '../../../../../common/runtime_types';
+import type { Cert } from '../../../../../common/runtime_types';
 
 describe('CertificateList', () => {
   it('render empty state', () => {

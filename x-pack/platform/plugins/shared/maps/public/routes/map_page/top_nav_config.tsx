@@ -7,17 +7,18 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import {
-  SavedObjectSaveModalOrigin,
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import type {
   OnSaveProps,
-  showSaveModal,
+  SaveResult,
+  ShowSaveModalMinimalSaveModalProps,
 } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModalOrigin, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import {
-  LazySavedObjectSaveModalDashboard,
+  LazySavedObjectSaveModalDashboardWithSaveResult,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
@@ -26,10 +27,12 @@ import {
   getSavedObjectsTagging,
 } from '../../kibana_services';
 import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
-import { SavedMap } from './saved_map';
+import type { SavedMap } from './saved_map';
 import { checkForDuplicateTitle } from '../../content_management';
 
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
+const SavedObjectSaveModalDashboardWithSaveResult = withSuspense(
+  LazySavedObjectSaveModalDashboardWithSaveResult
+);
 
 export function getTopNavConfig({
   savedMap,
@@ -169,7 +172,7 @@ export function getTopNavConfig({
               dashboardId?: string | null;
               addToLibrary: boolean;
             }
-          ) => {
+          ): Promise<SaveResult> => {
             try {
               await checkForDuplicateTitle(
                 {
@@ -210,7 +213,7 @@ export function getTopNavConfig({
           }),
         };
 
-        let saveModal;
+        let saveModal: React.ReactElement<ShowSaveModalMinimalSaveModalProps>;
 
         if (savedMap.hasOriginatingApp()) {
           saveModal = (
@@ -234,7 +237,7 @@ export function getTopNavConfig({
           );
         } else {
           saveModal = (
-            <SavedObjectSaveModalDashboard
+            <SavedObjectSaveModalDashboardWithSaveResult
               {...saveModalProps}
               canSaveByReference={true} // we know here that we have save capabilities.
               mustCopyOnSaveMessage={

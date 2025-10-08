@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
+import type { JourneyStep } from '../../../../common/runtime_types/ping/synthetics';
 import { getJourneySteps, formatSyntheticEvents } from './get_journey_steps';
 import { getUptimeESMockClient } from './test_helpers';
 

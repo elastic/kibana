@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { AggRow } from './agg_row';
 import type { Metric } from '../../../../common/types';
-import { DragHandleProps } from '../../../types';
+import type { DragHandleProps } from '../../../types';
 import { titleStyles } from '../../styles/common.styles';
 
 interface InvalidAggProps {

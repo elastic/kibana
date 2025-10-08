@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaQueryOutput } from '@kbn/data-plugin/common';
+import type { KibanaQueryOutput } from '@kbn/data-plugin/common';
 import type { PointStyleProps } from '@kbn/event-annotation-common';
 
 export type QueryPointEventAnnotationArgs = {

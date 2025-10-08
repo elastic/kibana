@@ -11,7 +11,8 @@ import * as Rx from 'rxjs';
 import { take, map, share } from 'rxjs';
 import Watchpack from 'watchpack';
 
-import { debounceTimeBuffer, Bundle } from '../common';
+import type { Bundle } from '../common';
+import { debounceTimeBuffer } from '../common';
 
 export interface ChangesStarted {
   type: 'changes detected';

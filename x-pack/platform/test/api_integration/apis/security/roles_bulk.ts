@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
                     spaces: ['bar-space'],
                     base: [],
                     feature: {
-                      fleetv2: ['all', 'read'],
+                      streams: ['all', 'read'],
                     },
                   },
                 ],

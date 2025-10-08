@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { Logger } from '@kbn/core/server';
-import { ALL_VALUE, Paginated, Pagination, sloDefinitionSchema } from '@kbn/slo-schema';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/core/server';
+import type { Paginated, Pagination } from '@kbn/slo-schema';
+import { ALL_VALUE, sloDefinitionSchema, storedSloDefinitionSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/Either';
 import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
-import { SLODefinition, StoredSLODefinition } from '../domain/models';
+import type { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
@@ -35,7 +40,8 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
 
   async create(slo: SLODefinition): Promise<SLODefinition> {
-    await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo));
+    const { storedSLO, references } = toStoredSLO(slo);
+    await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, storedSLO, { references });
     return slo;
   }
 
@@ -51,9 +57,11 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       existingSavedObjectId = findResponse.saved_objects[0].id;
     }
 
-    await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo), {
+    const { storedSLO, references } = toStoredSLO(slo);
+    await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, storedSLO, {
       id: existingSavedObjectId,
       overwrite: true,
+      references,
     });
 
     return slo;
@@ -107,9 +115,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       filter: `slo.attributes.id:(${ids.join(' or ')})`,
     });
 
-    return response.saved_objects
-      .map((slo) => this.toSLO(slo))
-      .filter((slo) => slo !== undefined) as SLODefinition[];
+    return response.saved_objects.map((so) => this.toSLO(so)).filter(this.isSLO);
   }
 
   async search(
@@ -147,12 +153,17 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       page: response.page,
       results: response.saved_objects
         .map((savedObject) => this.toSLO(savedObject))
-        .filter((slo) => slo !== undefined) as SLODefinition[],
+        .filter(this.isSLO),
     };
   }
 
   toSLO(storedSLOObject: SavedObject<StoredSLODefinition>): SLODefinition | undefined {
     const storedSLO = storedSLOObject.attributes;
+    const dashboardsIds = this.getDashboardsIds({
+      dashboardsRef: storedSLO.artifacts?.dashboards,
+      references: storedSLOObject.references,
+    });
+
     const result = sloDefinitionSchema.decode({
       ...storedSLO,
       // groupBy was added in 8.10.0
@@ -168,6 +179,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       ),
       createdBy: storedSLO.createdBy ?? storedSLOObject.created_by,
       updatedBy: storedSLO.updatedBy ?? storedSLOObject.updated_by,
+      artifacts: { dashboards: dashboardsIds },
     });
 
     if (isLeft(result)) {
@@ -177,8 +189,53 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
 
     return result.right;
   }
+
+  getDashboardsIds({
+    dashboardsRef,
+    references,
+  }: {
+    dashboardsRef?: { refId: string }[];
+    references: SavedObjectReference[];
+  }): { id: string }[] {
+    if (!dashboardsRef || dashboardsRef.length === 0) {
+      return [];
+    }
+
+    const refMap = new Map(references.map(({ name, id }) => [name, id]));
+
+    return dashboardsRef.flatMap(({ refId }) => {
+      const id = refMap.get(refId);
+      if (!id) {
+        this.logger.debug(`Invalid reference [${refId}]`);
+        return [];
+      }
+      return [{ id }];
+    });
+  }
+
+  private isSLO(slo: SLODefinition | undefined): slo is SLODefinition {
+    return slo !== undefined;
+  }
 }
 
-function toStoredSLO(slo: SLODefinition): StoredSLODefinition {
-  return sloDefinitionSchema.encode(slo);
+export function toStoredSLO(slo: SLODefinition): {
+  storedSLO: StoredSLODefinition;
+  references: SavedObjectReference[];
+} {
+  const dashboardsRef: { refId: string }[] = [];
+  const references: SavedObjectReference[] = [];
+  if (slo.artifacts?.dashboards?.length) {
+    slo.artifacts.dashboards.forEach(({ id }, index) => {
+      const refId = `dashboard-${index}`;
+      references.push({ id, type: 'dashboard', name: refId });
+      dashboardsRef.push({ refId });
+    });
+  }
+  return {
+    storedSLO: storedSloDefinitionSchema.encode({
+      ...slo,
+      artifacts: { dashboards: dashboardsRef },
+    }),
+    references,
+  };
 }

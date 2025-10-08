@@ -6,7 +6,7 @@
  */
 
 import { get, has } from 'lodash/fp';
-import {
+import type {
   EventHit,
   TimelineEdges,
   TimelineNonEcsData,

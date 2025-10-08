@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Query } from '../../..';
+import type { Query } from '../../..';
 import { AggConfigs } from '../agg_configs';
-import { AggTypesDependencies } from '../agg_types';
+import type { AggTypesDependencies } from '../agg_types';
 import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 

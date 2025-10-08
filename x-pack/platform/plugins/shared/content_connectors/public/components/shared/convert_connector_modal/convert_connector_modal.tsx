@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiConfirmModal, EuiText } from '@elastic/eui';
+import { EuiConfirmModal, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -23,6 +23,9 @@ export const ConvertConnectorModal: React.FC = () => {
   } = useKibana();
   const { convertConnector, hideModal } = useActions(ConvertConnectorLogic({ http }));
   const { isLoading } = useValues(ConvertConnectorLogic({ http }));
+
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
       onCancel={() => hideModal()}
@@ -31,6 +34,8 @@ export const ConvertConnectorModal: React.FC = () => {
         'xpack.contentConnectors.searchApplications.searchApplication.indices.convertInfexConfirm.title',
         { defaultMessage: 'Sure you want to convert your connector?' }
       )}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       cancelButtonText={CANCEL_BUTTON_LABEL}
       confirmButtonText={i18n.translate(

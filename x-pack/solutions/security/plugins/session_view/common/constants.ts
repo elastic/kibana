@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EventAction } from './types/v1';
+import type { EventAction } from './types/v1';
 
 export const SESSION_VIEW_APP_ID = 'sessionView';
 export const USAGE_COLLECTION_APP_NAME = 'session_view'; // underscore delimited is required

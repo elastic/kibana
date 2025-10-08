@@ -9,7 +9,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { xor } from 'lodash';
-import { DashboardLayout } from './types';
+import type { DashboardLayout } from './types';
 
 /**
  * Checks whether the layouts have the same keys, and if they do, checks whether every layout item in the
@@ -42,10 +42,7 @@ export const areLayoutsEqual = (originalLayout?: DashboardLayout, newLayout?: Da
   // then compare panel grid data
   for (const embeddableId of newPanelUuids) {
     if (
-      !deepEqual(
-        originalLayout?.panels[embeddableId]?.gridData,
-        newLayout?.panels[embeddableId]?.gridData
-      )
+      !deepEqual(originalLayout?.panels[embeddableId]?.grid, newLayout?.panels[embeddableId]?.grid)
     ) {
       return false;
     }

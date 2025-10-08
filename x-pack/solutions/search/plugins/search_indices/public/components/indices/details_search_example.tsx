@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { SearchHit } from '@kbn/es-types';
+import type { SearchHit } from '@kbn/es-types';
 
 import {
   EuiButton,
@@ -21,7 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../common/doc_links';
-import { Mappings } from '../../types';
+import type { Mappings } from '../../types';
 
 import { CodeBox } from '../code_box/code_box';
 import { useSearchCodeExamples } from '../../hooks/use_search_code_examples';

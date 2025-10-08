@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Id, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { transformElasticToList } from '../utils/transform_elastic_to_list';
-import { SearchEsListSchema } from '../../schemas/elastic_response';
+import type { SearchEsListSchema } from '../../schemas/elastic_response';
 
 interface GetListOptions {
   id: Id;

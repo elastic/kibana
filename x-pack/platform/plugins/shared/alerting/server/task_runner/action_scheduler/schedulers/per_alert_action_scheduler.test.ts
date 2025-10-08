@@ -317,11 +317,11 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `no scheduling of summary actions \"action-1\" for rule \"rule-id-1\": has active maintenance windows mw-1.`
+        `no scheduling of actions \"action-1\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`
       );
       expect(logger.debug).toHaveBeenNthCalledWith(
         2,
-        `no scheduling of summary actions \"action-2\" for rule \"rule-id-1\": has active maintenance windows mw-1.`
+        `no scheduling of actions \"action-2\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);

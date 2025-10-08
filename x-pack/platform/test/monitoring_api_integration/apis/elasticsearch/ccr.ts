@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getTestRunner } from '../../utils/test_runner';
 
 import ccrResponse from '../../fixtures/elasticsearch/ccr.json';

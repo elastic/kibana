@@ -8,14 +8,9 @@
  */
 
 import { LegendValue } from '@elastic/charts';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import {
-  BucketColumns,
-  PartitionVisParams,
-  LabelPositions,
-  ValueFormats,
-  LegendDisplay,
-} from '../common/types';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { BucketColumns, PartitionVisParams } from '../common/types';
+import { LabelPositions, ValueFormats, LegendDisplay } from '../common/types';
 
 export const createMockBucketColumns = (): BucketColumns[] => {
   return [

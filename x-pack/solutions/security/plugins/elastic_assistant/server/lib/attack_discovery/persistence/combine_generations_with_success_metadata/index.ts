@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
+import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
 
 export const combineGenerationsWithSuccessMetadata = ({
   successfulGenerationsMetadata,

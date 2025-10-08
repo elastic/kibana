@@ -25,6 +25,11 @@ export const ManagedBadge: React.FC<ManagedBadgeProps> = ({ meta }) => {
       color="hollow"
       className={css`
         margin-left: ${theme.euiTheme.size.s};
+        border-radius: 999px;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        font-weight: ${theme.euiTheme.font.weight.medium};
+        padding: 0 ${theme.euiTheme.size.m};
       `}
     >
       {i18n.translate('xpack.streams.streamDetailView.managed', {

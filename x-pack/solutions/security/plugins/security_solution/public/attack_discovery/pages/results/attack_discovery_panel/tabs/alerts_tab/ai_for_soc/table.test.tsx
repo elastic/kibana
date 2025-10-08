@@ -25,10 +25,6 @@ const packages: PackageListItem[] = [
     version: '0.1.0',
   },
 ];
-const ruleResponse = {
-  rules: [],
-  isLoading: false,
-};
 const id = 'id';
 const query = { ids: { values: ['abcdef'] } };
 
@@ -36,13 +32,7 @@ describe('<Table />', () => {
   it('should render all components', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <Table
-          dataView={dataView}
-          id={id}
-          packages={packages}
-          query={query}
-          ruleResponse={ruleResponse}
-        />
+        <Table dataView={dataView} id={id} packages={packages} query={query} />
       </TestProviders>
     );
 

@@ -5,44 +5,37 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import {
+import type {
   Connector,
-  FeatureName,
   IngestPipelineParams,
-  SyncStatus,
   IngestionStatus,
   IngestionMethod,
 } from '@kbn/search-connectors';
+import { FeatureName, SyncStatus } from '@kbn/search-connectors';
 
-import { Status } from '../../../../../common/types/api';
-import { Actions } from '../../../shared/api_logic/create_api_logic';
+import type { Status } from '../../../../../common/types/api';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 
-import {
-  StartAccessControlSyncApiLogic,
-  StartAccessControlSyncArgs,
-} from '../../api/connector/start_access_control_sync_api_logic';
-import {
-  StartIncrementalSyncApiLogic,
-  StartIncrementalSyncArgs,
-} from '../../api/connector/start_incremental_sync_api_logic';
-import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
-import {
-  ConnectorConfigurationApiLogic,
-  PostConnectorConfigurationActions,
-} from '../../api/connector/update_connector_configuration_api_logic';
-import {
-  CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicActions,
-} from '../../api/index/cached_fetch_index_api_logic';
+import type { StartAccessControlSyncArgs } from '../../api/connector/start_access_control_sync_api_logic';
+import { StartAccessControlSyncApiLogic } from '../../api/connector/start_access_control_sync_api_logic';
+import type { StartIncrementalSyncArgs } from '../../api/connector/start_incremental_sync_api_logic';
+import { StartIncrementalSyncApiLogic } from '../../api/connector/start_incremental_sync_api_logic';
+import type { StartSyncArgs } from '../../api/connector/start_sync_api_logic';
+import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
+import type { PostConnectorConfigurationActions } from '../../api/connector/update_connector_configuration_api_logic';
+import { ConnectorConfigurationApiLogic } from '../../api/connector/update_connector_configuration_api_logic';
+import type { CachedFetchIndexApiLogicActions } from '../../api/index/cached_fetch_index_api_logic';
+import { CachedFetchIndexApiLogic } from '../../api/index/cached_fetch_index_api_logic';
 
-import { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
-import { ElasticsearchViewIndex } from '../../types';
+import type { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
+import type { ElasticsearchViewIndex } from '../../types';
 import {
   hasDocumentLevelSecurityFeature,
   hasIncrementalSyncFeature,

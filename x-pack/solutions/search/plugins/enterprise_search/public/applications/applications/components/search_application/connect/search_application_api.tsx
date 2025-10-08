@@ -23,7 +23,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CloudDetails, useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
+import type { CloudDetails } from '../../../../shared/cloud_details/cloud_details';
+import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 

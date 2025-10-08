@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { CustomizePanelActionApi } from './customize_panel_action';
+import type { CustomizePanelActionApi } from './customize_panel_action';
 import { CustomizePanelEditor } from './customize_panel_editor';
 
 describe('customize panel editor', () => {
@@ -87,6 +87,17 @@ describe('customize panel editor', () => {
       renderPanelEditor();
       const titleInput = screen.getByTestId('customEmbeddablePanelTitleInput');
       expect(titleInput).toHaveValue('Default title');
+    });
+
+    // Even if the input value matches defaultTitle on apply, we expect setTitle(undefined) to be called,  meaning the title is treated as "not customized".
+    it('should not set panel custom title if it matches default title on apply', async () => {
+      api.defaultTitle$ = new BehaviorSubject<string | undefined>('Default title');
+      renderPanelEditor();
+      const titleInput = screen.getByTestId('customEmbeddablePanelTitleInput');
+      expect(titleInput).toHaveValue('Default title');
+      await userEvent.click(screen.getByTestId('saveCustomizePanelButton'));
+      expect(setTitle).toHaveBeenCalledWith(undefined);
+      expect(api.title$?.getValue()).toBeUndefined();
     });
 
     it('should use title even when empty string', () => {

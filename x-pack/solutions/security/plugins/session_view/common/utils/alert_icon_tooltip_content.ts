@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ProcessEventAlertCategory } from '..';
+import type { ProcessEventAlertCategory } from '..';
 import * as i18n from '../translations';
 
 export const getAlertIconTooltipContent = (

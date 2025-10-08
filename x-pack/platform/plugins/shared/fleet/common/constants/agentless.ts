@@ -37,6 +37,7 @@ export const AGENTLESS_ALLOWED_OUTPUT_TYPES = [outputType.Elasticsearch];
 
 export const AGENTLESS_API_ERROR_CODES = {
   OVER_PROVISIONED: 'OVER_PROVISIONED',
+  FLEET_UNREACHABLE: 'FLEET_UNREACHABLE',
 };
 
 // Input types to disable for agentless integrations
@@ -52,4 +53,6 @@ export const AGENTLESS_DISABLED_INPUTS = [
   'logfile',
   'aws-s3',
   'streaming',
+  'gcs',
+  'azure-blob-storage',
 ];

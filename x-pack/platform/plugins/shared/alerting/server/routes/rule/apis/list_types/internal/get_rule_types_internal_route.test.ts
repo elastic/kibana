@@ -13,7 +13,7 @@ import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../../rules_client.mock';
 import { RecoveredActionGroup } from '../../../../../../common';
 import type { RegistryAlertTypeWithAuth } from '../../../../../authorization';
-import type { AsApiContract } from '../../../../lib';
+import type { GetRuleTypesInternalResponseBody } from '../../../../../../common/routes/rule/apis/list_types/internal';
 
 const rulesClient = rulesClientMock.create();
 
@@ -48,6 +48,7 @@ describe('internalRuleTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        internallyManaged: false,
         isExportable: true,
         ruleTaskTimeout: '10m',
         recoveryActionGroup: RecoveredActionGroup,
@@ -66,9 +67,7 @@ describe('internalRuleTypesRoute', () => {
         validLegacyConsumers: [],
       } as RegistryAlertTypeWithAuth,
     ];
-    const expectedResult: Array<
-      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers'>>
-    > = [
+    const expectedResult: Readonly<GetRuleTypesInternalResponseBody> = [
       {
         id: '1',
         name: 'name',
@@ -82,6 +81,7 @@ describe('internalRuleTypesRoute', () => {
         default_schedule_interval: '10m',
         does_set_recovery_context: false,
         minimum_license_required: 'basic',
+        is_internally_managed: false,
         is_exportable: true,
         rule_task_timeout: '10m',
         recovery_action_group: RecoveredActionGroup,
@@ -116,6 +116,7 @@ describe('internalRuleTypesRoute', () => {
               "state": Array [],
             },
             "authorized_consumers": Object {},
+            "auto_recover_alerts": undefined,
             "category": "test",
             "default_action_group_id": "default",
             "default_schedule_interval": "10m",
@@ -124,6 +125,7 @@ describe('internalRuleTypesRoute', () => {
             "has_alerts_mappings": true,
             "id": "1",
             "is_exportable": true,
+            "is_internally_managed": false,
             "minimum_license_required": "basic",
             "name": "name",
             "producer": "test",
@@ -167,6 +169,7 @@ describe('internalRuleTypesRoute', () => {
         ],
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
+        isInternallyManaged: false,
         isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
@@ -225,6 +228,7 @@ describe('internalRuleTypesRoute', () => {
         defaultActionGroupId: 'default',
         minimumLicenseRequired: 'basic',
         isExportable: true,
+        isInternallyManaged: false,
         recoveryActionGroup: RecoveredActionGroup,
         authorizedConsumers: {},
         actionVariables: {

@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, visualize, visEditor, header } = getPageObjects([
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should not fetch new options when non-string is filtered', async () => {
-        await comboBox.set('fieldSelect-0', 'clientip');
+        await comboBox.set('fieldSelect-0', 'clientip', { retryCount: 3 });
         await visEditor.clickGo();
 
         const initialOptions = await comboBox.getOptionsList('listControlSelect0');
@@ -69,7 +69,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualize.loadSavedVisualization('chained input control with dynamic options', {
           navigateToVisualize: false,
         });
-        await comboBox.set('listControlSelect0', 'win 7');
+        await header.waitUntilLoadingHasFinished();
+        await comboBox.set('listControlSelect0', 'win 7', { retryCount: 3 });
       });
 
       it('should fetch new options when string field is filtered', async () => {

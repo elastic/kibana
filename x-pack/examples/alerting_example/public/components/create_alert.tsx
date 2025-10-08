@@ -6,17 +6,17 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { CoreStart } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
-import { AlertingExampleComponentParams } from '../application';
+import type { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 type KibanaDeps = {

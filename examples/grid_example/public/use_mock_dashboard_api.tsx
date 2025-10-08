@@ -12,11 +12,11 @@ import { useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 
-import { TimeRange } from '@kbn/es-query';
-import { PanelPackage } from '@kbn/presentation-containers';
+import type { TimeRange } from '@kbn/es-query';
+import type { PanelPackage } from '@kbn/presentation-containers';
 
-import { ViewMode } from '@kbn/presentation-publishing';
-import {
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type {
   MockDashboardApi,
   MockSerializedDashboardState,
   MockedDashboardPanelMap,
@@ -93,7 +93,7 @@ export const useMockDashboardApi = ({
           currentPanel.gridData.y = currentPanel.gridData.y + DEFAULT_PANEL_HEIGHT;
           otherPanels[id] = currentPanel;
         }
-        const newId = v4();
+        const newId = panelPackage.maybePanelId ?? v4();
         mockDashboardApi.panels$.next({
           ...otherPanels,
           [newId]: {

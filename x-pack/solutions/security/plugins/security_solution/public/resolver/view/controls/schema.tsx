@@ -71,7 +71,7 @@ export const SchemaInformation = ({
       closePopover={closePopover}
       anchorPosition="leftCenter"
     >
-      <EuiPopoverTitle style={{ textTransform: 'uppercase' }}>
+      <EuiPopoverTitle css={{ textTransform: 'uppercase' }}>
         {i18n.translate('xpack.securitySolution.resolver.graphControls.schemaInfoTitle', {
           defaultMessage: 'process tree',
         })}
@@ -87,7 +87,7 @@ export const SchemaInformation = ({
       </EuiPopoverTitle>
       <div
         // Limit the width based on UX design
-        style={{ maxWidth: '268px' }}
+        css={{ maxWidth: '268px' }}
       >
         <StyledDescriptionList
           data-test-subj="resolver:graph-controls:schema-info"

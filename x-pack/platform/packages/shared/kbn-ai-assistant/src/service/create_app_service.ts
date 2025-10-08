@@ -6,7 +6,7 @@
  */
 
 import type { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
-import { AIAssistantPluginStartDependencies } from '../types';
+import type { AIAssistantPluginStartDependencies } from '../types';
 
 export type AIAssistantAppService = ObservabilityAIAssistantService;
 

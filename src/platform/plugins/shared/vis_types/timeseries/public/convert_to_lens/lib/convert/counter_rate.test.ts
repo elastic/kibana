@@ -12,7 +12,7 @@ import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
 import { convertToCounterRateColumn } from './counter_rate';
-import { CommonColumnsConverterArgs, CounterRateColumn, MaxColumn } from './types';
+import type { CommonColumnsConverterArgs, CounterRateColumn, MaxColumn } from './types';
 
 describe('convertToCounterRateFormulaColumn', () => {
   const dataView = stubLogstashDataView;

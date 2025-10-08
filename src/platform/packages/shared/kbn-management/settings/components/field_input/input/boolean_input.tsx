@@ -9,7 +9,8 @@
 
 import React from 'react';
 
-import { EuiSwitch, EuiSwitchProps } from '@elastic/eui';
+import type { EuiSwitchProps } from '@elastic/eui';
+import { EuiSwitch } from '@elastic/eui';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 

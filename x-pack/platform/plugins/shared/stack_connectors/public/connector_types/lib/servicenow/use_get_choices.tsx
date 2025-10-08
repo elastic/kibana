@@ -6,10 +6,10 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { HttpSetup, IToasts } from '@kbn/core/public';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { getChoices } from './api';
-import { Choice } from './types';
+import type { Choice } from './types';
 import * as i18n from './translations';
 
 export interface UseGetChoicesProps {

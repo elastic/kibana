@@ -6,21 +6,25 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
-import { EuiFormRow } from '@elastic/eui';
-import {
-  CodeEditor,
-  FieldHook,
-  getFieldValidityAndErrorMessage,
-} from '../../../../../../shared_imports';
+import type { FunctionComponent } from 'react';
+import React from 'react';
+import { css } from '@emotion/react';
 
-import './text_editor.scss';
+import { EuiFormRow } from '@elastic/eui';
+import type { FieldHook } from '../../../../../../shared_imports';
+import { CodeEditor, getFieldValidityAndErrorMessage } from '../../../../../../shared_imports';
 
 interface Props {
   field: FieldHook<string>;
   editorProps: { [key: string]: any };
   euiFieldProps?: Record<string, any>;
 }
+
+const styles = {
+  panel: css`
+    box-shadow: none;
+  `,
+};
 
 export const TextEditor: FunctionComponent<Props> = ({ field, editorProps, euiFieldProps }) => {
   const { value, helpText, setValue, label } = field;
@@ -35,12 +39,7 @@ export const TextEditor: FunctionComponent<Props> = ({ field, editorProps, euiFi
       fullWidth
       labelAppend={editorProps.labelAppend}
     >
-      <EuiPanel
-        className="pipelineProcessorsEditor__form__textEditor__panel"
-        paddingSize="s"
-        hasShadow={false}
-        {...euiFieldProps}
-      >
+      <EuiPanel paddingSize="s" hasShadow={false} {...euiFieldProps} css={styles.panel}>
         <CodeEditor value={value} onChange={setValue} {...(editorProps as any)} />
       </EuiPanel>
     </EuiFormRow>

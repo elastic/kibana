@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { InferenceConnectorType, RawConnector } from './connectors';
+import type { RawConnector } from './connectors';
+import { InferenceConnectorType } from './connectors';
 import {
   isSupportedConnectorType,
   isSupportedConnector,

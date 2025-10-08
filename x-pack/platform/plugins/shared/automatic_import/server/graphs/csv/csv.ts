@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import type { LogFormatDetectionState } from '../../types';
 import { createJSONInput } from '../../util';
 import type { ESProcessorItem } from '../../../common';
 import { createCSVProcessor, createDropProcessor } from '../../util/processors';
-import { CSVParseError, UnparseableCSVFormatError } from '../../lib/errors/unparseable_csv_error';
+import type { CSVParseError } from '../../lib/errors/unparseable_csv_error';
+import { UnparseableCSVFormatError } from '../../lib/errors/unparseable_csv_error';
 import {
   generateColumnNames,
   upperBoundForColumnCount,

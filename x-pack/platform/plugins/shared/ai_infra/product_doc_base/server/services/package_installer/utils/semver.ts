@@ -7,15 +7,32 @@
 
 import Semver from 'semver';
 
-export const latestVersion = (versions: string[]): string => {
-  let latest: string = versions[0];
-  for (let i = 1; i < versions.length; i++) {
-    const current = versions[i];
-    if (Semver.gt(Semver.coerce(current)!, Semver.coerce(latest)!)) {
-      latest = current;
+/**
+ * @param availableVersions - List of available versions
+ * @param kibanaVer - Kibana version
+ * @returns The latest version from the list
+ * If kibanaVer is provided, return the previous closest version available
+ */
+export const latestVersion = (availableVersions: string[], kibanaVer?: string): string => {
+  const kibanaSemver = kibanaVer ? Semver.coerce(kibanaVer) : undefined;
+  let latest: string | undefined;
+
+  for (const version of availableVersions) {
+    const semver = Semver.coerce(version);
+    if (!semver) continue;
+
+    if (
+      // If a Kibana version is provided,
+      // narrow to only available versions prior to that Kibana version
+      (!kibanaSemver || Semver.lte(semver, kibanaSemver)) &&
+      // Else, grab the newer version from the list
+      (!latest || Semver.gt(semver, Semver.coerce(latest)!))
+    ) {
+      latest = version;
     }
   }
-  return latest;
+
+  return latest ?? availableVersions[0];
 };
 
 export const majorMinor = (version: string): string => {

@@ -10,7 +10,7 @@
 import { RunWithCommands } from '@kbn/dev-cli-runner';
 
 import { Render } from './lib/render';
-import { ContextExtensions } from './generate_command';
+import type { ContextExtensions } from './generate_command';
 
 import { PackageCommand } from './commands/package_command';
 import { CodeownersCommand } from './commands/codeowners_command';

@@ -67,15 +67,14 @@ export const MoreActions: FC<TakeActionProps> = ({ indicator }) => {
   ];
 
   const button = (
-    <EuiToolTip content={MORE_ACTIONS_BUTTON_LABEL}>
+    <EuiToolTip content={MORE_ACTIONS_BUTTON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={MORE_ACTIONS_BUTTON_LABEL}
-        iconType="boxesHorizontal"
-        iconSize="s"
-        size="xs"
-        onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
-        style={{ height: '100%' }}
+        color="text"
         data-test-subj={MORE_ACTIONS_TEST_ID}
+        iconType="boxesHorizontal"
+        onClick={() => setPopover((prevIsPopoverOpen) => !prevIsPopoverOpen)}
+        size="s"
       />
     </EuiToolTip>
   );

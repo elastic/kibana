@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { isPlainObject } from 'lodash';
-import {
+import type {
   Datatable,
   DatatableColumn,
   DatatableRow,

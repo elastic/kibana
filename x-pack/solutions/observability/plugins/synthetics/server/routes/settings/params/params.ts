@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
+import type { SavedObject } from '@kbn/core-saved-objects-api-server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
+import type { SyntheticsParams, SyntheticsParamsReadonly } from '../../../../common/runtime_types';
 
 const RequestParamsSchema = schema.object({
   id: schema.maybe(schema.string()),
@@ -96,14 +97,14 @@ const getDecryptedParams = async ({ server, spaceId }: RouteContext, paramId?: s
       }
     );
 
-  const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
+  const hits: Array<ReturnType<typeof toClientResponse>> = [];
   for await (const result of finder.find()) {
-    hits.push(...result.saved_objects);
+    hits.push(...result.saved_objects.map(toClientResponse));
   }
 
   void finder.close();
 
-  return hits.map((savedObject) => toClientResponse(savedObject));
+  return hits;
 };
 
 const findAllParams = async ({ savedObjectsClient }: RouteContext) => {
@@ -112,14 +113,14 @@ const findAllParams = async ({ savedObjectsClient }: RouteContext) => {
     perPage: 1000,
   });
 
-  const hits: Array<SavedObjectsFindResult<SyntheticsParams>> = [];
+  const hits: Array<ReturnType<typeof toClientResponse>> = [];
   for await (const result of finder.find()) {
-    hits.push(...result.saved_objects);
+    hits.push(...result.saved_objects.map(toClientResponse));
   }
 
   void finder.close();
 
-  return hits.map((savedObject) => toClientResponse(savedObject));
+  return hits;
 };
 
 const toClientResponse = (

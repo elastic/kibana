@@ -11,14 +11,14 @@ import { act } from 'react-dom/test-utils';
 
 // This import needs to come first as it contains the jest.mocks
 import { setupEnvironment, mockDocuments } from './helpers';
-import { FieldEditorFormState, Props } from '../../public/components/field_editor/field_editor';
+import type {
+  FieldEditorFormState,
+  Props,
+} from '../../public/components/field_editor/field_editor';
 import type { Field } from '../../public/types';
 import { setSearchResponse } from './field_editor_flyout_preview.helpers';
-import {
-  setup,
-  FieldEditorTestBed,
-  waitForDocumentsAndPreviewUpdate,
-} from './field_editor.helpers';
+import type { FieldEditorTestBed } from './field_editor.helpers';
+import { setup, waitForDocumentsAndPreviewUpdate } from './field_editor.helpers';
 
 describe('<FieldEditor />', () => {
   const { httpRequestsMockHelpers } = setupEnvironment();

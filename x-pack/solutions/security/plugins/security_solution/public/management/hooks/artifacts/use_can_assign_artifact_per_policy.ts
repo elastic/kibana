@@ -24,9 +24,12 @@ import type { ArtifactFormComponentProps } from '../../components/artifact_list_
 export const useCanAssignArtifactPerPolicy = (
   item: ArtifactFormComponentProps['item'],
   mode: ArtifactFormComponentProps['mode'],
-  hasItemBeenUpdated: boolean
+  hasItemBeenUpdated: boolean,
+  licenseType: 'platinumPlus' | 'enterprise' = 'platinumPlus'
 ): boolean => {
-  const isPlatinumPlus = useLicense().isPlatinumPlus();
+  const license = useLicense();
+  const hasRequiredLicense =
+    licenseType === 'platinumPlus' ? license.isPlatinumPlus() : license.isEnterprise();
   const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
   const [wasByPolicy, setWasByPolicy] = useState(isArtifactByPolicy(item));
 
@@ -37,7 +40,7 @@ export const useCanAssignArtifactPerPolicy = (
   }, [item.tags, hasItemBeenUpdated]);
 
   return useMemo(() => {
-    if (isPlatinumPlus) {
+    if (hasRequiredLicense) {
       return true;
     }
 
@@ -50,5 +53,5 @@ export const useCanAssignArtifactPerPolicy = (
     }
 
     return wasByPolicy && hasItemBeenUpdated;
-  }, [mode, isGlobal, hasItemBeenUpdated, isPlatinumPlus, wasByPolicy]);
+  }, [mode, isGlobal, hasItemBeenUpdated, hasRequiredLicense, wasByPolicy]);
 };

@@ -14,11 +14,14 @@
     ],
     "requiredPlugins": [
       "share",
+      "licensing",
     ],
     "optionalPlugins": [
       "cloud",
       "console",
+      "searchNavigation",
       "usageCollection",
+      "sampleDataIngest",
     ],
     "requiredBundles": [
       "kibanaReact"

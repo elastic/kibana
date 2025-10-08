@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueueObject } from 'async';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Doc, ParsedSchedule } from '../../../types';
+import type { QueueObject } from 'async';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Doc, ParsedSchedule } from '../../../types';
 
 export function tryPausingQueue(
   queue: QueueObject<Doc>,

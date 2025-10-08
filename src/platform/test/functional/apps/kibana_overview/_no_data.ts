@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('click on add data opens integrations', async () => {
-      const addIntegrations = await testSubjects.find('kbnOverviewAddIntegrations');
+      const addIntegrations = await testSubjects.find('noDataDefaultActionButton');
       await addIntegrations.click();
       await PageObjects.common.waitUntilUrlIncludes('integrations/browse');
     });

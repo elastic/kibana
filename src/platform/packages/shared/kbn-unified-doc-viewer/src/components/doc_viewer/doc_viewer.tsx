@@ -8,7 +8,8 @@
  */
 
 import React, { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { EuiTabbedContent } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps } from '../../types';
@@ -36,16 +37,16 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerInternalProps>(
   ({ docViews, initialTabId, ...renderProps }, ref) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
-      .map(({ id, title, render, component }: DocView) => ({
+      .map(({ id, title, component }: DocView) => ({
         id: getFullTabId(id), // `id` value is used to persist the selected tab in localStorage
         name: title,
         content: (
           <DocViewerTab
+            key={id}
             id={id}
             title={title}
             component={component}
             renderProps={renderProps}
-            render={render}
           />
         ),
         ['data-test-subj']: `docViewerTab-${id}`,

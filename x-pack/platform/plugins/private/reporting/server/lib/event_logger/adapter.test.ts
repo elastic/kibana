@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogMeta } from '@kbn/core/server';
+import type { LogMeta } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { EcsLogAdapter } from './adapter';
 

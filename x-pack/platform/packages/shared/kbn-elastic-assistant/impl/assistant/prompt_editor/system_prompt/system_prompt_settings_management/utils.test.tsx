@@ -41,6 +41,7 @@ describe('getSelectedConversations', () => {
         isDefault: true,
         isNewConversationDefault: true,
       },
+      createdBy: { id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0', name: 'elastic' },
     },
   };
   test('should return selected conversations', () => {

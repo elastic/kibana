@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import chroma from 'chroma-js';
 

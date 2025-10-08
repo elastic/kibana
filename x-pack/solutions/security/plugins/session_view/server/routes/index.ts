@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRouter, Logger } from '@kbn/core/server';
-import { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
+import type { IRouter, Logger } from '@kbn/core/server';
+import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import { registerProcessEventsRoute } from './process_events_route';
 import { registerAlertsRoute } from './alerts_route';
 import { registerAlertStatusRoute } from './alert_status_route';

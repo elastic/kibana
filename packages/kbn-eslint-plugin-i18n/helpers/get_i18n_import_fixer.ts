@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SourceCode } from 'eslint';
+import type { SourceCode } from 'eslint';
 
 export function getI18nImportFixer({
   sourceCode,

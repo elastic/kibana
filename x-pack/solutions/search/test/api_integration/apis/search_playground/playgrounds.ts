@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ALL_USERS, USERS } from './common/users';
 import { ALL_ROLES } from './common/roles';
 import { createUsersAndRoles, deleteUsersAndRoles } from './common/helpers';

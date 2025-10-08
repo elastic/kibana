@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ITagsClient } from '../common';
-import { SavedObjectsTaggingApiUi, SavedObjectsTaggingApiUiComponent, ITagsCache } from './api';
+import type { ITagsClient } from '../common';
+import type {
+  SavedObjectsTaggingApiUi,
+  SavedObjectsTaggingApiUiComponent,
+  ITagsCache,
+} from './api';
 
 const createClientMock = () => {
   const mock: jest.Mocked<ITagsClient> = {

@@ -6,8 +6,8 @@
  */
 
 import inquirer from 'inquirer';
-import { ToolingLog } from '@kbn/tooling-log';
-import { KibanaClient } from './kibana_client';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { KibanaClient } from './kibana_client';
 
 export async function selectConnector({
   connectors,

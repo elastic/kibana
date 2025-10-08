@@ -9,9 +9,10 @@
 
 import { resolve } from 'path';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { exec, Config, Build } from '../../lib';
+import type { Config, Build } from '../../lib';
+import { exec } from '../../lib';
 
 export async function runFpm(
   config: Config,
@@ -23,7 +24,6 @@ export async function runFpm(
 ) {
   const linux = config.getPlatform('linux', architecture);
   const version = config.getBuildVersion();
-  build.setBuildArch(architecture);
 
   const resolveWithTrailingSlash = (...paths: string[]) => `${resolve(...paths)}/`;
 

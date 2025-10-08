@@ -10,11 +10,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CasesCell } from './cases_cell';
-import { AdditionalContext, CellComponentProps, RenderContext } from '../types';
+import type { AdditionalContext, CellComponentProps, RenderContext } from '../types';
 import { getCasesMapMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
