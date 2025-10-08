@@ -21,7 +21,7 @@ export const StreamsListEmptyPrompt = () => {
   const {
     core: { docLinks, http },
     dependencies: {
-      start: { spaces, share },
+      start: { spaces, share, cloud },
     },
   } = useKibana();
   const streamsDocsLink = docLinks.links.observability.logsStreams;
@@ -35,8 +35,11 @@ export const StreamsListEmptyPrompt = () => {
 
   const spaceObservable = useMemo(() => (spaces ? spaces.getActiveSpace$() : EMPTY), [spaces]);
   const activeSpace = useObservable(spaceObservable);
-  const isObservabilitySpace = activeSpace?.solution === 'oblt';
-  const isSecuritySpace = activeSpace?.solution === 'security';
+
+  const isObservabilitySpace =
+    cloud?.serverless?.projectType === 'observability' || activeSpace?.solution === 'oblt';
+  const isSecuritySpace =
+    cloud?.serverless?.projectType === 'security' || activeSpace?.solution === 'security';
 
   const onboardingLink = useAsync(async () => {
     if (observabilityOnboardingLocator && isObservabilitySpace) {
