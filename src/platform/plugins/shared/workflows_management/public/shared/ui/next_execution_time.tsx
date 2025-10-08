@@ -38,10 +38,7 @@ export function NextExecutionTime({ triggers, history }: NextExecutionTimeProps)
         },
       })}
     >
-      <EuiBadge color="hollow">
-        {i18n.translate('workflows.workflowList.nextExecutionTime.nextExecutionTimeText', {
-          defaultMessage: 'Next execution: ',
-        })}
+      <EuiBadge color="hollow" iconType="clock">
         <FormattedRelative value={nextExecutionTime} />
       </EuiBadge>
     </EuiToolTip>

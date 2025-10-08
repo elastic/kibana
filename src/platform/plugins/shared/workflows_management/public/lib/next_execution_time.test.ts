@@ -40,7 +40,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getUTCHours()).toBe(9);
         expect(result!.getUTCMinutes()).toBe(0);
@@ -62,7 +62,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getUTCHours()).toBe(9);
       });
@@ -83,7 +83,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getUTCHours()).toBe(14);
         expect(result!.getUTCMinutes()).toBe(30);
@@ -105,7 +105,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getUTCHours()).toBe(10);
       });
@@ -128,7 +128,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         // Should use default time (midnight) when no specific time is set
       });
@@ -148,7 +148,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         // Should return the next occurrence (9 AM since we're at 10 AM)
         expect(result!.getUTCHours()).toBe(17);
@@ -169,7 +169,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
       });
 
@@ -188,7 +188,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
       });
 
@@ -205,7 +205,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeNull();
       });
 
@@ -221,7 +221,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeNull();
       });
     });
@@ -236,7 +236,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getTime() - mockNow.getTime()).toBe(5 * 60 * 1000);
       });
@@ -250,7 +250,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getTime() - mockNow.getTime()).toBe(2 * 60 * 60 * 1000);
       });
@@ -264,7 +264,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getTime() - mockNow.getTime()).toBe(24 * 60 * 60 * 1000);
       });
@@ -281,7 +281,7 @@ describe('next_execution_time', () => {
             },
           };
 
-          const result = calculateNextExecutionTime(trigger);
+          const result = calculateNextExecutionTime(trigger, new Date());
           expect(result).toBeInstanceOf(Date);
         });
       });
@@ -295,7 +295,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeNull();
       });
 
@@ -308,7 +308,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeNull();
       });
     });
@@ -323,7 +323,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getTime() - mockNow.getTime()).toBe(5 * 60 * 1000);
       });
@@ -337,7 +337,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getTime() - mockNow.getTime()).toBe(2 * 60 * 60 * 1000);
       });
@@ -351,7 +351,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getTime() - mockNow.getTime()).toBe(24 * 60 * 60 * 1000);
       });
@@ -365,7 +365,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
         expect(result!.getTime() - mockNow.getTime()).toBe(30 * 1000);
       });
@@ -382,7 +382,7 @@ describe('next_execution_time', () => {
             },
           };
 
-          const result = calculateNextExecutionTime(trigger);
+          const result = calculateNextExecutionTime(trigger, new Date());
           expect(result).toBeInstanceOf(Date);
         });
       });
@@ -396,7 +396,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeNull();
       });
 
@@ -409,7 +409,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeNull();
       });
     });
@@ -421,7 +421,7 @@ describe('next_execution_time', () => {
           enabled: true,
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeNull();
       });
 
@@ -434,7 +434,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeNull();
       });
 
@@ -444,7 +444,7 @@ describe('next_execution_time', () => {
           enabled: true,
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeNull();
       });
     });
@@ -457,7 +457,7 @@ describe('next_execution_time', () => {
         { type: 'alert', enabled: true },
       ];
 
-      const result = getWorkflowNextExecutionTime(triggers);
+      const result = getWorkflowNextExecutionTime(triggers, []);
       expect(result).toBeNull();
     });
 
@@ -467,7 +467,7 @@ describe('next_execution_time', () => {
         { type: 'manual', enabled: true },
       ];
 
-      const result = getWorkflowNextExecutionTime(triggers);
+      const result = getWorkflowNextExecutionTime(triggers, []);
       expect(result).toBeNull();
     });
 
@@ -477,7 +477,7 @@ describe('next_execution_time', () => {
         { type: 'manual', enabled: true },
       ];
 
-      const result = getWorkflowNextExecutionTime(triggers);
+      const result = getWorkflowNextExecutionTime(triggers, []);
       expect(result).toBeInstanceOf(Date);
       expect(result!.getTime() - mockNow.getTime()).toBe(5 * 60 * 1000);
     });
@@ -489,7 +489,7 @@ describe('next_execution_time', () => {
         { type: 'manual', enabled: true },
       ];
 
-      const result = getWorkflowNextExecutionTime(triggers);
+      const result = getWorkflowNextExecutionTime(triggers, []);
       expect(result).toBeInstanceOf(Date);
       // Should return the earlier time (5 minutes)
       expect(result!.getTime() - mockNow.getTime()).toBe(5 * 60 * 1000);
@@ -514,7 +514,7 @@ describe('next_execution_time', () => {
         { type: 'manual', enabled: true },
       ];
 
-      const result = getWorkflowNextExecutionTime(triggers);
+      const result = getWorkflowNextExecutionTime(triggers, []);
       expect(result).toBeInstanceOf(Date);
       // Should return the interval-based trigger (1 minute) as it's sooner
       expect(result!.getTime() - mockNow.getTime()).toBe(1 * 60 * 1000);
@@ -526,7 +526,7 @@ describe('next_execution_time', () => {
         { type: 'scheduled', enabled: true, with: { every: '5m' } },
       ];
 
-      const result = getWorkflowNextExecutionTime(triggers);
+      const result = getWorkflowNextExecutionTime(triggers, []);
       expect(result).toBeInstanceOf(Date);
       // Should return the valid trigger (5 minutes)
       expect(result!.getTime() - mockNow.getTime()).toBe(5 * 60 * 1000);
@@ -538,7 +538,7 @@ describe('next_execution_time', () => {
         { type: 'scheduled', enabled: true, with: { rrule: { freq: 'INVALID' } } },
       ];
 
-      const result = getWorkflowNextExecutionTime(triggers);
+      const result = getWorkflowNextExecutionTime(triggers, []);
       expect(result).toBeNull();
     });
   });
@@ -560,7 +560,7 @@ describe('next_execution_time', () => {
         },
       };
 
-      const result = calculateNextExecutionTime(trigger);
+      const result = calculateNextExecutionTime(trigger, new Date());
       expect(result).toBeInstanceOf(Date);
     });
 
@@ -580,7 +580,7 @@ describe('next_execution_time', () => {
         },
       };
 
-      const result = calculateNextExecutionTime(trigger);
+      const result = calculateNextExecutionTime(trigger, new Date());
       expect(result).toBeInstanceOf(Date);
     });
 
@@ -599,7 +599,7 @@ describe('next_execution_time', () => {
         },
       };
 
-      const result = calculateNextExecutionTime(trigger);
+      const result = calculateNextExecutionTime(trigger, new Date());
       expect(result).toBeInstanceOf(Date);
     });
 
@@ -621,7 +621,7 @@ describe('next_execution_time', () => {
           },
         };
 
-        const result = calculateNextExecutionTime(trigger);
+        const result = calculateNextExecutionTime(trigger, new Date());
         expect(result).toBeInstanceOf(Date);
       });
     });
@@ -641,7 +641,7 @@ describe('next_execution_time', () => {
         },
       };
 
-      const result = calculateNextExecutionTime(trigger);
+      const result = calculateNextExecutionTime(trigger, new Date());
       expect(result).toBeInstanceOf(Date);
     });
   });
