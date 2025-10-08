@@ -41,11 +41,6 @@ export const createTreeNodesFromPipelines = (
     children: treeNode.children.length ? [] : undefined,
     isExpanded: level === 1,
     callback: () => clickTreeNode(treeNode.pipelineName),
-    buttonProps: {
-      onClick: (e: React.MouseEvent) => {
-        e.stopPropagation();
-      },
-    },
   } as unknown as Node;
 
   if (level === MAX_TREE_LEVEL) {

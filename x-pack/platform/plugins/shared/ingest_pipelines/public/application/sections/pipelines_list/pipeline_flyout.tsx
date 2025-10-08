@@ -14,11 +14,14 @@ import {
   EuiFlyoutFooter,
   useIsWithinBreakpoints,
   useEuiTheme,
+  EuiSkeletonText,
+  EuiSkeletonRectangle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FlyoutFooter as FlyoutFooterContent, DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
 import type { Pipeline } from '../../../../common/types';
-import { SectionLoading, useKibana } from '../../../shared_imports';
+import { useKibana } from '../../../shared_imports';
 
 export interface Props {
   ingestPipeline: string;
@@ -125,12 +128,19 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
           <div css={detailsPanelWrapperStyles}>
             <div css={detailsPanelStyles}>
               {isLoading ? (
-                <SectionLoading>
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.list.pipelineDetails.loading"
-                    defaultMessage="Loading pipeline…"
-                  />
-                </SectionLoading>
+                <>
+                  <EuiSkeletonText lines={1} size="l" />
+                  <EuiSpacer size="s" />
+                  <EuiSkeletonText lines={2} size="s" />
+                  <EuiSpacer size="m" />
+                  <EuiSkeletonText lines={1} size="s" />
+                  <EuiSpacer size="s" />
+                  <EuiSkeletonRectangle width="100%" height={200} borderRadius="m" />
+                  <EuiSpacer size="m" />
+                  <EuiSkeletonText lines={1} size="s" />
+                  <EuiSpacer size="s" />
+                  <EuiSkeletonRectangle width="100%" height={150} borderRadius="m" />
+                </>
               ) : error ? (
                 <NotFoundPanel
                   pipelineName={pipelineName}
