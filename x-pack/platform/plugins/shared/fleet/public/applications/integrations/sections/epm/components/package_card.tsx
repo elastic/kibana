@@ -234,8 +234,8 @@ export function PackageCard({
 
             [class*='euiCard__titleButton'] {
               width: ${installationStatusVisible
-              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
-              : '100%'};
+                ? `calc(100% - ${theme.euiTheme.base * 4}px)`
+                : '100%'};
               ${getLineClampStyles(titleLineClamp)}
             }
 
@@ -262,21 +262,25 @@ export function PackageCard({
           }
           onClick={onClickProp ?? onCardClick}
         >
-          <EuiFlexGroup gutterSize="xs" wrap={true} css={css`
-            width: ${installationStatusVisible
-              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
-              : '100%'};
-            overflow-x: hidden;
-            text-overflow: ellipsis;
-            & > .euiFlexItem {
-              min-width: 0;
-            }
-            ${isCollectionCard
-              ? `& > .euiFlexItem:last-child {
+          <EuiFlexGroup
+            gutterSize="xs"
+            wrap={true}
+            css={css`
+              width: ${installationStatusVisible
+                ? `calc(100% - ${theme.euiTheme.base * 4}px)`
+                : '100%'};
+              overflow-x: hidden;
+              text-overflow: ellipsis;
+              & > .euiFlexItem {
+                min-width: 0;
+              }
+              ${isCollectionCard
+                ? `& > .euiFlexItem:last-child {
               min-width: auto;
             }`
-              : ''}
-          `}>
+                : ''}
+            `}
+          >
             {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
             {verifiedBadge}
             {updateAvailableBadge}
