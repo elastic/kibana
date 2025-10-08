@@ -317,7 +317,15 @@
             "signature": [
               "{ (savedObject: ",
               "SavedObject",
-              "<Types[\"Attributes\"]>): Types[\"Item\"]; (savedObject: PartialSavedObject<Types[\"Attributes\"]>, partial: true): Types[\"PartialItem\"]; }"
+              "<Types[\"Attributes\"]>): Types[\"Item\"]; (savedObject: ",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.PartialSavedObject",
+                "text": "PartialSavedObject"
+              },
+              "<Types[\"Attributes\"]>, partial: true): Types[\"PartialItem\"]; }"
             ],
             "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
             "deprecated": false,
@@ -332,7 +340,15 @@
                 "description": [],
                 "signature": [
                   "SavedObject",
-                  "<Types[\"Attributes\"]> | PartialSavedObject<Types[\"Attributes\"]>"
+                  "<Types[\"Attributes\"]> | ",
+                  {
+                    "pluginId": "@kbn/content-management-utils",
+                    "scope": "server",
+                    "docId": "kibKbnContentManagementUtilsPluginApi",
+                    "section": "def-server.PartialSavedObject",
+                    "text": "PartialSavedObject"
+                  },
+                  "<Types[\"Attributes\"]>"
                 ],
                 "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
                 "deprecated": false,
@@ -3281,6 +3297,25 @@
           "{ item: T; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-content-management-utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-utils",
+        "id": "def-server.PartialSavedObject",
+        "type": "Type",
+        "tags": [],
+        "label": "PartialSavedObject",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "SavedObject",
+          "<Partial<T>>, \"references\"> & { references: ",
+          "SavedObjectReference",
+          "[] | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-content-management-utils/src/saved_object_content_storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
