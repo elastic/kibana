@@ -7,10 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-
-function getBaseUrl(spaceId?: string) {
-  return spaceId ? `/s/${spaceId}` : '';
-}
+import { getBaseUrl } from './helpers';
 
 export async function pollResult(
   supertestAgent: any,

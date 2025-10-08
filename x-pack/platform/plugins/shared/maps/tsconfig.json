@@ -11,7 +11,7 @@
     "server/**/*",
     "server/config.ts",
     "../../../../../typings/**/*",
-    "test/scout/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -97,8 +97,8 @@
     "@kbn/css-utils",
     "@kbn/licensing-types",
     "@kbn/control-group-renderer",
+    "@kbn/es-query-server",
+    "@kbn/data-service-server"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

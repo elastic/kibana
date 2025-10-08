@@ -62,6 +62,32 @@ export const DashboardViewport = () => {
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
 
+  // TODO: Re-add this for sticky controls only **or** remove it once we fix the double fetch bug
+  // useEffect(() => {
+  //   if (!controlGroupApi) {
+  //     return;
+  //   }
+  //   const subscription = controlGroupApi.children$.subscribe((children) => {
+  //     setHasControls(Object.keys(children).length > 0);
+  //   });
+  //   return () => {
+  //     subscription.unsubscribe();
+  //   };
+  // }, [controlGroupApi]);
+
+  // const [controlsReady, setControlsReady] = useState(false);
+  // useEffect(() => {
+  //   let ignore = false;
+  //   dashboardInternalApi.untilControlsInitialized().then(() => {
+  //     if (!ignore) {
+  //       setControlsReady(true);
+  //     }
+  //   });
+  //   return () => {
+  //     ignore = true;
+  //   };
+  // }, [dashboardInternalApi]);
+
   const styles = useMemoCss(dashboardViewportStyles);
 
   return (
@@ -86,7 +112,11 @@ export const DashboardViewport = () => {
         data-shared-items-count={visiblePanelCount}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
+        {panelCount === 0 && sectionCount === 0 ? (
+          <DashboardEmptyScreen />
+        ) : viewMode === 'print' || controlsReady ? (
+          <DashboardGrid />
+        ) : null}
       </div>
     </div>
   );

@@ -112,5 +112,6 @@
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
     "@kbn/control-group-renderer",
+    "@kbn/deeplinks-management"
   ]
 }

@@ -46,43 +46,68 @@ export interface UpdateIncidentParams {
   incident: Incident;
 }
 
-export interface UpdateFieldText {
+export interface ResilientTextField {
   text: string;
 }
 
-export interface UpdateIdsField {
+export interface ResilientMultiselectField {
   ids: number[];
 }
-export interface UpdateIdField {
+export interface ResilientSelectField {
   id: number;
 }
 
-export interface UpdateFieldTextArea {
+export interface ResilientTextAreaField {
   textarea: { format: 'html' | 'text'; content: string };
 }
 
+export interface ResilientDateField {
+  date: number;
+}
+
+export interface ResilientBooleanField {
+  boolean: boolean;
+}
+
+export interface ResilientNumberField {
+  object: number;
+}
+
+export type ResilientUpdateFieldValue =
+  | ResilientTextField
+  | ResilientTextAreaField
+  | ResilientMultiselectField
+  | ResilientSelectField
+  | ResilientDateField
+  | ResilientBooleanField
+  | ResilientNumberField
+  | unknown;
+
+export type ResilientFieldPrimitives =
+  | string
+  | number
+  | number[]
+  | boolean
+  | ResilientTextAreaField['textarea']
+  | null;
+
 interface UpdateField {
   field: { name: string };
-  old_value: UpdateFieldText | UpdateFieldTextArea | UpdateIdsField | UpdateIdField;
-  new_value: UpdateFieldText | UpdateFieldTextArea | UpdateIdsField | UpdateIdField;
+  old_value: ResilientUpdateFieldValue;
+  new_value: ResilientUpdateFieldValue;
 }
 
 export interface UpdateIncidentRequest {
   changes: UpdateField[];
 }
 
-export type GetValueTextContentResponse =
-  | UpdateFieldText
-  | UpdateFieldTextArea
-  | UpdateIdsField
-  | UpdateIdField;
-
-export interface CreateIncidentData {
+export interface CreateIncidentData extends Record<string, unknown> {
   name: string;
   discovered_date: number;
   description?: { format: string; content: string };
   incident_type_ids?: Array<{ id: number }>;
   severity_code?: { id: number };
+  [unknown: string]: unknown;
 }
 
 export type ResilientConfig = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;

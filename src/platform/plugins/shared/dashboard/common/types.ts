@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord, Writable } from '@kbn/utility-types';
-import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { RefreshInterval } from '@kbn/data-plugin/public';
 
@@ -35,8 +34,8 @@ export type DashboardSettings = Writable<DashboardOptions> & {
 };
 
 export interface DashboardState extends DashboardSettings {
-  query?: Query;
-  filters?: Filter[];
+  query?: DashboardAttributes['query'];
+  filters?: DashboardAttributes['filters'];
   timeRange?: DashboardAttributes['timeRange'];
   refreshInterval?: RefreshInterval;
   panels: DashboardAttributes['panels'];

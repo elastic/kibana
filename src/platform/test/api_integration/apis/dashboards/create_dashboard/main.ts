@@ -27,7 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
       expect(response.status).to.be(200);
-      expect(response.body.data.kibanaSavedObjectMeta.searchSource).to.eql({});
       expect(response.body.data.panels).to.eql([]);
       expect(response.body.data.timeRestore).to.be(false);
       expect(response.body.data.options).to.eql({
@@ -67,7 +66,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.data.panels).to.be.an('array');
       // panel index is a random uuid when not provided
       expect(response.body.data.panels[0].uid).match(/^[0-9a-f-]{36}$/);
-      expect(response.body.data.panels[0].uid).to.eql(response.body.data.panels[0].grid.i);
     });
 
     it('sets controls default values', async () => {
@@ -141,7 +139,6 @@ export default function ({ getService }: FtrProviderContext) {
                 y: 0,
                 w: 24,
                 h: 15,
-                i: 'bizz',
               },
               config: {},
               uid: 'bizz',

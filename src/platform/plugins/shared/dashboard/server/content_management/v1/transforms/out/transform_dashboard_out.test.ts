@@ -69,7 +69,6 @@ describe('transformDashboardOut', () => {
         ],
       },
       description: 'my description',
-      kibanaSavedObjectMeta: {},
       options: {
         ...DEFAULT_DASHBOARD_OPTIONS,
         hidePanelTitles: false,
@@ -81,7 +80,7 @@ describe('transformDashboardOut', () => {
             savedObjectId: '1',
             title: 'title1',
           },
-          grid: { x: 0, y: 0, w: 10, h: 10, i: '1' },
+          grid: { x: 0, y: 0, w: 10, h: 10 },
           uid: '1',
           type: 'type1',
           version: '2',
@@ -165,9 +164,7 @@ describe('transformDashboardOut', () => {
         ],
       },
       description: 'description',
-      kibanaSavedObjectMeta: {
-        searchSource: { query: { query: 'test', language: 'KQL' } },
-      },
+      query: { query: 'test', language: 'KQL' },
       options: {
         hidePanelTitles: true,
         useMargins: false,
@@ -187,7 +184,6 @@ describe('transformDashboardOut', () => {
             y: 0,
             w: 10,
             h: 10,
-            i: '1',
           },
           uid: '1',
           type: 'type1',

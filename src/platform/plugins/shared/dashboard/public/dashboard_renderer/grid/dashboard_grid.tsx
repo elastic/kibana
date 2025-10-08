@@ -73,7 +73,6 @@ export const DashboardGrid = () => {
             collapsed: widget.isCollapsed,
             title: widget.title,
             grid: {
-              i: widget.id,
               y: widget.row,
             },
           };
@@ -218,7 +217,6 @@ export const DashboardGrid = () => {
 
 const convertGridPanelToDashboardGridData = (panel: GridPanelData): GridData => {
   return {
-    i: panel.id,
     y: panel.row,
     x: panel.column,
     w: panel.width,

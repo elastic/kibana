@@ -78,7 +78,6 @@ export const getSerializedState = ({
     //
   }
 
-  const searchSource = { filters, query };
   const options = {
     useMargins,
     syncColors,
@@ -105,8 +104,9 @@ export const getSerializedState = ({
   const attributes: DashboardAttributes = {
     version: LATEST_VERSION,
     controlGroupInput: controlGroupInput as DashboardAttributes['controlGroupInput'],
-    kibanaSavedObjectMeta: { searchSource },
     description: description ?? '',
+    ...(filters ? { filters } : {}),
+    ...(query ? { query } : {}),
     refreshInterval,
     timeRange,
     timeRestore,

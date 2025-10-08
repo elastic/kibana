@@ -17,11 +17,7 @@
     "../../../../../typings/**/*",
     "emotion.d.ts"
   ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
-  ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/core",
     {
@@ -261,6 +257,7 @@
     "@kbn/rrule",
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
-    "@kbn/control-group-renderer"
+    "@kbn/control-group-renderer",
+    "@kbn/core-ui-settings-common"
   ]
 }
