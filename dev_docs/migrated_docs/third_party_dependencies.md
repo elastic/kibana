@@ -30,7 +30,7 @@ Treat third-party code as if it was your own. We share the responsibility for th
 
 Looking for a dependency that isn't already available in Kibana? There are a few things to keep in mind before adding a new dependency.
 
-First, be sure you have read and are familiar with our [development principles](dev_principles.mdx). In particular, **Be wary of dependencies**
+First, be sure you have read and are familiar with our [development principles](https://docs.elastic.dev/kibana-dev-docs/contributing/dev-principles). In particular, **Be wary of dependencies**
 and **Prefer one way to do things** provide an overview of how we approach this question.
 
 In general, we have a bias toward **not** adding new dependencies unless there is a compelling reason to do so, as we want to
