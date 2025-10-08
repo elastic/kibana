@@ -17,8 +17,28 @@ export const createHandler = (
 ): ToolHandlerFn<z.infer<ZodObject<any>>> => {
   return async (params, { esClient }) => {
     const client = esClient.asCurrentUser;
+
+    // Apply default values for parameters that weren't provided by the LLM
+    const resolvedParams = Object.keys(configuration.params).reduce((acc, paramName) => {
+      const param = configuration.params[paramName];
+      const providedValue = params[paramName];
+
+      if (providedValue !== undefined) {
+        // LLM provided a value, use it
+        acc[paramName] = providedValue;
+      } else if (param.optional && param.defaultValue !== undefined) {
+        // LLM didn't provide a value, but we have a default
+        acc[paramName] = param.defaultValue;
+      } else {
+        // No value provided and no default, use null
+        acc[paramName] = null;
+      }
+
+      return acc;
+    }, {} as Record<string, unknown>);
+
     const paramArray = Object.keys(configuration.params).map((param) => ({
-      [param]: params[param] ?? null,
+      [param]: resolvedParams[param] ?? null,
     }));
 
     const result = await client.esql.query({
@@ -28,7 +48,7 @@ export const createHandler = (
     });
 
     // need the interpolated query to return in the results / to display in the UI
-    const interpolatedQuery = interpolateEsqlQuery(configuration.query, params);
+    const interpolatedQuery = interpolateEsqlQuery(configuration.query, resolvedParams);
 
     return {
       results: [
