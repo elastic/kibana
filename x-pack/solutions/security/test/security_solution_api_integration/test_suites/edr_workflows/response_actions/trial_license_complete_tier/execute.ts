@@ -23,12 +23,12 @@ export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');
 
   // @skipInServerlessMKI - this test uses internal index manipulation in before/after hooks
-  // Failing: See https://github.com/elastic/kibana/issues/236362
-  describe.skip('@ess @serverless @skipInServerlessMKI Endpoint `execute` response action', function () {
+  describe('@ess @serverless @skipInServerlessMKI Endpoint `execute` response action', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let agentId = '';
     let t1AnalystSupertest: TestAgent;
     let endpointOperationsAnalystSupertest: TestAgent;
+    const log = getService('log');
 
     before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();
@@ -42,7 +42,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       if (indexedData) {
-        await endpointTestResources.unloadEndpointData(indexedData);
+        // Delete data loaded and suppress any errors (no point in failing test suite on data
+        // cleanup, since all test already ran)
+        await endpointTestResources.unloadEndpointData(indexedData).catch((error) => {
+          log.warning(`afterAll data clean up threw error: ${error.message}`);
+          log.debug(error);
+        });
       }
     });
 
