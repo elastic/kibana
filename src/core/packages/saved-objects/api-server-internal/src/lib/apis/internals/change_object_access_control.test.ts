@@ -249,7 +249,52 @@ describe('changeObjectAccessControl', () => {
           'changeOwnership'
         );
       });
+    });
+  });
 
+  describe('change access mode', () => {
+    describe('validation', () => {
+      it('throws if access mode is not specified', async () => {
+        const params = setup({
+          objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
+        });
+
+        await expect(() =>
+          changeObjectAccessControl({
+            ...params,
+            options: {
+              accessMode: undefined,
+            },
+            actionType: 'changeAccessMode',
+            currentUserProfileUid: '',
+          })
+        ).rejects.toThrow(
+          'The "accessMode" field is required to change access mode of a saved object.: Bad Request'
+        );
+      });
+
+      it('returns error if no read-only objects are specified', async () => {
+        const params = setup({
+          objects: [{ type: NON_READ_ONLY_TYPE, id: 'id-1' }],
+        });
+
+        const result = await changeObjectAccessControl({
+          ...params,
+          options: {
+            accessMode: 'read_only',
+          },
+          actionType: 'changeAccessMode',
+          currentUserProfileUid: mockUserProfileId,
+        });
+        expect(result.objects[0]).toHaveProperty('error');
+        const error = result.objects[0].error;
+        expect(error).toBeTruthy();
+        expect(error!.message).toBe(
+          `The type ${NON_READ_ONLY_TYPE} does not support access control: Bad Request`
+        );
+      });
+    });
+    describe('authorization of operations', () => {
       it('successfully delegates to security extension for change access mode', async () => {
         const params = setup({
           objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],

@@ -99,7 +99,11 @@ const validateChangeAccessControlParams = ({
       );
     }
   }
-
+  if (actionType === 'changeAccessMode' && accessMode === undefined) {
+    throw SavedObjectsErrorHelpers.createBadRequestError(
+      'The "accessMode" field is required to change access mode of a saved object.'
+    );
+  }
   if (
     actionType === 'changeAccessMode' &&
     accessMode !== undefined &&
