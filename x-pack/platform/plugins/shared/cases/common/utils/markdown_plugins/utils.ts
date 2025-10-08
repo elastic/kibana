@@ -6,6 +6,7 @@
  */
 
 import { filter } from 'lodash';
+import type { Root } from 'mdast';
 import type { Node } from 'unist';
 import markdown from 'remark-parse-no-trim';
 import remarkStringify from 'remark-stringify';
@@ -39,7 +40,8 @@ export const getLensVisualizations = (parsedComment?: Array<LensMarkdownNode | N
  */
 export const parseCommentString = (comment: string) => {
   const processor = unified().use([[markdown, {}], LensParser, TimelineParser]);
-  return processor.parse(comment) as MarkdownNode;
+  const parsed: Root = processor.parse(comment) as Root;
+  return parsed as MarkdownNode;
 };
 
 export const stringifyMarkdownComment = (comment: MarkdownNode) =>
@@ -53,7 +55,7 @@ export const stringifyMarkdownComment = (comment: MarkdownNode) =>
       LensSerializer,
       TimelineSerializer,
     ])
-    .stringify(comment);
+    .stringify(comment as Root);
 
 export const isLensMarkdownNode = (node?: unknown): node is LensMarkdownNode => {
   const unsafeNode = node as LensMarkdownNode;

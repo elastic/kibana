@@ -6,8 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
+import type { ReactElement } from 'react';
 
-import type { ReactElement } from 'react-markdown';
 import * as i18n from '../translations';
 import { LinkAnchor } from '../../links';
 import { useCasesContext } from '../../cases_context/use_cases_context';
