@@ -1175,21 +1175,18 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         typesRequiringAccessControl,
         authorizationResult,
         currentSpace: namespaceString,
+        addAuditEventFn: (types: string[]) => {
+          const errMessage = `Unable to ${authzAction} for types ${types.join(', ')}`;
+          const err = new Error(errMessage);
+          this.addAuditEvent({
+            action: auditAction!,
+            error: err,
+            unauthorizedTypes: [...typesRequiringAccessControl],
+            unauthorizedSpaces: [...spacesToAuthorize],
+          });
+          throw SavedObjectsErrorHelpers.decorateForbiddenError(err);
+        },
       });
-
-      if (authorizationResult.status !== 'fully_authorized') {
-        const errMessage = `Unable to ${authzAction} for types ${[
-          ...typesRequiringAccessControl,
-        ].join(', ')}`;
-        const err = new Error(errMessage);
-        this.addAuditEvent({
-          action: auditAction!,
-          error: err,
-          unauthorizedTypes: [...typesRequiringAccessControl],
-          unauthorizedSpaces: [...spacesToAuthorize],
-        });
-        throw SavedObjectsErrorHelpers.decorateForbiddenError(err);
-      }
 
       return authorizationResult;
     }
