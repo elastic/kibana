@@ -95,10 +95,10 @@ export const useNodeDetailsPopover = ({
   // Calculate dynamic height based on number of items
   const panelStyle = useMemo(() => {
     const shouldScroll = items.length > MAX_VISIBLE_ITEMS;
-    const maxHeight = shouldScroll 
-      ? `${(MAX_VISIBLE_ITEMS * parseInt(euiTheme.size.l, 10)) + parseInt(euiTheme.size.xl, 10)}px`
+    const maxHeight = shouldScroll
+      ? `${MAX_VISIBLE_ITEMS * parseInt(euiTheme.size.l, 10) + parseInt(euiTheme.size.xl, 10)}px`
       : 'auto';
-    
+
     return {
       maxHeight,
       overflowY: shouldScroll ? ('auto' as const) : ('visible' as const),
