@@ -296,7 +296,7 @@ export const useTopNavLinks = ({
       entries.push(saveSearch);
 
       // Always add an adjacent icon-only primary button that opens a small popover
-      // with "Save as" and "Revert changes". When there are no unsaved changes,
+      // with "Save as" and "Reset changes". When there are no unsaved changes,
       // the submenu items are disabled.
       const saveMoreMenu: TopNavMenuData = {
         id: 'save-more',
@@ -345,7 +345,7 @@ export const useTopNavLinks = ({
                   type: AppMenuActionType.secondary,
                   controlProps: {
                     label: i18n.translate('discover.localMenu.revertChangesTitle', {
-                      defaultMessage: 'Revert changes',
+                      defaultMessage: 'Reset changes',
                     }),
                     testId: 'discoverRevertChangesFromMore',
                     disableButton: !hasUnsavedChanges,

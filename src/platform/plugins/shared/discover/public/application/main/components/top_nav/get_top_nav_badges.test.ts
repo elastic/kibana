@@ -54,7 +54,7 @@ describe('getTopNavBadges()', function () {
     await userEvent.click(screen.getByRole('button')); // open menu
     expect(screen.queryByText('Save')).not.toBeNull();
     expect(screen.queryByText('Save as')).not.toBeNull();
-    expect(screen.queryByText('Revert changes')).not.toBeNull();
+    expect(screen.queryByText('Reset changes')).not.toBeNull();
   });
 
   test('should not show save in unsaved changed badge for read-only user', async () => {
@@ -75,7 +75,7 @@ describe('getTopNavBadges()', function () {
     await userEvent.click(screen.getByRole('button')); // open menu
     expect(screen.queryByText('Save')).toBeNull();
     expect(screen.queryByText('Save as')).toBeNull();
-    expect(screen.queryByText('Revert changes')).not.toBeNull();
+    expect(screen.queryByText('Reset changes')).not.toBeNull();
   });
 
   describe('managed saved search', () => {

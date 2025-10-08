@@ -108,7 +108,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
           .dashSplitSaveLeft {
             border-top-right-radius: 0 !important;
             border-bottom-right-radius: 0 !important;
-            margin-right: -7px !important;
+            margin-right: -8px !important;
             min-width: 0 !important;
           }
           .dscSplitSaveRight,

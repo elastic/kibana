@@ -68,7 +68,7 @@ export const strings = {
     }),
   getUpdateButtonLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.updateButton', {
-      defaultMessage: 'Run',
+      defaultMessage: 'Search',
     }),
   getRefreshQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refresh', {
@@ -76,7 +76,7 @@ export const strings = {
     }),
   getRefreshButtonLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refreshButton', {
-      defaultMessage: 'Run',
+      defaultMessage: 'Search',
     }),
   getCancelQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cancel', {
@@ -88,7 +88,7 @@ export const strings = {
     }),
   getRunButtonLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.runButton', {
-      defaultMessage: 'Run',
+      defaultMessage: 'Search',
     }),
   getDisabledDatePickerLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.datePicker.disabledLabel', {
@@ -687,9 +687,9 @@ export const QueryBarTopRow = React.memo(
       const updateButton = props.useBackgroundSearchButton ? (
         <SplitButton
           aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
-          color={props.isDirty ? 'success' : 'primary'}
+          color="primary"
           data-test-subj="querySubmitSplitButton"
-          iconType={props.isDirty ? iconDirty : 'refresh'}
+          iconType={undefined}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
           isSecondaryButtonDisabled={!canSendToBackground}
@@ -704,14 +704,14 @@ export const QueryBarTopRow = React.memo(
         </SplitButton>
       ) : (
         <EuiSuperUpdateButton
-          iconType={props.isDirty ? iconDirty : 'refresh'}
+          iconType={undefined}
           iconOnly={submitButtonIconOnly}
           aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
           isDisabled={isDateRangeInvalid || props.isDisabled}
           isLoading={props.isLoading}
           onClick={onClickSubmitButton}
           size="s"
-          color={props.isDirty ? 'success' : 'primary'}
+          color="primary"
           fill={true}
           needsUpdate={props.isDirty}
           data-test-subj="querySubmitButton"
@@ -732,7 +732,7 @@ export const QueryBarTopRow = React.memo(
           {props.isLoading && propsOnCancel && renderCancelButton()}
           {(!props.isLoading || !propsOnCancel) && (
             <EuiSuperUpdateButton
-              iconType={props.isDirty ? iconDirty : 'playFilled'}
+              iconType={undefined}
               iconSize="s"
               iconOnly={submitButtonIconOnly}
               aria-label={props.isDirty ? labelDirty : strings.getRefreshQueryLabel()}
@@ -740,7 +740,7 @@ export const QueryBarTopRow = React.memo(
               isLoading={props.isLoading}
               onClick={onClickSubmitButton}
               size="s"
-              color={props.isDirty ? 'success' : 'primary'}
+              color="primary"
               fill={true}
               needsUpdate={props.isDirty}
               data-test-subj="querySubmitButton"

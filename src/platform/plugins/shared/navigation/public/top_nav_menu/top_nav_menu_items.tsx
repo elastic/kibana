@@ -20,7 +20,7 @@ import type { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
 
 const POPOVER_BREAKPOINTS: EuiBreakpointSize[] = ['xs', 's'];
-const MAX_VISIBLE_ITEMS = 5;
+const MAX_VISIBLE_ITEMS = 4;
 
 interface TopNavMenuItemsProps {
   config: TopNavMenuData[] | undefined;

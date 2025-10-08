@@ -116,7 +116,7 @@ export const AppMenuActionsMenuPopover: React.FC<AppMenuActionsMenuPopoverProps>
         button={anchorElement}
         closePopover={onClose}
         isOpen={!nestedContent}
-        panelPaddingSize="none"
+        panelPaddingSize="xs"
         anchorPosition={anchorPosition}
         hasArrow={hasArrow}
         offset={offset}

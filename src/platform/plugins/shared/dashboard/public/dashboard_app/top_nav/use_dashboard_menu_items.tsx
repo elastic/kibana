@@ -13,13 +13,9 @@ import ReactDOM from 'react-dom';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
-import {
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiWrappingPopover,
-} from '@elastic/eui';
+import { EuiContextMenuPanel, EuiContextMenuItem, EuiWrappingPopover } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-
+import { i18n } from '@kbn/i18n';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { UI_SETTINGS } from '../../../common/constants';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
@@ -31,7 +27,6 @@ import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
-import { i18n } from '@kbn/i18n';
 
 const container = document.createElement('div');
 let isPopoverOpen = false;
@@ -55,7 +50,6 @@ const SaveMorePopover: React.FC<SaveMorePopoverProps> = ({
     <EuiContextMenuItem
       key="save-as"
       data-test-subj="dashboardSaveAsFromMore"
-      icon="save"
       onClick={() => {
         onSaveAs();
         onClose();
@@ -68,7 +62,6 @@ const SaveMorePopover: React.FC<SaveMorePopoverProps> = ({
     <EuiContextMenuItem
       key="reset"
       data-test-subj="dashboardResetFromMore"
-      icon="refresh"
       disabled={isResetDisabled}
       onClick={() => {
         onReset();
@@ -76,7 +69,7 @@ const SaveMorePopover: React.FC<SaveMorePopoverProps> = ({
       }}
     >
       {i18n.translate('dashboard.topNav.resetFromMoreLabel', {
-        defaultMessage: 'Reset',
+        defaultMessage: 'Reset changes',
       })}
     </EuiContextMenuItem>,
   ];
@@ -86,7 +79,98 @@ const SaveMorePopover: React.FC<SaveMorePopoverProps> = ({
       button={anchorElement}
       isOpen={true}
       closePopover={onClose}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
+      anchorPosition="downRight"
+      attachToAnchor={true}
+      hasArrow={false}
+      offset={4}
+      buffer={0}
+    >
+      <EuiContextMenuPanel size="s" items={items} />
+    </EuiWrappingPopover>
+  );
+};
+
+interface AddPopoverProps {
+  anchorElement: HTMLElement;
+  onClose: () => void;
+}
+
+const AddPopover: React.FC<AddPopoverProps> = ({ anchorElement, onClose }) => {
+  const items = [
+    <EuiContextMenuItem
+      key="visualization"
+      data-test-subj="dashboardAddVisualization"
+      icon="lensApp"
+      onClick={() => {
+        // TODO: Hook up visualization action
+        onClose();
+      }}
+    >
+      {i18n.translate('dashboard.topNav.addVisualizationLabel', {
+        defaultMessage: 'Visualization',
+      })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="new-panel"
+      data-test-subj="dashboardAddNewPanel"
+      icon="plusInCircle"
+      onClick={() => {
+        // TODO: Hook up new panel action
+        onClose();
+      }}
+    >
+      {i18n.translate('dashboard.topNav.addNewPanelLabel', {
+        defaultMessage: 'New panel',
+      })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="collapsible-section"
+      data-test-subj="dashboardAddCollapsibleSection"
+      icon="section"
+      onClick={() => {
+        // TODO: Hook up collapsible section action
+        onClose();
+      }}
+    >
+      {i18n.translate('dashboard.topNav.addCollapsibleSectionLabel', {
+        defaultMessage: 'Collapsible section',
+      })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="controls"
+      data-test-subj="dashboardAddControls"
+      icon="controlsHorizontal"
+      onClick={() => {
+        // TODO: Hook up controls action
+        onClose();
+      }}
+    >
+      {i18n.translate('dashboard.topNav.addControlsLabel', {
+        defaultMessage: 'Controls',
+      })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="from-library"
+      data-test-subj="dashboardAddFromLibrary"
+      icon="folderOpen"
+      onClick={() => {
+        // TODO: Hook up from library action
+        onClose();
+      }}
+    >
+      {i18n.translate('dashboard.topNav.addFromLibraryLabel', {
+        defaultMessage: 'From library',
+      })}
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <EuiWrappingPopover
+      button={anchorElement}
+      isOpen={true}
+      closePopover={onClose}
+      panelPaddingSize="s"
       anchorPosition="downRight"
       attachToAnchor={true}
       hasArrow={false}
@@ -136,6 +220,29 @@ function showSaveMorePopover({
         onSaveAs={onSaveAs}
         onReset={onReset}
         isResetDisabled={isResetDisabled}
+      />
+    </KibanaRenderContextProvider>
+  );
+  ReactDOM.render(element, container);
+}
+
+function showAddPopover({ anchorElement }: { anchorElement: HTMLElement }) {
+  if (isPopoverOpen) {
+    cleanupPopover();
+    return;
+  }
+
+  isPopoverOpen = true;
+  document.body.appendChild(container);
+
+  const element = (
+    <KibanaRenderContextProvider {...coreServices}>
+      <AddPopover
+        anchorElement={anchorElement}
+        onClose={() => {
+          cleanupPopover();
+          anchorElement?.focus();
+        }}
       />
     </KibanaRenderContextProvider>
   );
@@ -276,8 +383,8 @@ export const useDashboardMenuItems = ({
         fill: false,
         color: 'primary',
         testId: 'dashboardAddButton',
-        run: () => {
-          // TODO: Hook up Add action
+        run: (anchorElement: HTMLElement) => {
+          showAddPopover({ anchorElement });
         },
       } as TopNavMenuData,
 
@@ -302,7 +409,9 @@ export const useDashboardMenuItems = ({
           defaultMessage: 'More save actions',
         }),
         testId: 'dashboardSaveMoreButton',
-        className: `dashSplitSaveRight${hasUnsavedChanges ? ' dashSplitSaveRight--hasChanges' : ''}`,
+        className: `dashSplitSaveRight${
+          hasUnsavedChanges ? ' dashSplitSaveRight--hasChanges' : ''
+        }`,
         emphasize: true,
         fill: false,
         color: 'text',
