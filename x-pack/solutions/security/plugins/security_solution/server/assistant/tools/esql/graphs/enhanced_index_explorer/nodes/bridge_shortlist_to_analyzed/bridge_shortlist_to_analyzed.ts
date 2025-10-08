@@ -22,7 +22,7 @@ export const bridgeShortlistToAnalyzed = () => {
     }
 
     // Filter discovered resources to only include shortlisted ones
-    const analyzedResources = (discoveredResources || []).filter((resource) =>
+    const analyzedResources = discoveredResources.filter((resource) =>
       shortlistedIndexPatterns.includes(resource.name)
     );
 
