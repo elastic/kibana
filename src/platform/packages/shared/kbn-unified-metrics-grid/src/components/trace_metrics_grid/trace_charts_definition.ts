@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
 import { chartPalette, type DataSource } from '.';
-import type { ChartProps } from '../chart';
 
 interface TraceChart {
   id: string;
