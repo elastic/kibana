@@ -10,3 +10,6 @@ inversify
 canvas-confetti
 @types/canvas-confetti
 undici
+@tanstack/react-table
+@tanstack/react-virtual
+@storybook/addon-docs

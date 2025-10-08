@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
-
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/doc.mdx',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-  ],
-};
+export { getESQLStatsQueryMeta } from './parse_esql';
+export {
+  getCascadeRowNodePath,
+  getCascadeRowNodePathValueRecord,
+  getCascadeRowLeafDataCacheKey,
+  getLeafIdFromCacheKey,
+} from './utils';
