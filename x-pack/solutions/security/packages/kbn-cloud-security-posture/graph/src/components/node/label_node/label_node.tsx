@@ -8,13 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { css } from '@emotion/react';
-import {
-  EuiText,
-  EuiTextTruncate,
-  transparentize,
-  useEuiShadow,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiText, EuiTextTruncate, transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import {
   LabelNodeContainer,
   LabelShape,
@@ -28,9 +22,7 @@ import {
 } from '../styles';
 import type { LabelNodeViewModel, NodeProps } from '../../types';
 import { NodeExpandButton } from '../node_expand_button';
-import {
-  GRAPH_LABEL_NODE_ID,
-} from '../../test_ids';
+import { GRAPH_LABEL_NODE_ID } from '../../test_ids';
 import { analyzeDocuments } from './analyze_documents';
 import { LabelNodeBadges } from './label_node_badges';
 import { LabelNodeDetails } from './label_node_details';
@@ -108,10 +100,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
             >
               <EuiTextTruncate truncation="end" text={text} />
             </EuiText>
-            <div
-              css={css`
-              `}
-            >
+            <div css={css``}>
               <LabelNodeBadges analysis={analysis} onEventClick={eventClickHandler} />
             </div>
           </div>
@@ -139,8 +128,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               onClick={(e, unToggleCallback) => expandButtonClick?.(e, props, unToggleCallback)}
               x={`${NODE_LABEL_WIDTH - 3}px`}
               y={`${
-                -ACTUAL_LABEL_HEIGHT +
-                (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
+                -ACTUAL_LABEL_HEIGHT + (ACTUAL_LABEL_HEIGHT - NodeExpandButton.ExpandButtonSize) / 2
               }px`}
             />
           </>

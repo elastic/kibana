@@ -48,7 +48,9 @@ const useGraphPopovers = ({
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
-  const [currentEventAnalysis, setCurrentEventAnalysis] = useState<DocumentAnalysisOutput | null>(null);
+  const [currentEventAnalysis, setCurrentEventAnalysis] = useState<DocumentAnalysisOutput | null>(
+    null
+  );
   const [currentEventText, setCurrentEventText] = useState<string>('');
   const nodeExpandPopover = useEntityNodeExpandPopover(
     setSearchFilters,
@@ -95,11 +97,12 @@ const useGraphPopovers = ({
   );
 
   const createEventClickHandler = useCallback(
-    (analysis: DocumentAnalysisOutput, text: string) => (e: React.MouseEvent<HTMLButtonElement>) => {
-      setCurrentEventAnalysis(analysis);
-      setCurrentEventText(text);
-      openPopoverCallback(eventPopover.onEventClick, e);
-    },
+    (analysis: DocumentAnalysisOutput, text: string) =>
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        setCurrentEventAnalysis(analysis);
+        setCurrentEventText(text);
+        openPopoverCallback(eventPopover.onEventClick, e);
+      },
     [setCurrentEventAnalysis, setCurrentEventText, openPopoverCallback, eventPopover.onEventClick]
   );
 
@@ -357,7 +360,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
             const nodeCountryCodes = node.countryCodes || [];
             const numEvents = node.uniqueEventsCount ?? 0;
             const numAlerts = node.uniqueAlertsCount ?? 0;
-            const analysis = analyzeDocuments({ uniqueEventsCount: numEvents, uniqueAlertsCount: numAlerts });
+            const analysis = analyzeDocuments({
+              uniqueEventsCount: numEvents,
+              uniqueAlertsCount: numAlerts,
+            });
             const text = node.label ? node.label : node.id;
             const docEventIds: string[] =
               'documentsData' in node && Array.isArray(node.documentsData)

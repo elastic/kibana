@@ -93,9 +93,9 @@ export const CountryFlags = memo(({ countryCodes, onCountryClick }: CountryFlags
           size="xs"
           color="text"
           data-test-subj={GRAPH_FLAGS_PLUS_COUNT_BUTTON_ID}
-        onClick={onCountryClick}
+          onClick={onCountryClick}
           aria-label={popoverAriaLabel}
-          flush='both'
+          flush="both"
           css={css`
             font-weight: medium;
           `}
