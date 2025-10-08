@@ -1746,4 +1746,3 @@ export function getCompletionItemProvider(
     },
   };
 }
-
