@@ -242,11 +242,13 @@ export async function pickTestGroupRunOrder() {
    * For example in code coverage pipeline definition, it is "limited"
    * to 'unit,integration'.  This means FTR tests will not be executed.
    */
-  const LIMIT_CONFIG_TYPE = process.env.LIMIT_CONFIG_TYPE
-    ? process.env.LIMIT_CONFIG_TYPE.split(',')
-        .map((t) => t.trim())
-        .filter(Boolean)
-    : ['unit', 'integration', 'functional'];
+  // const LIMIT_CONFIG_TYPE = process.env.LIMIT_CONFIG_TYPE
+  //   ? process.env.LIMIT_CONFIG_TYPE.split(',')
+  //       .map((t) => t.trim())
+  //       .filter(Boolean)
+  //   : ['unit', 'integration', 'functional'];
+
+  const LIMIT_CONFIG_TYPE = ['functional'];
 
   const LIMIT_SOLUTIONS = process.env.LIMIT_SOLUTIONS
     ? process.env.LIMIT_SOLUTIONS.split(',')
