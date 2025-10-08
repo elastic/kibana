@@ -216,7 +216,6 @@ export const streamRoutingMachine = setup({
               type: 'routingSamples.setDocumentMatchFilter',
               filter: 'matched',
             }),
-            sendTo('routingSamplesMachine', { type: 'routingSamples.resetSuggestions' }),
           ],
           initial: 'changing',
           states: {
@@ -224,10 +223,7 @@ export const streamRoutingMachine = setup({
               on: {
                 'routingRule.cancel': {
                   target: '#idle',
-                  actions: [
-                    { type: 'resetRoutingChanges' },
-                    sendTo('routingSamplesMachine', { type: 'routingSamples.resetSuggestions' }),
-                  ],
+                  actions: [{ type: 'resetRoutingChanges' }],
                 },
                 'routingRule.change': {
                   actions: enqueueActions(({ enqueue, event }) => {
@@ -262,7 +258,6 @@ export const streamRoutingMachine = setup({
               },
             },
             forking: {
-              exit: [sendTo('routingSamplesMachine', { type: 'routingSamples.resetSuggestions' })],
               invoke: {
                 id: 'forkStreamActor',
                 src: 'forkStream',
@@ -297,10 +292,7 @@ export const streamRoutingMachine = setup({
               preview: { type: 'updateStream' },
             }),
           ],
-          exit: [
-            { type: 'resetRoutingChanges' },
-            sendTo('routingSamplesMachine', { type: 'routingSamples.resetSuggestions' }),
-          ],
+          exit: [{ type: 'resetRoutingChanges' }],
           states: {
             changing: {
               on: {
@@ -336,7 +328,6 @@ export const streamRoutingMachine = setup({
               },
             },
             removingRule: {
-              exit: [sendTo('routingSamplesMachine', { type: 'routingSamples.resetSuggestions' })],
               invoke: {
                 id: 'deleteStreamActor',
                 src: 'deleteStream',
@@ -353,7 +344,6 @@ export const streamRoutingMachine = setup({
               },
             },
             updatingRule: {
-              exit: [sendTo('routingSamplesMachine', { type: 'routingSamples.resetSuggestions' })],
               invoke: {
                 id: 'upsertStreamActor',
                 src: 'upsertStream',
@@ -382,7 +372,6 @@ export const streamRoutingMachine = setup({
               preview: { type: 'updateStream' },
             }),
           ],
-          exit: [sendTo('routingSamplesMachine', { type: 'routingSamples.resetSuggestions' })],
           states: {
             reordering: {
               on: {

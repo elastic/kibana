@@ -11,7 +11,6 @@ import type { RoutingDefinition } from '@kbn/streams-schema';
 import { isRoutingEnabled } from '@kbn/streams-schema';
 import React from 'react';
 import { useRoutingFieldSuggestions } from '../../../hooks/use_field_suggestions';
-import { useRoutingValueSuggestions } from '../../../hooks/use_value_suggestions';
 import type { ConditionEditorProps } from '../shared/condition_editor';
 import { ConditionEditor } from '../shared/condition_editor';
 
@@ -24,7 +23,6 @@ export type RoutingConditionEditorProps = Omit<ConditionEditorProps, 'fieldSugge
 export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
   const isEnabled = isRoutingEnabled(props.status);
   const fieldSuggestions = useRoutingFieldSuggestions();
-  const valueSuggestions = useRoutingValueSuggestions();
 
   return (
     <EuiForm fullWidth>
@@ -52,11 +50,7 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
           onChange={(event) => props.onStatusChange(event.target.checked ? 'enabled' : 'disabled')}
         />
       </EuiFormRow>
-      <ConditionEditor
-        {...props}
-        fieldSuggestions={fieldSuggestions}
-        valueSuggestions={valueSuggestions}
-      />
+      <ConditionEditor {...props} fieldSuggestions={fieldSuggestions} />
     </EuiForm>
   );
 }

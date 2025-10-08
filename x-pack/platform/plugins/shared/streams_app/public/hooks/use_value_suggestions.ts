@@ -7,45 +7,53 @@
 
 import type { StringOrNumberOrBoolean } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
-  selectDocumentsForSuggestions,
+  selectPreviewDocuments,
   useStreamSamplesSelector,
 } from '../components/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 
-type Suggestions = Record<string, StringOrNumberOrBoolean[]>;
-
 /**
  * Create field suggestions from accumulated simulation records
- * @returns dictionary of field names to array of unique values. e.g { "field1": ["value1", "value2"], "field2": [true, false], ... }
+ * @param previewRecords array of flattened records
+ * @param field field name to extract unique values for
+ * @returns array of unique values for the specified field
  */
-const createValueSuggestions = (previewRecords: FlattenRecord[] = []): Suggestions => {
-  const accumulator: Record<string, Set<StringOrNumberOrBoolean>> = {};
-
-  for (const record of previewRecords) {
-    for (const [key, rawValue] of Object.entries(record)) {
-      if (rawValue !== undefined) {
-        const value = rawValue as StringOrNumberOrBoolean;
-        if (!accumulator[key]) {
-          accumulator[key] = new Set();
-        }
-        accumulator[key].add(value);
-      }
-    }
+const createValueSuggestions = (
+  previewRecords: FlattenRecord[] = [],
+  field?: string
+): StringOrNumberOrBoolean[] => {
+  if (!field) {
+    return [];
   }
 
-  return Object.fromEntries(Object.entries(accumulator).map(([key, set]) => [key, [...set]]));
+  const suggestions = new Set<StringOrNumberOrBoolean>();
+
+  previewRecords.forEach((record) => {
+    const value = record[field];
+    if (value !== undefined) {
+      suggestions.add(value as StringOrNumberOrBoolean);
+    }
+  });
+
+  return Array.from(suggestions);
 };
 
 /**
  * Hook for providing value suggestions from routing samples data - to be used with Routing only
  */
-export const useRoutingValueSuggestions = (): Suggestions => {
+export const useRoutingValueSuggestions = (field?: string): StringOrNumberOrBoolean[] => {
+  const [records, setRecords] = useState<FlattenRecord[]>([]);
+
   const previewRecords = useStreamSamplesSelector((snapshot) =>
-    selectDocumentsForSuggestions(snapshot.context)
+    selectPreviewDocuments(snapshot.context)
   );
 
-  return useMemo(() => {
-    return createValueSuggestions(previewRecords);
+  useEffect(() => {
+    setRecords((prevRecords) => [...prevRecords, ...previewRecords]);
   }, [previewRecords]);
+
+  return useMemo(() => {
+    return createValueSuggestions(records, field);
+  }, [records, field]);
 };

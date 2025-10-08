@@ -39,13 +39,3 @@ export const selectPreviewDocuments = createSelector(
     return documents.map((doc) => flattenObject(doc)) as FlattenRecord[];
   }
 );
-
-/**
- * Selects the documents used for generating suggestions.
- */
-export const selectDocumentsForSuggestions = createSelector(
-  [(context: RoutingSamplesContext) => context.accumulatedDocuments],
-  (values) => {
-    return values.map((doc) => flattenObject(doc)) as FlattenRecord[];
-  }
-);

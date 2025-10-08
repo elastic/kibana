@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Condition, StringOrNumberOrBoolean } from '@kbn/streamlang';
+import type { Condition } from '@kbn/streamlang';
 import {
   type FilterCondition,
   getDefaultFormValueForOperator,
@@ -31,6 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import React, { useMemo } from 'react';
+import { useRoutingValueSuggestions } from '../../../hooks/use_value_suggestions';
 import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 import type { Suggestion } from './autocomplete_selector';
 import { AutocompleteSelector } from './autocomplete_selector';
@@ -40,7 +41,6 @@ export interface ConditionEditorProps {
   status: RoutingStatus;
   onConditionChange: (condition: Condition) => void;
   fieldSuggestions?: Suggestion[];
-  valueSuggestions?: Record<string, StringOrNumberOrBoolean[]>;
 }
 
 const operatorOptions: EuiSelectOption[] = Object.entries(operatorToHumanReadableNameMap).map(
@@ -51,7 +51,7 @@ const operatorOptions: EuiSelectOption[] = Object.entries(operatorToHumanReadabl
 );
 
 export function ConditionEditor(props: ConditionEditorProps) {
-  const { status, onConditionChange, fieldSuggestions = [], valueSuggestions = {} } = props;
+  const { status, onConditionChange, fieldSuggestions = [] } = props;
 
   const isInvalidCondition = !isCondition(props.condition);
 
@@ -115,7 +115,6 @@ export function ConditionEditor(props: ConditionEditorProps) {
           condition={condition}
           onConditionChange={handleConditionChange}
           fieldSuggestions={fieldSuggestions}
-          valueSuggestions={valueSuggestions}
         />
       ) : (
         <EuiCodeBlock language="json" paddingSize="m" isCopyable>
@@ -131,9 +130,10 @@ function FilterForm(props: {
   disabled: boolean;
   onConditionChange: (condition: FilterCondition) => void;
   fieldSuggestions?: Suggestion[];
-  valueSuggestions?: Record<string, StringOrNumberOrBoolean[]>;
 }) {
-  const { condition, disabled, onConditionChange, fieldSuggestions, valueSuggestions } = props;
+  const { condition, disabled, onConditionChange, fieldSuggestions } = props;
+
+  const valueSuggestions = useRoutingValueSuggestions(condition.field);
 
   const operator = useMemo(() => {
     return getFilterOperator(condition);
@@ -145,11 +145,11 @@ function FilterForm(props: {
 
   const suggestions = useMemo(() => {
     return (
-      (valueSuggestions?.[condition.field] || []).map((v) => ({
+      valueSuggestions.map((v) => ({
         name: String(v),
       })) || []
     );
-  }, [condition.field, valueSuggestions]);
+  }, [valueSuggestions]);
 
   const handleConditionChange = (updatedCondition: Partial<FilterCondition>) => {
     onConditionChange({

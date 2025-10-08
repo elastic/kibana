@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { setup, assign, fromObservable, fromEventObservable } from 'xstate5';
-import { Observable, filter, map, switchMap, timeout, catchError, throwError } from 'rxjs';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import type { SampleDocument, Streams } from '@kbn/streams-schema';
-import { isEmpty, isNumber } from 'lodash';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import { i18n } from '@kbn/i18n';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
+import type { SampleDocument, Streams } from '@kbn/streams-schema';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
+import { isEmpty, isNumber } from 'lodash';
+import { Observable, catchError, filter, map, switchMap, throwError, timeout } from 'rxjs';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { assign, fromEventObservable, fromObservable, setup } from 'xstate5';
 import { getPercentageFormatter } from '../../../../../util/formatters';
 import { processCondition } from '../../utils';
 
@@ -49,7 +49,6 @@ export interface RoutingSamplesContext {
     | { type: 'suggestion'; name: string; index: number }
     | { type: 'createStream' }
     | { type: 'updateStream'; name: string };
-  accumulatedDocuments: SampleDocument[];
 }
 
 export type RoutingSamplesEvent =
@@ -111,9 +110,6 @@ export const routingSamplesMachine = setup({
         selectedPreview: params.preview,
       })
     ),
-    resetSuggestions: assign(() => ({
-      accumulatedDocuments: [],
-    })),
   },
   delays: {
     conditionUpdateDebounceTime: 500,
@@ -134,7 +130,6 @@ export const routingSamplesMachine = setup({
     approximateMatchingPercentageError: undefined,
     selectedPreview: undefined,
     documentMatchFilter: 'matched',
-    accumulatedDocuments: [],
   }),
   initial: 'fetching',
   invoke: {
@@ -145,7 +140,6 @@ export const routingSamplesMachine = setup({
     'routingSamples.refresh': {
       target: '.fetching',
       reenter: true,
-      actions: [{ type: 'resetSuggestions', params: ({ event }) => event }],
     },
     'routingSamples.updateCondition': {
       target: '.debouncingCondition',
@@ -169,15 +163,6 @@ export const routingSamplesMachine = setup({
         {
           type: 'setSelectedPreview',
           params: ({ event }) => event,
-        },
-      ],
-    },
-    'routingSamples.resetSuggestions': {
-      target: '.fetching',
-      reenter: true,
-      actions: [
-        {
-          type: 'resetSuggestions',
         },
       ],
     },
@@ -218,14 +203,6 @@ export const routingSamplesMachine = setup({
                 },
                 onDone: {
                   target: 'done',
-                  actions: [
-                    ({ context }) => {
-                      context.accumulatedDocuments = [
-                        ...context.accumulatedDocuments,
-                        ...(context.documents ?? []),
-                      ];
-                    },
-                  ],
                 },
                 onError: {
                   target: 'done',
