@@ -94,6 +94,7 @@ export function AiAssistantSelectionPage() {
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
+                      announceOnMount
                       iconType="warning"
                       data-test-subj="pluginsAiAssistantSelectionPageObservabilityDocumentationCallout"
                       title={i18n.translate(
@@ -181,6 +182,7 @@ export function AiAssistantSelectionPage() {
                   <>
                     <EuiSpacer size="s" />
                     <EuiCallOut
+                      announceOnMount
                       iconType="warning"
                       data-test-subj="pluginsAiAssistantSelectionPageSecurityDocumentationCallout"
                       title={i18n.translate(

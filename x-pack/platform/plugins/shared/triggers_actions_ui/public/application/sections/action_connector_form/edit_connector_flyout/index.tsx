@@ -240,6 +240,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               {showFormErrors && (
                 <>
                   <EuiCallOut
+                    announceOnMount
                     size="s"
                     color="danger"
                     iconType="warning"

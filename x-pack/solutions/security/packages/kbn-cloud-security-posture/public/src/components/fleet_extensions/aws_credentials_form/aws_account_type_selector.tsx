@@ -109,7 +109,7 @@ export const AwsAccountTypeSelect = ({
       <EuiSpacer size="l" />
       {!awsOrganizationEnabled && (
         <>
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount={false} color="warning">
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.awsOrganizationNotSupportedMessage"
               defaultMessage="AWS Organization not supported in current integration version. Please upgrade to the latest version to enable AWS Organizations integration."

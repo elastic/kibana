@@ -182,6 +182,7 @@ export const TemplateDetailsContent = ({
       const managedTemplateCallout = isCloudManaged && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.templateDetails.cloudManagedTemplateInfoTitle"

@@ -316,6 +316,7 @@ export const NotificationsList: FC = () => {
       {newNotificationsCount && !isLoading ? (
         <>
           <EuiCallOut
+            announceOnMount
             size="s"
             title={
               <FormattedMessage
@@ -381,6 +382,7 @@ export const NotificationsList: FC = () => {
       {queryError ? (
         <>
           <EuiCallOut
+            announceOnMount
             size={'s'}
             title={
               <FormattedMessage

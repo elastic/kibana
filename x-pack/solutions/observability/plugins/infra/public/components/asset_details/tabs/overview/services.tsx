@@ -90,6 +90,7 @@ export const ServicesContent = ({
     >
       {error ? (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.infra.assetDetails.services.getServicesRequestErrorTitle', {
             defaultMessage: 'Error',
           })}

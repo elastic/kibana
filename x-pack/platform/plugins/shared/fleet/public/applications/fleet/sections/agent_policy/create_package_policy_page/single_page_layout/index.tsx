@@ -607,6 +607,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             size="m"
             color="warning"
             iconType="warning"
@@ -639,6 +640,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut
+            announceOnMount
             size="m"
             color="warning"
             title={

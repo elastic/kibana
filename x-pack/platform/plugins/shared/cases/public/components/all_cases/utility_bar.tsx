@@ -252,6 +252,7 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiCallOut
+                  announceOnMount
                   title={renderMaxLimitWarning()}
                   color="warning"
                   size="s"

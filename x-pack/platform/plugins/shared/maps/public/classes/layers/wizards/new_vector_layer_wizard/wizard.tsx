@@ -153,6 +153,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       if (!this.state.userHasIndexWritePermissions) {
         return (
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.indexPrivsErrorTitle', {
               defaultMessage: 'Missing index privileges',
             })}
@@ -165,6 +166,7 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       }
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexErrorTitle', {
             defaultMessage: 'Unable to create index',
           })}

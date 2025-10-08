@@ -120,6 +120,7 @@ export const RuntimeFieldEditorFlyoutContent = ({
         {isSubmitted && !isFormValid && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18nTexts.formErrorsCalloutTitle}
               color="danger"
               iconType="cross"

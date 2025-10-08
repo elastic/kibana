@@ -63,6 +63,7 @@ export const RuleCustomizationsFlyoutSubheader = ({
         <>
           <EuiSpacer size="xs" />
           <EuiCallOut
+            announceOnMount={false}
             data-test-subj="ruleCustomizationsOutdatedCallout"
             color="warning"
             iconType="warning"

@@ -635,6 +635,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                 <>
                   <div css={sectionWrapperCss}>
                     <EuiCallOut
+                      announceOnMount
                       title={i18n.WARNING_NO_CONNECTOR_TITLE}
                       color="warning"
                       iconType="question"

@@ -82,7 +82,7 @@ export const GcpCredentialsFormAgentless = ({
       <EuiSpacer size="m" />
       {!showCloudTemplates && (
         <>
-          <EuiCallOut color="warning">
+          <EuiCallOut announceOnMount={false} color="warning">
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudFormationSupportedMessage"
               defaultMessage="Launch Cloud Shell for automated credentials not supported in current integration version. Please upgrade to the latest version to enable Launch Cloud Shell for automated credentials."

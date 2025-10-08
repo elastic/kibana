@@ -134,6 +134,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       {isSystemTemplate && (
         <Fragment>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.templateEdit.systemTemplateWarningTitle"
@@ -155,6 +156,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
       {isDeprecatedTemplate && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.templateEdit.deprecatedTemplateWarningTitle"

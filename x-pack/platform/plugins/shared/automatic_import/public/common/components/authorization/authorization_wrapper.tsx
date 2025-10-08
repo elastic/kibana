@@ -26,6 +26,7 @@ export const AuthorizationWrapper = React.memo<AuthorizationWrapperProps>(
     if (!isAuthorized) {
       return (
         <EuiCallOut
+          announceOnMount={false}
           title={i18n.PRIVILEGES_MISSING_TITLE}
           iconType="info"
           data-test-subj="missingPrivilegesCallOut"

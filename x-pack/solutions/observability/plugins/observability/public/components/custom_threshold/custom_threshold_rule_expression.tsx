@@ -467,6 +467,7 @@ export default function Expressions(props: Props) {
       {!!paramsWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.observability.customThreshold.rule.alertFlyout.warning.title',
               {
@@ -492,7 +493,12 @@ export default function Expressions(props: Props) {
       </EuiTitle>
       <EuiSpacer size="s" />
       {paramsError && !triggerResetDataView ? (
-        <EuiCallOut color="danger" iconType="warning" data-test-subj="thresholdRuleExpressionError">
+        <EuiCallOut
+          announceOnMount
+          color="danger"
+          iconType="warning"
+          data-test-subj="thresholdRuleExpressionError"
+        >
           <p>
             {i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.error.message', {
               defaultMessage: 'Error fetching search source',

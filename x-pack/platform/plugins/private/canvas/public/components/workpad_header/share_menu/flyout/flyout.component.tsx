@@ -181,7 +181,14 @@ export const ShareWebsiteFlyout: FC<Props> = ({
       <EuiSpacer size="xs" key="spacer" />,
     ];
     warningText = [
-      <EuiCallOut title={warning} color="warning" size="s" iconType="warning" key="callout" />,
+      <EuiCallOut
+        announceOnMount
+        title={warning}
+        color="warning"
+        size="s"
+        iconType="warning"
+        key="callout"
+      />,
       <EuiSpacer key="spacer" />,
     ];
   }

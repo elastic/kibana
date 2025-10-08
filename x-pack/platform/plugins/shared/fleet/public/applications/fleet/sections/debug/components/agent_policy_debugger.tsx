@@ -72,7 +72,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
 
   if (status === 'error') {
     return (
-      <EuiCallOut title="Error" color="danger">
+      <EuiCallOut announceOnMount title="Error" color="danger">
         <FormattedMessage
           id="xpack.fleet.debug.agentPolicyDebugger.fetchError"
           defaultMessage="Error fetching Agent Policies"

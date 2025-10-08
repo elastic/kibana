@@ -459,6 +459,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         {isDataStreamFullyManagedByILM(dataStream) && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.fullyManagedByILMTitle',
                 { defaultMessage: 'This data stream and its associated indices are managed by ILM' }

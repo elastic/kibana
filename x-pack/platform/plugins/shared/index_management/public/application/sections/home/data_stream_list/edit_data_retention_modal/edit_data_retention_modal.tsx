@@ -353,6 +353,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
 
           {affectedDataStreams.length > 0 && !formData.infiniteRetentionPeriod && (
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutTitle',
                 {
