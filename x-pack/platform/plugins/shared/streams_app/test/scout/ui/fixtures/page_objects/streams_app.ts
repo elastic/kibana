@@ -73,6 +73,45 @@ export class StreamsApp {
     await expect(this.page.getByTestId('streamsTable')).toBeVisible();
   }
 
+  async verifyDocCount(streamName: string, expectedCount: number) {
+    await expect(this.page.locator(`[data-test-subj="streamsDocCount-${streamName}"]`)).toHaveText(
+      expectedCount.toString()
+    );
+  }
+
+  async verifyDataQuality(streamName: string, expectedQuality: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="dataQualityIndicator-${streamName}"]`)
+    ).toHaveText(expectedQuality);
+  }
+
+  async verifyRetention(streamName: string, expectedIlmPolicy: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="retentionColumn-${streamName}"]`)
+    ).toContainText(expectedIlmPolicy);
+  }
+
+  async verifyDiscoverButtonLink(streamName: string) {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      throw new Error(`Missing href for Discover action button of stream ${streamName}`);
+    }
+
+    // Expect encoded ESQL snippet to appear (basic validation)
+    // 'FROM <streamName>' should appear URL-encoded
+    const expectedFragment = encodeURIComponent(`FROM ${streamName}`);
+    if (!href.includes(expectedFragment)) {
+      throw new Error(
+        `Href for ${streamName} did not contain expected ESQL fragment. href=${href} expectedFragment=${expectedFragment}`
+      );
+    }
+  }
+
   async verifyStreamsAreInTable(streamNames: string[]) {
     for (const name of streamNames) {
       await expect(
@@ -115,6 +154,21 @@ export class StreamsApp {
         await expandButton.click();
       }
     }
+  }
+
+  // Streams header utility methods
+  async verifyLifecycleBadge(streamName: string, expectedLabel: string) {
+    await expect(
+      this.page.locator(`[data-test-subj="lifecycleBadge-${streamName}"]`)
+    ).toContainText(expectedLabel);
+  }
+
+  async verifyClassicBadge() {
+    await expect(this.page.locator(`[data-test-subj="classicStreamBadge"]`)).toBeVisible();
+  }
+
+  async verifyWiredBadge() {
+    await expect(this.page.locator(`[data-test-subj="wiredStreamBadge"]`)).toBeVisible();
   }
 
   // Routing-specific utility methods

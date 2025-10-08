@@ -74,7 +74,11 @@ export function DataQualityColumn({
       })}
       data-test-subj={`streamsDataQualityLink-${streamName}`}
     >
-      <DatasetQualityIndicator quality={quality} isLoading={isLoading} />
+      <DatasetQualityIndicator
+        dataTestSubj={`dataQualityIndicator-${streamName}`}
+        quality={quality}
+        isLoading={isLoading}
+      />
     </EuiLink>
   );
 }

@@ -13,6 +13,8 @@ export enum DiscoverFlyouts {
   esqlDocs = 'esqlDocs',
   metricInsights = 'metricInsights',
   esqlControls = 'esqlControls',
+  lensAlertRule = 'lensAlertRule',
+  inspectorPanel = 'inspectorPanel',
 }
 
 const AllDiscoverFlyouts = Object.values(DiscoverFlyouts);
@@ -45,7 +47,7 @@ const getFlyoutCloseButtonGetters = (flyout: DiscoverFlyouts): Array<() => HTMLE
       return [
         () =>
           document.querySelector(
-            '[data-test-subj="metricInsightsFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
+            '[data-test-subj="metricsExperienceFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
           ),
       ];
     case DiscoverFlyouts.esqlControls:
@@ -53,6 +55,20 @@ const getFlyoutCloseButtonGetters = (flyout: DiscoverFlyouts): Array<() => HTMLE
         () =>
           document.querySelector(
             '[data-test-subj="esqlControlsFlyout"] [data-test-subj="euiFlyoutCloseButton"]'
+          ),
+      ];
+    case DiscoverFlyouts.lensAlertRule:
+      return [
+        () =>
+          document.querySelector(
+            '[data-test-subj="lensAlertRule"] [data-test-subj="euiFlyoutCloseButton"]'
+          ),
+      ];
+    case DiscoverFlyouts.inspectorPanel:
+      return [
+        () =>
+          document.querySelector(
+            '[data-test-subj="inspectorPanel"] [data-test-subj="euiFlyoutCloseButton"]'
           ),
       ];
   }
