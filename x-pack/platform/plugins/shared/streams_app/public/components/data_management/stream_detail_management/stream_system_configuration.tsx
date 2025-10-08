@@ -33,7 +33,7 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
         <EuiText size="s">
           <h3>
             {i18n.translate('xpack.streams.streamDetailView.configurationTitle', {
-              defaultMessage: 'Stream system configuration',
+              defaultMessage: 'Feature identification',
             })}
           </h3>
         </EuiText>
@@ -44,7 +44,7 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
             <EuiText size="s" color="subdued">
               {i18n.translate('xpack.streams.streamDetailView.configurationDescription', {
                 defaultMessage:
-                  'We will analyse your stream and provide proposals for the detection of different systems that might be part of your stream. This feature enables a better experience for significant events.',
+                  'Using AI to generate logical subsets of the data in that stream. You will find useful insights like programming language, operating system, cloud provider etc. This is useful for generating better significant events.',
               })}
             </EuiText>
           </EuiFlexItem>

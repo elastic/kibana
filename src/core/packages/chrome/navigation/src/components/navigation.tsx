@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KeyboardEvent } from 'react';
+import type { ReactNode } from 'react';
 import React from 'react';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -33,7 +33,7 @@ export interface NavigationProps {
   /**
    * Content to display inside the side panel footer.
    */
-  sidePanelFooter?: React.ReactNode;
+  sidePanelFooter?: ReactNode;
   /**
    * Whether the navigation is collapsed. This can be controlled by the parent component.
    */
@@ -88,20 +88,14 @@ export const Navigation = ({
 
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
 
-  const handleFooterItemKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      // Required for entering the popover with Enter or Space key
-      // Otherwise the navigation happens immediately
-      e.preventDefault();
-      focusMainContent();
-    }
-  };
+  const wrapperStyles = css`
+    display: flex;
+  `;
 
   return (
     <div
-      css={css`
-        display: flex;
-      `}
+      id="navigation-root"
+      css={wrapperStyles}
       data-test-subj={rest['data-test-subj'] ?? 'navigation-root'}
     >
       <SideNav isCollapsed={isCollapsed}>
@@ -204,18 +198,17 @@ export const Navigation = ({
                   >
                     <NestedSecondaryMenu.Section>
                       {overflowMenuItems.map((item) => {
-                        const hasSubItems = getHasSubmenu(item);
+                        const hasSubmenu = getHasSubmenu(item);
                         const { sections, ...itemProps } = item;
                         return (
                           <NestedSecondaryMenu.PrimaryMenuItem
                             key={item.id}
                             isHighlighted={item.id === visuallyActivePageId}
                             isCollapsed={isCollapsed}
-                            hasSubmenu={hasSubItems}
-                            submenuPanelId={hasSubItems ? `submenu-${item.id}` : undefined}
+                            hasSubmenu={hasSubmenu}
                             onClick={() => {
                               onItemClick?.(item);
-                              if (!hasSubItems) {
+                              if (!hasSubmenu) {
                                 closePopover();
                                 focusMainContent();
                               }
@@ -229,7 +222,7 @@ export const Navigation = ({
                     </NestedSecondaryMenu.Section>
                   </NestedSecondaryMenu.Panel>
                   {overflowMenuItems.filter(getHasSubmenu).map((item) => (
-                    <NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={`submenu-${item.id}`}>
+                    <NestedSecondaryMenu.Panel key={`submenu-${item.id}`} id={item.id}>
                       <NestedSecondaryMenu.Header title={item.label} />
                       {item.sections?.map((section) => (
                         <NestedSecondaryMenu.Section key={section.id} label={section.label}>
@@ -274,7 +267,6 @@ export const Navigation = ({
                     isCurrent={actualActiveItemId === item.id}
                     hasContent={getHasSubmenu(item)}
                     onClick={() => onItemClick?.(item)}
-                    onKeyDown={handleFooterItemKeyDown}
                     {...itemProps}
                   />
                 }

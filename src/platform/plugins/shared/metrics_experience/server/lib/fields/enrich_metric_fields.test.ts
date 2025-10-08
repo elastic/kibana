@@ -9,7 +9,7 @@
 
 import { enrichMetricFields } from './enrich_metric_fields';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import type { DataStreamFieldCapsMap } from '../../types';
+import type { DataStreamFieldCapsMap, EpochTimeRange } from '../../types';
 import type { MetricField } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import type { Logger } from '@kbn/core/server';
@@ -24,6 +24,7 @@ const extractDimensionsMock = extractDimensions as jest.MockedFunction<typeof ex
 const msearchMock = jest.fn() as jest.MockedFunction<TracedElasticsearchClient['msearch']>;
 const esClientMock = { msearch: msearchMock } as unknown as TracedElasticsearchClient;
 const normalizeUnitMock = normalizeUnit as jest.MockedFunction<typeof normalizeUnit>;
+const timeRangeFixture: EpochTimeRange = { from: Date.now() - 300_000, to: Date.now() };
 
 describe('enrichMetricFields', () => {
   let logger: Logger;
@@ -91,6 +92,7 @@ describe('enrichMetricFields', () => {
         metricFields: [],
         dataStreamFieldCapsMap,
         logger,
+        timerange: timeRangeFixture,
       });
       expect(result).toEqual([]);
     });
@@ -136,6 +138,7 @@ describe('enrichMetricFields', () => {
           metricFields,
           dataStreamFieldCapsMap,
           logger,
+          timerange: timeRangeFixture,
         });
 
         expect(result[0]).toMatchObject(expectedResult);
@@ -160,6 +163,7 @@ describe('enrichMetricFields', () => {
         metricFields,
         dataStreamFieldCapsMap,
         logger,
+        timerange: timeRangeFixture,
       });
 
       expect(result).toMatchObject([
@@ -201,6 +205,7 @@ describe('enrichMetricFields', () => {
         metricFields,
         dataStreamFieldCapsMap,
         logger,
+        timerange: timeRangeFixture,
       });
 
       expect(normalizeUnitMock).toHaveBeenCalledWith({
@@ -230,6 +235,7 @@ describe('enrichMetricFields', () => {
         metricFields,
         dataStreamFieldCapsMap,
         logger,
+        timerange: timeRangeFixture,
       });
 
       expect(normalizeUnitMock).toHaveBeenCalledWith({
