@@ -29,6 +29,7 @@ export async function bench({
   openProfile,
   grep,
   runs,
+  configFromCwd,
 }: {
   log: ToolingLog;
   config?: string | string[];
@@ -38,6 +39,7 @@ export async function bench({
   openProfile?: boolean;
   grep?: string | string[];
   runs?: number;
+  configFromCwd?: boolean;
 }) {
   log.info(`Creating workspace for ${left || 'current working directory'}`);
 
@@ -89,6 +91,7 @@ export async function bench({
   const leftResults = await collectAndRun({
     configGlob,
     context: leftContext,
+    configFromCwd,
   });
 
   leftLog.info(`Completed benchmarks`);
@@ -117,6 +120,7 @@ export async function bench({
   const rightResults = await collectAndRunForRightHandSide({
     context: rightContext,
     leftResults,
+    configFromCwd,
   });
 
   rightLog.info(`Completed benchmarks`);
