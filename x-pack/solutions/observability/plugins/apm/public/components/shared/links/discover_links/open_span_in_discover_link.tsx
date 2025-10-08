@@ -48,7 +48,15 @@ export const getESQLQuery = ({
   }
 
   if (kuery) {
-    filters.push(where(`KQL("${kuery.replaceAll('"', '\\"')}")`));
+    filters.push(
+      where(
+        `KQL("${kuery
+          .trim()
+          .replaceAll('"', '\\"')
+          .replaceAll(/\s+/g, ' ')
+          .replaceAll(/\n+/g, ' ')}")`
+      )
+    );
   }
 
   return from(dedupedIndices)
