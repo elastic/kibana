@@ -10,10 +10,14 @@ import type { EnhancedIndexExplorerAnnotation } from '../../state';
 
 export const selectBestIndices = ({ logger }: { logger: Logger }) => {
   return async (state: typeof EnhancedIndexExplorerAnnotation.State) => {
-    const { analyzedResources, input } = state;
-    if (!analyzedResources.length || !input) {
+    const { discoveredResources, input, shortlistedIndexPatterns } = state;
+    if (!discoveredResources.length || !input) {
       return { selectedResources: [] };
     }
+    // Filter discovered resources to only include shortlisted ones
+    const analyzedResources = discoveredResources.filter((resource) =>
+      shortlistedIndexPatterns.includes(resource.name)
+    );
 
     // Simply select the first (highest relevance) resource as primary
     const sortedResources = analyzedResources.sort(

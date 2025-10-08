@@ -40,10 +40,6 @@ export const EnhancedIndexExplorerAnnotation = Annotation.Root({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => [],
   }),
-  analyzedResources: Annotation<IndexResource[]>({
-    reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => [],
-  }),
   selectedResources: Annotation<IndexResource[]>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => [],
