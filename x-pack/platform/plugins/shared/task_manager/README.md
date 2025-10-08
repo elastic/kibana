@@ -462,7 +462,7 @@ The danger is that in such a situation, a Task with that same `id` might already
 
 To achieve this you should use the `ensureScheduled` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
 
-The only exception to this is if you use `ensureScheduled` to schedule a task with a fixed `id` and a recurring schedule interval. In this case, if a task with the same `id` already exists, the API will attempt to update the schedule of the existing task.
+The only exception to this is if you use `ensureScheduled` to schedule a task with a fixed `id` and a recurring schedule interval. In this case, if a task with the same `id` already exists, the API will attempt to update the schedule of the existing task if it has changed.
 
 #### runSoon
 
