@@ -55,9 +55,6 @@ describe('StorageIndexAdapter', () => {
   } satisfies StorageSettings;
   let adapter: SimpleStorageIndexAdapter<typeof storageSettings>;
   let client: SimpleIStorageClient<typeof storageSettings>;
-  beforeAll(async () => {
-    await createServers();
-  });
 
   afterAll(async () => {
     await stopServers();
@@ -335,13 +332,18 @@ describe('StorageIndexAdapter', () => {
     });
 
     it('updates the existing write index in place to v2', async () => {
+      const putMappingSpy = jest.spyOn(esClient.indices, 'putMapping');
       const storageSettingsV2 = {
         ...storageSettings,
         version: 2,
       } satisfies StorageSettings;
       client = new StorageIndexAdapter(esClient, loggerMock, storageSettingsV2).getClient();
-      await client.index({ id: 'foo', document: { foo: 'bar' } });
-      await verifyIndex({ version: 2 });
+
+      for (const _ of [1, 2, 3]) {
+        await client.index({ id: 'foo', document: { foo: 'bar' } });
+        await verifyIndex({ version: 2 });
+      }
+      expect(putMappingSpy).toHaveBeenCalledTimes(1);
     });
 
     it('does not update the existing write index in place if the version is the same, even if mappings changed', async () => {

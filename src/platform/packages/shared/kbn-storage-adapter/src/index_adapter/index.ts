@@ -258,6 +258,9 @@ export class StorageIndexAdapter<
           )}`
       );
       await this.esClient.indices.putMapping({
+        _meta: {
+          version: this.getSchemaVersion().version,
+        },
         index: name,
         ...simulateIndexTemplateResponse.template.mappings,
       });
