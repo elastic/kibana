@@ -8,10 +8,17 @@
  */
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import ReactDOM from 'react-dom';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
+import {
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiWrappingPopover,
+} from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { UI_SETTINGS } from '../../../common/constants';
@@ -24,6 +31,116 @@ import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
+import { i18n } from '@kbn/i18n';
+
+const container = document.createElement('div');
+let isPopoverOpen = false;
+
+interface SaveMorePopoverProps {
+  anchorElement: HTMLElement;
+  onClose: () => void;
+  onSaveAs: () => void;
+  onReset: () => void;
+  isResetDisabled: boolean;
+}
+
+const SaveMorePopover: React.FC<SaveMorePopoverProps> = ({
+  anchorElement,
+  onClose,
+  onSaveAs,
+  onReset,
+  isResetDisabled,
+}) => {
+  const items = [
+    <EuiContextMenuItem
+      key="save-as"
+      data-test-subj="dashboardSaveAsFromMore"
+      icon="save"
+      onClick={() => {
+        onSaveAs();
+        onClose();
+      }}
+    >
+      {i18n.translate('dashboard.topNav.saveAsFromMoreLabel', {
+        defaultMessage: 'Save as',
+      })}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="reset"
+      data-test-subj="dashboardResetFromMore"
+      icon="refresh"
+      disabled={isResetDisabled}
+      onClick={() => {
+        onReset();
+        onClose();
+      }}
+    >
+      {i18n.translate('dashboard.topNav.resetFromMoreLabel', {
+        defaultMessage: 'Reset',
+      })}
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <EuiWrappingPopover
+      button={anchorElement}
+      isOpen={true}
+      closePopover={onClose}
+      panelPaddingSize="none"
+      anchorPosition="downRight"
+      attachToAnchor={true}
+      hasArrow={false}
+      offset={4}
+      buffer={0}
+    >
+      <EuiContextMenuPanel size="s" items={items} />
+    </EuiWrappingPopover>
+  );
+};
+
+function cleanupPopover() {
+  ReactDOM.unmountComponentAtNode(container);
+  if (container.parentNode) {
+    document.body.removeChild(container);
+  }
+  isPopoverOpen = false;
+}
+
+function showSaveMorePopover({
+  anchorElement,
+  onSaveAs,
+  onReset,
+  isResetDisabled,
+}: {
+  anchorElement: HTMLElement;
+  onSaveAs: () => void;
+  onReset: () => void;
+  isResetDisabled: boolean;
+}) {
+  if (isPopoverOpen) {
+    cleanupPopover();
+    return;
+  }
+
+  isPopoverOpen = true;
+  document.body.appendChild(container);
+
+  const element = (
+    <KibanaRenderContextProvider {...coreServices}>
+      <SaveMorePopover
+        anchorElement={anchorElement}
+        onClose={() => {
+          cleanupPopover();
+          anchorElement?.focus();
+        }}
+        onSaveAs={onSaveAs}
+        onReset={onReset}
+        isResetDisabled={isResetDisabled}
+      />
+    </KibanaRenderContextProvider>
+  );
+  ReactDOM.render(element, container);
+}
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -149,6 +266,21 @@ export const useDashboardMenuItems = ({
         disableButton: disableTopNav,
       } as TopNavMenuData,
 
+      add: {
+        id: 'add',
+        label: i18n.translate('dashboard.topNav.addButtonLabel', {
+          defaultMessage: 'Add',
+        }),
+        iconType: 'plusInCircle',
+        emphasize: true,
+        fill: false,
+        color: 'primary',
+        testId: 'dashboardAddButton',
+        run: () => {
+          // TODO: Hook up Add action
+        },
+      } as TopNavMenuData,
+
       quickSave: {
         ...topNavStrings.quickSave,
         id: 'quick-save',
@@ -160,7 +292,35 @@ export const useDashboardMenuItems = ({
         color: 'text',
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
+        className: `dashSplitSaveLeft${hasUnsavedChanges ? ' dashSplitSaveLeft--hasChanges' : ''}`,
         run: () => quickSaveDashboard(),
+      } as TopNavMenuData,
+
+      saveMore: {
+        id: 'save-more',
+        label: i18n.translate('dashboard.topNav.saveMoreLabel', {
+          defaultMessage: 'More save actions',
+        }),
+        testId: 'dashboardSaveMoreButton',
+        className: `dashSplitSaveRight${hasUnsavedChanges ? ' dashSplitSaveRight--hasChanges' : ''}`,
+        emphasize: true,
+        fill: false,
+        color: 'text',
+        iconOnly: true,
+        iconType: 'arrowDown',
+        iconDisplay: 'base',
+        run: (anchorElement: HTMLElement) => {
+          showSaveMorePopover({
+            anchorElement,
+            onSaveAs: dashboardInteractiveSave,
+            onReset: () => resetChanges(),
+            isResetDisabled:
+              isResetting ||
+              !hasUnsavedChanges ||
+              hasOverlays ||
+              (viewMode === 'edit' && (isSaveInProgress || !lastSavedId)),
+          });
+        },
       } as TopNavMenuData,
 
       interactiveSave: {
@@ -235,6 +395,7 @@ export const useDashboardMenuItems = ({
     quickSaveDashboard,
     resetChanges,
     isResetting,
+    hasOverlays,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -317,25 +478,20 @@ export const useDashboardMenuItems = ({
         ].filter(Boolean) as TopNavMenuData[])
       : [];
 
-    const editModeItems: TopNavMenuData[] = [];
-
-    if (lastSavedId) {
-      editModeItems.push(menuItems.interactiveSave, menuItems.switchToViewMode);
-
-      if (showResetChange) {
-        editModeItems.push(resetChangesMenuItem);
-      }
-    } else {
-      editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
-    }
-
-    // Always include Save in Edit mode
-    editModeItems.push(menuItems.quickSave);
-
-    const editModeTopNavConfigItems = [...labsMenuItem, menuItems.settings, ...editModeItems];
-
-    // insert share menu item before the last item in edit mode
-    editModeTopNavConfigItems.splice(-2, 0, ...shareMenuItem);
+    // Build the menu order: Labs > Settings > Exit Edit > Share items > Add > Save buttons
+    const editModeTopNavConfigItems = [
+      ...labsMenuItem,
+      menuItems.settings,
+      // Add 'Exit edit' (Switch to view mode) right after Settings if there's a saved ID
+      ...(lastSavedId ? [menuItems.switchToViewMode] : []),
+      ...shareMenuItem,
+      // Green 'Add' button before Save
+      menuItems.add,
+      // Always include Save and Save More in Edit mode (split button)
+      // Save as and Reset are now included in the Save More popover menu
+      menuItems.quickSave,
+      menuItems.saveMore,
+    ];
 
     return editModeTopNavConfigItems;
   }, [
@@ -344,13 +500,12 @@ export const useDashboardMenuItems = ({
     menuItems.export,
     menuItems.share,
     menuItems.settings,
-    menuItems.interactiveSave,
     menuItems.switchToViewMode,
+    menuItems.add,
     menuItems.quickSave,
+    menuItems.saveMore,
     hasExportIntegration,
     lastSavedId,
-    showResetChange,
-    resetChangesMenuItem,
   ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

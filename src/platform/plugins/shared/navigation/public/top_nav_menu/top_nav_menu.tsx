@@ -104,16 +104,18 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
             }
           }
           /* Split button styling: Save + Save-more flush */
-          .dscSplitSaveLeft {
+          .dscSplitSaveLeft,
+          .dashSplitSaveLeft {
             border-top-right-radius: 0 !important;
             border-bottom-right-radius: 0 !important;
-            margin-right: -8px !important;
+            margin-right: -7px !important;
             min-width: 0 !important;
           }
-          .dscSplitSaveRight {
-            border-left: none !important;
+          .dscSplitSaveRight,
+          .dashSplitSaveRight {
             border-top-left-radius: 0 !important;
             border-bottom-left-radius: 0 !important;
+            margin-left: -1px !important;
             .euiIcon {
               color: ${euiTheme.colors.text} !important;
             }
