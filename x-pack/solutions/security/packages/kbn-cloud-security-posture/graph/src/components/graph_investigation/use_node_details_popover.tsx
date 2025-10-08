@@ -7,7 +7,8 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
-import { EuiListGroup } from '@elastic/eui';
+import { EuiListGroup, useEuiTheme } from '@elastic/eui';
+import styled from '@emotion/styled';
 import type { PopoverActions, PopoverState } from '../graph/use_graph_popover';
 import { useGraphPopover } from '../graph/use_graph_popover';
 import { GraphPopover } from '../graph/graph_popover';
@@ -72,6 +73,15 @@ export interface UseGenericPopoverProps {
   popoverTestSubj: string;
 }
 
+const MAX_VISIBLE_ITEMS = 10;
+
+const StyledExpandPopoverListItem = styled(ExpandPopoverListItem)`
+  > span {
+    min-block-size: unset !important;
+    padding-block: unset !important;
+  }
+`;
+
 export const useNodeDetailsPopover = ({
   popoverId,
   items,
@@ -80,6 +90,20 @@ export const useNodeDetailsPopover = ({
   popoverTestSubj,
 }: UseGenericPopoverProps): UseNodeDetailsPopoverReturn => {
   const { id, state, actions } = useGraphPopover(popoverId);
+  const { euiTheme } = useEuiTheme();
+
+  // Calculate dynamic height based on number of items
+  const panelStyle = useMemo(() => {
+    const shouldScroll = items.length > MAX_VISIBLE_ITEMS;
+    const maxHeight = shouldScroll 
+      ? `${(MAX_VISIBLE_ITEMS * parseInt(euiTheme.size.l, 10)) + parseInt(euiTheme.size.xl, 10)}px`
+      : 'auto';
+    
+    return {
+      maxHeight,
+      overflowY: shouldScroll ? ('auto' as const) : ('visible' as const),
+    };
+  }, [items.length, euiTheme]);
 
   const popoverContent = useMemo(
     () => (
@@ -91,7 +115,7 @@ export const useNodeDetailsPopover = ({
         data-test-subj={contentTestSubj}
       >
         {items.map((item) => (
-          <ExpandPopoverListItem
+          <StyledExpandPopoverListItem
             key={item.key}
             label={item.label}
             data-test-subj={itemTestSubj}
@@ -103,20 +127,22 @@ export const useNodeDetailsPopover = ({
     [items, contentTestSubj, itemTestSubj]
   );
 
-  // eslint-disable-next-line react/display-name
-  const PopoverComponent = memo(() => (
-    <GraphPopover
-      panelPaddingSize="m"
-      anchorPosition="rightCenter"
-      isOpen={state.isOpen}
-      anchorElement={state.anchorElement}
-      closePopover={actions.closePopover}
-      panelStyle={{ maxHeight: '336px', overflowY: 'auto' }}
-      data-test-subj={popoverTestSubj}
-    >
-      {popoverContent}
-    </GraphPopover>
-  ));
+  const PopoverComponent = useMemo(() => {
+    // eslint-disable-next-line react/display-name
+    return memo(() => (
+      <GraphPopover
+        panelPaddingSize="m"
+        anchorPosition="rightCenter"
+        isOpen={state.isOpen}
+        anchorElement={state.anchorElement}
+        closePopover={actions.closePopover}
+        panelStyle={panelStyle}
+        data-test-subj={popoverTestSubj}
+      >
+        {popoverContent}
+      </GraphPopover>
+    ));
+  }, [panelStyle, popoverContent]);
 
   const onClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => actions.openPopover(e.currentTarget),
