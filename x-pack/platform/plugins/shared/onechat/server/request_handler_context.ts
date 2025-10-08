@@ -6,6 +6,7 @@
  */
 
 import type { IRouter, CustomRequestHandlerContext, CoreSetup } from '@kbn/core/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { getCurrentSpaceId } from './utils/spaces';
 import type { OnechatPluginStart, OnechatStartDependencies } from './types';
 
@@ -16,6 +17,7 @@ export interface OnechatRequestHandlerContext {
 }
 
 export type OnechatHandlerContext = CustomRequestHandlerContext<{
+  licensing: LicensingApiRequestHandlerContext;
   onechat: OnechatRequestHandlerContext;
 }>;
 

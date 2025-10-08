@@ -411,6 +411,7 @@ describe('useDiscoverHistogram', () => {
             timeRangeAbsolute: timeRangeAbs,
             timeRangeRelative: timeRangeRel,
             searchSessionId: '123',
+            isSearchSessionRestored: false,
           },
         })
       );
