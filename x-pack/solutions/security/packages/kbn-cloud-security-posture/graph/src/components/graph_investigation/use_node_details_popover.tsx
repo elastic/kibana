@@ -127,22 +127,20 @@ export const useNodeDetailsPopover = ({
     [items, contentTestSubj, itemTestSubj]
   );
 
-  const PopoverComponent = useMemo(() => {
-    // eslint-disable-next-line react/display-name
-    return memo(() => (
-      <GraphPopover
-        panelPaddingSize="m"
-        anchorPosition="rightCenter"
-        isOpen={state.isOpen}
-        anchorElement={state.anchorElement}
-        closePopover={actions.closePopover}
-        panelStyle={panelStyle}
-        data-test-subj={popoverTestSubj}
-      >
-        {popoverContent}
-      </GraphPopover>
-    ));
-  }, [panelStyle, popoverContent]);
+ // eslint-disable-next-line react/display-name
+  const PopoverComponent = memo(() => (
+    <GraphPopover
+      panelPaddingSize="m"
+      anchorPosition="rightCenter"
+      isOpen={state.isOpen}
+      anchorElement={state.anchorElement}
+      closePopover={actions.closePopover}
+      panelStyle={panelStyle}
+      data-test-subj={popoverTestSubj}
+    >
+      {popoverContent}
+    </GraphPopover>
+  ));
 
   const onClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => actions.openPopover(e.currentTarget),
