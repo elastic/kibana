@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { SiemMigrationsEventTypes } from '../../../common/lib/telemetry/events/siem_migrations/types';
+import { SiemMigrationsRuleEventTypes } from '../../../common/lib/telemetry/events/siem_migrations/types';
 import { SiemBaseMigrationsTelemetry } from '../../common/service/telemetry';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 
 export class SiemRulesMigrationsTelemetry extends SiemBaseMigrationsTelemetry {
   constructor(telemetryService: TelemetryServiceStart) {
-    super(telemetryService, SiemMigrationsEventTypes);
+    super(telemetryService, SiemMigrationsRuleEventTypes);
   }
 }

@@ -14,7 +14,7 @@ import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type {
   BaseResultActionParams,
   ReportTranslatedItemInstallActionParams,
-  SiemMigrationsEventTypes,
+  SiemMigrationsRuleEventTypes,
   SiemMigrationsDashboardEventTypes,
 } from '../../../common/lib/telemetry/events/siem_migrations/types';
 import type { StartRuleMigrationParams } from '../../rules/api';
@@ -24,7 +24,7 @@ export class SiemBaseMigrationsTelemetry {
   constructor(
     protected readonly telemetryService: TelemetryServiceStart,
     protected readonly eventTypes:
-      | typeof SiemMigrationsEventTypes
+      | typeof SiemMigrationsRuleEventTypes
       | typeof SiemMigrationsDashboardEventTypes
   ) {}
 

@@ -26,7 +26,7 @@ export enum SiemMigrationsDashboardEventTypes {
   TranslatedBulkInstall = 'siem_migrations_dashboard_translated_dashboard_bulk_install',
 }
 
-export enum SiemMigrationsEventTypes {
+export enum SiemMigrationsRuleEventTypes {
   /**
    * When new AI Connector is selected
    * */
@@ -174,23 +174,41 @@ export interface ReportTranslatedItemBulkInstallActionParams {
 }
 
 export interface SiemMigrationsTelemetryEventsMap {
-  [SiemMigrationsEventTypes.SetupConnectorSelected]: ReportSetupConnectorSelectedActionParams;
-  [SiemMigrationsEventTypes.SetupMigrationOpenNew]: ReportSetupMigrationOpenNewActionParams;
-  [SiemMigrationsEventTypes.SetupMigrationOpenResources]: ReportSetupMigrationOpenResourcesActionParams;
-  [SiemMigrationsEventTypes.SetupQueryCopied]: ReportSetupQueryCopiedActionParams;
-  [SiemMigrationsEventTypes.SetupMigrationCreated]: ReportSetupMigrationCreatedActionParams;
-  [SiemMigrationsEventTypes.SetupMigrationDeleted]: ReportSetupMigrationDeletedActionParams;
-  [SiemMigrationsEventTypes.SetupMacrosQueryCopied]: ReportSetupMacrosQueryCopiedActionParams;
-  [SiemMigrationsEventTypes.SetupLookupNameCopied]: ReportSetupLookupNameCopiedActionParams;
-  [SiemMigrationsEventTypes.SetupResourcesUploaded]: ReportSetupResourcesUploadedActionParams;
-  [SiemMigrationsEventTypes.StartMigration]: ReportStartMigrationActionParams;
-  [SiemMigrationsEventTypes.StopMigration]: ReportStopMigrationActionParams;
-  [SiemMigrationsEventTypes.TranslatedItemUpdate]: ReportTranslatedItemUpdateActionParams;
-  [SiemMigrationsEventTypes.TranslatedItemInstall]: ReportTranslatedItemInstallActionParams;
-  [SiemMigrationsEventTypes.TranslatedBulkInstall]: ReportTranslatedItemBulkInstallActionParams;
+  [SiemMigrationsRuleEventTypes.SetupConnectorSelected]: ReportSetupConnectorSelectedActionParams;
+  [SiemMigrationsRuleEventTypes.SetupMigrationOpenNew]: ReportSetupMigrationOpenNewActionParams;
+  [SiemMigrationsRuleEventTypes.SetupMigrationOpenResources]: ReportSetupMigrationOpenResourcesActionParams;
+  [SiemMigrationsRuleEventTypes.SetupQueryCopied]: ReportSetupQueryCopiedActionParams;
+  [SiemMigrationsRuleEventTypes.SetupMigrationCreated]: ReportSetupMigrationCreatedActionParams;
+  [SiemMigrationsRuleEventTypes.SetupMigrationDeleted]: ReportSetupMigrationDeletedActionParams;
+  [SiemMigrationsRuleEventTypes.SetupMacrosQueryCopied]: ReportSetupMacrosQueryCopiedActionParams;
+  [SiemMigrationsRuleEventTypes.SetupLookupNameCopied]: ReportSetupLookupNameCopiedActionParams;
+  [SiemMigrationsRuleEventTypes.SetupResourcesUploaded]: ReportSetupResourcesUploadedActionParams;
+  [SiemMigrationsRuleEventTypes.StartMigration]: ReportStartMigrationActionParams;
+  [SiemMigrationsRuleEventTypes.StopMigration]: ReportStopMigrationActionParams;
+  [SiemMigrationsRuleEventTypes.TranslatedItemUpdate]: ReportTranslatedItemUpdateActionParams;
+  [SiemMigrationsRuleEventTypes.TranslatedItemInstall]: ReportTranslatedItemInstallActionParams;
+  [SiemMigrationsRuleEventTypes.TranslatedBulkInstall]: ReportTranslatedItemBulkInstallActionParams;
+  [SiemMigrationsDashboardEventTypes.SetupConnectorSelected]: ReportSetupConnectorSelectedActionParams;
+  [SiemMigrationsDashboardEventTypes.SetupMigrationOpenNew]: ReportSetupMigrationOpenNewActionParams;
+  [SiemMigrationsDashboardEventTypes.SetupMigrationOpenResources]: ReportSetupMigrationOpenResourcesActionParams;
+  [SiemMigrationsDashboardEventTypes.SetupQueryCopied]: ReportSetupQueryCopiedActionParams;
+  [SiemMigrationsDashboardEventTypes.SetupMigrationCreated]: ReportSetupMigrationCreatedActionParams;
+  [SiemMigrationsDashboardEventTypes.SetupMigrationDeleted]: ReportSetupMigrationDeletedActionParams;
+  [SiemMigrationsDashboardEventTypes.SetupMacrosQueryCopied]: ReportSetupMacrosQueryCopiedActionParams;
+  [SiemMigrationsDashboardEventTypes.SetupLookupNameCopied]: ReportSetupLookupNameCopiedActionParams;
+  [SiemMigrationsDashboardEventTypes.SetupResourcesUploaded]: ReportSetupResourcesUploadedActionParams;
+  [SiemMigrationsDashboardEventTypes.StartMigration]: ReportStartMigrationActionParams;
+  [SiemMigrationsDashboardEventTypes.StopMigration]: ReportStopMigrationActionParams;
+  [SiemMigrationsDashboardEventTypes.TranslatedItemUpdate]: ReportTranslatedItemUpdateActionParams;
+  [SiemMigrationsDashboardEventTypes.TranslatedItemInstall]: ReportTranslatedItemInstallActionParams;
+  [SiemMigrationsDashboardEventTypes.TranslatedBulkInstall]: ReportTranslatedItemBulkInstallActionParams;
 }
 
 export interface SiemMigrationsTelemetryEvent {
-  eventType: SiemMigrationsEventTypes;
-  schema: RootSchema<SiemMigrationsTelemetryEventsMap[SiemMigrationsEventTypes]>;
+  eventType: SiemMigrationsRuleEventTypes;
+  schema: RootSchema<
+    SiemMigrationsTelemetryEventsMap[
+      | SiemMigrationsRuleEventTypes
+      | SiemMigrationsDashboardEventTypes]
+  >;
 }
