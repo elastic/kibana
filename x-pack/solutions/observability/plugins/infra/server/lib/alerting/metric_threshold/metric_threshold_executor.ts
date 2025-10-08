@@ -196,9 +196,10 @@ export const createMetricThresholdExecutor =
       alertOnGroupDisappear: boolean | undefined;
     };
 
-    const {
-      configuration: { metricAlias },
-    } = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId || 'default');
+    const source = await libs.sources.getSourceConfiguration(
+      savedObjectsClient,
+      sourceId || 'default'
+    );
 
     if (!params.filterQuery && params.filterQueryText) {
       try {
@@ -229,7 +230,7 @@ export const createMetricThresholdExecutor =
           reason,
           actionGroup: actionGroupId,
           context: alertContext,
-          metricAlias,
+          metricAlias: source.configuration.metricAlias,
         });
 
         return {
@@ -246,10 +247,6 @@ export const createMetricThresholdExecutor =
     // For backwards-compatibility, interpret undefined alertOnGroupDisappear as true
     const alertOnGroupDisappear = _alertOnGroupDisappear !== false;
 
-    const source = await libs.sources.getSourceConfiguration(
-      savedObjectsClient,
-      sourceId || 'default'
-    );
     const config = source.configuration;
     const compositeSize = libs.configuration.alerting.metric_threshold.group_by_page_size;
 
@@ -453,7 +450,7 @@ export const createMetricThresholdExecutor =
           groups,
           thresholds,
           grouping: { flatten: flattenGroupings[group], unflatten: grouping },
-          metricAlias,
+          metricAlias: source.configuration.metricAlias,
         });
         scheduledActionsCount++;
       }

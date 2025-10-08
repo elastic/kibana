@@ -320,7 +320,7 @@ export const createInventoryMetricThresholdExecutor =
 
         const {
           configuration: { metricAlias },
-        } = await libs.sources.getSourceConfiguration(savedObjectsClient, sourceId);
+        } = source;
 
         const payload = {
           [ALERT_REASON]: reason,
