@@ -208,7 +208,7 @@ export const coloringTypeSchema = schema.oneOf([
 ]);
 
 /**
- * Schema for where to apply the color (to values or background).
+ * Schema for where to apply the color (to value or background).
  */
 export const applyColorToSchema = schema.oneOf(
   [schema.literal('value'), schema.literal('background')],
