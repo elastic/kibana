@@ -74,7 +74,8 @@ describe('MonitoringEntitySourceDataClient', () => {
 
       expect(defaultOpts.soClient.create).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        testDescriptor
+        testDescriptor,
+        { refresh: 'wait_for' }
       );
 
       expect(result).toEqual({ ...testDescriptor, managed: false, id: 'abcdefg' });

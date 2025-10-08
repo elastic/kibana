@@ -36,7 +36,8 @@ export class MonitoringEntitySourceDescriptorClient {
     const { id, attributes: created } =
       await this.dependencies.soClient.create<CreateMonitoringEntitySource>(
         monitoringEntitySourceTypeName,
-        { ...attributes, managed: attributes.managed ?? false } // Ensure managed is set to true on creation
+        { ...attributes, managed: attributes.managed ?? false }, // Ensure managed is set to true on creation
+        { refresh: 'wait_for' }
       );
 
     return { ...created, id };
@@ -47,7 +48,8 @@ export class MonitoringEntitySourceDescriptorClient {
       sources.map((source) => ({
         type: monitoringEntitySourceTypeName,
         attributes: { ...source },
-      }))
+      })),
+      { refresh: 'wait_for' }
     );
     return createdSources;
   }
@@ -149,6 +151,17 @@ export class MonitoringEntitySourceDescriptorClient {
     return result.saved_objects
       .filter((so) => so.attributes.type !== 'csv') // from the spec we are not using CSV on monitoring
       .map((so) => ({ ...so.attributes, id: so.id }));
+  }
+
+  public async findByQuery(query: string): Promise<MonitoringEntitySource[]> {
+    const scopedSoClient = this.dependencies.soClient;
+
+    const results = await scopedSoClient.find<MonitoringEntitySource>({
+      type: monitoringEntitySourceTypeName,
+      filter: query,
+      namespaces: [this.dependencies.namespace],
+    });
+    return results.saved_objects.map((so) => ({ ...so.attributes, id: so.id }));
   }
 
   private async assertNameUniqueness(attributes: Partial<MonitoringEntitySource>): Promise<void> {
