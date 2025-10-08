@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   withAutoSuggest,
   commaCompleteItem,
@@ -175,14 +176,18 @@ export function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggest
       {
         label: 'linear',
         kind: 'Value',
-        detail: '',
+        detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.linear', {
+          defaultMessage: 'Linear combination of scores',
+        }),
         text: 'linear ',
         sortText: '0',
       },
       {
         label: 'rrf',
         kind: 'Value',
-        detail: '',
+        detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.rrf', {
+          defaultMessage: 'Reciprocal rank fusion',
+        }),
         text: 'rrf ',
         sortText: '0',
       }
@@ -193,7 +198,10 @@ export function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggest
     suggestions.push({
       label: 'SCORE BY',
       kind: 'Reference',
-      detail: '',
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.scoreBy', {
+        defaultMessage:
+          'Defaults to _score. Designates which column to use to retrieve the relevance scores of the input',
+      }),
       text: 'SCORE BY ',
       sortText: '1',
     });
@@ -203,7 +211,9 @@ export function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggest
     suggestions.push({
       label: 'GROUP BY',
       kind: 'Reference',
-      detail: '',
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.groupBy', {
+        defaultMessage: 'Defaults to _fork. Designates which column represents the result set',
+      }),
       text: 'GROUP BY ',
       sortText: '2',
     });
@@ -213,7 +223,9 @@ export function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggest
     suggestions.push({
       label: 'KEY BY',
       kind: 'Reference',
-      detail: '',
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.keyBy', {
+        defaultMessage: 'Defaults to _id, _index. Rows with matching key_columns values are merged',
+      }),
       text: 'KEY BY ',
       sortText: '3',
     });
