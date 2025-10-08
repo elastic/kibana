@@ -59,6 +59,7 @@ export function runFtrCli() {
         },
         updateBaselines: flagsReader.boolean('updateBaselines') || flagsReader.boolean('u'),
         updateSnapshots: flagsReader.boolean('updateSnapshots') || flagsReader.boolean('u'),
+        recordVideo: flagsReader.boolean('record-video'),
       };
 
       const config = await readConfigFile(log, esVersion, configPaths[0], settingOverrides);
@@ -146,6 +147,7 @@ export function runFtrCli() {
           'headless',
           'dry-run',
           'pauseOnError',
+          'record-video',
         ],
         help: `
           --config=path      path to a config file (either this or --journey is required)
@@ -172,6 +174,7 @@ export function runFtrCli() {
           --headless         run browser in headless mode
           --dry-run          report tests without executing them
           --pauseOnError     pause test runner on error
+          --record-video     record video of test execution (saved to target/functional-tests/videos/)
         `,
       },
     }

@@ -19,7 +19,16 @@ import { EsVersion } from '../../functional_test_runner';
 export type RunTestsOptions = ReturnType<typeof parseFlags>;
 
 export const FLAG_OPTIONS: FlagOptions = {
-  boolean: ['bail', 'logToFile', 'dry-run', 'updateBaselines', 'updateSnapshots', 'updateAll'],
+  boolean: [
+    'bail',
+    'logToFile',
+    'dry-run',
+    'updateBaselines',
+    'updateSnapshots',
+    'updateAll',
+    'record-video',
+    'headless',
+  ],
   string: [
     'config',
     'journey',
@@ -54,6 +63,8 @@ export const FLAG_OPTIONS: FlagOptions = {
     --updateBaselines    Replace baseline screenshots with whatever is generated from the test
     --updateSnapshots    Replace inline and file snapshots with whatever is generated from the test
     --updateAll, -u      Replace both baseline screenshots and snapshots
+    --record-video       Record video of test execution (requires ffmpeg)
+    --headless           Run browser in headless mode
   `,
   examples: `
 Run the latest verified, kibana-compatible ES Serverless image:
@@ -89,6 +100,8 @@ export function parseFlags(flags: FlagsReader) {
     dryRun: flags.boolean('dry-run'),
     updateBaselines: flags.boolean('updateBaselines') || flags.boolean('updateAll'),
     updateSnapshots: flags.boolean('updateSnapshots') || flags.boolean('updateAll'),
+    recordVideo: flags.boolean('record-video'),
+    headless: flags.boolean('headless'),
     logsDir,
     esFrom: flags.enum('esFrom', ['snapshot', 'source', 'serverless']),
     esServerlessImage: flags.string('esServerlessImage'),

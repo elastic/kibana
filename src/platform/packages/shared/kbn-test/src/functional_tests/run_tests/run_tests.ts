@@ -60,7 +60,13 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
     },
     updateBaselines: options.updateBaselines,
     updateSnapshots: options.updateSnapshots,
+    recordVideo: options.recordVideo,
   };
+
+  // Set browser headless mode if requested
+  if (options.headless) {
+    process.env.TEST_BROWSER_HEADLESS = '1';
+  }
 
   for (const [i, path] of options.configs.entries()) {
     await log.indent(0, async () => {
