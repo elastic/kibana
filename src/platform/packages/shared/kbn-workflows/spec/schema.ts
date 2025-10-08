@@ -138,7 +138,7 @@ export const ScheduledTriggerSchema = z.object({
         .object({
           freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
           interval: z.number().int().positive(),
-          tzid: z.string().min(1),
+          tzid: z.enum(moment.tz.names() as [string, ...string[]]),
           dtstart: z.string().optional(),
           byhour: z.array(z.number().int().min(0).max(23)).optional(),
           byminute: z.array(z.number().int().min(0).max(59)).optional(),
