@@ -48,7 +48,7 @@ export function validateConnectorIds(
       results.push({
         id: connectorIdItem.id,
         severity: 'error',
-        message: `Connector id "${connectorIdItem.key}" not found for connector type ${connectorIdItem.connectorType}`,
+        message: `${connectorIdItem.connectorType} connector "${connectorIdItem.key}" not found. Add a new connector or choose an existing one`,
         owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
