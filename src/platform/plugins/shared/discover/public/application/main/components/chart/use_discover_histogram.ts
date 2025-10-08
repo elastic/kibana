@@ -399,7 +399,7 @@ export const useDiscoverHistogram = (
     },
     dataView: isEsqlMode ? esqlDataView : dataView,
     query: isEsqlMode ? esqlQuery : query,
-    filters: filtersMemoized,
+    filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
     timeRange: timeRangeMemoized,
     relativeTimeRange,
     columns: isEsqlMode ? esqlColumns : undefined,
