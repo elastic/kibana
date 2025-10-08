@@ -26,7 +26,34 @@ const options: MetricsAPIRequest = {
 describe('createAggregations(options)', () => {
   it('should return groupings aggregation with groupBy', () => {
     const optionsWithGroupBy: MetricsAPIRequest = { ...options, groupBy: ['host.name'] };
-    expect(createCompositeAggregations(optionsWithGroupBy)).toMatchSnapshot();
+    expect(createCompositeAggregations(optionsWithGroupBy)).toEqual({
+      groupings: expect.objectContaining({
+        composite: {
+          size: 20,
+          sources: [
+            {
+              groupBy0: {
+                terms: {
+                  field: 'host.name',
+                },
+              },
+            },
+          ],
+        },
+        aggs: {
+          metric_0: {
+            avg: {
+              field: 'system.cpu.user.pct',
+            },
+          },
+          metricsets: {
+            terms: {
+              field: 'metricset.name',
+            },
+          },
+        },
+      }),
+    });
   });
   it('should return groupings aggregation with afterKey', () => {
     const optionsWithGroupBy: MetricsAPIRequest = {
