@@ -10,12 +10,18 @@
 import { Liquid } from 'liquidjs';
 
 // Constants
-const LIQUID_ENGINE_CONFIG = { strictVariables: true };
 const DUMMY_VALUE = 'dummy';
 const UNDEFINED_VARIABLE_REGEX = /undefined variable: (.+)/;
 
-// Initialize Liquid engine
-const engine = new Liquid(LIQUID_ENGINE_CONFIG);
+// Lazy initialization - only create when needed
+let engineInstance: Liquid | null = null;
+
+function getLiquidEngine(): Liquid {
+  if (!engineInstance) {
+    engineInstance = new Liquid({ strictVariables: true });
+  }
+  return engineInstance;
+}
 
 /**
  * Extracts all Liquid variables from a template string.
@@ -28,6 +34,7 @@ const engine = new Liquid(LIQUID_ENGINE_CONFIG);
  * @returns Array of unique variable paths found in the template. If the template is invalid, returns an empty array.
  */
 export function extractTemplateVariables(template: string): string[] {
+  const engine = getLiquidEngine();
   const tokens = engine.parse(template);
   const context: Record<string, any> = {};
   const foundVariables = new Set<string>();
