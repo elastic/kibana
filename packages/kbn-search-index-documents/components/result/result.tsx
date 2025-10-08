@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -65,6 +65,7 @@ export const Result: React.FC<ResultProps> = ({
         });
   const toolTipContent = <>{tooltipText}</>;
 
+  const tooltipRef = useRef<EuiToolTip>(null);
   return (
     <EuiSplitPanel.Outer hasBorder={true} data-test-subj="search-index-documents-result">
       <EuiSplitPanel.Inner paddingSize="m" color="plain" className="resultHeaderContainer">
@@ -102,7 +103,7 @@ export const Result: React.FC<ResultProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip position="left" content={toolTipContent}>
+            <EuiToolTip position="left" content={toolTipContent} ref={tooltipRef}>
               <EuiButtonIcon
                 size="xs"
                 iconType={isExpanded ? 'fold' : 'unfold'}
@@ -111,6 +112,7 @@ export const Result: React.FC<ResultProps> = ({
                 onClick={(e: React.MouseEvent<HTMLElement>) => {
                   e.stopPropagation();
                   setIsExpanded(!isExpanded);
+                  tooltipRef.current?.showToolTip();
                 }}
                 aria-label={tooltipText}
               />
