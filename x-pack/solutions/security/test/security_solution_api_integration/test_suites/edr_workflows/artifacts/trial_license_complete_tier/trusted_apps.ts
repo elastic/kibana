@@ -88,26 +88,26 @@ export default function ({ getService }: FtrProviderContext) {
       const trustedAppApiCalls: TrustedAppApiCallsInterface<
         Pick<ExceptionListItemSchema, 'os_types' | 'tags' | 'entries'>
       > = [
-          {
-            method: 'post',
-            info: 'create single item',
-            path: EXCEPTION_LIST_ITEM_URL,
-            getBody: () => {
-              return exceptionsGenerator.generateTrustedAppForCreate({ tags: [GLOBAL_ARTIFACT_TAG] });
-            },
+        {
+          method: 'post',
+          info: 'create single item',
+          path: EXCEPTION_LIST_ITEM_URL,
+          getBody: () => {
+            return exceptionsGenerator.generateTrustedAppForCreate({ tags: [GLOBAL_ARTIFACT_TAG] });
           },
-          {
-            method: 'put',
-            info: 'update single item',
-            path: EXCEPTION_LIST_ITEM_URL,
-            getBody: () =>
-              exceptionsGenerator.generateTrustedAppForUpdate({
-                id: trustedAppData.artifact.id,
-                item_id: trustedAppData.artifact.item_id,
-                tags: [GLOBAL_ARTIFACT_TAG],
-              }),
-          },
-        ];
+        },
+        {
+          method: 'put',
+          info: 'update single item',
+          path: EXCEPTION_LIST_ITEM_URL,
+          getBody: () =>
+            exceptionsGenerator.generateTrustedAppForUpdate({
+              id: trustedAppData.artifact.id,
+              item_id: trustedAppData.artifact.item_id,
+              tags: [GLOBAL_ARTIFACT_TAG],
+            }),
+        },
+      ];
 
       const needsWritePrivilege: TrustedAppApiCallsInterface = [
         {
@@ -312,9 +312,10 @@ export default function ({ getService }: FtrProviderContext) {
               .send(body)
               .expect(400)
               .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/Process descendants feature is only allowed on advanced mode/));
+              .expect(
+                anErrorMessageWith(/Process descendants feature is only allowed on advanced mode/)
+              );
           });
-
 
           describe('when in advanced form mode', () => {
             const getAdvancedModeBody = () => {
