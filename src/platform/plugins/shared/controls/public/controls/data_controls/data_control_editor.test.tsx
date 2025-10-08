@@ -325,7 +325,6 @@ describe('Data control editor', () => {
     test('can hide elements with the editor config', async () => {
       getEditorConfig.mockImplementationOnce(() => ({
         hideDataViewSelector: true,
-        hideWidthSettings: true,
         hideAdditionalSettings: true,
       }));
 

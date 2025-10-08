@@ -69,12 +69,10 @@ export type AlertFilterControlsProps = Omit<
  *   // Controls configuration
  *   controlsUrlState={filterControls}
  *   defaultControls={DEFAULT_CONTROLS}
- *   chainingSystem="HIERARCHICAL"
  *   // Filters state
  *   filters={filters}
  *   onFiltersChange={setFilters}
  *   // Dependencies
- *   ControlGroupRenderer={ControlGroupRenderer}
  *   services={{
  *     http,
  *     notifications,

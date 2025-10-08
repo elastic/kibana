@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ControlGroupRendererProps } from './control_group_renderer';
-export { LazyControlGroupRenderer as ControlGroupRenderer } from './control_group_renderer_lazy';
-export type { ControlGroupCreationOptions, ControlGroupRendererApi } from './types';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/controls/control-group-renderer'],
+  setupFiles: ['<rootDir>/src/platform/plugins/shared/controls/jest_setup.ts'],
+};

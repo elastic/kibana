@@ -7,7 +7,6 @@
     "server": false,
     "browser": true,
     "requiredPlugins": [
-      "controls",
       "data",
       "developerExamples",
       "embeddable",
@@ -15,6 +14,7 @@
       "presentationUtil",
       "uiActions",
       "dataViews"
-    ]
+    ],
+    "requiredBundles": ["kibanaReact"]
   }
 }

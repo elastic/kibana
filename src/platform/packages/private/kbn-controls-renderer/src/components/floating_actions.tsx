@@ -44,17 +44,20 @@ const getFloatingActionItem = (
   ...omit(action, 'MenuItem'),
   MenuItem: () => {
     const MenuItem = action.MenuItem;
+    const tooltipKey = `control-action-${uuid}-${action.id}`;
     return MenuItem ? (
       <MenuItem key={action.id} context={context} />
     ) : (
       <EuiToolTip
-        key={`control-action-${uuid}-${action.id}`}
+        key={tooltipKey}
+        id={tooltipKey}
         content={action.getDisplayNameTooltip?.(context) || action.getDisplayName(context)}
       >
         <EuiButtonIcon
           iconType={action.getIconType(context) ?? 'empty'}
           color="text"
           onClick={() => action.execute(context)}
+          aria-labelledby={tooltipKey}
         />
       </EuiToolTip>
     );
@@ -104,7 +107,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         const newActions: FloatingActionItem[] = currentActions?.filter(
           (current) => current.id !== action.id
         );
-        if (isCompatible) {
+        if (isCompatible && (disabledActions ?? []).indexOf(action.id) === -1) {
           return [getFloatingActionItem(uuid, action, context), ...newActions].sort(sortByOrder);
         }
         return newActions;

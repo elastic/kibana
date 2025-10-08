@@ -210,7 +210,6 @@ const NEW_FORMAT = {
     ignoreValidations: false,
   },
   editorConfig: {
-    hideWidthSettings: true,
     hideDataViewSelector: true,
     hideAdditionalSettings: true,
   },

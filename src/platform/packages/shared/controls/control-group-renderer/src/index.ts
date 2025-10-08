@@ -7,17 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { dynamic } from '@kbn/shared-ux-utility';
-import type { ControlGroupRendererProps } from './control_group_renderer';
-
-const Component = dynamic(async () => {
-  const { ControlGroupRenderer } = await import('../../controls_module');
-  return {
-    default: ControlGroupRenderer,
-  };
-});
-
-export function LazyControlGroupRenderer(props: ControlGroupRendererProps) {
-  return <Component {...props} />;
-}
+export type { ControlGroupRendererProps } from './control_group_renderer';
+export { LazyControlGroupRenderer as ControlGroupRenderer } from './control_group_renderer_lazy';
+export type {
+  ControlGroupCreationOptions,
+  ControlGroupRendererApi,
+  ControlStateTransform,
+  ControlGroupEditorConfig,
+  ControlPanelsState,
+  ControlPanelState,
+} from './types';
+export { apiHasEditorConfig } from './types';

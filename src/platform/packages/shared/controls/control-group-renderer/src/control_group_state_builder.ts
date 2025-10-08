@@ -10,32 +10,46 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  CONTROL_MENU_TRIGGER,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import {
-  type ControlGroupRuntimeState,
-  type ControlPanelsState,
-  type DefaultDataControlState,
-} from '../../../common';
-import type { OptionsListControlState } from '../../../common/options_list';
-import { dataViewsService } from '../../services/kibana_services';
-// import { getDataControlFieldRegistry } from '../../controls/data_controls/data_control_editor_utils';
-import type { RangesliderControlState } from '../../controls/data_controls/range_slider/types';
+import type { TemporaryControlsLayout } from '@kbn/controls-renderer/src/types';
+import type {
+  DataControlState,
+  OptionsListDSLControlState,
+  RangeSliderControlState,
+  StickyControlState,
+} from '@kbn/controls-schemas';
+import { i18n } from '@kbn/i18n';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-export type ControlGroupStateBuilder = typeof controlGroupStateBuilder;
+import type { ControlGroupRuntimeState } from './types';
 
 export const controlGroupStateBuilder = {
   addDataControlFromField: async (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: DefaultDataControlState,
+    controlState: Omit<DataControlState & StickyControlState, 'type'>,
+    uiActionsService: UiActionsStart,
     controlId?: string
   ) => {
+    const type = await getCompatibleControlType(
+      controlState.dataViewId,
+      controlState.fieldName,
+      uiActionsService
+    );
+    if (!type)
+      throw new Error(
+        i18n.translate('controls.controlGroupRenderer.addDataControlFromField.error', {
+          defaultMessage: 'No control type is compatible with this field.',
+        })
+      );
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
-        type: await getCompatibleControlType(controlState.dataViewId, controlState.fieldName),
+        type,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         ...controlState,
       },
@@ -43,7 +57,10 @@ export const controlGroupStateBuilder = {
   },
   addOptionsListControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: OptionsListControlState,
+    controlState: Omit<
+      Omit<StickyControlState, keyof OptionsListDSLControlState> & OptionsListDSLControlState,
+      'type'
+    >,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {
@@ -57,7 +74,10 @@ export const controlGroupStateBuilder = {
   },
   addRangeSliderControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: RangesliderControlState,
+    controlState: Omit<
+      Omit<StickyControlState, keyof RangeSliderControlState> & RangeSliderControlState,
+      'type'
+    >,
     controlId?: string
   ) => {
     controlGroupState.initialChildControlState = {
@@ -84,17 +104,28 @@ export const controlGroupStateBuilder = {
   },
 };
 
-async function getCompatibleControlType(dataViewId: string, fieldName: string) {
-  const dataView = await dataViewsService.get(dataViewId);
-  const fieldRegistry = await getDataControlFieldRegistry(dataView);
-  const field = fieldRegistry[fieldName];
-  if (field.compatibleControlTypes.length === 0) {
-    throw new Error(`No compatible control type found for field: ${fieldName}`);
+async function getCompatibleControlType(
+  dataViewId: string,
+  fieldName: string,
+  uiActionsService: UiActionsStart
+): Promise<StickyControlState['type'] | undefined> {
+  const controlTypes = (await uiActionsService.getTriggerActions(CONTROL_MENU_TRIGGER)) as Array<
+    Action<EmbeddableApiContext & { state: unknown }> // This is CreateControlTypeAction but I cannot import it due to circular dependencies
+  >;
+
+  for (const action of controlTypes) {
+    const trigger = uiActionsService.getTrigger(CONTROL_MENU_TRIGGER);
+    const compatible = await action.isCompatible({
+      trigger,
+      embeddable: undefined, // parentApi isn't necessary for this
+      state: { dataViewId, fieldName },
+    });
+    if (compatible) return action.type as StickyControlState['type'];
   }
-  return field.compatibleControlTypes[0];
+  return undefined;
 }
 
-function getNextControlOrder(controlPanelsState?: ControlPanelsState) {
+function getNextControlOrder(controlPanelsState?: TemporaryControlsLayout['controls']) {
   if (!controlPanelsState) {
     return 0;
   }

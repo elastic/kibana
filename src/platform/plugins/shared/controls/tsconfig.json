@@ -3,7 +3,6 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "extraPublicDirs": ["common"],
   "include": [
     "common/**/*",
     "public/**/*",
@@ -32,7 +31,6 @@
     "@kbn/content-management-utils",
     "@kbn/field-formats-plugin",
     "@kbn/presentation-panel-plugin",
-    "@kbn/shared-ux-utility",
     "@kbn/std",
     "@kbn/esql-types",
     "@kbn/css-utils",
@@ -41,6 +39,7 @@
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
     "@kbn/presentation-util",
+    "@kbn/control-group-renderer"
   ],
   "exclude": ["target/**/*"]
 }

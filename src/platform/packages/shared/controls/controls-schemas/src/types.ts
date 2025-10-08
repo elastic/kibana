@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type React from 'react';
+
 import type { TypeOf } from '@kbn/config-schema';
 import type { controlSchema, dataControlSchema } from './control_schema';
 import type { controlsGroupSchema } from './controls_group_schema';
@@ -21,6 +23,7 @@ import type {
 import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_schema';
 
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
+export type StickyControlState = ControlsGroupState['controls'][number];
 export type ControlState = TypeOf<typeof controlSchema>;
 
 export type DataControlState = TypeOf<typeof dataControlSchema>;
@@ -37,3 +40,17 @@ export type OptionsListSortingType = TypeOf<typeof optionsListSortSchema>;
 
 export type RangeSliderControlState = TypeOf<typeof rangeSliderControlSchema>;
 export type RangeSliderValue = TypeOf<typeof rangeValueSchema>;
+
+export type TimeSlice = [number, number];
+
+export interface HasCustomPrepend {
+  CustomPrependComponent: React.FC<{}>;
+}
+
+// This value only exists for control saved objects prior to version 9.3
+export interface LegacyIgnoreParentSettings {
+  ignoreFilters?: boolean;
+  ignoreQuery?: boolean;
+  ignoreTimerange?: boolean;
+  ignoreValidations?: boolean;
+}

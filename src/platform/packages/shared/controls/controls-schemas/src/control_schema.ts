@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
+import { DEFAULT_IGNORE_VALIDATIONS, DEFAULT_USE_GLOBAL_FILTERS } from '@kbn/controls-constants';
 
 export const controlSchema = schema.object(
   {
@@ -32,6 +32,11 @@ export const dataControlSchema = controlSchema.extends({
   useGlobalFilters: schema.maybe(
     schema.boolean({
       defaultValue: DEFAULT_USE_GLOBAL_FILTERS,
+    })
+  ),
+  ignoreValidations: schema.maybe(
+    schema.boolean({
+      defaultValue: DEFAULT_IGNORE_VALIDATIONS,
     })
   ),
 });

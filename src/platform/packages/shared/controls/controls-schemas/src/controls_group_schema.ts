@@ -16,6 +16,7 @@ import {
   DEFAULT_CONTROL_WIDTH,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
+  TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import { optionsListDSLControlSchema } from './options_list_schema';
 import { rangeSliderControlSchema } from './range_slider_schema';
@@ -61,6 +62,10 @@ export const controlsGroupSchema = schema.object({
           stickyControlSchema,
         ])
         .extendsDeep({ unknowns: 'allow' }),
+      schema.allOf([
+        schema.object({ type: schema.literal(TIME_SLIDER_CONTROL) }),
+        stickyControlSchema,
+      ]),
     ]),
     {
       defaultValue: [],

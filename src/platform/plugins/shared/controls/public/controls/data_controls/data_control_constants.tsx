@@ -116,5 +116,13 @@ export const DataControlEditorStrings = {
       i18n.translate('controls.controlGroup.manageControl.useGlobalFilters', {
         defaultMessage: 'Use global filters',
       }),
+    getIgnoreValidationsTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.ignoreValidations.title', {
+        defaultMessage: 'Validate user selections',
+      }),
+    getIgnoreValidationsTooltip: () =>
+      i18n.translate('controls.controlGroup.manageControl.ignoreValidations.tooltip', {
+        defaultMessage: 'Highlight control selections that result in no data.',
+      }),
   },
 };

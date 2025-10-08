@@ -10,42 +10,39 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type {
-  FetchContext,
-  PublishesDataViews,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import type { DataControlApi } from '../types';
 import { getFetchContextFilters } from '../utils';
+import type { DataControlStateManager } from '../data_control_manager';
 
 export function hasNoResults$({
+  api,
   controlFetch$,
-  dataViews$,
-  rangeFilters$,
-  useGlobalFilters$,
   setIsLoading,
 }: {
+  api: DataControlStateManager['api'];
   controlFetch$: Observable<FetchContext>;
-  dataViews$?: PublishesDataViews['dataViews$'];
-  rangeFilters$: DataControlApi['appliedFilters$'];
-  useGlobalFilters$: PublishingSubject<boolean | undefined>;
   setIsLoading: (isLoading: boolean) => void;
 }) {
   let prevRequestAbortController: AbortController | undefined;
-  return combineLatest([controlFetch$, rangeFilters$, useGlobalFilters$]).pipe(
+  return combineLatest([
+    controlFetch$,
+    api.appliedFilters$,
+    api.useGlobalFilters$,
+    api.ignoreValidations$,
+  ]).pipe(
     tap(() => {
       if (prevRequestAbortController) {
         prevRequestAbortController.abort();
         prevRequestAbortController = undefined;
       }
     }),
-    switchMap(async ([controlFetchContext, rangeFilters, useGlobalFilters]) => {
-      const dataView = dataViews$?.value?.[0];
+    switchMap(async ([controlFetchContext, rangeFilters, useGlobalFilters, ignoreValidations]) => {
+      const dataView = api.dataViews$?.value?.[0];
       const rangeFilter = rangeFilters?.[0];
-      if (!dataView || !rangeFilter) {
+      if (!dataView || !rangeFilter || ignoreValidations) {
         return false;
       }
       controlFetchContext.filters = getFetchContextFilters(controlFetchContext, useGlobalFilters);

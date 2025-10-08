@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { HasCustomPrepend } from '@kbn/controls-plugin/public/controls/types';
+import type { HasCustomPrepend } from '@kbn/controls-schemas';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -195,7 +195,7 @@ export const ControlPanel = ({
                 )}
               </>
             }
-            compressed={parentApi.getCompressed ? parentApi.getCompressed() : true}
+            compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
           >
             <EmbeddableRenderer
               key={uuid}

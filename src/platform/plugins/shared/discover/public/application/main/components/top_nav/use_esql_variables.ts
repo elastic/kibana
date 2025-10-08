@@ -8,13 +8,12 @@
  */
 import { isEqual } from 'lodash';
 import { useCallback, useEffect } from 'react';
-import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import { skip } from 'rxjs';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
-  extractEsqlVariables,
   internalStateActions,
   parseControlGroupJson,
   useCurrentTabAction,
@@ -53,7 +52,7 @@ export const useESQLVariables = ({
   onUpdateESQLQuery: (query: string) => void;
 }): {
   onSaveControl: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
-  getActivePanels: () => ControlPanelsState<ESQLControlState> | undefined;
+  getActivePanels: () => ControlPanelsState | undefined;
 } => {
   const dispatch = useInternalStateDispatch();
   const setControlGroupState = useCurrentTabAction(internalStateActions.setControlGroupState);
@@ -79,9 +78,7 @@ export const useESQLVariables = ({
 
     const inputSubscription = controlGroupApi.getInput$().subscribe((input) => {
       if (input && input.initialChildControlState) {
-        const currentTabControlState =
-          input.initialChildControlState as ControlPanelsState<ESQLControlState>;
-
+        const currentTabControlState = input.initialChildControlState;
         stateContainer.savedSearchState.updateControlState({
           nextControlState: currentTabControlState,
         });
@@ -90,18 +87,21 @@ export const useESQLVariables = ({
             controlGroupState: currentTabControlState,
           })
         );
-        const newVariables = extractEsqlVariables(currentTabControlState);
-        if (!isEqual(newVariables, currentEsqlVariables)) {
-          // Update the ESQL variables in the internal state
-          dispatch(setEsqlVariables({ esqlVariables: newVariables }));
-          stateContainer.dataState.fetch();
-        }
+      }
+    });
+
+    const variableSubscription = controlGroupApi.esqlVariables$.subscribe((newVariables) => {
+      if (!isEqual(newVariables, currentEsqlVariables)) {
+        // Update the ESQL variables in the internal state
+        dispatch(setEsqlVariables({ esqlVariables: newVariables }));
+        stateContainer.dataState.fetch();
       }
     });
 
     return () => {
       inputSubscription.unsubscribe();
       savedSearchResetSubsciption.unsubscribe();
+      variableSubscription.unsubscribe();
     };
   }, [
     controlGroupApi,

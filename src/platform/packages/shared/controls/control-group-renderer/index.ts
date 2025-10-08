@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-
-// TODO: We will need some way of getting this from the parent
-export interface ControlGroupEditorConfig {
-  hideDataViewSelector?: boolean;
-  hideWidthSettings?: boolean;
-  hideAdditionalSettings?: boolean;
-  fieldFilterPredicate?: (f: DataViewField) => boolean;
-}
+export { ControlGroupRenderer, apiHasEditorConfig, type ControlGroupRendererProps } from './src';
+export type {
+  ControlGroupRendererApi,
+  ControlGroupCreationOptions,
+  ControlGroupRuntimeState,
+  ControlGroupStateBuilder,
+  ControlGroupEditorConfig,
+  ControlStateTransform,
+  ControlPanelsState,
+  ControlPanelState,
+} from './src/types';

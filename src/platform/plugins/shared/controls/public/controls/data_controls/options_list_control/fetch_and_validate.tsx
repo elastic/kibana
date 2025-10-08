@@ -22,6 +22,7 @@ import type { OptionsListSuccessResponse } from '../../../../common/options_list
 import { OptionsListFetchCache } from './options_list_fetch_cache';
 import type { OptionsListComponentApi, OptionsListControlApi } from './types';
 import { getFetchContextFilters } from '../utils';
+import type { DataControlStateManager } from '../data_control_manager';
 
 export function fetchAndValidate$({
   api,
@@ -31,10 +32,8 @@ export function fetchAndValidate$({
   searchTechnique$,
   sort$,
 }: {
-  api: Pick<
-    OptionsListControlApi,
-    'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi' | 'uuid' | 'useGlobalFilters$'
-  > &
+  api: DataControlStateManager['api'] &
+    Pick<OptionsListControlApi, 'parentApi' | 'uuid'> &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
@@ -54,6 +53,7 @@ export function fetchAndValidate$({
     fetchContext: fetch$(api),
     useGlobalFilters: api.useGlobalFilters$,
     searchString: api.debouncedSearchString,
+    ignoreValidations: api.ignoreValidations$,
     sort: sort$,
     searchTechnique: searchTechnique$,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
@@ -72,7 +72,16 @@ export function fetchAndValidate$({
     withLatestFrom(requestSize$, runPastTimeout$, selectedOptions$),
     switchMap(
       async ([
-        { dataViews, field, fetchContext, useGlobalFilters, searchString, sort, searchTechnique },
+        {
+          dataViews,
+          field,
+          fetchContext,
+          useGlobalFilters,
+          ignoreValidations,
+          searchString,
+          sort,
+          searchTechnique,
+        },
         requestSize,
         runPastTimeout,
         selectedOptions,
@@ -100,10 +109,11 @@ export function fetchAndValidate$({
           field: field.toSpec(),
           size: requestSize,
 
-          // TODO get expensive queries setting and ignore validations
-          allowExpensiveQueries: true,
-          ignoreValidations: false,
+          ignoreValidations,
           ...fetchContext,
+
+          // TODO: get expensive queries setting
+          allowExpensiveQueries: true,
         };
 
         const newAbortController = new AbortController();

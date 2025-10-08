@@ -15,10 +15,7 @@ import { SearchExample } from './control_group_renderer_examples/search_example'
 import { EditExample } from './control_group_renderer_examples/edit_example';
 import type { ControlsExampleStartDeps } from '../plugin';
 
-export const ControlGroupRendererExamples = ({
-  data,
-  navigation,
-}: Pick<ControlsExampleStartDeps, 'data' | 'navigation'>) => {
+export const ControlGroupRendererExamples = ({ data, navigation }: ControlsExampleStartDeps) => {
   const {
     loading,
     value: dataViews,
@@ -33,7 +30,7 @@ export const ControlGroupRendererExamples = ({
     <>
       <SearchExample dataView={dataViews[0]} navigation={navigation} data={data} />
       <EuiSpacer size="xl" />
-      <EditExample />
+      <EditExample dataView={dataViews[0]} />
     </>
   ) : (
     <EuiText>{'Install web logs sample data to run controls examples.'}</EuiText>

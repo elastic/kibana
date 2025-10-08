@@ -11,4 +11,6 @@ export const TIME_SLIDER_CONTROL = 'timeSlider';
 export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
 export const ESQL_CONTROL = 'esqlControl';
+
 export const CONTROL_HOVER_TRIGGER_ID = 'CONTROL_HOVER_TRIGGER';
+export const CONTROL_MENU_TRIGGER = 'CONTROL_MENU_TRIGGER';

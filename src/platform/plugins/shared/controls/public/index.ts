@@ -9,32 +9,13 @@
 
 import { ControlsPlugin } from './plugin';
 
-export {
-  controlGroupStateBuilder,
-  type ControlGroupStateBuilder,
-} from './control_group/utils/control_group_state_builder';
-
 export { ACTION_CLEAR_CONTROL } from './actions/constants';
 
 export type { DataControlApi } from './controls/data_controls/types';
 export type { OptionsListControlApi } from './controls/data_controls/options_list_control/types';
-export type { RangesliderControlApi } from './controls/data_controls/range_slider/types';
+export type { RangeSliderControlApi } from './controls/data_controls/range_slider/types';
 export type { ESQLControlApi } from './controls/esql_control/types';
 export type { TimesliderControlApi } from './controls/timeslider_control/types';
-
-export {
-  ControlGroupRenderer,
-  type ControlGroupCreationOptions,
-  type ControlGroupRendererApi,
-  type ControlGroupRendererProps,
-} from './control_group/control_group_renderer';
-
-export type {
-  ControlGroupRuntimeState,
-  ControlPanelState,
-  ControlPanelsState,
-  DefaultDataControlState,
-} from '../common';
 
 export function plugin() {
   return new ControlsPlugin();

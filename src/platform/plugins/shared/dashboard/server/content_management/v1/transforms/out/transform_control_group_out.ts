@@ -8,19 +8,19 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { ControlsGroupState } from '@kbn/controls-schemas';
 
 import type {
   DashboardSavedObjectAttributes,
   StoredControlGroupInput,
 } from '../../../../dashboard_saved_object';
 import { transformControlsState } from './transform_controls_state';
+import type { DashboardAttributes } from '../../types';
 
 export function transformControlGroupOut(
   controlGroupInput: NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>,
   references: Reference[],
   ignoreParentSettingsJSON?: string
-): ControlsGroupState {
+): DashboardAttributes['controlGroupInput'] {
   let controls = controlGroupInput.panelsJSON
     ? transformControlsState(controlGroupInput.panelsJSON, references)
     : [];
@@ -28,12 +28,19 @@ export function transformControlGroupOut(
   /** For legacy controls (<v9.2.0), pass relevant ignoreParentSettings into each individual control panel */
   const legacyControlGroupOptions: StoredControlGroupInput['ignoreParentSettings'] | undefined =
     ignoreParentSettingsJSON ? JSON.parse(ignoreParentSettingsJSON) : undefined;
-  const ignoreFilters =
-    legacyControlGroupOptions?.ignoreFilters || legacyControlGroupOptions?.ignoreQuery;
-  if (ignoreFilters) {
+  if (legacyControlGroupOptions) {
+    const ignoreFilters =
+      legacyControlGroupOptions.ignoreFilters || legacyControlGroupOptions.ignoreQuery;
     controls = controls.reduce((prev, control) => {
-      return [...prev, { ...control, useGlobalFilters: !ignoreFilters }];
-    }, [] as ControlsGroupState['controls']);
+      return [
+        ...prev,
+        {
+          ...control,
+          useGlobalFilters: !ignoreFilters,
+          ignoreValidations: legacyControlGroupOptions.ignoreValidations,
+        },
+      ];
+    }, [] as DashboardAttributes['controlGroupInput']['controls']);
   }
   return { controls };
 }

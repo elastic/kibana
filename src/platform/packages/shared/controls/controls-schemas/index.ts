@@ -22,4 +22,8 @@ export type {
   OptionsListSortingType,
   RangeSliderControlState,
   RangeSliderValue,
+  StickyControlState,
+  TimeSlice,
+  HasCustomPrepend,
+  LegacyIgnoreParentSettings,
 } from './src/types';

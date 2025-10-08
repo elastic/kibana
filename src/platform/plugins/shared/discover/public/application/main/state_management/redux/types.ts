@@ -9,7 +9,6 @@
 
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
@@ -20,6 +19,7 @@ import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 
