@@ -85,7 +85,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
     }
   };
 
-  const handleRegenerate = (connectorId: string) => {
+  const getSuggestionsForStream = (connectorId: string) => {
     fetchSuggestions({
       streamName: definition.stream.name,
       connectorId,
@@ -111,14 +111,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 size="s"
-                onClick={(connectorId) =>
-                  fetchSuggestions({
-                    streamName: definition.stream.name,
-                    connectorId,
-                    start: timeState.start,
-                    end: timeState.end,
-                  })
-                }
+                onClick={getSuggestionsForStream}
                 isLoading={isLoadingSuggestions}
                 aiFeatures={aiFeatures}
               >
@@ -227,7 +220,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                   aiFeatures={aiFeatures}
                   isLoadingSuggestions={isLoadingSuggestions}
                   onDismiss={resetForm}
-                  onRegenerate={handleRegenerate}
+                  onRegenerate={getSuggestionsForStream}
                 />
               ) : (
                 <ReviewSuggestionsForm
@@ -235,7 +228,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                   aiFeatures={aiFeatures}
                   definition={definition}
                   isLoadingSuggestions={isLoadingSuggestions}
-                  onRegenerate={handleRegenerate}
+                  onRegenerate={getSuggestionsForStream}
                   previewSuggestion={previewSuggestion}
                   rejectSuggestion={rejectSuggestion}
                   resetForm={resetForm}
