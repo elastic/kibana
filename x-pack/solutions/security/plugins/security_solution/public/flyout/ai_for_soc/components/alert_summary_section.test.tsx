@@ -13,6 +13,20 @@ import { ALERT_SUMMARY_SECTION_TEST_ID, AlertSummarySection } from './alert_summ
 import { ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID } from './settings_menu';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 
+jest.mock('../../../common/hooks/use_ai_connectors', () => ({
+  useAIConnectors: jest.fn().mockReturnValue({
+    aiConnectors: [
+      {
+        id: 'test-connector-id',
+        name: 'Test Connector',
+        actionTypeId: '.gen-ai',
+      },
+    ],
+    isLoading: false,
+    error: null,
+  }),
+}));
+
 jest.mock('../context');
 
 const mockedUseKibana = {
@@ -31,6 +45,9 @@ const mockedUseKibana = {
     },
     uiSettings: {
       get: jest.fn().mockReturnValue('default-connector-id'),
+    },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockReturnValue(false),
     },
   },
 };
