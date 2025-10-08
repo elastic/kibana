@@ -14,7 +14,6 @@ type MapValueType = 'string' | 'number' | 'boolean' | 'map';
 export interface MapParameterValues {
   type: MapValueType;
   suggestions: ISuggestionItem[];
-  children?: Record<string, MapParameterValues>;
 }
 
 export type MapParameters = Record<string, MapParameterValues>;
