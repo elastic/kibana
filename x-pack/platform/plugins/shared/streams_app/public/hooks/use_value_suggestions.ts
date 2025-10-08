@@ -37,11 +37,15 @@ const createValueSuggestions = (
     }
   });
 
-  return Array.from(suggestions).map((value) => ({ name: String(value) }));
+  return Array.from(suggestions)
+    .sort()
+    .map((value) => ({ name: String(value) }));
 };
 
 /**
  * Hook for providing value suggestions from routing samples data - to be used with Routing only
+ * @param field field name to extract unique values for
+ * @returns array of unique suggestions for the specified field
  */
 export const useRoutingValueSuggestions = (field?: string): Suggestion[] => {
   const [records, setRecords] = useState<FlattenRecord[]>([]);
