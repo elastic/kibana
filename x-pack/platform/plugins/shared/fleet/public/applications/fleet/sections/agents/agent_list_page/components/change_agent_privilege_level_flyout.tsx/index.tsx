@@ -154,7 +154,7 @@ export const ChangeAgentPrivilegeLevelFlyout: React.FC<Props> = ({
             <h1 id={flyoutTitleId}>
               <FormattedMessage
                 id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.title"
-                defaultMessage="Remove {agentCount, plural, one {agent} other {agents}} root access"
+                defaultMessage="Remove {agentCount, plural, one {agent} other {agents}} root privilege"
                 values={{
                   agentCount: filteredAgentCount,
                 }}
@@ -178,7 +178,7 @@ export const ChangeAgentPrivilegeLevelFlyout: React.FC<Props> = ({
                 <EuiText color="warning" className="eui-alignMiddle">
                   <FormattedMessage
                     id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.warning"
-                    defaultMessage="{icon} Root access cannot be removed for {x} of {y} selected agents as they are Fleet Server agents or on an unsupported version."
+                    defaultMessage="{icon} Root privilege cannot be removed for {x} of {y} selected agents. They might be Fleet Server agents, already unprivileged, or on an unsupported version."
                     values={{
                       icon: <EuiIcon type="warning" />,
                       x: unsupportedAgents.length,

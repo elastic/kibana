@@ -199,13 +199,14 @@ export const TableRowActions: React.FunctionComponent<{
   if (
     authz.fleet.allAgents &&
     isAgentPrivilegeLevelChangeSupported(agent) &&
+    agent.local_metadata?.elastic?.agent?.unprivileged !== true &&
     !isRootPrivilegeRequired(agentPolicy?.package_policies || []) &&
     !isFleetServerAgent &&
     agentPrivilegeLevelChangeEnabled
   ) {
     menuItems.push(
       <EuiContextMenuItem
-        icon="wrench"
+        icon="lock"
         onClick={() => {
           onChangeAgentPrivilegeLevelClick();
           setIsMenuOpen(false);
@@ -216,7 +217,7 @@ export const TableRowActions: React.FunctionComponent<{
       >
         <FormattedMessage
           id="xpack.fleet.agentList.changeAgentPrivilegeLevelActionText"
-          defaultMessage="Remove root access"
+          defaultMessage="Remove root privilege"
         />
       </EuiContextMenuItem>
     );

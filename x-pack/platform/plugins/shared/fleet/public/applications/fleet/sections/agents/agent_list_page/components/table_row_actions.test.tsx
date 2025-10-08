@@ -405,12 +405,15 @@ describe('TableRowActions', () => {
       return utils.queryByTestId('changeAgentPrivilegeLevelMenuItem');
     }
 
-    it('should render an active action button when agent is not a fleet server agent and does not require root access', async () => {
+    it('should render an active action button when agent is eligible for privilege level change', async () => {
       const res = renderAndGetChangePrivilegeLevelButton({
         agent: {
           active: true,
           status: 'online',
-          agent: { version: '9.3.0' },
+          agent: {
+            version: '9.3.0',
+          },
+          local_metadata: { elastic: { agent: { unprivileged: false } } },
         } as any,
         agentPolicy: {
           is_managed: false,
@@ -422,12 +425,34 @@ describe('TableRowActions', () => {
       expect(res).toBeEnabled();
     });
 
-    it('should not render an action button when agent requires root access', async () => {
+    it('should not render an action button when agent is already unprivileged', async () => {
       const res = renderAndGetChangePrivilegeLevelButton({
         agent: {
           active: true,
           status: 'online',
-          agent: { version: '9.3.0' },
+          agent: {
+            version: '9.3.0',
+          },
+          local_metadata: { elastic: { agent: { unprivileged: true } } },
+        } as any,
+        agentPolicy: {
+          is_managed: false,
+          package_policies: [{ package: { name: 'some-integration', requires_root: false } }],
+        } as AgentPolicy,
+      });
+
+      expect(res).toBe(null);
+    });
+
+    it('should not render an action button when agent requires root privilege', async () => {
+      const res = renderAndGetChangePrivilegeLevelButton({
+        agent: {
+          active: true,
+          status: 'online',
+          agent: {
+            version: '9.3.0',
+          },
+          local_metadata: { elastic: { agent: { unprivileged: false } } },
         } as any,
         agentPolicy: {
           is_managed: false,
@@ -443,7 +468,10 @@ describe('TableRowActions', () => {
         agent: {
           active: true,
           status: 'online',
-          agent: { version: '9.3.0' },
+          agent: {
+            version: '9.3.0',
+          },
+          local_metadata: { elastic: { agent: { unprivileged: false } } },
         } as any,
         agentPolicy: {
           is_managed: false,
@@ -462,7 +490,10 @@ describe('TableRowActions', () => {
         agent: {
           active: true,
           status: 'online',
-          agent: { version: '9.3.0' },
+          agent: {
+            version: '9.3.0',
+          },
+          local_metadata: { elastic: { agent: { unprivileged: false } } },
         } as any,
         agentPolicy: {
           is_managed: false,
@@ -478,7 +509,10 @@ describe('TableRowActions', () => {
         agent: {
           active: true,
           status: 'online',
-          agent: { version: '9.1.0' },
+          agent: {
+            version: '9.1.0',
+          },
+          local_metadata: { elastic: { agent: { unprivileged: false } } },
         } as any,
         agentPolicy: {
           is_managed: false,
@@ -500,7 +534,10 @@ describe('TableRowActions', () => {
         agent: {
           active: true,
           status: 'online',
-          agent: { version: '9.3.0' },
+          agent: {
+            version: '9.3.0',
+          },
+          local_metadata: { elastic: { agent: { unprivileged: false } } },
         } as any,
         agentPolicy: {
           is_managed: false,

@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
       policy2 = policyRes.body.item;
 
       // Install integrations.
-      // Nginx integration doesn't need root access.
+      // Nginx integration doesn't need root privilege.
       await supertest
         .post('/api/fleet/epm/packages/nginx')
         .set('kbn-xsrf', 'xx')
@@ -67,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xx')
         .expect(200);
       const nginxPackageVersion = packageInfoRes.body.item.version;
-      // System integration needs root access.
+      // System integration needs root privilege.
       await supertest
         .post('/api/fleet/epm/packages/system')
         .set('kbn-xsrf', 'xx')
@@ -108,55 +108,77 @@ export default function (providerContext: FtrProviderContext) {
         });
 
       // Create agents.
-      // Eligible for privilege level change: agent1, agent4, agent5
-      // Not eligible for privilege level change: agent2 (unsupported version), agent3 (needs root access)
-      await es.index({
-        refresh: 'wait_for',
-        index: AGENTS_INDEX,
-        id: 'agent1',
-        document: {
-          agent: { version: '9.3.0' }, // supported version
-          policy_id: policy1.id, // nginx, no root access needed
-          enrolled_at: enrolledTime,
-        },
-      });
-      await es.index({
-        refresh: 'wait_for',
-        index: AGENTS_INDEX,
-        id: 'agent2',
-        document: {
-          agent: { version: '9.1.0' }, // unsupported version
-          policy_id: policy1.id, // nginx, no root access needed
-          enrolled_at: enrolledTime,
-        },
-      });
-      await es.index({
-        refresh: 'wait_for',
-        index: AGENTS_INDEX,
-        id: 'agent3',
-        document: {
-          agent: { version: '9.3.0' }, // supported version
-          policy_id: policy2.id, // system, root access needed
-          enrolled_at: enrolledTime,
-        },
-      });
+      // Eligible for privilege level change: agent1, agent2, agent3
+      for (let i = 1; i <= 3; i++) {
+        await es.index({
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          id: `agent${i}`,
+          document: {
+            agent: { version: '9.3.0' }, // supported version
+            local_metadata: {
+              elastic: {
+                agent: {
+                  unprivileged: false, // root privilege
+                },
+              },
+            },
+            policy_id: policy1.id, // nginx, no root privilege needed
+            enrolled_at: enrolledTime,
+          },
+        });
+      }
+      // Not eligible for privilege level change: agent4 (already unprivileged)
       await es.index({
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         id: 'agent4',
         document: {
           agent: { version: '9.3.0' }, // supported version
-          policy_id: policy1.id, // nginx, no root access needed
+          local_metadata: {
+            elastic: {
+              agent: {
+                unprivileged: true, // unprivileged
+              },
+            },
+          },
+          policy_id: policy1.id, // nginx, no root privilege needed
           enrolled_at: enrolledTime,
         },
       });
+      // Not eligible for privilege level change: agent5 (unsupported version)
       await es.index({
         refresh: 'wait_for',
         index: AGENTS_INDEX,
         id: 'agent5',
         document: {
+          agent: { version: '9.1.0' }, // unsupported version
+          local_metadata: {
+            elastic: {
+              agent: {
+                unprivileged: false, // root privilege
+              },
+            },
+          },
+          policy_id: policy1.id, // nginx, no root privilege needed
+          enrolled_at: enrolledTime,
+        },
+      });
+      // Not eligible for privilege level change: agent6 (needs root privilege)
+      await es.index({
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        id: 'agent6',
+        document: {
           agent: { version: '9.3.0' }, // supported version
-          policy_id: policy1.id, // nginx, no root access needed
+          local_metadata: {
+            elastic: {
+              agent: {
+                unprivileged: false, // root privilege
+              },
+            },
+          },
+          policy_id: policy2.id, // system, root privilege needed
           enrolled_at: enrolledTime,
         },
       });
@@ -168,7 +190,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('POST /api/fleet/agents/{agentId}/privilege_level_change', () => {
       it('should return 200 if a PRIVILEGE_LEVEL_CHANGE action was created without secrets', async () => {
-        await supertest
+        const res = await supertest
           .post(`/api/fleet/agents/agent1/privilege_level_change`)
           .set('kbn-xsrf', 'xx')
           .send({
@@ -179,6 +201,8 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
+        expect(res.body).to.have.property('actionId');
+        expect(res.body).to.not.have.property('message');
 
         const actionsRes = await es.search({
           index: AGENT_ACTIONS_INDEX,
@@ -194,7 +218,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should return 200 if a PRIVILEGE_LEVEL_CHANGE action was created with secrets', async () => {
         await enableActionSecrets(providerContext);
-        await supertest
+        const res = await supertest
           .post(`/api/fleet/agents/agent1/privilege_level_change`)
           .set('kbn-xsrf', 'xx')
           .send({
@@ -205,6 +229,8 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(200);
+        expect(res.body).to.have.property('actionId');
+        expect(res.body).to.not.have.property('message');
 
         const actionsRes = await es.search({
           index: AGENT_ACTIONS_INDEX,
@@ -229,20 +255,43 @@ export default function (providerContext: FtrProviderContext) {
         expect(Object.keys(action)).to.not.contain(['secrets']);
       });
 
+      it('should return 200 if agent is already unprivileged', async () => {
+        const res = await supertest
+          .post(`/api/fleet/agents/agent4/privilege_level_change`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            user_info: {
+              username: 'user1',
+              groupname: 'group1',
+              password: 'password',
+            },
+          })
+          .expect(200);
+        expect(res.body).to.not.have.property('actionId');
+        expect(res.body).to.have.property('message');
+        expect(res.body.message).to.eql('Agent agent4 is already unprivileged');
+      });
+
       it('should return 400 if agent is on an unsupported version', async () => {
-        await supertest
-          .post(`/api/fleet/agents/agent2/privilege_level_change`)
+        const res = await supertest
+          .post(`/api/fleet/agents/agent5/privilege_level_change`)
           .set('kbn-xsrf', 'xx')
           .send()
           .expect(400);
+        expect(res.body.message).to.eql(
+          'Cannot remove root privilege. Privilege level change is supported from version 9.3.0.'
+        );
       });
 
-      it('should return 403 if agent needs root access', async () => {
-        await supertest
-          .post(`/api/fleet/agents/agent3/privilege_level_change`)
+      it('should return 403 if agent needs root privilege', async () => {
+        const res = await supertest
+          .post(`/api/fleet/agents/agent6/privilege_level_change`)
           .set('kbn-xsrf', 'xx')
           .send()
           .expect(403);
+        expect(res.body.message).to.eql(
+          `Agent agent6 is on policy ${policy2.id}, which contains integrations that require root privilege: system`
+        );
       });
 
       it('should return 404 if the agent does not exist', async () => {
@@ -261,7 +310,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_privilege_level_change`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agents: ['agent1', 'agent4'],
+            agents: ['agent1', 'agent2'],
             user_info: {
               username: 'user1',
               groupname: 'group1',
@@ -293,7 +342,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_privilege_level_change`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agents: ['agent1', 'agent4'],
+            agents: ['agent1', 'agent2'],
             user_info: {
               username: 'user1',
               groupname: 'group1',
@@ -344,14 +393,14 @@ export default function (providerContext: FtrProviderContext) {
         });
         const action: any = actionsRes.hits.hits[0]._source;
         expect(action.type).to.eql('PRIVILEGE_LEVEL_CHANGE');
-        expect(action.agents.length).to.eql(3);
-        expect(action.total).to.eql(4);
+        expect(action.agents.length).to.eql(4);
+        expect(action.total).to.eql(5);
         const { body } = await supertest
           .get(`/api/fleet/agents/action_status`)
           .set('kbn-xsrf', 'xxx');
         const actionStatus = body.items[0];
-        expect(actionStatus.nbAgentsActioned).to.eql(4);
-        expect(actionStatus.nbAgentsActionCreated).to.eql(3);
+        expect(actionStatus.nbAgentsActioned).to.eql(5);
+        expect(actionStatus.nbAgentsActionCreated).to.eql(4);
         expect(actionStatus.nbAgentsFailed).to.eql(1);
       });
 
@@ -360,7 +409,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_privilege_level_change`)
           .set('kbn-xsrf', 'xx')
           .send({
-            agents: ['agent1', 'agent2', 'agent3'],
+            agents: ['agent1', 'agent5', 'agent6'],
             user_info: {
               username: 'user1',
               groupname: 'group1',
@@ -376,13 +425,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(actionStatus.nbAgentsActionCreated).to.eql(1);
         expect(actionStatus.nbAgentsFailed).to.eql(2);
         expect(actionStatus.latestErrors.length).to.eql(2);
-        expect(actionStatus.latestErrors[0].agentId).to.eql('agent2');
+        expect(actionStatus.latestErrors[0].agentId).to.eql('agent5');
         expect(actionStatus.latestErrors[0].error).to.eql(
-          'Cannot remove root access. Privilege level change is supported from version 9.3.0.'
+          'Cannot remove root privilege. Privilege level change is supported from version 9.3.0.'
         );
-        expect(actionStatus.latestErrors[1].agentId).to.eql('agent3');
+        expect(actionStatus.latestErrors[1].agentId).to.eql('agent6');
         expect(actionStatus.latestErrors[1].error).to.eql(
-          'Agent agent3 contains integrations that require root access: system'
+          `Agent agent6 is on policy ${policy2.id}, which contains integrations that require root privilege: system`
         );
       });
 

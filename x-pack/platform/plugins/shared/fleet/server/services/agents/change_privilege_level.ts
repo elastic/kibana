@@ -41,29 +41,35 @@ export async function changeAgentPrivilegeLevel(
     };
   } | null
 ) {
-  // Fail fast if agent is on an unsupported version or contains an integration that requires root access.
   const agent = await getAgentById(esClient, soClient, agentId);
 
+  // Return fast if agent is already unprivileged.
+  if (agent.local_metadata?.elastic?.agent?.unprivileged === true) {
+    return { message: `Agent ${agentId} is already unprivileged` };
+  }
+
+  // Fail fast if agent is on an unsupported version.
   if (!isAgentPrivilegeLevelChangeSupported(agent)) {
     throw new FleetError(
-      `Cannot remove root access. Privilege level change is supported from version ${MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION}.`
+      `Cannot remove root privilege. Privilege level change is supported from version ${MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION}.`
     );
   }
 
+  // Fail fast if agent contains an integration that requires root privilege.
   const packagePolicies =
     (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id || '')) || [];
-  const packagesWithRootAccess = getPackagesWithRootAccess(packagePolicies);
-
-  if (packagesWithRootAccess.length > 0) {
+  const packagesWithRootPrivilege = getPackagesWithRootPrivilege(packagePolicies);
+  if (packagesWithRootPrivilege.length > 0) {
     throw new FleetUnauthorizedError(
-      `Agent policy ${
+      `Agent ${agent.id} is on policy ${
         agent.policy_id
-      } contains integrations that require root access: ${packagesWithRootAccess
+      }, which contains integrations that require root privilege: ${packagesWithRootPrivilege
         .map((pkg) => pkg?.name)
         .join(', ')}`
     );
   }
 
+  // Create action to change the agent's privilege level.
   // Extract password from options if provided and pass it as a secret.
   const res = await createAgentAction(esClient, soClient, {
     agents: [agentId],
@@ -133,7 +139,7 @@ export async function bulkChangeAgentsPrivilegeLevel(
   }
 }
 
-export function getPackagesWithRootAccess(packagePolicies: PackagePolicy[]) {
+export function getPackagesWithRootPrivilege(packagePolicies: PackagePolicy[]) {
   return packagePolicies
     .map((policy) => policy.package)
     .filter((pkg) => pkg && Boolean(pkg?.requires_root));

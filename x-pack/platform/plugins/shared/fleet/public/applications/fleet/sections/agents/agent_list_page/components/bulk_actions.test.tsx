@@ -97,7 +97,9 @@ describe('AgentBulkActions', () => {
         results.getByText('Request diagnostics for 2 agents').closest('button')!
       ).toBeEnabled();
       expect(results.getByText('Migrate 2 agents').closest('button')!).toBeEnabled();
-      expect(results.getByText('Remove root access for 2 agents').closest('button')!).toBeEnabled();
+      expect(
+        results.getByText('Remove root privilege for 2 agents').closest('button')!
+      ).toBeEnabled();
     });
 
     it('should allow scheduled upgrades if the license allows it', async () => {
@@ -142,7 +144,7 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Restart upgrade 10 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Migrate 10 agents').closest('button')!).toBeEnabled();
       expect(
-        results.getByText('Remove root access for 10 agents').closest('button')!
+        results.getByText('Remove root privilege for 10 agents').closest('button')!
       ).toBeEnabled();
     });
 
@@ -168,7 +170,9 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Schedule upgrade for 8 agents').closest('button')!).toBeDisabled();
       expect(results.getByText('Restart upgrade 8 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Migrate 8 agents').closest('button')!).toBeEnabled();
-      expect(results.getByText('Remove root access for 8 agents').closest('button')!).toBeEnabled();
+      expect(
+        results.getByText('Remove root privilege for 8 agents').closest('button')!
+      ).toBeEnabled();
     });
 
     it('should generate a correct kuery to select agents when no managed agents are listed', async () => {
@@ -236,7 +240,7 @@ describe('AgentBulkActions', () => {
       expect(bulkActionsButton).not.toBeInTheDocument();
     });
 
-    it('should not show the Remove root access button when agent feature flag is disabled', async () => {
+    it('should not show the Remove root privilege button when agent feature flag is disabled', async () => {
       mockedExperimentalFeaturesService.get.mockReturnValue({
         enableAgentPrivilegeLevelChange: false,
       } as any);

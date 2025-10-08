@@ -22,7 +22,7 @@ import {
 import { ActionRunner } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
 import { createAgentAction, createErrorActionResults } from './actions';
-import { getPackagesWithRootAccess } from './change_privilege_level';
+import { getPackagesWithRootPrivilege } from './change_privilege_level';
 
 export class ChangePrivilegeActionRunner extends ActionRunner {
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -68,26 +68,26 @@ export async function bulkChangePrivilegeAgentsBatch(
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 
-  // Fail fast if agent is on an unsupported version or contains an integration that requires root access.
   await pMap(
     agents,
     async (agent) => {
+      // Create error if agent is on an unsupported version.
       if (!isAgentPrivilegeLevelChangeSupported(agent)) {
         errors[agent.id] = new FleetUnauthorizedError(
-          `Cannot remove root access. Privilege level change is supported from version ${MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION}.`
+          `Cannot remove root privilege. Privilege level change is supported from version ${MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION}.`
         );
         return;
       }
       if (agent?.policy_id) {
         const allPackagePolicies =
           (await packagePolicyService.findAllForAgentPolicy(soClient, agent.policy_id)) || [];
-        const packagesWithRootAccess = getPackagesWithRootAccess(allPackagePolicies);
-        if (packagesWithRootAccess.length > 0) {
-          // find list of agents on that agent policy
+        const packagesWithRootPrivilege = getPackagesWithRootPrivilege(allPackagePolicies);
+        // Create error if agent contains an integration that requires root privilege.
+        if (packagesWithRootPrivilege.length > 0) {
           errors[agent.id] = new FleetUnauthorizedError(
-            `Agent ${
-              agent.id
-            } contains integrations that require root access: ${packagesWithRootAccess
+            `Agent ${agent.id} is on policy ${
+              agent.policy_id
+            }, which contains integrations that require root privilege: ${packagesWithRootPrivilege
               .map((pkg) => pkg?.name)
               .join(', ')}`
           );
@@ -102,6 +102,7 @@ export async function bulkChangePrivilegeAgentsBatch(
   );
   const agentIds = agentsToAction.map((agent) => agent.id);
 
+  // Create action to change the privilege level of eligible agents.
   // Extract password from options if provided and pass it as a secret.
   await createAgentAction(esClient, soClient, {
     id: actionId,

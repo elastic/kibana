@@ -54,6 +54,14 @@ describe('changeAgentPrivilegeLevel', () => {
     ).rejects.toThrowError(`Agent ${agentId} does not exist`);
   });
 
+  it('should return early if the agent is already unprivileged', async () => {
+    (getAgentById as jest.Mock).mockResolvedValue({
+      local_metadata: { elastic: { agent: { unprivileged: true } } },
+    } as any);
+    const res = await changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {});
+    expect(res).toEqual({ message: 'Agent agent-id is already unprivileged' });
+  });
+
   it('should throw an error if the agent is on an unsupported version', async () => {
     (getAgentById as jest.Mock).mockResolvedValue({
       agent: { version: '9.1.0' },
@@ -62,12 +70,13 @@ describe('changeAgentPrivilegeLevel', () => {
     await expect(
       changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
     ).rejects.toThrowError(
-      'Cannot remove root access. Privilege level change is supported from version 9.2.0.'
+      'Cannot remove root privilege. Privilege level change is supported from version 9.3.0.'
     );
   });
 
-  it('should throw an error if the agent needs root access', async () => {
+  it('should throw an error if the agent needs root privilege', async () => {
     (getAgentById as jest.Mock).mockResolvedValue({
+      id: 'agent-id',
       agent: { version: '9.3.0' },
       policy_id: policyId,
     } as any);
@@ -85,7 +94,7 @@ describe('changeAgentPrivilegeLevel', () => {
     await expect(
       changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {})
     ).rejects.toThrowError(
-      `Agent policy ${policyId} contains integrations that require root access: Package 2`
+      `Agent agent-id is on policy ${policyId}, which contains integrations that require root privilege: Package 2`
     );
   });
 
@@ -196,6 +205,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
       created_at: new Date().toISOString(),
     });
   });
+
   it('should create a PRIVILEGE_LEVEL_CHANGE action for the specified agents', async () => {
     (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
     const options = {
@@ -222,7 +232,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
     });
   });
 
-  it('should record error result if agent policies contain integrations that require root access', async () => {
+  it('should record error result if agent policies contain integrations that require root privilege', async () => {
     (getAgents as jest.Mock).mockResolvedValue([mockedAgent, mockedAgent]);
     const options = {
       user_info: {
@@ -251,7 +261,7 @@ describe('bulkChangeAgentsPrivilegeLevel', () => {
       expect.any(String),
       {
         'agent-123': new FleetUnauthorizedError(
-          'Agent agent-123 contains integrations that require root access: Package 2'
+          'Agent agent-123 is on policy policy-0001, which contains integrations that require root privilege: Package 2'
         ),
       },
       'agent does not support privilege change action'

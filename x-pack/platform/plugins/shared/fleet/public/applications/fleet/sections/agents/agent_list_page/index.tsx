@@ -205,6 +205,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [selectedAgents, agentPoliciesIndexedById]);
 
   const unsupportedPrivilegeLevelChangeAgents = useMemo(() => {
+    const alreadyUnprivilegedAgents = Array.isArray(selectedAgents)
+      ? selectedAgents.filter((agent) => agent.local_metadata.elastic.agent.unprivileged === true)
+      : [];
     const rootAccessNeededAgents = Array.isArray(selectedAgents)
       ? selectedAgents.filter((agent) =>
           isRootPrivilegeRequired(
@@ -222,7 +225,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     const unsupportedVersionAgents = Array.isArray(selectedAgents)
       ? selectedAgents.filter((agent) => !isAgentPrivilegeLevelChangeSupported(agent))
       : [];
-    return [...rootAccessNeededAgents, ...fleetServerAgents, ...unsupportedVersionAgents];
+    return [
+      ...alreadyUnprivilegedAgents,
+      ...rootAccessNeededAgents,
+      ...fleetServerAgents,
+      ...unsupportedVersionAgents,
+    ];
   }, [selectedAgents, agentPoliciesIndexedById]);
 
   const renderActions = (agent: Agent) => {

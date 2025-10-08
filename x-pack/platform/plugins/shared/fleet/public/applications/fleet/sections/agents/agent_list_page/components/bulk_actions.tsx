@@ -287,13 +287,13 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
         <FormattedMessage
           id="xpack.fleet.agentBulkActions.bulkChangeAgentsPrivilegeLevel"
           data-test-subj="agentBulkActionsBulkChangeAgentsPrivilegeLevel"
-          defaultMessage="Remove root access for {agentCount, plural, one {# agent} other {# agents}}"
+          defaultMessage="Remove root privilege for {agentCount, plural, one {# agent} other {# agents}}"
           values={{
             agentCount,
           }}
         />
       ),
-      icon: <EuiIcon type="wrench" size="m" />,
+      icon: <EuiIcon type="lock" size="m" />,
       disabled: !authz.fleet.allAgents,
       onClick: () => {
         closeMenu();
