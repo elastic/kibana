@@ -51,7 +51,7 @@ export function NoSystemsEmptyState({
           disabled={!aiFeatures?.genAiConnectors?.selectedConnector}
         >
           {i18n.translate('xpack.streams.significantEvents.noSystems.systemDetectionButtonLabel', {
-            defaultMessage: 'Detect systems',
+            defaultMessage: 'Identify features',
           })}
         </EuiButton>
         <EuiButtonEmpty onClick={onManualEntryClick}>
