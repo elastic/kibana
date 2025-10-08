@@ -154,9 +154,13 @@ export const ModalHost = memo(
           titleProps={{ id: confirmModalTitleId }}
           onCancel={closeConfirmModal}
           onConfirm={() => {
-            const v = state.forcemergeSegments;
-            if (v && !forcemergeSegmentsError()) {
-              forcemergeIndices(v);
+            const error = forcemergeSegmentsError();
+            if (!error) {
+              const value =
+                state.forcemergeSegments && state.forcemergeSegments.trim() !== ''
+                  ? state.forcemergeSegments
+                  : '1';
+              forcemergeIndices(value);
               dispatch({ type: 'CLOSE' });
               resetSelection?.();
             }

@@ -17,17 +17,6 @@ import type { Index } from '@kbn/index-management-shared-types';
 import { notificationService } from '../../../../services/notification';
 import { navigateToIndexDetailsPage, getIndexDetailsLink } from '../../../../services/routing';
 
-jest.mock('./modal_host/modal_host', () => {
-  const actual = jest.requireActual('./modal_host/modal_host');
-  const mockReact = jest.requireActual('react');
-  const captured = { openModal: jest.fn(), closeModal: jest.fn() };
-  const ModalHost = mockReact.forwardRef((_props: any, ref: any) => {
-    mockReact.useImperativeHandle(ref, () => captured);
-    return mockReact.createElement('div', { 'data-test-subj': 'modal-host-mock' });
-  });
-  return { ...actual, ModalHost, captured };
-});
-
 const user = userEvent.setup();
 
 jest.mock('../../../../services/routing', () => ({
@@ -348,7 +337,7 @@ describe('IndexActionsContextMenu', () => {
 
   describe('WHEN using Force Merge action', () => {
     describe('AND WHEN opening force merge from the menu', () => {
-      it('SHOULD call ModalHost.openModal with kind "forcemerge"', async () => {
+      it('SHOULD open the force merge modal', async () => {
         const props = getBaseProps();
         renderWithProviders(<IndexActionsContextMenu {...props} />);
 
@@ -356,19 +345,16 @@ describe('IndexActionsContextMenu', () => {
         const menu = await screen.findByTestId('indexContextMenu');
         const forcemergeBtn = await within(menu).findByText(/force merge index/i);
 
-        const { captured } = jest.requireMock('./modal_host/modal_host') as {
-          captured: { openModal: jest.Mock; closeModal: jest.Mock };
-        };
         fireEvent.click(forcemergeBtn);
 
-        expect(captured.openModal).toHaveBeenCalledWith({ kind: 'forcemerge' });
+        expect(await screen.findByTestId('indexActionsForcemergeNumSegments')).toBeInTheDocument();
       });
     });
   });
 
   describe('WHEN using Delete action', () => {
     describe('AND WHEN clicking Delete in the menu', () => {
-      it('SHOULD call ModalHost.openModal with kind "delete"', async () => {
+      it('SHOULD open the delete confirmation modal', async () => {
         const props = getBaseProps();
         renderWithProviders(<IndexActionsContextMenu {...props} />);
 
@@ -376,12 +362,9 @@ describe('IndexActionsContextMenu', () => {
         const menu = await screen.findByTestId('indexContextMenu');
         const deleteBtn = await within(menu).findByText(/delete index/i);
 
-        const { captured } = jest.requireMock('./modal_host/modal_host') as {
-          captured: { openModal: jest.Mock; closeModal: jest.Mock };
-        };
         fireEvent.click(deleteBtn);
 
-        expect(captured.openModal).toHaveBeenCalledWith({ kind: 'delete' });
+        expect(await screen.findByTestId('confirmModalConfirmButton')).toBeInTheDocument();
       });
     });
   });
@@ -512,14 +495,23 @@ describe('IndexActionsContextMenu', () => {
     });
 
     describe('AND WHEN extension provides modal-based action', () => {
-      it('SHOULD call ModalHost.openModal with kind "extension" and correct actionIndex', async () => {
+      it('SHOULD render the extension modal from ModalHost', async () => {
         const props = getBaseProps();
 
         const ctx = getIndexManagementCtx({
           services: {
             ...getIndexManagementCtx().services,
             extensionsService: {
-              actions: [() => ({ buttonLabel: 'Ext Modal', renderConfirmModal: () => null })],
+              actions: [
+                () => ({
+                  buttonLabel: 'Ext Modal',
+                  renderConfirmModal: (close: () => void) => (
+                    <div data-test-subj="ext-modal">
+                      <button data-test-subj="ext-close" onClick={close} />
+                    </div>
+                  ),
+                }),
+              ],
               columns: [],
               banners: [],
               toggles: [],
@@ -538,12 +530,9 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
         const extBtn = await screen.findByText(/ext modal/i);
 
-        const { captured } = jest.requireMock('./modal_host/modal_host') as {
-          captured: { openModal: jest.Mock; closeModal: jest.Mock };
-        };
         fireEvent.click(extBtn);
 
-        expect(captured.openModal).toHaveBeenCalledWith({ kind: 'extension', actionIndex: 0 });
+        expect(await screen.findByTestId('ext-modal')).toBeInTheDocument();
       });
     });
   });
@@ -575,7 +564,7 @@ describe('IndexActionsContextMenu', () => {
         expect(convertBtn).not.toBeDisabled();
       });
 
-      it('SHOULD call ModalHost.openModal with kind "convertToLookup"', async () => {
+      it('SHOULD open the Convert to Lookup modal', async () => {
         const props = getBaseProps();
         const convertible: MenuProps = {
           ...props,
@@ -597,12 +586,9 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
         const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
 
-        const { captured } = jest.requireMock('./modal_host/modal_host') as {
-          captured: { openModal: jest.Mock; closeModal: jest.Mock };
-        };
         fireEvent.click(convertBtn);
 
-        expect(captured.openModal).toHaveBeenCalledWith({ kind: 'convertToLookup' });
+        expect(await screen.findByTestId('mockConvertToLookup')).toBeInTheDocument();
       });
     });
 

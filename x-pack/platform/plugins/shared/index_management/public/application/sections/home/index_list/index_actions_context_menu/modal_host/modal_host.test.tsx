@@ -10,6 +10,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ModalHost, type ModalHostHandles } from './modal_host';
+import { navigateToIndexDetailsPage } from '../../../../../services/routing';
+import { notificationService } from '../../../../../services/notification';
 import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../../services/routing', () => ({
@@ -72,73 +74,98 @@ describe('ModalHost', () => {
   });
 
   describe('WHEN rendering and opening modals', () => {
-    describe('AND WHEN opening FORCEMERGE modal', () => {
-      it('SHOULD call forcemergeIndices with typed value', async () => {
-        const ref = React.createRef<ModalHostHandles>();
-        renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
+    describe('AND the forcemerge modal is opened', () => {
+      describe('AND input is empty', () => {
+        describe('AND confirming', () => {
+          it('defaults to 1', async () => {
+            const ref = React.createRef<ModalHostHandles>();
+            renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
 
-        await act(async () => {
-          ref.current?.openModal({ kind: 'forcemerge' });
+            await act(async () => {
+              ref.current?.openModal({ kind: 'forcemerge' });
+            });
+
+            const confirm = await screen.findByTestId('confirmModalConfirmButton');
+            await userEvent.click(confirm);
+
+            expect(baseProps.forcemergeIndices).toHaveBeenCalledWith('1');
+          });
         });
+      });
+      describe("AND input is '5'", () => {
+        describe('AND confirming', () => {
+          it('calls forcemergeIndices with typed segment count', async () => {
+            const ref = React.createRef<ModalHostHandles>();
+            renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
 
-        const input = (await screen.findByTestId(
-          'indexActionsForcemergeNumSegments'
-        )) as HTMLInputElement;
-        await userEvent.type(input, '5');
+            await act(async () => {
+              ref.current?.openModal({ kind: 'forcemerge' });
+            });
 
-        const confirm = await screen.findByTestId('confirmModalConfirmButton');
-        await userEvent.click(confirm);
+            const input = (await screen.findByTestId(
+              'indexActionsForcemergeNumSegments'
+            )) as HTMLInputElement;
+            await userEvent.type(input, '5');
 
-        expect(baseProps.forcemergeIndices).toHaveBeenCalledWith('5');
+            const confirm = await screen.findByTestId('confirmModalConfirmButton');
+            await userEvent.click(confirm);
+
+            expect(baseProps.forcemergeIndices).toHaveBeenCalledWith('5');
+          });
+        });
       });
 
-      it('SHOULD block confirm when input is invalid', async () => {
-        const ref = React.createRef<ModalHostHandles>();
-        renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
+      describe('AND the number of segments is invalid', () => {
+        it('SHOULD not call forcemergeIndices', async () => {
+          const ref = React.createRef<ModalHostHandles>();
+          renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
 
-        await act(async () => {
-          ref.current?.openModal({ kind: 'forcemerge' });
+          await act(async () => {
+            ref.current?.openModal({ kind: 'forcemerge' });
+          });
+
+          const input = (await screen.findByTestId(
+            'indexActionsForcemergeNumSegments'
+          )) as HTMLInputElement;
+          await userEvent.clear(input);
+          await userEvent.type(input, '0');
+
+          const confirm = await screen.findByTestId('confirmModalConfirmButton');
+          await userEvent.click(confirm);
+
+          expect(baseProps.forcemergeIndices).not.toHaveBeenCalled();
         });
-
-        const input = (await screen.findByTestId(
-          'indexActionsForcemergeNumSegments'
-        )) as HTMLInputElement;
-        await userEvent.clear(input);
-        await userEvent.type(input, '0');
-
-        const confirm = await screen.findByTestId('confirmModalConfirmButton');
-        await userEvent.click(confirm);
-
-        expect(baseProps.forcemergeIndices).not.toHaveBeenCalled();
       });
 
-      it('SHOULD reset input state on reopen', async () => {
-        const ref = React.createRef<ModalHostHandles>();
-        renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
+      describe('AND the modal is reopened', () => {
+        it('SHOULD reset the input value', async () => {
+          const ref = React.createRef<ModalHostHandles>();
+          renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
 
-        await act(async () => {
-          ref.current?.openModal({ kind: 'forcemerge' });
-        });
-        const input = (await screen.findByTestId(
-          'indexActionsForcemergeNumSegments'
-        )) as HTMLInputElement;
-        await userEvent.type(input, '7');
+          await act(async () => {
+            ref.current?.openModal({ kind: 'forcemerge' });
+          });
+          const input = (await screen.findByTestId(
+            'indexActionsForcemergeNumSegments'
+          )) as HTMLInputElement;
+          await userEvent.type(input, '7');
 
-        await act(async () => {
-          ref.current?.closeModal();
-        });
+          await act(async () => {
+            ref.current?.closeModal();
+          });
 
-        await act(async () => {
-          ref.current?.openModal({ kind: 'forcemerge' });
+          await act(async () => {
+            ref.current?.openModal({ kind: 'forcemerge' });
+          });
+          const input2 = (await screen.findByTestId(
+            'indexActionsForcemergeNumSegments'
+          )) as HTMLInputElement;
+          expect(input2.value).toBe('');
         });
-        const input2 = (await screen.findByTestId(
-          'indexActionsForcemergeNumSegments'
-        )) as HTMLInputElement;
-        expect(input2.value).toBe('');
       });
     });
 
-    describe('AND WHEN opening DELETE modal', () => {
+    describe('AND the DELETE modal is opened', () => {
       it('SHOULD close on cancel and reset selection', async () => {
         const ref = React.createRef<ModalHostHandles>();
         renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
@@ -167,8 +194,8 @@ describe('ModalHost', () => {
       });
     });
 
-    describe('AND WHEN opening EXTENSION modal', () => {
-      it('SHOULD render extension modal and close via closeConfirmModal', async () => {
+    describe('AND the EXTENSION modal is opened', () => {
+      it('SHOULD render the extension modal', async () => {
         const props: React.ComponentProps<typeof ModalHost> = {
           ...baseProps,
           extensionsService: {
@@ -191,7 +218,33 @@ describe('ModalHost', () => {
         await act(async () => {
           ref.current?.openModal({ kind: 'extension', actionIndex: 0 });
         });
+
         expect(await screen.findByTestId('ext-modal')).toBeInTheDocument();
+      });
+
+      it('SHOULD close the extension modal and reset selection', async () => {
+        const props: React.ComponentProps<typeof ModalHost> = {
+          ...baseProps,
+          extensionsService: {
+            actions: [
+              () => ({
+                buttonLabel: 'Ext Modal',
+                renderConfirmModal: (close: () => void) => (
+                  <div data-test-subj="ext-modal">
+                    <button data-test-subj="ext-close" onClick={close} />
+                  </div>
+                ),
+              }),
+            ],
+          } as unknown as React.ComponentProps<typeof ModalHost>['extensionsService'],
+        };
+
+        const ref = React.createRef<ModalHostHandles>();
+        renderWithI18n(<ModalHost ref={ref} {...props} />);
+
+        await act(async () => {
+          ref.current?.openModal({ kind: 'extension', actionIndex: 0 });
+        });
 
         const closeBtn = await screen.findByTestId('ext-close');
         await userEvent.click(closeBtn);
@@ -201,7 +254,7 @@ describe('ModalHost', () => {
       });
     });
 
-    describe('AND WHEN opening CONVERT TO LOOKUP modal', () => {
+    describe('AND the CONVERT TO LOOKUP modal is opened', () => {
       it('SHOULD render the container shell', async () => {
         const ref = React.createRef<ModalHostHandles>();
         renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
@@ -212,47 +265,44 @@ describe('ModalHost', () => {
         expect(await screen.findByTestId('mockConvertToLookup')).toBeInTheDocument();
       });
 
-      it('SHOULD navigate and toast on success', async () => {
-        const ref = React.createRef<ModalHostHandles>();
-        renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
+      describe('AND conversion completes successfully', () => {
+        it('SHOULD navigate to index details and show a success toast', async () => {
+          const ref = React.createRef<ModalHostHandles>();
+          renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
 
-        await act(async () => {
-          ref.current?.openModal({ kind: 'convertToLookup' });
+          await act(async () => {
+            ref.current?.openModal({ kind: 'convertToLookup' });
+          });
+
+          const success = await screen.findByTestId('convert-success');
+          await userEvent.click(success);
+
+          expect(navigateToIndexDetailsPage).toHaveBeenCalled();
+          expect(notificationService.showSuccessToast).toHaveBeenCalled();
         });
-
-        const success = await screen.findByTestId('convert-success');
-        await userEvent.click(success);
-
-        const { navigateToIndexDetailsPage } = jest.requireMock(
-          '../../../../../services/routing'
-        ) as { navigateToIndexDetailsPage: jest.Mock };
-        const { notificationService } = jest.requireMock(
-          '../../../../../services/notification'
-        ) as { notificationService: { showSuccessToast: jest.Mock } };
-
-        expect(navigateToIndexDetailsPage).toHaveBeenCalled();
-        expect(notificationService.showSuccessToast).toHaveBeenCalled();
       });
 
-      it('SHOULD close on cancel and reset selection', async () => {
-        const ref = React.createRef<ModalHostHandles>();
-        renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
+      describe('AND the modal is closed via cancel', () => {
+        it('SHOULD close and reset selection', async () => {
+          const ref = React.createRef<ModalHostHandles>();
+          renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
 
-        await act(async () => {
-          ref.current?.openModal({ kind: 'convertToLookup' });
+          await act(async () => {
+            ref.current?.openModal({ kind: 'convertToLookup' });
+          });
+
+          const cancel = await screen.findByTestId('convert-close');
+          await userEvent.click(cancel);
+
+          expect(screen.queryByTestId('mockConvertToLookup')).not.toBeInTheDocument();
+          expect(baseProps.resetSelection).toHaveBeenCalled();
         });
-
-        const cancel = await screen.findByTestId('convert-close');
-        await userEvent.click(cancel);
-
-        expect(screen.queryByTestId('mockConvertToLookup')).not.toBeInTheDocument();
-        expect(baseProps.resetSelection).toHaveBeenCalled();
       });
     });
   });
 
-  describe('WHEN calling imperative API directly', () => {
-    it('SHOULD close any open modal on closeModal()', async () => {
+  describe('WHEN calling the imperative API directly', () => {
+    it('SHOULD close any open modal on closeModal', async () => {
       const ref = React.createRef<ModalHostHandles>();
       renderWithI18n(<ModalHost ref={ref} {...baseProps} />);
 
