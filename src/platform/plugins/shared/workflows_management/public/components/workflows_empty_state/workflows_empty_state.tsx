@@ -95,7 +95,7 @@ export function WorkflowsEmptyState({
           <p>
             <FormattedMessage
               id="workflows.emptyState.body.firstParagraph"
-              defaultMessage="Workflows let you automate and orchestrate security actions across your environment. Build step-by-step processes to enrich alerts, trigger responses, or streamline investigations—all in one place. Start by creating a workflow to simplify repetitive tasks and improve efficiency."
+              defaultMessage="Workflows let you automate repetitive tasks and streamline processes across your environment. Create workflows to connect actions, reduce manual effort, and improve operational efficiency."
             />
           </p>
         </>
