@@ -12,6 +12,7 @@ import { userEvent } from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { apm } from '@elastic/apm-rum';
+import { TRANSIENT_NAVIGATION_WINDOW_MS } from '../services/error_service';
 
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
 import type { KibanaErrorBoundaryServices } from '../../types';
@@ -83,6 +84,7 @@ describe('<KibanaErrorBoundary>', () => {
   });
 
   it('captures the error event for telemetry', async () => {
+    jest.useFakeTimers();
     const mockDeps = {
       analytics: { reportEvent: jest.fn() },
     };
@@ -94,15 +96,20 @@ describe('<KibanaErrorBoundary>', () => {
       </Template>
     );
     await userEvent.click(await findByTestId('clickForErrorBtn'));
+
+    // Wait until `TRANSIENT_NAVIGATION_WINDOW_MS` settlement
+    jest.advanceTimersByTime(TRANSIENT_NAVIGATION_WINDOW_MS);
 
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
     expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
       component_name: 'BadComponent',
       error_message: 'Error: This is an error to show the test user!',
     });
+    jest.useRealTimers();
   });
 
   it('captures component and error stack traces in telemetry', async () => {
+    jest.useFakeTimers();
     const mockDeps = {
       analytics: { reportEvent: jest.fn() },
     };
@@ -114,6 +121,9 @@ describe('<KibanaErrorBoundary>', () => {
       </Template>
     );
     await userEvent.click(await findByTestId('clickForErrorBtn'));
+
+    // Wait until `TRANSIENT_NAVIGATION_WINDOW_MS` settlement
+    jest.advanceTimersByTime(TRANSIENT_NAVIGATION_WINDOW_MS);
 
     expect(
       mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack.includes('at BadComponent')
@@ -123,6 +133,7 @@ describe('<KibanaErrorBoundary>', () => {
         'Error: This is an error to show the test user!'
       )
     ).toBe(true);
+    jest.useRealTimers();
   });
 
   it('integrates with apm to capture the error', async () => {
