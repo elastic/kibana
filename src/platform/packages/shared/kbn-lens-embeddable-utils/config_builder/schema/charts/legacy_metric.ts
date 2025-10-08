@@ -76,7 +76,7 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
         /**
          * Where to apply the color (background or value)
          */
-        apply_color_to: schema.maybe(applyColorToSchema),
+        apply_color_to: applyColorToSchema,
       }),
       colorByValueSchema,
     ])
