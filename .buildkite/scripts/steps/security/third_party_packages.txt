@@ -10,4 +10,3 @@ inversify
 canvas-confetti
 @types/canvas-confetti
 undici
-joi-to-json-schema
