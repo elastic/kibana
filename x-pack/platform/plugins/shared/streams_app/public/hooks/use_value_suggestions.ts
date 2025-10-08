@@ -13,6 +13,8 @@ import {
   useStreamSamplesSelector,
 } from '../components/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
 import type { Suggestion } from '../components/data_management/shared/autocomplete_selector';
+import { useSimulatorSelector } from '../components/data_management/stream_detail_enrichment/state_management/stream_enrichment_state_machine';
+import { selectPreviewRecords } from '../components/data_management/stream_detail_enrichment/state_management/simulation_state_machine/selectors';
 
 /**
  * Create field suggestions from accumulated simulation records
@@ -42,17 +44,8 @@ const createValueSuggestions = (
     .map((value) => ({ name: String(value) }));
 };
 
-/**
- * Hook for providing value suggestions from routing samples data - to be used with Routing only
- * @param field field name to extract unique values for
- * @returns array of unique suggestions for the specified field
- */
-export const useRoutingValueSuggestions = (field?: string): Suggestion[] => {
+const useValueSuggestions = (previewRecords: FlattenRecord[], field?: string): Suggestion[] => {
   const [records, setRecords] = useState<FlattenRecord[]>([]);
-
-  const previewRecords = useStreamSamplesSelector((snapshot) =>
-    selectPreviewDocuments(snapshot.context)
-  );
 
   useEffect(() => {
     setRecords((prevRecords) => [...prevRecords, ...previewRecords]);
@@ -61,4 +54,28 @@ export const useRoutingValueSuggestions = (field?: string): Suggestion[] => {
   return useMemo(() => {
     return createValueSuggestions(records, field);
   }, [records, field]);
+};
+
+/**
+ * Hook for providing value suggestions from enrichment simulation data - to be used with Enrichment only
+ * @param field field name to extract unique values for
+ * @returns array of unique suggestions for the specified field
+ */
+export const useEnrichmentValueSuggestions = (field?: string): Suggestion[] => {
+  return useValueSuggestions(
+    useSimulatorSelector((state) => selectPreviewRecords(state.context)),
+    field
+  );
+};
+
+/**
+ * Hook for providing value suggestions from routing samples data - to be used with Routing only
+ * @param field field name to extract unique values for
+ * @returns array of unique suggestions for the specified field
+ */
+export const useRoutingValueSuggestions = (field?: string): Suggestion[] => {
+  return useValueSuggestions(
+    useStreamSamplesSelector((snapshot) => selectPreviewDocuments(snapshot.context)),
+    field
+  );
 };
