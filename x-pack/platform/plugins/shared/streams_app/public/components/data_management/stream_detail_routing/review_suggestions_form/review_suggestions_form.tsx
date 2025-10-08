@@ -13,31 +13,52 @@ import type { Streams } from '@kbn/streams-schema';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { NestedView } from '../../../nested_view';
 import { GenerateSuggestionButton } from './generate_suggestions_button';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { SuggestedStreamPanel } from './suggested_stream_panel';
-import { useReviewSuggestionsFormContext } from './use_review_suggestions_form';
-import { useStreamsRoutingSelector } from '../state_management/stream_routing_state_machine';
+import type {
+  PartitionSuggestion,
+  UseReviewSuggestionsFormResult,
+} from './use_review_suggestions_form';
+import {
+  useStreamSamplesSelector,
+  useStreamsRoutingSelector,
+} from '../state_management/stream_routing_state_machine';
 import { CreateStreamConfirmationModal } from './create_stream_confirmation_modal';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
 
-export interface ReviewSuggestionsFormProps {
+export interface ReviewSuggestionsFormProps
+  extends Pick<
+    UseReviewSuggestionsFormResult,
+    | 'resetForm'
+    | 'isLoadingSuggestions'
+    | 'previewSuggestion'
+    | 'acceptSuggestion'
+    | 'rejectSuggestion'
+  > {
+  suggestions: PartitionSuggestion[];
+  onRegenerate: (connectorId: string) => void;
   definition: Streams.WiredStream.GetResponse;
   aiFeatures: AIFeatures;
 }
 
-export function ReviewSuggestionsForm({ definition, aiFeatures }: ReviewSuggestionsFormProps) {
-  const { timeState } = useTimefilter();
-  const {
-    resetForm,
-    suggestions,
-    isLoadingSuggestions,
-    fetchSuggestions,
-    previewSuggestion,
-    acceptSuggestion,
-    rejectSuggestion,
-  } = useReviewSuggestionsFormContext();
+export function ReviewSuggestionsForm({
+  definition,
+  aiFeatures,
+  resetForm,
+  suggestions,
+  isLoadingSuggestions,
+  previewSuggestion,
+  acceptSuggestion,
+  rejectSuggestion,
+  onRegenerate,
+}: ReviewSuggestionsFormProps) {
   const ruleUnderReview = useStreamsRoutingSelector((snapshot) =>
     snapshot.matches({ ready: 'reviewSuggestedRule' }) ? snapshot.context.suggestedRuleId : null
+  );
+  const selectedPreviewName = useStreamSamplesSelector(
+    ({ context }) =>
+      context.selectedPreview &&
+      context.selectedPreview.type === 'suggestion' &&
+      context.selectedPreview.name
   );
 
   // Reset suggestions when navigating to a different stream
@@ -81,7 +102,7 @@ export function ReviewSuggestionsForm({ definition, aiFeatures }: ReviewSuggesti
               definition={definition}
               partition={partition}
               onPreview={(toggle) => previewSuggestion(index, toggle)}
-              onDismiss={() => rejectSuggestion(index)}
+              onDismiss={() => rejectSuggestion(index, selectedPreviewName === partition.name)}
             />
             <EuiSpacer size="s" />
           </NestedView>
@@ -90,14 +111,7 @@ export function ReviewSuggestionsForm({ definition, aiFeatures }: ReviewSuggesti
         <GenerateSuggestionButton
           iconType="refresh"
           size="s"
-          onClick={(connectorId) =>
-            fetchSuggestions({
-              streamName: definition.stream.name,
-              connectorId,
-              start: timeState.start,
-              end: timeState.end,
-            })
-          }
+          onClick={onRegenerate}
           isLoading={isLoadingSuggestions}
           aiFeatures={aiFeatures}
         >
