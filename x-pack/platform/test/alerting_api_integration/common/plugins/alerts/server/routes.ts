@@ -1099,7 +1099,7 @@ export function defineRoutes(
           .map((ruleType) => ruleType.id);
 
         const internalRuleTypesFilter = internalRuleTypes
-          .map((id) => `alert.attributes.alertTypeId: "${id}"`)
+          .map((id) => `alert.attributes.alertTypeId: ${id}`)
           .join(' OR ');
 
         return res.ok({
