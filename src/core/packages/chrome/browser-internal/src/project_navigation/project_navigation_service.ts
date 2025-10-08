@@ -52,7 +52,6 @@ import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { getSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
 import { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 
-import type { CloudDataAttributes } from '@kbn/cloud-plugin/common/types';
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
 import { getCloudLinks } from './cloud_links';
@@ -489,7 +488,9 @@ export class ProjectNavigationService {
     if (!this._http) return;
 
     this.deploymentName$ = from(
-      this._http.get<CloudDataAttributes>('/internal/cloud/solution', {
+      this._http.get<{
+        resourceData: { deployment: { name?: string } | undefined } | undefined;
+      }>('/internal/cloud/solution', {
         version: '1',
       })
     ).pipe(
