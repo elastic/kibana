@@ -2286,7 +2286,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.event_disabled',
       {
         defaultMessage:
-          'A comma separated list of security event IDs to selectively disable. example: 4624,4800,4801',
+          'A comma separated list of security event IDs to selectively disable. example: 4624,4800,4801. Default: none.',
       }
     ),
   },
