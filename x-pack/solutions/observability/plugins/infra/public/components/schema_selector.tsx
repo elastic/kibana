@@ -159,7 +159,7 @@ export const SchemaSelector = ({
 }: {
   onChange: (selected: DataSchemaFormat) => void;
   schemas: DataSchemaFormat[];
-  value: DataSchemaFormat | null;
+  value: DataSchemaFormat;
   isLoading: boolean;
   isHostsView?: boolean;
 }) => {

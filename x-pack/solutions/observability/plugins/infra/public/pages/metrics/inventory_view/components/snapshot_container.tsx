@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import moment from 'moment';
 import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
@@ -19,7 +20,7 @@ export const SnapshotContainer = React.memo(() => {
   const { sourceId } = useSourceContext();
   const { metric, groupBy, nodeType, accountId, region, preferredSchema } =
     useWaffleOptionsContext();
-  const { currentTime } = useWaffleTimeContext();
+  const { currentTime, jumpToTime } = useWaffleTimeContext();
   const { filterQuery } = useWaffleFiltersContext();
 
   const { inventoryPrefill } = useAlertPrefillContext();
@@ -28,10 +29,13 @@ export const SnapshotContainer = React.memo(() => {
     return () => inventoryPrefill.reset();
   }, [inventoryPrefill]);
 
+  const reload = () => {
+    jumpToTime(moment().valueOf());
+  };
+
   const {
     loading,
     nodes,
-    reload,
     interval = '60s',
   } = useSnapshot(
     {
