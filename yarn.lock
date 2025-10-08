@@ -23492,11 +23492,6 @@ jiti@^2.5.1:
   resolved "https://registry.yarnpkg.com/jiti/-/jiti-2.5.1.tgz#bd099c1c2be1c59bbea4e5adcd127363446759d0"
   integrity sha512-twQoecYPiVA5K/h6SxtORw/Bs3ar+mLUtoPSc7iMXzQzK8d7eJ/R09wmTwAjiamETn1cXYPGfNnu7DMoHgu12w==
 
-joi-to-json-schema@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/joi-to-json-schema/-/joi-to-json-schema-5.1.0.tgz#5cf2aa05c8d63a0a0a480661b7c4f3c65fa5707d"
-  integrity sha512-suSQS0zGdkIgnxKuc9huX+J/+RGtADNmp7Uh6HdCpkguN0Lxhy+7MT7d/BtQW4IBaYv/5AeR4uADN3m6BijQtw==
-
 joi-to-json@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/joi-to-json/-/joi-to-json-5.0.0.tgz#4185f6a38aba1827840e23d456c32568393560d6"
