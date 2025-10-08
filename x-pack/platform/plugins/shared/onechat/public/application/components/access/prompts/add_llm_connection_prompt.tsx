@@ -18,13 +18,14 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { docLinks } from '../../../../../common/doc_links';
 import { WelcomeText } from '../../common/welcome_text';
 import { PromptLayout } from './prompt_layout';
 
 const AddLlmConnectionActions: React.FC<{}> = () => {
   // TODO: Add links
   const connectLlmHref = '#';
-  const llmDocsHref = '#';
+  const llmDocsHref = docLinks.models;
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
