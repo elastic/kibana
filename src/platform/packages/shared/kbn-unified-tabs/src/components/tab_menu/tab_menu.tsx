@@ -92,7 +92,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({
       anchorPosition="downLeft"
       closePopover={closePopover}
       button={
-        <EuiToolTip content={menuButtonLabel} disableScreenReaderOutput>
+        <EuiToolTip content={menuButtonLabel}>
           <EuiButtonIcon
             // semantically role="tablist" does not allow other buttons in tabs
             aria-hidden={true}
@@ -101,7 +101,6 @@ export const TabMenu: React.FC<TabMenuProps> = ({
             data-test-subj={`unifiedTabs_tabMenuBtn_${item.id}`}
             iconType="boxesVertical"
             onClick={() => setPopover(!isPopoverOpen)}
-            aria-label={menuButtonLabel}
           />
         </EuiToolTip>
       }
