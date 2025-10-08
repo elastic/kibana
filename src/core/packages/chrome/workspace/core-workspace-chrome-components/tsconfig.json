@@ -1,0 +1,32 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@elastic/eui",
+      "@kbn/ambient-ui-types",
+      "@emotion/react/types/css-prop",
+      "../../../../../../typings/emotion.d.ts"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core-chrome-browser",
+    "@kbn/core-workspace-chrome-state",
+    "@kbn/core-chrome-navigation",
+    "@kbn/i18n",
+    "@kbn/core-chrome-layout-components",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/shared-ux-link-redirect-app-types",
+    "@kbn/core-chrome-layout-constants",
+  ]
+}
