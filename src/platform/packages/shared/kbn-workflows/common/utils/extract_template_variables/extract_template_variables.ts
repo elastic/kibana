@@ -11,7 +11,7 @@ import { Liquid } from 'liquidjs';
 
 // Constants
 const DUMMY_VALUE = 'dummy';
-const UNDEFINED_VARIABLE_REGEX = /undefined variable: (.+)/;
+const UNDEFINED_VARIABLE_REGEX = /undefined variable: [^,]+/;
 
 // Lazy initialization - only create when needed
 let engineInstance: Liquid | null = null;
