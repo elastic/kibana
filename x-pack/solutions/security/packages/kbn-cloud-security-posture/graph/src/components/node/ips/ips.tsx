@@ -21,6 +21,7 @@ import {
   GRAPH_IPS_POPOVER_ID,
   GRAPH_IPS_PLUS_COUNT_BUTTON_ID,
 } from '../../test_ids';
+import { createPreviewItems } from '../utils';
 
 export const VISIBLE_IPS_LIMIT = 1;
 export const MAX_IPS_IN_POPOVER = 10;
@@ -33,11 +34,13 @@ export type UseIpPopoverReturn = UseNodeDetailsPopoverReturn & {
   onIpClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
 
-export const useIpPopover = (ips: string[]): UseIpPopoverReturn => {
-  const items = ips.map((ip, index) => ({
-    key: `${index}-${ip}`,
-    label: ip,
-  }));
+export const useIpPopover = (ips: string[], scopeId?: string): UseIpPopoverReturn => {
+  const items = scopeId 
+    ? createPreviewItems('network-preview', ips, scopeId)
+    : ips.map((ip, index) => ({
+        key: `${index}-${ip}`,
+        label: ip,
+      }));
 
   const { id, onClick, PopoverComponent, actions, state } = useNodeDetailsPopover({
     popoverId: 'ips-popover',

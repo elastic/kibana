@@ -33,6 +33,7 @@ import { useEntityNodeExpandPopover } from './use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from './use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
 import { isLabelNode, showErrorToast } from '../utils';
+import { GRAPH_SCOPE_ID } from '../constants';
 
 const useGraphPopovers = ({
   dataViewId,
@@ -61,7 +62,7 @@ const useGraphPopovers = ({
     searchFilters,
     nodeDetailsClickHandler
   );
-  const ipPopover = useIpPopover(currentIps);
+  const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
   const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);
 
