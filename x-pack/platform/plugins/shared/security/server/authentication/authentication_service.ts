@@ -412,7 +412,8 @@ export class AuthenticationService {
           this.logger.error(
             `Login attempt with "${providerIdentifier}" provider failed due to unexpected error: ${getDetailedErrorMessage(
               err
-            )}. ${err.stack}`
+            )}`,
+            { error: { stack_trace: err.stack } }
           );
           throw err;
         }
