@@ -85,6 +85,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
               entityDocId,
               scopeId,
               contextId,
+              isEngineMetadataExist: Boolean(entityType), // Pass whether entityType exists to avoid error state in generic flyout
             },
           },
         });

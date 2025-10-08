@@ -16,7 +16,7 @@ import * as i18n from './translations';
 import { DashboardUploadSteps } from '../constants';
 import { useCopyExportQueryStep } from './sub_steps/copy_export_query';
 import { useMacrosFileUploadStep } from './sub_steps/macros_file_upload';
-import { useCheckResourcesStep } from './sub_steps/check_resources';
+import { useCheckResourcesStep } from '../common/check_resources';
 
 interface MacrosDataInputSubStepsProps {
   migrationStats: DashboardMigrationTaskStats;
@@ -43,13 +43,14 @@ export const MacrosDataInput = React.memo<MacrosDataInputProps>(
             <EuiFlexGroup direction="row" justifyContent="center" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiStepNumber
+                  data-test-subj="macrosUploadStepNumber"
                   titleSize="xs"
                   number={DashboardUploadSteps.MacrosUpload}
                   status={dataInputStatus}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiTitle size="xs">
+                <EuiTitle size="xs" data-test-subj="macrosUploadTitle">
                   <b>{i18n.MACROS_DATA_INPUT_TITLE}</b>
                 </EuiTitle>
               </EuiFlexItem>
