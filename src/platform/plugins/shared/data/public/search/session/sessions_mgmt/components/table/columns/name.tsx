@@ -76,7 +76,7 @@ export const nameColumn = ({
     const trackAction = isRestorable
       ? searchUsageCollector.trackSessionViewRestored
       : searchUsageCollector.trackSessionReloaded;
-    const notRestorableWarning = false ? null : (
+    const notRestorableWarning = isRestorable ? null : (
       <EuiIconTip
         type="warning"
         content={
