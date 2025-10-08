@@ -14,10 +14,12 @@ import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unifi
 import React, { useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { Subject } from 'rxjs';
+import { TraceMetricsProvider } from '../../context/trace_metrics_context';
 import { useEsqlQueryInfo } from '../../hooks';
 import { store } from '../../store';
-import { Chart } from '../chart';
-import { getErrorRateChart, getLatencyChart, getThroughputChart } from './trace_charts_definition';
+import { ErrorRateChart } from './error_rate';
+import { LatencyChart } from './latency';
+import { ThroughputChart } from './throughput';
 
 export const chartPalette = euiPaletteColorBlind({ rotations: 2 });
 
@@ -65,49 +67,47 @@ function TraceMetricsGrid({
     beforeFetch: updateTimeRange,
   });
 
-  const charts = useMemo(() => {
-    if (!indexes.apm.traces) {
-      return [];
-    }
-    return [
-      getLatencyChart({ dataSource, indexes: indexes.apm.traces, filters }),
-      getErrorRateChart({ dataSource, indexes: indexes.apm.traces, filters }),
-      getThroughputChart({ dataSource, indexes: indexes.apm.traces, filters }),
-    ];
-  }, [dataSource, indexes.apm.traces, filters]);
-
   if (!indexes.apm.traces) {
     return undefined;
   }
 
   return (
     <Provider store={store}>
-      <EuiPanel
-        hasBorder={false}
-        hasShadow={false}
-        css={css`
-          height: 100%;
-          align-content: center;
-        `}
+      <TraceMetricsProvider
+        value={{
+          dataSource,
+          indexes: indexes.apm.traces,
+          filters,
+          requestParams,
+          services,
+          searchSessionId,
+          abortController,
+          onBrushEnd,
+          onFilter,
+          discoverFetch$,
+        }}
       >
-        <EuiFlexGrid columns={3}>
-          {charts.map(({ id, ...chartProps }) => (
-            <EuiFlexItem key={id}>
-              <Chart
-                requestParams={requestParams}
-                searchSessionId={searchSessionId}
-                abortController={abortController}
-                onBrushEnd={onBrushEnd}
-                onFilter={onFilter}
-                services={services}
-                discoverFetch$={discoverFetch$}
-                size="s"
-                {...chartProps}
-              />
+        <EuiPanel
+          hasBorder={false}
+          hasShadow={false}
+          css={css`
+            height: 100%;
+            align-content: center;
+          `}
+        >
+          <EuiFlexGrid columns={3}>
+            <EuiFlexItem>
+              <LatencyChart />
             </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-      </EuiPanel>
+            <EuiFlexItem>
+              <ErrorRateChart />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ThroughputChart />
+            </EuiFlexItem>
+          </EuiFlexGrid>
+        </EuiPanel>
+      </TraceMetricsProvider>
     </Provider>
   );
 }

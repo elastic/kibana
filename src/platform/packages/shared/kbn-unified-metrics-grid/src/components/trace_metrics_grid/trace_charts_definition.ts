@@ -17,12 +17,19 @@ import {
 } from '@kbn/apm-types';
 import { evaluate, from, keep, sort, stats, where } from '@kbn/esql-composer';
 import { i18n } from '@kbn/i18n';
+import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
 import { chartPalette, type DataSource } from '.';
 import type { ChartProps } from '../chart';
 
-type TraceChart = Pick<ChartProps, 'title' | 'color' | 'unit' | 'seriesType' | 'esqlQuery'> & {
+interface TraceChart {
   id: string;
-};
+  title: string;
+  color: string;
+  unit: MetricUnit;
+  seriesType: LensSeriesLayer['seriesType'];
+  esqlQuery: string;
+}
 
 function getWhereClauses(dataSource: DataSource, filters: string[]) {
   return [...filters, ...(dataSource === 'apm' ? [`${PROCESSOR_EVENT} == "transaction"`] : [])].map(
