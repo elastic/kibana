@@ -58,8 +58,8 @@ export function FieldStatsPopover({
           setInfoOpen(!infoIsOpen);
         }}
         aria-label={i18n.translate('xpack.aiops.fieldContextPopover.topFieldValuesAriaLabel', {
-          defaultMessage: 'Show top {fieldName} values (current: {fieldValue})',
-          values: { fieldName, fieldValue },
+          defaultMessage: 'Show top field values for {fieldName}',
+          values: { fieldName },
         })}
         data-test-subj={'aiopsContextPopoverButton'}
         css={{ marginLeft: euiTheme.size.xs }}
