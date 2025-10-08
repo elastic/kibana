@@ -21,9 +21,9 @@ import {
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useTableState } from '@kbn/ml-in-memory-table';
-import { useEnabledFeatures } from '../../../../../contexts/ml';
 import type { JobType, MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type { ManagementListResponse, ManagementItems } from '@kbn/ml-common-types/management';
+import { useEnabledFeatures } from '../../../../../contexts/ml';
 import { useManagementApiService } from '../../../../../services/ml_api_service/management';
 import { getColumns } from './columns';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';

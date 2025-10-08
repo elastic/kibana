@@ -11,7 +11,6 @@
 import { isEmpty } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import { formatGenericMlUrl } from './common';
 import type {
   DataFrameAnalyticsExplorationQueryState,
   DataFrameAnalyticsExplorationUrlState,
@@ -21,8 +20,9 @@ import type {
   MlCommonGlobalState,
 } from '@kbn/ml-common-types/locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
 import type { AppPageState } from '@kbn/ml-common-types/common';
+import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
+import { formatGenericMlUrl } from './common';
 
 export function formatDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,

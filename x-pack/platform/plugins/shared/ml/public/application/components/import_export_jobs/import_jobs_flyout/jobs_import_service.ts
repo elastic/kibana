@@ -7,11 +7,11 @@
 
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import { createDatafeedId } from '../../../../../common/util/job_utils';
 import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { Filter } from '@kbn/ml-common-types/filters';
+import { createDatafeedId } from '../../../../../common/util/job_utils';
 
 export interface ImportedAdJob {
   job: Job;

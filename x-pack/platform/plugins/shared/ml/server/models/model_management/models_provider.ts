@@ -36,8 +36,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
-import type { MlFeatures } from '../../../common/constants/app';
 import type {
   DFAModelItem,
   ExistingModelBase,
@@ -56,6 +54,8 @@ import {
   type PipelineDefinition,
   type TrainedModelConfigResponse,
 } from '@kbn/ml-common-types/trained_models';
+import type { MlFeatures } from '../../../common/constants/app';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { filterForEnabledFeatureModels } from '../../routes/trained_models';

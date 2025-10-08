@@ -13,8 +13,8 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import { resolveMaxTimeInterval } from './job_utils';
 import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '@kbn/ml-common-types/alerts';
+import { resolveMaxTimeInterval } from './job_utils';
 
 const narrowBucketLength = 60;
 

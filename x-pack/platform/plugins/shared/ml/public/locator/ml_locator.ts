@@ -6,7 +6,6 @@
  */
 
 import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
-import { formatChangePointDetectionUrl } from './formatters/aiops';
 import type {
   DataFrameAnalyticsExplorationUrlState,
   MlLocatorParams,
@@ -15,6 +14,7 @@ import type {
 } from '@kbn/ml-common-types/locator';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { formatChangePointDetectionUrl } from './formatters/aiops';
 import {
   formatExplorerUrl,
   formatSingleMetricViewerUrl,

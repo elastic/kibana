@@ -13,7 +13,6 @@ import type { MlEntityField, ML_JOB_ID, ML_PARTITION_FIELD_VALUE } from '@kbn/ml
 import { type InfluencersFilterQuery, type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
@@ -28,9 +27,10 @@ import type {
   InfluencersByFieldResponse,
 } from '@kbn/ml-common-types/results';
 
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';
-import type { CriteriaField } from '@kbn/ml-common-types/results';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
 export interface CategoryDefinition {

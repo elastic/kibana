@@ -53,6 +53,7 @@ import {
   isModelDownloadItem,
   isNLPModelItem,
 } from '@kbn/ml-common-types/trained_models';
+import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { AddInferencePipelineFlyout } from '../components/ml_inference';
 import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import type { ModelsBarStats } from '../components/stats_bar';
@@ -70,7 +71,6 @@ import { useInitTrainedModelsService } from './hooks/use_init_trained_models_ser
 import { ModelStatusIndicator } from './model_status_indicator';
 import { MLSavedObjectsSpacesList } from '../components/ml_saved_objects_spaces_list';
 import { useCanManageSpacesAndSavedObjects } from '../hooks/use_spaces';
-import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { SpaceManagementContextWrapper } from '../components/space_management_context_wrapper';
 
 interface PageUrlState {

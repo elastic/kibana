@@ -11,7 +11,10 @@ import { configSchema } from './config_schema';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type { DatafeedStats as MlDatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';
 export type { Job as MlJob } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-export type { MlSummaryJob, SummaryJobState as MlSummaryJobState } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+export type {
+  MlSummaryJob,
+  SummaryJobState as MlSummaryJobState,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 export type {
   AlertingService as MlAlertingService,
   AnomalyDetectors as MlAnomalyDetectors,

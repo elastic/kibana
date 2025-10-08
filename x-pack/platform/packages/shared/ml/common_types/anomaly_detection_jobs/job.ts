@@ -28,12 +28,12 @@ export type ModelPlotConfig = estypes.MlModelPlotConfig;
 
 export type CustomRule = estypes.MlDetectionRule;
 
-export type CustomSettings = estypes.MlCustomSettings;
-
 export interface PerPartitionCategorization {
   enabled?: boolean;
   stop_on_warn?: boolean;
 }
+
+export type CustomSettings = estypes.MlCustomSettings;
 
 export function isAnomalyDetectionJob(arg: unknown): arg is Job {
   return (

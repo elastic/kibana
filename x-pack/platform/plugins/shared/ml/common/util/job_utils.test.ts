@@ -25,7 +25,10 @@ import {
   removeNodeInfo,
 } from './job_utils';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import type { CombinedJob, CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type {
+  CombinedJob,
+  CombinedJobWithStats,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { FilterStateStore } from '@kbn/es-query';
 
 import moment from 'moment';
