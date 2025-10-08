@@ -197,17 +197,20 @@ export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets
     let webhookConfig;
     if (webhook && !webhookUrl) {
       const config = await this.getWebhookParameters(webhook, connectorUsageCollector);
-      if (
-        config.type !== WEBHOOK_AGENT_TYPE ||
-        config.id !== webhook.id ||
-        config.story_id !== webhook.storyId ||
-        !config.options.path ||
-        !config.options.secret
-      ) {
+
+      const parametersMatch =
+        config.type === WEBHOOK_AGENT_TYPE &&
+        config.id === webhook.id &&
+        config.story_id === webhook.storyId;
+
+      const expectedOptionsReturned = config.options.path && config.options.secret;
+
+      if (!parametersMatch || !expectedOptionsReturned) {
         throw Error(
           `Invalid configuration for webhook id: ${webhook.id}. Verify webhook exists in Tines.`
         );
       }
+
       webhookConfig = config.options as TinesWebhookActionConfig;
     }
 
