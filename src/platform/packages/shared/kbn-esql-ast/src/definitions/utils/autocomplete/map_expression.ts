@@ -13,7 +13,7 @@ import { withAutoSuggest } from './helpers';
 type MapValueType = 'string' | 'number' | 'boolean' | 'map';
 export interface MapParameterValues {
   type: MapValueType;
-  suggestions: ISuggestionItem[];
+  suggestions?: ISuggestionItem[];
 }
 
 export type MapParameters = Record<string, MapParameterValues>;
@@ -69,7 +69,7 @@ export function getCommandMapExpressionSuggestions(
     const match = innerText.match(/"([^"]+)"\s*:\s*"[^"]*$/);
     const paramName = match ? match[1] : undefined;
     if (paramName && availableParameters[paramName]) {
-      return availableParameters[paramName].suggestions;
+      return availableParameters[paramName].suggestions ?? [];
     }
   }
   return [];

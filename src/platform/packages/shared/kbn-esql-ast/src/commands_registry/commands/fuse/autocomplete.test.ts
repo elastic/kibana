@@ -255,12 +255,36 @@ describe('FUSE Autocomplete', () => {
   });
 
   describe('WITH', () => {
-    it('suggests nothing when inside the WITH MapExpression', async () => {
-      await fuseExpectSuggestions('FROM a | FUSE WITH { ', []);
-      await fuseExpectSuggestions('FROM a | FUSE WITH { "', []);
-      await fuseExpectSuggestions('FROM a | FUSE WITH { "item"', []);
-      await fuseExpectSuggestions('FROM a | FUSE WITH { "item": "', []);
-      await fuseExpectSuggestions('FROM a | FUSE WITH { "item": "value" ', []);
+    it('suggests rank_constant and weights as parameters when FUSE method is rrf', async () => {
+      await fuseExpectSuggestions('FROM a | FUSE rrf WITH { ', [
+        '"rank_constant": ',
+        '"weights": { $0 }',
+      ]);
+    });
+
+    it('suggests rank_constant and weights as parameters when no FUSE method is provided', async () => {
+      await fuseExpectSuggestions('FROM a | FUSE WITH { ', [
+        '"rank_constant": ',
+        '"weights": { $0 }',
+      ]);
+    });
+
+    it('suggests normalizer and weights as parameters when FUSE method is linear', async () => {
+      await fuseExpectSuggestions('FROM a | FUSE linear WITH { ', [
+        '"normalizer": "$0"',
+        '"weights": { $0 }',
+      ]);
+    });
+
+    it('suggests parameter values for normalizer parameter', async () => {
+      await fuseExpectSuggestions('FROM a | FUSE linear WITH { "normalizer": "', [
+        'none',
+        'minmax',
+      ]);
+    });
+
+    it('suggests nothing within weights sub map', async () => {
+      await fuseExpectSuggestions('FROM a | FUSE linear WITH { "weights": { "', []);
     });
   });
 });

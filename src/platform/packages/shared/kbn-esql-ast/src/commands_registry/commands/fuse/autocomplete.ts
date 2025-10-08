@@ -99,7 +99,7 @@ export async function autocomplete(
 
     // WITH suggests a map of options that depends on the <fuse_method>
     case FusePosition.WITH:
-      return await withOptionAutocomplete(innerText, fuseCommand, callbacks, context);
+      return await withOptionAutocomplete(innerText, fuseCommand);
   }
 }
 
@@ -327,18 +327,12 @@ async function keyByAutocomplete(
  * If `rrf`, it suggests `rank_constant` and `weights`.
  * If `linear` method is used, it suggests `normalizer` and `weights`.
  */
-async function withOptionAutocomplete(
-  innerText: string,
-  command: ESQLAstFuseCommand,
-  callbacks?: ICommandCallbacks,
-  context?: ICommandContext
-) {
+async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCommand) {
   const rrfParameters: MapParameters = {
     rank_constant: {
       type: 'number',
-      suggestions: [],
     },
-    weights: { type: 'map', suggestions: [] },
+    weights: { type: 'map' },
   };
 
   const linearParameters: MapParameters = {
@@ -346,7 +340,7 @@ async function withOptionAutocomplete(
       type: 'string',
       suggestions: [noneValueCompleteItem, minMaxValueCompleteItem],
     },
-    weights: { type: 'map', suggestions: [] },
+    weights: { type: 'map' },
   };
 
   const mapParameters =
