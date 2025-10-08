@@ -94,6 +94,7 @@ export function useReviewSuggestionsForm() {
   };
 
   const resetForm = () => {
+    abortController.abort();
     setSuggestions(undefined);
     resetPreview();
   };
