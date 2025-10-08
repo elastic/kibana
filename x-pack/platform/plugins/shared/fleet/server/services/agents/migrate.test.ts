@@ -208,6 +208,35 @@ describe('Agent migration', () => {
         'Agent cannot be migrated. Migrate action is supported from version 9.2.0.'
       );
     });
+
+    it('should throw an error if the agent is containerized', async () => {
+      const agentId = 'agent-123';
+      const options = {
+        policyId: 'policy-456',
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await expect(
+        migrateSingleAgent(
+          esClientMock,
+          soClientMock,
+          agentId,
+          mockedPolicy,
+          {
+            ...mockedAgent,
+            local_metadata: {
+              elastic: {
+                agent: {
+                  version: '9.2.0',
+                  upgradeable: false, // Containerized agent
+                },
+              },
+            },
+          },
+          options
+        )
+      ).rejects.toThrowError('Containerized agents cannot be migrated');
+    });
   });
 
   // Bulk migrate
@@ -338,6 +367,39 @@ describe('Agent migration', () => {
         {
           'agent-123': new FleetError(
             'Agent agent-123 cannot be migrated. Migrate action is supported from version 9.2.0.'
+          ),
+        },
+        'agent does not support migration action'
+      );
+    });
+
+    it('should record error result if the agent is containerized', async () => {
+      const agent = {
+        ...mockedAgent,
+        local_metadata: {
+          elastic: {
+            agent: {
+              version: '9.2.0',
+              upgradeable: false, // Containerized agent
+            },
+          },
+        },
+      };
+      (getAgents as jest.Mock).mockResolvedValue([agent, agent]);
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        ...options,
+        agentIds: [agent.id, agent.id],
+      });
+      expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+        esClientMock,
+        expect.any(String),
+        {
+          'agent-123': new FleetError(
+            'Agent agent-123 cannot be migrated because it is containerized.'
           ),
         },
         'agent does not support migration action'
