@@ -209,7 +209,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             highlightDiff={highlightDiff}
             setHighlightDiff={setHighlightDiff}
             lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
-          />{' '}
+          />
         </EuiFlexItem>
         <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
           <WorkflowEditorLayout
