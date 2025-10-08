@@ -47,7 +47,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         if (isEditorFieldSetting(settingId)) {
           continue;
         }
-        // readOnly settings wont appear on the advanced settings page
+        // readOnly settings won't appear on the advanced settings page
         if (READ_ONLY_SETTINGS.includes(settingId)) {
           continue;
         }
