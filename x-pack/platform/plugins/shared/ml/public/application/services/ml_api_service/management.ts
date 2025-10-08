@@ -18,13 +18,6 @@ export interface InferenceStatsQueryParams {
   size?: number;
 }
 
-export interface IngestStats {
-  count: number;
-  time_in_millis: number;
-  current: number;
-  failed: number;
-}
-
 /**
  * Service with APIs calls to perform inference operations.
  * @param httpService

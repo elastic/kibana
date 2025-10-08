@@ -40,12 +40,6 @@ import { anomalyChartsDataProvider } from './anomaly_charts';
 
 const DEFAULT_MAX_EXAMPLES = 500;
 
-export interface CriteriaField {
-  fieldType?: string;
-  fieldName: string;
-  fieldValue: any;
-}
-
 interface Influencer {
   fieldName: string;
   fieldValue: any;

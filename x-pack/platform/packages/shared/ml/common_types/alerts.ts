@@ -6,7 +6,14 @@
  */
 
 import type { RuleTypeParams, Rule } from '@kbn/alerting-plugin/common';
-import { type MlAnomalyResultType, ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils';
+import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
+import { ML_ANOMALY_RESULT_TYPE } from '@kbn/ml-anomaly-utils/constants';
+import { ML_ANOMALY_DETECTION_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+
+export const ML_ALERT_TYPES = {
+  ANOMALY_DETECTION: ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  AD_JOBS_HEALTH: 'xpack.ml.anomaly_detection_jobs_health',
+} as const;
 
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';

@@ -12,9 +12,10 @@ import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-u
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
-import type { JobId } from './anomaly_detection_jobs/job';
-import type { ML_PAGES } from '../constants/locator';
+
 import type { SeverityThreshold } from './anomalies';
+import type { JobId } from './anomaly_detection_jobs/job';
+import type { ML_PAGES } from './locator_ml_pages';
 
 type OptionalPageState = (object & { globalState?: MlCommonGlobalState }) | undefined;
 
@@ -336,3 +337,15 @@ export type ChangePointDetectionUrlState = MLPageState<
   typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
   ChangePointDetectionQueryState
 >;
+
+// interface that MlManagementLocatorInternal will implement
+export interface MlManagementLocator {
+  getUrl: (
+    params: MlLocatorParams | undefined,
+    appId?: string
+  ) => Promise<{ path: string; url?: string }>;
+  getRedirectUrl: (params: MlLocatorParams, appId?: string) => { path: string; url?: string };
+  navigate: (path: string, appId?: string) => Promise<void>;
+  sectionId?: string;
+  locator?: LocatorPublic<SerializableRecord>;
+}

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { ML_NOTIFICATIONS_MESSAGE_LEVEL } from '../constants/notifications';
+export const ML_NOTIFICATIONS_MESSAGE_LEVEL = {
+  ERROR: 'error',
+  INFO: 'info',
+  WARNING: 'warning',
+} as const;
 
 export type MlNotificationMessageLevel =
   (typeof ML_NOTIFICATIONS_MESSAGE_LEVEL)[keyof typeof ML_NOTIFICATIONS_MESSAGE_LEVEL];

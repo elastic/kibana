@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ErrorType } from '@kbn/ml-error-utils';
+import type { ErrorType } from './errors';
 
 export const ANOMALY_DETECTOR_SAVED_OBJECT_TYPE = 'anomaly-detector';
 export const DFA_SAVED_OBJECT_TYPE = 'data-frame-analytics';

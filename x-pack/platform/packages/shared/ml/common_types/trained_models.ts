@@ -27,13 +27,6 @@ import type {
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
-export interface IngestStats {
-  count: number;
-  time_in_millis: number;
-  current: number;
-  failed: number;
-}
-
 export interface TrainedModelModelSizeStats {
   model_size_bytes: number;
   required_native_memory_bytes: number;
@@ -438,3 +431,55 @@ export const isBuiltInModel = (item: TrainedModelConfigResponse | TrainedModelUI
  * - DFA models
  */
 export type TrainedModelUIItem = TrainedModelItem | ModelDownloadItem | NLPModelItem | DFAModelItem;
+
+export interface InferenceQueryParams {
+  from?: number;
+  size?: number;
+  tags?: string;
+  include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
+}
+
+export interface InferenceStatsQueryParams {
+  from?: number;
+  size?: number;
+}
+
+export interface IngestStats {
+  count: number;
+  time_in_millis: number;
+  current: number;
+  failed: number;
+}
+
+export interface InferenceStatsResponse {
+  count: number;
+  trained_model_stats: TrainedModelStat[];
+}
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type CommonDeploymentParams = {
+  deployment_id?: string;
+  threads_per_allocation: number;
+  priority: 'low' | 'normal';
+  number_of_allocations?: number;
+};
+
+export interface AdaptiveAllocationsParams {
+  enabled: boolean;
+  min_number_of_allocations?: number;
+  max_number_of_allocations?: number;
+}
+
+export interface StartAllocationParams {
+  modelId: string;
+  deploymentParams: CommonDeploymentParams;
+  adaptiveAllocationsParams?: AdaptiveAllocationsParams;
+}
+export interface DeleteModelParams {
+  modelId: string;
+  options?: { with_pipelines?: boolean; force?: boolean };
+}
+export interface UpdateAllocationParams {
+  number_of_allocations?: number;
+  adaptive_allocations?: AdaptiveAllocationsParams;
+}

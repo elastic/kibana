@@ -58,26 +58,6 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
-/** Manual input by the user */
-export interface AnomalySwimlaneEmbeddableUserInput {
-  jobIds: JobId[];
-  panelTitle?: string;
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-}
-
-export interface AnomalySwimlaneEmbeddableCustomInput
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  perPage?: number;
-
-  // Embeddable inputs which are not included in the default interface
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange?: TimeRange;
-}
-
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyTimelineService: AnomalyTimelineService;

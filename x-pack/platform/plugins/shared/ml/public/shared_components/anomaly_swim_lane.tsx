@@ -19,11 +19,6 @@ import type {
 } from '../embeddables';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 
-export interface AnomalySwimLaneProps extends AnomalySwimlaneEmbeddableCustomInput {
-  id?: string;
-  executionContext: KibanaExecutionContext;
-}
-
 export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   id,
   jobIds,
