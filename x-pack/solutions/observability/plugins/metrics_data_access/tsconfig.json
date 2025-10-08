@@ -24,7 +24,6 @@
     "@kbn/observability-plugin",
     "@kbn/core-http-server",
     "@kbn/datemath",
-    "@kbn/es-types",
     "@kbn/es-query",
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-page-kibana-template",
