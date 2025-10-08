@@ -15,16 +15,16 @@ import {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
+import type { TemporaryControlsLayout } from '@kbn/controls-renderer/src/types';
 import type {
   DataControlState,
   OptionsListDSLControlState,
   RangeSliderControlState,
   StickyControlState,
 } from '@kbn/controls-schemas';
-import { type CreateControlTypeAction } from '@kbn/controls-plugin/public/actions/control_panel_actions';
-import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 import { i18n } from '@kbn/i18n';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type { ControlGroupRuntimeState } from './types';
 
@@ -109,9 +109,9 @@ async function getCompatibleControlType(
   fieldName: string,
   uiActionsService: UiActionsStart
 ): Promise<StickyControlState['type'] | undefined> {
-  const controlTypes = (await uiActionsService.getTriggerActions(
-    CONTROL_MENU_TRIGGER
-  )) as CreateControlTypeAction[];
+  const controlTypes = (await uiActionsService.getTriggerActions(CONTROL_MENU_TRIGGER)) as Array<
+    Action<EmbeddableApiContext & { state: unknown }> // This is CreateControlTypeAction but I cannot import it due to circular dependencies
+  >;
 
   for (const action of controlTypes) {
     const trigger = uiActionsService.getTrigger(CONTROL_MENU_TRIGGER);
@@ -125,7 +125,7 @@ async function getCompatibleControlType(
   return undefined;
 }
 
-function getNextControlOrder(controlPanelsState?: DashboardLayout['controls']) {
+function getNextControlOrder(controlPanelsState?: TemporaryControlsLayout['controls']) {
   if (!controlPanelsState) {
     return 0;
   }

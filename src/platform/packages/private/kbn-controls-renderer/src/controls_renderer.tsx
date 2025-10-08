@@ -28,11 +28,10 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { EuiFlexGroup } from '@elastic/eui';
-import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
-import type { ControlsRendererParentApi } from './types';
+import type { ControlsRendererParentApi, TemporaryControlsLayout } from './types';
 
 export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererParentApi }) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
@@ -42,7 +41,7 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
 
   const [controlState, setControlState] = useState(parentApi.layout$.getValue().controls);
 
-  const controlsInOrder: Array<DashboardLayout['controls'][string] & { id: string }> =
+  const controlsInOrder: Array<TemporaryControlsLayout['controls'][string] & { id: string }> =
     useMemo(() => {
       return Object.entries(controlState)
         .map(([id, control]) => {

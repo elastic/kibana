@@ -24,4 +24,5 @@ export type {
   RangeSliderValue,
   StickyControlState,
   TimeSlice,
+  HasCustomPrepend,
 } from './src/types';

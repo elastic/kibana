@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type React from 'react';
+
 import type { TypeOf } from '@kbn/config-schema';
 import type { controlSchema, dataControlSchema } from './control_schema';
 import type { controlsGroupSchema } from './controls_group_schema';
@@ -40,3 +42,7 @@ export type RangeSliderControlState = TypeOf<typeof rangeSliderControlSchema>;
 export type RangeSliderValue = TypeOf<typeof rangeValueSchema>;
 
 export type TimeSlice = [number, number];
+
+export interface HasCustomPrepend {
+  CustomPrependComponent: React.FC<{}>;
+}

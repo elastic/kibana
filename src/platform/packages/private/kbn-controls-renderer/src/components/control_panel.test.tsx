@@ -10,7 +10,6 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import type { DashboardLayout } from '@kbn/dashboard-plugin/public/dashboard_api/layout_manager';
 import {
   registerReactEmbeddableFactory,
   type EmbeddableFactory,
@@ -18,7 +17,7 @@ import {
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { render, waitFor } from '@testing-library/react';
 
-import type { ControlsRendererParentApi } from '../types';
+import type { ControlsRendererParentApi, TemporaryControlsLayout } from '../types';
 import { ControlPanel } from './control_panel';
 
 const mockServices = {
@@ -110,7 +109,7 @@ describe('render', () => {
             grow: true,
           },
         },
-      } as unknown as DashboardLayout);
+      } as unknown as TemporaryControlsLayout);
       const controlPanel = render(
         <ControlPanel
           uuid="control1"
