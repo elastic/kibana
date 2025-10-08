@@ -8,10 +8,14 @@
  */
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { TraceIndexes } from '@kbn/discover-utils/src';
+import {
+  DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
+  type TraceIndexes,
+} from '@kbn/discover-utils/src';
 import { useFetch } from '@kbn/unified-histogram';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { Subject } from 'rxjs';
 import { TraceMetricsProvider } from '../../context/trace_metrics_context';
@@ -66,6 +70,22 @@ function TraceMetricsGrid({
     input$,
     beforeFetch: updateTimeRange,
   });
+
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
+        dismissAllFlyoutsExceptFor(DiscoverFlyouts.inspectorPanel);
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, []);
 
   if (!indexes.apm.traces) {
     return undefined;
