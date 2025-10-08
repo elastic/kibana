@@ -23,8 +23,8 @@ import {
   useBreadcrumbs,
   useStartServices,
   useIntraAppState,
-  useUrlParams,
   sendGetAgentTags,
+  useAgentlessResources,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 
@@ -44,8 +44,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
-  const { urlParams } = useUrlParams();
-  const showAgentless = urlParams.showAgentless === 'true';
+  const { showAgentless } = useAgentlessResources();
   const {
     isLoading,
     isInitialRequest,
@@ -78,11 +77,9 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     }
   }, [routeState, navigateToApp]);
 
+  const isAgentlessAgent = agentPolicyData?.item.supports_agentless;
   const agent =
-    agentData?.item &&
-    (showAgentless || !agentData.item.local_metadata?.host?.hostname?.startsWith('agentless-')) // Hide agentless agents
-      ? agentData.item
-      : null;
+    agentData?.item && (isAgentlessAgent ? showAgentless : true) ? agentData.item : null;
   const host = agent && agent.local_metadata?.host;
 
   const headerLeftContent = useMemo(
