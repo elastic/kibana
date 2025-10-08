@@ -183,7 +183,7 @@ describe('SiemRulesMigrationsTelemetry', () => {
   it('reports translated rule install', () => {
     const migrationRule = migrationRules[0];
     telemetry.reportTranslatedItemInstall({
-      migrationRule,
+      migrationItem: migrationRule,
       enabled: true,
     });
     expect(telemetryService.reportEvent).toHaveBeenCalledWith(

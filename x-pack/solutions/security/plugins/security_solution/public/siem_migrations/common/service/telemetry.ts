@@ -9,7 +9,7 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SiemMigrationResourceType } from '../../../../common/siem_migrations/model/common.gen';
 import { siemMigrationEventNames } from '../../../common/lib/telemetry/events/siem_migrations';
 import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
-
+import type { DashboardMigrationDashboard } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { TelemetryServiceStart } from '../../../common/lib/telemetry';
 import type {
   BaseResultActionParams,
@@ -132,36 +132,39 @@ export class SiemBaseMigrationsTelemetry {
 
   // Translated migration actions
 
-  reportTranslatedItemUpdate = (params: { migrationRule: RuleMigrationRule; error?: Error }) => {
-    const { migrationRule, error } = params;
+  reportTranslatedItemUpdate = (params: {
+    migrationItem: RuleMigrationRule | DashboardMigrationDashboard;
+    error?: Error;
+  }) => {
+    const { migrationItem, error } = params;
     this.telemetryService.reportEvent(this.eventTypes.TranslatedItemUpdate, {
       eventName: siemMigrationEventNames[this.eventTypes.TranslatedItemUpdate],
-      migrationId: migrationRule.migration_id,
-      ruleMigrationId: migrationRule.id,
+      migrationId: migrationItem.migration_id,
+      ruleMigrationId: migrationItem.id,
       ...this.getBaseResultParams(error),
     });
   };
 
   reportTranslatedItemInstall = (params: {
-    migrationRule: RuleMigrationRule;
+    migrationItem: RuleMigrationRule | DashboardMigrationDashboard;
     enabled: boolean;
     error?: Error;
   }) => {
-    const { migrationRule, enabled, error } = params;
+    const { migrationItem, enabled, error } = params;
     const eventParams: ReportTranslatedItemInstallActionParams = {
       eventName: siemMigrationEventNames[this.eventTypes.TranslatedItemInstall],
-      migrationId: migrationRule.migration_id,
-      ruleMigrationId: migrationRule.id,
+      migrationId: migrationItem.migration_id,
+      ruleMigrationId: migrationItem.id,
       author: 'custom',
       enabled,
       ...this.getBaseResultParams(error),
     };
 
-    if (migrationRule.elastic_rule?.prebuilt_rule_id) {
+    if ('elastic_rule' in migrationItem && migrationItem.elastic_rule?.prebuilt_rule_id) {
       eventParams.author = 'elastic';
       eventParams.prebuiltRule = {
-        id: migrationRule.elastic_rule.prebuilt_rule_id,
-        title: migrationRule.elastic_rule.title,
+        id: migrationItem.elastic_rule.prebuilt_rule_id,
+        title: migrationItem.elastic_rule.title,
       };
     }
 

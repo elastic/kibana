@@ -30,7 +30,7 @@ export const useInstallMigrationRule = (migrationId: string) => {
 
   const reportTelemetry = useCallback(
     ({ migrationRule, enabled = false }: InstallMigrationRuleParams, error?: Error) => {
-      telemetry.reportTranslatedItemInstall({ migrationRule, enabled, error });
+      telemetry.reportTranslatedItemInstall({ migrationItem: migrationRule, enabled, error });
     },
     [telemetry]
   );
