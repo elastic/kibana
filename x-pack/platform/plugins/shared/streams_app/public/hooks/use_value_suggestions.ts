@@ -12,6 +12,7 @@ import {
   selectPreviewDocuments,
   useStreamSamplesSelector,
 } from '../components/data_management/stream_detail_routing/state_management/stream_routing_state_machine';
+import type { Suggestion } from '../components/data_management/shared/autocomplete_selector';
 
 /**
  * Create field suggestions from accumulated simulation records
@@ -22,7 +23,7 @@ import {
 const createValueSuggestions = (
   previewRecords: FlattenRecord[] = [],
   field?: string
-): StringOrNumberOrBoolean[] => {
+): Suggestion[] => {
   if (!field) {
     return [];
   }
@@ -36,13 +37,13 @@ const createValueSuggestions = (
     }
   });
 
-  return Array.from(suggestions);
+  return Array.from(suggestions).map((value) => ({ name: String(value) }));
 };
 
 /**
  * Hook for providing value suggestions from routing samples data - to be used with Routing only
  */
-export const useRoutingValueSuggestions = (field?: string): StringOrNumberOrBoolean[] => {
+export const useRoutingValueSuggestions = (field?: string): Suggestion[] => {
   const [records, setRecords] = useState<FlattenRecord[]>([]);
 
   const previewRecords = useStreamSamplesSelector((snapshot) =>

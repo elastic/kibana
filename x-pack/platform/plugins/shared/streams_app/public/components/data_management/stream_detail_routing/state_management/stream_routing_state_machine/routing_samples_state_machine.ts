@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { setup, assign, fromObservable, fromEventObservable } from 'xstate5';
+import { Observable, filter, map, switchMap, timeout, catchError, throwError } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
+import type { SampleDocument, Streams } from '@kbn/streams-schema';
+import { isEmpty, isNumber } from 'lodash';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { TimefilterHook } from '@kbn/data-plugin/public/query/timefilter/use_timefilter';
 import { i18n } from '@kbn/i18n';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
-import type { SampleDocument, Streams } from '@kbn/streams-schema';
-import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { isEmpty, isNumber } from 'lodash';
-import { Observable, catchError, filter, map, switchMap, throwError, timeout } from 'rxjs';
-import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
-import { assign, fromEventObservable, fromObservable, setup } from 'xstate5';
 import { getPercentageFormatter } from '../../../../../util/formatters';
 import { processCondition } from '../../utils';
 

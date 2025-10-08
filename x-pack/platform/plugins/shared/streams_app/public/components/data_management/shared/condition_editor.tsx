@@ -143,14 +143,6 @@ function FilterForm(props: {
     return getFilterValue(condition);
   }, [condition]);
 
-  const suggestions = useMemo(() => {
-    return (
-      valueSuggestions.map((v) => ({
-        name: String(v),
-      })) || []
-    );
-  }, [valueSuggestions]);
-
   const handleConditionChange = (updatedCondition: Partial<FilterCondition>) => {
     onConditionChange({
       ...condition,
@@ -217,7 +209,7 @@ function FilterForm(props: {
             placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
               defaultMessage: 'Value',
             })}
-            suggestions={suggestions}
+            suggestions={valueSuggestions}
             compressed
             disabled={disabled}
             dataTestSubj="streamsAppConditionEditorValueText"

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiForm, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import { isRoutingEnabled } from '@kbn/streams-schema';
-import React from 'react';
+import { EuiFlexGroup, EuiForm, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useRoutingFieldSuggestions } from '../../../hooks/use_field_suggestions';
 import type { ConditionEditorProps } from '../shared/condition_editor';
 import { ConditionEditor } from '../shared/condition_editor';
