@@ -856,7 +856,7 @@ describe('#create', () => {
     });
 
     describe('access control', () => {
-      it('should not allow creating a document with predefined access control when the type does not support access control', async () => {
+      it('should not allow creating an object with access control when the type does not support access control', async () => {
         await expect(
           repository.create(MULTI_NAMESPACE_TYPE, attributes, {
             id,
@@ -873,7 +873,7 @@ describe('#create', () => {
         expect(client.create).not.toHaveBeenCalled();
       });
 
-      it('allows creation of a document with access control when the type supports it', async () => {
+      it('allows creation of an object with access control when the type supports it', async () => {
         securityExtension.getCurrentUser.mockReturnValue(
           mockAuthenticatedUser({ profile_uid: 'u_test_user_version' })
         );
@@ -907,7 +907,7 @@ describe('#create', () => {
         });
       });
 
-      it('throws when trying to create a document with access control and no user', async () => {
+      it('throws when trying to create an object with access control and there is no active user profile', async () => {
         securityExtension.getCurrentUser.mockReturnValueOnce(null);
         await expect(
           repository.create(ACCESS_CONTROL_TYPE, attributes, {

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { estypes } from '@elastic/elasticsearch';
+
 import pMap from 'p-map';
 import type {
   AuthorizeUpdateObject,
@@ -48,12 +48,6 @@ import type {
 export interface PerformBulkDeleteParams<T = unknown> {
   objects: SavedObjectsBulkDeleteObject[];
   options: SavedObjectsBulkDeleteOptions;
-}
-
-export function isGetGetResult<TDocument = unknown>(
-  item: estypes.MgetResponseItem<TDocument> | undefined
-): item is estypes.GetGetResult<TDocument> {
-  return (item as estypes.MgetMultiGetError).error === undefined;
 }
 
 export const performBulkDelete = async <T>(

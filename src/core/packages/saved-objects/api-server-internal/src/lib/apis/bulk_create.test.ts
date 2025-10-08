@@ -1251,7 +1251,7 @@ describe('#bulkCreate', () => {
           );
         });
 
-        it('does not create objects with access control when there in no active user profile', async () => {
+        it('does not create objects with access control when there is no active user profile', async () => {
           securityExtension.getCurrentUser.mockReturnValueOnce(null);
 
           const obj1NoAccessControl = {
@@ -1287,7 +1287,7 @@ describe('#bulkCreate', () => {
         });
 
         // regression test
-        it('creates objects supporting access control when there in no active user profile if no access mode is provided', async () => {
+        it('creates objects supporting access control with no access control metadata when there is no active user profile and no access mode is provided', async () => {
           securityExtension.getCurrentUser.mockReturnValueOnce(null);
 
           const obj1NoAccessControl = {
