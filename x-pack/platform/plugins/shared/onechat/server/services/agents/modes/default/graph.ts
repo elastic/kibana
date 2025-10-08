@@ -48,16 +48,18 @@ const answerTool = tool(
         .describe(
           'Brief explanation of the reason why you are handing the conversation over to the answering agent'
         ),
-      /*
-      researchSummary: z
+      comments: z
         .string()
         .optional()
         .describe(
-          '(optional) A brief summary of the key pieces of information discovered. This will be used by the answering agent in addition to the conversation history to answer the question.'
+          `(optional) Can be used to provide additional context or feedback to the answering agent.
+           This can be used to ask the agent to ask for clarification in case of ambiguous or unclear questions.`
         ),
-       */
     }),
-    description: 'Use this tool to notify that you are ready to answer the question.',
+    description: `Use this tool to notify that you are ready to answer the question.
+
+    Notes: The answering agent will have access to all information you gathered - you do not need to summarize your finding in the comments.
+    Instead, this field can be used to leave notes which would be useful for the answering agent to consider when answering the question.`,
   }
 );
 
@@ -128,7 +130,7 @@ export const createAgentGraph = ({
       return {
         addedMessages: [
           new ToolMessage({
-            content: JSON.stringify({}),
+            content: JSON.stringify({ output: 'forwarding_to:answering_agent' }),
             tool_call_id: lastMessage.tool_calls[0].id!,
           }),
         ],
