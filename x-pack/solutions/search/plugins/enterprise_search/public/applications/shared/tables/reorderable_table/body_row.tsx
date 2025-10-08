@@ -7,8 +7,6 @@
 
 import React from 'react';
 
-import { css } from '@emotion/react';
-
 import {
   EuiCallOut,
   EuiFlexGroup,
@@ -20,6 +18,7 @@ import {
 
 import { Cell } from './cell';
 import { DRAGGABLE_UX_STYLE } from './constants';
+import * as Styles from './styles';
 import type { Column } from './types';
 
 export interface BodyRowProps<Item> {
@@ -55,11 +54,7 @@ export const BodyRow = <Item extends object>({
         aria-rowindex={ariaRowindex}
         {...(additionalProps || {})}
       >
-        <EuiFlexItem
-          css={css`
-            margin: ${euiTheme.size.m} 0;
-          `}
-        >
+        <EuiFlexItem css={Styles.bodyRowItemStyles(euiTheme)}>
           <EuiFlexGroup alignItems="center">
             {leftAction && (
               <Cell {...DRAGGABLE_UX_STYLE} role="cell" ariaColindex={1}>

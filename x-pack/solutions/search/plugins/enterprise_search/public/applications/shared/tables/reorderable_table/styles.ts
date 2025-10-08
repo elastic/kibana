@@ -38,3 +38,8 @@ export const reorderableTableStyles = (euiTheme: EuiThemeComputed<{}>) =>
       backgroundColor: euiTheme.colors.lightestShade,
     },
   });
+
+export const bodyRowItemStyles = (euiTheme: EuiThemeComputed<{}>) =>
+  css({
+    margin: `${euiTheme.size.m} 0`,
+  });

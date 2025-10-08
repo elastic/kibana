@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-
 import { useActions, useValues } from 'kea';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -21,8 +20,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
 import type { FilteringRule } from '@kbn/search-connectors';
 import {
   filteringPolicyToText,
@@ -31,6 +28,18 @@ import {
 } from '@kbn/search-connectors';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  BASIC_TABLE_FIELD_TITLE,
+  BASIC_TABLE_POLICY_TITLE,
+  BASIC_TABLE_RULE_TITLE,
+  BASIC_TABLE_VALUE_TITLE,
+  getSyncRulesDescription,
+  SYNC_RULES_LEARN_MORE_LINK,
+  SYNC_RULES_TABLE_ADD_RULE_LABEL,
+  SYNC_RULES_TABLE_ARIA_LABEL,
+  REGEX_ERROR,
+  INCLUDE_EVERYTHING_ELSE_MESSAGE,
+} from '../../translations';
 import { IndexViewLogic } from '../../index_view_logic';
 
 import { ConnectorFilteringLogic } from './connector_filtering_logic';
@@ -46,21 +55,6 @@ import type {
 
 const instanceId = 'FilteringRulesTable';
 
-const i18nMessages = {
-  field: i18n.translate('xpack.contentConnectors.index.connector.syncRules.basicTable.fieldTitle', {
-    defaultMessage: 'Field',
-  }),
-  policy: i18n.translate('xpack.contentConnectors.index.connector.rule.basicTable.policyTitle', {
-    defaultMessage: 'Policy',
-  }),
-  rule: i18n.translate('xpack.contentConnectors.index.connector.syncRules.basicTable.ruleTitle', {
-    defaultMessage: 'Rule',
-  }),
-  value: i18n.translate('xpack.contentConnectors.index.connector.syncRules.basicTable.valueTitle', {
-    defaultMessage: 'Value',
-  }),
-};
-
 function validateItem(filteringRule: FilteringRule): FormErrors {
   if (filteringRule.rule === 'regex') {
     try {
@@ -68,10 +62,7 @@ function validateItem(filteringRule: FilteringRule): FormErrors {
       return {};
     } catch {
       return {
-        value: i18n.translate(
-          'xpack.contentConnectors.content.index.connector.filteringRules.regExError',
-          { defaultMessage: 'Value should be a regular expression' }
-        ),
+        value: REGEX_ERROR,
       };
     }
   }
@@ -89,16 +80,10 @@ export const SyncRulesTable: React.FC = () => {
 
   const description = (
     <EuiText size="s" color="default">
-      {i18n.translate('xpack.contentConnectors.content.index.connector.syncRules.description', {
-        defaultMessage:
-          'Add a sync rule to customize what data is synchronized from {indexName}. Everything is included by default, and documents are validated against the configured set of sync rules in the listed order.',
-        values: { indexName },
-      })}
+      {getSyncRulesDescription(indexName)}
       <EuiSpacer />
       <EuiLink href={docLinks.syncRules} external target="_blank">
-        {i18n.translate('xpack.contentConnectors.content.index.connector.syncRules.link', {
-          defaultMessage: 'Learn more about customizing your sync rules.',
-        })}
+        {SYNC_RULES_LEARN_MORE_LINK}
       </EuiLink>
     </EuiText>
   );
@@ -120,11 +105,11 @@ export const SyncRulesTable: React.FC = () => {
               value: 'exclude',
             },
           ]}
-          aria-label={i18nMessages.policy}
+          aria-label={BASIC_TABLE_POLICY_TITLE}
         />
       ),
       field: 'policy',
-      name: i18nMessages.policy,
+      name: BASIC_TABLE_POLICY_TITLE,
       render: (indexingRule: any) => (
         <EuiText size="s">{filteringPolicyToText(indexingRule.policy)}</EuiText>
       ),
@@ -137,13 +122,13 @@ export const SyncRulesTable: React.FC = () => {
               fullWidth
               value={rule.field}
               onChange={(e) => onChange(e.target.value)}
-              aria-label={i18nMessages.field}
+              aria-label={BASIC_TABLE_FIELD_TITLE}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
       field: 'field',
-      name: i18nMessages.field,
+      name: BASIC_TABLE_FIELD_TITLE,
       render: (rule: any) => (
         <EuiText size="s">
           <EuiCode>{rule.field}</EuiCode>
@@ -160,11 +145,11 @@ export const SyncRulesTable: React.FC = () => {
             text: filteringRuleToText(rule),
             value: rule,
           }))}
-          aria-label={i18nMessages.rule}
+          aria-label={BASIC_TABLE_RULE_TITLE}
         />
       ),
       field: 'rule',
-      name: i18nMessages.rule,
+      name: BASIC_TABLE_RULE_TITLE,
       render: (rule: any) => <EuiText size="s">{filteringRuleToText(rule.rule)}</EuiText>,
     },
     {
@@ -175,13 +160,13 @@ export const SyncRulesTable: React.FC = () => {
               fullWidth
               value={rule.value}
               onChange={(e) => onChange(e.target.value)}
-              aria-label={i18nMessages.value}
+              aria-label={BASIC_TABLE_VALUE_TITLE}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
       field: 'value',
-      name: i18nMessages.value,
+      name: BASIC_TABLE_VALUE_TITLE,
       render: (rule: any) => (
         <EuiText size="s">
           <EuiCode>{rule.value}</EuiCode>
@@ -192,14 +177,8 @@ export const SyncRulesTable: React.FC = () => {
 
   return (
     <InlineEditableTable
-      addButtonText={i18n.translate(
-        'xpack.contentConnectors.content.index.connector.syncRules.table.addRuleLabel',
-        { defaultMessage: 'Add sync rule' }
-      )}
-      ariaLabel={i18n.translate(
-        'xpack.contentConnectors.content.index.connector.syncRules.table.ariaLabel',
-        { defaultMessage: 'Sync rules' }
-      )}
+      addButtonText={SYNC_RULES_TABLE_ADD_RULE_LABEL}
+      ariaLabel={SYNC_RULES_TABLE_ARIA_LABEL}
       columns={columns}
       defaultItem={{
         policy: 'include',
@@ -234,16 +213,7 @@ export const SyncRulesTable: React.FC = () => {
       onReorder={reorderFilteringRules}
       title=""
       validateItem={validateItem}
-      bottomRows={[
-        <EuiText size="s">
-          {i18n.translate(
-            'xpack.contentConnectors.content.sources.basicRulesTable.includeEverythingMessage',
-            {
-              defaultMessage: 'Include everything else from this source',
-            }
-          )}
-        </EuiText>,
-      ]}
+      bottomRows={[<EuiText size="s">{INCLUDE_EVERYTHING_ELSE_MESSAGE}</EuiText>]}
       canRemoveLastItem
       emptyPropertyAllowed
       showRowIndex
