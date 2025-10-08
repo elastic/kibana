@@ -495,6 +495,31 @@ export default function ({ getService }: FtrProviderContext) {
           'updated description'
         );
       });
+
+      it('allows admin to update objects owned by different user', async () => {
+        const { cookie: ownerCookie } = await loginAsObjectOwner('test_user', 'changeme');
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', ownerCookie.cookieString())
+          .send({ type: 'read_only_type', isReadOnly: true })
+          .expect(200);
+        const objectId = createResponse.body.id;
+
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
+        const updateResponse = await supertestWithoutAuth
+          .put('/read_only_objects/update')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ objectId, type: 'read_only_type' })
+          .expect(200);
+
+        expect(updateResponse.body.id).to.eql(objectId);
+        expect(updateResponse.body.attributes).to.have.property(
+          'description',
+          'updated description'
+        );
+      });
     });
 
     describe('#bulk_update', () => {
