@@ -103,14 +103,11 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
               migration_id: migrationId,
             }));
 
-            if (resources.length > 0) {
-              await Promise.all([
-                dashboardMigrationsClient.data.items.create(items),
-                dashboardMigrationsClient.data.resources.create(resources),
-              ]);
-            } else {
-              await dashboardMigrationsClient.data.items.create(items);
-            }
+            await Promise.all([
+              dashboardMigrationsClient.data.items.create(items),
+              dashboardMigrationsClient.data.resources.create(resources),
+            ]);
+
             return res.ok();
           } catch (error) {
             logger.error(`Error creating dashboards for migration ID ${migrationId}: ${error}`);
