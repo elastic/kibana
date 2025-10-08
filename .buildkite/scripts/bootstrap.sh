@@ -23,7 +23,11 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
     mv ~/.kibana/.yarn-local-mirror ./
   fi
-  if [[ -d ~/.kibana-moon-cache ]]; then
+  if [[ buildkite-agent artifact download "moon-cache.tar.gz" ~/moon-cache.tar.gz ]]; then
+    echo "Found moon-cache.tar.gz artifact, extracting to ./.moon/cache"
+    mkdir -p ./.moon/cache
+    tar -xzf ~/moon-cache.tar.gz -C ./.moon/cache
+  elif [[ -d ~/.kibana-moon-cache ]]; then
     echo "Using ~/.moon/cache as a starting point"
     mkdir -p ./.moon/cache
     mv ~/.kibana-moon-cache ./.moon/cache
