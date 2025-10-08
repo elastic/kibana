@@ -66,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const misConfigurationMockData = [
     {
+      ['@timestamp']: new Date().toISOString(),
       cluster_id: 'my-k8s-cluster-5555',
       rule: {
         benchmark: {
@@ -88,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const vulnerabilityMockData = [
     {
+      ['@timestamp']: new Date().toISOString(),
       host: {
         name: hostName,
       },
@@ -204,25 +206,20 @@ export default function ({ getService }: FtrProviderContext) {
       await deleteAllRiskScores(log, es);
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
-
       await supertest
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ agentPolicyId });
-
       await supertest
         .post(`/api/fleet/package_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ packagePolicyIds: [packagePolicyId] });
-
       await deleteAllDocuments(es, FINDINGS_LATEST_INDEX);
       await deleteAllDocuments(es, VULNERABILITIES_LATEST_INDEX);
-
       await esArchiver.unload(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
       );
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
-
       await esArchiver.unload(auditPath);
       await esArchiver.unload(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/anomalies'
@@ -273,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
             score: [expect.any(Number)],
           },
         ],
-        misconfigurations: [
+        failedMisconfigurations: [
           {
             '@timestamp': [expect.any(String)],
             _id: [expect.any(String)],
@@ -287,6 +284,13 @@ export default function ({ getService }: FtrProviderContext) {
             'host.name': [expect.any(String)],
           },
         ],
+        vulnerabilitiesTotal: {
+          CRITICAL: 0,
+          HIGH: 0,
+          LOW: 0,
+          MEDIUM: 1,
+          NONE: 0,
+        },
         anomalies: [
           {
             id: 'v3_linux_anomalous_network_activity',
@@ -326,8 +330,15 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.summary).toEqual({
         assetCriticality: [],
         riskScore: [],
-        misconfigurations: [],
+        failedMisconfigurations: [],
         vulnerabilities: [],
+        vulnerabilitiesTotal: {
+          CRITICAL: 0,
+          HIGH: 0,
+          LOW: 0,
+          MEDIUM: 0,
+          NONE: 0,
+        },
         anomalies: [],
       });
       expect(body.replacements).toEqual(expect.any(Object));

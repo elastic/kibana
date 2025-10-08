@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   getVulnerabilitiesQuery,
   buildMisconfigurationsFindingsQuery,
+  VULNERABILITIES_RESULT_EVALUATION,
 } from '@kbn/cloud-security-posture-common/utils/findings_query_builders';
 import {
   buildGenericEntityFlyoutPreviewQuery,
@@ -53,11 +54,11 @@ import type { AggregationBucket } from '../../../asset_inventory/telemetry/type'
 
 const EMPTY_VULNERABILITIES_TOTAL: EntityDetailsHighlightsResponse['summary']['vulnerabilitiesTotal'] =
   {
-    CRITICAL: 0,
-    HIGH: 0,
-    MEDIUM: 0,
-    LOW: 0,
-    UNKNOWN: 0,
+    [VULNERABILITIES_RESULT_EVALUATION.NONE]: 0,
+    [VULNERABILITIES_RESULT_EVALUATION.CRITICAL]: 0,
+    [VULNERABILITIES_RESULT_EVALUATION.HIGH]: 0,
+    [VULNERABILITIES_RESULT_EVALUATION.MEDIUM]: 0,
+    [VULNERABILITIES_RESULT_EVALUATION.LOW]: 0,
   };
 
 export const entityDetailsHighlightsRoute = (
