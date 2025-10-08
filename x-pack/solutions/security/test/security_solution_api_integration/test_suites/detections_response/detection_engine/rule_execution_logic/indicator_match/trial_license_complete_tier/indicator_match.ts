@@ -182,7 +182,7 @@ export default ({ getService }: FtrProviderContext) => {
   const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
   const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
 
-  const { indexListOfDocuments } = dataGeneratorFactory({
+  const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
     es,
     index: 'ecs_compliant',
     log,
@@ -687,6 +687,67 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
       expect(previewAlerts).toHaveLength(0);
+    });
+
+    it('should create 1000 alerts when many threat docs have identical timestamps', async () => {
+      const id = uuidv4();
+      const firstTimestamp = '2020-10-28T05:45:00.000Z';
+
+      // Index 1k source documents
+      await indexGeneratedDocuments({
+        docsCount: 1000,
+        seed: (index) => ({
+          id,
+          '@timestamp': firstTimestamp,
+          host: {
+            name: `host-${index}`,
+          },
+          agent: { name: 'agent-a' },
+        }),
+      });
+
+      // Index 2k threat docs - more threat docs than source so the rule will search source docs first
+      await indexGeneratedDocuments({
+        docsCount: 2000,
+        seed: (index) => ({
+          id,
+          '@timestamp': firstTimestamp,
+          agent: {
+            type: 'threat',
+            name: 'agent-a',
+          },
+          host: {
+            name: `host-${index}`,
+          },
+        }),
+      });
+
+      const rule: ThreatMatchRuleCreateProps = {
+        ...threatMatchRuleEcsComplaint(id),
+        from: 'now-35m',
+        interval: '30m',
+        max_signals: 1000,
+        timestamp_override: undefined,
+        timestamp_override_fallback_disabled: undefined,
+        items_per_search: 500,
+        concurrent_searches: 1,
+      };
+
+      const { previewId } = await previewRule({
+        supertest,
+        rule,
+        timeframeEnd: new Date('2020-10-28T06:00:00.000Z'),
+        invocationCount: 1,
+      });
+
+      const previewAlerts = await getPreviewAlerts({
+        es,
+        previewId,
+        sort: ['agent.name', ALERT_ORIGINAL_TIME],
+        size: 10000,
+        includeSource: false,
+      });
+      expect(previewAlerts.length).toEqual(1000);
     });
 
     describe('timeout behavior', () => {
