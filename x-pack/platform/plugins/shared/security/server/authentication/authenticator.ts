@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
+
 import type { IBasePath, IClusterClient, KibanaRequest, LoggerFactory } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
@@ -44,6 +46,7 @@ import { accessAgreementAcknowledgedEvent, userLoginEvent, userLogoutEvent } fro
 import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { securityTelemetry } from '../otel/instrumentation';
 import {
   getPrintableSessionId,
   type Session,
@@ -843,9 +846,20 @@ export class Authenticator {
 
     if (shouldActivateProfile) {
       this.logger.debug(`Activating profile for "${authenticationResult.user?.username}".`);
+
+      const startTime = performance.now();
+
       userProfileId = (
         await this.options.userProfileService.activate(authenticationResult.userProfileGrant)
       ).uid;
+
+      const duration = performance.now() - startTime;
+
+      securityTelemetry.recordUserProfileActivationDuration(duration, {
+        providerType: provider.type,
+        providerName: provider.name,
+        outcome: 'success',
+      });
 
       if (
         existingSessionValue?.userProfileId &&
@@ -857,11 +871,20 @@ export class Authenticator {
 
     let newSessionValue: Readonly<SessionValue> | null;
     if (!existingSessionValue) {
+      const startTime = performance.now();
       newSessionValue = await this.session.create(request, {
         username: authenticationResult.user?.username,
         userProfileId,
         provider,
         state: authenticationResult.shouldUpdateState() ? authenticationResult.state : null,
+      });
+
+      const duration = performance.now() - startTime;
+
+      securityTelemetry.recordSessionCreationDuration(duration, {
+        providerType: provider.type,
+        providerName: provider.name,
+        outcome: 'success',
       });
 
       // Log successful `user_login` event if a new authenticated session was created or an existing session was overwritten and
