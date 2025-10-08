@@ -28,7 +28,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  public monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): Promise<void> {
+  public async monitor(monitoredStepExecutionRuntime: StepExecutionRuntime): Promise<void> {
     const timeoutMs = parseDuration(this.node.timeout);
     const stepExecution = this.stepExecutionRuntime.stepExecution!;
     const whenStepStartedTime = new Date(stepExecution.startedAt).getTime();
@@ -38,7 +38,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
     if (currentStepDuration > timeoutMs) {
       const timeoutError = new Error('Failed due to workflow timeout');
       monitoredStepExecutionRuntime.abortController.abort();
-      monitoredStepExecutionRuntime.failStep(timeoutError);
+      await monitoredStepExecutionRuntime.failStep(timeoutError);
 
       let stack = monitoredStepExecutionRuntime.scopeStack;
 
@@ -52,7 +52,7 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
           });
 
         if (scopeStepExecutionRuntime.stepExecution) {
-          scopeStepExecutionRuntime.failStep(timeoutError);
+          await scopeStepExecutionRuntime.failStep(timeoutError);
         }
       }
 

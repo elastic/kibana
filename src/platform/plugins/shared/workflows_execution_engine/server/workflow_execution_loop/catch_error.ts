@@ -70,7 +70,7 @@ export async function catchError(
     }
 
     if (failedStepExecutionRuntime.stepExecutionExists()) {
-      failedStepExecutionRuntime.failStep(
+      await failedStepExecutionRuntime.failStep(
         params.workflowExecutionState.getWorkflowExecution().error!
       );
     }
