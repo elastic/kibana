@@ -23,6 +23,7 @@ import {
   matchGraphName,
   matchEvent,
   matchName,
+  hasTag,
   createTextChunkEvent,
   createMessageEvent,
   createToolCallEvent,
@@ -35,6 +36,7 @@ import {
 } from '@kbn/onechat-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
 import type { StateType } from './graph';
+import { answerToolId } from './graph';
 
 export type ConvertedEvents =
   | MessageChunkEvent
@@ -62,8 +64,8 @@ export const convertGraphEvents = ({
           return EMPTY;
         }
 
-        // stream text chunks for the UI
-        if (matchEvent(event, 'on_chat_model_stream')) {
+        // stream answering text chunks for the UI
+        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, 'answering-step')) {
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
@@ -71,11 +73,8 @@ export const convertGraphEvents = ({
           }
         }
 
-        // emit tool calls or full message on each agent step
-        if (
-          matchEvent(event, 'on_chain_end') &&
-          (matchName(event, 'agent') || matchName(event, 'answer'))
-        ) {
+        // emit tool calls for agent step
+        if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
           const events: ConvertedEvents[] = [];
 
           // process last emitted message
@@ -88,9 +87,15 @@ export const convertGraphEvents = ({
             const reasoningEvents: ReasoningEvent[] = [];
 
             for (const toolCall of toolCalls) {
+              // we don't log "internal" tool calls
+              if (toolCall.toolName === answerToolId) {
+                continue;
+              }
+
               const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
               const { toolCallId, args } = toolCall;
 
+              // TODO: can also check message content now that can identify those
               const { _reasoning, ...toolCallArgs } = args;
               if (_reasoning) {
                 reasoningEvents.push(createReasoningEvent(_reasoning));
@@ -106,7 +111,21 @@ export const convertGraphEvents = ({
               );
             }
             events.push(...reasoningEvents, ...toolCallEvents);
-          } else {
+          }
+
+          return of(...events);
+        }
+
+        // emit messages for answering step
+        if (matchEvent(event, 'on_chain_end') && matchName(event, 'answer')) {
+          const events: ConvertedEvents[] = [];
+
+          // process last emitted message
+          const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
+          const lastMessage = addedMessages[addedMessages.length - 1];
+
+          const toolCalls = extractToolCalls(lastMessage);
+          if (toolCalls.length === 0) {
             const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
               messageId,
             });

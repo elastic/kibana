@@ -33,7 +33,7 @@ const StateAnnotation = Annotation.Root({
   }),
 });
 
-const answerToolId = 'to_answer';
+export const answerToolId = 'to_answer';
 
 const answerTool = tool(
   async () => {
