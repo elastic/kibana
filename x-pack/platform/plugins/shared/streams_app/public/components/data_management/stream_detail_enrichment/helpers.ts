@@ -5,6 +5,14 @@
  * 2.0.
  */
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { hasUnclosedQuote } from '@kbn/console-plugin/public/application/containers/editor/utils/autocomplete_utils';
+import { parseBody } from '@kbn/console-plugin/public/application/containers/editor/utils/tokens_utils';
+
+import type { JsonValue } from '@kbn/utility-types';
+export interface ProcessorSuggestion {
+  name: string;
+  template?: JsonValue;
+}
 
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
   if (!v) {
@@ -64,4 +72,73 @@ const formatXJsonString = (input: string) => {
     });
   }
   return formattedJsonString;
+};
+
+export const hasOddQuoteCount = (text: string) => hasUnclosedQuote(text);
+
+export const buildProcessorInsertText = (
+  name: string,
+  template: JsonValue | undefined,
+  alreadyOpenedQuote: boolean
+): string => {
+  let insertText = alreadyOpenedQuote ? `${name}"` : `"${name}"`;
+
+  if (template) {
+    const json = typeof template === 'string' ? template : JSON.stringify(template, null, 2);
+    insertText += `: ${json}`;
+  } else {
+    insertText += ': {}';
+  }
+
+  if (insertText.endsWith('{}')) insertText = insertText.slice(0, -2) + '{$0}';
+  if (insertText.endsWith('[]')) insertText = insertText.slice(0, -2) + '[$0]';
+
+  return insertText;
+};
+
+const ALLOWED_TOKEN_PATHS: string[][] = [
+  ['{', 'processors', '[', '{'],
+  ['{', 'processors', '[', '{', 'on_failure', '[', '{'],
+];
+
+const tokensEndWithPath = (tokens: string[], path: string[]) =>
+  tokens.length >= path.length &&
+  path.every((value, index) => tokens[tokens.length - path.length + index] === value);
+
+export const shouldSuggestProcessorKey = (
+  lineBeforeCursor: string,
+  nearbyContextBeforeCursor: string
+): boolean => {
+  const trimmedLine = lineBeforeCursor.trimEnd();
+  if (!trimmedLine.endsWith('"')) {
+    return false;
+  }
+
+  if (hasUnclosedQuote(lineBeforeCursor)) {
+    return false;
+  }
+
+  const tripleQuoteCount = (nearbyContextBeforeCursor.match(/"""/g) || []).length;
+  if (tripleQuoteCount % 2 === 1) {
+    return false;
+  }
+
+  const lastQuoteIndex = trimmedLine.lastIndexOf('"');
+  const prevChar = lastQuoteIndex > 0 ? trimmedLine[lastQuoteIndex - 1] : '';
+  if (!['{', ',', '[', ''].includes(prevChar)) {
+    return false;
+  }
+
+  const lastColon = trimmedLine.lastIndexOf(':');
+  if (lastColon > lastQuoteIndex) {
+    return false;
+  }
+
+  const wrapped = `{"processors": ${nearbyContextBeforeCursor}}`;
+  try {
+    const tokens = parseBody(wrapped);
+    return ALLOWED_TOKEN_PATHS.some((path) => tokensEndWithPath(tokens, path));
+  } catch {
+    return false;
+  }
 };

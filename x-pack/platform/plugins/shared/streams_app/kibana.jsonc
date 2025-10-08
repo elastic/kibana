@@ -16,6 +16,7 @@
       "dataViews",
       "discover",
       "discoverShared",
+      "console",
       "fieldFormats",
       "fieldsMetadata",
       "licensing",
