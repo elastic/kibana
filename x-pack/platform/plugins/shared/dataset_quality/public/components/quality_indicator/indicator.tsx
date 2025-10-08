@@ -46,7 +46,7 @@ export function QualityIndicator({
     <EuiBadge color={qualityColors[quality]} iconType={BadgeIconType}>
       <EuiText
         color={qualityTextColors[quality]}
-        size="s"
+        size="xs"
         css={css`
           margin-left: ${euiTheme.size.xs};
         `}
