@@ -44,7 +44,7 @@ export const FilesPreview: FC = () => {
   const [filePreviewItems, setFilePreviewItems] = useState<FilePreviewItem[]>([]);
 
   useEffect(
-    function fetchFilePreviewAfterAnalysis() {
+    function updateFilePreviewItems() {
       // don't fetch preview if importing is in progress
       if (uploadStatus.overallImportStatus === STATUS.STARTED) {
         return;
