@@ -98,7 +98,7 @@ export const MetricsGrid = ({
   }, []);
 
   // TODO: find a better way to handle conflicts with other flyouts
-  // Close the metric insights flyout if the user clicks on the inspector button
+  // https://github.com/elastic/kibana/issues/237965
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;

@@ -66,13 +66,10 @@ export class AlertRuleFromVisAction implements Action<Context> {
     );
 
     // Close all existing flyouts before opening the alert rule flyout
-    try {
-      if (currentApp === 'discover') {
-        dismissAllFlyoutsExceptFor(DiscoverFlyouts.lensAlertRule);
-      }
-    } catch (error) {
-      // Flyouts don't exist or couldn't be closed, continue with opening the new flyout
+    if (currentApp === 'discover') {
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.lensAlertRule);
     }
+
     openLazyFlyout({
       core: this.startDependencies.coreStart,
       parentApi: embeddable.parentApi,
