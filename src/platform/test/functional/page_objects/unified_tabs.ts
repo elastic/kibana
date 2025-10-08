@@ -37,10 +37,6 @@ export class UnifiedTabsPageObject extends FtrService {
     }
   }
 
-  public async hasUnsavedChangesBadge() {
-    return await this.testSubjects.exists('unsavedChangesBadge');
-  }
-
   public async hasUnsavedIndicator(index?: number) {
     if (index === undefined) return false;
 

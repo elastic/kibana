@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab?.index)).to.be(true);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(true);
     });
 
     it('clears unsaved changes badge on session save', async () => {
@@ -52,13 +52,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab?.index)).to.be(true);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(true);
 
       await discover.saveSearch(SEARCH_NAME);
       await discover.waitUntilTabIsLoaded();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab?.index)).to.be(false);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
     });
 
     it('reverts unsaved changes in all tabs after clicking revert changes button', async () => {
@@ -67,6 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const selectedTab1 = await unifiedTabs.getSelectedTab();
 
       await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
 
       const selectedTab2 = await unifiedTabs.getSelectedTab();
 
@@ -78,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(true);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(true);
 
       await unifiedTabs.selectTab(0);
       await queryBar.setQuery(QUERY1);
@@ -86,14 +87,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(true);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(true);
 
       await discover.revertUnsavedChanges();
       await discover.waitUntilTabIsLoaded();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(false);
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(false);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
     });
 
     it('persists unsaved state for modified tabs across a refresh and clears it upon saving', async () => {
@@ -102,10 +103,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const selectedTab1 = await unifiedTabs.getSelectedTab();
 
       await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
 
       const selectedTab2 = await unifiedTabs.getSelectedTab();
 
       await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
 
       const selectedTab3 = await unifiedTabs.getSelectedTab();
 
@@ -118,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(true);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(true);
 
       await unifiedTabs.selectTab(1);
       await queryBar.setQuery(QUERY2);
@@ -126,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(true);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(true);
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab3?.index)).to.be(false);
 
       await browser.refresh();
@@ -135,14 +138,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(true);
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(true);
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab3?.index)).to.be(false);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(true);
 
       await discover.saveSearch(SEARCH_NAME);
       await discover.waitUntilTabIsLoaded();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(false);
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab2?.index)).to.be(false);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
     });
 
     it('forces a refetch on previously modified tab when switching back after reverting changes', async () => {
@@ -154,6 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const originalHitCount = await discover.getHitCount();
 
       await unifiedTabs.createNewTab();
+      await discover.waitUntilTabIsLoaded();
 
       const selectedTab2 = await unifiedTabs.getSelectedTab();
 
@@ -168,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(true);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(true);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(true);
 
       const hitCountAfterChange = await discover.getHitCount();
       expect(hitCountAfterChange).to.not.equal(originalHitCount);
@@ -178,7 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilTabIsLoaded();
 
       expect(await unifiedTabs.hasUnsavedIndicator(selectedTab1?.index)).to.be(false);
-      expect(await unifiedTabs.hasUnsavedChangesBadge()).to.be(false);
+      expect(await discover.hasUnsavedChangesBadge()).to.be(false);
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
