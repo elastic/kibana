@@ -104,7 +104,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       const actionId = body.actionId;
-
+      // TODO: use helper function `checkBulkAgentAction`
       await new Promise((resolve, reject) => {
         let attempts = 0;
         const intervalId = setInterval(async () => {
