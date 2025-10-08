@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useExplorerData } from './load_explorer_data';
+export { generateEsql, type GenerateEsqlResponse } from './nl_to_esql';
