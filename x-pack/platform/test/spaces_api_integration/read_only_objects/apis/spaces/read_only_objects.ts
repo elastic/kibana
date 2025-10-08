@@ -183,10 +183,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow overwriting an object owned by another user if admin', async () => {
-        const { cookie: objectOwnerCookie, profileUid } = await loginAsObjectOwner(
-          'test_user',
-          'changeme'
-        );
+        const { cookie: objectOwnerCookie, profileUid: objectOnwerProfileUid } =
+          await loginAsObjectOwner('test_user', 'changeme');
         const createResponse = await supertestWithoutAuth
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
@@ -197,7 +195,7 @@ export default function ({ getService }: FtrProviderContext) {
         const objectId = createResponse.body.id;
         expect(createResponse.body.attributes).to.have.property('description', 'test');
         expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
-        expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
+        expect(createResponse.body.accessControl).to.have.property('owner', objectOnwerProfileUid);
 
         const { cookie: adminCookie, profileUid: adminUid } = await loginAsKibanaAdmin();
 
@@ -211,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
         const overwriteId = overwriteResponse.body.id;
         expect(createResponse.body).to.have.property('id', overwriteId);
         expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
-        expect(createResponse.body.accessControl).to.have.property('owner', adminUid);
+        expect(createResponse.body.accessControl).to.have.property('owner', objectOnwerProfileUid);
       });
 
       it('should reject when attempting to overwrite an object owned by another user if not admin', async () => {
@@ -360,7 +358,7 @@ export default function ({ getService }: FtrProviderContext) {
         for (const { id, accessControl } of res.body.saved_objects) {
           const object = objects.find((obj) => obj.id === id);
           expect(object).to.not.be(undefined);
-          expect(accessControl).to.have.property('owner', adminProfileUid);
+          expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
           expect(accessControl).to.have.property('accessMode', 'read_only');
         }
       });
