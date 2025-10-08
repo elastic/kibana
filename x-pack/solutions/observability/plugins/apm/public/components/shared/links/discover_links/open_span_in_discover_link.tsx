@@ -14,11 +14,10 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
-import { from, where } from '@kbn/esql-composer';
-import { SPAN_ID } from '@kbn/apm-types';
+import { from } from '@kbn/esql-composer';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { BaseDiscoverButton } from './base_discover_button';
+import { BaseDiscoverButton, filterByKuery, filterBySpanId } from './base_discover_button';
 
 export const getESQLQuery = ({
   params,
@@ -44,19 +43,11 @@ export const getESQLQuery = ({
   const filters = [];
 
   if (spanId) {
-    filters.push(where(`${SPAN_ID} == ?spanId`, { spanId }));
+    filters.push(filterBySpanId(spanId));
   }
 
   if (kuery) {
-    filters.push(
-      where(
-        `KQL("${kuery
-          .trim()
-          .replaceAll('"', '\\"')
-          .replaceAll(/\s+/g, ' ')
-          .replaceAll(/\n+/g, ' ')}")`
-      )
-    );
+    filters.push(filterByKuery(kuery));
   }
 
   return from(dedupedIndices)
