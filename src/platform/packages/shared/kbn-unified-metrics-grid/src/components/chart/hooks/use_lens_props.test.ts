@@ -101,11 +101,11 @@ describe('useLensProps', () => {
       })
     );
 
-    expect(result.current.lensProps).toBeUndefined();
+    expect(result.current).toBeUndefined();
 
     await waitFor(() => {
-      expect(result.current.lensProps).toBeDefined();
-      expect(result.current?.lensProps?.attributes).toEqual({
+      expect(result.current).toBeDefined();
+      expect(result.current?.attributes).toEqual({
         attributes: {},
         state: {},
         visualizationType: 'lnsXY',
@@ -175,7 +175,7 @@ describe('useLensProps', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.lensProps).toStrictEqual({
+      expect(result.current).toStrictEqual({
         attributes: { attributes: {}, state: {}, visualizationType: 'lnsXY' },
         executionContext: { description: 'metrics experience chart data' },
         id: 'metricsExperienceLensComponent',
@@ -201,7 +201,7 @@ describe('useLensProps', () => {
     );
 
     await waitFor(() => {
-      expect(result.current.lensProps).not.toBeUndefined();
+      expect(result.current).not.toBeUndefined();
     });
   });
 });

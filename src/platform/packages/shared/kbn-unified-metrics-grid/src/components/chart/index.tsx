@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
@@ -19,6 +19,7 @@ import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
 import { useChartLayers } from './hooks/use_chart_layers';
 import { useLensProps } from './hooks/use_lens_props';
+import { ChartLoadingIcon } from '../empty_state/empty_state';
 
 const ChartSizes = {
   s: 230,
@@ -27,10 +28,7 @@ const ChartSizes = {
 
 export type ChartSize = keyof typeof ChartSizes;
 export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestParams'> &
-  Omit<
-    LensWrapperProps,
-    'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description' | 'loading'
-  > & {
+  Omit<LensWrapperProps, 'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description'> & {
     dimensions: string[];
     color?: string;
     size?: ChartSize;
@@ -78,7 +76,7 @@ export const Chart = ({
 
   const chartLayers = useChartLayers({ dimensions, metric, color });
 
-  const { lensProps, loading } = useLensProps({
+  const lensProps = useLensProps({
     title: metric.name,
     query: esqlQuery,
     services,
@@ -109,24 +107,36 @@ export const Chart = ({
       `}
       ref={chartRef}
     >
-      <LensWrapperMemo
-        lensProps={lensProps}
-        services={services}
-        onBrushEnd={onBrushEnd}
-        onFilter={onFilter}
-        abortController={abortController}
-        onViewDetails={handleViewDetails}
-        onCopyToDashboard={toggleSaveModalVisible}
-        loading={loading}
-      />
-      {isSaveModalVisible && (
-        <SaveModalComponent
-          initialInput={{ attributes: lensProps?.attributes }}
-          onClose={toggleSaveModalVisible}
-          // Disables saving ESQL charts to the library.
-          // it will only copy it to a dashboard
-          isSaveable={false}
-        />
+      {lensProps ? (
+        <>
+          <LensWrapperMemo
+            lensProps={lensProps}
+            services={services}
+            onBrushEnd={onBrushEnd}
+            onFilter={onFilter}
+            abortController={abortController}
+            onViewDetails={handleViewDetails}
+            onCopyToDashboard={toggleSaveModalVisible}
+          />
+          {isSaveModalVisible && (
+            <SaveModalComponent
+              initialInput={{ attributes: lensProps.attributes }}
+              onClose={toggleSaveModalVisible}
+              // Disables saving ESQL charts to the library.
+              // it will only copy it to a dashboard
+              isSaveable={false}
+            />
+          )}
+        </>
+      ) : (
+        <EuiFlexGroup
+          style={{ height: '100%' }}
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+        >
+          <ChartLoadingIcon />
+        </EuiFlexGroup>
       )}
     </div>
   );

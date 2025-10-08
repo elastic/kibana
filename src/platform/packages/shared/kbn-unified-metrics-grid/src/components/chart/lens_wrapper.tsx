@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { ChartTitle } from './chart_title';
 import { useMetricsGridState } from '../../hooks';
-import { ChartLoadingIcon, ChartLoadingProgress } from '../empty_state/empty_state';
 
 export type LensWrapperProps = {
-  lensProps: LensProps | undefined;
+  lensProps: LensProps;
   onViewDetails: () => void;
   onCopyToDashboard: () => void;
-  loading: boolean;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
 const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV'];
@@ -33,7 +31,6 @@ export function LensWrapper({
   abortController,
   onViewDetails,
   onCopyToDashboard,
-  loading,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -45,7 +42,7 @@ export function LensWrapper({
     position: relative;
     height: 100%;
 
-    & > div:not(.euiProgress) {
+    & > div {
       position: absolute;
       height: 100%;
       width: 100%;
@@ -79,32 +76,18 @@ export function LensWrapper({
   });
 
   return (
-    <>
-      {lensProps ? (
-        <div css={chartCss}>
-          <ChartTitle searchTerm={searchTerm} title={lensProps.attributes.title} />
-          {loading && <ChartLoadingProgress />}
-          <EmbeddableComponent
-            {...lensProps}
-            title={lensProps.attributes.title}
-            extraActions={extraActions}
-            abortController={abortController}
-            disabledActions={DEFAULT_DISABLED_ACTIONS}
-            withDefaultActions
-            onBrushEnd={onBrushEnd}
-            onFilter={onFilter}
-          />
-        </div>
-      ) : (
-        <EuiFlexGroup
-          style={{ height: '100%' }}
-          justifyContent="center"
-          alignItems="center"
-          responsive={false}
-        >
-          <ChartLoadingIcon />
-        </EuiFlexGroup>
-      )}
-    </>
+    <div css={chartCss}>
+      <ChartTitle searchTerm={searchTerm} title={lensProps.attributes.title} />
+      <EmbeddableComponent
+        {...lensProps}
+        title={lensProps.attributes.title}
+        extraActions={extraActions}
+        abortController={abortController}
+        disabledActions={DEFAULT_DISABLED_ACTIONS}
+        withDefaultActions
+        onBrushEnd={onBrushEnd}
+        onFilter={onFilter}
+      />
+    </div>
   );
 }

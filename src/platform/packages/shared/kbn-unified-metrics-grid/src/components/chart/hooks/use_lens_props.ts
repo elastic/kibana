@@ -81,7 +81,7 @@ export const useLensProps = ({
     [query, title, chartLayers]
   );
 
-  const { loading: metadataLoading } = useAsync(async () => {
+  useAsync(async () => {
     if (!lensParams) {
       attributes$.current.next(undefined);
       return;
@@ -157,7 +157,7 @@ export const useLensProps = ({
     };
   }, [discoverFetch$, updateLensPropsContext, chartRef, euiTheme.size.base]);
 
-  return { lensProps: lensPropsContext, loading: metadataLoading };
+  return lensPropsContext;
 };
 
 const getLensProps = ({
