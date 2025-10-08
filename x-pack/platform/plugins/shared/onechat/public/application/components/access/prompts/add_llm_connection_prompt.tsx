@@ -21,15 +21,21 @@ import { css } from '@emotion/react';
 import { docLinks } from '../../../../../common/doc_links';
 import { WelcomeText } from '../../common/welcome_text';
 import { PromptLayout } from './prompt_layout';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
 
 const AddLlmConnectionActions: React.FC<{}> = () => {
-  // TODO: Add links
-  const connectLlmHref = '#';
+  const { navigationService } = useOnechatServices();
   const llmDocsHref = docLinks.models;
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiButton iconType="sparkles" color="warning" href={connectLlmHref}>
+        <EuiButton
+          iconType="sparkles"
+          color="warning"
+          onClick={() => {
+            navigationService.navigateToLlmConnectorsManagement();
+          }}
+        >
           <FormattedMessage
             id="xpack.onechat.access.prompt.addLlm.actions.connectButton"
             defaultMessage="Connect to an LLM"

@@ -19,33 +19,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { PromptLayout } from './prompt_layout';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
 
-const LICENSE_MANAGEMENT_LOCATOR = 'LICENSE_MANAGEMENT_LOCATOR';
-
-const useLicenseManagementLocator = () => {
-  const {
-    startDependencies: { share },
-  } = useOnechatServices();
-
-  // Should we instead use the recommended approach that is mentioned in the README?
-  // https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/share/README.mdx#using-locator-of-another-app
-  const locator = share.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
-
-  // license management does not exist on serverless
-  if (!locator) {
-    return null;
-  }
-
-  return () => {
-    locator.navigate({
-      page: 'dashboard',
-    });
-  };
-};
-
 const SUBSCRIPTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
 const UpgradeLicenseActions: React.FC<{}> = () => {
-  const navigateToLicenseManagement = useLicenseManagementLocator();
+  const { navigationService } = useOnechatServices();
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -56,9 +33,13 @@ const UpgradeLicenseActions: React.FC<{}> = () => {
           />
         </EuiButton>
       </EuiFlexItem>
-      {navigateToLicenseManagement && (
+      {navigationService.hasLicenseManagentLocator() && (
         <EuiFlexItem>
-          <EuiButtonEmpty onClick={navigateToLicenseManagement}>
+          <EuiButtonEmpty
+            onClick={() => {
+              navigationService.navigateToLicenseManagementDashboard();
+            }}
+          >
             <FormattedMessage
               id="xpack.onechat.access.prompt.upgradeLicense.actions.manageLicenseButton"
               defaultMessage="Manage license"
