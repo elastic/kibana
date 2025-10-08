@@ -174,6 +174,28 @@ describe('Migrate handlers', () => {
       ).rejects.toThrow('Agent is protected and cannot be migrated');
     });
 
+    it('returns error when agent is containerized', async () => {
+      // Mock agent as containerized agent
+      (AgentService.getAgentById as jest.Mock).mockResolvedValue({
+        ...mockAgent,
+        local_metadata: {
+          elastic: {
+            agent: {
+              version: '9.2.0',
+              upgradeable: false, // Containerized agent
+            },
+          },
+        },
+      });
+      // Change the migrateSingleAgent mock to be an error
+      (AgentService.migrateSingleAgent as jest.Mock).mockRejectedValue(
+        new Error('Containerized agents cannot be migrated')
+      );
+      await expect(
+        migrateSingleAgentHandler(mockContext, mockRequest, mockResponse)
+      ).rejects.toThrow('Containerized agents cannot be migrated');
+    });
+
     it('returns error when agent is not found', async () => {
       const agentError = new AgentNotFoundError('Agent not found');
       (AgentService.getAgentById as jest.Mock).mockRejectedValue(agentError);

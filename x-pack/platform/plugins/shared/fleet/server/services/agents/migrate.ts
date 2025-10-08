@@ -52,6 +52,11 @@ export async function migrateSingleAgent(
     throw new FleetUnauthorizedError(`Fleet server agents cannot be migrated`);
   }
   if (!isAgentMigrationSupported(agent)) {
+    // Check if it's specifically a containerized agent
+    if (agent.local_metadata?.elastic?.agent?.upgradeable === false) {
+      throw new FleetError(`Containerized agents cannot be migrated`);
+    }
+    // Otherwise it's a version issue
     throw new FleetError(
       `Agent cannot be migrated. Migrate action is supported from version ${MINIMUM_MIGRATE_AGENT_VERSION}.`
     );

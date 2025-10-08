@@ -226,7 +226,7 @@ describe('Agent migration', () => {
       );
     });
 
-    it('should throw FleetUnauthorizedError when license is insufficient', async () => {
+  it('should throw FleetUnauthorizedError when license is insufficient', async () => {
       // Mock license as not having the required level
       mockLicenseService.hasAtLeast.mockReturnValue(false);
 
@@ -251,6 +251,29 @@ describe('Agent migration', () => {
       // Verify that createAgentAction was not called when license is insufficient
       expect(mockedCreateAgentAction).not.toHaveBeenCalled();
     });
+
+    it('should throw an error if the agent is containerized', async () => {
+     await expect(
+        migrateSingleAgent(
+          esClientMock,
+          soClientMock,
+          agentId,
+          mockedPolicy,
+          {
+            ...mockedAgent,
+            local_metadata: {
+              elastic: {
+                agent: {
+                  version: '9.2.0',
+                  upgradeable: false, // Containerized agent
+                },
+              },
+            },
+          },
+          options
+        )
+      ).rejects.toThrowError('Containerized agents cannot be migrated');
+    };
 
     it('should proceed normally when license is sufficient', async () => {
       // Ensure license is valid (default mock)
@@ -413,6 +436,7 @@ describe('Agent migration', () => {
       );
     });
 
+
     it('should throw FleetUnauthorizedError when license is insufficient', async () => {
       // Mock license as not having the required level
       mockLicenseService.hasAtLeast.mockReturnValue(false);
@@ -435,7 +459,39 @@ describe('Agent migration', () => {
       // Verify that getAgents was not called when license is insufficient
       expect(getAgents as jest.Mock).not.toHaveBeenCalled();
     });
-
+    
+ it('should record error result if the agent is containerized', async () => {
+      const agent = {
+        ...mockedAgent,
+        local_metadata: {
+          elastic: {
+            agent: {
+              version: '9.2.0',
+              upgradeable: false, // Containerized agent
+            },
+          },
+        },
+      };
+      (getAgents as jest.Mock).mockResolvedValue([agent, agent]);
+      const options = {
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await bulkMigrateAgents(esClientMock, soClientMock, {
+        ...options,
+        agentIds: [agent.id, agent.id],
+      });
+      expect(mockedCreateErrorActionResults).toHaveBeenCalledWith(
+        esClientMock,
+        expect.any(String),
+        {
+          'agent-123': new FleetError(
+            'Agent agent-123 cannot be migrated because it is containerized.'
+          ),
+        },
+        'agent does not support migration action'
+      );
+ });
     it('should proceed normally when license is sufficient', async () => {
       // Ensure license is valid (default mock)
       mockLicenseService.hasAtLeast.mockReturnValue(true);
