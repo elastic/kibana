@@ -27,7 +27,10 @@ export function StreamNameFormRow({
   const helpText =
     value.length >= MAX_NAME_LENGTH
       ? i18n.translate('xpack.streams.streamDetailRouting.nameHelpText', {
-          defaultMessage: `Stream name cannot be longer than ${MAX_NAME_LENGTH} characters.`,
+          defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
+          values: {
+            maxLength: MAX_NAME_LENGTH,
+          },
         })
       : undefined;
 
