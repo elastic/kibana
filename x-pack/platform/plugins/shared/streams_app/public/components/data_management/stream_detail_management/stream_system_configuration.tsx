@@ -33,7 +33,7 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
         <EuiText size="s">
           <h3>
             {i18n.translate('xpack.streams.streamDetailView.configurationTitle', {
-              defaultMessage: 'Stream identification',
+              defaultMessage: 'Feature identification',
             })}
           </h3>
         </EuiText>
