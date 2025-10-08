@@ -57,12 +57,6 @@ export interface Props {
  * The Menu for Exporting a Workpad from Canvas.
  */
 export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
-  const [showFlyout, setShowFlyout] = useState(false);
-
-  const onFlyoutClose = () => {
-    setShowFlyout(false);
-  };
-
   const getPanelTree = (closePopover: ClosePopoverFn) => ({
     id: 0,
     items: [
