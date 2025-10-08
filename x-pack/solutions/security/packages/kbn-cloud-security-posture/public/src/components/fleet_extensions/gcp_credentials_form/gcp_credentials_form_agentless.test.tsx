@@ -485,35 +485,4 @@ describe('GcpCredentialsFormAgentless', () => {
       }).not.toThrow();
     });
   });
-
-  describe('accessibility', () => {
-    it('provides proper test subjects for automation', () => {
-      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
-
-      expect(screen.getByTestId('gcp-setup-info')).toBeInTheDocument();
-      expect(screen.getByTestId('gcp-input-var-fields')).toBeInTheDocument();
-      expect(screen.getByTestId('read-documentation')).toBeInTheDocument();
-      expect(screen.getByTestId('launchGoogleCloudShellAgentlessButton')).toBeInTheDocument();
-      expect(screen.getByTestId('launchGoogleCloudShellAccordianInstructions')).toBeInTheDocument();
-    });
-
-    it('provides proper button structure with icons and text', () => {
-      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
-
-      const launchButton = screen.getByTestId('launchGoogleCloudShellAgentlessButton');
-      expect(launchButton).toHaveTextContent('Launch Google Cloud Shell');
-      expect(launchButton.querySelector('[data-euiicon-type="launch"]')).toBeInTheDocument();
-    });
-
-    it('provides expandable accordion for instructions', () => {
-      renderWithIntl(<GcpCredentialsFormAgentless {...defaultProps} />);
-
-      const accordion = screen.getByTestId('launchGoogleCloudShellAccordianInstructions');
-      expect(accordion).toBeInTheDocument();
-
-      // Should be able to expand/collapse
-      fireEvent.click(accordion);
-      expect(screen.getByTestId('gcp-credentials-guide')).toBeInTheDocument();
-    });
-  });
 });

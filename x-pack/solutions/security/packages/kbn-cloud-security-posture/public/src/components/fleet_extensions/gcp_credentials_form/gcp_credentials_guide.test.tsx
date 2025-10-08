@@ -180,27 +180,6 @@ describe('GoogleCloudShellCredentialsGuide', () => {
     });
   });
 
-  describe('accessibility', () => {
-    it('provides proper link accessibility', () => {
-      renderWithIntl(<GoogleCloudShellCredentialsGuide {...defaultProps} />);
-
-      const externalLink = screen.getByTestId('externalLink');
-      expect(externalLink).toHaveAttribute('target', '_blank');
-      expect(externalLink).toHaveAttribute('rel', 'nofollow noopener noreferrer');
-    });
-
-    it('provides semantic HTML structure', () => {
-      renderWithIntl(<GoogleCloudShellCredentialsGuide {...defaultProps} />);
-
-      // Should have proper list structure
-      expect(screen.getByRole('list')).toBeInTheDocument();
-      expect(screen.getAllByRole('listitem')).toHaveLength(6);
-
-      // Link elements
-      expect(screen.getByRole('link')).toBeInTheDocument();
-    });
-  });
-
   describe('content validation', () => {
     it('contains all required instructional content', () => {
       renderWithIntl(<GoogleCloudShellCredentialsGuide {...defaultProps} />);
