@@ -5,7 +5,21 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import type { ModelProvider } from '@kbn/onechat-server';
+import { SupportedChartType } from './types';
+
+const chartTypeSchema = z
+  .object({
+    chartType: z
+      .enum([SupportedChartType.Metric, SupportedChartType.Map])
+      .describe('The most appropriate chart type for the visualization'),
+    reasoning: z
+      .string()
+      .optional()
+      .describe('Brief explanation for why this chart type was selected'),
+  })
+  .describe('Chart type selection for data visualization');
 
 export async function getChartType(
   modelProvider: ModelProvider,
@@ -13,15 +27,28 @@ export async function getChartType(
   nlQuery: string
 ) {
   const model = await modelProvider.getDefaultModel();
-  const chartTypeResponse = await model.chatModel.invoke([
+
+  // Create a structured output model
+  const structuredModel = model.chatModel.withStructuredOutput(chartTypeSchema, {
+    name: 'select_chart_type',
+  });
+
+  const response = await structuredModel.invoke([
     {
       role: 'system',
-      content: `You are a data visualization expert. Based on the user's query, suggest the most appropriate chart type from the following options: metric, gauge, tagcloud, pie.
+      content: `You are a data visualization expert. Based on the user's query, suggest the most appropriate chart type from the available options.
 
-Respond with ONLY the chart type name, nothing else.
+You MUST call the 'select_chart_type' tool to provide your chart type selection. Do NOT respond with plain text.
+
+Available chart types:
+- metric: For displaying single numeric values, KPIs, or metrics with optional trend lines. Best for showing key performance indicators, counts, sums, averages, or other aggregate statistics.
+- map: For displaying geospatial data on a map. Use this when the query involves geographic locations, coordinates, or spatial data visualization.
 
 Guidelines:
-- metric: For single numeric values, KPIs, or metrics with optional trend line`,
+- Choose 'metric' for numerical statistics, aggregations, counts, or KPIs
+- Choose 'map' when the query explicitly mentions locations, maps, geographic areas, or spatial data
+- Consider the user's intent and the nature of the data being visualized
+${existingType ? `- The existing chart type is: ${existingType}` : ''}`,
     },
     {
       role: 'user',
@@ -31,7 +58,5 @@ Guidelines:
     },
   ]);
 
-  const suggestedType = chartTypeResponse.content.toString().trim().toLowerCase();
-
-  return suggestedType;
+  return response.chartType;
 }
