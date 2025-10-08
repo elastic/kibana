@@ -538,12 +538,40 @@ describe('Common authentication routes', () => {
       }
     });
 
-    it('correctly performs SAML login.', async () => {
+    it('correctly performs OIDC login with uppercase provider type.', async () => {
       authc.login.mockResolvedValue(AuthenticationResult.redirectTo('http://redirect-to/path'));
 
       const request = httpServerMock.createKibanaRequest({
         body: {
-          providerType: 'saml',
+          providerType: 'OIDC',
+          providerName: 'oidc1',
+          currentURL: 'https://kibana.com/?next=/mock-server-basepath/some-url#/app/nav',
+        },
+      });
+
+      await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+        status: 200,
+        payload: { location: 'http://redirect-to/path' },
+        options: { body: { location: 'http://redirect-to/path' } },
+      });
+
+      expect(authc.login).toHaveBeenCalledTimes(1);
+      expect(authc.login).toHaveBeenCalledWith(request, {
+        provider: { name: 'oidc1' },
+        redirectURL: '/mock-server-basepath/some-url#/app/nav',
+        value: {
+          type: OIDCLogin.LoginInitiatedByUser,
+          redirectURL: '/mock-server-basepath/some-url#/app/nav',
+        },
+      });
+    });
+
+    it('correctly performs SAML login with uppercase provider type.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.redirectTo('http://redirect-to/path'));
+
+      const request = httpServerMock.createKibanaRequest({
+        body: {
+          providerType: 'SAML',
           providerName: 'saml1',
           currentURL: 'https://kibana.com/?next=/mock-server-basepath/some-url#/app/nav',
         },
