@@ -474,6 +474,7 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.delete': {
                       target: 'idle',
+                      guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
@@ -504,6 +505,7 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.delete': {
                       target: 'idle',
+                      guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
@@ -527,6 +529,7 @@ export const streamEnrichmentMachine = setup({
                     'step.cancel': 'idle',
                     'step.delete': {
                       target: 'idle',
+                      guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
