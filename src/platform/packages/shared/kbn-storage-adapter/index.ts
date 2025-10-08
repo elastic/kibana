@@ -21,18 +21,18 @@ import type {
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { StorageFieldTypeOf, StorageMappingProperty } from './types';
 
-interface StorageSchemaProperties {
+interface StorageMappingProperties {
   [x: string]: StorageMappingProperty;
 }
 
-export interface StorageSchema {
-  properties: StorageSchemaProperties;
+export interface StorageMappings {
+  properties: StorageMappingProperties;
 }
 
 interface StorageSettingsBase {
   /** a number > 0; increment whenever you want new mappings to be applied to the index */
   version: number;
-  schema: StorageSchema;
+  mappings: StorageMappings;
 }
 
 export interface IndexStorageSettings extends StorageSettingsBase {
@@ -155,7 +155,7 @@ export type SimpleIStorageClient<TStorageSettings extends IndexStorageSettings> 
 export type StorageDocumentOf<TStorageSettings extends StorageSettings> = Partial<
   StorageFieldTypeOf<{
     type: 'object';
-    properties: TStorageSettings['schema']['properties'];
+    properties: TStorageSettings['mappings']['properties'];
   }>
 >;
 

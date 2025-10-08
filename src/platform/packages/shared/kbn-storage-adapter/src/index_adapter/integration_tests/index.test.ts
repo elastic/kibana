@@ -45,7 +45,7 @@ describe('StorageIndexAdapter', () => {
   const storageSettings = {
     name: TEST_INDEX_NAME,
     version: 1,
-    schema: {
+    mappings: {
       properties: {
         foo: {
           type: 'keyword',
@@ -349,11 +349,11 @@ describe('StorageIndexAdapter', () => {
     it('does not update the existing write index in place if the version is the same, even if mappings changed', async () => {
       const storageSettingsNotQuiteV2 = {
         ...storageSettings,
-        schema: {
-          ...storageSettings.schema,
+        mappings: {
+          ...storageSettings.mappings,
           properties: {
             // change the mappings
-            ...storageSettings.schema.properties,
+            ...storageSettings.mappings.properties,
             bar: {
               type: 'keyword',
             },
@@ -370,7 +370,7 @@ describe('StorageIndexAdapter', () => {
       } = await esClient.indices.get({ index: TEST_INDEX_NAME });
 
       expect(mappings!._meta?.version).toEqual(1);
-      expect(mappings!.properties).toEqual(storageSettings.schema.properties);
+      expect(mappings!.properties).toEqual(storageSettings.mappings.properties);
     });
 
     it('deletes the documents', async () => {
@@ -392,7 +392,7 @@ describe('StorageIndexAdapter', () => {
           _meta: {
             version: 'abc', // not a number!
           },
-          properties: storageSettings.schema.properties,
+          properties: storageSettings.mappings.properties,
         },
       });
     });
@@ -420,7 +420,7 @@ describe('StorageIndexAdapter', () => {
       const incompatibleAdapter = createStorageIndexAdapter({
         ...storageSettings,
         version: 2,
-        schema: {
+        mappings: {
           properties: {
             foo: {
               type: 'text',

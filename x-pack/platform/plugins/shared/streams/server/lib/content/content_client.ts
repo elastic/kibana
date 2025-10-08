@@ -16,7 +16,7 @@ import { CONTENT_NAME, STREAM_NAME } from './fields';
 export const contentStorageSettings = {
   version: 1, // Increment this to apply new storage settings!
   name: '.kibana_streams_content_packs',
-  schema: {
+  mappings: {
     properties: {
       [STREAM_NAME]: types.keyword(),
       [CONTENT_NAME]: types.keyword(),

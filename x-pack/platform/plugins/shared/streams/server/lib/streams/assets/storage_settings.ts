@@ -19,7 +19,7 @@ import {
 export const assetStorageSettings = {
   version: 1, // Increment this to apply new storage settings!
   name: '.kibana_streams_assets',
-  schema: {
+  mappings: {
     properties: {
       [ASSET_UUID]: types.keyword(),
       [ASSET_ID]: types.keyword(),

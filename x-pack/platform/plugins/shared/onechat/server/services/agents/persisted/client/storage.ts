@@ -16,7 +16,7 @@ export const agentsIndexName = chatSystemIndex('agents');
 const storageSettings = {
   version: 1, // Increment this to apply new storage settings!
   name: agentsIndexName,
-  schema: {
+  mappings: {
     properties: {
       id: types.keyword({}),
       name: types.keyword({}),

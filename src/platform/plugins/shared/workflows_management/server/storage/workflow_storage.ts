@@ -19,7 +19,7 @@ export const workflowIndexName = workflowSystemIndex('workflows');
 const storageSettings = {
   version: 1, // Increment this to apply new storage settings!
   name: workflowIndexName,
-  schema: {
+  mappings: {
     properties: {
       // ONLY map fields we actively search/filter/aggregate on
       name: types.text({

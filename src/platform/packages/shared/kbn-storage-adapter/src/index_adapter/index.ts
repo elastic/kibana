@@ -141,7 +141,7 @@ export class StorageIndexAdapter<
         },
         dynamic: 'strict',
         properties: {
-          ...mapValues(this.storage.schema.properties, toElasticsearchMappingProperty),
+          ...mapValues(this.storage.mappings.properties, toElasticsearchMappingProperty),
         },
       },
       aliases: {

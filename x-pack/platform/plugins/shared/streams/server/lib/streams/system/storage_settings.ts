@@ -11,7 +11,7 @@ import { STREAM_NAME, SYSTEM_DESCRIPTION, SYSTEM_FILTER, SYSTEM_NAME, SYSTEM_UUI
 
 export const systemStorageSettings = {
   name: '.kibana_streams_systems',
-  schema: {
+  mappings: {
     properties: {
       [SYSTEM_UUID]: types.keyword(),
       [STREAM_NAME]: types.keyword(),
