@@ -1530,9 +1530,11 @@ export class CstToAstConverter {
     const args: ast.ESQLAstItem[] = [];
     let incomplete = false;
 
+    const fuseType = fuseTypeCtx ? this.fromIdentifier(fuseTypeCtx) : undefined;
+
     // FUSE <fuse_method>
-    if (fuseTypeCtx) {
-      args.push(this.fromIdentifier(fuseTypeCtx));
+    if (fuseType) {
+      args.push(fuseType);
     }
 
     // FUSE SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
@@ -1549,8 +1551,8 @@ export class CstToAstConverter {
       incomplete,
     });
 
-    if (fuseTypeCtx) {
-      fuseCommand.fuseType = fuseCommand.args[0] as ast.ESQLIdentifier;
+    if (fuseType) {
+      fuseCommand.fuseType = fuseType;
     }
 
     return fuseCommand;
