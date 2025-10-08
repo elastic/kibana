@@ -177,7 +177,7 @@ export const DashboardMigrationDataInputFlyout = React.memo(
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onClose}>
+                <EuiButtonEmpty onClick={onClose} data-test-subj="dataFlyoutCloseButton">
                   <FormattedMessage
                     id="xpack.securitySolution.siemMigrations.dashboards.dataInputFlyout.closeButton"
                     defaultMessage="Close"
