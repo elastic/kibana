@@ -137,7 +137,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
     evaluate('Log data queries', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'esql: with logs data',
+          name: 'esql: (ambiguous questions) with logs data',
           description: 'ES|QL questions against various generated log datasets.',
           examples: [
             {
@@ -372,6 +372,249 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         },
       });
     });
+
+    evaluate('Log data queries (unambiguous)', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'esql: (unambiguous questions) with logs data',
+          description:
+            'Unambiguous ES|QL questions against generated log datasets. Prompts specify exact index patterns, fields, cases, time windows, grouping, sorting, and limits.',
+          examples: [
+            {
+              input: {
+                question:
+                  'From `logs-my_app-*`, show the 20 most frequent error messages in the last 6 hours. The `log.level` value is "error". Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    `The results should include error counts for the following errors:
+                    - ERROR: Database connection timed out
+                    - ERROR: Null pointer exception at com.example.UserService
+                    - ERROR: Payment gateway returned status 503
+                    - ERROR: Invalid API key provided
+                    - ERROR: Disk space is critically low`,
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-my_app-*
+                | WHERE @timestamp >= NOW() - 6 hours AND log.level == "error"
+                | STATS error_count = COUNT(*) BY message
+                | SORT error_count DESC
+                | LIMIT 20`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-*`, show the total count of error-level logs in the last 24 hours, grouped by `data_stream.dataset`. The `log.level` value is "error". Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    `Should identify errors in 'apache.error', 'my_app', 'my_service_app' and 'my_test_app' datasets.`,
+                    'The highest number of errors should be in in the apache.error dataset',
+                    'The lowest number of errors should be in in the my_test_app dataset',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-*
+                | WHERE @timestamp >= NOW() - 24 hours AND log.level == "error"
+                | STATS error_count = COUNT(*) BY data_stream.dataset
+                | SORT error_count DESC`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-*`, calculate the hourly error rate for service.name "my-service" over the last 6 hours as a percentage. Errors are documents where `log.level` is "error". Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The total number of logs in each full one-hour bucket should be 12.',
+                    'The number of errors in each bucket should be between 0 and 12, inclusive.',
+                    'The error rate percentage should be correctly calculated based on total and errors.',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-*
+                | WHERE @timestamp >= NOW() - 6 hours AND service.name == "my-service"
+                | EVAL is_error = CASE(log.level == "error", 1, 0)
+                | STATS total = COUNT(*), errors = SUM(is_error) BY BUCKET(@timestamp, 1h)
+                | EVAL error_rate_pct = TO_DOUBLE(errors) / total * 100`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-nginx.access-*`, what is the average request time in milliseconds over the last 2 hours? The `request_time` value is in seconds within the `message` field. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: true,
+                  expectedQuery: `FROM logs-nginx.access-*
+                | WHERE @timestamp >= NOW() - 2 hours
+                | GROK message "%{GREEDYDATA} %{NUMBER:request_time}"
+                | STATS average_request_time_ms = AVG(TO_DOUBLE(request_time) * 1000)`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-nginx.access-*`, find the top 5 slowest requests for service.name "api-gateway" in the last 2 hours. The `request_time` value is in seconds within the `message` field. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: ['Identifies the top 5 slowest requests.'],
+                  execute: true,
+                  expectedQuery: `FROM logs-nginx.access-*
+                | WHERE @timestamp >= NOW() - 2 hours AND service.name == "api-gateway"
+                | DISSECT message "%{} %{} %{} %{} %{} %{} %{} %{} %{} %{} %{request_time}"
+                | EVAL request_time_s = TO_DOUBLE(request_time)
+                | SORT request_time_s DESC
+                | LIMIT 5
+                | KEEP @timestamp, message, request_time_s`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-*`, show logs from Kubernetes pods that have restarted in the last 24 hours. Use `kubernetes.pod.restart_count > 0`. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: ['The restart count should be identified as 2.'],
+                  execute: true,
+                  expectedQuery: `FROM logs-*
+                | WHERE @timestamp >= NOW() - 24 hours AND kubernetes.pod.restart_count > 0
+                | KEEP kubernetes.pod.restart_count`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-*`, find all log entries with correlation id "abc123". The field name is `trace.id`. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: ['Should retrieve 1 log with the trace ID abc123.'],
+                  execute: true,
+                  expectedQuery: `FROM logs-*
+                | WHERE trace.id == "abc123"`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-apache.error-*`, count the number of error logs per 10-minute interval over the last 6 hours. The `log.level` value is "error". Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The response after query execution should include error count by 10-minute time intervals',
+                    '2 time intervals should have high error counts, while the rest should be low error counts',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-apache.error-*
+                | WHERE @timestamp >= NOW() - 6 hours AND log.level == "error"
+                | STATS error_count = COUNT(*) by BUCKET(@timestamp, 600s)
+                | SORT \`BUCKET(@timestamp, 600s)\` ASC`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-auth_service-*`, how many unique users logged in each day over the last 7 days? The `event.action` value is "login". Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: true,
+                  expectedQuery: `FROM logs-auth_service-*
+                | WHERE @timestamp >= NOW() - 7 days AND event.action == "login"
+                | STATS unique_users = COUNT_DISTINCT(user.id) BY BUCKET(@timestamp, 1d)
+                | SORT \`BUCKET(@timestamp, 1d)\` ASC`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-auth_service-*`, list users who logged in more than 5 times in the last 3 days. The `event.action` value is "login". Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The result should display the login count for each user who logged in more than 5 times',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-auth_service-*
+                | WHERE @timestamp >= NOW() - 3 days AND event.action == "login"
+                | STATS login_count = COUNT(user.id) BY user.id
+                | WHERE login_count > 5
+                | SORT login_count DESC`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-auth_service-*`, what is the total number of login events, and how many of those occurred during the hour before last? The `event.action` value is "login". Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: true,
+                  expectedQuery: `FROM logs-auth_service-*
+                | SORT @timestamp
+                | EVAL now = NOW()
+                | EVAL key = CASE(@timestamp < (now - 1 hour) AND @timestamp > (now - 2 hour), "Last hour", "Other")
+                | STATS count = COUNT(*) BY key
+                | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
+                | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
+                | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-nginx.access-*`, show a breakdown of successful (status < 400) and unsuccessful (status >= 400) requests over the last 24 hours. The field is `http.response.status_code`. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The result should include 2 rows for successful and error counts',
+                    'The successful http responses count should be higher than error error http responses count',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-nginx.access-*
+                | WHERE @timestamp >= NOW() - 24 hours
+                | EVAL status_type = CASE(http.response.status_code >= 400, "Error (>=400)", "Success (<400)")
+                | STATS count = COUNT(*) BY status_type`,
+                }),
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
   });
 
   // --- Test Suite for APM Data ---
@@ -391,7 +634,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
     evaluate('APM data queries', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'esql: with APM data',
+          name: 'esql: (ambiguous questions) with APM data',
           description: 'ES|QL examples for APM data.',
           examples: [
             {
@@ -588,6 +831,212 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         },
       });
     });
+
+    evaluate('APM data queries (unambiguous)', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'esql: (unambiguous questions) with APM data',
+          description:
+            'Unambiguous ES|QL prompts for APM data providing only specific field values and index details.',
+          examples: [
+            {
+              input: {
+                question:
+                  'From `traces-apm*`, show for each service the average transaction duration, success rate, and total requests over the last 24 hours. The duration field is `transaction.duration.us` and `event.outcome` values are "success" and "failure". Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    "The result should contain one row for the service 'my-apm-service'.",
+                    "For 'my-apm-service', the total requests should be approximately 28,780",
+                    'The average duration should be approximately 50,000',
+                    'The success rate should now be correctly calculated as 0.5.',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM traces-apm*
+                | WHERE @timestamp >= NOW() - 24 hours
+                | EVAL is_failure = CASE(event.outcome == "failure", 1, 0), is_success = CASE(event.outcome == "success", 1, 0)
+                | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), success_rate = TO_DOUBLE(SUM(is_success)) / COUNT(*) BY service.name
+                | KEEP service.name, avg_duration, success_rate, total_requests`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `metrics-apm`, for `metricset.name` = "service_destination" over the last 24 hours, show per `span.destination.service.resource` the average throughput, latency per request, and failure rate. Each document includes `span.destination.service.response_time.count` and `span.destination.service.response_time.sum.us`; failures use `event.outcome = "failure"`.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM metrics-apm
+                | WHERE metricset.name == "service_destination" AND @timestamp >= NOW() - 24 hours
+                | EVAL total_response_time = span.destination.service.response_time.sum.us / span.destination.service.response_time.count, total_failures = CASE(event.outcome == "failure", 1, 0) * span.destination.service.response_time.count
+                | STATS
+                  avg_throughput = AVG(span.destination.service.response_time.count),
+                  avg_latency = AVG(total_response_time),
+                  failure_rate = AVG(total_failures)
+                  BY span.destination.service.resource`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `traces-apm*`, find the average `transaction.duration.us` per service over the last hour. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The average duration should be 50,000 for the my-apm-service',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM traces-apm*
+                | WHERE @timestamp > NOW() - 1 hour
+                | STATS AVG(transaction.duration.us) BY service.name`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-apm*`, show the error rate as a percentage of error logs vs total logs per day for the last 7 days. Error logs are documents where `processor.event` is "error". Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The total error count for the most recent day should be 10610.',
+                    'The calculated error rate for that day should be approximately 50.',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-apm*
+                | WHERE @timestamp >= NOW() - 7 days
+                | EVAL error = CASE(processor.event == "error", 1, 0)
+                | STATS total_logs = COUNT(*), total_errors = SUM(error) BY BUCKET(@timestamp, 1 day)
+                | EVAL error_rate = TO_DOUBLE(total_errors) / total_logs * 100
+                | SORT \`BUCKET(@timestamp, 1 day)\` ASC`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-apm.error-*`, show the 5 latest messages and display the date they were indexed (format: "hh:mm a, d of MMMM yyyy"), `processor.event`, and `message`. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The assistant uses KEEP, to make sure AT LEAST the formatted date, processor event and the message fields are displayed. More columns are fine, fewer are not',
+                    'The assistant should retrieve exactly 5 rows',
+                    `The field that includes the message should have '2024-11-15T13:12:00 - ERROR - duration: 12ms'`,
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-apm.error-*
+                | SORT @timestamp DESC
+                | EVAL formatted_date = DATE_FORMAT("hh:mm a, d 'of' MMMM yyyy", @timestamp)
+                | KEEP formatted_date, processor.event, message
+                | LIMIT 5`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-apm.custom-*`, what is the total count of logs for each individual tag? The `tags` field is multi-valued. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The result should be a list of tags and their corresponding total counts across all logs.',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-apm.custom-*
+                | WHERE @timestamp >= NOW() - 24 hours
+                | MV_EXPAND tags
+                | STATS count = COUNT(*) BY tags
+                | SORT count DESC`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  "From `logs-apm.custom-*`, list info-level logs that are tagged with 'cache' but NOT with 'search'. Execute the query after generating.",
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    "Results must contain the 'cache' tag.",
+                    "Results must NOT contain the 'search' tag.",
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-apm.custom-*
+                | WHERE @timestamp >= NOW() - 24 hours AND log.level == "info" AND tags == "cache" AND NOT tags == "search"
+                | KEEP message, tags`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  "Show a side-by-side hourly comparison of the transaction failure count from 'my-apm-service' and the error log count from 'my-apm-service-2' over the last 24 hours. Transaction failures are where `processor.event` is 'transaction' and `event.outcome` is 'failure'; error logs are where `log.level` is 'error'. Use data matching `*apm*`. Execute the query after generating.",
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The result is a table showing a side-by-side comparison of `failure_count` and `error_log_count` for each hour.',
+                    'The result set should contain approximately 24 or 25 rows, representing the hourly buckets over the last 24 hours.',
+                    'The `failure_count` must sum transaction failures from `my-apm-service`, and `error_log_count` must sum error logs from `my-apm-service-2`.',
+                    'The results must be sorted chronologically from oldest to newest.',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM "*apm*"
+                | WHERE @timestamp >= NOW() - 24 hours
+                | EVAL tx_failure = CASE(processor.event == "transaction" AND event.outcome == "failure" AND service.name == "my-apm-service", 1, 0),
+                      log_error = CASE(log.level == "error" AND service.name == "my-apm-service-2", 1, 0)
+                | STATS failure_count = SUM(tx_failure), error_log_count = SUM(log_error) BY BUCKET(@timestamp, 1h)
+                | WHERE failure_count > 0 OR error_log_count > 0
+                | SORT \`BUCKET(@timestamp, 1h)\` ASC`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `logs-apm.custom-*`, parse the duration from the `message` (e.g., "duration: 123ms") and calculate the average parsed duration for each tag. The `tags` field is multi-valued. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The result should contain a row for each of the 5 possible tags.',
+                    "The 'avg_parsed_duration' for each tag should be a value between 5 and 200.",
+                    "The results must be sorted in descending order by 'avg_parsed_duration'.",
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM logs-apm.custom-*
+                | WHERE @timestamp >= NOW() - 24 hours AND log.level == 'error'
+                | GROK message "%{GREEDYDATA}duration: %{NUMBER:duration_ms:string}ms"
+                | WHERE duration_ms IS NOT NULL
+                | EVAL duration = TO_LONG(duration_ms)
+                | MV_EXPAND tags
+                | STATS avg_parsed_duration = AVG(duration) BY tags
+                | SORT avg_parsed_duration DESC`,
+                }),
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
   });
 
   // --- Test Suite for Packetbeat Data ---
@@ -604,7 +1053,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
     evaluate('Packetbeat data queries', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'esql: with packetbeat data',
+          name: 'esql: (ambiguous questions) with packetbeat data',
           description: 'Packetbeat question/query pairs.',
           examples: [
             {
@@ -681,6 +1130,91 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         },
       });
     });
+
+    evaluate('Packetbeat data queries (unambiguous)', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'esql: (unambiguous questions) with packetbeat data',
+          description:
+            'Unambiguous Packetbeat prompts providing only specific field values and index details.',
+          examples: [
+            {
+              input: {
+                question:
+                  'From `packetbeat-*`, show the top 10 `destination.domain` values by document count. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: true,
+                  expectedQuery: `FROM packetbeat-*
+                | STATS doc_count = COUNT(*) BY destination.domain
+                | SORT doc_count DESC
+                | LIMIT 10`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `packetbeat-*`, show the count of each HTTP response status code. The field is `http.response.status_code`. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The result should show counts for status codes 200, 404, and 503.',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM packetbeat-*
+                | WHERE http.response.status_code IS NOT NULL
+                | STATS request_count = COUNT(*) BY http.response.status_code
+                | SORT request_count DESC`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `packetbeat-*`, list failed DNS queries from the last hour. Failures are where `dns.response_code` is not "NOERROR". Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The result should find the query for "nonexistent.domain.xyz" with the response code "NXDomain".',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM packetbeat-*
+                | WHERE @timestamp >= NOW() - 1 hour AND dns.response_code IS NOT NULL AND dns.response_code != "NOERROR"`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `packetbeat-*`, what are the top 5 network conversations by total bytes transferred? Use `client.ip`, `server.ip`, `destination.bytes`, and `source.bytes`. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The result should show IP pairs and their total data transfer, sorted descending.',
+                  ],
+                  execute: true,
+                  expectedQuery: `FROM packetbeat-*
+                | WHERE client.ip IS NOT NULL AND server.ip IS NOT NULL
+                | EVAL total_bytes = destination.bytes + source.bytes
+                | STATS total_transfer = SUM(total_bytes) BY client.ip, server.ip
+                | SORT total_transfer DESC
+                | LIMIT 5`,
+                }),
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
   });
 
   // --- Test Suite for Employee Data ---
@@ -709,7 +1243,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
     evaluate('Employees data queries', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'esql: with employees data',
+          name: 'esql: (ambiguous questions) with employees data',
           description: 'ES|QL questions against a simple `employees` index.',
           examples: [
             {
@@ -764,13 +1298,73 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         },
       });
     });
+
+    evaluate('Employees data queries (unambiguous)', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'esql: (unambiguous questions) with employees data',
+          description:
+            'Unambiguous ES|QL prompts for the simple `employees` index with exact field usage and formatting.',
+          examples: [
+            {
+              input: {
+                question:
+                  'From the `employees` index, display each employee number and the month and year they were hired (e.g., "September 2019"), showing the 5 earliest hires. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: true,
+                  expectedQuery: `FROM employees
+                | EVAL hire_date_formatted = DATE_FORMAT("MMMM YYYY", hire_date)
+                | SORT hire_date
+                | KEEP emp_no, hire_date_formatted
+                | LIMIT 5`,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'Explain that ES|QL does not support pagination. If you still choose to demonstrate sorting and a LIMIT, sort the `employees` index by `salary` and include a clear note that pagination is not supported. Do not attempt paginated execution.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The assistant should clearly mention that pagination is currently not supported in ES|QL',
+                    'IF the assistant decides to execute the query, it should correctly execute, and the Assistant should clearly mention pagination is not currently supported',
+                  ],
+                  execute: false,
+                }),
+              },
+              metadata: {},
+            },
+            {
+              input: {
+                question:
+                  'From `employees`, show 10 employees hired in 2024. Execute the query after generating.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: true,
+                  expectedQuery: `FROM employees
+                | WHERE DATE_EXTRACT("year", hire_date) == 2024
+                | LIMIT 10`,
+                }),
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
   });
 
   // --- Test Suite for Queries without Data ---
   evaluate('without data', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
-        name: 'esql: without data',
+        name: 'esql: (ambiguous questions) without data',
         description: 'ES|QL query generation without any data or mappings.',
         examples: [
           {
@@ -843,11 +1437,89 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
     });
   });
 
+  evaluate('without data (unambiguous)', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'esql: (unambiguous questions) without data',
+        description:
+          'Unambiguous example-only ES|QL prompts with explicit index patterns and fields. Prompts instruct not to execute since data/mappings may not exist.',
+        examples: [
+          {
+            input: {
+              question:
+                'Provide only an ES|QL query (do not execute). Use `.ds-metrics-apm*` explicitly. Limit to `@timestamp >= NOW() - 15 minutes`. Compute the average `system.cpu.total.norm.pct` grouped by `BUCKET(@timestamp, 1m)` and `service.name`, sort by `avg_cpu` descending, and limit to 10.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM .ds-metrics-apm*
+              | WHERE @timestamp >= NOW() - 15 minutes
+              | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY BUCKET(@timestamp, 1m), service.name
+              | SORT avg_cpu DESC
+              | LIMIT 10`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Provide only an ES|QL query (do not execute). Use `metricbeat*`. Compute `system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores`, then return `avg_system_pct_normalized` per `host.name` sorted ascending by `host.name`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM metricbeat*
+              | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
+              | STATS avg_system_pct_normalized = AVG(system_pct_normalized) BY host.name
+              | SORT host.name ASC`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Provide only an ES|QL query (do not execute). Assume Postgres logs are in `postgres-logs*`. Extract the numeric duration from messages formatted like `... LOG:  duration: 123.456 ms  statement: ...` using DISSECT, cast to double, and compute the average duration.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM postgres-logs*
+              | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
+              | EVAL duration_double = TO_DOUBLE(duration)
+              | STATS AVG(duration_double)`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Provide only an ES|QL query (do not execute). Use `logs-auth_service-*` for successful logins today where `event.action == "login"`. Perform a `LOOKUP JOIN` to `users_metadata` on `user.id` and keep `@timestamp, user.id, full_name, department` limited to 20 rows.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM logs-auth_service-*
+              | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
+              | LOOKUP JOIN users_metadata ON user.id
+              | KEEP @timestamp, user.id, full_name, department
+              | LIMIT 20`,
+              }),
+            },
+            metadata: {},
+          },
+        ],
+      },
+    });
+  });
+
   // --- Test Suite for SPL to ES|QL Conversion ---
   evaluate('SPL to ES|QL conversion', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
-        name: 'esql: from SPL',
+        name: 'esql: (ambiguous questions) from SPL',
         description: 'Conversion of SPL (Splunk Processing Language) queries to ES|QL.',
         examples: [
           {
@@ -1106,6 +1778,302 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
           {
             input: {
               question: `Can you convert this SPL query to ES|QL? index=firewall | table _time, src_ip, dest_ip, action`,
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM firewall
+              | KEEP @timestamp, src_ip, dest_ip, action`,
+              }),
+            },
+            metadata: {},
+          },
+        ],
+      },
+    });
+  });
+
+  evaluate('SPL to ES|QL conversion (unambiguous)', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'esql: (unambiguous questions) from SPL',
+        description:
+          'Unambiguous SPL-to-ES|QL prompts. Prompts explicitly ask for ES|QL text only and state that indices may not exist in the target cluster.',
+        examples: [
+          {
+            input: {
+              question:
+                'Convert the SPL `index=network_firewall "SYN Timeout" | stats count by dest` into ES|QL. Return only the ES|QL query text; do not execute. Assume the literal index name may not exist in this cluster.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM network_firewall
+              | WHERE _raw == "SYN Timeout"
+              | STATS count = count(*) by dest`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert the SPL `index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)` to ES|QL. Return only ES|QL; do not execute. Use ES|QL functions `LENGTH` and `CASE` (not SPL `len`/`if`). Assume indices may not exist.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                specificCriteria: [
+                  'The query provided by the Assistant uses the ES|QL functions LENGTH and CASE, not the SPL functions len and if',
+                ],
+                execute: false,
+                expectedQuery: `from prod_web
+              | EVAL length = length(message), k255 = CASE(length > 255, 1, 0), k2 = CASE(length > 2048, 1, 0), k4 = CASE(length > 4096, 1, 0), k16 = CASE(length > 16384, 1, 0)
+              | STATS COUNT(*), SUM(k255), SUM(k2), SUM(k4), SUM(k16), SUM(length)`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only, do not execute; indices may not exist): `index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM prod_web
+              | WHERE _raw NOT LIKE "Connection reset"
+                AND _raw NOT LIKE "[acm-app] created a ThreadLocal"
+                AND sourcetype != "prod_urlf_east_logs"
+                AND sourcetype != "prod_urlf_west_logs"
+                AND host NOT LIKE "dbs-tools-*"
+                AND _raw NOT LIKE "Public] in context with path [/global]"
+                AND host NOT LIKE "*dev*"
+                AND host NOT LIKE "*qa*"
+                AND host NOT LIKE "*uat*"`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=security sourcetype=linux_secure "Failed password"`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM security
+              | WHERE _raw == "Failed password" AND sourcetype == "linux_secure"`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=firewall (action=allow AND dest_port=443) OR (action=block AND protocol=tcp)`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM firewall
+              | WHERE (action == "allow" AND dest_port == 443) OR (action == "block" AND protocol == "tcp")`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=prod_web host="webapp-*"`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM prod_web
+              | WHERE host LIKE "webapp-%"`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=sales status>=400 status<500`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM sales
+              | WHERE status >= 400 AND status < 500`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL using ES|QL `CASE` (text only; do not execute; indices may not exist): `index=inventory | stats price_with_tax = price * 1.13 | eval category = if(price > 1000, "premium", "standard")`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                specificCriteria: [
+                  'The query should use the ES|QL function CASE, not the SPL function if',
+                ],
+                execute: false,
+                expectedQuery: `FROM inventory
+              | EVAL price_with_tax = price * 1.13, category = CASE(price > 1000, "premium", "standard")`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=network_logs | rename source_ip as client_ip, dest_ip as server_ip`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM network_logs
+              | RENAME source_ip AS client_ip, dest_ip AS server_ip`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=employees | fields name, department, title`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM employees
+              | KEEP name, department, title`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=employees | fields - _raw, _time`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM employees
+              | DROP _raw, _time`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=web_traffic | stats count, dc(client_ip) as unique_visitors, avg(response_time) as avg_latency by http_method`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM web_traffic
+              | STATS count = count(*), unique_visitors = count_distinct(client_ip), avg_latency = avg(response_time) by http_method`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=products | stats sum(sales) as total_sales by category | sort - total_sales`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM products
+              | STATS total_sales = sum(sales) by category
+              | SORT total_sales DESC`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=access_logs | top limit=10 user`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM access_logs
+              | STATS count = count(*) by user
+              | SORT count DESC
+              | LIMIT 10`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=error_logs | rare limit=5 error_code`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: `FROM error_logs
+              | STATS count = count(*) by error_code
+              | SORT count ASC
+              | LIMIT 5`,
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL using `STATS ... BY BUCKET(@timestamp, 1h)` (text only; do not execute; indices may not exist): `index=auth | timechart span=1h count by action`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                specificCriteria: [
+                  'The query should use STATS with BUCKET to group data over time, which is an ES|QL equivalent of timechart.',
+                ],
+                execute: false,
+                expectedQuery: [
+                  `FROM auth
+                | STATS count = count(*) by BUCKET(@timestamp, 1h), action`,
+                  `FROM auth
+                | HISTOGRAM count(*) BY action, @timestamp BUCKETS=1h`,
+                ],
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL using either `IN (...)` or a `LOOKUP JOIN` (text only; do not execute; indices may not exist): `index=main [search index=suspicious_users | fields user_id]`.',
+            },
+            output: {
+              criteria: createEsqlCriteria({
+                execute: false,
+                expectedQuery: [
+                  `FROM main
+                | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
+                  `FROM main
+                | LOOKUP JOIN suspicious_users ON user_id`,
+                ],
+              }),
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question:
+                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=firewall | table _time, src_ip, dest_ip, action` where `_time` should map to `@timestamp`.',
             },
             output: {
               criteria: createEsqlCriteria({
