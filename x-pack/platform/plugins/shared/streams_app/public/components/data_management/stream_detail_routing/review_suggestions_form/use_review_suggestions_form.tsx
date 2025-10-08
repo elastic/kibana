@@ -10,9 +10,13 @@ import { useState } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
 import { lastValueFrom } from 'rxjs';
 import { isEmpty } from 'lodash';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { showErrorToast } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { useStreamsRoutingActorRef } from '../state_management/stream_routing_state_machine';
+import {
+  useStreamsRoutingActorRef,
+  useStreamsRoutingSelector,
+} from '../state_management/stream_routing_state_machine';
 
 export interface FetchSuggestedPartitionsParams {
   streamName: string;
@@ -37,6 +41,7 @@ export function useReviewSuggestionsForm() {
       },
     },
   } = useKibana();
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
   const streamsRoutingActorRef = useStreamsRoutingActorRef();
 
   const [suggestions, setSuggestions] = useState<PartitionSuggestion[] | undefined>(undefined);
@@ -98,6 +103,11 @@ export function useReviewSuggestionsForm() {
     setSuggestions(undefined);
     resetPreview();
   };
+
+  // Reset suggestions when navigating to a different stream
+  useUpdateEffect(() => {
+    resetForm();
+  }, [definition.stream.name]);
 
   return {
     suggestions,

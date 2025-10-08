@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { NestedView } from '../../../nested_view';
 import { GenerateSuggestionButton } from './generate_suggestions_button';
 import { SuggestedStreamPanel } from './suggested_stream_panel';
@@ -60,11 +59,6 @@ export function ReviewSuggestionsForm({
       context.selectedPreview.type === 'suggestion' &&
       context.selectedPreview.name
   );
-
-  // Reset suggestions when navigating to a different stream
-  useUpdateEffect(() => {
-    resetForm();
-  }, [definition.stream.name]);
 
   return (
     <>
