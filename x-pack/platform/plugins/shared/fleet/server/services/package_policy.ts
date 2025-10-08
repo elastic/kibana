@@ -50,6 +50,7 @@ import {
   getNormalizedInputs,
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
+  varsReducer,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -3585,9 +3586,13 @@ export function updatePackageInputs(
     });
   }
 
+  const packageInfoVars = packageInfo.vars?.reduce(varsReducer, {});
+  const { vars } = deepMergeVars(basePackagePolicy, { vars: packageInfoVars }, true);
+
   const resultingPackagePolicy: NewPackagePolicy = {
     ...basePackagePolicy,
     inputs,
+    vars,
   };
 
   const validationResults = validatePackagePolicy(resultingPackagePolicy, packageInfo, load);
