@@ -10,17 +10,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiText,
-  EuiTitle,
-  EuiLink,
-  EuiButton,
   useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
@@ -28,82 +23,11 @@ import { ConversationContentWithMargins } from './conversation_grid';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { useConversationGridCenterColumnWidth } from './conversation_grid.styles';
 import { docLinks } from '../../../../common/doc_links';
+import { WelcomeText } from '../common/welcome_text';
 
 const fullHeightStyles = css`
   height: 100%;
 `;
-
-const WelcomeText: React.FC<{}> = () => {
-  const labels = {
-    container: i18n.translate('xpack.onechat.newConversationPrompt.container', {
-      defaultMessage: 'New conversation welcome prompt',
-    }),
-    title: i18n.translate('xpack.onechat.newConversationPrompt.title', {
-      defaultMessage: 'Welcome to Elastic Agent Builder',
-    }),
-    subtitle: (
-      <FormattedMessage
-        id="xpack.onechat.newConversationPrompt.subtitle"
-        defaultMessage="Work interactively with your AI {agentsLink} using the chat interface. Your selected agent answers questions by searching your data with its assigned {toolsLink}."
-        values={{
-          agentsLink: (
-            <EuiLink href={docLinks.agentBuilderAgents} target="_blank">
-              {i18n.translate('xpack.onechat.newConversationPrompt.agentsLinkText', {
-                defaultMessage: 'agents',
-              })}
-            </EuiLink>
-          ),
-          toolsLink: (
-            <EuiLink href={docLinks.tools} target="_blank">
-              {i18n.translate('xpack.onechat.newConversationPrompt.toolsLinkText', {
-                defaultMessage: 'tools',
-              })}
-            </EuiLink>
-          ),
-        }}
-      />
-    ),
-  };
-  return (
-    <EuiFlexGroup
-      direction="column"
-      alignItems="center"
-      justifyContent="center"
-      aria-label={labels.container}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiIcon color="primary" size="xxl" type="logoElastic" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTitle>
-          <h2>{labels.title}</h2>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText textAlign="center" color="subdued">
-          <p>{labels.subtitle}</p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          href={docLinks.agentBuilder}
-          target="_blank"
-          size="m"
-          aria-label={i18n.translate(
-            'xpack.onechat.newConversationPrompt.agentBuilderDocsAriaLabel',
-            {
-              defaultMessage: 'Read Agent Builder documentation',
-            }
-          )}
-        >
-          {i18n.translate('xpack.onechat.newConversationPrompt.agentBuilderDocs', {
-            defaultMessage: 'Read the docs',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 const cards: Array<{
   key: string;
