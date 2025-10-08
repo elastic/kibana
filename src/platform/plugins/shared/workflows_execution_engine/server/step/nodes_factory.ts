@@ -38,7 +38,6 @@ import type { UrlValidator } from '../lib/url_validator';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
-import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { HttpStepImpl } from './http_step';
