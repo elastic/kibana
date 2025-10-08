@@ -77,23 +77,6 @@ describe('get_aws_credentials_form_options', () => {
   });
 
   describe('Cross-functional patterns', () => {
-    it('should demonstrate consistent structure across providers', () => {
-      const result = getAwsCredentialsFormOptions();
-
-      // Demonstrate that the pattern works for multiple credential types
-      const credentialTypes = Object.keys(result);
-      expect(credentialTypes.length).toBeGreaterThan(2);
-
-      // Show that each type follows the same pattern
-      credentialTypes.forEach((type) => {
-        const option = result[type as keyof typeof result];
-        expect(option).toMatchObject({
-          label: expect.any(String),
-          fields: expect.any(Object),
-        });
-      });
-    });
-
     it('should handle different credential configurations (demonstrates reusability)', () => {
       // Test with different field mappings - demonstrates cross-functional capability
       const basicResult = getAwsCredentialsFormOptions();

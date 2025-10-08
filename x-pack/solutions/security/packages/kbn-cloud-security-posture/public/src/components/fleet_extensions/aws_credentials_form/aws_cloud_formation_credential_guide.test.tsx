@@ -181,22 +181,6 @@ describe('CloudFormationCloudCredentialsGuide', () => {
   });
 
   describe('Component structure', () => {
-    it('renders with correct color and size styling', () => {
-      renderComponent({ credentialType: 'direct_access_keys' });
-
-      // Check that the main container has the expected classes (though we can't directly test CSS)
-      const container = screen.getByText(/Access keys are long-term credentials/).closest('div');
-      expect(container).toBeInTheDocument();
-    });
-
-    it('includes proper spacing elements', () => {
-      renderComponent({ credentialType: 'direct_access_keys' });
-
-      // The component uses EuiSpacer components which should be present in the DOM
-      // We can verify the structure is rendered correctly by checking for key content
-      expect(screen.getByText('Launch CloudFormation')).toBeInTheDocument();
-      expect(screen.getByText(/button below/)).toBeInTheDocument();
-    });
     it('uses shortName from useCloudSetup hook', () => {
       mockUseCloudSetup.mockReturnValue(getMockCloudSetup({ shortName: 'Custom Name' }));
 

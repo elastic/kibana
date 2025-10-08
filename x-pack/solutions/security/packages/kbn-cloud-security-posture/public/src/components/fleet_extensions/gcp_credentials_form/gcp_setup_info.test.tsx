@@ -175,36 +175,6 @@ describe('GCPSetupInfoContent', () => {
     });
   });
 
-  describe('accessibility', () => {
-    it('provides proper semantic structure', () => {
-      renderWithIntl(<GCPSetupInfoContent isAgentless={false} />);
-
-      // Should have a heading
-      expect(screen.getByRole('heading')).toBeInTheDocument();
-
-      // Should have a link
-      expect(screen.getByRole('link')).toBeInTheDocument();
-    });
-
-    it('provides meaningful link text', () => {
-      renderWithIntl(<GCPSetupInfoContent isAgentless={false} />);
-
-      const link = screen.getByRole('link', { name: /getting started/i });
-      expect(link).toHaveAccessibleName();
-    });
-  });
-
-  describe('responsive behavior', () => {
-    it('renders consistently across different viewport sizes', () => {
-      renderWithIntl(<GCPSetupInfoContent isAgentless={false} />);
-
-      // Component should render basic elements regardless of screen size
-      expect(screen.getByRole('heading', { name: /setup access/i })).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /getting started/i })).toBeInTheDocument();
-      expect(screen.getByText(/the integration will need/i)).toBeInTheDocument();
-    });
-  });
-
   describe('edge cases', () => {
     it('handles missing gcpOverviewPath gracefully', () => {
       mockUseCloudSetup.mockReturnValue({

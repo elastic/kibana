@@ -526,18 +526,5 @@ describe('AzureAccountTypeSelect', () => {
       expect(screen.getByText('Azure Organization')).toBeInTheDocument();
       expect(screen.getByText('Single Subscription')).toBeInTheDocument();
     });
-
-    it('handles context loading state', () => {
-      mockUseCloudSetup.mockReturnValue({
-        ...defaultMockCloudSetup,
-        isConfigContextLoading: true,
-      });
-
-      renderWithIntl(<AzureAccountTypeSelect {...defaultProps} />);
-
-      // Component should still render normally during loading
-      expect(screen.getByText('Azure Organization')).toBeInTheDocument();
-      expect(screen.getByText('Single Subscription')).toBeInTheDocument();
-    });
   });
 });

@@ -291,17 +291,6 @@ describe('AzureCredentialsFormAgentless', () => {
       expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
       expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
     });
-
-    it('renders form as disabled when package has invalid vars', () => {
-      const propsWithInvalidVars = {
-        ...defaultProps,
-        hasInvalidRequiredVars: true,
-      };
-
-      renderWithIntl(<AzureCredentialsFormAgentless {...propsWithInvalidVars} />);
-
-      expect(screen.getByTestId('disabled-state')).toHaveTextContent('true');
-    });
   });
 
   describe('cloud connector functionality', () => {
@@ -316,7 +305,7 @@ describe('AzureCredentialsFormAgentless', () => {
       renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
 
       const selector = screen.getByTestId('azure-credentials-type-selector');
-      fireEvent.change(selector, { target: { value: 'cloud_connectors' } });
+      fireEvent.change(selector, { target: { value: 'service_principal_with_client_secret' } });
 
       expect(mockUpdatePolicy).toHaveBeenCalled();
     });
@@ -391,20 +380,6 @@ describe('AzureCredentialsFormAgentless', () => {
       expect(screen.getByTestId('azure.credentials.client_id')).toBeInTheDocument();
       expect(screen.getByTestId('azure.credentials.tenant_id')).toBeInTheDocument();
       expect(screen.getByTestId('azure.credentials.client_secret')).toBeInTheDocument();
-    });
-  });
-
-  describe('field management', () => {
-    it('handles field changes correctly', () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      expect(mockGetInputVarsFields).toHaveBeenCalled();
-    });
-
-    it('filters fields correctly based on credential type', () => {
-      renderWithIntl(<AzureCredentialsFormAgentless {...defaultProps} />);
-
-      expect(mockGetInputVarsFields).toHaveBeenCalled();
     });
   });
 

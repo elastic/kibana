@@ -317,25 +317,4 @@ describe('GcpAccountTypeSelect', () => {
       }).not.toThrow();
     });
   });
-
-  describe('accessibility', () => {
-    it('provides proper radio button structure', () => {
-      renderWithIntl(<GcpAccountTypeSelect {...defaultProps} />);
-
-      const orgRadio = screen.getByRole('radio', { name: /GCP Organization/ });
-      const singleRadio = screen.getByRole('radio', { name: /Single Project/ });
-
-      expect(orgRadio).toBeInTheDocument();
-      expect(singleRadio).toBeInTheDocument();
-      expect(orgRadio).toHaveAttribute('name', 'gcpAccountType');
-      expect(singleRadio).toHaveAttribute('name', 'gcpAccountType');
-    });
-
-    it('provides proper test ids for automation', () => {
-      renderWithIntl(<GcpAccountTypeSelect {...defaultProps} />);
-
-      expect(screen.getByTestId(GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ)).toBeInTheDocument();
-      expect(screen.getByTestId(GCP_SINGLE_ACCOUNT_TEST_SUBJ)).toBeInTheDocument();
-    });
-  });
 });

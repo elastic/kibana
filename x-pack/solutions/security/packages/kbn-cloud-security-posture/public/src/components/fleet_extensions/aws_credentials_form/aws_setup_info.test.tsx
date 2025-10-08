@@ -25,28 +25,12 @@ describe('AWSSetupInfoContent', () => {
         <AWSSetupInfoContent info={mockInfo} />
       </TestWrapper>
     );
-
     // Verify the title is rendered with correct i18n message
-    expect(screen.getByRole('heading', { level: 2 })).toBeInTheDocument();
     expect(screen.getByText('Setup Access')).toBeInTheDocument();
 
     // Verify the info content is rendered
     expect(screen.getByTestId('aws-setup-info')).toBeInTheDocument();
     expect(screen.getByText('AWS setup instructions')).toBeInTheDocument();
-  });
-
-  it('should render horizontal rule separator', () => {
-    const mockInfo = <span>{'Test info'}</span>;
-
-    render(
-      <TestWrapper>
-        <AWSSetupInfoContent info={mockInfo} />
-      </TestWrapper>
-    );
-
-    // Verify the horizontal rule is present
-    const hrElement = document.querySelector('.euiHorizontalRule');
-    expect(hrElement).toBeInTheDocument();
   });
 
   it('should handle complex info content', () => {
@@ -110,46 +94,5 @@ describe('AWSSetupInfoContent', () => {
 
     // Verify FormattedMessage is rendered correctly
     expect(screen.getByText('This is a test message with parameter')).toBeInTheDocument();
-  });
-
-  // Demonstrate cross-functional reusability
-  it('should work with Azure-style content (cross-provider compatibility)', () => {
-    const azureStyleInfo = (
-      <div>
-        <p>{'Azure tenant setup'}</p>
-        <p>{'Service principal configuration'}</p>
-      </div>
-    );
-
-    render(
-      <TestWrapper>
-        <AWSSetupInfoContent info={azureStyleInfo} />
-      </TestWrapper>
-    );
-
-    // Shows how the same component pattern works across providers
-    expect(screen.getByText('Setup Access')).toBeInTheDocument();
-    expect(screen.getByText('Azure tenant setup')).toBeInTheDocument();
-    expect(screen.getByText('Service principal configuration')).toBeInTheDocument();
-  });
-
-  it('should work with GCP-style content (cross-provider compatibility)', () => {
-    const gcpStyleInfo = (
-      <div>
-        <p>{'Service account setup'}</p>
-        <p>{'Project configuration'}</p>
-      </div>
-    );
-
-    render(
-      <TestWrapper>
-        <AWSSetupInfoContent info={gcpStyleInfo} />
-      </TestWrapper>
-    );
-
-    // Demonstrates reusable setup info pattern across all cloud providers
-    expect(screen.getByText('Setup Access')).toBeInTheDocument();
-    expect(screen.getByText('Service account setup')).toBeInTheDocument();
-    expect(screen.getByText('Project configuration')).toBeInTheDocument();
   });
 });

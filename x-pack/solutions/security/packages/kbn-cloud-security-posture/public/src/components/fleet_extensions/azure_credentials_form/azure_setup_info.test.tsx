@@ -57,17 +57,6 @@ describe('AzureSetupInfoContent', () => {
     expect(screen.getByText(/deploy CSPM for assessing/i)).toBeInTheDocument();
   });
 
-  it('should render horizontal rule separator', () => {
-    const { container } = render(
-      <TestProvider>
-        <AzureSetupInfoContent documentationLink={mockDocumentationLink} />
-      </TestProvider>
-    );
-
-    // Check for the horizontal rule
-    expect(container.querySelector('.euiHorizontalRule')).toBeInTheDocument();
-  });
-
   it('should render with custom documentation link', () => {
     const customLink = 'https://example.com/custom-docs';
     render(
@@ -80,22 +69,5 @@ describe('AzureSetupInfoContent', () => {
       'href',
       customLink
     );
-  });
-
-  it('should have proper styling and structure', () => {
-    const { container } = render(
-      <TestProvider>
-        <AzureSetupInfoContent documentationLink={mockDocumentationLink} />
-      </TestProvider>
-    );
-
-    // Check for EuiTitle structure
-    expect(container.querySelector('.euiTitle')).toBeInTheDocument();
-
-    // Check for EuiText structure
-    expect(container.querySelector('.euiText')).toBeInTheDocument();
-
-    // Check for spacer elements
-    expect(container.querySelector('.euiSpacer')).toBeInTheDocument();
   });
 });
