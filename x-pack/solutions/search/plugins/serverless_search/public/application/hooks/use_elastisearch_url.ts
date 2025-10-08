@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
+import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-shared-ui';
 import { useKibanaServices } from './use_kibana';
 
 export const useElasticsearchUrl = () => {

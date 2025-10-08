@@ -123,6 +123,21 @@
       },
       {
         "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.ELASTICSEARCH_URL_PLACEHOLDER",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTICSEARCH_URL_PLACEHOLDER",
+        "description": [],
+        "signature": [
+          "\"https://your_deployment_url\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.GLOBAL_EMPTY_STATE_SKIP_KEY",
         "type": "string",
         "tags": [],
