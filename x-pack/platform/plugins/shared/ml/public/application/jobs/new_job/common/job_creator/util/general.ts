@@ -26,7 +26,7 @@ import { jobCloningService } from '../../../../../services/job_cloning_service';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { NewJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 

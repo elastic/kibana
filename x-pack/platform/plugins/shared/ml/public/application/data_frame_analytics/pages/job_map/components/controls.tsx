@@ -32,7 +32,7 @@ import {
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { CytoscapeContext } from './cytoscape';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import {
   useMlLocator,

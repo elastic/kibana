@@ -10,7 +10,7 @@ import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ML_PAGES, type MlPages } from '../../../../locator';
 import { FlyoutType } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
-import { ML_APP_LOCATOR } from '../../../../../common/constants/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 
 const ANOMALY_EXPLORER_TITLE = i18n.translate('xpack.ml.anomalyExplorerPageLabel', {
   defaultMessage: 'Anomaly Explorer',

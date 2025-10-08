@@ -24,6 +24,7 @@ import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
   DatafeedResultsChartDataParams,
+  CriteriaField,
 } from '@kbn/ml-common-types/results';
 import { defaultSearchQuery } from '@kbn/ml-common-types/results';
 import { getIndicesOptions } from '../../../common/util/datafeed_utils';

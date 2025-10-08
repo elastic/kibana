@@ -12,7 +12,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '../../../common/constants/locator';
+import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '@kbn/ml-common-types/locator_deprecated_routes';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlRoute } from './router';

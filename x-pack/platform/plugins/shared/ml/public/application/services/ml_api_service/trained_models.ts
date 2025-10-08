@@ -18,13 +18,18 @@ import type {
 import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type {
   ModelPipelines,
-  TrainedModelStat,
   NodesOverviewResponse,
   MemoryUsageInfo,
   ModelDownloadState,
   TrainedModelUIItem,
   TrainedModelConfigResponse,
   StartTrainedModelDeploymentResponse,
+  InferenceQueryParams,
+  InferenceStatsQueryParams,
+  InferenceStatsResponse,
+  StartAllocationParams,
+  DeleteModelParams,
+  UpdateAllocationParams,
 } from '@kbn/ml-common-types/trained_models';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { HttpService } from '../http_service';

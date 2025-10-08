@@ -12,11 +12,8 @@ import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishin
 import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type {
-  AnomalySwimLaneEmbeddableApi,
-  AnomalySwimlaneEmbeddableCustomInput,
-  AnomalySwimLaneEmbeddableState,
-} from '../embeddables';
+import type { AnomalySwimLaneProps } from '@kbn/ml-common-types/anomaly_swim_lane';
+import type { AnomalySwimLaneEmbeddableApi, AnomalySwimLaneEmbeddableState } from '../embeddables';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../embeddables';
 
 export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
@@ -39,8 +36,9 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
       swimlaneType,
       refreshConfig,
       viewBy,
+      timeRange,
     };
-  }, [jobIds, refreshConfig, swimlaneType, viewBy]);
+  }, [jobIds, refreshConfig, swimlaneType, viewBy, timeRange]);
 
   useEffect(
     function syncState() {

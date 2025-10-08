@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 
 import { extractErrorMessage } from './process_errors';
-import { type MLHttpFetchError, type EsErrorBody } from './types';
+import { type MLHttpFetchError, type EsErrorBody } from '@kbn/ml-common-types/errors';
 
 describe('ML - error message utils', () => {
   describe('extractErrorMessage', () => {

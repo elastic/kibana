@@ -16,7 +16,7 @@ import { type DataViewEditorService as DataViewEditorServiceSpec } from '@kbn/da
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { createPath } from '../../routing/router';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { DataDriftIndexPatternsEditor } from './data_drift_index_patterns_editor';
 
 import { MlPageHeader } from '../../components/page_header';

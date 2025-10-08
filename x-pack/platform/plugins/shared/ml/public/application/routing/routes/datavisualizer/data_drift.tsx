@@ -16,7 +16,7 @@ import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../..';
 import type { PageProps } from '../../router';
 import { createPath, PageLoader } from '../../router';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import {
   breadcrumbOnClickFactory,
   DATA_DRIFT_INDEX_SELECT_BREADCRUMB,

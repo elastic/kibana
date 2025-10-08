@@ -13,7 +13,7 @@ import type {
   DataFrameAnalyticsListAction,
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { getViewLinkStatus } from '../action_view/get_view_link_status';
 
 import { mapActionButtonText, MapButton } from './map_button';

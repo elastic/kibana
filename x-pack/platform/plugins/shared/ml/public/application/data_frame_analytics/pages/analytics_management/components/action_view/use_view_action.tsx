@@ -21,7 +21,7 @@ import type {
 
 import { getViewLinkStatus } from './get_view_link_status';
 import { viewActionButtonText, ViewButton } from './view_button';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 export type ViewAction = ReturnType<typeof useViewAction>;
 export const useViewAction = () => {

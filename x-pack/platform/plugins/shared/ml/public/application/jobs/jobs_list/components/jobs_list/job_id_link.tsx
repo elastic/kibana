@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useMlLocator } from '../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { AnomalyDetectionQueryState } from '@kbn/ml-common-types/locator';
 // @ts-ignore
 import { JobGroup } from '../job_group';

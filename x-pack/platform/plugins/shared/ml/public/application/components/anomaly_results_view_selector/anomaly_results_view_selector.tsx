@@ -16,7 +16,7 @@ import { useUrlState } from '@kbn/ml-url-state';
 
 import type { ExplorerJob } from '../../explorer/explorer_utils';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 interface Props {
   viewId: typeof ML_PAGES.SINGLE_METRIC_VIEWER | typeof ML_PAGES.ANOMALY_EXPLORER;

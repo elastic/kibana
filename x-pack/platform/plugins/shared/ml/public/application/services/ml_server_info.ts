@@ -12,6 +12,8 @@ import type {
 } from '@kbn/ml-common-types/ml_server_info';
 import type { MlApi } from './ml_api_service';
 
+export type { CloudInfo };
+
 let defaults: MlServerDefaults = {
   anomaly_detectors: {},
   datafeeds: {},

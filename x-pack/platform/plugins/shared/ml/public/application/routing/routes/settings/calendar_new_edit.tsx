@@ -18,7 +18,7 @@ import {
   getADSettingsBreadcrumbs,
   getMlManagementBreadcrumb,
 } from '../../breadcrumbs';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { getMlNodeCount } from '../../../ml_nodes_check';
 
 enum MODE {

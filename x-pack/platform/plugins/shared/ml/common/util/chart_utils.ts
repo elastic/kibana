@@ -7,7 +7,7 @@
 
 import type { ChartType } from '../constants/charts';
 import { CHART_TYPE } from '../constants/charts';
-import type { SeriesConfigWithMetadata } from '../types/results';
+import type { SeriesConfigWithMetadata } from '@kbn/ml-common-types/results';
 
 /**
  * Get the chart type based on its configuration

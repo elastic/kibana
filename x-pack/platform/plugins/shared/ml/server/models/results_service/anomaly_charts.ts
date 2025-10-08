@@ -49,8 +49,9 @@ import {
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import type { CriteriaField } from './results_service';
-import type { CombinedJob, Datafeed } from '../../shared';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';

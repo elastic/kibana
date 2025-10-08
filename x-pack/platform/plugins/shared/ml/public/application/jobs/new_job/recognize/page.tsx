@@ -43,7 +43,7 @@ import type { JobSettingsFormValues } from './components/job_settings_form';
 import { JobSettingsForm } from './components/job_settings_form';
 import type { TimeRange } from '../common/components';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { MlPageHeader } from '../../../components/page_header';
 import { PageTitle } from '../../../components/page_title';

@@ -27,7 +27,6 @@ import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
-import type { SwimlaneType } from '../application/explorer/explorer_constants';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
 import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';

@@ -27,7 +27,7 @@ import type {
 
 import type { AnomaliesTableData, ExplorerJob } from '../../application/explorer/explorer_utils';
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
-import { ML_APP_LOCATOR } from '../../../common/constants/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { useAnomalyChartsData } from './use_anomaly_charts_data';

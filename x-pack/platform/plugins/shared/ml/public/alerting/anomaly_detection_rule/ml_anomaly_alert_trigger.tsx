@@ -16,7 +16,7 @@ import { ML_ANOMALY_RESULT_TYPE, ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-ut
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
-import { ML_PAGES } from '../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlCoreSetup } from '../../plugin';
 import { JobSelectorControl } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';

@@ -15,7 +15,7 @@ import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-fin
 import { CreateDataViewButton } from '../../../../../components/create_data_view_button';
 import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import {
   getDataViewAndSavedSearchCallback,
   isCcsIndexPattern,

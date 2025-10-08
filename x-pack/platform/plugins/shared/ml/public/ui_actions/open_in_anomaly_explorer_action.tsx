@@ -13,7 +13,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ML_APP_LOCATOR } from '../../common/constants/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import type { ExplorerAppState } from '@kbn/ml-common-types/locator';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyChartsApi, AnomalyChartsEmbeddableApi } from '../embeddables';

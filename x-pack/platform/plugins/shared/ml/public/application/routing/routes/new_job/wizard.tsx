@@ -29,7 +29,7 @@ import {
   getMlManagementBreadcrumb,
 } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;

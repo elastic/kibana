@@ -9,7 +9,7 @@ import { EuiLink } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 import { useMlLink } from '../contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 export interface TrainedModelLinkProps {
   id: string;

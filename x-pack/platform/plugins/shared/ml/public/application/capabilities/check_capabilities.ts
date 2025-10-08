@@ -22,7 +22,7 @@ import { useMlKibana } from '../contexts/kibana';
 import { hasLicenseExpired } from '../license';
 
 import {
-  getDefaultCapabilities,
+  getDefaultMlCapabilities,
   type MlCapabilities,
   type MlCapabilitiesKey,
 } from '@kbn/ml-common-types/capabilities';
@@ -30,7 +30,7 @@ import { getCapabilities } from './get_capabilities';
 import type { MlApi } from '../services/ml_api_service';
 import type { MlGlobalServices } from '../app';
 
-let _capabilities: MlCapabilities = getDefaultCapabilities();
+let _capabilities: MlCapabilities = getDefaultMlCapabilities();
 
 const CAPABILITIES_REFRESH_INTERVAL = 5 * 60 * 1000; // 5min;
 

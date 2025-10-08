@@ -25,13 +25,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useMlLink } from '../../application/contexts/kibana';
-import { ML_PAGES } from '../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlApi } from '../../application/services/ml_api_service';
 import { extractInfluencers } from '../../../common/util/job_utils';
 import { JobSelectorControl } from '../../alerting/job_selector';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 import { SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
-import type { AnomalySwimLaneEmbeddableState, AnomalySwimlaneEmbeddableUserInput } from '..';
+import type { AnomalySwimLaneEmbeddableState } from '..';
+import type { AnomalySwimlaneEmbeddableUserInput } from '@kbn/ml-common-types/anomaly_swim_lane';
 import { getDefaultSwimlanePanelTitle } from './anomaly_swimlane_embeddable';
 import { getJobSelectionErrors } from '../utils';
 

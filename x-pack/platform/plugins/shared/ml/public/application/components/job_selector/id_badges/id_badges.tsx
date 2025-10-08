@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { GroupSelectorMenu } from '../group_or_job_selector_menu/group_selector_menu';
 import type { GroupObj } from '../job_selector';
 import { AnomalyDetectionInfoButton } from '../group_or_job_selector_menu/job_selector_button';
-import type { MlPages } from '../../../../../common/constants/locator';
+import type { MlPages } from '@kbn/ml-common-types/locator_ml_pages';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 
 export interface IdBadgesProps {

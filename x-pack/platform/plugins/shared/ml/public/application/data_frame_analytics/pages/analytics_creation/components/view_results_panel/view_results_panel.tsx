@@ -11,7 +11,7 @@ import { EuiCard, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
 import { useMlLink } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 interface Props {
   jobId: string;
   analysisType: DataFrameAnalysisConfigType;

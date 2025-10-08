@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 export const JobsActionMenu: FC = () => {
   const navigateToPath = useNavigateToPath();

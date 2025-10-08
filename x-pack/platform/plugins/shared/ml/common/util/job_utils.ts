@@ -30,14 +30,13 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 
 import { CREATED_BY_LABEL } from '../constants/new_job';
 import type {
-  CombinedJob,
-  CombinedJobWithStats,
-  CustomSettings,
-  Datafeed,
   Job,
   JobId,
-} from '../types/anomaly_detection_jobs';
-import type { MlServerLimits } from '../types/ml_server_info';
+  CustomSettings,
+} from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { CombinedJob, CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { MlServerLimits } from '@kbn/ml-common-types/ml_server_info';
 import type { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { getAggregations, getDatafeedAggregations } from './datafeed_utils';
 import { findAggField } from './validation_utils';

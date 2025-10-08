@@ -30,7 +30,7 @@ import type {
 
 import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';
-import type { CriteriaField } from '../results_service';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
 export interface CategoryDefinition {

@@ -26,7 +26,7 @@ import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { findAggField } from '../../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
 import type { MlApi } from '../ml_api_service';
-import type { CriteriaField } from '.';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 
 export interface ResultResponse {
   success: boolean;

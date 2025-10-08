@@ -17,5 +17,5 @@ export type {
   MLHttpFetchErrorBase,
   MLResponseError,
   QueryErrorMessage,
-} from './src/types';
+} from '@kbn/ml-common-types/errors';
 export { isBoomError, isErrorString, isEsErrorBody, isMLResponseError } from './src/types';

@@ -27,7 +27,7 @@ import { useToastNotificationService } from '../../services/toast_notification_s
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { useRefresh } from '../../routing/use_refresh';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type {
   MlNotificationMessageLevel,
   NotificationItem,

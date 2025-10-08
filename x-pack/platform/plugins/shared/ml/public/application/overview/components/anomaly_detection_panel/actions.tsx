@@ -13,7 +13,7 @@ import {
   useNavigateToPath,
   useMlManagementLocatorInternal,
 } from '../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import type { Group } from './anomaly_detection_panel';
 
 export function useGroupActions(): Array<Action<Group>> {

@@ -15,7 +15,7 @@ import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 

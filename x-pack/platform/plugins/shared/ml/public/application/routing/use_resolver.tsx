@@ -14,7 +14,7 @@ import { useMlApi, useMlKibana, useMlLicenseInfo } from '../contexts/kibana';
 import { type MlCapabilitiesKey } from '@kbn/ml-common-types/capabilities';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import type { ResolverResults, Resolvers } from './resolvers';
-import { ML_PAGES } from '../../../common/constants/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 export interface RouteResolverContext {
   initialized: boolean;

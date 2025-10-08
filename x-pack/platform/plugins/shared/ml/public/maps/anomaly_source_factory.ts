@@ -11,7 +11,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { HttpService } from '../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../plugin';
-import { ML_APP_LOCATOR } from '../../common/constants/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import type { MlApi } from '../application/services/ml_api_service';
 
 export class AnomalySourceFactory {

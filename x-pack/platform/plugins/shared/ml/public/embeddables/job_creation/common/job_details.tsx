@@ -39,7 +39,8 @@ import type { CreateState } from '../../../application/jobs/new_job/job_from_das
 import { JOB_TYPE, DEFAULT_BUCKET_SPAN } from '../../../../common/constants/new_job';
 import { basicJobValidation } from '../../../../common/util/job_utils';
 import { invalidTimeIntervalMessage } from '../../../application/jobs/new_job/common/job_validator/util';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlFromLensKibanaContext } from './context';
 
 export interface CreateADJobParams {

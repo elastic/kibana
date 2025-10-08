@@ -26,7 +26,8 @@ import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { LinkCard } from '../../../../components/link_card';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
 

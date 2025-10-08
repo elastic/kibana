@@ -25,7 +25,7 @@ import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer/timeseriesexplorer_constants';
 import { timeBucketsServiceFactory } from './time_buckets_service';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
-import type { CriteriaField } from '../services/results_service';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 import {
   MAX_SCHEDULED_EVENTS,
   TIME_FIELD_NAME,
