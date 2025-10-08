@@ -207,7 +207,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(Object.keys(res.body.item.ssl)).to.contain('key');
         expect(res.body.item.ssl.key).to.equal('KEY1');
       });
-      
+
       it('should allow to create a default fleet server host with id', async function () {
         const id = `test-${Date.now()}`;
 
