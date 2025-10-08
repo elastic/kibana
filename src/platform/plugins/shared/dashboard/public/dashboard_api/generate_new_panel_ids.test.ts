@@ -21,7 +21,7 @@ describe('generateNewPanelIds', () => {
     const { newPanels, newPanelReferences } = generateNewPanelIds(
       [
         {
-          grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+          grid: { x: 0, y: 0, w: 6, h: 6 },
           config: { title: 'panel One' },
           uid: '1',
           type: 'testPanelType',
@@ -38,7 +38,7 @@ describe('generateNewPanelIds', () => {
 
     expect(newPanels).toEqual([
       {
-        grid: { x: 0, y: 0, w: 6, h: 6, i: '100' },
+        grid: { x: 0, y: 0, w: 6, h: 6 },
         config: { title: 'panel One' },
         uid: '100',
         type: 'testPanelType',
@@ -62,11 +62,11 @@ describe('generateNewPanelIds', () => {
           collapsed: true,
           grid: {
             y: 6,
-            i: 'section1',
           },
+          uid: 'section1',
           panels: [
             {
-              grid: { x: 0, y: 0, w: 6, h: 6, i: '1' },
+              grid: { x: 0, y: 0, w: 6, h: 6 },
               config: { title: 'panel One' },
               uid: '1',
               type: 'testPanelType',
@@ -89,11 +89,11 @@ describe('generateNewPanelIds', () => {
         collapsed: true,
         grid: {
           y: 6,
-          i: '101',
         },
+        uid: '101',
         panels: [
           {
-            grid: { x: 0, y: 0, w: 6, h: 6, i: '102' },
+            grid: { x: 0, y: 0, w: 6, h: 6 },
             config: { title: 'panel One' },
             uid: '102',
             type: 'testPanelType',

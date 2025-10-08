@@ -193,10 +193,12 @@ export const PrivMonUtils = (
   const assertIsPrivileged = (user: PrivmonUser | undefined, isPrivileged: boolean) => {
     if (isPrivileged) {
       expect(user?.user?.is_privileged).toEqual(true);
+      expect(user?.user?.entity?.attributes?.Privileged).toEqual(true);
     } else {
       expect(user?.user?.is_privileged).toEqual(false);
       expect(user?.labels?.source_ids).toEqual([]);
       expect(user?.labels?.sources).toEqual([]);
+      expect(user?.user?.entity?.attributes?.Privileged).toEqual(false);
     }
   };
 
@@ -279,6 +281,9 @@ export const PrivMonUtils = (
         source: `
       if (ctx._source.user == null) ctx._source.user = new HashMap();
       ctx._source.user.is_privileged = params.new_privileged_status;
+      ctx._source.user.entity = ctx._source.user.entity != null ? ctx._source.user.entity : new HashMap();
+      ctx._source.user.entity.attributes = ctx._source.user.entity.attributes != null ? ctx._source.user.entity.attributes : new HashMap();
+      ctx._source.user.entity.attributes.Privileged = params.new_privileged_status;
       ctx._source.user.roles = params.roles;      
     `,
         params: { new_privileged_status: isPrivileged, roles: rolesParam },
