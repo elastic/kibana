@@ -25,7 +25,6 @@ export function NoSuggestionsCallout({
 }) {
   return (
     <EuiCallOut
-      announceOnMount
       title={i18n.translate(
         'xpack.streams.streamDetailRouting.childStreamList.noSuggestionsTitle',
         {
