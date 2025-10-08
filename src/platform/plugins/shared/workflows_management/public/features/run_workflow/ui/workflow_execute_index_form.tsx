@@ -250,7 +250,7 @@ export const WorkflowExecuteIndexForm = ({
           const mockRecord = {
             raw: { _source: source },
             flattened,
-            id: 'mock-id',
+            id: source && source._id ? source._id : undefined,
             isAnchor: false,
           };
 
