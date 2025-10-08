@@ -119,7 +119,7 @@ const findSpecificErrorToken = (
   }
 
   // Pattern for unclosed tags: "output '{{ content' not closed" or "tag '{% content' not closed"
-  const unclosedMatch = errorMessage.match(/(output|tag) ['"](\{\{.*?|<\%.*?)['"] not closed/);
+  const unclosedMatch = errorMessage.match(/(output|tag) ['"](\{\{.*?|\{\%.*?)['"] not closed/);
   if (unclosedMatch) {
     const content = unclosedMatch[2];
     const contentIndex = text.indexOf(content);
