@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PDF, JSON } from '../../../../i18n/constants';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
 import { ClosePopoverFn, Popover } from '../../popover';
-import { ShareWebsiteFlyout } from './flyout';
 
 const strings = {
   getShareDownloadJSONTitle: () =>
@@ -32,10 +31,6 @@ const strings = {
   getShareMenuButtonLabel: () =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareMenuButtonLabel', {
       defaultMessage: 'Share',
-    }),
-  getShareWebsiteTitle: () =>
-    i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWebsiteTitle', {
-      defaultMessage: 'Share on a website',
     }),
   getShareWorkpadMessage: () =>
     i18n.translate('xpack.canvas.workpadHeaderShareMenu.shareWorkpadMessage', {
@@ -61,12 +56,6 @@ export interface Props {
  * The Menu for Exporting a Workpad from Canvas.
  */
 export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
-  const [showFlyout, setShowFlyout] = useState(false);
-
-  const onFlyoutClose = () => {
-    setShowFlyout(false);
-  };
-
   const getPanelTree = (closePopover: ClosePopoverFn) => ({
     id: 0,
     items: [
@@ -90,14 +79,6 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
             'data-test-subj': 'sharePanel-PDFReports',
           }
         : false,
-      {
-        name: strings.getShareWebsiteTitle(),
-        icon: <EuiIcon type="globe" size="m" />,
-        onClick: () => {
-          setShowFlyout(true);
-          closePopover();
-        },
-      },
     ].filter(Boolean),
   });
 
@@ -112,8 +93,6 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
     </EuiButtonEmpty>
   );
 
-  const flyout = showFlyout ? <ShareWebsiteFlyout onClose={onFlyoutClose} /> : null;
-
   return (
     <div>
       <Popover button={shareControl} panelPaddingSize="none" anchorPosition="downLeft">
@@ -124,7 +103,6 @@ export const ShareMenu = ({ ReportingComponent, onExport }: Props) => {
           />
         )}
       </Popover>
-      {flyout}
     </div>
   );
 };
