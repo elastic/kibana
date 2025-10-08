@@ -20,8 +20,7 @@ export default function searchSolutionNavigation({
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/236973
-  describe.skip('Elasticsearch Solution Navigation', () => {
+  describe('Elasticsearch Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -40,11 +39,11 @@ export default function searchSolutionNavigation({
     it('renders expected side nav items', async () => {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      // await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
       // await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' }); enable when available
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Ingest and manage data' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Data management' });
     });
 
     it('has expected navigation', async () => {
@@ -76,11 +75,11 @@ export default function searchSolutionNavigation({
         //   breadcrumbs: ['Agent Chat'],
         //   pageTestSubject: 'onechatPageConversations',
         // },
-        // {
-        //   link: { deepLinkId: 'searchPlayground' },
-        //   breadcrumbs: ['Build', 'Playground'],
-        //   pageTestSubject: 'playgroundsListPage',
-        // },
+        {
+          link: { deepLinkId: 'searchPlayground' },
+          breadcrumbs: ['Build', 'Playground'],
+          pageTestSubject: 'playgroundsUnlicensed',
+        },
         {
           link: { deepLinkId: 'dev_tools' },
           breadcrumbs: ['Developer Tools'],
@@ -109,10 +108,10 @@ export default function searchSolutionNavigation({
           'discover',
           'dashboards',
           // 'agent_builder', enabled when available
-          // 'searchPlayground',
+          'searchPlayground',
           'machine_learning',
           'dev_tools',
-          'ingest_and_data',
+          'data_management',
           'stack_management',
         ],
         { checkOrder: false }

@@ -158,6 +158,7 @@ export function InternalDashboardTopNav({
           ) : (
             dashboardTitle
           ),
+        'aria-label': dashboardTitle,
       },
     ];
 
