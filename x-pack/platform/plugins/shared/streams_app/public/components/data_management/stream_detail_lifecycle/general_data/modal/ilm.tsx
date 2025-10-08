@@ -21,7 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { IngestStreamLifecycleAll } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+import type { IngestStreamLifecycleAll } from '@kbn/streams-schema/src/models/ingest/lifecycle';
 import { getFormattedError } from '../../../../../util/errors';
 
 interface PhaseProps {
