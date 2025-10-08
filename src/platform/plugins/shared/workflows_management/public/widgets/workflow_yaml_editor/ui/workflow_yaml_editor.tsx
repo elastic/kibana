@@ -63,11 +63,10 @@ import {
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
 import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
-import { useMonacoWorkflowStyles } from '../styles/use_monaco_workflow_styles';
 import { registerWorkflowYamlLanguage } from '../lib/monaco_language/workflow_yaml';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import { getMonacoMarkerInterceptor } from '../lib/get_monaco_marker_interceptor';
-import { useStaticTypeIcons } from '../styles/use_static_type_icons';
+import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -196,13 +195,11 @@ export const WorkflowYAMLEditor = ({
 
   // Styles
   const styles = useWorkflowEditorStyles();
-  useMonacoWorkflowStyles();
   const [positionStyles, setPositionStyles] = useState<{ top: string; right: string } | null>(null);
   const { styles: stepOutlineStyles } = useFocusedStepOutline(editorRef.current);
   const { styles: stepExecutionStyles } = useStepDecorationsInExecution(editorRef.current);
 
   useWorkflowsMonacoTheme();
-  useStaticTypeIcons();
   useDynamicTypeIcons(connectorsData);
 
   // Only show debug features in development
@@ -582,6 +579,7 @@ export const WorkflowYAMLEditor = ({
 
   return (
     <div css={css([styles.container, stepOutlineStyles, stepExecutionStyles])} ref={containerRef}>
+      <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
         anchorPosition="upCenter"
         offset={32}
