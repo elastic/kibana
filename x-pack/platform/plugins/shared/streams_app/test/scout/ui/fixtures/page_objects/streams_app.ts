@@ -86,8 +86,14 @@ export class StreamsApp {
   }
 
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
-    await expect(this.page.testSubj.locator('superDatePickerstartDatePopoverButton'), `Date picker 'start date' is incorrect`).toHaveText(expectedRange.from);
-    await expect(this.page.testSubj.locator('superDatePickerendDatePopoverButton'), `Date picker 'end date' is incorrect`).toHaveText(expectedRange.to);
+    await expect(
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      `Date picker 'start date' is incorrect`
+    ).toHaveText(expectedRange.from);
+    await expect(
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      `Date picker 'end date' is incorrect`
+    ).toHaveText(expectedRange.to);
   }
 
   async verifyStreamsAreInTable(streamNames: string[]) {
