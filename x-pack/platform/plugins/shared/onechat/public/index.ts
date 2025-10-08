@@ -17,6 +17,7 @@ import { OnechatPlugin } from './plugin';
 
 export type { OnechatPluginSetup, OnechatPluginStart };
 export type { EmbeddableConversationProps } from './embeddable';
+export type { OpenConversationFlyoutOptions } from './flyout';
 
 export const plugin: PluginInitializer<
   OnechatPluginSetup,
