@@ -10,6 +10,10 @@ import type { RoutingDefinition } from '@kbn/streams-schema';
 import { isRoutingEnabled } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiForm, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isCondition, isFilterConditionObject } from '@kbn/streamlang';
+import { isPlainObject } from 'lodash';
+import { useRoutingValueSuggestions } from '../../../hooks/use_value_suggestions';
+import { alwaysToEmptyEquals } from '../../../util/condition';
 import { useRoutingFieldSuggestions } from '../../../hooks/use_field_suggestions';
 import type { ConditionEditorProps } from '../shared/condition_editor';
 import { ConditionEditor } from '../shared/condition_editor';
@@ -23,7 +27,13 @@ export type RoutingConditionEditorProps = Omit<ConditionEditorProps, 'fieldSugge
 export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
   const isEnabled = isRoutingEnabled(props.status);
   const fieldSuggestions = useRoutingFieldSuggestions();
-
+  const valueSuggestions = useRoutingValueSuggestions(
+    isCondition(props.condition) && alwaysToEmptyEquals(props.condition)
+      ? isPlainObject(props.condition) && isFilterConditionObject(props.condition)
+        ? props.condition.field
+        : undefined
+      : undefined
+  );
   return (
     <EuiForm fullWidth>
       <EuiFormRow
@@ -50,7 +60,11 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
           onChange={(event) => props.onStatusChange(event.target.checked ? 'enabled' : 'disabled')}
         />
       </EuiFormRow>
-      <ConditionEditor {...props} fieldSuggestions={fieldSuggestions} />
+      <ConditionEditor
+        {...props}
+        fieldSuggestions={fieldSuggestions}
+        valueSuggestions={valueSuggestions}
+      />
     </EuiForm>
   );
 }
