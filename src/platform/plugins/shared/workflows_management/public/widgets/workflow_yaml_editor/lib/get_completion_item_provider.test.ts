@@ -201,15 +201,15 @@ steps:
       const suggestions = await getSuggestions(completionProvider, yamlContent);
       expect(suggestions).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ label: 'apiUrl', detail: expect.stringContaining('string') }),
+          expect.objectContaining({ label: 'apiUrl', detail: '"https://api.example.com"' }),
           expect.objectContaining({
             label: 'threshold',
-            detail: expect.stringContaining('number'),
+            detail: '100',
           }),
           expect.objectContaining({
             label: 'templates',
             detail: expect.stringContaining(
-              '{  name: string;  template: {  subject: string;  body: string}}[]'
+              '{  name: "template1";  template: {  subject: "Suspicious activity detected";  body: "Go look at the activity"}}[]'
             ),
           }),
         ])
@@ -238,10 +238,10 @@ steps:
       const suggestions = await getSuggestions(completionProvider, yamlContent);
       expect(suggestions).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ label: 'name', detail: expect.stringContaining('string') }),
+          expect.objectContaining({ label: 'name', detail: '"template1"' }),
           expect.objectContaining({
             label: 'template',
-            detail: expect.stringContaining('{  subject: string;  body: string}'),
+            detail: '{  subject: "Suspicious activity detected";  body: "Go look at the activity"}',
           }),
         ])
       );
