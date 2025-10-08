@@ -14,29 +14,9 @@ import {
   EuiDescriptionList,
   EuiFlyout,
   EuiFlyoutBody,
-  EuiPageTemplate,
   EuiSpacer,
-  EuiSwitch,
-  EuiTab,
-  EuiTabs,
   EuiText,
-  type EuiPageTemplateProps,
 } from '@elastic/eui';
-import type { OverlayStart } from '@kbn/core/public';
-import type { RenderingService } from '@kbn/core-rendering-browser';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { BrowserRouter as Router } from '@kbn/shared-ux-router';
-
-import { FlyoutWithIsOpen } from './_flyout_with_isopen';
-import { FlyoutWithOverlays } from './_flyout_with_overlays';
-import { FlyoutWithoutIsOpen } from './_flyout_without_isopen';
-
-interface AppDeps {
-  basename: string;
-  navigation: NavigationPublicPluginStart;
-  overlays: OverlayStart;
-  rendering: RenderingService;
-}
 
 interface FlyoutSessionProps {
   title: string;
@@ -169,92 +149,81 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
 
 FlyoutSession.displayName = 'FlyoutSession';
 
-// Tab constants
-const FLYOUT_WITH_ISOPEN = 'render_with_isopen';
-const FLYOUT_WITHOUT_ISOPEN = 'render_without_isopen';
-const FLYOUT_WITH_OVERLAYS = 'render_with_overlays';
+export interface FlyoutWithIsOpenProps {
+  flyoutType: 'overlay' | 'push';
+}
 
-export const App = ({ basename, navigation, overlays, rendering }: AppDeps) => {
-  const panelled: EuiPageTemplateProps['panelled'] = undefined;
-  const restrictWidth: EuiPageTemplateProps['restrictWidth'] = false;
-  const bottomBorder: EuiPageTemplateProps['bottomBorder'] = 'extended';
-
-  const [flyoutType, setFlyoutType] = React.useState<'overlay' | 'push'>('overlay');
-  const [childBackgroundShaded, setChildBackgroundShaded] = React.useState(false);
-  const [selectedTabId, setSelectedTabId] = React.useState(FLYOUT_WITH_ISOPEN);
-
-  const handleTabClick = (tabId: string) => {
-    setSelectedTabId(tabId);
-  };
-
-  const renderTabContent = () => {
-    switch (selectedTabId) {
-      case FLYOUT_WITH_ISOPEN:
-        return <FlyoutWithIsOpen flyoutType={flyoutType} />;
-      case FLYOUT_WITHOUT_ISOPEN:
-        return <FlyoutWithoutIsOpen flyoutType={flyoutType} />;
-      case FLYOUT_WITH_OVERLAYS:
-        return (
-          <FlyoutWithOverlays overlays={overlays} rendering={rendering} flyoutType={flyoutType} />
-        );
-      default:
-        return null;
-    }
-  };
-
+export const FlyoutWithIsOpen: React.FC<FlyoutWithIsOpenProps> = ({ flyoutType }) => {
   return (
-    <Router basename={basename}>
-      <navigation.ui.TopNavMenu
-        appName="flyout_system_example"
-        showSearchBar={false}
-        useDefaultBehaviors={true}
-      />
-      <EuiPageTemplate
-        panelled={panelled}
-        restrictWidth={restrictWidth}
-        bottomBorder={bottomBorder}
-        offset={0}
-        grow={false}
-      >
-        <EuiPageTemplate.Header iconType="logoElastic" pageTitle="Flyout System Example" />
-        <EuiPageTemplate.Section grow={false} bottomBorder={bottomBorder}>
-          <EuiSwitch
-            label="Flyouts push content"
-            checked={flyoutType === 'push'}
-            onChange={(e) => setFlyoutType(e.target.checked ? 'push' : 'overlay')}
-          />
-          <EuiSpacer />
-          <EuiSwitch
-            label="Child flyout background shaded"
-            checked={childBackgroundShaded}
-            onChange={(e) => setChildBackgroundShaded(e.target.checked)}
-          />
-        </EuiPageTemplate.Section>
-        <EuiPageTemplate.Section>
-          <EuiTabs>
-            <EuiTab
-              isSelected={selectedTabId === FLYOUT_WITH_ISOPEN}
-              onClick={() => handleTabClick(FLYOUT_WITH_ISOPEN)}
-            >
-              Render EuiFlyout with isOpen prop
-            </EuiTab>
-            <EuiTab
-              isSelected={selectedTabId === FLYOUT_WITHOUT_ISOPEN}
-              onClick={() => handleTabClick(FLYOUT_WITHOUT_ISOPEN)}
-            >
-              Render EuiFlyout without isOpen prop
-            </EuiTab>
-            <EuiTab
-              isSelected={selectedTabId === FLYOUT_WITH_OVERLAYS}
-              onClick={() => handleTabClick(FLYOUT_WITH_OVERLAYS)}
-            >
-              Render with overlays.openFlyout
-            </EuiTab>
-          </EuiTabs>
-          <EuiSpacer />
-          {renderTabContent()}
-        </EuiPageTemplate.Section>
-      </EuiPageTemplate>
-    </Router>
+    <EuiDescriptionList
+      type="column"
+      columnGutterSize="m"
+      listItems={[
+        {
+          title: 'Session A: main size = s, child size = s',
+          description: (
+            <FlyoutSession flyoutType={flyoutType} title="Session A" mainSize="s" childSize="s" />
+          ),
+        },
+        {
+          title: 'Session B: main size = m, child size = s',
+          description: (
+            <FlyoutSession flyoutType={flyoutType} title="Session B" mainSize="m" childSize="s" />
+          ),
+        },
+        {
+          title: 'Session C: main size = s, child size = fill',
+          description: (
+            <FlyoutSession
+              flyoutType={flyoutType}
+              title="Session C"
+              mainSize="s"
+              childSize="fill"
+            />
+          ),
+        },
+        {
+          title: 'Session D: main size = fill, child size = s',
+          description: (
+            <FlyoutSession
+              flyoutType={flyoutType}
+              title="Session D"
+              mainSize="fill"
+              childSize="s"
+            />
+          ),
+        },
+        {
+          title: 'Session E: main size = fill',
+          description: <FlyoutSession flyoutType={flyoutType} title="Session E" mainSize="fill" />,
+        },
+        {
+          title: 'Session F: main size = s, child size = fill (maxWidth 1000px)',
+          description: (
+            <FlyoutSession
+              flyoutType={flyoutType}
+              title="Session F"
+              mainSize="s"
+              childSize="fill"
+              childMaxWidth={1000}
+            />
+          ),
+        },
+        {
+          title: 'Session G: main size = fill (maxWidth 1000px), child size = s',
+          description: (
+            <FlyoutSession
+              flyoutType={flyoutType}
+              title="Session G"
+              mainSize="fill"
+              mainMaxWidth={1000}
+              childSize="s"
+            />
+          ),
+        },
+      ]}
+    />
   );
 };
+
+FlyoutWithIsOpen.displayName = 'FlyoutWithIsOpen';
