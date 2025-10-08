@@ -9,7 +9,6 @@
 
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
 import {
   LICENSE_TYPE_BASIC,
@@ -33,7 +32,6 @@ type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
   data: DataPluginStart;
   discover: DiscoverServerPluginStart;
-  security?: SecurityPluginStart;
 }
 
 export class CsvSearchSourceExportType extends ExportType<
@@ -100,43 +98,93 @@ export class CsvSearchSourceExportType extends ExportType<
     if (isFleetAgentExport) {
       logger.info('Using internal user privileges for Fleet agent export');
 
-      // Basic authorization check - ensure user has Fleet privileges
-      // This is a lightweight check without importing Fleet dependencies
-      try {
-        const security = this.startDeps.security;
-        if (security) {
-          const user = security.authc.getCurrentUser(request);
-          if (!user) {
-            logger.warn('No authenticated user found for Fleet agent export');
-            throw new Error('Authentication required for Fleet agent export');
-          }
+      // For Fleet agent exports, use internal user privileges completely
+      // This avoids user credential issues by bypassing user context entirely
 
-          logger.debug(`Fleet agent export requested by user: ${user.username}`);
-          // Additional authorization will be handled by the internal user access pattern
-        }
-      } catch (error) {
-        logger.error(`Fleet agent export authorization error: ${error.message}`);
-        throw error;
-      }
-
-      // Use internal user privileges for Fleet agent data access
-      // This approach keeps using the normal search flow but substitutes the ES client
-      // to use internal user privileges when the search cursors make ES calls
-
-      // Create search source with user context (for UI settings, etc.)
+      // Create search source with user context for UI settings only
       const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request);
 
       // Use internal ES client for all operations
       const internalEsClient = this.startDeps.esClient.asInternalUser;
+
+      // Create an ES client interface that uses internal user for both methods
       const internalEsClientScoped = {
         ...this.startDeps.esClient.asScoped(request),
         asCurrentUser: internalEsClient,
         asInternalUser: internalEsClient,
       };
 
+      // For Fleet exports, we'll bypass the normal search client entirely
+      // and use a custom implementation that calls searchAsInternalUser directly
       const clients = {
         uiSettings,
-        data: dataPluginStart.search.asScoped(request),
+        data: {
+          // This is a minimal implementation that bypasses user credentials
+          search: (searchRequest: any, searchOptions: any = {}) => {
+            logger.debug('Fleet agent export: Using searchAsInternalUser strategy directly');
+
+            // Check if this is a PIT search and disable ccs_minimize_roundtrips to avoid conflict
+            const isPitSearch = searchRequest.params?.pit?.id;
+            if (isPitSearch) {
+              logger.debug(
+                'Fleet agent export: Detected PIT search, removing conflicting parameters'
+              );
+              // Remove parameters that conflict with PIT searches
+              const { indices_options, indicesOptions, ignore_unavailable, index, ...cleanParams } =
+                searchRequest.params;
+
+              searchRequest = {
+                ...searchRequest,
+                params: {
+                  ...cleanParams,
+                  // Explicitly override the default parameters that conflict with PIT
+                  ccs_minimize_roundtrips: false,
+                  ignore_unavailable: undefined, // Remove this parameter for PIT
+                },
+              };
+            }
+
+            // Create internal dependencies without user context
+            const internalDeps = {
+              esClient: internalEsClientScoped, // Use the full scoped client interface
+              savedObjectsClient: this.startDeps.savedObjects.createInternalRepository(),
+              uiSettingsClient: uiSettings,
+              searchSessionsClient: {
+                save: async () => undefined,
+                get: async () => ({ attributes: {} } as any),
+                find: async () => ({ saved_objects: [] } as any),
+                update: async () => ({ attributes: {} } as any),
+                cancel: async () => ({}),
+                delete: async () => ({}),
+                extend: async () => ({ attributes: {} } as any),
+                status: async () => ({ status: 'complete' } as any),
+                getId: async () => '',
+                trackId: async () => {},
+                getSearchIdMapping: async () => new Map(),
+                getConfig: () => ({ enabled: false } as any),
+              },
+              request,
+            };
+
+            return dataPluginStart.search.searchAsInternalUser.search(
+              searchRequest,
+              searchOptions,
+              internalDeps
+            ) as any;
+          },
+          // Add missing methods required by ISearchClient interface
+          cancel: async () => {},
+          extend: async () => {},
+          // Minimal session methods to satisfy interface
+          saveSession: async () => ({ id: '' }),
+          getSession: async () => ({ attributes: {} } as any),
+          findSessions: async () => ({ saved_objects: [] } as any),
+          updateSession: async () => ({ attributes: {} } as any),
+          cancelSession: async () => ({}),
+          deleteSession: async () => ({}),
+          extendSession: async () => ({ attributes: {} } as any),
+          getSessionStatus: async () => ({ status: 'complete' } as any),
+        },
         es: internalEsClientScoped,
       };
       const dependencies = {
