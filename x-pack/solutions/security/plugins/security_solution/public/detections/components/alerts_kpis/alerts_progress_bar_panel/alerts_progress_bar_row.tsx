@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import type { AlertsProgressBarData } from './types';
 
 /**
- * Renders a EuiProgress, used in the KPI chart for the alerts page as well as the AI for SOC alert summary page.
+ * Renders a EuiProgress, used in the KPI chart for the alerts page as well as EASE alert summary page.
  */
 export const ProgressBarRow: React.FC<{ item: AlertsProgressBarData }> = ({ item }) => {
   const { euiTheme } = useEuiTheme();
