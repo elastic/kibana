@@ -6,6 +6,11 @@
  */
 import React from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GlobalStylesStorybookDecorator } from '../../../../../.storybook/decorators';
 import { GroupedItem as GroupedItemComp } from './grouped_item';
 import type {
@@ -49,7 +54,7 @@ export const EntityItem: StoryFn<EntityStoryProps> = ({
   ...itemArgs
 }: EntityStoryProps) => {
   const item: EntityItemType = {
-    itemType: 'entity',
+    itemType: DOCUMENT_TYPE_ENTITY,
     ...itemArgs,
   };
 
@@ -77,7 +82,7 @@ export const EventItem: StoryFn<EventAlertStoryProps> = ({
   ...itemArgs
 }: EventAlertStoryProps) => {
   const item: EventItemType = {
-    itemType: 'event',
+    itemType: DOCUMENT_TYPE_EVENT,
     ...itemArgs,
   };
 
@@ -102,7 +107,7 @@ export const AlertItem: StoryFn<EventAlertStoryProps> = ({
   ...itemArgs
 }: EventAlertStoryProps) => {
   const item: AlertItemType = {
-    itemType: 'alert',
+    itemType: DOCUMENT_TYPE_ALERT,
     ...itemArgs,
   };
 

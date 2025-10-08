@@ -8,6 +8,11 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GROUPED_ITEM_TITLE_TEST_ID } from '../../../test_ids';
 import type { EntityOrEventItem } from '../types';
 import { displayEntityName, displayEventName } from '../utils';
@@ -21,22 +26,22 @@ export const HeaderRow = ({ item }: HeaderRowProps) => {
 
   const title = useMemo(() => {
     switch (item.itemType) {
-      case 'event':
-      case 'alert':
+      case DOCUMENT_TYPE_EVENT:
+      case DOCUMENT_TYPE_ALERT:
         return displayEventName(item);
-      case 'entity':
+      case DOCUMENT_TYPE_ENTITY:
         return displayEntityName(item);
     }
   }, [item]);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      {item.itemType === 'alert' && (
+      {item.itemType === DOCUMENT_TYPE_ALERT && (
         <EuiFlexItem grow={false}>
           <EuiIcon type="warningFilled" size="m" color="danger" />
         </EuiFlexItem>
       )}
-      {item.itemType === 'entity' && item.icon && (
+      {item.itemType === DOCUMENT_TYPE_ENTITY && item.icon && (
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={item.icon}
