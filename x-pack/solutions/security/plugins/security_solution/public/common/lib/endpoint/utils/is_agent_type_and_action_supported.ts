@@ -23,7 +23,6 @@ export const isAgentTypeAndActionSupported = (
   actionType: ResponseActionType = 'manual'
 ): boolean => {
   const features = ExperimentalFeaturesService.get();
-  const isSentinelOneV1Enabled = features.responseActionsSentinelOneV1Enabled;
   const isSentinelOneRunScriptEnabled = features.responseActionsSentinelOneRunScriptEnabled;
   const isCrowdstrikeHostIsolationEnabled =
     features.responseActionsCrowdstrikeManualHostIsolationEnabled;
@@ -31,7 +30,7 @@ export const isAgentTypeAndActionSupported = (
 
   const isAgentTypeSupported =
     agentType === 'endpoint' ||
-    (agentType === 'sentinel_one' && isSentinelOneV1Enabled) ||
+    agentType === 'sentinel_one' ||
     (agentType === 'crowdstrike' && isCrowdstrikeHostIsolationEnabled) ||
     (agentType === 'microsoft_defender_endpoint' && isMicrosoftDefenderEndpointEnabled);
 
