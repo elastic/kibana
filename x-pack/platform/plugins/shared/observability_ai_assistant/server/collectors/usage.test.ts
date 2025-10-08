@@ -72,7 +72,11 @@ describe('observability_ai_assistant usage collector', () => {
       mockEsClient.search.mockResolvedValueOnce({
         aggregations: {
           global_entries: { unique_users: { value: 10 } },
+          global_entries_user_created: { unique_users: { value: 8 } },
+          global_entries_assistant_created: { unique_users: { value: 2 } },
           private_entries: { unique_users: { value: 5 } },
+          private_entries_user_created: { unique_users: { value: 4 } },
+          private_entries_assistant_created: { unique_users: { value: 1 } },
           user_instructions: { unique_users: { value: 3 } },
         },
       });
@@ -90,7 +94,11 @@ describe('observability_ai_assistant usage collector', () => {
       expect(result).toEqual({
         knowledge_base: {
           users_with_global_entries: 10,
+          users_with_global_entries_user_created: 8,
+          users_with_global_entries_assistant_created: 2,
           users_with_private_entries: 5,
+          users_with_private_entries_user_created: 4,
+          users_with_private_entries_assistant_created: 1,
           users_with_user_instructions: 3,
         },
         conversations: {
@@ -105,7 +113,11 @@ describe('observability_ai_assistant usage collector', () => {
       mockEsClient.search.mockResolvedValue({
         aggregations: {
           global_entries: { unique_users: { value: 0 } },
+          global_entries_user_created: { unique_users: { value: 0 } },
+          global_entries_assistant_created: { unique_users: { value: 0 } },
           private_entries: { unique_users: { value: 0 } },
+          private_entries_user_created: { unique_users: { value: 0 } },
+          private_entries_assistant_created: { unique_users: { value: 0 } },
           user_instructions: { unique_users: { value: 0 } },
           archived: { unique_users: { value: 0 } },
           private: { unique_users: { value: 0 } },

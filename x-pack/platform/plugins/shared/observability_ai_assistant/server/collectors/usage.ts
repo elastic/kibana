@@ -13,7 +13,11 @@ import { resourceNames } from '../service';
 interface ObservabilityAIAssistantUsage {
   knowledge_base: {
     users_with_global_entries: number;
+    users_with_global_entries_user_created: number;
+    users_with_global_entries_assistant_created: number;
     users_with_private_entries: number;
+    users_with_private_entries_user_created: number;
+    users_with_private_entries_assistant_created: number;
     users_with_user_instructions: number;
   };
   conversations: {
@@ -42,10 +46,34 @@ export function registerUsageCollector(
             description: 'Number of users with global knowledge base entries',
           },
         },
+        users_with_global_entries_user_created: {
+          type: 'long',
+          _meta: {
+            description: 'Number of users with global knowledge base entries created by user',
+          },
+        },
+        users_with_global_entries_assistant_created: {
+          type: 'long',
+          _meta: {
+            description: 'Number of users with global knowledge base entries created by assistant',
+          },
+        },
         users_with_private_entries: {
           type: 'long',
           _meta: {
             description: 'Number of users with private knowledge base entries',
+          },
+        },
+        users_with_private_entries_user_created: {
+          type: 'long',
+          _meta: {
+            description: 'Number of users with private knowledge base entries created by user',
+          },
+        },
+        users_with_private_entries_assistant_created: {
+          type: 'long',
+          _meta: {
+            description: 'Number of users with private knowledge base entries created by assistant',
           },
         },
         users_with_user_instructions: {
@@ -99,10 +127,63 @@ export function registerUsageCollector(
               },
             },
           },
+          global_entries_user_created: {
+            filter: {
+              bool: {
+                filter: [{ term: { public: true } }, { term: { role: 'user_entry' } }],
+              },
+            },
+            aggs: {
+              unique_users: {
+                cardinality: { field: 'user.id' },
+              },
+            },
+          },
+          global_entries_assistant_created: {
+            filter: {
+              bool: {
+                filter: [{ term: { public: true } }, { term: { role: 'assistant_summarization' } }],
+              },
+            },
+            aggs: {
+              unique_users: {
+                cardinality: { field: 'user.id' },
+              },
+            },
+          },
           private_entries: {
             filter: {
               bool: {
                 filter: [{ term: { public: false } }],
+                must_not: [{ term: { type: 'user_instruction' } }],
+              },
+            },
+            aggs: {
+              unique_users: {
+                cardinality: { field: 'user.id' },
+              },
+            },
+          },
+          private_entries_user_created: {
+            filter: {
+              bool: {
+                filter: [{ term: { public: false } }, { term: { role: 'user_entry' } }],
+                must_not: [{ term: { type: 'user_instruction' } }],
+              },
+            },
+            aggs: {
+              unique_users: {
+                cardinality: { field: 'user.id' },
+              },
+            },
+          },
+          private_entries_assistant_created: {
+            filter: {
+              bool: {
+                filter: [
+                  { term: { public: false } },
+                  { term: { role: 'assistant_summarization' } },
+                ],
                 must_not: [{ term: { type: 'user_instruction' } }],
               },
             },
@@ -165,8 +246,24 @@ export function registerUsageCollector(
             (kbResponse.aggregations?.global_entries as any)
               ?.unique_users as AggregationsCardinalityAggregate
           )?.value,
+          users_with_global_entries_user_created: (
+            (kbResponse.aggregations?.global_entries_user_created as any)
+              ?.unique_users as AggregationsCardinalityAggregate
+          )?.value,
+          users_with_global_entries_assistant_created: (
+            (kbResponse.aggregations?.global_entries_assistant_created as any)
+              ?.unique_users as AggregationsCardinalityAggregate
+          )?.value,
           users_with_private_entries: (
             (kbResponse.aggregations?.private_entries as any)
+              ?.unique_users as AggregationsCardinalityAggregate
+          )?.value,
+          users_with_private_entries_user_created: (
+            (kbResponse.aggregations?.private_entries_user_created as any)
+              ?.unique_users as AggregationsCardinalityAggregate
+          )?.value,
+          users_with_private_entries_assistant_created: (
+            (kbResponse.aggregations?.private_entries_assistant_created as any)
               ?.unique_users as AggregationsCardinalityAggregate
           )?.value,
           users_with_user_instructions: (
