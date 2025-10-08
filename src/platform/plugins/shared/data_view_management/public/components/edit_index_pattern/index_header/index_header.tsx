@@ -12,6 +12,8 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiIcon,
@@ -46,7 +48,7 @@ const editAriaLabel = i18n.translate('indexPatternManagement.editDataView.editAr
 });
 
 const editTooltip = i18n.translate('indexPatternManagement.editDataView.editTooltip', {
-  defaultMessage: 'Edit',
+  defaultMessage: 'Edit data view',
 });
 
 const removeAriaLabel = i18n.translate('indexPatternManagement.editDataView.removeAria', {
@@ -54,7 +56,7 @@ const removeAriaLabel = i18n.translate('indexPatternManagement.editDataView.remo
 });
 
 const removeTooltip = i18n.translate('indexPatternManagement.editDataView.removeTooltip', {
-  defaultMessage: 'Delete',
+  defaultMessage: 'Delete data view',
 });
 
 export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
@@ -69,33 +71,13 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const contextMenuItems = [
-    canSave && (
-      <EuiContextMenuItem
-        onClick={editIndexPatternClick}
-        icon="pencil"
-        aria-label={editAriaLabel}
-        data-test-subj="editIndexPatternButton"
-        color="primary"
-      >
-        <EuiText size="s" color="primary">
-          {editTooltip}
-        </EuiText>
-      </EuiContextMenuItem>
-    ),
-    defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
-      <EuiContextMenuItem
-        onClick={setDefault}
-        icon="starFilled"
-        aria-label={setDefaultAriaLabel}
-        data-test-subj="setDefaultIndexPatternButton"
-      >
-        <EuiText size="s">{setDefaultTooltip}</EuiText>
-      </EuiContextMenuItem>
-    ),
-    canSave && indexPattern.isPersisted() && (
+    canSave && indexPattern.isPersisted() && deleteIndexPatternClick && (
       <EuiContextMenuItem
         color="danger"
-        onClick={deleteIndexPatternClick}
+        onClick={() => {
+          setIsOpen(false);
+          deleteIndexPatternClick();
+        }}
         icon={<EuiIcon color="danger" type="trash" />}
         aria-label={removeAriaLabel}
         data-test-subj="deleteIndexPatternButton"
@@ -107,36 +89,67 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
     ),
   ].filter(Boolean) as ReactElement[];
 
+  const renderMoreActionsButton = () => {
+    return (
+      <EuiPopover
+        isOpen={isOpen}
+        closePopover={() => setIsOpen(false)}
+        panelPaddingSize="none"
+        button={
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            onClick={() => setIsOpen((prevIsOpen) => !prevIsOpen)}
+            size="m"
+            data-test-subj="moreActionsButton"
+            aria-label={i18n.translate(
+              'indexPatternManagement.editDataView.moreActionsButtonAria',
+              {
+                defaultMessage: 'More Actions',
+              }
+            )}
+            color="text"
+          >
+            <FormattedMessage
+              id="indexPatternManagement.editDataView.moreActionsButtonLabel"
+              defaultMessage="More Actions"
+            />
+          </EuiButtonIcon>
+        }
+      >
+        <EuiContextMenuPanel items={contextMenuItems} size="s" />
+      </EuiPopover>
+    );
+  };
+
   return (
     <EuiPageHeader
       pageTitle={<span data-test-subj="indexPatternTitle">{indexPattern.getName()}</span>}
       bottomBorder
       rightSideItems={[
-        <EuiPopover
-          isOpen={isOpen}
-          closePopover={() => setIsOpen(false)}
-          panelPaddingSize="none"
-          button={
-            <EuiButton
-              iconType="arrowDown"
-              iconSide="right"
-              onClick={() => setIsOpen(!isOpen)}
-              size="m"
-              data-test-subj="actionsButton"
-              aria-label={i18n.translate('indexPatternManagement.editDataView.actionsButtonAria', {
-                defaultMessage: 'Actions',
-              })}
-            >
-              <FormattedMessage
-                id="indexPatternManagement.editDataView.actionsButtonLabel"
-                defaultMessage="Actions"
-              />
-            </EuiButton>
-          }
-        >
-          <EuiContextMenuPanel items={contextMenuItems} />
-        </EuiPopover>,
-      ]}
+        canSave && (
+          <EuiButton
+            onClick={editIndexPatternClick}
+            iconType="pencil"
+            aria-label={editAriaLabel}
+            data-test-subj="editIndexPatternButton"
+            color="primary"
+          >
+            {editTooltip}
+          </EuiButton>
+        ),
+        contextMenuItems.length > 0 && renderMoreActionsButton(),
+        defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
+          <EuiButtonEmpty
+            onClick={setDefault}
+            iconType="starEmpty"
+            aria-label={setDefaultAriaLabel}
+            data-test-subj="setDefaultIndexPatternButton"
+            color="text"
+          >
+            {setDefaultTooltip}
+          </EuiButtonEmpty>
+        ),
+      ].filter(Boolean)}
     >
       {children}
     </EuiPageHeader>

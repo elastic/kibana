@@ -563,7 +563,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('addFieldFilterButton');
 
       // change title
-      await testSubjects.click('actionsButton');
       await testSubjects.click('editIndexPatternButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {

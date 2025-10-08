@@ -217,7 +217,6 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickEditIndexButton() {
-    await this.testSubjects.click('actionsButton');
     await this.testSubjects.click('editIndexPatternButton');
     await this.retry.waitFor('flyout', async () => {
       return await this.testSubjects.exists('indexPatternEditorFlyout');
@@ -225,7 +224,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async clickDeletePattern() {
-    await this.testSubjects.click('actionsButton');
+    await this.testSubjects.click('moreActionsButton');
     await this.testSubjects.click('deleteIndexPatternButton');
   }
 
