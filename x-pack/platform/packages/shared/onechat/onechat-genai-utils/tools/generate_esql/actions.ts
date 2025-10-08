@@ -94,7 +94,7 @@ export const formatAction = (action: Action, withoutToolCalls = true): BaseMessa
         ? [
             createAIMessage('Now you can execute the query'),
             createUserMessage(
-              `I ran the query through autocorrect and the output was
+              `I ran the query through autocorrect and the corrected query was:
 
  \`\`\`esql
  "${action.output}"
@@ -123,7 +123,7 @@ export const formatAction = (action: Action, withoutToolCalls = true): BaseMessa
         ? [
             createAIMessage('Now you can execute the query'),
             createUserMessage(
-              `I tried executing it and I got the following error:
+              `I tried executing the query and got the following error:
 
 \`\`\`
 ${action.error}
@@ -148,7 +148,7 @@ Can you fix the query?`
           ];
     case 'request_documentation':
       // always use tool call format for this action, to stay closer to the original flow
-      // also Claude don't seem to care about requesting more doc.
+      // also Claude doesn't seem to care about requesting more doc.
       return [
         createToolCallMessage({
           toolCallId,

@@ -55,7 +55,6 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         nlQuery,
         index: selectedTarget,
         additionalContext: context,
-        executeQuery: false,
         model,
         esClient: esClient.asCurrentUser,
         logger,
