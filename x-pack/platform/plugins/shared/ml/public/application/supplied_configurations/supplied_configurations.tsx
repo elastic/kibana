@@ -22,7 +22,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import useMount from 'react-use/lib/useMount';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useMlKibana } from '../contexts/kibana';
-import type { Module } from '../../../common/types/modules';
+import type { Module } from '@kbn/ml-common-types/modules';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { LoadingIndicator } from '../components/loading_indicator';
 import { filterModules } from './utils';

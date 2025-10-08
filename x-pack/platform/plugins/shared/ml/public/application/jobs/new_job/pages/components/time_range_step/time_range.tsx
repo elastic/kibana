@@ -30,7 +30,7 @@ import {
   ML_FROZEN_TIER_PREFERENCE,
   type MlStorageKey,
   type TMlStorageMapped,
-} from '../../../../../../../common/types/storage';
+} from '@kbn/ml-common-types/storage';
 
 export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) => {
   const timefilter = useTimefilter();

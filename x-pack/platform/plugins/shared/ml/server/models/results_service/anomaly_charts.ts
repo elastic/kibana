@@ -28,7 +28,7 @@ import {
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import type { SeverityThreshold } from '../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type { MlClient } from '../../lib/ml_client';
 import type {
   MetricData,
@@ -40,7 +40,7 @@ import type {
   ChartPoint,
   SeriesConfig,
   ExplorerChartsData,
-} from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
 import {
   isMappableJob,
   isModelPlotChartableForDetector,

@@ -18,7 +18,7 @@ import type {
   AnomalyDetectionManagementItems,
   AnalyticsManagementItems,
   TrainedModelsManagementItems,
-} from '../../common/types/management';
+} from '@kbn/ml-common-types/management';
 import { filterForEnabledFeatureModels } from './trained_models';
 
 /**

@@ -17,7 +17,7 @@ import type {
   Datafeed,
   Detector,
   CustomRule,
-} from '../../../../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs';
 import { createBasicDetector } from './util/default_configs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';

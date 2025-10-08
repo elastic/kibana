@@ -17,9 +17,9 @@ import {
   ML_NOTIFICATIONS_LAST_CHECKED_AT,
   type MlStorageKey,
   type TMlStorageMapped,
-} from '../../../../common/types/storage';
+} from '@kbn/ml-common-types/storage';
 import { useAsObservable } from '../../hooks';
-import type { NotificationsCountResponse } from '../../../../common/types/notifications';
+import type { NotificationsCountResponse } from '@kbn/ml-common-types/notifications';
 
 const NOTIFICATIONS_CHECK_INTERVAL = 60000;
 

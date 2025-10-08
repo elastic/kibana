@@ -11,12 +11,12 @@ import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   NotificationsQueryParams,
   NotificationsSearchResponse,
-} from '../../../../common/types/notifications';
+} from '@kbn/ml-common-types/notifications';
 import type { HttpService } from '../http_service';
 import type {
   NotificationsCountQueryParams,
   NotificationsCountResponse,
-} from '../../../../common/types/notifications';
+} from '@kbn/ml-common-types/notifications';
 
 export function notificationsProvider(httpService: HttpService) {
   return {

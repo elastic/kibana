@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useMountedState from 'react-use/lib/useMountedState';
-import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs';
 import { useMlApi } from '../../../contexts/kibana';
 import { JobDetails } from '../../jobs_list/components/job_details';
 import { loadFullJob } from '../../jobs_list/components/utils';

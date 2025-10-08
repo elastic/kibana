@@ -37,7 +37,7 @@ import { useActions } from './use_actions';
 import { useMlLink, useMlKibana } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
-import { DFA_SAVED_OBJECT_TYPE } from '../../../../../../../common/types/saved_objects';
+import { DFA_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { useCanManageSpacesAndSavedObjects } from '../../../../../hooks/use_spaces';
 
 const TRUNCATE_TEXT_LINES = 3;

@@ -14,7 +14,7 @@ import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlApi, useMlKibana } from '../../../../../contexts/kibana';
-import type { DeepReadonly } from '../../../../../../../common/types/common';
+import type { DeepReadonly } from '@kbn/ml-common-types/common';
 
 import { useRefreshAnalyticsList } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';

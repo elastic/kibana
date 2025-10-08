@@ -17,11 +17,7 @@ import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { EntityControl } from '../entity_control';
 import { useMlJobService } from '../../../services/job_service';
-import type {
-  CombinedJob,
-  Detector,
-  JobId,
-} from '../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob, Detector, JobId } from '@kbn/ml-common-types/anomaly_detection_jobs';
 import { useMlKibana } from '../../../contexts/kibana';
 import { APP_STATE_ACTION } from '../../timeseriesexplorer_constants';
 import type { ComboBoxOption, Entity, EntityControlProps } from '../entity_control/entity_control';
@@ -33,7 +29,7 @@ import {
   type PartitionFieldsConfig,
   type MlStorageKey,
   type TMlStorageMapped,
-} from '../../../../../common/types/storage';
+} from '@kbn/ml-common-types/storage';
 import type { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
 import { PlotByFunctionControls } from '../plot_function_controls';

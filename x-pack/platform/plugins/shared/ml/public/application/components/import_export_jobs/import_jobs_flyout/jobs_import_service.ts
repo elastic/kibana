@@ -8,9 +8,9 @@
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
 import { createDatafeedId } from '../../../../../common/util/job_utils';
-import type { JobType } from '../../../../../common/types/saved_objects';
-import type { Job, Datafeed } from '../../../../../common/types/anomaly_detection_jobs';
-import type { Filter } from '../../../../../common/types/filters';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
+import type { Job, Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { Filter } from '@kbn/ml-common-types/filters';
 
 export interface ImportedAdJob {
   job: Job;

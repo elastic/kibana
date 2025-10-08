@@ -31,7 +31,7 @@ import type { GetDataFrameAnalyticsResponse } from '../../../../services/ml_api_
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from '../../../../model_management/config_mapping';
 import { useMlApi } from '../../../../contexts/kibana';
-import type { TrainedModelConfigResponse } from '../../../../../../common/types/trained_models';
+import type { TrainedModelConfigResponse } from '@kbn/ml-common-types/trained_models';
 
 export interface AnalyticsSelectorIds {
   model_id?: string;

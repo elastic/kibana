@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { LinkId } from '@kbn/deeplinks-ml';
 
 import { type AppDeepLink } from '@kbn/core/public';
-import type { MlCapabilities } from '../../../common/types/capabilities';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { ML_PAGES } from '../../../common/constants/locator';
 
 function createDeepLinks(

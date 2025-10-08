@@ -32,7 +32,7 @@ import {
 import type {
   MlJobTimeRange,
   MlJobWithTimeRange,
-} from '../../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs';
 import { useMlKibana } from '../../contexts/kibana';
 import type { JobSelectionMaps } from './job_selector';
 

@@ -44,7 +44,7 @@ import type {
   TopHitsResultsKeys,
   TopInfluencerAADDoc,
   TopRecordAADDoc,
-} from '../../../common/types/alerts';
+} from '@kbn/ml-common-types/alerts';
 import type {
   AnomalyDetectionAlertContext,
   AnomalyDetectionAlertPayload,
@@ -52,7 +52,7 @@ import type {
 import { resolveMaxTimeInterval } from '../../../common/util/job_utils';
 import { getTopNBuckets, resolveLookbackInterval } from '../../../common/util/alerts';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 import { getTypicalAndActualValues } from '../../models/results_service/results_service';
 import type { GetDataViewsService } from '../data_views_utils';
 import { assertUserError } from './utils';

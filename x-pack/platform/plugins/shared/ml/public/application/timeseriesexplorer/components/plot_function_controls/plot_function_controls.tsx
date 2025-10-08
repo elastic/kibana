@@ -14,7 +14,7 @@ import { useMlJobService } from '../../../services/job_service';
 import { getFunctionDescription, isMetricDetector } from '../../get_function_description';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { useMlResultsService } from '../../../services/results_service';
-import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
 import type { MlEntity } from '../../../../embeddables';
 
 const plotByFunctionOptions = [

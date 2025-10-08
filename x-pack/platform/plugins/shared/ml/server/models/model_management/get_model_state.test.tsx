@@ -6,7 +6,7 @@
  */
 
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
-import type { NLPModelItem } from '../../../common/types/trained_models';
+import type { NLPModelItem } from '@kbn/ml-common-types/trained_models';
 import { getModelDeploymentState } from './get_model_state';
 
 describe('getModelDeploymentState', () => {

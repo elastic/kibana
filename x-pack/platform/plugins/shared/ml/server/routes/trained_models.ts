@@ -13,7 +13,7 @@ import type { ElasticCuratedModelName, ElserVersion } from '@kbn/ml-trained-mode
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 import { ML_INTERNAL_BASE_PATH, type MlFeatures } from '../../common/constants/app';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../common/constants/trained_models';
-import { type TrainedModelConfigResponse } from '../../common/types/trained_models';
+import { type TrainedModelConfigResponse } from '@kbn/ml-common-types/trained_models';
 import { wrapError } from '../client/error_wrapper';
 import { modelsProvider } from '../models/model_management';
 import type { RouteInitialization } from '../types';

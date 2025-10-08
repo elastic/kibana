@@ -28,7 +28,7 @@ import {
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
 import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
-import { DFA_SAVED_OBJECT_TYPE } from '../../../../../../../common/types/saved_objects';
+import { DFA_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import { useCanManageSpacesAndSavedObjects } from '../../../../../hooks/use_spaces';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (

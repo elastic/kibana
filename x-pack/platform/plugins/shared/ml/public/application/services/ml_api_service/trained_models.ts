@@ -15,10 +15,7 @@ import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
-import type { MlSavedObjectType } from '../../../../common/types/saved_objects';
-import type { HttpService } from '../http_service';
-import { useMlKibana } from '../../contexts/kibana';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type {
   ModelPipelines,
   TrainedModelStat,
@@ -28,7 +25,10 @@ import type {
   TrainedModelUIItem,
   TrainedModelConfigResponse,
   StartTrainedModelDeploymentResponse,
-} from '../../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import type { HttpService } from '../http_service';
+import { useMlKibana } from '../../contexts/kibana';
 
 /**
  * Service with APIs calls to perform operations with trained models.

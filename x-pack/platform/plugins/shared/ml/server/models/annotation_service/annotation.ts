@@ -17,14 +17,14 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '../../../common/constants/index_patterns';
 
-import type { Annotation, Annotations } from '../../../common/types/annotations';
+import type { Annotation, Annotations } from '@kbn/ml-common-types/annotations';
 import {
   isAnnotation,
   isAnnotations,
   getAnnotationFieldName,
   getAnnotationFieldValue,
-} from '../../../common/types/annotations';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/annotations';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions

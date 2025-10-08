@@ -23,10 +23,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import type {
-  CombinedJob,
-  Datafeed,
-} from '../../../../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob, Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
 import { JobCreatorContext } from '../../job_creator_context';

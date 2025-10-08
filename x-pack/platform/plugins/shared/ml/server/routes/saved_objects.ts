@@ -19,7 +19,7 @@ import {
   itemTypeSchema,
 } from './schemas/saved_objects';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
-import type { MlSavedObjectType } from '../../common/types/saved_objects';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 
 /**
  * Routes for job saved object management

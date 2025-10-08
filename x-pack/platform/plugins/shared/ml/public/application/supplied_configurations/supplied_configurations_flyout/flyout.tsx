@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { Module } from '../../../../common/types/modules';
+import type { Module } from '@kbn/ml-common-types/modules';
 import { isLogoObject } from '../supplied_configurations';
 import { OverviewTabContent } from './overview_tab_content';
 import { JobsTabContent } from './jobs_tab_content';

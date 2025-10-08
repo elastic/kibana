@@ -25,7 +25,7 @@ import {
   getDefaultCapabilities,
   type MlCapabilities,
   type MlCapabilitiesKey,
-} from '../../../common/types/capabilities';
+} from '@kbn/ml-common-types/capabilities';
 import { getCapabilities } from './get_capabilities';
 import type { MlApi } from '../services/ml_api_service';
 import type { MlGlobalServices } from '../app';

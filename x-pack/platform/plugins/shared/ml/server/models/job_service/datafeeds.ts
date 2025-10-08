@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
-import type { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
+import type { Datafeed, DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface MlDatafeedsResponse {

@@ -29,7 +29,7 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { MlJobState } from '@elastic/elasticsearch/lib/api/types';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../../../cases/constants';
 import type { CombinedJobWithStats } from '../../../../../server/shared';
-import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { useMlKibana } from '../../../contexts/kibana';
 import { useCasesModal } from '../../../contexts/kibana/use_cases_modal';
 import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/single_metric_viewer/get_default_panel_title';

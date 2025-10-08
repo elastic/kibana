@@ -6,7 +6,7 @@
  */
 
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import type { DeepReadonly } from '../../../../../../../common/types/common';
+import type { DeepReadonly } from '@kbn/ml-common-types/common';
 import type { FormMessage, State, SourceIndexMap } from './state';
 
 export enum ACTION {

@@ -38,7 +38,7 @@ import {
   getAnomalyDetectorsProvider,
 } from './providers';
 
-import type { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
+import type { ResolveMlCapabilities, MlCapabilitiesKey } from '@kbn/ml-common-types/capabilities';
 import type { HasMlCapabilities } from '../lib/capabilities';
 import { hasMlCapabilitiesProvider } from '../lib/capabilities';
 import {
@@ -54,7 +54,7 @@ import type { MlAlertingServiceProvider } from './providers/alerting_service';
 import { getAlertingServiceProvider } from './providers/alerting_service';
 import type { JobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
 import { getJobsHealthServiceProvider } from '../lib/alerts/jobs_health_service';
-import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 import type { GetDataViewsService } from '../lib/data_views_utils';
 import { getDataViewsServiceFactory } from '../lib/data_views_utils';
 

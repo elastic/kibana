@@ -17,11 +17,11 @@ import type {
   MlServerDefaults,
   MlServerLimits,
   MlNodeCount,
-} from '../../../../common/types/ml_server_info';
-import type { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
-import type { RecognizeModuleResult } from '../../../../common/types/modules';
-import type { MlCalendar, MlCalendarId, UpdateCalendar } from '../../../../common/types/calendars';
-import type { BucketSpanEstimatorData } from '../../../../common/types/job_service';
+} from '@kbn/ml-common-types/ml_server_info';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
+import type { RecognizeModuleResult } from '@kbn/ml-common-types/modules';
+import type { MlCalendar, MlCalendarId, UpdateCalendar } from '@kbn/ml-common-types/calendars';
+import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
 import type {
   Job,
   JobStats,
@@ -30,13 +30,13 @@ import type {
   AnalysisConfig,
   ModelSnapshot,
   IndicesOptions,
-} from '../../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs';
 import type {
   DataRecognizerConfigResponse,
   Module,
   RecognizeResult,
-} from '../../../../common/types/modules';
-import type { DatafeedValidationResponse } from '../../../../common/types/job_validation';
+} from '@kbn/ml-common-types/modules';
+import type { DatafeedValidationResponse } from '@kbn/ml-common-types/job_validation';
 
 import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
 

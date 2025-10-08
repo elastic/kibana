@@ -17,7 +17,7 @@ import type {
 
 import type { MLSavedObjectService } from '../../saved_objects';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import type { JobType } from '../../../common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 
 export function searchProvider(
   client: IScopedClusterClient,

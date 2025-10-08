@@ -17,8 +17,8 @@ import {
   OverviewStatsBar,
   type StatEntry,
 } from '../../../components/collapsible_panel/collapsible_panel';
-import type { MlStorageKey, TMlStorageMapped } from '../../../../../common/types/storage';
-import { ML_OVERVIEW_PANELS } from '../../../../../common/types/storage';
+import type { MlStorageKey, TMlStorageMapped } from '@kbn/ml-common-types/storage';
+import { ML_OVERVIEW_PANELS } from '@kbn/ml-common-types/storage';
 import { AnalyticsTable } from './table';
 import { useGetAnalytics } from '../../../data_frame_analytics/pages/analytics_management/services/analytics_service';
 import type { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';

@@ -31,7 +31,7 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 import type {
   MlNotificationMessageLevel,
   NotificationItem,
-} from '../../../../common/types/notifications';
+} from '@kbn/ml-common-types/notifications';
 import { useMlKibana } from '../../contexts/kibana';
 import { useEnabledFeatures } from '../../contexts/ml';
 

@@ -32,7 +32,7 @@ import type { ModuleJobUI } from '../page';
 import { usePartialState } from '../../../../components/custom_hooks';
 import { isJobIdValid } from '../../../../../../common/util/job_utils';
 import { JobGroupsInput } from '../../common/components';
-import type { JobOverride } from '../../../../../../common/types/modules';
+import type { JobOverride } from '@kbn/ml-common-types/modules';
 
 interface EditJobProps {
   job: ModuleJobUI;

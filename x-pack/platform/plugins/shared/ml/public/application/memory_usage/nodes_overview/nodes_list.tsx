@@ -22,7 +22,7 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type { ModelsBarStats } from '../../components/stats_bar';
 import { StatsBar } from '../../components/stats_bar';
-import type { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
+import type { NodeDeploymentStatsResponse } from '@kbn/ml-common-types/trained_models';
 import { ML_PAGES } from '../../../../common/constants/locator';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';

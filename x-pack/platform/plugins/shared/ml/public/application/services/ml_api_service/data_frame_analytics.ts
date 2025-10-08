@@ -19,7 +19,7 @@ import type {
 import type { ValidateAnalyticsJobResponse } from '@kbn/ml-validators';
 
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
-import type { JobMessage } from '../../../../common/types/audit_message';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
 import type { PutDataFrameAnalyticsResponseSchema } from '../../../../server/routes/schemas/data_frame_analytics_schema';
 
 import { useMlKibana } from '../../contexts/kibana';

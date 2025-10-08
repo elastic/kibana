@@ -43,7 +43,7 @@ import { AccessDeniedPage } from '../access_denied_page';
 import { InsufficientLicensePage } from '../insufficient_license_page';
 import { JobSpacesSyncFlyout } from '../../../../components/job_spaces_sync';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
-import type { MlSavedObjectType } from '../../../../../../common/types/saved_objects';
+import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';

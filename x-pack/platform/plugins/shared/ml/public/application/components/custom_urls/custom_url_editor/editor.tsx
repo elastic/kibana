@@ -35,7 +35,7 @@ import type { DashboardItems } from '../../../services/dashboard_service';
 import type { CustomUrlSettings } from './utils';
 import { isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
-import { type Job } from '../../../../../common/types/anomaly_detection_jobs';
+import { type Job } from '@kbn/ml-common-types/anomaly_detection_jobs';
 
 import type { TimeRangeType } from './constants';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';

@@ -16,7 +16,7 @@ import {
   type MlCapabilities,
   basicLicenseMlCapabilities,
   featureCapabilities,
-} from '../../../common/types/capabilities';
+} from '@kbn/ml-common-types/capabilities';
 
 export const setupCapabilitiesSwitcher = (
   coreSetup: CoreSetup,

@@ -43,10 +43,7 @@ import type {
 import { annotationsRefreshed } from '../../../services/annotations_service';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
-import {
-  getAnnotationFieldName,
-  getAnnotationFieldValue,
-} from '../../../../../common/types/annotations';
+import { getAnnotationFieldName, getAnnotationFieldValue } from '@kbn/ml-common-types/annotations';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import type { MlKibanaReactContextValue } from '../../../contexts/kibana';
 

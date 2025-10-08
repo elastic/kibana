@@ -6,7 +6,7 @@
  */
 
 import { chartLimits } from './anomaly_charts';
-import type { ChartPoint } from '../../../common/types/results';
+import type { ChartPoint } from '@kbn/ml-common-types/results';
 
 describe('chartLimits', () => {
   test('returns NaN when called without data', () => {

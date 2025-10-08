@@ -24,7 +24,7 @@ import type {
   TrainedModelsSpacesResponse,
   SyncCheckResponse,
   CanSyncToAllSpacesResponse,
-} from '../../../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
 
 export const savedObjectsApiProvider = (httpService: HttpService) => ({
   jobsSpaces() {

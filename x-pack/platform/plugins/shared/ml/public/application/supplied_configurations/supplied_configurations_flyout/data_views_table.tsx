@@ -17,7 +17,7 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 import type {
   RecognizeModuleResult,
   RecognizeModuleResultDataView,
-} from '../../../../common/types/modules';
+} from '@kbn/ml-common-types/modules';
 
 interface Props {
   matchingDataViews: RecognizeModuleResult;

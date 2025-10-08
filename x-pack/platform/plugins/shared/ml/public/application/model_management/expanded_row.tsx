@@ -36,10 +36,10 @@ import type {
   NLPModelItem,
   TrainedModelItem,
   TrainedModelStat,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import { useFieldFormatter } from '../contexts/kibana/use_field_formatter';
 import { useEnabledFeatures } from '../contexts/ml';
-import { isNLPModelItem } from '../../../common/types/trained_models';
+import { isNLPModelItem } from '@kbn/ml-common-types/trained_models';
 
 interface ExpandedRowProps {
   item: TrainedModelItem;

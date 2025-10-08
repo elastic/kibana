@@ -37,7 +37,7 @@ import {
   isNLPModelItem,
   type ModelDownloadState,
   type TrainedModelUIItem,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import type {
   UpdateAllocationParams,
   DeleteModelParams,

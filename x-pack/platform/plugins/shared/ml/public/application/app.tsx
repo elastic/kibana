@@ -21,7 +21,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
-import { ML_STORAGE_KEYS } from '../../common/types/storage';
+import { ML_STORAGE_KEYS } from '@kbn/ml-common-types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
 import { setLicenseCache } from './license';
 import { MlRouter } from './routing';

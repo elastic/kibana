@@ -15,7 +15,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SingleMetricViewerEmbeddableUserInput, SingleMetricViewerEmbeddableInput } from '..';
 import { SingleMetricViewerInitializer } from './single_metric_viewer_initializer';
 import type { MlApi } from '../../application/services/ml_api_service';
-import { ML_STORAGE_KEYS } from '../../../common/types/storage';
+import { ML_STORAGE_KEYS } from '@kbn/ml-common-types/storage';
 
 export function EmbeddableSingleMetricViewerUserInput({
   coreStart,

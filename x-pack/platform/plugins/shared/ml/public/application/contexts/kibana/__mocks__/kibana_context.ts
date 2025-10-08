@@ -11,8 +11,8 @@ import { BehaviorSubject } from 'rxjs';
 import { mlApiServicesMock } from '../../../services/__mocks__/ml_api_services';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { LIGHT_THEME } from '@elastic/charts';
-import type { MlCapabilities } from '../../../../../common/types/capabilities';
-import { getDefaultCapabilities } from '../../../../../common/types/capabilities';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
+import { getDefaultCapabilities } from '@kbn/ml-common-types/capabilities';
 
 export const chartsServiceMock = {
   theme: {

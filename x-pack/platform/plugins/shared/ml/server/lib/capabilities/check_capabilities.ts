@@ -14,8 +14,8 @@ import type {
   MlCapabilitiesResponse,
   ResolveMlCapabilities,
   MlCapabilitiesKey,
-} from '../../../common/types/capabilities';
-import { adminMlCapabilities } from '../../../common/types/capabilities';
+} from '@kbn/ml-common-types/capabilities';
+import { adminMlCapabilities } from '@kbn/ml-common-types/capabilities';
 import { upgradeCheckProvider } from './upgrade';
 import type { MlLicense } from '../../../common/license';
 import {

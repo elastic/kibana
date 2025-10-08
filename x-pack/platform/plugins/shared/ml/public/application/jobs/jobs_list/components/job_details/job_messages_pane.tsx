@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { JobMessages } from '../../../../components/job_messages';
-import type { JobMessage } from '../../../../../../common/types/audit_message';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApi } from '../../../../contexts/kibana';
 import { checkPermission } from '../../../../capabilities/check_capabilities';

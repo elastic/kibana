@@ -58,9 +58,9 @@ import type {
   CombinedJobWithStats,
   MlSummaryJob,
   ModelSnapshot,
-} from '../../../../../../common/types/anomaly_detection_jobs';
-import type { JobMessage } from '../../../../../../common/types/audit_message';
-import type { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
+} from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { JobMessage } from '@kbn/ml-common-types/audit_message';
+import type { LineAnnotationDatumWithModelSnapshot } from '@kbn/ml-common-types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';

@@ -14,7 +14,7 @@ import type {
   CardinalityValidationResult,
 } from '../../../../services/ml_api_service';
 import type { JobCreator } from '../job_creator';
-import type { CombinedJob } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
 import type { BasicValidations } from './job_validator';
 
 export enum VALIDATOR_SEVERITY {

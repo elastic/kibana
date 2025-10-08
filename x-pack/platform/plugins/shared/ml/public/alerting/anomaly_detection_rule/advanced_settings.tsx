@@ -20,7 +20,7 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { validateTopNBucket } from '../validators';
 import { TOP_N_BUCKETS_COUNT } from '../../../common/constants/alerts';
-import { type MlAnomalyDetectionAlertAdvancedSettings } from '../../../common/types/alerts';
+import { type MlAnomalyDetectionAlertAdvancedSettings } from '@kbn/ml-common-types/alerts';
 import { TimeIntervalControl } from '../time_interval_control';
 
 interface AdvancedSettingsProps {

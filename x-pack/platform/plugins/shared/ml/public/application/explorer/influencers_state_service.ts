@@ -24,7 +24,7 @@ import type { MlApi } from '../services/ml_api_service';
 import type {
   GetTopInfluencersRequest,
   InfluencersByFieldResponse,
-} from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
 import { StateService } from '../services/state_service';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyTimelineStateService } from './anomaly_timeline_state_service';

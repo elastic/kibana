@@ -8,7 +8,7 @@
 import type { ApplicationStart } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { jobCloningService } from '../../../../services/job_cloning_service';
-import type { Job, Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
+import type { Job, Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(

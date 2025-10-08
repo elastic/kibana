@@ -19,10 +19,10 @@ import type {
   ExplorationPageUrlState,
   MlGenericUrlState,
   MlCommonGlobalState,
-} from '../../../common/types/locator';
+} from '@kbn/ml-common-types/locator';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
-import type { AppPageState } from '../../../common/types/common';
+import type { AppPageState } from '@kbn/ml-common-types/common';
 
 export function formatDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,

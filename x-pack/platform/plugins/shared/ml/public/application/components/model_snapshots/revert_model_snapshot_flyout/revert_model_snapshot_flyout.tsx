@@ -37,7 +37,7 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import type {
   ModelSnapshot,
   CombinedJobWithStats,
-} from '../../../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs';
 import { useMlApi, useNotifications } from '../../../contexts/kibana';
 import { chartLoaderProvider } from './chart_loader';
 import { mlResultsServiceProvider } from '../../../services/results_service';

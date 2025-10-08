@@ -18,7 +18,7 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
-import type { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
+import type { Datafeed, IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs';
 
 /**
  * Service for carrying out queries to obtain data

@@ -14,7 +14,7 @@ import {
   ML_JOB_SAVED_OBJECT_TYPE,
   ML_MODULE_SAVED_OBJECT_TYPE,
   ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
-} from '../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
 
 interface MlModuleAttributes {
   id: string;

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { MlApi } from './ml_api_service';
 import type {
   CloudInfo,
   MlServerDefaults,
   MlServerLimits,
-} from '../../../common/types/ml_server_info';
+} from '@kbn/ml-common-types/ml_server_info';
+import type { MlApi } from './ml_api_service';
 
 let defaults: MlServerDefaults = {
   anomaly_detectors: {},

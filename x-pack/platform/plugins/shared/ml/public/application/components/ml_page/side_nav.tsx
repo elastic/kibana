@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { useUrlState } from '@kbn/ml-url-state';
-import type { MlLocatorParams } from '../../../../common/types/locator';
+import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';

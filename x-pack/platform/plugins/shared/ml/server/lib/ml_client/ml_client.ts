@@ -11,9 +11,9 @@ import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-util
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
-import type { JobType } from '../../../common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 
-import type { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
+import type { Job, Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs';
 import { searchProvider } from './search';
 
 import { MLJobNotFound, MLModelNotFound } from './errors';

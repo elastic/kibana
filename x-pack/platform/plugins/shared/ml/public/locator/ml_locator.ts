@@ -12,7 +12,7 @@ import type {
   MlLocatorParams,
   MlLocator,
   ChangePointDetectionQueryState,
-} from '../../common/types/locator';
+} from '@kbn/ml-common-types/locator';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import {
   formatExplorerUrl,

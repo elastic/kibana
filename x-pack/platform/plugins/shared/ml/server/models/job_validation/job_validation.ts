@@ -23,7 +23,7 @@ import { validateDatafeedPreviewWithMessages } from './validate_datafeed_preview
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 import type { validateJobSchema } from '../../routes/schemas/job_validation_schema';
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
 import { getDatafeedAggregations, getIndicesOptions } from '../../../common/util/datafeed_utils';
 import type { AuthorizationHeader } from '../../lib/request_authorization';

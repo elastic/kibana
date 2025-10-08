@@ -21,7 +21,7 @@ import { CloseJobConfirm } from './close_job_confirm';
 import type {
   CombinedJobWithStats,
   ModelSnapshot,
-} from '../../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs';
 
 interface Props {
   job: CombinedJobWithStats;

@@ -34,12 +34,12 @@ import type {
   CombinedJobWithStats,
   Datafeed,
   Job,
-} from '../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs';
 import type {
   JobsExistResponse,
   BulkCreateResults,
   ResetJobsResponse,
-} from '../../../common/types/job_service';
+} from '@kbn/ml-common-types/job_service';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';

@@ -27,7 +27,7 @@ import { isDataFrameAnalyticsRunning } from '../analytics_list/common';
 
 import { deleteActionNameText, DeleteActionName } from './delete_action_name';
 
-import type { JobType } from '../../../../../../../common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 
 import { getDestinationIndex } from '../../../../common/get_destination_index';
 

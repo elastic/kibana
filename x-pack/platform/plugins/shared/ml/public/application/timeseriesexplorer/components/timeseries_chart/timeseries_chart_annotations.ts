@@ -9,8 +9,8 @@ import d3 from 'd3';
 import moment from 'moment';
 
 import { ANNOTATION_TYPE } from '../../../../../common/constants/annotations';
-import type { Annotation, Annotations } from '../../../../../common/types/annotations';
-import type { Dictionary } from '../../../../../common/types/common';
+import type { Annotation, Annotations } from '@kbn/ml-common-types/annotations';
+import type { Dictionary } from '@kbn/ml-common-types/common';
 
 import type { TimeseriesChart } from './timeseries_chart';
 

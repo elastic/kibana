@@ -11,7 +11,7 @@ import type { DATAFEED_STATE } from '../../../../../common/constants/states';
 import type {
   CombinedJobWithStats,
   MlSummaryJob,
-} from '../../../../../common/types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs';
 import type { MlApi } from '../../../services/ml_api_service';
 
 export function loadFullJob(mlApi: MlApi, jobId: string): Promise<CombinedJobWithStats>;

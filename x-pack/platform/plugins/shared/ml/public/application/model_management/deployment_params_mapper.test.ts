@@ -8,7 +8,7 @@
 import type { MlTrainedModelAssignmentTaskParametersAdaptive } from './deployment_params_mapper';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
 import type { CloudInfo } from '../services/ml_server_info';
-import type { MlServerLimits } from '../../../common/types/ml_server_info';
+import type { MlServerLimits } from '@kbn/ml-common-types/ml_server_info';
 
 describe('DeploymentParamsMapper', () => {
   const modelId = 'test-model';

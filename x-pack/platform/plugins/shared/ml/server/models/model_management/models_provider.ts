@@ -46,8 +46,8 @@ import type {
   TrainedModelItem,
   TrainedModelUIItem,
   TrainedModelWithPipelines,
-} from '../../../common/types/trained_models';
-import { isBuiltInModel, isExistingModel } from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
+import { isBuiltInModel, isExistingModel } from '@kbn/ml-common-types/trained_models';
 import {
   isDFAModelItem,
   isElasticModel,
@@ -55,7 +55,7 @@ import {
   type ModelDownloadState,
   type PipelineDefinition,
   type TrainedModelConfigResponse,
-} from '../../../common/types/trained_models';
+} from '@kbn/ml-common-types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { filterForEnabledFeatureModels } from '../../routes/trained_models';

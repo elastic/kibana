@@ -25,7 +25,7 @@ import {
   ALL_JOBS_SELECTION,
   HEALTH_CHECK_NAMES,
 } from '../../../common/constants/alerts';
-import type { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
+import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs';
 import type { GetGuards } from '../../shared_services/shared_services';
 import type {
   AnomalyDetectionJobHealthAlertPayload,
@@ -46,7 +46,7 @@ import {
   jobAuditMessagesProvider,
   type JobAuditMessagesService,
 } from '../../models/job_audit_messages/job_audit_messages';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 
 export interface TestResult {
   name: string;

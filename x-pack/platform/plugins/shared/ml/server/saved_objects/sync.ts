@@ -13,7 +13,7 @@ import type {
   SyncSavedObjectResponse,
   InitializeSavedObjectResponse,
   MlSavedObjectType,
-} from '../../common/types/saved_objects';
+} from '@kbn/ml-common-types/saved_objects';
 import { checksFactory } from './checks';
 import type { JobStatus } from './checks';
 import {
