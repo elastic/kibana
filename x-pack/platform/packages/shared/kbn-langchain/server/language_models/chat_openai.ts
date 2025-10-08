@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { get } from 'lodash/fp';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { ChatOpenAI, ChatOpenAICompletions } from '@langchain/openai';
+import type { OpenAIClient } from '@langchain/openai';
+import { ChatOpenAICompletions } from '@langchain/openai';
 import type { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+
+import { parseChatCompletion } from 'openai/lib/parser';
+import type { ChatCompletionCreateParams } from 'openai/resources';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import type {
   InferenceChatCompleteParamsSchema,
@@ -49,65 +51,7 @@ export interface ActionsClientChatOpenAIParams {
  * In the ChatOpenAI class, *_streamResponseChunks calls completionWithRetry
  * and iterates over the chunks to form the response.
  */
-export class ActionsClientChatOpenAI extends ChatOpenAI {
-  // Not using getter as `this._llmType()` is called in the constructor via `super({})`
-  protected llmType: string;
-
-  constructor({
-    actionsClient,
-    connectorId,
-    traceId = uuidv4(),
-    llmType,
-    logger,
-    maxRetries,
-    model,
-    signal,
-    streaming = true,
-    temperature,
-    timeout,
-    maxTokens,
-    telemetryMetadata,
-  }: ActionsClientChatOpenAIParams) {
-    super({
-      maxRetries,
-      maxTokens,
-      streaming,
-      // matters only for the LangSmith logs (Metadata > Invocation Params), which are misleading if this is not set
-      modelName: model ?? DEFAULT_OPEN_AI_MODEL,
-      openAIApiKey: '',
-      completions: new ActionsClientChatOpenAICompletions({
-        actionsClient,
-        connectorId,
-        traceId,
-        llmType,
-        logger,
-        maxRetries,
-        model,
-        signal,
-        streaming,
-        temperature,
-        timeout,
-        maxTokens,
-        telemetryMetadata,
-      }),
-      useResponsesApi: false,
-    });
-    this.llmType = llmType ?? LLM_TYPE;
-  }
-
-  _llmType() {
-    return this.llmType;
-  }
-
-  // Model type needs to be `base_chat_model` to work with LangChain OpenAI Tools
-  // We may want to make this configurable (ala _llmType) if different agents end up requiring different model types
-  // See: https://github.com/langchain-ai/langchainjs/blob/fb699647a310c620140842776f4a7432c53e02fa/langchain/src/agents/openai/index.ts#L185
-  _modelType() {
-    return 'base_chat_model';
-  }
-}
-
-export class ActionsClientChatOpenAICompletions extends ChatOpenAICompletions {
+export class ActionsClientChatOpenAI extends ChatOpenAICompletions {
   streaming: boolean;
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
@@ -122,6 +66,7 @@ export class ActionsClientChatOpenAICompletions extends ChatOpenAICompletions {
   #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
   #logger: Logger;
+  #actionResultData: string;
   #traceId: string;
   #signal?: AbortSignal;
   #timeout?: number;
@@ -156,6 +101,7 @@ export class ActionsClientChatOpenAICompletions extends ChatOpenAICompletions {
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
     this.#timeout = timeout;
+    this.#actionResultData = '';
     this.streaming = streaming;
     this.#signal = signal;
     this.model = model ?? DEFAULT_OPEN_AI_MODEL;
@@ -165,6 +111,32 @@ export class ActionsClientChatOpenAICompletions extends ChatOpenAICompletions {
     // the connector can be passed an undefined temperature through #temperature
     this.temperature = temperature ?? this.temperature;
     this.telemetryMetadata = telemetryMetadata;
+  }
+
+  getActionResultData(): string {
+    return this.#actionResultData;
+  }
+
+  _llmType() {
+    return this.llmType;
+  }
+
+  // Model type needs to be `base_chat_model` to work with LangChain OpenAI Tools
+  // We may want to make this configurable (ala _llmType) if different agents end up requiring different model types
+  // See: https://github.com/langchain-ai/langchainjs/blob/fb699647a310c620140842776f4a7432c53e02fa/langchain/src/agents/openai/index.ts#L185
+  _modelType() {
+    return 'base_chat_model';
+  }
+
+  async betaParsedCompletionWithRetry(
+    request: OpenAI.ChatCompletionCreateParamsNonStreaming
+  ): Promise<ReturnType<OpenAIClient['chat']['completions']['parse']>> {
+    return this.completionWithRetry(request).then((response) =>
+      parseChatCompletion(
+        response,
+        this.constructBody(request, this.llmType) as ChatCompletionCreateParams
+      )
+    );
   }
 
   async completionWithRetry(
