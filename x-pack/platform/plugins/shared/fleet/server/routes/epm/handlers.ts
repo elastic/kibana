@@ -21,7 +21,6 @@ import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticse
 import type {
   GetInfoResponse,
   InstallPackageResponse,
-  DeletePackageResponse,
   GetCategoriesResponse,
   GetPackagesResponse,
   GetLimitedPackagesResponse,
@@ -58,6 +57,7 @@ import type {
   CustomIntegrationRequestSchema,
   RollbackPackageRequestSchema,
   GetKnowledgeBaseRequestSchema,
+  DeletePackageResponseSchema,
 } from '../../types';
 import { KibanaSavedObjectType } from '../../types';
 import {
@@ -263,7 +263,7 @@ export const getBulkAssetsHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const { assetIds } = request.body;
   const savedObjectsClient = coreContext.savedObjects.getClient({
-    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate],
+    includedHiddenTypes: [KibanaSavedObjectType.alertingRuleTemplate, KibanaSavedObjectType.alert],
   });
   const savedObjectsTypeRegistry = coreContext.savedObjects.typeRegistry;
   const assets = await getBulkAssets(
@@ -547,7 +547,7 @@ export const deletePackageHandler: FleetRequestHandler<
     esClient,
     force: request.query?.force,
   });
-  const body: DeletePackageResponse = {
+  const body: TypeOf<typeof DeletePackageResponseSchema> = {
     items: res,
   };
   return response.ok({ body });
@@ -693,6 +693,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       latest_install_failed_attempts: attributes.latest_install_failed_attempts,
       latest_executed_state: attributes.latest_executed_state,
       previous_version: attributes.previous_version,
+      rolled_back: attributes.rolled_back,
     };
 
     return {

@@ -58,19 +58,10 @@ export const StreamSystemsFlyout = ({
           <h2>
             <FormattedMessage
               id="xpack.streams.streamSystemsFlyout.title"
-              defaultMessage="Stream description"
+              defaultMessage="Feature identification"
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.streams.streamSystemsFlyout.description"
-              defaultMessage="Stream description is used to provide context to Elastic, so we could analyse, generate and work better with your data. We use this information to provide significant events and other insights."
-            />
-          </p>
-        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         className={css`

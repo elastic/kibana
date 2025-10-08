@@ -17,7 +17,7 @@ import { CaseMetricsFeature } from '../../common/types/api';
 
 describe('useCasesFeatures', () => {
   // isAlertsEnabled, isSyncAlertsEnabled, alerts
-  const tests: Array<[boolean, boolean, CasesContextFeatures['alerts']]> = [
+  const alertTests: Array<[boolean, boolean, CasesContextFeatures['alerts']]> = [
     [true, true, { enabled: true, sync: true }],
     [true, false, { enabled: true, sync: false }],
     [false, false, { enabled: false, sync: true }],
@@ -33,7 +33,7 @@ describe('useCasesFeatures', () => {
     [true, true, {}],
   ];
 
-  it.each(tests)(
+  it.each(alertTests)(
     'returns isAlertsEnabled=%s and isSyncAlertsEnabled=%s if feature.alerts=%s',
     async (isAlertsEnabled, isSyncAlertsEnabled, alerts) => {
       const { result } = renderHook(() => useCasesFeatures(), {
@@ -48,6 +48,41 @@ describe('useCasesFeatures', () => {
         pushToServiceAuthorized: false,
         observablesAuthorized: false,
         isObservablesFeatureEnabled: true,
+        isExtractObservablesEnabled: false,
+        connectorsAuthorized: false,
+      });
+    }
+  );
+
+  // isObservablesFeatureEnabled, isExtractObservablesEnabled, observables
+  const observableTests: Array<[boolean, boolean, CasesContextFeatures['observables']]> = [
+    [true, true, { enabled: true, autoExtract: true }],
+    [true, false, { enabled: true, autoExtract: false }],
+    [false, false, { enabled: false, autoExtract: true }],
+    [false, false, { enabled: false, autoExtract: false }],
+    [false, false, { enabled: false }],
+    // if observables is enabled and autoExtract is by defaultfalse
+    [true, false, { enabled: true }],
+  ];
+
+  it.each(observableTests)(
+    'returns isObservablesFeatureEnabled=%s and isExtractObservablesEnabled=%s if feature.observables=%s',
+    async (isObservablesFeatureEnabled, isExtractObservablesEnabled, observables) => {
+      const { result } = renderHook(() => useCasesFeatures(), {
+        wrapper: ({ children }) => (
+          <TestProviders features={{ observables }}>{children}</TestProviders>
+        ),
+      });
+
+      expect(result.current).toEqual({
+        isAlertsEnabled: true,
+        isSyncAlertsEnabled: true,
+        metricsFeatures: [],
+        caseAssignmentAuthorized: false,
+        pushToServiceAuthorized: false,
+        observablesAuthorized: false,
+        isObservablesFeatureEnabled,
+        isExtractObservablesEnabled,
         connectorsAuthorized: false,
       });
     }
@@ -70,6 +105,7 @@ describe('useCasesFeatures', () => {
       pushToServiceAuthorized: false,
       observablesAuthorized: false,
       isObservablesFeatureEnabled: true,
+      isExtractObservablesEnabled: false,
       connectorsAuthorized: false,
     });
   });

@@ -21,6 +21,7 @@ import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { JsonObject } from '@kbn/utility-types';
+import { AlertDetailFlyout } from '@kbn/response-ops-alerts-table/components/alert_detail_flyout';
 import {
   CONFIG_EDITOR_KQL_ERROR_TOAST_TITLE,
   getSolutionRuleTypesAuthPromptBody,
@@ -156,8 +157,9 @@ export const EmbeddableAlertsTable = ({
         variant: 'transparent',
       }}
       openLinksInNewTab={true}
-      flyoutOwnsFocus={true}
-      flyoutPagination={false}
+      renderExpandedAlertView={(props) => (
+        <AlertDetailFlyout {...props} ownFocus={true} hasPagination={false} />
+      )}
       // Disable configuration persistence
       configurationStorage={null}
       // Disable columns customziation

@@ -14,6 +14,7 @@ import type { NavigationID as MlNavId } from '@kbn/default-nav-ml';
 import type { NavigationID as AlNavId } from '@kbn/default-nav-analytics';
 import type { NavigationID as MgmtNavId } from '@kbn/default-nav-management';
 import type { NavigationID as DevNavId } from '@kbn/default-nav-devtools';
+import type { TourStepId } from '@kbn/core-chrome-navigation-tour';
 
 // use this for nicer type suggestions, but allow any string anyway
 type NavigationId = MlNavId | AlNavId | MgmtNavId | DevNavId | string;
@@ -30,6 +31,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
   const browser = ctx.getService('browser');
   const retry = ctx.getService('retry');
   const log = ctx.getService('log');
+  const kibanaServer = ctx.getService('kibanaServer');
 
   async function getSideNavVersion(): Promise<'v1' | 'v2'> {
     const sidenav = await testSubjects.find('~projectSideNav', TIMEOUT_CHECK);
@@ -83,7 +85,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           isExpanded
         );
         if (isExpanded === 'true') {
-          await moreMenuItem.click();
+          await browser.clickMouseButton({ x: 0, y: 0 }); // click outside to close
         }
         isExpanded = await moreMenuItem.getAttribute('aria-expanded');
         if (isExpanded === 'true') {
@@ -130,6 +132,8 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           mochaContext.skip();
         }
       },
+      expandMore: expandMoreIfNeeded,
+      collapseMore: collapseMoreIfNeeded,
       async expectLinkExists(
         by:
           | { deepLinkId: AppDeepLinkId }
@@ -138,10 +142,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           | { panelNavLinkId: string }
       ) {
         log.debug('SolutionNavigation.sidenav.expectLinkExists', JSON.stringify(by));
-
-        // TODO: find a better way without expanding every time
-        // https://github.com/elastic/kibana/issues/236242
-        await expandMoreIfNeeded();
 
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`, {
@@ -199,7 +199,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async clickLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
         // TODO: find a better way without expanding every time
         // https://github.com/elastic/kibana/issues/236242
-        await expandMoreIfNeeded();
         if ('deepLinkId' in by) {
           await testSubjects.existOrFail(`~nav-item-deepLinkId-${by.deepLinkId}`);
           await testSubjects.click(`~nav-item-deepLinkId-${by.deepLinkId}`);
@@ -228,7 +227,6 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async expectOnlyDefinedLinks(navItemIds: string[], options?: { checkOrder?: boolean }) {
         const navItemIdRegEx = /nav-item-id-[^\s]+/g;
-        await expandMoreIfNeeded();
         const allSideNavLinks = await testSubjects.findAll('*nav-item-id-');
         const foundNavItemIds: string[] = [];
         for (const sideNavItem of allSideNavLinks) {
@@ -356,10 +354,11 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       async isPanelOpen(sectionId: NavigationId) {
         if (await this.isV2()) {
           try {
-            await this.expectLinkActive({ navId: sectionId });
-            // TODO: check if panel is actually open
-            // https://github.com/elastic/kibana/issues/236242
-            return true;
+            const panel = await testSubjects.find(
+              `~side-navigation-panel_${sectionId}`,
+              TIMEOUT_CHECK
+            );
+            return !!panel;
           } catch (e) {
             return false;
           }
@@ -417,9 +416,44 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       tour: {
+        reset: async () => {
+          log.debug('SolutionNavigation.sidenav.tour.reset');
+          await browser.removeLocalStorageItem('solutionNavigationTour:completed');
+          try {
+            const sidCookie = (await browser.getCookie('sid')).value;
+            await kibanaServer.request({
+              path: `/internal/security/user_profile/_data`,
+              method: 'POST',
+              headers: {
+                Cookie: 'sid=' + sidCookie,
+              },
+              body: { 'solutionNavigationTour:completed': null },
+            });
+          } catch (e) {
+            log.warning(
+              `SolutionNavigation.sidenav.tour.reset - could not reset user profile data`,
+              e.message
+            );
+          }
+
+          await browser.refresh();
+        },
         ensureHidden: async () => {
+          log.debug('SolutionNavigation.sidenav.tour.ensureHidden');
           await browser.setLocalStorageItem('solutionNavigationTour:completed', 'true');
           await browser.refresh();
+        },
+        expectTourStepVisible: async (stepId: TourStepId) => {
+          log.debug('SolutionNavigation.sidenav.tour.expectTourStepVisible', stepId);
+          await testSubjects.existOrFail(`nav-tour-step-${stepId}`);
+        },
+        nextStep: async () => {
+          log.debug('SolutionNavigation.sidenav.tour.nextStep');
+          await testSubjects.click('nav-tour-next-button');
+        },
+        expectHidden: async () => {
+          log.debug('SolutionNavigation.sidenav.tour.expectHidden');
+          await testSubjects.missingOrFail('*nav-tour-step');
         },
       },
       feedbackCallout: {

@@ -8,12 +8,12 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { Global } from '@emotion/react';
 import {
-  useEuiTheme,
   euiAnimFadeIn,
-  transparentize,
+  euiAnimSlideInUp,
   euiBackgroundColor,
   euiCanAnimate,
-  euiAnimSlideInUp,
+  transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
 
 export const usePaneStyles = () => {
@@ -30,7 +30,7 @@ export const usePaneStyles = () => {
     // TODO EUI: add color with transparency
     background: ${transparentize(euiTheme.colors.ink, 0.5)};
     z-index: ${(euiTheme.levels.flyout as number) +
-    1}; // this z-index needs to be between the eventFlyout (set at 1000) and the timelineFlyout (set at 1002)
+    2}; // this z-index needs to be between the documentFlyout (set at 1001) and the timelineFlyout (set at 1003)
 
     ${euiCanAnimate} {
       animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;
