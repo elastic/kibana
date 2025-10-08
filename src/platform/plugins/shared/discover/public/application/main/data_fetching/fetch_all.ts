@@ -37,6 +37,7 @@ import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
+import { mutateQueryStatsGrouping } from '../components/layout/cascaded_documents/utils';
 
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
@@ -79,6 +80,7 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    internalState,
   } = params;
   const { data, expressions } = services;
 
@@ -88,6 +90,22 @@ export function fetchAll(
     const { query, sort } = appStateContainer.getState();
     const isEsqlQuery = isOfAggregateQueryType(query);
     const currentTab = getCurrentTab();
+
+    let fetchQuery = query!;
+
+    const internalStateStore = internalState.getState();
+    const currentTabState = internalStateStore.tabs.byId[internalStateStore.tabs.unsafeCurrentId];
+
+    if (
+      isEsqlQuery &&
+      currentTabState.uiState.layout?.supportsCascade !== false &&
+      currentTabState.uiState.cascade?.availableCascadeGroups?.length
+    ) {
+      fetchQuery = mutateQueryStatsGrouping(
+        query,
+        currentTabState.uiState.cascade.selectedCascadeGroups ?? []
+      );
+    }
 
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
@@ -113,7 +131,7 @@ export function fetchAll(
     // Start fetching all required requests
     const response = isEsqlQuery
       ? fetchEsql({
-          query,
+          query: fetchQuery,
           dataView,
           abortSignal: abortController.signal,
           inspectorAdapters,

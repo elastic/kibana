@@ -17,7 +17,6 @@ import {
   DataCascadeRowCell,
   type DataCascadeRowProps,
   type DataCascadeRowCellProps,
-  type DataCascadeProps,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -26,12 +25,7 @@ import { useScopedServices } from '../../../../../components/scoped_services_pro
 import { useAppStateSelector } from '../../../state_management/discover_app_state_container';
 import { useCurrentTabSelector } from '../../../state_management/redux';
 import { fetchEsql } from '../../../data_fetching/fetch_esql';
-import {
-  constructCascadeQuery,
-  type CascadeQueryArgs,
-  getESQLStatsQueryMeta,
-  mutateQueryStatsGrouping,
-} from './utils';
+import { constructCascadeQuery, type CascadeQueryArgs, getESQLStatsQueryMeta } from './utils';
 import {
   useEsqlDataCascadeRowHeaderComponents,
   useEsqlDataCascadeHeaderComponent,
@@ -40,22 +34,25 @@ import {
   type DataTableRecord,
 } from './blocks';
 import { esqlCascadeStyles } from './esql_data_cascade.styles';
+import type { CascadeDocumentsRestorableState } from './esql_data_cascade_restorable_state';
 
 export { getESQLStatsQueryMeta } from './utils';
+export { useGetGroupBySelectorRenderer as useGroupBySelectorRenderer } from './blocks/use_table_header_components';
 
-interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'> {
-  cascadeGroups: string[];
+export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'> {
   defaultFilters?: Filter[];
   viewModeToggle?: React.ReactNode | null;
-  // stateContainer: DiscoverStateContainer;
+  cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
+  cascadeConfig: CascadeDocumentsRestorableState;
 }
 
 export const ESQLDataCascade = React.memo(
   ({
     rows: initialData,
-    cascadeGroups,
     dataView,
     viewModeToggle,
+    cascadeConfig,
+    cascadeGroupingChangeHandler,
     ...props
   }: ESQLDataCascadeProps) => {
     const [query, defaultFilters] = useAppStateSelector((state) => [state.query, state.filters]);
@@ -115,7 +112,10 @@ export const ESQLDataCascade = React.memo(
       }))
     );
 
-    const customTableHeading = useEsqlDataCascadeHeaderComponent({ viewModeToggle });
+    const customTableHeading = useEsqlDataCascadeHeaderComponent({
+      viewModeToggle,
+      cascadeGroupingChangeHandler,
+    });
 
     const { renderRowActionPopover, rowActions, rowHeaderMeta, rowHeaderTitle } =
       useEsqlDataCascadeRowHeaderComponents(props.services, query as AggregateQuery, queryMeta);
@@ -182,26 +182,6 @@ export const ESQLDataCascade = React.memo(
       [fetchCascadeData]
     );
 
-    const onCascadeGroupingChange = useCallback<
-      DataCascadeProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupingChange']
-    >(
-      ([rootGroup]) => {
-        const rootQuery = mutateQueryStatsGrouping(query as AggregateQuery, [rootGroup]);
-
-        scopedESQLQueryFetch(rootQuery).then((records) => {
-          setCascadeGroupData(
-            records.map((datum) => ({
-              id: datum.id,
-              ...datum.flattened,
-            }))
-          );
-        });
-
-        return;
-      },
-      [query, scopedESQLQueryFetch]
-    );
-
     return (
       <div css={styles.wrapper}>
         <Fragment>{renderRowActionPopover()}</Fragment>
@@ -209,9 +189,9 @@ export const ESQLDataCascade = React.memo(
           size="s"
           overscan={15}
           data={cascadeGroupData}
-          cascadeGroups={cascadeGroups}
+          cascadeGroups={cascadeConfig.availableCascadeGroups}
+          initialGroupColumn={cascadeConfig.selectedCascadeGroups}
           customTableHeader={customTableHeading}
-          onCascadeGroupingChange={onCascadeGroupingChange}
         >
           <DataCascadeRow<ESQLDataGroupNode>
             rowHeaderTitleSlot={rowHeaderTitle}

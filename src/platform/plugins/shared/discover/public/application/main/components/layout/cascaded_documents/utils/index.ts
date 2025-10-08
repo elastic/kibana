@@ -294,7 +294,7 @@ function handleStatsByCategorizeLeafOperation(
 /**
  * Modifies the provided ESQL query to only include the specified columns in the stats by option.
  */
-export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]) {
+export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]): AggregateQuery {
   const EditorESQLQuery = EsqlQuery.fromSrc(query.esql);
 
   const dataSourceCommand = mutate.generic.commands.find(
@@ -360,13 +360,20 @@ export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]) 
                   args: [Builder.identifier({ name: cur.name })],
                 })
               );
+            } else if (
+              isFunctionExpression(cur) &&
+              supportedStatsFunctions.has(cur.name) &&
+              pick.includes(removeBackticks(cur.text))
+            ) {
+              acc.push(synth.exp(cur.text, { withFormatting: false }));
             }
+
             return acc;
           }, []),
         });
       }
 
-      // leverage synth to clone the rest of the args since we want to use as is
+      // leverage synth to clone the rest of the args since we'd want to use those parts as is
       return synth.exp((statsCommandArg as ESQLCommandOption).text, { withFormatting: false });
     }),
   });
