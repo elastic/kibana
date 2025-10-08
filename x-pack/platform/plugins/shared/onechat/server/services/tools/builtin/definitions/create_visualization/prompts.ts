@@ -6,7 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { JsonSchema, SupportedChartType } from './types';
+import type { SupportedChartType } from './types';
 
 export const createGenerateConfigPrompt = ({
   nlQuery,
@@ -18,7 +18,7 @@ export const createGenerateConfigPrompt = ({
 }: {
   nlQuery: string;
   chartType: SupportedChartType;
-  schema: JsonSchema;
+  schema: object;
   existingConfig?: string;
   additionalInstructions?: string;
   additionalContext?: string;

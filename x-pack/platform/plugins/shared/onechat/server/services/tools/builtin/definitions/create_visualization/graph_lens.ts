@@ -11,7 +11,7 @@ import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schem
 import { generateEsql } from '@kbn/onechat-genai-utils';
 import { extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { type IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { type JsonSchema, SupportedChartType, type VisualizationConfig } from './types';
+import { SupportedChartType, type VisualizationConfig } from './types';
 import {
   GENERATE_ESQL_NODE,
   GENERATE_CONFIG_NODE,
@@ -33,7 +33,7 @@ const VisualizationStateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
   chartType: Annotation<SupportedChartType>(),
-  schema: Annotation<JsonSchema>(),
+  schema: Annotation<object>(),
   existingConfig: Annotation<string | undefined>(),
   parsedExistingConfig: Annotation<VisualizationConfig | null>(),
   // internal

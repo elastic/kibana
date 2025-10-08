@@ -17,7 +17,7 @@ import { getChartType } from './guess_chart_type';
 import { SupportedChartType } from './types';
 import { createVisualizationGraph } from './graph_lens';
 
-const metricSchema = parse(esqlMetricState.getSchema());
+const metricSchema = parse(esqlMetricState.getSchema()) as object;
 
 const createVisualizationSchema = z.object({
   query: z.string().describe('A natural language query describing the desired visualization.'),
