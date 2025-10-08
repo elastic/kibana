@@ -8,8 +8,15 @@ import type { FunctionComponent } from 'react';
 import React, { useState, useEffect } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlyout, EuiSplitPanel, useIsWithinBreakpoints } from '@elastic/eui';
-import { FlyoutFooter, DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
+import { 
+  EuiFlyout, 
+  EuiFlyoutBody, 
+  EuiFlyoutFooter,
+  useIsWithinBreakpoints,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { FlyoutFooter as FlyoutFooterContent, DetailsPanel, TreePanel, NotFoundPanel } from './flyout_content';
 import type { Pipeline } from '../../../../common/types';
 import { SectionLoading, useKibana } from '../../../shared_imports';
 
@@ -59,61 +66,99 @@ export const PipelineFlyout: FunctionComponent<Props> = ({
       ? treeData.pipelineStructureTree
       : undefined;
 
+  const { euiTheme } = useEuiTheme();
+
+  const flyoutStyles = css`
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+  `;
+
+  const treePanelStyles = css`
+    width: 460px;
+    padding: ${euiTheme.size.xl};
+    overflow-y: auto;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    border-right: ${isResponsiveFlyout ? 'none' : euiTheme.border.thin};
+  `;
+
+  const detailsPanelWrapperStyles = css`
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  `;
+
+  const detailsPanelStyles = css`
+    padding: ${euiTheme.size.xl};
+    overflow-y: auto;
+  `;
+
   return (
     <EuiFlyout
       onClose={onClose}
       aria-labelledby="pipelineDetailsFlyoutTitle"
       data-test-subj="pipelineDetails"
-      size="l"
-      maxWidth={pipelineTree ? 1100 : 550}
+      maxWidth={pipelineTree && !isResponsiveFlyout ? 1000 : 560}
+      ownFocus={false}
+      paddingSize="none"
     >
-      <EuiSplitPanel.Outer direction="row" grow={true} responsive={false} borderRadius="none">
+      <EuiFlyoutBody css={flyoutStyles}>
         {pipelineTree && (!isResponsiveFlyout || responsiveFlyoutContent === TREE_VIEW) && (
-          <TreePanel
-            pipelineTree={pipelineTree}
-            selectedPipeline={isResponsiveFlyout ? undefined : pipelineName}
-            clickTreeNode={(name) => {
-              setPipelineName(name);
-              if (isResponsiveFlyout) {
-                setResponsiveFlyoutContent(DETAILS_VIEW);
-              }
-            }}
-            setTreeRootStack={setTreeRootStack}
-            isExtension={treeRootStack.length > 1}
-          />
+          <div css={treePanelStyles}>
+            <TreePanel
+              pipelineTree={pipelineTree}
+              selectedPipeline={isResponsiveFlyout ? undefined : pipelineName}
+              clickTreeNode={(name) => {
+                setPipelineName(name);
+                if (isResponsiveFlyout) {
+                  setResponsiveFlyoutContent(DETAILS_VIEW);
+                }
+              }}
+              setTreeRootStack={setTreeRootStack}
+              isExtension={treeRootStack.length > 1}
+            />
+          </div>
         )}
 
-        {(!isResponsiveFlyout || responsiveFlyoutContent === DETAILS_VIEW) &&
-          (isLoading ? (
-            <SectionLoading>
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.pipelineDetails.loading"
-                defaultMessage="Loading pipeline…"
-              />
-            </SectionLoading>
-          ) : error ? (
-            <NotFoundPanel
-              pipelineName={pipelineName}
-              onCreatePipeline={() => onCreateClick(pipelineName)}
-              error={error}
-              displayWarning={pipelineName !== ingestPipeline}
-            />
-          ) : (
-            pipeline && <DetailsPanel pipeline={pipeline} />
-          ))}
-      </EuiSplitPanel.Outer>
-
-      {((isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW) || !error) && pipeline && (
-        <FlyoutFooter
-          pipeline={pipeline}
-          onEditClick={onEditClick}
-          onCloneClick={onCloneClick}
-          onDeleteClick={onDeleteClick}
-          renderActions={!error}
-          renderViewTreeButton={isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW}
-          onViewTreeClick={() => setResponsiveFlyoutContent(TREE_VIEW)}
-        />
-      )}
+        {(!isResponsiveFlyout || responsiveFlyoutContent === DETAILS_VIEW) && (
+          <div css={detailsPanelWrapperStyles}>
+            <div css={detailsPanelStyles}>
+              {isLoading ? (
+                <SectionLoading>
+                  <FormattedMessage
+                    id="xpack.ingestPipelines.list.pipelineDetails.loading"
+                    defaultMessage="Loading pipeline…"
+                  />
+                </SectionLoading>
+              ) : error ? (
+                <NotFoundPanel
+                  pipelineName={pipelineName}
+                  onCreatePipeline={() => onCreateClick(pipelineName)}
+                  error={error}
+                  displayWarning={pipelineName !== ingestPipeline}
+                />
+              ) : (
+                pipeline && <DetailsPanel pipeline={pipeline} />
+              )}
+            </div>
+            
+            {((isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW) || !error) && pipeline && (
+              <EuiFlyoutFooter>
+                <FlyoutFooterContent
+                  pipeline={pipeline}
+                  onEditClick={onEditClick}
+                  onCloneClick={onCloneClick}
+                  onDeleteClick={onDeleteClick}
+                  renderActions={!error}
+                  renderViewTreeButton={isResponsiveFlyout && responsiveFlyoutContent === DETAILS_VIEW}
+                  onViewTreeClick={() => setResponsiveFlyoutContent(TREE_VIEW)}
+                />
+              </EuiFlyoutFooter>
+            )}
+          </div>
+        )}
+      </EuiFlyoutBody>
     </EuiFlyout>
   );
 };

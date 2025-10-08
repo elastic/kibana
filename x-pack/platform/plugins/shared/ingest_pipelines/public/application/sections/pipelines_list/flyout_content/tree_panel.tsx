@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiSplitPanel, EuiTitle, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
@@ -43,11 +43,7 @@ export const TreePanel = React.memo(
     }, [setTreeRootStack]);
 
     return (
-      <EuiSplitPanel.Inner
-        color="subdued"
-        data-test-subj="pipelineTreePanel"
-        style={{ overflowY: 'auto' }}
-      >
+      <>
         <EuiTitle id="pipelineTreeTitle">
           <h2>
             {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.pipelineTree.title', {
@@ -58,22 +54,21 @@ export const TreePanel = React.memo(
 
         <EuiSpacer size="m" />
 
-        <FormattedMessage
-          id="xpack.ingestPipelines.list.pipelineDetails.pipelineTree.description"
-          defaultMessage="A tree visualization of your ingest pipeline, showing how {pipelineProcessorsLink} are invoking other pipelines"
-          values={{
-            pipelineProcessorsLink: (
-              <EuiLink href={documentation.getDocLinks()?.links.ingest.pipeline} target="_blank">
-                {i18n.translate(
-                  'xpack.ingestPipelines.list.pipelineDetails.pipelineTree.pipelineProcessorsDocsLink',
-                  {
-                    defaultMessage: 'pipeline processors',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="xpack.ingestPipelines.list.pipelineDetails.pipelineTree.description"
+            defaultMessage="A tree visualization of your ingest pipeline, showing how pipeline processors are invoking other pipelines."
+          />
+          {' '}
+          <EuiLink href={documentation.getDocLinks()?.links.ingest.pipeline} target="_blank">
+            {i18n.translate(
+              'xpack.ingestPipelines.list.pipelineDetails.pipelineTree.viewDocsLink',
+              {
+                defaultMessage: 'View documentation',
+              }
+            )}
+          </EuiLink>
+        </EuiText>
 
         <EuiSpacer size="s" />
 
@@ -85,7 +80,7 @@ export const TreePanel = React.memo(
           clickMorePipelines={(name: string) => pushTreeStack(name)}
           goBack={popTreeStack}
         />
-      </EuiSplitPanel.Inner>
+      </>
     );
   }
 );

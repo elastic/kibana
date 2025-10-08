@@ -11,9 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBetaBadge,
@@ -21,7 +18,6 @@ import {
   EuiToolTip,
   EuiText,
   EuiSpacer,
-  EuiSplitPanel,
 } from '@elastic/eui';
 
 import type { Pipeline } from '../../../../../common/types';
@@ -36,14 +32,14 @@ export interface Props {
 
 export const DetailsPanel: FunctionComponent<Props> = ({ pipeline }) => {
   return (
-    <EuiSplitPanel.Inner style={{ overflowY: 'auto' }}>
+    <>
       <EuiTitle id="pipelineDetailsFlyoutTitle" data-test-subj="detailsPanelTitle">
         <h2>{pipeline.name}</h2>
       </EuiTitle>
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup alignItems="center" gutterSize="m">
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive={false}>
         {/* Pipeline version */}
         {pipeline.version && (
           <EuiFlexItem grow={false}>
@@ -85,56 +81,59 @@ export const DetailsPanel: FunctionComponent<Props> = ({ pipeline }) => {
         )}
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
-      <EuiDescriptionList rowGutterSize="m">
-        {/* Pipeline description */}
-        {pipeline.description && (
-          <>
-            <EuiDescriptionListTitle />
-            <EuiDescriptionListDescription>{pipeline.description}</EuiDescriptionListDescription>
-          </>
-        )}
+      {/* Pipeline description */}
+      {pipeline.description && (
+        <>
+          <EuiText size="s">{pipeline.description}</EuiText>
+          <EuiSpacer size="m" />
+        </>
+      )}
 
-        {/* Processors JSON */}
-        <EuiDescriptionListTitle>
+      {/* Processors JSON */}
+      <EuiTitle size="xs">
+        <h3>
           {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.processorsTitle', {
             defaultMessage: 'Processors',
           })}
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription>
-          <PipelineDetailsJsonBlock json={pipeline.processors} />
-        </EuiDescriptionListDescription>
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <PipelineDetailsJsonBlock json={pipeline.processors} />
 
-        {/* On Failure Processor JSON */}
-        {pipeline.on_failure?.length && (
-          <>
-            <EuiDescriptionListTitle>
+      {/* On Failure Processor JSON */}
+      {pipeline.on_failure?.length && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xs">
+            <h3>
               {i18n.translate('xpack.ingestPipelines.list.pipelineDetails.failureProcessorsTitle', {
                 defaultMessage: 'Failure processors',
               })}
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <PipelineDetailsJsonBlock json={pipeline.on_failure} />
-            </EuiDescriptionListDescription>
-          </>
-        )}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <PipelineDetailsJsonBlock json={pipeline.on_failure} />
+        </>
+      )}
 
-        {/* Metadata (optional) */}
-        {pipeline._meta && (
-          <>
-            <EuiDescriptionListTitle data-test-subj="metaTitle">
+      {/* Metadata (optional) */}
+      {pipeline._meta && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xs" data-test-subj="metaTitle">
+            <h3>
               <FormattedMessage
                 id="xpack.ingestPipelines.list.pipelineDetails.metaDescriptionListTitle"
                 defaultMessage="Metadata"
               />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>
-              <EuiCodeBlock language="json">{stringifyJson(pipeline._meta, false)}</EuiCodeBlock>
-            </EuiDescriptionListDescription>
-          </>
-        )}
-      </EuiDescriptionList>
-    </EuiSplitPanel.Inner>
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiCodeBlock language="json">{stringifyJson(pipeline._meta, false)}</EuiCodeBlock>
+        </>
+      )}
+    </>
   );
 };

@@ -6,33 +6,46 @@
  */
 
 import type { EuiFlexItemProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { css } from '@emotion/react';
 
 interface PipelineTreeNodeLabelProps {
   pipelineName: string;
   isManaged: boolean;
   isDeprecated: boolean;
+  isSelected: boolean;
 }
 
 export const PipelineTreeNodeLabel = ({
   pipelineName,
   isManaged,
   isDeprecated,
+  isSelected,
 }: PipelineTreeNodeLabelProps) => {
+  const { euiTheme } = useEuiTheme();
+  
+  const textStyles = css`
+    font-size: ${euiTheme.size.m};
+    font-weight: ${euiTheme.font.weight.medium};
+    color: ${euiTheme.colors.link};
+  `;
+  
+  const iconColor = isSelected ? euiTheme.colors.primary : 'subdued';
+  
   return (
     <EuiFlexGroup
       direction="row"
-      gutterSize="none"
-      css={{ width: '350px' }}
+      gutterSize="s"
+      css={{ width: '100%' }}
       alignItems="center"
       data-test-subj={`pipelineTreeNode-${pipelineName}`}
       responsive={false}
     >
       <EuiFlexItem
         grow={(10 - Number(isDeprecated) - Number(isManaged)) as EuiFlexItemProps['grow']}
-        css={{ textAlign: 'left' }}
+        css={textStyles}
       >
         {pipelineName}
       </EuiFlexItem>
@@ -46,6 +59,7 @@ export const PipelineTreeNodeLabel = ({
               }
             )}
             type="lock"
+            color={iconColor}
           />
         </EuiFlexItem>
       )}
@@ -59,6 +73,7 @@ export const PipelineTreeNodeLabel = ({
               }
             )}
             type="warning"
+            color={iconColor}
           />
         </EuiFlexItem>
       )}
