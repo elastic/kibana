@@ -24,7 +24,8 @@ import {
 } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
-import { colorByValueSchema } from '../color';
+import { applyColorToSchema, colorByValueSchema } from '../color';
+import { horizontalAlignmentSchema, verticalAlignmentSchema } from './shared';
 
 const legacyMetricStateMetricOptionsSchema = schema.object({
   /**
@@ -57,19 +58,14 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
      * - 'top': Align label to the top of the value (default)
      * - 'bottom': Align label to the bottom of the value
      */
-    label: schema.oneOf([schema.literal('top'), schema.literal('bottom')], { defaultValue: 'top' }),
+    label: verticalAlignmentSchema({ defaultValue: 'top' }),
     /**
      * Alignment for value. Possible values:
      * - 'left': Align value to the left (default)
      * - 'center': Align value to the center
      * - 'right': Align value to the right
      */
-    value: schema.oneOf(
-      [schema.literal('left'), schema.literal('center'), schema.literal('right')],
-      {
-        defaultValue: 'left',
-      }
-    ),
+    value: horizontalAlignmentSchema({ defaultValue: 'left' }),
   }),
   /**
    * Color configuration
@@ -78,11 +74,9 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
     schema.allOf([
       schema.object({
         /**
-         * Where to apply the color (background or text)
+         * Where to apply the color (background or value)
          */
-        apply_color_to: schema.oneOf([schema.literal('background'), schema.literal('text')], {
-          meta: { description: 'Apply color to' },
-        }),
+        apply_color_to: schema.maybe(applyColorToSchema),
       }),
       colorByValueSchema,
     ])
