@@ -490,7 +490,7 @@ export const createNavigationTree = ({
                 ),
                 breadcrumbStatus: 'hidden',
                 children: [
-                  { link: 'observability-overview:alerts' },
+                  { link: 'management:triggersActionsAlerts' },
                   { link: 'observability-overview:rules' },
                   { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
                 ],
