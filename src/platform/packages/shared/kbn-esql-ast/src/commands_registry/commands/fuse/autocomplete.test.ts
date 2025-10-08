@@ -221,7 +221,7 @@ describe('FUSE Autocomplete', () => {
       ]);
     });
 
-    it('suggests other config arguments and a coma immediately after a field', async () => {
+    it('suggests other config arguments and a comma immediately after a field', async () => {
       const expectedStringFields = getFieldNamesByType(ESQL_STRING_TYPES);
       const mockCallbacks = getMockCallbacks();
       (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
