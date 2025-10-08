@@ -33,7 +33,7 @@ export function NoSystemsEmptyState({
       <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.streams.significantEvents.noSystems.title', {
-            defaultMessage: 'Stream identification missing',
+            defaultMessage: 'Stream features missing',
           })}
         </h2>
       </EuiTitle>
