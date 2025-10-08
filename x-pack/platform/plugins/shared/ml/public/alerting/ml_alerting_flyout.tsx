@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { useMlKibana } from '../application/contexts/kibana';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import { PLUGIN_ID } from '../../common/constants/app';

@@ -24,7 +24,7 @@ import {
   getAnnotationFieldName,
   getAnnotationFieldValue,
 } from '@kbn/ml-common-types/annotations';
-import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions

@@ -17,7 +17,7 @@ import type { Dictionary } from '@kbn/ml-common-types/common';
 import { IdBadges } from './id_badges';
 
 import { BADGE_LIMIT } from './job_selector_flyout';
-import type { MlJobWithTimeRange, MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { MlJobWithTimeRange, MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { FeedBackButton } from '../feedback_button';
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
 import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';

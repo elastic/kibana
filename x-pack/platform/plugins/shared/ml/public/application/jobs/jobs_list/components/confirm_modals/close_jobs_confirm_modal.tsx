@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
-import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { isManagedJob } from '../../../jobs_utils';
 import { closeJobs } from '../utils';
 import { ManagedJobsWarningCallout } from './managed_jobs_warning_callout';

@@ -17,11 +17,10 @@ import type { Dictionary } from '@kbn/ml-common-types/common';
 import type {
   MlJobWithTimeRange,
   MlSummaryJobs,
-  CombinedJobWithStats,
-  Job,
-  Datafeed,
-  IndicesOptions,
-} from '@kbn/ml-common-types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { Datafeed, IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { JobMessage } from '@kbn/ml-common-types/audit_message';
 import type { JobAction } from '../../../../common/constants/job_actions';
 import type { Group } from '@kbn/ml-common-types/groups';

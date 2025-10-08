@@ -13,7 +13,8 @@ import type { MLSavedObjectService } from '../../saved_objects';
 import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
 import type { JobType } from '@kbn/ml-common-types/saved_objects';
 
-import type { Job, Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { searchProvider } from './search';
 
 import { MLJobNotFound, MLModelNotFound } from './errors';

@@ -20,7 +20,7 @@ import type {
   GetAnomaliesTableDataResult,
   ViewByResponse,
 } from '@kbn/ml-common-types/results';
-import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { PartitionFieldsConfig } from '@kbn/ml-common-types/storage';
 import type {
   ExplorerChartsData,

@@ -32,7 +32,7 @@ import type {
 } from '@kbn/ml-common-types/alerts';
 import { InterimResultsControl } from './interim_results_control';
 import { ConfigValidator } from './config_validator';
-import { type CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import { type CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { AdvancedSettings } from './advanced_settings';
 import { getLookbackInterval, getTopNBuckets } from '../../../common/util/alerts';
 

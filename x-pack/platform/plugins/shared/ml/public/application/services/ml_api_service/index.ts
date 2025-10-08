@@ -24,13 +24,12 @@ import type { MlCalendar, MlCalendarId, UpdateCalendar } from '@kbn/ml-common-ty
 import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
 import type {
   Job,
-  JobStats,
-  Datafeed,
-  CombinedJob,
   AnalysisConfig,
-  ModelSnapshot,
-  IndicesOptions,
-} from '@kbn/ml-common-types/anomaly_detection_jobs';
+} from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { JobStats } from '@kbn/ml-common-types/anomaly_detection_jobs/job_stats';
+import type { Datafeed, IndicesOptions } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
 import type {
   DataRecognizerConfigResponse,
   Module,

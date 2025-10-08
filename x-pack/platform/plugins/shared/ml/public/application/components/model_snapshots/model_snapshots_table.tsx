@@ -18,10 +18,8 @@ import { EditModelSnapshotFlyout } from './edit_model_snapshot_flyout';
 import { RevertModelSnapshotFlyout } from './revert_model_snapshot_flyout';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../common/constants/states';
 import { CloseJobConfirm } from './close_job_confirm';
-import type {
-  CombinedJobWithStats,
-  ModelSnapshot,
-} from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { ModelSnapshot } from '@kbn/ml-common-types/anomaly_detection_jobs/model_snapshot';
 
 interface Props {
   job: CombinedJobWithStats;

@@ -27,14 +27,10 @@ import {
   JOB_ACTION_TASKS,
   JOB_ACTION,
 } from '../../../common/constants/job_actions';
-import type {
-  MlSummaryJob,
-  AuditMessage,
-  DatafeedWithStats,
-  CombinedJobWithStats,
-  Datafeed,
-  Job,
-} from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { DatafeedWithStats, CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { MlSummaryJob, AuditMessage } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import type {
   JobsExistResponse,
   BulkCreateResults,

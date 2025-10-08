@@ -10,7 +10,8 @@ import { saveAs } from '@elastic/filesaver';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { MlApi } from '../../../services/ml_api_service';
 import type { JobType } from '@kbn/ml-common-types/saved_objects';
-import type { Job, Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { GLOBAL_CALENDAR } from '../../../../../common/constants/calendars';
 
 export type JobDependencies = Array<{ jobId: string; calendarIds: string[]; filterIds: string[] }>;

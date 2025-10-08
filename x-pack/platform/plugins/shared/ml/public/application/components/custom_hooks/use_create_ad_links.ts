@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { useMlKibana, useUiSettings } from '../../contexts/kibana';
 import {
   ANOMALY_DETECTION_DEFAULT_TIME_RANGE,

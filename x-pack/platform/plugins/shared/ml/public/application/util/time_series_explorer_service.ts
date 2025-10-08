@@ -24,7 +24,7 @@ import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer/timeseriesexplorer_constants';
 import { timeBucketsServiceFactory } from './time_buckets_service';
-import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { CriteriaField } from '../services/results_service';
 import {
   MAX_SCHEDULED_EVENTS,

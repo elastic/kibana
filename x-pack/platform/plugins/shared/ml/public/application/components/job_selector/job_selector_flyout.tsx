@@ -29,10 +29,7 @@ import {
   getTimeRangeFromSelection,
   normalizeTimes,
 } from './job_select_service_utils';
-import type {
-  MlJobTimeRange,
-  MlJobWithTimeRange,
-} from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { useMlKibana } from '../../contexts/kibana';
 import type { JobSelectionMaps } from './job_selector';
 

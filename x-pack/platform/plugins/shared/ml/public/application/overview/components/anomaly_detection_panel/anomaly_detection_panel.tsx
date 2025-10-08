@@ -20,7 +20,7 @@ import { useMlApi, useMlKibana, useMlManagementLocator } from '../../../contexts
 import { AnomalyDetectionTable } from './table';
 import { getGroupsFromJobs, getStatsBarData } from './utils';
 import type { Dictionary } from '@kbn/ml-common-types/common';
-import type { MlSummaryJob, MlSummaryJobs } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { MlSummaryJob, MlSummaryJobs } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import type { AnomalyTimelineService } from '../../../services/anomaly_timeline_service';

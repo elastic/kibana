@@ -11,7 +11,7 @@ import { extent as d3Extent } from 'd3-array';
 import { scaleLinear } from 'd3-scale';
 
 import type { Dictionary } from '@kbn/ml-common-types/common';
-import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { MlJobWithTimeRange } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 import type { MlJobGroupWithTimeRange } from './job_selector_flyout';
 
 export function getGroupsFromJobs(jobs: MlJobWithTimeRange[]) {

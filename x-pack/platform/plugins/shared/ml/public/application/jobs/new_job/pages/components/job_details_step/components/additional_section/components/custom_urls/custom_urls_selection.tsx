@@ -14,7 +14,7 @@ import { CustomUrlsDescription } from '../../../../../../../../../components/cus
 import { useDashboardService } from '../../../../../../../../../services/dashboard_service';
 import { CustomUrls } from '../../../../../../../../../components/custom_urls/custom_urls';
 import { JobCreatorContext } from '../../../../../job_creator_context';
-import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 
 export const CustomUrlsSelection: FC = () => {

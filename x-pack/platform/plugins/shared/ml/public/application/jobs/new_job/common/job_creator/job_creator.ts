@@ -29,15 +29,8 @@ import { createDatafeedId } from '../../../../../../common/util/job_utils';
 import type { MlApi } from '../../../../services/ml_api_service';
 import type { IndexPatternTitle } from '@kbn/ml-common-types/kibana';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-  JobId,
-  DatafeedId,
-  BucketSpan,
-  CustomSettings,
-} from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { Datafeed, DatafeedId } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job, Detector, JobId, BucketSpan } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { JobRunner, type ProgressSubscriber } from '../job_runner';

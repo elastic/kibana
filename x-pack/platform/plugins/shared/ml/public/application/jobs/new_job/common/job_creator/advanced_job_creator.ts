@@ -12,12 +12,8 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 import type { MlApi } from '../../../../services/ml_api_service';
 import { JobCreator } from './job_creator';
-import type {
-  Job,
-  Datafeed,
-  Detector,
-  CustomRule,
-} from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job, Detector, CustomRule } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { createBasicDetector } from './util/default_configs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';

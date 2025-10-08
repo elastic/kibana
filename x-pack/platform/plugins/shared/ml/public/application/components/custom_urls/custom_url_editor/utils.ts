@@ -46,8 +46,9 @@ import {
 } from '../../../util/custom_url_utils';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
 
-import type { CombinedJob, Job } from '@kbn/ml-common-types/anomaly_detection_jobs';
-import { isAnomalyDetectionJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import { isAnomalyDetectionJob } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { TimeRangeType } from './constants';
 import type { MlApi } from '../../../services/ml_api_service';
 

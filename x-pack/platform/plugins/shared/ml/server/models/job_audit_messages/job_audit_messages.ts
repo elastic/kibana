@@ -14,7 +14,7 @@ import { MESSAGE_LEVEL } from '../../../common/constants/message_levels';
 import type { MLSavedObjectService } from '../../saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 import type { JobMessage } from '@kbn/ml-common-types/audit_message';
-import type { AuditMessage } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { AuditMessage } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 
 const SIZE = 1000;
 const LEVEL = { system_info: -1, info: 0, warning: 1, error: 2 } as const;

@@ -12,7 +12,7 @@ import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
 import { TimeseriesChart } from './timeseries_chart';
-import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
 import type { Annotation } from '@kbn/ml-common-types/annotations';
 import { useMlKibana, useNotifications } from '../../../contexts/kibana';

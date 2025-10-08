@@ -17,7 +17,7 @@ import type {
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 
-import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '../constants';
 import type {

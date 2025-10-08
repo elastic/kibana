@@ -33,7 +33,8 @@ import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_sc
 
 import { jobServiceProvider } from '../models/job_service';
 import { getAuthorizationHeader } from '../lib/request_authorization';
-import type { Datafeed, Job } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
 /**
  * Routes for job service

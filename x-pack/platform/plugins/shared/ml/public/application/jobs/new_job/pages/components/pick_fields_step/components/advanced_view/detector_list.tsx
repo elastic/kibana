@@ -27,7 +27,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import type { Validation } from '../../../../../common/job_validator';
 import { detectorToString } from '../../../../../../../util/string_utils';
-import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
 interface Props {
   isActive: boolean;

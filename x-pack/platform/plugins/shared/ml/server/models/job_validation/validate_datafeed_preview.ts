@@ -7,7 +7,7 @@
 
 import type { MlClient } from '../../lib/ml_client';
 import type { AuthorizationHeader } from '../../lib/request_authorization';
-import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { JobValidationMessage } from '../../../common/constants/messages';
 import type { DatafeedValidationResponse } from '@kbn/ml-common-types/job_validation';
 

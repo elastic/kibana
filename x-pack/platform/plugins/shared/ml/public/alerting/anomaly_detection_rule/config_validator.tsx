@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { parseInterval } from '@kbn/ml-parse-interval';
-import { type CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import { type CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { DATAFEED_STATE } from '../../../common/constants/states';
 import { type MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import { type MlAnomalyAlertTriggerProps } from './ml_anomaly_alert_trigger';

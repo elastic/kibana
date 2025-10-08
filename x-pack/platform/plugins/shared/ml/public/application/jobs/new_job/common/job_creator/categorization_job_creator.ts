@@ -22,7 +22,8 @@ import {
   CATEGORY_EXAMPLES_VALIDATION_STATUS,
 } from '@kbn/ml-category-validator';
 import { JobCreator } from './job_creator';
-import type { Job, Datafeed, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job, Detector } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { createBasicDetector } from './util/default_configs';
 import {
   JOB_TYPE,

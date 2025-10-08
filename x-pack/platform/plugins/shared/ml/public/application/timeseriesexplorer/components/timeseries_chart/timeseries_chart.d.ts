@@ -9,7 +9,7 @@ import type d3 from 'd3';
 
 import React from 'react';
 import type { Annotation } from '@kbn/ml-common-types/annotations';
-import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { ChartTooltipService } from '../../../components/chart_tooltip';
 import type {
   AnnotationState,

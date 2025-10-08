@@ -16,7 +16,7 @@ import type {
   MemoryStatsResponse,
 } from '@kbn/ml-common-types/trained_models';
 
-import type { JobStats } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { JobStats } from '@kbn/ml-common-types/anomaly_detection_jobs/job_stats';
 import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
 import type { MlClient } from '../../lib/ml_client';
 import type {

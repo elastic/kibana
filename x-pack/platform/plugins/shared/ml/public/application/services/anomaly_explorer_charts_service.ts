@@ -14,7 +14,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
 import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
-import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { SeriesConfigWithMetadata } from '@kbn/ml-common-types/results';
 
 import type { ExplorerChartsData } from '../explorer/explorer_charts/explorer_charts_container_service';

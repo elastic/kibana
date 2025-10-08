@@ -43,7 +43,7 @@ import type { MlJobService } from '../services/job_service';
 
 import type { SwimlaneType } from './explorer_constants';
 import { MAX_CATEGORY_EXAMPLES, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
-import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import type { Annotations, AnnotationsTable } from '@kbn/ml-common-types/annotations';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlApi } from '../services/ml_api_service';

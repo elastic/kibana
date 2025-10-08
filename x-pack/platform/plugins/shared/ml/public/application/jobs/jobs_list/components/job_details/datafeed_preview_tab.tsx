@@ -14,7 +14,7 @@ import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
 import { useMlApi } from '../../../../contexts/kibana';
 import { usePermissionCheck } from '../../../../capabilities/check_capabilities';
 import { MLJobEditor } from '../ml_job_editor';
-import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 
 interface Props {
   job: CombinedJob;
