@@ -9,56 +9,79 @@ import React from 'react';
 import {
   EuiSuperDatePicker,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingSpinner,
   EuiSwitch,
   EuiSpacer,
-  useEuiTheme,
   EuiTitle,
+  EuiFormRow,
 } from '@elastic/eui';
 import * as i18n from '../../translations';
-import { getEntityAnalyticsRiskScorePageStyles } from './risk_score_page_styles';
 import type { RiskScoreConfiguration } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
+import { AlertFiltersKqlBar } from './alert_filters_kql_bar';
 
 export const RiskScoreConfigurationSection = ({
   selectedRiskEngineSettings,
   setSelectedDateSetting,
   toggleSelectedClosedAlertsSetting,
+  onSaveAlertFilters,
 }: {
   selectedRiskEngineSettings: RiskScoreConfiguration | undefined;
   setSelectedDateSetting: ({ start, end }: { start: string; end: string }) => void;
   toggleSelectedClosedAlertsSetting: () => void;
+  onSaveAlertFilters?: (filters: Array<{ id: string; text: string }>) => void;
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
-
-  if (!selectedRiskEngineSettings) return <EuiLoadingSpinner size="m" />;
+  if (!selectedRiskEngineSettings) {
+    return (
+      <>
+        <EuiTitle>
+          <h4>{i18n.RISK_SCORE_ALERT_CONFIG}</h4>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiLoadingSpinner size="m" />
+        <EuiText size="s">
+          <p>{'Loading risk engine settings...'}</p>
+        </EuiText>
+      </>
+    );
+  }
   return (
     <>
       <EuiTitle>
         <h4>{i18n.RISK_SCORE_ALERT_CONFIG}</h4>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="center">
-        <EuiSwitch
-          label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
-          checked={selectedRiskEngineSettings.includeClosedAlerts}
-          onChange={toggleSelectedClosedAlertsSetting}
-          data-test-subj="includeClosedAlertsSwitch"
+
+      {/* Alert time window section */}
+      <EuiFormRow label={i18n.ALERT_TIME_WINDOW_LABEL} display="rowCompressed">
+        <EuiSuperDatePicker
+          start={selectedRiskEngineSettings.range.start}
+          end={selectedRiskEngineSettings.range.end}
+          onTimeChange={setSelectedDateSetting}
+          width="auto"
+          compressed={true}
+          showUpdateButton={false}
         />
-        <styles.VerticalSeparator />
-        <EuiFlexItem grow={false}>
-          <EuiSuperDatePicker
-            start={selectedRiskEngineSettings.range.start}
-            end={selectedRiskEngineSettings.range.end}
-            onTimeChange={setSelectedDateSetting}
-            width="auto"
-            compressed={false}
-            showUpdateButton={false}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      </EuiFormRow>
+
+      <EuiSpacer size="m" />
+
+      {/* Closed alerts checkbox */}
+      <EuiSwitch
+        label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
+        checked={selectedRiskEngineSettings.includeClosedAlerts}
+        onChange={toggleSelectedClosedAlertsSetting}
+        data-test-subj="includeClosedAlertsSwitch"
+      />
+
+      <EuiSpacer size="m" />
+
+      {/* Alert filters section */}
+      <AlertFiltersKqlBar
+        placeholder={i18n.ALERT_FILTERS_PLACEHOLDER}
+        compressed={true}
+        data-test-subj="alertFiltersKqlBar"
+        onSave={onSaveAlertFilters}
+      />
 
       <EuiSpacer size="m" />
 
