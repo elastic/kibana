@@ -7,9 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = (_, options = {}) => {
+module.exports = (api, options = {}) => {
+  const isNode = api.caller(
+    (c) =>
+      !!c && (c.target === 'node' || c.name === 'kbn-babel-register' || c.name === 'babel-jest')
+  );
+
   return {
     presets: [
+      // Place first so it executes last (presets run last-to-first)
+      { plugins: [...(isNode ? [require.resolve('@kbn/babel-require-transformer')] : [])] },
       [
         require.resolve('@babel/preset-env'),
         {
