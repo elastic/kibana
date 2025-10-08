@@ -115,34 +115,34 @@ export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTel
           type: 'long',
           _meta: { description: 'Number of successfully updated rules in bulk update request' },
         },
-        noOfCustomizedRules: {
+        numOfCustomizedRules: {
           type: 'long',
           _meta: {
             description: 'Number of successfully updated customized rules in bulk update request',
           },
         },
-        noOfNonCustomizedRules: {
+        numOfNonCustomizedRules: {
           type: 'long',
           _meta: {
             description:
               'Number of successfully updated non-customized rules in bulk update request',
           },
         },
-        noOfNonSolvableConflicts: {
+        numOfNonSolvableConflicts: {
           type: 'long',
           _meta: {
             description:
               'Number of successfully updated rules with non-solvable conflicts in bulk update request',
           },
         },
-        noOfSolvableConflicts: {
+        numOfSolvableConflicts: {
           type: 'long',
           _meta: {
             description:
               'Number of successfully updated rules with solvable conflicts in bulk update request',
           },
         },
-        noOfNoConflicts: {
+        numOfNoConflicts: {
           type: 'long',
           _meta: {
             description:
@@ -157,34 +157,34 @@ export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTel
           type: 'long',
           _meta: { description: 'Number of rules that failed to update in bulk update request' },
         },
-        noOfCustomizedRules: {
+        numOfCustomizedRules: {
           type: 'long',
           _meta: {
             description: 'Number of customized rules that failed to update in bulk update request',
           },
         },
-        noOfNonCustomizedRules: {
+        numOfNonCustomizedRules: {
           type: 'long',
           _meta: {
             description:
               'Number of non-customized rules that failed to update in bulk update request',
           },
         },
-        noOfNonSolvableConflicts: {
+        numOfNonSolvableConflicts: {
           type: 'long',
           _meta: {
             description:
               'Number of rules with non-solvable conflicts that failed to update in bulk update request',
           },
         },
-        noOfSolvableConflicts: {
+        numOfSolvableConflicts: {
           type: 'long',
           _meta: {
             description:
               'Number of rules with solvable conflicts that failed to update in bulk update request',
           },
         },
-        noOfNoConflicts: {
+        numOfNoConflicts: {
           type: 'long',
           _meta: {
             description:
@@ -199,34 +199,34 @@ export const DETECTION_RULE_BULK_UPGRADE_EVENT: EventTypeOpts<RuleBulkUpgradeTel
           type: 'long',
           _meta: { description: 'Number of rules that were skipped during bulk update request' },
         },
-        noOfCustomizedRules: {
+        numOfCustomizedRules: {
           type: 'long',
           _meta: {
             description: 'Number of customized rules that were skipped during bulk update request',
           },
         },
-        noOfNonCustomizedRules: {
+        numOfNonCustomizedRules: {
           type: 'long',
           _meta: {
             description:
               'Number of non-customized rules that were skipped during bulk update request',
           },
         },
-        noOfNonSolvableConflicts: {
+        numOfNonSolvableConflicts: {
           type: 'long',
           _meta: {
             description:
               'Number of rules with non-solvable conflicts that were skipped during bulk update request',
           },
         },
-        noOfSolvableConflicts: {
+        numOfSolvableConflicts: {
           type: 'long',
           _meta: {
             description:
               'Number of rules with solvable conflicts that were skipped during bulk update request',
           },
         },
-        noOfNoConflicts: {
+        numOfNoConflicts: {
           type: 'long',
           _meta: {
             description:

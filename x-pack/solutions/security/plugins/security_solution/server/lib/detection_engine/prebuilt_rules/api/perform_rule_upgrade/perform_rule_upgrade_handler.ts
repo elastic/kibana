@@ -65,7 +65,7 @@ export const performRuleUpgradeHandler = async (
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
     const mlAuthz = ctx.securitySolution.getMlAuthz();
-    const analytics = ctx.securitySolution.getAnalytics();
+    const analyticsService = ctx.securitySolution.getAnalytics();
 
     const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
     const defaultPickVersion = isRulesCustomizationEnabled
@@ -244,20 +244,22 @@ export const performRuleUpgradeHandler = async (
       }
 
       sendRuleUpdateTelemetryEvents(
-        analytics,
+        analyticsService,
         ruleUpgradeContextsMap,
         updatedRules,
         ruleErrors,
-        skippedRules
+        skippedRules,
+        logger
       );
 
       if (mode === ModeEnum.ALL_RULES) {
         sendRuleBulkUpgradeTelemetryEvent(
-          analytics,
+          analyticsService,
           ruleUpgradeContextsMap,
           updatedRules,
           ruleErrors,
-          skippedRules
+          skippedRules,
+          logger
         );
       }
     }

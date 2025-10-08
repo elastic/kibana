@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceStart } from '@kbn/core/server';
+import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
@@ -22,6 +22,15 @@ import {
 
 const mockAnalytics = (): AnalyticsServiceStart =>
   ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceStart);
+
+const mockLogger = (): Logger =>
+  ({
+    trace: jest.fn(),
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger);
 
 const createMockRuleUpdateContext = (
   overrides: Partial<RuleUpgradeContext> = {}
@@ -46,6 +55,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
 
   test('emits SUCCESS with calculated updated fields for processed rule', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     sendRuleUpdateTelemetryEvents(
       analytics,
@@ -60,7 +70,8 @@ describe('sendRuleUpdateTelemetryEvents', () => {
       ]),
       [{ rule_id: 'r1' }],
       [],
-      []
+      [],
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -87,6 +98,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
 
   test('ignores fields that are not updatable outcomes', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     const notUpdatableCtx = createMockRuleUpdateContext({
       fieldsDiff: {
@@ -106,7 +118,8 @@ describe('sendRuleUpdateTelemetryEvents', () => {
       new Map([['r1', notUpdatableCtx]]),
       [{ rule_id: 'r1' }],
       [],
-      []
+      [],
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -126,6 +139,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
 
   test('emits ERROR for rules present in errors set', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     sendRuleUpdateTelemetryEvents(
       analytics,
@@ -140,7 +154,8 @@ describe('sendRuleUpdateTelemetryEvents', () => {
       ]),
       [],
       [{ item: { rule_id: 'r1' } }],
-      []
+      [],
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -163,6 +178,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
 
   test('emits SKIP for rules present in skipped set', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     sendRuleUpdateTelemetryEvents(
       analytics,
@@ -177,7 +193,8 @@ describe('sendRuleUpdateTelemetryEvents', () => {
       ]),
       [],
       [],
-      [{ rule_id: 'r1' }]
+      [{ rule_id: 'r1' }],
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -200,6 +217,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
 
   test('does not emit when there is no matching context for outcome lists', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     sendRuleUpdateTelemetryEvents(
       analytics,
@@ -214,7 +232,8 @@ describe('sendRuleUpdateTelemetryEvents', () => {
       ]),
       [{ rule_id: 'x' }],
       [{ item: { rule_id: 'y' } }],
-      [{ rule_id: 'z' }]
+      [{ rule_id: 'z' }],
+      logger
     );
 
     expect(analytics.reportEvent).not.toHaveBeenCalled();
@@ -222,6 +241,7 @@ describe('sendRuleUpdateTelemetryEvents', () => {
 
   test('emits multiple events when multiple outcomes exist', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     const c1 = createMockRuleUpdateContext({ ruleId: 'r1', ruleName: 'Rule r1' });
     const c2 = createMockRuleUpdateContext({
@@ -267,7 +287,8 @@ describe('sendRuleUpdateTelemetryEvents', () => {
       ]),
       [{ rule_id: 'r1' }, { rule_id: 'r3' }],
       [{ item: { rule_id: 'r2' } }],
-      [{ rule_id: 'r4' }]
+      [{ rule_id: 'r4' }],
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(4);
@@ -325,6 +346,7 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
 
   test('sends bulk upgrade telemetry with correct structure for successful updates', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     const ruleContextsMap = new Map([
       [
@@ -358,7 +380,8 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
       ruleContextsMap,
       [{ rule_id: 'r1' }, { rule_id: 'r2' }],
       [],
-      []
+      [],
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -368,33 +391,34 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     expect(payload).toEqual({
       successfulUpdates: {
         totalNumberOfRules: 2,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 2,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 1,
-        noOfNoConflicts: 1,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 2,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 1,
+        numOfNoConflicts: 1,
       },
       errorUpdates: {
         totalNumberOfRules: 0,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 0,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 0,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 0,
       },
       skippedUpdates: {
         totalNumberOfRules: 0,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 0,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 0,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 0,
       },
     });
   });
 
   test('calculates correct conflict types for each rule based on highest severity', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     const ruleContextsMap = new Map([
       [
@@ -448,7 +472,8 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
       ruleContextsMap,
       [{ rule_id: 'r1' }, { rule_id: 'r2' }, { rule_id: 'r3' }],
       [],
-      []
+      [],
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -459,16 +484,17 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     // Rule r3 has only NONE conflicts, so it counts as no conflicts
     expect(payload.successfulUpdates).toEqual({
       totalNumberOfRules: 3,
-      noOfCustomizedRules: 0,
-      noOfNonCustomizedRules: 3,
-      noOfNonSolvableConflicts: 1, // r1
-      noOfSolvableConflicts: 1, // r2
-      noOfNoConflicts: 1, // r3
+      numOfCustomizedRules: 0,
+      numOfNonCustomizedRules: 3,
+      numOfNonSolvableConflicts: 1, // r1
+      numOfSolvableConflicts: 1, // r2
+      numOfNoConflicts: 1, // r3
     });
   });
 
   test('handles mixed results correctly (success, error, skip)', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     const ruleContextsMap = new Map([
       [
@@ -514,7 +540,8 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
       ruleContextsMap,
       [{ rule_id: 'success1' }],
       [{ item: { rule_id: 'error1' } }],
-      [{ rule_id: 'skip1' }]
+      [{ rule_id: 'skip1' }],
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -523,35 +550,36 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     expect(payload).toEqual({
       successfulUpdates: {
         totalNumberOfRules: 1,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 1,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 1,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 1,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 1,
+        numOfNoConflicts: 0,
       },
       errorUpdates: {
         totalNumberOfRules: 1,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 1,
-        noOfNonSolvableConflicts: 1,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 1,
+        numOfNonSolvableConflicts: 1,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 0,
       },
       skippedUpdates: {
         totalNumberOfRules: 1,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 1,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 1,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 1,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 1,
       },
     });
   });
 
   test('handles empty inputs gracefully', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
-    sendRuleBulkUpgradeTelemetryEvent(analytics, new Map(), [], [], []);
+    sendRuleBulkUpgradeTelemetryEvent(analytics, new Map(), [], [], [], logger);
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
     const [eventType, payload] = (analytics.reportEvent as jest.Mock).mock.calls[0];
@@ -560,34 +588,34 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     expect(payload).toEqual({
       successfulUpdates: {
         totalNumberOfRules: 0,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 0,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 0,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 0,
       },
       errorUpdates: {
         totalNumberOfRules: 0,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 0,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 0,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 0,
       },
       skippedUpdates: {
         totalNumberOfRules: 0,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 0,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 0,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 0,
       },
     });
   });
 
   test('handles rules not found in context map', () => {
     const analytics = mockAnalytics();
-    const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const logger = mockLogger();
 
     const ruleContextsMap = new Map([
       [
@@ -609,7 +637,8 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
       ruleContextsMap,
       [{ rule_id: 'existing-rule' }, { rule_id: 'non-existing-rule' }],
       [{ item: { rule_id: 'non-existing-error' } }],
-      [{ rule_id: 'non-existing-skip' }]
+      [{ rule_id: 'non-existing-skip' }],
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -619,41 +648,39 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     expect(payload).toEqual({
       successfulUpdates: {
         totalNumberOfRules: 1, // Only existing-rule is counted
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 1, // Only existing-rule
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 1, // existing-rule has solvable conflict
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 1, // Only existing-rule
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 1, // existing-rule has solvable conflict
+        numOfNoConflicts: 0,
       },
       errorUpdates: {
         totalNumberOfRules: 0, // non-existing-error is skipped
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 0,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 0,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 0,
       },
       skippedUpdates: {
         totalNumberOfRules: 0, // non-existing-skip is skipped
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 0,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 0,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 0,
       },
     });
 
     // Verify warnings are logged for missing rules
-    expect(consoleWarnSpy).toHaveBeenCalledWith('Rule non-existing-rule not found in context map');
-    expect(consoleWarnSpy).toHaveBeenCalledWith('Rule non-existing-error not found in context map');
-    expect(consoleWarnSpy).toHaveBeenCalledWith('Rule non-existing-skip not found in context map');
-
-    consoleWarnSpy.mockRestore();
+    expect(logger.debug).toHaveBeenCalledWith('Rule non-existing-rule not found in context map');
+    expect(logger.debug).toHaveBeenCalledWith('Rule non-existing-error not found in context map');
+    expect(logger.debug).toHaveBeenCalledWith('Rule non-existing-skip not found in context map');
   });
 
-  test('handles errors gracefully and logs to console', () => {
+  test('handles errors gracefully and logs to logger', () => {
     const analytics = mockAnalytics();
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const logger = mockLogger();
 
     // Mock analytics.reportEvent to throw an error
     (analytics.reportEvent as jest.Mock).mockImplementation(() => {
@@ -671,19 +698,25 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
 
     // Should not throw an error
     expect(() => {
-      sendRuleBulkUpgradeTelemetryEvent(analytics, ruleContextsMap, [{ rule_id: 'r1' }], [], []);
+      sendRuleBulkUpgradeTelemetryEvent(
+        analytics,
+        ruleContextsMap,
+        [{ rule_id: 'r1' }],
+        [],
+        [],
+        logger
+      );
     }).not.toThrow();
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       'Failed to send detection rule bulk upgrade telemetry',
       expect.any(Error)
     );
-
-    consoleErrorSpy.mockRestore();
   });
 
   test('handles large number of rules across different categories', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     const ruleContextsMap = new Map();
     const successRules = [];
@@ -753,7 +786,8 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
       ruleContextsMap,
       successRules,
       errorRules,
-      skipRules
+      skipRules,
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -762,33 +796,34 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     expect(payload).toEqual({
       successfulUpdates: {
         totalNumberOfRules: 10,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 10,
-        noOfNonSolvableConflicts: 3, // Rules 1-3
-        noOfSolvableConflicts: 3, // Rules 4-6
-        noOfNoConflicts: 4, // Rules 7-10
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 10,
+        numOfNonSolvableConflicts: 3, // Rules 1-3
+        numOfSolvableConflicts: 3, // Rules 4-6
+        numOfNoConflicts: 4, // Rules 7-10
       },
       errorUpdates: {
         totalNumberOfRules: 5,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 5,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 5, // All error rules have solvable conflicts
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 5,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 5, // All error rules have solvable conflicts
+        numOfNoConflicts: 0,
       },
       skippedUpdates: {
         totalNumberOfRules: 3,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 3,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 3, // All skip rules have no conflicts
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 3,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 3, // All skip rules have no conflicts
       },
     });
   });
 
   test('tracks customized vs non-customized rules correctly', () => {
     const analytics = mockAnalytics();
+    const logger = mockLogger();
 
     const ruleContextsMap = new Map([
       [
@@ -837,7 +872,8 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
       ruleContextsMap,
       [{ rule_id: 'customized-1' }, { rule_id: 'non-customized-1' }],
       [{ item: { rule_id: 'customized-2' } }],
-      []
+      [],
+      logger
     );
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
@@ -846,27 +882,27 @@ describe('sendRuleBulkUpgradeTelemetryEvent', () => {
     expect(payload).toEqual({
       successfulUpdates: {
         totalNumberOfRules: 2,
-        noOfCustomizedRules: 1, // customized-1
-        noOfNonCustomizedRules: 1, // non-customized-1
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 1, // customized-1
-        noOfNoConflicts: 1, // non-customized-1
+        numOfCustomizedRules: 1, // customized-1
+        numOfNonCustomizedRules: 1, // non-customized-1
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 1, // customized-1
+        numOfNoConflicts: 1, // non-customized-1
       },
       errorUpdates: {
         totalNumberOfRules: 1,
-        noOfCustomizedRules: 1, // customized-2
-        noOfNonCustomizedRules: 0,
-        noOfNonSolvableConflicts: 1, // customized-2
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 1, // customized-2
+        numOfNonCustomizedRules: 0,
+        numOfNonSolvableConflicts: 1, // customized-2
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 0,
       },
       skippedUpdates: {
         totalNumberOfRules: 0,
-        noOfCustomizedRules: 0,
-        noOfNonCustomizedRules: 0,
-        noOfNonSolvableConflicts: 0,
-        noOfSolvableConflicts: 0,
-        noOfNoConflicts: 0,
+        numOfCustomizedRules: 0,
+        numOfNonCustomizedRules: 0,
+        numOfNonSolvableConflicts: 0,
+        numOfSolvableConflicts: 0,
+        numOfNoConflicts: 0,
       },
     });
   });

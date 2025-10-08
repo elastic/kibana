@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AnalyticsServiceStart } from '@kbn/core/server';
+import type { AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import {
   ThreeWayDiffOutcome,
   ThreeWayDiffConflict,
@@ -48,18 +48,18 @@ export interface RuleUpgradeTelemetry {
   finalResult: UpdateRuleFinalResult;
 }
 
-interface BulkUpdateSummary {
+interface BulkUpgradeSummary {
   totalNumberOfRules: number;
-  noOfCustomizedRules: number;
-  noOfNonCustomizedRules: number;
-  noOfNonSolvableConflicts: number;
-  noOfSolvableConflicts: number;
-  noOfNoConflicts: number;
+  numOfCustomizedRules: number;
+  numOfNonCustomizedRules: number;
+  numOfNonSolvableConflicts: number;
+  numOfSolvableConflicts: number;
+  numOfNoConflicts: number;
 }
 export interface RuleBulkUpgradeTelemetry {
-  successfulUpdates: BulkUpdateSummary;
-  errorUpdates: BulkUpdateSummary;
-  skippedUpdates: BulkUpdateSummary;
+  successfulUpdates: BulkUpgradeSummary;
+  errorUpdates: BulkUpgradeSummary;
+  skippedUpdates: BulkUpgradeSummary;
 }
 
 interface BasicRuleResponse {
@@ -81,7 +81,8 @@ export function sendRuleUpdateTelemetryEvents(
   RuleUpdateContextsMap: Map<string, RuleUpgradeContext>,
   updatedRules: BasicRuleResponse[],
   installationErrors: BasicInstallationError[],
-  skippedRules: BasicSkippedRule[]
+  skippedRules: BasicSkippedRule[],
+  logger: Logger
 ) {
   try {
     for (const ruleResponse of updatedRules) {
@@ -127,8 +128,7 @@ export function sendRuleUpdateTelemetryEvents(
     }
   } catch (e) {
     // we don't want telemetry errors to impact the main flow
-    // eslint-disable-next-line no-console
-    console.error('Failed to send detection rule update telemetry', e);
+    logger.debug('Failed to send detection rule update telemetry', e);
   }
 }
 
@@ -137,22 +137,26 @@ export function sendRuleBulkUpgradeTelemetryEvent(
   ruleUpgradeContextsMap: Map<string, RuleUpgradeContext>,
   updatedRules: BasicRuleResponse[],
   ruleErrors: BasicInstallationError[],
-  skippedRules: BasicSkippedRule[]
+  skippedRules: BasicSkippedRule[],
+  logger: Logger
 ) {
   try {
     const successfulUpdates = calculateBulkUpdateSummary(
       ruleUpgradeContextsMap,
-      updatedRules.map((rule) => rule.rule_id)
+      updatedRules.map((rule) => rule.rule_id),
+      logger
     );
 
     const errorUpdates = calculateBulkUpdateSummary(
       ruleUpgradeContextsMap,
-      ruleErrors.map((error) => error.item.rule_id)
+      ruleErrors.map((error) => error.item.rule_id),
+      logger
     );
 
     const skippedUpdates = calculateBulkUpdateSummary(
       ruleUpgradeContextsMap,
-      skippedRules.map((rule) => rule.rule_id)
+      skippedRules.map((rule) => rule.rule_id),
+      logger
     );
 
     const event: RuleBulkUpgradeTelemetry = {
@@ -164,28 +168,27 @@ export function sendRuleBulkUpgradeTelemetryEvent(
     analytics.reportEvent(DETECTION_RULE_BULK_UPGRADE_EVENT.eventType, event);
   } catch (e) {
     // we don't want telemetry errors to impact the main flow
-    // eslint-disable-next-line no-console
-    console.error('Failed to send detection rule bulk upgrade telemetry', e);
+    logger.debug('Failed to send detection rule bulk upgrade telemetry', e);
   }
 }
 
 function calculateBulkUpdateSummary(
   ruleUpgradeContextsMap: Map<string, RuleUpgradeContext>,
-  ruleIds: string[]
-): BulkUpdateSummary {
+  ruleIds: string[],
+  logger: Logger
+): BulkUpgradeSummary {
   let totalNumberOfRules = 0;
-  let noOfNonSolvableConflicts = 0;
-  let noOfSolvableConflicts = 0;
-  let noOfNoConflicts = 0;
-  let noOfCustomizedRules = 0;
-  let noOfNonCustomizedRules = 0;
+  let numOfNonSolvableConflicts = 0;
+  let numOfSolvableConflicts = 0;
+  let numOfNoConflicts = 0;
+  let numOfCustomizedRules = 0;
+  let numOfNonCustomizedRules = 0;
 
   ruleIds.forEach((ruleId) => {
     const ruleUpgradeContext = ruleUpgradeContextsMap.get(ruleId);
 
     if (!ruleUpgradeContext) {
-      // eslint-disable-next-line no-console
-      console.warn(`Rule ${ruleId} not found in context map`);
+      logger.debug(`Rule ${ruleId} not found in context map`);
       return;
     }
 
@@ -195,31 +198,31 @@ function calculateBulkUpdateSummary(
     const diffs = Object.values(fieldsDiff) as BasicDiffInfo[];
 
     if (isCustomized) {
-      noOfCustomizedRules++;
+      numOfCustomizedRules++;
     } else {
-      noOfNonCustomizedRules++;
+      numOfNonCustomizedRules++;
     }
 
     if (diffs.some((d) => d.conflict === ThreeWayDiffConflict.NON_SOLVABLE)) {
-      noOfNonSolvableConflicts++;
+      numOfNonSolvableConflicts++;
       return;
     }
 
     if (diffs.some((d) => d.conflict === ThreeWayDiffConflict.SOLVABLE)) {
-      noOfSolvableConflicts++;
+      numOfSolvableConflicts++;
       return;
     }
 
-    noOfNoConflicts++;
+    numOfNoConflicts++;
   });
 
   return {
     totalNumberOfRules,
-    noOfCustomizedRules,
-    noOfNonCustomizedRules,
-    noOfNonSolvableConflicts,
-    noOfSolvableConflicts,
-    noOfNoConflicts,
+    numOfCustomizedRules,
+    numOfNonCustomizedRules,
+    numOfNonSolvableConflicts,
+    numOfSolvableConflicts,
+    numOfNoConflicts,
   };
 }
 
