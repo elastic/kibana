@@ -228,6 +228,41 @@ describe('TaskScheduling', () => {
     expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
   });
 
+  test('handles VERSION_CONFLICT_STATUS errors when trying to update schedule for tasks that have already been scheduled', async () => {
+    const task = {
+      id: 'my-foo-id',
+      taskType: 'foo',
+      params: {},
+      state: {},
+      schedule: { interval: '1m' },
+    } as unknown as ConcreteTaskInstance;
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({
+        tasks: [],
+        errors: [
+          {
+            id: 'my-foo-id',
+            type: 'task',
+            error: {
+              error: 'error',
+              message: 'Failed to update schedule due to version conflict',
+              statusCode: 409,
+            },
+          },
+        ],
+      });
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    const result = await taskScheduling.ensureScheduled(task);
+
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(result.id).toEqual('my-foo-id');
+  });
+
   test('doesnt ignore failure to scheduling existing tasks for reasons other than already being scheduled', async () => {
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
     mockTaskStore.schedule.mockRejectedValueOnce({
