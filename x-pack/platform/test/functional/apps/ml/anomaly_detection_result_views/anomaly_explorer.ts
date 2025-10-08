@@ -490,11 +490,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 },
               };
 
-              const expectedAttachmentId = stringHash(JSON.stringify(attachmentData)).toString();
-
               const expectedAttachment: AnomalySwimLaneEmbeddableState = {
                 ...attachmentData,
-                id: expectedAttachmentId,
+                id: stringHash(JSON.stringify(attachmentData)).toString(),
               };
 
               await ml.cases.assertCaseWithAnomalySwimLaneAttachment(
