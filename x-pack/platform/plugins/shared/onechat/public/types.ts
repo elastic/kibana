@@ -15,6 +15,8 @@ import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { ToolServiceStartContract } from '@kbn/onechat-browser';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableConversationProps } from './embeddable';
+import type React from 'react';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -46,4 +48,24 @@ export interface OnechatPluginStart {
    * Tool service contract, can be used to list or execute tools.
    */
   tools: ToolServiceStartContract;
+
+  /**
+   * Embeddable components that can be used in other plugins.
+   */
+  components: {
+    /**
+     * Embeddable Conversation component.
+     * Renders a chat conversation interface that can be embedded in other applications.
+     *
+     * @example
+     * ```tsx
+     * // Start a new conversation
+     * <Conversation onConversationCreated={(id) => console.log('Created:', id)} />
+     *
+     * // Load an existing conversation
+     * <Conversation conversationId="existing-id" height="800px" />
+     * ```
+     */
+    Conversation: React.ComponentType<EmbeddableConversationProps>;
+  };
 }

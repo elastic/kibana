@@ -20,6 +20,7 @@ import { useConversationScrollActions } from '../../hooks/use_conversation_scrol
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { ConversationContent } from './conversation_grid';
 import type { LocationState } from '../../hooks/use_navigation';
+import { useEmbeddableMode } from '../../context/embeddable_mode_context';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -35,6 +36,7 @@ export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
+  const { isEmbeddedMode } = useEmbeddableMode();
   const location = useLocation<LocationState>();
 
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;

@@ -26,6 +26,7 @@ import type {
   OnechatStartDependencies,
 } from './types';
 import { createPublicToolContract } from './services/tools';
+import { createEmbeddableConversation } from './embeddable';
 
 import { registerLocators } from './locator/register_locators';
 
@@ -101,6 +102,12 @@ export class OnechatPlugin
 
     return {
       tools: createPublicToolContract({ toolsService }),
+      components: {
+        Conversation: createEmbeddableConversation({
+          services: this.internalServices,
+          coreStart: core,
+        }),
+      },
     };
   }
 }
