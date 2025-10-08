@@ -20,7 +20,6 @@ import {
   normalizeScores,
   riskEngineRouteHelpersFactory,
 } from '../../../utils';
-
 import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default ({ getService }: FtrProviderContextWithSpaces): void => {
@@ -28,6 +27,7 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
 
   const doTests = () => {
     describe('with alerts in a non-default space', () => {
