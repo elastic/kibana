@@ -11,7 +11,6 @@ import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 import { EditAgent } from '../components/agents/edit/edit_agent';
-import { PageWrapper } from '../page_wrapper';
 
 export const OnechatAgentsEdit = () => {
   const { agentId } = useParams<{ agentId: string }>();
@@ -24,9 +23,5 @@ export const OnechatAgentsEdit = () => {
       text: agentId,
     },
   ]);
-  return (
-    <PageWrapper>
-      <EditAgent agentId={agentId} />;
-    </PageWrapper>
-  );
+  return <EditAgent agentId={agentId} />;
 };

@@ -10,7 +10,6 @@ import { OnechatAgents } from '../components/agents/list/agents';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
-import { PageWrapper } from '../page_wrapper';
 
 export const OnechatAgentsPage = () => {
   useBreadcrumb([
@@ -19,9 +18,5 @@ export const OnechatAgentsPage = () => {
       path: appPaths.agents.list,
     },
   ]);
-  return (
-    <PageWrapper>
-      <OnechatAgents />
-    </PageWrapper>
-  );
+  return <OnechatAgents />;
 };

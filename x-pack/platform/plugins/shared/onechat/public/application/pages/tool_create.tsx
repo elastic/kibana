@@ -10,7 +10,6 @@ import { CreateTool } from '../components/tools/create_tool';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
-import { PageWrapper } from '../page_wrapper';
 
 export const OnechatToolCreatePage = () => {
   useBreadcrumb([
@@ -23,9 +22,5 @@ export const OnechatToolCreatePage = () => {
       path: appPaths.tools.new,
     },
   ]);
-  return (
-    <PageWrapper>
-      <CreateTool />;
-    </PageWrapper>
-  );
+  return <CreateTool />;
 };

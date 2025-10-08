@@ -16,7 +16,6 @@ import { useNavigation } from '../hooks/use_navigation';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 import { ToolsProvider } from '../context/tools_provider';
-import { PageWrapper } from '../page_wrapper';
 
 export const OnechatToolDetailsPage = () => {
   const { toolId } = useParams<{ toolId: string }>();
@@ -49,9 +48,5 @@ export const OnechatToolDetailsPage = () => {
     return;
   }
 
-  return (
-    <PageWrapper>
-      <ToolsProvider>{tool.readonly ? <ViewTool /> : <EditTool />}</ToolsProvider>
-    </PageWrapper>
-  );
+  return <ToolsProvider>{tool.readonly ? <ViewTool /> : <EditTool />}</ToolsProvider>;
 };

@@ -72,7 +72,7 @@ export default function searchSolutionNavigation({
         // TODO: enable when available
         // {
         //   link: { navId: 'agent_builder' },
-        //   breadcrumbs: ['Agent Chat'],
+        //   breadcrumbs: [],
         //   pageTestSubject: 'agentBuilderWrapper',
         // },
         // {

@@ -65,7 +65,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             },
             {
               link: { navId: 'agent_builder' },
-              breadcrumbs: ['Agent Chat'],
+              breadcrumbs: [],
               pageTestSubject: 'agentBuilderWrapper',
             },
             {

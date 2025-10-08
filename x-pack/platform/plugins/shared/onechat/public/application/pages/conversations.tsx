@@ -10,7 +10,6 @@ import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { OnechatConversationsView } from '../components/conversations/conversations_view';
 import { labels } from '../utils/i18n';
-import { PageWrapper } from '../page_wrapper';
 
 export const OnechatConversationsPage: React.FC = () => {
   useBreadcrumb([
@@ -19,9 +18,5 @@ export const OnechatConversationsPage: React.FC = () => {
       path: appPaths.chat.new,
     },
   ]);
-  return (
-    <PageWrapper>
-      <OnechatConversationsView />
-    </PageWrapper>
-  );
+  return <OnechatConversationsView />;
 };

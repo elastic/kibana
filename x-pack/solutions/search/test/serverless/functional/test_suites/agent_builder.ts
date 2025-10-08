@@ -21,7 +21,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.clickLink({ deepLinkId: 'agent_builder' });
         await testSubjects.existOrFail('agentBuilderWrapper');
         await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'agent_builder' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Agent Chat' });
       });
     }
     describe('admin user', function () {

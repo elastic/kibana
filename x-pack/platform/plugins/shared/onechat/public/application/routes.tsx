@@ -15,11 +15,6 @@ import { OnechatToolCreatePage } from './pages/tool_create';
 import { OnechatToolDetailsPage } from './pages/tool_details';
 import { OnechatToolsPage } from './pages/tools';
 
-/*
-  Note: each route rendered here should be wrapped with PageWrapper
-  This allows each route to set the correct breadcrumbs before checking access
-*/
-
 export const OnechatRoutes: React.FC<{}> = () => {
   return (
     <Routes>
