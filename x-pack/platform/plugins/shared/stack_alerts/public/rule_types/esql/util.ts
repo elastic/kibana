@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type { RegisterRuleTypesParams } from '../types';
-import { getRuleType } from './rule_type';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
-export function register(params: RegisterRuleTypesParams) {
-  const { alerting, core } = params;
-  alerting.registerType(getRuleType(core));
-}
+export const useTriggerUiActionServices = () => useKibana().services;

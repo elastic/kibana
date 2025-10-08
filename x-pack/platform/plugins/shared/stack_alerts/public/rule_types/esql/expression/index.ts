@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { RegisterRuleTypesParams } from '../types';
-import { getRuleType } from './rule_type';
+import { ESQLRuleTypeExpression } from './expression';
 
-export function register(params: RegisterRuleTypesParams) {
-  const { alerting, core } = params;
-  alerting.registerType(getRuleType(core));
-}
+// eslint-disable-next-line import/no-default-export
+export default ESQLRuleTypeExpression;

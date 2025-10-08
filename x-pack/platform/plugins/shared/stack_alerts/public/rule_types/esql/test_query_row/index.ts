@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type { RegisterRuleTypesParams } from '../types';
-import { getRuleType } from './rule_type';
-
-export function register(params: RegisterRuleTypesParams) {
-  const { alerting, core } = params;
-  alerting.registerType(getRuleType(core));
-}
+export { TestQueryRow } from './test_query_row';
+export type { TestQueryRowProps } from './test_query_row';
+export { useTestQuery } from './use_test_query';

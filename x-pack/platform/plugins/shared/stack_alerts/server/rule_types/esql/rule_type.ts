@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { ESQLParamsSchema, type ESQLParams } from '@kbn/response-ops-rule-params/esql';
 
 import { STACK_ALERTS_AAD_CONFIG } from '..';
@@ -21,6 +21,7 @@ import { getSourceFields } from './util';
 import type { StackAlertType } from '../types';
 import type { ESQLRuleState } from './rule_type_params';
 
+export const ESQL_RULE_ID = '.esql';
 export function getRuleType(
   core: CoreSetup
 ): RuleType<
@@ -33,65 +34,65 @@ export function getRuleType(
   never,
   StackAlertType
 > {
-  const ruleTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
-    defaultMessage: 'Elasticsearch query',
+  const ruleTypeName = i18n.translate('xpack.stackAlerts.esql.alertTypeTitle', {
+    defaultMessage: 'ES|QL',
   });
 
-  const actionGroupName = i18n.translate('xpack.stackAlerts.esQuery.actionGroupThresholdMetTitle', {
+  const actionGroupName = i18n.translate('xpack.stackAlerts.esql.actionGroupThresholdMetTitle', {
     defaultMessage: 'Query matched',
   });
 
   const actionVariableContextDateLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextDateLabel',
+    'xpack.stackAlerts.esql.actionVariableContextDateLabel',
     {
       defaultMessage: 'The date that the alert met the threshold condition.',
     }
   );
 
   const actionVariableContextValueLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextValueLabel',
+    'xpack.stackAlerts.esql.actionVariableContextValueLabel',
     {
       defaultMessage: 'The value that met the threshold condition.',
     }
   );
 
   const actionVariableContextHitsLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextHitsLabel',
+    'xpack.stackAlerts.esql.actionVariableContextHitsLabel',
     {
       defaultMessage: 'The documents that met the threshold condition.',
     }
   );
 
   const actionVariableContextMessageLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextMessageLabel',
+    'xpack.stackAlerts.esql.actionVariableContextMessageLabel',
     {
       defaultMessage: 'A message for the alert.',
     }
   );
 
   const actionVariableContextTitleLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextTitleLabel',
+    'xpack.stackAlerts.esql.actionVariableContextTitleLabel',
     {
       defaultMessage: 'A title for the alert.',
     }
   );
 
   const actionVariableContextConditionsLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextConditionsLabel',
+    'xpack.stackAlerts.esql.actionVariableContextConditionsLabel',
     {
       defaultMessage: 'A string that describes the threshold condition.',
     }
   );
 
   const actionVariableEsqlQueryLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextEsqlQueryLabel',
+    'xpack.stackAlerts.esql.actionVariableContextEsqlQueryLabel',
     {
       defaultMessage: 'ES|QL query field used to fetch data from Elasticsearch.',
     }
   );
 
   const actionVariableContextLinkLabel = i18n.translate(
-    'xpack.stackAlerts.esQuery.actionVariableContextLinkLabel',
+    'xpack.stackAlerts.esql.actionVariableContextLinkLabel',
     {
       defaultMessage: `Navigate to Discover and show the records that triggered
        the alert when the rule is created in Discover. Otherwise, navigate to the status page for the rule.`,
@@ -101,7 +102,7 @@ export function getRuleType(
   const sourceFields = getSourceFields();
 
   return {
-    id: ES_QUERY_ID,
+    id: ESQL_RULE_ID,
     name: ruleTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
@@ -136,7 +137,8 @@ export function getRuleType(
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
     solution: 'stack',
-    doesSetRecoveryContext: true,
+    doesSetRecoveryContext: false,
     alerts: STACK_ALERTS_AAD_CONFIG,
+    autoRecoverAlerts: false,
   };
 }

@@ -90,6 +90,7 @@ export async function executor(
     });
   }
 
+  alertsClient.setAlertLimitReached(false);
   return { state: { latestTimestamp } };
 }
 
