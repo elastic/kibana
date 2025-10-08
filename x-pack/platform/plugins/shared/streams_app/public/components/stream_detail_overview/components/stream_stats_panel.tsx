@@ -90,7 +90,6 @@ const StatItem = ({ label, value, withBorder = false }: StatItemProps) => {
 };
 
 export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
-  // This component is not in use. Adding the hooks here to avoid type errors
   const { timeState } = useTimefilter();
   const { aggregations } = useAggregations({
     definition,
@@ -183,7 +182,7 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
                   hasPrivileges={definition.privileges.monitor}
                   title={i18n.translate(
                     'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.ingestionrateLabel',
-                    { defaultMessage: 'ingestionRate' }
+                    { defaultMessage: 'Ingestion rate' }
                   )}
                 >
                   {dataStreamStats
