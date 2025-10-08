@@ -25,7 +25,7 @@ const engine = new Liquid(LIQUID_ENGINE_CONFIG);
  * added to the result set, and then created in the context to allow
  *
  * @param template - The template string to analyze
- * @returns Array of unique variable paths found in the template
+ * @returns Array of unique variable paths found in the template. If the template is invalid, returns an empty array.
  */
 export function extractTemplateVariables(template: string): string[] {
   const tokens = engine.parse(template);
@@ -40,8 +40,8 @@ export function extractTemplateVariables(template: string): string[] {
     } catch (error: any) {
       const match = UNDEFINED_VARIABLE_REGEX.exec(error.message);
       if (!match) {
-        // Not an undefined variable error - rethrow
-        throw error;
+        // Not an undefined variable error - return empty array
+        return [];
       }
 
       const variablePath = match[1].trim();
