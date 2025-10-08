@@ -470,7 +470,7 @@ export class ActionsPlugin
       return new ActionsClient({
         logger,
         unsecuredSavedObjectsClient,
-        actionTypeRegistry: connectorTypeRegistry!,
+        connectorTypeRegistry: connectorTypeRegistry!,
         kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
@@ -753,7 +753,7 @@ export class ActionsPlugin
           return new ActionsClient({
             logger,
             unsecuredSavedObjectsClient,
-            actionTypeRegistry: connectorTypeRegistry!,
+            connectorTypeRegistry: connectorTypeRegistry!,
             kibanaIndices: savedObjects.getAllIndices(),
             scopedClusterClient: coreContext.elasticsearch.client,
             inMemoryConnectors,

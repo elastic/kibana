@@ -10,7 +10,7 @@ import { ActionExecutor } from './action_executor';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner_factory';
-import { actionTypeRegistryMock } from '../action_type_registry.mock';
+import { connectorTypeRegistryMock } from '../connector_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -45,7 +45,7 @@ const executeParamsFields = [
   'source',
 ];
 const spaceIdToNamespace = jest.fn();
-const actionTypeRegistry = actionTypeRegistryMock.create();
+const connectorTypeRegistry = connectorTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const mockedActionExecutor = actionExecutorMock.create();
 const eventLogger = eventLoggerMock.create();
@@ -94,7 +94,7 @@ const actionExecutorInitializerParams = {
   logger: loggingSystemMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
   getUnsecuredServices: jest.fn().mockReturnValue(unsecuredServices),
-  actionTypeRegistry,
+  actionTypeRegistry: connectorTypeRegistry,
   getActionsAuthorizationWithRequest: jest.fn().mockReturnValue(actionsAuthorizationMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger,
@@ -105,7 +105,7 @@ const actionExecutorInitializerParams = {
 
 const taskRunnerFactoryInitializerParams = {
   spaceIdToNamespace,
-  actionTypeRegistry,
+  actionTypeRegistry: connectorTypeRegistry,
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   basePathService: httpServiceMock.createBasePath(),

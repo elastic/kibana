@@ -876,7 +876,7 @@ describe('Actions Plugin', () => {
     });
 
     describe('isActionTypeEnabled()', () => {
-      const actionType: ActionType = {
+      const actionType: ConnectorType = {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'gold',
@@ -904,7 +904,7 @@ describe('Actions Plugin', () => {
     });
 
     describe('isActionExecutable()', () => {
-      const actionType: ActionType = {
+      const actionType: ConnectorType = {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'gold',

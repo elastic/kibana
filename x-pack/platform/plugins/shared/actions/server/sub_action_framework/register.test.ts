@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
-import { actionTypeRegistryMock } from '../action_type_registry.mock';
+import { connectorTypeRegistryMock } from '../connector_type_registry.mock';
 import type { TestConfig, TestSecrets } from './mocks';
 import { TestSecretsSchema, TestConfigSchema, TestSubActionConnector } from './mocks';
 import { register } from './register';
@@ -34,7 +34,7 @@ describe('Registration', () => {
     renderParameterTemplates: mockRenderParameterTemplates,
   };
 
-  const actionTypeRegistry = actionTypeRegistryMock.create();
+  const connectorTypeRegistry = connectorTypeRegistryMock.create();
   const mockedActionsConfig = actionsConfigMock.create();
   const logger = loggingSystemMock.createLogger();
 
@@ -44,7 +44,7 @@ describe('Registration', () => {
 
   it('registers the connector correctly', async () => {
     register<TestConfig, TestSecrets>({
-      actionTypeRegistry,
+      actionTypeRegistry: connectorTypeRegistry,
       connector: {
         ...connector,
         preSaveHook: mockPreSaveHook,
@@ -55,8 +55,8 @@ describe('Registration', () => {
       logger,
     });
 
-    expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
-    expect(actionTypeRegistry.register).toHaveBeenCalledWith({
+    expect(connectorTypeRegistry.register).toHaveBeenCalledTimes(1);
+    expect(connectorTypeRegistry.register).toHaveBeenCalledWith({
       id: connector.id,
       name: connector.name,
       minimumLicenseRequired: connector.minimumLicenseRequired,
@@ -73,7 +73,7 @@ describe('Registration', () => {
 
   it('registers the renderParameterTemplates correctly', async () => {
     register<TestConfig, TestSecrets>({
-      actionTypeRegistry,
+      actionTypeRegistry: connectorTypeRegistry,
       connector,
       configurationUtilities: mockedActionsConfig,
       logger,
@@ -83,7 +83,7 @@ describe('Registration', () => {
     const variables = {};
     const actionId = 'action-id';
 
-    const { renderParameterTemplates } = actionTypeRegistry.register.mock.calls[0][0];
+    const { renderParameterTemplates } = connectorTypeRegistry.register.mock.calls[0][0];
     const rendered = renderParameterTemplates?.(logger, params, variables, actionId);
 
     expect(mockRenderParameterTemplates).toHaveBeenCalledWith(logger, params, variables, actionId);
@@ -92,14 +92,14 @@ describe('Registration', () => {
 
   it('registers a system connector correctly', async () => {
     register<TestConfig, TestSecrets>({
-      actionTypeRegistry,
+      actionTypeRegistry: connectorTypeRegistry,
       connector: { ...connector, isSystemActionType: true },
       configurationUtilities: mockedActionsConfig,
       logger,
     });
 
-    expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
-    expect(actionTypeRegistry.register).toHaveBeenCalledWith({
+    expect(connectorTypeRegistry.register).toHaveBeenCalledTimes(1);
+    expect(connectorTypeRegistry.register).toHaveBeenCalledWith({
       id: connector.id,
       name: connector.name,
       minimumLicenseRequired: connector.minimumLicenseRequired,
@@ -114,14 +114,14 @@ describe('Registration', () => {
 
   it('registers a sub-feature connector correctly', async () => {
     register<TestConfig, TestSecrets>({
-      actionTypeRegistry,
+      actionTypeRegistry: connectorTypeRegistry,
       connector: { ...connector, subFeature: 'endpointSecurity' },
       configurationUtilities: mockedActionsConfig,
       logger,
     });
 
-    expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
-    expect(actionTypeRegistry.register).toHaveBeenCalledWith({
+    expect(connectorTypeRegistry.register).toHaveBeenCalledTimes(1);
+    expect(connectorTypeRegistry.register).toHaveBeenCalledWith({
       id: connector.id,
       name: connector.name,
       minimumLicenseRequired: connector.minimumLicenseRequired,
@@ -138,7 +138,7 @@ describe('Registration', () => {
     const getKibanaPrivileges = () => ['my-privilege'];
 
     register<TestConfig, TestSecrets>({
-      actionTypeRegistry,
+      actionTypeRegistry: connectorTypeRegistry,
       connector: {
         ...connector,
         isSystemActionType: true,
@@ -148,8 +148,8 @@ describe('Registration', () => {
       logger,
     });
 
-    expect(actionTypeRegistry.register).toHaveBeenCalledTimes(1);
-    expect(actionTypeRegistry.register).toHaveBeenCalledWith({
+    expect(connectorTypeRegistry.register).toHaveBeenCalledTimes(1);
+    expect(connectorTypeRegistry.register).toHaveBeenCalledWith({
       id: connector.id,
       name: connector.name,
       minimumLicenseRequired: connector.minimumLicenseRequired,

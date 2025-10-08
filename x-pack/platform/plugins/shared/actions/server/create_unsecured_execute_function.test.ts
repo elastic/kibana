@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
-import { actionTypeRegistryMock } from './action_type_registry.mock';
+import { connectorTypeRegistryMock } from './connector_type_registry.mock';
 import {
   asNotificationExecutionSource,
   asSavedObjectExecutionSource,
@@ -41,7 +41,7 @@ describe('bulkExecute()', () => {
     async (isPreconfigured, isSystemAction) => {
       const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
         taskManager: mockTaskManager,
-        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        connectorTypeRegistry: connectorTypeRegistryMock.create(),
         inMemoryConnectors: [
           {
             id: '123',
@@ -154,7 +154,7 @@ describe('bulkExecute()', () => {
       const source = { type: 'alert', id: sourceUuid };
       const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
         taskManager: mockTaskManager,
-        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        connectorTypeRegistry: connectorTypeRegistryMock.create(),
         inMemoryConnectors: [
           {
             id: '123',
@@ -279,7 +279,7 @@ describe('bulkExecute()', () => {
       const source = { type: 'alert', id: sourceUuid };
       const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
         taskManager: mockTaskManager,
-        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        connectorTypeRegistry: connectorTypeRegistryMock.create(),
         inMemoryConnectors: [
           {
             id: '123',
@@ -428,7 +428,7 @@ describe('bulkExecute()', () => {
     async (isPreconfigured, isSystemAction) => {
       const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
         taskManager: mockTaskManager,
-        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        connectorTypeRegistry: connectorTypeRegistryMock.create(),
         inMemoryConnectors: [
           {
             id: '123',
@@ -468,7 +468,7 @@ describe('bulkExecute()', () => {
   ])(
     'throws when connector type is not enabled: isPreconfigured: %s, isSystemAction: %s',
     async (isPreconfigured, isSystemAction) => {
-      const mockedConnectorTypeRegistry = actionTypeRegistryMock.create();
+      const mockedConnectorTypeRegistry = connectorTypeRegistryMock.create();
       const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
         taskManager: mockTaskManager,
         connectorTypeRegistry: mockedConnectorTypeRegistry,
@@ -515,7 +515,7 @@ describe('bulkExecute()', () => {
     async (isPreconfigured, isSystemAction) => {
       const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
         taskManager: mockTaskManager,
-        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        connectorTypeRegistry: connectorTypeRegistryMock.create(),
         inMemoryConnectors: [
           {
             id: '123',
@@ -575,7 +575,7 @@ describe('bulkExecute()', () => {
       mockActionsConfig.getMaxQueued.mockReturnValueOnce(2);
       const executeFn = createBulkUnsecuredExecutionEnqueuerFunction({
         taskManager: mockTaskManager,
-        connectorTypeRegistry: actionTypeRegistryMock.create(),
+        connectorTypeRegistry: connectorTypeRegistryMock.create(),
         inMemoryConnectors: [
           {
             id: '123',
