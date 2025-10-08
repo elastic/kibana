@@ -98,11 +98,21 @@ export async function runStackMonitor(
     }
 
     await new Promise<void>((resolve) => {
-      const timeout = setTimeout(resolve, 500);
-      monitorAbortController.signal.addEventListener('abort', () => {
-        clearTimeout(timeout);
-        resolve();
-      });
+      let isResolved = false;
+
+      const cleanup = () => {
+        if (!isResolved) {
+          isResolved = true;
+          clearTimeout(timeout);
+          monitorAbortController.signal.removeEventListener('abort', abortCallback);
+          resolve();
+        }
+      };
+
+      const abortCallback = cleanup;
+      const timeout = setTimeout(cleanup, 500);
+
+      monitorAbortController.signal.addEventListener('abort', abortCallback);
     });
   }
 }
