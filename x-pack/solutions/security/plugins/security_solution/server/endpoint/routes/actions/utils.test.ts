@@ -11,7 +11,7 @@ import type { LogsEndpointAction } from '../../../../common/endpoint/types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { applyEsClientSearchMock } from '../../mocks/utils.mock';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
-import { ensureUserHasAuthzToFilesForAction } from './utils';
+import { doesActionHaveFileAccess, ensureUserHasAuthzToFilesForAction } from './utils';
 import type { Mutable } from 'utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
@@ -80,6 +80,21 @@ describe('Route utilities', () => {
       ).rejects.toThrow(
         'Response action [running-processes] for agent type [endpoint] does not support file downloads'
       );
+    });
+  });
+
+  describe('#doesActionHaveFileAccess()', () => {
+    it('should return true when action has file access', async () => {
+      expect(doesActionHaveFileAccess('endpoint', 'get-file')).toEqual(true);
+    });
+
+    it('should return false when action does not have file access', async () => {
+      expect(doesActionHaveFileAccess('endpoint', 'running-processes')).toEqual(false);
+    });
+
+    it('should return false for invalid combinations', async () => {
+      // @ts-expect-error TS2345: Argument of type 'some-unknown-action' is not assignable to parameter of type
+      expect(doesActionHaveFileAccess('endpoint', 'some-unknown-action')).toEqual(false);
     });
   });
 });
