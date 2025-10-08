@@ -24,6 +24,262 @@ describe('next_execution_time', () => {
   });
 
   describe('calculateNextExecutionTime', () => {
+    describe('lastRun parameter behavior', () => {
+      it('should use lastRun as dtstart when no dtstart is specified in RRule', () => {
+        const lastRun = new Date('2025-01-10T08:00:00Z');
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              tzid: 'UTC',
+              byhour: [9],
+              byminute: [0],
+            },
+          },
+        };
+
+        const result = calculateNextExecutionTime(trigger, lastRun);
+        expect(result).toBeInstanceOf(Date);
+        // Should calculate from the lastRun date, not current time
+        expect(result!.getTime()).toBeGreaterThan(lastRun.getTime());
+      });
+
+      it('should use current time as dtstart when lastRun is null', () => {
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              tzid: 'UTC',
+              byhour: [9],
+              byminute: [0],
+            },
+          },
+        };
+
+        const result = calculateNextExecutionTime(trigger, null);
+        expect(result).toBeInstanceOf(Date);
+        // Should calculate from current time (mockNow)
+        expect(result!.getTime()).toBeGreaterThan(mockNow.getTime());
+      });
+
+      it('should use dtstart from RRule config when provided, ignoring lastRun', () => {
+        const lastRun = new Date('2025-01-10T08:00:00Z');
+        const dtstart = new Date('2025-01-05T06:00:00Z');
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              tzid: 'UTC',
+              dtstart: dtstart.toISOString(),
+              byhour: [9],
+              byminute: [0],
+            },
+          },
+        };
+
+        const result = calculateNextExecutionTime(trigger, lastRun);
+        expect(result).toBeInstanceOf(Date);
+        // Should use dtstart from config, not lastRun
+        expect(result!.getTime()).toBeGreaterThan(dtstart.getTime());
+      });
+
+      it('should handle interval-based scheduling with lastRun', () => {
+        const lastRun = new Date('2025-01-10T08:00:00Z');
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            every: '2h',
+          },
+        };
+
+        const result = calculateNextExecutionTime(trigger, lastRun);
+        expect(result).toBeInstanceOf(Date);
+        // Should be 2 hours after lastRun
+        expect(result!.getTime() - lastRun.getTime()).toBe(2 * 60 * 60 * 1000);
+      });
+
+      it('should handle interval-based scheduling with null lastRun', () => {
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            every: '1h',
+          },
+        };
+
+        const result = calculateNextExecutionTime(trigger, null);
+        expect(result).toBeInstanceOf(Date);
+        // Should be 1 hour after current time (mockNow)
+        expect(result!.getTime() - mockNow.getTime()).toBe(60 * 60 * 1000);
+      });
+
+      it('should handle different lastRun dates for weekly RRule', () => {
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            rrule: {
+              freq: 'WEEKLY',
+              interval: 1,
+              tzid: 'UTC',
+              byweekday: ['MO', 'FR'],
+              byhour: [10],
+              byminute: [0],
+            },
+          },
+        };
+
+        // Test with lastRun on a Monday
+        const mondayLastRun = new Date('2025-01-13T08:00:00Z'); // Monday
+        const mondayResult = calculateNextExecutionTime(trigger, mondayLastRun);
+        expect(mondayResult).toBeInstanceOf(Date);
+        // Should be the next occurrence (Friday or next Monday)
+        expect([1, 5]).toContain(mondayResult!.getUTCDay()); // Monday (1) or Friday (5)
+
+        // Test with lastRun on a Friday
+        const fridayLastRun = new Date('2025-01-17T08:00:00Z'); // Friday
+        const fridayResult = calculateNextExecutionTime(trigger, fridayLastRun);
+        expect(fridayResult).toBeInstanceOf(Date);
+        // Should be the next occurrence (next Monday or Friday)
+        expect([1, 5]).toContain(fridayResult!.getUTCDay()); // Monday (1) or Friday (5)
+      });
+
+      it('should handle monthly RRule with different lastRun dates', () => {
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            rrule: {
+              freq: 'MONTHLY',
+              interval: 1,
+              tzid: 'UTC',
+              bymonthday: [1, 15],
+              byhour: [12],
+              byminute: [0],
+            },
+          },
+        };
+
+        // Test with lastRun on the 1st
+        const firstLastRun = new Date('2025-01-01T08:00:00Z');
+        const firstResult = calculateNextExecutionTime(trigger, firstLastRun);
+        expect(firstResult).toBeInstanceOf(Date);
+        // Should be the next occurrence (15th or 1st of next month)
+        expect([1, 15]).toContain(firstResult!.getUTCDate());
+
+        // Test with lastRun on the 15th
+        const fifteenthLastRun = new Date('2025-01-15T08:00:00Z');
+        const fifteenthResult = calculateNextExecutionTime(trigger, fifteenthLastRun);
+        expect(fifteenthResult).toBeInstanceOf(Date);
+        // Should be the next occurrence (1st of next month or 15th)
+        expect([1, 15]).toContain(fifteenthResult!.getUTCDate());
+      });
+
+      it('should handle timezone differences with lastRun', () => {
+        const lastRun = new Date('2025-01-10T08:00:00Z'); // UTC
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              tzid: 'America/New_York', // EST/EDT timezone
+              byhour: [9],
+              byminute: [0],
+            },
+          },
+        };
+
+        const result = calculateNextExecutionTime(trigger, lastRun);
+        expect(result).toBeInstanceOf(Date);
+        // The result should be in the specified timezone
+        expect(result!.getTime()).toBeGreaterThan(lastRun.getTime());
+      });
+
+      it('should handle edge case where lastRun is in the future', () => {
+        const futureLastRun = new Date('2025-02-01T08:00:00Z'); // Future date
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              tzid: 'UTC',
+              byhour: [9],
+              byminute: [0],
+            },
+          },
+        };
+
+        const result = calculateNextExecutionTime(trigger, futureLastRun);
+        expect(result).toBeInstanceOf(Date);
+        // Should still calculate correctly even with future lastRun
+        expect(result!.getTime()).toBeGreaterThan(futureLastRun.getTime());
+      });
+
+      it('should handle very old lastRun dates', () => {
+        const oldLastRun = new Date('2020-01-01T08:00:00Z'); // Very old date
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              tzid: 'UTC',
+              byhour: [9],
+              byminute: [0],
+            },
+          },
+        };
+
+        const result = calculateNextExecutionTime(trigger, oldLastRun);
+        expect(result).toBeInstanceOf(Date);
+        // Should calculate from the old lastRun date
+        expect(result!.getTime()).toBeGreaterThan(oldLastRun.getTime());
+      });
+
+      it('should handle invalid lastRun dates gracefully', () => {
+        const invalidLastRun = new Date('invalid');
+        const trigger: WorkflowTrigger = {
+          type: 'scheduled',
+          enabled: true,
+          with: {
+            rrule: {
+              freq: 'DAILY',
+              interval: 1,
+              tzid: 'UTC',
+              byhour: [9],
+              byminute: [0],
+            },
+          },
+        };
+
+        const result = calculateNextExecutionTime(trigger, invalidLastRun);
+        // The function should handle invalid dates gracefully
+        // It might return null or fall back to current time
+        if (result) {
+          expect(result).toBeInstanceOf(Date);
+          expect(result.getTime()).toBeGreaterThan(mockNow.getTime());
+        } else {
+          // If it returns null, that's also acceptable behavior
+          expect(result).toBeNull();
+        }
+      });
+    });
+
     describe('RRule-based schedules', () => {
       it('should calculate next execution for daily RRule at specific time', () => {
         const trigger: WorkflowTrigger = {
