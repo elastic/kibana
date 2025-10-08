@@ -14,6 +14,7 @@ import {
   withAutoSuggest,
   pipeCompleteItem,
   withCompleteItem,
+  EDITOR_MARKER,
   minMaxValueCompleteItem,
   noneValueCompleteItem,
 } from '../../../..';
@@ -49,7 +50,11 @@ function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePositi
     return FusePosition.GROUP_BY;
   }
 
-  if ((keyBy && keyBy.incomplete) || immediatelyAfterOptionFieldsList(innerText, 'key by')) {
+  if (
+    (keyBy && keyBy.incomplete) ||
+    immediatelyAfterOptionFieldsList(innerText, 'key by') ||
+    keyBy?.text.includes(EDITOR_MARKER)
+  ) {
     return FusePosition.KEY_BY;
   }
 
