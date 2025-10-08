@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+const getLatestTimeStamp = (reduceSeconds: number) => {
+  return new Date(new Date().getTime() - reduceSeconds).toISOString();
+};
+
 export const timeSeriesDataStreamTutorialCommands: string = `# Welcome to the tutorial on setting up time series data! 🎉
 # 🚀 This tutorial will guide you through setting up timeseries data stream, ingest sample data and run a query from the Kibana dev Console.
 # After selecting a command, execute it by clicking the ▶️ button or pressing Ctrl+Enter or Cmd+Enter.
@@ -49,16 +53,15 @@ POST _index_template/kibana_sample_weather_index_template
 
 # -----------------------------------------------
 # Step 2: Create data stream with data
-# Note: You have to adjust the @timestamp field to be close to your current date and time.
 # -----------------------------------------------
 
 PUT kibana_sample_weather_data_stream/_bulk
 { "create":{ } }
-{ "@timestamp": "2025-10-01T19:53:28.713Z", "location": "base", "temperature": 24.1 }
+{ "@timestamp": \"${getLatestTimeStamp(3600)}\", "location": "base", "temperature": 24.1 }
 { "create":{ } }
-{ "@timestamp": "2025-09-11T09:23:28.313Z", "location": "base", "temperature": 34.2}
+{ "@timestamp": \"${getLatestTimeStamp(6000)}\", "location": "base", "temperature": 34.2}
 { "create":{ } }
-{ "@timestamp": "2025-01-05T05:33:18.213Z", "location": "satellite", "temperature": 20.4}
+{ "@timestamp": \"${getLatestTimeStamp(10000)}\", "location": "satellite", "temperature": 20.4}
 
 # ✅ The response includes a summary of successes and errors for each operation.
 
