@@ -7,5 +7,6 @@
   "bugs": {
     "url": "https://github.com/elastic/kibana/issues"
   },
-  "homepage": "https://github.com/elastic/kibana/tree/main/packages/react-query#readme"
+  "homepage": "https://github.com/elastic/kibana/tree/main/packages/react-query#readme",
+  "sideEffects": false
 }
