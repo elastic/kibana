@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
 import { ToolType } from '@kbn/onechat-common';
+import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
 
 export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {
   const { onechat } = getPageObjects(['onechat']);
