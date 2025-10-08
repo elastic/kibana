@@ -112,11 +112,7 @@ export const DashboardViewport = () => {
         data-shared-items-count={visiblePanelCount}
         data-test-subj={'dshDashboardViewport'}
       >
-        {panelCount === 0 && sectionCount === 0 ? (
-          <DashboardEmptyScreen />
-        ) : viewMode === 'print' || controlsReady ? (
-          <DashboardGrid />
-        ) : null}
+        {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
       </div>
     </div>
   );
