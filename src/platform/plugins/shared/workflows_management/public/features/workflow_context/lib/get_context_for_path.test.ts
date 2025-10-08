@@ -86,7 +86,7 @@ describe('getContextSchemaForPath', () => {
       DynamicStepContextSchema.extend({
         inputs: z.object({}),
         consts: z.object({
-          test: z.string(),
+          test: z.literal('test'),
         }),
       })
     );
@@ -111,7 +111,7 @@ describe('getContextSchemaForPath', () => {
           }),
         }),
         consts: z.object({
-          test: z.string(),
+          test: z.literal('test'),
         }),
       })
     );
@@ -167,8 +167,8 @@ describe('getContextSchemaForPath', () => {
       'message',
     ]);
     const itemSchema = z.object({
-      name: z.string(),
-      surname: z.string(),
+      name: z.literal('Robert'),
+      surname: z.literal('Carmack'),
     });
     expect((context.shape as any).foreach).toBeDefined();
     expectZodSchemaEqual(
