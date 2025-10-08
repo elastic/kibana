@@ -34,6 +34,7 @@ export async function identifySystems({
   kql,
   inferenceClient,
   logger,
+  dropUnmapped = false,
 }: {
   stream: Streams.all.Definition;
   systems?: System[];
@@ -43,6 +44,7 @@ export async function identifySystems({
   kql?: string;
   inferenceClient: BoundInferenceClient;
   logger: Logger;
+  dropUnmapped?: boolean;
 }): Promise<{ systems: System[] }> {
   const [analysis, initialClustering] = await Promise.all([
     describeDataset({
@@ -65,16 +67,18 @@ export async function identifySystems({
           };
         }) ?? [],
       logger,
+      dropUnmapped,
     }),
   ]);
 
   const response = await executeAsReasoningAgent({
+    maxSteps: 3,
     input: {
       stream: {
         name: stream.name,
       },
       dataset_analysis: JSON.stringify(
-        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true })
+        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true, dropUnmapped })
       ),
       initial_clustering: JSON.stringify(initialClustering),
       condition_schema: conditionSchemaText,

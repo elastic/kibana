@@ -25,6 +25,10 @@ export interface ResourceData {
       type: 'general' | 'vector' | 'timeseries';
     };
   };
+  deployment?: {
+    id?: string;
+    name?: string;
+  };
 }
 export interface CloudSecurityAnswer {
   useCase: 'siem' | 'cloud' | 'edr' | 'other';

@@ -55,6 +55,13 @@ describe('StorageIndexAdapter', () => {
   } satisfies StorageSettings;
   let adapter: SimpleStorageIndexAdapter<typeof storageSettings>;
   let client: SimpleIStorageClient<typeof storageSettings>;
+  beforeAll(async () => {
+    await createServers();
+  });
+
+  afterAll(async () => {
+    await stopServers();
+  });
 
   beforeAll(async () => {
     await createServers();

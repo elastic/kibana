@@ -11,7 +11,7 @@ import { SettingsUserActionPayloadRt, SettingsUserActionRt } from './v1';
 describe('Settings', () => {
   describe('SettingsUserActionPayloadRt', () => {
     const defaultRequest = {
-      settings: { syncAlerts: true },
+      settings: { syncAlerts: true, extractObservables: true },
     };
 
     it('has expected attributes in request', () => {
@@ -25,14 +25,14 @@ describe('Settings', () => {
 
     it('removes foo:bar attributes from request', () => {
       const query = SettingsUserActionPayloadRt.decode({
-        settings: { syncAlerts: false },
+        settings: { syncAlerts: false, extractObservables: false },
         foo: 'bar',
       });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
-          settings: { syncAlerts: false },
+          settings: { syncAlerts: false, extractObservables: false },
         },
       });
     });
@@ -42,7 +42,7 @@ describe('Settings', () => {
     const defaultRequest = {
       type: UserActionTypes.settings,
       payload: {
-        settings: { syncAlerts: true },
+        settings: { syncAlerts: true, extractObservables: true },
       },
     };
 

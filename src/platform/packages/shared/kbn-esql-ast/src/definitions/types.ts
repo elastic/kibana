@@ -36,6 +36,8 @@ export const fieldTypes = [
   'unsupported',
   'date_nanos',
   'function_named_parameters',
+  'aggregate_metric_double',
+  'dense_vector',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -230,6 +232,7 @@ export interface FunctionFilterPredicates {
   location: Location;
   returnTypes?: string[];
   ignored?: string[];
+  allowed?: string[];
 }
 
 export interface Literals {

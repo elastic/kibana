@@ -7,10 +7,10 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
+import type { DashboardMigrationStats } from '../../../../../../types';
 import * as i18n from './translations';
 import { DashboardsFileUpload } from './dashboards_file_upload';
 import type { SplunkDashboardsResult, OnMigrationCreated } from '../../../../types';
-import type { DashboardMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import {
   useCreateMigration,
   type OnSuccess,
@@ -18,7 +18,7 @@ import {
 
 export interface DashboardsFileUploadStepProps {
   status: EuiStepStatus;
-  migrationStats: DashboardMigrationTaskStats | undefined;
+  migrationStats: DashboardMigrationStats | undefined;
   migrationName: string | undefined;
   onDashboardsFileChanged?: (files: FileList | null) => void;
   onFileUpload?: (dashboards: SplunkDashboardsResult[]) => void;

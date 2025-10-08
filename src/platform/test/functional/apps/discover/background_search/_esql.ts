@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -54,58 +53,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('ESQL view', function () {
-      it('stores a finished search', async () => {
-        const ariaLabel = await testSubjects.getAttribute(
-          'querySubmitSplitButton-primary-button',
-          'aria-label'
-        );
-        expect(ariaLabel).to.eql('Refresh query');
-        await testSubjects.click('querySubmitSplitButton-secondary-button');
-        await retry.waitFor(
-          'the toast appears indicating that the search session is saved',
-          async () => {
-            const count = await toasts.getCount();
-            return count > 0;
-          }
-        );
-      });
-
-      it('runs and stores a new search', async () => {
-        await monacoEditor.setCodeEditorValue('FROM kibana_sample_data_flights | LIMIT 10');
-
-        const ariaLabel = await testSubjects.getAttribute(
-          'querySubmitSplitButton-primary-button',
-          'aria-label'
-        );
-        expect(ariaLabel).to.eql('Run query');
-
-        await testSubjects.click('querySubmitSplitButton-secondary-button');
-        await retry.waitFor(
-          'the toast appears indicating that the search session is saved',
-          async () => {
-            const count = await toasts.getCount();
-            return count > 0;
-          }
-        );
-        await discover.waitUntilSearchingHasFinished();
-      });
-
       it('stores a running search', async () => {
         await monacoEditor.setCodeEditorValue(
           'FROM kibana_sample_data_flights | LIMIT 10 | WHERE DELAY(1000ms)'
         );
 
-        await testSubjects.click('querySubmitSplitButton-primary-button');
+        await testSubjects.click('querySubmitButton');
 
-        await retry.waitFor('waits for the Cancel button to appear', async () => {
-          const ariaLabel = await testSubjects.getAttribute(
-            'queryCancelSplitButton-primary-button',
-            'aria-label'
+        await retry.waitFor('waits for the send to background button to be enabled', async () => {
+          const disabled = await testSubjects.getAttribute(
+            'queryCancelButton-secondary-button',
+            'disabled'
           );
-          return ariaLabel === 'Cancel';
+          return disabled !== 'true';
         });
 
-        await testSubjects.click('queryCancelSplitButton-secondary-button');
+        await testSubjects.click('queryCancelButton-secondary-button');
 
         await retry.waitFor(
           'the toast appears indicating that the search session is saved',
@@ -114,6 +77,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             return count > 0;
           }
         );
+      });
+
+      describe('when clicking the open background search flyout button', () => {
+        it('opens the background search flyout', async () => {
+          await testSubjects.click('openBackgroundSearchFlyoutButton');
+          await testSubjects.exists('searchSessionsMgmtUiTable');
+        });
       });
     });
   });

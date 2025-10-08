@@ -70,6 +70,11 @@ export interface EmbeddableSetup {
    */
   registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
 
+  /**
+   * Use registerTransforms to register transforms for an embeddable type.
+   * Public transforms registry uses transformOut to convert StoredEmbeddableState from URL into EmbeddableState.
+   * transformIn is not used.
+   */
   registerTransforms: (
     type: string,
     getTransforms: () => Promise<EmbeddableTransforms<any, any> | undefined>

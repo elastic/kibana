@@ -7,15 +7,17 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { Owner } from '../../../common/constants/types';
 import { AnalyticsIndex } from '../analytics_index';
 import {
-  CAI_ATTACHMENTS_INDEX_NAME,
-  CAI_ATTACHMENTS_INDEX_ALIAS,
+  getAttachmentsDestinationIndexName,
+  getAttachmentsDestinationIndexAlias,
   CAI_ATTACHMENTS_INDEX_VERSION,
   CAI_ATTACHMENTS_SOURCE_INDEX,
-  CAI_ATTACHMENTS_SOURCE_QUERY,
-  CAI_ATTACHMENTS_BACKFILL_TASK_ID,
-  CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID,
+  getAttachmentsSourceQuery,
+  getCAIAttachmentsBackfillTaskId,
+  getCAIAttachmentsSynchronizationTaskId,
+  CAI_ATTACHMENTS_SYNC_TYPE,
 } from './constants';
 import { CAI_ATTACHMENTS_INDEX_MAPPINGS } from './mappings';
 import { CAI_ATTACHMENTS_INDEX_SCRIPT, CAI_ATTACHMENTS_INDEX_SCRIPT_ID } from './painless_scripts';
@@ -26,44 +28,54 @@ export const createAttachmentsAnalyticsIndex = ({
   logger,
   isServerless,
   taskManager,
+  spaceId,
+  owner,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   isServerless: boolean;
   taskManager: TaskManagerStartContract;
+  spaceId: string;
+  owner: Owner;
 }): AnalyticsIndex =>
   new AnalyticsIndex({
     logger,
     esClient,
     isServerless,
     taskManager,
-    indexName: CAI_ATTACHMENTS_INDEX_NAME,
-    indexAlias: CAI_ATTACHMENTS_INDEX_ALIAS,
+    indexName: getAttachmentsDestinationIndexName(spaceId, owner),
+    indexAlias: getAttachmentsDestinationIndexAlias(spaceId, owner),
     indexVersion: CAI_ATTACHMENTS_INDEX_VERSION,
     mappings: CAI_ATTACHMENTS_INDEX_MAPPINGS,
     painlessScriptId: CAI_ATTACHMENTS_INDEX_SCRIPT_ID,
     painlessScript: CAI_ATTACHMENTS_INDEX_SCRIPT,
-    taskId: CAI_ATTACHMENTS_BACKFILL_TASK_ID,
+    taskId: getCAIAttachmentsBackfillTaskId(spaceId, owner),
     sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
-    sourceQuery: CAI_ATTACHMENTS_SOURCE_QUERY,
+    sourceQuery: getAttachmentsSourceQuery(spaceId, owner),
   });
 
 export const scheduleAttachmentsAnalyticsSyncTask = ({
   taskManager,
   logger,
+  spaceId,
+  owner,
 }: {
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  spaceId: string;
+  owner: Owner;
 }) => {
+  const taskId = getCAIAttachmentsSynchronizationTaskId(spaceId, owner);
   scheduleCAISynchronizationTask({
-    taskId: CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID,
+    taskId,
     sourceIndex: CAI_ATTACHMENTS_SOURCE_INDEX,
-    destIndex: CAI_ATTACHMENTS_INDEX_NAME,
+    destIndex: getAttachmentsDestinationIndexName(spaceId, owner),
     taskManager,
+    spaceId,
+    owner,
+    syncType: CAI_ATTACHMENTS_SYNC_TYPE,
     logger,
   }).catch((e) => {
-    logger.error(
-      `Error scheduling ${CAI_ATTACHMENTS_SYNCHRONIZATION_TASK_ID} task, received ${e.message}`
-    );
+    logger.error(`Error scheduling ${taskId} task, received ${e.message}`);
   });
 };

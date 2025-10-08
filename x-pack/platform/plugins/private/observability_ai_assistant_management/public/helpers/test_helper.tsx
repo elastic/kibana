@@ -74,7 +74,6 @@ export const render = (
     config: {
       logSourcesEnabled: true,
       spacesEnabled: true,
-      visibilityEnabled: true,
     },
   };
 

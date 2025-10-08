@@ -647,6 +647,9 @@
       },
       "settings": {
         "properties": {
+          "extractObservables": {
+            "type": "boolean"
+          },
           "syncAlerts": {
             "type": "boolean"
           }
@@ -673,6 +676,9 @@
         "type": "integer"
       },
       "total_comments": {
+        "type": "integer"
+      },
+      "total_events": {
         "type": "integer"
       },
       "updated_at": {
@@ -3125,6 +3131,9 @@
       },
       "dataViewId": {
         "type": "keyword"
+      },
+      "enableResetToZero": {
+        "type": "boolean"
       },
       "enabled": {
         "type": "boolean"
