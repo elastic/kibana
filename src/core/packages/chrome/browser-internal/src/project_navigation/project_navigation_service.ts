@@ -485,15 +485,21 @@ export class ProjectNavigationService {
   }
 
   private initDeploymentName$() {
-    if (!this._http) return;
+    if (!this._http || typeof this._http.get !== 'function') {
+      this.deploymentName$ = of(undefined);
+      return;
+    }
 
-    this.deploymentName$ = from(
-      this._http.get<{
-        resourceData: { deployment: { name?: string } | undefined } | undefined;
-      }>('/internal/cloud/solution', {
-        version: '1',
-      })
-    ).pipe(
+    const response = this._http.get<{
+      resourceData: { deployment: { name?: string } | undefined } | undefined;
+    }>('/internal/cloud/solution', { version: '1' });
+
+    if (!response) {
+      this.deploymentName$ = of(undefined);
+      return;
+    }
+
+    this.deploymentName$ = from(response).pipe(
       map(({ resourceData }) => resourceData?.deployment?.name),
       catchError((err) => {
         this.logger?.warn(`Failed to load deployment name: ${err?.message}`);
