@@ -48,6 +48,7 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import { runWorkflow } from './execution_functions/run_workflow';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -84,42 +85,17 @@ export class WorkflowsExecutionEnginePlugin
 
               // Get ES client from core services (guaranteed to be available at task execution time)
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-
-              const {
-                workflowRuntime,
-                workflowExecutionState,
-                workflowLogger,
-                nodesFactory,
-                workflowExecutionGraph,
-                clientToUse,
-                fakeRequest: fakeRequestFromContainer,
-                coreStart: coreStartFromContainer,
-              } = await createContainer(
+              runWorkflow({
                 workflowRunId,
                 spaceId,
-                actions,
+                taskAbortController,
                 taskManager,
                 esClient,
-                logger,
+                actions,
+                coreStart,
                 config,
-                workflowExecutionRepository,
-                fakeRequest, // Provided by Task Manager's first-class API key support
-                coreStart
-              );
-              await workflowRuntime.start();
-
-              await workflowExecutionLoop({
-                workflowRuntime,
-                workflowExecutionState,
-                workflowExecutionRepository,
-                workflowLogger,
-                nodesFactory,
-                workflowExecutionGraph,
-                esClient: clientToUse,
-                fakeRequest: fakeRequestFromContainer,
-                coreStart: coreStartFromContainer,
-                taskAbortController,
+                logger,
+                fakeRequest: fakeRequest!,
               });
             },
             async cancel() {
