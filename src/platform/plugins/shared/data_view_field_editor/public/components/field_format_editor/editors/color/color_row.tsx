@@ -81,6 +81,7 @@ export const ColorRow = ({
       return (
         <EuiFieldText
           prepend={patternLabel}
+          aria-label={patternLabel}
           value={regex}
           data-test-subj={`colorEditorKeyPattern ${index}`}
           onChange={(e) => {
