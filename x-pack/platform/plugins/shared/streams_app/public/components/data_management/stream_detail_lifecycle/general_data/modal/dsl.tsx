@@ -87,6 +87,8 @@ export function DslField({ initialValue, isDisabled, setLifecycle, setSaveButton
         data-test-subj="streamsAppDslModalDaysField"
         value={isDisabled && existingRetention ? existingRetention?.value : retentionValue}
         onChange={(e) => {
+          // Ignore changes when disabled to prevent updating lifecycle state in read-only mode
+          if (isDisabled) return;
           setRetentionValue(e.target.value);
         }}
         disabled={isDisabled}
