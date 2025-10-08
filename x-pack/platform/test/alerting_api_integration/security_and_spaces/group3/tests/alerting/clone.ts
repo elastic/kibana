@@ -400,7 +400,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .expect(400);
 
-        await alertUtils.deleteInternallyManagedRule(createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
     });
   });

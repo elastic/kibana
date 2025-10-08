@@ -593,7 +593,7 @@ export class AlertUtils {
       request = request.auth(this.user.username, this.user.password);
     }
 
-    const response = await request.send().expect(200);
+    const response = await request.send();
 
     return response;
   }
@@ -608,7 +608,7 @@ export class AlertUtils {
       request = request.auth(this.user.username, this.user.password);
     }
 
-    const response = await request.send().expect(200);
+    const response = await request.send();
 
     return response;
   }

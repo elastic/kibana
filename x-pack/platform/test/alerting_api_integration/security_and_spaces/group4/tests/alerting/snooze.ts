@@ -403,7 +403,9 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           .send(snoozeSchedule)
           .expect(400);
 
-        await alertUtils.deleteInternallyManagedRule(createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
     });
   });

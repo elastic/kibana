@@ -1067,7 +1067,7 @@ export function defineRoutes(
           body: await rulesClient.delete({ id: req.params.id }),
         });
       } catch (err) {
-        return res.badRequest({ body: err });
+        throw err;
       }
     }
   );
@@ -1108,7 +1108,7 @@ export function defineRoutes(
           }),
         });
       } catch (err) {
-        return res.badRequest({ body: err });
+        throw err;
       }
     }
   );

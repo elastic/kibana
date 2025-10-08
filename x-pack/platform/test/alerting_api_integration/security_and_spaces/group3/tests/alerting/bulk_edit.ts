@@ -1122,7 +1122,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
 
-        await alertUtils.deleteInternallyManagedRule(createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
 
       it('should throw 400 error when trying to bulk update an internally managed rule type using the filter param', async () => {
@@ -1139,7 +1141,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
 
-        await alertUtils.deleteInternallyManagedRule(createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
 
       it('should throw 400 error when supplying both ids and filter', async () => {
@@ -1159,7 +1163,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(400);
 
-        await alertUtils.deleteInternallyManagedRule(createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
 
       it('should update the api key', async () => {
@@ -1176,7 +1182,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
         expect(response.status).to.eql(200);
 
-        await alertUtils.deleteInternallyManagedRule(createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
 
       it('should throw 400 error when multiple supported and non supported operations', async () => {

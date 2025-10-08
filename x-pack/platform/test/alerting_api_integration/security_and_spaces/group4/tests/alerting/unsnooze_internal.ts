@@ -338,7 +338,9 @@ export default function createUnsnoozeRuleTests({ getService }: FtrProviderConte
           })
           .expect(400);
 
-        await alertUtils.deleteInternallyManagedRule(createdRule.id);
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
     });
   });
