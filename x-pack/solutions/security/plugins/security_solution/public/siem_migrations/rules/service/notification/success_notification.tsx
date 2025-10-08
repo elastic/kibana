@@ -34,7 +34,7 @@ export const getSuccessToast = (migration: RuleMigrationStats, core: CoreStart):
   ),
 });
 
-const SuccessToastContent: React.FC<{ migration: RuleMigrationStats }> = ({ migration }) => {
+export const SuccessToastContent: React.FC<{ migration: RuleMigrationStats }> = ({ migration }) => {
   const navigation = { deepLinkId: SecurityPageName.siemMigrationsRules, path: migration.id };
 
   const { navigateTo, getAppUrl } = useNavigation();
