@@ -18,7 +18,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type YAML from 'yaml';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHandleMarkersChanged } from '../../../features/validate_workflow_yaml/lib/use_handle_markers_changed';
+import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
 import { addDynamicConnectorsToCache, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
@@ -65,10 +65,7 @@ import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
 import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
 import { registerWorkflowYamlLanguage } from '../lib/monaco_language/workflow_yaml';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
-import { getMonacoMarkerInterceptor } from '../lib/get_monaco_marker_interceptor';
 import { GlobalWorkflowEditorStyles } from '../styles/global_workflow_editor_styles';
-
-const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -206,17 +203,21 @@ export const WorkflowYAMLEditor = ({
   const isDevelopment = process.env.NODE_ENV !== 'production';
 
   // Validation
-  const workflowJsonSchemaStrict = useWorkflowJsonSchema({ loose: false });
+  const { jsonSchema: workflowJsonSchemaStrict, uri: workflowSchemaUriStrict } =
+    useWorkflowJsonSchema({ loose: false });
   const schemas: SchemasSettings[] = useMemo(() => {
+    if (!workflowSchemaUriStrict) {
+      return [];
+    }
     return [
       {
         fileMatch: ['*'],
         // casting here because zod-to-json-schema returns a more complex type than JSONSchema7 expected by monaco-yaml
         schema: workflowJsonSchemaStrict as any,
-        uri: WorkflowSchemaUri,
+        uri: workflowSchemaUriStrict,
       },
     ];
-  }, [workflowJsonSchemaStrict]);
+  }, [workflowJsonSchemaStrict, workflowSchemaUriStrict]);
 
   // TODO: move the schema generation up to detail page or some wrapper component
   const workflowYamlSchemaLoose = useMemo(() => {
@@ -228,10 +229,12 @@ export const WorkflowYAMLEditor = ({
 
   const { error: errorValidating } = useYamlValidation(editorRef.current);
 
-  const { validationErrors, handleMarkersChanged } = useHandleMarkersChanged({
-    workflowYamlSchema: workflowYamlSchemaLoose,
-    onValidationErrors,
-  });
+  const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
+    useMonacoMarkersChangedInterceptor({
+      yamlDocumentRef,
+      workflowYamlSchema: workflowYamlSchemaLoose,
+      onValidationErrors,
+    });
 
   const handleErrorClick = useCallback((error: YamlValidationResult) => {
     if (!editorRef.current) {
@@ -324,25 +327,6 @@ export const WorkflowYAMLEditor = ({
           kibanaHost: kibanaHost || window.location.origin,
         },
       };
-
-      // TODO: do not intercept 'setModelMarkers' twice
-      // Intercept and modify markers at the source to fix connector validation messages
-      // This prevents Monaco from ever seeing the problematic numeric enum messages
-      const originalSetModelMarkers = monaco.editor.setModelMarkers;
-
-      // Override Monaco's setModelMarkers function
-      monaco.editor.setModelMarkers = getMonacoMarkerInterceptor(
-        originalSetModelMarkers,
-        workflowYamlSchemaLoose,
-        yamlDocumentRef
-      );
-
-      // Store cleanup function to restore original behavior
-      disposablesRef.current.push({
-        dispose: () => {
-          monaco.editor.setModelMarkers = originalSetModelMarkers;
-        },
-      });
 
       // Monaco YAML hover is now disabled via configuration (hover: false)
       // The unified hover provider will handle all hover content including validation errors
@@ -541,11 +525,20 @@ export const WorkflowYAMLEditor = ({
   useEffect(() => {
     // Monkey patching to set the initial markers
     // https://github.com/suren-atoyan/monaco-react/issues/70#issuecomment-760389748
+    // +
+    // Intercept and modify markers at the source to fix connector validation messages
+    // This prevents Monaco from ever seeing the problematic numeric enum messages
     const setModelMarkers = monaco.editor.setModelMarkers;
     monaco.editor.setModelMarkers = function (model, owner, markers) {
-      setModelMarkers.call(monaco.editor, model, owner, markers);
+      // check if the model is the same as the editor model
+      const editorUri = editorRef.current?.getModel()?.uri;
+      if (model.uri.path !== editorUri?.path) {
+        return;
+      }
+      const transformedMarkers = transformMonacoMarkers(model, markers, owner);
+      setModelMarkers.call(monaco.editor, model, owner, transformedMarkers);
       if (editorRef.current) {
-        handleMarkersChanged(editorRef.current, model.uri, markers, owner);
+        handleMarkersChanged(model, transformedMarkers, owner);
       }
     };
 
@@ -553,7 +546,7 @@ export const WorkflowYAMLEditor = ({
       // Reset the monaco.editor.setModelMarkers to the original function
       monaco.editor.setModelMarkers = setModelMarkers;
     };
-  }, [handleMarkersChanged]);
+  }, [handleMarkersChanged, transformMonacoMarkers]);
 
   // Debug
   const downloadSchema = useCallback(() => {

@@ -9,10 +9,29 @@
 
 import { useMemo } from 'react';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
+import type { JSONSchema7 } from 'json-schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 
-export const useWorkflowJsonSchema = (options: { loose: boolean }) => {
+const WorkflowSchemaUriStrict = 'file:///workflow-schema.json';
+const WorkflowSchemaUriStrictWithDynamicConnectors =
+  'file:///workflow-schema-strict-with-dynamic-connectors.json';
+const WorkflowSchemaUriLoose = 'file:///workflow-schema-loose.json';
+const WorkflowSchemaUriLooseWithDynamicConnectors =
+  'file:///workflow-schema-loose-with-dynamic-connectors.json';
+
+interface UseWorkflowJsonSchemaOptions {
+  loose: boolean;
+}
+
+interface UseWorkflowJsonSchemaResult {
+  jsonSchema: JSONSchema7 | null;
+  uri: string | null;
+}
+
+export const useWorkflowJsonSchema = (
+  options: UseWorkflowJsonSchemaOptions
+): UseWorkflowJsonSchemaResult => {
   const { data: connectorsData } = useAvailableConnectors();
 
   // TODO: download from server instead of generating on client
@@ -21,6 +40,12 @@ export const useWorkflowJsonSchema = (options: { loose: boolean }) => {
   // Now uses lazy loading to keep large generated files out of main bundle
   return useMemo(() => {
     try {
+      let uri = options.loose ? WorkflowSchemaUriLoose : WorkflowSchemaUriStrict;
+      if (connectorsData?.connectorTypes) {
+        uri = options.loose
+          ? WorkflowSchemaUriLooseWithDynamicConnectors
+          : WorkflowSchemaUriStrictWithDynamicConnectors;
+      }
       const zodSchema = options.loose
         ? getWorkflowZodSchemaLoose(connectorsData?.connectorTypes ?? {})
         : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
@@ -29,10 +54,16 @@ export const useWorkflowJsonSchema = (options: { loose: boolean }) => {
       // Post-process to improve validation messages and add display names for connectors
       const processedSchema = improveTypeFieldDescriptions(jsonSchema, connectorsData);
 
-      return processedSchema ?? null;
+      return {
+        jsonSchema: processedSchema ?? null,
+        uri,
+      };
     } catch (error) {
       // console.error('🚨 Schema generation failed:', error);
-      return null;
+      return {
+        jsonSchema: null,
+        uri: null,
+      };
     }
   }, [connectorsData, options.loose]);
 };
