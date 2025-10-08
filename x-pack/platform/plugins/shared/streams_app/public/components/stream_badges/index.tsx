@@ -34,7 +34,7 @@ const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ chil
       defaultMessage: 'Data Retention',
     })}
     content={i18n.translate('xpack.streams.badges.lifecycle.description', {
-      defaultMessage: 'You can edit retention settings from the stream’s management view',
+      defaultMessage: 'The data retention period or policy for this stream.',
     })}
     anchorProps={{
       css: css`
@@ -55,7 +55,7 @@ export function ClassicStreamBadge() {
       })}
       content={i18n.translate('xpack.streams.badges.classic.description', {
         defaultMessage:
-          'Classic streams are based on existing data streams and may not support all Streams features like custom re-routing',
+          "Classic streams are based on existing data streams and don't support all Streams features like partitioning.",
       })}
       anchorProps={{
         css: css`
@@ -125,8 +125,8 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
     badge = (
       <EuiBadge color="hollow" iconType="clockCounter" iconSide="left" tabIndex={0}>
         {lifecycle.dsl.data_retention ??
-          i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslForeverBadgeLabel', {
-            defaultMessage: 'Forever',
+          i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel', {
+            defaultMessage: 'Indefinite',
           })}
       </EuiBadge>
     );

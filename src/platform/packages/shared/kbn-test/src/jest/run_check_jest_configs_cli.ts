@@ -12,7 +12,7 @@ import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { getAllJestPaths, getTestsForConfigPaths } from './configs';
+import { getJestConfigs } from './configs/get_jest_configs';
 
 const fmtMs = (ms: number) => {
   if (ms < 1000) {
@@ -29,26 +29,22 @@ export async function runCheckJestConfigsCli() {
     async ({ log }) => {
       const start = performance.now();
 
-      const jestPaths = await getAllJestPaths();
-      const allConfigs = await getTestsForConfigPaths(jestPaths.configs);
-      const missingConfigs = new Set<string>();
-      const multipleConfigs = new Set<{ configs: string[]; rel: string }>();
+      const { orphanedTestFiles, duplicateTestFiles, configsWithTests, emptyConfigs } =
+        await getJestConfigs();
 
-      for (const testPath of jestPaths.tests) {
-        const configs = allConfigs
-          .filter((c) => c.testPaths.has(testPath))
-          .map((c) => Path.relative(REPO_ROOT, c.path))
-          .sort((a, b) => Path.dirname(a).localeCompare(Path.dirname(b)));
+      // Convert to relative paths for display
+      const missingConfigs = new Set(
+        orphanedTestFiles.map((file) => Path.relative(REPO_ROOT, file))
+      );
 
-        if (configs.length === 0) {
-          missingConfigs.add(Path.relative(REPO_ROOT, testPath));
-        } else if (configs.length > 1) {
-          multipleConfigs.add({
-            configs,
-            rel: Path.relative(REPO_ROOT, testPath),
-          });
-        }
-      }
+      const multipleConfigs = new Set(
+        duplicateTestFiles.map(({ testFile, configs }) => ({
+          configs: configs
+            .map((c) => Path.relative(REPO_ROOT, c))
+            .sort((a, b) => Path.dirname(a).localeCompare(Path.dirname(b))),
+          rel: Path.relative(REPO_ROOT, testFile),
+        }))
+      );
 
       if (missingConfigs.size) {
         log.error(
@@ -84,6 +80,15 @@ export async function runCheckJestConfigsCli() {
 
         log.error(`The following test files are selected by multiple config files:\n${list}`);
       }
+
+      log.info(
+        `Summary        
+          - ${configsWithTests.length} configs with tests. 
+          - ${emptyConfigs.length} configs with no tests.
+          - ${missingConfigs.size} test files not covered by any config.
+          - ${multipleConfigs.size} test files covered by multiple configs.
+        `
+      );
 
       if (missingConfigs.size || multipleConfigs.size) {
         throw createFailError('Please resolve the previously logged issues.');

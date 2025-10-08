@@ -314,6 +314,46 @@ describe('fetchEsqlQuery', () => {
       `);
     });
 
+    it('should generate the correct query with parameters', async () => {
+      const params = {
+        ...defaultParams,
+        esqlQuery: {
+          esql: 'from test | where event.action == "execute" AND event.duration > 0 AND @timestamp > ?_tstart | stats duration = AVG(event.duration) BY BUCKET(@timestamp, 30, ?_tstart, ?_tend), event.provider | where duration > 0',
+        },
+      };
+      const { dateStart, dateEnd } = getTimeRange();
+      const query = getEsqlQuery(params, undefined, dateStart, dateEnd);
+
+      expect(query).toMatchInlineSnapshot(`
+        Object {
+          "filter": Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "range": Object {
+                    "time": Object {
+                      "format": "strict_date_optional_time",
+                      "gt": "2020-02-09T23:10:41.941Z",
+                      "lte": "2020-02-09T23:15:41.941Z",
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          "params": Array [
+            Object {
+              "_tstart": "2020-02-09T23:10:41.941Z",
+            },
+            Object {
+              "_tend": "2020-02-09T23:15:41.941Z",
+            },
+          ],
+          "query": "from test | where event.action == \\"execute\\" AND event.duration > 0 AND @timestamp > ?_tstart | stats duration = AVG(event.duration) BY BUCKET(@timestamp, 30, ?_tstart, ?_tend), event.provider | where duration > 0",
+        }
+      `);
+    });
+
     it('should generate the correct query with the alertLimit', async () => {
       const params = defaultParams;
       const { dateStart, dateEnd } = getTimeRange();

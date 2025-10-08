@@ -8,6 +8,48 @@
  */
 
 import { z } from '@kbn/zod';
+import moment from 'moment-timezone';
+
+export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
+
+// Timezone validation helper
+const validateTimezone = (timezone: string) => {
+  if (moment.tz.zone(timezone) != null) {
+    return null;
+  }
+  return `Invalid timezone: ${timezone}`;
+};
+
+// RRule validation helpers
+const validateRRuleFrequency = (freq: string, byweekday?: string[], bymonthday?: number[]) => {
+  if (freq === 'WEEKLY' && (!byweekday || byweekday.length === 0)) {
+    return 'WEEKLY frequency requires at least one byweekday value';
+  }
+  if (freq === 'MONTHLY' && (!bymonthday || bymonthday.length === 0)) {
+    return 'MONTHLY frequency requires at least one bymonthday value';
+  }
+  return null;
+};
+
+const validateRRuleTimeFields = (byhour?: number[], byminute?: number[]) => {
+  if (byhour && byhour.some((h) => h < 0 || h > 23)) {
+    return 'byhour values must be between 0 and 23';
+  }
+  if (byminute && byminute.some((m) => m < 0 || m > 59)) {
+    return 'byminute values must be between 0 and 59';
+  }
+  return null;
+};
+
+const validateRRuleDateStart = (dtstart?: string) => {
+  if (dtstart) {
+    const date = new Date(dtstart);
+    if (isNaN(date.getTime())) {
+      return 'dtstart must be a valid ISO date string';
+    }
+  }
+  return null;
+};
 
 /* -- Settings -- */
 export const RetryPolicySchema = z.object({
@@ -36,7 +78,9 @@ export const WorkflowOnFailureSchema = z.object({
   fallback: z.array(BaseStepSchema).min(1).optional(),
   continue: z.boolean().optional(),
 });
+
 export type WorkflowOnFailure = z.infer<typeof WorkflowOnFailureSchema>;
+
 export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = false) {
   const schema = WorkflowOnFailureSchema.extend({
     fallback: z.array(stepSchema).optional(),
@@ -53,6 +97,7 @@ export function getOnFailureStepSchema(stepSchema: z.ZodType, loose: boolean = f
 export const WorkflowSettingsSchema = z.object({
   'on-failure': WorkflowOnFailureSchema.optional(),
   timezone: z.string().optional(), // Should follow IANA TZ format
+  timeout: DurationSchema.optional(), // e.g., '5s', '1m', '2h'
 });
 export type WorkflowSettings = z.infer<typeof WorkflowSettingsSchema>;
 
@@ -82,11 +127,49 @@ export const ScheduledTriggerSchema = z.object({
   type: z.literal('scheduled'),
   enabled: z.boolean().optional().default(true),
   with: z.union([
+    // New format: every: "5m", "2h", "1d", "30s"
     z.object({
-      every: z.string().min(1),
-      unit: z.enum(['second', 'minute', 'hour', 'day', 'week', 'month', 'year']),
+      every: z
+        .string()
+        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
     }),
-    z.object({ cron: z.string().min(1) }),
+    z.object({
+      rrule: z
+        .object({
+          freq: z.enum(['DAILY', 'WEEKLY', 'MONTHLY']),
+          interval: z.number().int().positive(),
+          tzid: z.string().min(1),
+          dtstart: z.string().optional(),
+          byhour: z.array(z.number().int().min(0).max(23)).optional(),
+          byminute: z.array(z.number().int().min(0).max(59)).optional(),
+          byweekday: z.array(z.enum(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).optional(),
+          bymonthday: z.array(z.number().int().min(1).max(31)).optional(),
+        })
+        .refine(
+          (data) => {
+            const freqError = validateRRuleFrequency(data.freq, data.byweekday, data.bymonthday);
+            if (freqError) return false;
+            const timeError = validateRRuleTimeFields(data.byhour, data.byminute);
+            if (timeError) return false;
+            const dateError = validateRRuleDateStart(data.dtstart);
+            if (dateError) return false;
+            const timezoneError = validateTimezone(data.tzid);
+            if (timezoneError) return false;
+            return true;
+          },
+          (data) => {
+            const freqError = validateRRuleFrequency(data.freq, data.byweekday, data.bymonthday);
+            if (freqError) return { message: freqError };
+            const timeError = validateRRuleTimeFields(data.byhour, data.byminute);
+            if (timeError) return { message: timeError };
+            const dateError = validateRRuleDateStart(data.dtstart);
+            if (dateError) return { message: dateError };
+            const timezoneError = validateTimezone(data.tzid);
+            if (timezoneError) return { message: timezoneError };
+            return { message: 'Invalid RRule configuration' };
+          }
+        ),
+    }),
   ]),
 });
 
@@ -109,10 +192,10 @@ export const TriggerTypes = [
 export type TriggerType = (typeof TriggerTypes)[number];
 
 /* --- Steps --- */
-const StepWithTimeoutSchema = z.object({
-  timeout: z.number().optional(),
+export const TimeoutPropSchema = z.object({
+  timeout: DurationSchema.optional(),
 });
-export type StepWithTimeout = z.infer<typeof StepWithTimeoutSchema>;
+export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 const StepWithForEachSchema = z.object({
   foreach: z.string().optional(),
@@ -137,14 +220,14 @@ export const BaseConnectorStepSchema = BaseStepSchema.extend({
 })
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
-  .merge(StepWithTimeoutSchema)
+  .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type ConnectorStep = z.infer<typeof BaseConnectorStepSchema>;
 
 export const WaitStepSchema = BaseStepSchema.extend({
   type: z.literal('wait'),
   with: z.object({
-    duration: z.string().regex(/^\d+(ms|[smhdw])$/), // e.g., '5s', '1m', '2h'
+    duration: DurationSchema, // e.g., '5s', '1m', '2h'
   }),
 });
 export type WaitStep = z.infer<typeof WaitStepSchema>;
@@ -164,7 +247,7 @@ export const HttpStepSchema = BaseStepSchema.extend({
 })
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
-  .merge(StepWithTimeoutSchema)
+  .merge(TimeoutPropSchema)
   .merge(StepWithOnFailureSchema);
 export type HttpStep = z.infer<typeof HttpStepSchema>;
 

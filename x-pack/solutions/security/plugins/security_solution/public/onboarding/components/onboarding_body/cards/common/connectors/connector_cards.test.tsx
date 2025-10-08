@@ -20,6 +20,9 @@ jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_action_types', () 
 jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
   useKibana: () => ({
     services: {
+      settings: {
+        client: { get: jest.fn() },
+      },
       http: {
         get: jest.fn(),
       },
@@ -104,7 +107,7 @@ describe('ConnectorCards', () => {
       />
     );
 
-    await userEvent.click(screen.getByRole('button', { name: /Connector Selector/i }));
+    await userEvent.click(screen.getByTestId('connector-selector'));
     await userEvent.click(screen.getByText('Connector 1'));
     expect(onConnectorSelected).toHaveBeenCalledWith(mockConnectors[0]);
   });

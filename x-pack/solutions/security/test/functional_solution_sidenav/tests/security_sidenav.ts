@@ -12,7 +12,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spaces = getService('spaces');
   const browser = getService('browser');
 
-  describe('security solution', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/237708
+  // Failing: See https://github.com/elastic/kibana/issues/237035
+  describe.skip('security solution', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -49,11 +51,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // check the Investigations subsection
-        await solutionNavigation.sidenav.openPanel('securityGroup:investigations'); // open Investigations panel
-        await solutionNavigation.sidenav.clickPanelLink(`timelines`);
-        await solutionNavigation.sidenav.expectLinkActive({
-          navId: 'securityGroup:investigations',
-        });
+        await solutionNavigation.sidenav.expandMore();
+        // open Investigations popover and navigate to some link inside the popover to open the panel
+        await solutionNavigation.sidenav.clickLink({ navId: 'securityGroup:investigations' });
+        await solutionNavigation.sidenav.clickLink({ navId: 'timelines' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Timelines' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           deepLinkId: 'securitySolutionUI:timelines',
@@ -78,6 +79,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
         await browser.refresh();
         await solutionNavigation.sidenav.feedbackCallout.expectMissing();
+      });
+
+      it('renders tour', async () => {
+        await solutionNavigation.sidenav.tour.reset();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-more');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
+        await solutionNavigation.sidenav.tour.nextStep();
+        await solutionNavigation.sidenav.tour.expectHidden();
+        await browser.refresh();
+        await solutionNavigation.sidenav.tour.expectHidden();
       });
     });
   });

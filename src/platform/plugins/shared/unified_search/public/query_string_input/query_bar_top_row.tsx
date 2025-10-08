@@ -46,6 +46,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { SplitButton } from '@kbn/split-button';
+import { EuiIconBackgroundTask } from '@kbn/background-search';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { QueryStringInput } from './query_string_input';
 import { NoDataPopover } from './no_data_popover';
@@ -630,7 +631,8 @@ export const QueryBarTopRow = React.memo(
             onClick={onClickCancelButton}
             onSecondaryButtonClick={onClickSendToBackground}
             secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-            secondaryButtonIcon="clock"
+            // TODO: Replace when the backgroundTask icon is available in EUI
+            secondaryButtonIcon={EuiIconBackgroundTask}
             secondaryButtonTitle={strings.getSendToBackgroundLabel()}
             size="s"
           >
@@ -693,7 +695,8 @@ export const QueryBarTopRow = React.memo(
           onClick={onClickSubmitButton}
           onSecondaryButtonClick={onClickSendToBackground}
           secondaryButtonAriaLabel={strings.getSendToBackgroundLabel()}
-          secondaryButtonIcon="clock"
+          // TODO: Replace when the backgroundTask icon is available in EUI
+          secondaryButtonIcon={EuiIconBackgroundTask}
           secondaryButtonTitle={strings.getSendToBackgroundLabel()}
           size="s"
         >
@@ -913,6 +916,7 @@ export const QueryBarTopRow = React.memo(
           <>
             <EuiFlexGroup
               className="kbnQueryBar"
+              data-test-subj="kbnQueryBar"
               direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
               responsive={false}
               gutterSize="s"

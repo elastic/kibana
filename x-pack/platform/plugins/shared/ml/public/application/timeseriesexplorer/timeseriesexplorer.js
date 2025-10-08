@@ -443,6 +443,7 @@ export class TimeSeriesExplorer extends React.Component {
               contextForecastData: undefined,
               focusChartData: undefined,
               focusForecastData: undefined,
+              showForecastCheckbox: false,
               modelPlotEnabled:
                 isModelPlotChartableForDetector(currentSelectedJob, selectedDetectorIndex) &&
                 isModelPlotEnabled(currentSelectedJob, selectedDetectorIndex, entityControls),
@@ -849,6 +850,9 @@ export class TimeSeriesExplorer extends React.Component {
             showModelBoundsCheckbox: modelPlotEnabled && refreshFocusData.focusChartData.length > 0,
             zoomFromFocusLoaded: selection.from,
             zoomToFocusLoaded: selection.to,
+            showForecastCheckbox: Boolean(
+              this.props.selectedForecastId && refreshFocusData.showForecastCheckbox
+            ),
             ...refreshFocusData,
             ...tableData,
           });
@@ -1051,6 +1055,7 @@ export class TimeSeriesExplorer extends React.Component {
         {fieldNamesWithEmptyValues.length > 0 && (
           <>
             <EuiCallOut
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
@@ -1231,6 +1236,7 @@ export class TimeSeriesExplorer extends React.Component {
                   </EuiTitle>
                   <EuiPanel>
                     <EuiCallOut
+                      announceOnMount
                       title={i18n.translate(
                         'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
                         {
