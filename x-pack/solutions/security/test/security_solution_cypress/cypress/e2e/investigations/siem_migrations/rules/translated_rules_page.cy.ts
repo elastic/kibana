@@ -26,7 +26,7 @@ import {
   reprocessWithoutPrebuiltRulesMatching,
 } from '../../../../tasks/siem_migrations';
 import { GET_STARTED_URL } from '../../../../urls/navigation';
-import { role } from './role';
+import { role } from '../common/role';
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
 const tags = ['@ess', '@serverless', '@skipInServerlessMKI'];

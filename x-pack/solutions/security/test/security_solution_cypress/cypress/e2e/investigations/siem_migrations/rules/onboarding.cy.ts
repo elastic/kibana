@@ -6,7 +6,7 @@
  */
 import {
   MIGRATION_PANEL_NAME,
-  ONBOARDING_RULE_MIGRATIONS_LIST,
+  ONBOARDING_SIEM_MIGRATIONS_LIST,
   ONBOARDING_TRANSLATIONS_RESULT_TABLE,
   RULE_MIGRATIONS_GROUP_PANEL,
   RULE_MIGRATION_PROGRESS_BAR,
@@ -25,7 +25,7 @@ import {
   renameMigration,
 } from '../../../../tasks/siem_migrations';
 import { GET_STARTED_URL } from '../../../../urls/navigation';
-import { role } from './role';
+import { role } from '../common/role';
 
 export const SPLUNK_TEST_RULES = [
   {
@@ -123,7 +123,7 @@ describe('Rule Migrations - Basic Workflow', { tags }, () => {
         .its('request.body.settings')
         .should('have.property', 'skip_prebuilt_rules_matching', false);
       cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
-        cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
+        cy.get(ONBOARDING_SIEM_MIGRATIONS_LIST).should('have.length', 1);
         cy.get(RULE_MIGRATION_PROGRESS_BAR).should('have.length', 1);
       });
     });
@@ -138,7 +138,7 @@ describe('Rule Migrations - Basic Workflow', { tags }, () => {
 
       it('should be able to see the result of the completed migration', () => {
         cy.get(RULE_MIGRATIONS_GROUP_PANEL).within(() => {
-          cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
+          cy.get(ONBOARDING_SIEM_MIGRATIONS_LIST).should('have.length', 1);
           cy.get(ONBOARDING_TRANSLATIONS_RESULT_TABLE.TRANSLATION_STATUS_COUNT('Failed')).should(
             'have.text',
             1
@@ -153,7 +153,7 @@ describe('Rule Migrations - Basic Workflow', { tags }, () => {
       });
 
       it('should be able to rename the migration', () => {
-        cy.get(ONBOARDING_RULE_MIGRATIONS_LIST).should('have.length', 1);
+        cy.get(ONBOARDING_SIEM_MIGRATIONS_LIST).should('have.length', 1);
         renameMigration('New Migration Name');
         cy.get(MIGRATION_PANEL_NAME).should('have.text', 'New Migration Name');
       });
