@@ -8,12 +8,13 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiFlexGroup, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { CoreStart } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import { SearchSessionStatus } from '../../../../../../../common';
 import type { SearchUsageCollector } from '../../../../../collectors';
 import type { BackgroundSearchOpenedHandler, UISession } from '../../../types';
@@ -75,7 +76,7 @@ export const nameColumn = ({
     const trackAction = isRestorable
       ? searchUsageCollector.trackSessionViewRestored
       : searchUsageCollector.trackSessionReloaded;
-    const notRestorableWarning = isRestorable ? null : (
+    const notRestorableWarning = false ? null : (
       <EuiIconTip
         type="warning"
         content={
@@ -120,10 +121,18 @@ export const nameColumn = ({
           }}
         >
           <TableText data-test-subj="sessionManagementNameCol">
-            <EuiFlexGroup gutterSize="s">
-              {name}
-              {notRestorableWarning}
-              {versionIncompatibleWarning}
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+              {notRestorableWarning && (
+                <EuiFlexItem css={iconCss} grow={false}>
+                  {notRestorableWarning}
+                </EuiFlexItem>
+              )}
+              {versionIncompatibleWarning && (
+                <EuiFlexItem css={iconCss} grow={false}>
+                  {versionIncompatibleWarning}
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </TableText>
         </NameColumnText>
@@ -131,3 +140,7 @@ export const nameColumn = ({
     );
   },
 });
+
+const iconCss = css`
+  line-height: 1;
+`;
