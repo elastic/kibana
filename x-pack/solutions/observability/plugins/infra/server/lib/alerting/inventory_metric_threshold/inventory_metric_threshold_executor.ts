@@ -13,7 +13,7 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_GROUPING,
-  ALERT_CONTEXT,
+  ALERT_INDEX_PATTERN,
 } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import type {
@@ -327,7 +327,7 @@ export const createInventoryMetricThresholdExecutor =
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
           [ALERT_GROUPING]: grouping,
-          [ALERT_CONTEXT]: { metricAlias },
+          [ALERT_INDEX_PATTERN]: metricAlias,
           ...flattenAdditionalContext(additionalContext),
         };
 

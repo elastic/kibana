@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  ALERT_CONTEXT,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
   ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { castArray, isEqual } from 'lodash';
@@ -70,6 +70,7 @@ export type MetricThresholdAlert = Omit<
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
   [ALERT_GROUP]?: Group[];
+  [ALERT_INDEX_PATTERN]?: string;
 };
 
 export type MetricThresholdRuleParams = Record<string, any>;
@@ -175,7 +176,7 @@ export const createMetricThresholdExecutor =
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
           [ALERT_GROUP]: groups,
           [ALERT_GROUPING]: grouping?.unflatten,
-          [ALERT_CONTEXT]: { metricAlias },
+          [ALERT_INDEX_PATTERN]: metricAlias,
           ...flattenAdditionalContext(additionalContext),
           ...getEcsGroupsFromFlattenGrouping(grouping?.flatten),
         },

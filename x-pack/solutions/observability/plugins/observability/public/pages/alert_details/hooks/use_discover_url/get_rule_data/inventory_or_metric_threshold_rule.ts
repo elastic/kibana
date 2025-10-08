@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ALERT_CONTEXT } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { ALERT_INDEX_PATTERN } from '@kbn/rule-data-utils';
 import type { TopAlert } from '../../../../../typings/alerts';
 
 export const getInventoryOrMetricThresholdRuleData = ({
@@ -17,7 +17,9 @@ export const getInventoryOrMetricThresholdRuleData = ({
   alert: TopAlert;
   rule: Rule;
 }) => {
-  const metricAlias = (alert.fields[ALERT_CONTEXT] as { metricAlias?: unknown })?.metricAlias;
+  const metricAlias =
+    ALERT_INDEX_PATTERN in alert.fields ? alert.fields[ALERT_INDEX_PATTERN] : undefined;
+
   if (typeof metricAlias !== 'string') {
     return {};
   }

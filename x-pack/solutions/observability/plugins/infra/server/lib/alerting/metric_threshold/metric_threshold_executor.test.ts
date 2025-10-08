@@ -31,7 +31,7 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
   ALERT_GROUPING,
-  ALERT_CONTEXT,
+  ALERT_INDEX_PATTERN,
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/alerting-rule-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
@@ -2471,7 +2471,7 @@ describe('The metric threshold rule type', () => {
             }
           : {}),
         [ALERT_REASON]: reason,
-        [ALERT_CONTEXT]: { metricAlias: 'metrics-*,metricbeat-*' },
+        [ALERT_INDEX_PATTERN]: 'metrics-*,metricbeat-*',
         ...(tags ? { tags } : {}),
         ...(ecsGroups ? ecsGroups : {}),
         ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),

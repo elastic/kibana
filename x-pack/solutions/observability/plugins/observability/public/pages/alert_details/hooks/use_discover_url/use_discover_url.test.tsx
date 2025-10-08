@@ -15,10 +15,10 @@ import {
   SYNTHETICS_TLS_RULE,
   ES_QUERY_ID,
   SLO_BURN_RATE_RULE_TYPE_ID,
-  ALERT_CONTEXT,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   LOG_THRESHOLD_ALERT_TYPE_ID,
+  ALERT_INDEX_PATTERN,
 } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { TopAlert } from '../../../../typings/alerts';
@@ -294,7 +294,7 @@ describe('useDiscoverUrl', () => {
       const alertWithDataViewId = {
         ...MOCK_ALERT,
         fields: {
-          [ALERT_CONTEXT]: { metricAlias: expectedMetricAlias },
+          [ALERT_INDEX_PATTERN]: expectedMetricAlias,
         },
       } as unknown as TopAlert;
 
@@ -327,7 +327,7 @@ describe('useDiscoverUrl', () => {
       const alertWithDataViewId = {
         ...MOCK_ALERT,
         fields: {
-          [ALERT_CONTEXT]: { metricAlias: expectedMetricAlias },
+          [ALERT_INDEX_PATTERN]: expectedMetricAlias,
         },
       } as unknown as TopAlert;
 
