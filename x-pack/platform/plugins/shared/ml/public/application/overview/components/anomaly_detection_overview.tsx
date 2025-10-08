@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MlSummaryJobs } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
-import { ML_PAGES } from '../../../locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_kibana.png';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check';

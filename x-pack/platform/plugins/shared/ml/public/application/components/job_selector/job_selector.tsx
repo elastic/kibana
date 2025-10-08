@@ -17,7 +17,7 @@ import type {
   MlJobWithTimeRange,
   MlSummaryJob,
 } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
-import { ML_PAGES } from '../../../locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { IdBadges } from './id_badges';
 
 import { BADGE_LIMIT } from './job_selector_flyout';

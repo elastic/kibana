@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

@@ -19,12 +19,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState } from '@kbn/ml-url-state';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useCreateAndNavigateToManagementMlLink } from '../../../../../contexts/kibana/use_create_url';
 import { useJobInfoFlyouts } from '../../../../../jobs/components/job_details_flyout';
 import { useGetAnalytics } from '../../../analytics_management/services/analytics_service';
 import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
 import type { DataFrameAnalyticsListRow } from '../../../analytics_management/components/analytics_list/common';
-import { ML_PAGES } from '../../../../../../locator';
 import { ExpandedRow } from '../../../analytics_management/components/analytics_list/expanded_row';
 
 export const AnalyticsDetailFlyout = () => {

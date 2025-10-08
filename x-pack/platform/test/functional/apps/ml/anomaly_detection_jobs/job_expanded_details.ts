@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
 import { QuickFilterButtonTypes } from '../../../services/ml/job_table';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
