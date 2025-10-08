@@ -29,7 +29,6 @@ export const ConfigSchema = schema.oneOf([
     defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     contextWindowLength: schema.maybe(schema.number({})),
-    temperature: schema.maybe(schema.number()),
   }),
   schema.object({
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.Other)]),
@@ -44,7 +43,6 @@ export const ConfigSchema = schema.oneOf([
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     contextWindowLength: schema.maybe(schema.number({})),
     enableNativeFunctionCalling: schema.maybe(schema.boolean()),
-    temperature: schema.maybe(schema.number()),
   }),
 ]);
 
@@ -179,15 +177,13 @@ export const InvokeAIActionParamsSchema = schema.object({
 
 export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
-  usage: schema.maybe(
-    schema.object(
-      {
-        prompt_tokens: schema.number(),
-        completion_tokens: schema.number(),
-        total_tokens: schema.number(),
-      },
-      { unknowns: 'ignore' }
-    )
+  usage: schema.object(
+    {
+      prompt_tokens: schema.number(),
+      completion_tokens: schema.number(),
+      total_tokens: schema.number(),
+    },
+    { unknowns: 'ignore' }
   ),
 });
 
@@ -217,23 +213,21 @@ export const RunActionResponseSchema = schema.object(
       },
       { unknowns: 'ignore' }
     ),
-    choices: schema.maybe(
-      schema.arrayOf(
-        schema.object(
-          {
-            message: schema.object(
-              {
-                role: schema.string(),
-                // nullable because message can contain function calls instead of final response when used with RAG
-                content: schema.maybe(schema.nullable(schema.string())),
-              },
-              { unknowns: 'ignore' }
-            ),
-            finish_reason: schema.maybe(schema.string()),
-            index: schema.maybe(schema.number()),
-          },
-          { unknowns: 'ignore' }
-        )
+    choices: schema.arrayOf(
+      schema.object(
+        {
+          message: schema.object(
+            {
+              role: schema.string(),
+              // nullable because message can contain function calls instead of final response when used with RAG
+              content: schema.maybe(schema.nullable(schema.string())),
+            },
+            { unknowns: 'ignore' }
+          ),
+          finish_reason: schema.maybe(schema.string()),
+          index: schema.maybe(schema.number()),
+        },
+        { unknowns: 'ignore' }
       )
     ),
   },
