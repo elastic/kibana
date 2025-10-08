@@ -55,12 +55,7 @@ export const getSerializedState = ({
     timeRestore,
     description,
 
-    // Dashboard options
-    useMargins,
-    syncColors,
-    syncCursor,
-    syncTooltips,
-    hidePanelTitles,
+    options,
     controlGroupInput,
   } = dashboardState;
 
@@ -75,14 +70,6 @@ export const getSerializedState = ({
     // ControlGroup Component is keyed on dashboard id so changing dashboard id mounts new ControlGroup Component.
     //
   }
-
-  const options = {
-    useMargins,
-    syncColors,
-    syncCursor,
-    syncTooltips,
-    hidePanelTitles,
-  };
 
   /**
    * Parse global time filter settings

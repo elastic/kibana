@@ -13,27 +13,37 @@ import {
   initializeTitleManager,
   titleComparators,
 } from '@kbn/presentation-publishing';
+import type { Writable } from '@kbn/utility-types';
 import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
-import type { DashboardSettings, DashboardState } from '../../common';
+import type { DashboardState } from '../../common';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
+
+export type DashboardSettings = Writable<Required<DashboardOptions>> & {
+  description?: DashboardAttributes['description'];
+  tags: string[];
+  timeRestore: DashboardAttributes['timeRestore'];
+  title: DashboardAttributes['description'];
+};
 
 // SERIALIZED STATE ONLY TODO: This could be simplified by using src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
 export function initializeSettingsManager(initialState?: DashboardState) {
   const syncColors$ = new BehaviorSubject<boolean>(
-    initialState?.syncColors ?? DEFAULT_DASHBOARD_STATE.syncColors
+    initialState?.options?.syncColors ?? DEFAULT_DASHBOARD_OPTIONS.syncColors
   );
   function setSyncColors(syncColors: boolean) {
     if (syncColors !== syncColors$.value) syncColors$.next(syncColors);
   }
   const syncCursor$ = new BehaviorSubject<boolean>(
-    initialState?.syncCursor ?? DEFAULT_DASHBOARD_STATE.syncCursor
+    initialState?.options?.syncCursor ?? DEFAULT_DASHBOARD_OPTIONS.syncCursor
   );
   function setSyncCursor(syncCursor: boolean) {
     if (syncCursor !== syncCursor$.value) syncCursor$.next(syncCursor);
   }
   const syncTooltips$ = new BehaviorSubject<boolean>(
-    initialState?.syncTooltips ?? DEFAULT_DASHBOARD_STATE.syncTooltips
+    initialState?.options?.syncTooltips ?? DEFAULT_DASHBOARD_OPTIONS.syncTooltips
   );
   function setSyncTooltips(syncTooltips: boolean) {
     if (syncTooltips !== syncTooltips$.value) syncTooltips$.next(syncTooltips);
@@ -50,7 +60,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     if (timeRestore !== timeRestore$.value) timeRestore$.next(timeRestore);
   }
   const useMargins$ = new BehaviorSubject<boolean>(
-    initialState?.useMargins ?? DEFAULT_DASHBOARD_STATE.useMargins
+    initialState?.options?.useMargins ?? DEFAULT_DASHBOARD_OPTIONS.useMargins
   );
   function setUseMargins(useMargins: boolean) {
     if (useMargins !== useMargins$.value) useMargins$.next(useMargins);
@@ -61,7 +71,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     return {
       title: titleState.title ?? '',
       description: titleState.description,
-      hidePanelTitles: titleState.hidePanelTitles ?? DEFAULT_DASHBOARD_STATE.hidePanelTitles,
+      hidePanelTitles: titleState.hidePanelTitles ?? DEFAULT_DASHBOARD_OPTIONS.hidePanelTitles,
       syncColors: syncColors$.value,
       syncCursor: syncCursor$.value,
       syncTooltips: syncTooltips$.value,
@@ -81,6 +91,17 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     titleManager.api.setHideTitle(settings.hidePanelTitles);
     titleManager.api.setDescription(settings.description);
     titleManager.api.setTitle(settings.title);
+  }
+
+  function getSettingsFromLastSavedState(lastSavedState: DashboardState) {
+    return {
+      ...DEFAULT_DASHBOARD_OPTIONS,
+      ...lastSavedState?.options,
+      description: lastSavedState.description,
+      tags: lastSavedState.tags,
+      timeRestore: lastSavedState.timeRestore,
+      title: lastSavedState.title,
+    };
   }
 
   const comparators: StateComparators<DashboardSettings> = {
@@ -110,6 +131,16 @@ export function initializeSettingsManager(initialState?: DashboardState) {
       timeRestore$,
     },
     internalApi: {
+      serializeSettings: () => {
+        const { description, tags, timeRestore, title, ...options } = getSettings();
+        return {
+          description,
+          tags,
+          timeRestore,
+          title,
+          options,
+        };
+      },
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
           syncColors$,
@@ -118,19 +149,18 @@ export function initializeSettingsManager(initialState?: DashboardState) {
           tags$,
           timeRestore$,
           useMargins$,
-
           titleManager.anyStateChange$,
         ]).pipe(
           debounceTime(100),
           map(() => getSettings()),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
-            diffComparators(comparators, lastSavedState, latestState)
+            diffComparators(comparators, getSettingsFromLastSavedState(lastSavedState), latestState)
           )
         );
       },
       reset: (lastSavedState: DashboardState) => {
-        setSettings(lastSavedState);
+        setSettings(getSettingsFromLastSavedState(lastSavedState));
       },
     },
   };
