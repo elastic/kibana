@@ -157,10 +157,6 @@ export const useWorkflowEditorStyles = () => {
       css({
         position: 'absolute',
         zIndex: 1002, // Above the highlighting and pseudo-element
-        backgroundColor: euiTheme.colors.backgroundBasePlain,
-        padding: euiTheme.size.xs,
-        borderRadius: euiTheme.border.radius.small,
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
       }),
 
     downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>

@@ -19,6 +19,7 @@ import {
   EuiFlexGroup,
   useEuiTheme,
   euiFontSize,
+  EuiText,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type {
@@ -184,7 +185,14 @@ export function WorkflowYAMLValidationErrors({
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <span>{error.message}</span>
+                <EuiText color="text" size="xs">
+                  <span>{error.message}</span>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="xs">
+                  <span>{error.source}</span>
+                </EuiText>
               </EuiFlexItem>
             </button>
           ))}

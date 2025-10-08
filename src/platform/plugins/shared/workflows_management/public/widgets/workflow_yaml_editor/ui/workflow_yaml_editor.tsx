@@ -64,10 +64,7 @@ import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/
 import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
 import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';
 import { useMonacoWorkflowStyles } from '../styles/use_monaco_workflow_styles';
-import {
-  WORKFLOW_YAML_LANG_ID,
-  registerWorkflowYamlLanguage,
-} from '../lib/monaco_language/workflow_yaml';
+import { registerWorkflowYamlLanguage } from '../lib/monaco_language/workflow_yaml';
 import { useDynamicTypeIcons } from '../styles/use_dynamic_type_icons';
 import { getMonacoMarkerInterceptor } from '../lib/get_monaco_marker_interceptor';
 import { useStaticTypeIcons } from '../styles/use_static_type_icons';
@@ -628,7 +625,6 @@ export const WorkflowYAMLEditor = ({
       )}
       <div css={styles.editorContainer}>
         <YamlEditor
-          languageId={WORKFLOW_YAML_LANG_ID}
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
           onChange={handleChange}

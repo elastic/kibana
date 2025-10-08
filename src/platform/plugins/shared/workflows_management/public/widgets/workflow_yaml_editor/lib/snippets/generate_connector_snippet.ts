@@ -251,7 +251,7 @@ export function getConnectorIdSuggestions(
     suggestions.push({
       label: displayLabel, // Show both connector ID and name
       kind: monaco.languages.CompletionItemKind.Value, // Use generic value kind
-      insertText: instance.id, // Still insert only the ID
+      insertText: instance.name,
       range,
       detail: connectorType, // Show connector type as detail - this is what CSS targets
       documentation: `Connector ID: ${instance.id}\nName: ${
@@ -280,36 +280,6 @@ export function getConnectorIdSuggestions(
   }
 
   return suggestions;
-}
-
-/**
- * Format an object as YAML with proper indentation
- */
-function formatObjectAsYaml(obj: any, indentLevel: number = 0): string {
-  const indent = '  '.repeat(indentLevel);
-  const lines: string[] = [];
-
-  for (const [key, value] of Object.entries(obj)) {
-    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-      lines.push(`${indent}${key}:`);
-      lines.push(formatObjectAsYaml(value, indentLevel + 1));
-    } else if (Array.isArray(value)) {
-      lines.push(`${indent}${key}:`);
-      value.forEach((item) => {
-        if (typeof item === 'string') {
-          lines.push(`${indent}  - "${item}"`);
-        } else {
-          lines.push(`${indent}  - ${item}`);
-        }
-      });
-    } else if (typeof value === 'string') {
-      lines.push(`${indent}${key}: "${value}"`);
-    } else {
-      lines.push(`${indent}${key}: ${value}`);
-    }
-  }
-
-  return lines.join('\n');
 }
 
 /**
@@ -695,125 +665,4 @@ function getConnectorTypeFromWithBlock(yamlDocument: any, path: any[]): string |
     // Error detecting connector type from with block
     return null;
   }
-}
-
-/**
- * Extract example for body parameter based on its schema
- */
-function extractBodyExample(bodySchema: z.ZodType): any {
-  try {
-    // Handle ZodOptional wrapper
-    let schema = bodySchema;
-    if (bodySchema instanceof z.ZodOptional) {
-      schema = bodySchema._def.innerType;
-    }
-
-    // If it's a ZodObject, try to extract its shape and build YAML-compatible example
-    if (schema instanceof z.ZodObject) {
-      const shape = schema._def.shape();
-      const example: any = {};
-
-      // Extract examples from each field
-      for (const [key, fieldSchema] of Object.entries(shape)) {
-        const field = fieldSchema as z.ZodType;
-        const description = (field as any)?._def?.description || '';
-
-        // Extract example from description if available
-        const stringExampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
-        const objectExampleMatch = description.match(/e\.g\.,?\s*(\{[^}]+\})/);
-
-        if (stringExampleMatch) {
-          example[key] = stringExampleMatch[1];
-        } else if (objectExampleMatch) {
-          try {
-            example[key] = JSON.parse(objectExampleMatch[1]);
-          } catch {
-            // If JSON parse fails, use as string
-            example[key] = objectExampleMatch[1];
-          }
-        }
-        // No fallback - only use examples explicitly defined in enhanced connectors
-      }
-
-      if (Object.keys(example).length > 0) {
-        return example; // Return object, not JSON string
-      }
-    }
-  } catch (error) {
-    // Fallback to empty object
-  }
-
-  return {};
-}
-
-/**
- * Extract required parameters from a Zod schema
- */
-function extractRequiredParamsFromSchema(
-  schema: z.ZodType
-): Array<{ name: string; example?: string; defaultValue?: string; required: boolean }> {
-  const params: Array<{
-    name: string;
-    example?: string;
-    defaultValue?: string;
-    required: boolean;
-  }> = [];
-
-  if (schema instanceof z.ZodObject) {
-    const shape = schema.shape;
-    for (const [key, fieldSchema] of Object.entries(shape)) {
-      const zodField = fieldSchema as z.ZodType;
-
-      // Skip common non-parameter fields
-      if (['pretty', 'human', 'error_trace', 'source', 'filter_path'].includes(key)) {
-        continue;
-      }
-
-      // Check if field is required (not optional)
-      const isOptional = zodField instanceof z.ZodOptional;
-      const isRequired = !isOptional;
-
-      // Extract description for examples
-      let description = '';
-      let example = '';
-
-      if ('description' in zodField && typeof zodField.description === 'string') {
-        description = zodField.description;
-        // Try to extract example from description
-        const exampleMatch = description.match(
-          /example[:\s]+['"]*([^'"]+)['"]*|default[:\s]+['"]*([^'"]+)['"]*/i
-        );
-        if (exampleMatch) {
-          example = exampleMatch[1] || exampleMatch[2] || '';
-        }
-      }
-
-      // Add some default examples based on common parameter names
-      if (!example) {
-        if (key === 'index') {
-          example = 'my-index';
-        } else if (key === 'id') {
-          example = 'doc-id';
-        } else if (key === 'body') {
-          // Try to extract body structure from schema
-          example = extractBodyExample(zodField);
-        } else if (key === 'query') {
-          example = '{}';
-        } else if (key.includes('name')) {
-          example = 'my-name';
-        }
-      }
-
-      // Only include required parameters or very common ones
-      if (isRequired || ['index', 'id', 'body'].includes(key)) {
-        params.push({
-          name: key,
-          example,
-          required: isRequired,
-        });
-      }
-    }
-  }
-
-  return params;
 }

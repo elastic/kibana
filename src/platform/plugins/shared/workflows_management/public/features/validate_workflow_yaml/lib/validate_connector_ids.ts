@@ -67,7 +67,7 @@ export function validateConnectorIds(
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        after: `(${instance.name})`,
+        after: `(${capitalize(connectorIdItem.connectorType)} connector, ID: ${instance.id})`,
         hoverMessage: null,
       });
     }

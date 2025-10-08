@@ -12,7 +12,10 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import YAML, { LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { buildWorkflowLookup } from './build_workflow_lookup';
-import { getWorkflowZodSchemaLoose } from '../../../../../../common/schema';
+import {
+  getWorkflowZodSchemaLoose,
+  getCachedDynamicConnectorTypes,
+} from '../../../../../../common/schema';
 import { parseWorkflowYamlToJSON } from '../../../../../../common/lib/yaml_utils';
 import { clearComputedData, _setComputedDataInternal } from '../slice';
 import type { RootState } from '../types';
@@ -33,7 +36,11 @@ export const performComputation = (
     const yamlDoc = YAML.parseDocument(yamlString, { lineCounter });
 
     // Parse workflow JSON for graph creation
-    const parsingResult = parseWorkflowYamlToJSON(yamlString, getWorkflowZodSchemaLoose());
+    const dynamicConnectorTypes = getCachedDynamicConnectorTypes() || {};
+    const parsingResult = parseWorkflowYamlToJSON(
+      yamlString,
+      getWorkflowZodSchemaLoose(dynamicConnectorTypes)
+    );
 
     // Build workflow lookup
     const lookup = buildWorkflowLookup(yamlDoc, lineCounter);

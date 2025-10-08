@@ -209,55 +209,6 @@ export function getRequiredParamsForConnector(
 }
 
 /**
- * Extract example for body parameter based on its schema
- */
-function extractBodyExample(bodySchema: z.ZodType): any {
-  try {
-    // Handle ZodOptional wrapper
-    let schema = bodySchema;
-    if (bodySchema instanceof z.ZodOptional) {
-      schema = bodySchema._def.innerType;
-    }
-
-    // If it's a ZodObject, try to extract its shape and build YAML-compatible example
-    if (schema instanceof z.ZodObject) {
-      const shape = schema._def.shape();
-      const example: any = {};
-
-      // Extract examples from each field
-      for (const [key, fieldSchema] of Object.entries(shape)) {
-        const field = fieldSchema as z.ZodType;
-        const description = (field as any)?._def?.description || '';
-
-        // Extract example from description if available
-        const stringExampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
-        const objectExampleMatch = description.match(/e\.g\.,?\s*(\{[^}]+\})/);
-
-        if (stringExampleMatch) {
-          example[key] = stringExampleMatch[1];
-        } else if (objectExampleMatch) {
-          try {
-            example[key] = JSON.parse(objectExampleMatch[1]);
-          } catch {
-            // If JSON parse fails, use as string
-            example[key] = objectExampleMatch[1];
-          }
-        }
-        // No fallback - only use examples explicitly defined in enhanced connectors
-      }
-
-      if (Object.keys(example).length > 0) {
-        return example; // Return object, not JSON string
-      }
-    }
-  } catch (error) {
-    // Fallback to empty object
-  }
-
-  return {};
-}
-
-/**
  * Extract required parameters from a Zod schema
  */
 function extractRequiredParamsFromSchema(
@@ -327,4 +278,53 @@ function extractRequiredParamsFromSchema(
   }
 
   return params;
+}
+
+/**
+ * Extract example for body parameter based on its schema
+ */
+function extractBodyExample(bodySchema: z.ZodType): any {
+  try {
+    // Handle ZodOptional wrapper
+    let schema = bodySchema;
+    if (bodySchema instanceof z.ZodOptional) {
+      schema = bodySchema._def.innerType;
+    }
+
+    // If it's a ZodObject, try to extract its shape and build YAML-compatible example
+    if (schema instanceof z.ZodObject) {
+      const shape = schema._def.shape();
+      const example: any = {};
+
+      // Extract examples from each field
+      for (const [key, fieldSchema] of Object.entries(shape)) {
+        const field = fieldSchema as z.ZodType;
+        const description = (field as any)?._def?.description || '';
+
+        // Extract example from description if available
+        const stringExampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
+        const objectExampleMatch = description.match(/e\.g\.,?\s*(\{[^}]+\})/);
+
+        if (stringExampleMatch) {
+          example[key] = stringExampleMatch[1];
+        } else if (objectExampleMatch) {
+          try {
+            example[key] = JSON.parse(objectExampleMatch[1]);
+          } catch {
+            // If JSON parse fails, use as string
+            example[key] = objectExampleMatch[1];
+          }
+        }
+        // No fallback - only use examples explicitly defined in enhanced connectors
+      }
+
+      if (Object.keys(example).length > 0) {
+        return example; // Return object, not JSON string
+      }
+    }
+  } catch (error) {
+    // Fallback to empty object
+  }
+
+  return {};
 }

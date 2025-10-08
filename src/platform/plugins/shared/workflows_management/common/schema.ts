@@ -818,11 +818,21 @@ export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 
 // Global cache for all connectors (static + generated + dynamic)
 let allConnectorsCache: ConnectorContract[] | null = null;
 
+let allConnectorsMapCache: Map<string, ConnectorContract> | null = null;
+
 // Global cache for dynamic connector types (with instances)
 let dynamicConnectorTypesCache: Record<string, ConnectorTypeInfo> | null = null;
 
 // Track the last processed connector types to avoid unnecessary re-processing
 let lastProcessedConnectorTypesHash: string | null = null;
+
+export function getCachedAllConnectorsMap(): Map<string, ConnectorContract> | null {
+  return allConnectorsMapCache;
+}
+
+export function setCachedAllConnectorsMap(allConnectors: ConnectorContract[]) {
+  allConnectorsMapCache = new Map(allConnectors.map((c) => [c.type, c]));
+}
 
 /**
  * Add dynamic connectors to the global cache
@@ -862,6 +872,8 @@ export function addDynamicConnectorsToCache(
   if (newDynamicConnectors.length > 0) {
     allConnectorsCache.push(...newDynamicConnectors);
   }
+
+  setCachedAllConnectorsMap(allConnectorsCache);
 }
 
 /**
@@ -883,6 +895,7 @@ export function getAllConnectors(): ConnectorContract[] {
   const elasticsearchConnectors = generateElasticsearchConnectors();
   const kibanaConnectors = generateKibanaConnectors();
   allConnectorsCache = [...staticConnectors, ...elasticsearchConnectors, ...kibanaConnectors];
+  setCachedAllConnectorsMap(allConnectorsCache);
 
   return allConnectorsCache;
 }

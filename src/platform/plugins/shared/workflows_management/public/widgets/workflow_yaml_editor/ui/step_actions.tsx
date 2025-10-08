@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenuPanel,
@@ -17,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
+import { css } from '@emotion/react';
 import { RunStepButton } from './run_step_button';
 import { selectFocusedStepInfo } from '../lib/store';
 import { CopyElasticSearchDevToolsOption, CopyWorkflowStepOption } from './step_action_options';
@@ -67,7 +69,12 @@ export const StepActions: React.FC<StepActionsProps> = ({ onStepActionClicked })
   }
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+    <EuiFlexGroup
+      gutterSize="xs"
+      alignItems="center"
+      responsive={false}
+      css={componentStyles.actionsRow}
+    >
       {focusedStepInfo && (
         <EuiFlexItem grow={false}>
           <RunStepButton
@@ -96,4 +103,14 @@ export const StepActions: React.FC<StepActionsProps> = ({ onStepActionClicked })
       )}
     </EuiFlexGroup>
   );
+};
+
+const componentStyles = {
+  actionsRow: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      padding: euiTheme.size.xs,
+      borderRadius: euiTheme.border.radius.small,
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+    }),
 };

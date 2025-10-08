@@ -64,7 +64,16 @@ export function useYamlValidation(
       //   workflowGraph,
       //   workflowDefinition
       // );
-      setError(new Error('Error validating variables'));
+      setError(
+        new Error(
+          'Error validating variables. Yaml document: ' +
+            !!yamlDocument +
+            ', workflowGraph: ' +
+            workflowGraph +
+            ', workflowDefinition: ' +
+            workflowDefinition
+        )
+      );
       return;
     }
 

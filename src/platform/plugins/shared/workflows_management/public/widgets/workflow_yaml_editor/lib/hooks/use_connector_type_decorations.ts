@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { monaco } from '@kbn/monaco';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
+import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml_utils';
 
 interface UseConnectorTypeDecorationsProps {
@@ -49,6 +50,11 @@ export const useConnectorTypeDecorations = ({
 }: UseConnectorTypeDecorationsProps) => {
   const connectorTypeDecorationCollectionRef =
     useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+
+  const typeExists = useCallback((type: string) => {
+    const dynamicConnectorTypes = getCachedAllConnectorsMap() || new Map();
+    return dynamicConnectorTypes.has(type);
+  }, []);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -101,7 +107,13 @@ export const useConnectorTypeDecorations = ({
 
         const typeRange = typePair.value.range;
 
-        if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) continue;
+        if (!typeRange || !Array.isArray(typeRange) || typeRange.length < 3) {
+          continue;
+        }
+
+        if (!typeExists(connectorType)) {
+          continue;
+        }
 
         // Get icon and class based on connector type
         const { className } = getConnectorIcon(connectorType);
@@ -180,7 +192,7 @@ export const useConnectorTypeDecorations = ({
     }, 100); // Small delay to avoid multiple rapid executions
 
     return () => clearTimeout(timeoutId);
-  }, [isEditorMounted, yamlDocument, editor]);
+  }, [isEditorMounted, yamlDocument, editor, typeExists]);
 
   // Return ref for cleanup purposes
   return {
