@@ -448,6 +448,15 @@ export class SessionService {
   }
 
   /**
+   * Is current session in process of saving
+   */
+  public isSaving(
+    state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta> = this.state
+  ) {
+    return state.get().isSaving;
+  }
+
+  /**
    * Is current session already saved as SO (send to background)
    */
   public isStored(
@@ -600,6 +609,8 @@ export class SessionService {
       appendStartTime: currentSessionInfoProvider.appendSessionStartTimeToName,
     });
 
+    this.state.transitions.save();
+
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
       appId: currentSessionApp,
@@ -614,6 +625,7 @@ export class SessionService {
       this.state.transitions.store(searchSessionSavedObject);
 
       // trigger a poll for all the searches that are not yet stored to propagate them into newly created search session saved object and extend their keepAlive
+      // TODO: Fix the bug here that filters out search requests where the HTTP request has been aborted but the task in ES is still running
       const searchesToExtend = this.state
         .get()
         .trackedSearches.filter(
