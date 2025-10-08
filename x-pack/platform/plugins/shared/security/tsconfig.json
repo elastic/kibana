@@ -96,7 +96,6 @@
     "@kbn/css-utils",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
-    "@kbn/core-workspace-chrome-state"
   ],
   "exclude": ["target/**/*"]
 }
