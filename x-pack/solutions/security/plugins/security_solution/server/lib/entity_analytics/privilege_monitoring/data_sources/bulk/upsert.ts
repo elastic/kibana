@@ -275,7 +275,6 @@ export const bulkUpsertOperationsFactoryShared =
 
 export const makeIntegrationOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) => {
   const buildOps = bulkUpsertOperationsFactoryShared(dataClient);
-
   return (usersChunk: PrivMonBulkUser[], source: MonitoringEntitySource) =>
     buildOps({
       users: usersChunk,
@@ -301,5 +300,5 @@ export const makeIndexOpsBuilder = (dataClient: PrivilegeMonitoringDataClient) =
       sourceLabel: 'index_sync',
       buildUpdateParams: (user) => ({ source_id: user.sourceId }),
     });
-  return indexOperations;
+  return indexOperations || [];
 };
