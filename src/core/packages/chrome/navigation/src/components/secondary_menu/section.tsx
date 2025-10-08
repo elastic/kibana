@@ -11,7 +11,6 @@ import { EuiText, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { SECONDARY_MENU_WIDTH } from '../../constants';
 
 export interface SecondaryMenuSectionProps {
   children: ReactNode;

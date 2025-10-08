@@ -29,7 +29,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
     const { isProjectChromeStyle } = useChromeStyle(services);
 
     const selectedTabBackgroundColor = isProjectChromeStyle
-      ? euiTheme.colors.body
+      ? euiTheme.colors.backgroundBasePlain
       : euiTheme.colors.emptyShade;
 
     return (
