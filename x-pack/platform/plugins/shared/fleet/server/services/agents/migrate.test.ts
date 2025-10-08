@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { AgentPolicy, Agent } from '../../types';
 
@@ -27,11 +28,14 @@ jest.mock('./crud', () => {
   };
 });
 
+// Mock uuid to return predictable values
+jest.mock('uuid', () => ({
+  v4: jest.fn(),
+}));
+
 // Mock the license service
 jest.mock('..', () => {
-  const actual = jest.requireActual('..');
   return {
-    ...actual,
     licenseService: {
       hasAtLeast: jest.fn(),
     },
@@ -42,6 +46,7 @@ const mockedCreateAgentAction = createAgentAction as jest.MockedFunction<typeof 
 const mockedCreateErrorActionResults = createErrorActionResults as jest.MockedFunction<
   typeof createErrorActionResults
 >;
+const mockedUuidv4 = uuidv4 as jest.MockedFunction<typeof uuidv4>;
 
 const mockedAgent: Agent = {
   id: 'agent-123',
@@ -98,6 +103,10 @@ describe('Agent migration', () => {
       agents: ['agent-123'],
       created_at: new Date().toISOString(),
     });
+
+    // Mock uuid to return predictable value
+    mockedUuidv4.mockReturnValue('test-action-id');
+
     mockedPolicy.is_protected = false;
   });
 
