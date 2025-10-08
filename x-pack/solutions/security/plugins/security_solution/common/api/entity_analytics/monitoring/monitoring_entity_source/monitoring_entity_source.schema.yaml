@@ -216,19 +216,7 @@ components:
         matchers:
           type: array
           items:
-            type: object
-            required:
-            - fields
-            - values
-            properties:
-              fields:
-                type: array
-                items:
-                  type: string                
-              values:
-                type: array
-                items:
-                  type: string        
+            $ref: '#/components/schemas/Matcher'
         filter:
           type: object
           properties:
@@ -238,6 +226,21 @@ components:
               - type: object
         integrations: 
           $ref: '#/components/schemas/Integrations'
+
+    Matcher:
+      type: object
+      required:
+      - fields
+      - values
+      properties:
+        fields:
+          type: array
+          items:
+            type: string
+        values:
+          type: array
+          items:
+            type: string
 
     MonitoringEntitySourceNoId:
       allOf:

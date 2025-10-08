@@ -77,6 +77,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
       id={thinkingAccordionId}
       arrowDisplay="left"
       css={accordionStyles}
+      data-test-subj="agentBuilderThinkingToggle"
       buttonProps={{
         css: thinkingButtonStyles,
       }}

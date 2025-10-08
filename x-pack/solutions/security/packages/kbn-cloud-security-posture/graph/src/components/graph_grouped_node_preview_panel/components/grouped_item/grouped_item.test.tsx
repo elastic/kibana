@@ -29,7 +29,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId, getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             icon: 'node',
@@ -59,7 +59,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId, queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-id',
             action: 'process_start',
             timestamp,
@@ -85,7 +85,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId, queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'alert',
+            itemType: 'alert',
             id: 'alert-id',
             action: 'alert_action',
             timestamp,
@@ -111,12 +111,12 @@ describe('<GroupedItem />', () => {
     describe('entity', () => {
       it('falls back to entity id when entity label is missing', () => {
         const entityId = 'entity-id';
-        const { getByTestId } = render(<GroupedItem item={{ type: 'entity', id: entityId }} />);
+        const { getByTestId } = render(<GroupedItem item={{ itemType: 'entity', id: entityId }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(entityId);
       });
 
       it('falls back to dash when entity label and entity id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ type: 'entity' }} />);
+        const { getByTestId } = render(<GroupedItem item={{ itemType: 'entity' }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
       });
     });
@@ -124,12 +124,12 @@ describe('<GroupedItem />', () => {
     describe('event', () => {
       it('falls back to event id when event action is missing', () => {
         const eventId = 'event-id';
-        const { getByTestId } = render(<GroupedItem item={{ type: 'event', id: eventId }} />);
+        const { getByTestId } = render(<GroupedItem item={{ itemType: 'event', id: eventId }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(eventId);
       });
 
       it('falls back to dash when event action and event id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ type: 'event' }} />);
+        const { getByTestId } = render(<GroupedItem item={{ itemType: 'event' }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
       });
     });
@@ -137,12 +137,12 @@ describe('<GroupedItem />', () => {
     describe('alert', () => {
       it('falls back to alert id when alert action is missing', () => {
         const alertId = 'alert-id';
-        const { getByTestId } = render(<GroupedItem item={{ type: 'alert', id: alertId }} />);
+        const { getByTestId } = render(<GroupedItem item={{ itemType: 'alert', id: alertId }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe(alertId);
       });
 
       it('falls back to dash when alert action and alert id are both missing', () => {
-        const { getByTestId } = render(<GroupedItem item={{ type: 'alert' }} />);
+        const { getByTestId } = render(<GroupedItem item={{ itemType: 'alert' }} />);
         expect(getByTestId(GROUPED_ITEM_TITLE_TEST_ID).textContent).toBe('-');
       });
     });
@@ -154,7 +154,7 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           item={
             {
-              type: 'entity',
+              itemType: 'entity',
               id: 'e1',
               label: 'entity-1',
               actor: { id: 'a1', label: 'actor' },
@@ -172,7 +172,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             target: { id: 't1', label: 'target' },
@@ -188,7 +188,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
@@ -204,7 +204,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'alert',
+            itemType: 'alert',
             id: 'alert-1',
             action: 'test_action',
             target: { id: 't1', label: 'target' },
@@ -220,7 +220,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'alert',
+            itemType: 'alert',
             id: 'alert-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
@@ -236,7 +236,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
@@ -253,7 +253,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'alert',
+            itemType: 'alert',
             id: 'alert-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
@@ -270,7 +270,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1' }, // No label
@@ -287,7 +287,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor' },
@@ -304,7 +304,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1' }, // Only id
@@ -321,7 +321,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
             actor: { id: 'a1', label: 'actor', icon: 'user' },
@@ -348,7 +348,7 @@ describe('<GroupedItem />', () => {
       const { container } = render(
         <GroupedItem
           item={{
-            type: 'alert',
+            itemType: 'alert',
             id: 'alert-1',
             action: 'test_action',
           }}
@@ -364,7 +364,7 @@ describe('<GroupedItem />', () => {
       const { container } = render(
         <GroupedItem
           item={{
-            type: 'event',
+            itemType: 'event',
             id: 'event-1',
             action: 'test_action',
           }}
@@ -379,7 +379,7 @@ describe('<GroupedItem />', () => {
       const { container } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'entity-1',
             label: 'test_entity',
           }}
@@ -396,7 +396,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCode: 'il',
@@ -411,7 +411,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCode: undefined,
@@ -426,7 +426,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCode: '',
@@ -441,7 +441,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             countryCode: 'INVALID',
@@ -455,7 +455,7 @@ describe('<GroupedItem />', () => {
 
     it('handles uppercase, lowercase or mixed case country codes', () => {
       const item: EntityOrEventItem = {
-        type: 'entity',
+        itemType: 'entity',
         id: 'e1',
         label: 'entity-1',
       };
@@ -490,7 +490,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             ip: undefined,
@@ -505,7 +505,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             ip: '',
@@ -521,7 +521,7 @@ describe('<GroupedItem />', () => {
       const { getByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
             ip: ipv4,
@@ -547,7 +547,7 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           isLoading
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
           }}
@@ -564,7 +564,7 @@ describe('<GroupedItem />', () => {
         <GroupedItem
           isLoading={false}
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
           }}
@@ -580,7 +580,7 @@ describe('<GroupedItem />', () => {
       const { queryByTestId } = render(
         <GroupedItem
           item={{
-            type: 'entity',
+            itemType: 'entity',
             id: 'e1',
             label: 'entity-1',
           }}
