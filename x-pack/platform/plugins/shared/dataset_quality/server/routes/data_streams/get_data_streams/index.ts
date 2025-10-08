@@ -66,20 +66,28 @@ export async function getDataStreams(options: {
       )
     : {};
 
-  const mappedDataStreams = filteredDataStreams.map((dataStream) => ({
-    name: dataStream.name,
-    integration: dataStream._meta?.package?.name,
+  const mappedDataStreams = filteredDataStreams.map((dataStream) => {
     // @ts-expect-error
-    lastActivity: dataStream.maximum_timestamp,
-    userPrivileges: {
-      canMonitor: dataStreamsPrivileges[dataStream.name].monitor,
-      canReadFailureStore: dataStreamsPrivileges[dataStream.name][FAILURE_STORE_PRIVILEGE],
-      canManageFailureStore: dataStreamsPrivileges[dataStream.name][MANAGE_FAILURE_STORE_PRIVILEGE],
-    },
-    hasFailureStore: dataStream.failure_store?.enabled,
-    // @ts-expect-error
-    customRetentionPeriod: dataStream.failure_store?.lifecycle?.data_retention,
-  }));
+    const failureStoreLifecycle = dataStream.failure_store?.lifecycle;
+    return {
+      name: dataStream.name,
+      integration: dataStream._meta?.package?.name,
+      // @ts-expect-error
+      lastActivity: dataStream.maximum_timestamp,
+      userPrivileges: {
+        canMonitor: dataStreamsPrivileges[dataStream.name]?.monitor,
+        canReadFailureStore: dataStreamsPrivileges[dataStream.name]?.[FAILURE_STORE_PRIVILEGE],
+        canManageFailureStore:
+          dataStreamsPrivileges[dataStream.name]?.[MANAGE_FAILURE_STORE_PRIVILEGE],
+      },
+      hasFailureStore: dataStream.failure_store?.enabled,
+      customRetentionPeriod: failureStoreLifecycle?.data_retention,
+      defaultRetentionPeriod:
+        failureStoreLifecycle?.retention_determined_by === 'default_failures_retention'
+          ? failureStoreLifecycle?.effective_retention
+          : undefined,
+    };
+  });
 
   return {
     dataStreams: mappedDataStreams,

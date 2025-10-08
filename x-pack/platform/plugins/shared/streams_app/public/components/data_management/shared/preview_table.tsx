@@ -21,8 +21,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
-import React, { useMemo, useState, useCallback } from 'react';
-import { css } from '@emotion/css';
+import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
+import type {
+  IgnoredField,
+  DocumentWithIgnoredFields,
+} from '@kbn/streams-schema/src/shared/record_types';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import type {
   SampleDocumentWithUIAttributes,
@@ -34,7 +37,45 @@ import type { EnrichmentDataSourceWithUIAttributes } from '../stream_detail_enri
 
 const emptyCell = <>&nbsp;</>;
 
+interface RowSelectionContextType {
+  selectedRowIndex?: number;
+  onRowSelected?: (rowIndex: number) => void;
+}
+
+export const RowSelectionContext = createContext<RowSelectionContextType>({});
+
+const useRowSelection = () => useContext(RowSelectionContext);
+
+function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
+  const { selectedRowIndex, onRowSelected } = useRowSelection();
+
+  return (
+    <EuiButtonIcon
+      onClick={() => {
+        if (onRowSelected) {
+          onRowSelected(rowIndex);
+        }
+      }}
+      aria-label={i18n.translate(
+        'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
+        {
+          defaultMessage: 'Select row {rowIndex}',
+          values: { rowIndex: rowIndex + 1 },
+        }
+      )}
+      iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
+      color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
+    />
+  );
+}
+
 export const MemoPreviewTable = React.memo(PreviewTable);
+
+function isDocumentWithIgnoredFields(
+  doc: SampleDocument | DocumentWithIgnoredFields
+): doc is DocumentWithIgnoredFields {
+  return 'ignored_fields' in doc && Array.isArray(doc.ignored_fields);
+}
 
 export function PreviewTable({
   documents,
@@ -47,26 +88,28 @@ export function PreviewTable({
   toolbarVisibility = false,
   setVisibleColumns,
   columnOrderHint = [],
-  selectedRowIndex,
   showRowSourceAvatars = false,
+  showLeadingControlColumns = true,
   originalSamples,
-  onRowSelected,
   cellActions,
 }: {
-  documents: SampleDocument[];
+  documents: SampleDocument[] | DocumentWithIgnoredFields[];
   displayColumns?: string[];
   height?: EuiDataGridProps['height'];
-  renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
+  renderCellValue?: (
+    doc: SampleDocument,
+    columnId: string,
+    ignoredFields?: IgnoredField[]
+  ) => React.ReactNode | undefined;
   rowHeightsOptions?: EuiDataGridRowHeightsOptions;
   toolbarVisibility?: boolean;
   setVisibleColumns?: (visibleColumns: string[]) => void;
   columnOrderHint?: string[];
   sorting?: SimulationContext['previewColumnsSorting'];
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
-  selectedRowIndex?: number;
   showRowSourceAvatars?: boolean;
+  showLeadingControlColumns?: boolean;
   originalSamples?: SampleDocumentWithUIAttributes[];
-  onRowSelected?: (rowIndex: number) => void;
   cellActions?: EuiDataGridColumnCellAction[];
 }) {
   const { euiTheme: theme } = useEuiTheme();
@@ -74,10 +117,12 @@ export function PreviewTable({
   const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
     documents.forEach((doc) => {
-      if (!doc || typeof doc !== 'object') {
+      const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
+
+      if (!document || typeof document !== 'object') {
         return;
       }
-      Object.keys(doc).forEach((key) => {
+      Object.keys(document).forEach((key) => {
         cols.add(key);
       });
     });
@@ -145,26 +190,25 @@ export function PreviewTable({
         id: 'selection',
         width: showRowSourceAvatars ? 72 : 36,
         headerCellRender: () => null,
-        rowCellRender: ({ rowIndex }) => {
+        rowCellRender: ({ rowIndex, setCellProps }) => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          const { selectedRowIndex } = useRowSelection();
+
+          if (selectedRowIndex === rowIndex) {
+            setCellProps({
+              style: {
+                backgroundColor: theme.colors.highlight,
+              },
+            });
+          } else {
+            setCellProps({
+              style: {},
+            });
+          }
           const originalSample = originalSamples?.[rowIndex];
           return (
             <EuiFlexGroup gutterSize="s">
-              <EuiButtonIcon
-                onClick={() => {
-                  if (onRowSelected) {
-                    onRowSelected(rowIndex);
-                  }
-                }}
-                aria-label={i18n.translate(
-                  'xpack.streams.resultPanel.euiDataGrid.preview.selectRowAriaLabel',
-                  {
-                    defaultMessage: 'Select row {rowIndex}',
-                    values: { rowIndex: rowIndex + 1 },
-                  }
-                )}
-                iconType={selectedRowIndex === rowIndex ? 'minimize' : 'expand'}
-                color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
-              />
+              <RowSelectionButton rowIndex={rowIndex} />
               {showRowSourceAvatars && originalSample && (
                 <RowSourceAvatar originalSample={originalSample} />
               )}
@@ -173,7 +217,7 @@ export function PreviewTable({
         },
       },
     ],
-    [onRowSelected, showRowSourceAvatars, selectedRowIndex, originalSamples]
+    [showRowSourceAvatars, originalSamples, theme.colors.highlight]
   );
 
   // Derive visibleColumns from canonical order
@@ -223,24 +267,15 @@ export function PreviewTable({
       aria-label={i18n.translate('xpack.streams.resultPanel.euiDataGrid.previewLabel', {
         defaultMessage: 'Preview',
       })}
-      leadingControlColumns={visibleColumns.length > 0 ? leadingControlColumns : undefined}
+      leadingControlColumns={
+        showLeadingControlColumns && visibleColumns.length > 0 ? leadingControlColumns : undefined
+      }
       columns={gridColumns}
       columnVisibility={{
         visibleColumns,
         setVisibleColumns: setVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
-      gridStyle={
-        selectedRowIndex !== undefined
-          ? {
-              rowClasses: {
-                [String(selectedRowIndex)]: css`
-                  background-color: ${theme.colors.highlight};
-                `,
-              },
-            }
-          : undefined
-      }
       sorting={sortingConfig}
       inMemory={sortingConfig ? { level: 'sorting' } : undefined}
       height={height}
@@ -248,20 +283,38 @@ export function PreviewTable({
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
       onColumnResize={onColumnResize}
-      renderCellValue={({ rowIndex, columnId }) => {
+      renderCellValue={({ rowIndex, columnId, setCellProps }) => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const { selectedRowIndex } = useRowSelection();
+
+        if (selectedRowIndex === rowIndex) {
+          setCellProps({
+            style: {
+              backgroundColor: theme.colors.highlight,
+            },
+          });
+        } else {
+          setCellProps({
+            style: {},
+          });
+        }
+
         const doc = documents[rowIndex];
-        if (!doc || typeof doc !== 'object') {
+        const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
+        const ignoredFields = isDocumentWithIgnoredFields(doc) ? doc.ignored_fields : [];
+
+        if (!document || typeof document !== 'object') {
           return emptyCell;
         }
 
         if (renderCellValue) {
-          const renderedValue = renderCellValue(doc, columnId);
+          const renderedValue = renderCellValue(document, columnId, ignoredFields);
           if (renderedValue !== undefined) {
             return renderedValue;
           }
         }
 
-        const value = doc[columnId];
+        const value = document[columnId];
         if (value === undefined || value === null) {
           return emptyCell;
         }

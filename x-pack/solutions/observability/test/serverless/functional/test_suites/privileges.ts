@@ -51,11 +51,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           return await privilege.getVisibleText();
         })
       );
-      expect(privileges.length).to.be(12);
+      expect(privileges.length).to.be(11);
       expect(text).to.eql([
         'Discover\nAll\nRead\nNone',
         'Dashboard\nAll\nRead\nNone',
-        'Streams\nAll\nRead\nNone',
         'Logs\nAll\nRead\nNone',
         'Infrastructure\nAll\nRead\nNone',
         'Applications\nAll\nRead\nNone',

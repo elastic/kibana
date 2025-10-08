@@ -16,7 +16,7 @@ export interface DashboardChildren {
 }
 
 export interface DashboardLayoutPanel {
-  gridData: DashboardPanel['gridData'] & { sectionId?: string };
+  grid: DashboardPanel['grid'] & { sectionId?: string };
   type: DashboardPanel['type'];
 }
 
@@ -24,7 +24,7 @@ export interface DashboardLayout {
   panels: {
     [uuid: string]: DashboardLayoutPanel;
   };
-  sections: { [id: string]: Pick<DashboardSection, 'collapsed' | 'gridData' | 'title'> };
+  sections: { [id: string]: Pick<DashboardSection, 'collapsed' | 'grid' | 'title'> };
 }
 
 export interface DashboardChildState {

@@ -270,6 +270,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
 
         {selectedProvider === AWS_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
           <AwsCredentialsFormAgentless
+            cloud={cloud}
             input={input}
             newPolicy={newPolicy}
             packageInfo={packageInfo}
@@ -309,6 +310,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
             updatePolicy={updatePolicy}
             disabled={isEditPage}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
+            isEditPage={isEditPage}
           />
         )}
 

@@ -16,6 +16,7 @@ import {
   cleanFleetAgentPolicies,
   cleanFleetIndices,
   createFleetAgent,
+  createTestSpace,
 } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -26,7 +27,8 @@ export default function (providerContext: FtrProviderContext) {
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
 
-  describe('actions', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/236306
+  describe.skip('actions', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 
@@ -61,7 +63,7 @@ export default function (providerContext: FtrProviderContext) {
       testSpaceAgent1 = _testSpaceAgent1;
       testSpaceAgent2 = _testSpaceAgent2;
 
-      await spaces.createTestSpace(TEST_SPACE_1);
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     beforeEach(async () => {
