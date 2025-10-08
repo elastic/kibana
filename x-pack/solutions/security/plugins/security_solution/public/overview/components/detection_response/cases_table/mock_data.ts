@@ -20,6 +20,7 @@ export const mockCasesResult = {
       description: 'klklk',
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: 'securitySolution',
       closed_at: '2022-04-25T01:50:40.435Z',
@@ -60,6 +61,7 @@ export const mockCasesResult = {
       description: 'sssss',
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: 'securitySolution',
       closed_at: '2022-04-25T13:45:18.317Z',
@@ -100,6 +102,7 @@ export const mockCasesResult = {
       description: 'dsdd',
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: 'securitySolution',
       closed_at: '2022-04-25T13:45:22.539Z',

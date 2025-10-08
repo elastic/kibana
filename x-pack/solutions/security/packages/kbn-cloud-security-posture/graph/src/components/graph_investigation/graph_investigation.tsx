@@ -118,7 +118,7 @@ export interface GraphInvestigationProps {
   };
 
   /**
-   * Callback when show event preview is clicked.
+   * Callback when "show entity/event preview" is clicked.
    */
   onOpenEventPreview?: (node: NodeViewModel) => void;
 

@@ -17,6 +17,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import { createESQLQuery } from '../../common/utils/esql/create_esql_query';
 import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
+import { useChartLayers } from './hooks/use_chart_layers';
 import { useLensProps } from './hooks/use_lens_props';
 
 const ChartSizes = {
@@ -33,7 +34,7 @@ export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestPar
     filters?: Array<{ field: string; value: string }>;
     discoverFetch$: Observable<UnifiedHistogramInputMessage>;
     metric: MetricField;
-    onViewDetails: (esqlQuery: string) => void;
+    onViewDetails: (esqlQuery: string, metric: MetricField) => void;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -66,31 +67,28 @@ export const Chart = ({
       return '';
     }
     return createESQLQuery({
-      metricField: metric.name,
-      instrument: metric.instrument,
-      index: metric.index,
+      metric,
       dimensions,
       filters,
     });
-  }, [metric.type, metric.name, metric.instrument, metric.index, dimensions, filters]);
+  }, [metric, dimensions, filters]);
+
+  const chartLayers = useChartLayers({ dimensions, metric, color });
 
   const lensProps = useLensProps({
     title: metric.name,
     query: esqlQuery,
-    unit: metric.unit,
-    seriesType: dimensions.length > 0 ? 'line' : 'area',
-    color,
     services,
     searchSessionId,
     discoverFetch$,
-    abortController,
     getTimeRange,
     chartRef,
+    chartLayers,
   });
 
   const handleViewDetails = useCallback(() => {
-    onViewDetails(esqlQuery);
-  }, [onViewDetails, esqlQuery]);
+    onViewDetails(esqlQuery, metric);
+  }, [onViewDetails, esqlQuery, metric]);
 
   return (
     <div

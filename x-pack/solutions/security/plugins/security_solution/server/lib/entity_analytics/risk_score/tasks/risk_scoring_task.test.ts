@@ -218,6 +218,7 @@ describe('Risk Scoring Task', () => {
         _meta: {
           mappingsVersion: 1,
         },
+        enableResetToZero: true,
       });
       mockIsCancelled = jest.fn().mockReturnValue(false);
 
@@ -322,6 +323,7 @@ describe('Risk Scoring Task', () => {
           _meta: {
             mappingsVersion: 1,
           },
+          enableResetToZero: true,
         });
         await runTask({
           getRiskScoreService,
@@ -362,6 +364,7 @@ describe('Risk Scoring Task', () => {
             _meta: {
               mappingsVersion: 1,
             },
+            enableResetToZero: true,
           });
           // add additional mock responses for the additional identifier calls
           mockRiskScoreService.calculateAndPersistScores
@@ -463,6 +466,7 @@ describe('Risk Scoring Task', () => {
             _meta: {
               mappingsVersion: 1,
             },
+            enableResetToZero: true,
           });
           await runTask({
             getRiskScoreService,

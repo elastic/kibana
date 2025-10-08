@@ -531,6 +531,20 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
           timeout: SAVE_PLAYGROUND_EXTENDED_TIMEOUT,
         });
       },
+
+      async selectConnector(name: string) {
+        await testSubjects.existOrFail('summarizationPanel');
+        await testSubjects.existOrFail('summarizationModelSelect');
+        await testSubjects.click('summarizationModelSelect');
+        await retry.try(
+          async () => {
+            await testSubjects.existOrFail(`summarization_model_select_${name}_gpt-4o`);
+            await testSubjects.click(`summarization_model_select_${name}_gpt-4o`);
+          },
+          undefined,
+          1000
+        );
+      },
     },
     PlaygroundStartSearchPage: {
       async expectPlaygroundStartSearchPageComponentsToExist() {

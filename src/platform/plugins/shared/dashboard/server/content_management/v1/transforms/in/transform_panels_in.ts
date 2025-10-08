@@ -19,10 +19,7 @@ import type {
 import type { DashboardAttributes, DashboardPanel, DashboardSection } from '../../types';
 import { embeddableService, logger } from '../../../../kibana_services';
 
-export function transformPanelsIn(
-  widgets: DashboardAttributes['panels'] | undefined,
-  dropSections: boolean = false
-): {
+export function transformPanelsIn(widgets: DashboardAttributes['panels'] | undefined): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   sections: DashboardSavedObjectAttributes['sections'];
   references: SavedObjectReference[];
@@ -33,14 +30,14 @@ export function transformPanelsIn(
 
   widgets?.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const { panels: sectionPanels, grid, ...restOfSection } = widget as DashboardSection;
-      const idx = grid.i ?? uuidv4();
+      const { panels: sectionPanels, grid, uid, ...restOfSection } = widget as DashboardSection;
+      const idx = uid ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       (sectionPanels as DashboardPanel[]).forEach((panel) => {
         const { storedPanel, references } = transformPanelIn(panel);
         panels.push({
           ...storedPanel,
-          gridData: { ...storedPanel.gridData, ...(!dropSections && { sectionId: idx }) },
+          gridData: { ...storedPanel.gridData, sectionId: idx },
         });
         panelReferences.push(...references);
       });
@@ -67,7 +64,7 @@ function transformPanelIn(panel: DashboardPanel): {
   try {
     if (transforms?.transformIn) {
       const transformed = transforms.transformIn(config);
-      transformedPanelConfig = transformed.state;
+      transformedPanelConfig = transformed.state as Record<string, unknown>;
       references = transformed.references;
     }
   } catch (transformInError) {

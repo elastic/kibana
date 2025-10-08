@@ -8,7 +8,7 @@
 // embedded map v2
 
 import { EuiAccordion, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import styled from '@emotion/styled';
@@ -117,6 +117,7 @@ export const EmbeddedMapComponent = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView: experimentalDataView } = useDataView(SourcererScopeName.explore);
+  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
   const kibanaDataViews = useSelector(sourcererSelectors.kibanaDataViews);
   const selectedPatterns = useSelector((state: State) => {
     return sourcererSelectors.sourcererScopeSelectedPatterns(state, SourcererScopeName.default);
@@ -140,6 +141,7 @@ export const EmbeddedMapComponent = ({
     [euiTheme, experimentalDataView]
   );
 
+  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
   useEffect(() => {
     if (newDataViewPickerEnabled) return;
 
@@ -171,6 +173,7 @@ export const EmbeddedMapComponent = ({
     };
   }, [addError, availableDataViews, euiTheme, isFieldInIndexPattern, newDataViewPickerEnabled]);
 
+  // TODO This can be completely removed once we switch the newDataViewPickerEnabled on
   useEffect(() => {
     if (newDataViewPickerEnabled) return;
 
