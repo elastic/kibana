@@ -2003,10 +2003,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
         const agentPolicy = await agentPolicyService.get(soClient, agentPolicyId);
-
         if (!agentPolicy) {
           throw new AgentPolicyNotFoundError('Agent policy not found');
         }
+
         validateIsNotHostedPolicy(
           agentPolicy,
           options?.force,
