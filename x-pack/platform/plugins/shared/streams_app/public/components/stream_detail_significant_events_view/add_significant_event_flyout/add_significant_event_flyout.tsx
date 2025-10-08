@@ -233,11 +233,11 @@ export function AddSignificantEventFlyout({
               `}
             >
               <EuiPanel hasShadow={false} paddingSize="l">
-                <EuiText>
+                <EuiText size="xs">
                   <h4>
                     {i18n.translate(
                       'xpack.streams.streamDetailView.addSignificantEventFlyout.selectOptionLabel',
-                      { defaultMessage: 'Select an option' }
+                      { defaultMessage: 'Select a method' }
                     )}
                   </h4>
                 </EuiText>

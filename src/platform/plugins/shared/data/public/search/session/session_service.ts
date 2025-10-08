@@ -484,6 +484,7 @@ export class SessionService {
    * @param sessionId
    */
   public restore(sessionId: string) {
+    this.storeSessionSnapshot();
     this.state.transitions.restore(sessionId);
     this.refreshSearchSessionSavedObject();
   }
@@ -516,6 +517,17 @@ export class SessionService {
       // eslint-disable-next-line no-console
       console.warn(`Unknown ${sessionId} search session id recevied`);
     }
+  }
+
+  /**
+   * Resets the current search session state.
+   * Can be used to reset to a default state without clearing initialization info, such as when switching between discover tabs.
+   *
+   * This is different from {@link clear} as it does not reset initialization info set through {@link enableStorage}.
+   */
+  public reset() {
+    this.storeSessionSnapshot();
+    this.state.transitions.clear();
   }
 
   private storeSessionSnapshot() {

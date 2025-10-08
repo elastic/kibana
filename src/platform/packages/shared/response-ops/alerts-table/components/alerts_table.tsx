@@ -672,7 +672,7 @@ const AlertsTableContent = typedForwardRef(
                 alerts: { sync: casesConfiguration?.syncAlerts ?? false },
                 observables: {
                   enabled: true,
-                  autoExtract: false,
+                  autoExtract: casesConfiguration?.extractObservables ?? false,
                 },
               }}
             >

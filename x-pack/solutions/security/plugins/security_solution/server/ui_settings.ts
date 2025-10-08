@@ -10,9 +10,9 @@ import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { ReadonlyModeType } from '@kbn/core-ui-settings-common';
 import {
   APP_ID,
-  DEFAULT_AI_CONNECTOR,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
@@ -50,6 +50,8 @@ import {
   DEFAULT_VALUE_REPORT_MINUTES,
   DEFAULT_VALUE_REPORT_RATE,
   DEFAULT_VALUE_REPORT_TITLE,
+  ENABLE_ESQL_RISK_SCORING,
+  DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -476,7 +478,7 @@ export const initUiSettings = (
           defaultMessage: 'Privileged user monitoring',
         }
       ),
-      value: false,
+      value: true,
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
         {
@@ -491,6 +493,29 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.disableESQLRiskScoring
+      ? {}
+      : {
+          [ENABLE_ESQL_RISK_SCORING]: {
+            name: i18n.translate('xpack.securitySolution.uiSettings.enableEsqlRiskScoringLabel', {
+              defaultMessage: 'Enable ESQL-based risk scoring',
+            }),
+            value: true,
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.enableEsqlRiskScoringDescription',
+              {
+                defaultMessage:
+                  '<p>Enables risk scoring based on ESQL queries. Disabling this will revert to using scripted metrics</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
+              }
+            ),
+            type: 'boolean',
+            category: [APP_ID],
+            requiresPageReload: true,
+            schema: schema.boolean(),
+            solutionViews: ['classic', 'security'],
+          },
+        }),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
           [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
@@ -596,7 +621,11 @@ export const initUiSettings = (
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
-export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsConfig | null =>
+
+export const getDefaultAIConnectorSetting = (
+  connectors: Connector[],
+  readonlyMode?: ReadonlyModeType
+): SettingsConfig | null =>
   connectors.length > 0
     ? {
         [DEFAULT_AI_CONNECTOR]: {
@@ -619,6 +648,8 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
           requiresPageReload: true,
           schema: schema.string(),
           solutionViews: ['classic', 'security'],
+          readonlyMode,
+          readonly: readonlyMode !== undefined,
         },
       }
     : null;
