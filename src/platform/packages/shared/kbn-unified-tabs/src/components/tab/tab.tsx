@@ -259,6 +259,7 @@ export const Tab: React.FC<TabProps> = (props) => {
               <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
                 <EuiToolTip content={closeButtonLabel}>
                   <EuiButtonIcon
+                    // semantically role="tablist" does not allow other buttons in tabs
                     aria-hidden={true}
                     tabIndex={-1}
                     color="text"
