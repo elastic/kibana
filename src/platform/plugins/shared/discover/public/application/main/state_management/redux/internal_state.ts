@@ -276,6 +276,14 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.uiState.searchDraft = action.payload.searchDraftUiState;
       }),
+
+    setCascadeUiState: (
+      state,
+      action: TabAction<{ cascadeUiState: TabState['uiState']['cascade'] }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.uiState.cascade = action.payload.cascadeUiState;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {

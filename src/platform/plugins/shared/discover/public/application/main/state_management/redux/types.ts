@@ -22,6 +22,7 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
+import type { CascadeDocumentsRestorableState } from '../../components/layout/cascaded_documents/esql_data_cascade_restorable_state';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -70,6 +71,7 @@ export interface TabState extends TabItem {
     fieldList?: Partial<UnifiedFieldListRestorableState>;
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
+    cascade?: CascadeDocumentsRestorableState;
   };
 }
 

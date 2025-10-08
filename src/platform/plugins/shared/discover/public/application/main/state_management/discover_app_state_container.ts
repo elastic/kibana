@@ -49,6 +49,7 @@ import type { DiscoverInternalState, InternalStateStore, TabActionInjector } fro
 import { internalStateActions, selectTab } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
 import { GLOBAL_STATE_URL_KEY } from '../../../../common/constants';
+import { getESQLStatsQueryMeta } from '../components/layout/cascaded_documents';
 
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
   /**
@@ -217,9 +218,27 @@ export const getDiscoverAppStateContainer = ({
 
       previousState = appStateContainer.getState();
 
-      // When updating to an ES|QL query, sync the data source
+      // special handling for ES|QL queries
       if (isOfAggregateQueryType(value.query)) {
+        // When updating to an ES|QL query, sync the data source
         value = { ...value, dataSource: createEsqlDataSource() };
+
+        // compute and set cascade groupings when state updates happen
+        internalState.dispatch(
+          injectCurrentTab(internalStateActions.setCascadeUiState)({
+            cascadeUiState: {
+              get availableCascadeGroups() {
+                return getESQLStatsQueryMeta(
+                  (value!.query as AggregateQuery).esql
+                ).groupByFields.map((group) => group.field);
+              },
+              get selectedCascadeGroups() {
+                // select the first group by default
+                return [this.availableCascadeGroups[0]].filter(Boolean);
+              },
+            },
+          })
+        );
       }
 
       appStateContainer.set(value);
