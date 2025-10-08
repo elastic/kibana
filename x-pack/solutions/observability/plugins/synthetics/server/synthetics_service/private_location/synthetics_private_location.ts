@@ -374,17 +374,17 @@ export class SyntheticsPrivateLocation {
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string
   ) {
-    const listOfPolicies: string[] = [];
+    const packagePolicyIds: string[] = [];
     for (const config of configs) {
       for (const privateLocation of allPrivateLocations) {
         const currId = this.getPolicyId(config, privateLocation.id, spaceId);
-        listOfPolicies.push(currId);
+        packagePolicyIds.push(currId);
       }
     }
 
     return this.packagePolicyService.getByIds({
       spaceId,
-      listOfPolicies,
+      packagePolicyIds,
     });
   }
 

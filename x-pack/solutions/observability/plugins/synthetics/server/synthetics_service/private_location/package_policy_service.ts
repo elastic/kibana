@@ -6,6 +6,8 @@
  */
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { SyntheticsServerSetup } from '../../types';
 
 export class PackagePolicyService {
@@ -49,14 +51,16 @@ export class PackagePolicyService {
     );
   }
 
-  async getByIds({ spaceId, listOfPolicies }: { spaceId: string; listOfPolicies: string[] }) {
-    return this.server.fleet.packagePolicyService.getByIDs(
-      this.getSpaceSoClient(spaceId),
-      listOfPolicies,
-      {
-        ignoreMissing: true,
-      }
+  async getByIds({ spaceId, packagePolicyIds }: { spaceId: string; packagePolicyIds: string[] }) {
+    // For legacy reasons, we need to get the package policies from both the space and the default space
+    const ids = await Promise.all(
+      [this.getSpaceSoClient(spaceId), this.getSpaceSoClient(DEFAULT_SPACE_ID)].map((soClient) =>
+        this.server.fleet.packagePolicyService.getByIDs(soClient, packagePolicyIds, {
+          ignoreMissing: true,
+        })
+      )
     );
+    return ids.flat();
   }
 
   async bulkCreate({
@@ -66,18 +70,32 @@ export class PackagePolicyService {
     newPolicies: NewPackagePolicyWithId[];
     spaceId: string;
   }) {
-    const soClient = this.getSpaceSoClient(spaceId);
+    if (newPolicies.length === 0) {
+      return { created: [], failed: [] };
+    }
 
-    if (newPolicies.length > 0) {
-      return this.server.fleet.packagePolicyService.bulkCreate(
-        soClient,
+    const promises = (
+      await this.getDefaultAndSpacePackagePolicies({
+        policies: newPolicies,
+        spaceId,
+      })
+    ).map(({ client, policies }) =>
+      this.server.fleet.packagePolicyService.bulkCreate(
+        client,
         this.getInternalEsClient(),
-        newPolicies,
+        policies,
         {
           asyncDeploy: true,
         }
-      );
-    }
+      )
+    );
+
+    const res = await Promise.all(promises);
+
+    return {
+      created: res.flatMap((r) => r.created),
+      failed: res.flatMap((r) => r.failed),
+    };
   }
 
   async bulkUpdate({
@@ -87,20 +105,29 @@ export class PackagePolicyService {
     policiesToUpdate: NewPackagePolicyWithId[];
     spaceId: string;
   }) {
-    const soClient = this.getSpaceSoClient(spaceId);
+    if (policiesToUpdate.length === 0) {
+      return [];
+    }
 
-    if (policiesToUpdate.length > 0) {
-      const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
-        soClient,
+    const promises = (
+      await this.getDefaultAndSpacePackagePolicies({
+        policies: policiesToUpdate,
+        spaceId,
+      })
+    ).map(({ client, policies }) =>
+      this.server.fleet.packagePolicyService.bulkUpdate(
+        client,
         this.getInternalEsClient(),
-        policiesToUpdate,
+        policies,
         {
           force: true,
           asyncDeploy: true,
         }
-      );
-      return failedPolicies;
-    }
+      )
+    );
+
+    const res = await Promise.all(promises);
+    return res.flatMap((r) => r.failedPolicies);
   }
 
   async bulkDelete({
@@ -110,22 +137,92 @@ export class PackagePolicyService {
     policyIdsToDelete: string[];
     spaceId: string;
   }) {
-    const soClient = this.getSpaceSoClient(spaceId);
+    if (policyIdsToDelete.length === 0) {
+      return;
+    }
 
-    if (policyIdsToDelete.length > 0) {
-      try {
-        return this.server.fleet.packagePolicyService.delete(
-          soClient,
-          this.getInternalEsClient(),
-          policyIdsToDelete,
-          {
-            force: true,
-            asyncDeploy: true,
-          }
-        );
-      } catch (error) {
-        this.server.logger.error(error);
+    const promises = (
+      await this.getDefaultAndSpacePackagePolicies({
+        policies: await this.getByIds({ spaceId, packagePolicyIds: policyIdsToDelete }),
+        spaceId,
+      })
+    ).map(({ client, policies }) =>
+      this.server.fleet.packagePolicyService.delete(
+        client,
+        this.getInternalEsClient(),
+        policies.map((policy) => policy.id!),
+        {
+          force: true,
+          asyncDeploy: true,
+        }
+      )
+    );
+
+    try {
+      const res = await Promise.all(promises);
+      return res.flat();
+    } catch (error) {
+      this.server.logger.error(error);
+    }
+  }
+
+  // The agent policies can be in the default space or the spaceId
+  // This function returns the package policies that are in the spaceId and the default space and the correct saved objects client to fetch the package policies
+  private async getDefaultAndSpacePackagePolicies({
+    policies,
+    spaceId,
+  }: {
+    policies: NewPackagePolicyWithId[];
+    spaceId: string;
+  }): Promise<
+    {
+      client: SavedObjectsClientContract;
+      policies: NewPackagePolicyWithId[];
+    }[]
+  > {
+    const agentPolicyIds = new Set(policies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
+    const defaultSpaceSoClient = this.getSpaceSoClient(DEFAULT_SPACE_ID);
+    const spaceSoClient = this.getSpaceSoClient(spaceId);
+    const clients = [spaceSoClient];
+    if (spaceId !== DEFAULT_SPACE_ID) {
+      clients.push(defaultSpaceSoClient);
+    }
+    const agentPolicies = (
+      await Promise.all(
+        clients.map((soClient) =>
+          this.server.fleet.agentPolicyService.getByIds(soClient, [...agentPolicyIds], {
+            ignoreMissing: true,
+          })
+        )
+      )
+    ).flat();
+
+    const agentPolicyById = new Map(agentPolicies.map((ap) => [ap.id, ap]));
+    const defaultSpacePackagePolicies: NewPackagePolicyWithId[] = [];
+    const spacePackagePolicies: NewPackagePolicyWithId[] = [];
+
+    for (const pkgPolicy of policies) {
+      // Each package policy is associated with a single agent policy
+      const agentPolicy = agentPolicyById.get(pkgPolicy.policy_ids[0]);
+      if (agentPolicy?.space_ids?.includes(spaceId)) {
+        spacePackagePolicies.push(pkgPolicy);
+      } else {
+        defaultSpacePackagePolicies.push(pkgPolicy);
       }
     }
+
+    const res: {
+      client: SavedObjectsClientContract;
+      policies: NewPackagePolicyWithId[];
+    }[] = [];
+
+    if (defaultSpacePackagePolicies.length > 0) {
+      res.push({ client: defaultSpaceSoClient, policies: defaultSpacePackagePolicies });
+    }
+    if (spacePackagePolicies.length > 0) {
+      res.push({ client: spaceSoClient, policies: spacePackagePolicies });
+    }
+
+    return res;
   }
 }
