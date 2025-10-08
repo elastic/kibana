@@ -20,7 +20,15 @@ export const renderApp = (
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
-    core.rendering.addContext(<App basename={appBasePath} navigation={navigation} />),
+    core.rendering.addContext(
+      <App
+        // AppDeps
+        basename={appBasePath}
+        overlays={core.overlays}
+        rendering={core.rendering}
+        navigation={navigation}
+      />
+    ),
     element
   );
 
