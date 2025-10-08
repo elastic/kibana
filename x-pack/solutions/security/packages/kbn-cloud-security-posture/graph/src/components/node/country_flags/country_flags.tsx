@@ -27,6 +27,13 @@ import { getCountryFlag, getCountryName } from './country_codes';
 
 const VISIBLE_FLAGS_LIMIT = 2;
 
+/**
+ * Filters out invalid country codes that don't have corresponding flags
+ */
+const getValidCountryCodes = (countryCodes: string[]): string[] => {
+  return countryCodes.filter((code) => getCountryFlag(code) !== null);
+};
+
 const popoverAriaLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.countryFlags.popoverAriaLabel',
   {
@@ -39,7 +46,7 @@ export type UseCountryFlagsPopoverReturn = UseNodeDetailsPopoverReturn & {
 };
 
 export const useCountryFlagsPopover = (countryCodes: string[]): UseCountryFlagsPopoverReturn => {
-  const validCodes = countryCodes.filter((code) => getCountryFlag(code) !== null);
+  const validCodes = getValidCountryCodes(countryCodes);
 
   const items = validCodes.map((countryCode, index) => ({
     key: `${index}-${countryCode}`,
@@ -70,7 +77,7 @@ export interface CountryFlagsProps {
 }
 
 export const CountryFlags = memo(({ countryCodes, onCountryClick }: CountryFlagsProps) => {
-  const validCodes = countryCodes.filter((code) => getCountryFlag(code) !== null);
+  const validCodes = getValidCountryCodes(countryCodes);
   const xsFontSize = useEuiFontSize('xs');
 
   if (validCodes.length === 0) {

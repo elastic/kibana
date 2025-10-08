@@ -24,7 +24,6 @@ import {
 import { createPreviewItems } from '../utils';
 
 export const VISIBLE_IPS_LIMIT = 1;
-export const MAX_IPS_IN_POPOVER = 10;
 
 const toolTipAriaLabel = i18n.translate('securitySolutionPackages.csp.graph.ips.toolTipAriaLabel', {
   defaultMessage: 'Show IP address details',

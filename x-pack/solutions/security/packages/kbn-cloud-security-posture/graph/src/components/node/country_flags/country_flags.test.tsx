@@ -56,7 +56,7 @@ describe('CountryFlags', () => {
     expect(mockOnCountryClick).toHaveBeenCalledTimes(1);
   });
 
-  test('renders badge with none clickable counter when over the visible limit of country flags without onCountryClick callback', async () => {
+  test('renders badge with non clickable counter when over the visible limit of country flags without onCountryClick callback', async () => {
     const testCountryCodes = ['US', 'FR', 'DE', 'JP'];
     render(<CountryFlags countryCodes={testCountryCodes} />);
 
