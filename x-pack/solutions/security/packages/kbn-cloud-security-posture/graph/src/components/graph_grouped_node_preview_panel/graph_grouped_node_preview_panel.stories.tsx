@@ -7,6 +7,11 @@
 
 import React from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import type { GraphGroupedNodePreviewPanelProps } from '.';
 import type { PanelItems, EntityItem, EventItem, AlertItem } from './components/grouped_item/types';
@@ -41,7 +46,7 @@ const meta: Meta<ContentTemplateArgs> = {
 export default meta;
 
 const createEntityItem = (overrides: Partial<EntityItem> = {}): EntityItem => ({
-  itemType: 'entity',
+  itemType: DOCUMENT_TYPE_ENTITY,
   id: 'entity-1',
   type: 'host',
   label: 'host-01.acme.com',
@@ -54,7 +59,7 @@ const createEntityItem = (overrides: Partial<EntityItem> = {}): EntityItem => ({
 });
 
 const createEventItem = (overrides: Partial<EventItem> = {}): EventItem => ({
-  itemType: 'event',
+  itemType: DOCUMENT_TYPE_EVENT,
   id: 'event-1',
   action: 'process_start',
   timestamp: new Date('2023-12-01T11:15:00Z'),
@@ -66,7 +71,7 @@ const createEventItem = (overrides: Partial<EventItem> = {}): EventItem => ({
 });
 
 const createAlertItem = (overrides: Partial<AlertItem> = {}): AlertItem => ({
-  itemType: 'alert',
+  itemType: DOCUMENT_TYPE_ALERT,
   id: 'alert-1',
   action: 'malware_detected',
   timestamp: new Date('2023-12-01T12:45:00Z'),
@@ -93,7 +98,7 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
   const capitalize = (str: string) =>
     !str ? '' : str[0].toUpperCase() + str.slice(1).toLowerCase();
 
-  if (firstItem && firstItem.itemType === 'entity') {
+  if (firstItem && firstItem.itemType === DOCUMENT_TYPE_ENTITY) {
     icon = firstItem.icon ?? icon;
     groupedItemsType = capitalize(`${firstItem.type}s`) || 'Entities';
   }
@@ -209,7 +214,7 @@ AlertsGroup.args = {
     createAlertItem({
       id: 'alert-2',
       action: 'malware_execution',
-      actor: { id: 'process-malware', label: 'trojan.exe', icon: 'alert' },
+      actor: { id: 'process-malware', label: 'trojan.exe', icon: DOCUMENT_TYPE_ALERT },
       target: { id: 'system-memory', label: 'system_memory', icon: 'memory' },
     }),
     createAlertItem({
@@ -270,10 +275,10 @@ EventsAndAlertsGroup.parameters = {
 export const LargeGroup: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
 LargeGroup.args = {
   items: Array.from({ length: 10 }, (_, index) => {
-    const itemTypes = ['entity', 'event', 'alert'] as const;
+    const itemTypes = [DOCUMENT_TYPE_ENTITY, DOCUMENT_TYPE_EVENT, DOCUMENT_TYPE_ALERT] as const;
     const itemType = itemTypes[index % 3];
 
-    if (itemType === 'entity') {
+    if (itemType === DOCUMENT_TYPE_ENTITY) {
       return createEntityItem({
         id: `entity-${index}`,
         label: `host-${String(index).padStart(2, '0')}.domain.com`,
@@ -281,7 +286,7 @@ LargeGroup.args = {
         ip: `10.0.1.${100 + index}`,
         countryCode: ['US', 'CA', 'GB', 'DE', 'FR'][index % 5],
       });
-    } else if (itemType === 'event') {
+    } else if (itemType === DOCUMENT_TYPE_EVENT) {
       const actions = [
         'file_access',
         'network_connection',
@@ -304,7 +309,7 @@ LargeGroup.args = {
       return createAlertItem({
         id: `alert-${index}`,
         action: actions[index % actions.length],
-        actor: { id: `threat-${index}`, label: `threat_actor_${index}`, icon: 'alert' },
+        actor: { id: `threat-${index}`, label: `threat_actor_${index}`, icon: DOCUMENT_TYPE_ALERT },
         target: { id: `victim-${index}`, label: `target_${index}`, icon: 'warning' },
       });
     }
