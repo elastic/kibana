@@ -80,4 +80,24 @@ POST kibana_sample_weather_data_stream/_search
       }
     }
   }
-}`;
+}
+# -----------------------------------------------
+# Step 4: Delete data stream and index template that was created as part of this tutorial
+# Since index template is used by the data stream, we need to delete the data stream first before index template.
+# -----------------------------------------------
+DELETE _data_stream/kibana_sample_weather_data_stream
+
+# ✅ The response includes a confirmation that the data stream is deleted.
+
+DELETE _index_template/kibana_sample_weather_index_template
+
+# ✅ The response includes a confirmation that the index template is deleted.
+
+# -----------------------------------------------
+# 🎉 Conclusion
+# -----------------------------------------------
+# 🏁 In this tutorial, you learned how to set up a time series data stream(TSDS) in Elasticsearch.
+# You can now create some dashboards and visualize the data in kibana using Lens.
+# Learn more TSDS in https://www.elastic.co/docs/manage-data/data-store/data-streams/time-series-data-stream-tsds
+# Learn more about how to create dashboard using Lens, visit https://www.elastic.co/docs/explore-analyze/visualize/lens
+`;
