@@ -246,8 +246,27 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('#bulk_create', () => {
-      // it('should create read only objects', async () => {
-      // it('should throw when trying to create read only objects with no user', async () => {
+      it('should create read only objects', async () => {
+        const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
+          await loginAsObjectOwner('test_user', 'changeme');
+
+        const bulkCreateResponse = await supertestWithoutAuth
+          .post('/read_only_objects/bulk_create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', objectOwnerCookie.cookieString())
+          .send({
+            objects: [
+              { type: READ_ONLY_TYPE, isReadOnly: true },
+              { type: READ_ONLY_TYPE, isReadOnly: true },
+            ],
+          });
+        expect(bulkCreateResponse.body.saved_objects).to.have.length(2);
+        for (const { accessControl } of bulkCreateResponse.body.saved_objects) {
+          expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
+          expect(accessControl).to.have.property('accessMode', 'read_only');
+        }
+      });
+
       it('should allow overwriting objects owned by current user', async () => {
         const { cookie: objectOwnerCookie, profileUid: objectOwnerProfileUid } =
           await loginAsObjectOwner('test_user', 'changeme');
@@ -294,7 +313,6 @@ export default function ({ getService }: FtrProviderContext) {
           expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
           expect(accessControl).to.have.property('accessMode', 'read_only');
         }
-        // ToDo: read back objects and confirm the owner has changed
       });
 
       it('should allow overwriting objects owned by another user if admin', async () => {
