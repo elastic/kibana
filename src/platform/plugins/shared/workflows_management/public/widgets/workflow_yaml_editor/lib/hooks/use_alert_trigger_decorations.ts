@@ -112,9 +112,13 @@ export const useAlertTriggerDecorations = ({
             model.getLineMaxColumn(typeRange!.startLineNumber)
           ),
           options: {
-            className: 'alert-trigger-highlight',
-            marginClassName: 'alert-trigger-highlight',
-            isWholeLine: true,
+            // className: 'alert-trigger-highlight',
+            // marginClassName: 'alert-trigger-highlight',
+            // isWholeLine: true,
+            after: {
+              content: 'Connect this workflow to a rule via the "Run Workflow" action.',
+              inlineClassName: 'after-text',
+            },
           },
         };
 

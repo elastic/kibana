@@ -46,8 +46,11 @@ export const useWorkflowEditorStyles = () => {
 
         // After text (shadow) decorations
         '.after-text': {
-          paddingInlineStart: '10px',
+          marginLeft: '10px',
           color: euiTheme.colors.textDisabled,
+        },
+        '.after-text + .after-text': {
+          marginLeft: '0', // Remove padding for consecutive after-text spans
         },
 
         // Step highlighting decorations

@@ -13,6 +13,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/use_available_connectors';
 import { HARDCODED_ICONS } from './hardcoded_icons';
 import type { ConnectorTypeInfoMinimal } from '../../../../common/schema';
+import { ElasticsearchLogo } from './icons/elasticsearch.svg';
+import { KibanaLogo } from './icons/kibana.svg';
 
 const predefinedStepTypes = [
   {
@@ -114,13 +116,19 @@ function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMinimal[])
 
       // Only inject CSS if we successfully generated an icon
       if (iconBase64) {
-        cssToInject += `
-          /* Target by aria-label content */
-          .monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon:before,
+        let selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon:before,
           .monaco-list .monaco-list-row[aria-label$=", ${connectorType}"] .suggest-icon:before,
           .monaco-list .monaco-list-row[aria-label*=", ${connectorType},"] .suggest-icon:before,
           .monaco-list .monaco-list-row[aria-label="${connectorType}"] .suggest-icon:before,
-          .monaco-list .monaco-list-row[aria-label*="${displayName}"] .suggest-icon:before {
+          .monaco-list .monaco-list-row[aria-label*="${displayName}"] .suggest-icon:before`;
+        if (connectorType === 'elasticsearch') {
+          selector = '.codicon-symbol-struct:before';
+        } else if (connectorType === 'kibana') {
+          selector = '.codicon-symbol-module:before';
+        }
+        cssToInject += `
+          /* Target by aria-label content */
+          ${selector} {
             background-image: url("data:image/svg+xml;base64,${iconBase64}") !important;
             background-size: 16px 16px !important;
             background-repeat: no-repeat !important;
@@ -199,6 +207,7 @@ function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal[]) {
         `;
       }
     } catch (error) {
+      // console.log('error getting connector icon base64', error);
       // Silently skip if icon generation fails
     }
   }
@@ -225,54 +234,20 @@ const DEFAULT_CONNECTOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16
  */
 function getConnectorIconBase64(connectorType: string): string {
   try {
+    const dotConnectorType = `.${connectorType}`;
     // First, try to get the logo directly from stack connectors
-    if (connectorType in STACK_CONNECTOR_LOGOS) {
+    if (dotConnectorType in STACK_CONNECTOR_LOGOS) {
       const LogoComponent =
-        STACK_CONNECTOR_LOGOS[`.${connectorType}` as keyof typeof STACK_CONNECTOR_LOGOS];
+        STACK_CONNECTOR_LOGOS[dotConnectorType as keyof typeof STACK_CONNECTOR_LOGOS];
+      return getBase64FromReactComponent(LogoComponent);
+    }
 
-      // Render the actual logo component to HTML string
-      const logoElement = React.createElement(LogoComponent, { width: 16, height: 16 });
-      let htmlString = renderToStaticMarkup(logoElement);
+    if (connectorType === 'elasticsearch') {
+      return getBase64FromReactComponent(ElasticsearchLogo);
+    }
 
-      // Check if it's an <img> tag (imported SVG) or direct <svg>
-      const isImgTag = htmlString.includes('<img');
-
-      if (isImgTag) {
-        // Extract the src attribute from the img tag
-        const srcMatch = htmlString.match(/src="([^"]+)"/);
-        if (srcMatch && srcMatch[1]) {
-          const srcValue = srcMatch[1];
-
-          // If it's already a data URL, extract the base64 part
-          if (srcValue.startsWith('data:image/svg+xml;base64,')) {
-            const base64 = srcValue.replace('data:image/svg+xml;base64,', '');
-            return base64;
-          }
-
-          // If it's a different data URL format, return it as is
-          if (srcValue.startsWith('data:')) {
-            // Convert to base64 if needed
-            const base64 = btoa(srcValue);
-            return base64;
-          }
-
-          // If it's a regular URL/path, we can't easily convert it here
-        }
-      } else {
-        // It's a direct SVG - handle as before
-        const hasFillNone = /fill="none"/i.test(htmlString);
-
-        if (hasFillNone) {
-          // Remove fill="none" and add currentColor fill
-          htmlString = htmlString
-            .replace(/fill="none"/gi, '')
-            .replace(/fill='none'/gi, '')
-            .replace(/<svg([^>]*?)>/, '<svg$1 fill="currentColor">');
-        }
-      }
-
-      const base64 = btoa(htmlString);
-      return base64;
+    if (connectorType === 'kibana') {
+      return getBase64FromReactComponent(KibanaLogo);
     }
 
     // Handle connectors that use EUI built-in icons instead of custom logo components
@@ -291,4 +266,52 @@ function getConnectorIconBase64(connectorType: string): string {
     // Fallback to default static icon
     return btoa(DEFAULT_CONNECTOR_SVG);
   }
+}
+
+function getBase64FromReactComponent(
+  component: React.ComponentType<{ width: number; height: number }>
+): string {
+  // Render the actual logo component to HTML string
+  const logoElement = React.createElement(component, { width: 16, height: 16 });
+  let htmlString = renderToStaticMarkup(logoElement);
+
+  // Check if it's an <img> tag (imported SVG) or direct <svg>
+  const isImgTag = htmlString.includes('<img');
+
+  if (isImgTag) {
+    // Extract the src attribute from the img tag
+    const srcMatch = htmlString.match(/src="([^"]+)"/);
+    if (srcMatch && srcMatch[1]) {
+      const srcValue = srcMatch[1];
+
+      // If it's already a data URL, extract the base64 part
+      if (srcValue.startsWith('data:image/svg+xml;base64,')) {
+        const base64 = srcValue.replace('data:image/svg+xml;base64,', '');
+        return base64;
+      }
+
+      // If it's a different data URL format, return it as is
+      if (srcValue.startsWith('data:')) {
+        // Convert to base64 if needed
+        const base64 = btoa(srcValue);
+        return base64;
+      }
+
+      // If it's a regular URL/path, we can't easily convert it here
+    }
+  } else {
+    // It's a direct SVG - handle as before
+    const hasFillNone = /fill="none"/i.test(htmlString);
+
+    if (hasFillNone) {
+      // Remove fill="none" and add currentColor fill
+      htmlString = htmlString
+        .replace(/fill="none"/gi, '')
+        .replace(/fill='none'/gi, '')
+        .replace(/<svg([^>]*?)>/, '<svg$1 fill="currentColor">');
+    }
+  }
+
+  const base64 = btoa(htmlString);
+  return base64;
 }

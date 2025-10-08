@@ -54,9 +54,9 @@ export function validateConnectorIds(
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        afterMessage: `Not connected. [Add new ${capitalize(
+        afterMessage: `Not connected. Add new ${capitalize(
           connectorIdItem.connectorType
-        )} connector](http://localhost:5601/app/management/ingest-management/connectors/types/create)`,
+        )} connector`,
         hoverMessage: null,
       });
     } else {
