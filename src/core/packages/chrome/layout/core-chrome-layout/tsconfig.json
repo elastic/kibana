@@ -27,5 +27,7 @@
     "@kbn/core-chrome-layout-components",
     "@kbn/core-chrome-layout-constants",
     "@kbn/core-chrome-layout-feature-flags",
+    "@kbn/core-workspace-chrome-components",
+    "@kbn/core-workspace-chrome-state",
   ]
 }

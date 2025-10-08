@@ -33,6 +33,16 @@ import {
 } from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
+import { WorkspaceLayout } from '@kbn/core-chrome-layout/layouts/workspace';
+import type { ChromeStyle } from '@kbn/core-chrome-browser/src/types';
+import {
+  WORKSPACE_SIDEBAR_APP_FEEDBACK,
+  WORKSPACE_SIDEBAR_APP_RECENT,
+} from '@kbn/core-chrome-browser';
+import {
+  FeedbackSidebarApp,
+  RecentlyAccessedSidebarApp,
+} from '@kbn/core-workspace-chrome-components';
 
 export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
@@ -87,7 +97,7 @@ export class RenderingService implements IRenderingService {
     renderCoreDeps: RenderingServiceRenderCoreDeps,
     targetDomElement: HTMLDivElement
   ) {
-    const { chrome, featureFlags } = renderCoreDeps;
+    const { chrome, featureFlags, application } = renderCoreDeps;
     const layoutType = getLayoutVersion(featureFlags);
     const debugLayout = getLayoutDebugFlag(featureFlags);
     const projectSideNavVersion = getSideNavVersion(featureFlags);
@@ -103,16 +113,54 @@ export class RenderingService implements IRenderingService {
         body.classList.add(...newClasses);
       });
 
-    const layout: LayoutService =
-      layoutType === 'grid'
-        ? new GridLayout(renderCoreDeps, { debug: debugLayout, projectSideNavVersion })
-        : new LegacyFixedLayout(renderCoreDeps, { projectSideNavVersion });
+    const chromeStyle$ = chrome.getChromeStyle$();
+    let chromeStyle: ChromeStyle | undefined;
+    chromeStyle$
+      .subscribe((value) => {
+        chromeStyle = value;
+      })
+      .unsubscribe();
+
+    const isWorkspaceLayout = layoutType === 'workspace';
+    const isGridLayout = layoutType === 'grid' || (isWorkspaceLayout && chromeStyle === 'classic');
+
+    const layout: LayoutService = isGridLayout
+      ? new GridLayout(renderCoreDeps, { debug: debugLayout, projectSideNavVersion })
+      : isWorkspaceLayout
+      ? new WorkspaceLayout(renderCoreDeps)
+      : new LegacyFixedLayout(renderCoreDeps, { projectSideNavVersion });
 
     const Layout = layout.getComponent();
+    const WorkspaceProvider = chrome.workspace.getStoreProvider();
+
+    chrome.workspace.sidebar.registerSidebarApp({
+      appId: WORKSPACE_SIDEBAR_APP_RECENT,
+      button: { iconType: 'clock' },
+      app: {
+        title: 'Recently viewed',
+        children: (
+          <RecentlyAccessedSidebarApp
+            recentlyAccessed$={chrome.recentlyAccessed.get$()}
+            navigateToUrl={application.navigateToUrl}
+          />
+        ),
+      },
+    });
+
+    chrome.workspace.sidebar.registerSidebarApp({
+      appId: WORKSPACE_SIDEBAR_APP_FEEDBACK,
+      button: { iconType: 'editorComment' },
+      app: {
+        title: 'Feedback',
+        children: <FeedbackSidebarApp />,
+      },
+    });
 
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <Layout />
+        <WorkspaceProvider>
+          <Layout />
+        </WorkspaceProvider>
       </KibanaRootContextProvider>,
       targetDomElement
     );
@@ -132,6 +180,7 @@ export class RenderingService implements IRenderingService {
       return <EuiLoadingSpinner size="s" />;
     }
 
+    // TODO: add WorkspaceProvider, somehow.
     return (
       <KibanaRenderContextProvider
         analytics={deps.analytics}
