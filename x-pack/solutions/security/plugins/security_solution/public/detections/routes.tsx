@@ -35,6 +35,7 @@ const DetectionsRedirects = ({ location }: RouteComponentProps) =>
 export const routes: RouteProps[] = [
   {
     path: DETECTIONS_PATH,
+    // this route doesn't need SecurityRoutePageWrapper because it will always redirect to another route, the target route should apply the corresponding access restrictions
     render: DetectionsRedirects,
   },
   {
