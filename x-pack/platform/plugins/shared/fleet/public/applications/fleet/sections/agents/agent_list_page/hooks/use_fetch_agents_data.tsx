@@ -25,6 +25,7 @@ import {
   sendGetAgentsForRq,
   sendGetAgentTagsForRq,
   sendBulkGetAgentPoliciesForRq,
+  useAgentlessResources,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper } from '../../../../services';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../constants';
@@ -98,7 +99,7 @@ export function useFetchAgentsData() {
 
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
-  const showAgentless = urlParams.showAgentless === 'true';
+  const { showAgentless } = useAgentlessResources();
   const defaultKuery: string = (urlParams.kuery as string) || '';
   const urlHasInactive = (urlParams.showInactive as string) === 'true';
 
