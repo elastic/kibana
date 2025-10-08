@@ -72,7 +72,7 @@ describe('Legacy Metric Schema', () => {
           alignment: { label: 'top', value: 'left' },
           size: 'l' as const,
           color: {
-            apply_color_to: 'text' as const,
+            apply_color_to: 'value' as const,
             type: 'dynamic' as const,
             min: 0,
             max: 100,
