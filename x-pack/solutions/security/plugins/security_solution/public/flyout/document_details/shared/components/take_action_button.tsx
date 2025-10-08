@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useEuiTheme, EuiFlyout, useGeneratedHtmlId } from '@elastic/eui';
+import { useEuiTheme, EuiFlyout } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
 import type { Status } from '../../../../../common/api/detection_engine';
@@ -152,9 +152,6 @@ export const TakeActionButton: FC = () => {
     () => (dataAsNestedObject?.kibana?.alert ? dataAsNestedObject?._id : null),
     [dataAsNestedObject?._id, dataAsNestedObject?.kibana?.alert]
   );
-  const isolateHostFlyoutTitleId = useGeneratedHtmlId({
-    prefix: 'isolateHostFlyoutTitle',
-  });
 
   return (
     <>
@@ -208,16 +205,10 @@ export const TakeActionButton: FC = () => {
 
       {isHostIsolationPanelOpen && (
         // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-        <EuiFlyout
-          onClose={showAlertDetails}
-          size="m"
-          maskProps={flyoutZIndex}
-          aria-labelledby={isolateHostFlyoutTitleId}
-        >
+        <EuiFlyout onClose={showAlertDetails} size="m" maskProps={flyoutZIndex}>
           <IsolateHostPanelHeader
             isolateAction={isolateAction}
             data={dataFormattedForFieldBrowser}
-            titleId={isolateHostFlyoutTitleId}
           />
           <IsolateHostPanelContent
             isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
