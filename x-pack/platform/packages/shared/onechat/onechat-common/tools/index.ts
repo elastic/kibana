@@ -58,4 +58,9 @@ export {
   type ResourceResult,
   type TabularDataResult,
   type OtherResult,
+  isErrorResult,
+  isOtherResult,
+  isQueryResult,
+  isResourceResult,
+  isTabularDataResult,
 } from './tool_result';
