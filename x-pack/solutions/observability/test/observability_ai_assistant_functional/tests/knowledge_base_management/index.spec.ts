@@ -220,7 +220,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
     describe('Bulk import knowledge base entries', () => {
       const tempDir = os.tmpdir();
-      const createdTempFiles: string[] = [];
+      const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 
       async function prepareBulkImportData() {
         const entries = [
@@ -249,15 +249,16 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportEntryButton);
         await testSubjects.exists(ui.pages.kbManagementTab.bulkImportFlyout);
         await testSubjects.exists(ui.pages.kbManagementTab.bulkImportSaveButton);
+        // Wait for the file picker input to be present in the DOM
+        await retry.waitFor('file picker input to be rendered', async () => {
+          const flyout = await testSubjects.find(ui.pages.kbManagementTab.bulkImportFlyout);
+          const inputs = await flyout.findAllByCssSelector('.euiFilePicker__input');
+          return inputs.length > 0;
+        });
       }
 
       async function uploadBulkImportFile(content: string) {
-        const tempFilePath = path.join(
-          tempDir,
-          `bulk_import_${Date.now()}_${Math.random().toString(36).slice(2)}.ndjson`
-        );
         fs.writeFileSync(tempFilePath, content, 'utf8');
-        createdTempFiles.push(tempFilePath);
 
         log.debug(`File saved to: ${tempFilePath}`);
 
@@ -294,12 +295,10 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       afterEach(async () => {
         await clearKnowledgeBase(es);
         await browser.refresh();
-        for (const file of createdTempFiles.splice(0)) {
-          try {
-            fs.unlinkSync(file);
-          } catch (_e) {
-            // ignore
-          }
+        try {
+          fs.unlinkSync(tempFilePath);
+        } catch (_e) {
+          // ignore if file doesn't exist
         }
       });
 
