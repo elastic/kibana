@@ -20,7 +20,7 @@ describe('regex patterns', () => {
     it('should match complete mustache expressions', () => {
       const text = 'Hello {{ user.name }} and {{ item.price }}!';
       const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
-      
+
       expect(matches).toHaveLength(2);
       expect(matches[0].groups?.key).toBe('user.name');
       expect(matches[1].groups?.key).toBe('item.price');
@@ -29,7 +29,7 @@ describe('regex patterns', () => {
     it('should match mustache with whitespace', () => {
       const text = 'Value: {{  steps.getData.output  }}';
       const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
-      
+
       expect(matches).toHaveLength(1);
       expect(matches[0].groups?.key).toBe('steps.getData.output');
     });
@@ -37,7 +37,7 @@ describe('regex patterns', () => {
     it('should not match incomplete mustache', () => {
       const text = 'Incomplete: {{ user.name';
       const matches = [...text.matchAll(VARIABLE_REGEX_GLOBAL)];
-      
+
       expect(matches).toHaveLength(0);
     });
   });
@@ -46,7 +46,7 @@ describe('regex patterns', () => {
     it('should match unfinished mustache at end of line', () => {
       const text = 'Message: {{ user.name';
       const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
-      
+
       expect(matches).toHaveLength(1);
       expect(matches[0].groups?.key).toBe('user.name');
     });
@@ -54,7 +54,7 @@ describe('regex patterns', () => {
     it('should match unfinished mustache with partial key', () => {
       const text = 'Value: {{ steps.getData.out';
       const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
-      
+
       expect(matches).toHaveLength(1);
       expect(matches[0].groups?.key).toBe('steps.getData.out');
     });
@@ -62,7 +62,7 @@ describe('regex patterns', () => {
     it('should match mustache with just opening braces', () => {
       const text = 'Start: {{ ';
       const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
-      
+
       expect(matches).toHaveLength(1);
       expect(matches[0].groups?.key).toBe('');
     });
@@ -70,7 +70,7 @@ describe('regex patterns', () => {
     it('should not match complete mustache', () => {
       const text = 'Complete: {{ user.name }} more';
       const matches = [...text.matchAll(UNFINISHED_VARIABLE_REGEX_GLOBAL)];
-      
+
       expect(matches).toHaveLength(0);
     });
   });
@@ -88,7 +88,7 @@ describe('regex patterns', () => {
         'response.data["user-info"].name',
       ];
 
-      validPaths.forEach(path => {
+      validPaths.forEach((path) => {
         expect(ALLOWED_KEY_REGEX.test(path)).toBe(true);
       });
     });
@@ -100,7 +100,7 @@ describe('regex patterns', () => {
         'items | map: "title" | join: ", "',
       ];
 
-      pathsWithFilters.forEach(path => {
+      pathsWithFilters.forEach((path) => {
         expect(ALLOWED_KEY_REGEX.test(path)).toBe(true);
       });
     });
@@ -114,7 +114,7 @@ describe('regex patterns', () => {
         'user]invalid[', // wrong bracket order
       ];
 
-      invalidPaths.forEach(path => {
+      invalidPaths.forEach((path) => {
         expect(ALLOWED_KEY_REGEX.test(path)).toBe(false);
       });
     });
@@ -133,19 +133,15 @@ describe('regex patterns', () => {
         'response.data["user-info"].name',
       ];
 
-      validPaths.forEach(path => {
+      validPaths.forEach((path) => {
         expect(PROPERTY_PATH_REGEX.test(path)).toBe(true);
       });
     });
 
     it('should not match paths with liquid filters', () => {
-      const pathsWithFilters = [
-        'user.name | upcase',
-        'price | round: 2',
-        'items | map: "title"',
-      ];
+      const pathsWithFilters = ['user.name | upcase', 'price | round: 2', 'items | map: "title"'];
 
-      pathsWithFilters.forEach(path => {
+      pathsWithFilters.forEach((path) => {
         expect(PROPERTY_PATH_REGEX.test(path)).toBe(false);
       });
     });
@@ -158,7 +154,7 @@ describe('regex patterns', () => {
         'user[abc]', // unquoted string in brackets
       ];
 
-      invalidPaths.forEach(path => {
+      invalidPaths.forEach((path) => {
         expect(PROPERTY_PATH_REGEX.test(path)).toBe(false);
       });
     });
@@ -190,7 +186,7 @@ describe('regex patterns', () => {
         'normal | pipe character',
       ];
 
-      testCases.forEach(text => {
+      testCases.forEach((text) => {
         const match = text.match(LIQUID_FILTER_REGEX);
         expect(match).toBeNull();
       });
@@ -219,7 +215,7 @@ describe('regex patterns', () => {
         'user.name } | filter',
       ];
 
-      testCases.forEach(text => {
+      testCases.forEach((text) => {
         const match = text.match(LIQUID_FILTER_REGEX);
         expect(match).toBeNull();
       });
@@ -243,7 +239,7 @@ describe('regex patterns', () => {
       // Should match the last filter being typed
       const text = '{{ user.name | upcase | append: "!" | ';
       const match = text.match(LIQUID_FILTER_REGEX);
-      
+
       expect(match).toBeTruthy();
       expect(match![1]).toBe('');
     });

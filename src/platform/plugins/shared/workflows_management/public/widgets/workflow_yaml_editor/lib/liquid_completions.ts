@@ -339,8 +339,10 @@ export const LIQUID_BLOCK_KEYWORDS = [
   {
     name: 'case',
     description: 'Creates a switch statement',
-    insertText: 'case ${1:variable}\n  when ${2:value}\n    ${3:content}\n  else\n    ${4:default_content}\nendcase',
-    example: 'case alert_type\n  when "critical"\n    assign message = "Critical alert"\n  else\n    assign message = "Normal alert"\nendcase',
+    insertText:
+      'case ${1:variable}\n  when ${2:value}\n    ${3:content}\n  else\n    ${4:default_content}\nendcase',
+    example:
+      'case alert_type\n  when "critical"\n    assign message = "Critical alert"\n  else\n    assign message = "Normal alert"\nendcase',
   },
   {
     name: 'when',
