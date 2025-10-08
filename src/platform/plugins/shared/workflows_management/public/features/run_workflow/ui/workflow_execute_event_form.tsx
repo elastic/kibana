@@ -54,12 +54,14 @@ const unflattenObject = (flatObject: Record<string, any>): Record<string, any> =
     for (let i = 0; i < keys.length; i++) {
       const currentKey = keys[i];
       if (i === keys.length - 1) {
-        current[currentKey] = flatObject[key];
+        const v = flatObject[key];
+        current[currentKey] = v && typeof v === 'object' ? { ...v } : v;
       } else {
         if (
           current[currentKey] === undefined ||
           typeof current[currentKey] !== 'object' ||
-          Array.isArray(current[currentKey])
+          Array.isArray(current[currentKey]) ||
+          !Object.isExtensible(current[currentKey]) // add this
         ) {
           current[currentKey] = {};
         }
