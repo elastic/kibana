@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient, SyntheticsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { log, syntheticsMonitor, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
@@ -41,7 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     this.onlyEsVersion('8.19 || >=9.1');
 
     let synthtraceLogsEsClient: LogsSynthtraceEsClient;
-    let syntheticsSynthrace: ApmSynthtraceEsClient;
+    let syntheticsSynthrace: SyntheticsSynthtraceEsClient;
 
     async function ingestDocuments({
       from = '2023-11-20T15:00:00.000Z',
@@ -69,7 +69,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       synthtraceLogsEsClient = synthtrace.createLogsSynthtraceEsClient();
-      syntheticsSynthrace = await synthtrace.createApmSynthtraceEsClient();
+      syntheticsSynthrace = synthtrace.createLogsSynthtraceEsClient();
     });
 
     after(async () => {
