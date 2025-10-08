@@ -45,6 +45,7 @@ export function StreamSystemsTable({
       name: i18n.translate('xpack.streams.streamSystemsTable.columns.title', {
         defaultMessage: 'Title',
       }),
+      width: '15%',
       sortable: true,
       truncateText: true,
     },
@@ -53,6 +54,7 @@ export function StreamSystemsTable({
       name: i18n.translate('xpack.streams.streamSystemsTable.columns.description', {
         defaultMessage: 'Description',
       }),
+      width: '30%',
       truncateText: {
         lines: 4,
       },
@@ -62,6 +64,7 @@ export function StreamSystemsTable({
       name: i18n.translate('xpack.streams.streamSystemsTable.columns.filter', {
         defaultMessage: 'Filter',
       }),
+      width: '25%',
       render: (filter: System['filter']) => {
         return <ConditionPanel condition={filter} />;
       },
@@ -70,13 +73,14 @@ export function StreamSystemsTable({
       name: i18n.translate('xpack.streams.streamSystemsTable.columns.eventsLast24Hours', {
         defaultMessage: 'Events (last 24 hours)',
       }),
+      width: '20%',
       render: (system: System) => {
         return <SystemEventsSparkline system={system} definition={definition} />;
       },
     },
     {
       name: 'Actions',
-      width: '100px',
+      width: '5%',
       actions: [
         {
           name: i18n.translate('xpack.streams.streamSystemsTable.columns.actions.cloneActionName', {

@@ -8944,11 +8944,11 @@
           },
           "; }) => Promise<",
           {
-            "pluginId": "@kbn/onechat-common",
+            "pluginId": "@kbn/onechat-server",
             "scope": "common",
-            "docId": "kibKbnOnechatCommonPluginApi",
-            "section": "def-common.ToolResult",
-            "text": "ToolResult"
+            "docId": "kibKbnOnechatServerPluginApi",
+            "section": "def-common.ToolHandlerResult",
+            "text": "ToolHandlerResult"
           },
           "[]>"
         ],

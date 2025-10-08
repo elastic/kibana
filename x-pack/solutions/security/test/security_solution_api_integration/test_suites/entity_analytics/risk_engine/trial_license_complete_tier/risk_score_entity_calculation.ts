@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
 
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
@@ -73,9 +74,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
-    this.tags(['esGate']);
-
+  const doTests = () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -119,8 +118,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const expectedScore = {
           calculated_level: 'Unknown',
           calculated_score: 21,
-          calculated_score_norm: 8.10060175898781,
-          category_1_score: 8.10060175898781,
+          calculated_score_norm: 8.100601759,
+          category_1_score: 8.100601759,
           category_1_count: 1,
           id_field: 'host.name',
           id_value: 'host-1',
@@ -171,8 +170,8 @@ export default ({ getService }: FtrProviderContext): void => {
             criticality_modifier: 1.5,
             calculated_level: 'Unknown',
             calculated_score: 21,
-            calculated_score_norm: 11.677912063468526,
-            category_1_score: 8.10060175898781,
+            calculated_score_norm: 11.6779120635,
+            category_1_score: 8.100601759,
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',
@@ -214,8 +213,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const expectedScore = {
             calculated_level: 'Unknown',
             calculated_score: 21,
-            calculated_score_norm: 8.10060175898781,
-            category_1_score: 8.10060175898781,
+            calculated_score_norm: 8.100601759,
+            category_1_score: 8.100601759,
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',
@@ -243,6 +242,29 @@ export default ({ getService }: FtrProviderContext): void => {
           );
         });
       });
+    });
+  };
+
+  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', function () {
+    this.tags(['esGate']);
+
+    describe('ESQL based risk scoring', () => {
+      doTests();
+    });
+
+    describe('scripted metric based risk scoring', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          ['securitySolution:enableEsqlRiskScoring']: false,
+        });
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          ['securitySolution:enableEsqlRiskScoring']: true,
+        });
+      });
+      doTests();
     });
   });
 };

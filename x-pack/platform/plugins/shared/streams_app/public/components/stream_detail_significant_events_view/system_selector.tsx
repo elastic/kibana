@@ -22,7 +22,7 @@ export function SystemSelector({ systems, selectedSystems, onSystemsChange }: Sy
   return (
     <EuiFormRow
       label={
-        <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }}>
+        <EuiText css={{ fontWeight: euiTheme.font.weight.semiBold }} size="xs">
           {i18n.translate('xpack.streams.significantEvents.systemsSelector.systemsLabel', {
             defaultMessage: 'Select systems',
           })}

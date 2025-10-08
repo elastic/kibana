@@ -112,6 +112,7 @@ export class KibanaPhoenixClient {
       const ranExperiment = await experiments.runExperiment({
         client: this.phoenixClient,
         dataset: { datasetId },
+        experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
         task,
         experimentMetadata: {
           model: this.options.model,
