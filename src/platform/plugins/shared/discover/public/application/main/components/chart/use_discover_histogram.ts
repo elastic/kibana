@@ -371,6 +371,7 @@ export const useDiscoverHistogram = (
   const chartHidden = useAppStateSelector((state) => state.hideChart);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
 
   const onBreakdownFieldChange = useCallback<
     NonNullable<UseUnifiedHistogramProps['onBreakdownFieldChange']>
@@ -398,7 +399,7 @@ export const useDiscoverHistogram = (
     },
     dataView: isEsqlMode ? esqlDataView : dataView,
     query: isEsqlMode ? esqlQuery : query,
-    filters: filtersMemoized,
+    filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
     timeRange: timeRangeMemoized,
     relativeTimeRange,
     columns: isEsqlMode ? esqlColumns : undefined,
@@ -415,6 +416,7 @@ export const useDiscoverHistogram = (
         : undefined,
     onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
     breakdownField,
+    esqlVariables,
     onBreakdownFieldChange,
     searchSessionId,
     getModifiedVisAttributes,

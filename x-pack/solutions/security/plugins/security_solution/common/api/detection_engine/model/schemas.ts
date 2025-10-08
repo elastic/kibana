@@ -23,6 +23,16 @@ export const savedIdOrUndefined = saved_id.optional();
 export const status = z.enum(['open', 'closed', 'acknowledged', 'in-progress']);
 export type Status = z.infer<typeof status>;
 
+export const closingReason = z.enum([
+  'false_positive',
+  'duplicate',
+  'true_positive',
+  'benign_positive',
+  'automated_closure',
+  'other',
+]);
+export type ClosingReason = z.infer<typeof closingReason>;
+
 export const signal_ids = z.array(z.string());
 export type SignalIds = z.infer<typeof signal_ids>;
 

@@ -29,6 +29,33 @@ xpack.features.overrides:
     category: "security"
     order: 1102
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
+  siemV4:
+    privileges:
+      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
+      ### Visualize features.
+      all.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "dashboard_v2"
+          privileges: [ "all" ]
+        - feature: "visualize_v2"
+          privileges: [ "all" ]
+        - feature: "maps_v2"
+          privileges: [ "all" ]
+      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
+      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
+      ### Dashboard, and Visualize apps.
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "dashboard_v2"
+          privileges: [ "read" ]
+        - feature: "visualize_v2"
+          privileges: [ "read" ]
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+
+  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siemV3:
     privileges:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
@@ -208,8 +235,7 @@ xpack.alerting.rules.run.ruleTypeOverrides:
 # Experimental Security Solution features
 
 # These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental:
-  - privilegedUserMonitoringDisabled
+xpack.securitySolution.enableExperimental: [riskScoreAssistantToolDisabled]
 
 # AI Assistant config
 aiAssistantManagementSelection.preferredAIAssistantType: 'security'

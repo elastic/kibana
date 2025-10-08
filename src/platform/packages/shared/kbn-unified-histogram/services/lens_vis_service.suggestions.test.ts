@@ -169,6 +169,44 @@ describe('LensVisService suggestions', () => {
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });
 
+  test('should return histogramSuggestion with FROM for a timeseries user query', async () => {
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'TS metrics*' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      timeRange: {
+        from: '2023-09-03T08:00:00.000Z',
+        to: '2023-09-04T08:56:28.274Z',
+      },
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      isPlainRecord: true,
+      allSuggestions: [],
+      isTransformationalESQL: false,
+    });
+
+    expect(lensVis.currentSuggestionContext?.type).toBe(
+      UnifiedHistogramSuggestionType.histogramForESQL
+    );
+    expect(lensVis.currentSuggestionContext?.suggestion).toBeDefined();
+
+    const histogramQuery = {
+      esql: `FROM metrics*
+| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp`,
+    };
+
+    expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
+  });
+
   test('should not return histogramSuggestion if no suggestions returned by the api and transformational commands', async () => {
     const lensVis = await getLensVisMock({
       filters: [],

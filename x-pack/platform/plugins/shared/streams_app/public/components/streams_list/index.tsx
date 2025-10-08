@@ -310,7 +310,11 @@ function StreamNode({
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="xs">
             {node.children.map((child, index) => (
-              <NestedView key={child.name} last={index === node.children.length - 1}>
+              <NestedView
+                key={child.name}
+                last={index === node.children.length - 1}
+                first={index === 0}
+              >
                 <StreamNode node={child} collapsed={collapsed} setCollapsed={setCollapsed} />
               </NestedView>
             ))}

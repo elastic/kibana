@@ -275,11 +275,74 @@ query.setParam('customParam', 'value');
 // Get all parameters
 const allParams = query.getParams();
 
+// Inline individual parameter
+query.inlineParam('customParam');
+
+// Inline all parameters (convert parameterized query to static query)
+query.inlineParams();
+
 // Access AST directly
 const ast = query.ast;
 ```
 
 ### Advanced Features
+
+#### Parameter Inlining
+
+The `.inlineParams()` method converts a parameterized query into a static query by replacing all parameter placeholders with their actual values directly in the query text:
+
+```ts
+// Create a parameterized query
+const query = esql`FROM logs | WHERE user == ${{ userName: 'admin' }} | LIMIT ${{ limit: 100 }}`;
+
+console.log(query.print());
+// FROM logs | WHERE user == ?userName | LIMIT ?limit
+
+console.log(query.getParams());
+// { userName: 'admin', limit: 100 }
+
+// Inline all parameters
+query.inlineParams();
+
+console.log(query.print());
+// FROM logs | WHERE user == "admin" | LIMIT 100
+
+console.log(query.getParams());
+// {} (empty - all parameters have been inlined)
+```
+
+**Inline Individual Parameters:**
+
+```ts
+// Inline specific parameters while keeping others parameterized
+const query = esql`FROM logs | WHERE user == ${{ userName: 'admin' }} AND level == ${{
+  level: 'error',
+}}`;
+
+query.inlineParam('userName'); // Inline only the userName parameter
+
+console.log(query.print());
+// FROM logs | WHERE user == "admin" AND level == ?level
+
+console.log(query.getParams());
+// { level: 'error' }
+```
+
+**Supported Parameter Types:**
+
+- `string` - Converted to string literals with proper escaping
+- `number` - Converted to numeric literals
+- `boolean` - Converted to boolean literals
+- Column names (when used with `??` param syntax)
+- Nested column name parts (both `?` and `??` param syntax)
+- Function names (both `?` and `??` param syntax)
+
+**Important Notes:**
+
+- Inlining is irreversible - parameters cannot be extracted back
+- The parameter map is cleared after inlining all parameters
+- Type validation ensures only supported types can be inlined
+- Special handling for column names and function identifiers
 
 #### Dynamic Query Construction
 
@@ -325,6 +388,9 @@ const query = esql`FROM ${sources}`;
 
 // Using convenience method
 const query = esql.from('logs-app1-*', 'logs-app2-*');
+
+// Using convenience method with metadata fields
+const query = esql.from(['logs-app1-*', 'logs-app2-*'], ['_id', '_index']);
 ```
 
 ### Column References

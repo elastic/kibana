@@ -37,7 +37,6 @@ import * as i18n from '../../rule_management_ui/components/rules_table/upgrade_p
 import { UpgradeFlyoutSubHeader } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/upgrade_flyout_subheader';
 import { CustomizationDisabledCallout } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/customization_disabled_callout';
 import { RuleUpgradeTab } from '../components/rule_details/three_way_diff';
-import { TabContentPadding } from '../../../siem_migrations/rules/components/rule_details_flyout';
 import { RuleTypeChangeCallout } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_type_change_callout';
 import { RuleDiffTab } from '../components/rule_details/rule_diff_tab';
 import type { RulePreviewFlyoutCloseReason } from '../../rule_management_ui/components/rules_table/use_rule_preview_flyout';
@@ -46,6 +45,7 @@ import type { UpgradePrebuiltRulesSortingOptions } from '../../rule_management_u
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../../rule_management_ui/components/rules_table/constants';
 import type { RulesConflictStats } from '../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/use_upgrade_with_conflicts_modal/conflicts_description';
 import { useKibana } from '../../../common/lib/kibana';
+import { TabContentPadding } from '../components/rule_details/rule_details_flyout';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
 

@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  aiAssistantManagementSelection: 6917
+  aiAssistantManagementSelection: 8988
   aiops: 19890
   alerting: 28395
   apm: 38573
@@ -11,7 +11,6 @@ pageLoadAssetSize:
   canvas: 15210
   cases: 153204
   charts: 40269
-  chatDataRegistry: 4162
   cloud: 9012
   cloudDataMigration: 5687
   cloudExperiments: 103984
@@ -29,8 +28,9 @@ pageLoadAssetSize:
   dashboardEnhanced: 12500
   dashboardMarkdown: 5134
   data: 453742
-  dataQuality: 10387
-  datasetQuality: 30094
+  dataQuality: 11469
+  datasetQuality: 49315
+  dataSourcesRegistry: 4162
   dataUsage: 8926
   dataViewEditor: 7735
   dataViewFieldEditor: 26024
@@ -38,7 +38,7 @@ pageLoadAssetSize:
   dataViews: 65000
   dataVisualizer: 29533
   devTools: 13451
-  discover: 25000
+  discover: 26000
   discoverEnhanced: 10290
   discoverShared: 2322
   elasticAssistant: 338870
@@ -47,9 +47,9 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6596
   embeddableEnhanced: 10332
   enterpriseSearch: 38494
-  esql: 12323
+  esql: 18000
   esqlDataGrid: 10209
-  esUiShared: 100338
+  esUiShared: 101220
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45177
@@ -68,7 +68,7 @@ pageLoadAssetSize:
   filesManagement: 5270
   fileUpload: 16910
   fleet: 187942
-  genAiSettings: 4981
+  genAiSettings: 5003
   globalSearch: 6890
   globalSearchBar: 26986
   globalSearchProviders: 4646
@@ -116,12 +116,12 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 15709
+  onechat: 17322
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
   presentationUtil: 9000
-  productDocBase: 3074
+  productDocBase: 3083
   productIntercept: 9860
   profiling: 20716
   reindexService: 3601
@@ -150,8 +150,8 @@ pageLoadAssetSize:
   searchSynonyms: 6371
   security: 79987
   securitySolution: 106289
-  securitySolutionEss: 34480
-  securitySolutionServerless: 49663
+  securitySolutionEss: 43319
+  securitySolutionServerless: 62964
   serverless: 10682
   serverlessChat: 5133
   serverlessObservability: 16307
@@ -162,10 +162,9 @@ pageLoadAssetSize:
   snapshotRestore: 28452
   spaces: 32135
   stackAlerts: 31499
-  stackConnectors: 67939
-  streams: 8494
-  streamsApp: 15200
-  streamsAppWrapper: 5787
+  stackConnectors: 68838
+  streams: 9000
+  streamsApp: 17000
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522
@@ -175,7 +174,7 @@ pageLoadAssetSize:
   uiActions: 24712
   uiActionsEnhanced: 20189
   unifiedDocViewer: 14513
-  unifiedSearch: 23000
+  unifiedSearch: 24000
   upgradeAssistant: 6898
   uptime: 48184
   urlDrilldown: 21563

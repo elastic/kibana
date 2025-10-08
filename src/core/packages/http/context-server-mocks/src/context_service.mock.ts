@@ -14,29 +14,29 @@ import type {
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
 import { contextMock } from './context_container.mock';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createPrebootContractMock = (mockContext = {}) => {
-  const prebootContract: jest.Mocked<InternalContextPreboot> = {
+  const prebootContract: jest.Mocked<InternalContextPreboot> = lazyObject({
     createContextContainer: jest.fn().mockImplementation(() => contextMock.create(mockContext)),
-  };
+  });
   return prebootContract;
 };
 
 const createSetupContractMock = (mockContext = {}) => {
-  const setupContract: jest.Mocked<InternalContextSetup> = {
+  const setupContract: jest.Mocked<InternalContextSetup> = lazyObject({
     createContextContainer: jest.fn().mockImplementation(() => contextMock.create(mockContext)),
-  };
+  });
   return setupContract;
 };
 
 type ContextServiceContract = PublicMethodsOf<ContextService>;
 const createMock = () => {
-  const mocked: jest.Mocked<ContextServiceContract> = {
-    preboot: jest.fn(),
-    setup: jest.fn(),
-  };
-  mocked.preboot.mockReturnValue(createPrebootContractMock());
-  mocked.setup.mockReturnValue(createSetupContractMock());
+  const mocked: jest.Mocked<ContextServiceContract> = lazyObject({
+    preboot: jest.fn().mockReturnValue(createPrebootContractMock()),
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
+  });
+
   return mocked;
 };
 

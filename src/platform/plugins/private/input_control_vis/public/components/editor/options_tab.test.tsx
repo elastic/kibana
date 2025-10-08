@@ -8,17 +8,24 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { OptionsTabProps } from './options_tab';
 import OptionsTab from './options_tab';
 
+const Wrapper = ({ children }: { children: React.ReactNode }) => (
+  <I18nProvider>{children}</I18nProvider>
+);
+
 describe('OptionsTab', () => {
   let props: OptionsTabProps;
+  let setValue: jest.MockedFunction<any>;
 
   beforeEach(() => {
+    setValue = jest.fn();
     props = {
       vis: {} as Vis,
       stateParams: {
@@ -26,46 +33,65 @@ describe('OptionsTab', () => {
         useTimeFilter: false,
         pinFilters: false,
       },
-      setValue: jest.fn(),
+      setValue,
     } as unknown as OptionsTabProps;
   });
 
   it('should renders OptionsTab', () => {
-    const component = shallow(<OptionsTab {...props} />);
+    const { container } = render(
+      <Wrapper>
+        <OptionsTab {...props} />
+      </Wrapper>
+    );
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
-  it('should update updateFiltersOnChange', () => {
-    const component = mountWithIntl(<OptionsTab {...props} />);
-    const checkbox = component.find(
-      '[data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"] button'
-    );
-    checkbox.simulate('click');
+  it('should update updateFiltersOnChange', async () => {
+    const user = userEvent.setup();
 
-    expect(props.setValue).toHaveBeenCalledTimes(1);
-    expect(props.setValue).toHaveBeenCalledWith('updateFiltersOnChange', true);
+    render(
+      <Wrapper>
+        <OptionsTab {...props} />
+      </Wrapper>
+    );
+
+    const checkbox = screen.getByTestId('inputControlEditorUpdateFiltersOnChangeCheckbox');
+    await user.click(checkbox);
+
+    expect(setValue).toHaveBeenCalledTimes(1);
+    expect(setValue).toHaveBeenCalledWith('updateFiltersOnChange', true);
   });
 
-  it('should update useTimeFilter', () => {
-    const component = mountWithIntl(<OptionsTab {...props} />);
-    const checkbox = component.find(
-      '[data-test-subj="inputControlEditorUseTimeFilterCheckbox"] button'
-    );
-    checkbox.simulate('click');
+  it('should update useTimeFilter', async () => {
+    const user = userEvent.setup();
 
-    expect(props.setValue).toHaveBeenCalledTimes(1);
-    expect(props.setValue).toHaveBeenCalledWith('useTimeFilter', true);
+    render(
+      <Wrapper>
+        <OptionsTab {...props} />
+      </Wrapper>
+    );
+
+    const checkbox = screen.getByTestId('inputControlEditorUseTimeFilterCheckbox');
+    await user.click(checkbox);
+
+    expect(setValue).toHaveBeenCalledTimes(1);
+    expect(setValue).toHaveBeenCalledWith('useTimeFilter', true);
   });
 
-  it('should update pinFilters', () => {
-    const component = mountWithIntl(<OptionsTab {...props} />);
-    const checkbox = component.find(
-      '[data-test-subj="inputControlEditorPinFiltersCheckbox"] button'
-    );
-    checkbox.simulate('click');
+  it('should update pinFilters', async () => {
+    const user = userEvent.setup();
 
-    expect(props.setValue).toHaveBeenCalledTimes(1);
-    expect(props.setValue).toHaveBeenCalledWith('pinFilters', true);
+    render(
+      <Wrapper>
+        <OptionsTab {...props} />
+      </Wrapper>
+    );
+
+    const checkbox = screen.getByTestId('inputControlEditorPinFiltersCheckbox');
+    await user.click(checkbox);
+
+    expect(setValue).toHaveBeenCalledTimes(1);
+    expect(setValue).toHaveBeenCalledWith('pinFilters', true);
   });
 });

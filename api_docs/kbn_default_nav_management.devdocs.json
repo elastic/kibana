@@ -96,7 +96,7 @@
         "label": "NavigationID",
         "description": [],
         "signature": [
-          "\"ingest\" | \"kibana\" | \"data\" | \"root\" | \"rootNav:management\" | \"integration_management\" | \"stack_management\" | \"alerts_and_insights\" | \"ai\""
+          "\"ingest\" | \"kibana\" | \"data\" | \"root\" | \"stack_management\" | \"rootNav:management\" | \"integration_management\" | \"alerts_and_insights\" | \"ai\""
         ],
         "path": "src/platform/packages/private/default-nav/management/default_navigation.ts",
         "deprecated": false,

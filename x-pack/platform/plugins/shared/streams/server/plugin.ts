@@ -15,7 +15,6 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -34,7 +33,7 @@ import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
 import { QueryService } from './lib/streams/assets/query/query_service';
 import { StreamsService } from './lib/streams/service';
-import { StreamsTelemetryService } from './lib/telemetry/service';
+import { EbtTelemetryService, StatsTelemetryService } from './lib/telemetry';
 import { streamsRouteRepository } from './routes';
 import type { RouteHandlerScopedClients } from './routes/types';
 import type {
@@ -68,7 +67,8 @@ export class StreamsPlugin
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
-  private telemetryService = new StreamsTelemetryService();
+  private ebtTelemetryService = new EbtTelemetryService();
+  private statsTelemetryService = new StatsTelemetryService();
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -85,7 +85,12 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
-    this.telemetryService.setup(core.analytics);
+    this.ebtTelemetryService.setup(core.analytics);
+    this.statsTelemetryService.setup(
+      core,
+      this.logger.get('streams-stats-telemetry'),
+      plugins.usageCollection
+    );
 
     const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
       ruleTypeId,
@@ -106,8 +111,7 @@ export class StreamsPlugin
         defaultMessage: 'Streams',
       }),
       order: 600,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      category: DEFAULT_APP_CATEGORIES.management,
       app: [STREAMS_FEATURE_ID],
       privilegesTooltip: i18n.translate('xpack.streams.featureRegistry.privilegesTooltip', {
         defaultMessage: 'All Spaces is required for Streams access.',
@@ -161,7 +165,7 @@ export class StreamsPlugin
         assets: assetService,
         systems: systemService,
         server: this.server,
-        telemetry: this.telemetryService.getClient(),
+        telemetry: this.ebtTelemetryService.getClient(),
         getScopedClients: async ({
           request,
         }: {

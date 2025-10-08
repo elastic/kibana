@@ -26,6 +26,7 @@ import {
   INITIAL_REST_VERSION,
   GET_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
+import { toApiSpec } from './util/to_api_spec';
 
 interface GetDataViewArgs {
   dataViewsService: DataViewsService;
@@ -113,7 +114,7 @@ const getDataViewRouteFactory =
 
             const responseBody: Record<string, DataViewSpecRestResponse> = {
               [serviceKey]: {
-                ...(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
+                ...toApiSpec(await dataView.toSpec({ fieldParams: { fieldName: ['*'] } })),
                 namespaces: dataView.namespaces,
               },
             };

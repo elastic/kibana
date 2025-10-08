@@ -12,6 +12,7 @@ import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import { getActPrompt } from './prompts';
 
 const StateAnnotation = Annotation.Root({
@@ -33,13 +34,13 @@ export const createAgentGraph = ({
   chatModel,
   tools,
   customInstructions,
-  noPrompt,
+  capabilities,
   logger,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
+  capabilities: ResolvedAgentCapabilities;
   customInstructions?: string;
-  noPrompt?: boolean;
   logger: Logger;
 }) => {
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
@@ -50,12 +51,11 @@ export const createAgentGraph = ({
 
   const callModel = async (state: StateType) => {
     const response = await model.invoke(
-      noPrompt
-        ? [...state.initialMessages, ...state.addedMessages]
-        : getActPrompt({
-            customInstructions,
-            messages: [...state.initialMessages, ...state.addedMessages],
-          })
+      getActPrompt({
+        customInstructions,
+        capabilities,
+        messages: [...state.initialMessages, ...state.addedMessages],
+      })
     );
     return {
       addedMessages: [response],

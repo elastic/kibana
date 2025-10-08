@@ -46,13 +46,12 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-
+import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
@@ -176,6 +175,7 @@ export interface FleetStartDeps {
   savedObjectsTagging: SavedObjectTaggingStart;
   taskManager: TaskManagerStartContract;
   spaces: SpacesPluginStart;
+  alerting: AlertingServerStart;
 }
 
 export interface FleetAppContext {
@@ -213,6 +213,7 @@ export interface FleetAppContext {
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
   lockManagerService?: LockManagerService;
+  alertingStart?: AlertingServerStart;
 }
 
 export type FleetSetupContract = void;
@@ -368,7 +369,6 @@ export class FleetPlugin
         id: `fleetv2`,
         name: 'Fleet',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [PLUGIN_ID],
         catalogue: ['fleet'],
         reserved: {
@@ -523,7 +523,6 @@ export class FleetPlugin
         id: 'fleet', // for BWC
         name: 'Integrations',
         category: DEFAULT_APP_CATEGORIES.management,
-        scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
         privileges: {
@@ -714,12 +713,14 @@ export class FleetPlugin
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
     this.spacesPluginsStart = plugins.spaces;
+
     const messageSigningService = new MessageSigningService(
       this.initializerContext.logger,
       plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
       })
     );
+
     const uninstallTokenService = new UninstallTokenService(
       plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
@@ -762,6 +763,7 @@ export class FleetPlugin
       lockManagerService: this.lockManagerService,
       autoInstallContentPackagesTask: this.autoInstallContentPackagesTask!,
       agentStatusChangeTask: this.agentStatusChangeTask,
+      alertingStart: plugins.alerting,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});

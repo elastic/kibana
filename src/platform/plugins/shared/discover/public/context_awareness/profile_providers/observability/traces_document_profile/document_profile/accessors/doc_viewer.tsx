@@ -21,7 +21,7 @@ export const createGetDocViewer =
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
     const tabTitle = i18n.translate('discover.docViews.observability.traces.overview.title', {
-      defaultMessage: 'Overview',
+      defaultMessage: 'Trace Overview',
     });
     return {
       ...prevDocViewer,

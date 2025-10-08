@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, emptyAssets } from '@kbn/streams-schema';
 import type {
   IngestStreamSettings,
   WiredIngestStreamEffectiveSettings,
@@ -35,9 +35,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     settings: IngestStreamSettings
   ) {
     const request = {
-      dashboards: [],
-      queries: [],
-      rules: [],
+      ...emptyAssets,
       stream: {
         description: '',
         ingest: {
@@ -97,9 +95,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('inherits settings', async () => {
         await putStream(apiClient, 'logs.foo.bar', {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -127,9 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('allows local overrides', async () => {
         await putStream(apiClient, 'logs.override', {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {
@@ -161,9 +155,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       if (!isServerless) {
         it('allows all settings', async () => {
           await putStream(apiClient, 'logs.allsettings', {
-            dashboards: [],
-            queries: [],
-            rules: [],
+            ...emptyAssets,
             stream: {
               description: '',
               ingest: {
@@ -236,9 +228,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       async function upsertClassicStream(settings: IngestStreamSettings) {
         await putStream(apiClient, name, {
-          dashboards: [],
-          queries: [],
-          rules: [],
+          ...emptyAssets,
           stream: {
             description: '',
             ingest: {

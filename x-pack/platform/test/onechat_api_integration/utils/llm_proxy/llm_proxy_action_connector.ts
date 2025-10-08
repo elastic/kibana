@@ -16,7 +16,7 @@ export async function createLlmProxyActionConnector(
   const logger = getService('log');
 
   const internalReqHeader = samlAuth.getInternalRequestHeader();
-  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
   try {
     const res = await supertestWithoutAuth
@@ -52,7 +52,7 @@ export async function deleteActionConnector(
   const samlAuth = getService('samlAuth');
 
   const internalReqHeader = samlAuth.getInternalRequestHeader();
-  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+  const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
   return supertestWithoutAuth
     .delete(`/api/actions/connector/${actionId}`)
     .set(roleAuthc.apiKeyHeader)

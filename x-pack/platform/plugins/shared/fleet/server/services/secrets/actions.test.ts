@@ -45,6 +45,7 @@ describe('Action Secrets', () => {
       user_info: {
         password: 'password1',
       },
+      enrollment_token: 'enrollment_token1',
     },
   };
 
@@ -62,14 +63,26 @@ describe('Action Secrets', () => {
               id: expect.any(String),
             },
           },
+          enrollment_token: {
+            id: expect.any(String),
+          },
         },
       });
-      expect(res.secretReferences).toEqual([{ id: expect.anything() }]);
+      expect(res.secretReferences).toEqual([{ id: expect.anything() }, { id: expect.anything() }]);
       expect(esClientMock.transport.request.mock.calls).toEqual([
         [
           {
             body: {
               value: 'password1',
+            },
+            method: 'POST',
+            path: '/_fleet/secret',
+          },
+        ],
+        [
+          {
+            body: {
+              value: 'enrollment_token1',
             },
             method: 'POST',
             path: '/_fleet/secret',
@@ -89,6 +102,9 @@ describe('Action Secrets', () => {
               id: '7jCKYZUBBY96FE7DX6L1',
             },
           },
+          enrollment_token: {
+            id: '7jCKYZUBBY96FE7DX6L2',
+          },
         },
       } as any;
       await deleteActionSecrets({
@@ -100,6 +116,12 @@ describe('Action Secrets', () => {
           {
             method: 'DELETE',
             path: '/_fleet/secret/7jCKYZUBBY96FE7DX6L1',
+          },
+        ],
+        [
+          {
+            method: 'DELETE',
+            path: '/_fleet/secret/7jCKYZUBBY96FE7DX6L2',
           },
         ],
       ]);

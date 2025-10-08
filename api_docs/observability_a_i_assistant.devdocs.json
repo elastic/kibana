@@ -5397,6 +5397,31 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.isConnectorSelectionRestricted",
+            "type": "boolean",
+            "tags": [],
+            "label": "isConnectorSelectionRestricted",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAIAssistant",
+            "id": "def-public.UseGenAIConnectorsResult.defaultConnector",
+            "type": "string",
+            "tags": [],
+            "label": "defaultConnector",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5561,21 +5586,6 @@
         "description": [],
         "signature": [
           "\"observability:logSources\""
-        ],
-        "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAIAssistant",
-        "id": "def-public.aiAssistantPreferredAIAssistantType",
-        "type": "string",
-        "tags": [],
-        "label": "aiAssistantPreferredAIAssistantType",
-        "description": [],
-        "signature": [
-          "\"aiAssistant:preferredAIAssistantType\""
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
@@ -8856,7 +8866,7 @@
                         "section": "def-server.Connector",
                         "text": "Connector"
                       },
-                      "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
+                      "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
                       "ActionsConfigurationUtilities",
                       ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; bulkEnqueueExecution: (options: ",
                       "ExecuteOptions",

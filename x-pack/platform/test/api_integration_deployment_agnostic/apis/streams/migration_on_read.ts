@@ -54,7 +54,7 @@ const migratedProcessing = {
         {
           set: {
             field: 'message',
-            if: "\n  def relevant_fields = [:];\n  \nrelevant_fields['message'] = ctx['message'];\n\n  \n  try {\n  if ((relevant_fields['message'] !== null && ((relevant_fields['message'] instanceof Number && relevant_fields['message'].toString() == \"oldValue\") || relevant_fields['message'] == \"oldValue\"))) {\n    return true;\n  }\n  return false;\n} catch (Exception e) {\n  return false;\n}\n",
+            if: "\n  try {\n  if (($('message', null) !== null && (($('message', null) instanceof Number && $('message', null).toString() == \"oldValue\") || $('message', null) == \"oldValue\"))) {\n    return true;\n  }\n  return false;\n} catch (Exception e) {\n  return false;\n}\n",
             value: 'newValue',
           },
         },
