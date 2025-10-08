@@ -10,6 +10,7 @@ import { set } from '@kbn/safer-lodash-set/fp';
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 import type { Filter, MatchAllFilter } from '@kbn/es-query';
+import { v4 as uuidv4 } from 'uuid';
 import {
   isScriptedRangeFilter,
   isExistsFilter,
@@ -66,6 +67,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
     const timeline = selectTimelineById(storeState, localTimelineId);
     const { timelineId, timelineVersion, templateTimelineId, templateTimelineVersion } =
       extractTimelineIdsAndVersions(timeline);
+
     const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
     const selectedDataViewIdSourcerer = sourcererSelectors.sourcererScopeSelectedDataViewId(
       storeState,
@@ -345,10 +347,20 @@ function extractTimelineIdsAndVersions(timeline: TimelineModel) {
   // When a timeline hasn't been saved yet, its `savedObectId` is not defined.
   // In that case, we want to overwrite all locally created properties for the
   // timeline id, the timeline template id and the timeline template version.
+  //
+
+  let templateTimelineId = timeline.savedObjectId ? timeline.templateTimelineId : null;
+
+  // if not templateTimelineId is given and we know that the timelineType is `template`,
+  // we should generate one to handle template duplicate case
+  if (!templateTimelineId && timeline.timelineType === 'template') {
+    templateTimelineId = uuidv4();
+  }
+
   return {
     timelineId: timeline.savedObjectId ?? null,
     timelineVersion: timeline.version,
-    templateTimelineId: timeline.savedObjectId ? timeline.templateTimelineId : null,
+    templateTimelineId,
     templateTimelineVersion: timeline.savedObjectId ? timeline.templateTimelineVersion : null,
   };
 }
