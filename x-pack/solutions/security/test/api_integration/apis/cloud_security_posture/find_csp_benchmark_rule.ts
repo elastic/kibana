@@ -10,6 +10,7 @@ import type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-common/schema/rules/v3';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -233,14 +234,4 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
   });
-}
-function createPackagePolicy(
-  supertest: Agent,
-  agentPolicyId: string,
-  arg2: string,
-  arg3: string,
-  arg4: string,
-  arg5: string
-) {
-  throw new Error('Function not implemented.');
 }

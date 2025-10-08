@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import type { GetBenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types/benchmarks/v1';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { createPackagePolicy } from '../../../../serverless/api_integration/test_suites/cloud_security_posture/helper';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
