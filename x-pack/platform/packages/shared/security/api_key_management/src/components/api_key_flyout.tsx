@@ -702,7 +702,11 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       />
                     }
                     helpText={
-                      <EuiLink href={docLinks.apis.createCrossClusterApiKey} target="_blank" external>
+                      <EuiLink
+                        href={docLinks.apis.createCrossClusterApiKey}
+                        target="_blank"
+                        external
+                      >
                         <FormattedMessage
                           id="xpack.security.accountManagement.apiKeyFlyout.accessHelpText"
                           defaultMessage="Learn how to structure access permissions."
