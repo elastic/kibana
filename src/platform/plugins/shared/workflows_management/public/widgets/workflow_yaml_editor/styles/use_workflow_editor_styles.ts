@@ -14,7 +14,6 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 /**
  * Hook that provides memoized CSS styles for the workflow YAML editor component
- * Extracted from the main component's componentStyles to improve maintainability
  */
 export const useWorkflowEditorStyles = () => {
   return useMemoCss({
@@ -30,7 +29,7 @@ export const useWorkflowEditorStyles = () => {
         position: 'relative',
         minHeight: 0,
 
-        // Template variable styling
+        // Template variables decorations
         '.template-variable-valid': {
           backgroundColor: transparentize(euiTheme.colors.primary, 0.12),
           borderRadius: '2px',
@@ -45,11 +44,13 @@ export const useWorkflowEditorStyles = () => {
           borderRadius: '2px',
         },
 
-        // General utility classes
+        // After text (shadow) decorations
         '.after-text': {
           paddingInlineStart: '10px',
           color: euiTheme.colors.textDisabled,
         },
+
+        // Step highlighting decorations
         '.step-highlight': {
           backgroundColor: euiTheme.colors.backgroundBaseAccent,
           borderRadius: '2px',
@@ -153,17 +154,16 @@ export const useWorkflowEditorStyles = () => {
       zIndex: 2, // to overlay the editor flying action buttons
     }),
 
-    stepActionsContainer: ({ euiTheme }: UseEuiTheme) =>
-      css({
-        position: 'absolute',
-        zIndex: 1002, // Above the highlighting and pseudo-element
-      }),
+    stepActionsContainer: css({
+      position: 'absolute',
+      zIndex: 1002, // Above the highlighting and pseudo-element
+    }),
 
     downloadSchemaButton: ({ euiTheme }: UseEuiTheme) =>
       css({
         color: euiTheme.colors.textSubdued,
         '&:hover': {
-          color: euiTheme.colors.primaryText,
+          color: euiTheme.colors.textPrimary,
         },
         '&:hover:not(:disabled)::before': {
           backgroundColor: 'transparent',
