@@ -226,7 +226,7 @@ describe('Agent migration', () => {
       );
     });
 
-  it('should throw FleetUnauthorizedError when license is insufficient', async () => {
+    it('should throw FleetUnauthorizedError when license is insufficient', async () => {
       // Mock license as not having the required level
       mockLicenseService.hasAtLeast.mockReturnValue(false);
 
@@ -253,7 +253,13 @@ describe('Agent migration', () => {
     });
 
     it('should throw an error if the agent is containerized', async () => {
-     await expect(
+      const agentId = 'agent-123';
+      const options = {
+        policyId: 'policy-456',
+        enrollment_token: 'test-enrollment-token',
+        uri: 'https://test-fleet-server.example.com',
+      };
+      await expect(
         migrateSingleAgent(
           esClientMock,
           soClientMock,
@@ -273,7 +279,7 @@ describe('Agent migration', () => {
           options
         )
       ).rejects.toThrowError('Containerized agents cannot be migrated');
-    };
+    });
 
     it('should proceed normally when license is sufficient', async () => {
       // Ensure license is valid (default mock)
@@ -436,7 +442,6 @@ describe('Agent migration', () => {
       );
     });
 
-
     it('should throw FleetUnauthorizedError when license is insufficient', async () => {
       // Mock license as not having the required level
       mockLicenseService.hasAtLeast.mockReturnValue(false);
@@ -459,8 +464,8 @@ describe('Agent migration', () => {
       // Verify that getAgents was not called when license is insufficient
       expect(getAgents as jest.Mock).not.toHaveBeenCalled();
     });
-    
- it('should record error result if the agent is containerized', async () => {
+
+    it('should record error result if the agent is containerized', async () => {
       const agent = {
         ...mockedAgent,
         local_metadata: {
@@ -491,7 +496,7 @@ describe('Agent migration', () => {
         },
         'agent does not support migration action'
       );
- });
+    });
     it('should proceed normally when license is sufficient', async () => {
       // Ensure license is valid (default mock)
       mockLicenseService.hasAtLeast.mockReturnValue(true);
