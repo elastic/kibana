@@ -77,7 +77,7 @@ export const exploreIndices = ({
 
     // Transform the response to match our state structure
     const discoveredResources = response.resources.map((resource) => ({
-      type: resource.type as 'index' | 'alias' | 'datastream',
+      type: resource.type as 'index' | 'alias' | 'data_stream',
       name: resource.name,
       reason: resource.reason,
     }));

@@ -6,14 +6,14 @@
  */
 
 import { Command } from '@langchain/langgraph';
-import type { EnhancedIndexExplorerAnnotation, IndexResource } from '../../state';
+import type { EnhancedIndexExplorerAnnotation } from '../../state';
 
 export const bridgeShortlistToAnalyzed = () => {
   return async (state: typeof EnhancedIndexExplorerAnnotation.State) => {
     const { shortlistedIndexPatterns, discoveredResources } = state;
 
     // If no shortlisted patterns, return empty array
-    if (!shortlistedIndexPatterns || shortlistedIndexPatterns.length === 0) {
+    if (shortlistedIndexPatterns.length === 0) {
       return new Command({
         update: {
           analyzedResources: [],
@@ -22,7 +22,7 @@ export const bridgeShortlistToAnalyzed = () => {
     }
 
     // Filter discovered resources to only include shortlisted ones
-    const analyzedResources: IndexResource[] = (discoveredResources || []).filter((resource) =>
+    const analyzedResources = (discoveredResources || []).filter((resource) =>
       shortlistedIndexPatterns.includes(resource.name)
     );
 

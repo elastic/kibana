@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { EnhancedIndexExplorerAnnotation, IndexResource } from '../../state';
+import type { EnhancedIndexExplorerAnnotation } from '../../state';
 
 export const selectBestIndices = ({ logger }: { logger: Logger }) => {
   return async (state: typeof EnhancedIndexExplorerAnnotation.State) => {
@@ -23,7 +23,7 @@ export const selectBestIndices = ({ logger }: { logger: Logger }) => {
     const primaryResource = sortedResources[0];
     const alternativeResources = sortedResources.slice(1, 3);
 
-    const selectedResources: IndexResource[] = [primaryResource, ...alternativeResources];
+    const selectedResources = [primaryResource, ...alternativeResources];
 
     logger.debug(
       `Selected primary index: ${primaryResource.name} (score: ${primaryResource.relevanceScore})`

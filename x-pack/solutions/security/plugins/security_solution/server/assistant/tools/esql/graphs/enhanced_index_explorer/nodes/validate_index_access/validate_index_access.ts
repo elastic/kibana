@@ -16,7 +16,7 @@ export const validateIndexAccess = ({ esClient }: { esClient: ElasticsearchClien
     }
 
     // Validate access to each selected resource
-    const validatedResources: IndexResource[] = [];
+    const accessibleResources: IndexResource[] = [];
 
     for (const resource of selectedResources) {
       try {
@@ -26,21 +26,14 @@ export const validateIndexAccess = ({ esClient }: { esClient: ElasticsearchClien
           ignore_unavailable: true,
         });
 
-        validatedResources.push({
+        accessibleResources.push({
           ...resource,
           isAccessible: true,
         });
       } catch (error) {
-        // If we can't access the index, mark it as inaccessible
-        validatedResources.push({
-          ...resource,
-          isAccessible: false,
-        });
+        // Ignore inaccessible indices
       }
     }
-
-    // Filter out inaccessible resources and update the final recommendation
-    const accessibleResources = validatedResources.filter((resource) => resource.isAccessible);
 
     let finalRecommendation = state.finalRecommendation;
     if (finalRecommendation && accessibleResources.length > 0) {

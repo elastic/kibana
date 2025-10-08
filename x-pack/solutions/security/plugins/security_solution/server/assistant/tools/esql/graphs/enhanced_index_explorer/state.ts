@@ -9,7 +9,7 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 
 export interface IndexResource {
-  type: 'index' | 'alias' | 'datastream';
+  type: 'index' | 'alias' | 'data_stream';
   name: string;
   reason: string;
   relevanceScore?: number;
