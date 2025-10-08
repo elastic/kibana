@@ -17,7 +17,7 @@ import { shouldRunSourceMigrationFactory } from '../data_sources/migrations/chec
 
 export const MAX_PER_PAGE = 10_000;
 
-export const updatePrivilegedMonitoringEntitySource = async ({
+export const updatePrivilegedMonitoringSourceIndex = async ({
   logger,
   getStartServices,
 }: EntityAnalyticsMigrationsParams) => {
