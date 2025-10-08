@@ -69,7 +69,7 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
     });
   }
 
-  const dimensionTypeMap = new Map(metricDimensions.map((dim) => [dim.name, dim.type]));
+  const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
 
   const unfilteredDimensions = (dimensions ?? []).filter((dim) => !valuesByField.has(dim));
   const queryPipeline = source.pipe(
@@ -82,13 +82,13 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
         instrument,
         placeholderName: 'metricField',
       })} BY ${createTimeBucketAggregation({})}${
-        dimensions.length > 0 ? `, ${dimensions.join(',')}` : ''
+        (dimensions ?? []).length > 0 ? `, ${dimensions.join(',')}` : ''
       }`,
       {
         metricField,
       }
     ),
-    ...(dimensions.length > 0
+    ...((dimensions ?? []).length > 0
       ? dimensions.length === 1
         ? [rename(`??dim as ${DIMENSIONS_COLUMN}`, { dim: dimensions[0] })]
         : [
