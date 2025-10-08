@@ -98,9 +98,9 @@ export class SecuritySolutionServerlessPlugin
         .getStartServices()
         .then(async ([coreStart, depsStart]) => {
           const isNewDefaultConnectorEnabled = await coreStart.featureFlags.getBooleanValue(
-          AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-          false
-        );
+            AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
+            false
+          );
 
           try {
             const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
@@ -108,7 +108,10 @@ export class SecuritySolutionServerlessPlugin
             const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
               (connector: Connector) => isSupportedConnector(connector)
             );
-            const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors, isNewDefaultConnectorEnabled ? 'ui' : undefined);
+            const defaultAIConnectorSetting = getDefaultAIConnectorSetting(
+              aiConnectors,
+              isNewDefaultConnectorEnabled ? 'ui' : undefined
+            );
             if (defaultAIConnectorSetting !== null) {
               coreSetup.uiSettings.register(defaultAIConnectorSetting);
             }
