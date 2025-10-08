@@ -40,7 +40,7 @@ export function NoSystemsEmptyState({
       <EuiText size="s" textAlign="center" css={{ maxWidth: 480 }}>
         {i18n.translate('xpack.streams.significantEvents.noSystems.description', {
           defaultMessage:
-            'Stream identification generates logical subsets of the data in that stream. This is useful for generating better significant events.',
+            'Feature identification generates logical subsets of the data in that stream. This is useful for generating better significant events.',
         })}
       </EuiText>
       <EuiFlexGroup direction="row" gutterSize="s">
