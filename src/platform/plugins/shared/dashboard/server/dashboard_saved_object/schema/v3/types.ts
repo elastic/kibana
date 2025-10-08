@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { controlsGroupSchema } from '@kbn/controls-schemas';
+import type { LegacyIgnoreParentSettings, controlsGroupSchema } from '@kbn/controls-schemas';
 import type { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
 import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
 
@@ -46,10 +46,5 @@ export type StoredControlGroupInput = Omit<
   'panelsJSON' | 'ignoreParentSettingsJSON'
 > & {
   panels: { [key: string]: Omit<StoredControlState, 'id'> };
-  ignoreParentSettings: {
-    ignoreFilters?: boolean;
-    ignoreQuery?: boolean;
-    ignoreTimerange?: boolean;
-    ignoreValidations?: boolean;
-  };
+  ignoreParentSettings: LegacyIgnoreParentSettings;
 };

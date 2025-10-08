@@ -10,7 +10,12 @@
 import type { Observable } from 'rxjs';
 
 import type { ControlsRendererParentApi } from '@kbn/controls-renderer';
-import type { DataControlState, StickyControlState, TimeSlice } from '@kbn/controls-schemas';
+import type {
+  DataControlState,
+  LegacyIgnoreParentSettings,
+  StickyControlState,
+  TimeSlice,
+} from '@kbn/controls-schemas';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { PublishesESQLVariables } from '@kbn/esql-types';
 import type { AppliesFilters, PublishingSubject } from '@kbn/presentation-publishing';
@@ -92,7 +97,7 @@ export type FieldFilterPredicate = (f: DataViewField) => boolean;
 
 export interface ControlGroupRuntimeState<State extends StickyControlState = StickyControlState> {
   initialChildControlState: ControlPanelsState<State>;
-  ignoreParentSettings?: StoredControlGroupInput['ignoreParentSettings']; // these will be translated to panel-level settings
+  ignoreParentSettings?: LegacyIgnoreParentSettings; // these will be translated to panel-level settings
 }
 
 export interface ControlGroupCreationOptions {

@@ -46,3 +46,11 @@ export type TimeSlice = [number, number];
 export interface HasCustomPrepend {
   CustomPrependComponent: React.FC<{}>;
 }
+
+// This value only exists for control saved objects prior to version 9.3
+export interface LegacyIgnoreParentSettings {
+  ignoreFilters?: boolean;
+  ignoreQuery?: boolean;
+  ignoreTimerange?: boolean;
+  ignoreValidations?: boolean;
+}
