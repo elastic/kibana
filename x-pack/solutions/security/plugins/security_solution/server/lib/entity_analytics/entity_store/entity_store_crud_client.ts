@@ -80,9 +80,11 @@ export class EntityStoreCrudClient {
 
       const normalizedDocToECS = normalizeToECS(record);
       const flatProps = getFlattenedObject(normalizedDocToECS);
+      const entityTypeDescription = engineDescriptionRegistry[type];
+      const fieldDescriptions = getFieldDescriptions(flatProps, entityTypeDescription);
 
       if (!force) {
-        assertOnlyNonForcedAttributesInReq(flatProps);
+        assertOnlyNonForcedAttributesInReq(fieldDescriptions);
       }
 
       docs[type].push({ create: {} }, buildDocumentToUpdate(type, normalizedDocToECS));

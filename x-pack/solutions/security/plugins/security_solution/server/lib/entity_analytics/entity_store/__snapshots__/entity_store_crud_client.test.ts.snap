@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EntityStoreCrudClient update entities bulk when valid update entities 1`] = `
+exports[`EntityStoreCrudClient update entities bulk when valid create entities 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -125,7 +125,7 @@ exports[`EntityStoreCrudClient update entities bulk when valid update entities 1
 }
 `;
 
-exports[`EntityStoreCrudClient update entities bulk when valid update entity using force 1`] = `
+exports[`EntityStoreCrudClient update entities bulk when valid create entity using force 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [

@@ -568,14 +568,14 @@ describe('EntityStoreCrudClient', () => {
             },
           },
           {
-            type: 'host',
+            type: 'user',
             record: brokenRecord,
           },
         ])
       ).rejects.toThrow(
         new BadCRUDRequestError(
           `The following attributes are not allowed to be ` +
-            `updated without forcing it (?force=true): user.name, user.id, entity.type, entity.sub_type`
+            `updated without forcing it (?force=true): user.id, entity.type, entity.sub_type`
         )
       );
     });
