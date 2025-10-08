@@ -9,12 +9,12 @@ import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
 import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
+import { scenarios } from '../../utils/proxy_scenario';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
 import { createOneChatApiClient } from '../../utils/one_chat_client';
-import { toolCallMock } from '../../utils/llm_proxy/mocks';
 import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
 
 export default function ({ getService }: OneChatFtrProviderContext) {
@@ -43,12 +43,11 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       let body: ChatResponse;
 
       before(async () => {
-        void llmProxy.interceptors.toolChoice({
-          name: 'set_title',
-          response: toolCallMock('set_title', { title: MOCKED_LLM_TITLE }),
+        await scenarios.directAnswer({
+          proxy: llmProxy,
+          title: MOCKED_LLM_TITLE,
+          response: MOCKED_LLM_RESPONSE,
         });
-
-        void llmProxy.interceptors.userMessage({ response: MOCKED_LLM_RESPONSE });
 
         body = await oneChatApiClient.converse({
           input: 'Hello OneChat',

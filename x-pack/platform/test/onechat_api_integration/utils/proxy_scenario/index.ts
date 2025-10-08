@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { createLlmProxy, type LlmProxy } from './proxy';
-export { createToolCallMessage } from './mocks';
+import { directAnswer, callSearchToolWithEsqlThenAnswer } from './scenarios';
+
+export const scenarios = {
+  directAnswer,
+  callSearchToolWithEsqlThenAnswer,
+};
