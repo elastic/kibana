@@ -249,12 +249,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportEntryButton);
         await testSubjects.exists(ui.pages.kbManagementTab.bulkImportFlyout);
         await testSubjects.exists(ui.pages.kbManagementTab.bulkImportSaveButton);
-        // Wait for the file picker input to be present in the DOM
-        await retry.waitFor('file picker input to be rendered', async () => {
-          const flyout = await testSubjects.find(ui.pages.kbManagementTab.bulkImportFlyout);
-          const inputs = await flyout.findAllByCssSelector('.euiFilePicker__input');
-          return inputs.length > 0;
-        });
+        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportFilePicker);
       }
 
       async function uploadBulkImportFile(content: string) {
@@ -263,11 +258,10 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         log.debug(`File saved to: ${tempFilePath}`);
 
         try {
-          const flyout = await testSubjects.find(ui.pages.kbManagementTab.bulkImportFlyout);
-          const input = await flyout.findByCssSelector('.euiFilePicker__input');
-          await input.type(tempFilePath);
+          const filePicker = await testSubjects.find(ui.pages.kbManagementTab.bulkImportFilePicker);
+          await filePicker.type(tempFilePath);
           await retry.waitFor('file input value to be set after typing path', async () => {
-            const value = await input.getAttribute('value');
+            const value = await filePicker.getAttribute('value');
             return Boolean(value);
           });
           await testSubjects.waitForEnabled(ui.pages.kbManagementTab.bulkImportSaveButton);
