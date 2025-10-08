@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './anomaly/anomaly_swimlane';
+export * from './anomaly_swimlane/anomaly_swimlane';
 export * from './common/serialized_titles';

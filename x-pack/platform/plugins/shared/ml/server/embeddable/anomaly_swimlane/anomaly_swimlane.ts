@@ -29,7 +29,7 @@ const anomalySwimlaneEmbeddableUserInputSchema = schema.object({
 const { panelTitle, ...baseUserInputProps } =
   anomalySwimlaneEmbeddableUserInputSchema.getPropSchemas();
 
-const anomalySwimlaneEmbeddableCustomInputSchema = schema.object({
+export const anomalySwimlaneEmbeddableCustomInputSchema = schema.object({
   ...baseUserInputProps,
   id: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),

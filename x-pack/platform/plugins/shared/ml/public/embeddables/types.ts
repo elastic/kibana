@@ -22,6 +22,7 @@ import type {
   PublishesDataViews,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
+import type { TypeOf } from '@kbn/config-schema/src/types';
 import { type BehaviorSubject } from 'rxjs';
 import type { SeverityThreshold } from '../../common/types/anomalies';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
@@ -43,6 +44,7 @@ import type {
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
+import type { anomalySwimlaneEmbeddableCustomInputSchema } from '../../server/embeddable/schemas';
 
 export type {
   AnomalySwimLaneEmbeddableState,
@@ -66,17 +68,9 @@ export interface AnomalySwimlaneEmbeddableUserInput {
   viewBy?: string;
 }
 
-export interface AnomalySwimlaneEmbeddableCustomInput
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  perPage?: number;
-
-  // Embeddable inputs which are not included in the default interface
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange?: TimeRange;
-}
+export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
+  typeof anomalySwimlaneEmbeddableCustomInputSchema
+>;
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;
