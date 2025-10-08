@@ -87,6 +87,7 @@ export type {
   EncryptedObjectDescriptor,
 } from './src/extensions/encryption';
 export type {
+  AuthorizeObject,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
@@ -112,6 +113,8 @@ export type {
   AuthorizeUpdateSpacesParams,
   AuthorizeFindParams,
   WithAuditName,
+  AuthorizeChangeAccessControlParams,
+  SetAccessControlToWriteParams,
 } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';
@@ -152,6 +155,7 @@ export type {
 // We re-export the SavedObject types here for convenience.
 export type {
   SavedObject,
+  SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,

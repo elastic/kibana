@@ -23,8 +23,28 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   private readonly types = new Map<string, SavedObjectsType>();
   private readonly legacyTypesMap: Set<string>;
 
+  private accessControlEnabled: boolean = true;
+
   constructor({ legacyTypes = [] }: SavedObjectTypeRegistryConfig = {}) {
     this.legacyTypesMap = new Set(legacyTypes);
+  }
+
+  /**
+   * Sets whether access control is enabled
+   *
+   * @internal
+   */
+  public setAccessControlEnabled(enabled: boolean) {
+    this.accessControlEnabled = enabled;
+  }
+
+  /**
+   * Gets whether access control is enabled
+   *
+   * @internal
+   */
+  public isAccessControlEnabled() {
+    return this.accessControlEnabled;
   }
 
   /**
@@ -42,11 +62,15 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
         `Type '${type.name}' can't be used because it's been added to the legacy types`
       );
     }
+    const supportsAccessControl = this.accessControlEnabled ? type.supportsAccessControl : false;
+    const typeWithAccessControl = { ...type, supportsAccessControl };
+
     validateType(type);
+
     if (process.env.NODE_ENV !== 'production') {
-      deepFreeze(type);
+      deepFreeze(typeWithAccessControl);
     }
-    this.types.set(type.name, type);
+    this.types.set(type.name, typeWithAccessControl);
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getLegacyTypes} */
@@ -123,6 +147,10 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
 
   public getNameAttribute(type: string) {
     return this.types.get(type)?.nameAttribute || 'unknown';
+  }
+
+  public supportsAccessControl(type: string): boolean {
+    return this.types.get(type)?.supportsAccessControl ?? false;
   }
 }
 
