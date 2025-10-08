@@ -15,9 +15,16 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { AuthenticationResult, SAMLLogin } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import { securityTelemetry } from '../../otel/instrumentation';
 import type { SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
+
+jest.mock('../../otel/instrumentation', () => ({
+  securityTelemetry: {
+    recordSamlLoginDuration: jest.fn(),
+  },
+}));
 
 describe('SAML authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;
@@ -129,6 +136,10 @@ describe('SAML authentication routes', () => {
       ).resolves.toBe(unauthorizedErrorResponse);
 
       expect(responseFactory.unauthorized).toHaveBeenCalledWith({ body: failureReason });
+
+      expect(securityTelemetry.recordSamlLoginDuration).toHaveBeenCalledWith(expect.any(Number), {
+        outcome: 'failure',
+      });
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -147,6 +158,10 @@ describe('SAML authentication routes', () => {
       ).resolves.toBe(unauthorizedErrorResponse);
 
       expect(responseFactory.unauthorized).toHaveBeenCalledWith({ body: undefined });
+
+      expect(securityTelemetry.recordSamlLoginDuration).toHaveBeenCalledWith(expect.any(Number), {
+        outcome: 'failure',
+      });
     });
 
     it('returns 401 if authentication completes with unexpected result.', async () => {
@@ -165,6 +180,10 @@ describe('SAML authentication routes', () => {
       ).resolves.toBe(unauthorizedErrorResponse);
 
       expect(responseFactory.unauthorized).toHaveBeenCalledWith({ body: undefined });
+
+      expect(securityTelemetry.recordSamlLoginDuration).toHaveBeenCalledWith(expect.any(Number), {
+        outcome: 'failure',
+      });
     });
 
     it('redirects if required by the authentication process.', async () => {
@@ -192,6 +211,10 @@ describe('SAML authentication routes', () => {
 
       expect(responseFactory.redirected).toHaveBeenCalledWith({
         headers: { location: 'http://redirect-to/path' },
+      });
+
+      expect(securityTelemetry.recordSamlLoginDuration).toHaveBeenCalledWith(expect.any(Number), {
+        outcome: 'success',
       });
     });
 

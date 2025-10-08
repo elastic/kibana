@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
+
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { parseNextURL } from '@kbn/std';
@@ -20,6 +22,7 @@ import {
   TokenAuthenticationProvider,
 } from '../../authentication';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import { securityTelemetry } from '../../otel/instrumentation';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
@@ -67,13 +70,23 @@ export function defineCommonRoutes({
       try {
         const deauthenticationResult = await getAuthenticationService().logout(request);
         if (deauthenticationResult.failed()) {
+          securityTelemetry.recordLogoutAttempt({
+            outcome: 'failure',
+          });
           return response.customError(wrapIntoCustomErrorResponse(deauthenticationResult.error));
         }
+
+        securityTelemetry.recordLogoutAttempt({
+          outcome: 'success',
+        });
 
         return response.redirected({
           headers: { location: deauthenticationResult.redirectURL || `${serverBasePath}/` },
         });
       } catch (error) {
+        securityTelemetry.recordLogoutAttempt({
+          outcome: 'failure',
+        });
         return response.customError(wrapIntoCustomErrorResponse(error));
       }
     }
@@ -163,16 +176,39 @@ export function defineCommonRoutes({
     createLicensedRouteHandler(async (context, request, response) => {
       const { providerType, providerName, currentURL, params } = request.body;
       const redirectURL = parseNextURL(currentURL, basePath.serverBasePath);
+      const isBasicOrTokenLogin =
+        providerType === BasicAuthenticationProvider.type ||
+        providerType === TokenAuthenticationProvider.type;
+      const startTime = performance.now();
+
       const authenticationResult = await getAuthenticationService().login(request, {
         provider: { name: providerName },
         redirectURL,
         value: getLoginAttemptForProviderType(providerType, redirectURL, params),
       });
 
+      const duration = performance.now() - startTime;
+
       if (authenticationResult.redirected() || authenticationResult.succeeded()) {
+        if (isBasicOrTokenLogin) {
+          securityTelemetry.recordBasicTokenLoginDuration(duration, {
+            providerType,
+            providerName,
+            outcome: 'success',
+          });
+        }
+
         return response.ok({
           body: { location: authenticationResult.redirectURL || redirectURL },
           headers: authenticationResult.authResponseHeaders,
+        });
+      }
+
+      if (isBasicOrTokenLogin) {
+        securityTelemetry.recordBasicTokenLoginDuration(duration, {
+          providerType,
+          providerName,
+          outcome: 'failure',
         });
       }
 
