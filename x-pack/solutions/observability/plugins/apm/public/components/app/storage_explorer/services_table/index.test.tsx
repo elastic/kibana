@@ -14,11 +14,13 @@ import { ServicesTable } from '.';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { IndexLifecyclePhaseSelectOption } from '../../../../../common/storage_explorer_types';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 
 // Mock the hooks
-const mockUseProgressiveFetcher = jest.fn();
-const mockUseApmParams = jest.fn();
-const mockUseTimeRange = jest.fn();
+const mockUseProgressiveFetcher = jest.fn<any, any>();
+const mockUseApmParams = jest.fn<any, any>();
+const mockUseTimeRange = jest.fn<any, any>();
 
 jest.mock('../../../../hooks/use_progressive_fetcher', () => ({
   useProgressiveFetcher: () => mockUseProgressiveFetcher(),
@@ -52,28 +54,13 @@ const renderOptions = {
 };
 
 describe('ServicesTable', () => {
-  const mockSummaryStatsData = {
+  const mockSummaryStatsData: APIReturnType<'GET /internal/apm/storage_explorer_summary_stats'> = {
     totalSize: 1000000,
     dailyDataGeneration: 50000,
     tracesPerMinute: 100,
     numberOfServices: 3,
-    serviceStatistics: [
-      {
-        serviceName: 'opbeans-node',
-        size: 500000,
-        environments: ['production', 'staging'],
-      },
-      {
-        serviceName: 'opbeans-java',
-        size: 300000,
-        environments: ['production'],
-      },
-      {
-        serviceName: 'opbeans-rum',
-        size: 200000,
-        environments: ['production', 'development'],
-      },
-    ],
+    diskSpaceUsedPct: 0.75,
+    estimatedIncrementalSize: 150000,
   };
 
   const defaultParams = {
@@ -91,24 +78,33 @@ describe('ServicesTable', () => {
     end: '2023-01-02T00:00:00Z',
   };
 
-  const mockServicesData = [
+  const mockServicesData: Array<{
+    serviceName: string;
+    size: number;
+    environments: string[];
+    agentName: AgentName;
+    sampling: number;
+  }> = [
     {
       serviceName: 'opbeans-node',
       size: 500000,
       environments: ['production', 'staging'],
-      agentName: 'nodejs',
+      agentName: 'nodejs' as AgentName,
+      sampling: 1.0,
     },
     {
       serviceName: 'opbeans-java',
       size: 300000,
       environments: ['production'],
-      agentName: 'java',
+      agentName: 'java' as AgentName,
+      sampling: 1.0,
     },
     {
       serviceName: 'opbeans-rum',
       size: 200000,
       environments: ['production', 'development'],
-      agentName: 'rum-js',
+      agentName: 'rum-js' as AgentName,
+      sampling: 0.8,
     },
   ];
 
@@ -128,7 +124,14 @@ describe('ServicesTable', () => {
       const fnString = fetchFn.toString();
       if (fnString.includes('get_services')) {
         return {
-          data: { services: mockServicesData },
+          data: {
+            services: mockServicesData.map((service) => ({ serviceName: service.serviceName })),
+          },
+          status: FETCH_STATUS.SUCCESS,
+        };
+      } else if (fnString.includes('storage_explorer_summary_stats')) {
+        return {
+          data: mockSummaryStatsData,
           status: FETCH_STATUS.SUCCESS,
         };
       } else if (fnString.includes('storage_explorer')) {
@@ -286,7 +289,7 @@ describe('ServicesTable', () => {
   describe('Empty State', () => {
     it('displays no results message when no services are found', () => {
       mockUseProgressiveFetcher.mockImplementation(() => ({
-        data: { services: [], serviceStatistics: [] },
+        data: { serviceStatistics: [] },
         status: FETCH_STATUS.SUCCESS,
       }));
 
@@ -336,10 +339,11 @@ describe('ServicesTable', () => {
         serviceName: `service-${i + 1}`,
         size: Math.random() * 1000000,
         environments: i % 2 === 0 ? ['production'] : ['production', 'staging'],
-        agentName: i % 3 === 0 ? 'nodejs' : i % 3 === 1 ? 'java' : 'python',
+        agentName: (i % 3 === 0 ? 'nodejs' : i % 3 === 1 ? 'java' : 'python') as AgentName,
+        sampling: Math.random(),
       }));
       mockUseProgressiveFetcher.mockReturnValue({
-        data: { items: largeDataset },
+        data: { serviceStatistics: largeDataset },
         status: FETCH_STATUS.SUCCESS,
       });
 
