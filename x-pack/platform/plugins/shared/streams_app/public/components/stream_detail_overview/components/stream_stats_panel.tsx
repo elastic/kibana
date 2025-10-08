@@ -138,7 +138,7 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
                   hasPrivileges={definition.privileges.monitor}
                   title={i18n.translate(
                     'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.totaldoccountLabel',
-                    { defaultMessage: 'totalDocCount' }
+                    { defaultMessage: 'Total doc count' }
                   )}
                 >
                   {dataStreamStats ? formatNumber(dataStreamStats.totalDocs || 0, 'decimal0') : '-'}
@@ -152,7 +152,7 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
                   hasPrivileges={definition.privileges.monitor}
                   title={i18n.translate(
                     'xpack.streams.streamStatsPanel.privilegesWarningIconWrapper.sizebytesLabel',
-                    { defaultMessage: 'sizeBytes' }
+                    { defaultMessage: 'Size in bytes' }
                   )}
                 >
                   {dataStreamStats && dataStreamStats.sizeBytes
