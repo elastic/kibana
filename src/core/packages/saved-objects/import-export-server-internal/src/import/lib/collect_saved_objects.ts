@@ -62,7 +62,6 @@ export async function collectSavedObjects({
       if (supportedTypes.includes(obj.type)) {
         return true;
       }
-      console.log(`**** Unsupported saved object type "${obj.type}"`);
       const { title } = obj.attributes;
       errors.push({
         id: obj.id,
@@ -75,6 +74,7 @@ export async function collectSavedObjects({
       return false;
     }),
     ...(accessControlTransforms?.filterStream ? [accessControlTransforms.filterStream] : []),
+    ...(accessControlTransforms?.mapStream ? [accessControlTransforms.mapStream] : []),
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
       importStateMap.set(`${obj.type}:${obj.id}`, {});

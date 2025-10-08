@@ -10,7 +10,7 @@ import { Transform } from 'stream';
 import type { AuthenticatedUser, ISavedObjectTypeRegistry } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { exportTransform, getImportTransformsFactory } from './access_control_transforms';
+import { getImportTransformsFactory } from './access_control_transforms';
 
 describe('Access Control Transforms', () => {
   const request = httpServerMock.createKibanaRequest();
@@ -36,47 +36,47 @@ describe('Access Control Transforms', () => {
         }
       : null;
 
-  describe('exportTransform', () => {
-    it('strips the owner field for all objects that contain access control metadata', () => {
-      const objects = [
-        {
-          type: 'a',
-          id: 'id_1',
-          attributes: {},
-          references: [],
-          accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
-        },
-        {
-          type: 'b',
-          id: 'id_2',
-          attributes: {},
-          references: [],
-          accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
-        },
-        {
-          type: 'c',
-          id: 'id_3',
-          attributes: {},
-          references: [],
-        },
-        {
-          type: 'd',
-          id: 'id_4',
-          attributes: {},
-          references: [],
-          accessControl: { accessMode: 'read_only' as const, owner: 'bob' },
-        },
-      ];
+  // describe('exportTransform', () => {
+  //   it('strips the owner field for all objects that contain access control metadata', () => {
+  //     const objects = [
+  //       {
+  //         type: 'a',
+  //         id: 'id_1',
+  //         attributes: {},
+  //         references: [],
+  //         accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
+  //       },
+  //       {
+  //         type: 'b',
+  //         id: 'id_2',
+  //         attributes: {},
+  //         references: [],
+  //         accessControl: { accessMode: 'read_only' as const, owner: 'alice' },
+  //       },
+  //       {
+  //         type: 'c',
+  //         id: 'id_3',
+  //         attributes: {},
+  //         references: [],
+  //       },
+  //       {
+  //         type: 'd',
+  //         id: 'id_4',
+  //         attributes: {},
+  //         references: [],
+  //         accessControl: { accessMode: 'read_only' as const, owner: 'bob' },
+  //       },
+  //     ];
 
-      const result = exportTransform({ request }, objects);
-      expect(result).toEqual(
-        objects.map((obj) => ({
-          ...obj,
-          ...(obj.accessControl && { accessControl: { ...obj.accessControl, owner: '' } }),
-        }))
-      );
-    });
-  });
+  //     const result = exportTransform({ request }, objects);
+  //     expect(result).toEqual(
+  //       objects.map((obj) => ({
+  //         ...obj,
+  //         ...(obj.accessControl && { accessControl: { ...obj.accessControl, owner: '' } }),
+  //       }))
+  //     );
+  //   });
+  // });
 
   describe('getImportTransformsFactory', () => {
     const getCurrentUser = jest.fn().mockImplementation(() => makeUser('alice_profile_id'));
@@ -85,7 +85,9 @@ describe('Access Control Transforms', () => {
       const createImportTransforms = getImportTransformsFactory(getCurrentUser);
       expect(createImportTransforms).toBeInstanceOf(Function);
       const importTransforms = createImportTransforms(request, typeRegistry, []);
+      expect(importTransforms).toHaveProperty('mapStream');
       expect(importTransforms).toHaveProperty('filterStream');
+      expect(importTransforms.mapStream).toBeInstanceOf(Transform);
       expect(importTransforms.filterStream).toBeInstanceOf(Transform);
     });
   });

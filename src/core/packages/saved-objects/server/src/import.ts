@@ -146,6 +146,7 @@ export type SavedObjectsImportHook<T = unknown> = (
 
 export interface AccessControlImportTransforms {
   filterStream: Transform;
+  mapStream: Transform;
 }
 
 export type AccessControlImportTransformsFactory = (

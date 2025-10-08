@@ -10,25 +10,23 @@ import type {
   ISavedObjectTypeRegistry,
   KibanaRequest,
   SavedObject,
-  SavedObjectsExportTransform,
-  SavedObjectsExportTransformContext,
   SavedObjectsImportFailure,
 } from '@kbn/core/server';
 import type {
   AccessControlImportTransforms,
   AccessControlImportTransformsFactory,
 } from '@kbn/core-saved-objects-server';
-import { createFilterStream } from '@kbn/utils';
+import { createFilterStream, createMapStream } from '@kbn/utils';
 
-export const exportTransform: SavedObjectsExportTransform = (
-  context: SavedObjectsExportTransformContext,
-  objects: Array<SavedObject<unknown>>
-) => {
-  return objects.map<SavedObject<unknown>>(({ accessControl, ...object }) => {
-    if (!accessControl) return object;
-    return { ...object, accessControl: { ...accessControl, owner: '' } };
-  });
-};
+// export const exportTransform: SavedObjectsExportTransform = (
+//   context: SavedObjectsExportTransformContext,
+//   objects: Array<SavedObject<unknown>>
+// ) => {
+//   return objects.map<SavedObject<unknown>>(({ accessControl, ...object }) => {
+//     if (!accessControl) return object;
+//     return { ...object, accessControl: { ...accessControl, owner: '' } };
+//   });
+// };
 
 export function getImportTransformsFactory(
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null
@@ -43,34 +41,53 @@ export function getImportTransformsFactory(
       const typeSupportsAccessControl = typeRegistry.supportsAccessControl(obj.type);
       const { title } = obj.attributes;
 
-      // Require at least the mode, or nothing at all
-      if (typeSupportsAccessControl && obj.accessControl && !obj.accessControl.accessMode) {
-        errors.push({
-          id: obj.id,
-          type: obj.type,
-          meta: { title },
-          error: {
-            type: 'missing_access_control_metadata',
-          },
-        });
-        return false;
-      }
+      // In phase 1, these checks are irrelevent. We strip the incoming metadata to apply the default behavior of bulk_create.
+      // In phase 2, we will need to make these checks in order to validate when an Admin chooses to apply access control on import.
 
-      if (
-        typeSupportsAccessControl &&
-        obj.accessControl &&
-        (!profileId || profileId.trim() === '')
-      ) {
-        errors.push({
-          id: obj.id,
-          type: obj.type,
-          meta: { title },
-          error: {
-            type: 'requires_profile_id',
-          },
-        });
-        return false;
-      }
+      // if (typeSupportsAccessControl && obj.accessControl && !obj.accessControl.accessMode) {
+      //   errors.push({
+      //     id: obj.id,
+      //     type: obj.type,
+      //     meta: { title },
+      //     error: {
+      //       type: 'missing_access_control_mode_metadata',
+      //     },
+      //   });
+      //   return false;
+      // }
+
+      // if (
+      //   typeSupportsAccessControl &&
+      //   obj.accessControl &&
+      //   (!obj.accessControl.owner || obj.accessControl.owner.trim().length === 0)
+      // ) {
+      //   errors.push({
+      //     id: obj.id,
+      //     type: obj.type,
+      //     meta: { title },
+      //     error: {
+      //       type: 'missing_access_control_owner_metadata',
+      //     },
+      //   });
+      //   return false;
+      // }
+
+      // This will be handled by the bulk_create operation
+      // if (
+      //   typeSupportsAccessControl &&
+      //   obj.accessControl &&
+      //   (!profileId || profileId.trim() === '')
+      // ) {
+      //   errors.push({
+      //     id: obj.id,
+      //     type: obj.type,
+      //     meta: { title },
+      //     error: {
+      //       type: 'requires_profile_id',
+      //     },
+      //   });
+      //   return false;
+      // }
 
       if (!typeSupportsAccessControl && obj.accessControl) {
         errors.push({
@@ -87,23 +104,27 @@ export function getImportTransformsFactory(
       return true;
     });
 
-    // This is not needed, as the owner is set during the bulk create operation
-    // const mapStream = createMapStream((obj: SavedObject) => {
-    //   const profileId = getCurrentUser(request)?.profile_uid;
-    //   if (obj.accessControl) {
-    //     const test = {
-    //       ...obj,
-    //       ...(obj.accessControl &&
-    //         profileId && { accessControl: { ...obj.accessControl, owner: profileId } }),
-    //     };
-    //   }
-    //   return {
-    //     ...obj,
-    //     ...(obj.accessControl &&
-    //       profileId && { accessControl: { ...obj.accessControl, owner: profileId } }),
-    //   };
-    // });
+    // This is needed to strip incoming access control metadata, phase 1 for all users
+    // phase 2 for non-Admin users, and for admin users who are not applying access control on import
+    const mapStream = createMapStream((obj: SavedObject) => {
+      // const profileId = getCurrentUser(request)?.profile_uid;
+      const typeSupportsAccessControl = typeRegistry.supportsAccessControl(obj.type);
 
-    return { filterStream };
+      if (typeSupportsAccessControl && obj.accessControl) {
+        delete obj.accessControl;
+        // const test = {
+        //   ...obj,
+        //   ...(obj.accessControl &&
+        //     profileId && { accessControl: { ...obj.accessControl, owner: profileId } }),
+        // };
+      }
+      return {
+        ...obj,
+        // ...(obj.accessControl &&
+        //   profileId && { accessControl: { ...obj.accessControl, owner: profileId } }),
+      };
+    });
+
+    return { filterStream, mapStream };
   };
 }

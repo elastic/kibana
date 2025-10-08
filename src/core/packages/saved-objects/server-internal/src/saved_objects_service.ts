@@ -63,7 +63,7 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-serve
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsAccessControlTransforms } from '@kbn/core-saved-objects-server/src/contracts';
+import type { SavedObjectsAccessControlTransforms } from '@kbn/core-saved-objects-server/src/contracts';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
@@ -404,7 +404,7 @@ export class SavedObjectsService
           typeRegistry: this.typeRegistry,
           exportSizeLimit: this.config!.maxImportExportSize,
           logger: this.logger.get('exporter'),
-          accessControlExportTransform: this.accessControlTransforms?.exportTransform,
+          // accessControlExportTransform: this.accessControlTransforms?.exportTransform,
         }),
       createImporter: (savedObjectsClient, options) =>
         new SavedObjectsImporter({

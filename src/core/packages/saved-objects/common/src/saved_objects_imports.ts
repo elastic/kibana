@@ -62,12 +62,23 @@ export interface SavedObjectsImportUnsupportedTypeError {
 }
 
 /**
- * Represents a failure to import due to missing access control metadata.
- * This metadata is required only for objects that support access control.
+ * Represents a failure to import due to missing access control mode metadata.
+ * This metadata is required only for objects that support access control when
+ * an Admin chooses to apply access control on import.
  * @public
  */
-export interface SavedObjectsImportMissingAccessControlMetadataError {
-  type: 'missing_access_control_metadata';
+export interface SavedObjectsImportMissingAccessControlModeMetadataError {
+  type: 'missing_access_control_mode';
+}
+
+/**
+ * Represents a failure to import due to missing access control owner metadata.
+ * This metadata is required only for objects that support access control when
+ * an Admin chooses to apply access control on import.
+ * @public
+ */
+export interface SavedObjectsImportMissingAccessControlOwnerMetadataError {
+  type: 'missing_access_control_owner';
 }
 
 /**
@@ -137,7 +148,8 @@ export interface SavedObjectsImportFailure {
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
     | SavedObjectsImportUnknownError
-    | SavedObjectsImportMissingAccessControlMetadataError
+    | SavedObjectsImportMissingAccessControlOwnerMetadataError
+    | SavedObjectsImportMissingAccessControlModeMetadataError
     | SavedObjectsImportRequiresProfileIdError
     | SavedObjectsImportUnexpectedAccessControlMetadataError
     | SavedObjectsImportAccessControlConflict;

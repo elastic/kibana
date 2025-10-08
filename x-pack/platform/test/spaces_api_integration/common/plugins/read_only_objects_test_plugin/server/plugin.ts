@@ -498,6 +498,7 @@ export class ReadOnlyObjectsPlugin implements Plugin {
         }
       }
     );
+
     // Get NON_READ_ONLY_TYPE
     router.get(
       {

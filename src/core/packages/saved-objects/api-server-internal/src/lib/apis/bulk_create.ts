@@ -186,6 +186,8 @@ export const performBulkCreate = async <T>(
       ? existingAccessControl
       : object.accessControl;
 
+    console.log(`**** existingAccessControl: ${JSON.stringify(existingAccessControl)}`);
+
     return {
       type: object.type,
       id: object.id,
