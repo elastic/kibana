@@ -22,7 +22,7 @@ interface SpaceCreate {
   description?: string;
   color?: string;
   initials?: string;
-  solution?: 'es' | 'oblt' | 'security' | 'chat' | 'classic';
+  solution?: 'es' | 'oblt' | 'security' | 'workplace_ai' | 'classic';
   disabledFeatures?: string[];
 }
 
