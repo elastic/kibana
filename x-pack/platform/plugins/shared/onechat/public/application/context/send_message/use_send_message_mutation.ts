@@ -43,7 +43,13 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
   });
 
-  const sendMessage = ({ message }: { message: string }) => {
+  const sendMessage = ({
+    message,
+    additionalContext,
+  }: {
+    message: string;
+    additionalContext?: string;
+  }) => {
     const signal = messageControllerRef.current?.signal;
     if (!signal) {
       return Promise.reject(new Error('Abort signal not present'));
@@ -54,6 +60,7 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       conversationId,
       agentId,
       connectorId,
+      additionalContext,
     });
 
     return subscribeToChatEvents(events$);

@@ -7,21 +7,21 @@
 
 /** @jsx jsx */
 import { jsx } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiFlyoutResizable,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableConversationProps } from '../embeddable';
 import type { ConversationFlyoutProps } from './types';
+import { storeFlyoutConversation, clearFlyoutConversation } from './flyout_conversation_storage';
 
 interface ConversationFlyoutInternalProps extends ConversationFlyoutProps {
   ConversationComponent: React.ComponentType<EmbeddableConversationProps>;
@@ -31,52 +31,58 @@ export const ConversationFlyout: React.FC<ConversationFlyoutInternalProps> = ({
   conversationId: initialConversationId,
   agentId,
   additionalContext,
+  customMessage,
   onConversationCreated,
   onClose,
   ConversationComponent,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const [conversationId, setConversationId] = useState<string | undefined>(initialConversationId);
+  // Key to force remount of conversation component when starting a new chat
+  const [conversationKey, setConversationKey] = useState(0);
+
+  // Store the conversation when it's first opened (if already has an ID)
+  useEffect(() => {
+    if (initialConversationId) {
+      storeFlyoutConversation(initialConversationId, agentId);
+    }
+  }, [initialConversationId, agentId]);
 
   // Handle conversation creation
   const handleConversationCreated = useCallback(
     (id: string) => {
       setConversationId(id);
+      // Store the new conversation in localStorage
+      storeFlyoutConversation(id, agentId);
       onConversationCreated?.(id);
     },
-    [onConversationCreated]
+    [onConversationCreated, agentId]
   );
 
-  // TODO: Handle additional context by sending an initial message
-  // This would require extending the Conversation component to accept an initial message
-  useEffect(() => {
-    if (additionalContext) {
-      // For now, we just log it. In a future iteration, we could:
-      // 1. Add an initialMessage prop to EmbeddableConversation
-      // 2. Or use a ref to programmatically send a message
-      console.log('Additional context provided:', additionalContext);
-    }
-  }, [additionalContext]);
-
-  const flyoutHeaderStyles = css`
-    background-color: ${euiTheme.colors.emptyShade};
-    border-bottom: ${euiTheme.border.thin};
-  `;
+  // Handle starting a new conversation
+  const handleNewChat = useCallback(() => {
+    setConversationId(undefined);
+    clearFlyoutConversation();
+    // Force remount of the conversation component to clear all state
+    setConversationKey((prev) => prev + 1);
+  }, []);
 
   const flyoutBodyStyles = css`
     padding: 0;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     .euiFlyoutBody__overflowContent {
       padding: 0;
-      height: 100%;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
   `;
 
   const conversationContainerStyles = css`
     flex: 1;
-    overflow: hidden;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   `;
 
   return (
@@ -85,12 +91,12 @@ export const ConversationFlyout: React.FC<ConversationFlyoutInternalProps> = ({
       aria-labelledby="conversation-flyout-title"
       size="m"
       minWidth={400}
-      paddingSize="none"
+      maxWidth={1200}
       ownFocus
       data-test-subj="onechat-conversation-flyout"
     >
-      <EuiFlyoutHeader hasBorder css={flyoutHeaderStyles}>
-        <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween">
+      <EuiFlyoutHeader hasBorder>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
           <EuiFlexItem grow={true}>
             <EuiTitle size="m">
               <h2 id="conversation-flyout-title">
@@ -105,14 +111,19 @@ export const ConversationFlyout: React.FC<ConversationFlyoutInternalProps> = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              onClick={onClose}
-              aria-label={i18n.translate('xpack.onechat.flyout.closeButtonAriaLabel', {
-                defaultMessage: 'Close conversation flyout',
+            <EuiButtonEmpty
+              iconType="plus"
+              onClick={handleNewChat}
+              size="s"
+              aria-label={i18n.translate('xpack.onechat.flyout.newChatButtonAriaLabel', {
+                defaultMessage: 'Start a new conversation',
               })}
-              data-test-subj="onechat-conversation-flyout-close-button"
-            />
+              data-test-subj="onechat-flyout-new-chat-button"
+            >
+              {i18n.translate('xpack.onechat.flyout.newChatButton', {
+                defaultMessage: 'New chat',
+              })}
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
@@ -120,8 +131,11 @@ export const ConversationFlyout: React.FC<ConversationFlyoutInternalProps> = ({
       <EuiFlyoutBody css={flyoutBodyStyles}>
         <div css={conversationContainerStyles}>
           <ConversationComponent
+            key={conversationKey}
             conversationId={conversationId}
             agentId={agentId}
+            additionalContext={additionalContext}
+            customMessage={customMessage}
             height="100%"
             onConversationCreated={handleConversationCreated}
           />
@@ -130,4 +144,3 @@ export const ConversationFlyout: React.FC<ConversationFlyoutInternalProps> = ({
     </EuiFlyoutResizable>
   );
 };
-

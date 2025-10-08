@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useEmbeddableMode } from '../../../context/embeddable_mode_context';
 
 interface RoundLayoutProps {
   input: ReactNode;
@@ -38,14 +39,22 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   scrollContainerHeight,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
+  const { isEmbeddedMode } = useEmbeddableMode();
 
   useEffect(() => {
+    // Disable min-height behavior in embeddable mode (e.g., flyouts)
+    // as the scroll container height calculation doesn't work correctly
+    if (isEmbeddedMode) {
+      setRoundContainerMinHeight(0);
+      return;
+    }
+
     if (isCurrentRound && isResponseLoading) {
       setRoundContainerMinHeight(scrollContainerHeight);
     } else if (!isCurrentRound) {
       setRoundContainerMinHeight(0);
     }
-  }, [isCurrentRound, isResponseLoading, scrollContainerHeight]);
+  }, [isCurrentRound, isResponseLoading, scrollContainerHeight, isEmbeddedMode]);
 
   const { euiTheme } = useEuiTheme();
   const inputContainerStyles = css`

@@ -11,7 +11,8 @@
 export interface OpenConversationFlyoutOptions {
   /**
    * Optional conversation ID to load an existing conversation.
-   * If not provided, a new conversation will be started.
+   * If not provided, will try to load the last conversation from the flyout
+   * (unless newChat is true or agentId doesn't match).
    */
   conversationId?: string;
 
@@ -28,9 +29,21 @@ export interface OpenConversationFlyoutOptions {
   additionalContext?: string;
 
   /**
+   * If true, always start a new conversation (don't restore previous flyout conversation).
+   * Defaults to false.
+   */
+  newChat?: boolean;
+
+  /**
    * Optional callback that fires when a new conversation is created.
    */
   onConversationCreated?: (conversationId: string) => void;
+
+  /**
+   * Optional custom message to automatically submit when the flyout opens.
+   * This message will be sent immediately after the flyout is rendered.
+   */
+  customMessage?: string;
 }
 
 /**

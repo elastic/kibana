@@ -20,6 +20,11 @@ export interface ChatRequestBodyPayload {
   conversation_id?: string;
   capabilities?: AgentCapabilities;
   input: string;
+  /**
+   * Optional additional context to provide to the agent.
+   * This is sent separately from the input and not displayed to the user.
+   */
+  additional_context?: string;
 }
 
 export interface ChatResponse {

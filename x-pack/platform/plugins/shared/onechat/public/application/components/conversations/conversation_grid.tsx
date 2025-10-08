@@ -9,6 +9,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { useConversationGridCenterColumnWidth } from './conversation_grid.styles';
+import { useEmbeddableMode } from '../../context/embeddable_mode_context';
 
 // Main grid
 
@@ -19,17 +20,27 @@ interface ConversationGridProps {
 
 export const ConversationGrid: React.FC<ConversationGridProps> = ({ children, className }) => {
   const { euiTheme } = useEuiTheme();
+  const { isEmbeddedMode } = useEmbeddableMode();
   const sideColumnWidth = `minmax(calc(${euiTheme.size.xxl} * 2), 1fr)`;
   const contentMarginWidth = euiTheme.size.l;
   const centerColumnWidth = useConversationGridCenterColumnWidth();
-  const gridStyles = css`
-    display: grid;
-    grid-template-columns:
-      ${sideColumnWidth} ${contentMarginWidth} minmax(auto, ${centerColumnWidth})
-      ${contentMarginWidth} ${sideColumnWidth};
-    align-items: center;
-    width: 100%;
-  `;
+  
+  // In embeddable mode, use a simpler grid without side margins
+  const gridStyles = isEmbeddedMode
+    ? css`
+        display: grid;
+        grid-template-columns: ${contentMarginWidth} 1fr ${contentMarginWidth};
+        align-items: center;
+        width: 100%;
+      `
+    : css`
+        display: grid;
+        grid-template-columns:
+          ${sideColumnWidth} ${contentMarginWidth} minmax(auto, ${centerColumnWidth})
+          ${contentMarginWidth} ${sideColumnWidth};
+        align-items: center;
+        width: 100%;
+      `;
 
   return (
     <div css={gridStyles} className={className}>
@@ -45,14 +56,20 @@ interface ConversationGridContainerProps {
 
 // Left side column
 
-const leftContainerStyles = css`
-  grid-column: 1;
-`;
-
 export const ConversationLeft: React.FC<ConversationGridContainerProps> = ({
   children,
   className,
 }) => {
+  const { isEmbeddedMode } = useEmbeddableMode();
+  // In embeddable mode, there's no left column, so hide it
+  if (isEmbeddedMode) {
+    return null;
+  }
+  
+  const leftContainerStyles = css`
+    grid-column: 1;
+  `;
+  
   return (
     <div css={leftContainerStyles} className={className}>
       {children}
@@ -62,14 +79,17 @@ export const ConversationLeft: React.FC<ConversationGridContainerProps> = ({
 
 // Center column without the margins
 
-const centerContainerStyles = css`
-  grid-column: 3;
-`;
-
 export const ConversationCenter: React.FC<ConversationGridContainerProps> = ({
   children,
   className,
 }) => {
+  const { isEmbeddedMode } = useEmbeddableMode();
+  
+  // In embeddable mode, center content is in column 2; in standalone mode it's in column 3
+  const centerContainerStyles = css`
+    grid-column: ${isEmbeddedMode ? '2' : '3'};
+  `;
+  
   return (
     <div css={centerContainerStyles} className={className}>
       {children}
@@ -79,14 +99,20 @@ export const ConversationCenter: React.FC<ConversationGridContainerProps> = ({
 
 // Right side column
 
-const rightContainerStyles = css`
-  grid-column: 5;
-`;
-
 export const ConversationRight: React.FC<ConversationGridContainerProps> = ({
   children,
   className,
 }) => {
+  const { isEmbeddedMode } = useEmbeddableMode();
+  // In embeddable mode, there's no right column, so hide it
+  if (isEmbeddedMode) {
+    return null;
+  }
+  
+  const rightContainerStyles = css`
+    grid-column: 5;
+  `;
+  
   return (
     <div css={rightContainerStyles} className={className}>
       {children}
@@ -109,14 +135,17 @@ export const ConversationContent: React.FC<ConversationGridContainerProps> = ({
 
 // Shorthand for using centered content with margins in the grid
 
-const contentWithMarginsStyles = css`
-  grid-column: 2 / 5;
-`;
-
 export const ConversationContentWithMargins: React.FC<ConversationGridContainerProps> = ({
   children,
   className,
 }) => {
+  const { isEmbeddedMode } = useEmbeddableMode();
+  
+  // In embeddable mode, span all 3 columns; in standalone mode, span columns 2-5
+  const contentWithMarginsStyles = css`
+    grid-column: ${isEmbeddedMode ? '1 / 4' : '2 / 5'};
+  `;
+  
   return (
     <ConversationGrid className={className}>
       <div css={contentWithMarginsStyles}>{children}</div>

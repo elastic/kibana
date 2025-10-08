@@ -108,9 +108,11 @@ const createRoundFromEvents = ({
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
 
+  // Store the round without additionalContext (only the user's actual message)
+  // The additionalContext is only used for the AI but not stored in conversation history
   const round: ConversationRound = {
     id: uuidv4(),
-    input,
+    input: { message: input.message },
     steps: stepEvents.map(eventToStep),
     trace_id: getCurrentTraceId(),
     response: { message: messages[messages.length - 1].message_content },

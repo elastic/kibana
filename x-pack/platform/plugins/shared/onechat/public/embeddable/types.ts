@@ -22,6 +22,12 @@ export interface EmbeddableConversationProps {
   agentId?: string;
 
   /**
+   * Optional additional context to prepend to the first user message.
+   * This context will be automatically included when the user sends their first message.
+   */
+  additionalContext?: string;
+
+  /**
    * Optional height for the conversation container.
    * Can be a CSS string (e.g., '500px', '100%') or a number (pixels).
    * Defaults to '600px'.
@@ -38,5 +44,11 @@ export interface EmbeddableConversationProps {
    * Optional CSS class name for custom styling.
    */
   className?: string;
+
+  /**
+   * Optional custom message to automatically submit when the component mounts.
+   * This message will be sent immediately after the component is ready.
+   */
+  customMessage?: string;
 }
 

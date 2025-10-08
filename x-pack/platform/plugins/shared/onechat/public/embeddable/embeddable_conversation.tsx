@@ -20,9 +20,11 @@ import { OnechatServicesContext } from '../application/context/onechat_services_
 import { SendMessageProvider } from '../application/context/send_message/send_message_context';
 import { ConversationIdProvider } from '../application/context/conversation_id_context';
 import { EmbeddableModeProvider } from '../application/context/embeddable_mode_context';
-import { Conversation } from '../application/components/conversations/conversation';
+import { AdditionalContextProvider } from '../application/context/additional_context/additional_context';
+import { CustomMessageProvider } from '../application/context/custom_message_context';
 import { useEmbeddableConversationState } from './hooks/use_embeddable_conversation_state';
 import type { EmbeddableConversationProps } from './types';
+import { ConversationWithAgent } from './components/conversation_with_agent';
 
 interface EmbeddableConversationInternalProps extends EmbeddableConversationProps {
   services: OnechatInternalService;
@@ -32,6 +34,8 @@ interface EmbeddableConversationInternalProps extends EmbeddableConversationProp
 const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = ({
   conversationId: initialConversationId,
   agentId,
+  additionalContext,
+  customMessage,
   height = '600px',
   onConversationCreated,
   className,
@@ -81,9 +85,13 @@ const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalPro
                   onConversationCreated={setConversationId}
                 >
                   <ConversationIdProvider conversationId={conversationId}>
-                    <SendMessageProvider>
-                      <Conversation />
-                    </SendMessageProvider>
+                    <AdditionalContextProvider additionalContext={additionalContext}>
+                      <CustomMessageProvider customMessage={customMessage}>
+                        <SendMessageProvider>
+                          <ConversationWithAgent agentId={agentId} />
+                        </SendMessageProvider>
+                      </CustomMessageProvider>
+                    </AdditionalContextProvider>
                   </ConversationIdProvider>
                 </EmbeddableModeProvider>
               </Router>

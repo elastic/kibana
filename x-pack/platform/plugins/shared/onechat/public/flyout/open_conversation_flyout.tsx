@@ -17,6 +17,7 @@ import type { OnechatInternalService } from '../services';
 import type { OnechatStartDependencies } from '../types';
 import type { EmbeddableConversationProps } from '../embeddable';
 import { OnechatServicesContext } from '../application/context/onechat_services_context';
+import { resolveConversationId } from './flyout_conversation_storage';
 
 interface OpenConversationFlyoutParams {
   coreStart: CoreStart;
@@ -30,7 +31,7 @@ interface OpenConversationFlyoutParams {
  *
  * @param options - Configuration options for the flyout
  * @param params - Internal parameters (services, core, etc.)
- * @returns A Promise that resolves when the flyout is closed, and an OverlayRef to close it programmatically
+ * @returns An object with flyoutRef to close it programmatically and a promise that resolves when closed
  */
 export function openConversationFlyout(
   options: OpenConversationFlyoutOptions,
@@ -42,48 +43,50 @@ export function openConversationFlyout(
     ...startServices
   } = coreStart;
 
-  return new Promise<{ flyoutRef: OverlayRef; promise: Promise<void> }>((resolve, reject) => {
-    try {
-      // Prepare Kibana services context
-      const kibanaServices = {
-        ...coreStart,
-        plugins: startDependencies,
-      };
+  // Resolve which conversation to load (might restore previous flyout conversation)
+  const resolvedConversationId = resolveConversationId({
+    conversationId: options.conversationId,
+    agentId: options.agentId,
+    newChat: options.newChat,
+  });
 
-      const flyoutRef = overlays.openFlyout(
-        toMountPoint(
-          <KibanaContextProvider services={kibanaServices}>
-            <OnechatServicesContext.Provider value={services}>
-              <ConversationFlyout
-                {...options}
-                onClose={() => flyoutRef.close()}
-                ConversationComponent={ConversationComponent}
-              />
-            </OnechatServicesContext.Provider>
-          </KibanaContextProvider>,
-          startServices
-        ),
-        {
-          'data-test-subj': 'onechat-conversation-flyout-wrapper',
-          ownFocus: true,
-          onClose: () => flyoutRef.close(),
-          isResizable: true,
-        }
-      );
+  // Prepare Kibana services context
+  const kibanaServices = {
+    ...coreStart,
+    plugins: startDependencies,
+  };
 
-      // Close the flyout when user navigates out of the current plugin
-      currentAppId$
-        .pipe(skip(1), takeUntil(from(flyoutRef.onClose)), distinctUntilChanged())
-        .subscribe(() => {
-          flyoutRef.close();
-        });
-
-      resolve({
-        flyoutRef,
-        promise: flyoutRef.onClose.then(() => {}),
-      });
-    } catch (error) {
-      reject(error);
+  const flyoutRef = overlays.openFlyout(
+    toMountPoint(
+      <KibanaContextProvider services={kibanaServices}>
+        <OnechatServicesContext.Provider value={services}>
+          <ConversationFlyout
+            {...options}
+            conversationId={resolvedConversationId}
+            onClose={() => flyoutRef.close()}
+            ConversationComponent={ConversationComponent}
+          />
+        </OnechatServicesContext.Provider>
+      </KibanaContextProvider>,
+      startServices
+    ),
+    {
+      'data-test-subj': 'onechat-conversation-flyout-wrapper',
+      ownFocus: true,
+      onClose: () => flyoutRef.close(),
+      isResizable: true,
     }
-  }) as any; // TypeScript workaround for the Promise wrapping
+  );
+
+  // Close the flyout when user navigates out of the current plugin
+  currentAppId$
+    .pipe(skip(1), takeUntil(from(flyoutRef.onClose)), distinctUntilChanged())
+    .subscribe(() => {
+      flyoutRef.close();
+    });
+
+  return {
+    flyoutRef,
+    promise: flyoutRef.onClose.then(() => {}),
+  };
 }

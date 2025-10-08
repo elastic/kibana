@@ -12,7 +12,11 @@ import { useCallback, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  apiPublishesTitle,
+  getTitle,
+} from '@kbn/presentation-publishing';
 
 import useObservable from 'react-use/lib/useObservable';
 import { EuiIconBackgroundTask } from '@kbn/background-search';
@@ -60,6 +64,19 @@ export const useDashboardMenuItems = ({
       dashboardApi.viewMode$
     );
   const disableTopNav = isSaveInProgress || hasOverlays;
+
+  // Get panel titles for AI chat context
+  const dashboardChildren = useObservable(dashboardApi.children$, {});
+  const panelTitles = useMemo(() => {
+    return Object.values(dashboardChildren)
+      .map((childApi) => {
+        if (apiPublishesTitle(childApi)) {
+          return getTitle(childApi);
+        }
+        return undefined;
+      })
+      .filter((title): title is string => Boolean(title));
+  }, [dashboardChildren]);
 
   /**
    * Show the Dashboard app's share menu
@@ -128,19 +145,62 @@ export const useDashboardMenuItems = ({
    */
 
   /**
-   * Open AI chat assistant flyout
+   * Open AI chat assistant flyout with dashboard-specific agent
    */
   const openChat = useCallback(() => {
-    if (!onechatService) return;
+    if (!onechatService || typeof onechatService.openConversationFlyout !== 'function') {
+      // eslint-disable-next-line no-console
+      console.warn('Onechat service or openConversationFlyout method is not available');
+      return;
+    }
 
-    const dashboardContext = `User is viewing dashboard: ${dashboardTitle || 'Untitled'}
-View mode: ${viewMode}
-Has unsaved changes: ${hasUnsavedChanges}`;
-
-    onechatService.openConversationFlyout({
-      additionalContext: dashboardContext,
+    const additionalContext = JSON.stringify({
+      application_name: 'dashboard',
+      current_dashboard_name: dashboardTitle || 'Untitled',
+      dashboard_id: lastSavedId,
+      panel_titles: panelTitles,
     });
-  }, [onechatService, dashboardTitle, viewMode, hasUnsavedChanges]);
+
+    try {
+      onechatService.openConversationFlyout({
+        agentId: 'dashboard',
+        additionalContext,
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to open chat flyout:', error);
+    }
+  }, [dashboardTitle, lastSavedId, panelTitles]);
+
+  /**
+   * Open AI chat assistant flyout with dashboard-specific agent and auto-submit a summary request
+   */
+  const openChatWithSummary = useCallback(() => {
+    if (!onechatService || typeof onechatService.openConversationFlyout !== 'function') {
+      // eslint-disable-next-line no-console
+      console.warn('Onechat service or openConversationFlyout method is not available');
+      return;
+    }
+
+    const additionalContext = JSON.stringify({
+      application_name: 'dashboard',
+      current_dashboard_name: dashboardTitle || 'Untitled',
+      dashboard_id: lastSavedId,
+      panel_titles: panelTitles,
+    });
+
+    try {
+      onechatService.openConversationFlyout({
+        agentId: 'dashboard',
+        additionalContext,
+        customMessage: 'Please provide a summary of this dashboard',
+        newChat: true,
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to open chat flyout with summary:', error);
+    }
+  }, [dashboardTitle, lastSavedId, panelTitles]);
 
   const menuItems = useMemo(() => {
     return {
@@ -150,8 +210,25 @@ Has unsaved changes: ${hasUnsavedChanges}`;
         iconType: 'discuss',
         iconOnly: true,
         testId: 'dashboardChatButton',
-        disableButton: disableTopNav || !onechatService,
+        disableButton:
+          disableTopNav ||
+          !onechatService ||
+          typeof onechatService?.openConversationFlyout !== 'function',
         run: openChat,
+      } as TopNavMenuData,
+
+      chatSummary: {
+        label: 'Dashboard summary',
+        description: 'Get an AI-generated summary of this dashboard',
+        id: 'chat-summary',
+        iconType: 'editorComment',
+        iconOnly: true,
+        testId: 'dashboardChatSummaryButton',
+        disableButton:
+          disableTopNav ||
+          !onechatService ||
+          typeof onechatService?.openConversationFlyout !== 'function',
+        run: openChatWithSummary,
       } as TopNavMenuData,
 
       fullScreen: {
@@ -295,6 +372,7 @@ Has unsaved changes: ${hasUnsavedChanges}`;
     isResetting,
     appId,
     openChat,
+    openChatWithSummary,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -334,7 +412,10 @@ Has unsaved changes: ${hasUnsavedChanges}`;
     const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const chatMenuItem = onechatService ? [menuItems.chat] : [];
+    const chatMenuItem =
+      onechatService && typeof onechatService.openConversationFlyout === 'function'
+        ? [menuItems.chat, menuItems.chatSummary]
+        : [];
     const shareMenuItem = shareService
       ? ([
           // Only show the export button if the current user meets the requirements for at least one registered export integration
@@ -364,6 +445,7 @@ Has unsaved changes: ${hasUnsavedChanges}`;
     isLabsEnabled,
     menuItems.labs,
     menuItems.chat,
+    menuItems.chatSummary,
     menuItems.export,
     menuItems.share,
     menuItems.interactiveSave,
@@ -380,7 +462,10 @@ Has unsaved changes: ${hasUnsavedChanges}`;
     const { storeSearchSession } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const chatMenuItem = onechatService ? [menuItems.chat] : [];
+    const chatMenuItem =
+      onechatService && typeof onechatService.openConversationFlyout === 'function'
+        ? [menuItems.chat, menuItems.chatSummary]
+        : [];
     const shareMenuItem = shareService
       ? ([
           // Only show the export button if the current user meets the requirements for at least one registered export integration
@@ -417,6 +502,7 @@ Has unsaved changes: ${hasUnsavedChanges}`;
     isLabsEnabled,
     menuItems.labs,
     menuItems.chat,
+    menuItems.chatSummary,
     menuItems.export,
     menuItems.share,
     menuItems.settings,
