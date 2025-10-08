@@ -60,7 +60,7 @@ export const mockSearchToolCallWithNaturalLanguageGen = ({
   llmProxy: LlmProxy;
 }) => {
   // search tool - index explorer call
-  llmProxy.interceptors.toolChoice({
+  void llmProxy.interceptors.toolChoice({
     name: 'select_resources',
     response: createToolCallMessage('select_resources', {
       targets: [
@@ -73,7 +73,7 @@ export const mockSearchToolCallWithNaturalLanguageGen = ({
     }),
   });
 
-  llmProxy.interceptors.userMessage({
+  void llmProxy.interceptors.userMessage({
     name: 'search_tool:tool_selection',
     when: ({ messages }) => {
       const lastMessage = last(messages)?.content as string;
