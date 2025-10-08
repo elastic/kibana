@@ -11,6 +11,7 @@ import {
   INDEX_EDITOR_FLYOUT_OPENED_EVENT_TYPE,
   INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE,
   INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE,
+  INDEX_EDITOR_CLICK_QUERY_THIS_INDEX_EVENT_TYPE,
 } from './events_registration';
 import { getBucket } from './utils';
 
@@ -92,6 +93,17 @@ export class IndexEditorTelemetryService {
       flyout_mode: this._flyoutMode,
       action_type: eventData.actionType,
       failure_reason: eventData.failureReason,
+    });
+  }
+
+  public trackQueryThisIndexClicked(query: string) {
+    this.reportEvent(INDEX_EDITOR_CLICK_QUERY_THIS_INDEX_EVENT_TYPE, {
+      flyout_mode: this._flyoutMode,
+      search_query_length_bucket: getBucket(query?.length, [
+        { label: '1-50', to: 50 },
+        { label: '51-100', to: 100 },
+        { label: '101-200', to: 200 },
+      ]),
     });
   }
 

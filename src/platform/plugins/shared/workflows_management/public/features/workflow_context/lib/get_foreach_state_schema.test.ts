@@ -15,25 +15,28 @@ import { z } from '@kbn/zod';
 describe('getForeachStateSchema', () => {
   it('should return plain foreach state if item type is not inferable', () => {
     const stepContext = DynamicStepContextSchema;
-    const foreachStateSchema = getForeachStateSchema(stepContext, {
-      foreach: '{{some.path.to.items}}',
-      type: 'foreach',
-      name: 'foreach-step',
-    });
-    expectZodSchemaEqual(foreachStateSchema, ForEachContextSchema);
+    expect(() =>
+      getForeachStateSchema(stepContext, {
+        foreach: '{{some.path.to.items}}',
+        type: 'foreach',
+        name: 'foreach-step',
+      })
+    ).toThrow(
+      /Foreach step must iterate over an array type, but received no valid path or JSON string/
+    );
   });
 
   it('should return foreach state with item type if it is possible to infer from previous step output', () => {
     const itemSchema = z.object({ name: z.string(), surname: z.string() });
     const stepContext = DynamicStepContextSchema.extend({
       steps: z.object({
-        'previous-step': z.object({
+        previous_step: z.object({
           output: z.array(itemSchema),
         }),
       }),
     });
     const foreachStateSchema = getForeachStateSchema(stepContext, {
-      foreach: 'steps.previous-step.output',
+      foreach: 'steps.previous_step.output',
       type: 'foreach',
       name: 'foreach-step',
     });
