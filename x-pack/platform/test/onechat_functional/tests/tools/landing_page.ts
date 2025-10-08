@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { AGENT_BUILDER_APP_ID } from '../../../onechat/common/constants';
+import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
 
-const APP_ID = 'agent_builder';
-
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {
   const { common } = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
 
   describe('tools landing page', function () {
     it('should render', async () => {
-      await common.navigateToApp(APP_ID, { path: 'tools' });
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: 'tools' });
       await testSubjects.existOrFail('agentBuilderToolsPage');
       await testSubjects.existOrFail('agentBuilderToolsTable');
     });
@@ -37,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           .expect(200);
       }
 
-      await common.navigateToApp(APP_ID, { path: 'tools' });
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: 'tools' });
       await testSubjects.existOrFail('agentBuilderToolsTable');
 
       await testSubjects.click(`checkboxSelectRow-${ids[0]}`);

@@ -6,11 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { AGENT_BUILDER_APP_ID } from '../../../onechat/common/constants';
+import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
 
-const APP_ID = 'agent_builder';
-
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {
   const { common } = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
@@ -31,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      await common.navigateToApp(APP_ID, { path: `tools/${toolId}` });
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${toolId}` });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       const descriptionEditor = await testSubjects.find('agentBuilderToolDescriptionEditor');
       const descriptionTextarea = await descriptionEditor.findByCssSelector(
@@ -44,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('toastCloseButton');
 
       // Navigate back to the tool details page and verify edited fields
-      await common.navigateToApp(APP_ID, { path: `tools/${toolId}` });
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${toolId}` });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       const idValue = await testSubjects.getAttribute('agentBuilderToolIdInput', 'value');
       expect(idValue).to.be(toolId);
@@ -68,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           configuration: { query: 'FROM .kibana | LIMIT 1', params: {} },
         })
         .expect(200);
-      await common.navigateToApp(APP_ID, { path: `tools/${toolId}` });
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${toolId}` });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       await testSubjects.click('agentBuilderToolContextMenuButton');
       await testSubjects.click('agentBuilderToolCloneButton');
@@ -81,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('toastCloseButton');
 
       // After cloning, navigate to the cloned tool details and verify fields
-      await common.navigateToApp(APP_ID, { path: `tools/${clonedToolId!}` });
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${clonedToolId!}` });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       const clonedIdValue = await testSubjects.getAttribute('agentBuilderToolIdInput', 'value');
       expect(clonedIdValue).to.be(clonedToolId);
@@ -105,7 +104,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           configuration: { query: 'FROM .kibana | LIMIT 1', params: {} },
         })
         .expect(200);
-      await common.navigateToApp(APP_ID, {
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, {
         path: `tools/${toolId}`,
       });
       await testSubjects.click('toolFormTestButton');
@@ -135,7 +134,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           configuration: { query: 'FROM .kibana | LIMIT 1', params: {} },
         })
         .expect(200);
-      await common.navigateToApp(APP_ID, { path: `tools/${toolId}` });
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${toolId}` });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       await testSubjects.click('agentBuilderToolContextMenuButton');
       await testSubjects.click('agentBuilderToolDeleteButton');
@@ -146,7 +145,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('views built-in as read-only', async () => {
       const builtInToolId = 'platform.core.search';
-      await common.navigateToApp(APP_ID, { path: `tools/${builtInToolId}` });
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${builtInToolId}` });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       await testSubjects.existOrFail('agentBuilderToolReadOnlyBadge');
       await testSubjects.missingOrFail('agentBuilderToolContextMenuButton');

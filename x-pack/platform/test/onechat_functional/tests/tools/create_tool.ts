@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
+import { AGENT_BUILDER_APP_ID } from '../../../onechat/common/constants';
+import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
 
-const APP_ID = 'agent_builder';
-
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {
   const { common } = getPageObjects(['common']);
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
@@ -42,7 +41,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should create an esql tool', async () => {
       const toolId = `ftr.esql.${Date.now()}`;
-      await common.navigateToApp(APP_ID, { path: 'tools/new' });
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: 'tools/new' });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       await testSubjects.setValue('agentBuilderToolIdInput', toolId);
 
@@ -62,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should create an index search tool', async () => {
       const toolId = `ftr.index.${Date.now()}`;
-      await common.navigateToApp(APP_ID, { path: 'tools/new' });
+      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: 'tools/new' });
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       await testSubjects.setValue('agentBuilderToolIdInput', toolId);
 
