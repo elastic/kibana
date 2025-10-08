@@ -182,6 +182,6 @@ export const DEFAULT_OBSERVABLE_TYPES_MODAL_DESCRIPTION = i18n.translate(
   'xpack.cases.caseView.observables.defaultObservableTypesModalDescription',
   {
     defaultMessage:
-      'When auto-extracting observables is on, available values from the following ECS fields are added as observables.',
+      'When auto-extract observables is on, available values from the following ECS fields are added as observables.',
   }
 );
