@@ -32,7 +32,7 @@ buildkite-agent step update outcome passed || echo "Can't set step to passed, ma
 buildkite-agent step update state finished || echo "Can't set step to finished, maybe it's already finished?"
 .buildkite/scripts/bootstrap.sh
 echo "--- Archive moon cache"
-if [[ ! -d ~/.moon/cache ]]; then
+if [[ ! -d .moon/cache ]]; then
   echo "No moon cache directory found, skipping archive"
   exit 0
 else
