@@ -17,6 +17,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
   CanAddNewSection,
   CanExpandPanels,
+  CanPinPanel,
   HasLastSavedChildState,
   HasSerializedChildState,
   PassThroughContext,
@@ -93,6 +94,7 @@ export interface DashboardCreationOptions {
 }
 
 export type DashboardApi = CanExpandPanels &
+  CanPinPanel &
   CanAddNewSection &
   HasAppContext &
   HasExecutionContext &

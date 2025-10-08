@@ -76,6 +76,7 @@ export const EmbeddableRenderer = <
               isExpandable: true,
               isDuplicable: true,
               isCustomizable: true,
+              isPinnable: false,
             };
             return {
               // Spread default panel capabilities first, allow apiRegistration to override them

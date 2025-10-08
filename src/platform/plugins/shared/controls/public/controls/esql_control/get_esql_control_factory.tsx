@@ -91,6 +91,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
          * Once we come up with a good UX solution to this, we can remove this
          */
         isDuplicable: false,
+        isPinnable: true,
         defaultTitle$: new BehaviorSubject<string | undefined>(state.title),
         isEditingEnabled: () => true,
         getTypeDisplayName: () => displayName,

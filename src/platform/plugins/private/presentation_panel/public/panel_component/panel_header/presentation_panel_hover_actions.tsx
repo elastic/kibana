@@ -66,6 +66,7 @@ const QUICK_ACTION_IDS = {
   edit: [
     'editPanel',
     'clearControl',
+    'pinControl',
     'ACTION_CONFIGURE_IN_LENS',
     'ACTION_CUSTOMIZE_PANEL',
     'ACTION_OPEN_IN_DISCOVER',

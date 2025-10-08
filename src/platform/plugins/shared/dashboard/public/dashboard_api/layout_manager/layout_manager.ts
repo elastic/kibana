@@ -77,6 +77,7 @@ export function initializeLayoutManager(
     getReferences
   );
 
+  const pinnedPanels$ = new BehaviorSubject<string[]>(Object.keys(initialLayout.controls));
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
   const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
@@ -96,6 +97,12 @@ export function initializeLayoutManager(
       }),
       startWith({}) // do not block rendering by waiting for these settings
     );
+
+  const pinnedControlsSubscription = layout$
+    .pipe(map(({ controls }) => Object.keys(controls)))
+    .subscribe((pinnedControls) => {
+      pinnedPanels$.next(pinnedControls);
+    });
 
   /** Keep gridLayout$ in sync with layout$ + panelResizeSettings$ */
   const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
@@ -446,6 +453,44 @@ export function initializeLayoutManager(
       getPanelCount: () => Object.keys(layout$.value.panels).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
 
+      // only controls can be pinned
+      pinnedPanels$,
+      unpinPanel: (uuid: string) => {
+        const controlToUnpin = layout$.getValue().controls[uuid];
+        if (!controlToUnpin) return;
+
+        const newControls = { ...layout$.getValue().controls };
+        delete newControls[uuid];
+
+        const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
+          PanelPlacementStrategy.placeAtTop,
+          {
+            currentPanels: layout$.value.panels,
+            height: 2,
+            width: 12,
+          }
+        );
+
+        layout$.next({
+          ...layout$.getValue(),
+          panels: {
+            ...otherPanels,
+            [uuid]: { ...controlToUnpin, grid: { i: uuid, ...newPanelPlacement } },
+          },
+          controls: newControls,
+        });
+      },
+      pinPanel: (uuid: string) => {
+        const controlToPin = layout$.getValue().panels[uuid];
+        if (!controlToPin) return;
+
+        const newControls = { ...layout$.getValue().controls };
+        newControls[uuid] = { ...controlToPin, order: newControls.length };
+        const newPanels = { ...layout$.getValue().panels };
+        delete newPanels[uuid];
+        layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
+      },
+
       /** Sections */
       addNewSection: () => {
         const currentLayout = layout$.getValue();
@@ -478,6 +523,7 @@ export function initializeLayoutManager(
     },
     cleanup: () => {
       gridLayoutSubscription.unsubscribe();
+      pinnedControlsSubscription.unsubscribe();
     },
   };
 }

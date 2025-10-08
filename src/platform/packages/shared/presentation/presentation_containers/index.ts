@@ -14,16 +14,20 @@ export { initializeUnsavedChanges } from './interfaces/unsaved_changes/initializ
 export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
+  apiCanPinPanel,
   type CanDuplicatePanels,
   type CanExpandPanels,
+  type CanPinPanel,
 } from './interfaces/panel_management';
 export {
   apiCanBeDuplicated,
   apiCanBeCustomized,
   apiCanBeExpanded,
+  apiCanBePinned,
   type IsDuplicable,
   type IsExpandable,
   type IsCustomizable,
+  type IsPinnable,
   type HasPanelCapabilities,
 } from './interfaces/panel_capabilities';
 export { type CanAddNewSection, apiCanAddNewSection } from './interfaces/can_add_new_section';
