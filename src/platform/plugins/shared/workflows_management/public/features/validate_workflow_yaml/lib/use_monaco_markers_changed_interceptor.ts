@@ -14,7 +14,7 @@ import type YAML from 'yaml';
 import { formatMonacoYamlMarker } from '../../../widgets/workflow_yaml_editor/lib/format_monaco_yaml_marker';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
-import { isKnownYamlValidationResultOwner, type YamlValidationResult } from '../model/types';
+import { isYamlValidationMarkerOwner, type YamlValidationResult } from '../model/types';
 
 export interface UseMonacoMarkersChangedInterceptorResult {
   transformMonacoMarkers: (
@@ -70,7 +70,7 @@ export function useMonacoMarkersChangedInterceptor({
     ) => {
       const errors: YamlValidationResult[] = [];
       for (const marker of markers) {
-        if (!isKnownYamlValidationResultOwner(owner)) {
+        if (!isYamlValidationMarkerOwner(owner)) {
           // console.log('skipping marker for unknown owner', owner);
           continue;
         }

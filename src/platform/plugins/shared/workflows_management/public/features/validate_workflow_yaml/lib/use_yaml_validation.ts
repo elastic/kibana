@@ -26,6 +26,7 @@ import {
 } from '../../../widgets/workflow_yaml_editor/lib/store';
 import { collectAllConnectorIds } from './collect_all_connector_ids';
 import { validateConnectorIds } from './validate_connector_ids';
+import { useKibana } from '../../../hooks/use_kibana';
 
 const SEVERITY_MAP = {
   error: MarkerSeverity.Error,
@@ -48,6 +49,7 @@ export function useYamlValidation(
   const workflowGraph = useSelector(selectWorkflowGraph);
   const workflowDefinition = useSelector(selectWorkflowDefinition);
   const lineCounter = useSelector(selectYamlLineCounter);
+  const { application } = useKibana().services;
 
   useEffect(() => {
     if (!editor) {
@@ -81,10 +83,16 @@ export function useYamlValidation(
     const connectorIdItems = collectAllConnectorIds(yamlDocument, lineCounter);
     const dynamicConnectorTypes = getCachedDynamicConnectorTypes();
 
+    // Generate the connectors management URL
+    const connectorsManagementUrl = application?.getUrlForApp('management', {
+      path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+      absolute: true,
+    });
+
     const validationResults: YamlValidationResult[] = [
       validateStepNameUniqueness(yamlDocument),
       validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
-      validateConnectorIds(connectorIdItems, dynamicConnectorTypes),
+      validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
     ].flat();
 
     for (const validationResult of validationResults) {
@@ -200,7 +208,7 @@ export function useYamlValidation(
       markers.filter((m) => m.source === 'connector-id-validation')
     );
     setError(null);
-  }, [editor, lineCounter, workflowDefinition, workflowGraph, yamlDocument]);
+  }, [editor, lineCounter, workflowDefinition, workflowGraph, yamlDocument, application]);
 
   return {
     error,

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { capitalize } from 'lodash';
 import { getConnectorInstancesForType } from '../../../widgets/workflow_yaml_editor/lib/snippets/generate_connector_snippet';
 import type { ConnectorIdItem, YamlValidationResult } from '../model/types';
 
 export function validateConnectorIds(
   connectorIdItems: ConnectorIdItem[],
-  dynamicConnectorTypes: Record<string, any> | null
+  dynamicConnectorTypes: Record<string, any> | null,
+  connectorsManagementUrl?: string
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
 
@@ -54,10 +54,10 @@ export function validateConnectorIds(
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        afterMessage: `Not connected. Add new ${capitalize(
-          connectorIdItem.connectorType
-        )} connector`,
-        hoverMessage: null,
+        afterMessage: null,
+        hoverMessage: connectorsManagementUrl
+          ? `[Open connectors management](${connectorsManagementUrl})`
+          : null,
       });
     } else {
       results.push({
@@ -69,9 +69,7 @@ export function validateConnectorIds(
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        afterMessage: `✓ Connected (${capitalize(connectorIdItem.connectorType)} connector, ID: ${
-          instance.id
-        })`,
+        afterMessage: `✓ Connected (${connectorIdItem.connectorType} connector, ID: ${instance.id})`,
         hoverMessage: null,
       });
     }

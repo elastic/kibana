@@ -82,19 +82,15 @@ interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase 
   severity: null;
   message: null;
   owner: 'connector-id-validation';
-  afterMessage: string | null;
 }
 
 interface YamlValidationResultConnectorIdError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
   owner: 'connector-id-validation';
-  afterMessage: string | null;
 }
 
-export function isKnownYamlValidationResultOwner(
-  owner: string
-): owner is YamlValidationResult['owner'] {
+export function isYamlValidationMarkerOwner(owner: string): owner is YamlValidationResult['owner'] {
   return [
     'step-name-validation',
     'variable-validation',

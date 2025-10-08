@@ -43,6 +43,9 @@ export function getSchemaAtPath(
       if (current instanceof z.ZodOptional) {
         current = current.unwrap();
       }
+      if (current instanceof z.ZodDefault) {
+        current = current.removeDefault();
+      }
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
         if (!(segment in shape)) {
