@@ -39,7 +39,6 @@ import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_sele
 import type { SharingSavedObjectProps } from './load_from_library';
 import { loadFromLibrary } from './load_from_library';
 import { saveToLibrary } from './save_to_library';
-import type { MapSerializedState } from '../../../react_embeddable/types';
 import {
   getCoreChrome,
   getIndexPatternService,
@@ -61,6 +60,11 @@ import { LayerStatsCollector, MapSettingsCollector } from '../../../../common/te
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
 import { extractReferences } from '../../../../common/migrations/references';
 import { getByReferenceState, getByValueState } from '../../../react_embeddable/library_transforms';
+import type {
+  MapByReferenceState,
+  MapByValueState,
+  MapEmbeddableState,
+} from '../../../../common/embeddable/types';
 
 function setMapSettingsFromEncodedState(settings: Partial<MapSettings>) {
   const decodedCustomIcons = settings.customIcons
@@ -83,7 +87,7 @@ export class SavedMap {
   private readonly _defaultLayers: LayerDescriptor[];
   private readonly _embeddableId?: string;
   private _initialLayerListConfig: LayerDescriptor[] = [];
-  private _mapSerializedState?: MapSerializedState;
+  private _mapEmbeddableState?: MapEmbeddableState;
   private readonly _onSaveCallback?: () => void;
   private _originatingApp?: string;
   private _originatingPath?: string;
@@ -95,7 +99,7 @@ export class SavedMap {
 
   constructor({
     defaultLayers = [],
-    mapSerializedState,
+    mapEmbeddableState,
     embeddableId,
     onSaveCallback,
     originatingApp,
@@ -104,7 +108,7 @@ export class SavedMap {
     defaultLayerWizard,
   }: {
     defaultLayers?: LayerDescriptor[];
-    mapSerializedState?: MapSerializedState;
+    mapEmbeddableState?: MapEmbeddableState;
     embeddableId?: string;
     onSaveCallback?: () => void;
     originatingApp?: string;
@@ -113,7 +117,7 @@ export class SavedMap {
     defaultLayerWizard?: string;
   }) {
     this._defaultLayers = defaultLayers;
-    this._mapSerializedState = mapSerializedState;
+    this._mapEmbeddableState = mapEmbeddableState;
     this._embeddableId = embeddableId;
     this._onSaveCallback = onSaveCallback;
     this._originatingApp = originatingApp;
@@ -128,17 +132,17 @@ export class SavedMap {
     return this._store;
   }
 
-  public async reset(mapSerializedState: MapSerializedState) {
-    this._mapSerializedState = mapSerializedState;
+  public async reset(mapEmbeddableState: MapEmbeddableState) {
+    this._mapEmbeddableState = mapEmbeddableState;
     await this.whenReady();
   }
 
   async whenReady() {
     await whenLicenseInitialized();
 
-    if (this._mapSerializedState?.savedObjectId) {
+    if ((this._mapEmbeddableState as MapByReferenceState)?.savedObjectId) {
       const { attributes, managed, references, sharingSavedObjectProps } = await loadFromLibrary(
-        this._mapSerializedState.savedObjectId
+        (this._mapEmbeddableState as MapByReferenceState).savedObjectId!
       );
       this._attributes = attributes;
       if (sharingSavedObjectProps) {
@@ -150,8 +154,8 @@ export class SavedMap {
         this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
       }
     } else {
-      this._attributes = this._mapSerializedState?.attributes
-        ? this._mapSerializedState.attributes
+      this._attributes = (this._mapEmbeddableState as MapByValueState)?.attributes
+        ? (this._mapEmbeddableState as MapByValueState).attributes
         : {
             title: '',
           };
@@ -174,8 +178,8 @@ export class SavedMap {
       }
     }
 
-    if (this._mapSerializedState?.mapSettings !== undefined) {
-      this._store.dispatch(setMapSettingsFromEncodedState(this._mapSerializedState.mapSettings));
+    if (this._mapEmbeddableState?.mapSettings !== undefined) {
+      this._store.dispatch(setMapSettingsFromEncodedState(this._mapEmbeddableState.mapSettings));
     } else if (this._attributes?.mapStateJSON) {
       try {
         const mapState = JSON.parse(this._attributes.mapStateJSON) as ParsedMapStateJSON;
@@ -188,8 +192,8 @@ export class SavedMap {
     }
 
     let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
-    if (this._mapSerializedState?.isLayerTOCOpen !== undefined) {
-      isLayerTOCOpen = this._mapSerializedState.isLayerTOCOpen;
+    if (this._mapEmbeddableState?.isLayerTOCOpen !== undefined) {
+      isLayerTOCOpen = this._mapEmbeddableState.isLayerTOCOpen;
     } else if (this._attributes?.uiStateJSON) {
       try {
         const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiStateJSON;
@@ -203,8 +207,8 @@ export class SavedMap {
     this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
 
     let openTOCDetails: string[] = [];
-    if (this._mapSerializedState?.openTOCDetails !== undefined) {
-      openTOCDetails = this._mapSerializedState.openTOCDetails;
+    if (this._mapEmbeddableState?.openTOCDetails !== undefined) {
+      openTOCDetails = this._mapEmbeddableState.openTOCDetails;
     } else if (this._attributes?.uiStateJSON) {
       try {
         const uiState = JSON.parse(this._attributes.uiStateJSON) as ParsedUiStateJSON;
@@ -217,12 +221,12 @@ export class SavedMap {
     }
     this._store.dispatch(setOpenTOCDetails(openTOCDetails));
 
-    if (this._mapSerializedState?.mapCenter !== undefined) {
+    if (this._mapEmbeddableState?.mapCenter !== undefined) {
       this._store.dispatch(
         setGotoWithCenter({
-          lat: this._mapSerializedState.mapCenter.lat,
-          lon: this._mapSerializedState.mapCenter.lon,
-          zoom: this._mapSerializedState.mapCenter.zoom,
+          lat: this._mapEmbeddableState.mapCenter.lat,
+          lon: this._mapEmbeddableState.mapCenter.lon,
+          zoom: this._mapEmbeddableState.mapCenter.zoom,
         })
       );
     } else if (this._attributes?.mapStateJSON) {
@@ -257,8 +261,8 @@ export class SavedMap {
       }
     }
     this._store.dispatch<any>(replaceLayerList(layerList));
-    if (this._mapSerializedState?.hiddenLayers !== undefined) {
-      this._store.dispatch<any>(setHiddenLayers(this._mapSerializedState.hiddenLayers));
+    if (this._mapEmbeddableState?.hiddenLayers !== undefined) {
+      this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableState.hiddenLayers));
     }
     this._initialLayerListConfig = copyPersistentState(layerList);
 
@@ -295,7 +299,7 @@ export class SavedMap {
   }
 
   private _getPageTitle(): string {
-    if (!this._mapSerializedState) {
+    if (!this._mapEmbeddableState) {
       return i18n.translate('xpack.maps.breadcrumbsCreate', {
         defaultMessage: 'Create',
       });
@@ -366,9 +370,7 @@ export class SavedMap {
   }
 
   public getSavedObjectId(): string | undefined {
-    return this._mapSerializedState?.savedObjectId
-      ? this._mapSerializedState.savedObjectId
-      : undefined;
+    return (this._mapEmbeddableState as MapByReferenceState)?.savedObjectId;
   }
 
   public getOriginatingApp(): string | undefined {
@@ -416,8 +418,8 @@ export class SavedMap {
   }
 
   public getAutoFitToBounds(): boolean {
-    if (this._mapSerializedState?.mapSettings?.autoFitToDataBounds !== undefined) {
-      return this._mapSerializedState.mapSettings.autoFitToDataBounds;
+    if (this._mapEmbeddableState?.mapSettings?.autoFitToDataBounds !== undefined) {
+      return this._mapEmbeddableState.mapSettings.autoFitToDataBounds;
     }
 
     if (!this._attributes || !this._attributes.mapStateJSON) {
@@ -475,21 +477,23 @@ export class SavedMap {
     this._attributes.description = newDescription;
     await this._syncAttributesWithStore();
 
-    let mapSerializedState: MapSerializedState | undefined;
-    const { attributes, references } = extractReferences({
-      attributes: this._attributes,
-    });
+    let mapEmbeddableState: MapEmbeddableState | undefined;
     if (saveByReference) {
       try {
         const savedObjectsTagging = getSavedObjectsTagging();
         const tagReferences =
           savedObjectsTagging && tags ? savedObjectsTagging.ui.updateTagsReferences([], tags) : [];
+        const { attributes, references } = extractReferences({
+          attributes: this._attributes,
+        });
         const { id: savedObjectId } = await saveToLibrary(
           attributes,
           [...references, ...tagReferences],
-          newCopyOnSave ? undefined : this._mapSerializedState?.savedObjectId
+          newCopyOnSave
+            ? undefined
+            : (this._mapEmbeddableState as MapByReferenceState)?.savedObjectId
         );
-        mapSerializedState = getByReferenceState(this._mapSerializedState, savedObjectId);
+        mapEmbeddableState = getByReferenceState(this._mapEmbeddableState, savedObjectId);
       } catch (e) {
         this._attributes.title = prevTitle;
         this._attributes.description = prevDescription;
@@ -504,7 +508,7 @@ export class SavedMap {
         return;
       }
     } else {
-      mapSerializedState = getByValueState(this._mapSerializedState, this._attributes);
+      mapEmbeddableState = getByValueState(this._mapEmbeddableState, this._attributes);
     }
 
     if (tags) {
@@ -528,7 +532,7 @@ export class SavedMap {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
-          serializedState: { rawState: mapSerializedState, references },
+          serializedState: { rawState: mapEmbeddableState },
         },
         path: this._originatingPath,
       });
@@ -537,14 +541,14 @@ export class SavedMap {
       await this._getStateTransfer().navigateToWithEmbeddablePackage('dashboards', {
         state: {
           type: MAP_SAVED_OBJECT_TYPE,
-          serializedState: { rawState: mapSerializedState, references },
+          serializedState: { rawState: mapEmbeddableState },
         },
         path: dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`,
       });
       return;
     }
 
-    this._mapSerializedState = mapSerializedState;
+    this._mapEmbeddableState = mapEmbeddableState;
     // break connection to originating application
     this._originatingApp = undefined;
 

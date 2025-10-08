@@ -18,7 +18,7 @@ import { useEsqlQueryInfo } from '../../../hooks';
 
 export const useChartLayers = ({
   query,
-  timeRange,
+  getTimeRange,
   color,
   seriesType,
   services,
@@ -27,7 +27,7 @@ export const useChartLayers = ({
   query: string;
   color?: string;
   unit?: string;
-  timeRange: TimeRange;
+  getTimeRange: () => TimeRange;
   seriesType: LensSeriesLayer['seriesType'];
   services: ChartSectionProps['services'];
   abortController?: AbortController;
@@ -40,9 +40,10 @@ export const useChartLayers = ({
         esqlQuery: query,
         search: services.data.search.search,
         signal: abortController?.signal,
+        timeRange: getTimeRange(),
       }),
 
-    [query, services.data.search.search, timeRange]
+    [query, services.data.search, abortController, getTimeRange]
   );
 
   const layers = useMemo<LensSeriesLayer[]>(() => {

@@ -30,6 +30,7 @@ export const fromSavedObjectTabToTabState = ({
   label: tab.label,
   initialInternalState: {
     serializedSearchSource: tab.serializedSearchSource,
+    visContext: tab.visContext,
   },
   initialAppState: {
     columns: tab.columns,
@@ -132,7 +133,7 @@ export const fromTabStateToSavedObjectTab = ({
         : undefined,
     breakdownField: tab.initialAppState?.breakdownField,
     density: tab.initialAppState?.density,
-    visContext: tab.overriddenVisContextAfterInvalidation,
+    visContext: tab.initialInternalState?.visContext,
   };
 };
 

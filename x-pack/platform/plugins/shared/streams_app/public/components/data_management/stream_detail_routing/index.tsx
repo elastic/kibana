@@ -40,7 +40,11 @@ interface StreamDetailRoutingProps {
 
 export function StreamDetailRouting(props: StreamDetailRoutingProps) {
   const router = useStreamsAppRouter();
-  const { core, dependencies } = useKibana();
+  const {
+    core,
+    dependencies,
+    services: { telemetryClient },
+  } = useKibana();
   const {
     data,
     streams: { streamsRepositoryClient },
@@ -57,6 +61,7 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
       timeState$={timeState$}
       streamsRepositoryClient={streamsRepositoryClient}
       forkSuccessNofitier={createForkSuccessNofitier({ core, router })}
+      telemetryClient={telemetryClient}
     >
       <StreamDetailRoutingImpl />
     </StreamRoutingContextProvider>

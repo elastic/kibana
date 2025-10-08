@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
-import { MissingVersion } from '../../../../../../../../common/api/detection_engine';
-import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import { calculateRuleFieldsDiff } from '../../../../../prebuilt_rules/logic/diff/calculation/calculate_rule_fields_diff';
-import { convertRuleToDiffable } from '../../../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
+import type { RuleResponse } from '../../../../../../../../common/api/detection_engine';
+import type { PrebuiltRuleAsset } from '../../../../../prebuilt_rules';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../converters/convert_prebuilt_rule_asset_to_rule_response';
 
 interface CalculateIsCustomizedArgs {
@@ -61,11 +59,6 @@ export function calculateIsCustomized({
  * @returns true if all rule fields are equal, false otherwise
  */
 function areRulesEqual(ruleA: RuleResponse, ruleB: RuleResponse) {
-  const fieldsDiff = calculateRuleFieldsDiff({
-    base_version: MissingVersion,
-    current_version: convertRuleToDiffable(ruleA),
-    target_version: convertRuleToDiffable(ruleB),
-  });
-
-  return Object.values(fieldsDiff).every((diff) => diff.has_update === false);
+  const fieldsDiff = calculateRuleFieldsDiff({ ruleA, ruleB });
+  return Object.values(fieldsDiff).every((field) => field.is_equal === true);
 }

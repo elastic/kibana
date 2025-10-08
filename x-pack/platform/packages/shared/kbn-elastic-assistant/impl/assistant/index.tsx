@@ -79,7 +79,7 @@ const AssistantComponent: React.FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
-    assistantAvailability: { isAssistantEnabled, isAssistantSharingEnabled },
+    assistantAvailability: { isAssistantEnabled },
     assistantTelemetry,
     currentAppId,
     augmentMessageCodeBlocks,
@@ -441,11 +441,11 @@ const AssistantComponent: React.FC<Props> = ({
           >
             <ConversationSidePanel
               currentConversation={currentConversation}
+              currentUser={currentUser}
               onConversationSelected={handleOnConversationSelected}
               conversations={conversations}
               onConversationDeleted={handleOnConversationDeleted}
               onConversationCreate={handleCreateConversation}
-              isAssistantSharingEnabled={isAssistantSharingEnabled}
               isFetchingCurrentUserConversations={isFetchingCurrentUserConversations}
               refetchCurrentUserConversations={refetchCurrentUserConversations}
               setPaginationObserver={setPaginationObserver}
@@ -475,9 +475,9 @@ const AssistantComponent: React.FC<Props> = ({
                     conversations={conversations}
                     conversationsLoaded={isFetchedCurrentUserConversations}
                     conversationSharedState={conversationSharedState}
+                    currentUser={currentUser}
                     defaultConnector={defaultConnector}
                     isAssistantEnabled={isAssistantEnabled}
-                    isAssistantSharingEnabled={isAssistantSharingEnabled}
                     isConversationOwner={isConversationOwner}
                     isDisabled={isDisabled || isLoadingChatSend}
                     isLoading={isInitialLoad}

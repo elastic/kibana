@@ -54,6 +54,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         await streamsClient.putIngestStream('logs.android', {
           ingest: {
             lifecycle: { inherit: {} },
+            settings: {},
             processing: {
               steps: [],
             },

@@ -27,7 +27,7 @@ export const useExecuteTool = ({
   const { toolsService } = useOnechatServices();
 
   const mutationFn = ({ toolId, toolParams }: ExecuteToolParams): Promise<ExecuteToolResponse> =>
-    toolsService.execute(toolId, toolParams);
+    toolsService.execute({ toolId, toolParams });
 
   const { mutateAsync, isLoading, error } = useMutation<
     ExecuteToolResponse,

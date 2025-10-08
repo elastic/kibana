@@ -30,7 +30,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const indexName = 'test-my-index';
 
-  describe('Search Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/228946
+  describe.skip('Search Home page', function () {
     describe('Solution Nav - Search', function () {
       let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };

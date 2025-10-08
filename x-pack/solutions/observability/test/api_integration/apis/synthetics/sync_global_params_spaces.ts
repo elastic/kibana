@@ -12,6 +12,7 @@ import type {
 import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
@@ -27,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const kServer = getService('kibanaServer');
     let locWithSpace: PrivateLocation;
+    let loc2WithSpace: PrivateLocation;
     let _browserMonitorJson: HTTPFields;
     let browserMonitorJson: HTTPFields;
     let newBrowserMonitorId: string;
@@ -54,11 +56,15 @@ export default function ({ getService }: FtrProviderContext) {
         spaceId,
         label: 'Test private location 1',
       });
+      loc2WithSpace = await testPrivateLocations.createPrivateLocation({
+        label: 'Test private location 2',
+      });
     });
 
     it('create monitors in private locations', async () => {
       const newMonitor = browserMonitorJson;
       newMonitor.locations = [locWithSpace];
+      newMonitor.spaces = [spaceId, 'default'];
 
       const res = await monitorTestService.createMonitor({
         monitor: newMonitor,
@@ -70,10 +76,31 @@ export default function ({ getService }: FtrProviderContext) {
           ...newMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: res.body.id,
           [ConfigKey.CONFIG_ID]: res.body.id,
-          spaces: [spaceId],
+          spaces: [spaceId, 'default'],
         })
       );
       newBrowserMonitorId = res.rawBody.id;
+    });
+
+    it('create monitor in private locations 2', async () => {
+      const newMonitor = browserMonitorJson;
+      newMonitor.locations = [loc2WithSpace];
+      newMonitor.spaces = ['default'];
+      newMonitor.name = 'Test HTTP Monitor 03 01';
+
+      const res = await monitorTestService.createMonitor({
+        monitor: newMonitor,
+      });
+
+      expect(res.body).eql(
+        omitMonitorKeys({
+          ...newMonitor,
+          [ConfigKey.MONITOR_QUERY_ID]: res.body.id,
+          [ConfigKey.CONFIG_ID]: res.body.id,
+          spaces: ['default'],
+          locations: [omit(loc2WithSpace, 'spaces')],
+        })
+      );
     });
 
     it('added an integration for previously added monitor', async () => {
@@ -208,6 +235,17 @@ export default function ({ getService }: FtrProviderContext) {
           location: { id: locWithSpace.id },
         })
       );
+    });
+
+    it('number of package policies matches number of monitors', async () => {
+      const packagePolicies = await supertestAPI.get(
+        '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
+      );
+
+      const monitors = await supertestAPI.get(
+        '/api/synthetics/monitors?page=1&perPage=2000&showFromAllSpaces=true'
+      );
+      expect(packagePolicies.body.total).eql(monitors.body.total);
     });
   });
 }

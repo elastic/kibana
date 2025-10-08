@@ -21,13 +21,13 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../../entities/workflows/model/use_workflow_detail';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
+import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import { TestWorkflowModal } from '../../../features/run_workflow/ui/test_workflow_modal';
 import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
 import { WorkflowExecutionDetail } from '../../../features/workflow_execution_detail';
 import { WorkflowExecutionList } from '../../../features/workflow_execution_list/ui/workflow_execution_list_stateful';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { WorkflowDetailHeader } from './workflow_detail_header';
-import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -250,6 +250,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         handleTabChange={(tab) => {
           setActiveTab(tab);
         }}
+        hasUnsavedChanges={hasChanges}
       />
       <EuiFlexGroup gutterSize="none" css={styles.container}>
         <EuiFlexItem css={styles.main}>
@@ -266,6 +267,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
                   highlightStep={selectedStepId}
                   stepExecutions={execution?.stepExecutions}
                   readOnly={activeTab === 'executions'}
+                  activeTab={activeTab}
+                  selectedExecutionId={selectedExecutionId}
+                  originalValue={workflow?.yaml ?? ''}
                 />
               </React.Suspense>
             </EuiFlexItem>

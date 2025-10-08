@@ -364,7 +364,7 @@
             "label": "addFiles",
             "description": [],
             "signature": [
-              "(fileList: FileList) => Promise<void>"
+              "(fileList: FileList | File[]) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
             "deprecated": false,
@@ -373,12 +373,12 @@
               {
                 "parentPluginId": "@kbn/file-upload",
                 "id": "def-common.FileUploadManager.addFiles.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "fileList",
                 "description": [],
                 "signature": [
-                  "FileList"
+                  "FileList | File[]"
                 ],
                 "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
                 "deprecated": false,
@@ -1279,6 +1279,17 @@
                 "text": "STATUS"
               }
             ],
+            "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/file-upload",
+            "id": "def-common.UploadStatus.overallImportProgress",
+            "type": "number",
+            "tags": [],
+            "label": "overallImportProgress",
+            "description": [],
             "path": "x-pack/platform/packages/shared/file-upload/file_upload_manager/file_manager.ts",
             "deprecated": false,
             "trackAdoption": false

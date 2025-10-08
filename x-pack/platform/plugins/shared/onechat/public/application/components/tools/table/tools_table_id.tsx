@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
 import React from 'react';
 import { truncateAtNewline } from '../../../utils/truncate_at_newline';
-import { useToolsActions } from '../../../context/tools_table_provider';
+import { useToolsActions } from '../../../context/tools_provider';
 
 export interface ToolIdWithDescriptionProps {
   tool: ToolDefinitionWithSchema;

@@ -345,16 +345,18 @@ export const loadAttackDiscoveryData = async ({
   kbnClient,
   esClient,
   log,
+  episodes = ['1', '2'],
 }: {
   kbnClient: KbnClient;
   esClient: Client;
   log: ToolingLog;
+  episodes?: string[];
 }) => {
   await checkRuleExistsAndStatus({ kbnClient, log });
   await checkDeleteIndices({ esClient, log });
   await createPipeline({ esClient, log });
 
-  for (const epNum of ['1', '2']) {
+  for (const epNum of episodes) {
     await processFilesForEpisode({ esClient, epNum, log });
   }
 

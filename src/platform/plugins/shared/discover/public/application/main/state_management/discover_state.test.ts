@@ -559,11 +559,14 @@ describe('Discover state', () => {
       const savedSearch = copySavedSearch(savedSearchMock);
       const savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
+        dataView: undefined,
+        initialInternalState: undefined,
         appState: getInitialState({
           initialUrlState: undefined,
           savedSearch,
           services: mockServices,
         }),
+        globalState: undefined,
         services: mockServices,
       });
       const { state, customizationService, getCurrentUrl } = await getState('/', {
@@ -790,11 +793,14 @@ describe('Discover state', () => {
       let savedSearch = copySavedSearch(savedSearchMock);
       let savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
+        dataView: undefined,
+        initialInternalState: undefined,
         appState: getInitialState({
           initialUrlState: undefined,
           savedSearch,
           services: mockServices,
         }),
+        globalState: undefined,
         services: mockServices,
       });
       const { state, customizationService, history } = await getState('/', {
@@ -817,6 +823,8 @@ describe('Discover state', () => {
       savedSearch = { ...copySavedSearch(savedSearchMockWithTimeField), id: savedSearch.id };
       savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
+        dataView: undefined,
+        initialInternalState: undefined,
         appState: getInitialState({
           initialUrlState: undefined,
           savedSearch,
@@ -865,11 +873,14 @@ describe('Discover state', () => {
       savedSearch = copySavedSearch(savedSearchMock);
       savedSearchWithDefaults = updateSavedSearch({
         savedSearch,
+        dataView: undefined,
+        initialInternalState: undefined,
         appState: getInitialState({
           initialUrlState: undefined,
           savedSearch,
           services: mockServices,
         }),
+        globalState: undefined,
         services: mockServices,
       });
       mockServices.data.search.searchSource.create = jest

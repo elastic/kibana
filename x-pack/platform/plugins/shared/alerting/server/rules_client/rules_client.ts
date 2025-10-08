@@ -96,6 +96,8 @@ import type {
   BulkFillGapsByRuleIdsOptions,
   BulkFillGapsByRuleIdsParams,
 } from '../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
+import type { GetRuleTemplateParams } from '../application/rule_template/methods/get/types';
+import { getRuleTemplate } from '../application/rule_template/methods/get/get_rule_template';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -232,6 +234,8 @@ export class RulesClient {
   }
 
   public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
+
+  public getTemplate = (params: GetRuleTemplateParams) => getRuleTemplate(this.context, params);
 
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
 

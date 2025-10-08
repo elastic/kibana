@@ -93,7 +93,11 @@ export default ({ getService }: FtrProviderContext) => {
           })
         );
 
-        checkIfScheduleDisabled({ getService, id: createdSchedule.id, kibanaSpace: kibanaSpace1 });
+        await checkIfScheduleDisabled({
+          getService,
+          id: createdSchedule.id,
+          kibanaSpace: kibanaSpace1,
+        });
       });
 
       it('should not be able to enable a schedule in a space without kibana privileges for that space', async () => {
@@ -113,7 +117,11 @@ export default ({ getService }: FtrProviderContext) => {
           })
         );
 
-        checkIfScheduleDisabled({ getService, id: createdSchedule.id, kibanaSpace: kibanaSpace1 });
+        await checkIfScheduleDisabled({
+          getService,
+          id: createdSchedule.id,
+          kibanaSpace: kibanaSpace1,
+        });
       });
     });
   });

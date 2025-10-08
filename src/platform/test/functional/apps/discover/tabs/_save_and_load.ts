@@ -81,6 +81,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         end: 'Sep 22, 2015 @ 00:00:00.000',
       };
       const persistedTabDataView = 'logstash-*';
+      const persistedTabColumn1 = 'referer';
+      const persistedTabColumn2 = 'bytes';
       const persistedTabHitCount = '9';
 
       const adHocTabLabel = 'Ad hoc data view';
@@ -90,6 +92,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         end: 'Sep 22, 2015 @ 06:00:00.000',
       };
       const adHocTabDataView = 'logs*';
+      const adHocTabColumn1 = 'geo.src';
+      const adHocTabColumn2 = 'bytes';
       const adHocTabHitCount = '6,045';
 
       const esqlTabLabel = 'ES|QL';
@@ -98,6 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         start: 'Sep 20, 2015 @ 12:00:00.000',
         end: 'Sep 22, 2015 @ 12:00:00.000',
       };
+      const esqlTabVisShape = 'Line';
       const esqlTabHitCount = '50';
 
       it('should support saving a multi-tab Discover session', async () => {
@@ -106,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery(persistedTabQuery);
         await queryBar.submitQuery();
         await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.clickFieldListItemAdd('referer');
+        await unifiedFieldList.clickFieldListItemAdd(persistedTabColumn1);
         await unifiedTabs.editTabLabel(0, persistedTabLabel);
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
 
@@ -123,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery(adHocTabQuery);
         await queryBar.submitQuery();
         await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.clickFieldListItemAdd('geo.src');
+        await unifiedFieldList.clickFieldListItemAdd(adHocTabColumn1);
         await unifiedTabs.editTabLabel(1, adHocTabLabel);
         expect(await discover.getHitCount()).to.be(adHocTabHitCount);
 
@@ -135,6 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(esqlTabQuery);
         await queryBar.clickQuerySubmitButton();
         await discover.waitUntilTabIsLoaded();
+        await discover.changeVisShape(esqlTabVisShape);
         await unifiedTabs.editTabLabel(2, esqlTabLabel);
         expect(await discover.getHitCount()).to.be(esqlTabHitCount);
 
@@ -153,9 +159,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Validate persisted tab
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
         expect(await queryBar.getQueryString()).to.be(persistedTabQuery);
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql(['referer']);
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql([
+          persistedTabColumn1,
+        ]);
         expect(await dataViews.getSelectedName()).to.be(persistedTabDataView);
-        expect(await timePicker.getTimeConfig()).to.eql(persistedTabTime);
         expect(await timePicker.getTimeConfig()).to.eql(persistedTabTime);
 
         // Validate ad hoc tab
@@ -163,7 +170,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getHitCount()).to.be(adHocTabHitCount);
         expect(await queryBar.getQueryString()).to.be(adHocTabQuery);
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql(['geo.src']);
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql([
+          adHocTabColumn1,
+        ]);
         expect(await dataViews.getSelectedName()).to.be(adHocTabDataView);
         expect(await timePicker.getTimeConfig()).to.eql(adHocTabTime);
 
@@ -172,6 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getHitCount()).to.be(esqlTabHitCount);
         expect(await monacoEditor.getCodeEditorValue()).to.be(esqlTabQuery);
+        expect(await discover.getCurrentVisTitle()).to.be(esqlTabVisShape);
         expect(await timePicker.getTimeConfig()).to.eql(esqlTabTime);
 
         // Switch back to first tab and refresh
@@ -196,7 +206,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Validate persisted tab
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
         expect(await queryBar.getQueryString()).to.be(persistedTabQuery);
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql(['referer']);
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql([
+          persistedTabColumn1,
+        ]);
         expect(await dataViews.getSelectedName()).to.be(persistedTabDataView);
         expect(await timePicker.getTimeConfig()).to.eql(persistedTabTime);
 
@@ -205,7 +217,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getHitCount()).to.be(adHocTabHitCount);
         expect(await queryBar.getQueryString()).to.be(adHocTabQuery);
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql(['geo.src']);
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql([
+          adHocTabColumn1,
+        ]);
         expect(await dataViews.getSelectedName()).to.be(adHocTabDataView);
         expect(await timePicker.getTimeConfig()).to.eql(adHocTabTime);
 
@@ -214,6 +228,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getHitCount()).to.be(esqlTabHitCount);
         expect(await monacoEditor.getCodeEditorValue()).to.be(esqlTabQuery);
+        expect(await discover.getCurrentVisTitle()).to.be(esqlTabVisShape);
         expect(await timePicker.getTimeConfig()).to.eql(esqlTabTime);
       });
 
@@ -236,7 +251,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Validate persisted tab
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
         expect(await queryBar.getQueryString()).to.be(persistedTabQuery);
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql(['referer']);
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql([
+          persistedTabColumn1,
+        ]);
         expect(await dataViews.getSelectedName()).to.be(persistedTabDataView);
         expect(await timePicker.getTimeConfig()).to.eql(persistedTabTime);
 
@@ -245,7 +262,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getHitCount()).to.be(adHocTabHitCount);
         expect(await queryBar.getQueryString()).to.be(adHocTabQuery);
-        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql(['geo.src']);
+        expect(await unifiedFieldList.getSidebarSectionFieldNames('selected')).to.eql([
+          adHocTabColumn1,
+        ]);
         expect(await dataViews.getSelectedName()).to.be(adHocTabDataView);
         expect(await timePicker.getTimeConfig()).to.eql(adHocTabTime);
 
@@ -254,6 +273,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getHitCount()).to.be(esqlTabHitCount);
         expect(await monacoEditor.getCodeEditorValue()).to.be(esqlTabQuery);
+        expect(await discover.getCurrentVisTitle()).to.be(esqlTabVisShape);
         expect(await timePicker.getTimeConfig()).to.eql(esqlTabTime);
       });
 
@@ -266,16 +286,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const persistedUnsaved = {
           time: { start: 'Sep 20, 2015 @ 01:00:00.000', end: 'Sep 22, 2015 @ 01:00:00.000' },
           query: 'test and extension : png',
-          columns: ['referer', 'bytes'],
+          columns: [persistedTabColumn1, persistedTabColumn2],
         };
         const adHocUnsaved = {
           time: { start: 'Sep 20, 2015 @ 07:00:00.000', end: 'Sep 22, 2015 @ 07:00:00.000' },
           query: 'extension : png',
-          columns: ['geo.src', 'bytes'],
+          columns: [adHocTabColumn1, adHocTabColumn2],
         };
         const esqlUnsaved = {
           time: { start: 'Sep 20, 2015 @ 13:00:00.000', end: 'Sep 22, 2015 @ 13:00:00.000' },
           query: 'FROM logstash-* | SORT @timestamp DESC | LIMIT 25',
+          visShape: 'Area',
         };
 
         // Persisted data view tab
@@ -283,7 +304,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery(persistedUnsaved.query);
         await queryBar.submitQuery();
         await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.clickFieldListItemAdd('bytes');
+        await unifiedFieldList.clickFieldListItemAdd(persistedTabColumn2);
         const persistedUnsavedCount = await discover.getHitCount();
 
         // Ad hoc data view tab
@@ -293,7 +314,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery(adHocUnsaved.query);
         await queryBar.submitQuery();
         await discover.waitUntilTabIsLoaded();
-        await unifiedFieldList.clickFieldListItemAdd('bytes');
+        await unifiedFieldList.clickFieldListItemAdd(adHocTabColumn2);
         const adHocUnsavedCount = await discover.getHitCount();
 
         // ES|QL tab
@@ -303,6 +324,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await monacoEditor.setCodeEditorValue(esqlUnsaved.query);
         await queryBar.clickQuerySubmitButton();
         await discover.waitUntilTabIsLoaded();
+        await discover.changeVisShape(esqlUnsaved.visShape);
         const esqlUnsavedCount = await discover.getHitCount();
 
         // Unsaved changes badge should be visible after making changes
@@ -337,6 +359,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         expect(await monacoEditor.getCodeEditorValue()).to.be(esqlUnsaved.query);
         expect(await timePicker.getTimeConfig()).to.eql(esqlUnsaved.time);
+        expect(await discover.getCurrentVisTitle()).to.be(esqlUnsaved.visShape);
         expect(await discover.getHitCount()).to.be(esqlUnsavedCount);
 
         // Unsaved badge should still be visible after refresh

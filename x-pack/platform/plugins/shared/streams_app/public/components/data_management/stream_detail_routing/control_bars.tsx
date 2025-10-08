@@ -37,10 +37,8 @@ export const AddRoutingRuleControls = () => {
 };
 
 export const EditRoutingRuleControls = ({
-  relatedStreams,
   routingRule,
 }: {
-  relatedStreams: string[];
   routingRule: RoutingDefinitionWithUIAttributes;
 }) => {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
@@ -59,7 +57,6 @@ export const EditRoutingRuleControls = ({
       <RemoveButton
         onDelete={removeRule}
         isDisabled={!canRemoveRoutingRule}
-        relatedStreams={relatedStreams}
         streamName={routingRuleName}
       />
       <EuiFlexItem grow={false}>
@@ -81,12 +78,10 @@ export const EditRoutingRuleControls = ({
 const RemoveButton = ({
   isDisabled,
   onDelete,
-  relatedStreams,
   streamName,
 }: {
   isDisabled: boolean;
   onDelete: () => Promise<void>;
-  relatedStreams: string[];
   streamName: string;
 }) => {
   const [isDeleteModalOpen, { on: openDeleteModal, off: closeDeleteModal }] = useBoolean(false);
@@ -110,7 +105,6 @@ const RemoveButton = ({
           onCancel={closeDeleteModal}
           onDelete={onDelete}
           name={streamName}
-          relatedStreams={relatedStreams}
         />
       )}
     </>

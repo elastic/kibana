@@ -10,7 +10,7 @@ import { type AgentDefinition, AgentType } from '@kbn/onechat-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../common/agents';
 import type { AgentProperties } from './storage';
 
-export type Document = Pick<GetResponse<AgentProperties>, '_source' | '_id'>;
+export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
 
 const defaultAgentType = AgentType.chat;
 
@@ -20,7 +20,8 @@ export const fromEs = (document: Document): AgentDefinition => {
   }
 
   return {
-    id: document._id,
+    // backward compatibility with M1 - we check the document id.
+    id: document._source.id ?? document._id,
     type: document._source.type,
     name: document._source.name,
     description: document._source.description,
@@ -42,6 +43,7 @@ export const createRequestToEs = ({
   creationDate: Date;
 }): AgentProperties => {
   return {
+    id: profile.id,
     name: profile.name,
     type: defaultAgentType,
     description: profile.description,
@@ -57,20 +59,23 @@ export const createRequestToEs = ({
   };
 };
 
-export const updateProfile = ({
-  profile,
+export const updateRequestToEs = ({
+  agentId,
+  currentProps,
   update,
   updateDate,
 }: {
-  profile: AgentProperties;
+  agentId: string;
+  currentProps: AgentProperties;
   update: AgentUpdateRequest;
   updateDate: Date;
 }): AgentProperties => {
   const updated: AgentProperties = {
-    ...profile,
+    ...currentProps,
     ...update,
+    id: agentId,
     configuration: {
-      ...profile.configuration,
+      ...currentProps.configuration,
       ...update.configuration,
     },
     updated_at: updateDate.toISOString(),

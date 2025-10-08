@@ -233,13 +233,17 @@ describe('metric chart transformations', () => {
       expect(convertedConfig).toHaveProperty('metric');
       expect(convertedConfig).toHaveProperty('dataset');
       expect(convertedConfig).toHaveProperty('title');
+      expect(lensState).toHaveProperty('references');
+      expect(lensState.references).toHaveLength(1);
+
+      const referenceId = lensState.references[0].id;
 
       expect(lensState).toMatchInlineSnapshot(`
         Object {
           "description": "A test metric chart using ESQL",
           "references": Array [
             Object {
-              "id": "test-index",
+              "id": "${referenceId}",
               "name": "indexpattern-datasource-layer-layer_0",
               "type": "index-pattern",
             },
@@ -382,23 +386,36 @@ describe('metric chart transformations', () => {
       expect(convertedConfig).toHaveProperty('dataset');
       expect(convertedConfig).toHaveProperty('title');
 
+      expect(lensState).toHaveProperty('references');
+      expect(lensState.references).toHaveLength(1);
+
+      const referenceId = lensState.references[0].id;
+
       expect(lensState).toMatchInlineSnapshot(`
         Object {
           "description": "A comprehensive metric chart with all features",
           "references": Array [
             Object {
-              "id": "comprehensive-index",
+              "id": "${referenceId}",
               "name": "indexpattern-datasource-layer-layer_0",
-              "type": "index-pattern",
-            },
-            Object {
-              "id": "comprehensive-index",
-              "name": "indexpattern-datasource-layer-layer_0_trendline",
               "type": "index-pattern",
             },
           ],
           "state": Object {
-            "adHocDataViews": Object {},
+            "adHocDataViews": Object {
+              "${referenceId}": Object {
+                "allowHidden": false,
+                "allowNoIndex": false,
+                "fieldAttrs": Object {},
+                "fieldFormats": Object {},
+                "id": "${referenceId}",
+                "name": "comprehensive-index",
+                "runtimeFieldMap": Object {},
+                "sourceFilters": Array [],
+                "timeFieldName": "@timestamp",
+                "title": "comprehensive-index",
+              },
+            },
             "datasourceStates": Object {
               "formBased": Object {
                 "layers": Object {
@@ -591,9 +608,8 @@ describe('metric chart transformations', () => {
             "size": 10,
           },
           "dataset": Object {
-            "index": undefined,
-            "time_field": "@timestamp",
-            "type": "index",
+            "name": undefined,
+            "type": "dataView",
           },
           "description": "A comprehensive metric chart with all features",
           "ignore_global_filters": true,

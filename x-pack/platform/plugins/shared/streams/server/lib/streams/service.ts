@@ -15,6 +15,7 @@ import type { AssetClient } from './assets/asset_client';
 import type { QueryClient } from './assets/query/query_client';
 import { StreamsClient } from './client';
 import { migrateOnRead } from './helpers/migrate_on_read';
+import type { SystemClient } from './system/system_client';
 
 export const streamsStorageSettings = {
   name: '.kibana_streams',
@@ -42,10 +43,12 @@ export class StreamsService {
     request,
     assetClient,
     queryClient,
+    systemClient,
   }: {
     request: KibanaRequest;
     assetClient: AssetClient;
     queryClient: QueryClient;
+    systemClient: SystemClient;
   }): Promise<StreamsClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
@@ -66,6 +69,7 @@ export class StreamsService {
     return new StreamsClient({
       assetClient,
       queryClient,
+      systemClient,
       logger,
       scopedClusterClient,
       lockManager: new LockManagerService(this.coreSetup, logger),

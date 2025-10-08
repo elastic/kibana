@@ -1406,7 +1406,9 @@ describe('MaintenanceWindowsMock', () => {
 
     await waitFor(() => expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1));
     expect(
-      screen.queryByText('Rule notifications are stopped while maintenance windows are running.')
+      screen.queryByText(
+        'Some rule notifications may be stopped while maintenance windows are running.'
+      )
     ).not.toBeInTheDocument();
   });
 

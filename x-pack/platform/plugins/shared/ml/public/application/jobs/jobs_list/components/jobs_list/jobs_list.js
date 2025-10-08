@@ -23,10 +23,10 @@ import { JobDescription } from './job_description';
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiIcon,
   EuiScreenReaderOnly,
   EuiToolTip,
   EuiBadge,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -230,7 +230,7 @@ export class JobsListUI extends Component {
         width: '30px',
         render: (item) => {
           return Array.isArray(item) ? (
-            <EuiToolTip
+            <EuiIconTip
               position="bottom"
               content={
                 <FormattedMessage
@@ -239,9 +239,8 @@ export class JobsListUI extends Component {
                   values={{ rulesCount: item.length }}
                 />
               }
-            >
-              <EuiIcon type="bell" />
-            </EuiToolTip>
+              type="bell"
+            />
           ) : (
             <span />
           );

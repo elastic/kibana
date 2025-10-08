@@ -36,19 +36,25 @@ ${HORIZONTAL_LINE}
 `);
       log.info(`Loading data to: ${kbnClient.resolveUrl('')}`);
 
-      await loadAttackDiscoveryData({ kbnClient, esClient, log });
+      const episodes = (cliContext.flags.episodes as string)?.split(',').map((ep) => ep.trim()) || [
+        '1',
+        '2',
+      ];
+
+      await loadAttackDiscoveryData({ kbnClient, esClient, log, episodes });
     },
 
     // Options
     {
       description: `Loads data into a environment for testing/development`,
       flags: {
-        string: ['kibanaUrl', 'elasticsearchUrl', 'username', 'password'],
+        string: ['kibanaUrl', 'elasticsearchUrl', 'username', 'password', 'episodes'],
         default: {
           kibanaUrl: 'http://127.0.0.1:5601',
           elasticsearchUrl: 'http://127.0.0.1:9200',
           username: 'elastic',
           password: 'changeme',
+          episodes: '1,2',
         },
         allowUnexpected: false,
         help: `
@@ -57,6 +63,7 @@ ${HORIZONTAL_LINE}
         --password                      User name Password (Default: changeme)
         --kibanaUrl                     The url to Kibana (Default: http://127.0.0.1:5601)
         --elasticsearchUrl              The url to Elasticsearch (Default: http://127.0.0.1:9200)
+        --episodes                      Comma-separated list of episode numbers to load (Default: 1,2)
       `,
       },
     }

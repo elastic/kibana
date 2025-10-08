@@ -12,13 +12,16 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { processSemconvYaml } from './lib/generate_semconv';
+import { createSortedEntries } from './lib/sorting_utils';
+import type { SemconvStructuredFieldDefinitions, ProcessingResult } from './types/semconv_types';
 
-function generateTypeScriptFile(result: any, outputPath: string): void {
+function generateTypeScriptFile(result: ProcessingResult, outputPath: string): void {
   const { totalFields, stats } = result;
 
   // Convert structured object to string representation with single quotes (for Prettier compliance)
-  function structuredObjectToString(obj: Record<string, any>): string {
-    const entries = Object.entries(obj);
+  function structuredObjectToString(obj: SemconvStructuredFieldDefinitions): string {
+    // Use deterministic sorting to ensure consistent field ordering across builds
+    const entries = createSortedEntries(obj);
     if (entries.length === 0) {
       return '{}';
     }

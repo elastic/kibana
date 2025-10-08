@@ -35,6 +35,7 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import {
+  checkIntegrationFipsLooseCompatibility,
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
   isRootPrivilegesRequired,
@@ -49,6 +50,7 @@ import {
   useStartServices,
   useUIExtension,
   useAuthz,
+  useBulkGetAgentPoliciesQuery,
 } from '../../../../hooks';
 import {
   DevtoolsRequestFlyoutButton,
@@ -174,6 +176,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       : undefined;
   }, [integrationToEnable, packageInfo?.policy_templates]);
 
+  const fipsCompatibleIntegration = useMemo(() => {
+    return checkIntegrationFipsLooseCompatibility(pkgName, packageInfo);
+  }, [packageInfo, pkgName]);
+
   const showSecretsDisabledCallout =
     !fleetStatus.isSecretsStorageEnabled &&
     packageInfo &&
@@ -285,7 +291,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     if (isFleetEnabled && agentPolicyIds.length > 0) {
       getAgentCount();
     }
-  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled]);
+  }, [agentPolicyIds, selectedPolicyTab, isFleetEnabled, agentPolicies]);
+
+  const { data: agentPolicyData } = useBulkGetAgentPoliciesQuery(agentPolicyIds, { full: true });
+
+  const fipsAgentsCount = useMemo(() => {
+    if (!agentPolicyData?.items) return 0;
+
+    return agentPolicyData.items.reduce((acc, item) => (acc += item.fips_agents || 0), 0);
+  }, [agentPolicyData?.items]);
 
   useEffect(() => {
     if (
@@ -591,6 +605,38 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           <EuiSpacer size="xl" />
         </>
       ) : null}
+      {fipsAgentsCount > 0 && !fipsCompatibleIntegration && (
+        <>
+          <EuiCallOut
+            size="m"
+            color="warning"
+            iconType="warning"
+            title={
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.fipsCalloutTitle"
+                defaultMessage="This integration is not FIPS compatible"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.fleet.createPackagePolicy.fipsCalloutDescription"
+              defaultMessage="The selected agent policies have one or more agents enrolled in FIPS mode. Installing this integration could interfere with the agents' ability to ingest data correctly. For more information, see the {guideLink}."
+              values={{
+                guideLink: (
+                  <EuiLink href={docLinks.links.fleet.fipsIngest} target="_blank" external>
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollmentCallout.fipsMessage.guideLink"
+                      defaultMessage="Guide"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiCallOut>
+
+          <EuiSpacer size="m" />
+        </>
+      )}
       {showSecretsDisabledCallout && (
         <>
           <EuiCallOut

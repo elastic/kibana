@@ -8,7 +8,7 @@
  */
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -38,7 +38,13 @@ export function createWorkflowTaskRunner({
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actionsClient: IUnsecuredActionsClient;
 }) {
-  return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+  return ({
+    taskInstance,
+    fakeRequest,
+  }: {
+    taskInstance: ConcreteTaskInstance;
+    fakeRequest?: KibanaRequest;
+  }) => {
     const { workflowId, spaceId } = taskInstance.params as WorkflowTaskParams;
     const state = taskInstance.state as WorkflowTaskState;
 
@@ -70,21 +76,30 @@ export function createWorkflowTaskRunner({
             yaml: workflow.yaml,
           };
 
-          // Execute the workflow
-          const executionId = await workflowsExecutionEngine.executeWorkflow(
-            workflowExecutionModel,
-            {
-              workflowRunId: `scheduled-${Date.now()}`,
-              spaceId,
-              inputs: {},
-              event: {
-                type: 'scheduled',
-                timestamp: new Date().toISOString(),
-                source: 'task-manager',
-              },
-              triggeredBy: 'scheduled', // <-- mark as scheduled
-            }
-          );
+          // Execute the workflow with user context from fakeRequest if available
+          const executionContext = {
+            workflowRunId: `scheduled-${Date.now()}`,
+            spaceId,
+            inputs: {},
+            event: {
+              type: 'scheduled',
+              timestamp: new Date().toISOString(),
+              source: 'task-manager',
+            },
+            triggeredBy: 'scheduled', // <-- mark as scheduled
+          };
+
+          const executionId = fakeRequest
+            ? await workflowsExecutionEngine.executeWorkflow(
+                workflowExecutionModel,
+                executionContext,
+                fakeRequest // Pass the fakeRequest for user context
+              )
+            : await workflowsExecutionEngine.executeWorkflow(
+                workflowExecutionModel,
+                executionContext,
+                {} as any // Fallback when no user context is available
+              );
 
           logger.info(
             `Successfully executed scheduled workflow ${workflowId}, execution ID: ${executionId}`

@@ -10,6 +10,7 @@
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { Dimension } from '../dimensions/types';
 
+export type MetricFieldType = 'metric' | 'dimension';
 export interface MetricField {
   name: string;
   index: string;

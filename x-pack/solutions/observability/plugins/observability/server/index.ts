@@ -83,9 +83,7 @@ const configSchema = schema.object({
   }),
   enabled: schema.boolean({ defaultValue: true }),
   createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
-  managedOtlpServiceUrl: offeringBasedSchema({
-    serverless: schema.string({ defaultValue: '' }),
-  }),
+  managedOtlpServiceUrl: schema.string({ defaultValue: '' }),
 });
 
 export const config: PluginConfigDescriptor = {
@@ -97,6 +95,7 @@ export const config: PluginConfigDescriptor = {
         enabled: true,
       },
     },
+    managedOtlpServiceUrl: true,
   },
   schema: configSchema,
   deprecations: ({ unused }) => [

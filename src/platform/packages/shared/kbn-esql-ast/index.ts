@@ -37,10 +37,8 @@ export * from './src/ast/location';
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
 export {
-  createParser,
   parse,
   Parser,
-  parseErrors,
   type ParseOptions,
   type ParseResult,
   ESQLErrorListener,
@@ -52,6 +50,8 @@ export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walk
 export * as synth from './src/synth';
 export { qry, cmd, exp } from './src/synth';
 export * from './src/composer';
+
+export { esql, e } from './src/composer/esql';
 
 export {
   LeafPrinter,

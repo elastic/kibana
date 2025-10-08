@@ -19,7 +19,7 @@ import { authz } from '../../common/api/util/authz';
 import { getRetryFilter } from '../../common/api/util/retry';
 import { withLicense } from '../../common/api/util/with_license';
 import { createTracersCallbacks } from '../../common/api/util/tracing';
-import { withExistingMigration } from './util/with_existing_migration_id';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,

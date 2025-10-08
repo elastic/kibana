@@ -36,6 +36,7 @@ export class EventLoopDelayCircuitBreaker extends BaseCircuitBreaker {
     percentiles: {
       50: 0,
       75: 0,
+      90: 0,
       95: 0,
       99: 0,
     },
@@ -52,25 +53,20 @@ export class EventLoopDelayCircuitBreaker extends BaseCircuitBreaker {
   async validate(): Promise<CircuitBreakerResult> {
     const lastUpdated = new Date();
     this.loopMonitor.disable();
-    const {
-      min: minNs,
-      max: maxNs,
-      mean: meanNs,
-      exceeds: exceedsNs,
-      stddev: stddevNs,
-    } = this.loopMonitor;
+    const { min: minNs, max: maxNs, mean: meanNs, exceeds, stddev: stddevNs } = this.loopMonitor;
 
     this.lastHistogram = {
       min: this.nsToMs(minNs),
       max: this.nsToMs(maxNs),
       mean: this.nsToMs(meanNs),
-      exceeds: this.nsToMs(exceedsNs),
+      exceeds,
       stddev: this.nsToMs(stddevNs),
       fromTimestamp: this.fromTimestamp.toISOString(),
       lastUpdatedAt: lastUpdated.toISOString(),
       percentiles: {
         50: this.nsToMs(this.loopMonitor.percentile(50)),
         75: this.nsToMs(this.loopMonitor.percentile(75)),
+        90: this.nsToMs(this.loopMonitor.percentile(90)),
         95: this.nsToMs(this.loopMonitor.percentile(95)),
         99: this.nsToMs(this.loopMonitor.percentile(99)),
       },

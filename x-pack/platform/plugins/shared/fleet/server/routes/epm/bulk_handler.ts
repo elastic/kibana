@@ -7,8 +7,11 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+
 import { appContextService } from '../../services';
 import type {
+  BulkRollbackPackagesRequestSchema,
   BulkUninstallPackagesRequestSchema,
   BulkUpgradePackagesRequestSchema,
   FleetRequestHandler,
@@ -26,8 +29,8 @@ import {
   scheduleBulkUninstall,
   scheduleBulkUpgrade,
   getBulkOperationTaskResults,
+  scheduleBulkRollback,
 } from '../../tasks/packages_bulk_operations';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 async function validateInstalledPackages(
   savedObjectsClient: SavedObjectsClientContract,
@@ -116,6 +119,29 @@ export const getOneBulkOperationPackagesHandler: FleetRequestHandler<
     status: results.status,
     error: results.error,
     results: results.results,
+  };
+  return response.ok({ body });
+};
+
+export const postBulkRollbackPackagesHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof BulkRollbackPackagesRequestSchema.body>
+> = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.internalSoClient;
+  const spaceId = fleetContext.spaceId;
+
+  const taskManagerStart = getTaskManagerStart();
+  await validateInstalledPackages(savedObjectsClient, request.body.packages, 'rollback');
+
+  const taskId = await scheduleBulkRollback(taskManagerStart, {
+    packages: request.body.packages,
+    spaceId,
+  });
+
+  const body: BulkOperationPackagesResponse = {
+    taskId,
   };
   return response.ok({ body });
 };

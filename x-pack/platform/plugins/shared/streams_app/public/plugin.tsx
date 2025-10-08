@@ -52,7 +52,7 @@ export class StreamsAppPlugin
 
   start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
-    pluginsStart.streams.status$.subscribe((status) => {
+    pluginsStart.streams.navigationStatus$.subscribe((status) => {
       if (status.status !== 'enabled') return;
       pluginsStart.discoverShared.features.registry.register({
         id: 'streams',

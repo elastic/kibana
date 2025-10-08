@@ -199,7 +199,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
         expect(foundNavItemIds).to.have.length(
           navItemIds.length,
-          `Found nav item list length (${foundNavItemIds.length}) does not match expected length (${navItemIds.length}) of side nav items`
+          `Found nav item list length (${foundNavItemIds.length}) does not match expected length (${
+            navItemIds.length
+          }) of side nav items.\nFound items with nav ids:${JSON.stringify(foundNavItemIds)}`
         );
         if (options?.checkOrder !== false) {
           for (let i = 0; i < foundNavItemIds.length; i++) {
@@ -217,6 +219,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async clickPanelLink(deepLinkId: string) {
         if (await isV2()) {
+          await this.feedbackCallout.dismiss();
           await this.clickLink({ deepLinkId: deepLinkId as AppDeepLinkId });
         } else {
           await testSubjects.click(`~panelNavItem-id-${deepLinkId}`);
@@ -354,14 +357,33 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         }
       },
       feedbackCallout: {
+        async getFeedbackTestSubjectId() {
+          return (await isV2()) ? 'feedbackSnippetPanel' : 'sideNavfeedbackCallout';
+        },
+        async getFeedbackDismissTestSubjectId() {
+          return (await isV2())
+            ? 'feedbackSnippetPanel > feedbackSnippetPanelDismiss'
+            : 'sideNavfeedbackCallout > euiDismissCalloutButton';
+        },
         async expectExists() {
-          await testSubjects.existOrFail('sideNavfeedbackCallout', { timeout: TIMEOUT_CHECK });
+          await testSubjects.existOrFail(await this.getFeedbackTestSubjectId(), {
+            timeout: TIMEOUT_CHECK,
+          });
         },
         async expectMissing() {
-          await testSubjects.missingOrFail('sideNavfeedbackCallout', { timeout: TIMEOUT_CHECK });
+          return (await isV2())
+            ? await testSubjects.existOrFail('feedbackSnippetButton', {
+                timeout: TIMEOUT_CHECK,
+              })
+            : await testSubjects.missingOrFail(await this.getFeedbackTestSubjectId(), {
+                timeout: TIMEOUT_CHECK,
+              });
         },
         async dismiss() {
-          await testSubjects.click('sideNavfeedbackCallout > euiDismissCalloutButton');
+          const feedbackTestSubjectId = await this.getFeedbackTestSubjectId();
+          if (await testSubjects.exists(feedbackTestSubjectId, { timeout: TIMEOUT_CHECK })) {
+            await testSubjects.click(await this.getFeedbackDismissTestSubjectId());
+          }
         },
       },
     },

@@ -6,6 +6,7 @@
  */
 
 import { assign, concat } from 'lodash/fp';
+import type { EntityStoreCapability } from '@kbn/entities-schema';
 import type {
   EntityType,
   InitEntityEngineRequestBody,
@@ -38,6 +39,8 @@ interface EngineDescriptionParams {
   requestParams?: InitEntityEngineRequestBody;
   defaultIndexPatterns: string[];
 }
+
+const ENABLED_CAPABILITIES: EntityStoreCapability[] = []; // empty until new capability is enabled
 
 export const createEngineDescription = (params: EngineDescriptionParams) => {
   const { entityType, namespace, config, requestParams = {}, defaultIndexPatterns } = params;
@@ -74,6 +77,7 @@ export const createEngineDescription = (params: EngineDescriptionParams) => {
       })
     ),
     dynamic: description.dynamic || false,
+    capabilities: ENABLED_CAPABILITIES,
   };
 
   const updatedDescription: EntityEngineInstallationDescriptor = {

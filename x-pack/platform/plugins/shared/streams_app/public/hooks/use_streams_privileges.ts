@@ -33,6 +33,7 @@ export interface StreamsPrivileges {
     show: boolean;
   };
   features: StreamsFeatures;
+  isLoading?: boolean;
 }
 
 export function useStreamsPrivileges(): StreamsPrivileges {
@@ -82,5 +83,6 @@ export function useStreamsPrivileges(): StreamsPrivileges {
         enabled: groupStreamsEnabled,
       },
     },
+    isLoading: !license,
   };
 }

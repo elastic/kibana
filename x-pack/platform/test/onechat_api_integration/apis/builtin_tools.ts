@@ -16,11 +16,11 @@ export default function ({ getService }: FtrProviderContext) {
   const searchTool = platformCoreTools.search;
 
   describe('Builtin Tools API', () => {
-    describe(`DELETE /api/chat/tools/{toolName}`, () => {
+    describe(`DELETE /api/agent_builder/tools/{toolName}`, () => {
       it('should return 400 error when attempting to delete any read-only builtin system tool', async () => {
         for (const toolId of Object.values(platformCoreTools) as string[]) {
           const response = await supertest
-            .delete(`/api/chat/tools/${toolId}`)
+            .delete(`/api/agent_builder/tools/${toolId}`)
             .set('kbn-xsrf', 'kibana')
             .expect(400);
 
@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await supertest
-          .delete(`/api/chat/tools/${searchTool}`)
+          .delete(`/api/agent_builder/tools/${searchTool}`)
           .set('kbn-xsrf', 'kibana')
           .expect(404);
 
@@ -45,17 +45,17 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe(`PUT /api/chat/tools/${searchTool}`, () => {
+    describe(`PUT /api/agent_builder/tools/${searchTool}`, () => {
       it('should return 400 when attempting to update a builtin system tool', async () => {
         await supertest
-          .put(`/api/chat/tools/${searchTool}`)
+          .put(`/api/agent_builder/tools/${searchTool}`)
           .set('kbn-xsrf', 'kibana')
           .send({ description: 'Updated description' })
           .expect(400);
       });
     });
 
-    describe('POST /api/chat/tools', () => {
+    describe('POST /api/agent_builder/tools', () => {
       it('should return 400 when attempting to create a tool under an existing builtin tool ID', async () => {
         const toolData = {
           id: searchTool,
@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         const response = await supertest
-          .post('/api/chat/tools')
+          .post('/api/agent_builder/tools')
           .set('kbn-xsrf', 'kibana')
           .send(toolData)
           .expect(400);
@@ -80,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('POST /api/chat/tools/_execute', () => {
+    describe('POST /api/agent_builder/tools/_execute', () => {
       it('should execute a builtin tool successfully', async () => {
         const executeRequest = {
           tool_id: platformCoreTools.listIndices,
@@ -88,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         const response = await supertest
-          .post('/api/chat/tools/_execute')
+          .post('/api/agent_builder/tools/_execute')
           .set('kbn-xsrf', 'kibana')
           .send(executeRequest)
           .expect(200);
@@ -109,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/tools/_execute')
+          .post('/api/agent_builder/tools/_execute')
           .set('kbn-xsrf', 'kibana')
           .send(executeRequest)
           .expect(404);

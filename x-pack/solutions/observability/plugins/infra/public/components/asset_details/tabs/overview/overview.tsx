@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
   MetadataSummaryList,
   MetadataSummaryListCompact,
@@ -33,6 +34,10 @@ export const Overview = () => {
   } = useMetadataStateContext();
   const { metrics } = useDataViewsContext();
   const isFullPageView = renderMode.mode === 'page';
+  const {
+    services: { application },
+  } = useKibanaContextForPlugin();
+  const hasApmPermissions = Boolean(application.capabilities.apm?.show);
 
   const metadataSummarySection = isFullPageView ? (
     <MetadataSummaryList
@@ -75,7 +80,7 @@ export const Overview = () => {
           <SectionSeparator />
         </EuiFlexItem>
       ) : null}
-      {entity.type === 'host' ? (
+      {entity.type === 'host' && hasApmPermissions ? (
         <EuiFlexItem grow={false}>
           <ServicesContent hostName={entity.id} dateRange={dateRange} />
           <SectionSeparator />

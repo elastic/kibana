@@ -20,10 +20,14 @@ xpack.features.overrides:
   visualize_v2.hidden: true
   maps.hidden: true
   maps_v2.hidden: true
+  ### agent builder feature is moved from Analytics category to the Security one the bottom
+  agentBuilder:
+    category: "security"
+    order: 1101
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"
-    order: 1101
+    order: 1102
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siemV3:
     privileges:

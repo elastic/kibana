@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { FieldDefinition } from '@kbn/streams-schema';
+import type { FieldDefinition, FlattenRecord } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamlangProcessorDefinitionWithUIAttributes } from '@kbn/streamlang';
 import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import type { DetectedField, Simulation, SimulationContext } from './types';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
-export function getSourceField(processor: StreamlangProcessorDefinition): string | undefined {
+export function getSourceField(
+  processor: StreamlangProcessorDefinitionWithUIAttributes
+): string | undefined {
   const processorSourceField = (() => {
     switch (processor.action) {
       case 'append':
@@ -38,6 +40,23 @@ export function getSourceField(processor: StreamlangProcessorDefinition): string
 
 export function getUniqueDetectedFields(detectedFields: DetectedField[] = []) {
   return uniq(detectedFields.map((field) => field.name));
+}
+
+export function getAllFieldsInOrder(
+  previewRecords: FlattenRecord[] = [],
+  detectedFields: DetectedField[] = []
+): string[] {
+  const fields = new Set<string>();
+  previewRecords.forEach((record) => {
+    Object.keys(record).forEach((key) => {
+      fields.add(key);
+    });
+  });
+
+  const uniqueDetectedFields = getUniqueDetectedFields(detectedFields);
+  const otherFields = Array.from(fields).filter((field) => !uniqueDetectedFields.includes(field));
+
+  return [...uniqueDetectedFields, ...otherFields.sort()];
 }
 
 export function getTableColumns({

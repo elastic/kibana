@@ -100,6 +100,7 @@ export const PackagePolicyPackageSchema = schema.object({
   }),
   experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeaturesSchema),
   requires_root: schema.maybe(schema.boolean()),
+  fips_compatible: schema.maybe(schema.boolean()),
 });
 
 export const PackagePolicyBaseSchema = {
@@ -137,6 +138,15 @@ export const PackagePolicyBaseSchema = {
     )
   ),
   output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  cloud_connector_id: schema.maybe(
+    schema.nullable(
+      schema.string({
+        meta: {
+          description: 'ID of the cloud connector associated with this package policy.',
+        },
+      })
+    )
+  ),
   enabled: schema.boolean(),
   is_managed: schema.maybe(schema.boolean()),
   package: schema.maybe(PackagePolicyPackageSchema),
@@ -178,6 +188,16 @@ export const PackagePolicyBaseSchema = {
         defaultValue: false,
         meta: {
           description: 'Indicates whether the package policy belongs to an agentless agent policy.',
+        },
+      })
+    )
+  ),
+  supports_cloud_connector: schema.maybe(
+    schema.nullable(
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: 'Indicates whether the package policy supports cloud connectors.',
         },
       })
     )

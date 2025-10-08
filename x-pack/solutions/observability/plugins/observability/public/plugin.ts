@@ -120,6 +120,7 @@ export interface ConfigSchema {
     ruleFormV2?: {
       enabled: boolean;
     };
+    managedOtlpServiceUrl: string;
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;

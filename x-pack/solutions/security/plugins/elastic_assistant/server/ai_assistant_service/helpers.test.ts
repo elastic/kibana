@@ -14,6 +14,7 @@ const mockProductDocManager = {
   install: jest.fn(),
   uninstall: jest.fn(),
   update: jest.fn(),
+  updateAll: jest.fn(),
 };
 
 describe('helpers', () => {

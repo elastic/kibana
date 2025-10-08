@@ -522,7 +522,7 @@
             "section": "def-public.DataViewsServicePublic",
             "text": "DataViewsServicePublic"
           },
-          ") => Promise<",
+          ", allowNoIndex: boolean | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -571,6 +571,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLAdHocDataview.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowNoIndex",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1581,6 +1596,39 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getKqlSearchQueries",
+        "type": "Function",
+        "tags": [],
+        "label": "getKqlSearchQueries",
+        "description": [],
+        "signature": [
+          "(esql: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getKqlSearchQueries.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getLimitFromESQLQuery",
         "type": "Function",
         "tags": [],
@@ -1610,6 +1658,47 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getLookupIndicesFromQuery",
+        "type": "Function",
+        "tags": [
+          "return"
+        ],
+        "label": "getLookupIndicesFromQuery",
+        "description": [
+          "\nExtracts and returns a list of unique lookup indices from the provided ESQL query by parsing the query and traversing its AST.\n"
+        ],
+        "signature": [
+          "(esqlQuery: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_lookup_indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getLookupIndicesFromQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esqlQuery",
+            "description": [
+              "- The ESQL query string to parse and analyze for lookup indices."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_lookup_indices.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An array of unique lookup index names found in the query."
+        ],
         "initialIsOpen": false
       },
       {

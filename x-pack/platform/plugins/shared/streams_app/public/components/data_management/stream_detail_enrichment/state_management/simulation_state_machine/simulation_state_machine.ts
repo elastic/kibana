@@ -10,8 +10,8 @@ import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
-import { isValidProcessor } from '../../utils';
+import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { getValidSteps, isValidStep } from '../../utils';
 import type {
   SimulationInput,
   SimulationContext,
@@ -30,14 +30,13 @@ import type { MappedSchemaField } from '../../../schema_editor/types';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
-export interface ProcessorEventParams {
-  processors: StreamlangProcessorDefinition[];
+export interface StepsEventParams {
+  steps: StreamlangStepWithUIAttributes[];
 }
 
 const hasSamples = (samples: SampleDocumentWithUIAttributes[]) => !isEmpty(samples);
 
-const hasAnyValidProcessors = (processors: StreamlangProcessorDefinition[]) =>
-  processors.some(isValidProcessor);
+const hasAnyValidSteps = (steps: StreamlangStepWithUIAttributes[]) => steps.some(isValidStep);
 
 export const simulationMachine = setup({
   types: {
@@ -53,8 +52,8 @@ export const simulationMachine = setup({
     storePreviewDocsFilter: assign((_, params: { filter: PreviewDocsFilterOption }) => ({
       previewDocsFilter: params.filter,
     })),
-    storeProcessors: assign((_, params: ProcessorEventParams) => ({
-      processors: params.processors,
+    storeSteps: assign((_, params: StepsEventParams) => ({
+      steps: params.steps,
     })),
     storeSamples: assign((_, params: { samples: SampleDocumentWithUIAttributes[] }) => ({
       samples: params.samples,
@@ -112,16 +111,15 @@ export const simulationMachine = setup({
       simulation: undefined,
       previewDocsFilter: 'outcome_filter_all',
     }),
-    resetProcessors: assign({ processors: [] }),
+    resetSteps: assign({ steps: [] }),
     resetSamples: assign({ samples: [] }),
   },
   delays: {
     processorChangeDebounceTime: 300,
   },
   guards: {
-    canSimulate: ({ context }) =>
-      hasSamples(context.samples) && hasAnyValidProcessors(context.processors),
-    hasProcessors: (_, params: ProcessorEventParams) => !isEmpty(params.processors),
+    canSimulate: ({ context }) => hasSamples(context.samples) && hasAnyValidSteps(context.steps),
+    hasSteps: (_, params: StepsEventParams) => !isEmpty(params.steps),
     '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
       !hasSamples(params.samples),
   },
@@ -137,7 +135,7 @@ export const simulationMachine = setup({
     explicitlyEnabledPreviewColumns: [],
     previewColumnsOrder: [],
     previewColumnsSorting: { fieldName: undefined, direction: 'asc' },
-    processors: input.processors,
+    steps: input.steps,
     samples: [],
     streamName: input.streamName,
   }),
@@ -148,7 +146,7 @@ export const simulationMachine = setup({
     },
     'simulation.reset': {
       target: '.idle',
-      actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetProcessors' }],
+      actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetSteps' }],
     },
     'simulation.receive_samples': [
       {
@@ -158,8 +156,8 @@ export const simulationMachine = setup({
       },
       {
         guard: {
-          type: 'hasProcessors',
-          params: ({ context }) => ({ processors: context.processors }),
+          type: 'hasSteps',
+          params: ({ context }) => ({ steps: context.steps }),
         },
         target: '.assertingRequirements',
         actions: [{ type: 'storeSamples', params: ({ event }) => event }],
@@ -205,41 +203,41 @@ export const simulationMachine = setup({
       ],
       target: '.idle',
     },
-    // Handle adding/reordering processors
-    'processors.*': {
+    // Handle adding/reordering steps
+    'step.*': {
       target: '.assertingRequirements',
-      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
     },
-    'processor.cancel': {
+    'step.cancel': {
       target: '.assertingRequirements',
-      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
     },
-    'processor.edit': {
+    'step.edit': {
       target: '.assertingRequirements',
-      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
     },
-    'processor.save': {
+    'step.save': {
       target: '.assertingRequirements',
-      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
     },
-    'processor.change': {
+    'step.change': {
       target: '.debouncingChanges',
       reenter: true,
       description: 'Re-enter debouncing state and reinitialize the delayed processing.',
-      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
     },
-    'processor.delete': [
+    'step.delete': [
       {
         guard: {
-          type: 'hasProcessors',
-          params: ({ event }) => ({ processors: event.processors }),
+          type: 'hasSteps',
+          params: ({ event }) => ({ steps: event.steps }),
         },
         target: '.assertingRequirements',
-        actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+        actions: [{ type: 'storeSteps', params: ({ event }) => event }],
       },
       {
         target: '.idle',
-        actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetProcessors' }],
+        actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetSteps' }],
       },
     ],
   },
@@ -279,9 +277,7 @@ export const simulationMachine = setup({
           documents: context.samples
             .map((doc) => doc.document)
             .map(flattenObjectNestedLast) as FlattenRecord[],
-          processors: context.processors.filter((proc) => {
-            return isValidProcessor(proc);
-          }),
+          steps: getValidSteps(context.steps),
           detectedFields: context.detectedSchemaFields,
         }),
         onDone: {

@@ -54,6 +54,7 @@ export function registerPromptRoute({
       temperature = 0.25,
       metadata,
       prevMessages,
+      toolChoice,
     } = request.body;
 
     return client.prompt({
@@ -73,6 +74,7 @@ export function registerPromptRoute({
       temperature,
       metadata,
       prevMessages,
+      toolChoice,
     });
   }
 

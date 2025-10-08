@@ -324,8 +324,12 @@ jest.mock('./app_context', () => ({
 
 jest.mock('./audit_logging');
 
+jest.mock('./secrets', () => ({
+  isActionSecretStorageEnabled: jest.fn(),
+}));
+
 const spyAgentPolicyServiceUpdate = jest.spyOn(agentPolicy.agentPolicyService, 'update');
-const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
+const spyAgentPolicyServiceBumpAllAgentPoliciesForOutput = jest.spyOn(
   agentPolicy.agentPolicyService,
   'bumpAllAgentPoliciesForOutput'
 );
@@ -341,7 +345,7 @@ describe('policy preconfiguration', () => {
     mockInstallPackageErrors.clear();
     mockConfiguredPolicies.clear();
     spyAgentPolicyServiceUpdate.mockClear();
-    spyAgentPolicyServicBumpAllAgentPoliciesForOutput.mockClear();
+    spyAgentPolicyServiceBumpAllAgentPoliciesForOutput.mockClear();
   });
 
   describe('with no bundled packages', () => {

@@ -31,7 +31,7 @@ export const mountApp = async ({
   history: ScopedHistory;
   services: OnechatInternalService;
 }) => {
-  const kibanaServices = { ...core, plugins };
+  const kibanaServices = { ...core, plugins, appParams: { history } };
   const queryClient = new QueryClient();
 
   ReactDOM.render(

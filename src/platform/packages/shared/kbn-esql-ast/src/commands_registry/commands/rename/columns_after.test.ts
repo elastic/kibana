@@ -7,60 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { synth } from '../../../..';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
+import type { ESQLColumnData } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('RENAME', () => {
-  const context = {
-    userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([]),
-    fields: new Map<string, ESQLFieldWithMetadata>([
-      ['field1', { name: 'field1', type: 'keyword' }],
-      ['count', { name: 'count', type: 'double' }],
-    ]),
-  };
   it('renames the given columns with the new names using AS', () => {
-    const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
-    ] as ESQLFieldWithMetadata[];
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
 
-    const result = columnsAfter(synth.cmd`RENAME field1 as meow`, previousCommandFields, context);
+    const result = columnsAfter(synth.cmd`RENAME field1 as meow`, previousCommandFields, '');
 
-    expect(result).toEqual([
-      { name: 'meow', type: 'keyword' },
-      { name: 'field2', type: 'double' },
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'meow', type: 'keyword', userDefined: true, location: { max: 0, min: 0 } },
+      { name: 'field2', type: 'double', userDefined: false },
     ]);
   });
 
   it('renames the given columns with the new names using ASSIGN', () => {
-    const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
-    ] as ESQLFieldWithMetadata[];
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
 
-    const result = columnsAfter(synth.cmd`RENAME meow = field1`, previousCommandFields, context);
+    const result = columnsAfter(synth.cmd`RENAME meow = field1`, previousCommandFields, '');
 
-    expect(result).toEqual([
-      { name: 'meow', type: 'keyword' },
-      { name: 'field2', type: 'double' },
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'meow', type: 'keyword', userDefined: true, location: { max: 0, min: 0 } },
+      { name: 'field2', type: 'double', userDefined: false },
     ]);
   });
 
   it('renames the given columns with the new names using a mix of ASSIGN and =', () => {
-    const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'field2', type: 'double' },
-    ] as ESQLFieldWithMetadata[];
+    const previousCommandFields: ESQLColumnData[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'field2', type: 'double', userDefined: false },
+    ];
 
     const result = columnsAfter(
       synth.cmd`RENAME meow = field1, field2 as woof`,
       previousCommandFields,
-      context
+      ''
     );
 
-    expect(result).toEqual([
-      { name: 'meow', type: 'keyword' },
-      { name: 'woof', type: 'double' },
+    expect(result).toEqual<ESQLColumnData[]>([
+      { name: 'meow', type: 'keyword', userDefined: true, location: { max: 0, min: 0 } },
+      { name: 'woof', type: 'double', userDefined: true, location: { max: 0, min: 0 } },
     ]);
   });
 });

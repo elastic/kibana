@@ -28,9 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.deleteAllSearchSessions();
         await PageObjects.common.navigateToApp('dashboard');
         log.debug('wait for dashboard landing page');
-        await retry.tryForTime(10000, async () => {
-          testSubjects.existOrFail('dashboardLandingPage');
-        });
+        await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
         await searchSessions.markTourDone();
       });
 

@@ -11,31 +11,38 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useBoolean } from '@kbn/react-hooks';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 
 export type LensWrapperProps = {
+  metric: MetricField;
   lensProps: LensProps;
+  onViewDetails: (metric: MetricField, esqlQuery: string) => void;
 } & Pick<ChartSectionProps, 'services' | 'onBrushEnd' | 'onFilter' | 'abortController'>;
 
-const DEFAULT_DISABLED_ACTIONS = [
-  'ACTION_CUSTOMIZE_PANEL',
-  'ACTION_EXPORT_CSV',
-  // temporarily disabiling it until we figure out this action
-  'ACTION_OPEN_IN_DISCOVER',
-];
+const DEFAULT_DISABLED_ACTIONS = ['ACTION_CUSTOMIZE_PANEL', 'ACTION_EXPORT_CSV'];
 
 export function LensWrapper({
   lensProps,
+  metric,
   services,
   onBrushEnd,
   onFilter,
   abortController,
+  onViewDetails,
 }: LensWrapperProps) {
   const { euiTheme } = useEuiTheme();
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
 
   const { EmbeddableComponent, SaveModalComponent } = services.lens;
+
+  const esqlQuery = (lensProps?.attributes?.state?.query as AggregateQuery).esql ?? '';
+
+  const handleViewDetails = React.useCallback(() => {
+    onViewDetails(metric, esqlQuery);
+  }, [onViewDetails, metric, esqlQuery]);
 
   const chartCss = css`
     position: relative;
@@ -67,6 +74,7 @@ export function LensWrapper({
 
   const extraActions = useLensExtraActions({
     copyToDashboard: { onClick: toggleSaveModalVisible },
+    viewDetails: { onClick: handleViewDetails },
   });
 
   return (

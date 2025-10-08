@@ -416,6 +416,8 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
         supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
+        supports_cloud_connector:
+          restOfBody.supports_cloud_connector ?? packagePolicy.supports_cloud_connector,
       } as NewPackagePolicy;
 
       if (overrides) {

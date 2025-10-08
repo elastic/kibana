@@ -354,11 +354,36 @@ describe('nested unknowns', () => {
 
 test('meta', () => {
   const stringSchema = schema.string();
-  const type = schema.mapOf(schema.string(), stringSchema);
+  const type = schema.recordOf(schema.string(), stringSchema);
   const result = type
     .getSchema()
     .describe()
     .metas![0][META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]();
 
   expect(result).toBe(stringSchema.getSchema());
+});
+
+test('handles references', () => {
+  const type = schema.recordOf(
+    schema.string(),
+    schema.conditional(
+      schema.contextRef('scenario'),
+      'context',
+      schema.object({
+        value: schema.string({ defaultValue: schema.contextRef('context_value') }),
+        sibling: schema.string({ defaultValue: 'sibling#1' }),
+      }),
+      schema.object({
+        value: schema.string({ defaultValue: schema.siblingRef('sibling') }),
+        sibling: schema.string({ defaultValue: 'sibling#1' }),
+      })
+    )
+  );
+
+  expect(type.validate({ key: {} }, { scenario: 'context', context_value: 'context#1' })).toEqual({
+    key: { value: 'context#1', sibling: 'sibling#1' },
+  });
+  expect(type.validate({ key: {} }, { scenario: 'sibling', context_value: 'context#1' })).toEqual({
+    key: { value: 'sibling#1', sibling: 'sibling#1' },
+  });
 });

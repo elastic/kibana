@@ -23,6 +23,7 @@ export const connectorTypes: string[] = [
   '.teams',
   '.torq',
   '.opsgenie',
+  '.jira-service-management',
   '.tines',
   '.gen-ai',
   '.bedrock',

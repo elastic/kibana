@@ -94,9 +94,10 @@ export const processingGrokSuggestionRoute = createServerRoute({
       throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
-      request,
-    });
+    const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
+      await getScopedClients({
+        request,
+      });
 
     // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
     // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
@@ -106,6 +107,7 @@ export const processingGrokSuggestionRoute = createServerRoute({
         inferenceClient,
         streamsClient,
         scopedClusterClient,
+        fieldsMetadataClient,
       })
     ).pipe(
       map((grokProcessor) => ({

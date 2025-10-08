@@ -18,9 +18,10 @@ const fields: Array<ESQLFieldWithMetadata & { suggestedAs?: string }> = [
   ...types.map((type) => ({
     name: `${type}Field`,
     type,
+    userDefined: false as false,
   })),
-  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'double' },
+  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`', userDefined: false },
+  { name: 'kubernetes.something.something', type: 'double', userDefined: false },
 ];
 
 const indexes = (

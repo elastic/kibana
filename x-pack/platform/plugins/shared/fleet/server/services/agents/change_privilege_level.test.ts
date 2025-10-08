@@ -67,7 +67,7 @@ describe('changeAgentPrivilegeLevel', () => {
 
     const res = await changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, {});
 
-    expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, {
+    expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, soClientMock, {
       agents: [agentId],
       created_at: expect.any(String),
       type: 'PRIVILEGE_LEVEL_CHANGE',
@@ -97,18 +97,19 @@ describe('changeAgentPrivilegeLevel', () => {
     });
 
     const options = {
-      userInfo: { username: 'user', password: 'password' },
+      user_info: { username: 'user', groupname: 'group', password: 'password' },
     };
     const res = await changeAgentPrivilegeLevel(esClientMock, soClientMock, agentId, options);
 
-    expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, {
+    expect(mockedCreateAgentAction).toHaveBeenCalledWith(esClientMock, soClientMock, {
       agents: [agentId],
       created_at: expect.any(String),
       type: 'PRIVILEGE_LEVEL_CHANGE',
       data: {
         unprivileged: true,
-        userInfo: { username: 'user', password: 'password' },
+        user_info: { username: 'user', groupname: 'group' },
       },
+      secrets: { user_info: { password: 'password' } },
     });
     expect(res).toEqual({ actionId: 'test-action-id' });
   });

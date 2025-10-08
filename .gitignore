@@ -19,6 +19,7 @@ target
 /build
 .jruby
 .idea
+.claude
 .windsurf
 *.iml
 *.log

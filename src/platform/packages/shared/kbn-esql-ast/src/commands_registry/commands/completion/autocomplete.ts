@@ -62,11 +62,7 @@ function getPosition(
   }
 
   const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
-  const expressionType = getExpressionType(
-    expressionRoot,
-    context?.fields,
-    context?.userDefinedColumns
-  );
+  const expressionType = getExpressionType(expressionRoot, context?.columns);
 
   if (isExpressionComplete(expressionType, query)) {
     return CompletionPosition.AFTER_PROMPT;
@@ -161,8 +157,7 @@ export async function autocomplete(
           callbacks?.getByType,
           {
             functions: true,
-            fields: true,
-            userDefinedColumns: context?.userDefinedColumns,
+            columns: true,
           },
           {},
           callbacks?.hasMinimumLicenseRequired,

@@ -6251,7 +6251,15 @@
             "section": "def-server.SOWithMetadata",
             "text": "SOWithMetadata"
           },
-          "<Attr>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }>; }"
+          "<Attr>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }>; delete: (id: string) => Promise<",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.DeleteResult",
+            "text": "DeleteResult"
+          },
+          ">; }"
         ],
         "path": "src/platform/plugins/shared/visualizations/public/vis_types/vis_type_alias_registry.ts",
         "deprecated": false,

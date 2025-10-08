@@ -32,6 +32,10 @@ export const relevanceSearch = async ({
     (field) => field.type === 'text' || field.type === 'semantic_text'
   );
 
+  if (selectedFields.length === 0) {
+    throw new Error('No text or semantic_text fields found, aborting search.');
+  }
+
   return performMatchSearch({
     term,
     index: target,

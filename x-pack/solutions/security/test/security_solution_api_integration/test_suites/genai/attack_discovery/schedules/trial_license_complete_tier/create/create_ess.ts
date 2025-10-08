@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
         );
 
-        checkIfScheduleExists({ getService, id: schedule.id, kibanaSpace: kibanaSpace1 });
+        await checkIfScheduleExists({ getService, id: schedule.id, kibanaSpace: kibanaSpace1 });
       });
     });
 

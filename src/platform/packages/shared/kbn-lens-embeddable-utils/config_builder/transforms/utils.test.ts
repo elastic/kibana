@@ -257,7 +257,7 @@ describe('buildDatasetState', () => {
       allColumns: [],
     } as TextBasedLayer;
 
-    const result = buildDatasetState(textBasedLayer);
+    const result = buildDatasetState(textBasedLayer, {}, [], 'layer_0');
     expect(result).toMatchInlineSnapshot(`
       Object {
         "query": "from my-index | limit 10",
@@ -273,12 +273,11 @@ describe('buildDatasetState', () => {
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer);
+    const result = buildDatasetState(formBasedLayer, {}, [], 'layer_0');
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "index": "my-dataview-id",
-        "time_field": "@timestamp",
-        "type": "index",
+        "name": "my-dataview-id",
+        "type": "dataView",
       }
     `);
   });

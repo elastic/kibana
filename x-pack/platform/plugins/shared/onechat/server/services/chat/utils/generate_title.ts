@@ -25,13 +25,13 @@ export const generateTitle$ = ({
 }): Observable<string> => {
   return conversation$.pipe(
     switchMap((conversation) => {
-      return defer(async () =>
-        generateConversationTitle({
+      return defer(async () => {
+        return generateConversationTitle({
           previousRounds: conversation.rounds,
           nextInput,
           chatModel,
-        })
-      ).pipe(shareReplay());
+        });
+      }).pipe(shareReplay());
     })
   );
 };
@@ -50,15 +50,28 @@ export const generateConversationTitle = async ({
     { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
     async (span) => {
       const structuredModel = chatModel.withStructuredOutput(
-        z.object({
-          title: z.string().describe('The title for the conversation'),
-        })
+        z
+          .object({
+            title: z.string().describe('The title for the conversation'),
+          })
+          .describe('Tool to use to provide the title for the conversation'),
+        { name: 'set_title' }
       );
 
       const prompt: BaseMessageLike[] = [
         [
           'system',
-          "'You are a helpful assistant. Assume the following messages is the start of a conversation between you and a user; give this conversation a title based on the content below",
+          `You are a title-generation utility. Your ONLY purpose is to create a short, relevant title for the provided conversation.
+
+You MUST call the 'set_title' tool to provide the title. Do NOT respond with plain text or any other conversational language.
+
+Here is an example:
+Conversation:
+- User: "Hey, can you help me find out how to configure a new role in Kibana for read-only access to dashboards?"
+- Assistant: "Of course! To create a read-only role..."
+=> Your response MUST be a call to the 'set_title' tool like this: {"title": "Kibana Read-Only Role Configuration"}
+
+Now, generate a title for the following conversation.`,
         ],
         ...conversationToLangchainMessages({ previousRounds, nextInput }),
       ];

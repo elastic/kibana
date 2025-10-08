@@ -41,7 +41,7 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
 
   const onSubmit = useCallback(
     async (newLabel: string) => {
-      if (!newLabel) {
+      if (!newLabel || newLabel.length > MAX_TAB_LABEL_LENGTH) {
         return;
       }
 
@@ -93,7 +93,9 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
       value={value}
       maxLength={MAX_TAB_LABEL_LENGTH}
       isLoading={submitState === SubmitState.submitting}
-      isInvalid={submitState === SubmitState.error || !value.trim()}
+      isInvalid={
+        submitState === SubmitState.error || !value.trim() || value.length > MAX_TAB_LABEL_LENGTH
+      }
       onChange={onChange}
       onKeyDown={onKeyDown}
       onBlur={submitState !== SubmitState.submitting ? onExit : undefined}

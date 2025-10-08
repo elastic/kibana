@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ConversationRound, ToolCallStep } from '@kbn/onechat-common';
+import type {
+  ConversationRound,
+  ReasoningStep,
+  ToolCallProgress,
+  ToolCallStep,
+} from '@kbn/onechat-common';
 import { isToolCallStep } from '@kbn/onechat-common';
 
 import type { Conversation } from '@kbn/onechat-common';
@@ -98,9 +103,31 @@ export const useConversationActions = () => {
         })
       );
     },
+    addReasoningStep: ({ step }: { step: ReasoningStep }) => {
+      setCurrentRound((round) => {
+        round.steps.push(step);
+      });
+    },
     addToolCall: ({ step }: { step: ToolCallStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
+      });
+    },
+    setToolCallProgress: ({
+      progress,
+      toolCallId,
+    }: {
+      progress: ToolCallProgress;
+      toolCallId: string;
+    }) => {
+      setCurrentRound((round) => {
+        const step = round.steps.filter(isToolCallStep).find((s) => s.tool_call_id === toolCallId);
+        if (step) {
+          if (!step.progression) {
+            step.progression = [];
+          }
+          step.progression.push(progress);
+        }
       });
     },
     setToolCallResult: ({ results, toolCallId }: { results: ToolResult[]; toolCallId: string }) => {
