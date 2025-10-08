@@ -101,6 +101,7 @@ export const ColorRow = ({
     return (
       <EuiFieldText
         prepend={rangeLabel}
+        aria-label={rangeLabel}
         value={range}
         data-test-subj={`colorEditorKeyRange ${index}`}
         onChange={(e) => {
