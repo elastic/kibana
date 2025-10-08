@@ -36,7 +36,7 @@ describe('EnterForeachNodeImpl', () => {
     workflowExecutionRuntimeManager.navigateToNextNode = jest.fn();
     workflowExecutionRuntimeManager.navigateToNode = jest.fn();
     workflowExecutionRuntimeManager.enterScope = jest.fn();
-    
+
     stepExecutionRuntime = {} as unknown as StepExecutionRuntime;
     stepExecutionRuntime.startStep = jest.fn();
     stepExecutionRuntime.finishStep = jest.fn();
@@ -45,7 +45,7 @@ describe('EnterForeachNodeImpl', () => {
     stepExecutionRuntime.contextManager = {
       readContextPath: jest.fn(),
     } as any;
-    
+
     workflowLogger = {} as unknown as IWorkflowEventLogger;
     workflowLogger.logDebug = jest.fn();
     underTest = new EnterForeachNodeImpl(

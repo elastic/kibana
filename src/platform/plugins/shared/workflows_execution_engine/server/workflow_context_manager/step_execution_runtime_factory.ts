@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
