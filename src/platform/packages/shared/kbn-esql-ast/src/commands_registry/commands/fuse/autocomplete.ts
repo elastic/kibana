@@ -12,6 +12,7 @@ import {
   withAutoSuggest,
   pipeCompleteItem,
   withCompleteItem,
+  EDITOR_MARKER,
 } from '../../../..';
 import { isColumn } from '../../../ast/is';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
@@ -45,7 +46,11 @@ function getPosition(innerText: string, command: ESQLAstFuseCommand): FusePositi
     return FusePosition.GROUP_BY;
   }
 
-  if ((keyBy && keyBy.incomplete) || immediatelyAfterOptionFieldsList(innerText, 'key by')) {
+  if (
+    (keyBy && keyBy.incomplete) ||
+    immediatelyAfterOptionFieldsList(innerText, 'key by') ||
+    keyBy?.text.includes(EDITOR_MARKER)
+  ) {
     return FusePosition.KEY_BY;
   }
 
