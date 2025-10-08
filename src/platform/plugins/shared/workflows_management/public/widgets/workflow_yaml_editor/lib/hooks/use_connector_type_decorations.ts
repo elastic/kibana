@@ -11,6 +11,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { monaco } from '@kbn/monaco';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
+import { isBuiltInStepType } from '@kbn/workflows';
 import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml_utils';
 
@@ -53,7 +54,7 @@ export const useConnectorTypeDecorations = ({
 
   const typeExists = useCallback((type: string) => {
     const dynamicConnectorTypes = getCachedAllConnectorsMap() || new Map();
-    return dynamicConnectorTypes.has(type);
+    return isBuiltInStepType(type) || dynamicConnectorTypes.has(type);
   }, []);
 
   useEffect(() => {

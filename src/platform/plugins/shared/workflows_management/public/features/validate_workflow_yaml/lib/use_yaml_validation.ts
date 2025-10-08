@@ -35,11 +35,13 @@ const SEVERITY_MAP = {
 
 export interface UseYamlValidationResult {
   error: Error | null;
+  isLoading: boolean;
 }
 
 export function useYamlValidation(
   editor: monaco.editor.IStandaloneCodeEditor | null
 ): UseYamlValidationResult {
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const decorationsCollection = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
   const yamlDocument = useSelector(selectYamlDocument);
@@ -58,12 +60,7 @@ export function useYamlValidation(
     }
 
     if (!yamlDocument || !workflowGraph || !workflowDefinition) {
-      // console.error(
-      //   'Error validating variables',
-      //   yamlDocument,
-      //   workflowGraph,
-      //   workflowDefinition
-      // );
+      setIsLoading(false);
       setError(
         new Error(
           'Error validating variables. Yaml document: ' +
@@ -91,7 +88,18 @@ export function useYamlValidation(
     ].flat();
 
     for (const validationResult of validationResults) {
-      if (validationResult.source === 'variable-validation' && validationResult.severity === null) {
+      if (validationResult.owner === 'variable-validation') {
+        if (validationResult.severity !== null) {
+          markers.push({
+            severity: SEVERITY_MAP[validationResult.severity],
+            message: validationResult.message,
+            startLineNumber: validationResult.startLineNumber,
+            startColumn: validationResult.startColumn,
+            endLineNumber: validationResult.endLineNumber,
+            endColumn: validationResult.endColumn,
+            source: 'variable-validation',
+          });
+        }
         // handle valid variables
         decorations.push({
           range: new monaco.Range(
@@ -101,44 +109,14 @@ export function useYamlValidation(
             validationResult.endColumn
           ),
           options: {
-            inlineClassName: `template-variable-valid`,
+            inlineClassName: `template-variable-${validationResult.severity ?? 'valid'}`,
             hoverMessage: validationResult.hoverMessage
               ? createMarkdownContent(validationResult.hoverMessage)
               : null,
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
           },
         });
-      } else if (
-        validationResult.source === 'variable-validation' &&
-        validationResult.severity !== null
-      ) {
-        // handle invalid variables
-        markers.push({
-          severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message,
-          startLineNumber: validationResult.startLineNumber,
-          startColumn: validationResult.startColumn,
-          endLineNumber: validationResult.endLineNumber,
-          endColumn: validationResult.endColumn,
-          source: 'variable-validation',
-        });
-
-        decorations.push({
-          range: new monaco.Range(
-            validationResult.startLineNumber,
-            validationResult.startColumn,
-            validationResult.endLineNumber,
-            validationResult.endColumn
-          ),
-          options: {
-            inlineClassName: `template-variable-${validationResult.severity}`,
-            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-            hoverMessage: validationResult.hoverMessage
-              ? createMarkdownContent(validationResult.hoverMessage)
-              : null,
-          },
-        });
-      } else if (validationResult.source === 'step-name-validation') {
+      } else if (validationResult.owner === 'step-name-validation') {
         markers.push({
           severity: SEVERITY_MAP[validationResult.severity],
           message: validationResult.message,
@@ -148,7 +126,6 @@ export function useYamlValidation(
           endColumn: validationResult.endColumn,
           source: 'step-name-validation',
         });
-        // Add full line highlighting with red background
         decorations.push({
           range: new monaco.Range(
             validationResult.startLineNumber,
@@ -163,19 +140,18 @@ export function useYamlValidation(
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
           },
         });
-      } else if (
-        validationResult.source === 'connector-id-validation' &&
-        validationResult.severity !== null
-      ) {
-        markers.push({
-          severity: SEVERITY_MAP[validationResult.severity],
-          message: validationResult.message,
-          startLineNumber: validationResult.startLineNumber,
-          startColumn: validationResult.startColumn,
-          endLineNumber: validationResult.endLineNumber,
-          endColumn: validationResult.endColumn,
-          source: 'connector-id-validation',
-        });
+      } else if (validationResult.owner === 'connector-id-validation') {
+        if (validationResult.severity !== null) {
+          markers.push({
+            severity: SEVERITY_MAP[validationResult.severity],
+            message: validationResult.message,
+            startLineNumber: validationResult.startLineNumber,
+            startColumn: validationResult.startColumn,
+            endLineNumber: validationResult.endLineNumber,
+            endColumn: validationResult.endColumn,
+            source: 'connector-id-validation',
+          });
+        }
         decorations.push({
           range: new monaco.Range(
             validationResult.startLineNumber,
@@ -184,7 +160,7 @@ export function useYamlValidation(
             validationResult.endColumn
           ),
           options: {
-            inlineClassName: `template-variable-${validationResult.severity}`,
+            inlineClassName: `template-variable-${validationResult.severity ?? 'valid'}`,
             stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
             hoverMessage: validationResult.hoverMessage
               ? createMarkdownContent(validationResult.hoverMessage)
@@ -192,32 +168,6 @@ export function useYamlValidation(
             after: validationResult.afterMessage
               ? {
                   content: validationResult.afterMessage,
-                  cursorStops: monaco.editor.InjectedTextCursorStops.None,
-                  inlineClassName: `after-text`,
-                }
-              : null,
-          },
-        });
-      } else if (
-        validationResult.source === 'connector-id-validation' &&
-        validationResult.severity === null
-      ) {
-        decorations.push({
-          range: new monaco.Range(
-            validationResult.startLineNumber,
-            validationResult.startColumn,
-            validationResult.endLineNumber,
-            validationResult.endColumn
-          ),
-          options: {
-            inlineClassName: `template-variable-valid`,
-            stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-            hoverMessage: validationResult.hoverMessage
-              ? createMarkdownContent(validationResult.hoverMessage)
-              : null,
-            after: validationResult.after
-              ? {
-                  content: validationResult.after,
                   cursorStops: monaco.editor.InjectedTextCursorStops.None,
                   inlineClassName: `after-text`,
                 }
@@ -232,6 +182,7 @@ export function useYamlValidation(
     }
     decorationsCollection.current = editor.createDecorationsCollection(decorations);
 
+    setIsLoading(false);
     // Set markers on the model for the problems panel
     monaco.editor.setModelMarkers(
       model,
@@ -253,6 +204,7 @@ export function useYamlValidation(
 
   return {
     error,
+    isLoading,
   };
 }
 

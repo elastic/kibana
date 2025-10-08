@@ -49,7 +49,7 @@ interface YamlValidationResultBase {
   endColumn: number;
   hoverMessage: string | null;
   afterMessage?: string | null;
-  source: string | undefined; // the source of the marker
+  source?: string; // the source of the marker, details e.g. yaml schema uri
 }
 
 interface YamlValidationResultNonUniqueStepName extends YamlValidationResultBase {
@@ -82,13 +82,14 @@ interface YamlValidationResultConnectorIdValid extends YamlValidationResultBase 
   severity: null;
   message: null;
   owner: 'connector-id-validation';
-  after: string | null;
+  afterMessage: string | null;
 }
 
 interface YamlValidationResultConnectorIdError extends YamlValidationResultBase {
   severity: YamlValidationErrorSeverity;
   message: string;
   owner: 'connector-id-validation';
+  afterMessage: string | null;
 }
 
 export function isKnownYamlValidationResultOwner(

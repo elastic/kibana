@@ -23,12 +23,13 @@ export function validateConnectorIds(
         id: 'connector-id-validation',
         severity: 'error',
         message: 'Dynamic connector types not found',
-        source: 'connector-id-validation',
-        hoverMessage: null,
+        owner: 'connector-id-validation',
         startLineNumber: 0,
         startColumn: 0,
         endLineNumber: 0,
         endColumn: 0,
+        afterMessage: null,
+        hoverMessage: null,
       },
     ];
   }
@@ -48,26 +49,29 @@ export function validateConnectorIds(
         id: connectorIdItem.id,
         severity: 'error',
         message: `Connector id "${connectorIdItem.key}" not found for connector type ${connectorIdItem.connectorType}`,
-        source: 'connector-id-validation',
+        owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        hoverMessage: `[Add new ${capitalize(
+        afterMessage: `Not connected. [Add new ${capitalize(
           connectorIdItem.connectorType
         )} connector](http://localhost:5601/app/management/ingest-management/connectors/types/create)`,
+        hoverMessage: null,
       });
     } else {
       results.push({
         id: connectorIdItem.id,
         severity: null,
         message: null,
-        source: 'connector-id-validation',
+        owner: 'connector-id-validation',
         startLineNumber: connectorIdItem.startLineNumber,
         startColumn: connectorIdItem.startColumn,
         endLineNumber: connectorIdItem.endLineNumber,
         endColumn: connectorIdItem.endColumn,
-        after: `(${capitalize(connectorIdItem.connectorType)} connector, ID: ${instance.id})`,
+        afterMessage: `✓ Connected (${capitalize(connectorIdItem.connectorType)} connector, ID: ${
+          instance.id
+        })`,
         hoverMessage: null,
       });
     }

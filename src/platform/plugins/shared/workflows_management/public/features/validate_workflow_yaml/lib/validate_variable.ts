@@ -25,7 +25,7 @@ export function validateVariable(
       ...variableItem,
       message: 'Variable is not defined',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     };
   }
@@ -37,7 +37,7 @@ export function validateVariable(
       ...variableItem,
       message: `Invalid variable path: ${key}`,
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     };
   }
@@ -50,7 +50,7 @@ export function validateVariable(
           ...variableItem,
           message: null,
           severity: null,
-          source: 'variable-validation',
+          owner: 'variable-validation',
           hoverMessage: `<pre>(property) ${key}: ${getDetailedTypeDescription(itemSchema)}</pre>`,
         };
       } catch (e) {
@@ -58,7 +58,7 @@ export function validateVariable(
           ...variableItem,
           message: `Foreach parameter can be an array or a JSON string. ${key} is not valid JSON`,
           severity: 'error',
-          source: 'variable-validation',
+          owner: 'variable-validation',
           hoverMessage: null,
         };
       }
@@ -67,7 +67,7 @@ export function validateVariable(
         ...variableItem,
         message: parsedPath.errors.join(', '),
         severity: 'error',
-        source: 'variable-validation',
+        owner: 'variable-validation',
         hoverMessage: null,
       };
     }
@@ -78,7 +78,7 @@ export function validateVariable(
       ...variableItem,
       message: 'Failed to parse variable path',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     };
   }
@@ -88,7 +88,7 @@ export function validateVariable(
       ...variableItem,
       message: `Variable ${parsedPath.propertyPath} cannot be validated, because the workflow schema is invalid`,
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     };
   }
@@ -100,7 +100,7 @@ export function validateVariable(
       ...variableItem,
       message: `Variable ${parsedPath.propertyPath} is invalid`,
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     };
   }
@@ -112,7 +112,7 @@ export function validateVariable(
       ...variableItem,
       message: `Foreach parameter should be an array or a JSON string. ${parsedPath.propertyPath} is unknown string, engine will try to parse it as JSON in runtime, but it might fail`,
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
         refSchema
       )}</pre>`,
@@ -124,7 +124,7 @@ export function validateVariable(
       ...variableItem,
       message: `Foreach parameter should be an array or a JSON string. ${parsedPath.propertyPath} is ${zodTypeName}`,
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
         refSchema
       )}</pre>`,
@@ -136,7 +136,7 @@ export function validateVariable(
       ...variableItem,
       message: refSchema.description,
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
         refSchema
       )}</pre>`,
@@ -148,7 +148,7 @@ export function validateVariable(
       ...variableItem,
       message: `Variable ${parsedPath.propertyPath} cannot be validated, because it's type is unknown`,
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
         refSchema
       )}</pre>`,
@@ -159,7 +159,7 @@ export function validateVariable(
     ...variableItem,
     message: null,
     severity: null,
-    source: 'variable-validation',
+    owner: 'variable-validation',
     hoverMessage: `<pre>(property) ${parsedPath.propertyPath}: ${getDetailedTypeDescription(
       refSchema
     )}</pre>`,

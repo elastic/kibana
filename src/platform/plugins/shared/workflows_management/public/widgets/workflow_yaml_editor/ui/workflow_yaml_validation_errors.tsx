@@ -31,6 +31,7 @@ const severityOrder = ['error', 'warning', 'info'];
 
 interface WorkflowYAMLValidationErrorsProps {
   isMounted: boolean;
+  isLoading: boolean;
   error: Error | null;
   validationErrors: YamlValidationResult[] | null;
   onErrorClick?: (error: YamlValidationResult) => void;
@@ -39,6 +40,7 @@ interface WorkflowYAMLValidationErrorsProps {
 
 export function WorkflowYAMLValidationErrors({
   isMounted,
+  isLoading,
   error: errorValidating,
   validationErrors,
   onErrorClick,
@@ -61,9 +63,10 @@ export function WorkflowYAMLValidationErrors({
             hoverMessage: null,
             severity: 'error' as YamlValidationErrorSeverity,
             message: errorValidating.message,
-            source: 'variable-validation' as YamlValidationResult['source'],
+            owner: 'variable-validation' as YamlValidationResult['owner'],
             startLineNumber: 0,
             startColumn: 0,
+            afterMessage: null,
           },
         ]
       : []),
@@ -85,7 +88,7 @@ export function WorkflowYAMLValidationErrors({
   if (!isMounted) {
     icon = <EuiLoadingSpinner size="m" />;
     buttonContent = 'Loading editor...';
-  } else if (!allValidationErrors) {
+  } else if (!allValidationErrors || isLoading) {
     icon = <EuiLoadingSpinner size="m" />;
     buttonContent = 'Initializing validation...';
   } else if (allValidationErrors?.length === 0) {

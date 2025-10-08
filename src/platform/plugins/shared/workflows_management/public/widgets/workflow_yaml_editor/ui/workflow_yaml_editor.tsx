@@ -225,7 +225,9 @@ export const WorkflowYAMLEditor = ({
     return getWorkflowZodSchemaLoose(connectorsData.connectorTypes);
   }, [connectorsData?.connectorTypes]);
 
-  const { error: errorValidating } = useYamlValidation(editorRef.current);
+  const { error: errorValidating, isLoading: isLoadingValidation } = useYamlValidation(
+    editorRef.current
+  );
 
   const { validationErrors, transformMonacoMarkers, handleMarkersChanged } =
     useMonacoMarkersChangedInterceptor({
@@ -621,6 +623,7 @@ export const WorkflowYAMLEditor = ({
       <div css={styles.validationErrorsContainer}>
         <WorkflowYAMLValidationErrors
           isMounted={isEditorMounted}
+          isLoading={isLoadingValidation}
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
