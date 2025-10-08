@@ -64,16 +64,22 @@ Loading endpoint data into space_b`);
       );
     });
 
-    // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
-    // to do it manually
     after(async () => {
+      // Delete data loaded and suppress any errors (no point in failing test suite on data
+      // cleanup, since all test already ran)
       if (dataSpaceA) {
-        await dataSpaceA.unloadEndpointData();
+        await dataSpaceA.unloadEndpointData().catch((error) => {
+          log.warning(`afterAll data clean up threw error: ${error.message}`);
+          log.debug(error);
+        });
         // @ts-expect-error
         dataSpaceA = undefined;
       }
       if (dataSpaceB) {
-        await dataSpaceB.unloadEndpointData();
+        await dataSpaceB.unloadEndpointData().catch((error) => {
+          log.warning(`afterAll data clean up threw error: ${error.message}`);
+          log.debug(error);
+        });
         // @ts-expect-error
         dataSpaceB = undefined;
       }

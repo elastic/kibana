@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import React, { useState } from 'react';
 import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
@@ -110,13 +110,13 @@ export const StreamDetailGeneralData = ({
           updateInProgress={updateInProgress}
         />
       )}
-      <EuiText>
+      <EuiTitle size="xs">
         <h4>
           {i18n.translate('xpack.streams.streamDetailLifecycle.generalData', {
             defaultMessage: 'General data',
           })}
         </h4>
-      </EuiText>
+      </EuiTitle>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem>
           <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />

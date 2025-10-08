@@ -33,9 +33,9 @@ export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
         ],
       },
       {
-        title: i18nStrings.ingestAndManageData.indicesDsAndRollups.title,
+        title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
         children: [
-          { link: 'streams:overview' }, // TODO : update Steams link
+          { link: 'streams' },
           { link: 'management:index_management' },
           { link: 'management:index_lifecycle_management' },
           { link: 'management:snapshot_restore' },
