@@ -83,7 +83,6 @@ export class AccessControlService {
     actions,
   }: {
     objects: AuthorizeObject[];
-
     actions: Set<SecurityAction>;
   }): GetTypesRequiringAccessControlCheckResult {
     if (!this.typeRegistry) {
