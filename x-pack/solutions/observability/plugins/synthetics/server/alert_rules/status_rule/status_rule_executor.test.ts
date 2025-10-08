@@ -584,18 +584,6 @@ describe('StatusRuleExecutor', () => {
     const maxPeriod = 60000; // 1 minute
 
     it('should return the correct range for a default rule', () => {
-      const statusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
-        params: {},
-        services: {
-          uiSettingsClient,
-          savedObjectsClient: soClient,
-          scopedClusterClient: { asCurrentUser: mockEsClient },
-        },
-        rule: {
-          name: 'test',
-        },
-      } as any);
-
       const range = statusRule.getRange(maxPeriod);
       const expectedFrom = moment()
         .subtract(maxPeriod * 1, 'milliseconds')
@@ -605,7 +593,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     it('should return the correct range for a custom rule with numberOfChecks', () => {
-      const statusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
+      const customStatusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
         params: {
           condition: {
             window: {
@@ -623,7 +611,7 @@ describe('StatusRuleExecutor', () => {
         },
       } as any);
 
-      const range = statusRule.getRange(maxPeriod);
+      const range = customStatusRule.getRange(maxPeriod);
       const expectedFrom = moment()
         .subtract(maxPeriod * 5, 'milliseconds')
         .subtract(5, 'minutes')
@@ -632,7 +620,7 @@ describe('StatusRuleExecutor', () => {
     });
 
     it('should return the correct range for a custom rule with a time window', () => {
-      const statusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
+      const timeWindowStatusRule = new StatusRuleExecutor(esClient, serverMock, monitorClient, {
         params: {
           condition: {
             window: {
@@ -653,7 +641,7 @@ describe('StatusRuleExecutor', () => {
         },
       } as any);
 
-      const range = statusRule.getRange(maxPeriod);
+      const range = timeWindowStatusRule.getRange(maxPeriod);
       const expectedFrom = moment().subtract(10, 'minutes').toISOString();
       expect(range.from).toEqual(expectedFrom);
     });
