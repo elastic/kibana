@@ -100,7 +100,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
             min-inline-size: 0 !important;
 
             .euiIcon {
-              color: ${euiTheme.colors.primary};
+              color: currentColor;
             }
           }
           /* Split button styling: Save + Save-more flush */
