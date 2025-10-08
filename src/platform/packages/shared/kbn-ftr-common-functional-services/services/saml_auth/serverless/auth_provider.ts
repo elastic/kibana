@@ -24,7 +24,7 @@ const projectDefaultRoles = new Map<string, Role>([
   ['es', 'developer'],
   ['security', 'editor'],
   ['oblt', 'editor'],
-  ['chat', 'developer'], // TODO: double check if it's really 'developer'
+  ['workplace_ai', 'developer'], // TODO: double check if it's really 'developer'
 ]);
 
 const projectTypesWithCustomRolesEnabled = ['es', 'security', 'oblt'];
