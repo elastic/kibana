@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_APP_ID } from '../../../onechat/common/constants';
+import expect from '@kbn/expect';
 import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
 
 export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {
-  const { common } = getPageObjects(['common']);
+  const { onechat } = getPageObjects(['onechat']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
 
   describe('tools landing page', function () {
     it('should render', async () => {
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: 'tools' });
+      await onechat.navigateToToolsLanding();
       await testSubjects.existOrFail('agentBuilderToolsPage');
       await testSubjects.existOrFail('agentBuilderToolsTable');
     });
@@ -36,15 +36,14 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
           .expect(200);
       }
 
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: 'tools' });
+      await onechat.navigateToToolsLanding();
       await testSubjects.existOrFail('agentBuilderToolsTable');
-
-      await testSubjects.click(`checkboxSelectRow-${ids[0]}`);
-      await testSubjects.click('agentBuilderToolsSelectAllButton');
-      await testSubjects.click('agentBuilderToolsBulkDeleteButton');
-      await testSubjects.click('confirmModalConfirmButton');
+      await onechat.bulkDeleteTools(ids);
 
       await testSubjects.existOrFail('agentBuilderToolsTable');
+      for (const id of ids) {
+        expect(await onechat.isToolInTable(id)).to.be(false);
+      }
     });
   });
 }

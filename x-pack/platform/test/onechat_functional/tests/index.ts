@@ -6,8 +6,9 @@
  */
 
 import type { OneChatUiFtrProviderContext } from '../../onechat/services/functional';
+import { setupConnector, teardownConnector } from '../utils/connector_helpers';
 
-export default function ({ loadTestFile }: OneChatUiFtrProviderContext) {
+export default function ({ loadTestFile, getService }: OneChatUiFtrProviderContext) {
   describe('Agent Builder', function () {
     describe('converse', function () {
       loadTestFile(require.resolve('./converse/conversation_flow.ts'));
@@ -15,6 +16,14 @@ export default function ({ loadTestFile }: OneChatUiFtrProviderContext) {
     });
 
     describe('tools', function () {
+      before(async () => {
+        await setupConnector(getService);
+      });
+
+      after(async () => {
+        await teardownConnector(getService);
+      });
+
       loadTestFile(require.resolve('./tools/create_tool.ts'));
       loadTestFile(require.resolve('./tools/landing_page.ts'));
       loadTestFile(require.resolve('./tools/manage_tool.ts'));

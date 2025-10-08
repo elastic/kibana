@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { AGENT_BUILDER_APP_ID } from '../../../onechat/common/constants';
+import expect from '@kbn/expect';
 import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
+import { ToolType } from '@kbn/onechat-common';
 
 export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {
-  const { common } = getPageObjects(['common']);
+  const { onechat } = getPageObjects(['onechat']);
   const testSubjects = getService('testSubjects');
-  const monacoEditor = getService('monacoEditor');
   const es = getService('es');
 
   describe('create tool', function () {
@@ -41,46 +41,40 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
 
     it('should create an esql tool', async () => {
       const toolId = `ftr.esql.${Date.now()}`;
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: 'tools/new' });
+      await onechat.navigateToNewTool();
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await testSubjects.setValue('agentBuilderToolIdInput', toolId);
+      await onechat.setToolId(toolId);
 
       await testSubjects.existOrFail('agentBuilderToolTypeSelect');
-      await testSubjects.selectValue('agentBuilderToolTypeSelect', 'esql');
+      await onechat.selectToolType(ToolType.esql);
 
-      await testSubjects.setValue('euiMarkdownEditorTextArea', 'FTR created ES|QL tool');
+      await onechat.setToolDescription('FTR created ES|QL tool');
 
       await testSubjects.existOrFail('agentBuilderEsqlEditor');
-      await monacoEditor.setCodeEditorValue('FROM .kibana | LIMIT 1');
+      await onechat.setEsqlQuery('FROM .kibana | LIMIT 1');
 
-      await testSubjects.click('toolFormSaveButton');
-      await testSubjects.click('toastCloseButton');
+      await onechat.saveTool();
 
-      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${toolId}`);
+      expect(await onechat.isToolInTable(toolId)).to.be(true);
     });
 
     it('should create an index search tool', async () => {
       const toolId = `ftr.index.${Date.now()}`;
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: 'tools/new' });
+      await onechat.navigateToNewTool();
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await testSubjects.setValue('agentBuilderToolIdInput', toolId);
+      await onechat.setToolId(toolId);
 
       await testSubjects.existOrFail('agentBuilderToolTypeSelect');
-      await testSubjects.selectValue('agentBuilderToolTypeSelect', 'index_search');
+      await onechat.selectToolType(ToolType.index_search);
 
       await testSubjects.existOrFail('onechatIndexPatternInput');
-      await testSubjects.setValue('onechatIndexPatternInput', testIndexName);
+      await onechat.setIndexPattern(testIndexName);
 
-      const descriptionEditor = await testSubjects.find('agentBuilderToolDescriptionEditor');
-      const descriptionTextarea = await descriptionEditor.findByCssSelector(
-        'textarea.euiMarkdownEditorTextArea'
-      );
-      await descriptionTextarea.type('FTR created Index Search tool');
+      await onechat.setToolDescription('FTR created Index Search tool');
 
-      await testSubjects.click('toolFormSaveButton');
-      await testSubjects.click('toastCloseButton');
+      await onechat.saveTool();
 
-      await testSubjects.existOrFail(`agentBuilderToolsTableRow-${toolId}`);
+      expect(await onechat.isToolInTable(toolId)).to.be(true);
     });
   });
 }

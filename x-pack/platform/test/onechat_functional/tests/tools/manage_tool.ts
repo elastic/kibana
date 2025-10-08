@@ -6,14 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENT_BUILDER_APP_ID } from '../../../onechat/common/constants';
 import type { OneChatUiFtrProviderContext } from '../../../onechat/services/functional';
 
 export default function ({ getPageObjects, getService }: OneChatUiFtrProviderContext) {
-  const { common } = getPageObjects(['common']);
+  const { onechat } = getPageObjects(['onechat']);
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
-  const retry = getService('retry');
 
   describe('manage tool', function () {
     it('should edit a tool from the tool details page', async () => {
@@ -30,27 +28,18 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
         })
         .expect(200);
 
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${toolId}` });
+      await onechat.navigateToTool(toolId);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      const descriptionEditor = await testSubjects.find('agentBuilderToolDescriptionEditor');
-      const descriptionTextarea = await descriptionEditor.findByCssSelector(
-        'textarea.euiMarkdownEditorTextArea'
-      );
-      await descriptionTextarea.clearValue();
-      await descriptionTextarea.type('FTR updated description');
+      await onechat.setToolDescription('FTR updated description');
 
-      await testSubjects.click('toolFormSaveButton');
-      await testSubjects.click('toastCloseButton');
+      await onechat.saveTool();
 
       // Navigate back to the tool details page and verify edited fields
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${toolId}` });
+      await onechat.navigateToTool(toolId);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      const idValue = await testSubjects.getAttribute('agentBuilderToolIdInput', 'value');
+      const idValue = await onechat.getToolIdValue();
       expect(idValue).to.be(toolId);
-      const descriptionValue = await testSubjects.getAttribute(
-        'euiMarkdownEditorTextArea',
-        'value'
-      );
+      const descriptionValue = await onechat.getToolDescriptionValue();
       expect(descriptionValue).to.contain('FTR updated description');
     });
 
@@ -67,27 +56,23 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
           configuration: { query: 'FROM .kibana | LIMIT 1', params: {} },
         })
         .expect(200);
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${toolId}` });
+      await onechat.navigateToTool(toolId);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await testSubjects.click('agentBuilderToolContextMenuButton');
-      await testSubjects.click('agentBuilderToolCloneButton');
+      await onechat.openToolContextMenu();
+      await onechat.clickToolCloneButton();
       await testSubjects.existOrFail('agentBuilderToolFormPage');
 
       // Save the cloned tool ID
-      const clonedToolId = await testSubjects.getAttribute('agentBuilderToolIdInput', 'value');
+      const clonedToolId = await onechat.getToolIdValue();
 
-      await testSubjects.click('toolFormSaveButton');
-      await testSubjects.click('toastCloseButton');
+      await onechat.saveTool();
 
       // After cloning, navigate to the cloned tool details and verify fields
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${clonedToolId!}` });
+      await onechat.navigateToTool(clonedToolId!);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      const clonedIdValue = await testSubjects.getAttribute('agentBuilderToolIdInput', 'value');
+      const clonedIdValue = await onechat.getToolIdValue();
       expect(clonedIdValue).to.be(clonedToolId);
-      const clonedDescriptionValue = await testSubjects.getAttribute(
-        'euiMarkdownEditorTextArea',
-        'value'
-      );
+      const clonedDescriptionValue = await onechat.getToolDescriptionValue();
       expect(clonedDescriptionValue).to.contain('FTR clone source');
     });
 
@@ -104,21 +89,10 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
           configuration: { query: 'FROM .kibana | LIMIT 1', params: {} },
         })
         .expect(200);
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, {
-        path: `tools/${toolId}`,
-      });
-      await testSubjects.click('toolFormTestButton');
-      await testSubjects.existOrFail('euiFlyoutCloseButton');
-      await testSubjects.existOrFail('agentBuilderToolTestSubmitButton');
-      await testSubjects.click('agentBuilderToolTestSubmitButton');
-
-      await testSubjects.existOrFail('agentBuilderToolTestResponse');
-      await retry.try(async () => {
-        const response = await testSubjects.getVisibleText('agentBuilderToolTestResponse');
-        if (response.includes('{}')) {
-          throw new Error('Tool execution response not ready');
-        }
-      });
+      await onechat.navigateToTool(toolId);
+      await onechat.openToolTestFlyout();
+      await onechat.submitToolTest();
+      await onechat.waitForToolTestResponseNotEmpty();
     });
 
     it('should delete a tool from the tool details page', async () => {
@@ -134,18 +108,18 @@ export default function ({ getPageObjects, getService }: OneChatUiFtrProviderCon
           configuration: { query: 'FROM .kibana | LIMIT 1', params: {} },
         })
         .expect(200);
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${toolId}` });
+      await onechat.navigateToTool(toolId);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
-      await testSubjects.click('agentBuilderToolContextMenuButton');
-      await testSubjects.click('agentBuilderToolDeleteButton');
-      await testSubjects.click('confirmModalConfirmButton');
+      await onechat.openToolContextMenu();
+      await onechat.clickToolDeleteButton();
+      await onechat.confirmModalConfirm();
       await testSubjects.existOrFail('agentBuilderToolsPage');
-      await testSubjects.missingOrFail(`agentBuilderToolsTableRow-${toolId}`);
+      expect(await onechat.isToolInTable(toolId)).to.be(false);
     });
 
     it('views built-in as read-only', async () => {
       const builtInToolId = 'platform.core.search';
-      await common.navigateToApp(AGENT_BUILDER_APP_ID, { path: `tools/${builtInToolId}` });
+      await onechat.navigateToTool(builtInToolId);
       await testSubjects.existOrFail('agentBuilderToolFormPage');
       await testSubjects.existOrFail('agentBuilderToolReadOnlyBadge');
       await testSubjects.missingOrFail('agentBuilderToolContextMenuButton');
