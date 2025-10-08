@@ -105,7 +105,7 @@ describe('Agent migration', () => {
     });
 
     // Mock uuid to return predictable value
-    mockedUuidv4.mockReturnValue('test-action-id');
+    mockedUuidv4.mockReturnValue('test-action-id' as any);
 
     mockedPolicy.is_protected = false;
   });
