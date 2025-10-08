@@ -278,7 +278,7 @@ async function simulateIndexMapping({
 }
 
 async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<void> {
-  const { logger, esClient, indexPatterns, ilmPolicyName, totalFieldsLimit } = opts;
+  const { logger, esClient, indexPatterns, totalFieldsLimit } = opts;
   logger.debug(`Creating concrete write index - ${indexPatterns.name}`);
 
   const validConcreteIndices = await getValidConcreteIndices({
@@ -311,7 +311,6 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
         esClient,
         totalFieldsLimit,
         concreteIndices: nonWriteIndices,
-        ilmPolicyName,
         simulatedMapping,
       });
     } catch (err) {
@@ -327,7 +326,6 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
         logger,
         esClient,
         totalFieldsLimit,
-        ilmPolicyName,
         concreteIndices: [concreteWriteIndex],
         simulatedMapping,
       });

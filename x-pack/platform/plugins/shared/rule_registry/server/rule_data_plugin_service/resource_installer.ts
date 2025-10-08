@@ -265,7 +265,6 @@ export class ResourceInstaller {
       logger: this.options.logger,
       esClient: clusterClient,
       totalFieldsLimit: TOTAL_FIELDS_LIMIT,
-      ilmPolicyName,
       indexPatterns,
       dataStreamAdapter: this.options.dataStreamAdapter,
     });
