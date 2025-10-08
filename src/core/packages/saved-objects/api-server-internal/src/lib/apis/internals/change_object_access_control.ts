@@ -316,12 +316,11 @@ export const changeObjectAccessControl = async (
         },
       };
     } else {
-      const ownerFromSource = currentSource?.accessControl?.owner;
       documentToSave = {
         updated_at: time,
         updated_by: currentUserProfileUid,
         accessControl: {
-          owner: ownerFromSource,
+          ...(currentSource?.accessControl || {}),
           accessMode: accessMode ?? 'default',
         },
       };
