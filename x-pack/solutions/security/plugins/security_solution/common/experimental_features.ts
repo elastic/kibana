@@ -48,23 +48,11 @@ export const allowedExperimentalValues = Object.freeze({
   automatedProcessActionsEnabled: true,
 
   /**
-   * Enables the ability to send Response actions to SentinelOne and persist the results
-   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
-   * response actions in Response Console.
-   *
-   * Release: v8.13.0
-   */
-  responseActionsSentinelOneV1Enabled: true,
-
-  /**
    * Enables use of SentinelOne response actions that complete asynchronously
    *
    * Release: v8.14.0
    */
   responseActionsSentinelOneV2Enabled: true,
-
-  /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: true,
 
   /** Enables the `kill-process` response action for SentinelOne */
   responseActionsSentinelOneKillProcessEnabled: true,
@@ -123,12 +111,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Disables ESQL-based risk scoring
    */
-  disableESQLRiskScoring: true,
+  disableESQLRiskScoring: false,
 
   /**
    * Enable resetting risk scores to zero for outdated entities
    */
-  enableRiskScoreResetToZero: false,
+  enableRiskScoreResetToZero: true,
 
   /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
