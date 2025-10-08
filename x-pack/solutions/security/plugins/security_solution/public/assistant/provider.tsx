@@ -55,6 +55,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     }
   }, [elasticAssistantSharedState.promptContexts, promptContext, promptContexts]);
 
+  // If the _other_ AssistantProvider is not rendered, this will return null, rendering a blank page.
   if (!assistantContextValue) {
     return null;
   }

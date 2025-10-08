@@ -6,14 +6,12 @@
  */
 
 import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import ReactDOM from 'react-dom';
 import React, { Suspense } from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { AssistantOverlay } from '@kbn/elastic-assistant';
+import { Assistant } from '@kbn/elastic-assistant';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AssistantNavLink } from '@kbn/elastic-assistant/impl/assistant_context/assistant_nav_link';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { WORKSPACE_SIDEBAR_APP_AI_ASSISTANT } from '@kbn/core-chrome-browser';
 import type {
   ElasticAssistantPublicPluginSetupDependencies,
   ElasticAssistantPublicPluginStartDependencies,
@@ -76,56 +74,64 @@ export class ElasticAssistantPublicPlugin
       };
       return services;
     };
-
-    coreStart.chrome.navControls.registerRight({
-      order: 1001,
-      mount: (target) => {
-        const startService = startServices();
-        return this.mountAIAssistantButton(target, coreStart, startService);
-      },
-    });
-
-    return {};
-  }
-
-  private mountAIAssistantButton(
-    targetDomElement: HTMLElement,
-    coreStart: CoreStart,
-    services: StartServices
-  ) {
-    const { openChat$, completeOpenChat } = services.aiAssistantManagementSelection;
-    ReactDOM.render(
-      <I18nProvider>
+    const ContextWrapper = ({
+      children,
+      isServerless,
+    }: {
+      children: React.ReactNode;
+      isServerless: boolean;
+    }) => {
+      const services = startServices();
+      const { openChat$, completeOpenChat } = services.aiAssistantManagementSelection;
+      return (
         <KibanaContextProvider
           services={{
             appName: 'securitySolution',
             ...services,
           }}
         >
-          <KibanaThemeProvider {...coreStart}>
-            <NavigationProvider core={services}>
-              <ReactQueryClientProvider>
-                <AssistantSpaceIdProvider>
-                  <AssistantProvider
-                    isServerless={this.isServerless}
-                    openChatTrigger$={openChat$}
-                    completeOpenChat={completeOpenChat}
-                  >
-                    <Suspense fallback={null}>
-                      <AssistantNavLink />
-                      <AssistantOverlay />
-                    </Suspense>
-                  </AssistantProvider>
-                </AssistantSpaceIdProvider>
-              </ReactQueryClientProvider>
-            </NavigationProvider>
-          </KibanaThemeProvider>
+          <NavigationProvider core={services}>
+            <ReactQueryClientProvider>
+              <AssistantSpaceIdProvider>
+                <AssistantProvider
+                  isServerless={isServerless}
+                  openChatTrigger$={openChat$}
+                  completeOpenChat={completeOpenChat}
+                >
+                  <Suspense fallback={null}>{children}</Suspense>
+                </AssistantProvider>
+              </AssistantSpaceIdProvider>
+            </ReactQueryClientProvider>
+          </NavigationProvider>
         </KibanaContextProvider>
-      </I18nProvider>,
-      targetDomElement
-    );
+      );
+    };
 
-    return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+    coreStart.chrome.workspace.sidebar.registerSidebarApp({
+      appId: WORKSPACE_SIDEBAR_APP_AI_ASSISTANT,
+      size: 'wide',
+      button: {
+        iconType: AssistantIcon,
+        'aria-label': 'Elastic Assistant',
+        wrapper: (button) => (
+          <ContextWrapper isServerless={this.isServerless}>{button}</ContextWrapper>
+        ),
+      },
+      app: {
+        title: 'Elastic Assistant',
+        color: 'plain',
+        isScrollable: false,
+        hasBorder: true,
+        containerPadding: 'none',
+        children: (
+          <ContextWrapper isServerless={this.isServerless}>
+            <Assistant />
+          </ContextWrapper>
+        ),
+      },
+    });
+
+    return {};
   }
 
   public stop() {
