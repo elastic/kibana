@@ -260,10 +260,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         try {
           const filePicker = await testSubjects.find(ui.pages.kbManagementTab.bulkImportFilePicker);
           await filePicker.type(tempFilePath);
-          await retry.waitFor('file input value to be set after typing path', async () => {
-            const value = await filePicker.getAttribute('value');
-            return Boolean(value);
-          });
           await testSubjects.waitForEnabled(ui.pages.kbManagementTab.bulkImportSaveButton);
         } catch (error) {
           log.debug(`Error uploading file: ${error}`);
@@ -289,11 +285,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       afterEach(async () => {
         await clearKnowledgeBase(es);
         await browser.refresh();
-        try {
-          fs.unlinkSync(tempFilePath);
-        } catch (_e) {
-          // ignore if file doesn't exist
-        }
+        fs.unlinkSync(tempFilePath);
       });
 
       after(async () => {
