@@ -54,12 +54,11 @@ export abstract class SiemMigrationsDataItemClient<
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    const allItems = structuredClone(items);
     const createdAt = new Date().toISOString();
 
     const batches: CreateMigrationItemInput<I>[][] = [];
-    for (let i = 0; i < allItems.length; i += BULK_MAX_SIZE) {
-      batches.push(allItems.slice(i, i + BULK_MAX_SIZE));
+    for (let i = 0; i < items.length; i += BULK_MAX_SIZE) {
+      batches.push(items.slice(i, i + BULK_MAX_SIZE));
     }
 
     await Promise.all(

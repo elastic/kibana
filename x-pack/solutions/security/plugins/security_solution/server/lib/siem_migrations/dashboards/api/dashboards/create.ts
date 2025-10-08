@@ -90,8 +90,7 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
               items[0].original_dashboard.vendor
             );
 
-            const [, , extractedResources] = await Promise.all([
-              dashboardMigrationsClient.data.items.create(items),
+            const [, extractedResources] = await Promise.all([
               siemMigrationAuditLogger.logAddDashboards({
                 migrationId,
                 count: originalDashboardsCount,
@@ -105,7 +104,12 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
             }));
 
             if (resources.length > 0) {
-              await dashboardMigrationsClient.data.resources.create(resources);
+              await Promise.all([
+                dashboardMigrationsClient.data.items.create(items),
+                dashboardMigrationsClient.data.resources.create(resources),
+              ]);
+            } else {
+              await dashboardMigrationsClient.data.items.create(items);
             }
             return res.ok();
           } catch (error) {
