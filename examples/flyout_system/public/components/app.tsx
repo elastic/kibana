@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 
 import {
   EuiButton,
@@ -26,6 +26,7 @@ import type { OverlayStart } from '@kbn/core/public';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import { FlyoutWithIsOpen } from './_flyout_with_isopen';
 import { FlyoutWithOverlays } from './_flyout_with_overlays';
@@ -37,6 +38,8 @@ interface AppDeps {
   overlays: OverlayStart;
   rendering: RenderingService;
 }
+
+type AppContentDeps = Pick<AppDeps, 'overlays' | 'rendering'>;
 
 interface FlyoutSessionProps {
   title: string;
@@ -174,17 +177,37 @@ const FLYOUT_WITH_ISOPEN = 'render_with_isopen';
 const FLYOUT_WITHOUT_ISOPEN = 'render_without_isopen';
 const FLYOUT_WITH_OVERLAYS = 'render_with_overlays';
 
-export const App = ({ basename, navigation, overlays, rendering }: AppDeps) => {
+// Component that uses router hooks (must be inside Router context)
+const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
   const panelled: EuiPageTemplateProps['panelled'] = undefined;
   const restrictWidth: EuiPageTemplateProps['restrictWidth'] = false;
   const bottomBorder: EuiPageTemplateProps['bottomBorder'] = 'extended';
+
+  const history = useHistory();
+  const location = useLocation();
 
   const [flyoutType, setFlyoutType] = React.useState<'overlay' | 'push'>('overlay');
   const [childBackgroundShaded, setChildBackgroundShaded] = React.useState(false);
   const [selectedTabId, setSelectedTabId] = React.useState(FLYOUT_WITH_ISOPEN);
 
+  // Initialize tab from URL on mount
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tabFromUrl = searchParams.get('tab');
+    if (
+      tabFromUrl &&
+      [FLYOUT_WITH_ISOPEN, FLYOUT_WITHOUT_ISOPEN, FLYOUT_WITH_OVERLAYS].includes(tabFromUrl)
+    ) {
+      setSelectedTabId(tabFromUrl);
+    }
+  }, [location.search]);
+
   const handleTabClick = (tabId: string) => {
     setSelectedTabId(tabId);
+    // Update URL with the selected tab
+    const searchParams = new URLSearchParams(location.search);
+    searchParams.set('tab', tabId);
+    history.replace({ search: searchParams.toString() });
   };
 
   const renderTabContent = () => {
@@ -203,58 +226,65 @@ export const App = ({ basename, navigation, overlays, rendering }: AppDeps) => {
   };
 
   return (
+    <EuiPageTemplate
+      panelled={panelled}
+      restrictWidth={restrictWidth}
+      bottomBorder={bottomBorder}
+      offset={0}
+      grow={false}
+    >
+      <EuiPageTemplate.Header iconType="logoElastic" pageTitle="Flyout System Example" />
+      <EuiPageTemplate.Section grow={false} bottomBorder={bottomBorder}>
+        <EuiSwitch
+          label="Flyouts push content"
+          checked={flyoutType === 'push'}
+          onChange={(e) => setFlyoutType(e.target.checked ? 'push' : 'overlay')}
+        />
+        <EuiSpacer />
+        <EuiSwitch
+          label="Child flyout background shaded"
+          checked={childBackgroundShaded}
+          onChange={(e) => setChildBackgroundShaded(e.target.checked)}
+        />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section>
+        <EuiTabs>
+          <EuiTab
+            isSelected={selectedTabId === FLYOUT_WITH_ISOPEN}
+            onClick={() => handleTabClick(FLYOUT_WITH_ISOPEN)}
+          >
+            Render EuiFlyout with isOpen prop
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTabId === FLYOUT_WITHOUT_ISOPEN}
+            onClick={() => handleTabClick(FLYOUT_WITHOUT_ISOPEN)}
+          >
+            Render EuiFlyout without isOpen prop
+          </EuiTab>
+          <EuiTab
+            isSelected={selectedTabId === FLYOUT_WITH_OVERLAYS}
+            onClick={() => handleTabClick(FLYOUT_WITH_OVERLAYS)}
+          >
+            Render with overlays.openFlyout
+          </EuiTab>
+        </EuiTabs>
+        <EuiSpacer />
+        {renderTabContent()}
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
+  );
+};
+
+// Main App component that provides Router context
+export const App = ({ basename, navigation, overlays, rendering }: AppDeps) => {
+  return (
     <Router basename={basename}>
       <navigation.ui.TopNavMenu
         appName="flyout_system_example"
         showSearchBar={false}
         useDefaultBehaviors={true}
       />
-      <EuiPageTemplate
-        panelled={panelled}
-        restrictWidth={restrictWidth}
-        bottomBorder={bottomBorder}
-        offset={0}
-        grow={false}
-      >
-        <EuiPageTemplate.Header iconType="logoElastic" pageTitle="Flyout System Example" />
-        <EuiPageTemplate.Section grow={false} bottomBorder={bottomBorder}>
-          <EuiSwitch
-            label="Flyouts push content"
-            checked={flyoutType === 'push'}
-            onChange={(e) => setFlyoutType(e.target.checked ? 'push' : 'overlay')}
-          />
-          <EuiSpacer />
-          <EuiSwitch
-            label="Child flyout background shaded"
-            checked={childBackgroundShaded}
-            onChange={(e) => setChildBackgroundShaded(e.target.checked)}
-          />
-        </EuiPageTemplate.Section>
-        <EuiPageTemplate.Section>
-          <EuiTabs>
-            <EuiTab
-              isSelected={selectedTabId === FLYOUT_WITH_ISOPEN}
-              onClick={() => handleTabClick(FLYOUT_WITH_ISOPEN)}
-            >
-              Render EuiFlyout with isOpen prop
-            </EuiTab>
-            <EuiTab
-              isSelected={selectedTabId === FLYOUT_WITHOUT_ISOPEN}
-              onClick={() => handleTabClick(FLYOUT_WITHOUT_ISOPEN)}
-            >
-              Render EuiFlyout without isOpen prop
-            </EuiTab>
-            <EuiTab
-              isSelected={selectedTabId === FLYOUT_WITH_OVERLAYS}
-              onClick={() => handleTabClick(FLYOUT_WITH_OVERLAYS)}
-            >
-              Render with overlays.openFlyout
-            </EuiTab>
-          </EuiTabs>
-          <EuiSpacer />
-          {renderTabContent()}
-        </EuiPageTemplate.Section>
-      </EuiPageTemplate>
+      <AppContent overlays={overlays} rendering={rendering} />
     </Router>
   );
 };
