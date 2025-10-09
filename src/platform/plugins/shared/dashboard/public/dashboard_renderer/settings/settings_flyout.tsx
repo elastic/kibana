@@ -135,7 +135,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
         }
       >
         <savedObjectsTaggingApi.ui.components.TagSelector
-          selected={localSettings.tags}
+          selected={localSettings.tags ?? []}
           onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
         />
       </EuiFormRow>

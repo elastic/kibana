@@ -102,9 +102,10 @@ export const getSerializedState = ({
   // TODO Provide tags as an array of tag names in the attribute. In that case, tag references
   // will be extracted by the server.
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
-  const references = savedObjectsTaggingApi?.ui.updateTagsReferences
-    ? savedObjectsTaggingApi?.ui.updateTagsReferences([], tags)
-    : [];
+  const references =
+    tags && savedObjectsTaggingApi?.ui.updateTagsReferences
+      ? savedObjectsTaggingApi?.ui.updateTagsReferences([], tags)
+      : [];
 
   const allReferences = [
     ...references,

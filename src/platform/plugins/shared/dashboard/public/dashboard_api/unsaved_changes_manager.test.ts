@@ -20,6 +20,7 @@ import type { DashboardSettings } from './settings_manager';
 import { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { DashboardPanel } from '../../server';
+import { getSampleDashboardState } from '../mocks';
 
 jest.mock('../services/dashboard_backup_service', () => ({}));
 
@@ -94,7 +95,7 @@ describe('unsavedChangesManager', () => {
   describe('onUnsavedChanges', () => {
     describe('onSettingsChanges', () => {
       test('should have unsaved changes when tags change', (done) => {
-        const settingsManager = initializeSettingsManager();
+        const settingsManager = initializeSettingsManager(getSampleDashboardState());
         const unsavedChangesManager = initializeUnsavedChangesManager({
           viewMode$,
           storeUnsavedChanges: false,

@@ -30,7 +30,7 @@ export interface DashboardAttributesAndReferences {
 export interface DashboardState {
   options?: DashboardAttributes['options'];
   description?: DashboardAttributes['description'];
-  tags: string[];
+  tags?: DashboardAttributes['tags'];
   timeRestore: DashboardAttributes['timeRestore'];
   title: DashboardAttributes['description'];
   query?: DashboardAttributes['query'];

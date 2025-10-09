@@ -10,7 +10,7 @@
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardCreationOptions } from '../../../dashboard_api/types';
 import { extractControlGroupState } from './extract_control_group_state';
-import { extractSettings } from './extract_dashboard_settings';
+import { extractOptions } from './extract_options';
 import { extractPanelsState } from './extract_panels_state';
 import { extractSearchState } from './extract_search_state';
 
@@ -24,6 +24,22 @@ export function extractDashboardState(
     const controlGroupState = extractControlGroupState(stateAsObject);
     if (controlGroupState) dashboardState.controlGroupInput = controlGroupState;
 
+    if (typeof stateAsObject.description === 'string') {
+      dashboardState.description = stateAsObject.description;
+    }
+
+    if (Array.isArray(stateAsObject.tags)) {
+      dashboardState.tags = stateAsObject.tags;
+    }
+
+    if (typeof stateAsObject.timeRestore === 'boolean') {
+      dashboardState.timeRestore = stateAsObject.timeRestore;
+    }
+
+    if (typeof stateAsObject.title === 'string') {
+      dashboardState.title = stateAsObject.title;
+    }
+
     if (Array.isArray(stateAsObject.references))
       dashboardState.references = stateAsObject.references;
 
@@ -33,7 +49,7 @@ export function extractDashboardState(
     dashboardState = {
       ...dashboardState,
       ...extractSearchState(stateAsObject),
-      ...extractSettings(stateAsObject),
+      ...extractOptions(stateAsObject),
     };
 
     const { panels, savedObjectReferences } = extractPanelsState(stateAsObject);
