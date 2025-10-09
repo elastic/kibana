@@ -27,6 +27,7 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
+import type { ConnectorTypeInfo } from '../../../../common/schema';
 import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
 import {
   VARIABLE_REGEX_GLOBAL,
@@ -493,7 +494,7 @@ function getConnectorTypeSuggestions(
   context: monaco.languages.CompletionContext,
   scalarType: Scalar.Type | null,
   shouldBeQuoted: boolean,
-  dynamicConnectorTypes?: Record<string, any>
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): monaco.languages.CompletionItem[] {
   // Create a cache key based on the type prefix and context
   const cacheKey = `${typePrefix}|${JSON.stringify(range)}`;
@@ -513,11 +514,7 @@ function getConnectorTypeSuggestions(
 
   // Helper function to create a suggestion with snippet
   const createSnippetSuggestion = (connectorType: string): monaco.languages.CompletionItem => {
-    const snippetText = generateConnectorSnippet(
-      connectorType,
-      shouldBeQuoted,
-      dynamicConnectorTypes
-    );
+    const snippetText = generateConnectorSnippet(connectorType, {}, dynamicConnectorTypes);
 
     // For YAML, we insert the actual text without snippet placeholders
     const simpleText = snippetText;
@@ -1211,9 +1208,6 @@ export function getCompletionItemProvider(
 
               // Get enhanced type information
               const typeInfo = getEnhancedTypeInfo(currentSchema);
-              const propertyTypeName = getDetailedTypeDescription(currentSchema, {
-                singleLine: true,
-              });
 
               // Create a YAML key-value snippet suggestion with cursor positioning
               let insertText = `${key}: `;

@@ -10,6 +10,7 @@
 import { stringify, type ToStringOptions } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
+import type { ConnectorTypeInfo } from '../../../../../common/schema';
 import { isMac } from '../../../../shared/utils/is_mac';
 import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
 import { getCachedAllConnectors } from '../connectors_cache';
@@ -31,7 +32,8 @@ interface GenerateConnectorSnippetOptions {
  */
 export function generateConnectorSnippet(
   connectorType: string,
-  { full, withStepsSection }: GenerateConnectorSnippetOptions = {}
+  { full, withStepsSection }: GenerateConnectorSnippetOptions = {},
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
   let parameters: Record<string, any>;

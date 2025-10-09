@@ -95,6 +95,7 @@ describe('validateVariables', () => {
         startColumn: 1,
         endLineNumber: 1,
         endColumn: 10,
+        owner: 'variable-validation',
       }) // First variable is valid
       .mockReturnValueOnce({
         id: 'error-1',
@@ -106,6 +107,7 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         hoverMessage: null,
+        owner: 'variable-validation',
       })
       .mockReturnValueOnce({
         id: 'error-2',
@@ -117,6 +119,7 @@ describe('validateVariables', () => {
         endLineNumber: 2,
         endColumn: 10,
         hoverMessage: null,
+        owner: 'variable-validation',
       });
 
     const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
@@ -176,6 +179,7 @@ describe('validateVariables', () => {
         startColumn: 1,
         endLineNumber: 1,
         endColumn: 10,
+        owner: 'variable-validation',
       }) // valid1
       .mockReturnValueOnce({
         id: 'error-1',
@@ -187,6 +191,7 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         hoverMessage: null,
+        owner: 'variable-validation',
       })
       .mockReturnValueOnce({
         id: 'valid2',
@@ -198,6 +203,7 @@ describe('validateVariables', () => {
         startColumn: 1,
         endLineNumber: 1,
         endColumn: 10,
+        owner: 'variable-validation',
       }) // valid2
       .mockReturnValueOnce({
         id: 'error-2',
@@ -209,6 +215,7 @@ describe('validateVariables', () => {
         endLineNumber: 1,
         endColumn: 10,
         hoverMessage: 'Type info',
+        owner: 'variable-validation',
       });
 
     const result = validateVariables(variables, mockWorkflowGraph, mockWorkflowDefinition);
@@ -269,6 +276,7 @@ describe('validateVariables', () => {
       endLineNumber: 1,
       endColumn: 10,
       hoverMessage: '<pre>(property) items: array</pre>',
+      owner: 'variable-validation',
     });
 
     const result = validateVariables([foreachVariable], mockWorkflowGraph, mockWorkflowDefinition);
@@ -297,6 +305,7 @@ describe('validateVariables', () => {
       endLineNumber: 5,
       endColumn: 20,
       hoverMessage: 'Hover info',
+      owner: 'variable-validation',
     });
 
     const result = validateVariables([variable], mockWorkflowGraph, mockWorkflowDefinition);

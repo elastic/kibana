@@ -12,6 +12,8 @@ import type { ElasticsearchClient, SecurityServiceStart } from '@kbn/core/server
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { WorkflowsService } from './workflows_management_service';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 describe('WorkflowsService', () => {
   let service: WorkflowsService;
@@ -83,6 +85,10 @@ describe('WorkflowsService', () => {
     mockLogger.error = jest.fn();
 
     const mockEsClientPromise = Promise.resolve(mockEsClient);
+    const mockGetActionsClient = jest.fn().mockResolvedValue({} as IUnsecuredActionsClient);
+    const mockGetActionsClientWithRequest = jest
+      .fn()
+      .mockResolvedValue({} as PublicMethodsOf<ActionsClient>);
 
     service = new WorkflowsService(
       mockEsClientPromise,
@@ -90,7 +96,9 @@ describe('WorkflowsService', () => {
       'workflows-executions',
       'workflows-steps',
       'workflows-logs',
-      false
+      false,
+      mockGetActionsClient,
+      mockGetActionsClientWithRequest
     );
 
     mockSecurity = {
