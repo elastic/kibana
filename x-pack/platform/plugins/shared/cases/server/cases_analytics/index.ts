@@ -147,7 +147,7 @@ export const scheduleCasesAnalyticsSyncTasks = ({
   spaceId: string;
 }) => {
   for (const owner of OWNERS) {
-    scheduleCAISynchronizationTask({ taskManager, logger, spaceId, owner });
+    void scheduleCAISynchronizationTask({ taskManager, logger, spaceId, owner });
   }
 };
 
