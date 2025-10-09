@@ -76,19 +76,3 @@ export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from 'playwright/test';
-export type {
-  EsClient,
-  KbnClient,
-  KibanaUrl,
-  ScoutLogger,
-  ScoutServerConfig,
-  ScoutTestConfig,
-  KibanaRole,
-  ElasticsearchRoleDescriptor,
-} from './src/types';
-
-// Authentication types
-export type { RoleApiCredentials } from './src/playwright/fixtures/scope/worker/api_key';
-
-// Re-exported Playwright types
-export type { Locator, CDPSession } from 'playwright/test';
