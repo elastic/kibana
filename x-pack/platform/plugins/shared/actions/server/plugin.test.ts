@@ -20,6 +20,7 @@ import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import type { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
 import type { ActionsConfig } from './config';
+import { ActionTypeRegistry } from './action_type_registry';
 import type { ActionsPluginsSetup, ActionsPluginsStart, PluginSetupContract } from './plugin';
 import { ActionsPlugin } from './plugin';
 import {
@@ -896,6 +897,20 @@ describe('Actions Plugin', () => {
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
           'Connector: My action type'
         );
+      });
+    });
+
+    describe('listTypes()', () => {
+      it('passes through feature ID and sets exposeValidation to true', async () => {
+        const actionTypeRegistryListMock = jest.spyOn(ActionTypeRegistry.prototype, 'list');
+        await plugin.setup(coreSetup as any, pluginsSetup);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.listTypes('alerting');
+        expect(actionTypeRegistryListMock).toHaveBeenCalledWith({
+          exposeValidation: true,
+          featureId: 'alerting',
+        });
       });
     });
 
