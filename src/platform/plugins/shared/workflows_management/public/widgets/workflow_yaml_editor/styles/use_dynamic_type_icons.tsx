@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public/logos';
+import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public/common';
 import React, { useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/use_available_connectors';

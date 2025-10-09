@@ -31,3 +31,5 @@ export { BedrockLogo };
 
 export { MicrosoftDefenderEndpointLogo } from '../connector_types/microsoft_defender_endpoint/logo';
 export { INFERENCE_CONNECTOR_ID } from '../../common/inference/constants';
+
+export { STACK_CONNECTOR_LOGOS } from './logos';
