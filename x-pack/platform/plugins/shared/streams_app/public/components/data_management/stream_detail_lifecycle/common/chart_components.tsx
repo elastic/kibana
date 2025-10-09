@@ -28,6 +28,7 @@ import { orderIlmPhases } from '../helpers/helpers';
 import { formatBytes } from '../helpers/format_bytes';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
+import type { useAggregations } from '../hooks/use_ingestion_rate';
 import { useIngestionRate, useIngestionRatePerTier } from '../hooks/use_ingestion_rate';
 import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
@@ -40,26 +41,37 @@ interface BaseChartComponentProps {
 
 interface MainStreamChartProps extends BaseChartComponentProps {
   stats?: DataStreamStats;
+  isLoadingAggregations: boolean;
+  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
+  aggregationsError: Error | undefined;
 }
 
 interface FailureStoreChartProps extends BaseChartComponentProps {
   stats?: FailureStoreStats;
+  isLoadingAggregations: boolean;
+  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
+  aggregationsError: Error | undefined;
 }
 
 type ChartComponentProps = MainStreamChartProps | FailureStoreChartProps;
-type ChartPhasesComponentProps = MainStreamChartProps | FailureStoreChartProps;
+type ChartPhasesComponentProps = BaseChartComponentProps & {
+  stats?: DataStreamStats;
+};
 
 export function ChartBarSeries({
-  definition,
   stats,
   timeState,
   isLoadingStats,
+  isLoadingAggregations,
+  aggregations,
+  aggregationsError,
 }: ChartComponentProps) {
-  // Use the appropriate hook based on isFailureStore flag
   const mainStreamResult = useIngestionRate({
-    definition,
     stats,
     timeState,
+    aggregations,
+    isLoading: isLoadingAggregations,
+    error: aggregationsError,
   });
 
   const formatAsBytes = !!stats;
@@ -83,17 +95,19 @@ export function ChartBarSeries({
 }
 
 export function FailureStoreChartBarSeries({
-  definition,
   stats,
   timeState,
   isLoadingStats,
+  isLoadingAggregations,
+  aggregations,
+  aggregationsError,
 }: ChartComponentProps) {
-  // Use the appropriate hook based on isFailureStore flag
   const failureStoreResult = useIngestionRate({
-    definition,
     stats,
     timeState,
-    isFailureStore: true,
+    aggregations,
+    isLoading: isLoadingAggregations,
+    error: aggregationsError,
   });
 
   const formatAsBytes = !!stats;

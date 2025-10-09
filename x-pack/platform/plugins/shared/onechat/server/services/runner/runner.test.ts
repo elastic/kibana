@@ -11,6 +11,7 @@ import type {
   ScopedRunnerRunAgentParams,
   RunToolParams,
   RunAgentParams,
+  ToolHandlerFn,
 } from '@kbn/onechat-server';
 import type {
   CreateScopedRunnerDepsMock,
@@ -29,16 +30,21 @@ import {
 import { createScopedRunner, createRunner } from './runner';
 import { createAgentHandler } from '../agents/modes/create_handler';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { getToolResultId } from '@kbn/onechat-server/tools/utils';
 
 jest.mock('../agents/modes/create_handler');
+jest.mock('@kbn/onechat-server/tools/utils');
 
+const getToolResultIdMock = getToolResultId as jest.MockedFn<typeof getToolResultId>;
 const createAgentHandlerMock = createAgentHandler as jest.MockedFn<typeof createAgentHandler>;
 
 describe('Onechat runner', () => {
   let runnerDeps: CreateScopedRunnerDepsMock;
+  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
+    getToolResultIdMock.mockReturnValue('some-result-id');
   });
 
   describe('runTool', () => {
@@ -52,16 +58,20 @@ describe('Onechat runner', () => {
       } = runnerDeps;
       getRegistry.mockResolvedValue(registry);
 
-      tool = createMockedTool({
-        schema: z.object({
+      toolHandler = jest.fn().mockReturnValue({ results: [] });
+
+      tool = createMockedTool({});
+      tool.getSchema.mockReturnValue(
+        z.object({
           foo: z.string(),
-        }),
-      });
+        })
+      );
+      tool.getHandler.mockReturnValue(toolHandler);
       registry.get.mockResolvedValue(tool);
     });
 
     it('can be invoked through a scoped runner', async () => {
-      tool.handler.mockReturnValue({
+      toolHandler.mockReturnValue({
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
 
@@ -73,16 +83,22 @@ describe('Onechat runner', () => {
       const runner = createScopedRunner(runnerDeps);
       const response = await runner.runTool(params);
 
-      expect(tool.handler).toHaveBeenCalledTimes(1);
-      expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+      expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
+        results: [
+          {
+            tool_result_id: 'some-result-id',
+            type: ToolResultType.other,
+            data: { someProp: 'someValue' },
+          },
+        ],
       });
     });
 
     it('can be invoked through a runner', async () => {
-      tool.handler.mockReturnValue({
+      toolHandler.mockReturnValue({
         results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
       });
 
@@ -97,11 +113,17 @@ describe('Onechat runner', () => {
       const runner = createRunner(otherRunnerDeps);
       const response = await runner.runTool(params);
 
-      expect(tool.handler).toHaveBeenCalledTimes(1);
-      expect(tool.handler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
+      expect(toolHandler).toHaveBeenCalledTimes(1);
+      expect(toolHandler).toHaveBeenCalledWith(params.toolParams, expect.any(Object));
 
       expect(response).toEqual({
-        results: [{ type: ToolResultType.other, data: { someProp: 'someValue' } }],
+        results: [
+          {
+            tool_result_id: 'some-result-id',
+            type: ToolResultType.other,
+            data: { someProp: 'someValue' },
+          },
+        ],
       });
     });
   });
