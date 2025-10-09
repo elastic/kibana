@@ -184,7 +184,6 @@ export function registerUsageCollector(
                   { term: { public: false } },
                   { term: { role: 'assistant_summarization' } },
                 ],
-                must_not: [{ term: { type: 'user_instruction' } }],
               },
             },
             aggs: {
