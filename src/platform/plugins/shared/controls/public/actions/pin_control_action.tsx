@@ -57,13 +57,9 @@ export class PinControlAction
 
   constructor() {}
 
-  private panelIsPinned(api: PinnableControlApi) {
-    return api.parentApi.pinnedPanels$.getValue().includes(api.uuid);
-  }
-
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-    return this.panelIsPinned(embeddable)
+    return embeddable.parentApi.panelIsPinned(embeddable.uuid)
       ? i18n.translate('controls.controlGroup.floatingActions.pinControl', {
           defaultMessage: 'Unpin control',
         })
@@ -74,7 +70,7 @@ export class PinControlAction
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-    return this.panelIsPinned(embeddable) ? 'pinFilled' : 'pin';
+    return embeddable.parentApi.panelIsPinned(embeddable.uuid) ? 'pinFilled' : 'pin';
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
@@ -93,7 +89,7 @@ export class PinControlAction
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-    if (this.panelIsPinned(embeddable)) {
+    if (embeddable.parentApi.panelIsPinned(embeddable.uuid)) {
       embeddable.parentApi.unpinPanel(embeddable.uuid);
     } else {
       embeddable.parentApi.pinPanel(embeddable.uuid);

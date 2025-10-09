@@ -77,7 +77,6 @@ export function initializeLayoutManager(
     getReferences
   );
 
-  const pinnedPanels$ = new BehaviorSubject<string[]>(Object.keys(initialLayout.controls));
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
   const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
@@ -97,12 +96,6 @@ export function initializeLayoutManager(
       }),
       startWith({}) // do not block rendering by waiting for these settings
     );
-
-  const pinnedControlsSubscription = layout$
-    .pipe(map(({ controls }) => Object.keys(controls)))
-    .subscribe((pinnedControls) => {
-      pinnedPanels$.next(pinnedControls);
-    });
 
   /** Keep gridLayout$ in sync with layout$ + panelResizeSettings$ */
   const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
@@ -454,7 +447,9 @@ export function initializeLayoutManager(
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
 
       // only controls can be pinned
-      pinnedPanels$,
+      panelIsPinned: (uuid: string) => {
+        return Object.keys(layout$.getValue().controls).includes(uuid);
+      },
       unpinPanel: (uuid: string) => {
         const controlToUnpin = layout$.getValue().controls[uuid];
         if (!controlToUnpin) return;

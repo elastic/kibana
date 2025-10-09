@@ -29,9 +29,9 @@ export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is Ca
 };
 
 export interface CanPinPanel {
-  pinnedPanels$: PublishingSubject<string[]>;
   pinPanel: (panelId: string) => void;
   unpinPanel: (panelId: string) => void;
+  panelIsPinned: (panelId: string) => boolean;
 }
 
 export const apiCanPinPanel = (api: unknown): api is CanPinPanel => {
