@@ -57,6 +57,8 @@ export const ErrorRateChart = () => {
       onFilter={onFilter}
       title={title}
       chartLayers={chartLayers}
+      syncCursor
+      syncTooltips
     />
   );
 };

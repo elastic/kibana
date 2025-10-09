@@ -20,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
 import { chartPalette, type DataSource } from '.';
-import type { ChartProps } from '../chart';
 
 interface TraceChart {
   id: string;
@@ -89,7 +88,7 @@ export function getLatencyChart({
       defaultMessage: 'Latency',
     }),
     color: chartPalette[2],
-    unit: 'count',
+    unit: 'ms',
     seriesType: 'line',
     esqlQuery: from(indexes)
       .pipe(
@@ -97,11 +96,7 @@ export function getLatencyChart({
         dataSource === 'apm'
           ? evaluate(`duration_ms = ROUND(${TRANSACTION_DURATION})/1000`) // apm duration is in us
           : evaluate(`duration_ms = ROUND(${DURATION})/1000/1000`), // otel duration is in ns
-        stats(
-          `avg_duration = AVG(duration_ms) BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
-        ),
-        keep('avg_duration, timestamp'),
-        sort('timestamp')
+        stats(`AVG(duration_ms) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)
       )
       .toString(),
   };
@@ -111,10 +106,12 @@ export function getThroughputChart({
   indexes,
   filters,
   dataSource,
+  fieldName,
 }: {
   indexes: string;
   filters: string[];
   dataSource: DataSource;
+  fieldName: string;
 }): TraceChart {
   const whereClauses = getWhereClauses(dataSource, filters);
   return {
@@ -128,11 +125,7 @@ export function getThroughputChart({
     esqlQuery: from(indexes)
       .pipe(
         ...whereClauses,
-        stats(
-          `throughput = COUNT(*) BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
-        ),
-        keep('timestamp, throughput'),
-        sort('timestamp')
+        stats(`COUNT(${fieldName}) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)
       )
       .toString(),
   };

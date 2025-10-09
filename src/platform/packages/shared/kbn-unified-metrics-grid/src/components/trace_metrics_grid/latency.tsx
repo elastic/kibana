@@ -10,7 +10,7 @@
 import React from 'react';
 import { useTraceMetricsContext } from '../../context/trace_metrics_context';
 import { Chart } from '../chart';
-import { useChartLayersFromEsql } from '../chart/hooks/use_chart_layers_from_esql';
+import { useChartLayers } from '../chart/hooks/use_chart_layers';
 import { getLatencyChart } from './trace_charts_definition';
 
 export const LatencyChart = () => {
@@ -26,7 +26,6 @@ export const LatencyChart = () => {
     onBrushEnd,
     onFilter,
   } = useTraceMetricsContext();
-  const { getTimeRange } = requestParams;
 
   const { esqlQuery, seriesType, unit, color, title } = getLatencyChart({
     dataSource,
@@ -34,14 +33,17 @@ export const LatencyChart = () => {
     filters,
   });
 
-  const chartLayers = useChartLayersFromEsql({
-    query: esqlQuery,
-    seriesType,
-    services,
-    getTimeRange,
-    unit,
+  const chartLayers = useChartLayers({
+    metric: {
+      name: 'duration_ms',
+      instrument: 'histogram',
+      unit,
+      index: indexes,
+      dimensions: [],
+      type: 'metric',
+    },
     color,
-    abortController,
+    seriesType,
   });
 
   return (
@@ -57,6 +59,8 @@ export const LatencyChart = () => {
       onFilter={onFilter}
       title={title}
       chartLayers={chartLayers}
+      syncCursor
+      syncTooltips
     />
   );
 };

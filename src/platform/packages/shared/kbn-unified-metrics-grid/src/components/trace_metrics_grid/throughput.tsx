@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SPAN_ID, TRANSACTION_ID } from '@kbn/apm-types';
 import React from 'react';
 import { useTraceMetricsContext } from '../../context/trace_metrics_context';
 import { Chart } from '../chart';
-import { useChartLayersFromEsql } from '../chart/hooks/use_chart_layers_from_esql';
+import { useChartLayers } from '../chart/hooks/use_chart_layers';
 import { getThroughputChart } from './trace_charts_definition';
 
 export const ThroughputChart = () => {
@@ -26,22 +27,27 @@ export const ThroughputChart = () => {
     onBrushEnd,
     onFilter,
   } = useTraceMetricsContext();
-  const { getTimeRange } = requestParams;
+  const fieldName = dataSource === 'apm' ? TRANSACTION_ID : SPAN_ID;
 
   const { esqlQuery, seriesType, unit, color, title } = getThroughputChart({
     dataSource,
     indexes,
     filters,
+    fieldName,
   });
 
-  const chartLayers = useChartLayersFromEsql({
-    query: esqlQuery,
-    seriesType,
-    services,
-    getTimeRange,
-    unit,
+  const chartLayers = useChartLayers({
+    metric: {
+      name: fieldName,
+      instrument: 'histogram',
+      unit,
+      index: indexes,
+      dimensions: [],
+      type: 'metric',
+    },
     color,
-    abortController,
+    seriesType,
+    customFunction: 'COUNT',
   });
 
   return (
@@ -57,6 +63,8 @@ export const ThroughputChart = () => {
       onFilter={onFilter}
       title={title}
       chartLayers={chartLayers}
+      syncTooltips
+      syncCursor
     />
   );
 };

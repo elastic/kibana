@@ -48,6 +48,8 @@ export const Chart = ({
   esqlQuery,
   title,
   chartLayers,
+  syncCursor,
+  syncTooltips,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -93,6 +95,8 @@ export const Chart = ({
             abortController={abortController}
             onViewDetails={onViewDetails}
             onCopyToDashboard={toggleSaveModalVisible}
+            syncCursor={syncCursor}
+            syncTooltips={syncTooltips}
           />
           {isSaveModalVisible && (
             <SaveModalComponent

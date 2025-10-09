@@ -93,7 +93,7 @@ describe('trace_charts_definition', () => {
         id: 'latency',
         title: 'Latency',
         color: chartPalette[2],
-        unit: 'count',
+        unit: 'ms',
         seriesType: 'line',
         esqlQuery: expect.stringContaining('FROM traces-*'),
       });
@@ -110,7 +110,7 @@ describe('trace_charts_definition', () => {
         id: 'latency',
         title: 'Latency',
         color: chartPalette[2],
-        unit: 'count',
+        unit: 'ms',
         seriesType: 'line',
         esqlQuery: expect.stringContaining('FROM traces-*'),
       });
@@ -145,8 +145,6 @@ describe('trace_charts_definition', () => {
       expect(result.esqlQuery).toMatch(/FROM .+/);
       expect(result.esqlQuery).toContain('EVAL');
       expect(result.esqlQuery).toContain('STATS');
-      expect(result.esqlQuery).toContain('KEEP');
-      expect(result.esqlQuery).toContain('SORT');
       expect(result.esqlQuery).toContain('AVG(duration_ms)');
       expect(result.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
     });
@@ -156,7 +154,12 @@ describe('trace_charts_definition', () => {
     it('should return throughput chart configuration for APM data source', () => {
       const dataSource: DataSource = 'apm';
 
-      const result = getThroughputChart({ dataSource, indexes: mockIndexes, filters: mockFilters });
+      const result = getThroughputChart({
+        dataSource,
+        indexes: mockIndexes,
+        filters: mockFilters,
+        fieldName: 'transaction.id',
+      });
 
       expect(result).toEqual({
         id: 'throughput',
@@ -167,14 +170,19 @@ describe('trace_charts_definition', () => {
         esqlQuery: expect.stringContaining('FROM traces-*'),
       });
 
-      expect(result.esqlQuery).toContain('COUNT(*)');
+      expect(result.esqlQuery).toContain('COUNT(transaction.id)');
       expect(result.esqlQuery).toContain('processor.event == "transaction"');
     });
 
     it('should return throughput chart configuration for OTEL data source', () => {
       const dataSource: DataSource = 'otel';
 
-      const result = getThroughputChart({ dataSource, indexes: mockIndexes, filters: mockFilters });
+      const result = getThroughputChart({
+        dataSource,
+        indexes: mockIndexes,
+        filters: mockFilters,
+        fieldName: 'span.id',
+      });
 
       expect(result).toEqual({
         id: 'throughput',
@@ -185,14 +193,19 @@ describe('trace_charts_definition', () => {
         esqlQuery: expect.stringContaining('FROM traces-*'),
       });
 
-      expect(result.esqlQuery).toContain('COUNT(*)');
+      expect(result.esqlQuery).toContain('COUNT(span.id)');
       expect(result.esqlQuery).not.toContain('processor.event == "transaction"');
     });
 
     it('should include all provided filters in the ESQL query', () => {
       const dataSource: DataSource = 'apm';
 
-      const result = getThroughputChart({ dataSource, indexes: mockIndexes, filters: mockFilters });
+      const result = getThroughputChart({
+        dataSource,
+        indexes: mockIndexes,
+        filters: mockFilters,
+        fieldName: 'transaction.id',
+      });
 
       expect(result.esqlQuery).toContain('service.name == "test-service"');
       expect(result.esqlQuery).toContain('environment == "production"');
@@ -202,7 +215,12 @@ describe('trace_charts_definition', () => {
     it('should handle empty filters array', () => {
       const dataSource: DataSource = 'otel';
 
-      const result = getLatencyChart({ dataSource, indexes: mockIndexes, filters: [] });
+      const result = getThroughputChart({
+        dataSource,
+        indexes: mockIndexes,
+        filters: [],
+        fieldName: 'transaction.id',
+      });
 
       expect(result.esqlQuery).toContain('FROM traces-*');
     });
@@ -210,13 +228,16 @@ describe('trace_charts_definition', () => {
     it('should generate valid ESQL query structure', () => {
       const dataSource: DataSource = 'apm';
 
-      const result = getLatencyChart({ dataSource, indexes: mockIndexes, filters: mockFilters });
+      const result = getThroughputChart({
+        dataSource,
+        indexes: mockIndexes,
+        filters: mockFilters,
+        fieldName: 'transaction.id',
+      });
 
       // Verify basic ESQL structure
       expect(result.esqlQuery).toMatch(/FROM .+/);
       expect(result.esqlQuery).toContain('STATS');
-      expect(result.esqlQuery).toContain('KEEP');
-      expect(result.esqlQuery).toContain('SORT');
     });
   });
 });
