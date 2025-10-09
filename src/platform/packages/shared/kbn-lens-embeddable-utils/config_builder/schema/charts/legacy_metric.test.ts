@@ -12,9 +12,9 @@ import { legacyMetricStateSchema } from './legacy_metric';
 
 describe('Legacy Metric Schema', () => {
   const baseLegacyMetricConfig = {
-    type: 'legacy_metric' as const,
+    type: 'legacy_metric',
     dataset: {
-      type: 'dataView' as const,
+      type: 'dataView',
       id: 'test-data-view',
     },
   };
@@ -29,7 +29,7 @@ describe('Legacy Metric Schema', () => {
       const input = {
         ...baseLegacyMetricConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
@@ -48,13 +48,13 @@ describe('Legacy Metric Schema', () => {
       const input = {
         ...baseLegacyMetricConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
-          size: 's' as const,
+          size: 's',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           alignment: {
-            label: 'bottom' as const,
-            value: 'right' as const,
+            label: 'bottom',
+            value: 'right',
           },
         },
       };
@@ -67,19 +67,19 @@ describe('Legacy Metric Schema', () => {
       const input = {
         ...baseLegacyMetricConfig,
         metric: {
-          operation: 'average' as const,
+          operation: 'average',
           field: 'temperature',
           alignment: { label: 'top', value: 'left' },
-          size: 'l' as const,
+          size: 'l',
           color: {
-            apply_color_to: 'value' as const,
-            type: 'dynamic' as const,
+            apply_color_to: 'value',
+            type: 'dynamic',
             min: 0,
             max: 100,
-            range: 'absolute' as const,
+            range: 'absolute',
             steps: [
-              { type: 'from' as const, from: 0, color: '#blue' },
-              { type: 'to' as const, to: 100, color: '#red' },
+              { type: 'from', from: 0, color: '#blue' },
+              { type: 'to', to: 100, color: '#red' },
             ],
           },
         },
@@ -106,10 +106,10 @@ describe('Legacy Metric Schema', () => {
       const input = {
         ...baseLegacyMetricConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
           alignment: {
-            label: 'invalid' as const,
+            label: 'invalid',
           },
         },
       };
@@ -121,9 +121,9 @@ describe('Legacy Metric Schema', () => {
       const input = {
         ...baseLegacyMetricConfig,
         metric: {
-          operation: 'count' as const,
+          operation: 'count',
           field: 'test_field',
-          size: 'invalid' as const,
+          size: 'invalid',
         },
       };
 
@@ -134,17 +134,17 @@ describe('Legacy Metric Schema', () => {
       const input = {
         ...baseLegacyMetricConfig,
         metric: {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'sales',
           color: {
-            apply_color_to: 'invalid' as const,
-            type: 'dynamic' as const,
+            apply_color_to: 'invalid',
+            type: 'dynamic',
             min: 0,
             max: 100,
-            range: 'absolute' as const,
+            range: 'absolute',
             steps: [
-              { type: 'from' as const, from: 0, color: '#blue' },
-              { type: 'to' as const, to: 100, color: '#red' },
+              { type: 'from', from: 0, color: '#blue' },
+              { type: 'to', to: 100, color: '#red' },
             ],
           },
         },
@@ -161,23 +161,23 @@ describe('Legacy Metric Schema', () => {
         title: 'Sales Overview',
         description: 'Sales metrics',
         metric: {
-          operation: 'sum' as const,
+          operation: 'sum',
           field: 'sales',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-          size: 'xl' as const,
+          size: 'xl',
           alignment: {
-            label: 'bottom' as const,
-            value: 'right' as const,
+            label: 'bottom',
+            value: 'right',
           },
           color: {
-            apply_color_to: 'background' as const,
-            type: 'dynamic' as const,
+            apply_color_to: 'background',
+            type: 'dynamic',
             min: 0,
             max: 1000,
-            range: 'absolute' as const,
+            range: 'absolute',
             steps: [
-              { type: 'from' as const, from: 0, color: '#red' },
-              { type: 'to' as const, to: 1000, color: '#green' },
+              { type: 'from', from: 0, color: '#red' },
+              { type: 'to', to: 1000, color: '#green' },
             ],
           },
         },
@@ -192,18 +192,18 @@ describe('Legacy Metric Schema', () => {
 
     it('validates esql configuration', () => {
       const input = {
-        type: 'legacy_metric' as const,
+        type: 'legacy_metric',
         dataset: {
-          type: 'esql' as const,
+          type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
           operation: 'value',
-          column: 'unique_count' as const,
-          size: 'xxl' as const,
+          column: 'unique_count',
+          size: 'xxl',
           alignment: {
-            label: 'top' as const,
-            value: 'center' as const,
+            label: 'top',
+            value: 'center',
           },
         },
       };
