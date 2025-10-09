@@ -869,6 +869,7 @@ x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
 x-pack/solutions/security/packages/side-nav @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-investigations
+x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-rule-management
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-investigations
 x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/packages/private/security/ui_components @elastic/kibana-security
@@ -1227,6 +1228,8 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /docs/setup/configuring-reporting.asciidoc @elastic/appex-sharedux
 /x-pack/test_serverless/**/test_suites/common/reporting/ @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/group3/reporting.ts @elastic/appex-sharedux
+/x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture @elastic/response-ops
+/x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
 
 ### Global Experience Tagging
 /x-pack/platform/test/saved_object_tagging/ @elastic/appex-sharedux

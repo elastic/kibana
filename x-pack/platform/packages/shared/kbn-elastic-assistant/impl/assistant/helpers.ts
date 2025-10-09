@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { AIConnector } from '../connectorland/connector_selector';
-import { FetchConnectorExecuteResponse } from './api';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
+import type { AIConnector } from '../connectorland/connector_selector';
+import type { FetchConnectorExecuteResponse } from './api';
 import type { ClientMessage } from '../assistant_context/types';
 
 export const getMessageFromRawResponse = (
@@ -40,13 +42,30 @@ export const getMessageFromRawResponse = (
  * @param connectors
  */
 export const getDefaultConnector = (
-  connectors: AIConnector[] | undefined
+  connectors: AIConnector[] | undefined,
+  settings: SettingsStart
 ): AIConnector | undefined => {
+  const defaultAiConnectorId = settings.client.get<string>(
+    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+    undefined
+  );
+
   const validConnectors = connectors?.filter((connector) => !connector.isMissingSecrets);
+  const defaultConnector = validConnectors?.find(
+    (connector) => connector.id === defaultAiConnectorId
+  );
+
+  if (defaultConnector) {
+    // If the user has set a default connector setting, and that connector exists, use it
+    return defaultConnector;
+  }
+
   if (validConnectors?.length) {
+    // In case the default connector is not set or is invalid, return the first valid connector
     return validConnectors[0];
   }
 
+  // If no valid connectors are available, return undefined
   return undefined;
 };
 

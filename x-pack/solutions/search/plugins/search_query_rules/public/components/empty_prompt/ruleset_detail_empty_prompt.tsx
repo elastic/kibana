@@ -18,10 +18,16 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PLUGIN_TITLE } from '../../../common';
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
 import queryRulesDarkImg from '../../assets/query-rules-context-alt-dark.svg';
 
-export const RulesetDetailEmptyPrompt = () => {
+interface RulesetDetailEmptyPromptProps {
+  isFilter?: boolean;
+}
+export const RulesetDetailEmptyPrompt: React.FC<RulesetDetailEmptyPromptProps> = ({
+  isFilter = false,
+}) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const positionRelative = css({
     position: 'relative',
@@ -48,20 +54,29 @@ export const RulesetDetailEmptyPrompt = () => {
       <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
         <EuiFlexItem grow={false}>
           <EuiText textAlign="center" size="s" color="subdued">
-            <FormattedMessage
-              id="xpack.searchQueryRules.rulesetDetailEmptyPrompt.title"
-              defaultMessage="Add your first rule"
-            />
+            {isFilter ? (
+              <FormattedMessage
+                id="xpack.searchQueryRules.rulesetDetailEmptyPrompt.filterTitle"
+                defaultMessage="No rules match your search"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.searchQueryRules.rulesetDetailEmptyPrompt.title"
+                defaultMessage="Add your first rule"
+              />
+            )}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow css={positionRelative}>
-          <img
-            src={colorMode === 'DARK' ? queryRulesDarkImg : queryRulesImg}
-            alt="Query Rules"
-            css={imgProps}
-          />
-          <div css={gradientOverlay}>&nbsp;</div>
-        </EuiFlexItem>
+        {isFilter && (
+          <EuiFlexItem grow css={positionRelative}>
+            <img
+              src={colorMode === 'DARK' ? queryRulesDarkImg : queryRulesImg}
+              alt={PLUGIN_TITLE}
+              css={imgProps}
+            />
+            <div css={gradientOverlay}>&nbsp;</div>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

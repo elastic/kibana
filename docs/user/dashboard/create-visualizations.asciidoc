@@ -23,9 +23,6 @@ Use one of the editors to create visualizations of your data. Each editor offers
 | <<alert-panels,Alerts>> 
 | View Observability or Security alerts in your dashboard
 
-| <<field-statistics-dashboard,Field statistics>>
-| Add a field statistics view of your data to your dashboards
-
 | <<vega, Custom visualizations>>
 | Use Vega to create new types of visualizations
 
@@ -270,20 +267,6 @@ include::alerts-panel.asciidoc[][leveloffset=-1]
 == Maps
 
 The Maps editor has extensive documentation. For your reading comfort, we have moved it to <<maps,this section>>.
-
-[[field-statistics-dashboard]]
-== Field statistics
-
-**Field statistics** panels allow you to display a table with additional field information in your dashboards, such as document count, values, and distribution. 
-
-. From your dashboard, select **Add panel**.
-. Choose **Field statistics** under **Visualizations**. An ES|QL editor appears and lets you configure your query with the fields and information that you want to show.
-+
-TIP: Check the link:{ref}/esql-language.html[ES|QL reference] to get familiar with the syntax and optimize your query.
-. When editing your query or its configuration, run the query to update the preview of the visualization.
-+
-image:https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte2b1371159f5b9ff/66fc6ca13804eb2532b20727/field-statistics-preview-8.16.0.gif[Editing a field statistics dashboard panel and running the query to update the preview]
-. Select **Apply and close** to save the visualization to the dashboard.
 
 include::vega.asciidoc[leveloffset=-1]
 

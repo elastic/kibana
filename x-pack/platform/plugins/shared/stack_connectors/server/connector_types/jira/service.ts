@@ -60,7 +60,7 @@ export const createExternalService = (
   const commentUrl = `${incidentUrl}/{issueId}/comment`;
   const getIssueTypesUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes`;
   const getIssueTypeFieldsUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/issue/createmeta/${projectKey}/issuetypes/{issueTypeId}`;
-  const searchUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/search`;
+  const searchUrl = `${urlWithoutTrailingSlash}/${BASE_URL}/search/jql`;
 
   const axiosInstance = axios.create({
     headers: getBasicAuthHeader({ username: email, password: apiToken }),
@@ -441,7 +441,7 @@ export const createExternalService = (
     const jqlEscapedTitle = escapeJqlSpecialCharacters(title);
     const query = `${searchUrl}?jql=${encodeURIComponent(
       `project="${projectKey}" and summary ~"${jqlEscapedTitle}"`
-    )}`;
+    )}&fields=summary,key`;
 
     try {
       const res = await request({

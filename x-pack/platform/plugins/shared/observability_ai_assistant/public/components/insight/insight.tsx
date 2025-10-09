@@ -66,6 +66,7 @@ function ChatContent({
   const service = useObservabilityAIAssistant();
   const chatService = useObservabilityAIAssistantChatService();
   const scopes = chatService.getScopes();
+  const connectors = useGenAIConnectors();
 
   const initialMessagesRef = useRef(initialMessages);
 
@@ -92,14 +93,17 @@ function ChatContent({
 
   useEffect(() => {
     if (state !== ChatState.Loading && lastAssistantResponse) {
+      const connector = connectors.getConnector(connectors.selectedConnector || '');
       chatService.sendAnalyticsEvent({
         type: ObservabilityAIAssistantTelemetryEventType.InsightResponse,
         payload: {
           '@timestamp': lastAssistantResponse['@timestamp'],
+          connector,
+          scopes,
         },
       });
     }
-  }, [state, lastAssistantResponse, chatService]);
+  }, [state, lastAssistantResponse, chatService, connectors, scopes]);
 
   return (
     <>
@@ -124,10 +128,13 @@ function ChatContent({
               <FeedbackButtons
                 onClickFeedback={(feedback) => {
                   if (lastAssistantResponse) {
+                    const connector = connectors.getConnector(connectors.selectedConnector || '');
                     chatService.sendAnalyticsEvent({
                       type: ObservabilityAIAssistantTelemetryEventType.InsightFeedback,
                       payload: {
                         feedback,
+                        connector,
+                        scopes,
                       },
                     });
                   }

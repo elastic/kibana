@@ -34,6 +34,7 @@
     "@kbn/core-http-common",
     "@kbn/core-lifecycle-server-internal",
     "@kbn/cbor",
+    "@kbn/core-http-server",
   ],
   "exclude": [
     "target/**/*",

@@ -10,11 +10,13 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.5>>
 * <<release-notes-8.19.4>>
 * <<release-notes-8.19.3>>
 * <<release-notes-8.19.2>>
 * <<release-notes-8.19.1>>
 * <<release-notes-8.19.0>>
+* <<release-notes-8.18.8>>
 * <<release-notes-8.18.7>>
 * <<release-notes-8.18.6>>
 * <<release-notes-8.18.5>>
@@ -110,6 +112,54 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.19.5]]
+== {kib} 8.19.5
+
+The 8.19.5 release includes the following fixes.
+
+IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[fixes-v8.19.5]]
+=== Fixes
+Alerting::
+* Rolls over the reporting data stream if its template version is newer than the version in the data stream's mappings ({kibana-pull}234119[#234119]).
+Dashboards and Visualizations::
+* Fixes text kerning issues in PDF/PNG exports of dashboards and visualizations ({kibana-pull}235516[#235516]).
+* Fixes an issue where the dashboard title would not get updated in the breadcrumb when edited from the list of dashboards ({kibana-pull}236561[#236561]).
+* Fixes an issue with the Lens table's column sort order being different in the dashboard and the exported CSV ({kibana-pull}236673[#236673]).
+* Updates dashboards to wait until controls are ready before rendering panels to prevent a double fetch of data ({kibana-pull}237169[#237169]).
+Data ingestion and Fleet::
+* Fixes an issue where fields were resetting automatically when editing ingest pipeline settings. ({kibana-pull}237509[#237509]).
+* Adds a unique count to improve accuracy of the number of transforms on the integrations overview page ({kibana-pull}236177[#236177]).
+* Validates the Logstash pipeline ID at the {kib} API level ({kibana-pull}236347[#236347]).
+* Fixes malformed synthetics package policies ({kibana-pull}236176[#236176]).
+Discover::
+* Clears sort by `timestamp` when navigating from classic to ES|QL mode ({kibana-pull}235338[#235338]).
+* Fixes sizing issues with the **Actions** column header ({kibana-pull}235227[#235227]).
+Elastic Observability solution::
+* Fixes the AI Assistant button's tooltip by closing it when you click anywhere else on the page ({kibana-pull}237202[#237202]).
+* Removes span documents from the `getServiceAgent` function ({kibana-pull}236732[#236732]).
+* Prevents synthetics package policies from becoming malformed and reporting {agents} as unhealthy ({kibana-pull}236104[#236104]).
+* Cleans up extra synthetics package policies ({kibana-pull}235200[#235200]).
+Elastic Security solution::
+For the Elastic Security 8.19.5 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana security::
+* Allows `xpack.spaces.defaultSolution` to be configured through environment variables for Docker deployments ({kibana-pull}236570[#236570]).
+* Adds the ability to do partial matches and searches in the **API keys** section of Stack Management ({kibana-pull}221959[#221959]).
+Machine Learning::
+* Improves trained model performance by adding filters to the request to fetch all index settings ({kibana-pull}237072[#237072]).
+* Hides the show forecast checkbox when selecting a new job in the Single Metric Viewer ({kibana-pull}236724[#236724]).
+* Makes alerts visible in Anomaly Explorer to all Machine Learning-only users regardless of where they create rules ({kibana-pull}236289[#236289]).
+* Fixes the **Job details** flyout on the **Analytics Map** page ({kibana-pull}236131[#236131]).
+* Limits log rate analysis category requests to reduce `msearch` usage ({kibana-pull}235611[#235611]).
+* Fixes rendering of the dashboard panel in PDF reporting for the Anomaly Swim Lane ({kibana-pull}235475[#235475]).
+Search solution::
+* Adds search functionality to the **Query rules** details page ({kibana-pull}232579[#232579]).
+Management::
+* Fixes privilege requirements when reindexing indices through Upgrade Assistant. Previously, the `superuser` role was required, but now the `cluster: manage` and `all` privileges are sufficient ({kibana-pull}237055[#237055]).
+
+
 [[release-notes-8.19.4]]
 == {kib} 8.19.4
 
@@ -132,6 +182,8 @@ Kibana security::
 * Fixes an issue causing the API Keys Management page to break when trying to load API keys with null names ({kibana-pull}234083[#234083]).
 Search solution::
 * Fixes the Docs Explorer paging information to correctly render bold text instead of escaped HTML ({kibana-pull}234079[#234079]).
+Observability solution::
+* Fixes an issue in synthetics where multiple package policies are being created if user have monitors in multiple spaces ({kibana-pull}235021[#235021]).
 
 [[release-notes-8.19.3]]
 == {kib} 8.19.3
@@ -622,6 +674,45 @@ Management::
 Search::
 * Fixes an issue in Search Playground where context limit errors were not handled well when using the Elastic Managed LLM ({kibana-pull}225360[#225360]).
 * Adjusts the `z-index` of the app menu header to not conflict with the Persistent Console ({kibana-pull}224708[#224708]).
+
+[[release-notes-8.18.8]]
+== {kib} 8.18.8
+
+The 8.18.8 release includes the following fixes.
+
+IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[fixes-v8.18.8]]
+=== Fixes
+Dashboards and Visualizations::
+* Fixes text kerning issues in PDF/PNG exports of dashboards and visualizations ({kibana-pull}235516[#235516]).
+* Updates dashboards to wait until controls are ready before rendering panels to prevent a double fetch of data ({kibana-pull}237169[#237169]).
+* Fixes an issue with the Lens table's column sort order being different in the dashboard and the exported CSV ({kibana-pull}236673[#236673]).
+* Fixes an issue where the dashboard title would not get updated in the breadcrumb when edited from the list of dashboards ({kibana-pull}236561[#236561]).
+Data ingestion and Fleet::
+* Adds a unique count to improve accuracy of the number of transforms on the integrations overview page ({kibana-pull}236177[#236177]).
+* Validates the Logstash pipeline ID at the {kib} API level ({kibana-pull}236347[#236347]).
+Discover::
+* Clears sort by `timestamp` when navigating from classic to ES|QL mode ({kibana-pull}235338[#235338]).
+Elastic Observability solution::
+* Removes span documents from the `getServiceAgent` function ({kibana-pull}236732[#236732]).
+Elastic Security solution::
+For the Elastic Security 8.18.8 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+Kibana security::
+* Allows `xpack.spaces.defaultSolution` to be configured through environment variables for Docker deployments ({kibana-pull}236570[#236570]).
+* Adds the ability to do partial matches and searches in the **API keys** section of Stack Management ({kibana-pull}221959[#221959]).
+Machine Learning::
+* Improves trained model performance by adding filters to the request to fetch all index settings ({kibana-pull}237072[#237072]).
+* Hides the show forecast checkbox when selecting a new job in the Single Metric Viewer ({kibana-pull}236724[#236724]).
+* Makes alerts visible in Anomaly Explorer to all Machine Learning-only users regardless of where they create rules ({kibana-pull}236289[#236289]).
+* Fixes the **Job details** flyout on the **Analytics Map** page ({kibana-pull}236131[#236131]).
+* Limits log rate analysis category requests to reduce `msearch` usage ({kibana-pull}235611[#235611]).
+* Fixes rendering of the dashboard panel in PDF reporting for the Anomaly Swim Lane ({kibana-pull}235475[#235475]).
+Search solution::
+* Adds search functionality to the **Query rules** details page ({kibana-pull}232579[#232579]).
+Management::
+* Fixes privilege requirements when reindexing indices through Upgrade Assistant. Previously, the `superuser` role was required, but now the `cluster: manage` and `all` privileges are sufficient ({kibana-pull}237055[#237055]).
 
 [[release-notes-8.18.7]]
 == {kib} 8.18.7
