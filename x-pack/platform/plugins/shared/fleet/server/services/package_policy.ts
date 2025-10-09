@@ -3530,7 +3530,12 @@ export function updatePackageInputs(
 
     if (update.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
-      inputs[indexOfInput] = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
+      inputs[indexOfInput] = deepMergeVars(
+        originalInput,
+        update,
+        true,
+        true
+      ) as NewPackagePolicyInput;
       originalInput = inputs[indexOfInput];
     }
 
@@ -3571,6 +3576,7 @@ export function updatePackageInputs(
           originalInput.streams[indexOfStream] = deepMergeVars(
             originalStream,
             stream as InputsOverride,
+            true,
             true
           );
           originalStream = originalInput.streams[indexOfStream];
@@ -3587,7 +3593,12 @@ export function updatePackageInputs(
     });
   }
 
-  const vars = getUpdatedGlobalVars(packageInfo, basePackagePolicy);
+  let vars: PackagePolicyConfigRecord | undefined;
+
+  if (packageInfo.vars) {
+    const packageInfoVars = packageInfo.vars.reduce(varsReducer, {});
+    vars = deepMergeVars(basePackagePolicy, { vars: packageInfoVars }, true, true).vars;
+  }
 
   const resultingPackagePolicy: NewPackagePolicy = {
     ...basePackagePolicy,
@@ -3847,12 +3858,22 @@ export function sendUpdatePackagePolicyTelemetryEvent(
   });
 }
 
-function deepMergeVars(original: any, override: any, keepOriginalValue = false): any {
+function deepMergeVars(
+  original: any,
+  override: any,
+  keepOriginalValue = false,
+  // Keep original vars only if they exist in the override object
+  rightMerge = false
+): any {
   if (!original.vars) {
     original.vars = { ...override.vars };
   }
 
   const result = { ...original };
+
+  if (rightMerge) {
+    result.vars = {};
+  }
 
   const overrideVars = Array.isArray(override.vars)
     ? override.vars
@@ -3874,24 +3895,6 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   }
 
   return result;
-}
-
-function getUpdatedGlobalVars(packageInfo: PackageInfo, packagePolicy: NewPackagePolicy) {
-  if (!packageInfo.vars) {
-    return undefined;
-  }
-
-  const packageInfoVars = packageInfo.vars.reduce(varsReducer, {});
-  const mergedVars = deepMergeVars(packagePolicy, { vars: packageInfoVars }, true)
-    .vars as PackagePolicyConfigRecord;
-
-  // Remove existing global vars that are no longer defined in the package
-  return Object.entries(mergedVars).reduce<PackagePolicyConfigRecord>((acc, [key, val]) => {
-    if (key in packageInfoVars) {
-      acc[key] = val;
-    }
-    return acc;
-  }, {});
 }
 
 async function requireUniqueName(
