@@ -58,6 +58,7 @@ export const MetricsGrid = ({
   filters = [],
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
+  const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
 
@@ -65,6 +66,9 @@ export const MetricsGrid = ({
     | {
         metric: MetricField;
         esqlQuery: string;
+        chartId: string;
+        rowIndex: number;
+        colIndex: number;
       }
     | undefined
   >();
@@ -78,21 +82,52 @@ export const MetricsGrid = ({
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(rows.length / gridColumns);
 
-  const { focusedCell, handleKeyDown, handleCellClick, getRowColFromIndex } = useGridNavigation({
-    gridColumns,
-    gridRows,
-    totalRows: rows.length,
-    gridRef,
-  });
+  const { focusedCell, handleKeyDown, getRowColFromIndex, handleFocusCell, focusCell } =
+    useGridNavigation({
+      gridColumns,
+      gridRows,
+      totalRows: rows.length,
+      gridRef,
+    });
 
-  const handleViewDetails = useCallback((esqlQuery: string, metric: MetricField) => {
-    setExpandedMetric({ metric, esqlQuery });
-    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+  const setChartRef = useCallback((chartId: string, element: HTMLDivElement | null) => {
+    if (element) {
+      chartRefs.current.set(chartId, element);
+    } else {
+      chartRefs.current.delete(chartId);
+    }
   }, []);
+
+  const handleViewDetails = useCallback(
+    (esqlQuery: string, metric: MetricField, chartId: string) => {
+      const chartIndex = rows.findIndex((row) => `chart-${row.key}` === chartId);
+      const { rowIndex, colIndex } = getRowColFromIndex(chartIndex);
+
+      setExpandedMetric({ metric, esqlQuery, chartId, rowIndex, colIndex });
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+    },
+    [rows, getRowColFromIndex]
+  );
 
   const handleCloseFlyout = useCallback(() => {
+    if (expandedMetric) {
+      // Use setTimeout to ensure the flyout is fully closed before focusing
+      setTimeout(() => {
+        focusCell(expandedMetric.rowIndex, expandedMetric.colIndex);
+      }, 0);
+    }
     setExpandedMetric(undefined);
-  }, []);
+  }, [expandedMetric, focusCell]);
+
+  const getChartRefForFocus = useCallback(() => {
+    if (expandedMetric?.chartId) {
+      const chartElement = chartRefs.current.get(expandedMetric.chartId);
+      if (chartElement) {
+        return { current: chartElement };
+      }
+    }
+    return { current: null };
+  }, [expandedMetric?.chartId]);
 
   // TODO: find a better way to handle conflicts with other flyouts
   // https://github.com/elastic/kibana/issues/237965
@@ -139,16 +174,18 @@ export const MetricsGrid = ({
       >
         <EuiFlexGrid columns={columns} gutterSize="s">
           {rows.map(({ key, metric }, index) => {
+            const chartId = `chart-${key}`;
+
             return (
               <EuiFlexItem key={key}>
                 <ChartItem
+                  chartId={chartId}
                   metric={metric}
                   index={index}
                   getRowColFromIndex={getRowColFromIndex}
                   focusedCell={focusedCell}
                   dimensions={dimensions}
                   filters={filters}
-                  handleCellClick={handleCellClick}
                   discoverFetch$={discoverFetch$}
                   handleViewDetails={handleViewDetails}
                   searchSessionId={searchSessionId}
@@ -158,6 +195,8 @@ export const MetricsGrid = ({
                   abortController={abortController}
                   requestParams={requestParams}
                   size={chartSize}
+                  setChartRef={setChartRef}
+                  handleFocusCell={handleFocusCell}
                 />
               </EuiFlexItem>
             );
@@ -166,6 +205,7 @@ export const MetricsGrid = ({
       </div>
       {expandedMetric && (
         <MetricInsightsFlyout
+          chartRef={getChartRefForFocus()}
           metric={expandedMetric.metric}
           esqlQuery={expandedMetric.esqlQuery}
           isOpen
@@ -177,13 +217,13 @@ export const MetricsGrid = ({
 };
 
 function ChartItem({
+  chartId,
   metric,
   index,
   getRowColFromIndex,
   focusedCell,
   dimensions,
   filters,
-  handleCellClick,
   searchSessionId,
   services,
   onBrushEnd,
@@ -193,17 +233,21 @@ function ChartItem({
   discoverFetch$,
   handleViewDetails,
   size,
+  setChartRef,
+  handleFocusCell,
 }: {
+  chartId: string;
   metric: MetricField;
   index: number;
   getRowColFromIndex: (index: number) => { rowIndex: number; colIndex: number };
   focusedCell: { rowIndex: number; colIndex: number };
   dimensions: string[];
   filters: Array<{ field: string; value: string }>;
-  handleCellClick: (rowIndex: number, colIndex: number) => void;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
-  handleViewDetails: (esqlQuery: string, metric: MetricField) => void;
+  handleViewDetails: (esqlQuery: string, metric: MetricField, chartId: string) => void;
   size: ChartSize;
+  setChartRef: (chartId: string, element: HTMLDivElement | null) => void;
+  handleFocusCell: (rowIndex: number, colIndex: number) => void;
 } & Pick<
   ChartSectionProps,
   'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
@@ -230,19 +274,14 @@ function ChartItem({
 
   return (
     <div
+      ref={(element) => setChartRef(chartId, element)}
       role="gridcell"
-      aria-rowindex={rowIndex + 1} // 1-based for ARIA
-      aria-colindex={colIndex + 1} // 1-based for ARIA
+      aria-rowindex={rowIndex + 1}
+      aria-colindex={colIndex + 1}
       data-grid-cell={`${rowIndex}-${colIndex}`}
       data-chart-index={index}
       tabIndex={isFocused ? 0 : -1}
-      onClick={() => handleCellClick(rowIndex, colIndex)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleCellClick(rowIndex, colIndex);
-        }
-      }}
+      onFocus={() => handleFocusCell(rowIndex, colIndex)}
       style={{
         outline: 'none',
         cursor: 'pointer',
@@ -262,7 +301,7 @@ function ChartItem({
         searchSessionId={searchSessionId}
         onBrushEnd={onBrushEnd}
         onFilter={onFilter}
-        onViewDetails={() => handleViewDetails(esqlQuery, metric)}
+        onViewDetails={() => handleViewDetails(esqlQuery, metric, chartId)}
         title={metric.name}
         chartLayers={chartLayers}
       />

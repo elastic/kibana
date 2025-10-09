@@ -49,12 +49,13 @@ export const MetricsExperienceGrid = ({
   isChartLoading: isDiscoverLoading,
   isComponentVisible,
   abortController,
+  timeRange,
 }: ChartSectionProps) => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
 
   const { currentPage, dimensions, valueFilters, onPageChange, searchTerm } = useMetricsGridState();
-  const { getTimeRange, updateTimeRange } = requestParams;
+  const { updateTimeRange } = requestParams;
 
   const input$ = useMemo(
     () => originalInput$ ?? new Subject<UnifiedHistogramInputMessage>(),
@@ -69,7 +70,7 @@ export const MetricsExperienceGrid = ({
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
   const { data: fields = [], isFetching: isFieldsLoading } = useMetricFieldsQuery({
     index: indexPattern,
-    timeRange: getTimeRange(),
+    timeRange,
   });
 
   const {
