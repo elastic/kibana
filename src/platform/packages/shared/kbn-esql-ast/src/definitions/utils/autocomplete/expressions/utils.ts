@@ -11,7 +11,6 @@ import type { ESQLFunction } from '../../../../types';
 import { nullCheckOperators, inOperators } from '../../../all_operators';
 import type { ExpressionContext, FunctionParameterContext } from './types';
 import type { GetColumnsByTypeFn, ICommandContext } from '../../../../commands_registry/types';
-import { FunctionDefinitionTypes } from '../../../types';
 import { getFunctionDefinition, getValidSignaturesAndTypesToSuggestNext } from '../..';
 
 export type SpecialFunctionName = 'case' | 'count' | 'bucket';
@@ -43,31 +42,6 @@ export function isSpecialOperator(name: string) {
 /** Checks if function name matches a special function (case-insensitive) */
 export function matchesSpecialFunction(name: string, expected: SpecialFunctionName) {
   return name.toLowerCase() === expected;
-}
-
-/** Determines whether a comma should be appended after accepting a suggestion */
-export function shouldAddCommaAfterParam(
-  hasMoreMandatoryArgs: boolean | undefined,
-  functionType: FunctionDefinitionTypes,
-  options: {
-    isCursorFollowedByComma?: boolean;
-    isBooleanCondition?: boolean;
-    isCaseWithEmptyParams?: boolean;
-  } = {}
-): boolean {
-  const {
-    isCursorFollowedByComma = false,
-    isBooleanCondition = false,
-    isCaseWithEmptyParams = false,
-  } = options;
-
-  return (
-    Boolean(hasMoreMandatoryArgs) &&
-    functionType !== FunctionDefinitionTypes.OPERATOR &&
-    !isCursorFollowedByComma &&
-    !isBooleanCondition &&
-    !isCaseWithEmptyParams
-  );
 }
 
 /** Retrieves columns by type from context callbacks */

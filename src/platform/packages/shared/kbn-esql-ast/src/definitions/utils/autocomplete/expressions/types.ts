@@ -14,7 +14,12 @@ import type {
   Location,
 } from '../../../../commands_registry/types';
 import type { ESQLCommand, ESQLSingleAstItem } from '../../../../types';
-import type { FunctionDefinition, Signature, SupportedDataType } from '../../../types';
+import type {
+  FunctionDefinition,
+  FunctionParameter,
+  Signature,
+  SupportedDataType,
+} from '../../../types';
 import type { ExpressionPosition } from './position';
 
 export interface SuggestForExpressionParams {
@@ -55,7 +60,7 @@ export interface ExpressionContextOptions {
 }
 
 export interface FunctionParameterContext {
-  paramDefinitions: Signature['params'];
+  paramDefinitions: FunctionParameter[];
   functionsToIgnore: string[];
   // Flag to suggest comma after function parameters when more mandatory args exist
   hasMoreMandatoryArgs?: boolean;
@@ -65,4 +70,6 @@ export interface FunctionParameterContext {
   firstArgumentType?: SupportedDataType | 'unknown';
   // Index of the current parameter being edited
   currentParameterIndex?: number;
+  // Signaturres that match the already-given arguments
+  validSignatures?: Signature[];
 }

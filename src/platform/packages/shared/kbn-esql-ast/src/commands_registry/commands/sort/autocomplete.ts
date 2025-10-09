@@ -42,8 +42,7 @@ export async function autocomplete(
   });
 
   const commandText = innerText.slice(command.location.min);
-
-  const pos = getSortPos(commandText, command);
+  const { position: pos, context: posContext } = getSortPos(commandText, command, cursorPosition);
 
   switch (pos) {
     case 'empty_expression': {
@@ -77,7 +76,7 @@ export async function autocomplete(
       const expressionType = getExpressionType(expressionRoot, context?.columns);
       const isComplete = isExpressionComplete(expressionType, innerText);
 
-      if (isComplete) {
+      if (isComplete && !posContext?.insideFunction) {
         suggestions.push(
           ...getSuggestionsAfterCompleteExpression(innerText, expressionRoot, columnExists)
         );

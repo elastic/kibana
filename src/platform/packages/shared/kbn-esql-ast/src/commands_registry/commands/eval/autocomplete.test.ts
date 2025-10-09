@@ -766,14 +766,7 @@ describe('EVAL Autocomplete', () => {
 
       await evalExpectSuggestions(
         'from a | eval result = abs(doubleField ',
-        [
-          ...getFunctionSignaturesByReturnType(
-            Location.EVAL,
-            'any',
-            { operators: true, skipAssign: true },
-            ['double']
-          ),
-        ],
+        ['+ $0', '- $0', '* $0', '/ $0', '% $0'],
         mockCallbacks
       );
     });

@@ -89,6 +89,7 @@ function buildInFunctionParameterContext(
     functionDefinition,
     firstArgumentType,
     currentParameterIndex: validationResult.argIndex,
+    validSignatures: validationResult.validSignatures,
   };
 }
 

@@ -23,7 +23,7 @@ import { EDITOR_MARKER } from '../../constants';
 import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType } from '../expressions';
-import { allFunctions, filterFunctionDefinitions, getFunctionSuggestion } from '../functions';
+import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
 
@@ -207,7 +207,7 @@ export function getFunctionsSuggestions({
   const activeProduct = context?.activeProduct;
 
   const filteredFunctions = filterFunctionDefinitions(
-    allFunctions(),
+    getAllFunctions({ includeOperators: false }),
     predicates,
     hasMinimumLicenseRequired,
     activeProduct
@@ -459,6 +459,7 @@ export function getValidSignaturesAndTypesToSuggestNext(
     hasMoreMandatoryArgs,
     enrichedArgs,
     argIndex,
+    validSignatures,
   };
 }
 

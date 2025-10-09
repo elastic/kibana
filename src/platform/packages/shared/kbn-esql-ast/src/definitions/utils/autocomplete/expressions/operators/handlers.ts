@@ -21,12 +21,9 @@ import {
   getLiteralsSuggestions,
 } from '../../helpers';
 import type { ExpressionContext } from '../types';
-import {
-  getLogicalContinuationSuggestions,
-  shouldSuggestCommaInList,
-  shouldSuggestOpenListForOperand,
-} from './utils';
+import { getLogicalContinuationSuggestions, shouldSuggestOpenListForOperand } from './utils';
 import { getColumnsByTypeFromCtx, getLicenseCheckerFromCtx } from '../utils';
+import { shouldSuggestComma } from '../commaDecisionEngine';
 import type { GetColumnsByTypeFn } from '../../../../../commands_registry/types';
 import { buildConstantsDefinitions } from '../../../literals';
 
@@ -57,7 +54,13 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
     // Cursor inside list
     if (isColumn(leftOperand)) {
       // After a value but not after comma: suggest comma
-      if (shouldSuggestCommaInList(innerText, list)) {
+      if (
+        shouldSuggestComma({
+          position: 'inside_list',
+          innerText,
+          listHasValues: list.values && list.values.length > 0,
+        })
+      ) {
         return [{ ...commaCompleteItem, text: ', ' }];
       }
 
@@ -168,7 +171,13 @@ export async function handleStringListOperator(
   }
 
   // Cursor inside list: if previous value without a comma, suggest comma
-  if (shouldSuggestCommaInList(context.innerText, list)) {
+  if (
+    shouldSuggestComma({
+      position: 'inside_list',
+      innerText: context.innerText,
+      listHasValues: list.values && list.values.length > 0,
+    })
+  ) {
     return [{ ...commaCompleteItem, text: ', ' }];
   }
 

@@ -408,7 +408,7 @@ export const ESQL_NUMERIC_DECIMAL_TYPES = [
   'counter_double',
 ] as const;
 
-export const ESQL_NUMBER_TYPES: readonly string[] = [
+export const ESQL_NUMBER_TYPES: readonly SupportedDataType[] = [
   'integer',
   'counter_integer',
   ...ESQL_NUMERIC_DECIMAL_TYPES,

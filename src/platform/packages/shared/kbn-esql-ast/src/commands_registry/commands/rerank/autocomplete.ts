@@ -47,7 +47,7 @@ export async function autocomplete(
     return [];
   }
 
-  const { position, context: positionContext } = getPosition(innerText, command);
+  const { position, context: positionContext } = getPosition(innerText, command, cursorPosition);
 
   switch (position) {
     case CaretPosition.RERANK_KEYWORD: {
@@ -111,6 +111,7 @@ export async function autocomplete(
         callbacks,
         context,
         expressionRoot: positionContext?.expressionRoot,
+        insideFunction: positionContext?.insideFunction,
       });
     }
 
@@ -188,6 +189,7 @@ async function handleOnExpression({
   callbacks,
   context,
   expressionRoot,
+  insideFunction,
 }: {
   query: string;
   command: ESQLCommand;
@@ -195,6 +197,7 @@ async function handleOnExpression({
   callbacks: ICommandCallbacks;
   context: ICommandContext | undefined;
   expressionRoot: ESQLSingleAstItem | undefined;
+  insideFunction?: boolean;
 }): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   const suggestions = await suggestForExpression({
@@ -213,7 +216,11 @@ async function handleOnExpression({
   if (expressionRoot) {
     const expressionType = getExpressionType(expressionRoot, context?.columns);
 
-    if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
+    if (
+      expressionType === 'boolean' &&
+      isExpressionComplete(expressionType, innerText) &&
+      !insideFunction
+    ) {
       suggestions.push(...buildNextActions());
     }
   }

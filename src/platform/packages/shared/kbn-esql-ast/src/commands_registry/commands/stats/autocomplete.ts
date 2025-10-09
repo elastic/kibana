@@ -9,7 +9,7 @@
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { FunctionParameterContext } from '../../../definitions/utils/autocomplete/expressions/types';
 import { Walker } from '../../../walker';
-import { isAssignment, isColumn } from '../../../ast/is';
+import { isAssignment, isColumn, isFunctionExpression } from '../../../ast/is';
 import type { ICommandCallbacks } from '../../types';
 import { Location } from '../../types';
 import type {
@@ -123,6 +123,7 @@ export async function autocomplete(
         command,
         cursorPosition,
         expressionRoot,
+        lastArg: expressionRoot,
         location: Location.STATS,
         context,
         callbacks,
@@ -167,11 +168,16 @@ export async function autocomplete(
         return [];
       }
 
+      const lastArgRhs = Array.isArray(rightHandAssignment)
+        ? rightHandAssignment[0]
+        : rightHandAssignment;
+
       const expressionSuggestions = await getExpressionSuggestions({
         query,
         command,
         cursorPosition,
         expressionRoot,
+        lastArg: lastArgRhs,
         location: Location.STATS,
         context,
         callbacks,
@@ -241,12 +247,16 @@ export async function autocomplete(
       }
 
       const ignoredColumns = alreadyUsedColumns(command);
+      const lastArgRhs = Array.isArray(rightHandAssignment)
+        ? rightHandAssignment[0]
+        : rightHandAssignment;
 
       return getExpressionSuggestions({
         query,
         command,
         cursorPosition,
         expressionRoot,
+        lastArg: lastArgRhs,
         location: Location.STATS_BY,
         context,
         callbacks,
@@ -276,6 +286,7 @@ export async function autocomplete(
         command,
         cursorPosition,
         expressionRoot,
+        lastArg: expressionRoot,
         location: Location.STATS_BY,
         context,
         callbacks,
@@ -302,6 +313,7 @@ async function getExpressionSuggestions({
   cursorPosition,
   expressionRoot,
   location,
+  lastArg,
   context,
   callbacks,
   emptySuggestions = [],
@@ -316,6 +328,7 @@ async function getExpressionSuggestions({
   command: ESQLCommand;
   cursorPosition: number;
   expressionRoot: ESQLSingleAstItem | undefined;
+  lastArg?: ESQLAstItem;
   location: Location;
   context?: ICommandContext;
   callbacks?: ICommandCallbacks;
@@ -361,7 +374,13 @@ async function getExpressionSuggestions({
     suggestions.push(...emptySuggestions);
   }
 
-  if (isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText)) {
+  const insideFunction =
+    lastArg && isFunctionExpression(lastArg) && within(cursorPosition, lastArg);
+
+  if (
+    isExpressionComplete(getExpressionType(expressionRoot, context?.columns), innerText) &&
+    !insideFunction
+  ) {
     suggestions.push(...afterCompleteSuggestions);
   }
 

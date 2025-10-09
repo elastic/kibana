@@ -11,22 +11,15 @@ import { matchesSpecialFunction } from '../utils';
 import { ensureKeywordAndText } from '../../functions';
 import { isList } from '../../../../../ast/is';
 import { isMarkerNode } from '../../../ast';
-import { getLastNonWhitespaceChar } from '../../helpers';
 import { getOperatorSuggestion } from '../../../operators';
 import type { ISuggestionItem } from '../../../../../commands_registry/types';
 import { logicalOperators } from '../../../../all_operators';
 import type { FunctionParameterType } from '../../../../types';
 
-/** Returns true if the function name is CASE or the parameter */
-export function hasBooleanConditionParam(
-  functionName?: string,
-  paramDefinitions?: Array<{ type: FunctionParameterType; name?: string }>
-): boolean {
-  const isCase = functionName ? matchesSpecialFunction(functionName, 'case') : false;
-  const hasBooleanCondition =
-    paramDefinitions?.some(({ type, name }) => type === 'boolean' && name === 'condition') ?? false;
+export function shouldDisableAutoComma(functionName?: string): boolean {
+  const isCaseFunction = functionName ? matchesSpecialFunction(functionName, 'case') : false;
 
-  return isCase || hasBooleanCondition;
+  return isCaseFunction;
 }
 
 /**
@@ -38,25 +31,52 @@ export function hasBooleanConditionParam(
  * - Otherwise, prefer non-constant param types; fallback to all param types; final fallback ['any'].
  */
 export function getAcceptedTypesForParamContext(
-  functionName: string | undefined,
   paramDefinitions: Array<{ type: FunctionParameterType; constantOnly?: boolean; name?: string }>,
-  options: { isCaseWithEmptyParams?: boolean; firstArgumentType?: string } = {}
+  options: {
+    firstArgumentType?: string;
+    functionSignatures?: Array<{
+      params: Array<{ type: FunctionParameterType; name?: string }>;
+      minParams?: number;
+      returnType?: string;
+    }>;
+  } = {}
 ): ('any' | FunctionParameterType)[] {
   const nonConstantParamDefs = paramDefinitions.filter(({ constantOnly }) => !constantOnly);
-  const isCaseWithEmptyParams = Boolean(options.isCaseWithEmptyParams);
-  const isBooleanCondition = hasBooleanConditionParam(functionName, paramDefinitions);
 
   // Special case: if first parameter is boolean in homogeneous functions,
   // suggest all types (user can build boolean expressions with operators)
   // Example: COALESCE(bool1, textField▌) should suggest all fields, not just boolean
   const firstParamIsBoolean = options.firstArgumentType === 'boolean';
 
-  if (nonConstantParamDefs.length > 0 || isCaseWithEmptyParams) {
-    const computedTypes =
-      isBooleanCondition || isCaseWithEmptyParams
-        ? ['any']
-        : ensureKeywordAndText(nonConstantParamDefs.map(({ type }) => type));
+  if (nonConstantParamDefs.length > 0) {
+    const computedTypes = ensureKeywordAndText(nonConstantParamDefs.map(({ type }) => type));
 
+    // If parameter definition says 'any', return ['any'] directly
+    // This covers CASE value parameters and other functions with flexible parameter types
+    if (computedTypes.length === 1 && computedTypes[0] === 'any') {
+      return ['any'];
+    }
+
+    // Detect CASE-like pattern: function with alternating boolean/any parameters
+    // CASE has signatures with: params containing both 'boolean' and 'any', minParams>=2, returnType='unknown'
+    // This pattern indicates all parameters accept expressions (not just simple values)
+    if (options.functionSignatures) {
+      const hasCasePattern = options.functionSignatures.some((sig) => {
+        const hasMinParams = sig.minParams != null && sig.minParams >= 2;
+        const hasUnknownReturn = sig.returnType === 'unknown';
+        const hasBooleanAndAny =
+          sig.params.some((p) => p.type === 'boolean') && sig.params.some((p) => p.type === 'any');
+
+        return hasMinParams && hasUnknownReturn && hasBooleanAndAny;
+      });
+
+      if (hasCasePattern) {
+        return ['any'];
+      }
+    }
+
+    // Special case: boolean parameters in homogeneous functions accept any type
+    // because user can build boolean expressions with operators
     if (firstParamIsBoolean && computedTypes.length === 1 && computedTypes[0] === 'boolean') {
       return ['any'];
     }
@@ -69,14 +89,6 @@ export function getAcceptedTypesForParamContext(
   }
 
   return ['any'];
-}
-
-/** Returns true if a comma should be suggested inside the list based on current text */
-export function shouldSuggestCommaInList(innerText: string, list: any): boolean {
-  const hasValues = list.values && list.values.length > 0;
-  const isAfterComma = getLastNonWhitespaceChar(innerText) === ',';
-
-  return hasValues && !isAfterComma;
 }
 
 /** Returns true if we should suggest opening a list for the right operand */

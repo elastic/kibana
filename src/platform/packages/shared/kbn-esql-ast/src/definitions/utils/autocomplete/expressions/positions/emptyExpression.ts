@@ -11,13 +11,13 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import { uniq } from 'lodash';
 import {
   matchesSpecialFunction,
-  shouldAddCommaAfterParam,
   getColumnsByTypeFromCtx,
   getLicenseCheckerFromCtx,
   getCommandNameFromCtx,
   isCursorFollowedByCommaFromCtx,
 } from '../utils';
-import { hasBooleanConditionParam, getAcceptedTypesForParamContext } from '../operators/utils';
+import { getAcceptedTypesForParamContext } from '../operators/utils';
+import { shouldSuggestComma, type CommaContext } from '../commaDecisionEngine';
 import type { ExpressionContext } from '../types';
 import { ensureKeywordAndText } from '../../functions';
 import {
@@ -29,8 +29,7 @@ import {
 } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
 import { getCompatibleLiterals } from '../../../literals';
-import { FunctionDefinitionTypes } from '../../../../types';
-import type { FunctionParameterType } from '../../../../types';
+import type { FunctionDefinitionTypes, FunctionParameterType } from '../../../../types';
 import {
   type ISuggestionItem,
   type GetColumnsByTypeFn,
@@ -48,7 +47,12 @@ interface ParamDefinition {
 
 interface FunctionDef {
   name: string;
-  type: string;
+  type: FunctionDefinitionTypes;
+  signatures?: Array<{
+    params: Array<{ type: FunctionParameterType; name?: string }>;
+    minParams?: number;
+    returnType?: string;
+  }>;
 }
 
 /** Handles suggestions when starting a new expression (empty position) */
@@ -282,21 +286,23 @@ function getParamSuggestionConfig(
   firstArgumentType?: string
 ) {
   const nonConstantParams = paramDefinitions.filter(({ constantOnly }) => !constantOnly);
-  const isBooleanCondition = hasBooleanConditionParam(functionDefinition.name, paramDefinitions);
 
-  const acceptedTypes = getAcceptedTypesForParamContext(functionDefinition.name, paramDefinitions, {
+  const acceptedTypes = getAcceptedTypesForParamContext(paramDefinitions, {
     firstArgumentType,
+    functionSignatures: functionDefinition.signatures,
   }) as FunctionParameterType[];
 
   const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
-  const shouldAddComma = shouldAddCommaAfterParam(
+
+  const commaContext: CommaContext = {
+    position: 'empty_expression',
     hasMoreMandatoryArgs,
-    functionDefinition.type as any,
-    {
-      isCursorFollowedByComma,
-      isBooleanCondition,
-    }
-  );
+    functionType: functionDefinition.type,
+    isCursorFollowedByComma,
+    functionSignatures: functionDefinition.signatures,
+  };
+
+  const shouldAddComma = shouldSuggestComma(commaContext);
 
   let allowFieldsAndFunctions = nonConstantParams.length > 0 || paramDefinitions.length === 0;
 
@@ -320,12 +326,15 @@ function buildEnumValueSuggestions(
     return [];
   }
 
-  const isBooleanCondition = hasBooleanConditionParam(functionDefinition.name, paramDefinitions);
-  const shouldAddComma =
-    hasMoreMandatoryArgs &&
-    functionDefinition.type !== FunctionDefinitionTypes.OPERATOR &&
-    !isCursorFollowedByComma &&
-    !isBooleanCondition;
+  const commaContext: CommaContext = {
+    position: 'enum_value',
+    hasMoreMandatoryArgs,
+    functionType: functionDefinition.type,
+    isCursorFollowedByComma,
+    functionSignatures: functionDefinition.signatures,
+  };
+
+  const shouldAddComma = shouldSuggestComma(commaContext);
 
   return buildValueDefinitions(values, {
     addComma: shouldAddComma,

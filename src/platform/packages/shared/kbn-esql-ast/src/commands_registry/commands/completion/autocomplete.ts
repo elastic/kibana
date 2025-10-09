@@ -13,6 +13,8 @@ import type * as ast from '../../../types';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
 import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
+import { isFunctionExpression } from '../../../ast/is';
+import { within } from '../../../ast/location';
 import {
   pipeCompleteItem,
   assignCompletionItem,
@@ -54,7 +56,8 @@ export enum CompletionPosition {
 function getPosition(
   query: string,
   command: ESQLCommand,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): CompletionPosition | undefined {
   const { prompt, targetField } = command as ESQLAstCompletionCommand;
 
@@ -70,8 +73,13 @@ function getPosition(
 
   const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
   const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const insideFunction =
+    expressionRoot &&
+    isFunctionExpression(expressionRoot) &&
+    cursorPosition !== undefined &&
+    within(cursorPosition, expressionRoot);
 
-  if (isExpressionComplete(expressionType, query)) {
+  if (isExpressionComplete(expressionType, query) && !insideFunction) {
     return CompletionPosition.AFTER_PROMPT;
   }
 
@@ -107,7 +115,7 @@ export async function autocomplete(
 
   const innerText = query.substring(0, cursorPosition);
   const { prompt } = command as ESQLAstCompletionCommand;
-  const position = getPosition(innerText, command, context);
+  const position = getPosition(innerText, command, context, cursorPosition);
 
   const endpoints = context?.inferenceEndpoints;
 
