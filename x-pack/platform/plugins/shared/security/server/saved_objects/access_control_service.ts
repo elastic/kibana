@@ -15,7 +15,6 @@ import type {
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 import { SecurityAction } from '.';
-import { Actions } from '@kbn/security-authorization-core';
 
 export const MANAGE_ACCESS_CONTROL_ACTION = 'manage_access_control';
 
