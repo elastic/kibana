@@ -30,7 +30,6 @@ export {
   type PreflightDocResult,
   type PreflightNSParams,
   type PreflightNSResult,
-  type PreflightAccessControlResult,
 } from './preflight_check';
 
 export interface RepositoryHelpers {

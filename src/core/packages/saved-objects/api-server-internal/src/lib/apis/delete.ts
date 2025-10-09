@@ -8,7 +8,7 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
@@ -16,7 +16,7 @@ import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import { getExpectedVersionProperties } from './utils';
-import type { PreflightAccessControlResult, PreflightCheckNamespacesResult } from './helpers';
+import type { PreflightCheckNamespacesResult } from './helpers';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformDeleteParams<T = unknown> {
@@ -24,40 +24,6 @@ export interface PerformDeleteParams<T = unknown> {
   id: string;
   options: SavedObjectsDeleteOptions;
 }
-
-const authorizeDelete = async ({
-  type,
-  id,
-  namespace,
-  preflightResult,
-  context: { registry, extensions },
-}: {
-  type: string;
-  id: string;
-  namespace: string | undefined;
-  preflightResult: PreflightCheckNamespacesResult | PreflightAccessControlResult;
-  context: {
-    registry: ISavedObjectTypeRegistry;
-    extensions: any;
-  };
-}) => {
-  const { securityExtension } = extensions;
-
-  let name;
-
-  const doc = preflightResult?.rawDocSource?._source;
-
-  const accessControl = doc?.accessControl;
-  if (securityExtension.includeSavedObjectNames()) {
-    const saveObject = { attributes: doc?.[type] };
-    name = SavedObjectsUtils.getName(registry.getNameAttribute(type), saveObject);
-  }
-
-  await securityExtension?.authorizeDelete({
-    namespace,
-    object: { type, id, name, accessControl },
-  });
-};
 
 export const performDelete = async <T>(
   { type, id, options }: PerformDeleteParams<T>,
@@ -81,56 +47,52 @@ export const performDelete = async <T>(
   }
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
-  let preflightResult: PreflightCheckNamespacesResult | PreflightAccessControlResult | undefined;
 
   if (securityExtension) {
-    if (registry.isMultiNamespace(type)) {
-      preflightResult = await preflightHelper.preflightCheckNamespaces({
-        type,
-        id,
-        namespace,
-      });
-    } else {
-      const object = {
-        type,
-        id,
-        namespaces: [SavedObjectsUtils.namespaceIdToString(namespace)],
-      };
-      preflightResult = await preflightHelper.accessControlPreflightCheck(object, namespace);
-    }
+    const nameAttribute = registry.getNameAttribute(type);
 
-    if (!preflightResult) {
-      throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
-    }
+    const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
+      {
+        index: commonHelper.getIndexForType(type),
+        id: serializer.generateRawId(namespace, type, id),
+        _source_includes: [
+          ...SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
+          'accessControl',
+        ],
+      },
+      { ignore: [404], meta: true }
+    );
 
-    await authorizeDelete({
+    const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
+    const name = securityExtension.includeSavedObjectNames()
+      ? SavedObjectsUtils.getName(nameAttribute, saveObject)
+      : undefined;
+    const accessControl = savedObjectResponse.body._source?.accessControl;
+    // we don't need to pass existing namespaces in because we're only concerned with authorizing
+    // the current space. This saves us from performing the preflight check if we're unauthorized
+    await securityExtension?.authorizeDelete({
+      namespace,
+      object: { type, id, name, accessControl },
+    });
+  }
+
+  const rawId = serializer.generateRawId(namespace, type, id);
+  let preflightResult: PreflightCheckNamespacesResult | undefined;
+
+  if (registry.isMultiNamespace(type)) {
+    // note: this check throws an error if the object is found but does not exist in this namespace
+    preflightResult = await preflightHelper.preflightCheckNamespaces({
       type,
       id,
       namespace,
-      preflightResult,
-      context: { registry, extensions },
     });
-  }
-  if (registry.isMultiNamespace(type)) {
-    // Secondly we do multinamespace specific logic which might require doing the preflight again
-    if (!preflightResult) {
-      preflightResult = await preflightHelper.preflightCheckNamespaces({
-        type,
-        id,
-        namespace,
-      });
-    }
-
-    const multiNamespaceResult = preflightResult as PreflightCheckNamespacesResult;
-
     if (
-      multiNamespaceResult.checkResult === 'found_outside_namespace' ||
-      multiNamespaceResult.checkResult === 'not_found'
+      preflightResult.checkResult === 'found_outside_namespace' ||
+      preflightResult.checkResult === 'not_found'
     ) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
-
-    const existingNamespaces = multiNamespaceResult.savedObjectNamespaces ?? [];
+    const existingNamespaces = preflightResult.savedObjectNamespaces ?? [];
     if (
       !force &&
       (existingNamespaces.length > 1 || existingNamespaces.includes(ALL_NAMESPACES_STRING))
@@ -140,8 +102,6 @@ export const performDelete = async <T>(
       );
     }
   }
-
-  const rawId = serializer.generateRawId(namespace, type, id);
 
   const { body, statusCode, headers } = await client.delete(
     {
@@ -159,10 +119,7 @@ export const performDelete = async <T>(
 
   const deleted = body.result === 'deleted';
   if (deleted) {
-    const namespaces =
-      preflightResult && 'savedObjectNamespaces' in preflightResult
-        ? preflightResult?.savedObjectNamespaces
-        : undefined;
+    const namespaces = preflightResult?.savedObjectNamespaces;
     if (namespaces) {
       // This is a multi-namespace object type, and it might have legacy URL aliases that need to be deleted.
       await deleteLegacyUrlAliases({

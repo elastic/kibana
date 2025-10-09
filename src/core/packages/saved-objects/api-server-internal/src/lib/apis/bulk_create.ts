@@ -54,7 +54,6 @@ type ExpectedResult = Either<
       accessControl?: SavedObjectAccessControl;
     };
     preflightCheckIndex?: number;
-    accessControlPreflightIndex?: number;
   }
 >;
 
@@ -93,7 +92,7 @@ export const performBulkCreate = async <T>(
   const updatedBy = createdBy;
 
   let preflightCheckIndexCounter = 0;
-  let accessControlPreflightIndexCounter = 0;
+
   const expectedResults = objects.map<ExpectedResult>((object) => {
     const { type, id: requestId, initialNamespaces, version, managed } = object;
 
@@ -149,10 +148,6 @@ export const performBulkCreate = async <T>(
         accessControl: accessControlToWrite,
       },
       ...(requiresNamespacesCheck && { preflightCheckIndex: preflightCheckIndexCounter++ }),
-      ...(overwrite &&
-        typeSupportsAccessControl && {
-          accessControlPreflightIndex: accessControlPreflightIndexCounter++,
-        }),
     }) as ExpectedResult;
   });
 
@@ -179,35 +174,19 @@ export const performBulkCreate = async <T>(
     preflightCheckObjects
   );
 
-  const accessControlPreflightObjects = validObjects
-    .filter(({ value }) => value.accessControlPreflightIndex !== undefined)
-    .map(({ value }) => {
-      const { type, id, initialNamespaces } = value.object;
-      const namespaces = initialNamespaces ?? [namespaceString];
-      return { type, id, overwrite, namespaces };
-    });
-  const accessControlPreflightResponse = await preflightHelper.accessControlBulkPreflightCheck(
-    accessControlPreflightObjects,
-    namespace
-  );
-
   const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
-    const { object, preflightCheckIndex, accessControlPreflightIndex } = element.value;
+    const { object, preflightCheckIndex } = element.value;
 
     const preflightResult =
       preflightCheckIndex !== undefined ? preflightCheckResponse[preflightCheckIndex] : undefined;
 
-    const AccessControlPreflightResult =
-      accessControlPreflightIndex !== undefined
-        ? accessControlPreflightResponse?.body.docs[accessControlPreflightIndex]
-        : undefined;
-
     // ToDo: replace this ts expect error
     // @ts-expect-error MultiGetHit._source is optional
-    const existingAccessControl = AccessControlPreflightResult?._source?.accessControl;
-    if (existingAccessControl) {
-      object.accessControl = existingAccessControl as SavedObjectAccessControl;
-    }
+    const existingAccessControl = preflightResult?._source?.accessControl;
+
+    const accessControlToWrite = existingAccessControl
+      ? existingAccessControl
+      : object.accessControl;
 
     return {
       type: object.type,
@@ -215,7 +194,7 @@ export const performBulkCreate = async <T>(
       initialNamespaces: object.initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source.namespaces ?? [],
       name: SavedObjectsUtils.getName(registry.getNameAttribute(object.type), object),
-      ...(object.accessControl && { accessControl: object.accessControl }),
+      ...(accessControlToWrite && { accessControl: accessControlToWrite }),
     };
   });
 
@@ -240,6 +219,7 @@ export const performBulkCreate = async <T>(
       let savedObjectNamespaces: string[] | undefined;
       let existingOriginId: string | undefined;
       let versionProperties;
+      let accessControl: SavedObjectAccessControl | undefined;
       const {
         preflightCheckIndex,
         object: { initialNamespaces, version, ...object },
@@ -263,6 +243,7 @@ export const performBulkCreate = async <T>(
           initialNamespaces || getSavedObjectNamespaces(namespace, existingDocument);
         versionProperties = getExpectedVersionProperties(version);
         existingOriginId = existingDocument?._source?.originId;
+        accessControl = existingDocument?._source?.accessControl;
       } else {
         if (registry.isSingleNamespace(object.type)) {
           savedObjectNamespace = initialNamespaces
@@ -273,7 +254,7 @@ export const performBulkCreate = async <T>(
         }
         versionProperties = getExpectedVersionProperties(version);
       }
-
+      const accessControlToWrite = accessControl ? accessControl : object.accessControl;
       // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
       // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
       const originId = Object.keys(object).includes('originId')
@@ -294,7 +275,7 @@ export const performBulkCreate = async <T>(
         ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
         ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
         managed: setManaged({ optionsManaged, objectManaged: object.managed }),
-        ...(object.accessControl && { accessControl: object.accessControl }),
+        ...(accessControlToWrite && { accessControl: accessControlToWrite }),
         updated_at: time,
         created_at: time,
         ...(createdBy && { created_by: createdBy }),
