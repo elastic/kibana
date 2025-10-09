@@ -12,10 +12,7 @@ import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-// TODO: Here we import CodeEditor directly to avoid lazy loading
-// used to be: import { CodeEditor } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor/code_editor';
-
 import type { ESQLCallbacks, monaco } from '@kbn/monaco';
 import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang } from '@kbn/monaco';
 

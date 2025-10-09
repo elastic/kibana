@@ -9,14 +9,12 @@
 
 import React from 'react';
 import { VariablesEditor as VariablesEditorComponent } from './variables_editor';
-// import { withSuspense } from '@kbn/shared-ux-utility';
 
 export { type Props } from './variables_editor';
 export { type DevToolsVariable } from './types';
 
 /**
- * The Lazily-loaded `VariablesEditorLazy` component.  Consumers should use `React.Suspense` or
- * the withSuspense` HOC to load this component.
+ * The Lazily-loaded `VariablesEditorLazy` component.
  */
 export const VariablesEditorLazy = React.lazy(() =>
   import('./variables_editor').then(({ VariablesEditor }) => ({
@@ -24,10 +22,4 @@ export const VariablesEditorLazy = React.lazy(() =>
   }))
 );
 
-/**
- * A `VariablesEditor` component that is wrapped by the `withSuspense` HOC. This component can
- * be used directly by consumers and will load the `VariablesEditorLazy` component lazily with
- * a predefined fallback and error boundary.
- */
-// export const VariablesEditor = withSuspense(VariablesEditorLazy);
 export const VariablesEditor = VariablesEditorComponent;
