@@ -10,7 +10,7 @@
 import type { ComponentProps, FC, ReactNode } from 'react';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 
 import { SideNav } from '../side_nav';
 import { useNestedMenu } from './use_nested_menu';
@@ -23,27 +23,27 @@ export interface PrimaryMenuItemProps
   isCurrent?: boolean;
   isCollapsed: boolean;
   onClick?: () => void;
-  submenuPanelId?: string;
 }
 
 export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
+  id,
   children,
   hasSubmenu = false,
   isHighlighted = false,
   isCurrent,
   onClick,
-  submenuPanelId,
   ...props
 }) => {
   const { goToPanel } = useNestedMenu();
   const { euiTheme } = useEuiTheme();
 
   const handleClick = useCallback(() => {
-    onClick?.();
-    if (hasSubmenu && submenuPanelId) {
-      goToPanel(submenuPanelId);
+    if (hasSubmenu) {
+      goToPanel(id, id);
+    } else {
+      onClick?.();
     }
-  }, [onClick, hasSubmenu, submenuPanelId, goToPanel]);
+  }, [hasSubmenu, id, goToPanel, onClick]);
 
   const arrowStyle = css`
     opacity: 0.6;
@@ -62,24 +62,17 @@ export const PrimaryMenuItem: FC<PrimaryMenuItemProps> = ({
   return (
     <div css={wrapperStyle}>
       <SideNav.PrimaryMenuItem
+        id={id}
         isHorizontal
         isHighlighted={isHighlighted}
         isCurrent={isCurrent}
         onClick={handleClick}
         {...props}
+        as={hasSubmenu ? 'button' : 'a'}
       >
         {children}
+        {hasSubmenu && <EuiIcon color="text" css={arrowStyle} type="arrowRight" size="m" />}
       </SideNav.PrimaryMenuItem>
-      {hasSubmenu && (
-        <EuiButtonIcon
-          aria-label={`${children} has submenu`}
-          color="text"
-          css={arrowStyle}
-          display="empty"
-          iconType="arrowRight"
-          size="xs"
-        />
-      )}
     </div>
   );
 };

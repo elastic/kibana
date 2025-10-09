@@ -87,6 +87,9 @@ describe('useFleetServerHostsForm', () => {
             es_certificate_authorities: ['ES cert authorities'],
             certificate: 'path/to/cert',
             es_certificate: 'path/to/EScert',
+            agent_certificate_authorities: ['agent cert authorities'],
+            agent_certificate: 'path/to/agent_cert',
+            agent_key: 'path/to/agent_key',
           },
         },
         onSuccess

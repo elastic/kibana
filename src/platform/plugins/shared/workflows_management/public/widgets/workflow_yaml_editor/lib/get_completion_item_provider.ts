@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Scalar } from 'yaml';
-import { YAMLParseError, isScalar, parseDocument } from 'yaml';
+import type { Scalar, Document, Pair, Node } from 'yaml';
+import { YAMLParseError, isPair, isScalar, parseDocument, visit } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
 import type { BuiltInStepType, TriggerType } from '@kbn/workflows';
@@ -23,7 +23,8 @@ import {
   ScheduledTriggerSchema,
   ManualTriggerSchema,
 } from '@kbn/workflows';
-import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
+import { WorkflowGraph } from '@kbn/workflows/graph';
+import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
 import {
@@ -31,10 +32,12 @@ import {
   PROPERTY_PATH_REGEX,
   UNFINISHED_VARIABLE_REGEX_GLOBAL,
 } from '../../../../common/lib/regex';
-import { getSchemaAtPath, getZodTypeName, parsePath } from '../../../../common/lib/zod_utils';
 import { generateConnectorSnippet } from './snippets/generate_connector_snippet';
 import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
-import { generateTriggerSnippet } from './snippets/generate_trigger_snippet';
+import {
+  generateTriggerSnippet,
+  generateRRuleTriggerSnippet,
+} from './snippets/generate_trigger_snippet';
 import { getCachedAllConnectors } from './connectors_cache';
 import { getIndentLevel } from './get_indent_level';
 
@@ -171,10 +174,50 @@ function isInTriggersContext(path: any[]): boolean {
   return path.length > 0 && path[0] === 'triggers';
 }
 
+/**
+ * Detect if we're in a scheduled trigger's with block
+ */
+function isInScheduledTriggerWithBlock(yamlDocument: Document, absolutePosition: number): boolean {
+  let result = false;
+
+  visit(yamlDocument, {
+    Map(key, node, ancestors) {
+      if (!node.range || node.get('type') !== 'scheduled') return;
+
+      // Check if we're inside this trigger's range
+      if (absolutePosition < node.range[0] || absolutePosition > node.range[2]) return;
+
+      // Find the 'with' property node within this trigger
+      const withPair = node.items.find(
+        (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'with'
+      ) as Pair<Scalar, Node> | undefined;
+
+      if (withPair?.value?.range) {
+        // Check if the current position is within the with block's range
+        if (
+          absolutePosition >= withPair.value.range[0] &&
+          absolutePosition <= withPair.value.range[2]
+        ) {
+          result = true;
+          return visit.BREAK;
+        }
+      }
+    },
+  });
+
+  return result;
+}
+
 export interface LineParseResult {
   fullKey: string;
   pathSegments: string[] | null;
-  matchType: 'at' | 'bracket-unfinished' | 'variable-complete' | 'variable-unfinished' | null;
+  matchType:
+    | 'at'
+    | 'bracket-unfinished'
+    | 'variable-complete'
+    | 'variable-unfinished'
+    | 'foreach-variable'
+    | null;
   match: RegExpMatchArray | null;
 }
 
@@ -221,6 +264,17 @@ export function parseLineForCompletion(lineUpToCursor: string): LineParseResult 
       pathSegments: parsePath(fullKey),
       matchType: 'variable-complete',
       match: completeMatch,
+    };
+  }
+
+  const lastWordBeforeCursor = lineUpToCursor.split(' ').pop();
+  if (lineUpToCursor.includes('foreach:')) {
+    const fullKey = cleanKey(lastWordBeforeCursor ?? '');
+    return {
+      fullKey,
+      pathSegments: parsePath(fullKey),
+      matchType: 'foreach-variable',
+      match: null,
     };
   }
 
@@ -306,6 +360,8 @@ function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
 
   // Detecting if in with block
 
+  // Special handling for comment lines - they should be treated as if they're at the same level as parameters
+
   // Look backwards to find a "with:" line
   for (let lineNumber = currentLineNumber; lineNumber >= 1; lineNumber--) {
     const line = model.getLineContent(lineNumber);
@@ -320,11 +376,15 @@ function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
       // We're in the with block if:
       // 1. The with: line has LESS indentation than current line (we're inside the block)
       // 2. OR if we're on the with: line itself
+      // 3. OR if current line is a comment and has reasonable indentation relative to with:
       if (lineIndent < currentIndent) {
         // We are INSIDE with block
         return true;
       } else if (lineNumber === currentLineNumber) {
         // We are ON the with: line itself
+        return true;
+      } else if (currentLine.trim().startsWith('#') && currentIndent > lineIndent) {
+        // Current line is a comment with more indentation than with: - likely inside the block
         return true;
       } else {
         // with: line has same/more indentation, we are NOT inside this with block
@@ -339,7 +399,13 @@ function detectIfInWithBlock(model: any, currentLineNumber: number): boolean {
     }
 
     // Stop if we encounter a line with significantly less indentation (other major structure)
-    if (lineIndent < currentIndent && line.trim() !== '' && !line.includes('with:')) {
+    // But be more lenient with comment lines
+    if (
+      lineIndent < currentIndent &&
+      line.trim() !== '' &&
+      !line.includes('with:') &&
+      !currentLine.trim().startsWith('#')
+    ) {
       // Hit major structure boundary
       break;
     }
@@ -419,25 +485,27 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
   }
 
   // Now scan from the with line forward to collect existing parameters
-  const expectedParamIndent = withIndent + 2; // Parameters should be indented 2 spaces from with:
+  // Be more flexible with indentation - parameters should be indented MORE than with:
 
   for (let lineNumber = withLineNumber + 1; lineNumber <= model.getLineCount(); lineNumber++) {
     const line = model.getLineContent(lineNumber);
     const lineIndent = getIndentLevel(line);
 
-    // Stop if we've gone past the with block (less indentation) or hit another major structure
+    // Stop if we've gone past the with block (less or equal indentation to with:)
     if (line.trim() !== '' && lineIndent <= withIndent) {
       // Exited with block due to indentation
       break;
     }
 
-    // Look for parameters at the expected indentation level
-    if (lineIndent === expectedParamIndent) {
-      const paramMatch = line.match(/^\s*(\w+):/);
+    // Look for parameters at any indentation level greater than with:
+    // This handles both 2-space and 4-space indentation styles
+    if (lineIndent > withIndent && line.trim() !== '') {
+      // More flexible regex that handles various parameter name formats
+      const paramMatch = line.match(/^\s*([a-zA-Z_][a-zA-Z0-9_-]*)\s*:/);
       if (paramMatch) {
         const paramName = paramMatch[1];
         existingParams.add(paramName);
-        // Found existing parameter
+        // console.log(`Found existing parameter: ${paramName} at line ${lineNumber}`);
       }
     }
 
@@ -448,6 +516,7 @@ function getExistingParametersInWithBlock(model: any, position: any): Set<string
     }
   }
 
+  // console.log('Existing parameters found:', Array.from(existingParams));
   return existingParams;
 }
 
@@ -540,12 +609,134 @@ function getConnectorParamsSchema(connectorType: string): Record<string, any> | 
       return null;
     }
 
+    // Handle function-generated schemas (like the complex union schemas)
+    let actualSchema = connector.paramsSchema;
+    if (typeof connector.paramsSchema === 'function') {
+      try {
+        actualSchema = (connector.paramsSchema as any)();
+      } catch (error) {
+        // If function execution fails, cache null and return
+        connectorSchemaCache.set(connectorType, null);
+        return null;
+      }
+    }
+
     // Extract the shape from the Zod schema
-    if (connector.paramsSchema instanceof z.ZodObject) {
-      // Found paramsSchema for connector
-      const result = connector.paramsSchema.shape;
+    if (actualSchema instanceof z.ZodObject) {
+      // Found paramsSchema for connector (simple object)
+      const result = actualSchema.shape;
       connectorSchemaCache.set(connectorType, result);
       return result;
+    }
+
+    // Handle ZodUnion schemas (from our generic intersection fix)
+    if (actualSchema instanceof z.ZodUnion) {
+      // For union schemas, extract common properties from all options
+      const unionOptions = actualSchema._def.options;
+      const commonProperties: Record<string, any> = {};
+
+      // Helper function to extract properties from any schema type
+      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+        if (schema instanceof z.ZodObject) {
+          return schema.shape;
+        } else if (schema instanceof z.ZodIntersection) {
+          // For intersections, merge properties from both sides
+          const leftProps = extractPropertiesFromSchema(schema._def.left);
+          const rightProps = extractPropertiesFromSchema(schema._def.right);
+          return { ...leftProps, ...rightProps };
+        }
+        return {};
+      };
+
+      // Get properties that exist in ALL union options
+      if (unionOptions.length > 0) {
+        const firstOptionProps = extractPropertiesFromSchema(unionOptions[0]);
+
+        // Check each property in the first option
+        for (const [key, schema] of Object.entries(firstOptionProps)) {
+          // Check if this property exists in ALL other options
+          const existsInAll = unionOptions.every((option: any) => {
+            const optionProps = extractPropertiesFromSchema(option);
+            return optionProps[key];
+          });
+
+          if (existsInAll) {
+            commonProperties[key] = schema;
+          }
+        }
+      }
+
+      if (Object.keys(commonProperties).length > 0) {
+        // Found common properties in union schema
+        connectorSchemaCache.set(connectorType, commonProperties);
+        return commonProperties;
+      }
+    }
+
+    // Handle ZodIntersection schemas (from complex union handling)
+    if (actualSchema instanceof z.ZodIntersection) {
+      // Helper function to extract properties from any schema type (reuse from above)
+      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+        if (schema instanceof z.ZodObject) {
+          return schema.shape;
+        } else if (schema instanceof z.ZodIntersection) {
+          // For intersections, merge properties from both sides
+          const leftProps = extractPropertiesFromSchema(schema._def.left);
+          const rightProps = extractPropertiesFromSchema(schema._def.right);
+          return { ...leftProps, ...rightProps };
+        }
+        return {};
+      };
+
+      // For intersection schemas, extract properties from both sides
+      const allProperties = extractPropertiesFromSchema(actualSchema);
+
+      if (Object.keys(allProperties).length > 0) {
+        connectorSchemaCache.set(connectorType, allProperties);
+        return allProperties;
+      }
+    }
+
+    // Handle discriminated unions
+    if (actualSchema instanceof z.ZodDiscriminatedUnion) {
+      // For discriminated unions, extract common properties from all options
+      const unionOptions = Array.from(actualSchema._def.options.values());
+      const commonProperties: Record<string, any> = {};
+
+      // Helper function to extract properties from any schema type (reuse from above)
+      const extractPropertiesFromSchema = (schema: any): Record<string, any> => {
+        if (schema instanceof z.ZodObject) {
+          return schema.shape;
+        } else if (schema instanceof z.ZodIntersection) {
+          // For intersections, merge properties from both sides
+          const leftProps = extractPropertiesFromSchema(schema._def.left);
+          const rightProps = extractPropertiesFromSchema(schema._def.right);
+          return { ...leftProps, ...rightProps };
+        }
+        return {};
+      };
+
+      if (unionOptions.length > 0) {
+        const firstOptionProps = extractPropertiesFromSchema(unionOptions[0]);
+
+        // Check each property in the first option
+        for (const [key, schema] of Object.entries(firstOptionProps)) {
+          // Check if this property exists in ALL other options
+          const existsInAll = unionOptions.every((option: any) => {
+            const optionProps = extractPropertiesFromSchema(option);
+            return optionProps[key];
+          });
+
+          if (existsInAll) {
+            commonProperties[key] = schema;
+          }
+        }
+      }
+
+      if (Object.keys(commonProperties).length > 0) {
+        connectorSchemaCache.set(connectorType, commonProperties);
+        return commonProperties;
+      }
     }
 
     connectorSchemaCache.set(connectorType, null);
@@ -763,6 +954,65 @@ function getTriggerTypeSuggestions(
   return suggestions;
 }
 
+/**
+ * Get RRule scheduling pattern suggestions
+ */
+function getRRuleSchedulingSuggestions(range: monaco.IRange): monaco.languages.CompletionItem[] {
+  const suggestions: monaco.languages.CompletionItem[] = [];
+
+  const rrulePatterns = [
+    {
+      label: 'Daily at 9 AM',
+      description: 'Run daily at 9:00 AM UTC',
+      pattern: 'daily' as const,
+    },
+    {
+      label: 'Business hours (weekdays 8 AM & 5 PM)',
+      description: 'Run on weekdays at 8 AM and 5 PM EST',
+      pattern: 'weekly' as const,
+    },
+    {
+      label: 'Monthly on 1st and 15th',
+      description: 'Run monthly on 1st and 15th at 10:30 AM UTC',
+      pattern: 'monthly' as const,
+    },
+    {
+      label: 'Custom RRule',
+      description: 'Create a custom RRule configuration with all options',
+      pattern: 'custom' as const,
+    },
+  ];
+
+  rrulePatterns.forEach(({ label, description, pattern }) => {
+    const snippetText = generateRRuleTriggerSnippet(pattern, {
+      monacoSuggestionFormat: true,
+    });
+
+    // Extended range for multi-line insertion
+    const extendedRange = {
+      startLineNumber: range.startLineNumber,
+      endLineNumber: range.endLineNumber,
+      startColumn: range.startColumn,
+      endColumn: Math.max(range.endColumn, 1000),
+    };
+
+    suggestions.push({
+      label,
+      kind: monaco.languages.CompletionItemKind.Snippet,
+      insertText: snippetText,
+      insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+      range: extendedRange,
+      documentation: description,
+      filterText: label,
+      sortText: `!rrule-${pattern}`, // Priority prefix for RRule suggestions
+      detail: 'RRule scheduling pattern',
+      preselect: false,
+    });
+  });
+
+  return suggestions;
+}
+
 export function getSuggestion(
   key: string,
   context: monaco.languages.CompletionContext,
@@ -869,7 +1119,7 @@ export function getCompletionItemProvider(
           }
         }
 
-        const workflowGraph = getWorkflowGraph(workflowData);
+        const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowData);
         const path = getCurrentPath(yamlDocument, absolutePosition);
         const yamlNode = yamlDocument.getIn(path, true);
         const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
@@ -878,8 +1128,8 @@ export function getCompletionItemProvider(
         const shouldBeQuoted =
           isScalar(yamlNode) &&
           scalarType === 'PLAIN' &&
-          ((yamlNode?.value as string)?.startsWith('{') ||
-            (yamlNode?.value as string)?.startsWith('@'));
+          typeof yamlNode?.value === 'string' &&
+          (yamlNode?.value?.startsWith('{') || yamlNode?.value?.startsWith('@'));
 
         let context: z.ZodType;
         try {
@@ -904,7 +1154,11 @@ export function getCompletionItemProvider(
 
         // SPECIAL CASE: Variable expression completion
         // Handle completions inside {{ }} or after @ triggers
-        if (parseResult.matchType === 'variable-unfinished' || parseResult.matchType === 'at') {
+        if (
+          parseResult.matchType === 'variable-unfinished' ||
+          parseResult.matchType === 'at' ||
+          parseResult.matchType === 'foreach-variable'
+        ) {
           // We're inside a variable expression, provide context-based completions
           if (context instanceof z.ZodObject) {
             const contextKeys = Object.keys(context.shape);
@@ -916,7 +1170,7 @@ export function getCompletionItemProvider(
 
             for (const key of filteredKeys) {
               const keySchema = context.shape[key];
-              const propertyTypeName = getZodTypeName(keySchema);
+              const propertyTypeName = getDetailedTypeDescription(keySchema, { singleLine: true });
 
               suggestions.push(
                 getSuggestion(
@@ -983,101 +1237,123 @@ export function getCompletionItemProvider(
         const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
         // Detected connector type
 
+        // Check if we're in a scheduled trigger's with block for RRule suggestions
+        if (isInScheduledTriggerWithBlock(yamlDocument, absolutePosition)) {
+          // We're in a scheduled trigger's with block - provide RRule suggestions
+          const rruleSuggestions = getRRuleSchedulingSuggestions(range);
+
+          return {
+            suggestions: rruleSuggestions,
+            incomplete: false,
+          };
+        }
+
         // If we're in a connector with block, prioritize connector-specific suggestions
         if (connectorType) {
-          // Check if we're typing a value (after colon with content)
-          const colonIndex = lineUpToCursor.lastIndexOf(':');
+          // Special case: if we're on a comment line in a with block, skip value detection
+          // and go straight to showing connector parameters
+          const currentLine = model.getLineContent(lineNumber);
+          const isOnCommentLine = currentLine.trim().startsWith('#');
 
-          // More precise detection: are we actually in a value position?
-          // We are in value position if:
-          // 1. There's a colon in the line
-          // 2. There's non-whitespace content after the colon (we're editing a value)
-          // 3. OR if the cursor is right after ": " (ready to type value)
-          const isInValuePosition =
-            colonIndex !== -1 &&
-            // Pattern 1: "key: value" where cursor is in/after value
-            (/:\s+\S/.test(lineUpToCursor) ||
-              // Pattern 2: "key: " where cursor is right after the space (about to type value)
-              lineUpToCursor.endsWith(': ') ||
-              // Pattern 3: "key:" where cursor is right after colon
-              lineUpToCursor.endsWith(':'));
+          if (isOnCommentLine) {
+            // We're on a comment line in a with block - show connector parameters
+            // Skip the value position detection and go straight to parameter suggestions
+            // This will fall through to the connector parameter suggestions below
+          } else {
+            // Check if we're typing a value (after colon with content)
+            const colonIndex = lineUpToCursor.lastIndexOf(':');
 
-          // Analyzing cursor position
+            // More precise detection: are we actually in a value position?
+            // We are in value position if:
+            // 1. There's a colon in the line
+            // 2. There's non-whitespace content after the colon (we're editing a value)
+            // 3. OR if the cursor is right after ": " (ready to type value)
+            const isInValuePosition =
+              colonIndex !== -1 &&
+              // Pattern 1: "key: value" where cursor is in/after value
+              (/:\s+\S/.test(lineUpToCursor) ||
+                // Pattern 2: "key: " where cursor is right after the space (about to type value)
+                lineUpToCursor.endsWith(': ') ||
+                // Pattern 3: "key:" where cursor is right after colon
+                lineUpToCursor.endsWith(':'));
 
-          if (isInValuePosition) {
-            // Typing value after colon, not suggesting parameter names
+            // Analyzing cursor position
 
-            // Extract the parameter name more carefully
-            // Get everything before the colon, remove leading whitespace and dashes
-            const beforeColon = lineUpToCursor.substring(0, colonIndex);
-            const paramName = beforeColon.replace(/^\s*-?\s*/, '').trim();
-            // Parameter name extracted
+            if (isInValuePosition) {
+              // Typing value after colon, not suggesting parameter names
 
-            // Only provide value suggestions if we have a valid parameter name
-            if (paramName && !paramName.includes(' ')) {
-              // Provide basic value suggestions based on common parameter patterns
-              const valueSuggestions: monaco.languages.CompletionItem[] = [];
+              // Extract the parameter name more carefully
+              // Get everything before the colon, remove leading whitespace and dashes
+              const beforeColon = lineUpToCursor.substring(0, colonIndex);
+              const paramName = beforeColon.replace(/^\s*-?\s*/, '').trim();
+              // Parameter name extracted
 
-              if (
-                paramName.includes('enabled') ||
-                paramName.includes('disabled') ||
-                paramName.endsWith('Stream')
-              ) {
-                valueSuggestions.push(
-                  {
-                    label: 'true',
+              // Only provide value suggestions if we have a valid parameter name
+              if (paramName && !paramName.includes(' ')) {
+                // Provide basic value suggestions based on common parameter patterns
+                const valueSuggestions: monaco.languages.CompletionItem[] = [];
+
+                if (
+                  paramName.includes('enabled') ||
+                  paramName.includes('disabled') ||
+                  paramName.endsWith('Stream')
+                ) {
+                  valueSuggestions.push(
+                    {
+                      label: 'true',
+                      kind: monaco.languages.CompletionItemKind.Value,
+                      insertText: 'true',
+                      range,
+                      documentation: 'Boolean true value',
+                    },
+                    {
+                      label: 'false',
+                      kind: monaco.languages.CompletionItemKind.Value,
+                      insertText: 'false',
+                      range,
+                      documentation: 'Boolean false value',
+                    }
+                  );
+                } else if (
+                  paramName.includes('size') ||
+                  paramName.includes('count') ||
+                  paramName.includes('limit')
+                ) {
+                  valueSuggestions.push({
+                    label: '10',
                     kind: monaco.languages.CompletionItemKind.Value,
-                    insertText: 'true',
+                    insertText: '10',
                     range,
-                    documentation: 'Boolean true value',
-                  },
-                  {
-                    label: 'false',
+                    documentation: 'Numeric value',
+                  });
+                } else if (lineUpToCursor.match(/:\s*$/)) {
+                  // Generic string placeholder only if the value is still empty
+                  valueSuggestions.push({
+                    label: '""',
                     kind: monaco.languages.CompletionItemKind.Value,
-                    insertText: 'false',
+                    insertText: '""',
                     range,
-                    documentation: 'Boolean false value',
-                  }
-                );
-              } else if (
-                paramName.includes('size') ||
-                paramName.includes('count') ||
-                paramName.includes('limit')
-              ) {
-                valueSuggestions.push({
-                  label: '10',
-                  kind: monaco.languages.CompletionItemKind.Value,
-                  insertText: '10',
-                  range,
-                  documentation: 'Numeric value',
-                });
-              } else if (lineUpToCursor.match(/:\s*$/)) {
-                // Generic string placeholder only if the value is still empty
-                valueSuggestions.push({
-                  label: '""',
-                  kind: monaco.languages.CompletionItemKind.Value,
-                  insertText: '""',
-                  range,
-                  documentation: 'String value',
-                  command: {
-                    id: 'cursorMove',
-                    title: 'Move cursor left',
-                    arguments: ['cursorMove', { to: 'left' }],
-                  },
-                });
+                    documentation: 'String value',
+                    command: {
+                      id: 'cursorMove',
+                      title: 'Move cursor left',
+                      arguments: ['cursorMove', { to: 'left' }],
+                    },
+                  });
+                }
+
+                return {
+                  suggestions: valueSuggestions,
+                  incomplete: false,
+                };
               }
 
+              // If we can't determine a valid parameter name, don't show any suggestions
               return {
-                suggestions: valueSuggestions,
+                suggestions: [],
                 incomplete: false,
               };
             }
-
-            // If we can't determine a valid parameter name, don't show any suggestions
-            return {
-              suggestions: [],
-              incomplete: false,
-            };
           }
 
           // Continue to show connector parameters for manual triggers or when typing parameter names
@@ -1121,7 +1397,9 @@ export function getCompletionItemProvider(
                 continue;
               }
 
-              const propertyTypeName = getZodTypeName(currentSchema);
+              const propertyTypeName = getDetailedTypeDescription(currentSchema, {
+                singleLine: true,
+              });
 
               // Create a YAML key-value snippet suggestion with cursor positioning
               let insertText = `${key}: `;
@@ -1248,7 +1526,9 @@ export function getCompletionItemProvider(
               };
             } else {
               // For key completion, provide a custom "type:" completion that triggers snippet completion
-              const propertyTypeName = getZodTypeName(currentSchema);
+              const propertyTypeName = getDetailedTypeDescription(currentSchema, {
+                singleLine: true,
+              });
               const typeKeySuggestion = getSuggestion(
                 key,
                 completionContext,
@@ -1268,7 +1548,9 @@ export function getCompletionItemProvider(
               suggestions.push(typeKeySuggestion);
             }
           } else {
-            const propertyTypeName = getZodTypeName(currentSchema);
+            const propertyTypeName = getDetailedTypeDescription(currentSchema, {
+              singleLine: true,
+            });
             suggestions.push(
               getSuggestion(
                 key,

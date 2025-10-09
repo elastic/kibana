@@ -399,6 +399,10 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
+        const getEmbeddableServices = () => import('./plugin_imports/embeddable_services');
+        const { addControlsFromSavedSession } = await getEmbeddableServices();
+        addControlsFromSavedSession(container, savedObject);
+
         const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
         container.addNewPanel(
           {

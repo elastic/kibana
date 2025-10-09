@@ -36,7 +36,7 @@ const PROMPT_SUGGESTIONS = [
   ...getFunctionSuggestions({
     location: Location.COMPLETION,
     returnTypes: ['text', 'keyword', 'unknown'],
-  }).map((fn) => `${fn.text}`),
+  }).map((fn) => `${fn.text} `),
 ];
 
 describe('COMPLETION Autocomplete', () => {

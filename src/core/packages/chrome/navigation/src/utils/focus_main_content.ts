@@ -9,6 +9,9 @@
 
 import { MAIN_CONTENT_SELECTORS } from '@kbn/core-chrome-layout-constants';
 
+/**
+ * Utility function for focusing the main Kibana content.
+ */
 export const focusMainContent = () => {
   const mainElement = document.querySelector(MAIN_CONTENT_SELECTORS.join(','));
 

@@ -10,50 +10,110 @@ import { css } from '@emotion/css';
 import React from 'react';
 import {
   visualizationElement,
+  type VisualizationElementAttributes,
   type TabularDataResult,
 } from '@kbn/onechat-common/tools/tool_result';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import classNames from 'classnames';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiCode, EuiText, useEuiTheme } from '@elastic/eui';
+
 import type { OnechatStartDependencies } from '../../../../types';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 
-export const visualizationPlugin = () => {
-  const visitor = (node: Node) => {
-    if ('children' in node) {
-      const parent = node as Parent;
-      parent.children.forEach((child) => visitor(child));
+type MutableNode = Node & {
+  value?: string;
+  toolResultId?: string;
+  chartType?: string;
+};
+
+export const visualizationTagParser = () => {
+  const extractAttribute = (value: string, attr: string) => {
+    const regex = new RegExp(`${attr}="([^"]*)"`, 'i');
+    return value.match(regex)?.[1];
+  };
+
+  const getVisualizationAttributes = (value: string) => ({
+    toolResultId: extractAttribute(value, visualizationElement.attributes.toolResultId),
+    chartType: extractAttribute(value, visualizationElement.attributes.chartType),
+  });
+
+  const assignVisualizationAttributes = (
+    node: MutableNode,
+    attributes: ReturnType<typeof getVisualizationAttributes>
+  ) => {
+    node.type = visualizationElement.tagName;
+    node.toolResultId = attributes.toolResultId;
+    node.chartType = attributes.chartType;
+    delete node.value;
+  };
+
+  const visualizationTagRegex = new RegExp(`<${visualizationElement.tagName}\\b[^>]*\\/?>`, 'gi');
+
+  const createVisualizationNode = (
+    attributes: ReturnType<typeof getVisualizationAttributes>,
+    position: MutableNode['position']
+  ): MutableNode => ({
+    type: visualizationElement.tagName,
+    toolResultId: attributes.toolResultId,
+    chartType: attributes.chartType,
+    position,
+  });
+
+  const visitParent = (parent: Parent) => {
+    for (let index = 0; index < parent.children.length; index++) {
+      const child = parent.children[index] as MutableNode;
+
+      if ('children' in child) {
+        visitParent(child as Parent);
+      }
+
+      if (child.type !== 'html') {
+        continue; // terminate iteration if not html node
+      }
+
+      const rawValue = child.value;
+      if (!rawValue) {
+        continue; // terminate iteration if no value attribute
+      }
+
+      const trimmedValue = rawValue.trim();
+      if (!trimmedValue.toLowerCase().startsWith(`<${visualizationElement.tagName}`)) {
+        continue; // terminate iteration if not starting with visualization tag
+      }
+
+      const matches = Array.from(trimmedValue.matchAll(visualizationTagRegex));
+      if (matches.length === 0) {
+        continue; // terminate iteration if no matches found
+      }
+
+      const visualizationAttributes = matches.map((match) => getVisualizationAttributes(match[0]));
+      const leftoverContent = trimmedValue.replace(visualizationTagRegex, '').trim();
+
+      assignVisualizationAttributes(child, visualizationAttributes[0]);
+
+      if (visualizationAttributes.length === 1 || leftoverContent.length > 0) {
+        continue;
+      }
+
+      const additionalNodes = visualizationAttributes
+        .slice(1)
+        .map((attributes) => createVisualizationNode(attributes, child.position));
+
+      const siblings = parent.children as Node[];
+      siblings.splice(index + 1, 0, ...additionalNodes);
+      index += additionalNodes.length;
+      continue;
     }
-
-    if ((node as any).type !== 'html') {
-      return;
-    }
-
-    // find <visualization> nodes
-    const value = (node as any).value as string | undefined;
-    if (!value || !value.trim().toLowerCase().startsWith(`<${visualizationElement.tagName}`)) {
-      return;
-    }
-
-    // extract attributes
-    const toolResultRegex = new RegExp(
-      `${visualizationElement.attributes.toolResultId}="([^"]*)"`,
-      'i'
-    );
-    const toolResultId = value.match(toolResultRegex)?.[1];
-
-    // transform the node from type `html` to (custom) type `visualization`
-    (node as any).type = visualizationElement.tagName;
-    (node as any).toolResultId = toolResultId;
-    delete (node as any).value; // remove the raw HTML value
   };
 
   return (tree: Node) => {
-    visitor(tree);
+    if ('children' in tree) {
+      visitParent(tree as Parent);
+    }
   };
 };
 
-export function getVisualizationHandler({
+export function createVisualizationRenderer({
   startDependencies,
   stepsFromCurrentRound,
   stepsFromPrevRounds,
@@ -62,11 +122,13 @@ export function getVisualizationHandler({
   stepsFromCurrentRound: ConversationRoundStep[];
   stepsFromPrevRounds: ConversationRoundStep[];
 }) {
-  return (props: { toolResultId?: string }) => {
-    const { toolResultId } = props;
+  return (props: VisualizationElementAttributes) => {
+    const { toolResultId, chartType } = props;
 
     if (!toolResultId) {
-      return <p>Visualization requires a tool result ID.</p>;
+      return (
+        <EuiText>Visualization missing {visualizationElement.attributes.toolResultId}.</EuiText>
+      );
     }
 
     const steps = [...stepsFromPrevRounds, ...stepsFromCurrentRound];
@@ -78,22 +140,30 @@ export function getVisualizationHandler({
       | TabularDataResult
       | undefined;
 
+    const ToolResultAttribute = (
+      <EuiCode>
+        {visualizationElement.attributes.toolResultId}={toolResultId}
+      </EuiCode>
+    );
+
     if (!toolResult) {
-      return <p>Unable to find visualization for tool result ID: {toolResultId}</p>;
+      return <EuiText>Unable to find visualization for {ToolResultAttribute}.</EuiText>;
     }
 
     const { columns, query } = toolResult.data;
 
     if (!query) {
-      return <p>Unable to find query for tool result ID: {toolResultId}</p>;
+      return <EuiText>Unable to find esql query for {ToolResultAttribute}.</EuiText>;
     }
 
     return (
       <VisualizeESQL
         lens={startDependencies.lens}
         dataViews={startDependencies.dataViews}
+        uiActions={startDependencies.uiActions}
         esqlQuery={query}
         esqlColumns={columns}
+        preferredChartType={chartType}
       />
     );
   };

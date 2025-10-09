@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { badRequest } from '@hapi/boom';
 import type {
   SignificantEventsGenerateResponse,
   SignificantEventsGetResponse,
@@ -69,11 +68,6 @@ const previewSignificantEventsRoute = createServerRoute({
         request,
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams is not enabled');
-    }
 
     const {
       body: { query },
@@ -204,7 +198,7 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
-          system: params.body.system,
+          system: params.body?.system,
           connectorId: params.query.connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),

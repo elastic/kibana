@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchStart.expectToBeOnIndexListPage();
       });
       it('should redirect to indices list if single index exist on page load', async () => {
-        await svlSearchNavigation.navigateToGettingStartedPage();
+        await svlSearchNavigation.navigateToSearchPlaygroundList();
         await es.indices.create({ index: 'test-my-index-001' });
         await svlSearchNavigation.navigateToElasticsearchStartPage(true);
         await pageObjects.searchStart.expectToBeOnIndexListPage();

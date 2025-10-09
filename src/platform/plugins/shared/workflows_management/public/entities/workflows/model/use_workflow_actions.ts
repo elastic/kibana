@@ -14,6 +14,8 @@ import type {
   WorkflowDetailDto,
   RunWorkflowResponseDto,
   RunStepCommand,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
 } from '@kbn/workflows';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -100,6 +102,21 @@ export function useWorkflowActions() {
     },
   });
 
+  const testWorkflow = useMutation<TestWorkflowResponseDto, Error, TestWorkflowCommand>({
+    mutationKey: ['POST', 'workflows', 'test'],
+    mutationFn: ({
+      workflowYaml,
+      inputs,
+    }: {
+      workflowYaml: string;
+      inputs: Record<string, any>;
+    }) => {
+      return http!.post(`/api/workflows/test`, {
+        body: JSON.stringify({ workflowYaml, inputs }),
+      });
+    },
+  });
+
   return {
     createWorkflow,
     updateWorkflow, // kc: maybe return mutation.mutate? where the navigation is handled?
@@ -107,5 +124,6 @@ export function useWorkflowActions() {
     runWorkflow,
     runIndividualStep,
     cloneWorkflow,
+    testWorkflow,
   };
 }

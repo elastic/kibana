@@ -394,13 +394,13 @@ export class SearchSessionService implements ISearchSessionService {
     { sessionId, isStored, isRestore }: ISearchOptions
   ) => {
     if (!this.sessionConfig.enabled) {
-      throw new Error('Search sessions are disabled');
+      throw new Error('Background search is disabled');
     } else if (!sessionId) {
       throw new Error('Session ID is required');
     } else if (!isStored) {
-      throw new Error('Cannot get search ID from a session that is not stored');
+      throw new Error('Cannot get search ID from a search that is not stored');
     } else if (!isRestore) {
-      throw new Error('Get search ID is only supported when restoring a session');
+      throw new Error('Get search ID is only supported when restoring a background search');
     }
 
     const session = await this.get(deps, user, sessionId);

@@ -15,7 +15,11 @@ import {
 } from '../../../../../../common/api/entity_analytics/entity_store/entities/upsert_entity.gen';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
-import { BadCRUDRequestError, DocumentNotFoundError, EngineNotRunningError } from '../../errors';
+import {
+  BadCRUDRequestError,
+  EngineNotRunningError,
+  DocumentVersionConflictError,
+} from '../../errors';
 import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_error';
 
 export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
@@ -67,8 +71,11 @@ export const upsertEntity = (router: EntityAnalyticsRoutesDeps['router'], logger
             return response.badRequest({ body: error as BadCRUDRequestError });
           }
 
-          if (error instanceof DocumentNotFoundError) {
-            return response.notFound({ body: error as DocumentNotFoundError });
+          if (error instanceof DocumentVersionConflictError) {
+            return response.customError({
+              statusCode: 409,
+              body: error as DocumentVersionConflictError,
+            });
           }
 
           logger.error(error);

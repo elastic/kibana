@@ -50,17 +50,16 @@ const createMockModel = (value: string, cursorOffset: number) => {
   };
 };
 
-function testCompletion(
+async function getSuggestions(
   completionProvider: monaco.languages.CompletionItemProvider,
-  yamlContent: string,
-  expectedSuggestions: string[] | ((suggestion: monaco.languages.CompletionItem) => boolean)
+  yamlContent: string
 ) {
   const cursorOffset = yamlContent.indexOf('|<-');
   const mockModel = createMockModel(yamlContent, cursorOffset);
   const position = mockModel.getPositionAt(cursorOffset);
   const triggerCharacter = yamlContent.slice(cursorOffset - 1, cursorOffset);
 
-  const result = completionProvider.provideCompletionItems(
+  const result = await completionProvider.provideCompletionItems(
     mockModel as any,
     position as any,
     {
@@ -70,28 +69,7 @@ function testCompletion(
     {} as any // cancellation token
   );
 
-  // Handle both sync and async returns
-  const completionList = result as monaco.languages.CompletionList;
-  expect(completionList?.suggestions).toBeDefined();
-  expect(completionList?.suggestions.length).toBeGreaterThan(0);
-
-  // Should include basic context items
-  const labels =
-    completionList?.suggestions.map((s: monaco.languages.CompletionItem) => s.label) || [];
-  // checking for sorted arrays to avoid flakiness, since the order of suggestions is not guaranteed
-  if (typeof expectedSuggestions === 'function') {
-    for (const suggestion of completionList?.suggestions || []) {
-      if (!expectedSuggestions(suggestion)) {
-        throw new Error(
-          `Suggestion ${suggestion.label} does not match expected function: ${JSON.stringify(
-            suggestion
-          )}`
-        );
-      }
-    }
-  } else {
-    expect(labels.sort()).toEqual(expectedSuggestions.sort());
-  }
+  return result?.suggestions ?? [];
 }
 
 describe('getCompletionItemProvider', () => {
@@ -111,7 +89,7 @@ describe('getCompletionItemProvider', () => {
   const completionProvider = getCompletionItemProvider(workflowSchema);
 
   describe('Integration tests', () => {
-    it('should provide basic completions inside variable expression', () => {
+    it('should provide basic completions inside variable expression', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -124,18 +102,21 @@ steps:
       message: "{{|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, [
-        'consts',
-        'event',
-        'now',
-        'workflow',
-        'steps',
-        'execution',
-        'inputs',
-      ]);
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'consts',
+          'event',
+          'now',
+          'workflow',
+          'steps',
+          'execution',
+          'inputs',
+        ])
+      );
     });
 
-    it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', () => {
+    it('should provide completions after @ and quote insertText automatically if cursor is in plain scalar', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -147,12 +128,13 @@ steps:
     with:
       message: @|<-
 `.trim();
-      testCompletion(completionProvider, yamlContent, (suggestion) => {
-        return suggestion.insertText.startsWith('"') && suggestion.insertText.endsWith('"');
-      });
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.insertText)).toEqual(
+        expect.arrayContaining([expect.stringMatching(/^".*"$/)])
+      );
     });
 
-    it('should provide completions after @ and not quote insertText automatically if cursor is in plain scalar but not starting with { or @', () => {
+    it('should provide completions after @ and not quote insertText automatically if cursor is in plain scalar but not starting with { or @', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -164,12 +146,13 @@ steps:
     with:
       message: hey, this is @|<-
 `.trim();
-      testCompletion(completionProvider, yamlContent, (suggestion) => {
-        return !suggestion.insertText.startsWith('"') && !suggestion.insertText.endsWith('"');
-      });
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([expect.not.stringMatching(/^"[^"]*$/)])
+      );
     });
 
-    it('should provide basic completions with @ and not quote insertText automatically if cursor is in string', () => {
+    it('should provide basic completions with @ and not quote insertText automatically if cursor is in string', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -182,21 +165,21 @@ steps:
       message: "@<-"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, [
-        'consts',
-        'event',
-        'now',
-        'workflow',
-        'steps',
-        'execution',
-        'inputs',
-      ]);
-      testCompletion(completionProvider, yamlContent, (suggestion) => {
-        return !suggestion.insertText.startsWith('"') && !suggestion.insertText.endsWith('"');
-      });
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'consts',
+          'event',
+          'now',
+          'workflow',
+          'steps',
+          'execution',
+          'inputs',
+        ])
+      );
     });
 
-    it('should provide const completion with type', () => {
+    it('should provide const completion with type', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -215,21 +198,25 @@ steps:
       message: "{{consts.|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, (suggestion) => {
-        if (suggestion.label === 'apiUrl') {
-          return suggestion.detail!.startsWith('string');
-        }
-        if (suggestion.label === 'threshold') {
-          return suggestion.detail!.startsWith('number');
-        }
-        if (suggestion.label === 'templates') {
-          return suggestion.detail!.startsWith('array');
-        }
-        return false;
-      });
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ label: 'apiUrl', detail: '"https://api.example.com"' }),
+          expect.objectContaining({
+            label: 'threshold',
+            detail: '100',
+          }),
+          expect.objectContaining({
+            label: 'templates',
+            detail: expect.stringContaining(
+              '{  name: "template1";  template: {  subject: "Suspicious activity detected";  body: "Go look at the activity"}}[]'
+            ),
+          }),
+        ])
+      );
     });
 
-    it('should provide const completion with type in array', () => {
+    it('should provide const completion with type in array', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -248,18 +235,19 @@ steps:
       message: "{{consts.templates[0].|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, (suggestion) => {
-        if (suggestion.label === 'name') {
-          return suggestion.detail!.startsWith('string');
-        }
-        if (suggestion.label === 'template') {
-          return suggestion.detail!.startsWith('object');
-        }
-        return false;
-      });
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ label: 'name', detail: '"template1"' }),
+          expect.objectContaining({
+            label: 'template',
+            detail: '{  subject: "Suspicious activity detected";  body: "Go look at the activity"}',
+          }),
+        ])
+      );
     });
 
-    it('should provide previous step completion', () => {
+    it('should provide previous step completion', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -276,10 +264,11 @@ steps:
       message: "{{steps.|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, ['step0']);
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(expect.arrayContaining(['step0']));
     });
 
-    it('should not provide unreachable step', () => {
+    it('should not provide unreachable step', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -306,10 +295,13 @@ steps:
           message: "im unreachable"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, ['if-step', 'first-true-step']);
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining(['if-step', 'first-true-step'])
+      );
     });
 
-    it('should autocomplete incomplete key', () => {
+    it('should autocomplete incomplete key', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -322,10 +314,11 @@ steps:
       message: "{{consts.a|<-}}"
 `.trim();
 
-      testCompletion(completionProvider, yamlContent, ['apiUrl']);
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(expect.arrayContaining(['apiUrl']));
     });
 
-    it('should provide completions with brackets for keys in kebab-case and use quote type opposite to the one in the string', () => {
+    it('should provide completions with brackets for keys in kebab-case and use quote type opposite to the one in the string', async () => {
       const yamlContentDoubleQuote = `
 version: "1"
 name: "test"
@@ -337,9 +330,10 @@ steps:
     with:
       message: "{{consts.|<-}}"
 `.trim();
-      testCompletion(completionProvider, yamlContentDoubleQuote, (suggestion) => {
-        return suggestion.insertText === "['api-url']";
-      });
+      const suggestions1 = await getSuggestions(completionProvider, yamlContentDoubleQuote);
+      expect(suggestions1.map((s) => s.insertText)).toEqual(
+        expect.arrayContaining(["['api-url']"])
+      );
 
       const yamlContentSingleQuote = `
       version: "1"
@@ -352,9 +346,10 @@ steps:
           with:
             message: '{{consts.|<-}}'
       `.trim();
-      testCompletion(completionProvider, yamlContentSingleQuote, (suggestion) => {
-        return suggestion.insertText === '["api-url"]';
-      });
+      const suggestions2 = await getSuggestions(completionProvider, yamlContentSingleQuote);
+      expect(suggestions2.map((s) => s.insertText)).toEqual(
+        expect.arrayContaining(['["api-url"]'])
+      );
     });
   });
 

@@ -52,6 +52,7 @@ export interface DocLinks {
   };
   readonly cloud: {
     readonly beatsAndLogstashConfiguration: string;
+    readonly elasticsearchBillingManagingCosts: string;
     readonly indexManagement: string;
   };
   readonly console: {
@@ -304,6 +305,7 @@ export interface DocLinks {
   readonly securitySolution: {
     readonly aiAssistant: {
       home: string;
+      knowledgeBaseHome: string;
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
@@ -432,6 +434,7 @@ export interface DocLinks {
     aiAssistant: string;
     elasticManagedLlm: string;
     elasticManagedLlmUsageCost: string;
+    elasticServerlessSearchManagedLlmUsageCost: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;
@@ -559,6 +562,7 @@ export interface DocLinks {
     remoteESOoutputTroubleshooting: string;
     agentReleaseProcess: string;
     fipsIngest: string;
+    edotCollector: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

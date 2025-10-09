@@ -39,16 +39,18 @@ export function PreviewDataSparkPlot({
   isQueryValid,
   showTitle = true,
   compressed = false,
-  hideXAxis = false,
+  hideAxis = false,
   height,
+  noOfBuckets,
 }: {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   isQueryValid: boolean;
   showTitle?: boolean;
   compressed?: boolean;
-  hideXAxis?: boolean;
+  hideAxis?: boolean;
   height?: number;
+  noOfBuckets?: number;
 }) {
   const { timeState } = useTimefilter();
   const { euiTheme } = useEuiTheme();
@@ -59,6 +61,7 @@ export function PreviewDataSparkPlot({
     kqlQuery: query.kql.query,
     timeState,
     isQueryValid,
+    noOfBuckets,
   });
 
   const xFormatter = useMemo(() => {
@@ -114,6 +117,10 @@ export function PreviewDataSparkPlot({
     }
 
     if (previewFetch.error) {
+      if (compressed) {
+        return <EuiIcon type="cross" color="danger" size="l" />;
+      }
+
       return (
         <>
           <EuiIcon type="cross" color="danger" size="xl" />
@@ -130,6 +137,10 @@ export function PreviewDataSparkPlot({
     }
 
     if (noOccurrencesFound) {
+      if (compressed) {
+        return <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" />;
+      }
+
       return (
         <>
           <AssetImage type="barChart" size="xs" />
@@ -159,7 +170,10 @@ export function PreviewDataSparkPlot({
                 {i18n.translate(
                   'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartDetectedOccurrences',
                   {
-                    defaultMessage: 'Detected event occurrences',
+                    defaultMessage: 'Detected event occurrences ({count})',
+                    values: {
+                      count: sparkPlotData.timeseries.reduce((acc, point) => acc + point.y, 0),
+                    },
                   }
                 )}
               </EuiText>
@@ -187,7 +201,7 @@ export function PreviewDataSparkPlot({
           annotations={sparkPlotData.annotations}
           xFormatter={xFormatter}
           compressed={compressed}
-          hideXAxis={hideXAxis}
+          hideAxis={hideAxis}
           height={height}
         />
       </>
@@ -195,7 +209,12 @@ export function PreviewDataSparkPlot({
   }
 
   return (
-    <EuiPanel hasBorder={true} css={{ height: height ? height : '200px' }}>
+    <EuiPanel
+      hasBorder={!compressed}
+      hasShadow={false}
+      css={{ height: height ? height : '200px' }}
+      paddingSize={compressed ? 'none' : 'm'}
+    >
       <EuiFlexGroup
         direction="column"
         gutterSize="s"

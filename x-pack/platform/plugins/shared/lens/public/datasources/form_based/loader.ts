@@ -149,11 +149,10 @@ function expandFormulaColumns(
   }
   const layers = structuredClone(state.layers);
   for (const layerId of Object.keys(layers)) {
-    const layer = layers[layerId];
-    const formulaColumns = getFormulaColumnsFromLayer(layer);
+    const formulaColumns = getFormulaColumnsFromLayer(layers[layerId]);
     for (const [columnId, column] of formulaColumns) {
-      const { layer: newLayer } = insertOrReplaceFormulaColumn(columnId, column, layer, {
-        indexPattern: indexPatterns[layer.indexPatternId],
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(columnId, column, layers[layerId], {
+        indexPattern: indexPatterns[layers[layerId].indexPatternId],
         dateRange,
       });
       layers[layerId] = newLayer;
