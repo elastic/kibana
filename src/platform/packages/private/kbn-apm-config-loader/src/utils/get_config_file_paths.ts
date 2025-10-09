@@ -20,7 +20,6 @@ import { getArgValues } from './read_argv';
  */
 export const getConfigurationFilePaths = (argv: string[]): string[] => {
   const rawPaths = getArgValues(argv, ['-c', '--config']);
-
   if (rawPaths.length) {
     return rawPaths.map((path) => resolve(process.cwd(), path));
   }
