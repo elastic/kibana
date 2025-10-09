@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { DefaultEvaluators, EvaluationDataset, KibanaPhoenixClient } from '@kbn/evals';
+import {
+  createQuantitativeCorrectnessEvaluators,
+  createQuantitativeGroundednessEvaluator,
+  type DefaultEvaluators,
+  type EvaluationDataset,
+  type KibanaPhoenixClient,
+} from '@kbn/evals';
 import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
@@ -57,15 +63,39 @@ export function createEvaluateObservabilityAIAssistantDataset({
     await phoenixClient.runExperiment(
       {
         dataset,
-        task: async ({ input }) => {
+        task: async ({ input, output, metadata }) => {
           const response = await chatClient.complete({
             messages: input.question,
             scope: input.scope,
           });
 
+          const qualitativeAnalysisInput = {
+            input,
+            expected: {
+              expected: output.criteria.join('\n'),
+            },
+            output: {
+              messages: [response.messages[response.messages.length - 1]].map((message) => ({
+                message: message.content ?? '',
+              })),
+              steps: response.messages,
+            },
+            metadata,
+          };
+
+          // Running correctness and groundedness evaluators as part of the task since their respective quantitative evaluators need their output
+          const [correctnessResult, groundednessResult] = await Promise.all([
+            evaluators.correctnessAnalysis().evaluate(qualitativeAnalysisInput),
+            evaluators.groundednessAnalysis().evaluate(qualitativeAnalysisInput),
+          ]);
+          const correctnessAnalysis = correctnessResult.metadata;
+          const groundednessAnalysis = groundednessResult.metadata;
+
           return {
             errors: response.errors,
             messages: response.messages,
+            correctnessAnalysis,
+            groundednessAnalysis,
           };
         },
       },
@@ -73,6 +103,8 @@ export function createEvaluateObservabilityAIAssistantDataset({
         createCriteriaEvaluator({
           evaluators,
         }),
+        createQuantitativeGroundednessEvaluator(),
+        ...createQuantitativeCorrectnessEvaluators(),
       ]
     );
   };
