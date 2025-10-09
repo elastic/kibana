@@ -33,6 +33,8 @@ import type { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/publ
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 export interface ConfigSchema {}
@@ -73,6 +75,8 @@ export interface StreamsAppStartDependencies {
   unifiedDocViewer: UnifiedDocViewerStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   dashboard: DashboardStart;
+  cloud?: CloudStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}

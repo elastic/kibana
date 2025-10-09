@@ -43,7 +43,6 @@ export function ApmMainTemplate({
   environmentFilter = true,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
-  showEnablementCallout = false,
   selectedNavButton,
   ...pageTemplateProps
 }: {
@@ -53,7 +52,6 @@ export function ApmMainTemplate({
   environmentFilter?: boolean;
   showServiceGroupSaveButton?: boolean;
   showServiceGroupsNav?: boolean;
-  showEnablementCallout?: boolean;
   selectedNavButton?: 'serviceGroups' | 'allServices';
 } & KibanaPageTemplateProps &
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
@@ -131,11 +129,13 @@ export function ApmMainTemplate({
           ...pageHeader,
           pageTitle: pageHeader?.pageTitle ?? pageTitle,
           children: (
-            <EuiFlexGroup direction="column">
+            <>
               {showServiceGroupsNav && selectedNavButton && (
-                <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+                <EuiFlexGroup direction="column">
+                  <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+                </EuiFlexGroup>
               )}
-            </EuiFlexGroup>
+            </>
           ),
         }}
         {...pageTemplateProps}

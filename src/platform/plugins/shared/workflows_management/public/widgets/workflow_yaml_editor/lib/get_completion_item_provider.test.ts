@@ -201,15 +201,15 @@ steps:
       const suggestions = await getSuggestions(completionProvider, yamlContent);
       expect(suggestions).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ label: 'apiUrl', detail: expect.stringContaining('string') }),
+          expect.objectContaining({ label: 'apiUrl', detail: '"https://api.example.com"' }),
           expect.objectContaining({
             label: 'threshold',
-            detail: expect.stringContaining('number'),
+            detail: '100',
           }),
           expect.objectContaining({
             label: 'templates',
             detail: expect.stringContaining(
-              '{  name: string;  template: {  subject: string;  body: string}}[]'
+              '{  name: "template1";  template: {  subject: "Suspicious activity detected";  body: "Go look at the activity"}}[]'
             ),
           }),
         ])
@@ -238,10 +238,10 @@ steps:
       const suggestions = await getSuggestions(completionProvider, yamlContent);
       expect(suggestions).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ label: 'name', detail: expect.stringContaining('string') }),
+          expect.objectContaining({ label: 'name', detail: '"template1"' }),
           expect.objectContaining({
             label: 'template',
-            detail: expect.stringContaining('{  subject: string;  body: string}'),
+            detail: '{  subject: "Suspicious activity detected";  body: "Go look at the activity"}',
           }),
         ])
       );
@@ -349,6 +349,151 @@ steps:
       const suggestions2 = await getSuggestions(completionProvider, yamlContentSingleQuote);
       expect(suggestions2.map((s) => s.insertText)).toEqual(
         expect.arrayContaining(['["api-url"]'])
+      );
+    });
+
+    it('should provide rrule suggestions in empty scheduled trigger with block', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide rrule suggestions in scheduled trigger with block with proper YAML', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide rrule suggestions in scheduled trigger with block with empty map', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should provide rrule suggestions in scheduled trigger with block with cursor inside', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should NOT provide rrule suggestions when rrule already exists', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      rrule:
+        freq: DAILY
+        interval: 1
+        tzid: UTC
+        byhour: [9]
+        byminute: [0]
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).not.toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
+      );
+    });
+
+    it('should NOT provide rrule suggestions when every already exists', async () => {
+      const yamlContent = `
+version: "1"
+name: "test"
+triggers:
+  - type: scheduled
+    enabled: true
+    with:
+      every: "5m"
+      |<-
+steps: []
+`.trim();
+
+      const suggestions = await getSuggestions(completionProvider, yamlContent);
+      expect(suggestions.map((s) => s.label)).not.toEqual(
+        expect.arrayContaining([
+          'Daily at 9 AM',
+          'Business hours (weekdays 8 AM & 5 PM)',
+          'Monthly on 1st and 15th',
+          'Custom RRule',
+        ])
       );
     });
   });

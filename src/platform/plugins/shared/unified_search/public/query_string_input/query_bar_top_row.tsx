@@ -916,6 +916,7 @@ export const QueryBarTopRow = React.memo(
           <>
             <EuiFlexGroup
               className="kbnQueryBar"
+              data-test-subj="kbnQueryBar"
               direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
               responsive={false}
               gutterSize="s"

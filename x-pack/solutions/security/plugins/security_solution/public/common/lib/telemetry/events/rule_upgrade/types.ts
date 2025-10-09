@@ -7,20 +7,26 @@
 import type { RootSchema } from '@kbn/core/public';
 
 export enum RuleUpgradeEventTypes {
-  RuleUpgradeFlyoutButtonClick = 'Click Rule Upgrade Flyout Button',
-  RuleUpgradeFlyoutOpen = 'Open Rule Upgrade Flyout',
+  RuleUpgradeFlyoutButtonClick = 'Click Rule Upgrade Flyout Button v2',
+  RuleUpgradeSingleButtonClick = 'Click Rule Upgrade Single Button',
+  RuleUpgradeFlyoutOpen = 'Open Rule Upgrade Flyout v2',
 }
 interface ReportRuleUpgradeFlyoutButtonClickParams {
   type: 'update' | 'dismiss';
-  hasMissingBaseVersion: boolean;
+  hasBaseVersion: boolean;
+}
+
+interface ReportRuleUpgradeSingleButtonClickParams {
+  hasBaseVersion: boolean;
 }
 
 interface ReportRuleUpgradeFlyoutOpenParams {
-  hasMissingBaseVersion: boolean;
+  hasBaseVersion: boolean;
 }
 
 export interface RuleUpgradeTelemetryEventsMap {
   [RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick]: ReportRuleUpgradeFlyoutButtonClickParams;
+  [RuleUpgradeEventTypes.RuleUpgradeSingleButtonClick]: ReportRuleUpgradeSingleButtonClickParams;
   [RuleUpgradeEventTypes.RuleUpgradeFlyoutOpen]: ReportRuleUpgradeFlyoutOpenParams;
 }
 

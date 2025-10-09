@@ -116,7 +116,8 @@ export const createAppContextStartContractMock = (
   soClients: Partial<{
     internal?: SavedObjectsClientContract;
     withoutSpaceExtensions?: SavedObjectsClientContract;
-  }> = {}
+  }> = {},
+  experimentalFeatures: ExperimentalFeatures = {} as ExperimentalFeatures
 ): MockedFleetAppContext => {
   const config = {
     agents: { enabled: true, elasticsearch: {} },
@@ -154,7 +155,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: {} as ExperimentalFeatures,
+    experimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
