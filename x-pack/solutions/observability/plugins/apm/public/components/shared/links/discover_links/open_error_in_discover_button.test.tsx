@@ -139,10 +139,7 @@ describe('OpenErrorInDiscoverButton', () => {
 
   it('should generate ESQL query with error group id and kuery filter', () => {
     const query = {
-      kuery: `user.id: "123"
-       AND
-       status_code: 200
-        `,
+      kuery: 'user.id: "123" AND status_code: 200',
       rangeFrom: 'now-15m',
       rangeTo: 'now',
     };
