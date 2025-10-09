@@ -54,10 +54,18 @@ export const TableRowActions: React.FunctionComponent<{
   const licenseService = useLicense();
   const isFleetServerAgent =
     agentPolicy?.package_policies?.some((p) => p.package?.name === FLEET_SERVER_PACKAGE) ?? false;
-  const agentPrivilegeLevelChangeEnabled =
-    ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
   const isUnenrolling = agent.status === 'unenrolling';
   const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
+  const agentPrivilegeLevelChangeEnabled =
+    ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
+  const isPrivilegeLevelChangeAllowed =
+    authz.fleet.allAgents &&
+    isAgentPrivilegeLevelChangeSupported(agent) &&
+    agent.local_metadata?.elastic?.agent?.unprivileged !== true &&
+    !isRootPrivilegeRequired(agentPolicy?.package_policies || []) &&
+    !isFleetServerAgent &&
+    agentPrivilegeLevelChangeEnabled;
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
     <EuiContextMenuItem
@@ -93,6 +101,7 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>
     );
   }
+
   if (authz.fleet.allAgents && agentPolicy?.is_managed === false) {
     menuItems.push(
       <EuiContextMenuItem
@@ -196,14 +205,7 @@ export const TableRowActions: React.FunctionComponent<{
     }
   }
 
-  if (
-    authz.fleet.allAgents &&
-    isAgentPrivilegeLevelChangeSupported(agent) &&
-    agent.local_metadata?.elastic?.agent?.unprivileged !== true &&
-    !isRootPrivilegeRequired(agentPolicy?.package_policies || []) &&
-    !isFleetServerAgent &&
-    agentPrivilegeLevelChangeEnabled
-  ) {
+  if (isPrivilegeLevelChangeAllowed) {
     menuItems.push(
       <EuiContextMenuItem
         icon="lock"

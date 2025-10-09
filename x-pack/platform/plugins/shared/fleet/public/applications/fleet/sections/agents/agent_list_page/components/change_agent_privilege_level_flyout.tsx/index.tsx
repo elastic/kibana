@@ -178,7 +178,7 @@ export const ChangeAgentPrivilegeLevelFlyout: React.FC<Props> = ({
                 <EuiText color="warning" className="eui-alignMiddle">
                   <FormattedMessage
                     id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.warning"
-                    defaultMessage="{icon} Root privilege cannot be removed for {x} of {y} selected agents. They might be Fleet Server agents, already unprivileged, or on an unsupported version."
+                    defaultMessage="{icon} Root privilege cannot be removed for {x} of {y} selected agents. These agents are either Fleet Server agents, already unprivileged agents, or agents on an unsupported version."
                     values={{
                       icon: <EuiIcon type="warning" />,
                       x: unsupportedAgents.length,
@@ -190,10 +190,10 @@ export const ChangeAgentPrivilegeLevelFlyout: React.FC<Props> = ({
                 <EuiAccordion
                   id="changeAgentPrivilegeLevelFlyoutWarningAccordion"
                   buttonContent={
-                    <EuiButtonEmpty onClick={() => {}} aria-label="View Hosts">
+                    <EuiButtonEmpty onClick={() => {}} aria-label="View hosts">
                       <FormattedMessage
                         id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.warningAccordion"
-                        defaultMessage="View Hosts"
+                        defaultMessage="View hosts"
                       />
                     </EuiButtonEmpty>
                   }
@@ -218,27 +218,27 @@ export const ChangeAgentPrivilegeLevelFlyout: React.FC<Props> = ({
               fullWidth
               label={
                 <FormattedMessage
-                  id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.userNameLabel"
-                  defaultMessage="User name (optional)"
+                  id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.usernameLabel"
+                  defaultMessage="Username (optional)"
                 />
               }
               helpText={
                 <FormattedMessage
-                  id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.UserNameHelpText"
-                  defaultMessage="The name of the user that runs the Elastic Agent"
+                  id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.usernameHelpText"
+                  defaultMessage="The username of the user that runs the Elastic Agent"
                 />
               }
             >
               <EuiFieldText
                 placeholder={i18n.translate(
-                  'xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.userNamePlaceholder',
+                  'xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.usernamePlaceholder',
                   {
-                    defaultMessage: 'Specify user name',
+                    defaultMessage: 'Specify username',
                   }
                 )}
                 fullWidth
                 onChange={(e) => handleFormChange('username', e.target.value)}
-                data-test-subj="changeAgentPrivilegeLevelFlyout.userNameInput"
+                data-test-subj="changeAgentPrivilegeLevelFlyout.usernameInput"
               />
             </EuiFormRow>
             <EuiFormRow

@@ -321,11 +321,7 @@ export interface PostRetrieveAgentsByActionsResponse {
 export interface ChangeAgentPrivilegeLevelRequest {
   agentId: string;
   body: {
-    user_info?: {
-      username?: string;
-      groupname?: string;
-      password?: string;
-    };
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
   } | null;
 }
 
@@ -333,14 +329,16 @@ export interface ChangeAgentPrivilegeLevelResponse {
   actionId: string;
 }
 
+export interface AgentPrivilegeLevelChangeUserInfo {
+  username?: string;
+  groupname?: string;
+  password?: string;
+}
+
 export interface BulkChangeAgentPrivilegeLevelRequest {
   body: {
     agents: string[] | string;
-    user_info?: {
-      username?: string;
-      groupname?: string;
-      password?: string;
-    };
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
   };
 }
 

@@ -14,12 +14,10 @@ import {
   MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
   isAgentPrivilegeLevelChangeSupported,
 } from '../../../common/services';
-
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
-
 import { SO_SEARCH_LIMIT } from '../../constants';
-
 import type { PackagePolicy } from '../../types';
+import type { AgentPrivilegeLevelChangeUserInfo } from '../../../common/types';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
@@ -34,11 +32,7 @@ export async function changeAgentPrivilegeLevel(
   soClient: SavedObjectsClientContract,
   agentId: string,
   options?: {
-    user_info?: {
-      username?: string;
-      groupname?: string;
-      password?: string;
-    };
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
   } | null
 ) {
   const agent = await getAgentById(esClient, soClient, agentId);
@@ -93,11 +87,7 @@ export async function bulkChangeAgentsPrivilegeLevel(
     batchSize?: number;
     actionId?: string;
     total?: number;
-    user_info?: {
-      username?: string;
-      groupname?: string;
-      password?: string;
-    };
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
   }
 ): Promise<{ actionId: string }> {
   const currentSpaceId = getCurrentNamespace(soClient);

@@ -18,6 +18,7 @@ import {
   MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
   isAgentPrivilegeLevelChangeSupported,
 } from '../../../common/services';
+import type { AgentPrivilegeLevelChangeUserInfo } from '../../../common/types';
 
 import { ActionRunner } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
@@ -51,11 +52,7 @@ export async function bulkChangePrivilegeAgentsBatch(
     actionId?: string;
     total?: number;
     spaceId?: string;
-    user_info?: {
-      username?: string;
-      groupname?: string;
-      password?: string;
-    };
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
   }
 ) {
   const errors: Record<Agent['id'], Error> = {};

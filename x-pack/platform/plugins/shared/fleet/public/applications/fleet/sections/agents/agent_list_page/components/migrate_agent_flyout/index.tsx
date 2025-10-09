@@ -217,10 +217,10 @@ export const AgentMigrateFlyout: React.FC<Props> = ({
                 <EuiAccordion
                   id="migrateAgentFlyoutWarningAccordion"
                   buttonContent={
-                    <EuiButtonEmpty onClick={() => {}} aria-label="View Hosts">
+                    <EuiButtonEmpty onClick={() => {}} aria-label="View hosts">
                       <FormattedMessage
                         id="xpack.fleet.agentList.migrateAgentFlyout.warningAccordion"
-                        defaultMessage="View Hosts"
+                        defaultMessage="View hosts"
                       />
                     </EuiButtonEmpty>
                   }

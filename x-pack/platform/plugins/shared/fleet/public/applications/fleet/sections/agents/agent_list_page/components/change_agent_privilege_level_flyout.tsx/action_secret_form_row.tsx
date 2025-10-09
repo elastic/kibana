@@ -48,7 +48,7 @@ export const SecretFormRow: React.FC<{
   const secretHelpText = (
     <FormattedMessage
       id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.secretFormRow.secretHelpText"
-      defaultMessage="{description}{br}This field uses secret storage and requires Fleet Server v{minVersion} and above."
+      defaultMessage="{description}{br}This field uses secret storage and requires Fleet Server v{minVersion} or higher."
       values={{
         description: additionalHelpText,
         br: <br />,
@@ -60,7 +60,7 @@ export const SecretFormRow: React.FC<{
   const plainHelpText = (
     <FormattedMessage
       id="xpack.fleet.agentList.changeAgentPrivilegeLevelFlyout.secretFormRow.plainHelpText"
-      defaultMessage="{description}{br}Upgrade Fleet Server to v{minVersion} or above to store this field as a secret."
+      defaultMessage="{description}{br}Upgrade Fleet Server to v{minVersion} or higher to store this field as a secret."
       values={{
         description: additionalHelpText,
         br: <br />,
