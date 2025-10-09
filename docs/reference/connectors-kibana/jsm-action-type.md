@@ -13,7 +13,7 @@ applies_to:
 
 An {{jsm}} connector enables you to create and close alerts in {{jsm}}. In particular, it uses the [{{jsm}} Integration Events API](https://developer.atlassian.com/cloud/jira/service-desk-ops/rest/v1/api-group-integration-events/#api-group-integration-events).
 
-To create this connector, you must have a valid {{jsm}} URL and API key. For configuration tips, refer to [Configure an Jira Service Management account](#configuring-jsm).
+To create this connector, you must have a valid {{jsm}} URL and API key. For configuration tips, refer to [Configure a Jira Service Management account](#configuring-jsm).
 
 ## Create connectors in {{kib}} [define-jsm-ui]
 
@@ -39,7 +39,7 @@ URL
     ::::
 
 API Key
-:   The Jira Service Management API authentication key for HTTP basic authentication. For more details about generating Jira Service Management API keys, refer to [Jira Service Management documentation](https://support.atlassian.com/jira-service-management-cloud/docs/create-a-default-api-integration/).
+:   The Jira Service Management API authentication key for HTTP basic authentication. For more details about generating Jira Service Management API keys, refer to [Jira Service Management documentation](https://support.atlassian.com/jira-service-management-cloud/docs/set-up-an-api-integration/#Set-up-the-integration).
 
 ## Test connectors [jsm-action-configuration]
 
@@ -76,7 +76,7 @@ Description
 :   A description that provides detailed information about the alert (optional).
 
 Alias
-:   The alert identifier, which is used for alert deduplication in Jira Service Management. For more information, refer to the [Jira Service Management documentation](https://support.atlassian.com/jira-service-management-cloud/docs/what-is-alert-de-duplication/) (optional).
+:   The alert identifier, which is used for alert deduplication in Jira Service Management. For more information, refer to the [Jira Service Management documentation](https://support.atlassian.com/jira-service-management-cloud/docs/what-is-alert-deduplication/) (optional).
 
 Entity
 :   The domain of the alert (optional).
