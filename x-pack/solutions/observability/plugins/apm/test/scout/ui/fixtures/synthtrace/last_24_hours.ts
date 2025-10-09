@@ -8,7 +8,7 @@
 import type { ApmFields, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
-export function serviceGroups(): SynthtraceGenerator<ApmFields> {
+export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields> {
   const start = Date.now() - 1000 * 60 * 15;
   const end = Date.now();
   const range = timerange(new Date(start).getTime(), new Date(end).getTime());
