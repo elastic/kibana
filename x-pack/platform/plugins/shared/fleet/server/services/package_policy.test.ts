@@ -3331,12 +3331,7 @@ describe('Package policy service', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const mockPackagePolicy = {
-        id: 'test-package-policy',
-        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        attributes: {},
-        references: [],
-      };
+
       soClient.bulkGet.mockResolvedValueOnce({
         saved_objects: [{ ...mockPackagePolicy }],
       });
