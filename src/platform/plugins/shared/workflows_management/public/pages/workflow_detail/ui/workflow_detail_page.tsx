@@ -12,6 +12,8 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { css } from '@emotion/react';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -52,7 +54,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
-  const canTestWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
 
   const handleSave = () => {
     if (!id) {
@@ -188,8 +189,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   return (
     <WorkflowEditorStoreProvider>
-      <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
-        <EuiFlexItem style={{ overflow: 'hidden' }}>
+      <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
+        <EuiFlexItem grow={false}>
           <WorkflowDetailHeader
             name={workflow?.name}
             isLoading={isLoadingWorkflow}
@@ -201,13 +202,14 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             handleRunClick={handleRunClick}
             handleSave={handleSave}
             handleToggleWorkflow={handleToggleWorkflow}
-            canTestWorkflow={canTestWorkflow}
             handleTabChange={setActiveTab}
             hasUnsavedChanges={hasChanges}
             highlightDiff={highlightDiff}
             setHighlightDiff={setHighlightDiff}
             lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
           />
+        </EuiFlexItem>
+        <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
           <WorkflowEditorLayout
             editor={
               <WorkflowEditor
