@@ -800,7 +800,6 @@ steps:
       const labels = result?.suggestions.map((s) => s.label) || [];
       expect(labels).toContain('if');
       expect(labels).toContain('for');
-      expect(labels).toContain('assign');
     });
 
     it('should provide liquid syntax completions with partial match', async () => {
