@@ -625,15 +625,14 @@ export const initUiSettings = (
 export const getDefaultAIConnectorSetting = (
   connectors: Connector[],
   readonlyMode?: ReadonlyModeType
-): SettingsConfig | null =>
-  connectors.length > 0
-    ? {
+): SettingsConfig =>
+  ({
         [DEFAULT_AI_CONNECTOR]: {
           name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
             defaultMessage: 'Default AI Connector',
           }),
           // TODO, make Elastic LLM the default value once fully available in serverless
-          value: connectors[0].id,
+          value: connectors.at(0)?.id,
           description: i18n.translate(
             'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
             {
@@ -651,8 +650,7 @@ export const getDefaultAIConnectorSetting = (
           readonlyMode,
           readonly: readonlyMode !== undefined,
         },
-      }
-    : null;
+      });
 
 export const getDefaultValueReportSettings = (): SettingsConfig => ({
   [DEFAULT_VALUE_REPORT_MINUTES]: {
