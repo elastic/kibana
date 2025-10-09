@@ -8,7 +8,11 @@
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
-import type { ToolHandlerFn, LlmDescriptionHandler } from '@kbn/onechat-server';
+import type {
+  ToolHandlerFn,
+  LlmDescriptionHandler,
+  ToolAvailabilityHandler,
+} from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 export interface InternalToolDefinition<
@@ -16,6 +20,10 @@ export interface InternalToolDefinition<
   TConfig extends object = {},
   TSchema extends ZodObject<any> = ZodObject<any>
 > extends ToolDefinition<TType, TConfig> {
+  /**
+   * Check if the tool is available for the current context.
+   */
+  isAvailable: ToolAvailabilityHandler;
   /**
    * Generates the schema attached to this tool.
    */

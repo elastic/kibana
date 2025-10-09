@@ -32,6 +32,9 @@ export const convertTool = ({
       tags: tool.tags,
       configuration: {},
       readonly: true,
+      isAvailable: (ctx) => {
+        return tool.isAvailable ? tool.isAvailable(ctx) : true;
+      },
       getSchema: () => tool.schema,
       getHandler: () => tool.handler,
     };
@@ -50,6 +53,9 @@ export const convertTool = ({
       description: tool.description,
       tags: tool.tags,
       readonly: true,
+      isAvailable: (ctx) => {
+        return tool.isAvailable ? tool.isAvailable(ctx) : true;
+      },
       getSchema: async () => {
         const props = await getDynamicProps();
         return props.getSchema();
