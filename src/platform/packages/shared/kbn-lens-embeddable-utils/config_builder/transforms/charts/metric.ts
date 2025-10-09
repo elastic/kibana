@@ -42,7 +42,7 @@ import {
   fromColorByValueLensStateToAPI,
   fromStaticColorAPIToLensState,
   fromStaticColorLensStateToAPI,
-} from './color_utils';
+} from '../coloring';
 
 type MetricApiCompareType = Extract<
   Required<MetricState['secondary_metric']>,
