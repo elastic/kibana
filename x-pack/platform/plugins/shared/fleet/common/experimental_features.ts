@@ -15,7 +15,6 @@ const _allowedExperimentalValues = {
   enableSSLSecrets: true,
   installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
-  enableAgentMigrations: false,
   enablePackageRollback: false,
   enableAutoInstallContentPackages: true,
   enableOtelIntegrations: true,
