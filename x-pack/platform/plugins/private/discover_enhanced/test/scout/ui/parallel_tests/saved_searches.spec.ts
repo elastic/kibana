@@ -6,8 +6,8 @@
  */
 
 import { expect } from '@kbn/scout';
-import { spaceTest, testData } from '../fixtures';
 import type { ExtParallelRunTestFixtures } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 const assertNoFilterAndEmptyQuery = async (
   filterBadge: { field: string; value: string },
@@ -27,7 +27,7 @@ const assertNoFilterAndEmptyQuery = async (
 
 const assertDataViewIsSelected = async (page: ExtParallelRunTestFixtures['page'], name: string) =>
   await expect(
-    page.testSubj.locator('*dataView-switch-link'),
+    page.testSubj.locator('*dataView-switch-link-label'),
     'Incorrect data view is selected'
   ).toHaveText(name);
 

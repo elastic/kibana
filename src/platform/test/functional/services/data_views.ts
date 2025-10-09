@@ -79,7 +79,7 @@ export class DataViewsService extends FtrService {
    * Returns name for the currently selected Data View
    */
   async getSelectedName() {
-    return this.testSubjects.getVisibleText('*dataView-switch-link');
+    return this.testSubjects.getVisibleText('*dataView-switch-link-label');
   }
 
   /**

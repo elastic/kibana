@@ -8,20 +8,20 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiSelectableProps, Direction } from '@elastic/eui';
+import type { Direction, EuiSelectableProps } from '@elastic/eui';
 import {
-  EuiSelectable,
-  EuiBadge,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiButtonGroup,
+  EuiSelectable,
   toSentenceCase,
 } from '@elastic/eui';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { DataViewLabels } from './data_view_labels';
 import { SortingService } from './sorting_service';
 import { MIDDLE_TRUNCATION_PROPS } from '../filter_bar/filter_editor/lib/helpers';
 
@@ -45,18 +45,6 @@ const strings = {
       i18n.translate('unifiedSearch.optionsList.popover.sortDirections', {
         defaultMessage: 'Sort directions',
       }),
-    adhoc: {
-      getTemporaryDataviewLabel: () =>
-        i18n.translate('unifiedSearch.query.queryBar.indexPattern.temporaryDataviewLabel', {
-          defaultMessage: 'Temporary',
-        }),
-    },
-    managed: {
-      getManagedDataviewLabel: () =>
-        i18n.translate('unifiedSearch.query.queryBar.indexPattern.managedDataviewLabel', {
-          defaultMessage: 'Managed',
-        }),
-    },
     search: {
       getSearchPlaceholder: () =>
         i18n.translate('unifiedSearch.query.queryBar.indexPattern.findDataView', {
@@ -141,15 +129,7 @@ export function DataViewsList({
         label: name ? name : title,
         value: id,
         checked: id === currentDataViewId ? 'on' : undefined,
-        append: managed ? (
-          <EuiBadge color="hollow" data-test-subj={`dataViewItemManagedBadge-${name}`}>
-            {strings.editorAndPopover.managed.getManagedDataviewLabel()}
-          </EuiBadge>
-        ) : isAdhoc ? (
-          <EuiBadge color="hollow" data-test-subj={`dataViewItemTempBadge-${name}`}>
-            {strings.editorAndPopover.adhoc.getTemporaryDataviewLabel()}
-          </EuiBadge>
-        ) : null,
+        append: <DataViewLabels isAdhoc={isAdhoc} isManaged={managed} name={name} />,
       }))}
       onChange={(choices) => {
         const choice = choices.find(({ checked }) => checked) as unknown as {
