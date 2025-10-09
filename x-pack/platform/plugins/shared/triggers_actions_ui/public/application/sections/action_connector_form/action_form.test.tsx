@@ -310,6 +310,15 @@ describe('action_form', () => {
         supportedFeatureIds: ['alerting'],
       },
       {
+        id: 'hidden-in-ui',
+        name: 'Hidden in UI',
+        enabled: false,
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
+      },
+      {
         id: 'disabled-by-license',
         name: 'Disabled by license',
         enabled: false,
@@ -447,6 +456,14 @@ describe('action_form', () => {
       const wrapper = await setup();
       const actionOption = wrapper.find(
         '[data-test-subj="disabled-by-config-alerting-ActionTypeSelectOption"]'
+      );
+      expect(actionOption.exists()).toBeFalsy();
+    });
+
+    it('does not render action types hidden in ui', async () => {
+      const wrapper = await setup();
+      const actionOption = wrapper.find(
+        '[data-test-subj="hidden-in-ui-alerting-ActionTypeSelectOption"]'
       );
       expect(actionOption.exists()).toBeFalsy();
     });

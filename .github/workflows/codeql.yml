@@ -88,6 +88,7 @@ jobs:
         SLACK_CHANNEL: ${{secrets.CODE_SCANNING_SLACK_CHANNEL_ID}}
         CODE_SCANNING_ES_HOST: ${{secrets.CODE_SCANNING_ES_HOST}}
         CODE_SCANNING_ES_API_KEY: ${{secrets.CODE_SCANNING_ES_API_KEY}}
+        CODE_SCANNING_INDEX_NAME: appex-codeql-alerts
         CODE_SCANNING_BRANCHES: main,8.19
       run: |
         npm ci --omit=dev

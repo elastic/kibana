@@ -14,6 +14,7 @@ export default function ({ loadTestFile, getService }: OneChatUiFtrProviderConte
     describe('converse', function () {
       loadTestFile(require.resolve('./converse/conversation_flow.ts'));
       loadTestFile(require.resolve('./converse/conversation_history.ts'));
+      loadTestFile(require.resolve('./converse/conversation_error_handling.ts'));
     });
 
     describe('tools', function () {

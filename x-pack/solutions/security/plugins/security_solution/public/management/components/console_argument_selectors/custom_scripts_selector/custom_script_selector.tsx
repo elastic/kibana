@@ -165,7 +165,12 @@ export const CustomScriptSelector = memo<
           </EuiText>
           {hasDescription ? (
             <EuiToolTip position="right" content={descriptionText}>
-              <EuiText data-test-subj={`${option.label}-description`} color="subdued" size="s">
+              <EuiText
+                data-test-subj={`${option.label}-description`}
+                color="subdued"
+                size="s"
+                tabIndex={0}
+              >
                 <small css={SHARED_TRUNCATION_STYLE}>{descriptionText}</small>
               </EuiText>
             </EuiToolTip>
@@ -204,7 +209,7 @@ export const CustomScriptSelector = memo<
       panelProps={{ 'data-test-subj': testId('popoverPanel') }}
       button={
         <EuiToolTip content={CUSTOM_SCRIPTS_CONFIG.tooltipText} position="top" display="block">
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none" tabIndex={0}>
             <EuiFlexItem grow={false} onClick={handleOpenPopover}>
               <div title={valueText}>{valueText || CUSTOM_SCRIPTS_CONFIG.initialLabel}</div>
             </EuiFlexItem>
