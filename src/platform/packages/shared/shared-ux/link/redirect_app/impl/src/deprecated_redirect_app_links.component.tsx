@@ -21,17 +21,14 @@ export const redirectAppLinksStyles = css({
 
 /**
  * @deprecated - This component is deprecated and usages of it can be safely removed from your codebase.
- * The link navigation is handled by GlobalRedirectAppLinks component at the root of the application.
- * When removing the usages of this component, make sure to check that your app layout hasn't been affected.
+ * The link navigation is handled by GlobalRedirectAppLinks component at the root of Kibana.
+ * When removing the usages of this component, make sure to check that your app layout hasn't been affected since this adds additional div with styles
  */
-export const RedirectAppLinks: FC<any> = ({
+export const RedirectAppLinks: FC<React.PropsWithChildren<Record<string, any>>> = ({
   children,
-  navigateToUrl,
-  currentAppId,
-  ...containerProps
 }) => {
   return (
-    <div css={redirectAppLinksStyles} data-test-subj="kbnRedirectAppLink" {...containerProps}>
+    <div css={redirectAppLinksStyles} data-test-subj="kbnRedirectAppLink">
       {children}
     </div>
   );
