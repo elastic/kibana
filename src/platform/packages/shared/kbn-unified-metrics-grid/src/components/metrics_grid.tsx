@@ -14,8 +14,8 @@ import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
+import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
@@ -93,13 +93,16 @@ export const MetricsGrid = ({
       gridRef,
     });
 
-  const setChartRef = useCallback((chartId: string, element: HTMLDivElement | null) => {
-    if (element) {
-      chartRefs.current.set(chartId, element);
-    } else {
-      chartRefs.current.delete(chartId);
-    }
-  }, []);
+  const setChartRef = useCallback(
+    (chartId: string) => (element: HTMLDivElement | null) => {
+      if (element) {
+        chartRefs.current.set(chartId, element);
+      } else {
+        chartRefs.current.delete(chartId);
+      }
+    },
+    []
+  );
 
   const handleViewDetails = useCallback(
     (esqlQuery: string, metric: MetricField, chartId: string) => {
@@ -180,12 +183,12 @@ export const MetricsGrid = ({
             return (
               <EuiFlexItem key={key}>
                 <A11yGridCell
-                  ref={(element) => setChartRef(chartId, element)}
+                  ref={setChartRef(chartId)}
                   rowIndex={rowIndex}
                   colIndex={colIndex}
                   index={index}
                   isFocused={isFocused}
-                  handleFocusCell={handleFocusCell}
+                  onFocus={handleFocusCell}
                 >
                   <Chart
                     chartId={chartId}
@@ -266,26 +269,33 @@ const A11yGridCell = React.forwardRef(
       colIndex,
       index,
       isFocused,
-      handleFocusCell,
+      onFocus,
     }: React.PropsWithChildren<{
       rowIndex: number;
       colIndex: number;
       index: number;
       isFocused: boolean;
-      handleFocusCell: (rowIndex: number, colIndex: number) => void;
+      onFocus: (rowIndex: number, colIndex: number) => void;
     }>,
     ref: React.Ref<HTMLDivElement>
   ) => {
     const { euiTheme } = useEuiTheme();
+
+    const handleFocusCell = useCallback(
+      () => onFocus(rowIndex, colIndex),
+      [onFocus, rowIndex, colIndex]
+    );
+
     return (
       <div
+        ref={ref}
         role="gridcell"
         aria-rowindex={rowIndex + 1}
         aria-colindex={colIndex + 1}
         data-grid-cell={`${rowIndex}-${colIndex}`}
         data-chart-index={index}
         tabIndex={isFocused ? 0 : -1}
-        onFocus={() => handleFocusCell(rowIndex, colIndex)}
+        onFocus={handleFocusCell}
         css={css`
           outline: none,
           cursor: pointer,
