@@ -192,14 +192,16 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
         selectedEntities,
       };
 
-      const state = {
-        serializedState: { rawState: embeddableInput, references: [] },
-        type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-      };
+      const state = [
+        {
+          serializedState: { rawState: embeddableInput, references: [] },
+          type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
+        },
+      ];
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+      stateTransfer.navigateToWithMultipleEmbeddablePackage('dashboards', {
         state,
         path,
       });

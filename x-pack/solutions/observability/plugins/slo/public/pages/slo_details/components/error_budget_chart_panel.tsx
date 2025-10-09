@@ -52,14 +52,16 @@ export function ErrorBudgetChartPanel({
         sloInstanceId: slo.instanceId,
       };
 
-      const state = {
-        serializedState: { rawState: embeddableInput },
-        type: SLO_ERROR_BUDGET_ID,
-      };
+      const state = [
+        {
+          serializedState: { rawState: embeddableInput },
+          type: SLO_ERROR_BUDGET_ID,
+        },
+      ];
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+      stateTransfer.navigateToWithMultipleEmbeddablePackage('dashboards', {
         state,
         path,
       });
