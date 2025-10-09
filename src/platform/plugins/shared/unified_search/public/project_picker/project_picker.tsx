@@ -23,9 +23,11 @@ import {
   EuiText,
   EuiIconTip,
   useEuiTheme,
+  useEuiOverflowScroll,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 const strings = {
   getProjectPickerButtonAriaLabel: () =>
@@ -355,7 +357,7 @@ export const ProjectPicker = () => {
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             isFullWidth
-            legend={strings.getProjectPickerButtonLabel()}
+            legend={strings.getProjectPickerButtonAriaLabel()}
             idSelected={crossProjectSearchScope}
             options={[
               {
@@ -392,11 +394,11 @@ export const ProjectPicker = () => {
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
         <EuiFlexItem
-          css={{
-            overflow: 'scroll',
-            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-            padding: `${euiTheme.size.s} 0`,
-          }}
+          css={css`
+            ${useEuiOverflowScroll('y', true)}
+            background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            padding: ${euiTheme.size.s} 0;
+          `}
         >
           {renderProjectsList()}
         </EuiFlexItem>
