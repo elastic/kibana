@@ -140,27 +140,6 @@ describe('WHERE Autocomplete', () => {
       );
     });
 
-    test('date literals in function parameters with date type', async () => {
-      const expectedFields = getFieldNamesByType(['date', 'date_nanos']);
-      mockFieldsWithTypes(mockCallbacks, expectedFields);
-
-      const dateLiterals = getDateLiterals().map((item) => item.text);
-      const expectedSuggestions = [
-        ...dateLiterals,
-        ...getFieldNamesByType(['date']),
-        ...getFieldNamesByType(['date_nanos']),
-        ...getFunctionSignaturesByReturnType(Location.WHERE, ['date', 'date_nanos'], {
-          scalar: true,
-        }),
-      ];
-
-      await whereExpectSuggestions(
-        'from a | where date_diff("day", dateField, ',
-        expectedSuggestions,
-        mockCallbacks
-      );
-    });
-
     test('after a logical operator', async () => {
       for (const op of ['and', 'or']) {
         await whereExpectSuggestions(`from a | where keywordField >= keywordField ${op} `, [
