@@ -29,16 +29,20 @@ import { SiemMigrationsServiceBase } from '../../common/service';
 import type { GetMigrationsStatsAllParams, GetMigrationStatsParams } from '../../common/types';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import type { DashboardMigrationStats } from '../types';
+import { SiemDashboardMigrationsTelemetry } from './telemetry';
 
 export const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
 export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<DashboardMigrationStats> {
+  public telemetry: SiemDashboardMigrationsTelemetry;
+
   constructor(
     core: CoreStart,
     plugins: StartPluginsDependencies,
-    _telemetryService: TelemetryServiceStart
+    telemetryService: TelemetryServiceStart
   ) {
     super(core, plugins);
+    this.telemetry = new SiemDashboardMigrationsTelemetry(telemetryService);
   }
 
   /** Accessor for the dashboard migrations API client */
