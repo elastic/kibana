@@ -15,3 +15,7 @@ export const MACROS_DATA_INPUT_FILE_UPLOAD_PROMPT = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.macrosFileUpload.prompt',
   { defaultMessage: 'Select or drag and drop the exported JSON file' }
 );
+export const NO_MISSING_MACROS_PROVIDED = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.moMissingMacros.title',
+  { defaultMessage: 'There are no missing macros in the file' }
+);
