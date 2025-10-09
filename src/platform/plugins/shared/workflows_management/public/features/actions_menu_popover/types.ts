@@ -15,20 +15,22 @@ interface ActionBase {
   iconColor?: string;
 }
 
-interface ActionGroup extends ActionBase {
+export interface ActionGroup extends ActionBase {
   iconType: string;
   options: ActionOptionData[];
 }
 
-interface ActionConnectorGroup extends ActionBase {
+export interface ActionConnectorGroup extends ActionBase {
   connectorType: string;
+  options: ActionOptionData[];
 }
 
-interface ActionOption extends ActionBase {
+export interface ActionOption extends ActionBase {
   id: string;
+  iconType: string;
 }
 
-interface ActionConnectorOption extends ActionBase {
+export interface ActionConnectorOption extends ActionBase {
   connectorType: string;
 }
 

@@ -11,6 +11,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { getAllConnectors } from '../../../../common/schema';
+import type { ActionConnectorGroup } from '../types';
 import { isActionGroup, type ActionOptionData } from '../types';
 
 export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
@@ -178,28 +179,36 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
         // create a group for the basetype if not yet exists
         if (!connectorGroup) {
           baseTypeInstancesCount[baseType] = 0;
-          connectorGroup = {
+          const newConnectorGroup: ActionConnectorGroup = {
             id: baseType,
-            connectorType: baseType,
             label: baseType,
-            iconType: getStepIconType(baseType),
+            connectorType: baseType,
             options: [],
           };
-          externalGroup.options.push(connectorGroup);
+          connectorGroup = newConnectorGroup;
+          externalGroup.options.push(newConnectorGroup);
         }
-        groupOption = connectorGroup;
+        // We know connectorGroup is an ActionGroup because we either found it in options
+        // (which are ActionOptionData[]) or we just created it with the options property
+        if (isActionGroup(connectorGroup)) {
+          groupOption = connectorGroup;
+        }
       }
       const iconType = getStepIconType(connector.type);
       baseTypeInstancesCount[baseType] += connector.instances?.length || 0;
       groupOption.instancesLabel = getInstancesLabel(baseTypeInstancesCount[baseType]);
-      groupOption.options!.push({
-        id: connector.type,
-        label: connector.description || connector.type,
-        description: connector.type,
-        connectorType: connector.type,
-        instancesLabel: getInstancesLabel(connector.instances?.length),
-        iconType,
-      });
+
+      // groupOption is always an ActionGroup here (either externalGroup or a validated connectorGroup)
+      if (isActionGroup(groupOption)) {
+        groupOption.options.push({
+          id: connector.type,
+          label: connector.description || connector.type,
+          description: connector.type,
+          connectorType: connector.type,
+          instancesLabel: getInstancesLabel(connector.instances?.length),
+          iconType,
+        });
+      }
     }
   }
 

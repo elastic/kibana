@@ -31,6 +31,7 @@ import {
   isActionConnectorGroup,
   isActionConnectorOption,
   isActionGroup,
+  isActionOption,
   type ActionOptionData,
 } from '../types';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
@@ -64,9 +65,9 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
                 stepType={getBaseConnectorType(option.connectorType)}
                 executionStatus={null}
               />
-            ) : (
+            ) : isActionGroup(option) || isActionOption(option) ? (
               <EuiIcon type={option.iconType} size="m" color={option.iconColor} />
-            )}
+            ) : null}
           </span>
         </EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
