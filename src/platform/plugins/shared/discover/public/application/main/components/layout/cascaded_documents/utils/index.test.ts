@@ -109,8 +109,18 @@ describe('utils', () => {
 
       const result = getESQLStatsQueryMeta(queryString);
 
-      expect(result.groupByFields).toEqual([]);
-      expect(result.appliedFunctions).toEqual([]);
+      expect(result.groupByFields).toEqual([
+        {
+          field: 'clientip',
+          type: 'column',
+        },
+      ]);
+      expect(result.appliedFunctions).toEqual([
+        {
+          identifier: 'COUNT()',
+          operator: 'COUNT',
+        },
+      ]);
     });
   });
 
