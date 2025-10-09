@@ -18,11 +18,7 @@ test.describe('EUI testing wrapper: EuiCheckBox', { tag: ['@svlSecurity', '@ess'
         'xpath=(//div[contains(@class, "euiCheckbox") and div[contains(@class, "euiCheckbox__square")]])[1]',
     };
 
-    await navigateToEuiTestPage(
-      page,
-      'docs/components/forms/selection/checkbox-and-checkbox-group/#checkbox',
-      log
-    );
+    await navigateToEuiTestPage(page, 'docs/components/forms/selection/checkboxes-and-radios', log);
 
     await test.step('should be checked', async () => {
       const checkBox = new EuiCheckBoxWrapper(page, selector);
