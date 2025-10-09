@@ -21,7 +21,6 @@ import type {
 } from '../../../../dashboard_saved_object';
 import type { DashboardAttributes } from '../../types';
 import { transformDashboardOut } from './transform_dashboard_out';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../common/content_management';
 
 describe('transformDashboardOut', () => {
   const controlGroupInputControlsSo = {

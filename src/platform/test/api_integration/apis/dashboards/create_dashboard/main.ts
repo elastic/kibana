@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
         panels: [],
         references: [],
         timeRestore: false,
-        title
+        title,
       });
     });
 
