@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { createLlmProxy, type LlmProxy } from './proxy';
-export { createToolCallMessage } from './mocks';
+export {
+  setupAgentDirectAnswer,
+  setupAgentCallSearchToolWithEsqlThenAnswer,
+  setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
+} from './scenarios';

@@ -12,7 +12,10 @@ import { AGENT_BUILDER_APP_ID } from '../../onechat/common/constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { FtrService } from '../ftr_provider_context';
 import type { LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
-import { toolCallMock } from '../../onechat_api_integration/utils/llm_proxy/mocks';
+import {
+  setupAgentDirectAnswer,
+  setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
+} from '../../onechat_api_integration/utils/proxy_scenario';
 
 export class OneChatPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -72,48 +75,18 @@ export class OneChatPageObject extends FtrService {
     userMessage: string,
     expectedResponse: string,
     llmProxy: LlmProxy,
-    useToolCalls: boolean = false
+    withToolCall: boolean = false
   ): Promise<string> {
     // Navigate to new conversation
     await this.navigateToApp('conversations/new');
 
-    // Set up title tool call
-    void llmProxy.interceptors.toolChoice({
-      name: 'set_title',
-      response: toolCallMock('set_title', { title }),
-    });
-
-    if (useToolCalls) {
-      // First interceptor: respond to user message with tool call
-      void llmProxy.interceptors.userMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages)?.content as string;
-          return lastMessage?.includes(userMessage);
-        },
-        response: toolCallMock('platform_core_search', {
-          query: 'test data',
-        }),
-      });
-
-      // Second interceptor: respond to tool message with final response
-      void llmProxy.interceptors.toolMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages);
-          const contentParsed = JSON.parse(lastMessage?.content as string);
-          return contentParsed?.results;
-        },
-        response: expectedResponse,
-      });
-    } else {
-      // Simple response without tool calls
-      void llmProxy.interceptors.userMessage({
-        when: ({ messages }) => {
-          const lastMessage = last(messages)?.content as string;
-          return lastMessage?.includes(userMessage);
-        },
-        response: expectedResponse,
-      });
-    }
+    await (withToolCall
+      ? setupAgentCallSearchToolWithNoIndexSelectedThenAnswer({
+          proxy: llmProxy,
+          title,
+          response: expectedResponse,
+        })
+      : setupAgentDirectAnswer({ proxy: llmProxy, title, response: expectedResponse }));
 
     // Type and send the message
     await this.typeMessage(userMessage);
