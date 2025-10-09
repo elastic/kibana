@@ -45,21 +45,49 @@ export class GetSLOHealth {
         sloName: sloById[item.sloId].name,
       }));
 
-    const transformStatsById = await this.getTransformStats(sloList);
     const summaryDocsById = await this.getSummaryDocsById(filteredList);
 
-    const results = filteredList.map((item) => {
-      const health = computeHealth(transformStatsById, item);
-      const state = computeState(summaryDocsById, item);
+    const results = await Promise.all(
+      filteredList.map(async (item) => {
+        const rollupTransformStats =
+          await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+            {
+              transform_id: getSLOTransformId(item.sloId, item.sloRevision),
+              allow_no_match: true,
+              size: 1,
+            },
+            { ignore: [404] }
+          );
 
-      return {
-        sloId: item.sloId,
-        sloRevision: item.sloRevision,
-        sloName: item.sloName,
-        state,
-        health,
-      };
-    });
+        const summaryTransformStats =
+          await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+            {
+              transform_id: getSLOSummaryTransformId(item.sloId, item.sloRevision),
+              allow_no_match: true,
+              size: 1,
+            },
+            { ignore: [404] }
+          );
+
+        const transformStats = {
+          transforms: [
+            ...(rollupTransformStats.transforms || []),
+            ...(summaryTransformStats.transforms || []),
+          ],
+        };
+
+        const health = computeHealth(keyBy(transformStats.transforms, 'id'), item);
+        const state = computeState(summaryDocsById, item);
+
+        return {
+          sloId: item.sloId,
+          sloInstanceId: item.sloInstanceId,
+          sloRevision: item.sloRevision,
+          state,
+          health,
+        };
+      })
+    );
 
     /*
      * Map results based on SLO ids since transforms represent all instances
@@ -69,7 +97,13 @@ export class GetSLOHealth {
      */
     const mappedResults = Array.from(
       new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
-    );
+    ).map((item) => ({
+      sloId: item.sloId,
+      sloRevision: item.sloRevision,
+      sloName: sloById[item.sloId]?.name ?? '',
+      state: item.state,
+      health: item.health,
+    }));
     return fetchSLOHealthResponseSchema.encode(mappedResults);
   }
 
@@ -99,26 +133,7 @@ export class GetSLOHealth {
     return summaryDocsById;
   }
 
-  private async getTransformStats(
-    sloList: SLODefinition[]
-  ): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
-    const transformStats =
-      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
-        {
-          transform_id: sloList
-            .map((slo: SLODefinition) => [
-              getSLOTransformId(slo.id, slo.revision),
-              getSLOSummaryTransformId(slo.id, slo.revision),
-            ])
-            .flat(),
-          allow_no_match: true,
-          size: sloList.length * 2,
-        },
-        { ignore: [404] }
-      );
 
-    return keyBy(transformStats.transforms, (transform) => transform.id);
-  }
 }
 
 function buildSummaryKey(id: string, instanceId: string) {
