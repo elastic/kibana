@@ -142,7 +142,6 @@ export type LoadingRuleAction =
   | 'load'
   | 'edit'
   | 'run'
-  | 'fill_gaps'
   | null;
 
 export interface LoadingRules {
@@ -152,9 +151,7 @@ export interface LoadingRules {
 
 export interface RulesTableActions {
   reFetchRules: ReturnType<typeof useFindRules>['refetch'];
-  setFilterOptions: (
-    newFilter: Partial<FilterOptions> | ((prev: FilterOptions) => Partial<FilterOptions>)
-  ) => void;
+  setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsPreflightInProgress: React.Dispatch<React.SetStateAction<boolean>>;
   /**
@@ -244,18 +241,12 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
-  const handleFilterOptionsChange = useCallback(
-    (newFilter: Partial<FilterOptions> | ((prev: FilterOptions) => Partial<FilterOptions>)) => {
-      setFilterOptions((currentFilter) => {
-        const filterUpdate = typeof newFilter === 'function' ? newFilter(currentFilter) : newFilter;
-        return { ...currentFilter, ...filterUpdate };
-      });
-      setPage(1);
-      setSelectedRuleIds([]);
-      setIsAllSelected(false);
-    },
-    []
-  );
+  const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
+    setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
+    setPage(1);
+    setSelectedRuleIds([]);
+    setIsAllSelected(false);
+  }, []);
 
   const clearRulesSelection = useCallback(() => {
     setSelectedRuleIds([]);

@@ -254,32 +254,28 @@ export const withRulesTableRefresh = (action: () => void) => {
 export const filterByElasticRules = () => {
   withRulesTableRefresh(() => {
     cy.get(ELASTIC_RULES_BTN).click();
-    // Wait for the button to reflect the active state before continuing
-    // cy.get(`${ELASTIC_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+    cy.get(`${ELASTIC_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
   });
 };
 
 export const filterByCustomRules = () => {
   withRulesTableRefresh(() => {
     cy.get(CUSTOM_RULES_BTN).click();
-    // Wait for the button to reflect the active state before continuing
-    // cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+    cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
   });
 };
 
 export const filterByEnabledRules = () => {
   withRulesTableRefresh(() => {
     cy.get(ENABLED_RULES_BTN).click();
-    // Wait for the button to reflect the active state before continuing
-    // cy.get(`${ENABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+    cy.get(`${ENABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
   });
 };
 
 export const filterByDisabledRules = () => {
   withRulesTableRefresh(() => {
     cy.get(DISABLED_RULES_BTN).click();
-    // Wait for the button to reflect the active state before continuing
-    // cy.get(`${DISABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+    cy.get(`${DISABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
   });
 };
 
