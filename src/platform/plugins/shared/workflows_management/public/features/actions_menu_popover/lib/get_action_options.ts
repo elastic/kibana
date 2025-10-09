@@ -153,6 +153,8 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     options: [],
   };
 
+  const baseTypeInstancesCount: Record<string, number> = {};
+
   for (const connector of connectors) {
     if (connector.type.startsWith('elasticsearch.')) {
       elasticSearchGroup.options.push({
@@ -175,6 +177,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
         let connectorGroup = externalGroup.options.find((option) => option.id === baseType);
         // create a group for the basetype if not yet exists
         if (!connectorGroup) {
+          baseTypeInstancesCount[baseType] = 0;
           connectorGroup = {
             id: baseType,
             connectorType: baseType,
@@ -187,10 +190,14 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
         groupOption = connectorGroup;
       }
       const iconType = getStepIconType(connector.type);
+      baseTypeInstancesCount[baseType] += connector.instances?.length || 0;
+      groupOption.instancesLabel = getInstancesLabel(baseTypeInstancesCount[baseType]);
       groupOption.options!.push({
         id: connector.type,
         label: connector.description || connector.type,
         description: connector.type,
+        connectorType: connector.type,
+        instancesLabel: getInstancesLabel(connector.instances?.length),
         iconType,
       });
     }
@@ -210,4 +217,24 @@ export function flattenOptions(options: ActionOptionData[]): ActionOptionData[] 
   return options
     .map((option) => [option, ...flattenOptions(isActionGroup(option) ? option.options : [])])
     .flat();
+}
+
+function getInstancesLabel(instancesCount: number | undefined): string | undefined {
+  if (!instancesCount) {
+    return undefined;
+  }
+  if (instancesCount === 0) {
+    return i18n.translate('workflows.actionsMenu.noInstances', {
+      defaultMessage: 'Not connected',
+    });
+  }
+  if (instancesCount === 1) {
+    return i18n.translate('workflows.actionsMenu.oneInstance', {
+      defaultMessage: '1 connected',
+    });
+  }
+  return i18n.translate('workflows.actionsMenu.multipleInstances', {
+    defaultMessage: '{count} connected',
+    values: { count: instancesCount },
+  });
 }

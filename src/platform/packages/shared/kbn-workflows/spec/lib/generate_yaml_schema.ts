@@ -10,6 +10,7 @@
 import { z } from '@kbn/zod';
 import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import type { ConnectorInstance } from '../../types/v1';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -31,6 +32,7 @@ export interface ConnectorContract {
   outputSchema: z.ZodType;
   description?: string;
   summary?: string;
+  instances?: ConnectorInstance[];
 }
 
 export interface DynamicConnectorContract extends ConnectorContract {

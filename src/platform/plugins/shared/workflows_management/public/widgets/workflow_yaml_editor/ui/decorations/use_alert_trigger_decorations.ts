@@ -12,7 +12,7 @@ import { monaco } from '@kbn/monaco';
 import type { Document } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { getTriggerNodes } from '../../../../../common/lib/yaml_utils';
-import { getMonacoRangeFromYamlNode } from '../utils';
+import { getMonacoRangeFromYamlNode } from '../../lib/utils';
 
 interface UseAlertTriggerDecorationsProps {
   editor: monaco.editor.IStandaloneCodeEditor | null;

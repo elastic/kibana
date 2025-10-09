@@ -12,6 +12,7 @@ import type { monaco } from '@kbn/monaco';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
 import { isBuiltInStepType } from '@kbn/workflows';
+import { getBaseConnectorType } from '../../../../shared/ui/step_icons/get_base_connector_type';
 import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml_utils';
 
@@ -20,29 +21,6 @@ interface UseConnectorTypeDecorationsProps {
   yamlDocument: Document | null;
   isEditorMounted: boolean;
 }
-
-// Helper function to get connector icon and class
-const getConnectorIcon = (connectorType: string): { className: string } => {
-  if (connectorType.startsWith('elasticsearch.')) {
-    return { className: 'elasticsearch' };
-  } else if (connectorType.startsWith('kibana.')) {
-    return { className: 'kibana' };
-  } else {
-    // Handle connectors with dot notation properly
-    let className: string;
-    if (connectorType.startsWith('.')) {
-      // For connectors like ".jira", remove the leading dot
-      className = connectorType.substring(1);
-    } else if (connectorType.includes('.')) {
-      // For connectors like "thehive.createAlert", use base name
-      className = connectorType.split('.')[0];
-    } else {
-      // For simple connectors like "slack", use as-is
-      className = connectorType;
-    }
-    return { className };
-  }
-};
 
 export const useConnectorTypeDecorations = ({
   editor,
@@ -117,9 +95,9 @@ export const useConnectorTypeDecorations = ({
         }
 
         // Get icon and class based on connector type
-        const { className } = getConnectorIcon(connectorType);
+        const baseConnectorType = getBaseConnectorType(connectorType);
 
-        if (className) {
+        if (baseConnectorType) {
           // typeRange format: [startOffset, valueStartOffset, endOffset]
           const valueStartOffset = typeRange[1]; // Start of the value (after quotes if present)
           const valueEndOffset = typeRange[2]; // End of the value
@@ -173,7 +151,7 @@ export const useConnectorTypeDecorations = ({
                 endColumn: actualEndColumn,
               },
               options: {
-                inlineClassName: `type-inline-highlight type-${className}`,
+                inlineClassName: `type-inline-highlight type-${baseConnectorType}`,
               },
             },
           ];

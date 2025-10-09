@@ -340,3 +340,28 @@ export interface WorkflowAggsDto {
     label: string;
   }[];
 }
+
+export interface ConnectorSubAction {
+  name: string;
+  displayName: string;
+}
+
+export interface ConnectorInstance {
+  id: string;
+  name: string;
+  isPreconfigured: boolean;
+  isDeprecated: boolean;
+}
+
+export interface ConnectorTypeInfo {
+  actionTypeId: string;
+  displayName: string;
+  instances: ConnectorInstance[];
+  enabled: boolean;
+  enabledInConfig: boolean;
+  enabledInLicense: boolean;
+  minimumLicenseRequired: string;
+  subActions: ConnectorSubAction[];
+}
+
+export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;

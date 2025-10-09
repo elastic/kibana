@@ -11,6 +11,7 @@ interface ActionBase {
   id: string;
   label: string;
   description?: string;
+  instancesLabel?: string;
   iconColor?: string;
 }
 

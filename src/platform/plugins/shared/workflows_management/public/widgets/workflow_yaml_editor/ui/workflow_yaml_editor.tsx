@@ -59,7 +59,7 @@ import {
   useConnectorTypeDecorations,
   useLineDifferencesDecorations,
   useAlertTriggerDecorations,
-} from '../lib/hooks';
+} from './decorations';
 import { useWorkflowJsonSchema } from '../../../features/validate_workflow_yaml/model/use_workflow_json_schema';
 import { useWorkflowsMonacoTheme } from '../styles/use_workflows_monaco_theme';
 import { useWorkflowEditorStyles } from '../styles/use_workflow_editor_styles';

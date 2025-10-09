@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ConnectorContract } from '@kbn/workflows';
+import type { ConnectorContract, ConnectorTypeInfo } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
@@ -749,9 +749,8 @@ export function convertDynamicConnectorsToContracts(
             connectorIdRequired: true,
             connectorId: connectorIdSchema,
             outputSchema: getSubActionOutputSchema(connectorType.actionTypeId, subAction.name),
-            description: `${connectorType.displayName} - ${subAction.displayName}${
-              connectorType.instances.length === 0 ? ' (no instances configured)' : ''
-            }`,
+            description: `${connectorType.displayName} - ${subAction.displayName}`,
+            instances: connectorType.instances,
           });
         });
       } else {
@@ -767,9 +766,8 @@ export function convertDynamicConnectorsToContracts(
           connectorIdRequired: true,
           connectorId: connectorIdSchema,
           outputSchema,
-          description: `${connectorType.displayName} connector${
-            connectorType.instances.length === 0 ? ' (no instances configured)' : ''
-          }`,
+          description: `${connectorType.displayName} connector`,
+          instances: connectorType.instances,
         });
       }
     } catch (error) {
@@ -789,31 +787,6 @@ export function convertDynamicConnectorsToContracts(
 
   return connectorContracts;
 }
-
-export interface ConnectorSubAction {
-  name: string;
-  displayName: string;
-}
-
-export interface ConnectorInstance {
-  id: string;
-  name: string;
-  isPreconfigured: boolean;
-  isDeprecated: boolean;
-}
-
-export interface ConnectorTypeInfo {
-  actionTypeId: string;
-  displayName: string;
-  instances: ConnectorInstance[];
-  enabled: boolean;
-  enabledInConfig: boolean;
-  enabledInLicense: boolean;
-  minimumLicenseRequired: string;
-  subActions: ConnectorSubAction[];
-}
-
-export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
 
 // Global cache for all connectors (static + generated + dynamic)
 let allConnectorsCache: ConnectorContract[] | null = null;

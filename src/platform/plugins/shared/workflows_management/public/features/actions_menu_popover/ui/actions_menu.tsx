@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { getBaseConnectorType } from '../../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import {
   isActionConnectorGroup,
@@ -59,7 +60,10 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
         >
           <span css={isActionGroup(option) ? styles.groupIconInner : styles.actionIconInner}>
             {isActionConnectorGroup(option) || isActionConnectorOption(option) ? (
-              <StepIcon stepType={option.connectorType} executionStatus={null} />
+              <StepIcon
+                stepType={getBaseConnectorType(option.connectorType)}
+                executionStatus={null}
+              />
             ) : (
               <EuiIcon type={option.iconType} size="m" color={option.iconColor} />
             )}
@@ -67,11 +71,16 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
         </EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
-            <EuiTitle size="xxxs" css={styles.actionTitle}>
-              <h6>
-                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-              </h6>
-            </EuiTitle>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
+              <EuiTitle size="xxxs" css={styles.actionTitle}>
+                <h6>
+                  <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+                </h6>
+              </EuiTitle>
+              <EuiText color="subdued" size="xs">
+                {option.instancesLabel}
+              </EuiText>
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" className="eui-displayBlock" css={styles.actionDescription}>

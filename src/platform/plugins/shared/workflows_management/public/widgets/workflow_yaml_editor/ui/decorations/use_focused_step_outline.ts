@@ -11,7 +11,7 @@ import { monaco } from '@kbn/monaco';
 import { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useSelector } from 'react-redux';
-import { selectFocusedStepInfo } from '../store';
+import { selectFocusedStepInfo } from '../../lib/store';
 
 export const useFocusedStepOutline = (editor: monaco.editor.IStandaloneCodeEditor | null) => {
   const focusedStepInfo = useSelector(selectFocusedStepInfo);

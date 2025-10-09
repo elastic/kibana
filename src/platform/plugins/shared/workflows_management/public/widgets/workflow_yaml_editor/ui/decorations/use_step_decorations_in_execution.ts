@@ -12,7 +12,11 @@ import { css } from '@emotion/react';
 import { useEffect, useMemo } from 'react';
 import { monaco } from '@kbn/monaco';
 import { useSelector } from 'react-redux';
-import { selectHighlightedStepId, selectStepExecutions, selectWorkflowLookup } from '../store';
+import {
+  selectHighlightedStepId,
+  selectStepExecutions,
+  selectWorkflowLookup,
+} from '../../lib/store';
 
 export const useStepDecorationsInExecution = (
   editor: monaco.editor.IStandaloneCodeEditor | null

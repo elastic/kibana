@@ -38,6 +38,10 @@ export type {
   WorkflowListItemDto,
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  ConnectorSubAction,
+  ConnectorInstance,
+  ConnectorTypeInfo,
+  ConnectorTypeInfoMinimal,
 } from './v1';
 
 // exported full to use enum as values
