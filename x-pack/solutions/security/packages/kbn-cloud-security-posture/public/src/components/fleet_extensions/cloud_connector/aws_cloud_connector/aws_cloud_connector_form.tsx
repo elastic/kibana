@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
-import { type AWSCloudConnectorFormProps } from '../types';
+import { type CloudConnectorFormProps } from '../types';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
 import {
   updatePolicyWithAwsCloudConnectorCredentials,
@@ -20,7 +20,7 @@ import { AWS_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 
-export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
+export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   input,
   newPolicy,
   packageInfo,
@@ -39,6 +39,7 @@ export const AWSCloudConnectorForm: React.FC<AWSCloudConnectorFormProps> = ({
           cloud,
           packageInfo,
           templateName,
+          provider: 'aws',
         })
       : undefined;
   const inputVars = input.streams.find((i) => i.enabled)?.vars;

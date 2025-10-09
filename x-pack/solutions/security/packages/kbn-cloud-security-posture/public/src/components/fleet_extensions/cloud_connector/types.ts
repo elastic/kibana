@@ -15,10 +15,13 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CloudConnectorSecretVar } from '@kbn/fleet-plugin/public';
 import type { CloudConnectorRoleArn } from '@kbn/fleet-plugin/common/types';
 import type { UpdatePolicy } from '../types';
+import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 import type { CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
 
+export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER;
+
 export interface CloudConnectorConfig {
-  provider: 'aws' | 'gcp' | 'azure';
+  provider: CloudProviders;
   fields: CloudConnectorField[];
   description?: ReactNode;
 }
@@ -52,7 +55,7 @@ export interface ComboBoxOption {
   value: string;
 }
 
-export interface AWSCloudConnectorFormProps {
+export interface CloudConnectorFormProps {
   input: NewPackagePolicyInput;
   newPolicy: NewPackagePolicy;
   packageInfo: PackageInfo;
@@ -78,21 +81,6 @@ export interface CloudConnectorField {
   dataTestSubj: string;
   value: string;
   id: string;
-}
-
-export interface GetCloudConnectorRemoteRoleTemplateParams {
-  input: NewPackagePolicyInput;
-  cloud: Pick<
-    CloudSetup,
-    | 'isCloudEnabled'
-    | 'cloudId'
-    | 'cloudHost'
-    | 'deploymentUrl'
-    | 'serverless'
-    | 'isServerlessEnabled'
-  >;
-  packageInfo: PackageInfo;
-  templateName: string;
 }
 
 /**

@@ -8,6 +8,7 @@
 import React from 'react';
 import type { NewCloudConnectorFormProps } from '../types';
 import { AWSCloudConnectorForm } from '../aws_cloud_connector/aws_cloud_connector_form';
+import { AzureCloudConnectorForm } from '../azure_cloud_connector/azure_cloud_connector_form';
 
 export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
   input,
@@ -42,9 +43,23 @@ export const NewCloudConnectorForm: React.FC<NewCloudConnectorFormProps> = ({
           setCredentials={setCredentials}
         />
       );
-    case 'gcp':
     case 'azure':
-      // TODO: Implement GCP and Azure cloud connector forms
+      return (
+        <AzureCloudConnectorForm
+          templateName={templateName || ''}
+          input={input}
+          newPolicy={newPolicy}
+          packageInfo={packageInfo}
+          updatePolicy={updatePolicy}
+          isEditPage={isEditPage}
+          cloud={cloud}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
+          credentials={credentials}
+          setCredentials={setCredentials}
+        />
+      );
+    case 'gcp':
+      // TODO: Implement GCP cloud connector forms
       return null;
     default:
       return null;
