@@ -16,7 +16,6 @@ import {
   EuiFlyoutBody,
   EuiPageTemplate,
   EuiSpacer,
-  EuiSwitch,
   EuiTab,
   EuiTabs,
   EuiText,
@@ -186,8 +185,6 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
   const history = useHistory();
   const location = useLocation();
 
-  const [flyoutType, setFlyoutType] = React.useState<'overlay' | 'push'>('overlay');
-  const [childBackgroundShaded, setChildBackgroundShaded] = React.useState(false);
   const [selectedTabId, setSelectedTabId] = React.useState(FLYOUT_WITH_ISOPEN);
 
   // Initialize tab from URL on mount
@@ -213,13 +210,11 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
   const renderTabContent = () => {
     switch (selectedTabId) {
       case FLYOUT_WITH_ISOPEN:
-        return <FlyoutWithIsOpen flyoutType={flyoutType} />;
+        return <FlyoutWithIsOpen />;
       case FLYOUT_WITHOUT_ISOPEN:
-        return <FlyoutWithoutIsOpen flyoutType={flyoutType} />;
+        return <FlyoutWithoutIsOpen />;
       case FLYOUT_WITH_OVERLAYS:
-        return (
-          <FlyoutWithOverlays overlays={overlays} rendering={rendering} flyoutType={flyoutType} />
-        );
+        return <FlyoutWithOverlays overlays={overlays} rendering={rendering} />;
       default:
         return null;
     }
@@ -234,19 +229,6 @@ const AppContent: React.FC<AppContentDeps> = ({ overlays, rendering }) => {
       grow={false}
     >
       <EuiPageTemplate.Header iconType="logoElastic" pageTitle="Flyout System Example" />
-      <EuiPageTemplate.Section grow={false} bottomBorder={bottomBorder}>
-        <EuiSwitch
-          label="Flyouts push content"
-          checked={flyoutType === 'push'}
-          onChange={(e) => setFlyoutType(e.target.checked ? 'push' : 'overlay')}
-        />
-        <EuiSpacer />
-        <EuiSwitch
-          label="Child flyout background shaded"
-          checked={childBackgroundShaded}
-          onChange={(e) => setChildBackgroundShaded(e.target.checked)}
-        />
-      </EuiPageTemplate.Section>
       <EuiPageTemplate.Section>
         <EuiTabs>
           <EuiTab
