@@ -64,28 +64,25 @@ interface Project {
   [key: string]: string;
 }
 
-const getSolutionIcon = (solution: string) => {
-  switch (solution) {
-    case 'elasticsearch':
-      return 'logoElasticsearch';
-    case 'security':
-      return 'logoSecurity';
-    case 'observability':
-      return 'logoObservability';
-    default:
-      return 'empty';
-  }
+const SOLUTION_ICONS: Record<string, string> = {
+  elasticsearch: 'logoElasticsearch',
+  es: 'logoElasticsearch',
+  security: 'logoSecurity',
+  observability: 'logoObservability',
+} as const;
+
+const getSolutionIcon = (solution: string): string => {
+  return SOLUTION_ICONS[solution] || 'empty';
 };
 
-const getCSPLabel = (csp: string) => {
-  switch (csp) {
-    case 'aws':
-      return 'AWS';
-    case 'azure':
-      return 'Azure';
-    case 'gcp':
-      return 'GCP';
-  }
+const CSP_LABELS: Record<string, string> = {
+  aws: 'AWS',
+  azure: 'Azure',
+  gcp: 'GCP',
+} as const;
+
+const getCSPLabel = (csp: string): string => {
+  return CSP_LABELS[csp] || csp.toUpperCase();
 };
 
 const response: { origin: Record<string, Project>; linked_projects: Record<string, Project> } = {
