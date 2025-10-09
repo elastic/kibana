@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createParser } from './console_parser';
+import { createParser } from '../../../../../../packages/shared/kbn-monaco/src/languages/console/parser'
 
 interface ParsedRequest {
   method?: string;
