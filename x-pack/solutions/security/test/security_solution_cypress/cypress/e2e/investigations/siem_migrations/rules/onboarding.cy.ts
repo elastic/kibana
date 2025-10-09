@@ -10,11 +10,11 @@ import {
   ONBOARDING_TRANSLATIONS_RESULT_TABLE,
   RULE_MIGRATIONS_GROUP_PANEL,
   RULE_MIGRATION_PROGRESS_BAR,
-} from '../../../screens/siem_migrations';
-import { deleteConnectors } from '../../../tasks/api_calls/common';
-import { createBedrockConnector } from '../../../tasks/api_calls/connectors';
-import { cleanMigrationData } from '../../../tasks/api_calls/siem_migrations';
-import { visit } from '../../../tasks/navigation';
+} from '../../../../screens/siem_migrations';
+import { deleteConnectors } from '../../../../tasks/api_calls/common';
+import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
+import { cleanMigrationData } from '../../../../tasks/api_calls/siem_migrations';
+import { visit } from '../../../../tasks/navigation';
 import {
   openUploadRulesFlyout,
   selectMigrationConnector,
@@ -23,8 +23,8 @@ import {
   toggleMigrateRulesCard,
   saveDefaultMigrationName,
   renameMigration,
-} from '../../../tasks/siem_migrations';
-import { GET_STARTED_URL } from '../../../urls/navigation';
+} from '../../../../tasks/siem_migrations';
+import { GET_STARTED_URL } from '../../../../urls/navigation';
 import { role } from './role';
 
 export const SPLUNK_TEST_RULES = [

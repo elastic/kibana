@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { login as loginTask } from '../../../tasks/login';
+import { login as loginTask } from '../../../../tasks/login';
 
 export const ROLE = {
   roleDescriptor: {
