@@ -52,17 +52,15 @@ while read -r config; do
     continue;
   fi
 
-  echo "--- Checking for existing scout event for config $config"
-  # We do not use --dontFailOnError here because we need a real exit code to determine if we should skip
-  if node scripts/scout check-event --buildNumber "${BUILDKITE_BUILD_NUMBER:-}" --testConfig "$config"; then
-    echo "--- Scout event found for config $config, skipping"
-    continue
-  else
-    echo "--- Scout event not found for config $config, running tests"
-  fi
-
   FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
-  echo "--- $ $FULL_COMMAND"
+
+  CONFIG_EXECUTION_KEY="${config}_executed"
+  IS_CONFIG_EXECUTION=$(buildkite-agent meta-data get "$CONFIG_EXECUTION_KEY" --default "false")
+
+  if [[ "${IS_CONFIG_EXECUTION}" == "true" ]]; then
+    echo "--- [ already-tested ] $FULL_COMMAND"
+  else
+    echo "--- $ $FULL_COMMAND"
 
   start=$(date +%s)
 
@@ -95,14 +93,19 @@ while read -r config; do
     EVENT_LOG_FILE="${REPORT_DIR}event-log.ndjson"
     if [ -f "$EVENT_LOG_FILE" ]; then
       # Upload events after running each config
-      export SCOUT_EVENT_LOG_PATH="$EVENT_LOG_FILE"
-      source .buildkite/scripts/steps/test/scout_upload_report_events.sh
-      unset SCOUT_EVENT_LOG_PATH
+      echo "Upload Scout reporter events to AppEx QA's team cluster for config $config"
+      if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
+        node scripts/scout upload-events --dontFailOnError --eventLogPath "$EVENT_LOG_FILE"
+      else
+        echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
+      fi
     else
-      echo "Could not find event log file '$EVENT_LOG_FILE' for config $config"
+      echo "❌ Could not find event log file '$EVENT_LOG_FILE' for config $config"
+      buildkite-agent annotate --style 'warning' --context 'scout-reporter' "Could not find event log file for config \`$config\`."
     fi
   else
-    echo "Could not find any scout report directory '$EVENT_LOG_FILE'."
+    echo "❌ Could not find any scout report directory '$REPORT_DIR'."
+    buildkite-agent annotate --style 'warning' --context 'scout-reporter' "Could not find any scout report directory \`$REPORT_DIR\`."
   fi
 
   timeSec=$(($(date +%s)-start))
@@ -118,7 +121,10 @@ while read -r config; do
     duration: ${duration}
     result: ${lastCode}")
 
-  if [ $lastCode -ne 0 ]; then
+  if [ $lastCode -eq 0 ]; then
+    # Test was successful, so mark it as executed
+    buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
+  else
     exitCode=10
     echo "FTR exited with code $lastCode"
     echo "^^^ +++"
