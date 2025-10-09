@@ -28,15 +28,17 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 const strings = {
-  getProjectPickerButtonLabel: () =>
+  getProjectPickerButtonAriaLabel: () =>
     i18n.translate('projectPicker.projectPickerButtonLabel', {
       defaultMessage: 'Cross-project search project picker',
     }),
-  getOriginProjectTooltip: (numberOfProjects: number) =>
+  getProjectPickerButtonLabel: (numberOfProjects: number, totalProjects: number) =>
     i18n.translate('projectPicker.originProjectTooltip', {
-      defaultMessage: 'Searching {numberOfProjects, plural, one {# project} other {# projects}}',
+      defaultMessage:
+        'Searching {numberOfProjects} of {totalProjects, plural, one {# project} other {# projects}}',
       values: {
         numberOfProjects,
+        totalProjects,
       },
     }),
   getProjectPickerPopoverTitle: () =>
@@ -211,17 +213,20 @@ export const ProjectPicker = () => {
 
   const originProject: Project = Object.values(response.origin)[0];
 
+  const projects =
+    crossProjectSearchScope === 'origin' ? [originProject] : [originProject, ...linkedProjects];
+
   const button = (
     <EuiToolTip
       delay="long"
-      content={strings.getProjectPickerButtonLabel()}
+      content={strings.getProjectPickerButtonLabel(projects.length, linkedProjects.length + 1)}
       disableScreenReaderOutput
     >
       <EuiButtonIcon
         type="link"
         display="base"
         iconType="cluster"
-        aria-label={strings.getProjectPickerButtonLabel()}
+        aria-label={strings.getProjectPickerButtonAriaLabel()}
         data-test-subj="addFilter"
         onClick={() => setShowProjectPickerPopover(!showProjectPickerPopover)}
         size="s"
@@ -235,8 +240,65 @@ export const ProjectPicker = () => {
 
   const closePopover = () => setShowProjectPickerPopover(false);
 
-  const projects =
-    crossProjectSearchScope === 'origin' ? [originProject] : [originProject, ...linkedProjects];
+  const renderProjectsList = () =>
+    projects.map((project, index) => {
+      const tags = Object.entries(project)
+        .filter(([key]) => !key.startsWith('_'))
+        .map(([key, value]) => `${key}: ${value}`);
+
+      return (
+        <>
+          {index > 0 && <EuiHorizontalRule margin="xs" />}
+          <EuiFlexGroup
+            responsive={false}
+            alignItems="center"
+            justifyContent="spaceBetween"
+            css={{ padding: `0 ${euiTheme.size.s}` }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={getSolutionIcon(project._type)} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="text">
+                    {project._alias || project._id}
+                  </EuiText>
+                </EuiFlexItem>
+                {project._id === originProject._id ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip size="s" type="flag" content={strings.getOriginProjectLabel()} />
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {`${getCSPLabel(project._csp)}, ${project._region}`}
+                  </EuiText>
+                </EuiFlexItem>
+                {tags.length ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      title={i18n.translate('projectPicker.tagTooltipTitle', {
+                        defaultMessage: 'Custom tags',
+                      })}
+                      content={tags.map((tag) => (
+                        <EuiBadge>{tag}</EuiBadge>
+                      ))}
+                    >
+                      <EuiBadge iconType="tag">{tags.length}</EuiBadge>
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      );
+    });
 
   return (
     <EuiPopover
@@ -312,11 +374,11 @@ export const ProjectPicker = () => {
             onChange={(value: string) => setCrossProjectSearchScope(value)}
             css={{ margin: '8px' }}
           />
-          <EuiHorizontalRule margin="xs" />
+          <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}>
           <EuiTitle size="xxxs">
-            <p css={{ padding: `0 ${euiTheme.size.s}` }}>
+            <p css={{ padding: `${euiTheme.size.s}` }}>
               <FormattedMessage
                 id="projectPicker.numberOfProjectsDescription"
                 defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
@@ -327,72 +389,16 @@ export const ProjectPicker = () => {
               />
             </p>
           </EuiTitle>
+          <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
         <EuiFlexItem
-          css={{ overflow: 'scroll', backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+          css={{
+            overflow: 'scroll',
+            backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+            padding: `${euiTheme.size.s} 0`,
+          }}
         >
-          {projects.map((project) => {
-            const tags = Object.entries(project)
-              .filter(([key]) => !key.startsWith('_'))
-              .map(([key, value]) => `${key}: ${value}`);
-
-            return (
-              <>
-                <EuiHorizontalRule margin="xs" />
-                <EuiFlexGroup
-                  responsive={false}
-                  alignItems="center"
-                  justifyContent="spaceBetween"
-                  css={{ padding: `0 ${euiTheme.size.s}` }}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup responsive={false} gutterSize="xs">
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type={getSolutionIcon(project._type)} />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="text">
-                          {project._alias || project._id}
-                        </EuiText>
-                      </EuiFlexItem>
-                      {project._id === originProject._id ? (
-                        <EuiFlexItem grow={false}>
-                          <EuiIconTip
-                            size="s"
-                            type="flag"
-                            content={strings.getOriginProjectLabel()}
-                          />
-                        </EuiFlexItem>
-                      ) : null}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs" color="subdued">
-                          {`${getCSPLabel(project._csp)}, ${project._region}`}
-                        </EuiText>
-                      </EuiFlexItem>
-                      {tags.length ? (
-                        <EuiFlexItem grow={false}>
-                          <EuiToolTip
-                            title={i18n.translate('projectPicker.tagTooltipTitle', {
-                              defaultMessage: 'Custom tags',
-                            })}
-                            content={tags.map((tag) => (
-                              <EuiBadge>{tag}</EuiBadge>
-                            ))}
-                          >
-                            <EuiBadge iconType="tag">{tags.length}</EuiBadge>
-                          </EuiToolTip>
-                        </EuiFlexItem>
-                      ) : null}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            );
-          })}
+          {renderProjectsList()}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopover>
