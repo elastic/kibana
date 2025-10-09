@@ -152,7 +152,7 @@ function formatReportData(docs: ModelScoreDocument[]): PreparedEvaluationData {
         numExamples: doc.dataset.examples_count,
         evaluatorScores: new Map(),
         evaluatorStats: new Map(),
-        experiments: doc.experiments,
+        experimentId: doc.experiment_id,
       });
     }
 

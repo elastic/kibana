@@ -14,6 +14,7 @@ import type { DatasetScoreWithStats } from './evaluation_stats';
 export interface ModelScoreDocument {
   '@timestamp': string;
   run_id: string;
+  experiment_id: string;
   model: {
     id: string;
     family: string;
@@ -42,9 +43,6 @@ export interface ModelScoreDocument {
     };
     scores: number[];
   };
-  experiments: Array<{
-    id?: string;
-  }>;
   environment: {
     hostname: string;
   };
@@ -75,6 +73,7 @@ export class EvaluationScoreRepository {
           properties: {
             '@timestamp': { type: 'date' },
             run_id: { type: 'keyword' },
+            experiment_id: { type: 'keyword' },
             model: {
               type: 'object',
               properties: {
@@ -119,12 +118,6 @@ export class EvaluationScoreRepository {
                   type: 'float',
                   index: false,
                 },
-              },
-            },
-            experiments: {
-              type: 'nested',
-              properties: {
-                id: { type: 'keyword' },
               },
             },
             environment: {
@@ -219,6 +212,7 @@ export class EvaluationScoreRepository {
           const document: ModelScoreDocument = {
             '@timestamp': timestamp,
             run_id: runId,
+            experiment_id: dataset.experimentId,
             model: {
               id: model.id || 'unknown',
               family: model.family,
@@ -247,7 +241,6 @@ export class EvaluationScoreRepository {
               },
               scores,
             },
-            experiments: dataset.experiments || [],
             environment: {
               hostname: hostname(),
             },
