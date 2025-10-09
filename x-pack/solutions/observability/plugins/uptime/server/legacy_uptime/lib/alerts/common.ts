@@ -20,6 +20,7 @@ import type { AlertInstanceState } from '@kbn/alerting-plugin/server';
 import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
+import { uptimeRuleStateFieldMap } from '../../../../common/rules/uptime_rule_state_field_map';
 import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../../../common/constants/synthetics_alerts';
 import type { UptimeCommonState } from '../../../../common/runtime_types';
@@ -131,7 +132,11 @@ export const setRecoveredAlertsContext = async <ActionGroupIds extends string>({
   }
 };
 
-export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
+export const uptimeRuleTypeFieldMap = {
+  ...uptimeRuleFieldMap,
+  ...uptimeRuleStateFieldMap,
+  ...legacyExperimentalFieldMap,
+};
 
 const stringAsKeywords: MappingDynamicTemplate = {
   path_match: `${ALERT_GROUPING}.*`,
