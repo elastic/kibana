@@ -17,8 +17,8 @@ import { BodyRows } from './body_rows';
 import { DraggableBodyRow } from './draggable_body_row';
 import { DraggableBodyRows } from './draggable_body_rows';
 import { HeaderRow } from './header_row';
-import { Column } from './types';
 import * as Styles from './styles';
+import { Column } from './types';
 
 interface ReorderableTableProps<Item> {
   ariaLabel?: string;
