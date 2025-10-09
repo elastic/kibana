@@ -32,7 +32,7 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   elif [[ -d ~/.kibana-moon-cache ]]; then
     echo "Using ~/.moon/cache as a starting point"
     mkdir -p ./.moon/cache
-    mv ~/.kibana-moon-cache ./.moon/cache
+    mv ~/.kibana-moon-cache/* ./.moon/cache
   fi
 fi
 
