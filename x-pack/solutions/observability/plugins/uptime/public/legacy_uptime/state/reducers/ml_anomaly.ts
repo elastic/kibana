@@ -6,7 +6,8 @@
  */
 
 import { handleActions } from 'redux-actions';
-import type { MlCapabilitiesResponse, JobExistResult } from '@kbn/ml-plugin/public';
+import type { MlCapabilitiesResponse } from '@kbn/ml-common-types/capabilities';
+import type { JobExistResult } from '@kbn/ml-common-types/data_recognizer';
 import type { AnomalyRecords } from '../actions';
 import {
   getExistingMLJobAction,
