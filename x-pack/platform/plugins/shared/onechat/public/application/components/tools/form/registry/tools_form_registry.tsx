@@ -30,12 +30,12 @@ export function getToolTypeConfig<T extends ToolType>(
 }
 
 export function getCreatePayloadFromData<T extends ToolFormData>(data: T): CreateToolPayload {
-  const config = TOOLS_FORM_REGISTRY[data.type] as unknown as ToolTypeRegistryEntry<T>;
+  const config = getToolTypeConfig(data.type) as unknown as ToolTypeRegistryEntry<T>;
   return config.formDataToCreatePayload(data);
 }
 
 export function getUpdatePayloadFromData<T extends ToolFormData>(data: T): UpdateToolPayload {
-  const config = TOOLS_FORM_REGISTRY[data.type] as unknown as ToolTypeRegistryEntry<T>;
+  const config = getToolTypeConfig(data.type) as unknown as ToolTypeRegistryEntry<T>;
   return config.formDataToUpdatePayload(data);
 }
 
