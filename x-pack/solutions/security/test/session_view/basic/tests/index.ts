@@ -58,6 +58,7 @@ export const securitySolutionOnlyReadSpacesAll: Role = {
       {
         feature: {
           siemV5: ['read'],
+          securitySolutionRulesV1: ['read']
         },
         spaces: ['*'],
       },
