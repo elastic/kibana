@@ -16,6 +16,7 @@ import { FleetError } from '../../errors';
 import type { FleetServerHost } from '../../types';
 import { appContextService } from '../app_context';
 import { fleetServerHostService } from '../fleet_server_host';
+import { isAgentlessEnabled } from '../utils/agentless';
 
 import { agentPolicyService } from '../agent_policy';
 
@@ -144,6 +145,8 @@ export async function createCloudFleetServerHostsIfNeeded(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
+  const cloudSetup = appContextService.getCloud();
+  const isServerless = cloudSetup?.isServerlessEnabled;
   const cloudServerHosts = getCloudFleetServersHosts();
   if (!cloudServerHosts || cloudServerHosts.length === 0) {
     return;
@@ -168,22 +171,24 @@ export async function createCloudFleetServerHostsIfNeeded(
   // Ensure internal Fleet Server host exists for ECH agentless.
   // This "duplicate" ensure that agentless agents use an unmodifiable
   // Fleet Server host that is hidden from the user.
-  const agentlessFleetServerHost = await fleetServerHostService.get(
-    soClient,
-    ECH_AGENTLESS_FLEET_SERVER_HOST_ID
-  );
-  if (!agentlessFleetServerHost) {
-    await fleetServerHostService.create(
+  if (isAgentlessEnabled() && !isServerless) {
+    const agentlessFleetServerHost = await fleetServerHostService.get(
       soClient,
-      esClient,
-      {
-        name: 'Internal Fleet Server for agentless',
-        host_urls: cloudServerHosts,
-        is_default: false,
-        is_preconfigured: true, // Fake preconfiguration status to prevent user modification
-      },
-      { id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID, overwrite: true, fromPreconfiguration: true }
+      ECH_AGENTLESS_FLEET_SERVER_HOST_ID
     );
+    if (!agentlessFleetServerHost) {
+      await fleetServerHostService.create(
+        soClient,
+        esClient,
+        {
+          name: 'Internal Fleet Server for agentless',
+          host_urls: cloudServerHosts,
+          is_default: false,
+          is_preconfigured: true, // Fake preconfiguration status to prevent user modification
+        },
+        { id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID, overwrite: true, fromPreconfiguration: true }
+      );
+    }
   }
 }
 

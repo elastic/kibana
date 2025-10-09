@@ -85,6 +85,7 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+import { isAgentlessEnabled } from './utils/agentless';
 import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
@@ -503,7 +504,6 @@ class OutputService {
   ) {
     const logger = appContextService.getLogger();
     const cloudSetup = appContextService.getCloud();
-    const isCloud = cloudSetup?.isCloudEnabled;
     const isServerless = cloudSetup?.isServerlessEnabled;
     const outputs = await this.list(soClient);
 
@@ -527,7 +527,7 @@ class OutputService {
     }
 
     // Ensure default output exists for ECH agentless
-    if (isCloud && !isServerless) {
+    if (isAgentlessEnabled() && !isServerless) {
       const defaultAgentlessOutput = outputs.items.find((o) => o.id === ECH_AGENTLESS_OUTPUT_ID);
       if (!defaultAgentlessOutput) {
         logger.debug('Creating default output for ECH agentless');

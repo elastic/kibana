@@ -2808,7 +2808,7 @@ describe('Output Service', () => {
       );
     });
 
-    it('should create ECH agentless output in cloud environment', async () => {
+    it('should create ECH agentless output when agentless is enabled', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'existing-default-output',
       });
@@ -2818,6 +2818,14 @@ describe('Output Service', () => {
         isCloudEnabled: true,
         isServerlessEnabled: false,
       });
+      mockedAppContextService.getConfig.mockReturnValue({
+        agents: {
+          elasticsearch: {
+            ca_sha256: 'test-ca-sha256',
+          },
+        },
+        agentless: { enabled: true },
+      } as any);
 
       await outputService.ensureDefaultOutputs(soClient, esClientMock);
 
@@ -2837,7 +2845,7 @@ describe('Output Service', () => {
       );
     });
 
-    it('should not create ECH agentless output in serverless environment', async () => {
+    it('should not create ECH agentless output when agentless is disabled', async () => {
       const soClient = getMockedSoClient({
         defaultOutputId: 'existing-default-output',
       });
@@ -2845,31 +2853,16 @@ describe('Output Service', () => {
       // @ts-expect-error
       mockedAppContextService.getCloud.mockReturnValue({
         isCloudEnabled: true,
-        isServerlessEnabled: true,
-      });
-
-      await outputService.ensureDefaultOutputs(soClient, esClientMock);
-
-      // Should not create the agentless output
-      expect(soClient.create).not.toHaveBeenCalledWith(
-        'ingest-outputs',
-        expect.objectContaining({
-          name: 'Internal output for agentless',
-        }),
-        expect.anything()
-      );
-    });
-
-    it('should not create ECH agentless output in non-cloud environment', async () => {
-      const soClient = getMockedSoClient({
-        defaultOutputId: 'existing-default-output',
-      });
-
-      // @ts-expect-error
-      mockedAppContextService.getCloud.mockReturnValue({
-        isCloudEnabled: false,
         isServerlessEnabled: false,
       });
+      mockedAppContextService.getConfig.mockReturnValue({
+        agents: {
+          elasticsearch: {
+            ca_sha256: 'test-ca-sha256',
+          },
+        },
+        agentless: { enabled: false },
+      } as any);
 
       await outputService.ensureDefaultOutputs(soClient, esClientMock);
 
@@ -2908,6 +2901,14 @@ describe('Output Service', () => {
         isCloudEnabled: true,
         isServerlessEnabled: false,
       });
+      mockedAppContextService.getConfig.mockReturnValue({
+        agents: {
+          elasticsearch: {
+            ca_sha256: 'test-ca-sha256',
+          },
+        },
+        agentless: { enabled: true },
+      } as any);
 
       await outputService.ensureDefaultOutputs(soClient, esClientMock);
 
@@ -2931,10 +2932,49 @@ describe('Output Service', () => {
         isCloudEnabled: true,
         isServerlessEnabled: false,
       });
+      mockedAppContextService.getConfig.mockReturnValue({
+        agents: {
+          elasticsearch: {
+            ca_sha256: 'test-ca-sha256',
+          },
+        },
+        agentless: { enabled: true },
+      } as any);
 
       await outputService.ensureDefaultOutputs(soClient, esClientMock);
 
       expect(mockedLogger.debug).toHaveBeenCalledWith('Creating default output for ECH agentless');
+    });
+
+    it('should not create ECH agentless output in serverless environment', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-output',
+      });
+
+      // @ts-expect-error
+      mockedAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: true,
+      });
+      mockedAppContextService.getConfig.mockReturnValue({
+        agents: {
+          elasticsearch: {
+            ca_sha256: 'test-ca-sha256',
+          },
+        },
+        agentless: { enabled: true },
+      } as any);
+
+      await outputService.ensureDefaultOutputs(soClient, esClientMock);
+
+      // Should not create the agentless output
+      expect(soClient.create).not.toHaveBeenCalledWith(
+        'ingest-outputs',
+        expect.objectContaining({
+          name: 'Internal output for agentless',
+        }),
+        expect.anything()
+      );
     });
   });
 

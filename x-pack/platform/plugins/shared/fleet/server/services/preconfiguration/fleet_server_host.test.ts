@@ -230,6 +230,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
   afterEach(() => {
     mockedFleetServerHostService.create.mockReset();
     mockedAppContextService.getCloud.mockReset();
+    mockedAppContextService.getConfig.mockReset();
   });
   it('should do nothing if there is no cloud fleet server hosts', async () => {
     const soClient = savedObjectsClientMock.create();
@@ -257,6 +258,9 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
         projectId: undefined,
       },
     });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
     // Default doesn't exist but agentless does
     mockedFleetServerHostService.getDefaultFleetServerHost = jest
       .fn()
@@ -283,7 +287,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
     );
   });
 
-  it('should create both default and agentless fleet server hosts if none are configured', async () => {
+  it('should create both default and agentless fleet server hosts if none are configured and agentless is enabled', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -300,6 +304,9 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
         projectId: undefined,
       },
     });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
     // Mock both getDefaultFleetServerHost and get calls to return null
     mockedFleetServerHostService.getDefaultFleetServerHost = jest
       .fn()
@@ -343,7 +350,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
     );
   });
 
-  it('should create only agentless fleet server host if default already exists', async () => {
+  it('should create only default fleet server host if agentless is disabled', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -360,6 +367,57 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
         projectId: undefined,
       },
     });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: false },
+    } as any);
+    // Mock both getDefaultFleetServerHost and get calls to return null
+    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+      .fn()
+      .mockResolvedValue(null as any);
+    mockedFleetServerHostService.get.mockResolvedValue(null as any);
+    soClient.create.mockResolvedValue({
+      id: 'test-id',
+      attributes: {},
+    } as any);
+
+    await createCloudFleetServerHostsIfNeeded(soClient, esClient);
+
+    expect(mockedFleetServerHostService.create).toBeCalledTimes(1);
+
+    // Verify only default Fleet Server host creation
+    expect(mockedFleetServerHostService.create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        name: 'Default',
+        host_urls: ['https://deployment-id-1.fleet.us-east-1.aws.found.io'],
+        is_default: true,
+        is_preconfigured: false,
+      }),
+      { id: 'fleet-default-fleet-server-host', overwrite: true, fromPreconfiguration: true }
+    );
+  });
+
+  it('should create only agentless fleet server host if default already exists and agentless is enabled', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
+      apm: {},
+      onboarding: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
+    });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
     // Default exists but agentless doesn't
     mockedFleetServerHostService.getDefaultFleetServerHost = jest
       .fn()
@@ -401,11 +459,76 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
         projectId: undefined,
       },
     });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
     // Both exist
     mockedFleetServerHostService.getDefaultFleetServerHost = jest
       .fn()
       .mockResolvedValue({ id: 'existing-default' } as any);
     mockedFleetServerHostService.get.mockResolvedValue({ id: 'existing-agentless' } as any);
+
+    await createCloudFleetServerHostsIfNeeded(soClient, esClient);
+
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+  });
+
+  it('should not create agentless fleet server host if default already exists but agentless is disabled', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
+      apm: {},
+      onboarding: {},
+      isServerlessEnabled: false,
+      serverless: {
+        projectId: undefined,
+      },
+    });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: false },
+    } as any);
+    // Default exists but agentless doesn't and agentless is disabled
+    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+      .fn()
+      .mockResolvedValue({ id: 'existing-default' } as any);
+    mockedFleetServerHostService.get.mockResolvedValue(null as any);
+
+    await createCloudFleetServerHostsIfNeeded(soClient, esClient);
+
+    expect(mockedFleetServerHostService.create).not.toBeCalled();
+  });
+
+  it('should not create agentless fleet server host in serverless environment', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedAppContextService.getCloud.mockReturnValue({
+      cloudId:
+        'dXMtZWFzdC0xLmF3cy5mb3VuZC5pbyRjZWM2ZjI2MWE3NGJmMjRjZTMzYmI4ODExYjg0Mjk0ZiRjNmMyY2E2ZDA0MjI0OWFmMGNjN2Q3YTllOTYyNTc0Mw==',
+      isCloudEnabled: true,
+      deploymentId: 'deployment-id-1',
+      cloudHost: 'us-east-1.aws.found.io',
+      apm: {},
+      onboarding: {},
+      isServerlessEnabled: true,
+      serverless: {
+        projectId: 'project-123',
+      },
+    });
+    mockedAppContextService.getConfig.mockReturnValue({
+      agentless: { enabled: true },
+    } as any);
+    // Default exists but we're in serverless
+    mockedFleetServerHostService.getDefaultFleetServerHost = jest
+      .fn()
+      .mockResolvedValue({ id: 'existing-default' } as any);
+    mockedFleetServerHostService.get.mockResolvedValue(null as any);
 
     await createCloudFleetServerHostsIfNeeded(soClient, esClient);
 
