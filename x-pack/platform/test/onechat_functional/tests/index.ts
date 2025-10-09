@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
+import type { LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
 import type { OneChatUiFtrProviderContext } from '../../onechat/services/functional';
 import { setupConnector, teardownConnector } from '../utils/connector_helpers';
 
