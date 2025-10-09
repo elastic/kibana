@@ -99,26 +99,31 @@ components:
                 type: object
                 properties:
                   content:
-                    allOf:
+                    oneOf:
                       - type: object
                         properties:
                           code:
                             type: string
                           command:
                             type: string
-                      - oneOf:
-                          - type: object
-                            properties:
-                              pid:
-                                type: number
-                          - type: object
-                            properties:
-                              entity_id:
-                                type: string
-                          - type: object
-                            properties:
-                              process_name:
-                                type: string
+                          pid:
+                            type: number
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          entity_id:
+                            type: string
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          process_name:
+                            type: string
 
     GetFile:
       allOf:
@@ -375,22 +380,23 @@ components:
                 type: object
                 properties:
                   content:
-                    allOf:
+                    oneOf:
                       - type: object
                         properties:
                           code:
                             type: string
                           command:
                             type: string
-                      - oneOf:
-                          - type: object
-                            properties:
-                              pid:
-                                type: number
-                          - type: object
-                            properties:
-                              entity_id:
-                                type: string
+                          pid:
+                            type: number
+                      - type: object
+                        properties:
+                          code:
+                            type: string
+                          command:
+                            type: string
+                          entity_id:
+                            type: string
 
     RunningProcessesOutputEndpoint:
       type: object
