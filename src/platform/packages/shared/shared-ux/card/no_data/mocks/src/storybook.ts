@@ -9,7 +9,6 @@
 
 import { action } from '@storybook/addon-actions';
 import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
-import { RedirectAppLinksStorybookMock } from '@kbn/shared-ux-link-redirect-app-mocks';
 import type { NoDataCardServices, NoDataCardProps } from '@kbn/shared-ux-card-no-data-types';
 
 type PropArguments = Pick<
@@ -30,8 +29,6 @@ type Arguments = PropArguments & ServiceArguments;
  * Storybook parameters provided from the controls addon.
  */
 export type Params = Record<keyof Arguments, any>;
-
-const redirectMock = new RedirectAppLinksStorybookMock();
 
 /**
  * Storybook mocks for the `NoDataCard` component.
@@ -94,7 +91,7 @@ export class StorybookMock extends AbstractStorybookMock<
     },
   };
 
-  dependencies = [redirectMock];
+  dependencies = [];
 
   getProps(params?: Params): NoDataCardProps {
     return {
@@ -118,7 +115,6 @@ export class StorybookMock extends AbstractStorybookMock<
         action('addBasePath')(path);
         return path;
       },
-      ...redirectMock.getServices(),
     };
   }
 }

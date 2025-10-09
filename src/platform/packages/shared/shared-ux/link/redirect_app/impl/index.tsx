@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { RedirectAppLinks as RedirectAppLinksContainer } from './src/redirect_app_links.container';
-export { RedirectAppLinks as RedirectAppLinksComponent } from './src/redirect_app_links.component';
-export { RedirectAppLinks } from './src/redirect_app_links';
-export { RedirectAppLinksKibanaProvider, RedirectAppLinksProvider } from './src/services';
+import type { PropsWithChildren } from 'react';
+export { RedirectAppLinks } from './src/deprecated_redirect_app_links.component';
+export { RedirectAppLinks as RedirectAppLinksContainer } from './src/deprecated_redirect_app_links.component';
+export { RedirectAppLinks as RedirectAppLinksComponent } from './src/deprecated_redirect_app_links.component';
 
-export type {
-  RedirectAppLinksServices,
-  RedirectAppLinksKibanaDependencies,
-  RedirectAppLinksProps,
-} from '@kbn/shared-ux-link-redirect-app-types';
+/**
+ * @deprecated - does nothing. This provider is no longer needed as the link navigation is handled by GlobalRedirectAppLinks component at the root of the application.
+ */
+export const RedirectAppLinksKibanaProvider = ({ children }: PropsWithChildren) => children;

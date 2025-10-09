@@ -22,11 +22,9 @@ export const hasActiveModifierKey = (event: MouseEvent): boolean => {
  */
 export const getClosestLink = (
   element: HTMLElement | null | undefined,
-  container?: HTMLElement,
-  maxDepth = 25
+  container?: HTMLElement
 ): HTMLAnchorElement | undefined => {
   let current = element;
-  let currentDepth = 1;
   do {
     if (current?.tagName.toLowerCase() === 'a') {
       return current as HTMLAnchorElement;
@@ -36,7 +34,6 @@ export const getClosestLink = (
       break;
     }
     current = parent;
-    currentDepth++;
-  } while (parent || parent !== document.body || parent !== container || currentDepth < maxDepth);
+  } while (parent || parent !== document.body || parent !== container);
   return undefined;
 };

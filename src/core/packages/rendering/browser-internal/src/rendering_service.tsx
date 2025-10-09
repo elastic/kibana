@@ -113,6 +113,7 @@ export class RenderingService implements IRenderingService {
 
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
+        <GlobalRedirectAppLink navigateToUrl={renderCoreDeps.application.navigateToUrl} />
         <Layout />
       </KibanaRootContextProvider>,
       targetDomElement

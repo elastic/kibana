@@ -15,11 +15,6 @@ import type {
   NoDataCardKibanaDependencies,
 } from '@kbn/shared-ux-card-no-data-types';
 
-import {
-  getRedirectAppLinksServicesMock,
-  getRedirectAppLinksKibanaDependenciesMock,
-} from '@kbn/shared-ux-link-redirect-app-mocks';
-
 const defaultParams = { canAccessFleet: true };
 
 /**
@@ -30,7 +25,6 @@ export const getServicesMock = (params: Partial<NoDataCardServices> = defaultPar
     params.canAccessFleet !== undefined ? params.canAccessFleet : defaultParams.canAccessFleet;
 
   const services: NoDataCardServices = {
-    ...getRedirectAppLinksServicesMock(),
     canAccessFleet,
     addBasePath: (path) => path,
   };
@@ -64,7 +58,6 @@ export const getKibanaDependenciesMock = (
         },
       },
     },
-    getRedirectAppLinksKibanaDependenciesMock(),
     {
       isMergeableObject: isPlainObject,
     }
