@@ -139,6 +139,88 @@ describe('Gauge Schema', () => {
     expect(validated).toEqual({ ...defaultValues, ...input });
   });
 
+  it('validates ES|QL full configuration with bullet shape', () => {
+    const input = {
+      type: 'gauge' as const,
+      dataset: {
+        type: 'esql' as const,
+        query: 'FROM my-index | LIMIT 100',
+      },
+      title: 'Performance Gauge',
+      metric: {
+        operation: 'value' as const,
+        column: 'score',
+        title: 'Score',
+        sub_title: 'with 80% target',
+        color: {
+          type: 'dynamic' as const,
+          min: 0,
+          max: 100,
+          range: 'absolute' as const,
+          steps: [
+            { type: 'from' as const, from: 0, color: '#red' },
+            { type: 'to' as const, to: 100, color: '#green' },
+          ],
+        },
+        ticks: 'bands' as const,
+        min: {
+          operation: 'value' as const,
+          column: 'min',
+        },
+        max: {
+          operation: 'value' as const,
+          column: 'max',
+        },
+        goal: {
+          operation: 'value' as const,
+          column: 'goal',
+        },
+      },
+      shape: {
+        type: 'bullet' as const,
+        direction: 'vertical' as const,
+      },
+    };
+
+    const validated = gaugeStateSchema.validate(input);
+    expect(validated).toEqual({ ...defaultValues, ...input });
+  });
+
+  it('throws on mixed DSL and ES|QL configs', () => {
+    const input = {
+      type: 'gauge' as const,
+      dataset: {
+        type: 'esql' as const,
+        query: 'FROM my-index | LIMIT 100',
+      },
+      title: 'Performance Gauge',
+      metric: {
+        operation: 'value' as const,
+        column: 'score',
+        min: {
+          operation: 'static' as const,
+          value: 5,
+        },
+      },
+      shape: {
+        type: 'bullet' as const,
+        direction: 'vertical' as const,
+      },
+    };
+
+    expect(() => gaugeStateSchema.validate(input)).toThrow();
+  });
+
+  it('throws on invalid operations as metric', () => {
+    const invalidOps = [
+      { operation: 'static', value: 5 },
+      { operation: 'moving_average', window: 5, field: 'bytes' },
+    ];
+    for (const op of invalidOps) {
+      expect(() => gaugeStateSchema.validate({ ...baseGaugeConfig, metric: op })).toThrow();
+    }
+  });
+
   it('throws on invalid shape type', () => {
     const input = {
       ...baseGaugeConfig,

@@ -9,11 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  esqlColumnSchema,
-  genericOperationOptionsSchema,
-  metricOperationDefinitionSchema,
-} from '../metric_ops';
+import { esqlColumnSchema, metricOperationDefinitionSchema } from '../metric_ops';
 import { colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
@@ -42,7 +38,43 @@ const gaugeStateSharedOptionsSchema = {
   ),
 };
 
-const gaugeStateMetricOptionsSchema = schema.object({
+const gaugeStateMetricInnerNoESQLOpsSchema = {
+  /**
+   * Minimum value for the gauge
+   * Note: label, format and other visual options are ignored
+   */
+  min: schema.maybe(metricOperationDefinitionSchema),
+  /**
+   * Maximum value for the gauge
+   * Note: label, format and other visual options are ignored
+   */
+  max: schema.maybe(metricOperationDefinitionSchema),
+  /**
+   * Goal value for the gauge
+   * Note: label, format and other visual options are ignored
+   */
+  goal: schema.maybe(metricOperationDefinitionSchema),
+};
+
+const gaugeStateMetricInnerESQLOpsSchema = {
+  /**
+   * Minimum value for the gauge
+   * Note: label, format and other visual options are ignored
+   */
+  min: schema.maybe(esqlColumnSchema),
+  /**
+   * Maximum value for the gauge
+   * Note: label, format and other visual options are ignored
+   */
+  max: schema.maybe(esqlColumnSchema),
+  /**
+   * Goal value for the gauge
+   * Note: label, format and other visual options are ignored
+   */
+  goal: schema.maybe(esqlColumnSchema),
+};
+
+const gaugeStateMetricOptionsSchema = {
   /**
    * Title (overrides label on chart panel, but not in table)
    */
@@ -63,22 +95,7 @@ const gaugeStateMetricOptionsSchema = schema.object({
       defaultValue: 'auto',
     })
   ),
-  /**
-   * Minimum value for the gauge
-   * Note: label, format and other visual options are ignored
-   */
-  min: schema.maybe(metricOperationDefinitionSchema),
-  /**
-   * Maximum value for the gauge
-   * Note: label, format and other visual options are ignored
-   */
-  max: schema.maybe(metricOperationDefinitionSchema),
-  /**
-   * Goal value for the gauge
-   * Note: label, format and other visual options are ignored
-   */
-  goal: schema.maybe(metricOperationDefinitionSchema),
-});
+};
 
 export const gaugeStateSchemaNoESQL = schema.object({
   type: schema.literal('gauge'),
@@ -89,7 +106,12 @@ export const gaugeStateSchemaNoESQL = schema.object({
   /**
    * Primary value configuration, must define operation.
    */
-  metric: mergeAllMetricsWithChartDimensionSchema(gaugeStateMetricOptionsSchema),
+  metric: mergeAllMetricsWithChartDimensionSchema(
+    schema.object({
+      ...gaugeStateMetricOptionsSchema,
+      ...gaugeStateMetricInnerNoESQLOpsSchema,
+    })
+  ),
 });
 
 const gaugeStateSchemaESQL = schema.object({
@@ -102,8 +124,10 @@ const gaugeStateSchemaESQL = schema.object({
    * Primary value configuration, must define operation.
    */
   metric: schema.allOf([
-    schema.object(genericOperationOptionsSchema),
-    gaugeStateMetricOptionsSchema,
+    schema.object({
+      ...gaugeStateMetricOptionsSchema,
+      ...gaugeStateMetricInnerESQLOpsSchema,
+    }),
     esqlColumnSchema,
   ]),
 });
