@@ -29,92 +29,104 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useToggleWorkflow } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_toggle_workflow';
+import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+import { useSaveYaml } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_save_yaml';
+import { useCapabilities } from '../../../hooks/use_capabilities';
+import {
+  selectHasChanges,
+  selectWorkflow,
+} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import { getRunWorkflowTooltipContent } from '../../../shared/ui';
 
+const buttonGroupOptions: EuiButtonGroupOptionProps[] = [
+  {
+    id: 'workflow',
+    label: i18n.translate('workflows.workflowDetailHeader.workflow', {
+      defaultMessage: 'Workflow',
+    }),
+    iconType: 'grid',
+  },
+  {
+    id: 'executions',
+    label: i18n.translate('workflows.workflowDetailHeader.executions', {
+      defaultMessage: 'Executions',
+    }),
+    iconType: 'play',
+  },
+];
+
 export interface WorkflowDetailHeaderProps {
-  name: string | undefined;
   isLoading: boolean;
   activeTab: WorkflowUrlStateTabType;
   handleTabChange: (tab: WorkflowUrlStateTabType) => void;
-  canRunWorkflow: boolean;
-  handleRunClick: () => void;
-  canSaveWorkflow: boolean;
-  handleSave: () => void;
-  isEnabled: boolean;
-  handleToggleWorkflow: () => void;
-  canTestWorkflow: boolean;
-  isValid: boolean;
-  hasUnsavedChanges: boolean;
   // TODO: manage it in a workflow state context
   highlightDiff: boolean;
   setHighlightDiff: React.Dispatch<React.SetStateAction<boolean>>;
-  lastUpdatedAt: Date | null;
 }
 
 export const WorkflowDetailHeader = ({
-  name,
   isLoading,
   activeTab,
-  canRunWorkflow,
-  handleRunClick,
-  handleSave,
-  canSaveWorkflow,
-  isEnabled,
-  handleToggleWorkflow,
-  canTestWorkflow,
   handleTabChange,
-  isValid,
-  hasUnsavedChanges,
   highlightDiff,
   setHighlightDiff,
-  lastUpdatedAt,
 }: WorkflowDetailHeaderProps) => {
   const styles = useMemoCss(componentStyles);
+  const dispatch = useDispatch();
+  const { canUpdateWorkflow, canExecuteWorkflow } = useCapabilities();
+
+  const workflow = useSelector(selectWorkflow);
+  const { name, isEnabled, isValid, lastUpdatedAt } = useMemo(
+    () => ({
+      name: workflow?.name ?? '',
+      isEnabled: workflow?.enabled ?? false,
+      isValid: workflow?.valid ?? true,
+      lastUpdatedAt: workflow ? new Date(workflow.lastUpdatedAt) : null,
+    }),
+    [workflow]
+  );
+  const hasUnsavedChanges = useSelector(selectHasChanges);
+
+  const { saveYaml } = useSaveYaml();
+  const handleSaveWorkflow = useCallback(() => {
+    saveYaml();
+  }, [saveYaml]);
+
+  const { toggleWorkflow } = useToggleWorkflow();
+  const handleToggleWorkflow = useCallback(() => {
+    toggleWorkflow(!isEnabled);
+  }, [toggleWorkflow, isEnabled]);
+
+  const openTestModal = useCallback(() => {
+    dispatch(setIsTestModalOpen({ isTestModalOpen: true }));
+  }, [dispatch]);
+
   const [showRunConfirmation, setShowRunConfirmation] = useState(false);
 
-  const buttonGroupOptions: EuiButtonGroupOptionProps[] = useMemo(
-    () => [
-      {
-        id: 'workflow',
-        label: 'Workflow',
-        iconType: 'grid',
-        type: 'button',
-      },
-      {
-        id: 'executions',
-        label: 'Executions',
-        iconType: 'play',
-      },
-    ],
-    []
-  );
-
   const runWorkflowTooltipContent = useMemo(() => {
-    return getRunWorkflowTooltipContent(isValid, canRunWorkflow, isEnabled, false);
-  }, [isValid, canRunWorkflow, isEnabled]);
+    return getRunWorkflowTooltipContent(isValid, canExecuteWorkflow, isEnabled, false);
+  }, [isValid, canExecuteWorkflow, isEnabled]);
 
-  const handleSaveClick = useCallback<React.MouseEventHandler<HTMLButtonElement>>(() => {
-    handleSave();
-  }, [handleSave]);
-
-  const handleRunClickWithUnsavedCheck = () => {
+  const handleRunClickWithUnsavedCheck = useCallback(() => {
     if (hasUnsavedChanges) {
       setShowRunConfirmation(true);
     } else {
-      handleRunClick();
+      openTestModal();
     }
-  };
+  }, [hasUnsavedChanges, openTestModal]);
 
-  const handleConfirmRun = () => {
+  const handleConfirmRun = useCallback(() => {
     setShowRunConfirmation(false);
-    handleRunClick();
-  };
+    openTestModal();
+  }, [openTestModal]);
 
-  const handleCancelRun = () => {
+  const handleCancelRun = useCallback(() => {
     setShowRunConfirmation(false);
-  };
+  }, []);
 
   return (
     <>
@@ -194,9 +206,9 @@ export const WorkflowDetailHeader = ({
                 }
               >
                 <EuiSwitch
-                  disabled={isLoading || !canSaveWorkflow || !isValid || hasUnsavedChanges}
+                  disabled={isLoading || !canUpdateWorkflow || !isValid || hasUnsavedChanges}
                   checked={isEnabled}
-                  onChange={() => handleToggleWorkflow()}
+                  onChange={handleToggleWorkflow}
                   label={i18n.translate('workflows.workflowDetailHeader.enabled', {
                     defaultMessage: 'Enabled',
                   })}
@@ -210,7 +222,7 @@ export const WorkflowDetailHeader = ({
                   iconType="play"
                   size="s"
                   onClick={handleRunClickWithUnsavedCheck}
-                  disabled={!canRunWorkflow || !isEnabled || isLoading || !isValid}
+                  disabled={!canExecuteWorkflow || !isEnabled || isLoading || !isValid}
                   title={runWorkflowTooltipContent ?? undefined}
                   aria-label={i18n.translate(
                     'workflows.workflowDetailHeader.runWorkflow.ariaLabel',
@@ -224,8 +236,8 @@ export const WorkflowDetailHeader = ({
                 fill
                 color="primary"
                 size="s"
-                onClick={handleSaveClick}
-                disabled={!canSaveWorkflow || isLoading}
+                onClick={handleSaveWorkflow}
+                disabled={!canUpdateWorkflow || isLoading}
               >
                 <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
               </EuiButton>

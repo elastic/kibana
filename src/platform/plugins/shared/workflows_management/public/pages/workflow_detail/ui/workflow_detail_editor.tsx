@@ -12,18 +12,20 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { StepContext, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
+import type { StepContext, WorkflowExecutionDto } from '@kbn/workflows';
 import {
   WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
   WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
 } from '@kbn/workflows';
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { ExecutionGraph } from '../../../features/debug-graph/execution_graph';
 import type { WorkflowUrlStateTabType } from '../../../hooks/use_workflow_url_state';
 import type { ContextOverrideData } from '../../../shared/utils/build_step_context_override/build_step_context_override';
 import { TestStepModal } from '../../../features/run_workflow/ui/test_step_modal';
 import { buildContextOverrideForStep } from './build_step_context_mock_for_step';
+import { selectYamlString } from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../../widgets/workflow_yaml_editor').then((module) => ({
@@ -37,39 +39,26 @@ const WorkflowVisualEditor = React.lazy(() =>
   }))
 );
 
-interface WorkflowEditorProps {
-  workflowYaml: string;
-  onWorkflowYamlChange: (yaml: string | undefined) => void;
-  hasChanges: boolean;
-  handleSave: () => void;
-  handleRun: () => void;
-  handleSaveAndRun: () => void;
+interface WorkflowDetailEditorProps {
   activeTab: WorkflowUrlStateTabType;
   selectedExecutionId: string | undefined;
   selectedStepId: string | undefined;
-  workflow: WorkflowDetailDto | undefined;
   execution: WorkflowExecutionDto | undefined;
   highlightDiff?: boolean;
   setSelectedExecution: (executionId: string | null) => void;
 }
 
-export function WorkflowEditor({
-  workflowYaml,
-  onWorkflowYamlChange,
-  handleSave,
-  handleRun,
-  handleSaveAndRun,
-  hasChanges,
+export function WorkflowDetailEditor({
   activeTab,
   selectedExecutionId,
   selectedStepId,
-  workflow,
   execution,
   highlightDiff,
   setSelectedExecution,
-}: WorkflowEditorProps) {
+}: WorkflowDetailEditorProps) {
   const styles = useMemoCss(componentStyles);
   const { uiSettings } = useKibana().services;
+  const workflowYaml = useSelector(selectYamlString) ?? '';
 
   const { runIndividualStep } = useWorkflowActions();
 
@@ -118,26 +107,16 @@ export function WorkflowEditor({
         <EuiFlexItem css={styles.yamlEditor}>
           <React.Suspense fallback={<EuiLoadingSpinner />}>
             <WorkflowYAMLEditor
-              workflowId={workflow?.id ?? 'unknown'}
-              filename={`${workflow?.id ?? 'unknown'}.yaml`}
-              value={yamlValue}
-              onChange={onWorkflowYamlChange}
-              onSave={handleSave}
-              onRun={handleRun}
-              onSaveAndRun={handleSaveAndRun}
-              lastUpdatedAt={workflow?.lastUpdatedAt}
-              hasChanges={hasChanges}
               highlightStep={selectedStepId}
               stepExecutions={execution?.stepExecutions}
               readOnly={activeTab === 'executions'}
               highlightDiff={highlightDiff}
               selectedExecutionId={selectedExecutionId}
-              originalValue={workflow?.yaml ?? ''}
               onStepActionClicked={handleStepRun}
             />
           </React.Suspense>
         </EuiFlexItem>
-        {isVisualEditorEnabled && workflow && (
+        {isVisualEditorEnabled && (
           <EuiFlexItem css={styles.visualEditor}>
             <React.Suspense fallback={<EuiLoadingSpinner />}>
               <WorkflowVisualEditor
@@ -147,7 +126,7 @@ export function WorkflowEditor({
             </React.Suspense>
           </EuiFlexItem>
         )}
-        {isExecutionGraphEnabled && workflow && (
+        {isExecutionGraphEnabled && (
           <EuiFlexItem css={styles.visualEditor}>
             <React.Suspense fallback={<EuiLoadingSpinner />}>
               <ExecutionGraph workflowYaml={yamlValue} />

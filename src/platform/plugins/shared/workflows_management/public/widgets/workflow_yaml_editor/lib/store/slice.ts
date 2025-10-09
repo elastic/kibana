@@ -8,60 +8,51 @@
  */
 
 import { createSlice } from '@reduxjs/toolkit';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
-import type YAML from 'yaml';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import type { WorkflowLookup } from './utils/build_workflow_lookup';
-import type { WorkflowEditorState } from './types';
+import type { EsWorkflow, WorkflowDetailDto, WorkflowStepExecutionDto } from '@kbn/workflows';
+import type { ComputedData, WorkflowDetailState } from './types';
 import { findStepByLine } from './utils/step_finder';
 
 // Initial state
-const initialState: WorkflowEditorState = {
+const initialState: WorkflowDetailState = {
+  workflow: undefined,
   yamlString: undefined,
   computed: undefined,
   focusedStepId: undefined,
   stepExecutions: undefined,
   highlightedStepId: undefined,
+  isTestModalOpen: false,
 };
 
 // Slice
-const workflowEditorSlice = createSlice({
-  name: 'workflow',
+const workflowDetailSlice = createSlice({
+  name: 'detail',
   initialState,
   reducers: {
+    setWorkflow: (state, action: { payload: WorkflowDetailDto }) => {
+      state.workflow = action.payload;
+      state.yamlString = action.payload.yaml;
+    },
+    updateWorkflow: (state, action: { payload: Partial<EsWorkflow> }) => {
+      if (!state.workflow) {
+        return;
+      }
+      Object.assign(state.workflow, action.payload);
+    },
     setYamlString: (state, action: { payload: string }) => {
       state.yamlString = action.payload;
     },
     // Internal action - not for external use
-    _setComputedDataInternal: (
-      state,
-      action: {
-        payload: {
-          yamlDocument?: YAML.Document;
-          workflowLookup?: WorkflowLookup;
-          workflowGraph?: WorkflowGraph;
-        };
-      }
-    ) => {
-      state.computed = {
-        yamlDocument: action.payload.yamlDocument,
-        workflowLookup: action.payload.workflowLookup,
-        workflowGraph: action.payload.workflowGraph,
-      };
+    _setComputedDataInternal: (state, action: { payload: ComputedData }) => {
+      state.computed = action.payload;
     },
     clearComputedData: (state) => {
-      state.computed = {
-        yamlDocument: undefined,
-        workflowLookup: undefined,
-        workflowGraph: undefined,
-      };
+      state.computed = undefined;
     },
     setCursorPosition: (state, action: { payload: { lineNumber: number } }) => {
       if (!state.computed?.workflowLookup) {
         state.focusedStepId = undefined;
         return;
       }
-
       state.focusedStepId = findStepByLine(
         action.payload.lineNumber,
         state.computed.workflowLookup
@@ -76,20 +67,26 @@ const workflowEditorSlice = createSlice({
     setHighlightedStepId: (state, action: { payload: { stepId: string } }) => {
       state.highlightedStepId = action.payload.stepId;
     },
+    setIsTestModalOpen: (state, action: { payload: { isTestModalOpen: boolean } }) => {
+      state.isTestModalOpen = action.payload.isTestModalOpen;
+    },
   },
 });
 
 // Export public action creators from the slice
 export const {
+  setWorkflow,
+  updateWorkflow,
   setYamlString,
   clearComputedData,
   setCursorPosition,
   setStepExecutions,
   setHighlightedStepId,
-} = workflowEditorSlice.actions;
+  setIsTestModalOpen,
+} = workflowDetailSlice.actions;
 
 // Internal action for middleware use only
-export const { _setComputedDataInternal } = workflowEditorSlice.actions;
+export const { _setComputedDataInternal } = workflowDetailSlice.actions;
 
 // Export the reducer
-export const workflowEditorReducer = workflowEditorSlice.reducer;
+export const workflowDetailReducer = workflowDetailSlice.reducer;

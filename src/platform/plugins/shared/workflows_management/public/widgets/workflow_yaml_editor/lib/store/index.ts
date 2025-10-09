@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 // Re-export everything from the individual modules
-export type { WorkflowEditorState, RootState, AppDispatch, WorkflowEditorStore } from './types';
+export type { WorkflowDetailState, RootState, AppDispatch, WorkflowsStore } from './types';
 
 // Action creators
 export { setYamlString, clearComputedData, setCursorPosition, setStepExecutions } from './slice';
 
 // Store
-export { createWorkflowEditorStore, workflowEditorStore } from './store';
+export { createWorkflowsStore as createWorkflowEditorStore } from './store';
 
 // Selectors
 export {

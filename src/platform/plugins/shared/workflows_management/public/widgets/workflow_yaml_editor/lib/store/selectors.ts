@@ -13,43 +13,49 @@ import type { RootState } from './types';
 // Selectors
 
 // Base selectors - these are simple property accessors that don't need memoization
-const selectWorkflowState = (state: RootState) => state.workflow;
-const selectComputedState = (state: RootState) => state.workflow.computed;
+const selectDetailState = (state: RootState) => state.detail;
+const selectDetailComputedState = (state: RootState) => state.detail.computed;
 
 // Exported memoized selectors for final properties
-export const selectYamlString = createSelector(
-  selectWorkflowState,
-  (workflow) => workflow.yamlString
+export const selectWorkflow = createSelector(selectDetailState, (detail) => detail.workflow);
+export const selectYamlString = createSelector(selectDetailState, (detail) => detail.yamlString);
+
+export const selectIsEnabled = createSelector(selectWorkflow, (workflow) => !!workflow?.enabled);
+export const selectWorkflowName = createSelector(selectWorkflow, (workflow) => workflow?.name);
+
+export const selectHasChanges = createSelector(
+  selectDetailState,
+  (detail) => detail.yamlString !== detail.workflow?.yaml
 );
 
 export const selectYamlDocument = createSelector(
-  selectComputedState,
+  selectDetailComputedState,
   (computed) => computed?.yamlDocument
 );
 
 export const selectWorkflowLookup = createSelector(
-  selectComputedState,
+  selectDetailComputedState,
   (computed) => computed?.workflowLookup
 );
 
 export const selectWorkflowGraph = createSelector(
-  selectComputedState,
+  selectDetailComputedState,
   (computed) => computed?.workflowGraph
 );
 
 export const selectFocusedStepId = createSelector(
-  selectWorkflowState,
-  (workflow) => workflow.focusedStepId
+  selectDetailState,
+  (detail) => detail.focusedStepId
 );
 
 export const selectHighlightedStepId = createSelector(
-  selectWorkflowState,
-  (workflow) => workflow.highlightedStepId
+  selectDetailState,
+  (detail) => detail.highlightedStepId
 );
 
 export const selectStepExecutions = createSelector(
-  selectWorkflowState,
-  (workflow) => workflow.stepExecutions
+  selectDetailState,
+  (detail) => detail.stepExecutions
 );
 
 export const selectFocusedStepInfo = createSelector(
@@ -57,4 +63,9 @@ export const selectFocusedStepInfo = createSelector(
   selectWorkflowLookup,
   (focusedStepId, workflowLookup) =>
     focusedStepId && workflowLookup ? workflowLookup.steps[focusedStepId] : undefined
+);
+
+export const selectIsTestModalOpen = createSelector(
+  selectDetailState,
+  (detail) => detail.isTestModalOpen
 );

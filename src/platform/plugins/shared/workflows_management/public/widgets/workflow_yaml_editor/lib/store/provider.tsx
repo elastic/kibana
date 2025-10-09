@@ -9,18 +9,16 @@
 
 import React, { useMemo } from 'react';
 import { Provider } from 'react-redux';
-import { createWorkflowEditorStore } from './store';
-
-interface WorkflowEditorStoreProviderProps {
-  children: React.ReactNode;
-}
+import { useKibana } from '../../../../hooks/use_kibana';
+import { createWorkflowsStore } from './store';
 
 /**
  * Provides a workflow editor Redux store context to child components.
  * Creates a new store instance for each provider instance, ensuring isolation.
  */
-export function WorkflowEditorStoreProvider({ children }: WorkflowEditorStoreProviderProps) {
-  const workflowEditorStore = useMemo(() => createWorkflowEditorStore(), []);
+export function WorkflowEditorStoreProvider({ children }: React.PropsWithChildren) {
+  const { services } = useKibana(); // Services are pre-wired in the Kibana services context, they never change.
+  const workflowEditorStore = useMemo(() => createWorkflowsStore(services), [services]);
 
   return <Provider store={workflowEditorStore}>{children}</Provider>;
 }

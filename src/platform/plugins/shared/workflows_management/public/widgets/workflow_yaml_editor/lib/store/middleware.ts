@@ -41,10 +41,10 @@ export const workflowComputationMiddleware: Middleware =
     // Only react to yamlString changes
     if (action.type === setYamlString.type) {
       const state = store.getState();
-      const { yamlString } = state.workflow;
+      const { yamlString } = state.detail;
 
       // Do computation immediately if yaml string is defined and no previous workflow graph exists
-      if (yamlString && !state.workflow.computed) {
+      if (yamlString && !state.detail.computed) {
         performComputation(store, yamlString);
         return result;
       }
