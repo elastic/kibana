@@ -25,6 +25,9 @@ steps:
     depends_on:
       - terrazzo-initial-pipeline-upload
     agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
       machineType: n2-standard-2
       diskSizeGb: 95
 
