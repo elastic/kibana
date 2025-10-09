@@ -255,6 +255,10 @@ describe('FUSE Autocomplete', () => {
   });
 
   describe('WITH', () => {
+    it('suggests empty map if WITH is empty', async () => {
+      await fuseExpectSuggestions('FROM a | FUSE linear WITH ', ['{ $0 }']);
+    });
+
     it('suggests rank_constant and weights as parameters when FUSE method is rrf', async () => {
       await fuseExpectSuggestions('FROM a | FUSE rrf WITH { ', [
         '"rank_constant": ',
