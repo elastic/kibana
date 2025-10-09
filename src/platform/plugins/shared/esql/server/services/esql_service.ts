@@ -15,6 +15,7 @@ import type {
 } from '@kbn/esql-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceEndpointsAutocompleteResult } from '@kbn/esql-types';
+import { getListOfCCSIndices } from '../lookup/utils';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;
@@ -24,26 +25,41 @@ export class EsqlService {
   constructor(public readonly options: EsqlServiceOptions) {}
 
   public async getIndicesByIndexMode(
-    mode: 'lookup' | 'time_series'
+    mode: 'lookup' | 'time_series',
+    remoteClusters?: string
   ): Promise<IndicesAutocompleteResult> {
     const { client } = this.options;
 
     const indices: IndexAutocompleteItem[] = [];
 
+    const sourcesToQuery = ['*'];
+    const remoteClustersArray: string[] = [];
+    if (remoteClusters) {
+      remoteClustersArray.push(...remoteClusters.split(','));
+      // attach a wildcard * for each remoteCluster
+      const clustersArray = remoteClustersArray.map((cluster) => `${cluster.trim()}:*`);
+      sourcesToQuery.push(...clustersArray);
+    }
+
     // It doesn't return hidden indices
     const sources = (await client.indices.resolveIndex({
-      name: '*',
+      name: sourcesToQuery,
       expand_wildcards: 'open',
+      querystring: {
+        mode,
+      },
     })) as ResolveIndexResponse;
 
     sources.indices?.forEach((index) => {
-      if (index.mode === mode) {
-        indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
-      }
+      indices.push({ name: index.name, mode, aliases: index.aliases ?? [] });
     });
 
+    const crossClusterCommonIndices = remoteClusters
+      ? getListOfCCSIndices(remoteClustersArray, indices)
+      : indices;
+
     const result: IndicesAutocompleteResult = {
-      indices,
+      indices: crossClusterCommonIndices,
     };
 
     return result;

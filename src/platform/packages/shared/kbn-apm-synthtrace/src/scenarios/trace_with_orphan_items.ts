@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates a distributed trace that intentionally contains orphaned (missing parent) spans.
+ */
+
 import type { ApmFields, Serializable } from '@kbn/apm-synthtrace-client';
 import { apm, httpExitSpan } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';

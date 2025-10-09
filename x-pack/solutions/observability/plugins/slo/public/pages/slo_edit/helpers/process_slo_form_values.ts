@@ -61,6 +61,9 @@ export function transformSloResponseToCreateSloForm(
         : SETTINGS_DEFAULT_VALUES.frequency,
       syncField: values.settings?.syncField ?? null,
     },
+    artifacts: {
+      dashboards: values.artifacts?.dashboards || [],
+    },
   };
 }
 
@@ -93,6 +96,9 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
     },
+    artifacts: {
+      dashboards: values.artifacts?.dashboards || [],
+    },
   };
 }
 
@@ -124,6 +130,9 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
       syncDelay: `${values.settings.syncDelay ?? SETTINGS_DEFAULT_VALUES.syncDelay}m`,
       frequency: `${values.settings.frequency ?? SETTINGS_DEFAULT_VALUES.frequency}m`,
       syncField: values.settings.syncField,
+    },
+    artifacts: {
+      dashboards: values.artifacts?.dashboards || [],
     },
   };
 }

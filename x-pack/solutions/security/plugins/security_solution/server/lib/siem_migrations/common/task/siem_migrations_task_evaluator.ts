@@ -11,14 +11,14 @@ import { evaluate } from 'langsmith/evaluation';
 import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
 import { Client } from 'langsmith';
 import type { Logger } from '@kbn/logging';
+import type { TargetConfigT } from 'langsmith/dist/evaluation/_runner';
 import type { LangSmithEvaluationOptions } from '../../../../../common/siem_migrations/model/common.gen';
 import type { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
 import type { MigrationDocument, ItemDocument, SiemMigrationsClientDependencies } from '../types';
 
-export interface EvaluateParams<C extends object = {}> {
+export interface EvaluateParams {
   connectorId: string;
   langsmithOptions: LangSmithEvaluationOptions;
-  invocationConfig?: RunnableConfig<C>;
 }
 
 export type Evaluator = (args: { run: Run; example: Example }) => EvaluationResult;
@@ -54,7 +54,7 @@ export abstract class SiemMigrationsBaseEvaluator<
     protected logger: Logger
   ) {}
 
-  public async evaluate({ connectorId, langsmithOptions, invocationConfig }: EvaluateParams<C>) {
+  public async evaluate({ connectorId, langsmithOptions }: EvaluateParams): Promise<void> {
     if (!isLangSmithEnabled()) {
       throw Error('LangSmith is not enabled');
     }
@@ -84,8 +84,8 @@ export abstract class SiemMigrationsBaseEvaluator<
 
     // create the migration task after setup
     const evaluators = this.getEvaluators();
-    const executeMigrationTask = (params: P) =>
-      this.taskRunner.executeTask(params, invocationConfig ?? {});
+    const executeMigrationTask = (params: P, config?: TargetConfigT) =>
+      this.taskRunner.executeTask(params, config as RunnableConfig<C>);
 
     evaluate(executeMigrationTask, {
       data: langsmithOptions.dataset,

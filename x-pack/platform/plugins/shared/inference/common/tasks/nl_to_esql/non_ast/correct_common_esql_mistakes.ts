@@ -18,7 +18,7 @@ const ESCAPE_TOKEN = '\\\\';
 // this function splits statements by a certain token,
 // and takes into account escaping, or function calls
 
-function split(value: string, splitToken: string) {
+function split(value: string, splitToken: string | RegExp) {
   const statements: string[] = [];
 
   let delimiterToken: string | undefined;
@@ -32,18 +32,28 @@ function split(value: string, splitToken: string) {
   for (let index = 0; index < trimmed.length; index++) {
     const char = trimmed[index];
 
-    if (
-      !delimiterToken &&
-      groupingCount === 0 &&
-      trimmed
-        .slice(index, index + splitToken.length)
-        .join('')
-        .toLowerCase() === splitToken.toLowerCase()
-    ) {
-      index += splitToken.length - 1;
-      statements.push(currentStatement.trim());
-      currentStatement = '';
-      continue;
+    if (!delimiterToken && groupingCount === 0) {
+      let charsMatched: number = 0;
+
+      if (typeof splitToken === 'string') {
+        charsMatched =
+          trimmed
+            .slice(index, index + splitToken.length)
+            .join('')
+            .toLowerCase() === splitToken.toLowerCase()
+            ? splitToken.length
+            : 0;
+      } else {
+        charsMatched = trimmed.slice(index).join('').match(splitToken)?.[0].length ?? 0;
+      }
+
+      if (charsMatched) {
+        // decrement by 1 to account for increment in loop
+        index += charsMatched - 1;
+        statements.push(currentStatement.trim());
+        currentStatement = '';
+        continue;
+      }
     }
 
     currentStatement += char;
@@ -87,8 +97,8 @@ export function splitIntoCommands(query: string) {
 }
 
 function replaceSingleQuotesWithDoubleQuotes(command: string) {
-  const regex = /'(?=(?:[^"]*"[^"]*")*[^"]*$)/g;
-  return command.replace(regex, '"');
+  const regex = /'(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/g;
+  return command.replaceAll(regex, '"');
 }
 
 function removeColumnQuotesAndEscape(column: string) {
@@ -180,10 +190,13 @@ function escapeColumns(line: string) {
 
   const escapedBody = split(body.trim(), ',')
     .map((statement) => {
-      const [lhs, rhs] = split(statement, '=');
-
+      // It's an assignment, so we need to split on the equals sign.
+      // We want to split on assignments only, so we use a regex that looks for
+      // an equals sign that is not preceded or followed by another equals sign.
+      const [lhs, rhs] = split(statement, /(?<!=)=(?!=)/);
       if (!rhs) {
-        return lhs;
+        // This is not a valid assignment, so we don't need to do anything.
+        return statement;
       }
       const escapedRhs = escapeColumnsInFunctions(rhs);
       return `${removeColumnQuotesAndEscape(lhs)} = ${escapedRhs}`;
@@ -302,12 +315,17 @@ export function correctCommonEsqlMistakes(query: string): {
 } {
   const commands = splitIntoCommands(query.trim());
 
-  const formattedCommands: string[] = commands.map(({ name, command }, index) => {
+  const formattedCommands = commands.map(({ name, command }, idx) => {
     let formattedCommand = command;
 
     formattedCommand = formattedCommand
       .replaceAll(/"@timestamp"/g, '@timestamp')
       .replaceAll(/'@timestamp'/g, '@timestamp');
+
+    // Do this for all commands, except for FROM that has special logic for quotes
+    if (name !== 'FROM') {
+      formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
+    }
 
     switch (name) {
       case 'FROM': {
@@ -317,12 +335,10 @@ export function correctCommonEsqlMistakes(query: string): {
         break;
       }
       case 'WHERE':
-        formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
         formattedCommand = ensureEqualityOperators(formattedCommand);
         break;
 
       case 'EVAL':
-        formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
         formattedCommand = escapeColumns(formattedCommand);
         break;
 
@@ -336,7 +352,7 @@ export function correctCommonEsqlMistakes(query: string): {
         break;
 
       case 'KEEP':
-        formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(index + 1));
+        formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(idx + 1));
         break;
 
       case 'SORT':

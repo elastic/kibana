@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AllFieldsDiff } from '../../../../../common/api/detection_engine';
+import type { AllThreeWayFieldsDiff } from '../../../../../common/api/detection_engine';
 
 export interface FieldDiff {
   currentVersion: string;
@@ -19,7 +19,7 @@ export interface FormattedFieldDiff {
 
 export interface FieldsGroupDiff {
   formattedDiffs: FormattedFieldDiff;
-  fieldsGroupName: keyof AllFieldsDiff;
+  fieldsGroupName: keyof AllThreeWayFieldsDiff;
 }
 
 export enum DiffLayout {

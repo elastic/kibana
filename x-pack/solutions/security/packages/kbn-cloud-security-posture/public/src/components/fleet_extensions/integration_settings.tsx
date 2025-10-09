@@ -29,7 +29,7 @@ export const IntegrationSettings = ({
         error: validationResults?.name || null,
         label: (
           <FormattedMessage
-            id="securitySolutionPackages.fleetIntegration.integrationNameLabel"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.integrationNameLabel"
             defaultMessage="Name"
           />
         ),
@@ -40,7 +40,7 @@ export const IntegrationSettings = ({
         error: validationResults?.description || null,
         label: (
           <FormattedMessage
-            id="securitySolutionPackages.fleetIntegration.integrationDescriptionLabel"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.integrationDescriptionLabel"
             defaultMessage="Description"
           />
         ),

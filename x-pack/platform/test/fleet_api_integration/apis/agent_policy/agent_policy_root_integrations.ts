@@ -118,6 +118,7 @@ export default function (providerContext: FtrProviderContext) {
             title: 'Auditd Manager',
             requires_root: true,
             version: '1.16.3',
+            fips_compatible: false,
           },
         ]);
 

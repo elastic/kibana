@@ -10,6 +10,7 @@
 import type { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 
+import type { ESQLControlState } from '@kbn/esql-types';
 import type { OptionsListSelection } from './options_list_selections';
 import type { OptionsListSortingType } from './suggestions_sorting';
 import type { DefaultDataControlState } from '../types';
@@ -29,9 +30,7 @@ export interface OptionsListDisplaySettings {
   hideSort?: boolean;
 }
 
-export interface OptionsListControlState
-  extends DefaultDataControlState,
-    OptionsListDisplaySettings {
+type OptionsListBaseControlState = OptionsListDisplaySettings & {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;
   selectedOptions?: OptionsListSelection[];
@@ -39,7 +38,19 @@ export interface OptionsListControlState
   runPastTimeout?: boolean;
   singleSelect?: boolean;
   exclude?: boolean;
-}
+};
+export type OptionsListDSLControlState = DefaultDataControlState & OptionsListBaseControlState;
+export type OptionsListESQLControlState = ESQLControlState & OptionsListBaseControlState;
+
+export type OptionsListControlState = OptionsListDSLControlState | OptionsListESQLControlState;
+
+export const isOptionsListESQLControlState = (
+  state: OptionsListControlState | undefined
+): state is OptionsListESQLControlState =>
+  typeof state !== 'undefined' &&
+  Object.hasOwn(state, 'esqlQuery') &&
+  Object.hasOwn(state, 'controlType') &&
+  !Object.hasOwn(state, 'fieldName');
 
 /**
  * ----------------------------------------------------------------
@@ -92,7 +103,7 @@ export type OptionsListRequest = Omit<
  */
 export interface OptionsListRequestBody
   extends Pick<
-    OptionsListControlState,
+    OptionsListDSLControlState,
     'fieldName' | 'searchTechnique' | 'sort' | 'selectedOptions'
   > {
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;

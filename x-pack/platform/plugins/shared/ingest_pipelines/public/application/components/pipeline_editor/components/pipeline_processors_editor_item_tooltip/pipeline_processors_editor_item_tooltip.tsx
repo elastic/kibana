@@ -7,10 +7,11 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
-import { EuiPortal } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiPortal, useEuiTheme } from '@elastic/eui';
+
 import type { ProcessorInternal } from '../../types';
 
-import './pipeline_processors_editor_item_toolip.scss';
 import { ProcessorInformation } from './processor_information';
 
 export interface Position {
@@ -25,8 +26,21 @@ interface Props {
 const MOUSE_PADDING_RIGHT = 20;
 const MOUSE_PADDING_BOTTOM = 20;
 
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    tooltip: css`
+      position: fixed;
+      pointer-events: none;
+      z-index: ${euiTheme.levels.menu};
+    `,
+  };
+};
+
 export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({ processor }) => {
   const [position, setPosition] = useState<Position | undefined>();
+  const styles = useStyles();
 
   useEffect(() => {
     const mouseMoveListener = (event: MouseEvent) => {
@@ -50,7 +64,7 @@ export const PipelineProcessorsItemTooltip: FunctionComponent<Props> = ({ proces
      */
     <EuiPortal>
       <div
-        className="pipelineProcessorsEditor__itemTooltip"
+        css={styles.tooltip}
         style={{
           left: position.x + MOUSE_PADDING_RIGHT,
           top: position.y + MOUSE_PADDING_BOTTOM,

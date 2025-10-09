@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -24,7 +25,6 @@ export default function ({ getService }: FtrProviderContext) {
         instructions: 'You are a helpful test agent',
         tools: [
           {
-            type: 'builtin',
             tool_ids: ['*'],
           },
         ],
@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const agentId of createdAgentIds) {
         try {
           await supertest
-            .delete(`/api/chat/agents/${agentId}`)
+            .delete(`/api/agent_builder/agents/${agentId}`)
             .set('kbn-xsrf', 'kibana')
             .expect(200);
         } catch (error) {
@@ -44,10 +44,10 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    describe('POST /api/chat/agents', () => {
+    describe('POST /api/agent_builder/agents', () => {
       it('should create a new agent successfully', async () => {
         const response = await supertest
-          .post('/api/chat/agents')
+          .post('/api/agent_builder/agents')
           .set('kbn-xsrf', 'kibana')
           .send(mockAgent)
           .expect(200);
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         const response = await supertest
-          .post('/api/chat/agents')
+          .post('/api/agent_builder/agents')
           .set('kbn-xsrf', 'kibana')
           .send(invalidAgent)
           .expect(400);
@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/agents')
+          .post('/api/agent_builder/agents')
           .set('kbn-xsrf', 'kibana')
           .send(incompleteAgent)
           .expect(400);
@@ -95,17 +95,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when agent API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': false,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
         await supertest
-          .post('/api/chat/agents')
+          .post('/api/agent_builder/agents')
           .set('kbn-xsrf', 'kibana')
           .send(mockAgent)
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': true,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
         });
       });
 
@@ -117,7 +117,6 @@ export default function ({ getService }: FtrProviderContext) {
             instructions: 'Test agent with invalid tools',
             tools: [
               {
-                type: 'invalid_type',
                 tool_ids: ['non-existent-tool'],
               },
             ],
@@ -125,14 +124,14 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/agents')
+          .post('/api/agent_builder/agents')
           .set('kbn-xsrf', 'kibana')
           .send(agentWithInvalidTools)
           .expect(400);
       });
     });
 
-    describe('GET /api/chat/agents/get-test-agent', () => {
+    describe('GET /api/agent_builder/agents/get-test-agent', () => {
       let testAgentId: string;
 
       before(async () => {
@@ -142,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         const response = await supertest
-          .post('/api/chat/agents')
+          .post('/api/agent_builder/agents')
           .set('kbn-xsrf', 'kibana')
           .send(testAgent)
           .expect(200);
@@ -152,7 +151,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should retrieve an existing agent', async () => {
-        const response = await supertest.get(`/api/chat/agents/get-test-agent`).expect(200);
+        const response = await supertest
+          .get(`/api/agent_builder/agents/get-test-agent`)
+          .expect(200);
 
         expect(response.body).to.have.property('id', 'get-test-agent');
         expect(response.body).to.have.property('name', mockAgent.name);
@@ -166,7 +167,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should return 404 for non-existent agent', async () => {
-        const response = await supertest.get('/api/chat/agents/non-existent-agent').expect(404);
+        const response = await supertest
+          .get('/api/agent_builder/agents/non-existent-agent')
+          .expect(404);
 
         expect(response.body).to.have.property('message');
         expect(response.body.message).to.contain('not found');
@@ -174,18 +177,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when agent API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': false,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
-        await supertest.get(`/api/chat/agents/get-test-agent`).expect(404);
+        await supertest.get(`/api/agent_builder/agents/get-test-agent`).expect(404);
 
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': true,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
         });
       });
     });
 
-    describe('GET /api/chat/agents', () => {
+    describe('GET /api/agent_builder/agents', () => {
       const testAgentIds: string[] = [];
 
       before(async () => {
@@ -197,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           };
 
           await supertest
-            .post('/api/chat/agents')
+            .post('/api/agent_builder/agents')
             .set('kbn-xsrf', 'kibana')
             .send(testAgent)
             .expect(200);
@@ -208,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should list all agents', async () => {
-        const response = await supertest.get('/api/chat/agents').expect(200);
+        const response = await supertest.get('/api/agent_builder/agents').expect(200);
 
         expect(response.body).to.have.property('results');
         expect(response.body.results).to.be.an('array');
@@ -217,18 +220,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when agent API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': false,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
-        await supertest.get('/api/chat/agents').expect(404);
+        await supertest.get('/api/agent_builder/agents').expect(404);
 
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': true,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
         });
       });
     });
 
-    describe('PUT /api/chat/agents/update-test-agent', () => {
+    describe('PUT /api/agent_builder/agents/update-test-agent', () => {
       before(async () => {
         const testAgent = {
           ...mockAgent,
@@ -236,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/agents')
+          .post('/api/agent_builder/agents')
           .set('kbn-xsrf', 'kibana')
           .send(testAgent)
           .expect(200);
@@ -251,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         const response = await supertest
-          .put(`/api/chat/agents/update-test-agent`)
+          .put(`/api/agent_builder/agents/update-test-agent`)
           .set('kbn-xsrf', 'kibana')
           .send(updates)
           .expect(200);
@@ -270,7 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         const response = await supertest
-          .put(`/api/chat/agents/update-test-agent`)
+          .put(`/api/agent_builder/agents/update-test-agent`)
           .set('kbn-xsrf', 'kibana')
           .send(configUpdates)
           .expect(200);
@@ -285,7 +288,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 for non-existent agent', async () => {
         await supertest
-          .put('/api/chat/agents/non-existent-agent')
+          .put('/api/agent_builder/agents/non-existent-agent')
           .set('kbn-xsrf', 'kibana')
           .send({ name: 'Updated name' })
           .expect(404);
@@ -293,22 +296,22 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when agent API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': false,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
         await supertest
-          .put(`/api/chat/agents/update-test-agent`)
+          .put(`/api/agent_builder/agents/update-test-agent`)
           .set('kbn-xsrf', 'kibana')
           .send({ name: 'Updated Name' })
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': true,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
         });
       });
     });
 
-    describe('DELETE /api/chat/agents/delete-test-agent', () => {
+    describe('DELETE /api/agent_builder/agents/delete-test-agent', () => {
       before(async () => {
         const testAgent = {
           ...mockAgent,
@@ -316,7 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
 
         await supertest
-          .post('/api/chat/agents')
+          .post('/api/agent_builder/agents')
           .set('kbn-xsrf', 'kibana')
           .send(testAgent)
           .expect(200);
@@ -326,7 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should delete an existing agent', async () => {
         const response = await supertest
-          .delete(`/api/chat/agents/delete-test-agent`)
+          .delete(`/api/agent_builder/agents/delete-test-agent`)
           .set('kbn-xsrf', 'kibana')
           .expect(200);
 
@@ -335,7 +338,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 for non-existent agent', async () => {
         const response = await supertest
-          .delete('/api/chat/agents/non-existent-agent')
+          .delete('/api/agent_builder/agents/non-existent-agent')
           .set('kbn-xsrf', 'kibana')
           .expect(404);
 
@@ -345,16 +348,16 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should return 404 when agent API is disabled', async () => {
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': false,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: false,
         });
 
         await supertest
-          .delete(`/api/chat/agents/delete-test-agent`)
+          .delete(`/api/agent_builder/agents/delete-test-agent`)
           .set('kbn-xsrf', 'kibana')
           .expect(404);
 
         await kibanaServer.uiSettings.update({
-          'onechat:api:enabled': true,
+          [AGENT_BUILDER_ENABLED_SETTING_ID]: true,
         });
       });
     });

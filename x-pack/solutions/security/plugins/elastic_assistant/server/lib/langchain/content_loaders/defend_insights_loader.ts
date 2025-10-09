@@ -8,11 +8,12 @@
 import type { Document } from 'langchain/document';
 import type { Logger } from '@kbn/core/server';
 import type { Metadata } from '@kbn/elastic-assistant-common';
-import globby from 'globby';
+import { globSync } from 'fs';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { TextLoader } from 'langchain/document_loaders/fs/text';
 import { resolve } from 'path';
 import pMap from 'p-map';
+import normalizePath from 'normalize-path';
 
 import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { DEFEND_INSIGHTS_POLICY_RESPONSE_FAILURE } from '../../../routes/knowledge_base/constants';
@@ -104,9 +105,10 @@ export const getDefendInsightsDocsCount = async ({
   logger: Logger;
 }): Promise<number> => {
   try {
-    const files = await globby('**/*.{md,txt}', {
+    const files = globSync('**/*.{md,txt}', {
       cwd: resolve(__dirname, '../../../knowledge_base/defend_insights'),
-    });
+    }).map((p) => normalizePath(p));
+
     return files.length;
   } catch (e) {
     logger.error(`Failed to get Defend Insights source docs count\n${e}`);

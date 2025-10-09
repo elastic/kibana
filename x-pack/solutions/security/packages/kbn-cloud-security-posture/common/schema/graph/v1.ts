@@ -48,16 +48,32 @@ export const graphRequestSchema = schema.object({
 
 export const DOCUMENT_TYPE_EVENT = 'event' as const;
 export const DOCUMENT_TYPE_ALERT = 'alert' as const;
+export const DOCUMENT_TYPE_ENTITY = 'entity' as const;
 
 export const entitySchema = schema.object({
   name: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
+  sub_type: schema.maybe(schema.string()),
+  host: schema.maybe(
+    schema.object({
+      ip: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export const nodeDocumentDataSchema = schema.object({
   id: schema.string(),
-  type: schema.oneOf([schema.literal(DOCUMENT_TYPE_EVENT), schema.literal(DOCUMENT_TYPE_ALERT)]),
+  type: schema.oneOf([
+    schema.literal(DOCUMENT_TYPE_EVENT),
+    schema.literal(DOCUMENT_TYPE_ALERT),
+    schema.literal(DOCUMENT_TYPE_ENTITY),
+  ]),
   index: schema.maybe(schema.string()),
+  event: schema.maybe(
+    schema.object({
+      id: schema.string(),
+    })
+  ),
   alert: schema.maybe(
     schema.object({
       ruleName: schema.maybe(schema.string()),
@@ -138,6 +154,11 @@ export const labelNodeDataSchema = schema.allOf([
     shape: schema.literal('label'),
     parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
+    ips: schema.maybe(schema.arrayOf(schema.string())),
+    count: schema.maybe(schema.number()),
+    uniqueEventsCount: schema.maybe(schema.number()),
+    uniqueAlertsCount: schema.maybe(schema.number()),
+    countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
   }),
 ]);

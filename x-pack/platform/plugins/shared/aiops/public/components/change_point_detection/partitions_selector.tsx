@@ -6,14 +6,7 @@
  */
 
 import React, { type FC, useState, useCallback, useMemo, useEffect } from 'react';
-import {
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -186,15 +179,15 @@ export const PartitionsSelector: FC<PartitionsSelectorProps> = ({
             })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
+            <EuiIconTip
               content={i18n.translate('xpack.aiops.changePointDetection.partitionsDescription', {
                 defaultMessage:
                   'If not supplied, the largest change points across all split field values will be displayed.',
               })}
               position="right"
-            >
-              <EuiIcon size="s" type="question" />
-            </EuiToolTip>
+              type="question"
+              size="s"
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       }

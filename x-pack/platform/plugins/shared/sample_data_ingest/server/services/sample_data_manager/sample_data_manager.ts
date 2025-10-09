@@ -6,14 +6,18 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  ISavedObjectsImporter,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { DatasetSampleType } from '../../../common';
 import { type StatusResponse, getSampleDataIndexName } from '../../../common';
 import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';
+import { SavedObjectsManager } from '../saved_objects_manager';
 import type { ZipArchive } from '../types';
-
 interface SampleDataManagerOpts {
   artifactsFolder: string;
   logger: Logger;
@@ -27,6 +31,7 @@ export class SampleDataManager {
   private readonly log: Logger;
   private readonly artifactManager: ArtifactManager;
   private readonly indexManager: IndexManager;
+  private readonly savedObjectsManager: SavedObjectsManager;
   private isInstalling: boolean = false;
 
   constructor({
@@ -51,24 +56,34 @@ export class SampleDataManager {
       logger: this.log,
       isServerlessPlatform,
     });
+
+    this.savedObjectsManager = new SavedObjectsManager({
+      logger: this.log,
+    });
   }
 
   async installSampleData({
     sampleType,
     esClient,
+    soClient,
+    soImporter,
   }: {
     sampleType: DatasetSampleType;
     esClient: ElasticsearchClient;
-  }): Promise<string> {
+    soClient: SavedObjectsClientContract;
+    soImporter: ISavedObjectsImporter;
+  }): Promise<{ indexName: string; dashboardId?: string }> {
     this.log.info(`Installing sample data for [${sampleType}]`);
 
     let archive: ZipArchive | undefined;
     const indexName = getSampleDataIndexName(sampleType);
 
     try {
-      if ((await this.indexManager.hasIndex({ indexName, esClient })) || this.isInstalling) {
+      const status = await this.getSampleDataStatus({ sampleType, esClient, soClient });
+      if (status.status === 'installed' || this.isInstalling) {
         this.log.warn(`Sample data already installed for [${sampleType}]`);
-        return indexName;
+
+        return { indexName, dashboardId: status.dashboardId };
       }
 
       this.isInstalling = true;
@@ -89,9 +104,16 @@ export class SampleDataManager {
       });
 
       this.log.info(`Sample data installation successful for [${sampleType}]`);
-      return indexName;
+
+      const { dashboardId } = await this.savedObjectsManager.importSavedObjects(
+        soImporter,
+        sampleType
+      );
+
+      return { indexName, dashboardId };
     } catch (error) {
       await this.indexManager.deleteIndex({ indexName, esClient });
+      await this.savedObjectsManager.deleteSavedObjects(soClient, sampleType);
       this.log.error(
         `Sample data installation failed for [${sampleType}]: ${error?.message || error}`
       );
@@ -111,28 +133,41 @@ export class SampleDataManager {
   async removeSampleData({
     sampleType,
     esClient,
+    soClient,
   }: {
     sampleType: DatasetSampleType;
     esClient: ElasticsearchClient;
+    soClient?: SavedObjectsClientContract;
   }): Promise<void> {
     const indexName = getSampleDataIndexName(sampleType);
     await this.indexManager.deleteIndex({ indexName, esClient });
+
+    if (soClient) {
+      await this.savedObjectsManager.deleteSavedObjects(soClient, sampleType);
+    }
   }
 
   async getSampleDataStatus({
     sampleType,
     esClient,
+    soClient,
   }: {
     sampleType: DatasetSampleType;
     esClient: ElasticsearchClient;
+    soClient: SavedObjectsClientContract;
   }): Promise<StatusResponse> {
     const indexName = getSampleDataIndexName(sampleType);
     try {
       const hasIndex = await this.indexManager.hasIndex({ indexName, esClient });
-      return {
-        status: hasIndex ? 'installed' : 'uninstalled',
-        indexName: hasIndex ? indexName : undefined,
-      };
+      const dashboardId = await this.savedObjectsManager.getDashboardId(soClient, sampleType);
+      if (hasIndex) {
+        return {
+          status: 'installed',
+          indexName,
+          dashboardId,
+        };
+      }
+      return { status: 'uninstalled' };
     } catch (error) {
       this.log.warn(`Failed to check sample data status for [${sampleType}]: ${error.message}`);
       return { status: 'uninstalled' };

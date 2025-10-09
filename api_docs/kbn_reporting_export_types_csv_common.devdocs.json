@@ -305,15 +305,7 @@
           "\nPublic-facing interface\nApps should use this interface to build job params. The browserTimezone and version\nfields become automatically provided by Reporting"
         ],
         "signature": [
-          "{ title: string; columns?: string[] | undefined; searchSource: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SerializedSearchSourceFields",
-            "text": "SerializedSearchSourceFields"
-          },
-          "; forceNow?: string | undefined; layout?: { id?: ",
+          "{ title: string; columns?: string[] | undefined; forceNow?: string | undefined; layout?: { id?: ",
           {
             "pluginId": "screenshotting",
             "scope": "common",
@@ -323,7 +315,15 @@
           },
           " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
-          "> | undefined; zoom?: number | undefined; } | undefined; objectType: string; pagingStrategy?: ",
+          "> | undefined; zoom?: number | undefined; } | undefined; searchSource: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SerializedSearchSourceFields",
+            "text": "SerializedSearchSourceFields"
+          },
+          "; objectType: string; pagingStrategy?: ",
           "CsvPagingStrategy",
           " | undefined; }"
         ],

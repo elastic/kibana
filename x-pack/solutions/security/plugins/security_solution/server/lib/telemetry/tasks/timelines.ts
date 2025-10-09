@@ -11,7 +11,13 @@ import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
-import { ranges, TelemetryTimelineFetcher, newTelemetryLogger } from '../helpers';
+import {
+  ranges,
+  TelemetryTimelineFetcher,
+  newTelemetryLogger,
+  getPreviousDailyTaskTimestamp,
+} from '../helpers';
+import { telemetryConfiguration } from '../configuration';
 
 export function createTelemetryTimelineTaskConfig() {
   const taskName = 'Security Solution Timeline telemetry';
@@ -22,6 +28,7 @@ export function createTelemetryTimelineTaskConfig() {
     interval: '1h',
     timeout: '15m',
     version: '1.0.1',
+    getLastExecutionTime: getPreviousDailyTaskTimestamp,
     runTask: async (
       taskId: string,
       logger: Logger,
@@ -46,34 +53,41 @@ export function createTelemetryTimelineTaskConfig() {
         if (!alertsIndex) {
           throw Error('alerts index is not ready yet, skipping telemetry task');
         }
-        const alerts = await receiver.fetchTimelineAlerts(alertsIndex, rangeFrom, rangeTo);
+        const alerts = receiver.fetchTimelineAlerts(
+          alertsIndex,
+          rangeFrom,
+          rangeTo,
+          telemetryConfiguration.query_config
+        );
 
-        log.debug('found alerts to process', { length: alerts.length } as LogMeta);
+        for await (const page of alerts) {
+          log.debug('found alerts to process', { length: page.length, alertsIndex } as LogMeta);
 
-        for (const alert of alerts) {
-          const result = await fetcher.fetchTimeline(alert);
+          for (const alert of page) {
+            const result = await fetcher.fetchTimeline(alert);
 
-          sender.getTelemetryUsageCluster()?.incrementCounter({
-            counterName: 'telemetry_timeline',
-            counterType: 'timeline_node_count',
-            incrementBy: result.nodes,
-          });
+            sender.getTelemetryUsageCluster()?.incrementCounter({
+              counterName: 'telemetry_timeline',
+              counterType: 'timeline_node_count',
+              incrementBy: result.nodes,
+            });
 
-          sender.getTelemetryUsageCluster()?.incrementCounter({
-            counterName: 'telemetry_timeline',
-            counterType: 'timeline_event_count',
-            incrementBy: result.events,
-          });
+            sender.getTelemetryUsageCluster()?.incrementCounter({
+              counterName: 'telemetry_timeline',
+              counterType: 'timeline_event_count',
+              incrementBy: result.events,
+            });
 
-          if (result.timeline) {
-            await sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
-            counter += 1;
-          } else {
-            log.debug('no events in timeline');
+            if (result.timeline) {
+              await sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
+              counter += 1;
+            } else {
+              log.debug('no events in timeline');
+            }
           }
         }
 
-        log.debug('Concluding timeline task.', { counter } as LogMeta);
+        log.debug('Concluding timeline task.', { counter, rangeFrom, rangeTo } as LogMeta);
 
         await taskMetricsService.end(trace);
 

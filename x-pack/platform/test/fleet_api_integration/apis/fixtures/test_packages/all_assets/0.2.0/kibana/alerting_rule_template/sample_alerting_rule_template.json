@@ -1,0 +1,24 @@
+{
+  "id": "sample_alerting_rule_template",
+  "type": "alerting_rule_template",
+  "attributes": {
+    "name": "Sample alerting rule template v2",
+    "tags": ["Testing"],
+    "ruleTypeId": "apm.anomaly",
+    "schedule": {
+      "interval": "1m"
+    },
+    "params": {
+      "windowSize": 30,
+      "windowUnit": "m",
+      "anomalySeverityType": "critical",
+      "anomalyDetectorTypes": ["txLatency", "txThroughput", "txFailureRate"],
+      "environment": "ENVIRONMENT_ALL"
+    },
+    "alertDelay": {
+      "active": 1
+    }
+  },
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.1.0"
+}

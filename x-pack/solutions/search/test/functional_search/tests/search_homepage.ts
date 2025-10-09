@@ -13,16 +13,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'embeddedConsole',
     'header',
-    'common',
-    'searchStart',
-    'searchOverview',
     'apiKeys',
     'searchHomePage',
     'searchNavigation',
   ]);
   const es = getService('es');
+  const searchSpace = getService('searchSpace');
   const browser = getService('browser');
-  const spaces = getService('spaces');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
@@ -30,23 +27,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const indexName = 'test-my-index';
 
-  describe('Search Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/228946
+  describe.skip('Search Home page', function () {
     describe('Solution Nav - Search', function () {
       let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
 
       before(async () => {
-        // Navigate to the spaces management page which will log us in Kibana
-        await pageObjects.common.navigateToUrl('management', 'kibana/spaces', {
-          shouldUseHashForSubUrl: false,
-        });
-
-        // Create a space with the search solution and navigate to its home page
-        ({ cleanUp, space: spaceCreated } = await spaces.create({
-          name: 'search-ftr',
-          solution: 'es',
-        }));
-        await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
+        ({ cleanUp, spaceCreated } = await searchSpace.createTestSpace('search-homepage-ftr'));
+        await searchSpace.navigateTo(spaceCreated.id);
       });
 
       after(async () => {
@@ -58,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('search home page', () => {
         beforeEach(async () => {
           await esDeleteAllIndices(['test-*', 'search-*']);
-          await pageObjects.searchNavigation.navigateToElasticsearchOverviewPage(
+          await pageObjects.searchNavigation.navigateToElasticsearchSearchHomePage(
             `/s/${spaceCreated.id}`
           );
         });
@@ -69,10 +58,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
-        });
-
-        it('redirect to start page when no indices are exists', async () => {
-          await pageObjects.searchStart.expectToBeOnStartPage();
         });
 
         it('load search home page', async () => {
@@ -156,41 +141,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               it('renders the "View data" button', async () => {
                 await testSubjects.existOrFail('viewDataBtn');
               });
-            });
-          });
-        });
-
-        describe('AI search capabilities', function () {
-          it('renders Semantic Search content', async () => {
-            await testSubjects.existOrFail('aiSearchCapabilities-item-semantic');
-            await testSubjects.existOrFail('createSemanticOptimizedIndexButton');
-            await testSubjects.click('createSemanticOptimizedIndexButton');
-            expect(await browser.getCurrentUrl()).contain(
-              'app/elasticsearch/indices/create?workflow=semantic'
-            );
-            await testSubjects.existOrFail('createIndexBtn');
-            expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
-            await testSubjects.click('createIndexBtn');
-            await retry.tryForTime(60 * 1000, async () => {
-              expect(await browser.getCurrentUrl()).contain('data?workflow=semantic');
-            });
-          });
-
-          it('renders Vector Search content', async () => {
-            await testSubjects.scrollIntoView('aiSearchCapabilities-item-vector');
-            await testSubjects.existOrFail('aiSearchCapabilities-item-vector');
-            await testSubjects.click('aiSearchCapabilities-item-vector');
-            await testSubjects.existOrFail('createVectorIndexButton');
-            await testSubjects.click('createVectorIndexButton');
-            expect(await browser.getCurrentUrl()).contain(
-              'app/elasticsearch/indices/create?workflow=vector'
-            );
-
-            await testSubjects.existOrFail('createIndexBtn');
-            expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
-            await testSubjects.click('createIndexBtn');
-            await retry.tryForTime(60 * 1000, async () => {
-              expect(await browser.getCurrentUrl()).contain('data?workflow=vector');
             });
           });
         });

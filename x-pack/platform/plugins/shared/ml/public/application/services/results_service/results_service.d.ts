@@ -22,16 +22,6 @@ export function resultsServiceProvider(mlApi: MlApi): {
     swimLaneSeverity?: SeverityThreshold[],
     influencersFilterQuery?: InfluencersFilterQuery
   ): Promise<any>;
-  getTopInfluencers(
-    selectedJobIds: string[],
-    earliestMs: number,
-    latestMs: number,
-    maxFieldValues?: number,
-    perPage?: number,
-    fromPage?: number,
-    influencers?: EntityField[],
-    influencersFilterQuery?: InfluencersFilterQuery
-  ): Promise<any>;
   getTopInfluencerValues(): Promise<any>;
   getOverallBucketScores(
     jobIds: any,

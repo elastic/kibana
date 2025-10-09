@@ -308,6 +308,34 @@ export default ({ getService }: FtrProviderContext) => {
         });
         expect(response.body.total).toEqual(5);
       });
+
+      it('should fetch rules filtered by `missingIndex`', async () => {
+        const migrationId = uuidv4();
+        const overrideCallback = (index: number): Partial<RuleMigrationRuleData> => {
+          const missingIndex = index < 4 ? true : false;
+          return {
+            migration_id: migrationId,
+            elastic_rule: {
+              query: missingIndex ? '[indexPattern]' : 'from logs-* | LIMIT 1',
+              title: 'Elastic rule',
+            },
+          };
+        };
+
+        const migrationRuleDocuments = getMigrationRuleDocuments(10, overrideCallback);
+        await createMigrationRules(es, migrationRuleDocuments);
+
+        let response = await migrationRulesRoutes.getRules({
+          migrationId,
+          queryParams: { is_missing_index: true },
+        });
+        expect(response.body.total).toEqual(4);
+
+        response = await migrationRulesRoutes.getRules({
+          migrationId,
+        });
+        expect(response.body.total).toEqual(10);
+      });
     });
 
     describe('Sorting', () => {

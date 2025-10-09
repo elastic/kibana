@@ -131,7 +131,7 @@ describe('Observability AI Assistant client', () => {
 
   let llmSimulator: LlmSimulator;
 
-  function createClient() {
+  function createClient(namespace: string = 'default') {
     jest.resetAllMocks();
 
     // uncomment this line for debugging
@@ -284,7 +284,7 @@ describe('Observability AI Assistant client', () => {
             connectorId: 'foo',
             stream: false,
             system:
-              'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. DO NOT include any labels or prefixes like "Title:", "**Title:**", or similar. Only the actual title text should be returned. If the conversation content itself suggests a relevant prefix (e.g., "Incident: ..."), that is acceptable, but do not add generic labels. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+              'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. DO NOT include any labels or prefixes like "Title:", "**Title:**", or similar. Only the actual title text should be returned. If the conversation content itself suggests a relevant prefix, that is acceptable, but do not add generic labels. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
             functionCalling: 'auto',
             maxRetries: 1,
             temperature: 0.25,
@@ -1644,6 +1644,60 @@ describe('Observability AI Assistant client', () => {
 
         expect(messages[2].message.content).toBe('Looks like the function call failed');
       });
+    });
+  });
+
+  describe('space-aware links', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      (functionClientMock as any).registerInstruction = jest.fn();
+      inferenceClientMock.chatComplete.mockImplementation(
+        () => new Observable((sub) => sub.complete())
+      );
+    });
+
+    const runWithNamespace = async (namespace: string) => {
+      // client = createClient(namespace);
+      client = createClient();
+      (client as any).dependencies.namespace = namespace;
+      (
+        await client.complete({
+          functionClient: functionClientMock,
+          connectorId: 'foo',
+          messages: [],
+          signal: new AbortController().signal,
+          persist: true,
+          kibanaPublicUrl: 'http://localhost:5601',
+          title: 'Generated title',
+        })
+      ).subscribe({});
+
+      await nextTick();
+    };
+
+    it('generates a link without space segment for default space', async () => {
+      await runWithNamespace('default');
+
+      expect(functionClientMock.registerInstruction).toHaveBeenCalled();
+      expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
+        expect.stringContaining('http://localhost:5601/app/observabilityAIAssistant/conversations/')
+      );
+      expect(functionClientMock.registerInstruction).not.toHaveBeenCalledWith(
+        expect.stringContaining('/s/')
+      );
+    });
+
+    it('generates a link with space segment for non-default space', async () => {
+      const space = 'myspace';
+      await runWithNamespace('myspace');
+
+      expect(functionClientMock.registerInstruction).toHaveBeenCalled();
+      expect(functionClientMock.registerInstruction).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `http://localhost:5601/s/${space}/app/observabilityAIAssistant/conversations/`
+        )
+      );
     });
   });
 });

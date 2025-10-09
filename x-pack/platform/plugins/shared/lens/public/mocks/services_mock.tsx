@@ -33,6 +33,7 @@ import { getLensInspectorService } from '../lens_inspector_service';
 import type { LensDocument, LensDocumentService } from '../persistence';
 import type { LensAttributesService } from '../lens_attribute_service';
 import { mockDatasourceStates } from './store_mocks';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 const startMock = coreMock.createStart();
 
@@ -47,6 +48,7 @@ export const defaultDoc: LensDocument = {
     visualization: {},
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const exactMatchDoc = {

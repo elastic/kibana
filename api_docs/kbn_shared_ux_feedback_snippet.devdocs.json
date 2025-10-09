@@ -1,0 +1,63 @@
+{
+  "id": "@kbn/shared-ux-feedback-snippet",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-feedback-snippet",
+        "id": "def-common.FeedbackSnippet",
+        "type": "Function",
+        "tags": [],
+        "label": "FeedbackSnippet",
+        "description": [
+          "\nA snippet to gather user feedback.\nInitially a panel, once interacted with, it becomes a persistent button."
+        ],
+        "signature": [
+          "({ feedbackButtonMessage, feedbackSnippetId, promptViewMessage, surveyUrl, className, }: FeedbackSnippetProps) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/feedback_snippet/src/feedback_snippet.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-feedback-snippet",
+            "id": "def-common.FeedbackSnippet.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  feedbackButtonMessage,\n  feedbackSnippetId,\n  promptViewMessage,\n  surveyUrl,\n  className,\n}",
+            "description": [],
+            "signature": [
+              "FeedbackSnippetProps"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/feedback_snippet/src/feedback_snippet.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
+
 import { schema } from '@kbn/config-schema';
 import type { QueryApiKeyResult } from '@kbn/security-plugin-types-common';
 
@@ -15,6 +17,15 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 interface QueryClause {
   [key: string]: any;
 }
+
+const transformAPIKeyNames = (keys: SecurityApiKey[]) => {
+  return keys.map((key) => {
+    if (!key.name) {
+      key.name = key.id;
+    }
+    return key;
+  });
+};
 
 export function defineQueryApiKeysAndAggregationsRoute({
   router,
@@ -165,7 +176,7 @@ export function defineQueryApiKeysAndAggregationsRoute({
 
           queryResult = {
             // @ts-expect-error Elasticsearch client types do not know about Cross-Cluster API keys yet.
-            apiKeys: queryResponse.api_keys,
+            apiKeys: transformAPIKeyNames(queryResponse.api_keys),
             total: queryResponse.total,
             count: queryResponse.api_keys.length,
           };

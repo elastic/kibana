@@ -20,7 +20,13 @@ interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId'> {
 export function YamlEditor(props: YamlEditorProps) {
   useEffect(() => {
     if (props.schemas) {
-      configureMonacoYamlSchema(props.schemas);
+      // Configure Monaco YAML with completions and hover disabled
+      // while keeping validation and hover information enabled
+      configureMonacoYamlSchema(props.schemas, {
+        completion: false, // Disable schema-based completions
+        hover: false, // hover is handled by the custom providers
+        validate: true, // Keep validation
+      });
     }
   }, [props.schemas]);
 

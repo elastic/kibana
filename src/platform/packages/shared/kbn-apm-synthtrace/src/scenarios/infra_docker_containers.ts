@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Generates infrastructure metrics for a number of Docker containers.
+ */
+
 import type { InfraDocument } from '@kbn/apm-synthtrace-client';
 import { infra, generateShortId } from '@kbn/apm-synthtrace-client';
 

@@ -55,10 +55,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(text).to.eql([
         'Discover\nAll\nRead\nNone',
         'Dashboard\nAll\nRead\nNone',
-        'Streams\nAll\nRead\nNone',
         'Logs\nAll\nRead\nNone',
         'Infrastructure\nAll\nRead\nNone',
         'Applications\nAll\nRead\nNone',
+        'Agent Builder\nAll\nRead\nNone',
         'Synthetics\nAll\nRead\nNone',
         'Cases\nAll\nRead\nNone',
         'Machine Learning\nAll\nRead\nNone',

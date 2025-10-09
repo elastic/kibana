@@ -1499,6 +1499,17 @@
           },
           {
             "parentPluginId": "@kbn/data-streams",
+            "id": "def-server.DataStreamDefinition.version",
+            "type": "number",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-data-streams/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-streams",
             "id": "def-server.DataStreamDefinition.template",
             "type": "CompoundType",
             "tags": [],
@@ -1818,7 +1829,7 @@
         "signature": [
           "{ id?: string | undefined; version?: number | undefined; timeout?: ",
           "Duration",
-          " | undefined; routing?: string | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; document?: S | undefined; pipeline?: string | undefined; refresh?: ",
+          " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; if_primary_term?: undefined; if_seq_no?: undefined; include_source_on_error?: undefined; op_type?: undefined; pipeline?: undefined; refresh?: undefined; routing?: undefined; timeout?: undefined; version?: undefined; version_type?: undefined; wait_for_active_shards?: undefined; require_alias?: undefined; require_data_stream?: undefined; document?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; routing?: string | undefined; document?: S | undefined; pipeline?: string | undefined; refresh?: ",
           "Refresh",
           " | undefined; wait_for_active_shards?: ",
           "WaitForActiveShards",

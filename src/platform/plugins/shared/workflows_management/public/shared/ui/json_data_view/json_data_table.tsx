@@ -17,113 +17,19 @@ import {
   useResizeObserver,
   EuiEmptyPrompt,
 } from '@elastic/eui';
-import { FieldIcon } from '@kbn/field-utils';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePager } from '@kbn/discover-utils';
+import { TableFieldValue } from './table_field_value';
+import { kibanaFlatten } from '../../lib/kibana_flatten';
+import { FieldName } from './field_name';
+import { inferFieldType } from './infer_field_type';
+import { formatValue } from './format_value';
+import { useGetFormattedDateTime } from '../use_formatted_date';
 
 const MIN_NAME_COLUMN_WIDTH = 120;
 const MAX_NAME_COLUMN_WIDTH = 300;
-
-/**
- * Infers the field type from a value to determine the field icon
- */
-const inferFieldType = (value: unknown): string => {
-  if (value === null || value === undefined) {
-    return 'unknown';
-  }
-
-  if (typeof value === 'string') {
-    // Check if it looks like a date
-    if (!isNaN(Date.parse(value)) && /\d{4}-\d{2}-\d{2}/.test(value)) {
-      return 'date';
-    }
-    return 'keyword';
-  }
-
-  if (typeof value === 'number') {
-    return Number.isInteger(value) ? 'long' : 'double';
-  }
-
-  if (typeof value === 'boolean') {
-    return 'boolean';
-  }
-
-  if (typeof value === 'object') {
-    return 'object';
-  }
-
-  return 'keyword';
-};
-
-const componentStyles = {
-  fieldsGridWrapper: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      minBlockSize: 0,
-      display: 'block',
-    }),
-  fieldsGrid: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
-    const { fontSize } = euiFontSize(themeContext, 's');
-
-    // TODO: leave just the styles that are needed for the json data table
-    // taken from src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_table/table.tsx
-    // FIX: the adjust to work in our case
-    return css({
-      '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
-        borderTop: 'none',
-      },
-
-      '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
-        borderBottom: euiTheme.border.thin,
-      },
-
-      '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
-        paddingTop: 0,
-        paddingBottom: 0,
-      },
-
-      '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
-        padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
-      },
-
-      '.kbnDocViewer__fieldName': {
-        padding: euiTheme.size.xs,
-        paddingLeft: 0,
-        lineHeight: euiTheme.font.lineHeightMultiplier,
-
-        '.euiDataGridRowCell__popover &': {
-          fontSize,
-        },
-      },
-
-      '.kbnDocViewer__fieldName_icon': {
-        paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
-        lineHeight: euiTheme.font.lineHeightMultiplier,
-      },
-
-      '.kbnDocViewer__fieldName_multiFieldBadge': {
-        margin: `${euiTheme.size.xs} 0`,
-        fontWeight: euiTheme.font.weight.regular,
-        fontFamily: euiTheme.font.family,
-      },
-
-      '.kbnDocViewer__fieldsGrid__pinAction': {
-        opacity: 0,
-      },
-
-      '& [data-gridcell-column-id="pin_field"]:focus-within': {
-        '.kbnDocViewer__fieldsGrid__pinAction': {
-          opacity: 1,
-        },
-      },
-
-      '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
-        opacity: 1,
-      },
-    });
-  },
-};
 
 /**
  * Props for the JSONDataTable component
@@ -162,9 +68,22 @@ export interface JSONDataTableProps {
   className?: string;
 
   /**
+   * Optional search term to filter the data
+   */
+  searchTerm?: string;
+
+  /**
    * Test subject for testing purposes
    */
   'data-test-subj'?: string;
+}
+
+interface JSONDataTableRecord extends DataTableRecord {
+  flattened: {
+    field: string;
+    value: string;
+    fieldType: string;
+  };
 }
 
 /**
@@ -193,32 +112,18 @@ export function JSONDataTable({
   data: jsonObject,
   title = 'JSON Data',
   columns,
+  searchTerm,
   'data-test-subj': dataTestSubj = 'jsonDataTable',
 }: JSONDataTableProps) {
   const styles = useMemoCss(componentStyles);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const getFormattedDateTime = useGetFormattedDateTime();
 
   // Create DataTableRecord from JSON - each field becomes a row
-  const dataTableRecords = useMemo((): DataTableRecord[] => {
+  const dataTableRecords = useMemo((): JSONDataTableRecord[] => {
     // Flatten nested objects for better display
-    const flattenObject = (obj: Record<string, unknown>, prefix = ''): Record<string, unknown> => {
-      const flattened: Record<string, unknown> = {};
 
-      Object.keys(obj).forEach((key) => {
-        const value = obj[key];
-        const newKey = prefix ? `${prefix}.${key}` : key;
-
-        if (value && typeof value === 'object' && !Array.isArray(value)) {
-          Object.assign(flattened, flattenObject(value as Record<string, unknown>, newKey));
-        } else {
-          flattened[newKey] = value;
-        }
-      });
-
-      return flattened;
-    };
-
-    const flattened = flattenObject(jsonObject);
+    const flattened = kibanaFlatten(jsonObject);
 
     // Filter fields if columns prop is provided
     const fieldsToShow = columns
@@ -230,13 +135,9 @@ export function JSONDataTable({
       const value = flattened[fieldName];
       const fieldType = inferFieldType(value);
       const displayValue =
-        value === null
-          ? '-'
-          : value === undefined
-          ? '-'
-          : typeof value === 'object'
-          ? JSON.stringify(value)
-          : String(value);
+        fieldType === 'date'
+          ? getFormattedDateTime(new Date(value as string)) ?? ''
+          : formatValue(value);
 
       return {
         id: `field-${index}`,
@@ -252,15 +153,28 @@ export function JSONDataTable({
         },
       };
     });
-  }, [jsonObject, title, columns]);
+  }, [jsonObject, columns, getFormattedDateTime, title]);
+
+  const filteredDataTableRecords = useMemo(() => {
+    return dataTableRecords.filter((record) => {
+      return (
+        record.flattened.field.toLowerCase().includes(searchTerm?.toLowerCase() || '') ||
+        record.flattened.value.toLowerCase().includes(searchTerm?.toLowerCase() || '')
+      );
+    });
+  }, [dataTableRecords, searchTerm]);
 
   const { width: containerWidth } = useResizeObserver(containerRef.current);
+  const { curPageIndex, pageSize, changePageIndex, changePageSize } = usePager({
+    initialPageSize: 20,
+    totalItems: filteredDataTableRecords.length,
+  });
 
   // Grid columns configuration
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
       {
-        id: 'field',
+        id: 'name',
         displayAsText: 'Field',
         initialWidth: Math.min(
           Math.max(Math.round(containerWidth * 0.3), MIN_NAME_COLUMN_WIDTH),
@@ -280,30 +194,34 @@ export function JSONDataTable({
   // Cell renderer for the data grid
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useMemo(() => {
     return ({ rowIndex, columnId }) => {
-      const row = dataTableRecords[rowIndex];
+      const row = filteredDataTableRecords[rowIndex];
       if (!row) return null;
 
-      if (columnId === 'field') {
+      if (columnId === 'name') {
         const fieldName = row.flattened.field as string;
         const fieldType = row.flattened.fieldType as string;
 
-        return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <FieldIcon type={fieldType} size="s" />
-            <span>{fieldName}</span>
-          </div>
-        );
+        return <FieldName fieldName={fieldName} fieldType={fieldType} highlight={searchTerm} />;
       }
 
       if (columnId === 'value') {
-        return <span>{row.flattened.value as string}</span>;
+        return (
+          <TableFieldValue
+            formattedValue={row.flattened.value as string}
+            field={row.flattened.field as string}
+            rawValue={row.flattened.value}
+            isHighlighted={Boolean(
+              searchTerm && row.flattened.value.toLowerCase().includes(searchTerm.toLowerCase())
+            )}
+          />
+        );
       }
 
       return null;
     };
-  }, [dataTableRecords]);
+  }, [filteredDataTableRecords, searchTerm]);
 
-  if (dataTableRecords.length === 0) {
+  if (filteredDataTableRecords.length === 0) {
     return (
       <EuiEmptyPrompt
         title={
@@ -320,38 +238,71 @@ export function JSONDataTable({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="kbnDocViewer"
-      css={styles.fieldsGridWrapper}
-      data-test-subj={dataTestSubj}
-    >
-      <EuiDataGrid
-        className="kbnDocViewer__fieldsGrid"
-        css={styles.fieldsGrid}
-        aria-label={title || 'JSON Data Table'}
-        columns={gridColumns}
-        columnVisibility={{
-          visibleColumns: ['field', 'value'],
-          setVisibleColumns: () => {},
-        }}
-        rowCount={dataTableRecords.length}
-        renderCellValue={renderCellValue}
-        toolbarVisibility={false}
-        pagination={{
-          pageIndex: 0,
-          pageSize: Math.min(dataTableRecords.length, 10),
-          pageSizeOptions: [10, 25, 50],
-          onChangeItemsPerPage: () => {},
-          onChangePage: () => {},
-        }}
-        sorting={{ columns: [], onSort: () => {} }}
-        gridStyle={{
-          header: 'underline',
-          border: 'none',
-          fontSize: 's',
-        }}
-      />
-    </div>
+    <EuiDataGrid
+      className="kbnDocViewer__fieldsGrid"
+      css={styles.fieldsGrid}
+      aria-label={title || 'JSON Data Table'}
+      columns={gridColumns}
+      columnVisibility={{
+        visibleColumns: ['name', 'value'],
+        setVisibleColumns: () => {},
+      }}
+      rowCount={filteredDataTableRecords.length}
+      renderCellValue={renderCellValue}
+      toolbarVisibility={false}
+      sorting={{ columns: [], onSort: () => {} }}
+      rowHeightsOptions={{ defaultHeight: 'auto' }}
+      gridStyle={{
+        header: 'underline',
+        border: 'horizontal',
+        fontSize: 's',
+        stripes: true,
+      }}
+      pagination={{
+        pageSizeOptions: [20, 50, 100, 200],
+        pageIndex: curPageIndex,
+        pageSize,
+        onChangeItemsPerPage: changePageSize,
+        onChangePage: changePageIndex,
+      }}
+    />
   );
 }
+
+const componentStyles = {
+  fieldsGrid: (themeContext: UseEuiTheme) => {
+    const { euiTheme } = themeContext;
+    const { fontSize } = euiFontSize(themeContext, 's');
+
+    // taken from src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_table/table.tsx
+    return css({
+      '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
+        borderTop: 'none',
+      },
+
+      '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
+        borderBottom: euiTheme.border.thin,
+      },
+
+      '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
+        paddingTop: 0,
+        paddingBottom: 0,
+      },
+
+      '.kbnDocViewer__fieldName': {
+        padding: euiTheme.size.xs,
+        paddingLeft: 0,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+
+        '.euiDataGridRowCell__popover &': {
+          fontSize,
+        },
+      },
+
+      '.kbnDocViewer__fieldName_icon': {
+        paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
+        lineHeight: euiTheme.font.lineHeightMultiplier,
+      },
+    });
+  },
+};

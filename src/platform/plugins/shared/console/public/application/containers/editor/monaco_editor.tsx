@@ -9,7 +9,7 @@
 
 import type { CSSProperties } from 'react';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 // TODO: Here we import CodeEditor directly to avoid lazy loading
@@ -41,6 +41,21 @@ import {
 } from '../../contexts';
 import { ContextMenu } from './components';
 import { useSetInputEditor } from '../../hooks';
+import { useActionStyles, useHighlightedLinesClassName } from './styles';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { actions } = useActionStyles();
+
+  return {
+    editorActions: css`
+      ${actions}
+
+      // For IE11
+      min-width: calc(${euiTheme.size.l} * 2);
+    `,
+  };
+};
 
 export interface EditorProps {
   localStorageValue: string | undefined;
@@ -88,6 +103,8 @@ export const MonacoEditor = ({
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
   const setInputEditor = useSetInputEditor();
+  const styles = useStyles();
+  const highlightedLinesClassName = useHighlightedLinesClassName();
 
   const getRequestsCallback = useCallback(async (): Promise<EditorRequest[]> => {
     const requests = await actionsProvider.current?.getRequests();
@@ -117,14 +134,13 @@ export const MonacoEditor = ({
         ? customParsedRequestsProvider(editor.getModel())
         : undefined;
 
-      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, customProvider);
-
+      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, highlightedLinesClassName, customProvider);
       setInputEditor(provider);
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
       setEditorInstace(editor);
     },
-    [setupResizeChecker, setInputEditor, setEditorInstace, customParsedRequestsProvider]
+    [setupResizeChecker, setInputEditor, setEditorInstace, customParsedRequestsProvider, highlightedLinesClassName]
   );
 
   useEffect(() => {
@@ -175,6 +191,7 @@ export const MonacoEditor = ({
                   name: c.name,
                   type: c.meta.esType as FieldType,
                   hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
+                  userDefined: false,
                 };
               }) || []
             );
@@ -232,7 +249,7 @@ export const MonacoEditor = ({
       data-test-subj="consoleMonacoEditorContainer"
     >
       <EuiFlexGroup
-        className="conApp__editorActions"
+        css={styles.editorActions}
         id="ConAppEditorActions"
         gutterSize="xs"
         responsive={false}

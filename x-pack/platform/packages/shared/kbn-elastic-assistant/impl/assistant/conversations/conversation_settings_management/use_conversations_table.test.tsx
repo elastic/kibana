@@ -31,7 +31,7 @@ const mockActionTypeRegistry: ActionTypeRegistryContract = {
 
 describe('useConversationsTable', () => {
   it('should return columns', () => {
-    const { result } = renderHook(() => useConversationsTable());
+    const { result } = renderHook(() => useConversationsTable({ name: 'elastic' }));
     const columns = result.current.getColumns({
       conversationOptions: [],
       deletedConversationsIds: [],
@@ -75,7 +75,7 @@ describe('useConversationsTable', () => {
       defaultConnector: mockConnectors[0],
     };
 
-    const { result } = renderHook(() => useConversationsTable());
+    const { result } = renderHook(() => useConversationsTable({ name: 'elastic' }));
     const conversationsList: ConversationTableItem[] = result.current.getConversationsList(params);
 
     expect(conversationsList).toHaveLength(3);

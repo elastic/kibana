@@ -309,6 +309,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
+        siemReadiness: new subPluginClasses.SiemReadiness(),
         configurations: new subPluginClasses.Configurations(),
         reports: new subPluginClasses.Reports(),
       };
@@ -341,9 +342,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       entityAnalytics: subPlugins.entityAnalytics.start(
         this.experimentalFeatures.riskScoringRoutesEnabled
       ),
-      siemMigrations: subPlugins.siemMigrations.start(
-        !this.experimentalFeatures.siemMigrationsDisabled
-      ),
+      siemMigrations: subPlugins.siemMigrations.start(this.experimentalFeatures),
+      siemReadiness: subPlugins.siemReadiness.start(),
       configurations: subPlugins.configurations.start(),
       reports: subPlugins.reports.start(),
     };

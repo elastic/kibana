@@ -177,7 +177,7 @@ export const summaryPanelQualityPoorText = i18n.translate(
 export const summaryPanelQualityDegradedText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityDegradedText',
   {
-    defaultMessage: 'Warning',
+    defaultMessage: 'Degraded',
   }
 );
 
@@ -771,6 +771,10 @@ export const createAlertText = i18n.translate('xpack.datasetQuality.createAlert'
   defaultMessage: 'Create rule',
 });
 
+export const editFailureStoreText = i18n.translate('xpack.datasetQuality.editFailureStore', {
+  defaultMessage: 'Edit failure store',
+});
+
 export const issueTypeFilterSearchPlaceholder = i18n.translate(
   'xpack.datasetQuality.details.qualityIssuesTable.issueTypeFilterSearchPlaceholder',
   {
@@ -810,5 +814,12 @@ export const fieldFilterNoneMatching = i18n.translate(
   'xpack.datasetQuality.details.qualityIssuesTable.fieldFilterNoneMatching',
   {
     defaultMessage: 'No fields found',
+  }
+);
+
+export const enableFailureStoreButtonLabel = i18n.translate(
+  'xpack.datasetQuality.enableFailureStore',
+  {
+    defaultMessage: 'Enable failure store',
   }
 );

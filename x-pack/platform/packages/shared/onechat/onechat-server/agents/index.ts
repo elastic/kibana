@@ -11,6 +11,7 @@ export type {
   AgentHandlerReturn,
   AgentHandlerFn,
   AgentEventEmitter,
+  AgentEventEmitterFn,
 } from './provider';
 export type {
   RunAgentFn,
@@ -20,3 +21,4 @@ export type {
   ScopedRunnerRunAgentParams,
   RunAgentOnEventFn,
 } from './runner';
+export type { BuiltInAgentDefinition, BuiltInAgentConfiguration } from './builtin_definition';

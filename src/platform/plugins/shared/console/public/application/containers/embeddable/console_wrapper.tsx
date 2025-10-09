@@ -44,6 +44,7 @@ import {
 } from '../../contexts';
 import { Main } from '../main';
 import { EditorContentSpinner } from '../../components';
+import { useEmbeddableConsoleContentStyles } from './styles';
 
 interface ConsoleDependencies extends ConsoleStartServices {
   autocompleteInfo: AutocompleteInfo;
@@ -110,9 +111,16 @@ interface ConsoleWrapperProps
   isOpen: boolean;
 }
 
+const useStyles = () => {
+  return {
+    embeddableConsoleContent: useEmbeddableConsoleContentStyles(),
+  };
+};
+
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
   const { core, dataViews, data, licensing, usageCollection, onKeyDown, isDevMode, isOpen } = props;
+  const styles = useStyles();
 
   useEffect(() => {
     if (dependencies === null && isOpen) {
@@ -174,7 +182,7 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
         <RequestContextProvider>
           <EditorContextProvider settings={settings.toJSON()}>
             {isOpen ? (
-              <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
+              <div css={styles.embeddableConsoleContent} data-test-subj="consoleEmbeddedBody">
                 <EuiWindowEvent event="keydown" handler={onKeyDown} />
                 <Main isEmbeddable={true} />
               </div>

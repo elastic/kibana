@@ -15,24 +15,48 @@ const createRuleMigrationStorageMock = () => {
   };
 };
 
+const commonMocks = {
+  getLatestStats$: jest.fn(),
+  getMissingCapabilities: jest.fn(),
+  hasMissingCapabilities: jest.fn(),
+  isAvailable: jest.fn(),
+  startPolling: jest.fn(),
+  deleteMigration: jest.fn(),
+  connectorIdStorage: createRuleMigrationStorageMock(),
+  traceOptionsStorage: createRuleMigrationStorageMock(),
+  startMigrationFromStats: jest.fn(),
+};
+
 export const createSiemMigrationsMock = () => {
   return {
     rules: {
-      getLatestStats$: jest.fn(),
-      getMissingCapabilities: jest.fn(),
-      hasMissingCapabilities: jest.fn(),
-      isAvailable: jest.fn(),
-      startPolling: jest.fn(),
+      ...commonMocks,
       createRuleMigration: jest.fn(),
       upsertMigrationResources: jest.fn(),
       startRuleMigration: jest.fn(),
-      getRuleMigrationStats: jest.fn(),
-      getRuleMigrationsStats: jest.fn(),
+      getMigrationsStats: jest.fn(),
       getMissingResources: jest.fn(),
       getIntegrations: jest.fn(),
-      connectorIdStorage: createRuleMigrationStorageMock(),
-      traceOptionsStorage: createRuleMigrationStorageMock(),
+      addRuleToMigration: jest.fn(),
       telemetry: createTelemetryServiceMock(),
+      api: {
+        getMissingResources: jest.fn(),
+      },
+    },
+
+    dashboards: {
+      ...commonMocks,
+      addDashboardToMigration: jest.fn(),
+      createDashboardMigration: jest.fn(),
+      upsertMigrationResources: jest.fn(),
+      startDashboardMigration: jest.fn(),
+      stopDashboardMigration: jest.fn(),
+      getMigrationsStats: jest.fn(),
+      getMissingResources: jest.fn(),
+      deleteMigration: jest.fn(),
+      api: {
+        getDashboardMigrationMissingResources: jest.fn(),
+      },
     },
   };
 };

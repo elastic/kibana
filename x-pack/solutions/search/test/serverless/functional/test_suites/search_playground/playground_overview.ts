@@ -23,7 +23,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchPlayground',
     'embeddedConsole',
     'solutionNavigation',
-    'svlSearchElasticsearchStartPage',
     'svlSearchCreateIndexPage',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
@@ -196,10 +195,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
             await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
             await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
-            await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue(indexName);
-            await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
-            await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
-            await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.setIndexNameValue(indexName);
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToBeEnabled();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndexButton();
+            await pageObjects.searchPlayground.PlaygroundStartChatPage.expectToBeOnIndexDetailsPage();
 
             // add mapping
             await es.indices.putMapping({

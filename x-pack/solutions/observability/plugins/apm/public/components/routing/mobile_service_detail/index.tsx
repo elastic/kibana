@@ -171,6 +171,8 @@ export const mobileServiceDetailRoute = {
                   traceId: t.string,
                   transactionId: t.string,
                   flyoutDetailTab: t.string,
+                  sampleRangeTo: toNumberRt,
+                  sampleRangeFrom: toNumberRt,
                 }),
                 offsetRt,
               ]),

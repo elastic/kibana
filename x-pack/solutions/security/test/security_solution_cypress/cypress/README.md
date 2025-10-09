@@ -59,7 +59,7 @@ Please, before opening a PR with a new test, make sure that the test fails. If y
 
 When running the tests, FTR is used to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section).
 
-Run the tests with the following yarn scripts from `x-pack/test/security_solution_cypress`:
+Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`:
 
 | Script Name                                                  | Description                                                                                                                                                                                                                                                                                                                 |
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -222,7 +222,7 @@ We use es_archiver to manage the data that our Cypress tests need.
 
 1. Set up a clean instance of kibana and elasticsearch (if this is not possible, try to clean/minimize the data that you are going to archive).
 2. With the kibana and elasticsearch instance up and running, create the data that you need for your test.
-3. When you are sure that you have all the data you need run the following command from: `x-pack/test/security_solution_cypress`
+3. When you are sure that you have all the data you need run the following command from: `x-pack/solutions/security/test/security_solution_cypress`
 
 ```sh
 node ../../../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../src/platform/test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
@@ -238,9 +238,9 @@ Note that the command will create the folder if it does not exist.
 
 ### Using an archive from within the Cypress tests
 
-Task [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_cypress/cypress/support/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
+Task [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/test/security_solution_cypress/cypress/support/es_archiver.ts) provides helpers such as `esArchiverLoad` and `esArchiverUnload` by means of `es_archiver`'s CLI.
 
-Archives used only for Cypress tests purposes are stored in `x-pack/test/security_solution_cypress/es_archives` and are used as follow on the tests.
+Archives used only for Cypress tests purposes are stored in `x-pack/solutions/security/test/security_solution_cypress/es_archives` and are used as follow on the tests.
 
 ```typescript
 cy.task('esArchiverLoad', { archiveName: 'overview' });
@@ -261,7 +261,7 @@ Note that we use tags in order to select which tests we want to execute, if you 
 
 ### Running serverless tests locally pointing to FTR serverless (First Quality Gate)
 
-Run the tests with the following yarn scripts from `x-pack/test/security_solution_cypress`:
+Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`:
 
 | Script Name                                                         | Description                                                                                                                                                                                                                     |
 | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -306,7 +306,7 @@ describe('Entity Analytics Dashboard in Serverless', {
 
 Per the way we set the environment during the execution process on CI, the above configuration is going to be valid when the test is executed on headless mode.
 
-For test developing or test debugging purposes, you need to modify the configuration but without committing and pushing the changes in `x-pack/test/security_solution_cypress/serverless_config.ts`.
+For test developing or test debugging purposes, you need to modify the configuration but without committing and pushing the changes in `x-pack/solutions/security/test/security_solution_cypress/serverless_config.ts`.
 
 #### Custom Roles
 
@@ -392,7 +392,7 @@ after(() => {
 Note that when using any of the below scripts, the tests are going to be executed through an MKI project with the version that is currently available in QA. If you need to use
 a specific commit (i.e. debugging a failing tests on the periodic pipeline), check the section: `Running serverless tests locally pointing to a MKI project created in QA environment with an overridden image`.
 
-Run the tests with the following yarn scripts from `x-pack/test/security_solution_cypress`:
+Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`:
 
 | Script Name                                               | Description                                                                                                                                                                                                                                                                                                                 |
 | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -146,4 +146,34 @@ describe('use chat send', () => {
       });
     });
   });
+  it('retries getConversation up to 5 times if title is empty, and stops when title is found', async () => {
+    const promptText = 'test prompt';
+    const getConversationMock = jest.fn();
+    // First 3 calls return empty title, 4th returns non-empty
+    getConversationMock
+      .mockResolvedValueOnce({ title: '' })
+      .mockResolvedValueOnce({ title: '' })
+      .mockResolvedValueOnce({ title: '' })
+      .mockResolvedValueOnce({ title: 'Final Title' });
+    (useConversation as jest.Mock).mockReturnValue({
+      removeLastMessage,
+      clearConversation,
+      getConversation: getConversationMock,
+      createConversation: jest.fn(),
+    });
+    const { result } = renderHook(
+      () =>
+        useChatSend({
+          ...testProps,
+          currentConversation: { ...emptyWelcomeConvo, id: 'convo-id', title: '' },
+        }),
+      { wrapper: TestProviders }
+    );
+    await act(async () => {
+      await result.current.handleChatSend(promptText);
+    });
+    // Should call getConversation 4 times (until non-empty title)
+    expect(getConversationMock).toHaveBeenCalledTimes(4);
+    expect(getConversationMock).toHaveBeenLastCalledWith('convo-id');
+  });
 });

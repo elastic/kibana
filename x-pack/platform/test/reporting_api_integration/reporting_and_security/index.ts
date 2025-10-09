@@ -29,6 +29,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./list_scheduled_reports'));
     loadTestFile(require.resolve('./disable_scheduled_reports'));
     loadTestFile(require.resolve('./list_jobs'));
+    loadTestFile(require.resolve('./telemetry'));
 
     // CSV-specific
     loadTestFile(require.resolve('./csv/csv_v2'));

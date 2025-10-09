@@ -10,6 +10,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineStatusEnum } from '../../../../common/api/timeline';
 import { persistTimeline } from '../../containers/api';
 import { ensureTimelineIsSaved } from './helpers';
+import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mocks/mock_data_view';
 
 jest.mock('../../containers/api');
 
@@ -18,6 +19,16 @@ describe('Timeline middleware helpers', () => {
     let store = createMockStore(undefined, undefined, kibanaMock);
 
     beforeEach(() => {
+      const dataView = getMockDataViewWithMatchedIndices();
+      dataView.version = 'is-persisted';
+
+      (kibanaMock.plugins.onStart as jest.Mock).mockReturnValue({
+        dataViews: {
+          found: true,
+          contract: { get: () => dataView },
+        },
+      });
+
       store = createMockStore(undefined, undefined, kibanaMock);
       jest.clearAllMocks();
     });

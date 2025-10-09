@@ -483,7 +483,11 @@
           " | ",
           "ObservabilityCreateSLOFeature",
           " | ",
+          "ObservabilityLogEventsFeature",
+          " | ",
           "ObservabilityTracesSpanLinksFeature",
+          " | ",
+          "ObservabilityTracesFetchErrorsFeature",
           " | ",
           "SecuritySolutionFeature"
         ],

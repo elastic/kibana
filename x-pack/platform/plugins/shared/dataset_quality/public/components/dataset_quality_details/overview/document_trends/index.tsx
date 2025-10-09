@@ -20,8 +20,13 @@ import {
   discoverAriaText,
   openInDiscoverText,
   createAlertText,
+  editFailureStoreText,
 } from '../../../../../common/translations';
-import { useDatasetQualityDetailsState, useQualityIssuesDocsChart } from '../../../../hooks';
+import {
+  useDatasetQualityDetailsState,
+  useFailureStoreModal,
+  useQualityIssuesDocsChart,
+} from '../../../../hooks';
 import { TrendDocsChart } from './trend_docs_chart';
 import { useKibanaContextForPlugin } from '../../../../utils/use_kibana';
 import { getAlertingCapabilities } from '../../../../alerts/get_alerting_capabilities';
@@ -30,12 +35,15 @@ import { getAlertingCapabilities } from '../../../../alerts/get_alerting_capabil
 // eslint-disable-next-line import/no-default-export
 export default function DocumentTrends({
   lastReloadTime,
-  displayCreateRuleButton,
   openAlertFlyout,
+  displayActions: { displayCreateRuleButton, displayEditFailureStore },
 }: {
   lastReloadTime: number;
-  displayCreateRuleButton: boolean;
   openAlertFlyout: () => void;
+  displayActions: {
+    displayCreateRuleButton: boolean;
+    displayEditFailureStore: boolean;
+  };
 }) {
   const { timeRange, updateTimeRange } = useDatasetQualityDetailsState();
   const {
@@ -54,14 +62,19 @@ export default function DocumentTrends({
 
   const onTimeRangeChange = useCallback(
     ({ start, end }: Pick<OnTimeChangeProps, 'start' | 'end'>) => {
-      updateTimeRange({ start, end, refreshInterval: timeRange.refresh.value });
+      updateTimeRange({ start, end });
     },
-    [updateTimeRange, timeRange.refresh]
+    [updateTimeRange]
   );
+
+  const {
+    openModal: openFailureStoreModal,
+    canUserManageFailureStore,
+    renderModal: renderFailureStoreModal,
+  } = useFailureStoreModal();
 
   return (
     <>
-      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="stretch" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
           <EuiSkeletonRectangle width={160} height={32} isLoading={!dataView}>
@@ -87,10 +100,11 @@ export default function DocumentTrends({
                 size="s"
                 data-test-subj="datasetQualityDetailsLinkToDiscover"
                 {...redirectLinkProps.linkProps}
+                color="text"
               />
             </EuiToolTip>
             {displayCreateRuleButton && isAlertingAvailable && (
-              <EuiToolTip content={createAlertText}>
+              <EuiToolTip content={createAlertText} disableScreenReaderOutput>
                 <EuiButtonIcon
                   display="base"
                   iconType="bell"
@@ -98,6 +112,20 @@ export default function DocumentTrends({
                   size="s"
                   data-test-subj="datasetQualityDetailsCreateRule"
                   onClick={openAlertFlyout}
+                  color="text"
+                />
+              </EuiToolTip>
+            )}
+            {displayEditFailureStore && canUserManageFailureStore && (
+              <EuiToolTip content={editFailureStoreText} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  display="base"
+                  iconType="pencil"
+                  aria-label={editFailureStoreText}
+                  size="s"
+                  data-test-subj="datasetQualityDetailsEditFailureStore"
+                  onClick={openFailureStoreModal}
+                  color="text"
                 />
               </EuiToolTip>
             )}
@@ -111,6 +139,7 @@ export default function DocumentTrends({
         lastReloadTime={lastReloadTime}
         onTimeRangeChange={onTimeRangeChange}
       />
+      {renderFailureStoreModal()}
     </>
   );
 }

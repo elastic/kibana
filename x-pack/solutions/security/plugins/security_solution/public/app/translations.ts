@@ -138,6 +138,10 @@ export const INVENTORY = i18n.translate('xpack.securitySolution.navigation.inven
   defaultMessage: 'Inventory',
 });
 
+export const SIEM_READINESS = i18n.translate('xpack.securitySolution.navigation.siemReadiness', {
+  defaultMessage: 'SIEM Readiness',
+});
+
 export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timelines', {
   defaultMessage: 'Timelines',
 });

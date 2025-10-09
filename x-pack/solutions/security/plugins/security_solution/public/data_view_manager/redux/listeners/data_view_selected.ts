@@ -112,7 +112,14 @@ export const createDataViewSelectedListener = (dependencies: {
         }
       }
 
-      const resolvedIdToUse = cachedDataViewSpec?.id || dataViewById?.id || adHocDataView?.id;
+      const resolvedIdToUse =
+        cachedDataViewSpec?.id ||
+        dataViewById?.id ||
+        adHocDataView?.id ||
+        // WARN: added this because some of the e2e tests, such as
+        // x-pack/test/security_solution_cypress/cypress/e2e/detection_response/detection_engine/rule_creation/indicator_match_rule.cy.ts
+        // seem to depend on this, not sure if we want it.
+        state.dataViewManager.shared.defaultDataViewId;
 
       const currentScopeActions = scopes[action.payload.scope].actions;
       if (resolvedIdToUse) {

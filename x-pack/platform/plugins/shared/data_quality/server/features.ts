@@ -12,7 +12,6 @@ import type {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { AlertConsumers, DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_FEATURE_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
@@ -72,7 +71,6 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   id: PLUGIN_FEATURE_ID,
   name: PLUGIN_NAME,
   category: DEFAULT_APP_CATEGORIES.management,
-  scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [PLUGIN_ID],
   alerting: [degradedDocsAlertingFeatures],
   management: {

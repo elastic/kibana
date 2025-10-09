@@ -273,6 +273,7 @@ export const createStartServicesMock = (
       removeItem: jest.fn(),
       clear: jest.fn(),
     }),
+    plugins: { onStart: jest.fn() },
   } as unknown as StartServices;
 };
 

@@ -387,6 +387,42 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
     });
 
+    it('should activate user profile with UIAM access token grant', async () => {
+      const startContract = userProfileService.start(mockStartParams);
+      await expect(
+        startContract.activate({
+          type: 'uiamAccessToken',
+          accessToken: 'some-token',
+          sharedSecret: 'some-shared-secret',
+        })
+      ).resolves.toMatchInlineSnapshot(`
+        Object {
+          "data": Object {},
+          "enabled": true,
+          "labels": Object {},
+          "uid": "some-profile-uid",
+          "user": Object {
+            "email": "some@email",
+            "full_name": undefined,
+            "realm_domain": "some-realm-domain",
+            "realm_name": "some-realm",
+            "roles": Array [],
+            "username": "some-username",
+          },
+        }
+      `);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledWith({
+        grant_type: 'access_token',
+        access_token: 'some-token',
+        client_authentication: { scheme: 'SharedSecret', value: 'some-shared-secret' },
+      });
+    });
+
     it('fails if activation fails with non-409 error', async () => {
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse({ statusCode: 500, body: 'some message' })
@@ -607,6 +643,138 @@ describe('UserProfileService', () => {
       ).toHaveBeenCalledWith({
         uid: 'UID-1,UID-2',
       });
+    });
+
+    it('splits large requests into batches with concurrency control', async () => {
+      // Create 75 UIDs to trigger batching (should create 2 batches: 50 + 25)
+      const uids = Array.from({ length: 75 }, (_, i) => `UID-${i + 1}`);
+
+      // Mock the first batch (UIDs 1-50)
+      const firstBatchProfiles = Array.from({ length: 50 }, (_, i) =>
+        userProfileMock.createWithSecurity({
+          uid: `UID-${i + 1}`,
+          user: {
+            username: `user-${i + 1}`,
+            full_name: `full-name-${i + 1}`,
+            realm_name: 'some-realm',
+            realm_domain: 'some-domain',
+            roles: ['role-1'],
+          },
+        })
+      );
+
+      // Mock the second batch (UIDs 51-75)
+      const secondBatchProfiles = Array.from({ length: 25 }, (_, i) =>
+        userProfileMock.createWithSecurity({
+          uid: `UID-${i + 51}`,
+          user: {
+            username: `user-${i + 51}`,
+            full_name: `full-name-${i + 51}`,
+            realm_name: 'some-realm',
+            realm_domain: 'some-domain',
+            roles: ['role-1'],
+          },
+        })
+      );
+
+      // Mock getUserProfile to return different responses based on the UID string
+      mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        .mockImplementationOnce(() => Promise.resolve({ profiles: firstBatchProfiles } as any))
+        .mockImplementationOnce(() => Promise.resolve({ profiles: secondBatchProfiles } as any));
+
+      const startContract = userProfileService.start(mockStartParams);
+      const result = await startContract.bulkGet({ uids: new Set(uids) });
+
+      // Verify that getUserProfile was called twice (once for each batch)
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).toHaveBeenCalledTimes(2);
+
+      // Verify the first batch call (UIDs 1-50)
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).toHaveBeenNthCalledWith(1, {
+        uid: uids.slice(0, 50).join(','),
+      });
+
+      // Verify the second batch call (UIDs 51-75)
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).toHaveBeenNthCalledWith(2, {
+        uid: uids.slice(50, 75).join(','),
+      });
+
+      // Verify all 75 profiles are returned
+      expect(result).toHaveLength(75);
+
+      // Verify the results contain profiles from both batches
+      expect(result[0].uid).toBe('UID-1');
+      expect(result[49].uid).toBe('UID-50');
+      expect(result[50].uid).toBe('UID-51');
+      expect(result[74].uid).toBe('UID-75');
+    });
+
+    it('handles single batch requests efficiently when at batch limit', async () => {
+      // Test with exactly 50 UIDs (should not trigger batching)
+      const uids = Array.from({ length: 50 }, (_, i) => `UID-${i + 1}`);
+      const profiles = uids.map((uid, i) =>
+        userProfileMock.createWithSecurity({
+          uid,
+          user: {
+            username: `user-${i + 1}`,
+            full_name: `full-name-${i + 1}`,
+            realm_name: 'some-realm',
+            realm_domain: 'some-domain',
+            roles: ['role-1'],
+          },
+        })
+      );
+
+      mockStartParams.clusterClient.asInternalUser.security.getUserProfile.mockResolvedValue({
+        profiles,
+      } as unknown as SecurityGetUserProfileResponse);
+
+      const startContract = userProfileService.start(mockStartParams);
+      const result = await startContract.bulkGet({ uids: new Set(uids) });
+
+      // Verify that getUserProfile was called only once
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).toHaveBeenCalledTimes(1);
+
+      // Verify the single call contains all 50 UIDs
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).toHaveBeenCalledWith({
+        uid: uids.join(','),
+      });
+
+      // Verify all 50 profiles are returned
+      expect(result).toHaveLength(50);
+    });
+
+    it('handles errors during batched requests', async () => {
+      // Create 75 UIDs to trigger batching (should create 2 batches: 50 + 25)
+      const uids = Array.from({ length: 75 }, (_, i) => `UID-${i + 1}`);
+
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 500, body: 'batch request failed' })
+      );
+
+      // Mock the first batch to succeed and second batch to fail
+      mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+        .mockImplementationOnce(() => Promise.resolve({ profiles: [] } as any))
+        .mockImplementationOnce(() => Promise.reject(failureReason));
+
+      const startContract = userProfileService.start(mockStartParams);
+
+      // The entire operation should fail if any batch fails
+      await expect(startContract.bulkGet({ uids: new Set(uids) })).rejects.toBe(failureReason);
+
+      // Verify that both batches were attempted
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.getUserProfile
+      ).toHaveBeenCalledTimes(2);
     });
   });
 

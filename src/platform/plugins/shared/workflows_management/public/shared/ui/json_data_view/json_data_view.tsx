@@ -8,10 +8,10 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonGroup, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiButtonGroup, EuiSpacer, EuiFieldSearch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JSONDataTable } from './json_data_table';
 import { JsonDataCode } from './json_data_code';
+import { JSONDataTable } from './json_data_table';
 
 export interface JSONDataViewProps {
   /**
@@ -31,7 +31,15 @@ export interface JSONDataViewProps {
    */
   columns?: string[];
 
-  /** */
+  /**
+   * Optional search term to filter the data.
+   */
+  searchTerm?: string;
+
+  /**
+   * Optional function to set the search term.
+   */
+  onSearchTermChange?: (value: string) => void;
 
   /**
    * Test subject for testing purposes
@@ -43,6 +51,8 @@ export function JSONDataView({
   data,
   title = 'JSON Data',
   columns,
+  searchTerm,
+  onSearchTermChange,
   'data-test-subj': dataTestSubj = 'jsonDataTable',
 }: JSONDataViewProps) {
   const [viewMode, setViewMode] = useState<'table' | 'json'>('table');
@@ -71,13 +81,33 @@ export function JSONDataView({
       data-test-subj={dataTestSubj}
       direction="column"
       gutterSize="none"
-      css={{ flex: 1 }}
+      responsive={false}
+      style={{ height: '100%' }}
     >
-      {/* TODO: add filters and search without too much services dependencies */}
       <EuiFlexItem grow={false}>
-        {/* <TableFilters {...tableFiltersProps} allFields={allFields} /> */}
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false} css={{ justifySelf: 'flex-end', marginLeft: 'auto' }}>
+        <EuiFlexGroup responsive={false} gutterSize="s">
+          {viewMode === 'table' && onSearchTermChange && (
+            <EuiFlexItem>
+              <EuiFieldSearch
+                compressed
+                fullWidth
+                placeholder="Filter by field, value"
+                value={searchTerm}
+                onChange={(e) => onSearchTermChange(e.target.value)}
+                isClearable
+                aria-label={i18n.translate('workflows.jsonDataTable.searchAriaLabel', {
+                  defaultMessage: 'Search fields and values',
+                })}
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem
+            grow={false}
+            css={{
+              justifySelf: 'flex-end',
+              marginLeft: 'auto',
+            }}
+          >
             <EuiButtonGroup
               isIconOnly
               buttonSize="compressed"
@@ -109,10 +139,15 @@ export function JSONDataView({
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={true}>
         <EuiSpacer size="s" />
         {viewMode === 'table' && (
-          <JSONDataTable data={jsonObject} title={title} columns={columns} />
+          <JSONDataTable
+            data={jsonObject}
+            title={title}
+            columns={columns}
+            searchTerm={searchTerm}
+          />
         )}
         {viewMode === 'json' && <JsonDataCode json={jsonObject} />}
       </EuiFlexItem>

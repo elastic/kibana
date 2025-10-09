@@ -9,8 +9,8 @@ import { RuleMigrationTaskEvaluator } from './rule_migrations_task_evaluator';
 import type { Run, Example } from 'langsmith/schemas';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { CustomEvaluator } from '../../common/task/siem_migrations_task_evaluator';
-import type { RuleMigrationsClientDependencies } from '../types';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 jest.mock('../../common/task/siem_migrations_task_runner', () => ({
   SiemMigrationTaskRunner: jest.fn().mockReturnValue({
@@ -40,7 +40,8 @@ describe('RuleMigrationTaskEvaluator', () => {
   let taskEvaluator: RuleMigrationTaskEvaluator;
 
   const mockLogger = loggerMock.create();
-  const mockDependencies: jest.Mocked<RuleMigrationsClientDependencies> = {
+  const mockDependencies: jest.Mocked<SiemMigrationsClientDependencies> = {
+    inferenceService: {},
     rulesClient: {},
     savedObjectsClient: {},
     inferenceClient: {},
@@ -48,7 +49,7 @@ describe('RuleMigrationTaskEvaluator', () => {
       get: jest.fn().mockResolvedValue({ id: 'test-connector-id', name: 'Test Connector' }),
     },
     telemetry: {},
-  } as unknown as RuleMigrationsClientDependencies;
+  } as unknown as SiemMigrationsClientDependencies;
 
   beforeAll(() => {
     const taskRunner = (SiemMigrationTaskRunner as jest.Mock)();

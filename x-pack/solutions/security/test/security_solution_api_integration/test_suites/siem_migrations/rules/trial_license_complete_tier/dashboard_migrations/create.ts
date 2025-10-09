@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @serverlessQA Create API', () => {
     beforeEach(async () => {
-      deleteAllDashboardMigrations(es);
+      await deleteAllDashboardMigrations(es);
     });
 
     it('should create migrations without any issues', async () => {

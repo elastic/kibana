@@ -15,7 +15,10 @@ import type {
   ReindexAction,
   UnfreezeAction,
 } from '../../../common/types';
-import { ReindexStep, ReindexStatus, DataStreamMigrationStatus } from '../../../common/types';
+import { DataStreamMigrationStatus } from '../../../common/types';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { REINDEX_SERVICE_BASE_PATH } from '@kbn/reindex-service-plugin/server';
 import { setupEnvironment } from '../helpers';
 import type { ElasticsearchTestBed } from './es_deprecations.helpers';
 import { setupElasticsearchPage } from './es_deprecations.helpers';
@@ -95,7 +98,7 @@ describe('ES deprecations table', () => {
       expect.anything()
     );
     expect(httpSetup.get).toHaveBeenCalledWith(
-      `${API_BASE_PATH}/reindex/${reindexDeprecation.index}`,
+      `${REINDEX_SERVICE_BASE_PATH}/${reindexDeprecation.index}`,
       expect.anything()
     );
 

@@ -34,4 +34,21 @@ describe('buildDefaultSettings', () => {
       }
     `);
   });
+
+  it('should use @lifecycle ILM policy for OTEL input type', () => {
+    const settings = buildDefaultSettings({
+      type: 'logs',
+      isOtelInputType: true,
+    });
+
+    expect(settings).toMatchInlineSnapshot(`
+      Object {
+        "index": Object {
+          "lifecycle": Object {
+            "name": "logs@lifecycle",
+          },
+        },
+      }
+    `);
+  });
 });

@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
+import React, { forwardRef } from 'react';
 import type { ForwardedRef, ReactNode } from 'react';
-import React, { forwardRef, useRef, useImperativeHandle } from 'react';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-import { useRovingIndex } from '../../utils/use_roving_index';
+import { PRIMARY_NAVIGATION_ID } from '../../constants';
+import { handleRovingIndex } from '../../utils/handle_roving_index';
+import { getFocusableElements } from '../../utils/get_focusable_elements';
+import { updateTabIndices } from '../../utils/update_tab_indices';
 
 export interface SideNavPrimaryMenuProps {
   children: ReactNode;
@@ -21,29 +24,37 @@ export interface SideNavPrimaryMenuProps {
 }
 
 export const SideNavPrimaryMenu = forwardRef<HTMLElement, SideNavPrimaryMenuProps>(
-  ({ children, isCollapsed }, forwardedRef: ForwardedRef<HTMLElement>): JSX.Element => {
+  ({ children, isCollapsed }, ref: ForwardedRef<HTMLElement>): JSX.Element => {
     const { euiTheme } = useEuiTheme();
-    const localRef = useRef<HTMLElement>(null);
 
-    useRovingIndex(localRef);
-
-    useImperativeHandle(forwardedRef, () => localRef.current!);
+    const styles = css`
+      align-items: center;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: ${isCollapsed ? euiTheme.size.xs : euiTheme.size.base};
+      min-height: 0;
+    `;
 
     return (
+      // The nav itself is not interactive but the children are
+      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
       <nav
-        id="primary-navigation"
         aria-label={i18n.translate('core.ui.chrome.sideNavigation.primaryMenuAriaLabel', {
-          defaultMessage: 'Main navigation',
+          defaultMessage: 'Main',
         })}
-        ref={localRef}
-        css={css`
-          align-items: center;
-          display: flex;
-          flex-direction: column;
-          flex: 1;
-          gap: ${isCollapsed ? euiTheme.size.xs : euiTheme.size.base};
-          min-height: 0;
-        `}
+        css={styles}
+        id={PRIMARY_NAVIGATION_ID}
+        onKeyDown={handleRovingIndex}
+        ref={(node) => {
+          if (node) {
+            const elements = getFocusableElements(node);
+            updateTabIndices(elements);
+          }
+
+          if (typeof ref === 'function') ref(node);
+          else if (ref && 'current' in ref) ref.current = node;
+        }}
       >
         {children}
       </nav>

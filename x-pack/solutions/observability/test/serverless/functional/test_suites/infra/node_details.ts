@@ -53,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('Osquery Tab', () => {
         it('should not render in serverless', async () => {
           const OsqueryExist = await testSubjects.exists('infraAssetDetailsOsqueryTab');
-          expect(OsqueryExist).to.be(true);
+          expect(OsqueryExist).to.be(false);
         });
       });
 

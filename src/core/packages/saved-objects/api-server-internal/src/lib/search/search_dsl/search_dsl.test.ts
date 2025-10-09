@@ -86,6 +86,7 @@ describe('getSearchDsl', () => {
         hasReferenceOperator: opts.hasReferenceOperator,
         hasNoReference: opts.hasNoReference,
         hasNoReferenceOperator: opts.hasNoReferenceOperator,
+        mappings,
       });
     });
 

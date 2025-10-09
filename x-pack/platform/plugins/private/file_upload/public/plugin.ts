@@ -17,6 +17,7 @@ import {
   getTimeFieldRange,
   analyzeFile,
   previewTikaFile,
+  isIndexSearchable,
 } from './api';
 import { setStartServices } from './kibana_services';
 import {
@@ -61,6 +62,7 @@ export class FileUploadPlugin
       getTimeFieldRange,
       analyzeFile,
       previewTikaFile,
+      isIndexSearchable,
     };
   }
 }

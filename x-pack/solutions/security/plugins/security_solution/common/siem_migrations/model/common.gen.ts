@@ -111,6 +111,10 @@ export const MigrationTaskStatusEnum = MigrationTaskStatus.enum;
 export type MigrationLastExecution = z.infer<typeof MigrationLastExecution>;
 export const MigrationLastExecution = z.object({
   /**
+   * The total execution time in milliseconds for the migration. This includes duration of last_execution and any previous executions.
+   */
+  total_execution_time_ms: z.number().int().optional(),
+  /**
    * The moment the last execution started.
    */
   started_at: z.string().optional(),
@@ -130,6 +134,60 @@ export const MigrationLastExecution = z.object({
    * Indicates if the last execution was stopped by the user.
    */
   is_stopped: z.boolean().optional(),
+});
+
+/**
+ * The items migration translation stats object.
+ */
+export type MigrationTranslationStats = z.infer<typeof MigrationTranslationStats>;
+export const MigrationTranslationStats = z.object({
+  /**
+   * The migration id
+   */
+  id: NonEmptyString,
+  /**
+   * The items migration translation stats.
+   */
+  items: z.object({
+    /**
+     * The total number of items in the migration.
+     */
+    total: z.number().int(),
+    /**
+     * The number of items that have been successfully translated.
+     */
+    success: z.object({
+      /**
+       * The total number of items that have been successfully translated.
+       */
+      total: z.number().int(),
+      /**
+       * The translation results
+       */
+      result: z.object({
+        /**
+         * The number of items that have been fully translated.
+         */
+        full: z.number().int(),
+        /**
+         * The number of items that have been partially translated.
+         */
+        partial: z.number().int(),
+        /**
+         * The number of items that could not be translated.
+         */
+        untranslatable: z.number().int(),
+      }),
+      /**
+       * The number of items that have been successfully translated and can be installed.
+       */
+      installable: z.number().int(),
+    }),
+    /**
+     * The number of items that have failed translation.
+     */
+    failed: z.number().int(),
+  }),
 });
 
 /**

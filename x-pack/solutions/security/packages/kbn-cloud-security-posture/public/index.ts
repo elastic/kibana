@@ -7,12 +7,7 @@
 
 export type * from './src/types';
 export * from './src/constants/navigation';
-export {
-  AWS_ORGANIZATION_ACCOUNT,
-  AWS_SINGLE_ACCOUNT,
-  GCP_ORGANIZATION_ACCOUNT,
-  GCP_SINGLE_ACCOUNT,
-} from './src/components/fleet_extensions/constants';
+
 export type { CloudSetupConfig } from './src/components/fleet_extensions/types';
 export type { NavFilter } from './src/utils/query_utils';
 export { showErrorToast } from './src/utils/show_error_toast';
@@ -37,3 +32,12 @@ export {
 } from './src/utils/vulnerability_reference';
 export { getVulnerabilitiesQuery } from './src/utils/findings_query_builders';
 export { getGroupPanelTitle } from './src/utils/get_group_panel_title';
+export {
+  GroupWrapper,
+  GroupWrapperLoading,
+  GenericGroupRenderer,
+  LoadingGroup,
+  NullGroup,
+  firstNonNullValue,
+  type GroupRenderRegistry,
+} from './src/components/grouping';

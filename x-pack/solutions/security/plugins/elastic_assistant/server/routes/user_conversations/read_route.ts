@@ -43,7 +43,6 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
       },
       async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
         const assistantResponse = buildResponse(response);
-
         const { id } = request.params;
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
@@ -58,12 +57,22 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
           const authenticatedUser = checkResponse.currentUser;
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-          const conversation = await dataClient?.getConversation({ id, authenticatedUser });
 
-          if (conversation == null) {
+          // First check if the conversation exists at all
+          const conversationExists = await dataClient?.conversationExists({ id });
+          if (!conversationExists) {
             return assistantResponse.error({
               body: `conversation id: "${id}" not found`,
               statusCode: 404,
+            });
+          }
+
+          // Then check if the user has access to the conversation
+          const conversation = await dataClient?.getConversation({ id, authenticatedUser });
+          if (conversation == null) {
+            return assistantResponse.error({
+              body: `Access denied to conversation id: "${id}"`,
+              statusCode: 403,
             });
           }
           const isConversationOwner = getIsConversationOwner(conversation, {

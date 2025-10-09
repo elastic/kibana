@@ -390,6 +390,84 @@
       },
       {
         "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.ESQLTelemetryCallbacks",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLTelemetryCallbacks",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLTelemetryCallbacks.onDecorationHoverShown",
+            "type": "Function",
+            "tags": [],
+            "label": "onDecorationHoverShown",
+            "description": [],
+            "signature": [
+              "((hoverMessage: string) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-types",
+                "id": "def-common.ESQLTelemetryCallbacks.onDecorationHoverShown.$1",
+                "type": "string",
+                "tags": [],
+                "label": "hoverMessage",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLTelemetryCallbacks.onSuggestionsWithCustomCommandShown",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuggestionsWithCustomCommandShown",
+            "description": [],
+            "signature": [
+              "((commandNames: string[]) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-types",
+                "id": "def-common.ESQLTelemetryCallbacks.onSuggestionsWithCustomCommandShown.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "commandNames",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
         "id": "def-common.IndexAutocompleteItem",
         "type": "Interface",
         "tags": [],
@@ -1396,7 +1474,7 @@
         "tags": [],
         "label": "ResolveIndexResponse",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1410,7 +1488,7 @@
             "signature": [
               "ResolveIndexResponseItem[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1424,7 +1502,7 @@
             "signature": [
               "ResolveIndexResponseItem[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1438,7 +1516,7 @@
             "signature": [
               "ResolveIndexResponseItem[] | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-types/src/extensions_autocomplete_types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

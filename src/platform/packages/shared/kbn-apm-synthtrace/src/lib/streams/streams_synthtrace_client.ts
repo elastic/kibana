@@ -24,12 +24,17 @@ interface StreamsDocument {}
 export interface StreamsSynthtraceClient extends SynthtraceEsClient<StreamsDocument> {
   forkStream(
     streamName: string,
-    request: { stream: { name: string }; if: Condition }
+    request: { stream: { name: string }; where: Condition }
   ): Promise<{ acknowledged: true }>;
   putStream(
     streamName: string,
     request: Streams.all.UpsertRequest
   ): Promise<{ acknowledged: true; result: 'created' | 'updated' }>;
+  putIngestStream(
+    streamName: string,
+    request: Streams.all.Definition
+  ): Promise<{ acknowledged: true; result: 'created' | 'updated' }>;
+  enableFailureStore(streamName: string): Promise<unknown>;
   enable(): Promise<void>;
   disable(): Promise<void>;
   clearESCache(): Promise<void>;
@@ -49,7 +54,7 @@ export class StreamsSynthtraceClientImpl
 
   async forkStream(
     streamName: string,
-    request: { stream: { name: string }; if: Condition }
+    request: { stream: { name: string }; where: Condition }
   ): Promise<{ acknowledged: true }> {
     return this.kibana.fetch(`/api/streams/${streamName}/_fork`, {
       method: 'POST',
@@ -70,6 +75,28 @@ export class StreamsSynthtraceClientImpl
         ...internalKibanaHeaders(),
       },
       body: JSON.stringify(request),
+    });
+  }
+
+  async putIngestStream(
+    streamName: string,
+    request: Streams.all.Definition
+  ): Promise<{ acknowledged: true; result: 'created' | 'updated' }> {
+    return this.kibana.fetch(`/api/streams/${streamName}/_ingest`, {
+      method: 'PUT',
+      headers: {
+        ...internalKibanaHeaders(),
+      },
+      body: JSON.stringify(request),
+    });
+  }
+
+  async enableFailureStore(streamName: string) {
+    return this.client.indices.putDataStreamOptions({
+      name: streamName,
+      failure_store: {
+        enabled: true,
+      },
     });
   }
 
@@ -106,10 +133,7 @@ function streamsRoutingTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<StreamsDocument>, encoding, callback) {
-      // 50-50 send to logs or to logs-generic-default
-      if (Math.random() > 0.5) {
-        document._index = 'logs-generic-default';
-      } else {
+      if (!document._index) {
         document._index = 'logs';
       }
       callback(null, document);

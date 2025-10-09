@@ -12,8 +12,6 @@ import type { AgentParams, AgentResponse } from './provider';
 export interface RunAgentReturn {
   /** return from the agent */
   result: AgentResponse;
-  /** ID of this run */
-  runId: string;
 }
 
 /**

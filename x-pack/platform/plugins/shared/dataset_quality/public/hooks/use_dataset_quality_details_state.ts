@@ -7,8 +7,6 @@
 
 import { useCallback } from 'react';
 import { useSelector } from '@xstate/react';
-import type { OnRefreshProps } from '@elastic/eui';
-import { DEFAULT_DATEPICKER_REFRESH } from '../../common/constants';
 import { useDatasetQualityDetailsContext } from '../components/dataset_quality_details/context';
 import { indexNameToDataStreamParts } from '../../common/utils';
 import type { BasicDataStream } from '../../common/types';
@@ -28,6 +26,7 @@ export const useDatasetQualityDetailsState = () => {
     breakdownField,
     isIndexNotFoundError,
     expandedQualityIssue,
+    view,
   } = useSelector(service, (state) => state.context) ?? {};
 
   const isNonAggregatable = useSelector(service, (state) =>
@@ -103,6 +102,11 @@ export const useDatasetQualityDetailsState = () => {
     dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]?.canReadFailureStore
   );
 
+  const canUserManageFailureStore = Boolean(
+    dataStreamSettings?.datasetUserPrivileges?.datasetsPrivilages?.[dataStream]
+      ?.canManageFailureStore
+  );
+
   const dataStreamDetails = useSelector(service, (state) =>
     state.matches('initializing.dataStreamDetails.done')
       ? state.context.dataStreamDetails
@@ -147,17 +151,17 @@ export const useDatasetQualityDetailsState = () => {
   );
 
   const updateTimeRange = useCallback(
-    ({ start, end, refreshInterval }: OnRefreshProps) => {
+    ({ start, end }: { start: string; end: string }) => {
       service.send({
         type: 'UPDATE_TIME_RANGE',
         timeRange: {
+          ...timeRange,
           from: start,
           to: end,
-          refresh: { ...DEFAULT_DATEPICKER_REFRESH, value: refreshInterval },
         },
       });
     },
-    [service]
+    [service, timeRange]
   );
 
   const updateFailureStore = useCallback(
@@ -212,7 +216,9 @@ export const useDatasetQualityDetailsState = () => {
     canShowFailureStoreInfo,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
+    view,
     defaultRetentionPeriod,
     customRetentionPeriod,
+    canUserManageFailureStore,
   };
 };

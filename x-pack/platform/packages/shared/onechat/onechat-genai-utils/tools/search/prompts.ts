@@ -6,6 +6,7 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
+import type { SearchTarget } from './types';
 
 import {
   naturalLanguageSearchToolName as nlTool,
@@ -14,10 +15,10 @@ import {
 
 export const getSearchPrompt = ({
   nlQuery,
-  index,
+  searchTarget,
 }: {
   nlQuery: string;
-  index: string;
+  searchTarget: SearchTarget;
 }): BaseMessageLike[] => {
   const systemPrompt = `You are an expert search dispatcher. Your sole task is to analyze a user's request and call the single most appropriate tool to answer it.
 You **must** call **one** of the available tools. Do not answer the user directly or ask clarifying questions.
@@ -39,7 +40,9 @@ You **must** call **one** of the available tools. Do not answer the user directl
   - "list all products where status is 'in_stock' and price is less than 50"
   - "how many errors were logged in the past hour?"
 
-The search will be performed on the \`${index}\` index.`;
+## Additional instructions
+
+- The search will be performed against the \`${searchTarget.name}\` ${searchTarget.type}, so you should use that value for the \`index\` parameters of the tool you will call.`;
 
   const userPrompt = `Execute the following user query: "${nlQuery}"`;
 
