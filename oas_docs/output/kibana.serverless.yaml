@@ -75,25 +75,62 @@ tags:
     x-displayName: Connectors
   - name: Dashboards
   - name: Data streams
+    description: |
+      Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
+    x-displayName: Data streams
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.
     name: data views
     x-displayName: Data views
   - name: Elastic Agent actions
+    description: |
+      Elastic Agent actions APIs enable you to manage actions performed on Elastic Agents, including agent reassignment, diagnostics collection, enrollment management, upgrades, and bulk operations for agent lifecycle management.
+    x-displayName: Elastic Agent actions
   - name: Elastic Agent binary download sources
+    description: |
+      Elastic Agent binary download sources APIs enable you to manage download sources for Elastic Agent binaries, including creating, updating, and deleting custom download sources for agent binaries.
+    x-displayName: Elastic Agent binary download sources
   - name: Elastic Agent policies
+    description: |
+      Elastic Agent policies APIs enable you to manage agent policies, including creating, updating, and deleting policies, as well as to retrieve agent policy outputs, manifests, and auto-upgrade status information.
+    x-displayName: Elastic Agent policies
   - name: Elastic Agent status
+    description: |
+      Enables you to retrieve status information about Elastic Agents, including health summaries and operational status.
+    x-displayName: Elastic Agent status
   - name: Elastic Agents
+    description: |
+      Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and initiating agent setup.
+    x-displayName: Elastic Agents
   - name: Elastic Package Manager (EPM)
   - name: Fleet enrollment API keys
+    description: |
+      Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
+    x-displayName: Fleet enrollment API keys
   - name: Fleet internals
+    description: |
+      Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
+    x-displayName: Fleet internals
   - name: Fleet outputs
+    description: |
+      Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating Logstash API keys, and monitoring output health.
+    x-displayName: Fleet outputs
   - name: Fleet package policies
+    description: |
+      Fleet package policies APIs enable you to manage Fleet package policies, including creating, updating, and deleting policies, performing bulk operations, and managing policy upgrades.
+    x-displayName: Fleet package policies
   - name: Fleet proxies
+    description: |
+      Fleet proxies APIs enable you to manage Fleet proxies, including creating, updating, and deleting proxy configurations for Fleet agent communication.
+    x-displayName: Fleet proxies
   - name: Fleet Server hosts
   - name: Fleet service tokens
   - name: Fleet uninstall tokens
   - name: Message Signing Service
-  - description: Machine learning
+    description: |
+      Enables you to rotate message signing key pairs for secure Fleet communication.
+    x-displayName: Fleet Message Signing Service
+  - description: |
+      Enables you to synchronize machine learning saved objects.
     name: ml
     x-displayName: Machine learning
   - name: roles
@@ -142,7 +179,8 @@ tags:
   - description: Interact with and manage endpoints running the Elastic Defend integration.
     name: Security Endpoint Management API
     x-displayName: Security endpoint management
-  - description: ''
+  - description: |
+      Use the Security entity analytics APIs to manage entity analytics and risk scoring, including asset criticality, privileged user monitoring, and entity engines.
     name: Security Entity Analytics API
     x-displayName: Security entity analytics
   - description: |
@@ -220,6 +258,9 @@ tags:
   - name: spaces
     x-displayName: Spaces
     description: Manage your Kibana spaces.
+    externalDocs:
+      url: https://www.elastic.co/docs/deploy-manage/manage-spaces
+      description: Space overview
   - name: streams
     description: |
       Streams is a new and experimental way to manage your data in Kibana. The API is currently not considered stable and can change at any point.
@@ -227,8 +268,9 @@ tags:
   - name: system
     x-displayName: System
     description: |
-      Get information about the system status, resource usage, and installed plugins.
-  - externalDocs:
+      Get information about the system status, resource usage, features, and installed plugins.
+  - description: Task manager APIs enable you to check the health of the Kibana task manager, which is used by features such as alerting, actions, and reporting to run mission critical work as persistent background tasks.
+    externalDocs:
       description: Task manager
       url: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
     name: task manager
