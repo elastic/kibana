@@ -87,8 +87,14 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
   for (let j = 0; j < grouping.length; j++) {
     const group = grouping[j];
 
+    if (!group.definition) {
+      // query received is malformed without complete grouping definition, there's no need to proceed further
+      return { groupByFields: [], appliedFunctions: [] };
+    }
+
     const groupFieldName = removeBackticks(group.field);
 
+    // check if there is a where command targeting the group field in the stats command
     const whereCommandGroupFieldSearch = mutate.commands.where.byField(
       esqlQuery.ast,
       Builder.expression.column({
@@ -96,11 +102,23 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
       })
     );
 
-    if (!group.definition || whereCommandGroupFieldSearch?.length) {
-      // if query received is malformed without complete grouping definition or
-      // there is a where command targeting a column on the stats command we are processing in the query,
-      // then we do not want to classify it as having metadata required for the cascade experience
-      return { groupByFields: [], appliedFunctions: [] };
+    if (whereCommandGroupFieldSearch?.length) {
+      if (groupByFields.length > 0) {
+        // if there's a where command targeting the group in this current iteration,
+        // then this specific query can only be grouped by the current group, pivoting on any other columns though they exist
+        // in the query would be invalid, hence we clear out any previously added group by fields since they are no longer valid
+        groupByFields.splice(0, groupByFields.length);
+      }
+
+      // add the current group and break out of the loop
+      // since there's no need to continue processing other groups
+      // as they are not valid in this context
+      groupByFields.push({
+        field: groupFieldName,
+        type: group.definition.type === 'function' ? group.definition.name : group.definition.type,
+      });
+
+      break;
     }
 
     if (isFunctionExpression(group.definition)) {
