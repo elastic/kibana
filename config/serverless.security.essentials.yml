@@ -3,7 +3,7 @@
 ## Cloud settings
 xpack.cloud.serverless.product_tier: essentials
 
-### Workflows Management feature privilege should not be enabled in this tier
-xpack.workflowsManagement.enabled: false
-xpack.workflowsExecutionEngine.enabled: false
+### Workflows plugins should not be enabled in this tier
+workflowsManagement.enabled: false
+workflowsExecutionEngine.enabled: false
 
