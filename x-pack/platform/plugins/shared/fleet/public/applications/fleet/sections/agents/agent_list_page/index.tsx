@@ -122,7 +122,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     draftKuery,
     setDraftKuery,
     fetchData,
-    currentRequestRef,
+    queryHasChanged,
     latestAgentActionErrors,
     setLatestAgentActionErrors,
   } = useFetchAgentsData();
@@ -304,8 +304,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     fetchData({ refreshTags });
     setShowAgentActivityTour(true);
   };
-
-  const isCurrentRequestIncremented = currentRequestRef?.current === 1;
 
   return (
     <>
@@ -535,7 +533,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
         clearFilters={clearFilters}
-        isCurrentRequestIncremented={isCurrentRequestIncremented}
+        queryHasChanged={queryHasChanged}
       />
     </>
   );
