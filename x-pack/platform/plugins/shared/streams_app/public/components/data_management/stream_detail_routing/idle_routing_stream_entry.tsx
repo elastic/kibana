@@ -151,7 +151,7 @@ export function IdleRoutingStreamEntry({
                     }
                   )}
                 >
-                  <EuiBadge color="hollow">{`+${childrenCount}`}</EuiBadge>
+                  <EuiBadge color="hollow" tabIndex={0}>{`+${childrenCount}`}</EuiBadge>
                 </EuiToolTip>
                 <VerticalRule />
               </>
