@@ -58,6 +58,7 @@ export interface Query {
   root: ESQLAstQueryExpression;
   commands: Array<ESQLCommand<string>>;
   params: Params[];
+  comments?: Array<{ type: 'comment'; text: string; position: number }>;
 }
 
 export interface QueryRequest {

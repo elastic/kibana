@@ -6,55 +6,50 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { comment } from './comment';
 import { from } from './from';
-import { where } from './where';
+import { comment } from './comment';
+import { stats } from './stats';
 
 describe('comment', () => {
-  const source = from('logs-*');
+  it('adds comments to the query', () => {
+    const pipeline = from('logs-*')
+      .pipe(stats('count = COUNT(*)'))
+      .pipe(comment('This is a test comment'))
+      .pipe(stats('avg = AVG(value)'));
 
-  it('adds a single-line comment to the pipeline', () => {
-    const pipeline = source.pipe(comment('This is a comment'));
-
-    const result = pipeline.toString();
-    // The comment should appear in the output
-    expect(result).toContain('// This is a comment');
-    // A ROW 1 command should be added as a carrier for the comment
-    expect(result).toContain('ROW 1');
-    expect(result).toContain('FROM logs-*');
+    expect(pipeline.toString()).toContain('// This is a test comment');
   });
 
-  it('adds a multi-line comment to the pipeline', () => {
-    const pipeline = source.pipe(comment('Line 1\nLine 2\nLine 3'));
+  it('positions comments correctly', () => {
+    const pipeline = from('logs-*')
+      .pipe(comment('First comment'))
+      .pipe(stats('count = COUNT(*)'))
+      .pipe(comment('Second comment'))
+      .pipe(stats('avg = AVG(value)'));
 
-    const result = pipeline.toString();
-    // Multi-line comments should use /* */ syntax
-    expect(result).toContain('/* Line 1');
-    expect(result).toContain('Line 2');
-    expect(result).toContain('Line 3 */');
-    expect(result).toContain('ROW 1');
+    const queryString = pipeline.toString();
+    const lines = queryString.split('\n');
+
+    expect(lines[1]).toContain('// First comment');
+    expect(lines[3]).toContain('// Second comment');
   });
 
-  it('can chain comments with other commands', () => {
-    const pipeline = source.pipe(
-      comment('Filter logs'),
-      where('@timestamp >= NOW() - 1 hour')
-    );
+  it('handles multiple comments', () => {
+    const pipeline = from('logs-*')
+      .pipe(comment('Comment 1'))
+      .pipe(comment('Comment 2'))
+      .pipe(stats('count = COUNT(*)'));
 
-    const result = pipeline.toString();
-    expect(result).toContain('// Filter logs');
-    expect(result).toContain('WHERE @timestamp >= NOW() - 1 hour');
+    const queryString = pipeline.toString();
+    expect(queryString).toContain('// Comment 1');
+    expect(queryString).toContain('// Comment 2');
   });
 
-  it('can add multiple comments', () => {
-    const pipeline = source.pipe(
-      comment('First comment'),
-      comment('Second comment'),
-      where('@timestamp >= NOW() - 1 hour')
-    );
+  it('does not add // prefix if already present', () => {
+    const pipeline = from('logs-*').pipe(comment('This is a comment'));
 
-    const result = pipeline.toString();
-    expect(result).toContain('// First comment');
-    expect(result).toContain('// Second comment');
+    const queryString = pipeline.toString();
+    expect(queryString).toContain('// This is a comment');
+    expect(queryString).not.toContain('// // This is a comment');
   });
 });

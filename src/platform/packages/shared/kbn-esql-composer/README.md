@@ -117,17 +117,19 @@ FROM logs-*
 
 ### `COMMENT`
 
-The `comment` function allows you to add documentation and annotations to your ES|QL queries. Since ES|QL doesn't have a dedicated comment command, this function creates a minimal `ROW 1` command prefixed with your comment.
+The `comment` function allows you to add documentation and annotations to your ES|QL queries. Comments are included in the query string output for documentation purposes.
 
 #### Basic comment
 
 ```ts
-import { from, comment, where } from '@kbn/esql-composer';
+import { from, comment, stats, evaluate, drop } from '@kbn/esql-composer';
 
-from('logs-*')
+const query = from('metrics-*')
   .pipe(
-    comment('Filter for logs from the last hour'),
-    where('@timestamp >= NOW() - 1 hour')
+    stats('AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name'),
+    comment('Technical preview: The following two commands are needed during the preview and will be removed once the feature is generally available (GA)'),
+    evaluate('__DIMENSIONS__ = CONCAT(host.name)'),
+    drop('host.name')
   )
   .toString();
 ```
@@ -135,21 +137,24 @@ from('logs-*')
 Output:
 
 ```sql
-FROM logs-*
-  // Filter for logs from the last hour
-  | ROW 1
-  | WHERE @timestamp >= NOW() - 1 hour
+FROM metrics-*
+  | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name
+  // Technical preview: The following two commands are needed during the preview and will be removed once the feature is generally available (GA)
+  | EVAL __DIMENSIONS__ = CONCAT(host.name)
+  | DROP host.name
 ```
 
-#### Multi-line comment
+#### Multiple comments
 
 ```ts
-import { from, comment, where } from '@kbn/esql-composer';
+import { from, comment, stats } from '@kbn/esql-composer';
 
-from('logs-*')
+const query = from('logs-*')
   .pipe(
-    comment('This query filters logs\nfrom the last hour\nand groups by service'),
-    where('@timestamp >= NOW() - 1 hour')
+    comment('First filter the data'),
+    stats('count = COUNT(*)'),
+    comment('Then calculate the average'),
+    stats('avg = AVG(value)')
   )
   .toString();
 ```
@@ -158,11 +163,10 @@ Output:
 
 ```sql
 FROM logs-*
-  /* This query filters logs
-from the last hour
-and groups by service */
-  | ROW 1
-  | WHERE @timestamp >= NOW() - 1 hour
+  // First filter the data
+  | STATS count = COUNT(*)
+  // Then calculate the average
+  | STATS avg = AVG(value)
 ```
 
 ### `WHERE`
