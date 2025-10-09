@@ -10,13 +10,12 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Stateful Observability - Deployment-agnostic API integration tests', () => {
     // load new oblt (except APM) deployment-agnostic tests here
-    // TODO - don't forget to uncomment this when you submit your PR
-    // loadTestFile(require.resolve('../../apis/alerting'));
+    loadTestFile(require.resolve('../../apis/alerting'));
     loadTestFile(require.resolve('../../apis/dataset_quality'));
-    // loadTestFile(require.resolve('../../apis/slo'));
-    // loadTestFile(require.resolve('../../apis/synthetics'));
-    // loadTestFile(require.resolve('../../apis/infra'));
-    // loadTestFile(require.resolve('../../apis/onboarding'));
-    // loadTestFile(require.resolve('../../apis/incident_management'));
+    loadTestFile(require.resolve('../../apis/slo'));
+    loadTestFile(require.resolve('../../apis/synthetics'));
+    loadTestFile(require.resolve('../../apis/infra'));
+    loadTestFile(require.resolve('../../apis/onboarding'));
+    loadTestFile(require.resolve('../../apis/incident_management'));
   });
 }

@@ -26,7 +26,7 @@ const readUserRole: KibanaRoleDescriptors = {
   kibana: [],
 };
 
-const datasetQualityMonitorUserRole = {
+const datasetQualityMonitorUserRole: KibanaRoleDescriptors = {
   elasticsearch: {
     indices: [
       {

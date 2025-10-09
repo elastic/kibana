@@ -18,6 +18,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const customRoleScopedSupertest = getService('customRoleScopedSupertest');
   const saml = getService('samlAuth');
   const synthtrace = getService('synthtrace');
+  const retry = getService('retry');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
   const type = 'logs';
@@ -151,6 +152,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns "sizeBytes" correctly', async () => {
+        // Metering stats api is cached and refreshed every 30 seconds
+        await retry.waitForWithTimeout('Metering stats cache is refreshed', 45000, async () => {
+          const detailsResponse = await callApiAs(
+            supertestDatasetQualityMonitorWithCookieCredentials,
+            `${type}-${dataset}-${namespace}`
+          );
+          if (detailsResponse.body.sizeBytes === 0) {
+            throw new Error("Metering stats cache hasn't refreshed");
+          }
+          return true;
+        });
         const resp = await callApiAs(
           supertestDatasetQualityMonitorWithCookieCredentials,
           `${type}-${dataset}-${namespace}`

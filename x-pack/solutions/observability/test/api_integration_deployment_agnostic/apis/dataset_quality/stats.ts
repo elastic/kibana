@@ -20,6 +20,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const saml = getService('samlAuth');
   const synthtrace = getService('synthtrace');
   const es = getService('es');
+  const retry = getService('retry');
 
   async function callApiAs(
     roleScopedSupertestWithCookieCredentials: SupertestWithRoleScopeType,
@@ -33,6 +34,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         includeCreationDate,
       });
   }
+
+  const waitForSizeBytes = async (
+    roleScopedSupertestWithCookieCredentials: SupertestWithRoleScopeType,
+    types: Array<'logs' | 'metrics' | 'traces' | 'synthetics'> = ['logs'],
+    includeCreationDate = false
+  ) => {
+    // Metering stats api is cached and refreshed every 30 seconds
+    await retry.waitForWithTimeout('Metering stats cache is refreshed', 45000, async () => {
+      const res = await callApiAs(
+        roleScopedSupertestWithCookieCredentials,
+        types,
+        includeCreationDate
+      );
+      if (res.body.dataStreamsStats[0].sizeBytes === 0) {
+        throw new Error("Metering stats cache hasn't refreshed");
+      }
+      return true;
+    });
+  };
 
   describe('Stats', function () {
     // This disables the forward-compatibility test for Kibana 8.19 with ES upgraded to 9.0.
@@ -69,7 +89,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       synthtraceLogsEsClient = synthtrace.createLogsSynthtraceEsClient();
-      syntheticsSynthrace = synthtrace.createLogsSynthtraceEsClient();
+      syntheticsSynthrace = synthtrace.createSyntheticsEsClient();
     });
 
     after(async () => {
@@ -160,11 +180,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns stats correctly', async () => {
+        await waitForSizeBytes(supertestDatasetQualityMonitorWithCookieCredentials);
         const stats = await callApiAs(supertestDatasetQualityMonitorWithCookieCredentials);
 
         expect(stats.body.dataStreamsStats.length).to.be(1);
         expect(stats.body.dataStreamsStats[0].integration).not.ok();
-        expect(stats.body.dataStreamsStats[0].size).not.empty();
         expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
         expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
         expect(stats.body.dataStreamsStats[0].totalDocs).greaterThan(0);
@@ -203,11 +223,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns stats correctly', async () => {
+        await waitForSizeBytes(supertestDatasetQualityMonitorWithCookieCredentials);
         const stats = await callApiAs(supertestDatasetQualityMonitorWithCookieCredentials);
 
         expect(stats.body.dataStreamsStats.length).to.be(1);
         expect(stats.body.dataStreamsStats[0].integration).to.be(integration);
-        expect(stats.body.dataStreamsStats[0].size).not.empty();
         expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
         expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
         expect(stats.body.dataStreamsStats[0].totalDocs).greaterThan(0);
@@ -215,7 +235,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('does not return creation date by default', async () => {
         const stats = await callApiAs(supertestDatasetQualityMonitorWithCookieCredentials);
-        expect(stats.body.dataStreamsStats[0].size).not.empty();
         expect(stats.body.dataStreamsStats[0].creationDate).to.be(undefined);
       });
 
@@ -225,7 +244,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ['logs'],
           true
         );
-        expect(stats.body.dataStreamsStats[0].size).not.empty();
         expect(stats.body.dataStreamsStats[0].creationDate).greaterThan(0);
       });
     });
@@ -250,7 +268,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               }),
             ]),
         ]);
-        // TODO - this seems to cause issue with the test
         await syntheticsSynthrace.index([
           timerange('2023-11-20T15:00:00.000Z', '2023-11-20T15:01:00.000Z')
             .interval('1m')
@@ -262,18 +279,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns stats correctly', async () => {
+        await waitForSizeBytes(supertestDatasetQualityMonitorWithCookieCredentials, [
+          'logs',
+          'synthetics',
+        ]);
         const stats = await callApiAs(supertestDatasetQualityMonitorWithCookieCredentials, [
           'logs',
           'synthetics',
         ]);
 
         expect(stats.body.dataStreamsStats.length).to.be(2);
-        expect(stats.body.dataStreamsStats[0].size).not.empty();
         expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
         expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
         expect(stats.body.dataStreamsStats[0].totalDocs).greaterThan(0);
         expect(stats.body.dataStreamsStats[0].name).match(new RegExp(/^logs-[\w.]+-[\w.]+/));
-        expect(stats.body.dataStreamsStats[1].size).not.empty();
         expect(stats.body.dataStreamsStats[1].sizeBytes).greaterThan(0);
         expect(stats.body.dataStreamsStats[1].lastActivity).greaterThan(0);
         expect(stats.body.dataStreamsStats[1].totalDocs).greaterThan(0);
@@ -282,6 +301,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         saml.deleteCustomRole();
+        await synthtraceLogsEsClient.clean();
         await syntheticsSynthrace.clean();
       });
     });
@@ -304,9 +324,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('returns non empty stats for an authorized user', async () => {
         await ingestDocuments();
+        await waitForSizeBytes(supertestDatasetQualityMonitorWithCookieCredentials);
         const stats = await callApiAs(supertestDatasetQualityMonitorWithCookieCredentials);
 
-        expect(stats.body.dataStreamsStats[0].size).not.empty();
         expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
         expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
       });
