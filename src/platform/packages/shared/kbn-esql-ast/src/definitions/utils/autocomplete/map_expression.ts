@@ -28,6 +28,7 @@ export type MapParameters = Record<string, MapParameterValues>;
  *  | COMPLETION "prompt" WITH {                       ---> suggests parameters names
  *  | COMPLETION "prompt" WITH { "                     ---> suggests parameters names
  *  | COMPLETION "prompt" WITH { "param1": "           ---> suggests parameter values
+ *  | COMPLETION "prompt" WITH { "param1": "           ---> suggests parameter values
  *  | COMPLETION "prompt" WITH { "param1": "value",    ---> suggests parameter names that were not used
  *  | COMPLETION "prompt" WITH { "param1": "value", "  ---> suggests parameter names that were not used
  *
@@ -40,6 +41,8 @@ export function getCommandMapExpressionSuggestions(
   innerText: string,
   availableParameters: MapParameters
 ): ISuggestionItem[] {
+  const finalWord = findFinalWord(innerText);
+
   // Suggest a parameter entry after { or after a comma or when opening quotes after those
   if (/{\s*"?$/i.test(innerText) || /,\s*"?$/.test(innerText)) {
     const usedParams = new Set<string>();
@@ -52,8 +55,6 @@ export function getCommandMapExpressionSuggestions(
     const availableParamNames = Object.keys(availableParameters).filter(
       (paramName) => !usedParams.has(paramName)
     );
-
-    const finalWord = findFinalWord(innerText);
 
     return availableParamNames.map((paramName) => {
       const valueSnippet = SNIPPET_BY_VALUE_TYPE[availableParameters[paramName].type];
@@ -74,11 +75,21 @@ export function getCommandMapExpressionSuggestions(
   }
 
   // Suggest a parameter value if on the right side of a parameter entry, capture the parameter name
-  if (/:\s*"[^"]*$/i.test(innerText)) {
-    const match = innerText.match(/"([^"]+)"\s*:\s*"[^"]*$/);
+  if (/:\s*"?[^"]*$/i.test(innerText)) {
+    const match = innerText.match(/"([^"]+)"\s*:\s*"?[^"]*$/);
     const paramName = match ? match[1] : undefined;
     if (paramName && availableParameters[paramName]) {
-      return availableParameters[paramName].suggestions ?? [];
+      return (
+        availableParameters[paramName].suggestions?.map((s) => ({
+          ...s,
+          text: finalWord.startsWith('"') ? `"${s.text}` : `"${s.text}"`,
+          filterText: `"${s.text}`,
+          rangeToReplace: {
+            start: innerText.length - finalWord.length,
+            end: innerText.length,
+          },
+        })) ?? []
+      );
     }
   }
   return [];
