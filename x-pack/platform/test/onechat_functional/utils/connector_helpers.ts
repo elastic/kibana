@@ -59,7 +59,11 @@ export async function setupConnector(getService: OneChatApiFtrProviderContext['g
  * Cleans up all created connectors
  * @param getService
  */
-export async function teardownConnector(getService: OneChatApiFtrProviderContext['getService']) {
+export async function teardownConnector(
+  getService: OneChatApiFtrProviderContext['getService'],
+  llmProxy: LlmProxy
+) {
+  llmProxy.close();
   const supertest = getService('supertest');
   await deleteConnectors(supertest);
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import type { OneChatUiFtrProviderContext } from '../../onechat/services/functional';
 import { setupConnector, teardownConnector } from '../utils/connector_helpers';
 
@@ -16,12 +17,14 @@ export default function ({ loadTestFile, getService }: OneChatUiFtrProviderConte
     });
 
     describe('tools', function () {
+      let llmProxy: LlmProxy;
+
       before(async () => {
-        await setupConnector(getService);
+        llmProxy = await setupConnector(getService);
       });
 
       after(async () => {
-        await teardownConnector(getService);
+        await teardownConnector(getService, llmProxy);
       });
 
       loadTestFile(require.resolve('./tools/create_tool.ts'));
