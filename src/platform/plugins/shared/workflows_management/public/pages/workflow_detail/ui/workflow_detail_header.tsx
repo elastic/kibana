@@ -133,7 +133,7 @@ export const WorkflowDetailHeader = ({
                   css={styles.skeletonTitle}
                 >
                   <EuiTitle size="m" css={styles.title}>
-                    <h1>{name}</h1>
+                    <h2>{name}</h2>
                   </EuiTitle>
                 </EuiSkeletonTitle>
               </EuiFlexItem>
