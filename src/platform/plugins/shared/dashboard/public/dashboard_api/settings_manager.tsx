@@ -86,16 +86,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
       title$: stateManager.api.title$,
     },
     internalApi: {
-      serializeSettings: () => {
-        const { description, tags, timeRestore, title, ...options } = stateManager.getLatestState();
-        return {
-          ...(description && { description }),
-          tags,
-          timeRestore,
-          title: title ?? '',
-          options,
-        };
-      },
+      serializeSettings,
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return stateManager.anyStateChange$.pipe(
           debounceTime(100),
@@ -108,6 +99,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
               latestState,
               DEFAULT_SETTINGS
             );
+            // options needs to contain all values and not just diffs since is spread into saved state
             const options = Object.keys(optionDiffs).length
               ? { ...serializeSettings().options, ...optionDiffs }
               : undefined;
