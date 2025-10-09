@@ -46,7 +46,7 @@ export const runCasesBackfillTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runCasesSynchronizationTask = async (supertest: SuperTest.Agent) => {
+export const runCAISynchronizationTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/synchronization/run_soon')
     .set('kbn-xsrf', 'xxx')
@@ -75,14 +75,6 @@ export const runSchedulerTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runAttachmentsSynchronizationTask = async (supertest: SuperTest.Agent) => {
-  await supertest
-    .post('/api/analytics_index/synchronization/run_soon')
-    .set('kbn-xsrf', 'xxx')
-    .send({ taskId: getSynchronizationTaskId('default', 'securitySolution') })
-    .expect(200);
-};
-
 export const runCommentsBackfillTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/backfill/run_soon')
@@ -96,14 +88,6 @@ export const runCommentsBackfillTask = async (supertest: SuperTest.Agent) => {
     .expect(200);
 };
 
-export const runCommentsSynchronizationTask = async (supertest: SuperTest.Agent) => {
-  await supertest
-    .post('/api/analytics_index/synchronization/run_soon')
-    .set('kbn-xsrf', 'xxx')
-    .send({ taskId: getSynchronizationTaskId('default', 'securitySolution') })
-    .expect(200);
-};
-
 export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
   await supertest
     .post('/api/analytics_index/backfill/run_soon')
@@ -114,13 +98,5 @@ export const runActivityBackfillTask = async (supertest: SuperTest.Agent) => {
       destIndex: getActivityDestinationIndexName('default', 'securitySolution'),
       sourceQuery: JSON.stringify(getActivitySourceQuery('default', 'securitySolution')),
     })
-    .expect(200);
-};
-
-export const runActivitySynchronizationTask = async (supertest: SuperTest.Agent) => {
-  await supertest
-    .post('/api/analytics_index/synchronization/run_soon')
-    .set('kbn-xsrf', 'xxx')
-    .send({ taskId: getSynchronizationTaskId('default', 'securitySolution') })
     .expect(200);
 };
