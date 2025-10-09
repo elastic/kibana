@@ -39,7 +39,7 @@ URL
     ::::
 
 API Key
-:   The Jira Service Management API authentication key for HTTP basic authentication. For more details about generating Jira Service Management API keys, refer to [Jira Service Management documentation](https://support.atlassian.com/jsm/docs/create-a-default-api-integration/).
+:   The Jira Service Management API authentication key for HTTP basic authentication. For more details about generating Jira Service Management API keys, refer to [Jira Service Management documentation](https://support.atlassian.com/jira-service-management-cloud/docs/create-a-default-api-integration/).
 
 ## Test connectors [jsm-action-configuration]
 
@@ -76,7 +76,7 @@ Description
 :   A description that provides detailed information about the alert (optional).
 
 Alias
-:   The alert identifier, which is used for alert deduplication in Jira Service Management. For more information, refer to the [Jira Service Management documentation](https://support.atlassian.com/jsm/docs/what-is-alert-de-duplication/) (optional).
+:   The alert identifier, which is used for alert deduplication in Jira Service Management. For more information, refer to the [Jira Service Management documentation](https://support.atlassian.com/jira-service-management-cloud/docs/what-is-alert-de-duplication/) (optional).
 
 Entity
 :   The domain of the alert (optional).
