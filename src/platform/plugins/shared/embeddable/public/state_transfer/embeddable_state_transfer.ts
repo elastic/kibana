@@ -61,7 +61,7 @@ export class EmbeddableStateTransfer {
     appId: string,
     removeAfterFetch?: boolean
   ): EmbeddableEditorState | undefined {
-    return this.getIncomingState<EmbeddableEditorState>(
+    const states = this.getIncomingPackagesState<EmbeddableEditorState>(
       isEmbeddableEditorState,
       appId,
       EMBEDDABLE_EDITOR_STATE_KEY,
@@ -69,6 +69,7 @@ export class EmbeddableStateTransfer {
         keysToRemoveAfterFetch: removeAfterFetch ? [EMBEDDABLE_EDITOR_STATE_KEY] : undefined,
       }
     );
+    return states?.[0];
   }
 
   /**
@@ -161,30 +162,9 @@ export class EmbeddableStateTransfer {
     }
   }
 
-  private getIncomingState<IncomingStateType>(
-    guard: (state: unknown) => state is IncomingStateType,
-    appId: string,
-    key: string,
-    options?: {
-      keysToRemoveAfterFetch?: string[];
-    }
-  ): IncomingStateType | undefined {
-    const incomingState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key]?.[appId];
-    const castState =
-      !guard || guard(incomingState) ? (cloneDeep(incomingState) as IncomingStateType) : undefined;
-    if (castState && options?.keysToRemoveAfterFetch) {
-      const stateReplace = { ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY) };
-      options.keysToRemoveAfterFetch.forEach((keyToRemove: string) => {
-        delete stateReplace[keyToRemove];
-      });
-      this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateReplace);
-    }
-    return castState;
-  }
-
   /**
-   * Retrieves incoming embeddable package states from session storage, handling both single items and arrays.
-   * Always returns an array format. Filters results using the provided type guard.
+   * Retrieves incoming embeddable package states from session storage.
+   * Always expects and returns an array format. Filters results using the provided type guard.
    *
    * @param guard - Type guard function to validate state items
    * @param appId - The application ID to fetch state for
@@ -207,24 +187,15 @@ export class EmbeddableStateTransfer {
 
     const incomingState = embeddableState[key]?.[appId];
 
-    if (!incomingState) {
+    if (!incomingState || !Array.isArray(incomingState)) {
       return undefined;
     }
 
-    // Handle array case: collect all valid states that pass the guard
-    if (Array.isArray(incomingState)) {
-      const validStates = incomingState.filter((item) => guard(item));
-      if (validStates.length > 0) {
-        this.removeKeysFromStorage(embeddableState, options);
-        return validStates.map((item) => cloneDeep(item) as IncomingStateType);
-      }
-      return undefined;
-    }
-
-    // Handle single item case
-    if (guard(incomingState)) {
+    // Collect all valid states that pass the guard
+    const validStates = incomingState.filter((item) => guard(item));
+    if (validStates.length > 0) {
       this.removeKeysFromStorage(embeddableState, options);
-      return [cloneDeep(incomingState)];
+      return validStates.map((item) => cloneDeep(item) as IncomingStateType);
     }
 
     return undefined;
@@ -241,11 +212,18 @@ export class EmbeddableStateTransfer {
     }
   ): Promise<void> {
     const existingAppState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key] || {};
+
+    // Ensure editor states are wrapped in arrays, but keep package states as-is
+    let stateToStore = options?.state;
+    if (key === EMBEDDABLE_EDITOR_STATE_KEY && stateToStore) {
+      stateToStore = [stateToStore] as OutgoingStateType;
+    }
+
     const stateObject = {
       ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY),
       [key]: {
         ...existingAppState,
-        [appId]: options?.state,
+        [appId]: stateToStore,
       },
     };
     this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateObject);
