@@ -199,6 +199,28 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectCreateIndexButtonToExists() {
         await testSubjects.existOrFail('createIndexButton');
       },
+      async expectToBeOnCreateIndexPage() {
+        expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/create');
+        await testSubjects.existOrFail('elasticsearchCreateIndexPage', { timeout: 2000 });
+      },
+      async expectToBeOnIndexDetailsPage() {
+        await retry.tryForTime(60 * 1000, async () => {
+          expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/indices/index_details');
+        });
+      },
+      async setIndexNameValue(value: string) {
+        await testSubjects.existOrFail('indexNameField');
+        await testSubjects.setValue('indexNameField', value);
+      },
+      async expectCreateIndexButtonToBeEnabled() {
+        await testSubjects.existOrFail('createIndexBtn');
+        expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
+      },
+      async clickCreateIndexButton() {
+        await testSubjects.existOrFail('createIndexBtn');
+        expect(await testSubjects.isEnabled('createIndexBtn')).equal(true);
+        await testSubjects.click('createIndexBtn');
+      },
 
       async expectOpenFlyoutAndSelectIndex() {
         await browser.refresh();
