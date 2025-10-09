@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepmerge from 'deepmerge';
-import { isPlainObject } from 'lodash';
-
 import type {
   NoDataCardServices,
   NoDataCardKibanaDependencies,
@@ -41,27 +38,22 @@ export const getKibanaDependenciesMock = (
   const integrations =
     params.canAccessFleet !== undefined ? params.canAccessFleet : defaultParams.canAccessFleet;
 
-  const result = deepmerge(
-    {
-      coreStart: {
-        http: {
-          basePath: {
-            prepend: jest.fn(),
-          },
+  const result: NoDataCardKibanaDependencies = {
+    coreStart: {
+      http: {
+        basePath: {
+          prepend: jest.fn(),
         },
-        application: {
-          capabilities: {
-            navLinks: {
-              integrations,
-            },
+      },
+      application: {
+        capabilities: {
+          navLinks: {
+            integrations,
           },
         },
       },
     },
-    {
-      isMergeableObject: isPlainObject,
-    }
-  );
+  };
 
   return result;
 };
