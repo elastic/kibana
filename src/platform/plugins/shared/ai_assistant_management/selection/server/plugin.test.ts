@@ -91,7 +91,7 @@ describe('plugin', () => {
         expect.objectContaining({
           [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: expect.objectContaining({
             readonlyMode: 'ui',
-            readonly: false,
+            readonly: true,
             value: NO_DEFAULT_CONNECTOR,
           }),
         })
@@ -100,7 +100,7 @@ describe('plugin', () => {
         expect.objectContaining({
           [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: expect.objectContaining({
             readonlyMode: 'ui',
-            readonly: false,
+            readonly: true,
             value: false,
           }),
         })
@@ -136,7 +136,7 @@ describe('plugin', () => {
         expect.objectContaining({
           [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: expect.objectContaining({
             readonlyMode: 'ui',
-            readonly: false,
+            readonly: true,
             value: NO_DEFAULT_CONNECTOR,
           }),
         })
@@ -145,7 +145,7 @@ describe('plugin', () => {
         expect.objectContaining({
           [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: expect.objectContaining({
             readonlyMode: 'ui',
-            readonly: false,
+            readonly: true,
             value: false,
           }),
         })
@@ -179,7 +179,7 @@ describe('plugin', () => {
         expect.objectContaining({
           [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: expect.objectContaining({
             readonlyMode: 'ui',
-            readonly: false,
+            readonly: true,
             value: NO_DEFAULT_CONNECTOR,
           }),
         })
@@ -188,7 +188,7 @@ describe('plugin', () => {
         expect.objectContaining({
           [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: expect.objectContaining({
             readonlyMode: 'ui',
-            readonly: false,
+            readonly: true,
             value: false,
           }),
         })
@@ -250,7 +250,7 @@ describe('plugin', () => {
         expect.objectContaining({
           [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: expect.objectContaining({
             readonlyMode: 'ui',
-            readonly: false,
+            readonly: true,
             value: NO_DEFAULT_CONNECTOR,
           }),
         })
@@ -259,7 +259,7 @@ describe('plugin', () => {
         expect.objectContaining({
           [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: expect.objectContaining({
             readonlyMode: 'ui',
-            readonly: false,
+            readonly: true,
             value: false,
           }),
         })
