@@ -10,7 +10,10 @@ import { last } from 'lodash';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { FtrService } from '../ftr_provider_context';
 import type { LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
-import { scenarios } from '../../onechat_api_integration/utils/proxy_scenario';
+import {
+  directAnswer,
+  callSearchToolWithNoIndexSelectedThenAnswer,
+} from '../../onechat_api_integration/utils/proxy_scenario';
 
 export class OneChatPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -68,12 +71,19 @@ export class OneChatPageObject extends FtrService {
     title: string,
     userMessage: string,
     expectedResponse: string,
-    llmProxy: LlmProxy
+    llmProxy: LlmProxy,
+    withToolCall: boolean = false
   ): Promise<string> {
     // Navigate to new conversation
     await this.navigateToApp('conversations/new');
 
-    await scenarios.directAnswer({ proxy: llmProxy, title, response: expectedResponse });
+    await (withToolCall
+      ? directAnswer({ proxy: llmProxy, title, response: expectedResponse })
+      : callSearchToolWithNoIndexSelectedThenAnswer({
+          proxy: llmProxy,
+          title,
+          response: expectedResponse,
+        }));
 
     // Type and send the message
     await this.typeMessage(userMessage);

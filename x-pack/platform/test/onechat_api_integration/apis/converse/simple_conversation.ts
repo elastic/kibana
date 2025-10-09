@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
 import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
-import { scenarios } from '../../utils/proxy_scenario';
+import { directAnswer } from '../../utils/proxy_scenario';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
@@ -43,7 +43,7 @@ export default function ({ getService }: OneChatFtrProviderContext) {
       let body: ChatResponse;
 
       before(async () => {
-        await scenarios.directAnswer({
+        await directAnswer({
           proxy: llmProxy,
           title: MOCKED_LLM_TITLE,
           response: MOCKED_LLM_RESPONSE,

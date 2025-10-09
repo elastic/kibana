@@ -11,12 +11,13 @@ import {
   mockFinalAnswer,
   mockAgentToolCall,
   mockSearchToolCallWithNaturalLanguageGen,
+  mockInternalIndexExplorerCall,
 } from './calls';
 
 /**
  * Simple request scenario - response with the given response directly
  */
-export const directAnswer = ({
+export const directAnswer = async ({
   response,
   proxy,
   title = 'New discussion',
@@ -32,7 +33,7 @@ export const directAnswer = ({
 /**
  * Calls
  */
-export const callSearchToolWithEsqlThenAnswer = ({
+export const callSearchToolWithEsqlThenAnswer = async ({
   response,
   proxy,
   title = 'New discussion',
@@ -59,11 +60,36 @@ export const callSearchToolWithEsqlThenAnswer = ({
 
   mockSearchToolCallWithNaturalLanguageGen({
     llmProxy: proxy,
-    indexName: '',
     esqlQuery,
-    resourceName,
-    resourceType,
+    resource: { name: resourceName, type: resourceType },
   });
+
+  mockFinalAnswer(proxy, response);
+};
+
+/**
+ * Calls
+ */
+export const callSearchToolWithNoIndexSelectedThenAnswer = async ({
+  response,
+  proxy,
+  title = 'New discussion',
+}: {
+  response: string;
+  title?: string;
+  proxy: LlmProxy;
+}) => {
+  mockTitleGeneration(proxy, title);
+
+  mockAgentToolCall({
+    llmProxy: proxy,
+    toolName: 'platform_core_search',
+    toolArg: {
+      query: 'service.name:java-backend',
+    },
+  });
+
+  mockInternalIndexExplorerCall({ llmProxy: proxy, resource: null });
 
   mockFinalAnswer(proxy, response);
 };

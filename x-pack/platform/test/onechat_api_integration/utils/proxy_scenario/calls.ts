@@ -47,32 +47,43 @@ export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string) => {
     .completeAfterIntercept();
 };
 
-export const mockSearchToolCallWithNaturalLanguageGen = ({
-  resourceName,
-  resourceType,
-  esqlQuery = "FROM my_index WHERE name = 'John'",
+export const mockInternalIndexExplorerCall = ({
+  resource,
   llmProxy,
 }: {
-  resourceName: string;
-  resourceType: 'index' | 'data_stream';
-  indexName: string;
-  esqlQuery?: string;
+  resource: { name: string; type: 'index' | 'data_stream' } | null;
   llmProxy: LlmProxy;
 }) => {
   // search tool - index explorer call
   void llmProxy.interceptors.toolChoice({
     name: 'select_resources',
     response: createToolCallMessage('select_resources', {
-      targets: [
-        {
-          reason: 'Because',
-          type: resourceType,
-          name: resourceName,
-        },
-      ],
+      targets: resource
+        ? [
+            {
+              reason: 'Because',
+              type: resource.type,
+              name: resource.name,
+            },
+          ]
+        : [],
     }),
   });
+};
 
+export const mockSearchToolCallWithNaturalLanguageGen = ({
+  resource,
+  esqlQuery = "FROM my_index WHERE name = 'John'",
+  llmProxy,
+}: {
+  resource: { name: string; type: 'index' | 'data_stream' };
+  esqlQuery?: string;
+  llmProxy: LlmProxy;
+}) => {
+  // search tool - index explorer call
+  mockInternalIndexExplorerCall({ llmProxy, resource });
+
+  // search tool - search strategy selection
   void llmProxy.interceptors.userMessage({
     name: 'search_tool:tool_selection',
     when: ({ messages }) => {
@@ -81,10 +92,11 @@ export const mockSearchToolCallWithNaturalLanguageGen = ({
     },
     response: createToolCallMessage('natural_language_search', {
       query: 'service.name:java-backend',
-      index: 'metrics-apm.transaction.1m-default',
+      index: resource.name,
     }),
   });
 
+  // search tool - nl-to-esql call
   mockNlToEsql({ esqlQuery, llmProxy });
 };
 

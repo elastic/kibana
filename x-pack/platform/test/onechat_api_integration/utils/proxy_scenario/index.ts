@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { directAnswer, callSearchToolWithEsqlThenAnswer } from './scenarios';
-
-export const scenarios = {
+export {
   directAnswer,
   callSearchToolWithEsqlThenAnswer,
-};
+  callSearchToolWithNoIndexSelectedThenAnswer,
+} from './scenarios';
