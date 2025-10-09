@@ -11,7 +11,7 @@ import type { Scalar, Document, Pair, Node } from 'yaml';
 import { YAMLParseError, isPair, isScalar, parseDocument, visit } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
-import type { BuiltInStepType, TriggerType } from '@kbn/workflows';
+import type { BuiltInStepType, TriggerType, ConnectorTypeInfo } from '@kbn/workflows';
 import {
   ForEachStepSchema,
   IfStepSchema,
@@ -27,7 +27,6 @@ import { WorkflowGraph } from '@kbn/workflows/graph';
 import { getDetailedTypeDescription, getSchemaAtPath, parsePath } from '../../../../common/lib/zod';
 import { getCurrentPath, parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
-import type { ConnectorTypeInfo } from '../../../../common/schema';
 import { getCachedDynamicConnectorTypes } from '../../../../common/schema';
 import {
   VARIABLE_REGEX_GLOBAL,

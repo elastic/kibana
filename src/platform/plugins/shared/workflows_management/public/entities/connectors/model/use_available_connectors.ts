@@ -11,7 +11,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useRef, useEffect } from 'react';
-import type { ConnectorInstance, ConnectorTypeInfo } from '../../../../common/schema';
+import type { ConnectorInstance, ConnectorTypeInfo } from '@kbn/workflows';
 import { addDynamicConnectorsToCache } from '../../../../common/schema';
 
 export interface ConnectorsResponse {

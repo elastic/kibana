@@ -26,14 +26,13 @@ import type {
   WorkflowExecutionListDto,
   WorkflowListDto,
   WorkflowYaml,
-} from '@kbn/workflows';
-import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type {
   ExecutionStatus,
   ExecutionType,
   WorkflowAggsDto,
   WorkflowStatsDto,
-} from '@kbn/workflows/types/v1';
+  ConnectorTypeInfo,
+} from '@kbn/workflows';
+import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { v4 as generateUuid } from 'uuid';
 import type { z } from '@kbn/zod';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
@@ -44,7 +43,6 @@ import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_ma
 import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
-import type { ConnectorTypeInfo } from '../../common/schema';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';

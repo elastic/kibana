@@ -36,8 +36,12 @@ export type {
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+  // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  // connector types
   ConnectorSubAction,
   ConnectorInstance,
   ConnectorTypeInfo,

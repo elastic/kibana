@@ -20,6 +20,7 @@ import type {
   WorkflowExecutionListDto,
   WorkflowListDto,
   WorkflowYaml,
+  ConnectorTypeInfo,
 } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -27,7 +28,6 @@ import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
-import type { ConnectorTypeInfo } from '../../common/schema';
 import type { LogSearchResult } from './lib/workflow_logger';
 import type {
   SearchWorkflowExecutionsParams,

@@ -10,7 +10,7 @@
 import { stringify, type ToStringOptions } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
-import type { ConnectorTypeInfo } from '../../../../../common/schema';
+import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { isMac } from '../../../../shared/utils/is_mac';
 import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
 import { getCachedAllConnectors } from '../connectors_cache';
