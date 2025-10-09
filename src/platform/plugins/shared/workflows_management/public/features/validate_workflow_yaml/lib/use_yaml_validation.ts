@@ -62,17 +62,18 @@ export function useYamlValidation(
     }
 
     if (!yamlDocument || !workflowGraph || !workflowDefinition) {
+      let errorMessage = 'Error validating variables';
+      if (!yamlDocument) {
+        errorMessage += '. Yaml document is not loaded';
+      }
+      if (!workflowGraph) {
+        errorMessage += '. Workflow graph is not loaded';
+      }
+      if (!workflowDefinition) {
+        errorMessage += '. Workflow definition is not loaded';
+      }
       setIsLoading(false);
-      setError(
-        new Error(
-          'Error validating variables. Yaml document: ' +
-            !!yamlDocument +
-            ', workflowGraph: ' +
-            workflowGraph +
-            ', workflowDefinition: ' +
-            workflowDefinition
-        )
-      );
+      setError(new Error(errorMessage));
       return;
     }
 
