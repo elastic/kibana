@@ -69,6 +69,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ])}`,
       ],
     },
-    indexRefreshInterval: '1s',
   };
 }
