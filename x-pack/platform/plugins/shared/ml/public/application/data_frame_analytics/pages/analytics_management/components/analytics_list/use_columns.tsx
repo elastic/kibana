@@ -65,7 +65,7 @@ export const getTaskStateBadge = (
   if (isDataFrameAnalyticsFailed(state) && failureReason !== undefined) {
     return (
       <EuiToolTip content={failureReason}>
-        <EuiBadge css={badgeStyle} color={color}>
+        <EuiBadge css={badgeStyle} color={color} tabIndex={0}>
           {state}
         </EuiBadge>
       </EuiToolTip>
@@ -121,6 +121,7 @@ export const progressColumn = {
                   color="primary"
                   size="m"
                   data-test-subj="mlAnalyticsTableProgress"
+                  tabIndex={0}
                 />
               </EuiToolTip>
             </EuiFlexItem>
