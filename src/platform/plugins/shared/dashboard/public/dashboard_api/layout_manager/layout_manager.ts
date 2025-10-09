@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { filter, map as lodashMap, max } from 'lodash';
+import { filter, map as lodashMap, max, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -445,6 +445,55 @@ export function initializeLayoutManager(
       getDashboardPanelFromId,
       getPanelCount: () => Object.keys(layout$.value.panels).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
+
+      /** Pinned panels (only controls can currently be pinned) */
+      panelIsPinned: (uuid: string) => {
+        return Object.keys(layout$.getValue().controls).includes(uuid);
+      },
+      unpinPanel: (uuid: string) => {
+        const controlToUnpin = layout$.getValue().controls[uuid];
+        if (!controlToUnpin) return;
+
+        const newControls = { ...layout$.getValue().controls };
+        delete newControls[uuid];
+
+        const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
+          PanelPlacementStrategy.placeAtTop,
+          {
+            currentPanels: layout$.value.panels,
+            height: 2,
+            width: 12,
+          }
+        );
+
+        layout$.next({
+          ...layout$.getValue(),
+          panels: {
+            ...otherPanels,
+            [uuid]: {
+              type: controlToUnpin.type,
+              grid: { i: uuid, ...newPanelPlacement },
+            },
+          },
+          controls: newControls,
+        });
+      },
+      pinPanel: (uuid: string) => {
+        const controlToPin = layout$.getValue().panels[uuid];
+        if (!controlToPin) return;
+
+        const newControls = { ...layout$.getValue().controls };
+        newControls[uuid] = {
+          grow: undefined,
+          width: undefined,
+          type: controlToPin.type,
+          order: Object.keys(newControls).length,
+        };
+        const newPanels = { ...layout$.getValue().panels };
+        delete newPanels[uuid];
+
+        layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
+      },
 
       /** Sections */
       addNewSection: () => {
