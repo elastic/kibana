@@ -395,7 +395,30 @@ describe('actionTypeRegistry', () => {
         executor,
       });
       const connectorTypes = connectorTypeRegistry.list({ exposeValidation: true });
-      expect(connectorTypes).toMatchSnapshot();
+      expect(connectorTypes).toEqual([
+        {
+          id: 'my-connector-type',
+          name: 'My connector type',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isSystemActionType: false,
+          validate: { params: expect.any(Object) },
+        },
+        {
+          id: 'my-connector-type-with-subaction',
+          name: 'My connector type with subaction',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          isSystemActionType: false,
+          validate: { params: expect.any(Object) },
+        },
+      ]);
 
       // check that validation works
       try {
