@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter } from '@kbn/esql-ast';
+import { WrappingPrettyPrinter } from '@kbn/esql-ast';
 import type { Query, QueryPipeline, QueryRequest } from '../types';
 import { buildQueryAst } from './build_query_ast';
 import { replaceParameters } from './replace_parameters';
@@ -17,16 +17,18 @@ export function createPipeline(source: Query): QueryPipeline {
     const ast = buildQueryAst(source);
     replaceParameters(ast, source.params);
 
-    return BasicPrettyPrinter.print(ast, {
+    return WrappingPrettyPrinter.print(ast, {
       multiline: true,
+      wrap: 9999, // Set a very high wrap limit to prevent unwanted line breaks
     });
   };
 
   const asRequest = (): QueryRequest => {
     const ast = buildQueryAst(source);
     return {
-      query: BasicPrettyPrinter.print(ast, {
+      query: WrappingPrettyPrinter.print(ast, {
         multiline: true,
+        wrap: 9999, // Set a very high wrap limit to prevent unwanted line breaks
       }),
       params: source.params,
     };

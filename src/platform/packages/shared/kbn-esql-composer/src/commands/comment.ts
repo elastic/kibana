@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { synth } from '@kbn/esql-ast';
+import { Builder } from '@kbn/esql-ast';
+import type { ESQLCommand, ESQLLiteral } from '@kbn/esql-ast';
 import type { QueryOperator, Query } from '../types';
 
 /**
  * Adds a comment annotation to the ESQL composer pipeline.
  * 
  * Note: ES|QL comments are typically inline with commands, not standalone.
- * This function creates a minimal ROW command with a comment prefix as a workaround
+ * This function creates a minimal ROW command with a comment decoration as a workaround
  * to add documentation to your queries.
  *
  * @param text The comment text.
@@ -31,20 +32,35 @@ import type { QueryOperator, Query } from '../types';
  */
 export function comment(text: string): QueryOperator {
   return (source): Query => {
-    // Format the comment - use single-line for single lines, multi-line for multiple lines
+    // Determine if we need single-line or multi-line comment
     const lines = text.split('\n');
-    const commentText = lines.length === 1
-      ? `// ${text}`
-      : `/* ${text} */`;
+    const isMultiLine = lines.length > 1;
     
-    // Create a ROW 1 command with the comment as a prefix
-    // This will render as: // comment \n | ROW 1
-    // The ROW 1 is a minimal no-op that ensures the comment is preserved
-    const commentedCommand = synth.cmd(`${commentText}\nROW 1`);
+    // Create the comment node
+    const commentNode = Builder.comment(
+      isMultiLine ? 'multi-line' : 'single-line',
+      isMultiLine ? ` ${text} ` : ` ${text}`,
+      { min: 0, max: 0 }
+    );
+    
+    // Create a minimal ROW 1 command
+    const literal: ESQLLiteral = Builder.expression.literal.numeric({
+      value: 1,
+      name: '1',
+    });
+    
+    const rowCommand: ESQLCommand = Builder.command({
+      name: 'row',
+      args: [literal],
+      // Attach the comment as a top formatting decoration
+      formatting: {
+        top: [commentNode],
+      },
+    });
     
     return {
       root: source.root,
-      commands: source.commands.concat(commentedCommand),
+      commands: source.commands.concat(rowCommand),
       params: source.params,
     };
   };
