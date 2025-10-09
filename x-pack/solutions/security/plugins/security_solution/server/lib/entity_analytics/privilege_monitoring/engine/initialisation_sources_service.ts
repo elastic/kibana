@@ -80,10 +80,9 @@ export const createInitialisationSourcesService = (deps: {
 };
 
 const getLastFullSyncMarkersIndex = (namespace: string, integration: IntegrationType) => {
-  // When using AD, will use the users index: TODO in: https://github.com/elastic/security-team/issues/13990
-  /* if (integration === 'ad') {
+  if (integration === 'entityanalytics_ad') {
     return getStreamPatternFor(integration, namespace);
-  }*/
+  }
   // okta has a dedicated index for last full sync markers
   return oktaLastFullSyncMarkersIndex(namespace);
 };
@@ -98,12 +97,12 @@ const makeIntegrationSource = (namespace: string, integration: IntegrationType) 
   integrations: { syncMarkerIndex: getLastFullSyncMarkersIndex(namespace, integration) },
 });
 
-const buildRequiredSources = (namespace: string, indexPattern: string) => {
+function buildRequiredSources(namespace: string, indexPattern: string) {
   const integrations = INTEGRATION_TYPES.map((integration) =>
     makeIntegrationSource(namespace, integration)
   );
   return [makeDefaultIndexSource(namespace, indexPattern), ...integrations];
-};
+}
 
 const makeDefaultIndexSource = (namespace: string, name: string) => ({
   type: 'index' as const,

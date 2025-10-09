@@ -222,6 +222,28 @@ export default function (providerContext: FtrProviderContext) {
           enrolled_at: new Date().toISOString(),
         },
       });
+
+      // Create a containerized agent (upgradeable: false)
+      await es.index({
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        id: 'agent_containerized',
+        document: {
+          policy_id: policy1.id,
+          enrolled_at: new Date().toISOString(),
+          agent: {
+            version: '9.2.0',
+          },
+          local_metadata: {
+            elastic: {
+              agent: {
+                version: '9.2.0',
+                upgradeable: false, // Containerized agent
+              },
+            },
+          },
+        },
+      });
     });
 
     after(async () => {
@@ -291,6 +313,17 @@ export default function (providerContext: FtrProviderContext) {
       it('should return a 400 if the agent is an unsupported version', async () => {
         const {} = await supertest
           .post(`/api/fleet/agents/agent3_91/migrate`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            enrollment_token: '1234',
+            uri: 'https://example.com',
+          })
+          .expect(400);
+      });
+
+      it('should return a 400 if the agent is containerized', async () => {
+        const {} = await supertest
+          .post(`/api/fleet/agents/agent_containerized/migrate`)
           .set('kbn-xsrf', 'xx')
           .send({
             enrollment_token: '1234',
@@ -381,6 +414,27 @@ export default function (providerContext: FtrProviderContext) {
         expect(actionStatus.nbAgentsFailed).to.eql(1);
         expect(actionStatus.latestErrors[0].error).to.eql(
           'Agent agent3 cannot be migrated because it is a fleet-server.'
+        );
+      });
+
+      it('should return a 200 if any agent is containerized', async () => {
+        const {} = await supertest
+          .post(`/api/fleet/agents/bulk_migrate`)
+          .set('kbn-xsrf', 'xx')
+          .send({
+            agents: ['agent1', 'agent_containerized'],
+            uri: 'https://example.com',
+            enrollment_token: '1234',
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agents/action_status`)
+          .set('kbn-xsrf', 'xxx');
+        const actionStatus = body.items[0];
+        expect(actionStatus.nbAgentsFailed).to.eql(1);
+        expect(actionStatus.latestErrors[0].error).to.eql(
+          'Agent agent_containerized cannot be migrated because it is containerized.'
         );
       });
 

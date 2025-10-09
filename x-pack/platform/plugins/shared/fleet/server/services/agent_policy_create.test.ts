@@ -16,6 +16,7 @@ import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { bulkInstallPackages } from './epm/packages';
 import { incrementPackageName } from './package_policies';
 import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
+import { agentlessAgentService } from './agents/agentless_agent';
 
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
@@ -45,6 +46,7 @@ jest.mock('./api_keys', () => {
 jest.mock('./agent_policy');
 jest.mock('./package_policy');
 jest.mock('./package_policies');
+jest.mock('./agents/agentless_agent');
 
 function getPackagePolicy(name: string, policyId = '') {
   return {
@@ -84,6 +86,10 @@ describe('createAgentPolicyWithPackages', () => {
         ...newPolicy,
       } as PackagePolicy)
     );
+
+    jest.mocked(agentlessAgentService.createAgentlessAgent).mockReset();
+    jest.mocked(mockedBulkInstallPackages).mockReset();
+    jest.mocked(mockedPackagePolicyService.create).mockReset();
   });
 
   afterEach(() => {
@@ -201,6 +207,48 @@ describe('createAgentPolicyWithPackages', () => {
       getPackagePolicy('system-1', 'new_id'),
       expect.anything()
     );
+  });
+
+  it('should no create agentless policy with system package or monitoring', async () => {
+    const response = await createAgentPolicyWithPackages({
+      esClient: esClientMock,
+      soClient: soClientMock,
+      agentPolicyService: mockedAgentPolicyService,
+      newPolicy: {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
+      withSysMonitoring: true,
+      monitoringEnabled: ['logs', 'metrics'],
+      spaceId: 'default',
+    });
+
+    expect(response.id).toEqual('new_id');
+    expect(mockedBulkInstallPackages).not.toHaveBeenCalled();
+    expect(mockedPackagePolicyService.create).not.toHaveBeenCalled();
+
+    expect(agentPolicyService.create).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      {
+        name: 'Agent policy 1',
+        namespace: 'default',
+        supports_agentless: true,
+        monitoring_enabled: [],
+      },
+      expect.objectContaining({ skipDeploy: true })
+    );
+
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+      'Disabling system monitoring for agentless policy [Agent policy 1]'
+    );
+    expect(appContextService.getLogger().info).toHaveBeenCalledWith(
+      'Disabling monitoring for agentless policy [Agent policy 1]'
+    );
+
+    expect(agentlessAgentService.createAgentlessAgent).toHaveBeenCalled();
   });
 
   it('should call deploy policy once when create policy with system package', async () => {
