@@ -184,96 +184,14 @@ export default function ({ getService }: FtrProviderContext) {
 
         // ToDo: `should create objects supporting access control without access control metadata if there is not profile ID`
 
-        // it('should apply defaults to objects with no access control metadata', async () => {
-        //   const { cookie: objectOwnerCookie, profileUid: testProfileId } = await loginAsObjectOwner(
-        //     'test_user',
-        //     'changeme'
-        //   );
-
-        //   const toImport = [
-        //     {
-        //       attributes: { description: 'test' },
-        //       coreMigrationVersion: '8.8.0',
-        //       created_at: '2025-07-16T10:03:03.253Z',
-        //       created_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        //       id: '11111111111111111111111111111111',
-        //       managed: false,
-        //       references: [],
-        //       type: READ_ONLY_TYPE,
-        //       updated_at: '2025-07-16T10:03:03.253Z',
-        //       updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        //       version: 'WzY5LDFd',
-        //     },
-        //     {
-        //       attributes: { description: 'test' },
-        //       coreMigrationVersion: '8.8.0',
-        //       created_at: '2025-07-16T10:03:03.253Z',
-        //       created_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        //       id: '22222222222222222222222222222222',
-        //       managed: false,
-        //       references: [],
-        //       type: NON_READ_ONLY_TYPE,
-        //       updated_at: '2025-07-16T10:03:03.253Z',
-        //       updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-        //       version: 'WzY5LDFd',
-        //     },
-        //     {
-        //       excludedObjects: [],
-        //       excludedObjectsCount: 0,
-        //       exportedCount: 2,
-        //       missingRefCount: 0,
-        //       missingReferences: [],
-        //     },
-        //   ];
-
-        //   const response = await performImport(toImport, objectOwnerCookie.cookieString());
-
-        //   const results = response.body.successResults;
-        //   expect(Array.isArray(results)).to.be(true);
-        //   expect(results.length).to.be(2);
-        //   expect(results[0].type).to.be(READ_ONLY_TYPE);
-        //   expect(results[1].type).to.be(NON_READ_ONLY_TYPE);
-
-        //   let getResponse = await supertestWithoutAuth
-        //     .get(`/read_only_objects/${results[0].destinationId}`)
-        //     .set('kbn-xsrf', 'true')
-        //     .set('cookie', objectOwnerCookie.cookieString())
-        //     .expect(200);
-
-        //   expect(getResponse.body).to.have.property('accessControl');
-        //   expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
-        //   expect(getResponse.body.accessControl).to.have.property('owner', testProfileId);
-
-        //   getResponse = await supertestWithoutAuth
-        //     .get(`/non_read_only_objects/${results[1].destinationId}`)
-        //     .set('kbn-xsrf', 'true')
-        //     .set('cookie', objectOwnerCookie.cookieString())
-        //     .expect(200);
-        //   expect(getResponse.body).not.to.have.property('accessControl');
-        // });
-      });
-
-      describe('ovewriting objects', () => {
-        it('should disallow overwrite of owned objects if not owned by the current user', async () => {
-          const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
-
-          const createResponse = await supertestWithoutAuth
-            .post('/read_only_objects/create')
-            .set('kbn-xsrf', 'true')
-            .set('cookie', adminCookie.cookieString())
-            .send({ type: 'read_only_type', isReadOnly: true })
-            .expect(200);
-          expect(createResponse.body.type).to.eql('read_only_type');
-          expect(createResponse.body).to.have.property('accessControl');
-          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
-          expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
-
-          const { cookie: testUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
+        it('should apply defaults to objects with no access control metadata', async () => {
+          const { cookie: objectOwnerCookie, profileUid: testProfileId } = await loginAsObjectOwner(
+            'test_user',
+            'changeme'
+          );
 
           const toImport = [
             {
-              // this first object will import ok
-              accessControl: { accessMode: 'default', owner: 'some_user' },
               attributes: { description: 'test' },
               coreMigrationVersion: '8.8.0',
               created_at: '2025-07-16T10:03:03.253Z',
@@ -287,18 +205,116 @@ export default function ({ getService }: FtrProviderContext) {
               version: 'WzY5LDFd',
             },
             {
-              // this second object will be rejected because it is owned by another user
-              accessControl: { accessMode: 'read_only', owner: '' },
               attributes: { description: 'test' },
               coreMigrationVersion: '8.8.0',
               created_at: '2025-07-16T10:03:03.253Z',
               created_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-              id: createResponse.body.id,
+              id: '22222222222222222222222222222222',
+              managed: false,
+              references: [],
+              type: NON_READ_ONLY_TYPE,
+              updated_at: '2025-07-16T10:03:03.253Z',
+              updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+              version: 'WzY5LDFd',
+            },
+            {
+              excludedObjects: [],
+              excludedObjectsCount: 0,
+              exportedCount: 2,
+              missingRefCount: 0,
+              missingReferences: [],
+            },
+          ];
+
+          const response = await performImport(toImport, objectOwnerCookie.cookieString());
+
+          const results = response.body.successResults;
+          expect(Array.isArray(results)).to.be(true);
+          expect(results.length).to.be(2);
+          expect(results[0].type).to.be(READ_ONLY_TYPE);
+          expect(results[1].type).to.be(NON_READ_ONLY_TYPE);
+
+          let getResponse = await supertestWithoutAuth
+            .get(`/read_only_objects/${results[0].destinationId}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .expect(200);
+
+          expect(getResponse.body).to.have.property('accessControl');
+          expect(getResponse.body.accessControl).to.have.property('accessMode', 'default');
+          expect(getResponse.body.accessControl).to.have.property('owner', testProfileId);
+
+          getResponse = await supertestWithoutAuth
+            .get(`/non_read_only_objects/${results[1].destinationId}`)
+            .set('kbn-xsrf', 'true')
+            .set('cookie', objectOwnerCookie.cookieString())
+            .expect(200);
+          expect(getResponse.body).not.to.have.property('accessControl');
+        });
+      });
+
+      describe('ovewriting objects', () => {
+        it('should disallow overwrite of owned objects if not owned by the current user', async () => {
+          const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
+
+          let createResponse = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: 'read_only_type', isReadOnly: true })
+            .expect(200);
+          expect(createResponse.body.type).to.eql('read_only_type');
+          expect(createResponse.body).to.have.property('accessControl');
+          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
+          const adminObjId = createResponse.body.id;
+
+          const { cookie: testUserCookie, profileUid: testProfileId } = await loginAsNotObjectOwner(
+            'test_user',
+            'changeme'
+          );
+
+          createResponse = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', testUserCookie.cookieString())
+            .send({ type: 'read_only_type', isReadOnly: true })
+            .expect(200);
+          expect(createResponse.body.type).to.eql('read_only_type');
+          expect(createResponse.body).to.have.property('accessControl');
+          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(createResponse.body.accessControl).to.have.property('owner', testProfileId);
+          const testUserObjId = createResponse.body.id;
+
+          const toImport = [
+            {
+              // this first object will import ok
+              accessControl: { accessMode: 'read_only', owner: testProfileId },
+              attributes: { description: 'test' },
+              coreMigrationVersion: '8.8.0',
+              created_at: '2025-07-16T10:03:03.253Z',
+              created_by: testProfileId,
+              id: testUserObjId,
               managed: false,
               references: [],
               type: READ_ONLY_TYPE,
               updated_at: '2025-07-16T10:03:03.253Z',
-              updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+              updated_by: testProfileId,
+              version: 'WzY5LDFd',
+            },
+            {
+              // this second object will be rejected because it is owned by another user
+              accessControl: { accessMode: 'read_only', owner: adminProfileId },
+              attributes: { description: 'test' },
+              coreMigrationVersion: '8.8.0',
+              created_at: '2025-07-16T10:03:03.253Z',
+              created_by: adminProfileId,
+              id: adminObjId,
+              managed: false,
+              references: [],
+              type: READ_ONLY_TYPE,
+              updated_at: '2025-07-16T10:03:03.253Z',
+              updated_by: adminProfileId,
               version: 'WzY5LDFd',
             },
             {
@@ -315,15 +331,40 @@ export default function ({ getService }: FtrProviderContext) {
             testUserCookie.cookieString(),
             true, // overwrite = true,
             false, // createNewCopies = false
-            403 // expect forbidden...this is because bulk create will throw if unauthorized for any of the objects being created, rather than filter left/right
-            // We could try to intercept this in import before getting to the bulk create op
+            200
           );
-
           const results = importResponse.text.split('\n').map((str) => JSON.parse(str));
           expect(Array.isArray(results)).to.be(true);
           expect(results.length).to.be(1);
-          expect(results[0]).to.have.property('error', 'Forbidden');
-          expect(results[0]).to.have.property('message', 'Unable to bulk_create read_only_type'); // ToDo: not the best message, is it possible to notify if failure is due to privs or ownership?
+          const result = results[0];
+          expect(result).to.have.property('successCount', 1);
+          expect(result).to.have.property('success', false);
+          expect(result).to.have.property('successResults');
+          expect(result.successResults).to.eql([
+            {
+              type: 'read_only_type',
+              id: testUserObjId,
+              meta: {},
+              managed: false,
+              overwrite: true,
+            },
+          ]);
+          expect(result).to.have.property('errors');
+          expect(result.errors).to.eql([
+            {
+              id: adminObjId,
+              type: 'read_only_type',
+              meta: {},
+              error: {
+                message:
+                  'Overwriting objects in read-only mode that are owned by another user requires the manage_access_control privilege.',
+                statusCode: 403,
+                error: 'Forbidden',
+                type: 'unknown',
+              },
+              overwrite: true,
+            },
+          ]);
         });
 
         it('should allow overwrite of owned objects, but maintain original access control metadata, if owned by the current user', async () => {

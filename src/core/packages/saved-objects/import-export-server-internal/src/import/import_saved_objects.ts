@@ -172,10 +172,11 @@ export async function importSavedObjectsFromStream({
       ...checkOriginConflictsResult.pendingOverwrites,
     ]);
 
-    // ToDo: check access control conflicts
+    // Check access control conflicts
     // This should look like the above check conflict functions, but it would check for overwrites to any objects owned by someone other than the current user
     // It would be nice to work this into the check conflicts API
     // The alternative is to let this fall through to the create operation and have the import fail there, but this is not ideal
+    // savedObjectsClient.performCheckAccessControl();
   }
 
   // Create objects in bulk

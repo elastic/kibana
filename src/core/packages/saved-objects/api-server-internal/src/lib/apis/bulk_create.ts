@@ -186,8 +186,6 @@ export const performBulkCreate = async <T>(
       ? existingAccessControl
       : object.accessControl;
 
-    console.log(`**** existingAccessControl: ${JSON.stringify(existingAccessControl)}`);
-
     return {
       type: object.type,
       id: object.id,
@@ -203,6 +201,10 @@ export const performBulkCreate = async <T>(
     objects: authObjects,
   });
 
+  const inaccessibleObjects = authorizationResult?.inaccessibleObjects
+    ? Array.from(authorizationResult.inaccessibleObjects)
+    : [];
+
   let bulkRequestIndexCounter = 0;
   const bulkCreateParams: object[] = [];
   type ExpectedBulkResult = Either<
@@ -213,6 +215,29 @@ export const performBulkCreate = async <T>(
     expectedResults.map<Promise<ExpectedBulkResult>>(async (expectedBulkGetResult) => {
       if (isLeft(expectedBulkGetResult)) {
         return expectedBulkGetResult;
+      }
+
+      // ToDo: move this to the security extension/access control service
+      if (
+        inaccessibleObjects.find(
+          (obj) =>
+            obj.type === expectedBulkGetResult.value.object.type &&
+            obj.id === expectedBulkGetResult.value.object.id
+        )
+      ) {
+        return left({
+          id: expectedBulkGetResult.value.object.id,
+          type: expectedBulkGetResult.value.object.type,
+          error: {
+            ...errorContent(
+              SavedObjectsErrorHelpers.decorateForbiddenError(
+                new Error(
+                  `Overwriting objects in read-only mode that are owned by another user requires the manage_access_control privilege.`
+                )
+              )
+            ),
+          },
+        });
       }
 
       let savedObjectNamespace: string | undefined;
