@@ -39,6 +39,7 @@ import type { z } from '@kbn/zod';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import { UNSUPPORTED_CONNECTOR_TYPES } from '../../common';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
@@ -1077,14 +1078,10 @@ export class WorkflowsService {
     // Initialize connectorsByType with ALL available action types
     const connectorsByType: Record<string, ConnectorTypeInfo> = {};
 
-    // Define connector types to filter out
-    // These are connectors that are not supported in the workflows management UI
-    const FILTERED_CONNECTOR_TYPES = ['.index', '.webhook', '.cases-webhook', '.server-log'];
-
     // First, add all action types (even those without instances), excluding filtered types
     actionTypes.forEach((actionType) => {
       // Skip filtered connector types
-      if (FILTERED_CONNECTOR_TYPES.includes(actionType.id)) {
+      if (UNSUPPORTED_CONNECTOR_TYPES.includes(actionType.id)) {
         return;
       }
 
