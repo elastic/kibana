@@ -10,10 +10,12 @@
 import { createContext, useContext } from 'react';
 
 interface NestedMenuContextValue {
-  currentPanel: string;
-  goToPanel: (panelId: string) => void;
-  goBack: () => void;
   canGoBack: boolean;
+  currentPanel: string;
+  goBack: () => void;
+  goToPanel: (panelId: string, returnFocusId?: string) => void;
+  panelStackDepth: number;
+  returnFocusId?: string;
 }
 
 export const NestedMenuContext = createContext<NestedMenuContextValue | null>(null);

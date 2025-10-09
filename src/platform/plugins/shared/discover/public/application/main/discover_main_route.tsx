@@ -76,7 +76,7 @@ export const DiscoverMainRoute = ({
         ...withNotifyOnErrors(services.core.notifications.toasts),
       })
   );
-  const { internalState, runtimeStateManager } = useStateManagers({
+  const { internalState, runtimeStateManager, searchSessionManager } = useStateManagers({
     services,
     urlStateStorage,
     customizationContext,
@@ -92,6 +92,7 @@ export const DiscoverMainRoute = ({
         urlStateStorage={urlStateStorage}
         internalState={internalState}
         runtimeStateManager={runtimeStateManager}
+        searchSessionManager={searchSessionManager}
       />
     </InternalStateProvider>
   );
@@ -100,7 +101,7 @@ export const DiscoverMainRoute = ({
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome, discoverFeatureFlags } = services;
+  const { core, dataViews, chrome, data, discoverFeatureFlags } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
@@ -178,6 +179,8 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   }, [currentDiscoverSessionId, initializeDiscoverSession]);
 
   useUnmount(() => {
+    data.search.session.clear();
+
     for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
       dispatch(internalStateActions.disconnectTab({ tabId }));
     }
