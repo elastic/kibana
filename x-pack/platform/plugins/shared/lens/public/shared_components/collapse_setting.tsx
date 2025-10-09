@@ -40,7 +40,7 @@ export function CollapseSetting({
                 'Do not show this dimension in the visualization and aggregate all metric values which have the same value for this dimension into a single number.',
             })}
           >
-            <span>
+            <span tabIndex={0}>
               {i18n.translate('xpack.lens.collapse.label', { defaultMessage: 'Collapse by' })}
               {''}
               <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
