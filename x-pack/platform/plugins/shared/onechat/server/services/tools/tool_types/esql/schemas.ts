@@ -24,6 +24,20 @@ export const paramSchema = schema.object({
   type: paramValueTypeSchema,
   description: schema.string(),
   optional: schema.maybe(schema.boolean()),
+  defaultValue: schema.conditional(
+    schema.siblingRef('optional'),
+    true,
+    schema.maybe(
+      schema.oneOf([
+        schema.string(),
+        schema.number(),
+        schema.boolean(),
+        schema.recordOf(schema.string(), schema.any()),
+        schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+      ])
+    ),
+    schema.never()
+  ),
 });
 
 export const configurationSchema = schema.object({
