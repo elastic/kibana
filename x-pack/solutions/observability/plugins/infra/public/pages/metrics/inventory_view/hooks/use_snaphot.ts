@@ -30,12 +30,7 @@ export function useSnapshot(
 ) {
   const payload = useMemo(() => JSON.stringify(buildPayload(props)), [props]);
 
-  const {
-    data,
-    status,
-    error,
-    refetch: reload,
-  } = useFetcher(
+  const { data, status, error, refetch } = useFetcher(
     async (callApi) => {
       const response = await callApi('/api/metrics/snapshot', {
         method: 'POST',
@@ -55,7 +50,7 @@ export function useSnapshot(
     loading: isPending(status),
     nodes: data?.nodes || [],
     interval: data?.interval || '60s',
-    reload,
+    reload: refetch,
   };
 }
 
