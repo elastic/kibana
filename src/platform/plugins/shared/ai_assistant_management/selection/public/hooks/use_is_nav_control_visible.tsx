@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import type { Space, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY } from '../../common/ui_setting_keys';
-import type { AIAssistantType } from '../../common/ai_assistant_type';
+import { AIAssistantType } from '../../common/ai_assistant_type';
 
 function getVisibility(
   appId: string | undefined,
@@ -47,7 +47,8 @@ export function useIsNavControlVisible(coreStart: CoreStart, spaces?: SpacesPlug
   const { currentAppId$, applications$ } = coreStart.application;
 
   const uiSetting$ = coreStart.uiSettings.get$<AIAssistantType>(
-    PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY
+    PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
+    AIAssistantType.Default
   );
 
   const activeSpace$ = useMemo(
