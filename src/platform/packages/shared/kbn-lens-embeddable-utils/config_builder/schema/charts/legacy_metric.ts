@@ -25,7 +25,7 @@ import {
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
 import { applyColorToSchema, colorByValueSchema } from '../color';
-import { horizontalAlignmentSchema, verticalAlignmentSchema } from './shared';
+import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 
 const legacyMetricStateMetricOptionsSchema = schema.object({
   /**

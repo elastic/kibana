@@ -42,7 +42,7 @@ import {
   layerSettingsSchema,
   sharedPanelInfoSchema,
 } from '../shared';
-import { horizontalAlignmentSchema, leftRightAlignmentSchema } from './shared';
+import { horizontalAlignmentSchema, leftRightAlignmentSchema } from '../alignments';
 
 const compareToSchemaShared = schema.object({
   palette: schema.maybe(schema.string({ meta: { description: 'Palette' } })),
