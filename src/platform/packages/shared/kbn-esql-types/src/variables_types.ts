@@ -87,5 +87,9 @@ interface HasVariableName {
  * @returns True if the control state has a defined variableName property
  */
 export const controlHasVariableName = (controlState: unknown): controlState is HasVariableName => {
-  return Boolean(controlState && (controlState as HasVariableName)?.variableName !== undefined);
+  return Boolean(
+    controlState &&
+      (controlState as HasVariableName)?.variableName !== undefined &&
+      typeof (controlState as HasVariableName).variableName === 'string'
+  );
 };
