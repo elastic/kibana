@@ -55,7 +55,9 @@ export abstract class BaseErrorBoundary<
   componentWillUnmount() {
     // Remove beforeunload event listener
     if (this.beforeUnloadHandler) {
-      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      }
       this.beforeUnloadHandler = null;
     }
 
