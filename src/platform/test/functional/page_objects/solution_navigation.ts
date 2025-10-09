@@ -445,7 +445,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         },
         expectTourStepVisible: async (stepId: TourStepId) => {
           log.debug('SolutionNavigation.sidenav.tour.expectTourStepVisible', stepId);
-          await testSubjects.existOrFail(`nav-tour-step-${stepId}`, { timeout: TIMEOUT_CHECK });
+          await testSubjects.existOrFail(`nav-tour-step-${stepId}`);
         },
         nextStep: async () => {
           log.debug('SolutionNavigation.sidenav.tour.nextStep');

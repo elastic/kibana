@@ -9,23 +9,31 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elasti
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { TimeState } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { ChartBarSeries, ChartBarPhasesSeries } from '../common/chart_components';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import type { useAggregations } from '../hooks/use_ingestion_rate';
 
 export function IngestionRate({
   definition,
   stats,
   isLoadingStats,
+  timeState,
+  isLoadingAggregations,
+  aggregations,
+  aggregationsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   isLoadingStats: boolean;
+  timeState: TimeState;
+  isLoadingAggregations: boolean;
+  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
+  aggregationsError: Error | undefined;
 }) {
   const { isServerless } = useKibana();
-  const { timeState } = useTimefilter();
 
   return (
     <>
@@ -64,6 +72,9 @@ export function IngestionRate({
             stats={stats}
             timeState={timeState}
             isLoadingStats={isLoadingStats}
+            isLoadingAggregations={isLoadingAggregations}
+            aggregationsError={aggregationsError}
+            aggregations={aggregations}
           />
         ) : (
           <ChartBarPhasesSeries

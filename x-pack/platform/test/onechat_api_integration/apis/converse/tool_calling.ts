@@ -18,10 +18,10 @@ import {
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
 import { createOneChatApiClient } from '../../utils/one_chat_client';
-import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
 import { toolCallMock } from '../../utils/llm_proxy/mocks';
+import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
 
-export default function ({ getService }: OneChatFtrProviderContext) {
+export default function ({ getService }: OneChatApiFtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
   const synthtrace = getService('synthtrace');

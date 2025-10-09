@@ -20,9 +20,6 @@ export function SearchHomePageProvider({ getService }: FtrProviderContext) {
     async expectToBeOnHomepage() {
       expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/home');
     },
-    async expectToBeOnStartpage() {
-      expect(await browser.getCurrentUrl()).contain('/app/elasticsearch/start');
-    },
     async expectToNotBeOnHomepage() {
       expect(await browser.getCurrentUrl()).not.contain('/app/elasticsearch/home');
     },

@@ -80,6 +80,7 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
       }
     >
       <EuiFormRow
+        data-test-subj="agentBuilderToolIdRow"
         isDisabled={isToolIdDisabled}
         label={i18nMessages.systemReferences.form.toolId.label}
         isInvalid={!!errors.toolId}
@@ -91,6 +92,7 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
           name="toolId"
           render={({ field: { ref, ...field }, fieldState: { invalid } }) => (
             <EuiFieldText
+              data-test-subj="agentBuilderToolIdInput"
               disabled={isToolIdDisabled}
               placeholder="namespace.tool_name (e.g., acme.financial.search)"
               readOnly={isReadOnly}
@@ -102,6 +104,7 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
         />
       </EuiFormRow>
       <EuiFormRow
+        data-test-subj="agentBuilderToolDescriptionRow"
         label={i18nMessages.systemReferences.form.description.label}
         isInvalid={!!errors.description}
         error={errors.description?.message}
@@ -113,6 +116,7 @@ export const SystemReferences = ({ mode }: SystemReferencesProps) => {
             ref(descriptionRef.current?.textarea);
             return (
               <EuiMarkdownEditor
+                data-test-subj="agentBuilderToolDescriptionEditor"
                 aria-label={i18nMessages.systemReferences.form.description.label}
                 readOnly={isReadOnly}
                 ref={descriptionRef}

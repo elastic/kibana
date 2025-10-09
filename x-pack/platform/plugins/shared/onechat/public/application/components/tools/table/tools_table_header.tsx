@@ -87,6 +87,8 @@ export const ToolsTableHeader = ({
           {selectedTools.length > 0 && (
             <EuiFlexGroup gutterSize="none">
               <EuiButtonEmpty
+                aria-label={labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
+                data-test-subj="agentBuilderToolsBulkDeleteButton"
                 iconType="trash"
                 iconSize="m"
                 size="xs"
@@ -102,7 +104,14 @@ export const ToolsTableHeader = ({
                   {labels.tools.deleteSelectedToolsButtonLabel(selectedTools.length)}
                 </EuiText>
               </EuiButtonEmpty>
-              <EuiButtonEmpty iconType="pagesSelect" iconSize="m" size="xs" onClick={selectAll}>
+              <EuiButtonEmpty
+                aria-label={labels.tools.selectAllToolsButtonLabel}
+                data-test-subj="agentBuilderToolsSelectAllButton"
+                iconType="pagesSelect"
+                iconSize="m"
+                size="xs"
+                onClick={selectAll}
+              >
                 <EuiText
                   size="xs"
                   css={css`
@@ -112,7 +121,14 @@ export const ToolsTableHeader = ({
                   {labels.tools.selectAllToolsButtonLabel}
                 </EuiText>
               </EuiButtonEmpty>
-              <EuiButtonEmpty iconType="cross" iconSize="m" size="xs" onClick={clearSelection}>
+              <EuiButtonEmpty
+                aria-label={labels.tools.clearSelectionButtonLabel}
+                data-test-subj="agentBuilderToolsClearSelectionButton"
+                iconType="cross"
+                iconSize="m"
+                size="xs"
+                onClick={clearSelection}
+              >
                 <EuiText
                   size="xs"
                   css={css`
