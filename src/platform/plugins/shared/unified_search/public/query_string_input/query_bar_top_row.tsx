@@ -777,20 +777,6 @@ export const QueryBarTopRow = React.memo(
       }
     }
 
-    function renderDataViewsPicker() {
-      if (props.dataViewPickerComponentProps && !Boolean(isQueryLangSelected)) {
-        return (
-          <EuiFlexItem css={{ maxWidth: '100%' }} grow={isMobile}>
-            <DataViewPicker
-              {...props.dataViewPickerComponentProps}
-              trigger={{ fullWidth: isMobile, ...props.dataViewPickerComponentProps.trigger }}
-              isDisabled={props.isDisabled}
-            />
-          </EuiFlexItem>
-        );
-      }
-    }
-
     function renderProjectPicker() {
       // temporarily adding a local storage key to toggle the project picker visibility
       if (props.showProjectPicker && localStorage.getItem(SHOW_PROJECT_PICKER_KEY) === 'true') {
