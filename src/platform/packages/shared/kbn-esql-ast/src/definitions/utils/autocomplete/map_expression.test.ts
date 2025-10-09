@@ -6,18 +6,23 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { ISuggestionItem } from '../../../commands_registry/types';
 import { withAutoSuggest } from './helpers';
+import type { MapParameters } from './map_expression';
 import { getCommandMapExpressionSuggestions } from './map_expression';
 
 describe('getCommandMapExpressionSuggestions', () => {
-  const availableParameters: Record<string, ISuggestionItem[]> = {
-    param1: [
-      { label: 'value1', text: 'value1', kind: 'Constant', detail: 'value1' },
-      { label: 'value2', text: 'value2', kind: 'Constant', detail: 'value2' },
-    ],
-    param2: [{ label: 'value3', text: 'value3', kind: 'Constant', detail: 'value3' }],
+  const availableParameters: MapParameters = {
+    param1: {
+      type: 'string',
+      suggestions: [
+        { label: 'value1', text: 'value1', kind: 'Constant', detail: 'value1' },
+        { label: 'value2', text: 'value2', kind: 'Constant', detail: 'value2' },
+      ],
+    },
+    param2: {
+      type: 'string',
+      suggestions: [{ label: 'value3', text: 'value3', kind: 'Constant', detail: 'value3' }],
+    },
   };
 
   describe('parameters name suggestions', () => {
@@ -66,6 +71,44 @@ describe('getCommandMapExpressionSuggestions', () => {
       const innerText = '{"param1": "value1", "param2": "value3",';
       const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters);
       expect(suggestions).toEqual([]);
+    });
+  });
+
+  describe('parameter types', () => {
+    it('should wrap parameter value in quotes if type is string', () => {
+      const innerText = '{';
+      const stringParameters: MapParameters = {
+        paramString: {
+          type: 'string',
+        },
+      };
+      const suggestions = getCommandMapExpressionSuggestions(innerText, stringParameters);
+      expect(suggestions.map((s) => s.text)).toEqual(['"paramString": "$0"']);
+    });
+
+    it('should suggest map snippet if type is map', () => {
+      const innerText = '{';
+      const mapParameters: MapParameters = {
+        paramMap: {
+          type: 'map',
+        },
+      };
+      const suggestions = getCommandMapExpressionSuggestions(innerText, mapParameters);
+      expect(suggestions.map((s) => s.text)).toEqual(['"paramMap": { $0 }']);
+    });
+
+    it('should not wrap parameter value in quotes if type is number or boolean', () => {
+      const innerText = '{';
+      const numberAndBooleanParameters: MapParameters = {
+        paramNumber: {
+          type: 'number',
+        },
+        paramBoolean: {
+          type: 'boolean',
+        },
+      };
+      const suggestions = getCommandMapExpressionSuggestions(innerText, numberAndBooleanParameters);
+      expect(suggestions.map((s) => s.text)).toEqual(['"paramNumber": ', '"paramBoolean": ']);
     });
   });
 
