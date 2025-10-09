@@ -205,6 +205,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       searchPlayground: {
         pathname: '/app/search_playground',
       },
+      agentBuilder: {
+        pathname: '/app/agent_builder',
+      },
     },
 
     suiteTags: {

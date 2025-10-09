@@ -18,7 +18,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ExperimentalFeaturesService } from '../../../../services';
-
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
@@ -26,14 +25,14 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAuthz, useLicense } from '../../../../hooks';
-import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
-
+import {
+  LICENSE_FOR_SCHEDULE_UPGRADE,
+  AGENTS_PREFIX,
+  LICENSE_FOR_AGENT_MIGRATION,
+} from '../../../../../../../common/constants';
 import { getCommonTags } from '../utils';
-
 import { AgentRequestDiagnosticsModal } from '../../components/agent_request_diagnostics_modal';
-
 import { useExportCSV } from '../hooks/export_csv';
-
 import { AgentExportCSVModal } from '../../components/agent_export_csv_modal';
 
 import type { SelectionMode } from './types';
@@ -75,7 +74,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const licenseService = useLicense();
   const authz = useAuthz();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
-  const agentMigrationsEnabled = ExperimentalFeaturesService.get().enableAgentMigrations;
+  const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   const agentPrivilegeLevelChangeEnabled =
     ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
   // Bulk actions menu states
@@ -135,6 +134,24 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       onClick: (event: any) => {
         setTagsPopoverButton((event.target as Element).closest('button')!);
         setIsTagAddVisible(!isTagAddVisible);
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
+          data-test-subj="agentBulkActionsBulkMigrate"
+          defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="cluster" size="m" />,
+      disabled: !authz.fleet.allAgents || !doesLicenseAllowMigration,
+      onClick: (event: any) => {
+        closeMenu();
+        setIsMigrateModalOpen(true);
       },
     },
     {
@@ -261,26 +278,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       },
     },
   ];
-  if (agentMigrationsEnabled) {
-    menuItems.splice(1, 0, {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
-          data-test-subj="agentBulkActionsBulkMigrate"
-          defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="cluster" size="m" />,
-      disabled: !authz.fleet.allAgents || !agentMigrationsEnabled,
-      onClick: (event: any) => {
-        closeMenu();
-        setIsMigrateModalOpen(true);
-      },
-    });
-  }
   if (agentPrivilegeLevelChangeEnabled) {
     menuItems.push({
       name: (
