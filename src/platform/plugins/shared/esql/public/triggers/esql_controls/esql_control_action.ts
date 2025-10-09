@@ -16,6 +16,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
@@ -36,6 +37,7 @@ interface Context {
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
+  parentApi?: DashboardApi;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -71,6 +73,7 @@ export class CreateESQLControlAction implements Action<Context> {
     onCancelControl,
     cursorPosition,
     initialState,
+    parentApi,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -88,7 +91,7 @@ export class CreateESQLControlAction implements Action<Context> {
 
     openLazyFlyout({
       core: this.core,
-      parentApi: this.search,
+      parentApi,
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
         const { loadESQLControlFlyout } = await import('./esql_control_helpers');
         return await loadESQLControlFlyout({
