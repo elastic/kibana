@@ -865,11 +865,6 @@ export class DiscoverPageObject extends FtrService {
     });
 
     await this.testSubjects.click('confirmSaveSavedObjectButton');
-    await this.retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-      this.testSubjects
-        .missingOrFail('confirmSaveSavedObjectButton')
-        .then(() => true)
-        .catch(() => false)
-    );
+    await this.testSubjects.missingOrFail('confirmSaveSavedObjectButton');
   }
 }
