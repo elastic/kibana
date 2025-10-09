@@ -49,34 +49,8 @@ export class GetSLOHealth {
 
     const results = await Promise.all(
       filteredList.map(async (item) => {
-        const rollupTransformStats =
-          await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
-            {
-              transform_id: getSLOTransformId(item.sloId, item.sloRevision),
-              allow_no_match: true,
-              size: 1,
-            },
-            { ignore: [404] }
-          );
-
-        const summaryTransformStats =
-          await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
-            {
-              transform_id: getSLOSummaryTransformId(item.sloId, item.sloRevision),
-              allow_no_match: true,
-              size: 1,
-            },
-            { ignore: [404] }
-          );
-
-        const transformStats = {
-          transforms: [
-            ...(rollupTransformStats.transforms || []),
-            ...(summaryTransformStats.transforms || []),
-          ],
-        };
-
-        const health = computeHealth(keyBy(transformStats.transforms, 'id'), item);
+        const transformStatsById = await this.getTransformStatsForSLO(item);
+        const health = computeHealth(transformStatsById, item);
         const state = computeState(summaryDocsById, item);
 
         return {
@@ -133,7 +107,37 @@ export class GetSLOHealth {
     return summaryDocsById;
   }
 
+  private async getTransformStatsForSLO(item: {
+    sloId: string;
+    sloRevision: number;
+  }): Promise<Dictionary<TransformGetTransformStatsTransformStats>> {
+    const rollupTransformStats =
+      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+        {
+          transform_id: getSLOTransformId(item.sloId, item.sloRevision),
+          allow_no_match: true,
+          size: 1,
+        },
+        { ignore: [404] }
+      );
 
+    const summaryTransformStats =
+      await this.scopedClusterClient.asSecondaryAuthUser.transform.getTransformStats(
+        {
+          transform_id: getSLOSummaryTransformId(item.sloId, item.sloRevision),
+          allow_no_match: true,
+          size: 1,
+        },
+        { ignore: [404] }
+      );
+
+    const allTransforms = [
+      ...(rollupTransformStats.transforms || []),
+      ...(summaryTransformStats.transforms || []),
+    ];
+
+    return keyBy(allTransforms, (transform) => transform.id);
+  }
 }
 
 function buildSummaryKey(id: string, instanceId: string) {
