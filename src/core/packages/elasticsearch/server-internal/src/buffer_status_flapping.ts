@@ -11,13 +11,12 @@ import type { Observable } from 'rxjs';
 import { scan, filter, map } from 'rxjs';
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
-// Emit only after threhold consecutive failures
 /**
+ * prevents status flapping from intermittent failures
  * passes through compatible statuses immediately
- * but requires threshold consecutive incompatible statuses before emitting them,
- * which prevents status flapping from intermittent failures.
- * @param threshold
- * @returns
+ * requires threshold consecutive incompatible statuses before emitting them
+ *
+ * @param threshold number of consecutive incompatible statuses required before emitting
  */
 export function bufferStatusFlapping(
   threshold: number = 3
@@ -31,7 +30,6 @@ export function bufferStatusFlapping(
         }),
         { count: 0, status: {} as NodesVersionCompatibility }
       ),
-      // only emit compatable statuses or after threshold consecutive failures
       filter((state) => state.status.isCompatible || state.count >= threshold),
       map((state) => state.status)
     );

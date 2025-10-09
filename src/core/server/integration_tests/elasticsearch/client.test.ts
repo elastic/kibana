@@ -28,16 +28,6 @@ describe('elasticsearch clients', () => {
   beforeAll(async () => {
     const { startES, startKibana } = createTestServers({
       adjustTimeout: jest.setTimeout,
-      settings: {
-        kbn: {
-          elasticsearch: {
-            // required to adjust the requestTimeout for the test
-            requestTimeout: 120000,
-            // Set to 1 for faster testing
-            bufferThreshold: 1,
-          },
-        },
-      },
     });
 
     esServer = await startES();
@@ -90,14 +80,14 @@ describe('fake elasticsearch', () => {
     kibanaServer = createRootWithCorePlugins({
       status: { allowAnonymous: true },
       elasticsearch: {
-        bufferThreshold: 1, // Set to 1 for faster testing
+        bufferThreshold: 1,
       },
     });
     esServer = createFakeElasticsearchServer();
 
     await kibanaServer.preboot();
     const { elasticsearch } = await kibanaServer.setup();
-    esStatus$ = new ReplaySubject(2); // Increase buffer to capture more status changes
+    esStatus$ = new ReplaySubject(2);
     elasticsearch.status$.subscribe(esStatus$);
 
     // give kibanaServer's status Observables enough time to bootstrap

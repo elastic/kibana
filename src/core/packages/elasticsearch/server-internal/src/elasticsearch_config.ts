@@ -305,11 +305,9 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
  */
 export class ElasticsearchConfig implements IElasticsearchConfig {
   /**
-   * The maximum number of consecutive failures allowed for the nodes info request
-   * until the overall ES compatibility status is set to red.
-   * Only applies to the nodes info request used for version compatibility checks,
-   * not the regular health check requests.
    * @internal
+   * The maximum number of consecutive failures allowed for the nodes info request
+   * until the ES status is set
    */
   public readonly bufferThreshold: number;
 
@@ -467,11 +465,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly dnsCacheTtl: Duration;
 
-  /**
-   * Constructs Elasticsearch configuration.
-   * @param rawConfig
-   */
-
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
@@ -501,7 +494,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
     this.dnsCacheTtl = rawConfig.dnsCacheTtl;
     this.publicBaseUrl = rawConfig.publicBaseUrl;
-    this.bufferThreshold = rawConfig.bufferThreshold ? rawConfig.bufferThreshold : 3; // default to 3 to be safe
+    this.bufferThreshold = rawConfig.bufferThreshold ? rawConfig.bufferThreshold : 3;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);
