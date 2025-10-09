@@ -53,3 +53,10 @@ export const TRIGGERS_LIST_TITLE = i18n.translate(
     defaultMessage: 'Triggers',
   }
 );
+
+export const TAGS_LIST_TITLE = i18n.translate(
+  'plugins.workflowsManagement.workflowsList.tagsListTitle',
+  {
+    defaultMessage: 'Tags',
+  }
+);

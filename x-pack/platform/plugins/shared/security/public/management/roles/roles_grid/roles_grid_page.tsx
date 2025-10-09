@@ -296,7 +296,12 @@ export const RolesGridPage: FC<Props> = ({
         truncateText: { lines: 3 },
         render: (description: string, record: Role) => (
           <EuiToolTip position="top" content={description} display="block">
-            <EuiText color="subdued" size="s" data-test-subj={`roleRowDescription-${record.name}`}>
+            <EuiText
+              color="subdued"
+              size="s"
+              data-test-subj={`roleRowDescription-${record.name}`}
+              tabIndex={0}
+            >
               {description}
             </EuiText>
           </EuiToolTip>
