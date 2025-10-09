@@ -380,8 +380,16 @@ export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]):
               );
             } else if (
               isFunctionExpression(cur) &&
-              supportedStatsFunctions.has(cur.name) &&
-              pick.includes(removeBackticks(cur.text))
+              supportedStatsFunctions.has(
+                cur.subtype === 'variadic-call'
+                  ? cur.name
+                  : (cur.args[1] as ESQLAstItem[]).find(isFunctionExpression)?.name ?? ''
+              ) &&
+              pick.includes(
+                cur.subtype === 'variadic-call'
+                  ? cur.text
+                  : removeBackticks(cur.args.find(isColumn)?.name ?? '')
+              )
             ) {
               acc.push(synth.exp(cur.text, { withFormatting: false }));
             }
