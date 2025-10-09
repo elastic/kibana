@@ -6,8 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
+import type { ProcessorSuggestion } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import type { ProcessorSuggestion } from '@kbn/streams-plugin/common';
 import { createServerRoute } from '../../../create_server_route';
 
 const processorSuggestionsRoute = createServerRoute({

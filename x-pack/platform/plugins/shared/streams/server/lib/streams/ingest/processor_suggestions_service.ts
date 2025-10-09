@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ConsoleStart } from '@kbn/console-plugin/server';
-import type { ProcessorSuggestion } from '@kbn/streams-plugin/common';
+import type { ProcessorSuggestion } from '../../../../common';
 
 type SpecJsonFetcher = () => ReturnType<ConsoleStart['getSpecJson']>;
 
@@ -28,15 +28,11 @@ interface ProcessorEntry {
 function isProcessorEntry(value: unknown): value is ProcessorEntry {
   return (
     isRecord(value) &&
-    Object.values(value).every(
-      (definition) => definition === undefined || isRecord(definition)
-    )
+    Object.values(value).every((definition) => definition === undefined || isRecord(definition))
   );
 }
 
-function extractProcessorEntries(
-  spec: ReturnType<ConsoleStart['getSpecJson']>
-): ProcessorEntry[] {
+function extractProcessorEntries(spec: ReturnType<ConsoleStart['getSpecJson']>): ProcessorEntry[] {
   const endpoints = spec.endpoints;
   if (!isRecord(endpoints)) {
     return [];
@@ -79,7 +75,9 @@ export class ProcessorSuggestionsService {
 
   public async getSuggestions(): Promise<ProcessorSuggestion[]> {
     if (!this.fetcher) {
-      this.logger.debug('Console spec fetcher not available; returning empty processor suggestions');
+      this.logger.debug(
+        'Console spec fetcher not available; returning empty processor suggestions'
+      );
       return [];
     }
 
@@ -109,6 +107,6 @@ export class ProcessorSuggestionsService {
         const template = def?.__template as ProcessorSuggestion['template'];
         return { name, template } as ProcessorSuggestion;
       })
-      .filter((suggestion): suggestion is ProcessorSuggestion => suggestion !== undefined)
+      .filter((suggestion): suggestion is ProcessorSuggestion => suggestion !== undefined);
   }
 }

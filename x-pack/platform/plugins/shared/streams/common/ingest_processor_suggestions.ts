@@ -11,4 +11,3 @@ export interface ProcessorSuggestion {
   name: string;
   template?: JsonValue;
 }
-

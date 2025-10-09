@@ -41,5 +41,4 @@ export class ConsoleSpecClient {
       });
     return this.esSpecPromise;
   }
-
 }

@@ -14,9 +14,9 @@ import { i18n } from '@kbn/i18n';
 import type { ElasticsearchProcessorType } from '@kbn/streams-schema';
 import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ProcessorSuggestion } from '@kbn/streams-plugin/common';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../../../types';
-import type { ProcessorSuggestion } from '@kbn/streams-plugin/common';
 import {
   serializeXJson,
   parseXJsonOrString,

@@ -92,7 +92,7 @@ const formatXJsonString = (input: string) => {
 
 export const hasOddQuoteCount = (text: string) => {
   const matches = text.match(/(?<!\\)"/g);
-  return ((matches?.length ?? 0) % 2) === 1;
+  return (matches?.length ?? 0) % 2 === 1;
 };
 
 export const buildProcessorInsertText = (
