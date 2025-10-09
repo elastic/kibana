@@ -15,6 +15,7 @@ const TIMESTAMP = '@timestamp' as const;
 const KIBANA_NAMESPACE = 'kibana' as const;
 const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
 const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
+const ALERT_STATE_NAMESPACE = `${ALERT_NAMESPACE}.state` as const;
 const ALERT_LAST_SCHEDULED_ACTIONS_NAMESPACE = `${ALERT_NAMESPACE}.last_scheduled_actions` as const;
 
 // kibana.space_ids - space ID(s) of the rule that created this alert
@@ -148,6 +149,7 @@ const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
+  ALERT_STATE_NAMESPACE,
 };
 
 export const fields = {
@@ -202,6 +204,7 @@ export {
   ALERT_NAMESPACE,
   ALERT_RULE_NAMESPACE,
   KIBANA_NAMESPACE,
+  ALERT_STATE_NAMESPACE,
 
   // fields
   ALERT_ACTION_GROUP,

@@ -37,6 +37,7 @@ import {
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
   SLO_DATA_VIEW_ID_FIELD,
+  ALERT_STATE_ALERT_STATE,
 } from '../../../../common/field_names/slo';
 import type { Duration, SLODefinition } from '../../../domain/models';
 import { KibanaSavedObjectsSLORepository } from '../../../services';
@@ -182,6 +183,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
               [ALERT_REASON]: reason,
               [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
               [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
+              [ALERT_STATE_ALERT_STATE]: AlertStates.ALERT as unknown as string,
               [ALERT_GROUP]: groups,
               [ALERT_GROUPING]: groupings, // Object, example: { host: { name: 'host-0' } }
               [SLO_ID_FIELD]: slo.id,

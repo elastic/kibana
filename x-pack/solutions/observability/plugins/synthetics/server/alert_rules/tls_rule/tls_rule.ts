@@ -104,14 +104,16 @@ export const registerSyntheticsTLSCheckRule = (
           return;
         }
 
+        const state = { ...updateState(ruleState, foundCerts), ...summary };
+
         const alertId = cert.sha256;
         const { uuid } = alertsClient.report({
           id: alertId,
           actionGroup: TLS_CERTIFICATE.id,
-          state: { ...updateState(ruleState, foundCerts), ...summary },
+          state,
         });
 
-        const payload = getTLSAlertDocument(cert, summary, uuid);
+        const payload = getTLSAlertDocument(cert, summary, uuid, state);
 
         const context = {
           [ALERT_DETAILS_URL]: await getAlertDetailsUrl(basePath, spaceId, uuid),

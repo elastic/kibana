@@ -17,6 +17,16 @@ import { i18n } from '@kbn/i18n';
 import type { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
 import type { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
+import type { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
+import {
+  ALERT_STATE_FIRST_CHECKED_AT,
+  ALERT_STATE_FIRST_TRIGGERED_AT,
+  ALERT_STATE_IS_TRIGGERED,
+  ALERT_STATE_LAST_CHECKED_AT,
+  ALERT_STATE_LAST_RESOLVED_AT,
+  ALERT_STATE_LAST_TRIGGERED_AT,
+  ALERT_STATE_META,
+} from '../../../common/rules/synthetics_rule_field_map';
 import type { MonitorSummaryTLSRule } from './types';
 import type { TLSLatestPing } from './tls_rule_executor';
 import { ALERT_DETAILS_URL } from '../action_variables';
@@ -118,7 +128,12 @@ export const getCertSummary = (
   };
 };
 
-export const getTLSAlertDocument = (cert: Cert, monitorSummary: CertSummary, uuid: string) => ({
+export const getTLSAlertDocument = (
+  cert: Cert,
+  monitorSummary: CertSummary,
+  uuid: string,
+  state: SyntheticsCommonState
+) => ({
   [CERT_COMMON_NAME]: cert.common_name,
   [CERT_ISSUER_NAME]: cert.issuer,
   [CERT_VALID_NOT_AFTER]: cert.not_after,
@@ -142,6 +157,13 @@ export const getTLSAlertDocument = (cert: Cert, monitorSummary: CertSummary, uui
   labels: cert.labels,
   configId: monitorSummary.configId,
   'monitor.tags': monitorSummary.monitorTags ?? [],
+  [ALERT_STATE_META]: state.meta,
+  [ALERT_STATE_FIRST_CHECKED_AT]: state.firstCheckedAt,
+  [ALERT_STATE_FIRST_TRIGGERED_AT]: state.firstTriggeredAt,
+  [ALERT_STATE_LAST_CHECKED_AT]: state.lastCheckedAt,
+  [ALERT_STATE_LAST_TRIGGERED_AT]: state.lastTriggeredAt,
+  [ALERT_STATE_LAST_RESOLVED_AT]: state.lastResolvedAt,
+  [ALERT_STATE_IS_TRIGGERED]: state.isTriggered,
 });
 
 export const setTLSRecoveredAlertsContext = async ({

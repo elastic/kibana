@@ -8,7 +8,7 @@
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { type IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { ALERT_GROUPING } from '@kbn/rule-data-utils';
+import { ALERT_GROUPING, ALERT_STATE_NAMESPACE } from '@kbn/rule-data-utils';
 import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { registerMetricThresholdRuleType } from './metric_threshold/register_metric_threshold_rule_type';
 import { registerInventoryThresholdRuleType } from './inventory_metric_threshold/register_inventory_metric_threshold_rule_type';
@@ -29,6 +29,17 @@ const dynamicTemplates = [
   },
 ];
 
+export const ALERT_STATE_ALERT_STATE = `${ALERT_STATE_NAMESPACE}.alert_state` as const;
+
+export const logsRulesFieldMap = {
+  ...legacyExperimentalFieldMap,
+  [ALERT_STATE_ALERT_STATE]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+};
+
 export const LOGS_RULES_ALERT_CONTEXT = 'observability.logs';
 // Defines which alerts-as-data index logs rules will use
 export const LogsRulesTypeAlertDefinition: IRuleTypeAlerts<LogThresholdAlert> = {
@@ -47,7 +58,7 @@ export const METRICS_RULES_ALERT_CONTEXT = 'observability.metrics';
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<MetricThresholdAlert> = {
   context: METRICS_RULES_ALERT_CONTEXT,
   mappings: {
-    fieldMap: legacyExperimentalFieldMap,
+    fieldMap: logsRulesFieldMap,
     dynamicTemplates,
   },
   useEcs: true,
