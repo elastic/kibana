@@ -176,7 +176,7 @@ export const MetricsGrid = ({
         }}
       >
         <EuiFlexGrid columns={columns} gutterSize="s">
-          {rows.map(({ metric }, index) => {
+          {rows.map(({ key, metric }, index) => {
             const { rowIndex, colIndex } = getRowColFromIndex(index);
             const isFocused =
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
