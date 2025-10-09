@@ -182,6 +182,10 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('discoverOpenButton');
   }
 
+  public async hasUnsavedChangesBadge() {
+    return await this.testSubjects.exists('unsavedChangesBadge');
+  }
+
   public async revertUnsavedChanges() {
     await this.testSubjects.moveMouseTo('unsavedChangesBadge');
     await this.testSubjects.click('unsavedChangesBadge');
