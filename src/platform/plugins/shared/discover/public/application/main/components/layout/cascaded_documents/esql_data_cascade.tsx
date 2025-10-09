@@ -120,7 +120,12 @@ export const ESQLDataCascade = React.memo(
     });
 
     const { renderRowActionPopover, rowActions, rowHeaderMeta, rowHeaderTitle } =
-      useEsqlDataCascadeRowHeaderComponents(props.services, query as AggregateQuery, queryMeta);
+      useEsqlDataCascadeRowHeaderComponents(
+        props.services,
+        query as AggregateQuery,
+        queryMeta,
+        globalState
+      );
 
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']

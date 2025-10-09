@@ -28,19 +28,29 @@ import { getPatternCellRenderer } from '../../../../../../context_awareness/prof
 import { type ESQLStatsQueryMeta } from '../utils';
 
 import type { ESQLDataGroupNode, DataTableRecord } from './types';
+import { constructCascadeQuery, type SupportedStatsFunction } from '../utils';
+import type { TabStateGlobalState } from '../../../../state_management/redux';
+import type { DiscoverAppLocator } from '../../../../../../../common/app_locator';
 
 interface RowContext {
   groupId: string;
-  groupValue: unknown;
+  groupValue: string;
 }
 
 interface RowClickActionContext {
   editorQuery: AggregateQuery;
+  editorQueryMeta: ESQLStatsQueryMeta;
   rowContext: RowContext;
   services: UnifiedDataTableProps['services'];
+  closeActionMenu: () => void;
+  globalState: TabStateGlobalState;
 }
 
-const contextRowActions: NonNullable<EuiContextMenuPanelDescriptor['items']> = [
+const contextRowActions: Array<
+  NonNullable<EuiContextMenuPanelDescriptor['items']>[number] & {
+    renderFor?: SupportedStatsFunction;
+  }
+> = [
   {
     name: i18n.translate('discover.esql_data_cascade.row.action.copy_to_clipboard', {
       defaultMessage: 'Copy to clipboard',
@@ -48,6 +58,7 @@ const contextRowActions: NonNullable<EuiContextMenuPanelDescriptor['items']> = [
     icon: 'copy',
     onClick(this: RowClickActionContext) {
       copyToClipboard(this.rowContext.groupValue as string);
+      this.closeActionMenu();
     },
   },
   {
@@ -99,47 +110,64 @@ const contextRowActions: NonNullable<EuiContextMenuPanelDescriptor['items']> = [
       defaultMessage: 'Open in new discover tab',
     }),
     icon: 'discoverApp',
-    onClick(this: RowClickActionContext, e: React.MouseEvent) {
+    renderFor: 'categorize',
+    onClick(this: RowClickActionContext, e) {
       e.preventDefault();
 
-      // const discoverLink = this.services.locator.getRedirectUrl({
-      // query: this.query,
-      // timeRange: executeContext.timeRange,
-      // hideChart: false,
-      // });
-      // window.open(discoverLink, '_blank');
+      // @ts-expect-error -- brittle, locator exists on services, however unified table doesn't have it in its types
+      const discoverLink = (this.services.locator as DiscoverAppLocator).getRedirectUrl({
+        query: constructCascadeQuery({
+          query: this.editorQuery,
+          nodeType: 'leaf',
+          nodePath: [this.rowContext.groupId],
+          nodePathMap: { [this.rowContext.groupId]: this.rowContext.groupValue },
+        }),
+        timeRange: this.globalState.timeRange,
+        hideChart: false,
+      });
+
+      window.open(discoverLink, '_blank');
     },
   },
 ];
 
-const ContextMenu = React.memo(
-  ({
-    row,
-    services,
-    editorQuery,
-  }: {
-    row: RowContext;
-    services: UnifiedDataTableProps['services'];
-    editorQuery: AggregateQuery;
-  }) => {
-    // @ts-expect-error - mismatch with onClick function signature
-    const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
-      const rowAction = {
-        rowContext: row,
-        services,
-        editorQuery,
-      };
+interface ContextMenuProps
+  extends Pick<RowClickActionContext, 'editorQuery' | 'editorQueryMeta' | 'globalState'> {
+  row: RowContext;
+  services: UnifiedDataTableProps['services'];
+  close: RowClickActionContext['closeActionMenu'];
+}
 
+const ContextMenu = React.memo(
+  ({ row, services, editorQuery, editorQueryMeta, close, globalState }: ContextMenuProps) => {
+    const groupType = editorQueryMeta.groupByFields.find(
+      (field) => field.field === row.groupId
+    )?.type;
+
+    const panels = useMemo<EuiContextMenuPanelDescriptor[]>(() => {
       return [
         {
           id: `${row.groupId}-${row.groupValue}-context-menu`,
-          items: contextRowActions.map((action) => ({
-            ...action,
-            onClick: action.onClick?.bind(rowAction),
-          })),
+          items: contextRowActions.reduce((acc, action) => {
+            if (action.renderFor && action.renderFor !== groupType) {
+              return acc;
+            }
+
+            return acc.concat({
+              ...action,
+              // @ts-expect-error - this is necessary to bind the correct context to the action
+              onClick: action.onClick?.bind({
+                rowContext: row,
+                services,
+                editorQuery,
+                closeActionMenu: close,
+                globalState,
+              }),
+            });
+          }, [] as NonNullable<EuiContextMenuPanelDescriptor['items']>),
         },
       ];
-    }, [editorQuery, row, services]);
+    }, [close, editorQuery, globalState, groupType, row, services]);
 
     return <EuiContextMenu initialPanelId={panels[0].id} panels={panels} />;
   }
@@ -148,10 +176,13 @@ const ContextMenu = React.memo(
 export function useEsqlDataCascadeRowHeaderComponents(
   services: UnifiedDataTableProps['services'],
   editorQuery: AggregateQuery,
-  editorQueryMeta: ESQLStatsQueryMeta
+  editorQueryMeta: ESQLStatsQueryMeta,
+  globalState: TabStateGlobalState
 ) {
   const popoverRef = useRef<HTMLButtonElement | null>(null);
   const [popoverRowData, setPopoverRowData] = useState<RowContext | null>(null);
+
+  const closePopover = useCallback(() => setPopoverRowData(null), [setPopoverRowData]);
 
   /**
    * Renders the popover for the row action (3 dots) button. Adopting this patterns avoids rendering multiple popovers
@@ -168,10 +199,17 @@ export function useEsqlDataCascadeRowHeaderComponents(
         closePopover={() => setPopoverRowData(null)}
         panelPaddingSize="none"
       >
-        <ContextMenu services={services} row={popoverRowData!} editorQuery={editorQuery} />
+        <ContextMenu
+          close={closePopover}
+          editorQuery={editorQuery}
+          editorQueryMeta={editorQueryMeta}
+          globalState={globalState}
+          row={popoverRowData!}
+          services={services}
+        />
       </EuiWrappingPopover>
     ) : null;
-  }, [popoverRowData, services, editorQuery]);
+  }, [popoverRowData, closePopover, editorQuery, editorQueryMeta, globalState, services]);
 
   /**
    * Renders the title part of the row header.
@@ -267,7 +305,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
   >(
     ({ rowData, nodePath }) => {
       const groupId = nodePath[nodePath.length - 1];
-      const groupValue = rowData[groupId];
+      const groupValue = rowData[groupId] as string;
 
       return [
         {
