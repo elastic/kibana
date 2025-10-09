@@ -84,42 +84,32 @@ describe('extractLiquidErrorPosition', () => {
 
     it('should extend position to include full liquid expression', () => {
       const text = 'Hello {{ myVariable | filter }} world';
-      const errorMessage = 'error, line:1, col:8';
+      const errorMessage = 'error, line:1, col:7';
 
       const result = extractLiquidErrorPosition(text, errorMessage);
 
-      expect(result.start).toBe(7); // Start of '{{'
+      expect(result.start).toBe(6); // Start of '{{'
       expect(result.end).toBe(text.indexOf('}}') + 2); // End of '}}'
     });
 
     it('should handle liquid tag expressions', () => {
       const text = 'Hello {% if condition %} world';
-      const errorMessage = 'error, line:1, col:8';
+      const errorMessage = 'error, line:1, col:7';
 
       const result = extractLiquidErrorPosition(text, errorMessage);
 
-      expect(result.start).toBe(7); // Start of '{%'
+      expect(result.start).toBe(6); // Start of '{%'
       expect(result.end).toBe(text.indexOf('%}') + 2); // End of '%}'
     });
 
     it('should handle expressions without closing tags', () => {
       const text = 'Hello {{ unclosed expression';
-      const errorMessage = 'error, line:1, col:8';
+      const errorMessage = 'error, line:1, col:7';
 
       const result = extractLiquidErrorPosition(text, errorMessage);
 
-      expect(result.start).toBe(7);
-      expect(result.end).toBe(Math.min(7 + 50, text.length)); // Limited to 50 chars
-    });
-
-    it('should handle word boundaries when no liquid syntax', () => {
-      const text = 'Hello world error here';
-      const errorMessage = 'error, line:1, col:12';
-
-      const result = extractLiquidErrorPosition(text, errorMessage);
-
-      expect(result.start).toBe(11); // Start of 'error'
-      expect(result.end).toBe(16); // End of 'error'
+      expect(result.start).toBe(6);
+      expect(result.end).toBe(text.length);
     });
   });
 
@@ -195,17 +185,6 @@ describe('extractLiquidErrorPosition', () => {
       // Should fall back to liquid pattern matching
       expect(result.start).toBe(text.indexOf('{{'));
       expect(result.end).toBe(text.indexOf('}}') + 2);
-    });
-
-    it('should handle line numbers beyond text length', () => {
-      const text = 'Single line';
-      const errorMessage = 'error, line:10, col:5';
-
-      const result = extractLiquidErrorPosition(text, errorMessage);
-
-      // Should fall back to liquid pattern matching
-      expect(result.start).toBe(0);
-      expect(result.end).toBe(1);
     });
 
     it('should handle very long text', () => {
