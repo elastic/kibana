@@ -142,6 +142,7 @@ export type LoadingRuleAction =
   | 'load'
   | 'edit'
   | 'run'
+  | 'fill_gaps'
   | null;
 
 export interface LoadingRules {
