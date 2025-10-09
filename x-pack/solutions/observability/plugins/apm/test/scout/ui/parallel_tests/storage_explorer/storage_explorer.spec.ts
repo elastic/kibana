@@ -23,6 +23,7 @@ test.describe('Storage Explorer - Viewer (No Permissions)', { tag: ['@ess', '@sv
     pageObjects: { storageExplorerPage },
   }) => {
     await storageExplorerPage.goto();
+    await expect(storageExplorerPage.pageTitle).toBeVisible();
 
     await test.step('verify permission denied is shown', async () => {
       await expect(page.getByText('You need permission')).toBeVisible();
@@ -41,11 +42,10 @@ test.describe('Storage Explorer - Monitor User', { tag: ['@ess'] }, () => {
   }) => {
     await test.step('verify charts and data in the storageExplorerServicesTable', async () => {
       await storageExplorerPage.gotoWithTimeRange(timeRange.rangeFrom, timeRange.rangeTo);
-      await page.waitForLoadingIndicatorHidden();
-      await expect(page.getByRole('heading', { name: 'Storage explorer', level: 1 })).toBeVisible();
+      await expect(storageExplorerPage.pageTitle).toBeVisible();
 
       // Verify the chart is present
-      await expect(await storageExplorerPage.getStorageChart()).toBeVisible();
+      await expect(await storageExplorerPage.storageChart).toBeVisible();
 
       // Verify the summary title elements are present
       const summaryStatTitleElements = await storageExplorerPage.getSummaryStatTitleElements();
@@ -72,11 +72,10 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
   }) => {
     await test.step('verify charts and data in the storageExplorerServicesTable', async () => {
       await storageExplorerPage.gotoWithTimeRange(timeRange.rangeFrom, timeRange.rangeTo);
-      await page.waitForLoadingIndicatorHidden();
-      await expect(page.getByRole('heading', { name: 'Storage explorer', level: 1 })).toBeVisible();
+      await expect(storageExplorerPage.pageTitle).toBeVisible();
 
       // Verify the chart is present
-      await expect(await storageExplorerPage.getStorageChart()).toBeVisible();
+      await expect(await storageExplorerPage.storageChart).toBeVisible();
 
       // Verify the summary title elements are present
       const summaryStatTitleElements = await storageExplorerPage.getSummaryStatTitleElements();
@@ -134,7 +133,7 @@ test.describe('Storage Explorer - Admin User', { tag: ['@ess'] }, () => {
       await page.waitForLoadingIndicatorHidden();
 
       await expect(page).toHaveURL(/.*environment=production.*/);
-      await expect(page.getByRole('heading', { name: 'Storage explorer', level: 1 })).toBeVisible();
+      await expect(storageExplorerPage.pageTitle).toBeVisible();
     });
   });
 });

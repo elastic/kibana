@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
+import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 
 export class StorageExplorerPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public storageChart: Locator;
+  public pageTitle: Locator;
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.storageChart = this.page.testSubj.locator('storageExplorerTimeseriesChart');
+    this.pageTitle = this.page.getByRole('heading', { name: 'Storage explorer', level: 1 });
+  }
 
   async goto() {
     await this.page.goto(
@@ -16,23 +21,7 @@ export class StorageExplorerPage {
         'apm'
       )}/storage-explorer?rangeFrom=now-24h&rangeTo=now&environment=ENVIRONMENT_ALL&indexLifecyclePhase=all`
     );
-    await this.page.waitForLoadingIndicatorHidden();
-
-    // Wait for either the storage explorer page or permission denied page
-    try {
-      await this.page
-        .getByRole('heading', { name: 'Storage explorer', level: 1 })
-        .waitFor({ timeout: 10000 });
-    } catch (error) {
-      // Check if it's a permission denied page instead
-      const permissionText = this.page.getByText('You need permission');
-      if (await permissionText.isVisible()) {
-        return this.page;
-      }
-      throw error;
-    }
-
-    return this.page;
+    return this.page.waitForLoadingIndicatorHidden();
   }
 
   async gotoWithTimeRange(rangeFrom: string, rangeTo: string) {
@@ -41,8 +30,7 @@ export class StorageExplorerPage {
         'apm'
       )}/storage-explorer?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&environment=ENVIRONMENT_ALL&indexLifecyclePhase=all`
     );
-    await this.page.waitForLoadingIndicatorHidden();
-    return this.page;
+    return this.page.waitForLoadingIndicatorHidden();
   }
 
   // Summary stats methods
@@ -57,16 +45,8 @@ export class StorageExplorerPage {
       'Number of services',
     ];
 
-    const visibleElements = [];
-    for (const title of titles) {
-      const element = this.page.getByText(title);
-      visibleElements.push(element);
-    }
-    return visibleElements;
-  }
+    const elements = titles.map((title) => this.page.getByText(title));
 
-  // Chart methods
-  async getStorageChart() {
-    return this.page.getByTestId('storageExplorerTimeseriesChart');
+    return elements;
   }
 }
