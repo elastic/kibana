@@ -133,7 +133,7 @@ paths:
           schema:
             type: string
         - description: >
-            The file identifier is constructed one of two ways:
+            The file identifier is constructed in one of two ways:
 
             - For Elastic Defend agents (`agentType` of `endpoint`): combine the
             `action_id` and `agent_id` values using a dot (`.`) separator:
@@ -197,7 +197,7 @@ paths:
           schema:
             type: string
         - description: >
-            The file identifier is constructed one of two ways:
+            The file identifier is constructed in one of two ways:
 
             - For Elastic Defend agents (`agentType` of `endpoint`): combine the
             `action_id` and `agent_id` values using a dot (`.`) separator:
