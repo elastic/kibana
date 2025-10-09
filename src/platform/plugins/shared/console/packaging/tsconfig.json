@@ -32,6 +32,7 @@
     "@kbn/core-analytics-browser-internal",
     "@kbn/core-theme-browser-internal",
     "@kbn/core-i18n-browser-internal",
+    "@kbn/monaco",
   ],
   "exclude": [
     "target/**/*"
