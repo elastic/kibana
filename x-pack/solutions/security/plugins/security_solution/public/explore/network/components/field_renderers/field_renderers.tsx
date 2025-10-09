@@ -9,19 +9,19 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React, { Fragment } from 'react';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
+import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import type {
   AutonomousSystem,
   FlowTarget,
   FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
-} from '../../../../common/search_strategy';
-import { DefaultDraggable } from '../../../common/components/draggables';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
-import { ReputationLink, WhoIsLink } from '../../../common/components/links';
-import * as i18n from '../../../explore/network/components/details/translations';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
-import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
-import { DefaultFieldRenderer } from './default_renderer';
+} from '../../../../../common/search_strategy';
+import { DefaultDraggable } from '../../../../common/components/draggables';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { ReputationLink, WhoIsLink } from '../../../../common/components/links';
+import * as i18n from '../details/translations';
+import type { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { FlyoutLink } from '../../../../flyout/shared/components/flyout_link';
 
 export const IpOverviewId = 'ip-overview';
 
