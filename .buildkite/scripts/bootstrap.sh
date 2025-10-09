@@ -26,11 +26,9 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   # Check if the download succeeds before trying to extract the cache
   if (buildkite-agent artifact download --step "pre_build" "moon-cache.tar.gz" ~/); then
     echo "Found moon-cache.tar.gz artifact, extracting to ./.moon/cache"
-    ls -la ~/
-    pwd
-    ls -la
     mkdir -p ./.moon/cache
     tar -xzf ~/moon-cache.tar.gz -C ./.moon/cache
+    ls -la ./.moon/cache
   elif [[ -d ~/.kibana-moon-cache ]]; then
     echo "Using ~/.moon/cache as a starting point"
     mkdir -p ./.moon/cache
