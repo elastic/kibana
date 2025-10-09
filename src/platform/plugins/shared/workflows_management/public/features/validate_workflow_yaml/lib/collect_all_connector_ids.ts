@@ -44,8 +44,6 @@ export function collectAllConnectorIds(
         return;
       }
 
-      // Find the step node that contains this connector-id to get the connector type
-      let stepNode = null;
       let connectorType = 'unknown';
 
       // Walk up the ancestors to find the step node (should contain both 'type' and 'connector-id')
@@ -71,7 +69,6 @@ export function collectAllConnectorIds(
             }
 
             if (hasType && hasConnectorId && typeValue) {
-              stepNode = ancestor;
               connectorType = typeValue as string;
               break;
             }
