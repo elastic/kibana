@@ -832,6 +832,7 @@ export function getCompletionItemProvider(
         const value = model.getValue();
 
         const yamlDocument = parseDocument(value);
+        // TODO: use the yaml document from the store
         // const yamlDocument = useSelector(selectYamlDocument);
 
         // Try to parse with the strict schema first
