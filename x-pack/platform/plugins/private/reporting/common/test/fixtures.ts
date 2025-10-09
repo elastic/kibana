@@ -181,7 +181,7 @@ export const mockJobs: ReportApiJSON[] = [
 
 export const mockScheduledReports: ScheduledReportApiJSON[] = [
   {
-    created_at: '2025-06-10T12:41:45.136Z',
+    created_at: '2025-06-16T12:41:45.136Z',
     created_by: 'Foo Bar',
     enabled: true,
     id: 'scheduled-report-1',
@@ -221,7 +221,7 @@ export const mockScheduledReports: ScheduledReportApiJSON[] = [
     } as BaseParamsV2,
   },
   {
-    created_at: '2025-06-16T12:41:45.136Z',
+    created_at: '2025-06-12T12:41:45.136Z',
     created_by: 'Test abc',
     enabled: true,
     id: 'scheduled-report-2',
@@ -235,7 +235,7 @@ export const mockScheduledReports: ScheduledReportApiJSON[] = [
     title: 'Scheduled report 2',
   },
   {
-    created_at: '2025-06-12T12:41:45.136Z',
+    created_at: '2025-06-10T12:41:45.136Z',
     created_by: 'New',
     enabled: false,
     id: 'scheduled-report-3',
