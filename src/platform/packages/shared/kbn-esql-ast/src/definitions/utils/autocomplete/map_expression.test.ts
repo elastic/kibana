@@ -157,5 +157,25 @@ describe('getCommandMapExpressionSuggestions', () => {
       const suggestions = getCommandMapExpressionSuggestions('{ "param1"', availableParameters);
       expect(suggestions).toEqual([]);
     });
+
+    // We don't have currently a case where we need suggestions in nested maps.
+    it('should not return suggestions when inside a nested map', () => {
+      const nestedMapScenarios = [
+        '{ "weights": { ',
+        '{ "weights": { "',
+        '{ "weights": { "field1": 1, ',
+        '{ "weights": { "field1": 1, "',
+        '{ "param1": "value", "weights": { ',
+        '{ "param1": "value", "weights": { "field1": 1, ',
+      ];
+
+      nestedMapScenarios.forEach((scenario) => {
+        const suggestions = getCommandMapExpressionSuggestions(scenario, {
+          ...availableParameters,
+          weights: { type: 'map' },
+        });
+        expect(suggestions).toEqual([]);
+      });
+    });
   });
 });

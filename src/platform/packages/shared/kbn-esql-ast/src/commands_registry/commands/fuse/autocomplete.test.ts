@@ -282,13 +282,16 @@ describe('FUSE Autocomplete', () => {
 
     it('suggests parameter values for normalizer parameter', async () => {
       await fuseExpectSuggestions('FROM a | FUSE linear WITH { "normalizer": "', [
-        'none',
-        'minmax',
+        '"none',
+        '"minmax',
       ]);
     });
 
     it('suggests nothing within weights sub map', async () => {
+      await fuseExpectSuggestions('FROM a | FUSE linear WITH { "weights": { ', []);
       await fuseExpectSuggestions('FROM a | FUSE linear WITH { "weights": { "', []);
+      await fuseExpectSuggestions('FROM a | FUSE linear WITH { "weights": { "fork1": ', []);
+      await fuseExpectSuggestions('FROM a | FUSE linear WITH { "weights": { "fork1": "', []);
     });
   });
 });

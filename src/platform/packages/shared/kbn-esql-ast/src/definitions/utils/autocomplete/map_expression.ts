@@ -31,8 +31,11 @@ export type MapParameters = Record<string, MapParameterValues>;
  *  | COMPLETION "prompt" WITH { "param1": "           ---> suggests parameter values
  *  | COMPLETION "prompt" WITH { "param1": "value",    ---> suggests parameter names that were not used
  *  | COMPLETION "prompt" WITH { "param1": "value", "  ---> suggests parameter names that were not used
+ *  | COMPLETION "prompt" WITH { "nestedParam": {      ---> suggests []
  *
  * This helper does not suggest enclosing brackets.
+ * This helper does not support suggestions within nested maps, we don't have currently a case where it's needed,
+ *  so no suggestions will be provided within a nested map.
  *
  * @param innerText
  * @param availableParameters
@@ -42,6 +45,16 @@ export function getCommandMapExpressionSuggestions(
   availableParameters: MapParameters
 ): ISuggestionItem[] {
   const finalWord = findFinalWord(innerText);
+
+  // Check if we're inside a nested map by counting braces
+  const openBraces = (innerText.match(/\{/g) || []).length;
+  const closeBraces = (innerText.match(/\}/g) || []).length;
+  const nestingLevel = openBraces - closeBraces;
+
+  // Return no suggestions if we're inside a nested map (nesting level > 1)
+  if (nestingLevel > 1) {
+    return [];
+  }
 
   // Suggest a parameter entry after { or after a comma or when opening quotes after those
   if (/{\s*"?$/i.test(innerText) || /,\s*"?$/.test(innerText)) {
