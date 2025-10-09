@@ -10,7 +10,7 @@
 require('@kbn/babel-register').install();
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
@@ -27,7 +27,7 @@ module.exports = [
     devtool: 'cheap-source-map',
     output: {
       libraryTarget: 'commonjs',
-      path: path.resolve(BUILD_OUTPUT_DIR, 'react'),
+      path: path.resolve(BUILD_OUTPUT_DIR),
       filename: 'index.js',
       chunkFilename: '[name].chunk.js',
       publicPath: 'auto',
@@ -52,8 +52,6 @@ module.exports = [
         'moment-timezone': 'commonjs moment-timezone',
         '@elastic/datemath': 'commonjs @elastic/datemath',
         'monaco-editor': 'commonjs monaco-editor',
-        // '@kbn/monaco': 'commonjs @kbn/monaco',
-        // '@kbn/code-editor': 'commonjs @kbn/code-editor',
       },
       // Handle react-dom internal imports only
       function (context, request, callback) {
@@ -68,12 +66,6 @@ module.exports = [
         }
         callback();
       },
-      // function (context, request, callback) {
-      // if (/^@kbn\/code-editor\//.test(request)) {
-      // return callback(null, 'commonjs ' + request);
-      // }
-      // callback();
-      // },
     ],
     module: {
       rules: [

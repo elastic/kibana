@@ -52,7 +52,7 @@ cd "$KIBANA_ROOT" && NODE_ENV=production BUILD_OUTPUT_DIR="$OUTPUT_DIR" yarn web
 cd "$CONSOLE_PACKAGING_DIR"
 
 echo "Build react TS definitions..."
-npx tsc ../react/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/react/index.d.ts" --skipLibCheck
+npx tsc ../react/types.ts --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/index.d.ts" --skipLibCheck
 
 echo "Build complete! Files generated in: $OUTPUT_DIR"
 ls -la "$OUTPUT_DIR/"

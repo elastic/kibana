@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Standalone type definitions - no imports to avoid compiling dependencies
+// Standalone type definitions, here we avoid imports to avoid compiling dependencies
 
 export interface HttpSetup {
   get: <T = any>(url: string, options?: { query?: Record<string, any> }) => Promise<T>;

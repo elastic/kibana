@@ -9,7 +9,6 @@
 
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { noop } from 'lodash';
-// import 'monaco-editor/min/vs/editor/editor.main.css';
 
 // Disable Monaco workers entirely to prevent "Unexpected usage" errors
 // This sacrifices some language features but allows the editor to work in external apps
@@ -84,7 +83,7 @@ export const OneConsole = ({ lang = 'en', http: customHttp, notifications: custo
     messages: selectedTranslations.messages,
   });
 
-  // Create all services once using useRef - they should never be recreated
+  // Create all services once using useRef as they should never be recreated
   const servicesRef = useRef<any>(null);
 
   if (!servicesRef.current) {
@@ -142,8 +141,7 @@ export const OneConsole = ({ lang = 'en', http: customHttp, notifications: custo
     const autocompleteInfo = new AutocompleteInfo();
     autocompleteInfo.setup(http);
     autocompleteInfo.mapping.setup(http, settings);
-
-    // IMPORTANT: Set the global autocompleteInfo so getAutocompleteInfo() works
+    // Initialize autocomplete
     setAutocompleteInfo(autocompleteInfo);
 
     servicesRef.current = {

@@ -193,7 +193,7 @@ async function generateAggregatedDefinitions() {
   const scriptDir = __dirname;
   console.log('Script directory:', scriptDir);
 
-  const consoleDefinitionsDir = path.join(scriptDir, '..', '..', 'target', 'console_definitions');
+  const consoleDefinitionsDir = path.join(scriptDir, '..', '..', 'console_definitions_target');
 
   // Check if console_definitions directory exists
   if (!fs.existsSync(consoleDefinitionsDir)) {
@@ -238,7 +238,7 @@ async function generateAggregatedDefinitions() {
   }
 
   // Write individual versioned files to the target directory
-  const outputDir = path.join(scriptDir, '..', '..', 'target', 'console_definitions');
+  const outputDir = path.join(scriptDir, '..', '..', 'console_definitions_target');
   const generatedFiles = [];
 
   Object.entries(aggregatedResponse).forEach(([version, versionData]) => {
