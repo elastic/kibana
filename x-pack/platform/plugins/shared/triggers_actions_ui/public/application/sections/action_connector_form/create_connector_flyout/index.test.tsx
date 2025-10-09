@@ -137,7 +137,6 @@ describe('CreateConnectorFlyout', () => {
         onConnectorCreated={onConnectorCreated}
       />
     );
-    await act(() => Promise.resolve());
 
     expect(screen.queryByTestId('create-connector-flyout-save-test-btn')).not.toBeInTheDocument();
   });
