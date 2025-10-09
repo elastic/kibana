@@ -64,6 +64,7 @@ export const DensitySettings: React.FC<DensitySettingsProps> = ({ dataGridDensit
       aria-label={densityLabel}
       display="columnCompressed"
       data-test-subj="lnsDensitySettings"
+      fullWidth
     >
       <EuiButtonGroup
         legend={densityLabel}
