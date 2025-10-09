@@ -101,7 +101,6 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
       setupTechnology,
       updateSetupTechnology,
       shouldRenderAgentlessSelector,
-      isServerless,
       hasInvalidRequiredVars,
     } = useLoadCloudSetup({
       newPolicy,
