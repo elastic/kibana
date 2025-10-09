@@ -11,7 +11,6 @@ import {
   mockFinalAnswer,
   mockAgentToolCall,
   mockSearchToolCallWithNaturalLanguageGen,
-  mockInternalIndexExplorerCall,
 } from './calls';
 
 /**
@@ -85,11 +84,12 @@ export const callSearchToolWithNoIndexSelectedThenAnswer = async ({
     llmProxy: proxy,
     toolName: 'platform_core_search',
     toolArg: {
-      query: 'service.name:java-backend',
+      query: 'just a query',
     },
   });
 
-  mockInternalIndexExplorerCall({ llmProxy: proxy, resource: null });
+  // no index present -> won't run index explorer
+  // mockInternalIndexExplorerCall({ llmProxy: proxy, resource: null });
 
   mockFinalAnswer(proxy, response);
 };

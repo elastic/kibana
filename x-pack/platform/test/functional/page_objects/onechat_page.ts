@@ -78,12 +78,12 @@ export class OneChatPageObject extends FtrService {
     await this.navigateToApp('conversations/new');
 
     await (withToolCall
-      ? directAnswer({ proxy: llmProxy, title, response: expectedResponse })
-      : callSearchToolWithNoIndexSelectedThenAnswer({
+      ? callSearchToolWithNoIndexSelectedThenAnswer({
           proxy: llmProxy,
           title,
           response: expectedResponse,
-        }));
+        })
+      : directAnswer({ proxy: llmProxy, title, response: expectedResponse }));
 
     // Type and send the message
     await this.typeMessage(userMessage);
