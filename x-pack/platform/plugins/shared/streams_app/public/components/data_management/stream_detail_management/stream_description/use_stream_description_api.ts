@@ -18,8 +18,10 @@ import { useTimefilter } from '../../../../hooks/use_timefilter';
 
 export const useStreamDescriptionApi = ({
   definition,
+  refreshDefinition,
 }: {
   definition: Streams.all.GetResponse;
+  refreshDefinition: () => void;
 }) => {
   const { signal } = useAbortController();
 
@@ -79,9 +81,18 @@ export const useStreamDescriptionApi = ({
         })
         .finally(() => {
           setIsUpdating(false);
+          refreshDefinition();
         });
     },
-    [definition, updateStream, notifications.toasts]
+    [
+      updateStream,
+      definition.dashboards,
+      definition.queries,
+      definition.rules,
+      definition.stream,
+      notifications.toasts,
+      refreshDefinition,
+    ]
   );
 
   const generate = useCallback(() => {

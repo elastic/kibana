@@ -22,6 +22,7 @@ import { ConnectorListButton } from '../../connector_list_button/connector_list_
 
 export interface AISummaryProps {
   definition: Streams.all.GetResponse;
+  refreshDefinition: () => void;
 }
 
 const STREAM_DESCRIPTION_PANEL_TITLE = i18n.translate(
@@ -81,7 +82,7 @@ const CANCEL_LABEL = i18n.translate(
   }
 );
 
-export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
+export const StreamDescription: React.FC<AISummaryProps> = ({ definition, refreshDefinition }) => {
   const {
     save,
     generate,
@@ -91,7 +92,7 @@ export const StreamDescription: React.FC<AISummaryProps> = ({ definition }) => {
     isEditing,
     setIsEditing,
     setDescription,
-  } = useStreamDescriptionApi({ definition });
+  } = useStreamDescriptionApi({ definition, refreshDefinition });
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
