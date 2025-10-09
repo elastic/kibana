@@ -263,7 +263,7 @@ export const useDashboardMenuItems = ({
         label: 'Dashboard summary',
         description: 'Get an AI-generated summary of this dashboard',
         id: 'chat-summary',
-        iconType: 'editorComment',
+        iconType: 'visText',
         iconOnly: true,
         testId: 'dashboardChatSummaryButton',
         disableButton:
