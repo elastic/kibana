@@ -13,7 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { EsqlQueryExpression } from './esql_query_expression';
+import { EsqlQueryExpression, getTimeFilter } from './esql_query_expression';
 import type { EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
 
@@ -94,10 +94,13 @@ const defaultEsqlQueryExpressionParams: EsQueryRuleParams<SearchType.esqlQuery> 
 };
 
 describe('EsqlQueryRuleTypeExpression', () => {
+  const fakeNow = new Date('2020-02-09T23:15:41.941Z');
+
   beforeEach(() => {
     jest.clearAllMocks();
 
     hasExpressionValidationErrors.mockReturnValue(false);
+    global.Date.now = jest.fn(() => fakeNow.getTime());
   });
 
   test('should render EsqlQueryRuleTypeExpression with chosen time field', async () => {
@@ -318,5 +321,26 @@ describe('EsqlQueryRuleTypeExpression', () => {
 
     expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
     expect(result.getByTestId('testQueryError')).toBeInTheDocument();
+  });
+
+  test('getTimeFilter should return the correct filters', async () => {
+    expect(getTimeFilter('@timestamp', '3h')).toEqual({
+      timeFilter: {
+        bool: {
+          filter: [
+            {
+              range: {
+                '@timestamp': {
+                  format: 'strict_date_optional_time',
+                  gt: '2020-02-09T20:15:41.941Z',
+                  lte: '2020-02-09T23:15:41.941Z',
+                },
+              },
+            },
+          ],
+        },
+      },
+      timeRange: { from: '2020-02-09T20:15:41.941Z', to: '2020-02-09T23:15:41.941Z' },
+    });
   });
 });
