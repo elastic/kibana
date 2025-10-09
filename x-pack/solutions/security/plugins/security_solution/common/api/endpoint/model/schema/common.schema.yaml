@@ -278,8 +278,10 @@ components:
            description: The user who created the response action
          agents:
            type: array
-           format: uuid
            description: The agent IDs for the hosts that the response action was sent to
+           items:
+             type: string
+             format: uuid
          parameters:
            type: object
            description: The parameters of the response action. Content different depending on the response action command
