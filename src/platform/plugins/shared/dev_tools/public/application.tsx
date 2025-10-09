@@ -121,7 +121,7 @@ function DevToolsWrapper({
             }}
           >
             <EuiToolTip content={currentDevTool.tooltipContent}>
-              <span>
+              <span tabIndex={0}>
                 {currentDevTool.title}{' '}
                 {currentDevTool.isBeta && (
                   <EuiBetaBadge
