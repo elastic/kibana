@@ -38,7 +38,7 @@ apiTest.describe('Fleet Integration Management', { tag: ['@svlSecurity', '@ess']
   });
 
   apiTest('should handle delete of non-existent integration', async ({ apiServices }) => {
-    const nonExistentIntegration = `non-existent-integration-${Date.now()}`;
+    const nonExistentIntegration = `non_existent_integration_${Date.now()}`;
 
     const response = await apiServices.fleet.integration.delete(nonExistentIntegration);
 
