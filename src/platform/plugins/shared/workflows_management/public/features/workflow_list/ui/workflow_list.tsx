@@ -222,10 +222,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         name: 'Trigger',
         width: '16%',
         render: (value: any, item: WorkflowListItemDto) => (
-          <EuiFlexGroup direction="column" gutterSize="xs">
+          <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
             <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
-            <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history} />
-          </EuiFlexGroup>
+          </NextExecutionTime>
         ),
       },
       {

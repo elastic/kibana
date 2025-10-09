@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n-react';
+import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { WorkflowExecutionHistoryModel } from '@kbn/workflows';
@@ -19,9 +18,10 @@ import { useGetFormattedDateTime } from './use_formatted_date';
 interface NextExecutionTimeProps {
   triggers: WorkflowTrigger[];
   history: WorkflowExecutionHistoryModel[];
+  children: React.ReactElement;
 }
 
-export function NextExecutionTime({ triggers, history }: NextExecutionTimeProps) {
+export function NextExecutionTime({ triggers, history, children }: NextExecutionTimeProps) {
   const nextExecutionTime = getWorkflowNextExecutionTime(triggers, history);
   const getFormattedDateTime = useGetFormattedDateTime();
 
@@ -38,9 +38,7 @@ export function NextExecutionTime({ triggers, history }: NextExecutionTimeProps)
         },
       })}
     >
-      <EuiBadge color="hollow" iconType="clock">
-        <FormattedRelative value={nextExecutionTime} />
-      </EuiBadge>
+      {children}
     </EuiToolTip>
   );
 }
