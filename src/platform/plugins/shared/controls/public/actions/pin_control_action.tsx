@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { map } from 'rxjs';
+
 import { i18n } from '@kbn/i18n';
 import {
   apiCanBePinned,
@@ -21,6 +23,8 @@ import {
   apiHasParentApi,
   apiHasType,
   apiHasUniqueId,
+  getInheritedViewMode,
+  getViewModeSubject,
   type EmbeddableApiContext,
   type HasUniqueId,
 } from '@kbn/presentation-publishing';
@@ -39,13 +43,14 @@ const compatibilityCheck = (api: unknown | null): api is PinnableControlApi =>
     apiHasType(api) &&
       apiHasUniqueId(api) &&
       apiCanBePinned(api) &&
+      apiCanAccessViewMode(api) &&
       apiHasParentApi(api) &&
-      apiCanAccessViewMode(api.parentApi) &&
       apiCanPinPanel(api.parentApi)
   );
 
-export class PinControlAction implements Action<EmbeddableApiContext> {
-  // FrequentCompatibilityChangeAction<EmbeddableApiContext>
+export class PinControlAction
+  implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
+{
   public readonly type = ACTION_PIN_CONTROL;
   public readonly id = ACTION_PIN_CONTROL;
   public order = 60; // puts it before the edit action
@@ -72,18 +77,18 @@ export class PinControlAction implements Action<EmbeddableApiContext> {
     return this.panelIsPinned(embeddable) ? 'pinFilled' : 'pin';
   }
 
-  // public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
-  //   return isClearableControl(embeddable);
-  // }
+  public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+    return apiHasParentApi(embeddable) && apiCanPinPanel(embeddable.parentApi);
+  }
 
-  // public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
-  //   return isClearableControl(embeddable)
-  //     ? embeddable.hasSelections$.pipe(map(() => undefined))
-  //     : undefined;
-  // }
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    return compatibilityCheck(embeddable)
+      ? getViewModeSubject(embeddable)?.pipe(map(() => undefined))
+      : undefined;
+  }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    return compatibilityCheck(embeddable);
+    return compatibilityCheck(embeddable) && getInheritedViewMode(embeddable) === 'edit';
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {

@@ -9,7 +9,6 @@
 
 export { ClearControlAction } from './actions/clear_control_action';
 export { PinControlAction } from './actions/pin_control_action';
-export { UnpinControlAction } from './actions/unpin_control_action';
 
 export { getOptionsListControlFactory } from './controls/data_controls/options_list_control/get_options_list_control_factory';
 export { getRangesliderControlFactory } from './controls/data_controls/range_slider/get_range_slider_control_factory';
