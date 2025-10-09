@@ -10,6 +10,7 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-i
 import type { AIConnector } from '../connectorland/connector_selector';
 import type { FetchConnectorExecuteResponse } from './api';
 import type { ClientMessage } from '../assistant_context/types';
+import { OpenAiProviderType } from '../connectorland/helpers';
 
 export const getMessageFromRawResponse = (
   rawResponse: FetchConnectorExecuteResponse
@@ -37,6 +38,8 @@ export const getMessageFromRawResponse = (
   }
 };
 
+const ELASTIC_LLM_CONNECTOR_ID = 'Elastic-Managed-LLM';
+
 /**
  * Returns a default connector if there is only one connector
  * @param connectors
@@ -61,8 +64,23 @@ export const getDefaultConnector = (
   }
 
   if (validConnectors?.length) {
-    // In case the default connector is not set or is invalid, return the first valid connector
-    return validConnectors[0];
+    // In case the default connector is not set or is invalid, return the prioritized connector
+    const prioritizedConnectors = [...validConnectors].sort((a, b) => {
+      const priority = (connector: (typeof validConnectors)[number]) => {
+        if (connector.id === ELASTIC_LLM_CONNECTOR_ID) return 0;
+        if (
+          connector.apiProvider === OpenAiProviderType.OpenAi ||
+          connector.apiProvider === OpenAiProviderType.AzureAi
+        ) {
+          return 1;
+        }
+        return 2;
+      };
+
+      return priority(a) - priority(b);
+    });
+
+    return prioritizedConnectors[0];
   }
 
   // If no valid connectors are available, return undefined
