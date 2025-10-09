@@ -305,9 +305,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('DELETE feature returns 403', async () => {
-        const res = await apiClient.fetch('DELETE /internal/streams/{name}/features/{featureName}', {
-          params: { path: { name: STREAM_NAME, featureName: 'nope' } },
-        });
+        const res = await apiClient.fetch(
+          'DELETE /internal/streams/{name}/features/{featureName}',
+          {
+            params: { path: { name: STREAM_NAME, featureName: 'nope' } },
+          }
+        );
         expect(res.status).to.be(403);
       });
 
