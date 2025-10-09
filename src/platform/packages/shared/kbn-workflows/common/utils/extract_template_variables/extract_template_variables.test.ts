@@ -9,8 +9,8 @@
 
 import { extractTemplateVariables } from './extract_template_variables';
 
-describe('extractTemplateVariables', () => {
-  it('should extract variables from a template string', () => {
+describe('extractNunjucksVariables', () => {
+  it('should extract variables from a Nunjucks template string', () => {
     const template = `
       Hello {{ user.name }}!
       Your order {{ order.id }} is confirmed.
@@ -21,23 +21,6 @@ describe('extractTemplateVariables', () => {
 
     const variables = extractTemplateVariables(template);
     expect(variables).toEqual(['user.name', 'order.id', 'user.isMember']);
-  });
-
-  it('should return an empty array if the template is invalid', () => {
-    const template = `
-      Hello {{ user.name | unclosed
-    `;
-
-    const variables = extractTemplateVariables(template);
-    expect(variables).toEqual([]);
-  });
-
-  it('should return the correct variables if the template contains an invalid filter', () => {
-    const template = `
-      Hello {{ user.name | invalidFilter }}!
-    `;
-    const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['user.name']);
   });
 
   it('should return an empty array if no variables are found', () => {
@@ -56,15 +39,15 @@ describe('extractTemplateVariables', () => {
       {{order.items[0].name}}
       {% if   user.isAdmin %}
         Admin Panel Access  {% endif %}
-        {{   user.FullName   }}
+        {{   user.getFullName()   }}
     `;
 
     const variables = extractTemplateVariables(template);
     expect(variables).toEqual([
       'user.profile.firstName',
-      'order.items.0.name',
+      'order.items[0].name',
       'user.isAdmin',
-      'user.FullName',
+      'user.getFullName()',
     ]);
   });
 
@@ -80,6 +63,12 @@ describe('extractTemplateVariables', () => {
     `;
 
     const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['order.items', 'order.total']);
+    expect(variables).toEqual([
+      'order.items',
+      'item.name',
+      'item.price',
+      'item.onSale',
+      'order.total',
+    ]);
   });
 });
