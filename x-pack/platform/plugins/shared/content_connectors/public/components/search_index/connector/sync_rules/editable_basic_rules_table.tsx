@@ -92,10 +92,6 @@ export const SyncRulesTable: React.FC = () => {
     {
       editingRender: (filteringRule, onChange) => (
         <EuiSelect
-          aria-label={i18n.translate(
-            'xpack.contentConnectors.index.connector.rule.basicTable.policyTitle',
-            { defaultMessage: 'Policy' }
-          )}
           fullWidth
           value={filteringRule.policy}
           onChange={(e) => onChange(e.target.value)}
@@ -142,12 +138,6 @@ export const SyncRulesTable: React.FC = () => {
     {
       editingRender: (filteringRule, onChange) => (
         <EuiSelect
-          aria-label={i18n.translate(
-            'xpack.contentConnectors.index.connector.syncRules.basicTable.ruleTitle',
-            {
-              defaultMessage: 'Rule',
-            }
-          )}
           fullWidth
           value={filteringRule.rule}
           onChange={(e) => onChange(e.target.value)}
