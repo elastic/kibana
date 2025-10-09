@@ -92,7 +92,7 @@ Note
 
 #### JSON editor [jsm-action-create-alert-json-configuration]
 
-A JSON editor is provided as an alternative to the form view and supports additional fields not shown in the form view. The JSON editor supports all of the forms configuration properties but as lowercase keys as [described in the Jira Service Management API documentation](https://docs.jsm.com/docs/alert-api#create-alert). The JSON editor supports the following additional properties:
+A JSON editor is provided as an alternative to the form view and supports additional fields not shown in the form view. The JSON editor supports all of the forms configuration properties but as lowercase keys as [described in the Jira Service Management API documentation](https://developer.atlassian.com/cloud/jira/service-desk-ops/rest/v1/api-group-integration-events/#api-jsm-ops-integration-v2-alerts-post). The JSON editor supports the following additional properties:
 
 responders
 :   The entities to receive notifications about the alert (optional).
