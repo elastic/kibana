@@ -13,10 +13,16 @@ import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover
 
 export const test = {};
 
-export function useDatastreamsRollover() {
+export function useUpdateAssociatedDatastreamsMappings() {
   const { api, startServices } = useComponentTemplatesContext();
 
-  const showDatastreamRolloverModal = useCallback(
+  /**
+   * Update the mappings for data streams associated with the component template.
+   * Each data stream updates its mappings from its index template.
+   * If mappings cannot be updated due to incompatible changes, a modal is shown to
+   * propose rolling over the data streams.
+   */
+  const updateAssociatedDatastreamsMappings = useCallback(
     async (componentTemplateName: string) => {
       const { data: dataStreamResponse } = await api.getComponentTemplateDatastreams(
         componentTemplateName
@@ -60,6 +66,6 @@ export function useDatastreamsRollover() {
   );
 
   return {
-    showDatastreamRolloverModal,
+    updateAssociatedDatastreamsMappings,
   };
 }

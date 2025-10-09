@@ -9,11 +9,11 @@ import { renderHook } from '@testing-library/react';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 
-import { useDatastreamsRollover } from './use_datastreams_rollover';
+import { useUpdateAssociatedDatastreamsMappings } from './use_update_associated_datastreams_mappings';
 
 jest.mock('../../component_templates_context');
 
-describe('useStepFromQueryString', () => {
+describe('useUpdateAssociatedDatastreamsMappings', () => {
   beforeEach(() => {
     jest.mocked(useComponentTemplatesContext).mockReturnValue({
       api: {
@@ -32,11 +32,11 @@ describe('useStepFromQueryString', () => {
 
     const {
       result: {
-        current: { showDatastreamRolloverModal },
+        current: { updateAssociatedDatastreamsMappings },
       },
-    } = renderHook(() => useDatastreamsRollover());
+    } = renderHook(() => useUpdateAssociatedDatastreamsMappings());
 
-    await showDatastreamRolloverModal('logs-test.data@custom');
+    await updateAssociatedDatastreamsMappings('logs-test.data@custom');
   });
 
   it('should try to update mappings if there is impacted data_streams', async () => {
@@ -58,11 +58,11 @@ describe('useStepFromQueryString', () => {
 
     const {
       result: {
-        current: { showDatastreamRolloverModal },
+        current: { updateAssociatedDatastreamsMappings },
       },
-    } = renderHook(() => useDatastreamsRollover());
+    } = renderHook(() => useUpdateAssociatedDatastreamsMappings());
 
-    await showDatastreamRolloverModal('logs-test.data@custom');
+    await updateAssociatedDatastreamsMappings('logs-test.data@custom');
 
     expect(api.postDataStreamMappingsFromTemplate).toBeCalledTimes(1);
     expect(startServices.overlays.openModal).not.toBeCalled();
@@ -87,11 +87,11 @@ describe('useStepFromQueryString', () => {
 
     const {
       result: {
-        current: { showDatastreamRolloverModal },
+        current: { updateAssociatedDatastreamsMappings },
       },
-    } = renderHook(() => useDatastreamsRollover());
+    } = renderHook(() => useUpdateAssociatedDatastreamsMappings());
 
-    await showDatastreamRolloverModal('logs-test.data@custom');
+    await updateAssociatedDatastreamsMappings('logs-test.data@custom');
     expect(startServices.overlays.openModal).toBeCalled();
   });
 });
