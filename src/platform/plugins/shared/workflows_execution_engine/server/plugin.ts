@@ -49,6 +49,7 @@ import type {
 } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { runWorkflow } from './execution_functions/run_workflow';
+import { LogsRepository } from './repositories/logs_repository/logs_repository';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -420,12 +421,12 @@ async function createContainer(
 
   const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
   const stepExecutionRepository = new StepExecutionRepository(esClient);
+  const logsRepository = new LogsRepository(esClient, logger);
   const connectorExecutor = new ConnectorExecutor(unsecuredActionsClient);
 
   const workflowLogger = new WorkflowEventLogger(
-    esClient,
+    logsRepository,
     logger,
-    WORKFLOWS_EXECUTION_LOGS_INDEX,
     {
       workflowId: workflowExecution.workflowId,
       workflowName: workflowExecution.workflowDefinition.name,

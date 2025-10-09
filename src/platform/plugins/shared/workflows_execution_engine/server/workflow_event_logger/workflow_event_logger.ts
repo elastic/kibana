@@ -45,19 +45,13 @@ export interface IWorkflowEventLogger {
   ): IWorkflowEventLogger;
 }
 
-interface Doc {
-  index: string;
-  body: WorkflowLogEvent;
-}
-
 export class WorkflowEventLogger implements IWorkflowEventLogger {
-  private eventQueue: Doc[] = [];
+  private eventQueue: WorkflowLogEvent[] = [];
   private timings: Map<string, Date> = new Map();
 
   constructor(
     private logsRepository: LogsRepository,
     private logger: Logger,
-    private indexName: string,
     private context: WorkflowEventLoggerContext = {},
     private options: WorkflowEventLoggerOptions = {}
   ) {}
@@ -73,12 +67,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
       this.logToConsole(event);
     }
 
-    const doc: Doc = {
-      index: this.indexName,
-      body: event,
-    };
-
-    this.queueEvent(doc);
+    this.queueEvent(event);
   }
 
   public logInfo(message: string, additionalData: Partial<WorkflowLogEvent> = {}): void {
@@ -205,7 +194,6 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     return new WorkflowEventLogger(
       this.logsRepository,
       this.logger,
-      this.indexName,
       {
         ...this.context,
         stepExecutionId,
@@ -282,8 +270,8 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     }`;
   }
 
-  private queueEvent(doc: Doc): void {
-    this.eventQueue.push(doc);
+  private queueEvent(event: WorkflowLogEvent): void {
+    this.eventQueue.push(event);
   }
 
   public async flushEvents(): Promise<void> {
@@ -293,7 +281,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     this.eventQueue = [];
 
     try {
-      await this.logsRepository.createLogs(events.map((doc) => doc.body));
+      await this.logsRepository.createLogs(events.map((event) => event));
 
       this.logger.info(`Successfully indexed ${events.length} workflow events`);
     } catch (error) {
