@@ -134,11 +134,11 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
       }
     });
 
-    evaluate('Log data queries', async ({ evaluateDataset }) => {
+    evaluate('Log data queries (ambiguous)', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
           name: 'esql: (ambiguous questions) with logs data',
-          description: 'ES|QL questions against various generated log datasets.',
+          description: 'ES|QL examples for Logs data with ambiguous prompts.',
           examples: [
             {
               input: {
@@ -378,12 +378,12 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         dataset: {
           name: 'esql: (unambiguous questions) with logs data',
           description:
-            'Unambiguous ES|QL questions against generated log datasets. Prompts specify exact index patterns, fields, cases, time windows, grouping, sorting, and limits.',
+            'ES|QL examples for Logs data with unambiguous prompt where all required information is provided.',
           examples: [
             {
               input: {
                 question:
-                  'From `logs-my_app-*`, show the 20 most frequent error messages in the last 6 hours. The `log.level` value is "error". Execute the query after generating.',
+                  'From `logs-my_app-*`, show the 20 most frequent error messages in the last six hours. The `log.level` value is "error". Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -408,7 +408,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-*`, show the total count of error-level logs in the last 24 hours, grouped by `data_stream.dataset`. The `log.level` value is "error". Execute the query after generating.',
+                  'Show the total count of error-level logs from all log datasets (index pattern is `logs-*`) in the last 24 hours, grouped by `data_stream.dataset`. The `log.level` value is "error". Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -451,7 +451,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-nginx.access-*`, what is the average request time in milliseconds over the last 2 hours? The `request_time` value is in seconds within the `message` field. Execute the query after generating.',
+                  'What is the average request time in milliseconds for Nginx services over the last 2 hours? The index pattern is `logs-nginx.access-*`. The `request_time` value is in seconds within the `message` field. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -467,7 +467,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-nginx.access-*`, find the top 5 slowest requests for service.name "api-gateway" in the last 2 hours. The `request_time` value is in seconds within the `message` field. Execute the query after generating.',
+                  'Find the top 5 slowest Nginx requests for service.name "api-gateway" in the last 2 hours. The index pattern is `logs-nginx.access-*`. The `request_time` value is in seconds within the `message` field. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -487,7 +487,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-*`, show logs from Kubernetes pods that have restarted in the last 24 hours. Use `kubernetes.pod.restart_count > 0`. Execute the query after generating.',
+                  'Show logs from Kubernetes pods that have restarted in the last 24 hours. The index pattern is `logs-*`. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -503,7 +503,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-*`, find all log entries with correlation id "abc123". The field name is `trace.id`. Execute the query after generating.',
+                  'From `logs-*`, find all log entries with correlation id "abc123". The field name for the correlation id is `trace.id`. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -518,7 +518,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-apache.error-*`, count the number of error logs per 10-minute interval over the last 6 hours. The `log.level` value is "error". Execute the query after generating.',
+                  'Count the number of apache errors per 10-minute interval over the last 6 hours to find any anomalies. The index pattern is `logs-apache.error-*`. The `log.level` value is "error". Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -538,7 +538,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-auth_service-*`, how many unique users logged in each day over the last 7 days? The `event.action` value is "login". Execute the query after generating.',
+                  'How many unique users logged in each day over the last 7 days? The index pattern is `logs-auth_service-*`. The `event.action` value is "login". Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -554,7 +554,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-auth_service-*`, list users who logged in more than 5 times in the last 3 days. The `event.action` value is "login". Execute the query after generating.',
+                  'List users who logged in more than 5 times in the last 3 days. The index pattern is `logs-auth_service-*`. The `event.action` value is "login". Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -574,7 +574,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-auth_service-*`, what is the total number of login events, and how many of those occurred during the hour before last? The `event.action` value is "login". Execute the query after generating.',
+                  'What is the total number of login events, and how many of those occurred during the hour before last (Total count vs count last hour)? The index pattern is `logs-auth_service-*`. The `event.action` value is "login". Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -594,7 +594,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-nginx.access-*`, show a breakdown of successful (status < 400) and unsuccessful (status >= 400) requests over the last 24 hours. The field is `http.response.status_code`. Execute the query after generating.',
+                  'Show a breakdown of successful (status < 400) and unsuccessful (status >= 400) requests over the last 24 hours. The index pattern is `logs-nginx.access-*`. The field that contains the http status code is `http.response.status_code`. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -631,16 +631,16 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
       await apmSynthtraceEsClient.clean();
     });
 
-    evaluate('APM data queries', async ({ evaluateDataset }) => {
+    evaluate('APM data queries (ambiguous)', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
           name: 'esql: (ambiguous questions) with APM data',
-          description: 'ES|QL examples for APM data.',
+          description: 'ES|QL examples for APM data with ambiguous prompts.',
           examples: [
             {
               input: {
                 question:
-                  'I want to see a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours. Use ES|QL.',
+                  'I want to see a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -837,12 +837,12 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         dataset: {
           name: 'esql: (unambiguous questions) with APM data',
           description:
-            'Unambiguous ES|QL prompts for APM data providing only specific field values and index details.',
+            'ES|QL examples for APM data with unambiguous prompt where all required information is provided.',
           examples: [
             {
               input: {
                 question:
-                  'From `traces-apm*`, show for each service the average transaction duration, success rate, and total requests over the last 24 hours. The duration field is `transaction.duration.us` and `event.outcome` values are "success" and "failure". Execute the query after generating.',
+                  'I want to see a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours. The duration field is `transaction.duration.us` and `event.outcome` values are "success" and "failure". Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -864,8 +864,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             },
             {
               input: {
-                question:
-                  'From `metrics-apm`, for `metricset.name` = "service_destination" over the last 24 hours, show per `span.destination.service.resource` the average throughput, latency per request, and failure rate. Each document includes `span.destination.service.response_time.count` and `span.destination.service.response_time.sum.us`; failures use `event.outcome = "failure"`.',
+                question: `I've got APM data in metrics-apm. Show me a query that filters on metricset.name:service_destination and the last 24 hours. Break down by span.destination.service.resource. Each document contains the count of total events (span.destination.service.response_time.count) for that document's interval and the total amount of latency (span.destination.service.response_time.sum.us). A document either contains an aggregate of failed events (event.outcome:success) or failed events (event.outcome:failure). A single document might represent multiple failures or successes, depending on the value of span.destination.service.response_time.count. For each value of span.destination.service.resource, give me the average throughput, latency per request, and failure rate, as a value between 0 and 1. Just show me the query, don't execute it. Each document includes 'span.destination.service.response_time.count' and 'span.destination.service.response_time.sum.us'; failures use 'event.outcome = "failure"'.`,
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -885,7 +884,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `traces-apm*`, find the average `transaction.duration.us` per service over the last hour. Execute the query after generating.',
+                  'My APM data is in traces-apm*. Generate a query to find the average for `transaction.duration.us` by service.name over the last hour. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -903,7 +902,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-apm*`, show the error rate as a percentage of error logs vs total logs per day for the last 7 days. Error logs are documents where `processor.event` is "error". Execute the query after generating.',
+                  'I have logs in logs-apm*. Using ES|QL, show me the error rate as a percentage of the error logs (identified as `processor.event` containing the value "error") vs the total logs per day for the last 7 days. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -925,7 +924,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-apm.error-*`, show the 5 latest messages and display the date they were indexed (format: "hh:mm a, d of MMMM yyyy"), `processor.event`, and `message`. Execute the query after generating.',
+                  'From `logs-apm.error-*`, show the 5 latest messages and display the date they were indexed (format for the date should be e.g. "10:30 AM, 1 of September 2019"), `processor.event`, and `message`. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -967,7 +966,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  "From `logs-apm.custom-*`, list info-level logs that are tagged with 'cache' but NOT with 'search'. Execute the query after generating.",
+                  "From `logs-apm.custom-*`, list info-level logs that are tagged with 'cache' but NOT with 'search'. The `tags` field is multi-valued. Execute the query after generating.",
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -986,7 +985,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  "Show a side-by-side hourly comparison of the transaction failure count from 'my-apm-service' and the error log count from 'my-apm-service-2' over the last 24 hours. Transaction failures are where `processor.event` is 'transaction' and `event.outcome` is 'failure'; error logs are where `log.level` is 'error'. Use data matching `*apm*`. Execute the query after generating.",
+                  "Show a side-by-side hourly comparison of the transaction failure count from 'my-apm-service' and the error log count from 'my-apm-service-2' over the last 24 hours. Transaction failures are where `processor.event` is 'transaction' and `event.outcome` is 'failure'; error logs are where `log.level` is 'error'. Use the index pattern `*apm*`. Execute the query after generating.",
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -1011,7 +1010,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `logs-apm.custom-*`, parse the duration from the `message` (e.g., "duration: 123ms") and calculate the average parsed duration for each tag. The `tags` field is multi-valued. Execute the query after generating.',
+                  'From `logs-apm.custom-*`, parse the duration from the `message` (e.g., "duration: 123ms") and calculate the average parsed duration for each tag. The `tags` field is multi-valued. The log.level field is "error". Filter out null values from the duration. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -1050,11 +1049,11 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
       await esClient.indices.delete({ index: indexName, allow_no_indices: true });
     });
 
-    evaluate('Packetbeat data queries', async ({ evaluateDataset }) => {
+    evaluate('Packetbeat data queries (ambiguous)', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'esql: (ambiguous questions) with packetbeat data',
-          description: 'Packetbeat question/query pairs.',
+          name: 'esql: (ambiguous questions) with Packetbeat data',
+          description: 'ES|QL examples for Packetbeat data with ambiguous prompts',
           examples: [
             {
               input: {
@@ -1134,14 +1133,14 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
     evaluate('Packetbeat data queries (unambiguous)', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
-          name: 'esql: (unambiguous questions) with packetbeat data',
+          name: 'esql: (unambiguous questions) with Packetbeat data',
           description:
-            'Unambiguous Packetbeat prompts providing only specific field values and index details.',
+            'ES|QL examples for Packetbeat data with unambiguous prompt where all required information is provided.',
           examples: [
             {
               input: {
                 question:
-                  'From `packetbeat-*`, show the top 10 `destination.domain` values by document count. Execute the query after generating.',
+                  'For standard Elastic ECS compliant packetbeat data view, show me the top 10 unique destination.domain with the most docs. Use the index pattern `packetbeat-*`. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -1157,7 +1156,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `packetbeat-*`, show the count of each HTTP response status code. The field is `http.response.status_code`. Execute the query after generating.',
+                  'Show me the count of each HTTP response status code. Use the index pattern `packetbeat-*`. The field that contains the http status code is `http.response.status_code`. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -1176,7 +1175,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `packetbeat-*`, list failed DNS queries from the last hour. Failures are where `dns.response_code` is not "NOERROR". Execute the query after generating.',
+                  'List all failed DNS queries from the last hour. Use the index pattern `packetbeat-*`. Failures are where `dns.response_code` is not "NOERROR". Exclude documents with a null dns.response_code. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -1193,7 +1192,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `packetbeat-*`, what are the top 5 network conversations by total bytes transferred? Use `client.ip`, `server.ip`, `destination.bytes`, and `source.bytes`. Execute the query after generating.',
+                  'What are the top 5 network conversations by total bytes transferred? Use the index pattern `packetbeat-*`. Exclude documents with a null `client.ip` or `server.ip`. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -1240,11 +1239,11 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
       await esClient.indices.delete({ index: 'employees' });
     });
 
-    evaluate('Employees data queries', async ({ evaluateDataset }) => {
+    evaluate('Employees data queries (ambiguous)', async ({ evaluateDataset }) => {
       await evaluateDataset({
         dataset: {
           name: 'esql: (ambiguous questions) with employees data',
-          description: 'ES|QL questions against a simple `employees` index.',
+          description: 'ES|QL examples for Employees data with ambiguous prompts.',
           examples: [
             {
               input: {
@@ -1304,12 +1303,12 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
         dataset: {
           name: 'esql: (unambiguous questions) with employees data',
           description:
-            'Unambiguous ES|QL prompts for the simple `employees` index with exact field usage and formatting.',
+            'ES|QL examples for Employees data with unambiguous prompt where all required information is provided.',
           examples: [
             {
               input: {
                 question:
-                  'From the `employees` index, display each employee number and the month and year they were hired (e.g., "September 2019"), showing the 5 earliest hires. Execute the query after generating.',
+                  'From the employees index, I want to see the 5 earliest employees (hire_date), I want to display only the month and the year that they were hired in and their employee number (emp_no). Format the hire_date as e.g. "September 2019".Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -1326,7 +1325,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'Explain that ES|QL does not support pagination. If you still choose to demonstrate sorting and a LIMIT, sort the `employees` index by `salary` and include a clear note that pagination is not supported. Do not attempt paginated execution.',
+                  'From employees, I want to sort the documents by salary, and then return 10 results per page, and then see the second page. Do not execute the query.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -1342,7 +1341,7 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
             {
               input: {
                 question:
-                  'From `employees`, show 10 employees hired in 2024. Execute the query after generating.',
+                  'From the `employees` index, extract the year from hire_date and show 10 employees hired in 2024. Execute the query after generating.',
               },
               output: {
                 criteria: createEsqlCriteria({
@@ -1361,731 +1360,736 @@ evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
   });
 
   // --- Test Suite for Queries without Data ---
-  evaluate('without data', async ({ evaluateDataset }) => {
-    await evaluateDataset({
-      dataset: {
-        name: 'esql: (ambiguous questions) without data',
-        description: 'ES|QL query generation without any data or mappings.',
-        examples: [
-          {
-            input: {
-              question:
-                'Assume my metrics data is in `metrics-*`. I want to see what a query would look like that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m.',
+  evaluate.describe('without data', () => {
+    evaluate('Queries without data (ambiguous)', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'esql: (ambiguous questions) without data',
+          description:
+            'ES|QL query generation without any data or mappings with ambiguous prompts.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Assume my metrics data is in `metrics-*`. I want to see what a query would look like that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM .ds-metrics-apm*
+                | WHERE @timestamp >= NOW() - 15 minutes
+                | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY BUCKET(@timestamp, 1m), service.name
+                | SORT avg_cpu DESC
+                | LIMIT 10`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM .ds-metrics-apm*
-              | WHERE @timestamp >= NOW() - 15 minutes
-              | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY BUCKET(@timestamp, 1m), service.name
-              | SORT avg_cpu DESC
-              | LIMIT 10`,
-              }),
+            {
+              input: {
+                question: `Assume my data is in \`metricbeat*\`. Show me an example query to see the percentage of CPU time (system.cpu.system.pct) normalized by the number of CPU cores (system.cpu.cores), broken down by host name`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM metricbeat*
+                | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
+                | STATS avg_system_pct_normalized = AVG(system_pct_normalized) BY host.name
+                | SORT host.name ASC`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Assume my data is in \`metricbeat*\`. Show me an example query to see the percentage of CPU time (system.cpu.system.pct) normalized by the number of CPU cores (system.cpu.cores), broken down by host name`,
+            {
+              input: {
+                question:
+                  'Show me an example ES|QL query to extract the query duration from postgres log messages in postgres-logs*, with this format:\n `2021-01-01 00:00:00 UTC [12345]: [1-1] user=postgres,db=mydb,app=[unknown],client=127.0.0.1 LOG:  duration: 123.456 ms  statement: SELECT * FROM my_table`. \n Use ECS fields, and calculate the avg.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM postgres-logs*
+                | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
+                | EVAL duration_double = TO_DOUBLE(duration)
+                | STATS AVG(duration_double)`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM metricbeat*
-              | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
-              | STATS avg_system_pct_normalized = AVG(system_pct_normalized) BY host.name
-              | SORT host.name ASC`,
-              }),
+            {
+              input: {
+                question:
+                  "Assume user login data is logs-auth_service-*. The event action for user login is `login`. Generate an example query to fetch successful logins today and for each successful login, show the user's full name and department. The user meta data is in the users_metadata index.",
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM logs-auth_service-*
+                | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
+                | LOOKUP JOIN users_metadata ON user.id
+                | KEEP @timestamp, user.id, full_name, department
+                | LIMIT 20`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Show me an example ES|QL query to extract the query duration from postgres log messages in postgres-logs*, with this format:\n `2021-01-01 00:00:00 UTC [12345]: [1-1] user=postgres,db=mydb,app=[unknown],client=127.0.0.1 LOG:  duration: 123.456 ms  statement: SELECT * FROM my_table`. \n Use ECS fields, and calculate the avg.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM postgres-logs*
-              | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
-              | EVAL duration_double = TO_DOUBLE(duration)
-              | STATS AVG(duration_double)`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                "Assume user login data is logs-auth_service-*. The event action for user login is `login`. Generate an example query to fetch successful logins today and for each successful login, show the user's full name and department. The user meta data is in the users_metadata index.",
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM logs-auth_service-*
-              | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
-              | LOOKUP JOIN users_metadata ON user.id
-              | KEEP @timestamp, user.id, full_name, department
-              | LIMIT 20`,
-              }),
-            },
-            metadata: {},
-          },
-        ],
-      },
+          ],
+        },
+      });
     });
-  });
 
-  evaluate('without data (unambiguous)', async ({ evaluateDataset }) => {
-    await evaluateDataset({
-      dataset: {
-        name: 'esql: (unambiguous questions) without data',
-        description:
-          'Unambiguous example-only ES|QL prompts with explicit index patterns and fields. Prompts instruct not to execute since data/mappings may not exist.',
-        examples: [
-          {
-            input: {
-              question:
-                'Provide only an ES|QL query (do not execute). Use `.ds-metrics-apm*` explicitly. Limit to `@timestamp >= NOW() - 15 minutes`. Compute the average `system.cpu.total.norm.pct` grouped by `BUCKET(@timestamp, 1m)` and `service.name`, sort by `avg_cpu` descending, and limit to 10.',
+    evaluate('Queries without data (unambiguous)', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'esql: (unambiguous questions) without data',
+          description:
+            'ES|QL query generation without data with unambiguous prompts where all required information is provided.',
+          examples: [
+            {
+              input: {
+                question:
+                  "Assume my metrics data is in `metrics-*`. I want to see what a query would look like that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m. Use the sample index pattern `.ds-metrics-apm*`. This index doesn't exist, so don't execute the query.",
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM .ds-metrics-apm*
+                | WHERE @timestamp >= NOW() - 15 minutes
+                | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY BUCKET(@timestamp, 1m), service.name
+                | SORT avg_cpu DESC
+                | LIMIT 10`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM .ds-metrics-apm*
-              | WHERE @timestamp >= NOW() - 15 minutes
-              | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY BUCKET(@timestamp, 1m), service.name
-              | SORT avg_cpu DESC
-              | LIMIT 10`,
-              }),
+            {
+              input: {
+                question: `Assume my data is in the \`metricbeat*\` index. Show me an example query to see the percentage of CPU time (system.cpu.system.pct) normalized by the number of CPU cores (system.cpu.cores), broken down by host.name. This index doesn't exist, so don't execute the query.`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM metricbeat*
+                | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
+                | STATS avg_system_pct_normalized = AVG(system_pct_normalized) BY host.name
+                | SORT host.name ASC`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Provide only an ES|QL query (do not execute). Use `metricbeat*`. Compute `system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores`, then return `avg_system_pct_normalized` per `host.name` sorted ascending by `host.name`.',
+            {
+              input: {
+                question:
+                  "Show me an example ES|QL query to extract the query duration from postgres log messages in the index postgres-logs*, with this format:\n `2021-01-01 00:00:00 UTC [12345]: [1-1] user=postgres,db=mydb,app=[unknown],client=127.0.0.1 LOG:  duration: 123.456 ms  statement: SELECT * FROM my_table`. \n Use ECS fields, and calculate the average. The index doesn't exist, therefore don't execute the query.",
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM postgres-logs*
+                | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
+                | EVAL duration_double = TO_DOUBLE(duration)
+                | STATS AVG(duration_double)`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM metricbeat*
-              | EVAL system_pct_normalized = TO_DOUBLE(system.cpu.system.pct) / system.cpu.cores
-              | STATS avg_system_pct_normalized = AVG(system_pct_normalized) BY host.name
-              | SORT host.name ASC`,
-              }),
+            {
+              input: {
+                question:
+                  "Assume user login data is in the logs-auth_service-* index. The event action for user login is `login`. Generate an example query to fetch successful logins today and for each successful login, show the user's full name (full_name) and department (department). The user meta data is in the users_metadata index.",
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM logs-auth_service-*
+                | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
+                | LOOKUP JOIN users_metadata ON user.id
+                | KEEP @timestamp, user.id, full_name, department
+                | LIMIT 20`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Provide only an ES|QL query (do not execute). Assume Postgres logs are in `postgres-logs*`. Extract the numeric duration from messages formatted like `... LOG:  duration: 123.456 ms  statement: ...` using DISSECT, cast to double, and compute the average duration.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM postgres-logs*
-              | DISSECT message "%{}:  duration: %{query_duration} ms  %{}"
-              | EVAL duration_double = TO_DOUBLE(duration)
-              | STATS AVG(duration_double)`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Provide only an ES|QL query (do not execute). Use `logs-auth_service-*` for successful logins today where `event.action == "login"`. Perform a `LOOKUP JOIN` to `users_metadata` on `user.id` and keep `@timestamp, user.id, full_name, department` limited to 20 rows.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM logs-auth_service-*
-              | WHERE @timestamp >= NOW() - 1 day AND event.action == "login"
-              | LOOKUP JOIN users_metadata ON user.id
-              | KEEP @timestamp, user.id, full_name, department
-              | LIMIT 20`,
-              }),
-            },
-            metadata: {},
-          },
-        ],
-      },
+          ],
+        },
+      });
     });
   });
 
   // --- Test Suite for SPL to ES|QL Conversion ---
-  evaluate('SPL to ES|QL conversion', async ({ evaluateDataset }) => {
-    await evaluateDataset({
-      dataset: {
-        name: 'esql: (ambiguous questions) from SPL',
-        description: 'Conversion of SPL (Splunk Processing Language) queries to ES|QL.',
-        examples: [
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=network_firewall "SYN Timeout" | stats count by dest`,
+  evaluate.describe('SPL to ES|QL conversion', () => {
+    evaluate('SPL to ES|QL conversion queries (ambiguous)', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'esql: (ambiguous questions) from SPL',
+          description:
+            'Conversion of SPL (Splunk Processing Language) queries to ES|QL with ambiguous prompts.',
+          examples: [
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=network_firewall "SYN Timeout" | stats count by dest`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM network_firewall
+                | WHERE _raw == "SYN Timeout"
+                | STATS count = count(*) by dest`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM network_firewall
-              | WHERE _raw == "SYN Timeout"
-              | STATS count = count(*) by dest`,
-              }),
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The query provided by the Assistant uses the ES|QL functions LENGTH and CASE, not the SPL functions len and if',
+                  ],
+                  execute: false,
+                  expectedQuery: `from prod_web
+                | EVAL length = length(message), k255 = CASE(length > 255, 1, 0), k2 = CASE(length > 2048, 1, 0), k4 = CASE(length > 4096, 1, 0), k16 = CASE(length > 16384, 1, 0)
+                | STATS COUNT(*), SUM(k255), SUM(k2), SUM(k4), SUM(k16), SUM(length)`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)`,
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM prod_web
+                | WHERE _raw NOT LIKE "Connection reset"
+                  AND _raw NOT LIKE "[acm-app] created a ThreadLocal"
+                  AND sourcetype != "prod_urlf_east_logs"
+                  AND sourcetype != "prod_urlf_west_logs"
+                  AND host NOT LIKE "dbs-tools-*"
+                  AND _raw NOT LIKE "Public] in context with path [/global]"
+                  AND host NOT LIKE "*dev*"
+                  AND host NOT LIKE "*qa*"
+                  AND host NOT LIKE "*uat*"`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                specificCriteria: [
-                  'The query provided by the Assistant uses the ES|QL functions LENGTH and CASE, not the SPL functions len and if',
-                ],
-                execute: false,
-                expectedQuery: `from prod_web
-              | EVAL length = length(message), k255 = CASE(length > 255, 1, 0), k2 = CASE(length > 2048, 1, 0), k4 = CASE(length > 4096, 1, 0), k16 = CASE(length > 16384, 1, 0)
-              | STATS COUNT(*), SUM(k255), SUM(k2), SUM(k4), SUM(k16), SUM(length)`,
-              }),
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=security sourcetype=linux_secure "Failed password"`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM security
+                | WHERE _raw == "Failed password" AND sourcetype == "linux_secure"`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=firewall (action=allow AND dest_port=443) OR (action=block AND protocol=tcp)`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM firewall
+                | WHERE (action == "allow" AND dest_port == 443) OR (action == "block" AND protocol == "tcp")`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM prod_web
-              | WHERE _raw NOT LIKE "Connection reset"
-                AND _raw NOT LIKE "[acm-app] created a ThreadLocal"
-                AND sourcetype != "prod_urlf_east_logs"
-                AND sourcetype != "prod_urlf_west_logs"
-                AND host NOT LIKE "dbs-tools-*"
-                AND _raw NOT LIKE "Public] in context with path [/global]"
-                AND host NOT LIKE "*dev*"
-                AND host NOT LIKE "*qa*"
-                AND host NOT LIKE "*uat*"`,
-              }),
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=prod_web host="webapp-*"`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM prod_web
+                | WHERE host LIKE "webapp-%"`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=security sourcetype=linux_secure "Failed password"`,
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=sales status>=400 status<500`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM sales
+                | WHERE status >= 400 AND status < 500`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM security
-              | WHERE _raw == "Failed password" AND sourcetype == "linux_secure"`,
-              }),
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=inventory | eval price_with_tax = price * 1.13 | eval category = if(price > 1000, "premium", "standard")`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The query should use the ES|QL function CASE, not the SPL function if',
+                  ],
+                  execute: false,
+                  expectedQuery: `FROM inventory
+                | EVAL price_with_tax = price * 1.13, category = CASE(price > 1000, "premium", "standard")`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=firewall (action=allow AND dest_port=443) OR (action=block AND protocol=tcp)`,
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=network_logs | rename source_ip as client_ip, dest_ip as server_ip`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM network_logs
+                | RENAME source_ip AS client_ip, dest_ip AS server_ip`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM firewall
-              | WHERE (action == "allow" AND dest_port == 443) OR (action == "block" AND protocol == "tcp")`,
-              }),
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=employees | fields name, department, title`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM employees
+                | KEEP name, department, title`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=prod_web host="webapp-*"`,
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=employees | fields - _raw, _time`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM employees
+                | DROP _raw, _time`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM prod_web
-              | WHERE host LIKE "webapp-%"`,
-              }),
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=web_traffic | stats count, dc(client_ip) as unique_visitors, avg(response_time) as avg_latency by http_method`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM web_traffic
+                | STATS count = count(*), unique_visitors = count_distinct(client_ip), avg_latency = avg(response_time) by http_method`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=sales status>=400 status<500`,
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=products | stats sum(sales) as total_sales by category | sort - total_sales`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM products
+                | STATS total_sales = sum(sales) by category
+                | SORT total_sales DESC`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM sales
-              | WHERE status >= 400 AND status < 500`,
-              }),
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=access_logs | top limit=10 user`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM access_logs
+                | STATS count = count(*) by user
+                | SORT count DESC
+                | LIMIT 10`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=inventory | eval price_with_tax = price * 1.13 | eval category = if(price > 1000, "premium", "standard")`,
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=error_logs | rare limit=5 error_code`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM error_logs
+                | STATS count = count(*) by error_code
+                | SORT count ASC
+                | LIMIT 5`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                specificCriteria: [
-                  'The query should use the ES|QL function CASE, not the SPL function if',
-                ],
-                execute: false,
-                expectedQuery: `FROM inventory
-              | EVAL price_with_tax = price * 1.13, category = CASE(price > 1000, "premium", "standard")`,
-              }),
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=auth | timechart span=1h count by action`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The query should use STATS with BUCKET to group data over time, which is an ES|QL equivalent of timechart.',
+                  ],
+                  execute: false,
+                  expectedQuery: [
+                    `FROM auth
+                  | STATS count = count(*) by BUCKET(@timestamp, 1h), action`,
+                    `FROM auth
+                  | HISTOGRAM count(*) BY action, @timestamp BUCKETS=1h`,
+                  ],
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=network_logs | rename source_ip as client_ip, dest_ip as server_ip`,
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=main [search index=suspicious_users | fields user_id]`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: [
+                    `FROM main
+                  | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
+                    `FROM main
+                  | LOOKUP JOIN suspicious_users ON user_id`,
+                  ],
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM network_logs
-              | RENAME source_ip AS client_ip, dest_ip AS server_ip`,
-              }),
+            {
+              input: {
+                question: `Can you convert this SPL query to ES|QL? index=firewall | table _time, src_ip, dest_ip, action`,
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM firewall
+                | KEEP @timestamp, src_ip, dest_ip, action`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=employees | fields name, department, title`,
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM employees
-              | KEEP name, department, title`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=employees | fields - _raw, _time`,
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM employees
-              | DROP _raw, _time`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=web_traffic | stats count, dc(client_ip) as unique_visitors, avg(response_time) as avg_latency by http_method`,
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM web_traffic
-              | STATS count = count(*), unique_visitors = count_distinct(client_ip), avg_latency = avg(response_time) by http_method`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=products | stats sum(sales) as total_sales by category | sort - total_sales`,
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM products
-              | STATS total_sales = sum(sales) by category
-              | SORT total_sales DESC`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=access_logs | top limit=10 user`,
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM access_logs
-              | STATS count = count(*) by user
-              | SORT count DESC
-              | LIMIT 10`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=error_logs | rare limit=5 error_code`,
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM error_logs
-              | STATS count = count(*) by error_code
-              | SORT count ASC
-              | LIMIT 5`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=auth | timechart span=1h count by action`,
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                specificCriteria: [
-                  'The query should use STATS with BUCKET to group data over time, which is an ES|QL equivalent of timechart.',
-                ],
-                execute: false,
-                expectedQuery: [
-                  `FROM auth
-                | STATS count = count(*) by BUCKET(@timestamp, 1h), action`,
-                  `FROM auth
-                | HISTOGRAM count(*) BY action, @timestamp BUCKETS=1h`,
-                ],
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=main [search index=suspicious_users | fields user_id]`,
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: [
-                  `FROM main
-                | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
-                  `FROM main
-                | LOOKUP JOIN suspicious_users ON user_id`,
-                ],
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question: `Can you convert this SPL query to ES|QL? index=firewall | table _time, src_ip, dest_ip, action`,
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM firewall
-              | KEEP @timestamp, src_ip, dest_ip, action`,
-              }),
-            },
-            metadata: {},
-          },
-        ],
-      },
+          ],
+        },
+      });
     });
-  });
 
-  evaluate('SPL to ES|QL conversion (unambiguous)', async ({ evaluateDataset }) => {
-    await evaluateDataset({
-      dataset: {
-        name: 'esql: (unambiguous questions) from SPL',
-        description:
-          'Unambiguous SPL-to-ES|QL prompts. Prompts explicitly ask for ES|QL text only and state that indices may not exist in the target cluster.',
-        examples: [
-          {
-            input: {
-              question:
-                'Convert the SPL `index=network_firewall "SYN Timeout" | stats count by dest` into ES|QL. Return only the ES|QL query text; do not execute. Assume the literal index name may not exist in this cluster.',
+    evaluate('SPL to ES|QL conversion queries (unambiguous)', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'esql: (unambiguous questions) from SPL',
+          description:
+            'Conversion of SPL (Splunk Processing Language) queries to ES|QL with unambiguous prompts.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=network_firewall "SYN Timeout" | stats count by dest`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM network_firewall
+                | WHERE _raw == "SYN Timeout"
+                | STATS count = count(*) by dest`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM network_firewall
-              | WHERE _raw == "SYN Timeout"
-              | STATS count = count(*) by dest`,
-              }),
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The query provided by the Assistant uses the ES|QL functions LENGTH and CASE, not the SPL functions len and if',
+                  ],
+                  execute: false,
+                  expectedQuery: `from prod_web
+                | EVAL length = length(message), k255 = CASE(length > 255, 1, 0), k2 = CASE(length > 2048, 1, 0), k4 = CASE(length > 4096, 1, 0), k16 = CASE(length > 16384, 1, 0)
+                | STATS COUNT(*), SUM(k255), SUM(k2), SUM(k4), SUM(k16), SUM(length)`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert the SPL `index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)` to ES|QL. Return only ES|QL; do not execute. Use ES|QL functions `LENGTH` and `CASE` (not SPL `len`/`if`). Assume indices may not exist.',
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM prod_web
+                | WHERE _raw NOT LIKE "Connection reset"
+                  AND _raw NOT LIKE "[acm-app] created a ThreadLocal"
+                  AND sourcetype != "prod_urlf_east_logs"
+                  AND sourcetype != "prod_urlf_west_logs"
+                  AND host NOT LIKE "dbs-tools-*"
+                  AND _raw NOT LIKE "Public] in context with path [/global]"
+                  AND host NOT LIKE "*dev*"
+                  AND host NOT LIKE "*qa*"
+                  AND host NOT LIKE "*uat*"`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                specificCriteria: [
-                  'The query provided by the Assistant uses the ES|QL functions LENGTH and CASE, not the SPL functions len and if',
-                ],
-                execute: false,
-                expectedQuery: `from prod_web
-              | EVAL length = length(message), k255 = CASE(length > 255, 1, 0), k2 = CASE(length > 2048, 1, 0), k4 = CASE(length > 4096, 1, 0), k16 = CASE(length > 16384, 1, 0)
-              | STATS COUNT(*), SUM(k255), SUM(k2), SUM(k4), SUM(k16), SUM(length)`,
-              }),
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=security sourcetype=linux_secure "Failed password"`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM security
+                | WHERE _raw == "Failed password" AND sourcetype == "linux_secure"`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only, do not execute; indices may not exist): `index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`.',
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=firewall (action=allow AND dest_port=443) OR (action=block AND protocol=tcp)`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM firewall
+                | WHERE (action == "allow" AND dest_port == 443) OR (action == "block" AND protocol == "tcp")`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM prod_web
-              | WHERE _raw NOT LIKE "Connection reset"
-                AND _raw NOT LIKE "[acm-app] created a ThreadLocal"
-                AND sourcetype != "prod_urlf_east_logs"
-                AND sourcetype != "prod_urlf_west_logs"
-                AND host NOT LIKE "dbs-tools-*"
-                AND _raw NOT LIKE "Public] in context with path [/global]"
-                AND host NOT LIKE "*dev*"
-                AND host NOT LIKE "*qa*"
-                AND host NOT LIKE "*uat*"`,
-              }),
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=prod_web host="webapp-*"`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM prod_web
+                | WHERE host LIKE "webapp-%"`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=security sourcetype=linux_secure "Failed password"`.',
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=sales status>=400 status<500`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM sales
+                | WHERE status >= 400 AND status < 500`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM security
-              | WHERE _raw == "Failed password" AND sourcetype == "linux_secure"`,
-              }),
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=inventory | stats price_with_tax = price * 1.13 | eval category = if(price > 1000, "premium", "standard")`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The query should use the ES|QL function CASE, not the SPL function if',
+                  ],
+                  execute: false,
+                  expectedQuery: `FROM inventory
+                | EVAL price_with_tax = price * 1.13, category = CASE(price > 1000, "premium", "standard")`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=firewall (action=allow AND dest_port=443) OR (action=block AND protocol=tcp)`.',
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=network_logs | rename source_ip as client_ip, dest_ip as server_ip`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM network_logs
+                | RENAME source_ip AS client_ip, dest_ip AS server_ip`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM firewall
-              | WHERE (action == "allow" AND dest_port == 443) OR (action == "block" AND protocol == "tcp")`,
-              }),
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=employees | fields name, department, title`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM employees
+                | KEEP name, department, title`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=prod_web host="webapp-*"`.',
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=employees | fields - _raw, _time`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM employees
+                | DROP _raw, _time`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM prod_web
-              | WHERE host LIKE "webapp-%"`,
-              }),
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=web_traffic | stats count, dc(client_ip) as unique_visitors, avg(response_time) as avg_latency by http_method`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM web_traffic
+                | STATS count = count(*), unique_visitors = count_distinct(client_ip), avg_latency = avg(response_time) by http_method`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=sales status>=400 status<500`.',
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=products | stats sum(sales) as total_sales by category | sort - total_sales`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM products
+                | STATS total_sales = sum(sales) by category
+                | SORT total_sales DESC`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM sales
-              | WHERE status >= 400 AND status < 500`,
-              }),
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=access_logs | top limit=10 user`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM access_logs
+                | STATS count = count(*) by user
+                | SORT count DESC
+                | LIMIT 10`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL using ES|QL `CASE` (text only; do not execute; indices may not exist): `index=inventory | stats price_with_tax = price * 1.13 | eval category = if(price > 1000, "premium", "standard")`.',
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=error_logs | rare limit=5 error_code`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM error_logs
+                | STATS count = count(*) by error_code
+                | SORT count ASC
+                | LIMIT 5`,
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                specificCriteria: [
-                  'The query should use the ES|QL function CASE, not the SPL function if',
-                ],
-                execute: false,
-                expectedQuery: `FROM inventory
-              | EVAL price_with_tax = price * 1.13, category = CASE(price > 1000, "premium", "standard")`,
-              }),
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=auth | timechart span=1h count by action`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  specificCriteria: [
+                    'The query should use STATS with BUCKET to group data over time, which is an ES|QL equivalent of timechart.',
+                  ],
+                  execute: false,
+                  expectedQuery: [
+                    `FROM auth
+                  | STATS count = count(*) by BUCKET(@timestamp, 1h), action`,
+                    `FROM auth
+                  | HISTOGRAM count(*) BY action, @timestamp BUCKETS=1h`,
+                  ],
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=network_logs | rename source_ip as client_ip, dest_ip as server_ip`.',
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=main [search index=suspicious_users | fields user_id]`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: [
+                    `FROM main
+                  | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
+                    `FROM main
+                  | LOOKUP JOIN suspicious_users ON user_id`,
+                  ],
+                }),
+              },
+              metadata: {},
             },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM network_logs
-              | RENAME source_ip AS client_ip, dest_ip AS server_ip`,
-              }),
+            {
+              input: {
+                question:
+                  'Can you convert this SPL query to ES|QL? `index=firewall | table _time, src_ip, dest_ip, action`. The index does not exist, therefore do not execute the query.',
+              },
+              output: {
+                criteria: createEsqlCriteria({
+                  execute: false,
+                  expectedQuery: `FROM firewall
+                | KEEP @timestamp, src_ip, dest_ip, action`,
+                }),
+              },
+              metadata: {},
             },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=employees | fields name, department, title`.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM employees
-              | KEEP name, department, title`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=employees | fields - _raw, _time`.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM employees
-              | DROP _raw, _time`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=web_traffic | stats count, dc(client_ip) as unique_visitors, avg(response_time) as avg_latency by http_method`.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM web_traffic
-              | STATS count = count(*), unique_visitors = count_distinct(client_ip), avg_latency = avg(response_time) by http_method`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=products | stats sum(sales) as total_sales by category | sort - total_sales`.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM products
-              | STATS total_sales = sum(sales) by category
-              | SORT total_sales DESC`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=access_logs | top limit=10 user`.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM access_logs
-              | STATS count = count(*) by user
-              | SORT count DESC
-              | LIMIT 10`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=error_logs | rare limit=5 error_code`.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM error_logs
-              | STATS count = count(*) by error_code
-              | SORT count ASC
-              | LIMIT 5`,
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL using `STATS ... BY BUCKET(@timestamp, 1h)` (text only; do not execute; indices may not exist): `index=auth | timechart span=1h count by action`.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                specificCriteria: [
-                  'The query should use STATS with BUCKET to group data over time, which is an ES|QL equivalent of timechart.',
-                ],
-                execute: false,
-                expectedQuery: [
-                  `FROM auth
-                | STATS count = count(*) by BUCKET(@timestamp, 1h), action`,
-                  `FROM auth
-                | HISTOGRAM count(*) BY action, @timestamp BUCKETS=1h`,
-                ],
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL using either `IN (...)` or a `LOOKUP JOIN` (text only; do not execute; indices may not exist): `index=main [search index=suspicious_users | fields user_id]`.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: [
-                  `FROM main
-                | WHERE user_id IN (FROM suspicious_users | KEEP user_id)`,
-                  `FROM main
-                | LOOKUP JOIN suspicious_users ON user_id`,
-                ],
-              }),
-            },
-            metadata: {},
-          },
-          {
-            input: {
-              question:
-                'Convert to ES|QL (text only; do not execute; indices may not exist): `index=firewall | table _time, src_ip, dest_ip, action` where `_time` should map to `@timestamp`.',
-            },
-            output: {
-              criteria: createEsqlCriteria({
-                execute: false,
-                expectedQuery: `FROM firewall
-              | KEEP @timestamp, src_ip, dest_ip, action`,
-              }),
-            },
-            metadata: {},
-          },
-        ],
-      },
+          ],
+        },
+      });
     });
   });
 });
