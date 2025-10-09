@@ -288,7 +288,8 @@ export class SearchInterceptor {
   private runSearch$(
     { id, ...request }: IKibanaSearchRequest,
     options: IAsyncSearchOptions,
-    searchAbortController: SearchAbortController
+    searchAbortController: SearchAbortController,
+    mark: boolean = false
   ) {
     const { sessionId, strategy } = options;
 
@@ -304,7 +305,8 @@ export class SearchInterceptor {
           ...this.deps.session.getSearchOptions(sessionId),
           abortSignal: searchAbortController.getSignal(),
           isSearchStored,
-        }
+        },
+        mark
       )
         .then((result) => {
           afterPoll({ isSearchStored: result.isStored ?? false });
@@ -439,7 +441,8 @@ export class SearchInterceptor {
    */
   private runSearch(
     request: IKibanaSearchRequest,
-    options?: ISearchOptions
+    options?: ISearchOptions,
+    mark: boolean = false
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
@@ -460,7 +463,8 @@ export class SearchInterceptor {
               strategy === undefined, // undefined strategy is treated as enhanced ES
           }),
           asResponse: true,
-        }
+        },
+        mark
       )
       .then((rawResponse) => {
         const warning = rawResponse.response?.headers.get('warning');
@@ -534,7 +538,8 @@ export class SearchInterceptor {
   private getSearchResponse$(
     request: IKibanaSearchRequest,
     options: IAsyncSearchOptions,
-    requestHash?: string
+    requestHash?: string,
+    mark: boolean = false
   ) {
     const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
 
@@ -544,7 +549,8 @@ export class SearchInterceptor {
     // Create a new abort signal if one was not passed. This fake signal will never be aborted,
     // So the underlaying search will not be aborted, even if the other consumers abort.
     searchAbortController.addAbortSignal(options.abortSignal ?? new AbortController().signal);
-    const response$ = cached?.response$ || this.runSearch$(request, options, searchAbortController);
+    const response$ =
+      cached?.response$ || this.runSearch$(request, options, searchAbortController, mark);
 
     if (requestHash && !this.responseCache.has(requestHash)) {
       this.responseCache.set(requestHash, {
@@ -568,7 +574,11 @@ export class SearchInterceptor {
    * @options
    * @returns `Observable` emitting the search response or an error.
    */
-  public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
+  public search(
+    { id, ...request }: IKibanaSearchRequest,
+    options: IAsyncSearchOptions = {},
+    mark: boolean = false
+  ) {
     const searchOptions = {
       ...options,
     };
@@ -583,7 +593,8 @@ export class SearchInterceptor {
         const { searchAbortController, response$ } = this.getSearchResponse$(
           request,
           searchOptions,
-          requestHash
+          requestHash,
+          mark
         );
 
         this.pendingCount$.next(this.pendingCount$.getValue() + 1);

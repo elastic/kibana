@@ -159,6 +159,22 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       detail: 'load_started',
     })
 
+    // Set up performance observer to log marks and measures as they happen
+    if (typeof PerformanceObserver !== 'undefined' && false) {
+      const observer = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'mark') {
+            console.log(
+              \`Performance Mark: \${entry.name} at \${entry.startTime.toFixed(2)}ms\`,
+              entry.toJSON()
+            );
+          }
+        });
+      });
+      observer.observe({ entryTypes: ['mark', 'measure'] });
+    }
+
     load([
       ${jsDependencyPaths.map((path) => `'${path}'`).join(',')}
     ], function () {

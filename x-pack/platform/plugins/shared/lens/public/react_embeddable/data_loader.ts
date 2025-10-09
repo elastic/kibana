@@ -149,7 +149,7 @@ export function loadEmbeddableData(
     const separator = `${'-'.repeat(maxNameLength)}-|-----------|-----------`;
     const rows = measures.map((m) => {
       const percentage = totalTime > 0 ? ((m.duration / totalTime) * 100).toFixed(1) : '0.0';
-      return `${m.name.padEnd(maxNameLength)} | ${m.duration
+      return `${('`' + m.name + '`').padEnd(maxNameLength)} | ${m.duration
         .toFixed(2)
         .padStart(7)}ms | ${percentage.padStart(8)}%`;
     });

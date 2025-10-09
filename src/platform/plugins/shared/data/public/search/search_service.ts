@@ -231,8 +231,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const { http, uiSettings, chrome, application, notifications, ...startServices } = coreStart;
 
     const search = ((request, options = {}) => {
-      performance.mark('search_initiated');
-      return this.searchInterceptor.search(request, options);
+      return this.searchInterceptor.search(request, options, true);
     }) as ISearchGeneric;
 
     const loadingCount$ = new BehaviorSubject(0);
@@ -252,7 +251,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       search,
       dataViews: indexPatterns,
       onResponse: (request, response, options) => {
-        performance.mark('search_response_received');
         if (!options.disableWarningToasts) {
           const { rawResponse } = response;
 

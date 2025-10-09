@@ -82,6 +82,8 @@ export class Fetch {
     const optionsWithPath = validateFetchArguments(pathOrOptions, options);
     const controller = new HttpInterceptController();
 
+    const mark = typeof pathOrOptions !== 'string' && pathOrOptions.mark;
+
     // We wrap the interception in a separate promise to ensure that when
     // a halt is called we do not resolve or reject, halting handling of the promise.
     return new Promise<TResponseBody | HttpResponse<TResponseBody>>(async (resolve, reject) => {
@@ -93,7 +95,7 @@ export class Fetch {
           controller
         );
         const initialResponse = interceptFetch(
-          this.fetchResponse.bind(this),
+          this.fetchResponse.bind(this, !!mark),
           interceptedOptions,
           this.interceptors,
           controller
@@ -164,11 +166,16 @@ export class Fetch {
   }
 
   private async fetchResponse(
+    mark: boolean,
     fetchOptions: HttpFetchOptionsWithPath
   ): Promise<HttpResponse<unknown>> {
     const request = this.createRequest(fetchOptions);
     let response: Response;
     let body = null;
+
+    if (mark) {
+      performance.mark('search_initiated');
+    }
 
     try {
       response = await window.fetch(request);
@@ -189,6 +196,9 @@ export class Fetch {
         body = await response.arrayBuffer();
       } else {
         const text = await response.text();
+        if (mark) {
+          performance.mark('search_response_received');
+        }
 
         try {
           body = JSON.parse(text);
@@ -210,13 +220,14 @@ export class Fetch {
   private shorthand(method: string): HttpHandler {
     return <T = unknown>(
       pathOrOptions: string | HttpFetchOptionsWithPath,
-      options?: HttpFetchOptions
+      options?: HttpFetchOptions,
+      mark?: boolean
     ) => {
       const optionsWithPath: HttpFetchOptionsWithPath = validateFetchArguments(
         pathOrOptions,
         options
       );
-      return this.fetch<HttpResponse<T>>({ ...optionsWithPath, method });
+      return this.fetch<HttpResponse<T>>({ ...optionsWithPath, method, mark });
     };
   }
 }
