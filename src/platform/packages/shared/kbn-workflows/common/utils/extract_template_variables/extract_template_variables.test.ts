@@ -80,12 +80,6 @@ describe('extractTemplateVariables', () => {
     `;
 
     const variables = extractTemplateVariables(template);
-    expect(variables).toEqual([
-      'order.items',
-      'item.name',
-      'item.price',
-      'item.onSale',
-      'order.total',
-    ]);
+    expect(variables).toEqual(['order.items', 'order.total']);
   });
 });

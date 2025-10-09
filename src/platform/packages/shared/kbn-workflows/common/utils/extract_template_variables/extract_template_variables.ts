@@ -48,15 +48,20 @@ export function extractTemplateVariables(template: string): string[] {
       } catch (error: any) {
         const match = UNDEFINED_VARIABLE_REGEX.exec(error.message);
         if (!match) {
-          // Not an undefined variable error - return empty array
-          return [];
+          // Not an undefined variable error - return found variables
+          return Array.from(foundVariables);
         }
 
         const variablePath = match[1].trim();
-        foundVariables.add(variablePath);
+        // Check if we've already processed this variable to prevent infinite loops
+        if (foundVariables.has(variablePath)) {
+          // Detected potential infinite loop: variable was already processed
+          return Array.from(foundVariables);
+        }
 
+        foundVariables.add(variablePath);
         // Create context structure for this variable so rendering can continue
-        createContextStructure(context, variablePath);
+        createContextStructure(context, variablePath, template);
       }
     }
 
@@ -68,7 +73,7 @@ export function extractTemplateVariables(template: string): string[] {
 }
 
 /**
- * Parses a Liquid variable path into its component parts.
+ * Normalizes a Liquid variable path into its component parts.
  *
  * Handles various path formats:
  * - Dot notation: `user.name` → `["user", "name"]`
@@ -109,10 +114,15 @@ function parseVariablePath(path: string): string[] {
  *
  * @param context - The context object to modify
  * @param path - The variable path to create structure for
+ * @param template - The template string to analyze for loop context
  *
  * @private
  */
-function createContextStructure(context: Record<string, any>, path: string): void {
+function createContextStructure(
+  context: Record<string, any>,
+  path: string,
+  template: string
+): void {
   const parts = parseVariablePath(path);
   let current: any = context;
 
@@ -123,7 +133,15 @@ function createContextStructure(context: Record<string, any>, path: string): voi
     if (isLastPart) {
       // Set dummy value for the leaf node
       if (!(key in current)) {
-        current[key] = DUMMY_VALUE;
+        // Check if this path is used in a for loop and this is the last part
+        const loopVariable = getLoopVariableForParts(parts, template);
+        if (loopVariable) {
+          // Create an array with dummy objects that have the properties accessed in the loop
+          const dummyObject = createDummyObjectForLoop(loopVariable, template);
+          current[key] = [dummyObject];
+        } else {
+          current[key] = DUMMY_VALUE;
+        }
       }
     } else {
       // Ensure intermediate nodes are objects
@@ -133,4 +151,78 @@ function createContextStructure(context: Record<string, any>, path: string): voi
       current = current[key];
     }
   }
+}
+
+/**
+ * Gets the loop variable for given path parts if it's used in a for loop.
+ * As Liquid normalizes the path, we need to use a generic approach to find any for loop that matches the path structure.
+ *
+ * @param parts - The path parts to check
+ * @param template - The template string to analyze
+ * @returns The loop variable name if used in a loop, null otherwise
+ *
+ * @private
+ */
+function getLoopVariableForParts(parts: string[], template: string): string | null {
+  // Create a flexible regex that matches any for loop with the same path structure
+  // This handles both bracket and dot notation, and various path formats
+  const pathPattern = parts
+    .map((part, index) => {
+      // First part should not be wrapped with dots or brackets
+      if (index === 0) {
+        return part;
+      }
+      // For numeric parts, match both bracket and dot notation
+      if (/^\d+$/.test(part)) {
+        return `(?:\\[${part}\\]|\\.${part})`;
+      }
+      // For string parts, match both bracket and dot notation
+      return `(?:\\["${part}"\\]|\\['${part}'\\]|\\.${part})`;
+    })
+    .join('');
+
+  const forLoopRegex = new RegExp(`{%\\s*for\\s+(\\w+)\\s+in\\s+[^%]*${pathPattern}[^%]*%}`, 'gi');
+
+  const match = forLoopRegex.exec(template);
+  return match ? match[1] : null;
+}
+
+/**
+ * Creates a dummy object for loop iteration with properties that are accessed in the loop.
+ * Uses a generic approach to find all properties accessed on the loop variable.
+ *
+ * @param loopVariable - The loop variable name (e.g., "item")
+ * @param template - The template string to analyze
+ * @returns A dummy object with properties accessed in the loop
+ *
+ * @private
+ */
+function createDummyObjectForLoop(loopVariable: string, template: string): Record<string, any> {
+  const dummyObject: Record<string, any> = {};
+
+  // Generic regex to find any property access on the loop variable
+  // Matches patterns like: variable.property, variable["property"], variable['property']
+  const propertyAccessRegex = new RegExp(
+    `${loopVariable}\\.(\\w+)|${loopVariable}\\["([^"]+)"\\]|${loopVariable}\\['([^']+)'\\]`,
+    'gi'
+  );
+
+  let match;
+  const properties = new Set<string>();
+
+  // Find all property accesses on the loop variable
+  while ((match = propertyAccessRegex.exec(template))) {
+    // Extract the property name from any of the three capture groups
+    const propertyName = match[1] || match[2] || match[3];
+    if (propertyName) {
+      properties.add(propertyName);
+    }
+  }
+
+  // Add dummy values for all found properties
+  properties.forEach((prop) => {
+    dummyObject[prop] = DUMMY_VALUE;
+  });
+
+  return dummyObject;
 }
