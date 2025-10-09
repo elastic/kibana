@@ -9,7 +9,6 @@ import { ToolType } from '@kbn/onechat-common';
 
 import type { CreateToolPayload, UpdateToolPayload } from '../../../../../../common/http_api/tools';
 import type { ToolFormData } from '../types/tool_form_types';
-import type { ToolTypeRegistryEntry } from './common';
 
 import { esqlToolFormRegistryEntry } from './tool_types/esql';
 import { indexSearchToolRegistryEntry } from './tool_types/index_search';
@@ -26,17 +25,21 @@ export const TOOLS_FORM_REGISTRY = {
 export function getToolTypeConfig<T extends ToolType>(
   toolType: T
 ): (typeof TOOLS_FORM_REGISTRY)[T] {
-  return TOOLS_FORM_REGISTRY[toolType];
+  const config = TOOLS_FORM_REGISTRY[toolType];
+  if (!config) {
+    throw new Error(`Unknown tool type: ${toolType}`);
+  }
+  return config;
 }
 
 export function getCreatePayloadFromData<T extends ToolFormData>(data: T): CreateToolPayload {
-  const config = getToolTypeConfig(data.type) as unknown as ToolTypeRegistryEntry<T>;
-  return config.formDataToCreatePayload(data);
+  const config = getToolTypeConfig(data.type);
+  return config.formDataToCreatePayload(data as any);
 }
 
 export function getUpdatePayloadFromData<T extends ToolFormData>(data: T): UpdateToolPayload {
-  const config = getToolTypeConfig(data.type) as unknown as ToolTypeRegistryEntry<T>;
-  return config.formDataToUpdatePayload(data);
+  const config = getToolTypeConfig(data.type);
+  return config.formDataToUpdatePayload(data as any);
 }
 
 export function getEditableToolTypes(): Array<{ value: ToolType; text: string }> {
@@ -50,10 +53,5 @@ export function getEditableToolTypes(): Array<{ value: ToolType; text: string }>
 
 export function getToolTypeDefaultValues(toolType: ToolType): ToolFormData {
   const config = getToolTypeConfig(toolType);
-
-  if (!config) {
-    throw new Error(`Unknown tool type: ${toolType}`);
-  }
-
   return config.defaultValues;
 }
