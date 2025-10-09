@@ -22,7 +22,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 interface IndexHeaderProps {
   indexPattern: DataView;
@@ -108,15 +107,10 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
               }
             )}
             color="text"
-          >
-            <FormattedMessage
-              id="indexPatternManagement.editDataView.moreActionsButtonLabel"
-              defaultMessage="More Actions"
-            />
-          </EuiButtonIcon>
+          />
         }
       >
-        <EuiContextMenuPanel items={contextMenuItems} size="s" />
+        <EuiContextMenuPanel items={contextMenuItems} />
       </EuiPopover>
     );
   };
