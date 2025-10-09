@@ -9,10 +9,13 @@ import type { Streams } from '@kbn/streams-schema';
 import { useEffect, useMemo } from 'react';
 import { useSelector } from '@xstate5/react';
 import { createActor } from 'xstate5';
+import { getPercentageFormatter } from '../../../../util/formatters';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import type { PartitionSuggestion } from './use_review_suggestions_form';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { createDocumentsCountCollectorActor } from '../state_management/stream_routing_state_machine/routing_samples_state_machine';
+
+const percentageFormatter = getPercentageFormatter({ precision: 2 });
 
 export const useMatchRate = (
   definition: Streams.WiredStream.GetResponse,
@@ -45,7 +48,7 @@ export const useMatchRate = (
   }, [actorInstance]);
 
   const value = useSelector(actorInstance, (snapshot) =>
-    snapshot.status === 'done' ? snapshot.context : undefined
+    snapshot.status === 'done' ? percentageFormatter.format(snapshot.context ?? 0) : undefined
   );
   const loading = useSelector(actorInstance, (snapshot) => snapshot.status === 'active');
 
