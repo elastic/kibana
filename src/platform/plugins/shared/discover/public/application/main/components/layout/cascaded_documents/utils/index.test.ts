@@ -273,6 +273,21 @@ describe('utils', () => {
       );
     });
 
+    it('should return a valid query that only contains the root group by column in the stats by option when the root group is a named function', () => {
+      const editorQuery: AggregateQuery = {
+        esql: `
+          FROM kibana_sample_data_logs
+            | STATS Count=COUNT(*) BY Pattern=CATEGORIZE(message), agent.keyword, url.keyword
+        `,
+      };
+
+      const result = mutateQueryStatsGrouping(editorQuery, ['Pattern']);
+
+      expect(result.esql).toMatchInlineSnapshot(
+        `"FROM kibana_sample_data_logs | STATS Count = COUNT(*) BY Pattern = CATEGORIZE(message)"`
+      );
+    });
+
     it('should return the original query if the root group is the only column in the stats by option', () => {
       const editorQuery: AggregateQuery = {
         esql: `
