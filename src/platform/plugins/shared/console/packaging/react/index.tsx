@@ -70,7 +70,11 @@ const translations = {
   'zh-CN': require('./translations/zh-CN.json'),
 };
 
-export const OneConsole = ({ lang = 'en', http: customHttp, notifications: customNotifications }: OneConsoleProps) => {
+export const OneConsole = ({
+  lang = 'en',
+  http: customHttp,
+  notifications: customNotifications,
+}: OneConsoleProps) => {
   const [apiLoaded, setApiLoaded] = useState(false);
 
   // Get the translations for the selected language, fallback to English
@@ -158,19 +162,33 @@ export const OneConsole = ({ lang = 'en', http: customHttp, notifications: custo
     };
   }
 
-  const { http, docLinks, theme, i18nService, storage, storageHistory, settings, objectStorageClient, esHostService, autocompleteInfo } = servicesRef.current;
+  const {
+    http,
+    docLinks,
+    theme,
+    i18nService,
+    storage,
+    storageHistory,
+    settings,
+    objectStorageClient,
+    esHostService,
+    autocompleteInfo,
+  } = servicesRef.current;
 
   // Use the custom notifications provided by the consumer
-  const notifications = useMemo(() => ({
-    toasts: {
-      addSuccess: customNotifications.addSuccess || noop,
-      addWarning: customNotifications.addWarning || noop,
-      addDanger: customNotifications.addDanger || noop,
-      addError: customNotifications.addError || noop,
-      add: customNotifications.add || noop,
-      remove: customNotifications.remove || noop,
-    }
-  }), [customNotifications]);
+  const notifications = useMemo(
+    () => ({
+      toasts: {
+        addSuccess: customNotifications.addSuccess || noop,
+        addWarning: customNotifications.addWarning || noop,
+        addDanger: customNotifications.addDanger || noop,
+        addError: customNotifications.addError || noop,
+        add: customNotifications.add || noop,
+        remove: customNotifications.remove || noop,
+      },
+    }),
+    [customNotifications]
+  );
 
   useEffect(() => {
     const loadApi = async () => {
