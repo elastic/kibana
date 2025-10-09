@@ -9,16 +9,22 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { createContainer } from './create_container';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
 
 export async function runWorkflow({
   workflowRunId,
   spaceId,
   taskAbortController,
+  workflowExecutionRepository,
+  stepExecutionRepository,
+  logsRepository,
   coreStart,
   esClient,
   actions,
@@ -32,15 +38,15 @@ export async function runWorkflow({
   taskAbortController: AbortController;
   coreStart: CoreStart;
   esClient: Client;
-  actions: WorkflowsExecutionEnginePluginStartDeps['actions'];
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
+  logsRepository: LogsRepository;
+  actions: ActionsPluginStartContract;
   taskManager: WorkflowsExecutionEnginePluginStartDeps['taskManager'];
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
 }): Promise<void> {
-  // Get ES client from core services (guaranteed to be available at task execution time)
-  const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-
   const {
     workflowRuntime,
     workflowExecutionState,
@@ -59,6 +65,8 @@ export async function runWorkflow({
     logger,
     config,
     workflowExecutionRepository,
+    stepExecutionRepository,
+    logsRepository,
     fakeRequest, // Provided by Task Manager's first-class API key support
     coreStart
   );

@@ -16,16 +16,16 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
-import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../../common';
 import { ConnectorExecutor } from '../connector_executor';
 import { UrlValidator } from '../lib/url_validator';
-import { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
 
 export async function createContainer(
   workflowRunId: string,
@@ -36,6 +36,8 @@ export async function createContainer(
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   workflowExecutionRepository: WorkflowExecutionRepository,
+  stepExecutionRepository: StepExecutionRepository,
+  logsRepository: LogsRepository,
   fakeRequest?: any, // KibanaRequest from task manager
   coreStart?: any // CoreStart for creating esClientAsUser
 ) {
@@ -58,13 +60,11 @@ export async function createContainer(
   }
 
   const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
-  const stepExecutionRepository = new StepExecutionRepository(esClient);
   const connectorExecutor = new ConnectorExecutor(unsecuredActionsClient);
 
   const workflowLogger = new WorkflowEventLogger(
-    esClient,
+    logsRepository,
     logger,
-    WORKFLOWS_EXECUTION_LOGS_INDEX,
     {
       workflowId: workflowExecution.workflowId,
       workflowName: workflowExecution.workflowDefinition.name,

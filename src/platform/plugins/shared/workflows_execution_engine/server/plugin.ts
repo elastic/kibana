@@ -19,10 +19,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
 
 import type { Client } from '@elastic/elasticsearch';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { v4 as generateUuid } from 'uuid';
-import { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import type {
@@ -33,22 +30,15 @@ import type {
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
 
-import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../common';
-import { ConnectorExecutor } from './connector_executor';
-import { UrlValidator } from './lib/url_validator';
-import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
-import { NodesFactory } from './step/nodes_factory';
-import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
-import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
-import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
 import { workflowExecutionLoop } from './workflow_execution_loop';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
-import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { runWorkflow } from './execution_functions/run_workflow';
+import { createContainer } from './execution_functions/create_container';
+import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { LogsRepository } from './repositories/logs_repository/logs_repository';
 
 export class WorkflowsExecutionEnginePlugin
@@ -83,12 +73,18 @@ export class WorkflowsExecutionEnginePlugin
               const [coreStart, pluginsStart] = await core.getStartServices();
               const { actions, taskManager } =
                 pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
-
               // Get ES client from core services (guaranteed to be available at task execution time)
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const logsRepository = new LogsRepository(esClient, logger);
+
               runWorkflow({
                 workflowRunId,
                 spaceId,
+                workflowExecutionRepository,
+                stepExecutionRepository,
+                logsRepository,
                 taskAbortController,
                 taskManager,
                 esClient,
@@ -125,8 +121,10 @@ export class WorkflowsExecutionEnginePlugin
 
               // Get ES client from core services (guaranteed to be available at task execution time)
               const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
 
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const logsRepository = new LogsRepository(esClient, logger);
               const {
                 workflowRuntime,
                 workflowExecutionState,
@@ -145,6 +143,8 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 config,
                 workflowExecutionRepository,
+                stepExecutionRepository,
+                logsRepository,
                 fakeRequest, // Provided by Task Manager's first-class API key support
                 coreStart
               );
@@ -187,6 +187,8 @@ export class WorkflowsExecutionEnginePlugin
       // Get ES client and create repository for this execution
       const esClient = core.elasticsearch.client.asInternalUser as Client;
       const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+      const stepExecutionRepository = new StepExecutionRepository(esClient);
+      const logsRepository = new LogsRepository(esClient, this.logger);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution: Partial<EsWorkflowExecution> = {
@@ -234,6 +236,8 @@ export class WorkflowsExecutionEnginePlugin
           this.logger,
           this.config,
           workflowExecutionRepository,
+          stepExecutionRepository,
+          logsRepository,
           request, // Pass the fakeRequest for user context
           core
         );
@@ -387,105 +391,4 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {}
-}
-
-async function createContainer(
-  workflowRunId: string,
-  spaceId: string,
-  actionsPlugin: ActionsPluginStartContract,
-  taskManagerPlugin: TaskManagerStartContract,
-  esClient: Client,
-  logger: Logger,
-  config: WorkflowsExecutionEngineConfig,
-  workflowExecutionRepository: WorkflowExecutionRepository,
-  fakeRequest?: any, // KibanaRequest from task manager
-  coreStart?: any // CoreStart for creating esClientAsUser
-) {
-  const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId,
-    spaceId
-  );
-
-  if (!workflowExecution) {
-    throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
-  }
-
-  let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
-    workflowExecution.workflowDefinition
-  );
-
-  // If the execution is for a specific step, narrow the graph to that step
-  if (workflowExecution.stepId) {
-    workflowExecutionGraph = workflowExecutionGraph.getStepGraph(workflowExecution.stepId);
-  }
-
-  const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
-  const stepExecutionRepository = new StepExecutionRepository(esClient);
-  const logsRepository = new LogsRepository(esClient, logger);
-  const connectorExecutor = new ConnectorExecutor(unsecuredActionsClient);
-
-  const workflowLogger = new WorkflowEventLogger(
-    logsRepository,
-    logger,
-    {
-      workflowId: workflowExecution.workflowId,
-      workflowName: workflowExecution.workflowDefinition.name,
-      executionId: workflowExecution.id,
-      spaceId: workflowExecution.spaceId,
-    },
-    {
-      enableConsoleLogging: config.logging.console,
-    }
-  );
-
-  const workflowExecutionState = new WorkflowExecutionState(
-    workflowExecution as EsWorkflowExecution,
-    workflowExecutionRepository,
-    stepExecutionRepository
-  );
-
-  // Create workflow runtime first (simpler, fewer dependencies)
-  const workflowRuntime = new WorkflowExecutionRuntimeManager({
-    workflowExecution: workflowExecution as EsWorkflowExecution,
-    workflowExecutionGraph,
-    workflowLogger,
-    workflowExecutionState,
-  });
-
-  // Use user-scoped ES client if fakeRequest is available, otherwise fallback to regular client
-  let clientToUse = esClient; // fallback
-  if (fakeRequest && coreStart) {
-    clientToUse = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
-  }
-
-  const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
-
-  const urlValidator = new UrlValidator({
-    allowedHosts: config.http.allowedHosts,
-  });
-
-  const nodesFactory = new NodesFactory(
-    connectorExecutor,
-    workflowRuntime,
-    workflowExecutionState,
-    workflowLogger,
-    workflowTaskManager,
-    urlValidator,
-    workflowExecutionGraph
-  );
-
-  return {
-    workflowExecutionGraph,
-    workflowRuntime,
-    workflowExecutionState,
-    connectorExecutor,
-    workflowLogger,
-    taskManagerPlugin,
-    workflowExecutionRepository,
-    workflowTaskManager,
-    nodesFactory,
-    fakeRequest,
-    clientToUse,
-    coreStart,
-  };
 }
