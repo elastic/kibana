@@ -22,5 +22,6 @@
     "@kbn/securitysolution-lists-common",
     "@kbn/osquery-plugin",
     "@kbn/ftr-common-functional-services",
+    "@kbn/spaces-plugin",
   ]
 }

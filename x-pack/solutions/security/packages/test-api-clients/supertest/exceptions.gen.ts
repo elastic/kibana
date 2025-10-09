@@ -41,10 +41,7 @@ import type { UpdateExceptionListRequestBodyInput } from '@kbn/securitysolution-
 import type { UpdateExceptionListItemRequestBodyInput } from '@kbn/securitysolution-exceptions-common/api/update_exception_list_item/update_exception_list_item.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
-
-function getRouteUrlForSpace(routeUrl: string, spaceId?: string): string {
-  return spaceId ? `/s/${spaceId}${routeUrl}` : routeUrl;
-}
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
