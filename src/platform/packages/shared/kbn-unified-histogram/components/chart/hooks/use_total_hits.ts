@@ -37,6 +37,7 @@ export const useTotalHits = ({
   fetch$,
   onTotalHitsChange,
   isPlainRecord,
+  abortController: parentAbortController,
 }: {
   services: UnifiedHistogramServices;
   dataView: DataView;
@@ -49,6 +50,7 @@ export const useTotalHits = ({
   fetch$: Observable<UnifiedHistogramInputMessage>;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   isPlainRecord?: boolean;
+  abortController: AbortController | undefined;
 }) => {
   const abortController = useRef<AbortController>();
   const fetch = useStableCallback(() => {
@@ -76,9 +78,12 @@ export const useTotalHits = ({
     abortController.current?.abort();
   }, []);
 
-  return {
-    onAbort,
-  };
+  useEffect(() => {
+    parentAbortController?.signal.addEventListener('abort', onAbort);
+    return () => {
+      parentAbortController?.signal.removeEventListener('abort', onAbort);
+    };
+  }, [parentAbortController, onAbort]);
 };
 
 const fetchTotalHits = async ({
