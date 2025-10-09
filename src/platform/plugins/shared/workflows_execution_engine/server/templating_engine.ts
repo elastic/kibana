@@ -17,6 +17,29 @@ export class WorkflowTemplatingEngine {
       strictFilters: true,
       strictVariables: false,
     });
+
+    // register json filter that converts JSON string to object
+    this.engine.registerFilter('json', (value: any) => {
+      if (typeof value !== 'string') {
+        return value;
+      }
+      try {
+        return JSON.parse(value);
+      } catch (error) {
+        return value;
+      }
+    });
+    // register dump filter that converts an object to a JSON string
+    this.engine.registerFilter('dump', (value: any) => {
+      if (typeof value !== 'object') {
+        return value;
+      }
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch (error) {
+        return value;
+      }
+    });
   }
 
   public render(template: string, context: Record<string, any>): string {

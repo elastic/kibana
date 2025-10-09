@@ -84,6 +84,12 @@ export const LIQUID_FILTERS = [
     example: '{{ "HELLO" | downcase }} => hello',
   },
   {
+    name: 'dump',
+    description: 'Converts an object to a JSON string',
+    insertText: 'dump',
+    example: '{{ object | dump }}',
+  },
+  {
     name: 'escape',
     description: 'Escapes a string by replacing characters with escape sequences',
     insertText: 'escape',
