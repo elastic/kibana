@@ -32,7 +32,7 @@ const scheduledReportEventTypes: Record<
   scheduled_report_schedule: 'creation',
   scheduled_report_list: 'access',
   scheduled_report_disable: 'change',
-  scheduled_report_delete: 'change',
+  scheduled_report_delete: 'deletion',
 };
 
 export interface ScheduledReportAuditEventParams {
