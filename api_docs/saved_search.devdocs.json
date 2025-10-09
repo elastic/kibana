@@ -990,7 +990,7 @@
           "\nExtract tab attributes into a separate array since multiple tabs are supported"
         ],
         "signature": [
-          "(attributes: T) => T & { tabs: { id: string; label: string; attributes: Pick<Omit<T, \"title\" | \"description\">, Exclude<Exclude<keyof T, \"title\" | \"description\">, \"tabs\">>; }[]; }"
+          "(attributes: T, discoverSessionId: string | undefined) => T & { tabs: { id: string; label: string; attributes: Pick<Omit<T, \"title\" | \"description\">, Exclude<Exclude<keyof T, \"title\" | \"description\">, \"tabs\">>; }[]; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
         "deprecated": false,
@@ -1012,6 +1012,23 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.extractTabs.$2",
+            "type": "string",
+            "tags": [],
+            "label": "discoverSessionId",
+            "description": [
+              "Optional Discover session ID used to generate a deterministic UUID for the default tab"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
