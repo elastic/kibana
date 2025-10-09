@@ -15,7 +15,7 @@ import {
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
-import type { TemporaryControlsLayout } from '@kbn/controls-renderer/src/types';
+import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
 import type {
   DataControlState,
   OptionsListDSLControlState,
@@ -125,7 +125,7 @@ async function getCompatibleControlType(
   return undefined;
 }
 
-function getNextControlOrder(controlPanelsState?: TemporaryControlsLayout['controls']) {
+function getNextControlOrder(controlPanelsState?: ControlsLayout['controls']) {
   if (!controlPanelsState) {
     return 0;
   }

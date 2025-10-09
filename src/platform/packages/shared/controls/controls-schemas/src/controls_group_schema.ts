@@ -33,7 +33,7 @@ const controlWidthSchema = schema.oneOf(
   }
 );
 
-const stickyControlSchema = schema.object({
+export const stickyControlSchema = schema.object({
   id: schema.maybe(schema.string({ meta: { description: 'The unique ID of the control' } })),
   width: schema.maybe(controlWidthSchema),
   grow: schema.maybe(

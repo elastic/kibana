@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import type { StickyControlState } from '@kbn/controls-schemas';
-import type { TemporaryControlsLayout } from '@kbn/controls-renderer/src/types';
+import type { ControlsLayout } from '@kbn/controls-renderer/src/types';
 import type { PanelPackage } from '@kbn/presentation-containers';
 
 import type { ControlGroupCreationOptions, ControlPanelsState } from './types';
@@ -26,20 +26,20 @@ export const useLayoutApi = (
   lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
 ) => {
   const layout$Ref = useRef(
-    new BehaviorSubject<TemporaryControlsLayout>({ controls: {}, panels: {}, sections: {} })
+    new BehaviorSubject<ControlsLayout>({ controls: {}, panels: {}, sections: {} })
   );
 
   useEffect(() => {
     /** Keep `layout$` in sync with `lastSavedState$Ref` */
     const lastSavedStateSubscription = lastSavedState$Ref.current.subscribe((lastSavedState) => {
-      const lastSavedLayout: TemporaryControlsLayout['controls'] = {};
+      const lastSavedLayout: ControlsLayout['controls'] = {};
       Object.entries(lastSavedState).forEach(([id, control]) => {
         lastSavedLayout[id] = pick(control, [
           'grow',
           'width',
           'order',
           'type',
-        ]) as TemporaryControlsLayout['controls'][string];
+        ]) as ControlsLayout['controls'][string];
       });
       const currentLayout = layout$Ref.current.getValue();
       layout$Ref.current.next({
@@ -58,8 +58,6 @@ export const useLayoutApi = (
 
     layout$Ref.current.next({
       controls: getControlsLayout(state.initialState?.initialChildControlState),
-      panels: {},
-      sections: {},
     });
 
     return {

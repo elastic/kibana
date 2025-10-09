@@ -31,7 +31,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
-import type { ControlsRendererParentApi, TemporaryControlsLayout } from './types';
+import type { ControlsRendererParentApi, ControlsLayout } from './types';
 
 export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererParentApi }) => {
   const controlPanelRefs = useRef<{ [id: string]: HTMLElement | null }>({});
@@ -41,7 +41,7 @@ export const ControlsRenderer = ({ parentApi }: { parentApi: ControlsRendererPar
 
   const [controlState, setControlState] = useState(parentApi.layout$.getValue().controls);
 
-  const controlsInOrder: Array<TemporaryControlsLayout['controls'][string] & { id: string }> =
+  const controlsInOrder: Array<ControlsLayout['controls'][string] & { id: string }> =
     useMemo(() => {
       return Object.entries(controlState)
         .map(([id, control]) => {

@@ -17,7 +17,7 @@ import {
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { render, waitFor } from '@testing-library/react';
 
-import type { ControlsRendererParentApi, TemporaryControlsLayout } from '../types';
+import type { ControlsRendererParentApi, ControlsLayout } from '../types';
 import { ControlPanel } from './control_panel';
 
 const mockServices = {
@@ -109,7 +109,7 @@ describe('render', () => {
             grow: true,
           },
         },
-      } as unknown as TemporaryControlsLayout);
+      } as unknown as ControlsLayout);
       const controlPanel = render(
         <ControlPanel
           uuid="control1"

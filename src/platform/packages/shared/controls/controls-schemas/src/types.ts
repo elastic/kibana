@@ -11,7 +11,7 @@ import type React from 'react';
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { controlSchema, dataControlSchema } from './control_schema';
-import type { controlsGroupSchema } from './controls_group_schema';
+import type { controlsGroupSchema, stickyControlSchema } from './controls_group_schema';
 import type {
   optionsListDSLControlSchema,
   optionsListESQLControlSchema,
@@ -24,6 +24,10 @@ import type { rangeSliderControlSchema, rangeValueSchema } from './range_slider_
 
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
 export type StickyControlState = ControlsGroupState['controls'][number];
+export type StickyControlLayoutState = TypeOf<typeof stickyControlSchema> & {
+  order: number;
+  type: StickyControlState['type'];
+};
 export type ControlState = TypeOf<typeof controlSchema>;
 
 export type DataControlState = TypeOf<typeof dataControlSchema>;
