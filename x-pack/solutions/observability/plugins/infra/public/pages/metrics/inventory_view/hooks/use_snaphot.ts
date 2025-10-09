@@ -8,13 +8,14 @@
 import { useMemo } from 'react';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import moment from 'moment';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import type {
   InfraTimerangeInput,
   SnapshotRequest,
 } from '../../../../../common/http_api/snapshot_api';
 import { SnapshotNodeResponseRT } from '../../../../../common/http_api/snapshot_api';
-
+import { useWaffleTimeContext } from './use_waffle_time';
 export interface UseSnapshotRequest
   extends Omit<SnapshotRequest, 'timerange' | 'includeTimeseries' | 'schema'> {
   currentTime: number;
@@ -30,7 +31,8 @@ export function useSnapshot(
 ) {
   const payload = useMemo(() => JSON.stringify(buildPayload(props)), [props]);
 
-  const { data, status, error, refetch } = useFetcher(
+  const { jumpToTime } = useWaffleTimeContext();
+  const { data, status, error } = useFetcher(
     async (callApi) => {
       const response = await callApi('/api/metrics/snapshot', {
         method: 'POST',
@@ -45,12 +47,16 @@ export function useSnapshot(
     }
   );
 
+  const reload = () => {
+    jumpToTime(moment().valueOf());
+  };
+
   return {
     error: (error && error.message) || null,
     loading: isPending(status),
     nodes: data?.nodes || [],
     interval: data?.interval || '60s',
-    reload: refetch,
+    reload,
   };
 }
 
