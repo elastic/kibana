@@ -178,7 +178,6 @@ export interface SearchBarState<QT extends Query | AggregateQuery = Query> {
   query?: QT | Query;
   dateRangeFrom: string;
   dateRangeTo: string;
-  isSendingToBackground: boolean;
 }
 
 export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends Component<
@@ -310,7 +309,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     isFiltersVisible: true,
     openQueryBarMenu: false,
     showSavedQueryPopover: false,
-    isSendingToBackground: false,
     currentProps: this.props,
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
@@ -574,14 +572,11 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     query?: QT | Query | undefined;
   }) => {
     if (!this.isDirty()) {
-      this.setState({ isSendingToBackground: true });
       const searchSession = await this.services.data.search.session.save();
       this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
-      this.setState({ isSendingToBackground: false });
       return;
     }
 
-    this.setState({ isSendingToBackground: true });
     const currentSessionId = this.services.data.search.session.getSessionId();
 
     const subscription = this.services.data.search.session
@@ -594,7 +589,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       });
 
     this.onQueryBarSubmit(payload);
-    this.setState({ isSendingToBackground: false });
   };
 
   private shouldShowDatePickerAsBadge() {
@@ -733,7 +727,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
-          isSendingToBackground={this.state.isSendingToBackground}
           fillSubmitButton={this.props.fillSubmitButton || false}
           prepend={this.props.showFilterBar || this.props.showQueryInput ? queryBarMenu : undefined}
           showDatePicker={this.props.showDatePicker}
