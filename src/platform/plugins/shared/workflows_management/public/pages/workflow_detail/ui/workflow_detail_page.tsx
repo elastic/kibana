@@ -57,7 +57,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
-  const canTestWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
 
   const handleSave = () => {
     if (!id) {
@@ -210,7 +209,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             handleRunClick={handleRunClick}
             handleSave={handleSave}
             handleToggleWorkflow={handleToggleWorkflow}
-            canTestWorkflow={canTestWorkflow}
             handleTabChange={setActiveTab}
             hasUnsavedChanges={hasChanges}
             highlightDiff={highlightDiff}
