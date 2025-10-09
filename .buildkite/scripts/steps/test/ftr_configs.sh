@@ -61,6 +61,7 @@ while read -r config; do
     echo "--- [ already-tested ] $FULL_COMMAND"
   else
     echo "--- $ $FULL_COMMAND"
+  fi
 
   start=$(date +%s)
 
