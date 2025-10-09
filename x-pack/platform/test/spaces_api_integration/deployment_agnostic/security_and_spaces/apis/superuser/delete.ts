@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { createSpaces, deleteSpaces } from '../../../common/lib/space_test_utils';
-import { SPACE_2, SPACES } from '../../../common/lib/spaces';
-import { deleteTestSuiteFactory } from '../../../common/suites/delete.agnostic';
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { AUTHENTICATION } from '../../../../common/lib/authentication';
+import { createSpaces, deleteSpaces } from '../../../../common/lib/space_test_utils';
+import { SPACES } from '../../../../common/lib/spaces';
+import { deleteTestSuiteFactory } from '../../../../common/suites/delete.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function deleteSpaceTestSuite(context: DeploymentAgnosticFtrProviderContext) {
-  const { deleteTest, expectEmptyResult, expectReservedSpaceResult, expectNotFound } =
+  const { deleteTest, expectEmptyResult, expectNotFound, expectReservedSpaceResult } =
     deleteTestSuiteFactory(context);
 
   const spacesService = context.getService('spaces');
@@ -44,7 +45,7 @@ export default function deleteSpaceTestSuite(context: DeploymentAgnosticFtrProvi
 
     afterEach(async () => {
       try {
-        await spacesService.create(SPACE_2);
+        await spacesService.create(SPACES.SPACE_2);
         await kbnClient.importExport.load(
           `x-pack/platform/test/spaces_api_integration/common/fixtures/kbn_archiver/space_2_objects.json`,
           { space: 'space_2' }
@@ -68,8 +69,9 @@ export default function deleteSpaceTestSuite(context: DeploymentAgnosticFtrProvi
         spaceId: SPACES.SPACE_1.spaceId,
       },
     ].forEach((scenario) => {
-      deleteTest(`from the ${scenario.spaceId} space`, {
+      deleteTest(`superuser from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
+        user: AUTHENTICATION.SUPERUSER,
         tests: {
           exists: {
             statusCode: 204,

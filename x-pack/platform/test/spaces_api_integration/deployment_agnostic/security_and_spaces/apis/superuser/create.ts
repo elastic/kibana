@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { createSpaces, deleteSpaces } from '../../../common/lib/space_test_utils';
-import { SPACES } from '../../../common/lib/spaces';
-import { createTestSuiteFactory } from '../../../common/suites/create.agnostic';
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { AUTHENTICATION } from '../../../../common/lib/authentication';
+import { createSpaces, deleteSpaces } from '../../../../common/lib/space_test_utils';
+import { SPACES } from '../../../../common/lib/spaces';
+import { createTestSuiteFactory } from '../../../../common/suites/create.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function createSpacesOnlySuite(context: DeploymentAgnosticFtrProviderContext) {
   const {
     createTest,
     expectNewSpaceResult,
-    expectConflictResponse,
     expectReservedSpecifiedResult,
+    expectConflictResponse,
     expectSolutionSpecifiedResult,
   } = createTestSuiteFactory(context);
 
@@ -26,6 +27,7 @@ export default function createSpacesOnlySuite(context: DeploymentAgnosticFtrProv
     before(async () => {
       await createSpaces(spacesService, isServerless);
     });
+
     after(async () => {
       await deleteSpaces(spacesService);
     });
@@ -38,8 +40,9 @@ export default function createSpacesOnlySuite(context: DeploymentAgnosticFtrProv
         spaceId: SPACES.SPACE_1.spaceId,
       },
     ].forEach((scenario) => {
-      createTest(`from the ${scenario.spaceId} space`, {
+      createTest(`superuser from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
+        user: AUTHENTICATION.SUPERUSER,
         tests: {
           newSpace: {
             statusCode: 200,

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { createSpaces, deleteSpaces } from '../../../common/lib/space_test_utils';
-import { SPACES } from '../../../common/lib/spaces';
-import { updateTestSuiteFactory } from '../../../common/suites/update.agnostic';
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { AUTHENTICATION } from '../../../../common/lib/authentication';
+import { createSpaces, deleteSpaces } from '../../../../common/lib/space_test_utils';
+import { SPACES } from '../../../../common/lib/spaces';
+import { updateTestSuiteFactory } from '../../../../common/suites/update.agnostic';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function updateSpaceTestSuite(context: DeploymentAgnosticFtrProviderContext) {
-  const { updateTest, expectAlreadyExistsResult, expectDefaultSpaceResult, expectNotFound } =
+  const { updateTest, expectNotFound, expectAlreadyExistsResult, expectDefaultSpaceResult } =
     updateTestSuiteFactory(context);
+
   const spacesService = context.getService('spaces');
   const isServerless = context.getService('config').get('serverless');
 
@@ -33,8 +35,9 @@ export default function updateSpaceTestSuite(context: DeploymentAgnosticFtrProvi
         spaceId: SPACES.SPACE_1.spaceId,
       },
     ].forEach((scenario) => {
-      updateTest(`can update from the ${scenario.spaceId} space`, {
+      updateTest(`superuser from the ${scenario.spaceId} space`, {
         spaceId: scenario.spaceId,
+        user: AUTHENTICATION.SUPERUSER,
         tests: {
           alreadyExists: {
             statusCode: 200,
