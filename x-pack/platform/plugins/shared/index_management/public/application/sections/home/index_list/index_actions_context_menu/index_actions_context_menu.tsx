@@ -159,14 +159,16 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index overview',
         }),
         onClick: () => {
-          navigateToIndexDetailsPage(
-            indexNames[0],
-            indicesListURLParams,
-            extensionsService,
-            application,
-            http,
-            IndexDetailsSection.Overview
-          );
+          closePopoverAndExecute(() => {
+            navigateToIndexDetailsPage(
+              indexNames[0],
+              indicesListURLParams,
+              extensionsService,
+              application,
+              http,
+              IndexDetailsSection.Overview
+            );
+          });
         },
       });
       items.push({
@@ -175,14 +177,16 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index settings',
         }),
         onClick: () => {
-          navigateToIndexDetailsPage(
-            indexNames[0],
-            indicesListURLParams,
-            extensionsService,
-            application,
-            http,
-            IndexDetailsSection.Settings
-          );
+          closePopoverAndExecute(() => {
+            navigateToIndexDetailsPage(
+              indexNames[0],
+              indicesListURLParams,
+              extensionsService,
+              application,
+              http,
+              IndexDetailsSection.Settings
+            );
+          });
         },
       });
       items.push({
@@ -191,14 +195,16 @@ export const IndexActionsContextMenu = ({
           defaultMessage: 'Show index mapping',
         }),
         onClick: () => {
-          navigateToIndexDetailsPage(
-            indexNames[0],
-            indicesListURLParams,
-            extensionsService,
-            application,
-            http,
-            IndexDetailsSection.Mappings
-          );
+          closePopoverAndExecute(() => {
+            navigateToIndexDetailsPage(
+              indexNames[0],
+              indicesListURLParams,
+              extensionsService,
+              application,
+              http,
+              IndexDetailsSection.Mappings
+            );
+          });
         },
       });
       if (allOpen && enableIndexActions) {

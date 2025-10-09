@@ -390,13 +390,11 @@ describe('IndexActionsContextMenu', () => {
         await user.click(overviewBtn);
 
         await openContextMenu();
-        const menu1 = await screen.findByTestId('indexContextMenu');
-        const settingsBtn = await within(menu1).findByText(/show index settings/i);
-        await user.setup({ pointerEventsCheck: 0 }).click(settingsBtn);
+        const settingsBtn = await screen.findByText(/show index settings/i);
+        await user.click(settingsBtn);
 
         await openContextMenu();
-        const menu2 = await screen.findByTestId('indexContextMenu');
-        const mappingBtn = await within(menu2).findByText(/show index mapping/i);
+        const mappingBtn = await screen.findByText(/show index mapping/i);
         await user.click(mappingBtn);
 
         expect(navigateToIndexDetailsPage).toHaveBeenCalledTimes(3);
