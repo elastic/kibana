@@ -63,8 +63,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Cases\nAll\nRead\nNone',
         'Machine Learning\nAll\nRead\nNone',
         'SLOs\nAll\nRead\nNone',
-        'Observability AI Assistant\nAll\nNone',
         'Workflows\nAll\nRead\nNone',
+        'Observability AI Assistant\nAll\nNone',
       ]);
     });
 
