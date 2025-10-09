@@ -15,6 +15,9 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
   EuiDescriptionList,
+  EuiCodeBlock,
+  useEuiTheme,
+  EuiBadge,
 } from '@elastic/eui';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
@@ -47,6 +50,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
       http,
       notifications: { toasts },
     } = useKibana().services;
+    const { euiTheme } = useEuiTheme();
 
     const [ruleType, setRuleType] = useState<RuleType>();
 
@@ -117,6 +121,37 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
       }
       return '';
     }, [rule, ruleTypeRegistry]);
+
+    const getDescriptionFields = useMemo(() => {
+      if (!rule || !rule.ruleTypeId || !ruleTypeRegistry.has(rule.ruleTypeId)) {
+        return;
+      }
+      return ruleTypeRegistry.get(rule.ruleTypeId).getDescriptionFields;
+    }, [rule, ruleTypeRegistry]);
+
+    const customDescriptionContentWrappers = useMemo(() => {
+      return {
+        customQuery: ({ children }: { children: React.ReactNode }) => (
+          <EuiCodeBlock
+            language="json"
+            isCopyable
+            overflowHeight={100}
+            paddingSize="m"
+            css={{ border: euiTheme.border.thin }}
+          >
+            {children}
+          </EuiCodeBlock>
+        ),
+        indexPattern: ({ children }: { children: React.ReactNode }) => (
+          <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+            {children}
+          </EuiFlexGroup>
+        ),
+        indexPatternItem: ({ children }: { children: React.ReactNode }) => {
+          return <EuiBadge color="hollow">{children}</EuiBadge>;
+        },
+      };
+    }, [euiTheme.border.thin]);
 
     const onEditRuleClick = () => {
       if (navigateToEditRuleForm) {
@@ -197,6 +232,9 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
             },
           ]
         : []),
+      ...(getDescriptionFields
+        ? getDescriptionFields({ rule, contentWrappers: customDescriptionContentWrappers })
+        : []),
       {
         title: i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
           defaultMessage: 'Actions',
@@ -250,7 +288,13 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
             )}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
-          <EuiDescriptionList compressed={true} type="column" listItems={ruleDefinitionList} />
+          <EuiDescriptionList
+            compressed={true}
+            type="column"
+            listItems={ruleDefinitionList}
+            css={{ alignItems: 'start' }}
+            columnWidths={[15, 85]}
+          />
         </EuiPanel>
       </EuiFlexItem>
     );

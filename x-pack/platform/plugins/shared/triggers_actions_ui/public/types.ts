@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type React from 'react';
 import type { Moment } from 'moment';
 import type { EuiSuperSelectOption } from '@elastic/eui';
@@ -276,9 +276,22 @@ export interface RuleTypeParamsExpressionProps<
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
+export type GetDescriptionFieldsFn = ({
+  rule,
+  contentWrappers,
+}: {
+  rule: Rule;
+  contentWrappers: {
+    indexPattern: JSX.ElementType;
+    indexPatternItem: JSX.ElementType;
+    customQuery: JSX.ElementType;
+  };
+}) => { title: NonNullable<ReactNode>; description: NonNullable<ReactNode> }[];
+
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
+  getDescriptionFields?: GetDescriptionFieldsFn;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (ruleParams: Params, isServerless?: boolean) => ValidationResult;
