@@ -197,7 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
         expect(createResponse.body.accessControl).to.have.property('owner', objectOnwerProfileUid);
 
-        const { cookie: adminCookie, profileUid: adminUid } = await loginAsKibanaAdmin();
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
 
         const overwriteResponse = await supertestWithoutAuth
           .post('/read_only_objects/create?overwrite=true')
@@ -345,7 +345,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         ];
 
-        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+        const { cookie: adminCookie } = await loginAsKibanaAdmin();
 
         const res = await supertestWithoutAuth
           .post('/read_only_objects/bulk_create?overwrite=true')
