@@ -16,18 +16,18 @@ The goal of these tests is to proactively detect memory exhaustion scenarios by 
 
 ### ⚙️ Test Environment Setup
 
-To effectively reproduce OOM-related behavior, the deployment should be created in Elastic Cloud with 1GB RAM limit for the Kibana instance and 2-4GB RAM limit for Elasticsearch instance. ML and Integration instances as well as cold and frozen tier Elasticsearch nodes aren't required. An example Elastic Cloud configuration applicable for internal testing framework QAF (QA Framework) looks like the following
+To effectively reproduce OOM-related behavior, the deployment should be created in Elastic Cloud with 1GB RAM limit for the Kibana instance. Elasticsearch instance isn't so important in that testing a reasonable 1GB RAM instance provide sufficient performance for the testing. ML and Integration instances as well as cold and frozen tier Elasticsearch nodes aren't required. An example Elastic Cloud configuration applicable for internal testing framework QAF (QA Framework) looks like the following
 
 ```yaml
 ---
-name: { { deployment_name } }
+name: '{{ deployment_name }}'
 settings:
-  autoscaling_enabled: { { autoscaling_enabled } }
+  autoscaling_enabled: '{{ autoscaling_enabled }}'
 metadata:
   system_owned: false
 resources:
   elasticsearch:
-    - region: { { region } }
+    - region: '{{ region }}'
       settings:
         dedicated_masters_threshold: 6
       plan:
@@ -36,8 +36,6 @@ resources:
             elasticsearch:
               node_attributes:
                 data: hot
-              enabled_built_in_plugins:
-                - repository-gcs
             instance_configuration_id: gcp.es.datahot.n2.68x10x45
             node_roles:
               - master
@@ -48,17 +46,17 @@ resources:
               - data_content
             id: hot_content
             size:
-              value: 4096
+              value: 1024
               resource: memory
         elasticsearch:
-          version: { { stack_version } }
+          version: '{{ stack_version }}'
         deployment_template:
           id: gcp-storage-optimized
       ref_id: main-elasticsearch
   enterprise_search: []
   kibana:
     - elasticsearch_cluster_ref_id: main-elasticsearch
-      region: { { region } }
+      region: '{{ region }}'
       plan:
         cluster_topology:
           - instance_configuration_id: gcp.kibana.n2.68x32x45
@@ -67,15 +65,17 @@ resources:
               value: 1024
               resource: memory
         kibana:
-          version: { { stack_version } }
+          version: '{{ stack_version }}'
           user_settings_yaml: |-
-            xpack.securitySolution.prebuiltRulesPackageVersion: 8.17.4
+            xpack.securitySolution.prebuiltRulesPackageVersion: '<package-version>'
       ref_id: main-kibana
 ```
 
-When using QAF the config provided above should be placed in `~/.qaf/config/cloud_plans/prebuilt_rules_oom_testing.yml`.
+Where `<package-version>` is the package to be installed, e.g. `8.17.4`.
 
-To create the
+With QAF the config provided above should be placed in `~/.qaf/config/cloud_plans/prebuilt_rules_oom_testing.yml`.
+
+> **_NOTE:_** Make sure to use Cloud First Testing (CFT) regions when creating the testing deployment as these regions support Kibana configuration options like `xpack.securitySolution.prebuiltRulesPackageVersion` or `xpack.fleet.registryUrl` otherwise the choice of configuration options will be restricted to those listed on the [General settings in Kibana page](https://www.elastic.co/docs/reference/kibana/configuration-reference/general-settings) and having the "C" icon. The CFT regions are `gcp-us-west2` and `aws-eu-west-1`.
 
 ### 🧪 Running the Tests
 
@@ -107,12 +107,6 @@ qaf kibana ftr run-config --ec-deployment-name <deployment-name> --kibana-repo-r
 
 where `<kibana-root>` is the absolute path to the Kibana's root folder and `<deployment-name>` is the deployment name used in `qaf elastic-cloud deployments create` to create an Elastic Stack deployment.
 
-#### CI
-
-The tests can be run via a Buildkite pipeline...
-
-**TBD**
-
 ### 📁 Test Structure
 
 The tests in this folder include scenarios that:
@@ -128,7 +122,3 @@ The tests in this folder include scenarios that:
 - **Pass**: Kibana completes all operations without OOM crashes.
 
 - **Fail**: Kibana terminates with a fatal OOM error or becomes unresponsive.
-
-### 📋 Troubleshooting
-
-**TBD**
