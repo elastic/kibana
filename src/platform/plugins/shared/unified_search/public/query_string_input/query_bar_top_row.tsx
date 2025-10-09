@@ -104,6 +104,8 @@ export const strings = {
     }),
 };
 
+const SHOW_PROJECT_PICKER_KEY = 'unifiedSearch.showProjectPicker';
+
 const getWrapperWithTooltip = (
   children: JSX.Element,
   enableTooltip: boolean,
@@ -232,7 +234,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     controlsWrapper: React.ReactNode;
   };
   useBackgroundSearchButton?: boolean;
-  showProjectPicker?: ProjectPickerProps;
+  showProjectPicker?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -304,7 +306,6 @@ export const QueryBarTopRow = React.memo(
       showDatePicker = true,
       showAutoRefreshOnly = false,
       showSubmitButton = true,
-      showProjectPicker = true,
     } = props;
 
     const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
@@ -791,7 +792,8 @@ export const QueryBarTopRow = React.memo(
     }
 
     function renderProjectPicker() {
-      if (props.showProjectPicker) {
+      // temporarily adding a local storage key to toggle the project picker visibility
+      if (props.showProjectPicker && localStorage.getItem(SHOW_PROJECT_PICKER_KEY) === 'true') {
         return (
           <EuiFlexItem grow={isMobile}>
             <ProjectPicker />

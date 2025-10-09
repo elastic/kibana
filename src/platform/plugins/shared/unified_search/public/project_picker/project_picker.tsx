@@ -19,17 +19,27 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiTitle,
-  EuiSelectable,
   EuiIcon,
   EuiBadge,
   EuiText,
+  EuiIconTip,
+  useEuiTheme,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const strings = {
   getProjectPickerButtonLabel: () =>
     i18n.translate('projectPicker.projectPickerButtonLabel', {
       defaultMessage: 'Cross-project search project picker',
+    }),
+  getOriginProjectTooltip: (numberOfProjects: number) =>
+    i18n.translate('projectPicker.originProjectTooltip', {
+      defaultMessage: 'Searching {numberOfProjects, plural, one {# project} other {# projects}}',
+      values: {
+        numberOfProjects,
+      },
     }),
   getProjectPickerPopoverTitle: () =>
     i18n.translate('projectPicker.projectPickerPopoverTitle', {
@@ -39,6 +49,10 @@ const strings = {
     i18n.translate('projectPicker.manageCrossProjectSearchLabel', {
       defaultMessage: 'Manage cross-project search',
     }),
+  getOriginProjectLabel: () =>
+    i18n.translate('projectPicker.thisProjectLabel', {
+      defaultMessage: 'This project',
+    }),
 };
 
 interface Project {
@@ -47,7 +61,7 @@ interface Project {
   _type: string;
   _csp: string;
   _region: string;
-  tags?: string[];
+  [key: string]: string;
 }
 
 const getSolutionIcon = (solution: string) => {
@@ -81,8 +95,11 @@ const response: { origin: Record<string, Project>; linked_projects: Record<strin
       _csp: 'aws',
       _alias: 'my-project-b72b95',
       _region: 'N. Virginia (us-east-1)',
-      tags: ['tag1', 'tag2', 'tag3', 'tag4'],
       _type: 'security',
+      mytag1: 'foo',
+      mytag2: 'bar',
+      mytag3: 'baz',
+      mytag4: 'qux',
     },
   },
   linked_projects: {
@@ -107,64 +124,72 @@ const response: { origin: Record<string, Project>; linked_projects: Record<strin
       _alias: 'big-query-analytics-616b96',
       _csp: 'azure',
       _region: 'Virginia (eastus2)',
-      tags: ['tag1', 'tag2'],
       _type: 'observability',
+      mytag1: 'foo',
+      mytag2: 'bar',
     },
     h8a3r0932f40bd195389s3761023ca7aa: {
       _id: 'h8a3r0932f40bd195389s3761023ca7aa',
       _alias: 'cloud-backup-c91q12',
       _csp: 'azure',
       _region: 'Virginia (eastus2)',
-      tags: ['tag1', 'tag2'],
       _type: 'security',
+      mytag1: 'foo',
+      mytag2: 'bar',
     },
     r0932f40bd195389s3761023ca7aa8a3: {
-      _id: 'customer-portal-p61068',
+      _id: 'r0932f40bd195389s3761023ca7aa8a3',
       _alias: 'customer-portal-p61068',
       _csp: 'aws',
-      _region: 'AWS, N. Virginia (us-east-1)',
+      _region: 'N. Virginia (us-east-1)',
       _type: 'observability',
     },
     j023ca7aa8a3r0932f40bd195389s376: {
-      _id: 'data-analysis-platform-j4962a',
+      _id: 'j023ca7aa8a3r0932f40bd195389s376',
       _alias: 'data-analysis-platform-j4962a',
       _csp: 'azure',
       _region: 'Virginia (eastus2)',
-      tags: ['tag1', 'tag2'],
       _type: 'observability',
+      mytag1: 'foo',
+      mytag2: 'bar',
     },
     k40bd195389s3761023ca7aa8a3r0932: {
-      _id: 'dev-environment-b19a81',
+      _id: 'k40bd195389s3761023ca7aa8a3r0932',
       _alias: 'dev-environment-b19a81',
       _csp: 'azure',
       _region: 'Virginia (eastus2)',
       _type: 'security',
+      mytag1: 'foo',
+      mytag2: 'bar',
     },
     eaa8a3r0932f40bd195389s3761023ca: {
-      _id: 'engineering-dev-ops-k416e1',
+      _id: 'eaa8a3r0932f40bd195389s3761023ca',
       _alias: 'engineering-dev-ops-k416e1',
-      _csp: 'aws',
-      _region: 'AWS, N. Virginia (us-east-1)',
-      tags: ['tag1', 'tag2', 'tag3', 'tag4'],
-      _type: 'es',
+      _csp: 'gcp',
+      _region: 'N. Virginia (us-east-1)',
+      _type: 'elasticsearch',
     },
     t40bd195389s3761023ca7aa8a3r0932: {
-      _id: 'feature-beta-t149a4',
+      _id: 't40bd195389s3761023ca7aa8a3r0932',
       _alias: 'feature-beta-t149a4',
-      _csp: 'aws',
-      _region: 'AWS, N. Virginia (us-east-1)',
-      tags: ['tag1', 'tag2', 'tag3'],
-      _type: 'es',
+      _csp: 'gcp',
+      _region: 'N. Virginia (us-east-1)',
+      _type: 'elasticsearch',
+      mytag1: 'foo',
+      mytag2: 'bar',
+      mytag3: 'baz',
     },
   },
 };
 
-export const ProjectPicker = (currentProjectId = 'my-project-b72b95') => {
+export const ProjectPicker = () => {
   const [crossProjectSearchScope, setCrossProjectSearchScope] = useState<string>('all');
   const [showProjectPickerPopover, setShowProjectPickerPopover] = useState(false);
   const [linkedProjects, setProjects] = useState<Project[]>(
     Object.values(response.linked_projects)
   );
+
+  const { euiTheme } = useEuiTheme();
 
   const originProject: Project = Object.values(response.origin)[0];
 
@@ -182,30 +207,52 @@ export const ProjectPicker = (currentProjectId = 'my-project-b72b95') => {
         data-test-subj="addFilter"
         onClick={() => setShowProjectPickerPopover(!showProjectPickerPopover)}
         size="s"
+        css={{
+          backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend,
+          border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        }}
       />
     </EuiToolTip>
   );
 
   const closePopover = () => setShowProjectPickerPopover(false);
 
-  const options: EuiSelectableOption[] = (
-    crossProjectSearchScope === 'origin' ? [originProject] : [originProject, ...linkedProjects]
-  ).map((project: Project) => ({
-    label: project._id,
-    prepend: <EuiIcon type={getSolutionIcon(project._type)} />,
-    append: (
-      <>
-        <EuiText size="s">
-          {`${getCSPLabel(project._csp)}, ${project._region}`}
-          {project.tags?.length ? (
-            <EuiBadge color="hollow" iconType="tag" css={{ marginLeft: '4px' }}>
-              {project.tags.length}
-            </EuiBadge>
-          ) : null}
-        </EuiText>
-      </>
-    ),
-  }));
+  const projects =
+    crossProjectSearchScope === 'origin' ? [originProject] : [originProject, ...linkedProjects];
+
+  const options: EuiSelectableOption[] = projects.map((project: Project) => {
+    const tags = Object.entries(project)
+      .filter(([key]) => !key.startsWith('_'))
+      .map(([key, value]) => `${key}: ${value}`);
+
+    return {
+      key: project._id,
+      label: project._alias,
+      prepend: <EuiIcon type={getSolutionIcon(project._type)} />,
+      append: (
+        <>
+          <EuiText size="s">
+            {`${getCSPLabel(project._csp)}, ${project._region}`}
+            {tags.length ? (
+              <EuiToolTip
+                title={i18n.translate('projectPicker.tagTooltipTitle', {
+                  defaultMessage: 'Custom tags',
+                })}
+                content={tags.map((tag) => (
+                  <EuiBadge>{tag}</EuiBadge>
+                ))}
+              >
+                <EuiBadge iconType="tag" css={{ marginLeft: euiTheme.size.s }}>
+                  {tags.length}
+                </EuiBadge>
+              </EuiToolTip>
+            ) : null}
+          </EuiText>
+        </>
+      ),
+      disabled: true,
+    };
+  });
 
   return (
     <EuiPopover
@@ -216,7 +263,7 @@ export const ProjectPicker = (currentProjectId = 'my-project-b72b95') => {
       anchorPosition="downLeft"
       ownFocus
       panelPaddingSize="none"
-      panelProps={{ css: { width: '560px' } }}
+      panelProps={{ css: { width: parseFloat(euiTheme.size.xxxl) * 10 } }}
     >
       <EuiPopoverTitle paddingSize="s">
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -226,7 +273,11 @@ export const ProjectPicker = (currentProjectId = 'my-project-b72b95') => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={strings.getManageCrossProjectSearchLabel()}>
+            <EuiToolTip
+              content={strings.getManageCrossProjectSearchLabel()}
+              delay="long"
+              repositionOnScroll
+            >
               <EuiButtonIcon
                 display="empty"
                 iconType="gear"
@@ -258,37 +309,65 @@ export const ProjectPicker = (currentProjectId = 'my-project-b72b95') => {
           {
             id: 'origin',
             value: 'origin',
-            label: i18n.translate('projectPicker.thisProjectLabel', {
-              defaultMessage: 'This project',
-            }),
+            label: strings.getOriginProjectLabel(),
           },
         ]}
         onChange={(value: string) => setCrossProjectSearchScope(value)}
         css={{ margin: '8px' }}
       />
       <EuiHorizontalRule margin="xs" />
-      <EuiSelectable
-        listProps={{ showIcons: false }}
-        options={[
-          {
-            label: i18n.translate('projectPicker.numberOfProjectsDescription', {
-              defaultMessage:
-                'Searching across {numberOfProjects, plural, one {# project} other {# projects}}',
-              values: {
+      <EuiPanel
+        paddingSize="none"
+        hasBorder={false}
+        hasShadow={false}
+        css={{ paddingBottom: euiTheme.size.s }}
+      >
+        <EuiTitle size="xxs">
+          <p css={{ padding: `0 ${euiTheme.size.s}` }}>
+            <FormattedMessage
+              id="projectPicker.numberOfProjectsDescription"
+              defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
+              values={{
                 numberOfProjects:
                   crossProjectSearchScope === 'origin' ? 1 : linkedProjects.length + 1,
-              },
-            }),
-            isGroupLabel: true,
-          },
-          ...options,
-        ]}
-        onChange={(selectedOptions) => {
-          // Handle project selection
-        }}
-      >
-        {(list) => list}
-      </EuiSelectable>
+              }}
+            />
+          </p>
+        </EuiTitle>
+        {projects.map((project) => (
+          <>
+            <EuiHorizontalRule margin="xs" />
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="spaceBetween"
+              css={{ padding: `0 ${euiTheme.size.s}` }}
+            >
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type={getSolutionIcon(project._type)} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="text">
+                      {project._alias || project._id}
+                    </EuiText>
+                  </EuiFlexItem>
+                  {project._id === originProject._id ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiIconTip size="s" type="flag" content={strings.getOriginProjectLabel()} />
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {`${getCSPLabel(project._csp)}, ${project._region}`}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        ))}
+      </EuiPanel>
     </EuiPopover>
   );
 };
