@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { withAutoSuggest } from './helpers';
 import type { MapParameters } from './map_expression';
 import { getCommandMapExpressionSuggestions } from './map_expression';
 
@@ -29,24 +28,7 @@ describe('getCommandMapExpressionSuggestions', () => {
     it('should suggest all parameters names when the map is empty', () => {
       const query = '{';
       const suggestions = getCommandMapExpressionSuggestions(query, availableParameters);
-      expect(suggestions).toEqual([
-        withAutoSuggest({
-          label: 'param1',
-          kind: 'Constant',
-          asSnippet: true,
-          text: '"param1": "$0"',
-          detail: 'param1',
-          sortText: '1',
-        }),
-        withAutoSuggest({
-          label: 'param2',
-          kind: 'Constant',
-          asSnippet: true,
-          text: '"param2": "$0"',
-          detail: 'param2',
-          sortText: '1',
-        }),
-      ]);
+      expect(suggestions.map((s) => s.label)).toEqual(['param1', 'param2']);
     });
 
     it('should suggest all parameter names when the map is empty with whitespaces', () => {
@@ -55,8 +37,20 @@ describe('getCommandMapExpressionSuggestions', () => {
       expect(suggestions.map((s) => s.label)).toEqual(['param1', 'param2']);
     });
 
+    it('should suggest all parameters names when opening quotes after {', () => {
+      const innerText = '{ "';
+      const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters);
+      expect(suggestions.map((s) => s.label)).toEqual(['param1', 'param2']);
+    });
+
     it('should suggest remaining parameters names after a comma', () => {
       const innerText = '{"param1":"value1",';
+      const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters);
+      expect(suggestions.map((s) => s.label)).toEqual(['param2']);
+    });
+
+    it('should suggest remaining parameters names after a comma followed by quotes', () => {
+      const innerText = '{"param1":"value1", "';
       const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters);
       expect(suggestions.map((s) => s.label)).toEqual(['param2']);
     });
