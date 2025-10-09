@@ -8,9 +8,10 @@
  */
 
 import type { QueryClientConfig } from '@tanstack/react-query';
-import { QueryClient as OriginalQueryClient } from '@tanstack/react-query';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { QueryClient as TanstackQueryClient } from '@tanstack/query-core';
 
-class QueryClient extends OriginalQueryClient {
+class QueryClient extends TanstackQueryClient {
   constructor(config: QueryClientConfig = {}) {
     super({
       ...config,
@@ -30,6 +31,7 @@ class QueryClient extends OriginalQueryClient {
 }
 
 export {
+  TanstackQueryClient,
   QueryClient, // export the extended class, with the `networkMode: 'always'` behavior
 };
 
