@@ -11,6 +11,7 @@ import { allOrAnyString } from '../../schema/common';
 const fetchSLOHealthResponseSchema = t.array(
   t.type({
     sloId: sloIdSchema,
+    sloInstanceId: t.string,
     sloRevision: t.number,
     sloName: t.string,
     state: stateSchema,

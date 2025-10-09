@@ -78,7 +78,12 @@ export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }
                   <ExternalLinkDisplayText
                     textSize="xs"
                     content={result.sloName}
-                    url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
+                    url={paths.sloDetails(
+                      result.sloId,
+                      result.sloInstanceId,
+                      undefined,
+                      'overview'
+                    )}
                   />
                 </li>
               ))}
