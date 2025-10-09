@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RefObject } from 'react';
-
 import { getFocusableElements } from './get_focusable_elements';
 
 /**
@@ -16,11 +14,10 @@ import { getFocusableElements } from './get_focusable_elements';
  *
  * @param ref - The ref to the container element.
  */
-export const focusFirstElement = (ref: RefObject<HTMLElement>) => {
-  const container = ref?.current;
-  if (!container) return;
+export const focusFirstElement = (node: HTMLElement) => {
+  if (!node) return;
 
-  const elements = getFocusableElements(container);
+  const elements = getFocusableElements(node);
 
   if (elements.length > 0) {
     elements[0].focus();
