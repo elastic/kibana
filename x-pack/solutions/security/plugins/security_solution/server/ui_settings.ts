@@ -10,9 +10,9 @@ import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { ReadonlyModeType } from '@kbn/core-ui-settings-common';
 import {
   APP_ID,
-  DEFAULT_AI_CONNECTOR,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
@@ -51,6 +51,7 @@ import {
   DEFAULT_VALUE_REPORT_RATE,
   DEFAULT_VALUE_REPORT_TITLE,
   ENABLE_ESQL_RISK_SCORING,
+  DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -284,7 +285,7 @@ export const initUiSettings = (
         }
       ),
       type: 'boolean',
-      value: false,
+      value: true,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
@@ -620,7 +621,11 @@ export const initUiSettings = (
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
-export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsConfig | null =>
+
+export const getDefaultAIConnectorSetting = (
+  connectors: Connector[],
+  readonlyMode?: ReadonlyModeType
+): SettingsConfig | null =>
   connectors.length > 0
     ? {
         [DEFAULT_AI_CONNECTOR]: {
@@ -643,6 +648,8 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
           requiresPageReload: true,
           schema: schema.string(),
           solutionViews: ['classic', 'security'],
+          readonlyMode,
+          readonly: readonlyMode !== undefined,
         },
       }
     : null;

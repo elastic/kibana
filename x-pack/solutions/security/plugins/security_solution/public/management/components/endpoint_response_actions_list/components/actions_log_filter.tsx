@@ -12,7 +12,6 @@ import {
   isActionType,
   isAgentType,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   type ResponseActionsApiCommandNames,
@@ -46,10 +45,6 @@ export const ActionsLogFilter = memo(
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-      'responseActionsSentinelOneV1Enabled'
-    );
-
     // popover states and handlers
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const onPopoverButtonClick = useCallback(() => {
@@ -74,7 +69,6 @@ export const ActionsLogFilter = memo(
       setUrlHostsFilters,
       setUrlStatusesFilters,
       setUrlTypesFilters,
-      setUrlTypeFilters,
     } = useActionsLogFilter({
       filterName,
       isFlyout,
@@ -163,14 +157,10 @@ export const ActionsLogFilter = memo(
           } else if (filterName === 'statuses') {
             setUrlStatusesFilters(selectedItems.join());
           } else if (filterName === 'types') {
-            if (isSentinelOneV1Enabled) {
-              setUrlTypesFilters({
-                agentTypes: groupedSelectedTypeFilterOptions.agentTypes.join(),
-                actionTypes: groupedSelectedTypeFilterOptions.actionTypes.join(),
-              });
-            } else {
-              setUrlTypeFilters(selectedItems.join());
-            }
+            setUrlTypesFilters({
+              agentTypes: groupedSelectedTypeFilterOptions.agentTypes.join(),
+              actionTypes: groupedSelectedTypeFilterOptions.actionTypes.join(),
+            });
           }
           // reset shouldPinSelectedHosts, setAreHostsSelectedOnMount
           shouldPinSelectedHosts(false);
@@ -202,9 +192,7 @@ export const ActionsLogFilter = memo(
         setUrlActionsFilters,
         setUrlHostsFilters,
         setUrlStatusesFilters,
-        isSentinelOneV1Enabled,
         setUrlTypesFilters,
-        setUrlTypeFilters,
       ]
     );
 
