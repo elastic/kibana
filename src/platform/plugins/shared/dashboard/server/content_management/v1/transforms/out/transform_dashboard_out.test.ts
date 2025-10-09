@@ -42,7 +42,7 @@ describe('transformDashboardOut', () => {
     },
   ];
 
-  test('should set default values if not provided', () => {
+  test('should not supply defaults for missing properties', () => {
     const input: DashboardSavedObjectAttributes = {
       controlGroupInput: {
         panelsJSON: JSON.stringify({ foo: controlGroupInputControlsSo }),
@@ -74,7 +74,6 @@ describe('transformDashboardOut', () => {
       },
       description: 'my description',
       options: {
-        ...DEFAULT_DASHBOARD_OPTIONS,
         hidePanelTitles: false,
       },
       panels: [
