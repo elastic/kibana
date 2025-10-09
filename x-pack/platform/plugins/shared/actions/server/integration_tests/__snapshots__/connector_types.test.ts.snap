@@ -24,6 +24,46 @@ Object {
       ],
       "type": "string",
     },
+    "budgetTokens": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 1024,
+          },
+          "name": "min",
+        },
+        Object {
+          "args": Object {
+            "limit": 32000,
+          },
+          "name": "max",
+        },
+      ],
+      "type": "number",
+    },
+    "extendedThinking": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "boolean",
+    },
     "model": Object {
       "flags": Object {
         "default": [Function],
@@ -201,6 +241,46 @@ Object {
         },
       ],
       "type": "string",
+    },
+    "budgetTokens": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 1024,
+          },
+          "name": "min",
+        },
+        Object {
+          "args": Object {
+            "limit": 32000,
+          },
+          "name": "max",
+        },
+      ],
+      "type": "number",
+    },
+    "extendedThinking": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "boolean",
     },
     "model": Object {
       "flags": Object {
@@ -2371,6 +2451,33 @@ Object {
       ],
       "type": "string",
     },
+    "budgetTokens": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "limit": 1024,
+          },
+          "name": "min",
+        },
+        Object {
+          "args": Object {
+            "limit": 32000,
+          },
+          "name": "max",
+        },
+      ],
+      "type": "number",
+    },
     "contextWindowLength": Object {
       "flags": Object {
         "default": [Function],
@@ -2399,6 +2506,19 @@ Object {
         },
       ],
       "type": "string",
+    },
+    "extendedThinking": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "boolean",
     },
   },
   "type": "object",
