@@ -8,7 +8,6 @@
 import { EuiButtonEmpty, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { ExternalLinkDisplayText } from '../../../slo_details/components/external_link_display_text';
@@ -16,8 +15,8 @@ import { paths } from '../../../../../common/locators/paths';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
-export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }) {
-  const { isLoading, isError, data: resultData } = useFetchSloHealth({ page: 0, perPage: 50 });
+export function HealthCallout() {
+  const { isLoading, isError, data: resultData } = useFetchSloHealth({ page: 0, perPage: 10 });
   const { data: results, total } = resultData ?? {};
   const [showCallOut, setShowCallOut] = useState(
     !sessionStorage.getItem(CALLOUT_SESSION_STORAGE_KEY)
