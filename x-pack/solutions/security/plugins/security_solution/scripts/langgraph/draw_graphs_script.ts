@@ -64,6 +64,9 @@ async function getSiemDashboardMigrationGraph(logger: Logger): Promise<Drawable>
     dashboardMigrationsRetriever,
     logger,
     telemetryClient,
+    inference: {} as InferenceServerStart,
+    request: {} as KibanaRequest,
+    connectorId: 'test-connector-id',
   });
   return graph.getGraphAsync({ xray: true });
 }

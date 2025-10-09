@@ -43,7 +43,10 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
               onTabClick(tab);
             }}
             isSelected={tab.id === selectedTabId}
-            disabled={tab.id === TABS.EXISTING_CONNECTION && !cloudConnectorsCount}
+            disabled={
+              (tab.id === TABS.EXISTING_CONNECTION && !cloudConnectorsCount) ||
+              (isEditPage && tab.id === TABS.NEW_CONNECTION)
+            }
           >
             <FormattedMessage
               id="securitySolutionPackages.cloudSecurityPosture.cloudConnectorSetup.cloudConnectorTabs.tab"

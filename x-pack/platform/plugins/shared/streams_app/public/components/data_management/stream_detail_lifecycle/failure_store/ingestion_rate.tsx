@@ -8,22 +8,29 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
+import type { TimeState } from '@kbn/es-query';
 import type { FailureStoreStats } from '../hooks/use_failure_store_stats';
 import { FailureStoreChartBarSeries } from '../common/chart_components';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
+import type { useAggregations } from '../hooks/use_ingestion_rate';
 
 export function FailureStoreIngestionRate({
   definition,
   stats,
   isLoadingStats,
+  timeState,
+  isLoadingAggregations,
+  aggregations,
+  aggregationsError,
 }: {
   definition: Streams.ingest.all.GetResponse;
   stats?: FailureStoreStats;
   isLoadingStats: boolean;
+  timeState: TimeState;
+  isLoadingAggregations: boolean;
+  aggregations?: ReturnType<typeof useAggregations>['aggregations'];
+  aggregationsError: Error | undefined;
 }) {
-  const { timeState } = useTimefilter();
-
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
@@ -58,6 +65,9 @@ export function FailureStoreIngestionRate({
           stats={stats}
           timeState={timeState}
           isLoadingStats={isLoadingStats}
+          isLoadingAggregations={isLoadingAggregations}
+          aggregationsError={aggregationsError}
+          aggregations={aggregations}
         />
       </EuiFlexGroup>
     </EuiPanel>
