@@ -1913,7 +1913,9 @@ components:
       properties:
         agents:
           description: The agent IDs for the hosts that the response action was sent to
-          format: uuid
+          items:
+            format: uuid
+            type: string
           type: array
         agentState:
           additionalProperties:
