@@ -41,12 +41,18 @@ export const useChartLayers = ({
       instrument: metric.instrument,
       metricName: metric.name,
     });
-    const hasDimensions = dimensions.length > 0;
+    
+    // Determine the breakdown field based on dimension count
+    const getBreakdownField = () => {
+      if (dimensions.length === 0) return undefined;
+      if (dimensions.length === 1) return dimensions[0];
+      return DIMENSIONS_COLUMN;
+    };
 
     return [
       {
         type: 'series',
-        seriesType: hasDimensions ? 'line' : 'area',
+        seriesType: dimensions.length > 0 ? 'line' : 'area',
         xAxis: {
           field: createTimeBucketAggregation({}),
           type: 'dateHistogram',
@@ -60,7 +66,7 @@ export const useChartLayers = ({
             ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
           },
         ],
-        breakdown: hasDimensions ? DIMENSIONS_COLUMN : undefined,
+        breakdown: getBreakdownField(),
       },
     ];
   }, [dimensions, metric, color]);

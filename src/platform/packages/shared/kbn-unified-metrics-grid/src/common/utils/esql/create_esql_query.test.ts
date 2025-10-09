@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import { DIMENSIONS_COLUMN } from './constants';
+import { DIMENSIONS_COLUMN, TECHNICAL_PREVIEW_COMMENT } from './constants';
 import { createESQLQuery } from './create_esql_query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
@@ -78,6 +78,7 @@ TS metrics-*
 TS metrics-*
   | WHERE host.name IS NOT NULL AND container.id IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.name, container.id
+  ${TECHNICAL_PREVIEW_COMMENT}
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.name, " › ", container.id)
   | DROP host.name, container.id
 `.trim()
@@ -94,6 +95,7 @@ TS metrics-*
 TS metrics-*
   | WHERE host.ip IS NOT NULL AND host.name IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.ip, host.name
+  ${TECHNICAL_PREVIEW_COMMENT}
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.ip::STRING, " › ", host.name)
   | DROP host.ip, host.name
 `.trim()
@@ -110,6 +112,7 @@ TS metrics-*
 TS metrics-*
   | WHERE cpu.cores IS NOT NULL AND host.name IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), cpu.cores, host.name
+  ${TECHNICAL_PREVIEW_COMMENT}
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(cpu.cores::STRING, " › ", host.name)
   | DROP cpu.cores, host.name
 `.trim()
@@ -126,6 +129,7 @@ TS metrics-*
 TS metrics-*
   | WHERE host.ip IS NOT NULL AND host.name IS NOT NULL AND cpu.cores IS NOT NULL
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), host.ip, host.name, cpu.cores
+  ${TECHNICAL_PREVIEW_COMMENT}
   | EVAL ${DIMENSIONS_COLUMN} = CONCAT(host.ip::STRING, " › ", host.name, " › ", cpu.cores::STRING)
   | DROP host.ip, host.name, cpu.cores
 `.trim()
