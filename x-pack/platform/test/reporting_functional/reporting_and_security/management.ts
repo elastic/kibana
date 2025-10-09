@@ -92,13 +92,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await (await testSubjects.find('scheduleExport')).click();
         await testSubjects.existOrFail('exportItemDetailsFlyout');
 
-        await (await testSubjects.find('scheduleExportSubmitButton')).click();
+        await retry.try(async () => {
+          await (await testSubjects.find('scheduleExportSubmitButton')).click();
 
-        const successToast = await toasts.getElementByIndex(1);
-        expect(await successToast.getVisibleText()).to.contain(
-          'Find your schedule information and your exports in the Reporting page'
-        );
-        await toasts.dismissAll();
+          const successToast = await toasts.getElementByIndex(1);
+          expect(await successToast.getVisibleText()).to.contain(
+            'Find your schedule information and your exports in the Reporting page'
+          );
+          await toasts.dismissAll();
+        });
 
         await PageObjects.common.navigateToApp('reporting');
         await (await testSubjects.find('reportingTabs-schedules')).click();
@@ -129,9 +131,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await disableButton.click();
 
-        await testSubjects.existOrFail('confirm-disable-modal');
+        await testSubjects.existOrFail('confirm-destructive-action-modal');
         await testSubjects.click('confirmModalConfirmButton');
-        await testSubjects.missingOrFail('confirm-disable-modal');
+        await testSubjects.missingOrFail('confirm-destructive-action-modal');
 
         const successToast = await toasts.getElementByIndex(1);
         expect(await successToast.getVisibleText()).to.contain('Scheduled report disabled');
@@ -149,11 +151,31 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         await openDashboardButton.click();
 
-        const [, , dashboardWindowHandle] = await browser.getAllWindowHandles(); // it is the third window handle
+        const [, reportingWindowHandle, dashboardWindowHandle] =
+          await browser.getAllWindowHandles(); // it is the third window handle
 
         await browser.switchToWindow(dashboardWindowHandle);
 
         await PageObjects.dashboard.expectOnDashboard(dashboardTitle);
+
+        await browser.switchToWindow(reportingWindowHandle);
+      });
+
+      it('allows user to delete schedule', async () => {
+        await (await testSubjects.find('reportingTabs-schedules')).click();
+        await testSubjects.existOrFail('reportSchedulesTable');
+        await (await testSubjects.findAll('euiCollapsedItemActionsButton'))[0].click();
+        const deleteButton = await find.byCssSelector(`[data-test-subj*="reportDeleteSchedule-"]`);
+        await deleteButton.click();
+
+        await testSubjects.existOrFail('confirm-destructive-action-modal');
+        await testSubjects.click('confirmModalConfirmButton');
+        await testSubjects.missingOrFail('confirm-destructive-action-modal');
+
+        const successToast = await toasts.getElementByIndex(1);
+        expect(await successToast.getVisibleText()).to.contain('Scheduled report deleted');
+        await toasts.dismissAll();
+        await testSubjects.missingOrFail('reportScheduleRow');
       });
     });
 
