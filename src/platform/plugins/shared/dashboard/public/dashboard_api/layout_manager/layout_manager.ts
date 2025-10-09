@@ -484,6 +484,8 @@ export function initializeLayoutManager(
 
         const newControls = { ...layout$.getValue().controls };
         newControls[uuid] = {
+          grow: undefined,
+          width: undefined,
           type: controlToPin.type,
           order: Object.keys(newControls).length,
         };
@@ -525,7 +527,6 @@ export function initializeLayoutManager(
     },
     cleanup: () => {
       gridLayoutSubscription.unsubscribe();
-      pinnedControlsSubscription.unsubscribe();
     },
   };
 }
