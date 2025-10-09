@@ -34,32 +34,37 @@ function getLiquidEngine(): Liquid {
  * @returns Array of unique variable paths found in the template. If the template is invalid, returns an empty array.
  */
 export function extractTemplateVariables(template: string): string[] {
-  const engine = getLiquidEngine();
-  const tokens = engine.parse(template);
-  const context: Record<string, any> = {};
-  const foundVariables = new Set<string>();
+  try {
+    const engine = getLiquidEngine();
+    const tokens = engine.parse(template);
+    const context: Record<string, any> = {};
+    const foundVariables = new Set<string>();
 
-  // Continue rendering until all variables are discovered
-  while (true) {
-    try {
-      engine.renderSync(tokens, context);
-      break; // Success - no more undefined variables
-    } catch (error: any) {
-      const match = UNDEFINED_VARIABLE_REGEX.exec(error.message);
-      if (!match) {
-        // Not an undefined variable error - return empty array
-        return [];
+    // Continue rendering until all variables are discovered
+    while (true) {
+      try {
+        engine.renderSync(tokens, context);
+        break; // Success - no more undefined variables
+      } catch (error: any) {
+        const match = UNDEFINED_VARIABLE_REGEX.exec(error.message);
+        if (!match) {
+          // Not an undefined variable error - return empty array
+          return [];
+        }
+
+        const variablePath = match[1].trim();
+        foundVariables.add(variablePath);
+
+        // Create context structure for this variable so rendering can continue
+        createContextStructure(context, variablePath);
       }
-
-      const variablePath = match[1].trim();
-      foundVariables.add(variablePath);
-
-      // Create context structure for this variable so rendering can continue
-      createContextStructure(context, variablePath);
     }
-  }
 
-  return Array.from(foundVariables);
+    return Array.from(foundVariables);
+  } catch (error) {
+    // If template parsing fails, return empty array
+    return [];
+  }
 }
 
 /**
