@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import type { SomeDevLog } from '@kbn/some-dev-log';
+import type { EvaluationReporter, EvaluationScoreRepository } from '@kbn/evals';
 import { table } from 'table';
 import chalk from 'chalk';
 import { sumBy } from 'lodash';
-import type { SomeDevLog } from '@kbn/some-dev-log';
-import { EvaluationScoreRepository } from '@kbn/evals/src/utils/score_repository';
-import { evaluate } from '../src/evaluate';
 
 interface EvaluatorStats {
   mean: number;
@@ -29,16 +28,6 @@ interface ScenarioInfo {
   name: string;
   datasets: DatasetInfo[];
   overallStats: Map<string, EvaluatorStats>;
-}
-
-interface ScoresByScenarioResult {
-  scenarios: ScenarioInfo[];
-  evaluatorNames: string[];
-  metadata: {
-    runId: string;
-    timestamp?: string;
-    model?: string;
-  };
 }
 
 /**
@@ -68,7 +57,7 @@ function formatStatisticsCell(
 /**
  * Calculates overall statistics across all scenarios for each evaluator.
  */
-function calculateOverallStats(
+function calculateOverallStatsForScenarios(
   scenarios: ScenarioInfo[],
   evaluatorNames: string[]
 ): Map<string, { mean: number; stdDev: number; percentage: number }> {
@@ -105,17 +94,14 @@ function calculateOverallStats(
 
 /**
  * Creates a formatted table displaying scenario evaluation statistics.
- * Includes one row per scenario and an overall summary row.
  */
 function createScenarioSummaryTable(
   scenarios: ScenarioInfo[],
   evaluatorNames: string[],
   totalExamples: number
 ): string {
-  // Build headers - scenario name, examples count, and evaluator columns
   const headers = ['Scenario', '# Examples', ...evaluatorNames];
 
-  // Build rows - one per scenario with aggregated statistics
   const scenarioRows = scenarios.map((scenario) => {
     const scenarioTotalExamples = sumBy(scenario.datasets, (d) => d.examplesCount);
     const row = [chalk.bold.white(scenario.name), scenarioTotalExamples.toString()];
@@ -133,8 +119,8 @@ function createScenarioSummaryTable(
     return row;
   });
 
-  // Calculate and add overall row (aggregated across ALL scenarios)
-  const overallStats = calculateOverallStats(scenarios, evaluatorNames);
+  // Calculate and add overall row
+  const overallStats = calculateOverallStatsForScenarios(scenarios, evaluatorNames);
   const overallRow = [chalk.bold.green('Overall'), chalk.bold.green(totalExamples.toString())];
 
   evaluatorNames.forEach((evaluatorName) => {
@@ -147,7 +133,6 @@ function createScenarioSummaryTable(
     }
   });
 
-  // Build column alignment configuration
   const columnConfig: Record<number, { alignment: 'right' | 'left' }> = {
     0: { alignment: 'left' },
   };
@@ -161,101 +146,23 @@ function createScenarioSummaryTable(
 }
 
 /**
- * Displays the complete scenario summary report including metadata, table, and statistics.
- */
-function displayScenarioSummaryReport(
-  scenarios: ScenarioInfo[],
-  evaluatorNames: string[],
-  metadata: { runId: string; timestamp?: string; model?: string },
-  log: SomeDevLog
-): void {
-  // Validate input parameters
-  if (!scenarios || scenarios.length === 0) {
-    log.warning('⚠️ No scenarios found to display');
-    return;
-  }
-
-  if (!evaluatorNames || evaluatorNames.length === 0) {
-    log.warning('⚠️ No evaluators found to display');
-    return;
-  }
-
-  if (!metadata || !metadata.runId) {
-    log.warning('⚠️ Invalid metadata provided');
-    return;
-  }
-
-  // Display metadata
-  log.info(`\n${chalk.bold.blue('📋 Run Metadata:')}`);
-  log.info(
-    `Run: ${chalk.cyan(metadata.runId)} (${
-      metadata.timestamp || 'Unknown time'
-    }) - Model: ${chalk.yellow(metadata.model || 'Unknown')}`
-  );
-
-  // Calculate total examples across all scenarios
-  const totalExamples = sumBy(
-    scenarios.flatMap((scenario) => scenario.datasets),
-    (dataset) => dataset.examplesCount
-  );
-
-  // Create and display scenario summary table
-  log.info(`\n${chalk.bold.blue('═══ SCENARIO SUMMARY ═══')}`);
-  const scenarioTable = createScenarioSummaryTable(scenarios, evaluatorNames, totalExamples);
-  log.info(`\n${scenarioTable}`);
-
-  // Display summary statistics
-  log.info(`\n${chalk.bold.blue('📊 Summary:')}`);
-  log.info(`  • Total Scenarios: ${chalk.green(scenarios.length.toString())}`);
-  log.info(
-    `  • Total Datasets: ${chalk.green(
-      scenarios.flatMap((scenario) => scenario.datasets).length.toString()
-    )}`
-  );
-  log.info(`  • Total Examples: ${chalk.green(totalExamples.toString())}`);
-}
-
-/**
- * Retrieves evaluation scores for a given run and groups them by scenario.
+ * Retrieves evaluation scores and groups them by scenario.
  * Scenarios are extracted from dataset names using the pattern "scenario: dataset-name".
- * This function is specific to Observability AI Assistant evaluations.
  */
-async function getScoresByScenario({
-  scoreRepository,
-  log,
-  runId,
-}: {
-  scoreRepository: EvaluationScoreRepository;
-  log: SomeDevLog;
-  runId: string;
-}): Promise<ScoresByScenarioResult> {
-  // Validate input parameters
-  if (!runId || typeof runId !== 'string' || runId.trim().length === 0) {
-    throw new Error('Invalid runId: must be a non-empty string');
-  }
-
-  if (!scoreRepository) {
-    throw new Error('Score repository is required');
-  }
-
-  if (!log) {
-    throw new Error('Logger is required');
-  }
-
+async function getScoresByScenario(
+  scoreRepository: EvaluationScoreRepository,
+  runId: string,
+  log: SomeDevLog
+): Promise<{ scenarios: ScenarioInfo[]; evaluatorNames: string[]; metadata: any }> {
   log.info(`Retrieving scores for run ID: ${runId} and grouping by scenario`);
 
-  let scores;
-  try {
-    scores = await scoreRepository.getScoresByRunId(runId);
-  } catch (error) {
-    throw new Error(`Failed to retrieve scores for run ID ${runId}: ${error.message}`);
-  }
+  const scores = await scoreRepository.getScoresByRunId(runId);
 
   if (!scores || scores.length === 0) {
     throw new Error(`No scores found for run ID: ${runId}`);
   }
 
-  // Extract unique evaluator names from all scores
+  // Extract unique evaluator names
   const uniqueEvaluatorNames = new Set<string>();
   scores.forEach((score: any) => uniqueEvaluatorNames.add(score.evaluator.name));
   const sortedEvaluatorNames = Array.from(uniqueEvaluatorNames).sort();
@@ -307,7 +214,6 @@ async function getScoresByScenario({
   // Calculate overall stats per scenario
   const processedScenarios = Array.from(scenarioToDatasetsMap.entries())
     .map(([scenarioName, scenarioDatasets]) => {
-      // Calculate overall stats for this scenario across all datasets
       const scenarioOverallStats = new Map<string, EvaluatorStats>();
 
       sortedEvaluatorNames.forEach((evaluatorName) => {
@@ -316,7 +222,6 @@ async function getScoresByScenario({
         scenarioDatasets.forEach((dataset) => {
           const evaluatorStats = dataset.evaluatorStats.get(evaluatorName);
           if (evaluatorStats) {
-            // Collect all individual scores for this evaluator across datasets in this scenario
             const datasetEvaluatorScores = dataset.scores
               .filter((score) => score.evaluator.name === evaluatorName)
               .flatMap((score) => score.evaluator.scores || []);
@@ -366,36 +271,65 @@ async function getScoresByScenario({
   };
 }
 
-evaluate.describe('Observability AI Assistant Scenario Summary Report', { tag: '@svlOblt' }, () => {
-  evaluate('Scenario-Grouped Evaluation Results', async ({ esClient, log }) => {
-    const runId = process.env.EVALUATION_RUN_ID;
-
-    if (!runId) {
-      log.warning('⚠️ Skipping scenario summary: EVALUATION_RUN_ID environment variable not set');
-      log.info('To use this report, set:');
-      log.info('  - EVALUATION_RUN_ID: ID of the evaluation run to report on');
-      return;
-    }
-
-    log.info(chalk.bold.blue('🔍 === SCENARIO SUMMARY REPORT ==='));
-    log.info(`Run ID: ${chalk.cyan(runId)}`);
-
+/**
+ * Creates a custom reporter that displays evaluation results grouped by scenario.
+ * This is specific to Observability AI Assistant where datasets follow the pattern "scenario: dataset-name".
+ */
+export function createScenarioSummaryReporter(): EvaluationReporter {
+  return async (
+    scoreRepository: EvaluationScoreRepository,
+    runId: string,
+    log: SomeDevLog
+  ): Promise<void> => {
     try {
-      const { scenarios, evaluatorNames, metadata } = await getScoresByScenario({
-        scoreRepository: new EvaluationScoreRepository(esClient, log),
-        log,
-        runId,
-      });
+      log.info(chalk.bold.blue('\n🔍 === SCENARIO SUMMARY REPORT ==='));
 
-      // Display the complete scenario summary report
-      displayScenarioSummaryReport(scenarios, evaluatorNames, metadata, log);
+      const { scenarios, evaluatorNames, metadata } = await getScoresByScenario(
+        scoreRepository,
+        runId,
+        log
+      );
+
+      if (!scenarios || scenarios.length === 0) {
+        log.warning('⚠️ No scenarios found to display');
+        return;
+      }
+
+      // Display metadata
+      log.info(`\n${chalk.bold.blue('📋 Run Metadata:')}`);
+      log.info(
+        `Run: ${chalk.cyan(metadata.runId)} (${
+          metadata.timestamp || 'Unknown time'
+        }) - Model: ${chalk.yellow(metadata.model || 'Unknown')}`
+      );
+
+      // Calculate total examples
+      const totalExamples = sumBy(
+        scenarios.flatMap((scenario) => scenario.datasets),
+        (dataset) => dataset.examplesCount
+      );
+
+      // Display scenario summary table
+      log.info(`\n${chalk.bold.blue('═══ SCENARIO SUMMARY ═══')}`);
+      const scenarioTable = createScenarioSummaryTable(scenarios, evaluatorNames, totalExamples);
+      log.info(`\n${scenarioTable}`);
+
+      // Display summary statistics
+      log.info(`\n${chalk.bold.blue('📊 Summary:')}`);
+      log.info(`  • Total Scenarios: ${chalk.green(scenarios.length.toString())}`);
+      log.info(
+        `  • Total Datasets: ${chalk.green(
+          scenarios.flatMap((scenario) => scenario.datasets).length.toString()
+        )}`
+      );
+      log.info(`  • Total Examples: ${chalk.green(totalExamples.toString())}`);
 
       log.info(
         chalk.green(`\n✅ Scenario summary report generated successfully for run ID: ${runId}`)
       );
-    } catch (error) {
+    } catch (error: any) {
       log.error(`❌ Failed to generate scenario summary report: ${error.message}`);
       throw error;
     }
-  });
-});
+  };
+}

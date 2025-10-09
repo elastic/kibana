@@ -11,6 +11,7 @@ import { ConversationsClient } from './clients/conversations_client';
 import { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
 import type { EvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
 import { createEvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
+import { createScenarioSummaryReporter } from './scenario_summary_reporter';
 
 export const evaluate = base.extend<
   {},
@@ -62,6 +63,13 @@ export const evaluate = base.extend<
           phoenixClient,
         })
       );
+    },
+    { scope: 'worker' },
+  ],
+  reportModelScore: [
+    async ({}, use) => {
+      // Override default reporter with scenario summary reporter
+      await use(createScenarioSummaryReporter());
     },
     { scope: 'worker' },
   ],

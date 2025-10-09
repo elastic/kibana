@@ -81,14 +81,14 @@ export async function prepareEvaluationData({
     ),
   }));
 
-  const currentRunId = runId || process.env.TEST_RUN_ID || `run_${Date.now()}`;
+  const currentRunId = runId || process.env.TEST_RUN_ID;
 
   return {
     datasetScoresWithStats,
     model,
     evaluatorModel,
     repetitions,
-    runId: currentRunId,
+    runId: currentRunId!,
   };
 }
 
