@@ -8,7 +8,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { filter, map as lodashMap, max } from 'lodash';
+import { filter, map as lodashMap, max, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -446,7 +446,7 @@ export function initializeLayoutManager(
       getPanelCount: () => Object.keys(layout$.value.panels).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
 
-      // only controls can be pinned
+      /** Pinned panels (only controls can currently be pinned) */
       panelIsPinned: (uuid: string) => {
         return Object.keys(layout$.getValue().controls).includes(uuid);
       },
@@ -470,7 +470,10 @@ export function initializeLayoutManager(
           ...layout$.getValue(),
           panels: {
             ...otherPanels,
-            [uuid]: { ...controlToUnpin, grid: { i: uuid, ...newPanelPlacement } },
+            [uuid]: {
+              type: controlToUnpin.type,
+              grid: { i: uuid, ...newPanelPlacement },
+            },
           },
           controls: newControls,
         });
@@ -480,9 +483,13 @@ export function initializeLayoutManager(
         if (!controlToPin) return;
 
         const newControls = { ...layout$.getValue().controls };
-        newControls[uuid] = { ...controlToPin, order: newControls.length };
+        newControls[uuid] = {
+          type: controlToPin.type,
+          order: Object.keys(newControls).length,
+        };
         const newPanels = { ...layout$.getValue().panels };
         delete newPanels[uuid];
+
         layout$.next({ ...layout$.getValue(), panels: newPanels, controls: newControls });
       },
 
