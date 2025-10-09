@@ -83,7 +83,22 @@ class TelemetryConfigurationDTO {
     maxResponseSize: 10 * 1024 * 1024, // 10 MB
     maxCompressedResponseSize: 8 * 1024 * 1024, // 8 MB
   };
-  private readonly DEFAULT_ENCRYPTION_PUBLIC_KEYS: Record<string, string> = {};
+  private readonly DEFAULT_ENCRYPTION_PUBLIC_KEYS: Record<string, string> = {
+    'test-pubkey': `-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAsWH/fnL4e5xs3ihBGTme
+xOI63U1kX5WVBqf9qYy9MDLtttegyl7eqepKXpqnRIndzs5im1hgqEViE/KAJfSj
+ZeYqhZodiZOfCUC55ROW+iAUEoCaiz5qVvxHEo2T5sPZLwO4IDWO8xBZ0QgsouEw
+1riDck3jDD1dIRc7tWMf41ERGsLSAoLHd9+sJS4385Qh40W7Kx74MxXExPL0GIvt
+SP85RAC3AC1a6A/QxHu4wYMxAhXYOPkeRllK7ROmVhu3AKCd1PLi1Xi/CvfIvLFn
++WDwhSwwTY9ve58lkcwe1XM/o4DPGiJ/iRBWiDX/MiHgAP2eNygH7CjYXcaBGzNF
+L+QNPxBqROC84dTi8IBqYK4snx+/fu9gShX1udCQe5y/gy08TgsYUkRKiQXDKjYV
+gCRFV6YTD31DdbZ61MfJPg+mL2yZADC9lGsEkMDNhq7z/eTXpeFlFZcmjbAsRSQn
+boZaIoIbYn5lfY6QNrllGDQzLsRURxMIHh1ZEp0gDE6u92aBjkZ+MGUi6oYJG9uc
+TulTRQdsiWOC0CBz40XBB7UdkV93CQ3gEDgP9hBjGR3vFpEn9AqmJEOW6PRsP+/N
+WvZWsTclsArvmpygLzeoLhFKc/lyNKnSgR9cYfkRHQiVXP7vhCeIRC3LU4M4+jk4
+Vu/VBGZzdBch4tB34Cg0OVMCAwEAAQ==
+-----END PUBLIC KEY-----`,
+  };
 
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
   private _max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
