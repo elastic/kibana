@@ -19,13 +19,19 @@ import type {
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
-import type { StorageFieldTypeOf, StorageMappingProperty } from './types';
+import type { ObjectMappingsToStorageDocument, StorageMappingProperty } from './types';
+
+interface StorageDocumentBase {
+  /** This is a special property in ES, you almost definitely do not want to include it in your document _source */
+  _id?: never;
+}
 
 interface StorageMappingProperties {
   [x: string]: StorageMappingProperty;
 }
 
 export interface StorageMappings {
+  /** This will be mapped as an object */
   properties: StorageMappingProperties;
 }
 
@@ -51,16 +57,13 @@ export type StorageClientSearchResponse<
   TSearchRequest extends Omit<SearchRequest, 'index'>
 > = InferSearchResponseOf<TDocument, TSearchRequest>;
 
-export type StorageClientBulkOperation<TDocument extends { _id?: string }> =
+export type StorageClientBulkOperation<TDocument> =
   | {
-      index: { document: Omit<TDocument, '_id'>; _id?: string };
+      index: { document: TDocument; _id?: string };
     }
   | { delete: { _id: string } };
 
-export type StorageClientBulkRequest<TDocument extends { _id?: string }> = Omit<
-  BulkRequest,
-  'operations' | 'index'
-> & {
+export type StorageClientBulkRequest<TDocument> = Omit<BulkRequest, 'operations' | 'index'> & {
   operations: Array<StorageClientBulkOperation<TDocument>>;
 };
 export type StorageClientBulkResponse = BulkResponse;
@@ -77,10 +80,7 @@ export interface StorageClientCleanResponse {
   result: Extract<Result, 'deleted' | 'noop'>;
 }
 
-export type StorageClientIndexRequest<TDocument = unknown> = Omit<
-  IndexRequest<Omit<TDocument, '_id'>>,
-  'index'
->;
+export type StorageClientIndexRequest<TDocument = unknown> = Omit<IndexRequest<TDocument>, 'index'>;
 
 export type StorageClientIndexResponse = IndexResponse;
 
@@ -138,25 +138,32 @@ type MissingKeysError<T extends string> = Error &
 // To keep the type safety of the application type in the consuming code, both the storage
 // settings and the application type are passed to the IStorageClient type.
 // The IStorageClient type then checks if the application type is a subset of the storage
-// document type. If this is not the case, the IStorageClient type is set to never, which
-// will cause a type error in the consuming code.
+// document type. If this is not the case, the IStorageClient type is set to an error.
 export type IStorageClient<
-  TSchema extends IndexStorageSettings,
-  TApplicationType extends StorageDocumentOf<TSchema>
-> = Exact<TApplicationType, StorageDocumentOf<TSchema>> extends true
+  TSettings extends IndexStorageSettings,
+  TApplicationType extends StorageDocumentBase & StorageDocumentFromSettings<TSettings>
+> = Exact<TApplicationType, StorageDocumentFromSettings<TSettings>> extends true
   ? InternalIStorageClient<TApplicationType>
-  : MissingKeysError<Exclude<UnionKeys<TApplicationType>, UnionKeys<StorageDocumentOf<TSchema>>>>;
+  : MissingKeysError<
+      Exclude<UnionKeys<TApplicationType>, UnionKeys<StorageDocumentFromSettings<TSettings>>>
+    >;
 
 export type SimpleIStorageClient<TStorageSettings extends IndexStorageSettings> = IStorageClient<
   TStorageSettings,
-  StorageDocumentOf<TStorageSettings>
+  StorageDocumentFromSettings<TStorageSettings>
 >;
 
-export type StorageDocumentOf<TStorageSettings extends StorageSettings> = Partial<
-  StorageFieldTypeOf<{
-    type: 'object';
-    properties: TStorageSettings['mappings']['properties'];
-  }>
+/**
+ * This type checks that that the mappings are a subset of the application type.
+ *
+ * Not every field in the stored document needs to be present in mappings.
+ */
+export type StorageDocumentFromSettings<TStorageSettings extends StorageSettings> = Partial<
+  StorageDocumentBase &
+    ObjectMappingsToStorageDocument<{
+      type: 'object';
+      properties: TStorageSettings['mappings']['properties'];
+    }>
 >;
 
 export { StorageIndexAdapter } from './src/index_adapter';

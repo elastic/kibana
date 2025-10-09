@@ -12,7 +12,7 @@ import type {
   SimpleIStorageClient,
   StorageClientBulkResponse,
   StorageClientIndexResponse,
-  StorageDocumentOf,
+  StorageDocumentFromSettings,
 } from '../../..';
 import { StorageIndexAdapter, type StorageSettings } from '../../..';
 import type { Logger } from '@kbn/core/server';
@@ -181,6 +181,65 @@ describe('StorageIndexAdapter', () => {
     it('deletes the document', async () => {
       await verifyClean();
     });
+
+    describe('serializes and deserializes a document', () => {
+      let serdeClient: SimpleIStorageClient<typeof storageSettings>;
+      beforeAll(async () => {
+        adapter = createStorageIndexAdapter(storageSettings, {
+          deserializeSource: (source) => {
+            return {
+              ...source,
+              foo: String(source.foo).toLowerCase(),
+            } as StorageDocumentFromSettings<typeof storageSettings>;
+          },
+          serializeSource: (source) => {
+            return {
+              ...source,
+              foo: String(source.foo).toUpperCase(),
+            };
+          },
+        });
+        serdeClient = adapter.getClient();
+        await serdeClient.index({
+          id: 'otherdoc',
+          document: { foo: 'xyz' } as StorageDocumentFromSettings<typeof storageSettings>,
+        });
+      });
+
+      afterAll(async () => {
+        await client.clean();
+      });
+
+      it('returns the deserialized document on get', async () => {
+        const getResponse = await serdeClient.get({ id: 'otherdoc' });
+        expect(getResponse._source).toMatchObject({
+          foo: 'xyz',
+        });
+      });
+
+      it('returns the deserialized document on search', async () => {
+        const searchResponse = await serdeClient.search({
+          track_total_hits: true,
+          size: 1,
+          query: {
+            match: {
+              foo: 'XYZ', // Must be serialized source value!
+            },
+          },
+        });
+
+        expect(searchResponse.hits.hits[0]._source).toMatchObject({
+          foo: 'xyz',
+        });
+      });
+
+      it('stores the serialized document', async () => {
+        const getResponse = await esClient.get({ index: TEST_INDEX_NAME, id: 'otherdoc' });
+        expect(getResponse._source).toMatchObject({
+          foo: 'XYZ',
+        });
+      });
+    });
   });
 
   describe('when bulk indexing into a clean Elasticsearch instance', () => {
@@ -259,24 +318,30 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
-    describe('migrates a document with a legacy property', () => {
-      let migratingClient: SimpleIStorageClient<typeof storageSettings>;
+    describe('serializes and deserializes a document', () => {
+      let serdeClient: SimpleIStorageClient<typeof storageSettings>;
       beforeAll(async () => {
         adapter = createStorageIndexAdapter(storageSettings, {
-          migrateSource: (source) => {
+          deserializeSource: (source) => {
             return {
               ...source,
-              migratedProp: String(source.foo).toUpperCase(),
-            } as StorageDocumentOf<typeof storageSettings>;
+              foo: String(source.foo).toLowerCase(),
+            } as StorageDocumentFromSettings<typeof storageSettings>;
+          },
+          serializeSource: (source) => {
+            return {
+              ...source,
+              foo: String(source.foo).toUpperCase(),
+            };
           },
         });
-        migratingClient = adapter.getClient();
-        await client.bulk({
+        serdeClient = adapter.getClient();
+        await serdeClient.bulk({
           operations: [
             {
               index: {
                 _id: 'otherdoc',
-                document: { foo: 'xyz' } as StorageDocumentOf<typeof storageSettings>,
+                document: { foo: 'xyz' } as StorageDocumentFromSettings<typeof storageSettings>,
               },
             },
           ],
@@ -287,34 +352,33 @@ describe('StorageIndexAdapter', () => {
         await client.clean();
       });
 
-      it('returns the migrated document on get', async () => {
-        const getResponse = await migratingClient.get({ id: 'otherdoc' });
+      it('returns the deserialized document on get', async () => {
+        const getResponse = await serdeClient.get({ id: 'otherdoc' });
         expect(getResponse._source).toMatchObject({
           foo: 'xyz',
-          migratedProp: 'XYZ',
         });
       });
 
-      it('returns the migrated document on search', async () => {
-        const searchResponse = await migratingClient.search({
+      it('returns the deserialized document on search', async () => {
+        const searchResponse = await serdeClient.search({
           track_total_hits: true,
           size: 1,
           query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    foo: 'xyz',
-                  },
-                },
-              ],
+            match: {
+              foo: 'XYZ', // Must be serialized source value!
             },
           },
         });
 
         expect(searchResponse.hits.hits[0]._source).toMatchObject({
-          migratedProp: 'XYZ',
           foo: 'xyz',
+        });
+      });
+
+      it('stores the serialized document when bulk indexing', async () => {
+        const getResponse = await esClient.get({ index: TEST_INDEX_NAME, id: 'otherdoc' });
+        expect(getResponse._source).toMatchObject({
+          foo: 'XYZ',
         });
       });
     });
@@ -446,7 +510,7 @@ describe('StorageIndexAdapter', () => {
 
   function createStorageIndexAdapter<TStorageSettings extends StorageSettings>(
     settings: TStorageSettings,
-    options?: StorageIndexAdapterOptions<StorageDocumentOf<TStorageSettings>>
+    options?: StorageIndexAdapterOptions<StorageDocumentFromSettings<TStorageSettings>>
   ): SimpleStorageIndexAdapter<TStorageSettings> {
     return new StorageIndexAdapter(esClient, loggerMock, settings, options);
   }

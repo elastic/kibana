@@ -18,7 +18,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import { last, mapValues, padStart } from 'lodash';
+import { last, mapValues, padStart, identity } from 'lodash';
 import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type {
@@ -32,7 +32,7 @@ import type {
   StorageClientSearch,
   StorageClientGet,
   StorageClientExistsIndex,
-  StorageDocumentOf,
+  StorageDocumentFromSettings,
   StorageClientSearchResponse,
   StorageClientClean,
   StorageClientCleanResponse,
@@ -89,14 +89,19 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
   });
 }
 
-export interface StorageIndexAdapterOptions<TApplicationType> {
+export interface StorageIndexAdapterOptions<
+  TApplicationType,
+  TSerializedType extends Record<string, unknown> = Record<string, unknown>
+> {
   /**
    * If this callback is provided, it will be called on every _source before returned to the caller of the search or get methods.
-   * This is useful for migrating documents from one version to another, or for transforming the document before returning it.
-   * This should be used as rarely as possible - in most cases, new properties should be added as optional.
+   * This is useful for serializing documents for transforming the document before returning or storing it.
    */
-  migrateSource?: (document: Record<string, unknown>) => TApplicationType;
+  deserializeSource?: (_source: TSerializedType) => TApplicationType;
+  serializeSource?: (_source: TApplicationType) => TSerializedType;
 }
+
+type InternalStorageIndexAdapterOptions = Required<StorageIndexAdapterOptions<any, any>>;
 
 /**
  * Adapter for writing and reading documents to/from Elasticsearch,
@@ -107,16 +112,27 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
  */
 export class StorageIndexAdapter<
   TStorageSettings extends IndexStorageSettings,
-  TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>
+  TApplicationType extends Partial<StorageDocumentFromSettings<TStorageSettings>>,
+  TSerializedType extends Record<string, unknown> = Record<string, unknown>
 > {
   private readonly logger: Logger;
+  private readonly options: InternalStorageIndexAdapterOptions;
   constructor(
     private readonly esClient: ElasticsearchClient,
     logger: Logger,
     private readonly storage: TStorageSettings,
-    private readonly options: StorageIndexAdapterOptions<TApplicationType> = {}
+    options: StorageIndexAdapterOptions<TApplicationType, TSerializedType> = {}
   ) {
     this.logger = logger.get('storage').get(this.storage.name);
+    this.options = Object.assign(
+      {},
+      {
+        /* defaults */
+        serializeSource: identity,
+        deserializeSource: identity,
+      },
+      options
+    );
   }
 
   private getSearchIndexPattern(): string {
@@ -318,7 +334,7 @@ export class StorageIndexAdapter<
               ...response.hits,
               hits: response.hits.hits.map((hit) => ({
                 ...hit,
-                _source: this.maybeMigrateSource(hit._source),
+                _source: this.maybeDeserializeSource(hit._source),
               })),
             },
           };
@@ -356,6 +372,7 @@ export class StorageIndexAdapter<
       const indexResponse = await wrapEsCall(
         this.esClient.index({
           ...request,
+          ...(request.document ? this.maybeSerializeSource(request.document) : undefined),
           id,
           refresh,
           index: this.getWriteTarget(),
@@ -392,13 +409,14 @@ export class StorageIndexAdapter<
 
     const bulkOperations = operations.flatMap((operation): BulkOperationContainer[] => {
       if ('index' in operation) {
+        const serializedDoc = this.maybeSerializeSource(operation.index.document);
         return [
           {
             index: {
               _id: operation.index._id,
             },
           },
-          operation.index.document as {},
+          serializedDoc as {},
         ];
       }
 
@@ -533,7 +551,7 @@ export class StorageIndexAdapter<
       _id: hit._id!,
       _index: hit._index,
       found: true,
-      _source: this.maybeMigrateSource(hit._source),
+      _source: this.maybeDeserializeSource(hit._source),
       _ignored: hit._ignored,
       _primary_term: hit._primary_term,
       _routing: hit._routing,
@@ -543,15 +561,20 @@ export class StorageIndexAdapter<
     };
   };
 
-  private maybeMigrateSource = (_source: unknown): TApplicationType => {
+  private maybeSerializeSource = (_source: TApplicationType): object => {
     // check whether source is an object, if not fail
     if (typeof _source !== 'object' || _source === null) {
-      throw new Error(`Source must be an object, got ${typeof _source}`);
+      throw new Error(`Could not serialize: expected an object, got ${typeof _source}`);
     }
-    if (this.options.migrateSource) {
-      return this.options.migrateSource(_source as Record<string, unknown>);
+    return this.options.serializeSource(_source) as object;
+  };
+
+  private maybeDeserializeSource = (_source: unknown): TApplicationType => {
+    // check whether source is an object, if not fail
+    if (typeof _source !== 'object' || _source === null) {
+      throw new Error(`Could not deserialize: expected an object, got ${typeof _source}`);
     }
-    return _source as TApplicationType;
+    return this.options.deserializeSource(_source) as TApplicationType;
   };
 
   private existsIndex: StorageClientExistsIndex = () => {
@@ -574,4 +597,4 @@ export class StorageIndexAdapter<
 }
 
 export type SimpleStorageIndexAdapter<TStorageSettings extends IndexStorageSettings> =
-  StorageIndexAdapter<TStorageSettings, StorageDocumentOf<TStorageSettings>>;
+  StorageIndexAdapter<TStorageSettings, StorageDocumentFromSettings<TStorageSettings>>;

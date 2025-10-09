@@ -47,7 +47,7 @@ export function createStreamsStorageClient(
     logger,
     streamsStorageSettings,
     {
-      migrateSource: migrateOnRead,
+      deserializeSource: migrateOnRead,
     }
   );
 
