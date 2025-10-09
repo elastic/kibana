@@ -15,8 +15,8 @@ import {
   ENVIRONMENT_ALL_VALUE,
   ENVIRONMENT_NOT_DEFINED_VALUE,
 } from '../../../../../common/environment_filter_values';
+import { BaseDiscoverButton } from './base_discover_button';
 import {
-  BaseDiscoverButton,
   filterByDependencyName,
   filterByEnvironment,
   filterByKuery,
@@ -24,7 +24,7 @@ import {
   filterByServiceName,
   filterByTransactionNameOrSpanName,
   filterByTransactionType,
-} from './base_discover_button';
+} from './filters';
 
 const getESQLQuery = ({
   params,
