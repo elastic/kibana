@@ -96,5 +96,60 @@ export default function ({ getService }: DatasetQualityFtrContextProvider) {
       expect(isNaN(resp.body.sizeBytes as number)).to.be(false);
       expect(resp.body.sizeBytes).to.be.greaterThan(0);
     });
+
+    describe('failure store retention periods', () => {
+      const dataStreamName = `${type}-${dataset}-${namespace}`;
+
+      it('returns "customRetentionPeriod"', async () => {
+        const es = getService('es');
+        await es.indices.putDataStreamOptions({
+          name: dataStreamName,
+          failure_store: {
+            enabled: true,
+            lifecycle: {
+              data_retention: '30d',
+              enabled: true,
+            },
+          },
+        });
+
+        const resp = await callApi(dataStreamName, roleAuthc, internalReqHeader);
+
+        expect(resp.status).to.be(200);
+        expect(resp.body).to.have.property('customRetentionPeriod');
+        expect(resp.body.customRetentionPeriod).to.be('30d');
+      });
+
+      it('returns "defaultRetentionPeriod" if already present in data streams details', async () => {
+        const es = getService('es');
+        await es.indices.putDataStreamOptions({
+          name: dataStreamName,
+          failure_store: {
+            enabled: true,
+          },
+        });
+
+        const resp = await callApi(dataStreamName, roleAuthc, internalReqHeader);
+
+        expect(resp.status).to.be(200);
+        expect(resp.body).to.have.property('defaultRetentionPeriod');
+        expect(resp.body.defaultRetentionPeriod).not.to.be(undefined);
+      });
+
+      it('do not returns "defaultRetentionPeriod" if not present in data streams details', async () => {
+        const es = getService('es');
+        await es.indices.putDataStreamOptions({
+          name: dataStreamName,
+          failure_store: {
+            enabled: false,
+          },
+        });
+
+        const resp = await callApi(dataStreamName, roleAuthc, internalReqHeader);
+
+        expect(resp.status).to.be(200);
+        expect(resp.body).not.to.have.property('defaultRetentionPeriod');
+      });
+    });
   });
 }

@@ -64,6 +64,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ),
         ]);
       });
+      after(async () => {
+        await synthtrace.clean();
+      });
 
       it('returns "sizeBytes" correctly', async () => {
         const resp = await callApiAs(
@@ -74,8 +77,71 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(resp.body.sizeBytes).to.be.greaterThan(0);
       });
 
-      after(async () => {
-        await synthtrace.clean();
+      describe('failure store retention periods', () => {
+        const dataStreamName = `${type}-${dataset}-${namespace}`;
+        const es = getService('es');
+        it('returns "customRetentionPeriod"', async () => {
+          await es.indices.putDataStreamOptions({
+            name: dataStreamName,
+            failure_store: {
+              enabled: true,
+              lifecycle: {
+                data_retention: '30d',
+                enabled: true,
+              },
+            },
+          });
+
+          const resp = await callApiAs('datasetQualityMonitorUser', dataStreamName);
+
+          expect(resp.status).to.be(200);
+          expect(resp.body).to.have.property('customRetentionPeriod');
+          expect(resp.body.customRetentionPeriod).to.be('30d');
+        });
+
+        it('returns "defaultRetentionPeriod" if present in data streams details', async () => {
+          await es.indices.putDataStreamOptions({
+            name: dataStreamName,
+            failure_store: {
+              enabled: true,
+            },
+          });
+
+          const resp = await callApiAs('datasetQualityMonitorUser', dataStreamName);
+
+          expect(resp.status).to.be(200);
+          expect(resp.body).to.have.property('defaultRetentionPeriod');
+          expect(resp.body.defaultRetentionPeriod).not.to.be(undefined);
+        });
+
+        it('returns "defaultRetentionPeriod" if not present in data streams details and user has permissions to view it at cluster level', async () => {
+          await es.indices.putDataStreamOptions({
+            name: dataStreamName,
+            failure_store: {
+              enabled: false,
+            },
+          });
+
+          const resp = await callApiAs('adminUser', dataStreamName);
+
+          expect(resp.status).to.be(200);
+          expect(resp.body).to.have.property('defaultRetentionPeriod');
+          expect(resp.body.defaultRetentionPeriod).not.to.be(undefined);
+        });
+
+        it('do not returns "defaultRetentionPeriod" if not present in data streams details and user has not permissions to view it at cluster level', async () => {
+          await es.indices.putDataStreamOptions({
+            name: dataStreamName,
+            failure_store: {
+              enabled: false,
+            },
+          });
+
+          const resp = await callApiAs('datasetQualityMonitorUser', dataStreamName);
+
+          expect(resp.status).to.be(200);
+          expect(resp.body).not.to.have.property('defaultRetentionPeriod');
+        });
       });
     });
   });
