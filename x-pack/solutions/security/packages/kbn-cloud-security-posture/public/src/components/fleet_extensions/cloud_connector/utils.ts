@@ -13,18 +13,18 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import semver from 'semver';
 
-import type { GetCloudConnectorRemoteRoleTemplateParams } from './types';
-
-import type { CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudProviders } from './types';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
-  AWS_SINGLE_ACCOUNT,
+  CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
+  ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
   CLOUD_CONNECTOR_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
   CLOUD_CONNECTOR_CSPM_REUSABLE_MIN_VERSION,
-  CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
-  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
-  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
+  AWS_PROVIDER,
+  AZURE_PROVIDER,
 } from './constants';
+import type { CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
 
 const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | undefined => {
   if (!cloudHost) return undefined;
@@ -68,40 +68,78 @@ export const getTemplateUrlFromPackageInfo = (
   }
 };
 
+type CloudSetupForCloudConnector = Pick<
+  CloudSetup,
+  | 'isCloudEnabled'
+  | 'cloudId'
+  | 'cloudHost'
+  | 'deploymentUrl'
+  | 'serverless'
+  | 'isServerlessEnabled'
+>;
+
+export const getElasticStackId = (cloud?: CloudSetupForCloudConnector): string | undefined => {
+  if (!cloud) return undefined;
+
+  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
+    return cloud.serverless.projectId;
+  }
+
+  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+
+  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
+    return kibanaComponentId;
+  }
+
+  return undefined;
+};
+interface GetCloudConnectorRemoteRoleTemplateParams {
+  input: NewPackagePolicyInput;
+  cloud: CloudSetupForCloudConnector;
+  packageInfo: PackageInfo;
+  templateName: string;
+  provider: CloudProviders;
+}
+
 export const getCloudConnectorRemoteRoleTemplate = ({
   input,
   cloud,
   packageInfo,
   templateName,
+  provider,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
-  let elasticResourceId: string | undefined;
-  const accountType = input?.streams?.[0]?.vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
+  const accountTypeField = Object.keys(input?.streams?.[0]?.vars || {}).find((key) =>
+    key.includes('account_type')
+  );
+  const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
+  const TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR = 'RESOURCE_ID';
 
-  const provider = getCloudProviderFromCloudHost(cloud?.cloudHost);
+  const accountType = input?.streams?.[0]?.vars?.[accountTypeField || '']?.value;
 
-  if (!provider || provider !== 'aws') return undefined;
+  if (!accountType) return undefined;
 
-  const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
+  const hostProvider = getCloudProviderFromCloudHost(cloud?.cloudHost);
+  if (!hostProvider || (provider === 'aws' && hostProvider !== provider)) return undefined;
 
-  const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
+  const elasticStackId = getElasticStackId(cloud);
 
-  if (cloud?.isServerlessEnabled && cloud?.serverless?.projectId) {
-    elasticResourceId = cloud.serverless.projectId;
+  if (!elasticStackId) return undefined;
+
+  const templateUrlFieldName =
+    provider === AWS_PROVIDER
+      ? CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS
+      : provider === AZURE_PROVIDER
+      ? ARM_TEMPLATE_URL_CLOUD_CONNECTORS
+      : undefined;
+
+  if (templateUrlFieldName) {
+    return getTemplateUrlFromPackageInfo(packageInfo, templateName, templateUrlFieldName)
+      ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
+      ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticStackId);
   }
 
-  if (cloud?.isCloudEnabled && deploymentId && kibanaComponentId) {
-    elasticResourceId = kibanaComponentId;
-  }
-
-  if (!elasticResourceId) return undefined;
-
-  return getTemplateUrlFromPackageInfo(
-    packageInfo,
-    templateName,
-    CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS
-  )
-    ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
+  return undefined;
 };
 
 /**
