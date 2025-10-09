@@ -35,40 +35,6 @@ export default ({ getService }: FtrProviderContext) => {
     },
   };
 
-  async function startDatafeed(
-    datafeedConfig: estypes.MlStartDatafeedRequest,
-    user: USER,
-    expectedStatusCode: number,
-    space?: string
-  ) {
-    const { datafeed_id: datafeedId, ...requestBody } = datafeedConfig;
-    const { body, status } = await supertest
-      .post(`${space ? `/s/${space}` : ''}/internal/ml/datafeeds/${datafeedId}/_start`)
-      .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(getCommonRequestHeader('1'))
-      .send(requestBody);
-    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
-
-    return body;
-  }
-
-  async function stopDatafeed(
-    datafeedConfig: estypes.MlStopDatafeedRequest,
-    user: USER,
-    expectedStatusCode: number,
-    space?: string
-  ) {
-    const { datafeed_id: datafeedId, ...requestBody } = datafeedConfig;
-    const { body, status } = await supertest
-      .post(`${space ? `/s/${space}` : ''}/internal/ml/datafeeds/${datafeedId}/_stop`)
-      .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(getCommonRequestHeader('1'))
-      .send(requestBody);
-    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
-
-    return body;
-  }
-
   async function forceStopAndCloseJob(
     { jobId }: { jobId: string },
     user: USER,
@@ -97,20 +63,10 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.createDatafeed(datafeedConfig, idSpace1);
       await ml.api.openAnomalyDetectionJob(jobIdSpace1);
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await startDatafeed(
-        { datafeed_id: datafeedIdSpace1 },
-        USER.ML_POWERUSER_ALL_SPACES,
-        200,
-        idSpace1
-      );
+      await ml.api.startDatafeed(datafeedIdSpace1);
     });
     after(async () => {
-      await stopDatafeed(
-        { datafeed_id: datafeedIdSpace1, force: true },
-        USER.ML_POWERUSER_ALL_SPACES,
-        200,
-        idSpace1
-      );
+      await ml.api.stopDatafeed(datafeedIdSpace1);
       await spacesService.delete(idSpace1);
       await spacesService.delete(idSpace2);
       await ml.api.cleanMlIndices();
