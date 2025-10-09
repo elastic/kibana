@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe.only('starts and stops datafeeds', () => {
+  describe('starts and stops datafeeds', () => {
     before(async () => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
