@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { serializedValueSchema } from './serializedValue';
 
 const colorByValueBase = schema.object({
   type: schema.literal('dynamic'), // Specifies that the color assignment is dynamic (by value). Possible value: 'dynamic'
@@ -135,8 +136,6 @@ export const staticColorSchema = schema.object({
   color: schema.string({ meta: { description: 'The static color to be used for all values.' } }),
 });
 
-const serializedValueSchema = schema.oneOf([schema.string(), schema.any()]);
-
 const colorFromPaletteSchema = schema.object({
   type: schema.literal('from_palette'),
   index: schema.number({ meta: { description: 'The index of the color in the palette.' } }),
@@ -204,5 +203,4 @@ export type ColorMappingType = TypeOf<typeof colorMappingSchema>;
 export type ColorMappingCategoricalType = TypeOf<typeof categoricalColorMappingSchema>;
 export type ColorMappingGradientType = TypeOf<typeof gradientColorMappingSchema>;
 export type ColorMappingColorDefType = TypeOf<typeof colorDefSchema>;
-export type ColorMappingSerializableValueType = TypeOf<typeof serializedValueSchema>;
 export type AllColoringTypes = TypeOf<typeof allColoringTypeSchema>;
