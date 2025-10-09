@@ -699,7 +699,6 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
               );
 
               const resultFindInitatorSystem = findInitiatorSystemResponse.body;
-              console.log(JSON.stringify(resultFindInitatorSystem));
               expect(resultFindInitatorSystem.total).to.eql(0);
 
               break;
