@@ -12,7 +12,7 @@ import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import type { TickFormatter } from '@elastic/charts';
-import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import type { StreamQuery, Streams, System } from '@kbn/streams-schema';
 import { StreamSystemDetailsFlyout } from '../data_management/stream_detail_management/stream_systems/stream_system_details_flyout';
 import type { SignificantEventItem } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -20,6 +20,7 @@ import { formatChangePoint } from './utils/change_point';
 import { SignificantEventsHistogramChart } from './significant_events_histogram';
 import { buildDiscoverParams } from './utils/discover_helpers';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { useStreamSystems } from '../data_management/stream_detail_management/stream_systems/hooks/use_stream_systems';
 
 export function SignificantEventsTable({
   definition,
@@ -47,7 +48,8 @@ export function SignificantEventsTable({
   const [selectedDeleteItem, setSelectedDeleteItem] = useState<SignificantEventItem>();
   const [isDeleteLoading, setIsDeleteLoading] = useState(false);
 
-  const [isSystemDetailFlyoutOpen, setIsSystemDetailFlyoutOpen] = useState<string>('');
+  const [selectedSystem, setSelectedSystem] = useState<System>();
+  const { systemsByName } = useStreamSystems(definition);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -85,12 +87,12 @@ export function SignificantEventsTable({
             )}
             onClick={() => {
               if (query.system?.name) {
-                setIsSystemDetailFlyoutOpen(query.system.name);
+                setSelectedSystem(systemsByName[query.system.name]);
               }
             }}
             iconOnClick={() => {
               if (query.system?.name) {
-                setIsSystemDetailFlyoutOpen(query.system.name);
+                setSelectedSystem(systemsByName[query.system.name]);
               }
             }}
             iconOnClickAriaLabel={i18n.translate(
@@ -214,12 +216,12 @@ export function SignificantEventsTable({
         tableLayout="auto"
         itemId="id"
       />
-      {isSystemDetailFlyoutOpen && (
+      {selectedSystem && (
         <StreamSystemDetailsFlyout
           definition={definition}
-          systemName={isSystemDetailFlyoutOpen}
+          system={selectedSystem}
           closeFlyout={() => {
-            setIsSystemDetailFlyoutOpen('');
+            setSelectedSystem(undefined);
           }}
         />
       )}

@@ -39,7 +39,7 @@ export function StreamExistingSystemsTable({
 }) {
   const router = useStreamsAppRouter();
 
-  const [isDetailFlyoutOpen, setIsDetailFlyoutOpen] = useState<System>();
+  const [selectedSystem, setSelectedSystem] = useState<System>();
   const [selectedSystems, setSelectedSystems] = useState<System[]>([]);
   const { removeSystemsFromStream } = useStreamSystemsApi(definition);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -94,7 +94,7 @@ export function StreamExistingSystemsTable({
           type: 'icon',
           icon: 'pencil',
           onClick: (system) => {
-            setIsDetailFlyoutOpen(system);
+            setSelectedSystem(system);
           },
         },
         {
@@ -119,7 +119,7 @@ export function StreamExistingSystemsTable({
   ];
 
   const toggleDetails = (system: System) => {
-    setIsDetailFlyoutOpen(system);
+    setSelectedSystem(system);
   };
 
   const columnsWithExpandingRowToggle: Array<EuiBasicTableColumn<System>> = [
@@ -136,8 +136,8 @@ export function StreamExistingSystemsTable({
         return (
           <EuiButtonIcon
             onClick={() => toggleDetails(system)}
-            aria-label={isDetailFlyoutOpen ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
-            iconType={isDetailFlyoutOpen ? 'minimize' : 'expand'}
+            aria-label={selectedSystem ? COLLAPSE_DETAILS_LABEL : EXPAND_DETAILS_LABEL}
+            iconType={selectedSystem ? 'minimize' : 'expand'}
           />
         );
       },
@@ -236,12 +236,12 @@ export function StreamExistingSystemsTable({
           },
         }}
       />
-      {isDetailFlyoutOpen && (
+      {selectedSystem && (
         <StreamSystemDetailsFlyout
           definition={definition}
-          system={isDetailFlyoutOpen}
+          system={selectedSystem}
           closeFlyout={() => {
-            setIsDetailFlyoutOpen(undefined);
+            setSelectedSystem(undefined);
             refreshSystems();
           }}
         />
