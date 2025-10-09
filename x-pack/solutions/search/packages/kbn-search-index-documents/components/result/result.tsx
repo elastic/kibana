@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -130,6 +130,3 @@ export const Result: React.FC<ResultProps> = ({
     </EuiSplitPanel.Outer>
   );
 };
-function useRef<T>(arg0: null) {
-  throw new Error('Function not implemented.');
-}
