@@ -30,8 +30,11 @@ import {
   createVisualizationRenderer,
   loadingCursorPlugin,
   visualizationTagParser,
+  clientToolCallTagParser,
+  clientToolCallElement,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
+import { ClientToolCall } from './client_tool_call';
 
 interface Props {
   content: string;
@@ -123,6 +126,9 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         stepsFromCurrentRound,
         stepsFromPrevRounds,
       }),
+      [clientToolCallElement.tagName]: (props: any) => {
+        return <ClientToolCall id={props.clientToolId} params={props.clientToolParams} />;
+      },
     };
 
     return {
@@ -130,6 +136,7 @@ export function ChatMessageText({ content, steps: stepsFromCurrentRound }: Props
         loadingCursorPlugin,
         esqlLanguagePlugin,
         visualizationTagParser,
+        clientToolCallTagParser,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,

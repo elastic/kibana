@@ -22,6 +22,7 @@ import { ConversationIdProvider } from '../application/context/conversation_id_c
 import { EmbeddableModeProvider } from '../application/context/embeddable_mode_context';
 import { AdditionalContextProvider } from '../application/context/additional_context/additional_context';
 import { CustomMessageProvider } from '../application/context/custom_message_context';
+import { ClientToolsProvider } from '../application/context/client_tools_context';
 import { useEmbeddableConversationState } from './hooks/use_embeddable_conversation_state';
 import type { EmbeddableConversationProps } from './types';
 import { ConversationWithAgent } from './components/conversation_with_agent';
@@ -39,6 +40,7 @@ const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalPro
   height = '600px',
   onConversationCreated,
   className,
+  clientTools,
   services,
   coreStart,
 }) => {
@@ -80,20 +82,22 @@ const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalPro
           <QueryClientProvider client={queryClient}>
             <OnechatServicesContext.Provider value={services}>
               <Router history={history}>
-                <EmbeddableModeProvider
-                  isEmbeddedMode={true}
-                  onConversationCreated={setConversationId}
-                >
-                  <ConversationIdProvider conversationId={conversationId}>
-                    <AdditionalContextProvider additionalContext={additionalContext}>
-                      <CustomMessageProvider customMessage={customMessage}>
-                        <SendMessageProvider>
-                          <ConversationWithAgent agentId={agentId} />
-                        </SendMessageProvider>
-                      </CustomMessageProvider>
-                    </AdditionalContextProvider>
-                  </ConversationIdProvider>
-                </EmbeddableModeProvider>
+                <ClientToolsProvider clientTools={clientTools}>
+                  <EmbeddableModeProvider
+                    isEmbeddedMode={true}
+                    onConversationCreated={setConversationId}
+                  >
+                    <ConversationIdProvider conversationId={conversationId}>
+                      <AdditionalContextProvider additionalContext={additionalContext}>
+                        <CustomMessageProvider customMessage={customMessage}>
+                          <SendMessageProvider>
+                            <ConversationWithAgent agentId={agentId} />
+                          </SendMessageProvider>
+                        </CustomMessageProvider>
+                      </AdditionalContextProvider>
+                    </ConversationIdProvider>
+                  </EmbeddableModeProvider>
+                </ClientToolsProvider>
               </Router>
             </OnechatServicesContext.Provider>
           </QueryClientProvider>

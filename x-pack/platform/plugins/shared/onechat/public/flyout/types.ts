@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ClientToolsMap } from '../embeddable/types';
+
 /**
  * Options for opening a conversation flyout
  */
@@ -44,6 +46,12 @@ export interface OpenConversationFlyoutOptions {
    * This message will be sent immediately after the flyout is rendered.
    */
   customMessage?: string;
+
+  /**
+   * Optional map of client-side tools that the AI can invoke.
+   * The AI can call these tools by rendering <clientToolCall id="tool_id" params={...}> in its response.
+   */
+  clientTools?: ClientToolsMap;
 }
 
 /**

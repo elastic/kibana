@@ -17,6 +17,7 @@ import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationInputActions } from './conversation_input_actions';
 import { useAdditionalContext } from '../../../context/additional_context/additional_context';
+import { useClientTools } from '../../../context/client_tools_context';
 
 interface ConversationInputFormProps {
   onSubmit?: () => void;
@@ -34,6 +35,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   const { isFetched } = useOnechatAgents();
   const agentId = useAgentId();
   const { consumeAdditionalContext } = useAdditionalContext();
+  const clientTools = useClientTools();
 
   const validateAgentId = useValidateAgentId();
   const isAgentIdValid = validateAgentId(agentId);
@@ -47,7 +49,25 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     }
     
     // Consume additional context if available and send it as a separate parameter
-    const additionalContext = consumeAdditionalContext();
+    let additionalContext = consumeAdditionalContext();
+    
+    // If client tools are available, append instructions about them to additional context
+    if (clientTools && Object.keys(clientTools).length > 0) {
+      const clientToolsInstructions = `\n\nCLIENT-SIDE TOOLS:\nYou have access to client-side tools that can be invoked by rendering special tags in your response. Available client-side tools:\n\n${Object.entries(
+        clientTools
+      )
+        .map(
+          ([id, tool]) =>
+            `- ${id}: ${tool.description}\n  Input schema: ${JSON.stringify(tool.input, null, 2)}\n  To call this tool, render: <clientToolCall id="${id}" params='${JSON.stringify(
+              {}
+            )}' />`
+        )
+        .join('\n\n')}\n\nIMPORTANT: These tools execute in the user's browser. Only call them when appropriate. The params attribute should be a JSON string matching the input schema.`;
+      
+      additionalContext = additionalContext
+        ? `${additionalContext}${clientToolsInstructions}`
+        : clientToolsInstructions;
+    }
     
     sendMessage({ message: input, additionalContext });
     setInput('');

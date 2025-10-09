@@ -161,10 +161,31 @@ export const useDashboardMenuItems = ({
       panel_titles: panelTitles,
     });
 
+    // Define client-side tools available to the AI
+    const clientTools = {
+      alert_tool: {
+        description: 'Call this when you want to show an alert message to the user',
+        input: {
+          type: 'object' as const,
+          properties: {
+            message: {
+              type: 'string',
+              description: 'The message to display in the alert',
+            },
+          },
+          required: ['message'],
+        },
+        fn: (params: { message: string }) => {
+          alert(params.message);
+        },
+      },
+    };
+
     try {
       onechatService.openConversationFlyout({
         agentId: 'dashboard',
         additionalContext,
+        clientTools,
       });
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -189,12 +210,33 @@ export const useDashboardMenuItems = ({
       panel_titles: panelTitles,
     });
 
+    // Define client-side tools available to the AI
+    const clientTools = {
+      alert_tool: {
+        description: 'Call this when you want to show an alert message to the user',
+        input: {
+          type: 'object' as const,
+          properties: {
+            message: {
+              type: 'string',
+              description: 'The message to display in the alert',
+            },
+          },
+          required: ['message'],
+        },
+        fn: (params: { message: string }) => {
+          alert(params.message);
+        },
+      },
+    };
+
     try {
       onechatService.openConversationFlyout({
         agentId: 'dashboard',
         additionalContext,
         customMessage: 'Please provide a summary of this dashboard',
         newChat: true,
+        clientTools,
       });
     } catch (error) {
       // eslint-disable-next-line no-console

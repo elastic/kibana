@@ -32,6 +32,7 @@ export const ConversationFlyout: React.FC<ConversationFlyoutInternalProps> = ({
   agentId,
   additionalContext,
   customMessage,
+  clientTools,
   onConversationCreated,
   onClose,
   ConversationComponent,
@@ -136,6 +137,7 @@ export const ConversationFlyout: React.FC<ConversationFlyoutInternalProps> = ({
             agentId={agentId}
             additionalContext={additionalContext}
             customMessage={customMessage}
+            clientTools={clientTools}
             height="100%"
             onConversationCreated={handleConversationCreated}
           />

@@ -24,6 +24,93 @@ type MutableNode = Node & {
   value?: string;
   toolResultId?: string;
   chartType?: string;
+  clientToolId?: string;
+  clientToolParams?: string;
+};
+
+// Client tool call element configuration
+export const clientToolCallElement = {
+  tagName: 'clienttoolcall',
+  attributes: {
+    id: 'id',
+    params: 'params',
+  },
+};
+
+export const clientToolCallTagParser = () => {
+  const extractAttribute = (value: string, attr: string) => {
+    // First try to match double quotes
+    const doubleQuoteRegex = new RegExp(`${attr}="([^"]*)"`, 'i');
+    const doubleQuoteMatch = value.match(doubleQuoteRegex);
+    if (doubleQuoteMatch) return doubleQuoteMatch[1];
+    
+    // Then try single quotes
+    const singleQuoteRegex = new RegExp(`${attr}='([^']*)'`, 'i');
+    const singleQuoteMatch = value.match(singleQuoteRegex);
+    if (singleQuoteMatch) return singleQuoteMatch[1];
+    
+    // Finally try unquoted (e.g., for JSON in curly braces)
+    const unquotedRegex = new RegExp(`${attr}=({[^}]*})`, 'i');
+    const unquotedMatch = value.match(unquotedRegex);
+    if (unquotedMatch) return unquotedMatch[1];
+    
+    return undefined;
+  };
+
+  const getClientToolCallAttributes = (value: string) => ({
+    clientToolId: extractAttribute(value, clientToolCallElement.attributes.id),
+    clientToolParams: extractAttribute(value, clientToolCallElement.attributes.params),
+  });
+
+  const assignClientToolCallAttributes = (
+    node: MutableNode,
+    attributes: ReturnType<typeof getClientToolCallAttributes>
+  ) => {
+    node.type = clientToolCallElement.tagName;
+    node.clientToolId = attributes.clientToolId;
+    node.clientToolParams = attributes.clientToolParams;
+    delete node.value;
+  };
+
+  const clientToolCallTagRegex = new RegExp(`<${clientToolCallElement.tagName}\\b[^>]*\\/?>`, 'gi');
+
+  const visitParent = (parent: Parent) => {
+    for (let index = 0; index < parent.children.length; index++) {
+      const child = parent.children[index] as MutableNode;
+
+      if ('children' in child) {
+        visitParent(child as Parent);
+      }
+
+      if (child.type !== 'html') {
+        continue;
+      }
+
+      const rawValue = child.value;
+      if (!rawValue) {
+        continue;
+      }
+
+      const trimmedValue = rawValue.trim();
+      if (!trimmedValue.toLowerCase().startsWith(`<${clientToolCallElement.tagName}`)) {
+        continue;
+      }
+
+      const matches = Array.from(trimmedValue.matchAll(clientToolCallTagRegex));
+      if (matches.length === 0) {
+        continue;
+      }
+
+      const attributes = getClientToolCallAttributes(matches[0][0]);
+      assignClientToolCallAttributes(child, attributes);
+    }
+  };
+
+  return (tree: Node) => {
+    if ('children' in tree) {
+      visitParent(tree as Parent);
+    }
+  };
 };
 
 export const visualizationTagParser = () => {
