@@ -114,10 +114,7 @@ import type {
   EndpointGetActionsDetailsRequestParamsInput,
   EndpointGetActionsDetailsResponse,
 } from './endpoint/actions/details/details.gen';
-import type {
-  EndpointFileDownloadRequestParamsInput,
-  EndpointFileDownloadResponse,
-} from './endpoint/actions/file_download/file_download.gen';
+import type { EndpointFileDownloadRequestParamsInput } from './endpoint/actions/file_download/file_download.gen';
 import type {
   EndpointFileInfoRequestParamsInput,
   EndpointFileInfoResponse,
@@ -1155,16 +1152,13 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Download a file from an endpoint. 
-> info
-> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-> {`file_id`} = {`action_id`}`.`{`agent_id`}
+    * Download a file associated with a response action.
 
     */
   async endpointFileDownload(props: EndpointFileDownloadProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileDownload`);
     return this.kbnClient
-      .request<EndpointFileDownloadResponse>({
+      .request({
         path: replaceParams(
           '/api/endpoint/action/{action_id}/file/{file_id}/download',
           props.params
@@ -1177,10 +1171,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Get information for the specified file using the file ID.
-> info
-> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
-> {`file_id`} = {`action_id`}`.`{`agent_id`}
+    * Get information for the specified response action file download.
 
     */
   async endpointFileInfo(props: EndpointFileInfoProps) {

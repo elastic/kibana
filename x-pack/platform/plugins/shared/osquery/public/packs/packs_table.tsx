@@ -104,7 +104,7 @@ const PacksTableComponent = () => {
 
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
-        <span css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
+        <span tabIndex={0} css={updatedAtCss}>{`${moment(updatedAt).fromNow()}${updatedBy}`}</span>
       </EuiToolTip>
     ) : (
       '-'

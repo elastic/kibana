@@ -8,7 +8,7 @@
  */
 
 import type React from 'react';
-import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -253,6 +253,10 @@ export interface ChartSectionProps {
    * Controls whether or not the chart is visible (used for Show and Hide toggle)
    */
   isComponentVisible: boolean;
+  /**
+   * The current time range
+   */
+  timeRange?: TimeRange;
 }
 /**
  * Supports customizing the chart (UnifiedHistogram) section in Discover

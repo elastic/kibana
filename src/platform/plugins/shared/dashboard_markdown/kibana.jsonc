@@ -3,6 +3,8 @@
   "id": "@kbn/dashboard-markdown",
   "owner": "@elastic/kibana-presentation",
   "description": "Dashboard markdown",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "dashboardMarkdown",
     "server": false,

@@ -50,12 +50,14 @@ export function StreamExistingSystemsTable({
     {
       field: 'name',
       name: TITLE_LABEL,
+      width: '15%',
       sortable: true,
       truncateText: true,
     },
     {
       field: 'description',
       name: DESCRIPTION_LABEL,
+      width: '30%',
       truncateText: {
         lines: 4,
       },
@@ -63,25 +65,27 @@ export function StreamExistingSystemsTable({
     {
       field: 'filter',
       name: FILTER_LABEL,
+      width: '30%',
       render: (filter: System['filter']) => {
         return <ConditionPanel condition={filter} />;
       },
     },
     {
       name: EVENTS_LAST_24_HOURS_LABEL,
+      width: '15%',
       render: (system: System) => {
         return <SystemEventsSparkline system={system} definition={definition} />;
       },
     },
     {
       name: ACTIONS_COLUMN_HEADER_LABEL,
-      width: '120px',
+      width: '5%',
       actions: [
         {
           name: GENERATE_SIGNIFICANT_EVENTS,
           description: GENERATE_SIGNIFICANT_EVENTS,
           type: 'icon',
-          icon: 'plusInSquare',
+          icon: 'crosshairs',
           onClick: () => '',
         },
         {
@@ -98,6 +102,7 @@ export function StreamExistingSystemsTable({
           description: DELETE_ACTION_DESCRIPTION_LABEL,
           type: 'icon',
           icon: 'trash',
+          color: 'danger',
           onClick: (system) => {
             setIsDeleting(true);
             removeSystemsFromStream([system.name])
@@ -159,7 +164,8 @@ export function StreamExistingSystemsTable({
           >
             <EuiButtonEmpty
               disabled={systems.length === 0}
-              iconType="popout"
+              iconType="crosshairs"
+              size="xs"
               aria-label={GENERATE_SIGNIFICANT_EVENTS}
             >
               {GENERATE_SIGNIFICANT_EVENTS}
@@ -169,6 +175,7 @@ export function StreamExistingSystemsTable({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             iconType="cross"
+            size="xs"
             aria-label={CLEAR_SELECTION}
             isDisabled={selectedSystems.length === 0 || isLoading}
             onClick={() => {
@@ -181,6 +188,7 @@ export function StreamExistingSystemsTable({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             isLoading={isDeleting}
+            size="xs"
             iconType="trash"
             color="danger"
             aria-label={DELETE_ALL}

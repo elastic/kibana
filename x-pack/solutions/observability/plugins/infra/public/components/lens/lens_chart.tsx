@@ -157,7 +157,7 @@ export const LensChart = React.memo(
       >
         {/* EuiToolTip forwards some event handlers to the child component.
         Wrapping Lens inside a div prevents that from causing unnecessary re-renders  */}
-        <div>{lens}</div>
+        <div tabIndex={0}>{lens}</div>
       </EuiToolTip>
     );
 

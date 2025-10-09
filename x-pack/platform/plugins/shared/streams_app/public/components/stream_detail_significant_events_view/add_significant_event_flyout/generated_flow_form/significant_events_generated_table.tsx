@@ -137,7 +137,7 @@ export function SignificantEventsGeneratedTable({
       name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.titleColumn', {
         defaultMessage: 'Title',
       }),
-      render: (_, query) => <EuiText>{query.title}</EuiText>,
+      render: (_, query) => <EuiText size="s">{query.title}</EuiText>,
     },
     {
       width: '20%',

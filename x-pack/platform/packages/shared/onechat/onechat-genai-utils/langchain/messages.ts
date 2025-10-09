@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { BaseMessage, MessageContentComplex, ToolMessage } from '@langchain/core/messages';
+import { v4 } from 'uuid';
+import type { BaseMessage, MessageContentComplex } from '@langchain/core/messages';
+import { ToolMessage, AIMessage, HumanMessage } from '@langchain/core/messages';
 import { isAIMessage } from '@langchain/core/messages';
 import type { RunToolReturn } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
@@ -82,4 +84,42 @@ export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
       throw new Error(`No artifact attached to tool message: ${JSON.stringify(message)}`);
     }
   }
+};
+
+export const generateFakeToolCallId = () => {
+  return v4().substr(0, 6);
+};
+
+export const createUserMessage = (content: string): HumanMessage => {
+  return new HumanMessage({ content });
+};
+
+export const createAIMessage = (content: string): AIMessage => {
+  return new AIMessage({ content });
+};
+
+export const createToolResultMessage = ({
+  content,
+  toolCallId,
+}: {
+  content: unknown;
+  toolCallId: string;
+}): ToolMessage => {
+  return new ToolMessage({
+    content: typeof content === 'string' ? content : JSON.stringify(content),
+    tool_call_id: toolCallId,
+  });
+};
+
+export const createToolCallMessage = (toolCall: ToolCall, message?: string): AIMessage => {
+  return new AIMessage({
+    content: message ?? '',
+    tool_calls: [
+      {
+        id: toolCall.toolCallId,
+        name: toolCall.toolName,
+        args: toolCall.args,
+      },
+    ],
+  });
 };

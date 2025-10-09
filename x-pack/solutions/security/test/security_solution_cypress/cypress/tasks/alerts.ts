@@ -214,14 +214,14 @@ export const openPageFilterPopover = (filterIndex: number) => {
   cy.log(`Opening Page filter popover for index ${filterIndex}`);
 
   cy.get(OPTION_LIST_VALUES(filterIndex)).click();
-  cy.get(OPTION_LIST_VALUES(filterIndex)).should('have.class', 'euiFilterButton-isSelected');
+  cy.get(OPTION_LIST_VALUES(filterIndex)).should('have.attr', 'aria-expanded', 'true');
 };
 
 export const closePageFilterPopover = (filterIndex: number) => {
   cy.log(`Closing Page filter popover for index ${filterIndex}`);
 
   cy.get(OPTION_LIST_VALUES(filterIndex)).click();
-  cy.get(OPTION_LIST_VALUES(filterIndex)).should('not.have.class', 'euiFilterButton-isSelected');
+  cy.get(OPTION_LIST_VALUES(filterIndex)).should('have.attr', 'aria-expanded', 'false');
 };
 
 export const hasSelection = (filterIndex: number) => {

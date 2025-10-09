@@ -131,7 +131,7 @@ describe('OTel input package with custom data stream type', () => {
   const agentPolicyId = 'test-otel-input-package-policy';
   const agentPolicyName = 'Test input package policy';
   const packagePolicyName = 'input-package-policy';
-  const datasetName = 'check'; // Default from the package.
+  const datasetName = 'httpcheckreceiver'; // Default from the package.
   const dataStreamType = 'logs';
 
   before(() => {

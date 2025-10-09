@@ -18,20 +18,6 @@ export const FAIL_MANAGED_USER = i18n.translate(
   }
 );
 
-export const RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.host.riskScoreLabel',
-  {
-    defaultMessage: 'Risk score',
-  }
-);
-
-export const CLOSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.host.closeButton',
-  {
-    defaultMessage: 'close',
-  }
-);
-
 export const ASK_AI_ASSISTANT = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAssistant.askAIAssistant',
   {
