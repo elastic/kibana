@@ -42,7 +42,11 @@ jest.mock('../../../../hooks/use_kibana', () => ({
 
 // Mock the abort controller hook
 jest.mock('@kbn/react-hooks', () => ({
-  useAbortController: () => ({ signal: new AbortController().signal }),
+  useAbortController: () => ({
+    signal: new AbortController().signal,
+    abort: jest.fn(),
+    refresh: jest.fn(),
+  }),
 }));
 
 // Mock the error toast function
@@ -54,6 +58,7 @@ jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
 const mockSend = jest.fn();
 jest.mock('../state_management/stream_routing_state_machine', () => ({
   useStreamsRoutingActorRef: () => ({ send: mockSend }),
+  useStreamsRoutingSelector: () => 'test-stream',
 }));
 
 const condition: Condition = { field: 'service.name', eq: 'api' };
@@ -220,6 +225,9 @@ describe('useReviewSuggestionsForm', () => {
         end: 1000,
       });
     });
+
+    // Reset mock after setup to ignore any calls during initialization
+    mockSend.mockReset();
 
     act(() => {
       result.current.rejectSuggestion(0, false);

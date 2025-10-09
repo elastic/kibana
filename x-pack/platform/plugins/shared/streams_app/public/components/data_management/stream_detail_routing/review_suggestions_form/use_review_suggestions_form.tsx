@@ -41,7 +41,9 @@ export function useReviewSuggestionsForm() {
       },
     },
   } = useKibana();
-  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const streamName = useStreamsRoutingSelector(
+    (snapshot) => snapshot.context.definition.stream.name
+  );
   const streamsRoutingActorRef = useStreamsRoutingActorRef();
 
   const [suggestions, setSuggestions] = useState<PartitionSuggestion[] | undefined>(undefined);
@@ -108,7 +110,7 @@ export function useReviewSuggestionsForm() {
   // Reset suggestions when navigating to a different stream
   useUpdateEffect(() => {
     resetForm();
-  }, [definition.stream.name]);
+  }, [streamName]);
 
   return {
     suggestions,
