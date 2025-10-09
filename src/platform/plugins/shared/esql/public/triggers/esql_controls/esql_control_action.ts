@@ -16,7 +16,6 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
@@ -37,7 +36,7 @@ interface Context {
   onCancelControl?: () => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
-  parentApi?: DashboardApi;
+  parentApi?: unknown;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
