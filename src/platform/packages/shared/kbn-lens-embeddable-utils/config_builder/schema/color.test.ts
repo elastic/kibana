@@ -13,21 +13,21 @@ describe('Color Schema', () => {
   describe('colorByValue schema', () => {
     it('validates a valid dynamic absolute color configuration', () => {
       const input: ColorByValueType = {
-        type: 'dynamic' as const,
-        range: 'absolute' as const,
+        type: 'dynamic',
+        range: 'absolute',
         steps: [
           {
-            type: 'from' as const,
+            type: 'from',
             from: 0,
             color: '#ff0000',
           },
           {
-            type: 'exact' as const,
+            type: 'exact',
             value: 50,
             color: '#0000ff',
           },
           {
-            type: 'to' as const,
+            type: 'to',
             to: 75,
             color: '#00ff00',
           },
@@ -40,23 +40,23 @@ describe('Color Schema', () => {
 
     it('validates percentage range type', () => {
       const input: ColorByValueType = {
-        type: 'dynamic' as const,
+        type: 'dynamic',
         min: 0,
         max: 100,
-        range: 'percentage' as const,
+        range: 'percentage',
         steps: [
           {
-            type: 'from' as const,
+            type: 'from',
             from: 0,
             color: '#ff0000',
           },
           {
-            type: 'exact' as const,
+            type: 'exact',
             value: 50,
             color: '#0000ff',
           },
           {
-            type: 'to' as const,
+            type: 'to',
             to: 75,
             color: '#00ff00',
           },
@@ -69,21 +69,21 @@ describe('Color Schema', () => {
 
     it('throw on invalid steps sorting order', () => {
       const input: ColorByValueType = {
-        type: 'dynamic' as const,
-        range: 'absolute' as const,
+        type: 'dynamic',
+        range: 'absolute',
         steps: [
           {
-            type: 'from' as const,
+            type: 'from',
             from: 0,
             color: '#ff0000',
           },
           {
-            type: 'to' as const,
+            type: 'to',
             to: 50,
             color: '#00ff00',
           },
           {
-            type: 'exact' as const,
+            type: 'exact',
             value: 75,
             color: '#0000ff',
           },
@@ -109,7 +109,7 @@ describe('Color Schema', () => {
   describe('staticColor schema', () => {
     it('validates a valid static color configuration', () => {
       const input = {
-        type: 'static' as const,
+        type: 'static',
         color: '#ff0000',
       };
 
@@ -208,16 +208,16 @@ describe('Color Schema', () => {
     it('validates a valid gradient color mapping using palette color', () => {
       const input: ColorMappingType = {
         palette: 'kibana_palette',
-        mode: 'gradient' as const,
+        mode: 'gradient',
         mapping: [{ values: ['low', 'medium', 'high'] }],
         gradient: [
           {
-            type: 'from_palette' as const,
+            type: 'from_palette',
             index: 0,
             palette: 'default',
           },
           {
-            type: 'from_palette' as const,
+            type: 'from_palette',
             index: 2,
             palette: 'default',
           },
@@ -231,16 +231,16 @@ describe('Color Schema', () => {
     it('validates a valid gradient color mapping using palette color and unassigned values', () => {
       const input: ColorMappingType = {
         palette: 'kibana_palette',
-        mode: 'gradient' as const,
+        mode: 'gradient',
         mapping: [{ values: ['low', 'medium', 'high'] }],
         gradient: [
           {
-            type: 'from_palette' as const,
+            type: 'from_palette',
             index: 0,
             palette: 'default',
           },
           {
-            type: 'from_palette' as const,
+            type: 'from_palette',
             index: 2,
             palette: 'default',
           },
@@ -305,8 +305,8 @@ describe('Color Schema', () => {
   describe('edge cases', () => {
     it('validates dynamic configuration with minimum required fields', () => {
       const input = {
-        type: 'dynamic' as const,
-        range: 'absolute' as const,
+        type: 'dynamic',
+        range: 'absolute',
         steps: [],
       };
 
@@ -317,7 +317,7 @@ describe('Color Schema', () => {
     it('validates color mapping with minimal otherColors', () => {
       const input: ColorMappingType = {
         palette: 'kibana_palette',
-        mode: 'categorical' as const,
+        mode: 'categorical',
         mapping: [],
       };
 
