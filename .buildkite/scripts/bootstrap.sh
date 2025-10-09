@@ -29,6 +29,8 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     mkdir -p ./.moon/cache
     tar -xzf ~/moon-cache.tar.gz -C ./
     ls -la ./.moon/cache
+    ls -la ./.moon/cache/.kibana-moon-cache || echo "No .kibana-moon-cache directory found inside the moon cache"
+    ls -la ~/.kibana-moon-cache || echo "No ~/.kibana-moon-cache directory found"
   elif [[ -d ~/.kibana-moon-cache ]]; then
     echo "Using ~/.moon/cache as a starting point"
     mkdir -p ./.moon/cache

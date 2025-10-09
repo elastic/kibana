@@ -30,6 +30,7 @@ fi
 # Bootstrap and archive moon cache to avoid remote cache accesses in every step
 buildkite-agent step update outcome passed || echo "Can't set step to passed, maybe it's already passed?"
 buildkite-agent step update state finished || echo "Can't set step to finished, maybe it's already finished?"
+export MOON_CACHE=write
 .buildkite/scripts/bootstrap.sh
 echo "--- Archive moon cache"
 if [[ ! -d .moon/cache ]]; then
