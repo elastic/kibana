@@ -510,7 +510,7 @@ class OutputService {
     // Ensure general default output
     const currentDefaultOutput = outputs.items.find((o) => o.is_default);
     const currentDefaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
-    let defaultOutput: Output | undefined = currentDefaultOutput;
+    let defaultOutput = currentDefaultOutput;
 
     if (!currentDefaultOutput) {
       const newDefaultOutput = {
@@ -549,7 +549,7 @@ class OutputService {
       }
     }
 
-    return { defaultOutput };
+    return { defaultOutput } as { defaultOutput: Output };
   }
 
   public getDefaultESHosts(): string[] {
