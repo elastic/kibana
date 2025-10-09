@@ -112,16 +112,21 @@ export const WorkflowExecutionList = ({
       />
     );
   } else {
-    content = executions.results.map((execution) => (
-      <WorkflowExecutionListItem
-        key={execution.id}
-        status={execution.status}
-        startedAt={new Date(execution.startedAt)}
-        duration={execution.duration}
-        selected={execution.id === selectedId}
-        onClick={() => onExecutionClick(execution.id)}
-      />
-    ));
+    content = (
+      <EuiFlexGroup direction="column" gutterSize="s">
+        {executions.results.map((execution) => (
+          <EuiFlexItem key={execution.id}>
+            <WorkflowExecutionListItem
+              status={execution.status}
+              startedAt={new Date(execution.startedAt)}
+              duration={execution.duration}
+              selected={execution.id === selectedId}
+              onClick={() => onExecutionClick(execution.id)}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
   }
 
   return (
@@ -148,7 +153,9 @@ export const WorkflowExecutionList = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </header>
-      {content}
+      <EuiFlexItem grow={true} css={styles.scrollableContent}>
+        {content}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -156,7 +163,13 @@ export const WorkflowExecutionList = ({
 const componentStyles = {
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
-      padding: euiTheme.size.m,
+      padding: euiTheme.size.s,
+      height: '100%',
+      overflow: 'hidden',
+    }),
+  scrollableContent: ({ euiTheme }: UseEuiTheme) =>
+    css({
       overflowY: 'auto',
+      minHeight: 0, // This is important for flex items to shrink properly
     }),
 };

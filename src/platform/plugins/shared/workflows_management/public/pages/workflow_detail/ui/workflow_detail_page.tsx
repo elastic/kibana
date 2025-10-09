@@ -12,6 +12,8 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { css } from '@emotion/react';
+import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { useWorkflowsBreadcrumbs } from '../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
@@ -48,7 +50,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
-  const { updateWorkflow, runWorkflow, testWorkflow } = useWorkflowActions();
+  const { updateWorkflow, testWorkflow } = useWorkflowActions();
 
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
@@ -95,7 +97,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   };
 
   const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
-  const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
 
   const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
     const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
@@ -106,68 +107,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     return parsingResult.data as WorkflowYaml;
   }, [workflowYaml]);
 
-  const handleRunClick = ({ test = false }: { test: boolean }) => {
-    const def = test ? definitionFromCurrentYaml : workflow?.definition;
-    let needInput: boolean | undefined = false;
-    if (def?.triggers) {
-      needInput =
-        def.triggers.some((trigger) => trigger.type === 'alert') ||
-        (def.triggers.some((trigger) => trigger.type === 'manual') &&
-          def.inputs &&
-          Object.keys(def.inputs).length > 0);
-    }
-    if (needInput) {
-      if (test) {
-        setTestWorkflowModalOpen(true);
-      } else {
-        setWorkflowExecuteModalOpen(true);
-      }
-    } else {
-      if (test) {
-        handleTestRunWorkflow({});
-      } else {
-        handleRunWorkflow({});
-      }
-    }
+  const handleRunClick = () => {
+    setWorkflowExecuteModalOpen(true);
   };
 
   const handleRunWorkflow = (event: Record<string, any>) => {
-    if (!workflow) {
-      notifications?.toasts.addError(new Error('Workflow is not loaded'), {
-        toastLifeTimeMs: 3000,
-        title: i18n.translate('workflows.workflowDetailHeader.error.workflowNotLoaded', {
-          defaultMessage: 'Workflow is not loaded',
-        }),
-      });
-      return;
-    }
-    runWorkflow.mutate(
-      { id, inputs: event },
-      {
-        onSuccess: ({ workflowExecutionId }) => {
-          notifications?.toasts.addSuccess(
-            i18n.translate('workflows.workflowDetailHeader.success.workflowRunStarted', {
-              defaultMessage: 'Workflow run started',
-            }),
-            {
-              toastLifeTimeMs: 3000,
-            }
-          );
-          setSelectedExecution(workflowExecutionId);
-        },
-        onError: (err: unknown) => {
-          notifications?.toasts.addError(err as Error, {
-            toastLifeTimeMs: 3000,
-            title: i18n.translate('workflows.workflowDetailHeader.error.workflowRunFailed', {
-              defaultMessage: 'Failed to run workflow',
-            }),
-          });
-        },
-      }
-    );
-  };
-
-  const handleTestRunWorkflow = (event: Record<string, any>) => {
     testWorkflow.mutate(
       { workflowYaml, inputs: event },
       {
@@ -246,8 +190,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   return (
     <WorkflowEditorStoreProvider>
-      <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
-        <EuiFlexItem style={{ overflow: 'hidden' }}>
+      <EuiFlexGroup direction="column" gutterSize="none" css={kbnFullBodyHeightCss()}>
+        <EuiFlexItem grow={false}>
           <WorkflowDetailHeader
             name={workflow?.name}
             isLoading={isLoadingWorkflow}
@@ -256,17 +200,18 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             canSaveWorkflow={canSaveWorkflow}
             isValid={workflow?.valid ?? true}
             isEnabled={workflow?.enabled ?? false}
-            handleRunClick={() => handleRunClick({ test: false })}
+            handleRunClick={handleRunClick}
             handleSave={handleSave}
             handleToggleWorkflow={handleToggleWorkflow}
             canTestWorkflow={canTestWorkflow}
-            handleTestClick={() => handleRunClick({ test: true })}
             handleTabChange={setActiveTab}
             hasUnsavedChanges={hasChanges}
             highlightDiff={highlightDiff}
             setHighlightDiff={setHighlightDiff}
             lastUpdatedAt={workflow?.lastUpdatedAt ?? null}
           />
+        </EuiFlexItem>
+        <EuiFlexItem css={css({ overflow: 'hidden', minHeight: 0 })}>
           <WorkflowEditorLayout
             editor={
               <WorkflowEditor
@@ -302,16 +247,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
         {workflowExecuteModalOpen && workflow && (
           <WorkflowExecuteModal
-            definition={workflow.definition}
+            definition={definitionFromCurrentYaml}
             onClose={() => setWorkflowExecuteModalOpen(false)}
             onSubmit={handleRunWorkflow}
-          />
-        )}
-        {testWorkflowModalOpen && definitionFromCurrentYaml && (
-          <WorkflowExecuteModal
-            definition={definitionFromCurrentYaml}
-            onClose={() => setTestWorkflowModalOpen(false)}
-            onSubmit={handleTestRunWorkflow}
           />
         )}
       </EuiFlexGroup>
