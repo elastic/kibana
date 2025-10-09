@@ -301,6 +301,8 @@ export function XYChart({
   const onRenderChange = useCallback(
     (isRendered: boolean = true) => {
       if (isRendered) {
+        performance.mark('render_complete');
+
         renderComplete();
       }
     },
@@ -762,8 +764,6 @@ export function XYChart({
   // ES|QL charts are allowed to create alert rules only in dashboards
   const canCreateAlerts =
     isEsqlMode && applicationQuery && !isOfAggregateQueryType(applicationQuery);
-
-  performance.mark('charts_lib_invoked');
 
   return (
     <>

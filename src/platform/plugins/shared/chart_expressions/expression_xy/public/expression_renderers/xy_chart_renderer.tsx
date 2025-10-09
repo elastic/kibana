@@ -313,5 +313,7 @@ export const getXyChartRenderer = ({
       </KibanaRenderContextProvider>,
       domNode
     );
+
+    performance.mark('charts_lib_invoked');
   },
 });
