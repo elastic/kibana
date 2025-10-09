@@ -29,7 +29,7 @@ import {
 import type { FramePublicAPI } from '../../../../types';
 import { getDataLayers } from '../../visualization_helpers';
 
-function getValueLabelDisableReason({
+export function getValueLabelDisableReason({
   isAreaPercentage,
   isHistogramSeries,
 }: {

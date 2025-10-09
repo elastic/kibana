@@ -13,6 +13,7 @@ import type { AxesSettingsConfig, AxisExtentConfig } from '@kbn/visualizations-p
 import { ScaleType } from '@elastic/charts';
 import type { YScaleType } from '@kbn/expression-xy-plugin/common';
 
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   hasNumericHistogramDimension,
   type AxesSettingsConfigKeys,
@@ -21,12 +22,17 @@ import type { ContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { XYState } from '../types';
-import { XyAppearanceSettings } from './visual_options_popover';
+import { XyAppearanceSettings, getValueLabelDisableReason } from './visual_options_popover';
 import { XyTitlesAndTextSettings } from './titles_and_text_popover';
 import { XyAxisSettings, popoverConfig } from './axis_settings_popover';
 import { getAxesConfiguration, getXDomain } from '../axes_configuration';
 import { getDataLayers } from '../visualization_helpers';
-import { hasBarSeries, isHorizontalChart } from '../state_helpers';
+import {
+  hasBarSeries,
+  hasHistogramSeries,
+  hasNonBarSeries,
+  isHorizontalChart,
+} from '../state_helpers';
 import { axisKeyToTitleMapping, getDataBounds, hasPercentageAxis } from '.';
 import { getScaleType } from '../to_expression';
 
@@ -46,6 +52,22 @@ const XyStyleSettings: React.FC<Props> = (props) => {
   const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
   const dataBounds = getDataBounds(frame.activeData, axisGroups);
   const xDataBounds = getXDomain(dataLayers, frame.activeData);
+
+  const isAreaPercentage = dataLayers.some(
+    ({ seriesType }) => seriesType === 'area_percentage_stacked'
+  );
+  const isHasNonBarSeries = hasNonBarSeries(dataLayers);
+  const isHistogramSeries = Boolean(hasHistogramSeries(dataLayers, frame.datasourceLayers));
+
+  const isFittingEnabled = isHasNonBarSeries && !isAreaPercentage;
+  const isCurveTypeEnabled = isHasNonBarSeries || isAreaPercentage;
+
+  const valueLabelsDisabledReason = getValueLabelDisableReason({
+    isAreaPercentage,
+    isHistogramSeries,
+  });
+
+  const isAppearanceSettingDisabled = !isFittingEnabled && !isCurveTypeEnabled && isHasNonBarSeries;
 
   const tickLabelsVisibilitySettings = {
     x: state?.tickLabelsVisibilitySettings?.x ?? true,
@@ -236,36 +258,65 @@ const XyStyleSettings: React.FC<Props> = (props) => {
 
   return (
     <>
-      {/* Appearance  */}
+      {/* Appearance */}
       <EuiAccordion
         id={''}
-        buttonContent={i18n.translate('xpack.lens.visualization.toolbar.appearance', {
-          defaultMessage: 'Appearance',
-        })}
+        buttonContent={
+          <TooltipWrapper
+            tooltipContent={valueLabelsDisabledReason}
+            condition={isAppearanceSettingDisabled}
+          >
+            <p>
+              {i18n.translate('xpack.lens.visualization.toolbar.appearance', {
+                defaultMessage: 'Appearance',
+              })}
+            </p>
+          </TooltipWrapper>
+        }
         paddingSize="s"
         initialIsOpen
+        isDisabled={isAppearanceSettingDisabled}
       >
         <XyAppearanceSettings datasourceLayers={frame.datasourceLayers} {...props} />
       </EuiAccordion>
       <EuiHorizontalRule margin="m" />
-      {/* Titles and text. TODO: hide when has bar series  */}
+      {/* Titles and text. Note: Hidden when Area and Line visualizations are selected */}
+      {hasBarSeries(state.layers) && (
+        <>
+          <EuiAccordion
+            id={''}
+            buttonContent={i18n.translate('xpack.lens.visualization.toolbar.titlesAndText', {
+              defaultMessage: 'Titles and text',
+            })}
+            paddingSize="s"
+            initialIsOpen
+          >
+            <XyTitlesAndTextSettings datasourceLayers={props.frame.datasourceLayers} {...props} />
+          </EuiAccordion>
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
+      {/* Axis yLeft */}
       <EuiAccordion
         id={''}
-        buttonContent={i18n.translate('xpack.lens.visualization.toolbar.titlesAndText', {
-          defaultMessage: 'Titles and text',
-        })}
-        paddingSize="s"
-        initialIsOpen
-        isDisabled={!hasBarSeries(state.layers)}
-        {...(!hasBarSeries(state.layers) && { forceState: 'closed' })}
-      >
-        <XyTitlesAndTextSettings datasourceLayers={props.frame.datasourceLayers} {...props} />
-      </EuiAccordion>
-      <EuiHorizontalRule margin="m" />
-      {/* Axis 1. TODO: Add condition for adding tooltip info */}
-      <EuiAccordion
-        id={''}
-        buttonContent={popoverConfig('yLeft', isHorizontal).popoverTitle}
+        buttonContent={
+          <TooltipWrapper
+            tooltipContent={
+              shouldRotate
+                ? i18n.translate('xpack.lens.xyChart.bottomAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when bottom axis is enabled.',
+                  })
+                : i18n.translate('xpack.lens.xyChart.leftAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when left axis is enabled.',
+                  })
+            }
+            condition={
+              Object.keys(axisGroups.find((group) => group.groupId === 'left') || {}).length === 0
+            }
+          >
+            <p>{popoverConfig('yLeft', isHorizontal).popoverTitle}</p>
+          </TooltipWrapper>
+        }
         paddingSize="s"
         initialIsOpen
         isDisabled={
@@ -297,7 +348,7 @@ const XyStyleSettings: React.FC<Props> = (props) => {
         />
       </EuiAccordion>
       <EuiHorizontalRule margin="m" />
-      {/* Axis 2 */}
+      {/* Axis x */}
       <EuiAccordion
         id={''}
         buttonContent={popoverConfig('x', isHorizontal).popoverTitle}
@@ -329,10 +380,27 @@ const XyStyleSettings: React.FC<Props> = (props) => {
         />
       </EuiAccordion>
       <EuiHorizontalRule margin="m" />
-      {/* Axis 3. TODO: Add condition for adding tooltip info */}
+      {/* Axis yRight */}
       <EuiAccordion
         id={''}
-        buttonContent={popoverConfig('yRight', isHorizontal).popoverTitle}
+        buttonContent={
+          <TooltipWrapper
+            tooltipContent={
+              shouldRotate
+                ? i18n.translate('xpack.lens.xyChart.topAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when top axis is enabled.',
+                  })
+                : i18n.translate('xpack.lens.xyChart.rightAxisDisabledHelpText', {
+                    defaultMessage: 'This setting only applies when right axis is enabled.',
+                  })
+            }
+            condition={
+              Object.keys(axisGroups.find((group) => group.groupId === 'right') || {}).length === 0
+            }
+          >
+            <p>{popoverConfig('yRight', isHorizontal).popoverTitle}</p>
+          </TooltipWrapper>
+        }
         paddingSize="s"
         initialIsOpen
         isDisabled={
