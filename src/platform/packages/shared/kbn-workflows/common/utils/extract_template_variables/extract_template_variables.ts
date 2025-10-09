@@ -18,7 +18,7 @@ let engineInstance: Liquid | null = null;
 
 function getLiquidEngine(): Liquid {
   if (!engineInstance) {
-    engineInstance = new Liquid({ strictVariables: true });
+    engineInstance = new Liquid({ strictVariables: true, strictFilters: false });
   }
   return engineInstance;
 }
