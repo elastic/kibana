@@ -20,8 +20,6 @@ xpack.features.overrides:
   visualize_v2.hidden: true
   maps.hidden: true
   maps_v2.hidden: true
-  ### Workflows Management should be moved from Analytics category to the Security one.
-  workflowsManagement.category: "security"
   ### agent builder feature is moved from Analytics category to the Security one the bottom
   agentBuilder:
     category: "security"
