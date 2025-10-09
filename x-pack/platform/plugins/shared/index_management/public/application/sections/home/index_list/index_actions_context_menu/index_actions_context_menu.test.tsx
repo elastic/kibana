@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within, fireEvent } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -259,7 +259,7 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
         const closeBtn = await screen.findByTestId('closeIndexMenuButton');
 
-        fireEvent.click(closeBtn);
+        await user.click(closeBtn);
 
         expect(props.closeIndices).toHaveBeenCalledTimes(1);
         expect(props.resetSelection).toHaveBeenCalledTimes(1);
@@ -281,7 +281,7 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
         const openBtn = await screen.findByTestId('openIndexMenuButton');
 
-        fireEvent.click(openBtn);
+        await user.click(openBtn);
 
         expect(props.openIndices).toHaveBeenCalledTimes(1);
       });
@@ -298,7 +298,7 @@ describe('IndexActionsContextMenu', () => {
         const menu = await screen.findByTestId('indexContextMenu');
         const refreshBtn = await within(menu).findByText(/refresh index/i);
 
-        fireEvent.click(refreshBtn);
+        await user.click(refreshBtn);
 
         expect(props.refreshIndices).toHaveBeenCalledTimes(1);
       });
@@ -313,7 +313,7 @@ describe('IndexActionsContextMenu', () => {
         const menu = await screen.findByTestId('indexContextMenu');
         const clearBtn = await within(menu).findByText(/clear index cache/i);
 
-        fireEvent.click(clearBtn);
+        await user.click(clearBtn);
 
         expect(props.clearCacheIndices).toHaveBeenCalledTimes(1);
       });
@@ -328,7 +328,7 @@ describe('IndexActionsContextMenu', () => {
         const menu = await screen.findByTestId('indexContextMenu');
         const flushBtn = await within(menu).findByText(/flush index/i);
 
-        fireEvent.click(flushBtn);
+        await user.click(flushBtn);
 
         expect(props.flushIndices).toHaveBeenCalledTimes(1);
       });
@@ -345,7 +345,7 @@ describe('IndexActionsContextMenu', () => {
         const menu = await screen.findByTestId('indexContextMenu');
         const forcemergeBtn = await within(menu).findByText(/force merge index/i);
 
-        fireEvent.click(forcemergeBtn);
+        await user.click(forcemergeBtn);
 
         expect(await screen.findByTestId('indexActionsForcemergeNumSegments')).toBeInTheDocument();
       });
@@ -362,7 +362,7 @@ describe('IndexActionsContextMenu', () => {
         const menu = await screen.findByTestId('indexContextMenu');
         const deleteBtn = await within(menu).findByText(/delete index/i);
 
-        fireEvent.click(deleteBtn);
+        await user.click(deleteBtn);
 
         expect(await screen.findByTestId('confirmModalConfirmButton')).toBeInTheDocument();
       });
@@ -386,19 +386,18 @@ describe('IndexActionsContextMenu', () => {
         );
 
         await openContextMenu();
-
         const overviewBtn = await screen.findByText(/show index overview/i);
-        fireEvent.click(overviewBtn);
+        await user.click(overviewBtn);
 
         await openContextMenu();
         const menu1 = await screen.findByTestId('indexContextMenu');
         const settingsBtn = await within(menu1).findByText(/show index settings/i);
-        fireEvent.click(settingsBtn);
+        await user.setup({ pointerEventsCheck: 0 }).click(settingsBtn);
 
         await openContextMenu();
         const menu2 = await screen.findByTestId('indexContextMenu');
         const mappingBtn = await within(menu2).findByText(/show index mapping/i);
-        fireEvent.click(mappingBtn);
+        await user.click(mappingBtn);
 
         expect(navigateToIndexDetailsPage).toHaveBeenCalledTimes(3);
       });
@@ -423,7 +422,7 @@ describe('IndexActionsContextMenu', () => {
         const menu = await screen.findByTestId('indexContextMenu');
         const statsBtn = await within(menu).findByText(/show index stats/i);
 
-        fireEvent.click(statsBtn);
+        await user.click(statsBtn);
 
         expect(getIndexDetailsLink).toHaveBeenCalled();
         expect(historyPush).toHaveBeenCalledWith('/indices/some/stats');
@@ -488,7 +487,7 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
         const extBtn = await screen.findByText(/ext request/i);
 
-        fireEvent.click(extBtn);
+        await user.click(extBtn);
 
         expect(performExtensionAction).toHaveBeenCalledTimes(1);
       });
@@ -530,7 +529,7 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
         const extBtn = await screen.findByText(/ext modal/i);
 
-        fireEvent.click(extBtn);
+        await user.click(extBtn);
 
         expect(await screen.findByTestId('ext-modal')).toBeInTheDocument();
       });
@@ -586,7 +585,7 @@ describe('IndexActionsContextMenu', () => {
         await openContextMenu();
         const convertBtn = await screen.findByTestId('convertToLookupIndexButton');
 
-        fireEvent.click(convertBtn);
+        await user.click(convertBtn);
 
         expect(await screen.findByTestId('mockConvertToLookup')).toBeInTheDocument();
       });
