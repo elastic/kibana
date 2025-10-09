@@ -15,6 +15,7 @@ import {
 } from './health_diagnostic_service.types';
 import { unflatten } from '../helpers';
 import type { AnyObject } from '../types';
+import { generateDEK, encryptDEKWithRSA, encryptField } from './encryption';
 
 export function shouldExecute(startDate: Date, endDate: Date, interval: Interval): boolean {
   const nextDate = intervalFromDate(startDate, interval);
@@ -66,9 +67,31 @@ export function emptyStat(name: string, now: Date): HealthDiagnosticQueryStats {
 export async function applyFilterlist(
   data: unknown[],
   rules: Record<string, Action>,
-  salt: string
+  salt: string,
+  query?: Pick<HealthDiagnosticQuery, 'encryptionKeyId'>,
+  encryptionPublicKeys?: Record<string, string>
 ): Promise<unknown[]> {
   const filteredResult: unknown[] = [];
+
+  const hasEncryptAction = Object.values(rules).some((action) => action === Action.ENCRYPT);
+  let dek: Buffer | undefined;
+  let encryptedDEK: Buffer | undefined;
+  let keyId: string | undefined;
+
+  if (hasEncryptAction) {
+    if (!query?.encryptionKeyId) {
+      throw new Error('encryptionKeyId is required when filterlist contains encrypt actions');
+    }
+    if (!encryptionPublicKeys || !encryptionPublicKeys[query.encryptionKeyId]) {
+      throw new Error(`Public key not found for encryptionKeyId: ${query.encryptionKeyId}`);
+    }
+
+    // same DEK for all the data
+    keyId = query.encryptionKeyId;
+    const publicKey = encryptionPublicKeys[keyId];
+    dek = generateDEK();
+    encryptedDEK = encryptDEKWithRSA(dek, publicKey);
+  }
 
   const applyFilterToDoc = async (doc: unknown): Promise<Record<string, unknown>> => {
     const filteredDoc: Record<string, unknown> = {};
@@ -95,7 +118,21 @@ export async function applyFilterlist(
 
     if (keyIndex === keys.length - 1) {
       const value = srcObj[key];
-      dst[key] = rules[fullPath] === Action.MASK ? await maskValue(String(value), salt) : value;
+      const action = rules[fullPath];
+
+      if (action === Action.MASK) {
+        dst[key] = await maskValue(String(value), salt);
+      } else if (action === Action.ENCRYPT) {
+        if (!dek || !encryptedDEK || !keyId) {
+          throw new Error('Encryption configuration not initialized');
+        }
+        dst[key] = encryptField(String(value), dek, encryptedDEK, keyId);
+      } else if (action === Action.KEEP) {
+        dst[key] = value;
+      } else {
+        // should never happen due to enum values
+        throw new Error(`Unknown action: ${action} for path: ${fullPath}`);
+      }
     } else {
       const nextValue = srcObj[key];
 
