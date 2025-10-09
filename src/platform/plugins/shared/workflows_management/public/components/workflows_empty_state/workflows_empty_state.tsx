@@ -74,6 +74,7 @@ export function WorkflowsEmptyState({
               }
             >
               <EuiBetaBadge
+                tabIndex={0}
                 label={
                   <FormattedMessage
                     id="workflows.emptyState.technicalPreviewBadge"
