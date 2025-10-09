@@ -32,10 +32,7 @@ import {
 } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
-import {
-  RedirectAppLinksContainer as RedirectAppLinks,
-  RedirectAppLinksKibanaProvider,
-} from '@kbn/shared-ux-link-redirect-app';
+import { RedirectAppLinksContainer as RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import type { FetchResult } from '@kbn/newsfeed-plugin/public';
 import type {
@@ -127,31 +124,21 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
     return app ? (
       <EuiFlexItem className="kbnOverviewApps__item" key={appId}>
-        <RedirectAppLinksKibanaProvider
-          coreStart={{
-            application: {
-              currentAppId$: application.currentAppId$,
-              navigateToUrl: application.navigateToUrl,
-            },
-          }}
-          {...application}
-        >
-          <RedirectAppLinks>
-            <EuiCard
-              description={app?.subtitle || ''}
-              href={addBasePath(app.path)}
-              onClick={() => {
-                trackUiMetric(METRIC_TYPE.CLICK, `app_card_${appId}`);
-              }}
-              image={addBasePath(
-                `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${isDarkMode ? 'dark' : 'light'}.svg`
-              )}
-              title={app.title}
-              titleElement="h3"
-              titleSize="s"
-            />
-          </RedirectAppLinks>
-        </RedirectAppLinksKibanaProvider>
+        <RedirectAppLinks>
+          <EuiCard
+            description={app?.subtitle || ''}
+            href={addBasePath(app.path)}
+            onClick={() => {
+              trackUiMetric(METRIC_TYPE.CLICK, `app_card_${appId}`);
+            }}
+            image={addBasePath(
+              `/plugins/${PLUGIN_ID}/assets/kibana_${appId}_${isDarkMode ? 'dark' : 'light'}.svg`
+            )}
+            title={app.title}
+            titleElement="h3"
+            titleSize="s"
+          />
+        </RedirectAppLinks>
       </EuiFlexItem>
     ) : null;
   };
@@ -310,31 +297,21 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                       key={id}
                       className="kbnOverviewItemSolution"
                     >
-                      <RedirectAppLinksKibanaProvider
-                        coreStart={{
-                          application: {
-                            currentAppId$: application.currentAppId$,
-                            navigateToUrl: application.navigateToUrl,
-                          },
-                        }}
-                        {...application}
-                      >
-                        <RedirectAppLinks className="kbnRedirectAppLinkImage">
-                          <EuiCard
-                            className={`kbnOverviewSolution--${id}`}
-                            description={description ? description : ''}
-                            href={addBasePath(path)}
-                            icon={<KibanaSolutionAvatar name={title} iconType={icon} size="xl" />}
-                            image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
-                            title={title}
-                            titleElement="h3"
-                            titleSize="xs"
-                            onClick={() => {
-                              trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${id}`);
-                            }}
-                          />
-                        </RedirectAppLinks>
-                      </RedirectAppLinksKibanaProvider>
+                      <RedirectAppLinks className="kbnRedirectAppLinkImage">
+                        <EuiCard
+                          className={`kbnOverviewSolution--${id}`}
+                          description={description ? description : ''}
+                          href={addBasePath(path)}
+                          icon={<KibanaSolutionAvatar name={title} iconType={icon} size="xl" />}
+                          image={addBasePath(getSolutionGraphicURL(snakeCase(id)))}
+                          title={title}
+                          titleElement="h3"
+                          titleSize="xs"
+                          onClick={() => {
+                            trackUiMetric(METRIC_TYPE.CLICK, `solution_panel_${id}`);
+                          }}
+                        />
+                      </RedirectAppLinks>
                     </EuiFlexItem>
                   ))}
                 </EuiFlexGroup>
