@@ -44,7 +44,6 @@ export interface WorkflowDetailHeaderProps {
   handleSave: () => void;
   isEnabled: boolean;
   handleToggleWorkflow: () => void;
-  canTestWorkflow: boolean;
   isValid: boolean;
   hasUnsavedChanges: boolean;
   // TODO: manage it in a workflow state context
@@ -63,7 +62,6 @@ export const WorkflowDetailHeader = ({
   canSaveWorkflow,
   isEnabled,
   handleToggleWorkflow,
-  canTestWorkflow,
   handleTabChange,
   isValid,
   hasUnsavedChanges,
@@ -78,13 +76,17 @@ export const WorkflowDetailHeader = ({
     () => [
       {
         id: 'workflow',
-        label: 'Workflow',
+        label: i18n.translate('workflows.workflowDetailHeader.workflowTab', {
+          defaultMessage: 'Workflow',
+        }),
         iconType: 'grid',
         type: 'button',
       },
       {
         id: 'executions',
-        label: 'Executions',
+        label: i18n.translate('workflows.workflowDetailHeader.executionsTab', {
+          defaultMessage: 'Executions',
+        }),
         iconType: 'play',
       },
     ],
