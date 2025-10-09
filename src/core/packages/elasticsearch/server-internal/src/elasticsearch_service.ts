@@ -130,7 +130,7 @@ export class ElasticsearchService
       esNodesCompatibility$,
       status$: calculateStatus$(
         esNodesCompatibility$.pipe(bufferStatusFlapping(config.bufferThreshold))
-      ), // wrap for backward compatibility
+      ),
       setUnauthorizedErrorHandler: (handler) => {
         if (this.unauthorizedErrorHandler) {
           throw new Error('setUnauthorizedErrorHandler can only be called once.');
