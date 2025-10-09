@@ -21,6 +21,7 @@
     "@kbn/securitysolution-endpoint-exceptions-common",
     "@kbn/securitysolution-exceptions-common",
     "@kbn/securitysolution-lists-common",
-    "@kbn/osquery-plugin"
+    "@kbn/osquery-plugin",
+    "@kbn/spaces-plugin"
   ]
 }

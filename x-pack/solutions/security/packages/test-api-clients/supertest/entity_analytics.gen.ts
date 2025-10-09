@@ -47,10 +47,7 @@ import type { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-
 import type { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
-
-function getRouteUrlForSpace(routeUrl: string, spaceId?: string): string {
-  return spaceId ? `/s/${spaceId}${routeUrl}` : routeUrl;
-}
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
