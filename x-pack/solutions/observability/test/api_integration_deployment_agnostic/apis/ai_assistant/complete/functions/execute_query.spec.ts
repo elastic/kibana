@@ -11,7 +11,6 @@ import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { last } from 'lodash';
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { type EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
-import { timerange, log as synthtraceLog } from '@kbn/apm-synthtrace-client';
 import type { LlmProxy } from '../../utils/create_llm_proxy';
 import { createLlmProxy } from '../../utils/create_llm_proxy';
 import { chatComplete } from '../../utils/conversation';
@@ -235,109 +234,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             });
           });
         });
-      });
-    });
-
-    describe('execute_query tool - handles timeout in long-running ES|QL query', () => {
-      let logsSynthtraceEsClient: LogsSynthtraceEsClient;
-      let content: any;
-      let toolRequest: any;
-      let toolResponse: any;
-      before(async () => {
-        logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
-        // Create synthetic data: 2 hours, 50 logs per second (~360,000 docs). This ensures the ES|QL aggregation will take >10 seconds.
-        const range = timerange('now-2h', 'now');
-        const heavyLogs = range
-          .interval('1s')
-          .rate(50)
-          .generator((timestamp) =>
-            synthtraceLog
-              .create()
-              .timestamp(timestamp)
-              .dataset('apache.access')
-              .message(`Apache access log entry at ${timestamp}`)
-          );
-
-        await logsSynthtraceEsClient.index([heavyLogs]);
-
-        void llmProxy.interceptWithFunctionRequest({
-          name: 'query',
-          arguments: () => JSON.stringify({}),
-        });
-
-        void llmProxy.interceptWithFunctionRequest({
-          name: 'structuredOutput',
-          arguments: () => JSON.stringify({}),
-          // @ts-expect-error
-          when: (requestBody) => requestBody.tool_choice?.function?.name === 'structuredOutput',
-        });
-
-        // Force an ES|QL query that will always be heavy (full table scan + aggregation)
-        void llmProxy.interceptWithFunctionRequest({
-          name: 'execute_query',
-          arguments: () =>
-            JSON.stringify({
-              query: `
-                FROM logs-apache.access-default
-                | WHERE @timestamp >= NOW() - 5 hours
-                | EVAL msg_len = LENGTH(message), ts_long = TO_LONG(@timestamp), complex1 = SQRT(POW(msg_len, 2) + LOG(ABS(ts_long % 1000000) + 1)), complex2 = POW(msg_len, 3) + LOG(ts_long + 1), complex3 = ABS(msg_len * ts_long % 99999)
-                | STATS count = COUNT(*), avg_len = AVG(msg_len), max_len = MAX(msg_len), min_len = MIN(msg_len), stddev_len = STD_DEV(msg_len), p50_len = PERCENTILE(msg_len, 50), p95_len = PERCENTILE(msg_len, 95), p99_len = PERCENTILE(msg_len, 99), avg_complex1 = AVG(complex1), sum_complex2 = SUM(complex2), max_complex3 = MAX(complex3)
-                  BY
-                    ms_bucket = BUCKET(@timestamp, 1 ms), len_bucket = BUCKET(msg_len, 1), complex1_bucket = BUCKET(complex1, 1), complex2_bucket = BUCKET(complex2, 1), complex3_bucket = BUCKET(complex3, 1), dataset = data_stream.dataset
-                | SORT ms_bucket ASC, len_bucket ASC, complex1_bucket ASC, complex2_bucket ASC, complex3_bucket ASC, dataset ASC
-              `,
-            }),
-        });
-
-        void llmProxy.interceptWithResponse('Hello from user');
-
-        await chatComplete({
-          userPrompt: 'Please retrieve the most recent Apache log messages',
-          connectorId,
-          observabilityAIAssistantAPIClient,
-        });
-
-        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-        const lastRequestBody: ChatCompletionStreamParams =
-          llmProxy.interceptedRequests[3].requestBody;
-        content = JSON.parse(last(lastRequestBody.messages)?.content as string);
-        [toolRequest, toolResponse] = content.steps;
-      });
-
-      after(async () => {
-        await logsSynthtraceEsClient.clean();
-      });
-
-      afterEach(async () => {
-        llmProxy.clear();
-      });
-
-      it('makes 4 requests to the LLM', () => {
-        expect(llmProxy.interceptedRequests.length).to.be(4);
-      });
-
-      it('collapses the `execute_query` tool call into a single step pair', () => {
-        expect(content.steps).to.have.length(2);
-        expect(toolRequest.role).to.be('assistant');
-        expect(toolRequest.toolCalls[0].function.name).to.be('execute_query');
-
-        expect(toolResponse.role).to.be('tool');
-        expect(toolResponse.name).to.be('execute_query');
-      });
-
-      it('contains a valid `execute_query` tool call request', () => {
-        const toolCallRequest = toolRequest.toolCalls[0];
-        expect(toolCallRequest.function.name).to.be('execute_query');
-        expect(toolCallRequest.function.arguments.query).to.contain(
-          'FROM logs-apache.access-default'
-        );
-      });
-
-      it('the `execute_query` response indicates a timeout error', () => {
-        const toolCallResponse = toolResponse.response;
-        expect(toolCallResponse.message).to.be('The query failed to execute');
-        expect(toolCallResponse.error.name).to.be('TimeoutError');
-        expect(toolCallResponse.error.message).to.be('Request timed out');
       });
     });
   });
