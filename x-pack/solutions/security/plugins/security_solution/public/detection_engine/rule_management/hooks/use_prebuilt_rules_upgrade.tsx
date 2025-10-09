@@ -364,16 +364,16 @@ export function usePrebuiltRulesUpgrade({
   );
   const closeRulePreviewAction = (rule: RuleResponse, reason: RulePreviewFlyoutCloseReason) => {
     const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
-    const hasMissingBaseVersion = ruleUpgradeState.has_base_version === false;
+    const hasBaseVersion = ruleUpgradeState.has_base_version === true;
     if (reason === 'dismiss') {
       telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
         type: 'dismiss',
-        hasMissingBaseVersion,
+        hasBaseVersion,
       });
     } else {
       telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutButtonClick, {
         type: 'update',
-        hasMissingBaseVersion,
+        hasBaseVersion,
       });
     }
   };
@@ -393,9 +393,9 @@ export function usePrebuiltRulesUpgrade({
     (ruleId: string) => {
       openRulePreviewDefault(ruleId);
       const ruleUpgradeState = rulesUpgradeState[ruleId];
-      const hasMissingBaseVersion = ruleUpgradeState.has_base_version === false;
+      const hasBaseVersion = ruleUpgradeState.has_base_version === true;
       telemetry.reportEvent(RuleUpgradeEventTypes.RuleUpgradeFlyoutOpen, {
-        hasMissingBaseVersion,
+        hasBaseVersion,
       });
     },
     [openRulePreviewDefault, rulesUpgradeState, telemetry]
