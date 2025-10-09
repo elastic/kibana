@@ -89,7 +89,7 @@ describe('AzureCredentialsFormAgentless', () => {
 
       beforeEach(() => {
         // this will return false for all settings checks for  SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING
-        uiSettingsClient.get = jest.fn().mockReturnValue(false);
+        uiSettingsClient.get = jest.fn().mockReturnValue(true);
       });
 
       it('shows cloud connector credential type', async () => {
@@ -191,7 +191,7 @@ describe('AzureCredentialsFormAgentless', () => {
       const cloudMocker = createCloudServerlessMock(false, AZURE_PROVIDER, AZURE_PROVIDER);
       beforeEach(() => {
         // this will return false for all settings checks for  SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING
-        uiSettingsClient.get = jest.fn().mockReturnValue(false);
+        uiSettingsClient.get = jest.fn().mockReturnValue(true);
       });
 
       it('shows cloud connector credential type', () => {
