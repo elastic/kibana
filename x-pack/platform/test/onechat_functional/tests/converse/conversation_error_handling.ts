@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { LlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '../../../onechat_api_integration/utils/llm_proxy';
-import { toolCallMock } from '../../../onechat_api_integration/utils/llm_proxy/mocks';
+import { createToolCallMessage } from '../../../onechat_api_integration/utils/llm_proxy/mocks';
 import { createConnector, deleteConnectors } from '../../utils/connector_helpers';
 import type { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Now set up the LLM proxy to work correctly for the retry
       void llmProxy.interceptors.toolChoice({
         name: 'set_title',
-        response: toolCallMock('set_title', { title: MOCKED_TITLE }),
+        response: createToolCallMessage('set_title', { title: MOCKED_TITLE }),
       });
 
       void llmProxy.interceptors.userMessage({
@@ -120,7 +120,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       void llmProxy.interceptors.toolChoice({
         name: 'set_title',
-        response: toolCallMock('set_title', { title: MOCKED_TITLE }),
+        response: createToolCallMessage('set_title', { title: MOCKED_TITLE }),
       });
 
       void llmProxy.interceptors.userMessage({
@@ -210,7 +210,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Now set up interceptors for the new message
       void llmProxy.interceptors.toolChoice({
         name: 'set_title',
-        response: toolCallMock('set_title', { title: MOCKED_TITLE }),
+        response: createToolCallMessage('set_title', { title: MOCKED_TITLE }),
       });
 
       void llmProxy.interceptors.userMessage({
