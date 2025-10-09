@@ -73,7 +73,7 @@ describe('Options list control', () => {
       } as DataViewField);
       const control = mountComponent(contextMock);
       const selections = control.getByTestId('optionsListSelections');
-      expect(selections.textContent).toBe('woof,  bark ');
+      expect(selections.textContent).toBe('woof, bark');
     });
   });
 
@@ -92,7 +92,7 @@ describe('Options list control', () => {
     } as DataViewField);
     const control = mountComponent(contextMock);
     const selections = control.getByTestId('optionsListSelections');
-    expect(selections.textContent).toBe('1;   2 ');
+    expect(selections.textContent).toBe('1;  2');
   });
 
   test('should display invalid state', async () => {
