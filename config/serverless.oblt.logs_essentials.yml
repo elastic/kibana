@@ -14,7 +14,6 @@ xpack.legacy_uptime.enabled: false
 xpack.ux.enabled: false
 xpack.uptime.enabled: false
 xpack.exploratoryView.enabled: false
-### Workflows Management feature privilege should not be enabled in this tier
 xpack.workflowsManagement.enabled: false
 xpack.workflowsExecutionEngine.enabled: false
 
