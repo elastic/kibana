@@ -140,7 +140,7 @@ export function DatePickerContextProvider({ children }: { children: React.ReactE
   );
 }
 
-function parseRefreshInterval(value: string | string[] | number | null): number {
+function parseRefreshInterval(value: string | number | (string | null)[] | null): number {
   switch (typeof value) {
     case 'number':
       return value;
@@ -151,7 +151,7 @@ function parseRefreshInterval(value: string | string[] | number | null): number 
   }
 }
 
-function parseRefreshPaused(value: string | string[] | boolean | null): boolean {
+function parseRefreshPaused(value: string | boolean | (string | null)[] | null): boolean {
   if (typeof value === 'boolean') {
     return value;
   }
