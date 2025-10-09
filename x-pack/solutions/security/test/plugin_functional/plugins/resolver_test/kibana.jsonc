@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/resolver-test-plugin",
   "owner": "@elastic/security-solution",
-  "group": "platform",
+  "group": "security",
   "visibility": "private",
   "plugin": {
     "id": "resolverTest",
