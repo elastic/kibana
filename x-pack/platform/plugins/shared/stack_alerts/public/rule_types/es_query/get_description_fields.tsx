@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { RULE_DESCRIPTION_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public/common/constants/rule_definition_field_types';
 
 export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, contentWrappers }) => {
   if (!rule) return [];
@@ -19,7 +20,7 @@ export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, contentWrap
   if (rule.params.searchType === 'esQuery') {
     return [
       {
-        title: 'Index patterns',
+        type: RULE_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN,
         description: (
           <IndexPatternWrapper>
             {(rule.params.index as string[]).map((index) => (
@@ -29,8 +30,8 @@ export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, contentWrap
         ),
       },
       {
-        title: 'Custom query',
-        description: <CustomQueryWrapper>{rule.params.esQuery}</CustomQueryWrapper>,
+        type: RULE_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY,
+        description: <CustomQueryWrapper>{rule.params.esQuery as string}</CustomQueryWrapper>,
       },
     ];
   }
@@ -38,7 +39,7 @@ export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, contentWrap
   if (rule.params.searchType === 'esqlQuery') {
     return [
       {
-        title: 'Custom query',
+        type: RULE_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY,
         description: (
           <CustomQueryWrapper>
             {(rule.params.esqlQuery as { esql: string }).esql}

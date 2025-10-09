@@ -69,6 +69,7 @@ import type { CreateConnectorFlyoutProps } from './application/sections/action_c
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
+import type { RuleDescriptionFieldType } from './common/constants/rule_definition_field_types';
 
 export type {
   ActionConnectorFieldsProps,
@@ -282,11 +283,11 @@ export type GetDescriptionFieldsFn = ({
 }: {
   rule: Rule;
   contentWrappers: {
-    indexPattern: JSX.ElementType;
-    indexPatternItem: JSX.ElementType;
-    customQuery: JSX.ElementType;
+    indexPattern: React.ComponentType<{ children: React.ReactNode }>;
+    indexPatternItem: React.ComponentType<{ children: React.ReactNode }>;
+    customQuery: React.ComponentType<{ children: React.ReactNode }>;
   };
-}) => { title: NonNullable<ReactNode>; description: NonNullable<ReactNode> }[];
+}) => { type: RuleDescriptionFieldType; description: NonNullable<ReactNode> }[];
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;

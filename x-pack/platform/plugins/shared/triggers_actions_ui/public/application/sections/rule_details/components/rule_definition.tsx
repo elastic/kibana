@@ -24,6 +24,7 @@ import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { RULE_DESCRIPTION_FIELD_TYPES } from '../../../../common/constants/rule_definition_field_types';
 import type { RuleDefinitionProps } from '../../../../types';
 import type { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -35,6 +36,21 @@ import {
 import { RuleActions } from './rule_actions';
 
 const INITIAL_FILTERED_RULE_TYPES: string[] = [];
+
+const translatedTypeTitles = {
+  [RULE_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY]: i18n.translate(
+    'xpack.triggersActionsUI.ruleDetails.customQueryTitle',
+    {
+      defaultMessage: 'Custom query',
+    }
+  ),
+  [RULE_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN]: i18n.translate(
+    'xpack.triggersActionsUI.ruleDetails.indexPatternTitle',
+    {
+      defaultMessage: 'Index pattern',
+    }
+  ),
+};
 
 export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo(
   ({
@@ -131,22 +147,26 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
 
     const customDescriptionContentWrappers = useMemo(() => {
       return {
-        customQuery: ({ children }: { children: React.ReactNode }) => (
-          <EuiCodeBlock
-            language="json"
-            isCopyable
-            overflowHeight={100}
-            paddingSize="m"
-            css={{ border: euiTheme.border.thin }}
-          >
-            {children}
-          </EuiCodeBlock>
-        ),
-        indexPattern: ({ children }: { children: React.ReactNode }) => (
-          <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
-            {children}
-          </EuiFlexGroup>
-        ),
+        customQuery: ({ children }: { children: React.ReactNode }) => {
+          return (
+            <EuiCodeBlock
+              language="text"
+              isCopyable
+              overflowHeight={100}
+              paddingSize="m"
+              css={{ border: euiTheme.border.thin }}
+            >
+              {children}
+            </EuiCodeBlock>
+          );
+        },
+        indexPattern: ({ children }: { children: React.ReactNode }) => {
+          return (
+            <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+              {children}
+            </EuiFlexGroup>
+          );
+        },
         indexPatternItem: ({ children }: { children: React.ReactNode }) => {
           return <EuiBadge color="hollow">{children}</EuiBadge>;
         },
@@ -233,7 +253,9 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
           ]
         : []),
       ...(getDescriptionFields
-        ? getDescriptionFields({ rule, contentWrappers: customDescriptionContentWrappers })
+        ? getDescriptionFields({ rule, contentWrappers: customDescriptionContentWrappers }).map(
+            ({ type, description }) => ({ title: translatedTypeTitles[type], description })
+          )
         : []),
       {
         title: i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
@@ -293,7 +315,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
             type="column"
             listItems={ruleDefinitionList}
             css={{ alignItems: 'start' }}
-            columnWidths={[15, 85]}
+            columnWidths={[20, 80]}
           />
         </EuiPanel>
       </EuiFlexItem>
