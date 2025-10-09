@@ -84,7 +84,7 @@ export const evaluate = base.extend<
     },
   ],
   inferenceClient: [
-    async ({ kbnClient, log, fetch, connector }, use, testInfo) => {
+    async ({ log, fetch, connector }, use) => {
       log.info('Loading inference client');
 
       const inferenceClient = createRestClient({

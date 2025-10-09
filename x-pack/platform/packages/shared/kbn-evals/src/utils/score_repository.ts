@@ -281,20 +281,9 @@ export class EvaluationScoreRepository {
           );
         }
 
-        this.log.success(
+        this.log.debug(
           `Successfully indexed evaluation results to a datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`
         );
-
-        // Log summary information for easy querying
-        this.log.info(`Export details:`);
-        this.log.info(
-          `  - Query filter: environment.hostname:"${hostname()}" AND model.id:"${
-            model.id
-          }" AND run_id:"${runId}"`
-        );
-        this.log.info(`  - Timestamp: ${timestamp}`);
-        this.log.info(`  - Datasets: ${datasetScoresWithStats.map((d) => d.name).join(', ')}`);
-        this.log.info(`  - Evaluators: ${evaluatorNames.join(', ')}`);
       }
     } catch (error) {
       this.log.error('Failed to export scores to Elasticsearch:', error);
