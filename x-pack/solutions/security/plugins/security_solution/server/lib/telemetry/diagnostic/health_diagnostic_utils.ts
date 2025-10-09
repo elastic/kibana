@@ -102,6 +102,51 @@ export async function applyFilterlist(
     return filteredDoc;
   };
 
+  const processFieldValue = async (value: unknown, action: Action): Promise<unknown> => {
+    if (action === Action.MASK) {
+      return maskValue(String(value), salt);
+    } else if (action === Action.ENCRYPT) {
+      if (!dek || !encryptedDEK || !keyId) {
+        throw new Error('Encryption configuration not initialized');
+      }
+      return encryptField(String(value), dek, encryptedDEK, keyId);
+    } else if (action === Action.KEEP) {
+      return value;
+    } else {
+      throw new Error(`Unknown action: ${action}`);
+    }
+  };
+
+  const processArrayField = async (
+    nextValue: unknown[],
+    dst: Record<string, unknown>,
+    key: string,
+    keys: string[],
+    fullPath: string,
+    keyIndex: number
+  ): Promise<void> => {
+    if (!dst[key]) {
+      dst[key] = [];
+    }
+    const dstArray = dst[key] as unknown[];
+
+    for (let i = 0; i < nextValue.length; i++) {
+      const item = nextValue[i];
+      if (item && typeof item === 'object') {
+        if (!dstArray[i]) {
+          dstArray[i] = {};
+        }
+        await processPath(
+          item,
+          dstArray[i] as Record<string, unknown>,
+          keys,
+          fullPath,
+          keyIndex + 1
+        );
+      }
+    }
+  };
+
   const processPath = async (
     src: unknown,
     dst: Record<string, unknown>,
@@ -119,44 +164,12 @@ export async function applyFilterlist(
     if (keyIndex === keys.length - 1) {
       const value = srcObj[key];
       const action = rules[fullPath];
-
-      if (action === Action.MASK) {
-        dst[key] = await maskValue(String(value), salt);
-      } else if (action === Action.ENCRYPT) {
-        if (!dek || !encryptedDEK || !keyId) {
-          throw new Error('Encryption configuration not initialized');
-        }
-        dst[key] = encryptField(String(value), dek, encryptedDEK, keyId);
-      } else if (action === Action.KEEP) {
-        dst[key] = value;
-      } else {
-        // should never happen due to enum values
-        throw new Error(`Unknown action: ${action} for path: ${fullPath}`);
-      }
+      dst[key] = await processFieldValue(value, action);
     } else {
       const nextValue = srcObj[key];
 
       if (Array.isArray(nextValue)) {
-        if (!dst[key]) {
-          dst[key] = [];
-        }
-        const dstArray = dst[key] as unknown[];
-
-        for (let i = 0; i < nextValue.length; i++) {
-          const item = nextValue[i];
-          if (item && typeof item === 'object') {
-            if (!dstArray[i]) {
-              dstArray[i] = {};
-            }
-            await processPath(
-              item,
-              dstArray[i] as Record<string, unknown>,
-              keys,
-              fullPath,
-              keyIndex + 1
-            );
-          }
-        }
+        await processArrayField(nextValue, dst, key, keys, fullPath, keyIndex);
       } else if (nextValue && typeof nextValue === 'object') {
         dst[key] ??= {};
         await processPath(
