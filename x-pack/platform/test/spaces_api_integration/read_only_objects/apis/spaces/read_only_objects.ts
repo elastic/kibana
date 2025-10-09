@@ -212,6 +212,41 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.body.accessControl).to.have.property('owner', objectOnwerProfileUid);
       });
 
+      it('should allow overwriting an object owned by another user if in default mode', async () => {
+        const { cookie: adminCookie, profileUid: adminUid } = await loginAsKibanaAdmin();
+        const createResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: READ_ONLY_TYPE, isReadOnly: false })
+          .expect(200);
+
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.attributes).to.have.property('description', 'test');
+        expect(createResponse.body.accessControl).to.have.property('accessMode', 'default');
+        expect(createResponse.body.accessControl).to.have.property('owner', adminUid);
+
+        const { cookie: otherUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
+
+        const overwriteResponse = await supertestWithoutAuth
+          .post('/read_only_objects/create?overwrite=true')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', otherUserCookie.cookieString())
+          .send({
+            id: objectId,
+            type: READ_ONLY_TYPE,
+            isReadOnly: true,
+            // description: 'overwritten', ToDo: support this in test plugin
+          })
+          .expect(200);
+
+        const overwriteId = overwriteResponse.body.id;
+        expect(createResponse.body).to.have.property('id', overwriteId);
+        // expect(createResponse.body.attributes).to.have.property('description', 'test');
+        expect(createResponse.body.accessControl).to.have.property('accessMode', 'default'); // cannot overwrite mode
+        expect(createResponse.body.accessControl).to.have.property('owner', adminUid);
+      });
+
       it('should reject when attempting to overwrite an object owned by another user if not admin', async () => {
         const { cookie: objectOwnerCookie, profileUid: adminUid } = await loginAsKibanaAdmin();
         const createResponse = await supertestWithoutAuth
@@ -361,6 +396,59 @@ export default function ({ getService }: FtrProviderContext) {
           expect(accessControl).to.have.property('owner', objectOwnerProfileUid);
           expect(accessControl).to.have.property('accessMode', 'read_only');
         }
+      });
+
+      it('should allow overwriting objects owned by another user if in default mode', async () => {
+        const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin();
+
+        const firstObject = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: READ_ONLY_TYPE, isReadOnly: false })
+          .expect(200);
+        const { id: objectId1, type: type1 } = firstObject.body;
+        expect(firstObject.body.accessControl).to.have.property('owner', adminProfileUid);
+
+        const secondObject = await supertestWithoutAuth
+          .post('/read_only_objects/create')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', adminCookie.cookieString())
+          .send({ type: READ_ONLY_TYPE, isReadOnly: false })
+          .expect(200);
+        const { id: objectId2, type: type2 } = secondObject.body;
+        expect(secondObject.body.accessControl).to.have.property('owner', adminProfileUid);
+
+        const objects = [
+          {
+            id: objectId1,
+            type: type1,
+          },
+          {
+            id: objectId2,
+            type: type2,
+          },
+        ];
+
+        const { cookie: notObjectOwnerCookieCookie } = await loginAsNotObjectOwner(
+          'test_user',
+          'changeme'
+        );
+
+        const res = await supertestWithoutAuth
+          .post('/read_only_objects/bulk_create?overwrite=true')
+          .set('kbn-xsrf', 'true')
+          .set('cookie', notObjectOwnerCookieCookie.cookieString())
+          .send({
+            objects,
+          })
+          .expect(200);
+
+        expect(res.body.saved_objects.length).to.be(2);
+        expect(res.body.saved_objects[0].accessControl).to.have.property('owner', adminProfileUid);
+        expect(res.body.saved_objects[0].accessControl).to.have.property('accessMode', 'default');
+        expect(res.body.saved_objects[1].accessControl).to.have.property('owner', adminProfileUid);
+        expect(res.body.saved_objects[1].accessControl).to.have.property('accessMode', 'default');
       });
 
       it('should reject when attempting to overwrite objects owned by another user if not admin', async () => {
