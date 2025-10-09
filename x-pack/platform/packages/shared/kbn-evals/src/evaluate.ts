@@ -68,11 +68,15 @@ export const evaluate = base.extend<
   ],
   evaluationConnector: [
     async ({ fetch, log, connector }, use, testInfo) => {
-      const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
-        .connector;
+      const predefinedConnector = (
+        testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
+      ).evaluationConnector;
 
       if (predefinedConnector.id !== connector.id) {
         await createConnectorFixture({ predefinedConnector, fetch, log, use });
+      } else {
+        // If the evaluation connector is the same as the main connector, reuse it
+        await use(connector);
       }
     },
     {
@@ -96,24 +100,31 @@ export const evaluate = base.extend<
     { scope: 'worker' },
   ],
   phoenixClient: [
-    async ({ log, connector, repetitions, esClient }, use) => {
+    async ({ log, connector, evaluationConnector, repetitions, esClient }, use) => {
       const config = getPhoenixConfig();
 
-      const inferenceConnector: InferenceConnector = {
-        type: connector.actionTypeId as InferenceConnectorType,
-        config: connector.config,
-        connectorId: connector.id,
-        name: connector.name,
-        capabilities: {
-          contextWindowSize: 32000,
-        },
-      };
+      function buildInferenceConnectorAndModel(connectorWithId: AvailableConnectorWithId): Model {
+        const inferenceConnector: InferenceConnector = {
+          type: connectorWithId.actionTypeId as InferenceConnectorType,
+          config: connectorWithId.config,
+          connectorId: connectorWithId.id,
+          name: connectorWithId.name,
+          capabilities: {
+            contextWindowSize: 32000,
+          },
+        };
 
-      const model: Model = {
-        family: getConnectorFamily(inferenceConnector),
-        provider: getConnectorProvider(inferenceConnector),
-        id: getConnectorModel(inferenceConnector),
-      };
+        const model: Model = {
+          family: getConnectorFamily(inferenceConnector),
+          provider: getConnectorProvider(inferenceConnector),
+          id: getConnectorModel(inferenceConnector),
+        };
+
+        return model;
+      }
+
+      const model = buildInferenceConnectorAndModel(connector);
+      const evaluatorModel = buildInferenceConnectorAndModel(evaluationConnector);
 
       const phoenixClient = new KibanaPhoenixClient({
         config,
@@ -130,6 +141,7 @@ export const evaluate = base.extend<
         esClient,
         log,
         model,
+        evaluatorModel,
         experiments: await phoenixClient.getRanExperiments(),
         repetitions,
         runId: process.env.TEST_RUN_ID,

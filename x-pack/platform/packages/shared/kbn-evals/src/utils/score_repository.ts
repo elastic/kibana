@@ -19,6 +19,11 @@ interface ModelScoreDocument {
     family: string;
     provider: string;
   };
+  evaluatorModel: {
+    id: string;
+    family: string;
+    provider: string;
+  };
   dataset: {
     id: string;
     name: string;
@@ -71,6 +76,14 @@ export class EvaluationScoreRepository {
             '@timestamp': { type: 'date' },
             run_id: { type: 'keyword' },
             model: {
+              type: 'object',
+              properties: {
+                id: { type: 'keyword' },
+                family: { type: 'keyword' },
+                provider: { type: 'keyword' },
+              },
+            },
+            evaluatorModel: {
               type: 'object',
               properties: {
                 id: { type: 'keyword' },
@@ -172,12 +185,14 @@ export class EvaluationScoreRepository {
     datasetScoresWithStats,
     evaluatorNames,
     model,
+    evaluatorModel,
     runId,
     tags = [],
   }: {
     datasetScoresWithStats: DatasetScoreWithStats[];
     evaluatorNames: string[];
     model: Model;
+    evaluatorModel: Model;
     runId: string;
     tags?: string[];
   }): Promise<void> {
@@ -208,6 +223,11 @@ export class EvaluationScoreRepository {
               id: model.id || 'unknown',
               family: model.family,
               provider: model.provider,
+            },
+            evaluatorModel: {
+              id: evaluatorModel.id || 'unknown',
+              family: evaluatorModel.family,
+              provider: evaluatorModel.provider,
             },
             dataset: {
               id: dataset.id,

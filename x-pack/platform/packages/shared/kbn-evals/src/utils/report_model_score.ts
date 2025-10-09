@@ -25,6 +25,7 @@ export async function reportModelScore({
   log,
   phoenixClient,
   model,
+  evaluatorModel,
   experiments,
   repetitions,
   esClient,
@@ -34,6 +35,7 @@ export async function reportModelScore({
   phoenixClient: KibanaPhoenixClient;
   esClient: EsClient;
   model: Model;
+  evaluatorModel: Model;
   experiments: RanExperiment[];
   repetitions: number;
   runId?: string;
@@ -61,7 +63,10 @@ export async function reportModelScore({
   }
 
   const totalExamples = sumBy(datasetScores, (d) => d.numExamples);
-  const header = [`Model: ${model.id} (${model.family}/${model.provider})`];
+  const header = [
+    `Model: ${model.id} (${model.family}/${model.provider})`,
+    `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`,
+  ];
 
   // Create summary table with dataset-level and overall descriptive statistics
   const createSummaryTable = () => {
@@ -134,7 +139,7 @@ export async function reportModelScore({
 
   const summaryTable = createSummaryTable();
 
-  log.info(`\n\n${header[0]}`);
+  log.info(`\n\n${header.join('\n')}`);
   log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
 
   // Export to Elasticsearch
@@ -148,6 +153,7 @@ export async function reportModelScore({
       datasetScoresWithStats,
       evaluatorNames,
       model,
+      evaluatorModel,
       runId: currentRunId,
       tags: ['evaluation', 'model-score'],
     });
