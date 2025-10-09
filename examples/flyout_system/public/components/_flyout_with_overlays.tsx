@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 
-import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCode, EuiFlyout, EuiFlyoutBody, EuiSpacer, EuiText } from '@elastic/eui';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { OverlayRef, OverlayStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -43,7 +43,10 @@ const FlyoutContent: React.FC<FlyoutWithOverlaysProps> = ({ flyoutType }) => {
       >
         <EuiFlyoutBody>
           <EuiText>
-            <p>This is a child flyout opened from the main flyout.</p>
+            <p>
+              This is a child flyout opened from the flyout that was opened using the overlays
+              service.
+            </p>
           </EuiText>
         </EuiFlyoutBody>
       </EuiFlyout>
@@ -60,8 +63,15 @@ export const FlyoutWithOverlays: React.FC<FlyoutWithOverlaysProps> = (props) => 
       toMountPoint(<FlyoutContent {...props} />, rendering),
       {
         session: true,
-        'aria-label': 'Main flyout',
+        flyoutMenuProps: {
+          title: (
+            <>
+              Flyout opened with <EuiCode>overlays.openFlyout()</EuiCode>
+            </>
+          ) as string & React.ReactElement,
+        },
         type: flyoutType,
+        size: 's',
       }
     );
     _flyoutSession.onClose.then(() => setFlyoutSession(null));
