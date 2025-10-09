@@ -21,16 +21,12 @@ const swimlaneTypeSchema = schema.oneOf([
 
 const anomalySwimlaneEmbeddableUserInputSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
-  panelTitle: schema.maybe(schema.string()),
   swimlaneType: swimlaneTypeSchema,
   viewBy: schema.maybe(schema.string()),
 });
 
-const { panelTitle, ...baseUserInputProps } =
-  anomalySwimlaneEmbeddableUserInputSchema.getPropSchemas();
-
 export const anomalySwimlaneEmbeddableCustomInputSchema = schema.object({
-  ...baseUserInputProps,
+  ...anomalySwimlaneEmbeddableUserInputSchema.getPropSchemas(),
   id: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),
   filters: schema.maybe(schema.arrayOf(filterSchema)),
