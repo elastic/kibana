@@ -18,9 +18,9 @@ import {
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
 import { createOneChatApiClient } from '../../utils/one_chat_client';
-import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
+import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
 
-export default function ({ getService }: OneChatFtrProviderContext) {
+export default function ({ getService }: OneChatApiFtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
   const synthtrace = getService('synthtrace');
@@ -55,15 +55,6 @@ export default function ({ getService }: OneChatFtrProviderContext) {
         response: MOCKED_LLM_RESPONSE,
         esqlQuery: MOCKED_ESQL_QUERY,
       });
-
-      /*
-      void setupInterceptors(llmProxy, log, {
-        userPrompt: USER_PROMPT,
-        title: MOCKED_LLM_TITLE,
-        finalLlmResponse: MOCKED_LLM_RESPONSE,
-        esqlQuery: MOCKED_ESQL_QUERY,
-      });
-      */
 
       body = await oneChatApiClient.converse({
         input: USER_PROMPT,

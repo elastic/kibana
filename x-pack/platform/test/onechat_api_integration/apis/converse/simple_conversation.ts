@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { Payload } from '@hapi/boom';
 import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
+import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
 import { directAnswer } from '../../utils/proxy_scenario';
 import {
@@ -15,9 +16,8 @@ import {
   deleteActionConnector,
 } from '../../utils/llm_proxy/llm_proxy_action_connector';
 import { createOneChatApiClient } from '../../utils/one_chat_client';
-import type { OneChatFtrProviderContext } from '../../configs/ftr_provider_context';
 
-export default function ({ getService }: OneChatFtrProviderContext) {
+export default function ({ getService }: OneChatApiFtrProviderContext) {
   const supertest = getService('supertest');
 
   const log = getService('log');
