@@ -59,6 +59,7 @@ while read -r config; do
 
   if [[ "${IS_CONFIG_EXECUTION}" == "true" ]]; then
     echo "--- [ already-tested ] $FULL_COMMAND"
+    continue
   else
     echo "--- $ $FULL_COMMAND"
   fi
