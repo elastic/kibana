@@ -49,6 +49,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'bulkEditAlertSuppressionEnabled',
             'doesNotMatchForIndicatorMatchRuleEnabled',
+            'endpointExceptionsMovedUnderManagement',
           ])}`,
           ...(options.kbnTestServerArgs || []),
           `--plugin-path=${path.resolve(
