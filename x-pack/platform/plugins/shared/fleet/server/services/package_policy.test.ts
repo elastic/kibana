@@ -229,9 +229,10 @@ const mockAgentPolicyGet = (spaceIds: string[] = ['default'], additionalProps?: 
   };
 
   mockAgentPolicyService.get.mockImplementation(
-    (_soClient: SavedObjectsClientContract, id: string, _force = false, _options) => {
+    (_soClient: SavedObjectsClientContract, id: string, withPackagePolicies?: boolean) => {
       return Promise.resolve({
         id,
+        withPackagePolicies,
         ...basePolicy,
       });
     }
@@ -3160,7 +3161,7 @@ describe('Package policy service', () => {
     };
 
     it('should allow to delete package policies from ES index', async () => {
-      const soClient = createSavedObjectClientMock();
+      const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValue({
@@ -3206,7 +3207,7 @@ describe('Package policy service', () => {
       );
     });
     it('should allow to delete orphaned package policies from ES index', async () => {
-      const soClient = createSavedObjectClientMock();
+      const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValue({
@@ -3230,7 +3231,7 @@ describe('Package policy service', () => {
         output: { statusCode: 404, payload: { message: 'policy not found' } },
       });
 
-      mockAgentPolicyService.getByIds.mockResolvedValueOnce([
+      mockAgentPolicyService.getByIDs.mockResolvedValueOnce([
         {
           id: 'agentPolicy1',
           name: 'Test Agent Policy',
@@ -3271,7 +3272,7 @@ describe('Package policy service', () => {
     });
 
     it('should not allow to delete managed package policies', async () => {
-      const soClient = createSavedObjectClientMock();
+      const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValue({
@@ -3304,7 +3305,7 @@ describe('Package policy service', () => {
       // agent policy not found
       mockAgentPolicyService.get.mockResolvedValueOnce(managedAgentPolicy);
 
-      mockAgentPolicyService.getByIds.mockResolvedValueOnce([managedAgentPolicy]);
+      mockAgentPolicyService.getByIDs.mockResolvedValueOnce([managedAgentPolicy]);
 
       (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
         return Promise.resolve({
@@ -3334,7 +3335,7 @@ describe('Package policy service', () => {
     });
 
     it('should call audit logger', async () => {
-      const soClient = createSavedObjectClientMock();
+      const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       soClient.bulkGet.mockResolvedValueOnce({
@@ -3359,7 +3360,7 @@ describe('Package policy service', () => {
     });
 
     it('should return empty array if no package policies are found', async () => {
-      const soClient = createSavedObjectClientMock();
+      const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const res = await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
       expect(res).toEqual([]);
