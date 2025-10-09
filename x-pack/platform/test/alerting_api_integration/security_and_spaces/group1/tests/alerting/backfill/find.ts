@@ -244,16 +244,6 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(apiOptions.username, apiOptions.password);
 
-          // assertions for initiator filter
-          expect(findInitiatorUserResponse.status).to.eql(200);
-          expect(findInitiatorUserResponse.body.total).to.be.greaterThan(0);
-          expect(
-            findInitiatorUserResponse.body.data.every((d: any) => d.initiator === 'user')
-          ).to.be(true);
-
-          expect(findInitiatorSystemResponse.status).to.eql(200);
-          expect(findInitiatorSystemResponse.body.total).to.eql(0);
-
           // find backfill with start time that is before both backfill starts
           const findWithStartBothRulesResponse = await supertestWithoutAuth
             .post(
@@ -442,6 +432,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
                 findWithSortAndPageResponse1,
                 findWithSortAndPageResponse2,
                 findWithSortResponse,
+                findInitiatorUserResponse,
+                findInitiatorSystemResponse,
               ].forEach((response) => {
                 expect(response.statusCode).to.eql(403);
                 expect(response.body).to.eql({
@@ -479,6 +471,8 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
                 findWithSortAndPageResponse1,
                 findWithSortAndPageResponse2,
                 findWithSortResponse,
+                findInitiatorUserResponse,
+                findInitiatorSystemResponse,
               ].forEach((response) => {
                 expect(response.statusCode).to.eql(200);
               });
@@ -697,6 +691,16 @@ export default function findBackfillTests({ getService }: FtrProviderContext) {
               const sortedStart1 = new Date(resultFindWithSort.data[0].start).valueOf();
               const sortedStart2 = new Date(resultFindWithSort.data[1].start).valueOf();
               expect(sortedStart1).to.be.greaterThan(sortedStart2);
+
+              const resultFindInitatorUser = findInitiatorUserResponse.body;
+              expect(resultFindInitatorUser.total).to.be.greaterThan(0);
+              expect(resultFindInitatorUser.data.every((b: any) => b.initiator === 'user')).to.be(
+                true
+              );
+
+              const resultFindInitatorSystem = findInitiatorSystemResponse.body;
+              console.log(JSON.stringify(resultFindInitatorSystem));
+              expect(resultFindInitatorSystem.total).to.eql(0);
 
               break;
             default:
