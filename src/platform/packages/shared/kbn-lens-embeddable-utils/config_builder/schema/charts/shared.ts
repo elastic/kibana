@@ -31,7 +31,60 @@ import {
   bucketFiltersOperationSchema,
 } from '../bucket_ops';
 
+/**
+ * Best to not use dynamic schema building logic
+ * so the possible combinations are declared here explicitly:
+ * - metric without ref based ops (eh. gauge/any chart that cannot have a date histogram)
+ * - the previous + ref based ops (eh. line chart with date histogram)
+ * - the previous + static op (i.e. reference line or gauge min/max/etc...)
+ * - bucket operations
+ */
+
 export function mergeAllMetricsWithChartDimensionSchema<T extends Props>(
+  baseSchema: ObjectType<T>
+) {
+  return schema.oneOf([
+    // oneOf allows only 12 items
+    // so break down metrics based on the type: field-based, reference-based, formula-like
+    schema.oneOf([
+      schema.allOf([baseSchema, countMetricOperationSchema]),
+      schema.allOf([baseSchema, uniqueCountMetricOperationSchema]),
+      schema.allOf([baseSchema, metricOperationSchema]),
+      schema.allOf([baseSchema, sumMetricOperationSchema]),
+      schema.allOf([baseSchema, lastValueOperationSchema]),
+      schema.allOf([baseSchema, percentileOperationSchema]),
+      schema.allOf([baseSchema, percentileRanksOperationSchema]),
+    ]),
+    schema.oneOf([schema.allOf([baseSchema, formulaOperationDefinitionSchema])]),
+  ]);
+}
+
+export function mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps<T extends Props>(
+  baseSchema: ObjectType<T>
+) {
+  return schema.oneOf([
+    // oneOf allows only 12 items
+    // so break down metrics based on the type: field-based, reference-based, formula-like
+    schema.oneOf([
+      schema.allOf([baseSchema, countMetricOperationSchema]),
+      schema.allOf([baseSchema, uniqueCountMetricOperationSchema]),
+      schema.allOf([baseSchema, metricOperationSchema]),
+      schema.allOf([baseSchema, sumMetricOperationSchema]),
+      schema.allOf([baseSchema, lastValueOperationSchema]),
+      schema.allOf([baseSchema, percentileOperationSchema]),
+      schema.allOf([baseSchema, percentileRanksOperationSchema]),
+    ]),
+    schema.oneOf([
+      schema.allOf([baseSchema, differencesOperationSchema]),
+      schema.allOf([baseSchema, movingAverageOperationSchema]),
+      schema.allOf([baseSchema, cumulativeSumOperationSchema]),
+      schema.allOf([baseSchema, counterRateOperationSchema]),
+    ]),
+    schema.oneOf([schema.allOf([baseSchema, formulaOperationDefinitionSchema])]),
+  ]);
+}
+
+export function mergeAllMetricsWithChartDimensionSchemaWithTimeBasedAndStaticOps<T extends Props>(
   baseSchema: ObjectType<T>
 ) {
   return schema.oneOf([

@@ -24,7 +24,7 @@ import {
 } from '../shared';
 import {
   mergeAllBucketsWithChartDimensionSchema,
-  mergeAllMetricsWithChartDimensionSchema,
+  mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
 
 const compareToSchemaShared = schema.object({
@@ -198,12 +198,14 @@ export const metricStateSchemaNoESQL = schema.object({
   /**
    * Primary value configuration, must define operation.
    */
-  metric: mergeAllMetricsWithChartDimensionSchema(metricStatePrimaryMetricOptionsSchema),
+  metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
+    metricStatePrimaryMetricOptionsSchema
+  ),
   /**
    * Secondary value configuration, must define operation.
    */
   secondary_metric: schema.maybe(
-    mergeAllMetricsWithChartDimensionSchema(metricStateSecondaryMetricOptionsSchema)
+    mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(metricStateSecondaryMetricOptionsSchema)
   ),
   /**
    * Configure how to break down the metric (e.g. show one metric per term).
