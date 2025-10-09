@@ -78,7 +78,7 @@ export interface ResponseActionGetFileOutputContent {
   /**
    * The relative API path to download the output file for this response action
    */
-  downloadUri: string;
+  downloadUri?: string;
 }
 
 export interface ResponseActionExecuteOutputContent {
@@ -103,7 +103,7 @@ export interface ResponseActionExecuteOutputContent {
   /**
    * The relative API path to download the output file for this response action
    */
-  downloadUri: string;
+  downloadUri?: string;
 }
 
 export interface ResponseActionScanOutputContent {
@@ -117,7 +117,7 @@ export interface ResponseActionRunScriptOutputContent {
   /**
    * The relative API path to download the output file for this response action
    */
-  downloadUri: string;
+  downloadUri?: string;
 }
 
 export interface ResponseActionCancelOutputContent {
