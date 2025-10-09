@@ -104,44 +104,6 @@ export async function autocomplete(
 }
 
 /**
- *  Returns suggestions for the `GROUP BY` argument of the `FUSE` command.
- *  Returns fields of string type.
- */
-async function groupByAutocomplete(
-  innerText: string,
-  callbacks?: ICommandCallbacks,
-  context?: ICommandContext
-) {
-  const stringFields = await callbacks?.getByType?.(ESQL_STRING_TYPES, [], {
-    advanceCursor: true,
-    openSuggestions: true,
-  });
-
-  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
-  const getSuggestionsForIncomplete = (
-    _fragment: string,
-    rangeToReplace?: { start: number; end: number }
-  ) => {
-    return (
-      stringFields?.map((suggestion) => {
-        return {
-          ...suggestion,
-          rangeToReplace,
-        };
-      }) ?? []
-    );
-  };
-  const getSuggestionsForComplete = () => [];
-
-  return await handleFragment(
-    innerText,
-    isFragmentComplete,
-    getSuggestionsForIncomplete,
-    getSuggestionsForComplete
-  );
-}
-
-/**
  * Returns suggestions for the `SCORE BY` argument of the `FUSE` command.
  * Returns fields of double type.
  */
@@ -162,6 +124,44 @@ async function scoreByAutocomplete(
   ) => {
     return (
       numericFields?.map((suggestion) => {
+        return {
+          ...suggestion,
+          rangeToReplace,
+        };
+      }) ?? []
+    );
+  };
+  const getSuggestionsForComplete = () => [];
+
+  return await handleFragment(
+    innerText,
+    isFragmentComplete,
+    getSuggestionsForIncomplete,
+    getSuggestionsForComplete
+  );
+}
+
+/**
+ *  Returns suggestions for the `GROUP BY` argument of the `FUSE` command.
+ *  Returns fields of string type.
+ */
+async function groupByAutocomplete(
+  innerText: string,
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext
+) {
+  const stringFields = await callbacks?.getByType?.(ESQL_STRING_TYPES, [], {
+    advanceCursor: true,
+    openSuggestions: true,
+  });
+
+  const isFragmentComplete = (fragment: string) => columnExists(fragment, context);
+  const getSuggestionsForIncomplete = (
+    _fragment: string,
+    rangeToReplace?: { start: number; end: number }
+  ) => {
+    return (
+      stringFields?.map((suggestion) => {
         return {
           ...suggestion,
           rangeToReplace,
