@@ -206,7 +206,6 @@ const metricStateBreakdownByOptionsSchema = schema.object({
 });
 
 export const metricStateSchemaNoESQL = schema.object({
-  id: schema.maybe(schema.string()),
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...dslOnlyPanelInfoSchema,
@@ -281,7 +280,6 @@ export const metricStateSchemaNoESQL = schema.object({
 });
 
 const esqlMetricState = schema.object({
-  id: schema.maybe(schema.string()),
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
