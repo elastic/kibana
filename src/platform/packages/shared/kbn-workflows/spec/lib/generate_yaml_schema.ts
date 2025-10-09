@@ -25,7 +25,6 @@ import {
 
 export interface ConnectorContract {
   type: string;
-  displayName: string;
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
   connectorId?: z.ZodType;

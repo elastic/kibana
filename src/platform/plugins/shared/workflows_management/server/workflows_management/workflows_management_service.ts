@@ -37,12 +37,13 @@ import type {
 import { v4 as generateUuid } from 'uuid';
 import type { z } from '@kbn/zod';
 import type { FindActionResult } from '@kbn/actions-plugin/server/types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
-import type { ConnectorTypeWithInstances } from '../../common/schema';
+import type { ConnectorTypeInfo } from '../../common/schema';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -82,12 +83,10 @@ export class WorkflowsService {
   private readonly stepsExecutionIndex: string;
   private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
   private security?: SecurityServiceStart;
-  private getActionsClient: () => Promise<
-    import('@kbn/actions-plugin/server').IUnsecuredActionsClient
-  >;
+  private getActionsClient: () => Promise<IUnsecuredActionsClient>;
   private getActionsClientWithRequest: (
-    request: import('@kbn/core/server').KibanaRequest
-  ) => Promise<any>;
+    request: KibanaRequest
+  ) => Promise<PublicMethodsOf<ActionsClient>>;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
@@ -96,8 +95,8 @@ export class WorkflowsService {
     stepsExecutionIndex: string,
     workflowExecutionLogsIndex: string,
     enableConsoleLogging: boolean = false,
-    getActionsClient: () => Promise<import('@kbn/actions-plugin/server').IUnsecuredActionsClient>,
-    getActionsClientWithRequest: (request: import('@kbn/core/server').KibanaRequest) => Promise<any>
+    getActionsClient: () => Promise<IUnsecuredActionsClient>,
+    getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>
   ) {
     this.logger = logger;
     this.stepsExecutionIndex = stepsExecutionIndex;
@@ -505,7 +504,7 @@ export class WorkflowsService {
     const { limit = 20, page = 1, enabled, createdBy, query } = params;
     const from = (page - 1) * limit;
 
-    const must: any[] = [];
+    const must: estypes.QueryDslQueryContainer[] = [];
 
     // Filter by spaceId
     must.push({ term: { spaceId } });
@@ -1076,14 +1075,14 @@ export class WorkflowsService {
     // Note: We now get display names directly from actionTypes, no need for the map
 
     // Initialize connectorsByType with ALL available action types
-    const connectorsByType: Record<string, ConnectorTypeWithInstances> = {};
+    const connectorsByType: Record<string, ConnectorTypeInfo> = {};
 
     // Define connector types to filter out
     // These are connectors that are not supported in the workflows management UI
     const FILTERED_CONNECTOR_TYPES = ['.index', '.webhook', '.cases-webhook', '.server-log'];
 
     // First, add all action types (even those without instances), excluding filtered types
-    actionTypes.forEach((actionType: any) => {
+    actionTypes.forEach((actionType) => {
       // Skip filtered connector types
       if (FILTERED_CONNECTOR_TYPES.includes(actionType.id)) {
         return;

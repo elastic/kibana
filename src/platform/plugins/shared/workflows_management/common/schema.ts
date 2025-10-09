@@ -617,7 +617,7 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
 const staticConnectors: ConnectorContract[] = [
   {
     type: 'console',
-    displayName: 'Console',
+    summary: 'Console',
     paramsSchema: z
       .object({
         message: z.string(),
@@ -632,7 +632,7 @@ const staticConnectors: ConnectorContract[] = [
   // Generic request types for raw API calls
   {
     type: 'elasticsearch.request',
-    displayName: 'Elasticsearch Request',
+    summary: 'Elasticsearch Request',
     connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
@@ -647,7 +647,7 @@ const staticConnectors: ConnectorContract[] = [
   },
   {
     type: 'kibana.request',
-    displayName: 'Kibana Request',
+    summary: 'Kibana Request',
     connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
@@ -744,7 +744,7 @@ export function convertDynamicConnectorsToContracts(
 
           connectorContracts.push({
             type: subActionType,
-            displayName: connectorType.displayName,
+            summary: subAction.displayName,
             paramsSchema: getSubActionParamsSchema(connectorType.actionTypeId, subAction.name),
             connectorIdRequired: true,
             connectorId: connectorIdSchema,
@@ -762,7 +762,7 @@ export function convertDynamicConnectorsToContracts(
 
         connectorContracts.push({
           type: connectorTypeName,
-          displayName: connectorType.displayName,
+          summary: connectorType.displayName,
           paramsSchema,
           connectorIdRequired: true,
           connectorId: connectorIdSchema,
@@ -777,7 +777,7 @@ export function convertDynamicConnectorsToContracts(
       // Return a basic connector contract as fallback
       connectorContracts.push({
         type: connectorType.actionTypeId,
-        displayName: connectorType.displayName,
+        summary: connectorType.displayName,
         paramsSchema: z.any(),
         connectorIdRequired: true,
         connectorId: z.string(),
