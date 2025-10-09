@@ -11,12 +11,21 @@ import React, { useCallback, useState } from 'react';
 
 import {
   EuiButton,
+  EuiCode,
   EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+
+import {
+  createChildFlyoutDescriptionItems,
+  createMainFlyoutDescriptionItems,
+  FlyoutTypeSwitch,
+} from '../utils';
 
 interface FlyoutSessionProps {
   title: string;
@@ -24,12 +33,13 @@ interface FlyoutSessionProps {
   mainMaxWidth?: number;
   childSize?: 's' | 'm' | 'fill';
   childMaxWidth?: number;
-  flyoutType: 'overlay' | 'push';
   childBackgroundShaded?: boolean;
 }
 
-const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
-  const { title, mainSize, childSize, mainMaxWidth, childMaxWidth, flyoutType } = props;
+const FlyoutSessionWithIsOpen: React.FC<FlyoutSessionProps> = React.memo((props) => {
+  const { title, mainSize, childSize, mainMaxWidth, childMaxWidth } = props;
+
+  const [flyoutType, setFlyoutType] = useState<'overlay' | 'push'>('overlay');
 
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isChildFlyoutVisible, setIsChildFlyoutVisible] = useState(false);
@@ -65,20 +75,45 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
     setIsChildFlyoutVisible(false);
   }, [title]);
 
+  // Create description items using shared utilities
+  const mainDescriptionItems = createMainFlyoutDescriptionItems(
+    flyoutType,
+    mainSize,
+    mainMaxWidth,
+    'isOpen prop'
+  );
+
+  const childDescriptionItems = createChildFlyoutDescriptionItems(
+    childSize,
+    childMaxWidth,
+    'isOpen prop'
+  );
+
   // Render
 
   return (
     <>
-      <EuiText>
-        <EuiButton disabled={isFlyoutVisible} onClick={handleOpenMainFlyout}>
-          Open {title}
-        </EuiButton>
-      </EuiText>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <FlyoutTypeSwitch flyoutType={flyoutType} onChange={setFlyoutType} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton disabled={isFlyoutVisible} onClick={handleOpenMainFlyout}>
+            Open {title}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlyout
         id={`mainFlyout-${title}`}
         session={true}
         isOpen={isFlyoutVisible}
-        flyoutMenuProps={{ title: `${title} - Main` }}
+        flyoutMenuProps={{
+          title: (
+            <>
+              {title} - Main (with <EuiCode>isOpen</EuiCode>)
+            </>
+          ) as string & React.ReactElement,
+        }}
         aria-labelledby="flyoutTitle"
         size={mainSize}
         maxWidth={mainMaxWidth}
@@ -92,17 +127,8 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
           <EuiText>
             <p>This is the content of {title}.</p>
             <EuiSpacer size="s" />
-            <EuiDescriptionList
-              type="column"
-              listItems={[
-                { title: 'Flyout type', description: flyoutType },
-                { title: 'Main flyout size', description: mainSize },
-                {
-                  title: 'Main flyout maxWidth',
-                  description: mainMaxWidth ?? 'N/A',
-                },
-              ]}
-            />
+            <EuiDescriptionList type="column" listItems={mainDescriptionItems} />
+            <EuiSpacer />
             {childSize && (
               <EuiButton onClick={handleOpenChildFlyout} disabled={isChildFlyoutVisible}>
                 Open child flyout
@@ -114,7 +140,13 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
           <EuiFlyout
             id={`childFlyout-${title}`}
             isOpen={isChildFlyoutVisible}
-            flyoutMenuProps={{ title: `${title} - Child` }}
+            flyoutMenuProps={{
+              title: (
+                <>
+                  {title} - Child (with <EuiCode>isOpen</EuiCode>)
+                </>
+              ) as string & React.ReactElement,
+            }}
             aria-labelledby="childFlyoutTitle"
             size={childSize}
             maxWidth={childMaxWidth}
@@ -125,19 +157,7 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
               <EuiText>
                 <p>This is the content of the child flyout of {title}.</p>
                 <EuiSpacer size="s" />
-                <EuiDescriptionList
-                  type="column"
-                  listItems={[
-                    {
-                      title: 'Child flyout size',
-                      description: childSize ?? 'N/A',
-                    },
-                    {
-                      title: 'Child flyout maxWidth',
-                      description: childMaxWidth ?? 'N/A',
-                    },
-                  ]}
-                />
+                <EuiDescriptionList type="column" listItems={childDescriptionItems} />
               </EuiText>
             </EuiFlyoutBody>
           </EuiFlyout>
@@ -147,13 +167,13 @@ const FlyoutSession: React.FC<FlyoutSessionProps> = React.memo((props) => {
   );
 });
 
-FlyoutSession.displayName = 'FlyoutSession';
+FlyoutSessionWithIsOpen.displayName = 'FlyoutSession';
 
 export interface FlyoutWithIsOpenProps {
   flyoutType: 'overlay' | 'push';
 }
 
-export const FlyoutWithIsOpen: React.FC<FlyoutWithIsOpenProps> = ({ flyoutType }) => {
+export const FlyoutWithIsOpen: React.FC = () => {
   return (
     <EuiDescriptionList
       type="column"
@@ -161,47 +181,28 @@ export const FlyoutWithIsOpen: React.FC<FlyoutWithIsOpenProps> = ({ flyoutType }
       listItems={[
         {
           title: 'Session A: main size = s, child size = s',
-          description: (
-            <FlyoutSession flyoutType={flyoutType} title="Session A" mainSize="s" childSize="s" />
-          ),
+          description: <FlyoutSessionWithIsOpen title="Session A" mainSize="s" childSize="s" />,
         },
         {
           title: 'Session B: main size = m, child size = s',
-          description: (
-            <FlyoutSession flyoutType={flyoutType} title="Session B" mainSize="m" childSize="s" />
-          ),
+          description: <FlyoutSessionWithIsOpen title="Session B" mainSize="m" childSize="s" />,
         },
         {
           title: 'Session C: main size = s, child size = fill',
-          description: (
-            <FlyoutSession
-              flyoutType={flyoutType}
-              title="Session C"
-              mainSize="s"
-              childSize="fill"
-            />
-          ),
+          description: <FlyoutSessionWithIsOpen title="Session C" mainSize="s" childSize="fill" />,
         },
         {
           title: 'Session D: main size = fill, child size = s',
-          description: (
-            <FlyoutSession
-              flyoutType={flyoutType}
-              title="Session D"
-              mainSize="fill"
-              childSize="s"
-            />
-          ),
+          description: <FlyoutSessionWithIsOpen title="Session D" mainSize="fill" childSize="s" />,
         },
         {
           title: 'Session E: main size = fill',
-          description: <FlyoutSession flyoutType={flyoutType} title="Session E" mainSize="fill" />,
+          description: <FlyoutSessionWithIsOpen title="Session E" mainSize="fill" />,
         },
         {
           title: 'Session F: main size = s, child size = fill (maxWidth 1000px)',
           description: (
-            <FlyoutSession
-              flyoutType={flyoutType}
+            <FlyoutSessionWithIsOpen
               title="Session F"
               mainSize="s"
               childSize="fill"
@@ -212,8 +213,7 @@ export const FlyoutWithIsOpen: React.FC<FlyoutWithIsOpenProps> = ({ flyoutType }
         {
           title: 'Session G: main size = fill (maxWidth 1000px), child size = s',
           description: (
-            <FlyoutSession
-              flyoutType={flyoutType}
+            <FlyoutSessionWithIsOpen
               title="Session G"
               mainSize="fill"
               mainMaxWidth={1000}
