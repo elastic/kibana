@@ -50,6 +50,11 @@ export type ClassicIngestStreamEffectiveLifecycle =
   | IngestStreamLifecycleError
   | IngestStreamLifecycleDisabled;
 
+export type IngestStreamLifecycleAll =
+  | IngestStreamLifecycle
+  | IngestStreamLifecycleError
+  | IngestStreamLifecycleDisabled;
+
 export type IngestStreamEffectiveLifecycle =
   | WiredIngestStreamEffectiveLifecycle
   | ClassicIngestStreamEffectiveLifecycle;
