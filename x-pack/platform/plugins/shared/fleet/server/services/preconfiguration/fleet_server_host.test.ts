@@ -13,7 +13,7 @@ import { fleetServerHostService } from '../fleet_server_host';
 import type { FleetServerHost } from '../../../common/types';
 
 import {
-  createCloudFleetServerHostIfNeeded,
+  createCloudFleetServerHostsIfNeeded,
   getCloudFleetServersHosts,
   getPreconfiguredFleetServerHostFromConfig,
   createOrUpdatePreconfiguredFleetServerHosts,
@@ -235,7 +235,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-    await createCloudFleetServerHostIfNeeded(soClient, esClient);
+    await createCloudFleetServerHostsIfNeeded(soClient, esClient);
 
     expect(mockedFleetServerHostService.create).not.toBeCalled();
   });
@@ -260,7 +260,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       id: 'test',
     } as any);
 
-    await createCloudFleetServerHostIfNeeded(soClient, esClient);
+    await createCloudFleetServerHostsIfNeeded(soClient, esClient);
 
     expect(mockedFleetServerHostService.create).not.toBeCalled();
   });
@@ -288,7 +288,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
       attributes: {},
     } as any);
 
-    await createCloudFleetServerHostIfNeeded(soClient, esClient);
+    await createCloudFleetServerHostsIfNeeded(soClient, esClient);
 
     expect(mockedFleetServerHostService.create).toBeCalledTimes(1);
     expect(mockedFleetServerHostService.create).toBeCalledWith(

@@ -117,9 +117,7 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
 
   appContextService
     .getLogger()
-    .debug(
-      `Fixing output and/or fleet server host IDs on agent policies: ${agentlessDataOutputIdsToFix}`
-    );
+    .debug(`Fixing output and/or fleet server host IDs on agent policies: ${allIdsToFix}`);
 
   await pMap(
     allIdsToFix,
