@@ -76,11 +76,10 @@ export const SPLUNK_TEST_DASHBOARDS = [
 let bedrockConnectorId: string | null = null;
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
-const tags = ['@ess', '@serverless', '@skipInServerlessMKI'];
 describe(
   'Dashboards Migrations - Basic Workflow',
   {
-    tags,
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
