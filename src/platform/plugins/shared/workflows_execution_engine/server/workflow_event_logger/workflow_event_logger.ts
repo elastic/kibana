@@ -7,40 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
-
-export interface WorkflowLogEvent {
-  '@timestamp'?: string;
-  message?: string;
-  level?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
-  workflow?: {
-    id?: string;
-    name?: string;
-    execution_id?: string;
-    step_id?: string;
-    step_execution_id?: string;
-    step_name?: string;
-    step_type?: string;
-  };
-  event?: {
-    action?: string;
-    category?: string[];
-    type?: string[];
-    provider?: string;
-    outcome?: 'success' | 'failure' | 'unknown';
-    duration?: number;
-    start?: string;
-    end?: string;
-  };
-  error?: {
-    message?: string;
-    type?: string;
-    stack_trace?: string;
-  };
-  tags?: string[];
-  [key: string]: any;
-}
+import type {
+  LogsRepository,
+  WorkflowLogEvent,
+} from '../repositories/logs_repository/logs_repository';
 
 export interface WorkflowEventLoggerContext {
   workflowId?: string;
@@ -79,27 +51,16 @@ interface Doc {
 }
 
 export class WorkflowEventLogger implements IWorkflowEventLogger {
-  private esClient: ElasticsearchClient;
-  private logger: Logger;
-  private indexName: string;
-  private context: WorkflowEventLoggerContext;
-  private options: WorkflowEventLoggerOptions;
   private eventQueue: Doc[] = [];
   private timings: Map<string, Date> = new Map();
 
   constructor(
-    esClient: ElasticsearchClient,
-    logger: Logger,
-    indexName: string,
-    context: WorkflowEventLoggerContext = {},
-    options: WorkflowEventLoggerOptions = {}
-  ) {
-    this.esClient = esClient;
-    this.logger = logger;
-    this.indexName = indexName;
-    this.context = context;
-    this.options = options;
-  }
+    private logsRepository: LogsRepository,
+    private logger: Logger,
+    private indexName: string,
+    private context: WorkflowEventLoggerContext = {},
+    private options: WorkflowEventLoggerOptions = {}
+  ) {}
 
   public logEvent(eventProperties: WorkflowLogEvent): void {
     const event: WorkflowLogEvent = this.createBaseEvent();
@@ -242,7 +203,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     stepType?: string
   ): IWorkflowEventLogger {
     return new WorkflowEventLogger(
-      this.esClient,
+      this.logsRepository,
       this.logger,
       this.indexName,
       {
@@ -332,18 +293,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     this.eventQueue = [];
 
     try {
-      const bulkBody: Array<Record<string, unknown>> = [];
-
-      for (const doc of events) {
-        bulkBody.push({ create: {} });
-        bulkBody.push(doc.body);
-      }
-
-      await this.esClient.bulk({
-        index: this.indexName,
-        body: bulkBody,
-        refresh: 'wait_for',
-      });
+      await this.logsRepository.createLogs(events.map((doc) => doc.body));
 
       this.logger.info(`Successfully indexed ${events.length} workflow events`);
     } catch (error) {
