@@ -27,7 +27,7 @@ export type MapParameters = Record<string, MapParameterValues>;
  * Examples:
  *  | COMPLETION "prompt" WITH {                       ---> suggests parameters names
  *  | COMPLETION "prompt" WITH { "                     ---> suggests parameters names
- *  | COMPLETION "prompt" WITH { "param1": "           ---> suggests parameter values
+ *  | COMPLETION "prompt" WITH { "param1":           ---> suggests parameter values
  *  | COMPLETION "prompt" WITH { "param1": "           ---> suggests parameter values
  *  | COMPLETION "prompt" WITH { "param1": "value",    ---> suggests parameter names that were not used
  *  | COMPLETION "prompt" WITH { "param1": "value", "  ---> suggests parameter names that were not used
