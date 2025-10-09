@@ -50,6 +50,7 @@ const createStartMock = () => {
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
     getAllTypes: jest.fn(),
+    listTypes: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
     getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
     getActionsAuthorizationWithRequest: jest
