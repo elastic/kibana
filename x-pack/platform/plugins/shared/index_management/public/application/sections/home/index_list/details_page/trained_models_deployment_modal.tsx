@@ -49,6 +49,7 @@ export function TrainedModelsDeploymentModal({
   forceSaveMappings,
   saveMappings,
   saveMappingsLoading,
+  setErrorsInTrainedModelDeployment,
 }: TrainedModelsDeploymentModalProps) {
   const modalTitleId = useGeneratedHtmlId();
   const { fields, inferenceToModelIdMap } = useMappingsState();
