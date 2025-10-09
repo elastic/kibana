@@ -7,8 +7,6 @@
 
 import * as React from 'react';
 import { screen } from '@testing-library/react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
 import ConnectorAddModal from './connector_add_modal';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { ActionType, GenericValidationResult } from '../../../types';
@@ -72,7 +70,7 @@ describe('connector_add_modal', () => {
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
 
-    const wrapper = mountWithIntl(
+    appMockRenderer.render(
       <ConnectorAddModal
         onClose={() => {}}
         actionType={actionType}
@@ -80,12 +78,7 @@ describe('connector_add_modal', () => {
       />
     );
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    expect(wrapper.exists('.euiModalHeader')).toBeTruthy();
-    expect(wrapper.exists('[data-test-subj="saveActionButtonModal"]')).toBeTruthy();
+    expect(await screen.findByTestId('saveActionButtonModal')).toBeInTheDocument();
   });
 
   it('filters out sub type connector when disabled in config', async () => {
@@ -127,8 +120,11 @@ describe('connector_add_modal', () => {
       />
     );
 
-    expect(await screen.findByTestId('my-action-typeButton')).toBeInTheDocument();
+    expect(await screen.findByText('test connector')).toBeInTheDocument();
+    expect(screen.queryByText('test 1 connector')).not.toBeInTheDocument();
+
     expect(screen.queryByTestId('my-action-type-1Button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('my-action-typeButton')).not.toBeInTheDocument();
   });
 
   describe('beta badge', () => {
@@ -146,19 +142,15 @@ describe('connector_add_modal', () => {
       });
       actionTypeRegistry.get.mockReturnValue(actionTypeModel);
       actionTypeRegistry.has.mockReturnValue(true);
-      const wrapper = mountWithIntl(
+      appMockRenderer.render(
         <ConnectorAddModal
           onClose={() => {}}
           actionType={actionType}
           actionTypeRegistry={actionTypeRegistry}
         />
       );
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
 
-      expect(wrapper.find('EuiBetaBadge').exists()).toBeFalsy();
+      expect(screen.queryByTestId('betaBadge')).not.toBeInTheDocument();
     });
 
     it(`renders beta badge when isExperimental=true`, async () => {
@@ -175,19 +167,15 @@ describe('connector_add_modal', () => {
       });
       actionTypeRegistry.get.mockReturnValue(actionTypeModel);
       actionTypeRegistry.has.mockReturnValue(true);
-      const wrapper = mountWithIntl(
+      appMockRenderer.render(
         <ConnectorAddModal
           onClose={() => {}}
           actionType={actionType}
           actionTypeRegistry={actionTypeRegistry}
         />
       );
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
 
-      expect(wrapper.find('EuiBetaBadge').exists()).toBeTruthy();
+      expect(await screen.findByTestId('betaBadge')).toBeInTheDocument();
     });
   });
 });

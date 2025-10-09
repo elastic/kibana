@@ -87,11 +87,14 @@ const ConnectorAddModal = ({
         }))
     : [];
 
-  const groupActionButtons = groupActionTypeModel.map((gAction) => ({
-    id: gAction.id,
-    label: gAction.name,
-    'data-test-subj': `${gAction.id}Button`,
-  }));
+  const groupActionButtons =
+    groupActionTypeModel?.length > 1
+      ? groupActionTypeModel.map((gAction) => ({
+          id: gAction.id,
+          label: gAction.name,
+          'data-test-subj': `${gAction.id}Button`,
+        }))
+      : [];
 
   const resetConnectorForm = useRef<ResetForm | undefined>();
 
@@ -271,6 +274,7 @@ const ConnectorAddModal = ({
                 {actionTypeModel && actionTypeModel.isExperimental && (
                   <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
                     <EuiBetaBadge
+                      data-test-subj="betaBadge"
                       label={TECH_PREVIEW_LABEL}
                       tooltipContent={TECH_PREVIEW_DESCRIPTION}
                     />
