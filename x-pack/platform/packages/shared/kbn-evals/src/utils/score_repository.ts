@@ -11,7 +11,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import { hostname } from 'os';
 import type { DatasetScoreWithStats } from './evaluation_stats';
 
-interface ModelScoreDocument {
+export interface ModelScoreDocument {
   '@timestamp': string;
   run_id: string;
   model: {
@@ -269,6 +269,7 @@ export class EvaluationScoreRepository {
               },
             };
           },
+          refresh: 'wait_for',
         });
 
         // Check for bulk operation errors

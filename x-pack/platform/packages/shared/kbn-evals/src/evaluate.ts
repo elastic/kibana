@@ -22,7 +22,12 @@ import type { EvaluationTestOptions } from './config/create_playwright_eval_conf
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators } from './types';
-import { reportModelScore } from './utils/report_model_score';
+import {
+  prepareEvaluationData,
+  exportEvaluationToElasticsearch,
+  createDefaultTerminalReporter,
+  type EvaluationReporter,
+} from './utils/report_model_score';
 import { createConnectorFixture } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { EvaluationAnalysisService } from './utils/analysis';
@@ -44,6 +49,7 @@ export const evaluate = base.extend<
     evaluationConnector: AvailableConnectorWithId;
     repetitions: number;
     evaluationAnalysisService: EvaluationAnalysisService;
+    reportModelScore: EvaluationReporter;
   }
 >({
   fetch: [
@@ -99,8 +105,19 @@ export const evaluate = base.extend<
     },
     { scope: 'worker' },
   ],
+  reportModelScore: [
+    async ({}, use) => {
+      // Provide default terminal reporter implementation
+      // Consumers can override this fixture to provide custom reporting
+      await use(createDefaultTerminalReporter());
+    },
+    { scope: 'worker' },
+  ],
   phoenixClient: [
-    async ({ log, connector, evaluationConnector, repetitions, esClient }, use) => {
+    async (
+      { log, connector, evaluationConnector, repetitions, esClient, reportModelScore },
+      use
+    ) => {
       const config = getPhoenixConfig();
 
       function buildInferenceConnectorAndModel(connectorWithId: AvailableConnectorWithId): Model {
@@ -136,16 +153,24 @@ export const evaluate = base.extend<
 
       await use(phoenixClient);
 
-      await reportModelScore({
+      const preparedData = await prepareEvaluationData({
         phoenixClient,
-        esClient,
-        log,
+        experiments: await phoenixClient.getRanExperiments(),
         model,
         evaluatorModel,
-        experiments: await phoenixClient.getRanExperiments(),
         repetitions,
         runId: process.env.TEST_RUN_ID,
       });
+
+      try {
+        await exportEvaluationToElasticsearch(preparedData, esClient, log);
+      } catch (error) {
+        log.warning('Failed to export evaluation results to Elasticsearch:', error);
+      }
+
+      // Then display results using the reporter (queries Elasticsearch), can be customized by downstream consumers
+      const scoreRepository = new EvaluationScoreRepository(esClient, log);
+      await reportModelScore(scoreRepository, preparedData.runId, log);
     },
     {
       scope: 'worker',
