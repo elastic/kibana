@@ -274,6 +274,7 @@ function ChartItem({
 
   return (
     <div
+      id={chartId}
       ref={(element) => setChartRef(chartId, element)}
       role="gridcell"
       aria-rowindex={rowIndex + 1}
