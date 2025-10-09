@@ -115,6 +115,56 @@ FROM logs-*
 
 ## Example of commands
 
+### `COMMENT`
+
+The `comment` function allows you to add documentation and annotations to your ES|QL queries. Since ES|QL doesn't have a dedicated comment command, this function creates a minimal `ROW 1` command prefixed with your comment.
+
+#### Basic comment
+
+```ts
+import { from, comment, where } from '@kbn/esql-composer';
+
+from('logs-*')
+  .pipe(
+    comment('Filter for logs from the last hour'),
+    where('@timestamp >= NOW() - 1 hour')
+  )
+  .toString();
+```
+
+Output:
+
+```sql
+FROM logs-*
+  // Filter for logs from the last hour
+  | ROW 1
+  | WHERE @timestamp >= NOW() - 1 hour
+```
+
+#### Multi-line comment
+
+```ts
+import { from, comment, where } from '@kbn/esql-composer';
+
+from('logs-*')
+  .pipe(
+    comment('This query filters logs\nfrom the last hour\nand groups by service'),
+    where('@timestamp >= NOW() - 1 hour')
+  )
+  .toString();
+```
+
+Output:
+
+```sql
+FROM logs-*
+  /* This query filters logs
+from the last hour
+and groups by service */
+  | ROW 1
+  | WHERE @timestamp >= NOW() - 1 hour
+```
+
 ### `WHERE`
 
 #### Basic `WHERE` clause
