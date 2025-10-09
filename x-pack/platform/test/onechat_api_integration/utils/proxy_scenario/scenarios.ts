@@ -16,7 +16,7 @@ import {
 /**
  * Simple request scenario - response with the given response directly
  */
-export const directAnswer = async ({
+export const setupAgentDirectAnswer = async ({
   response,
   proxy,
   title = 'New discussion',
@@ -32,7 +32,7 @@ export const directAnswer = async ({
 /**
  * Calls
  */
-export const callSearchToolWithEsqlThenAnswer = async ({
+export const setupAgentCallSearchToolWithEsqlThenAnswer = async ({
   response,
   proxy,
   title = 'New discussion',
@@ -69,7 +69,7 @@ export const callSearchToolWithEsqlThenAnswer = async ({
 /**
  * Calls
  */
-export const callSearchToolWithNoIndexSelectedThenAnswer = async ({
+export const setupAgentCallSearchToolWithNoIndexSelectedThenAnswer = async ({
   response,
   proxy,
   title = 'New discussion',

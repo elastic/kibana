@@ -13,8 +13,8 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import { FtrService } from '../ftr_provider_context';
 import type { LlmProxy } from '../../onechat_api_integration/utils/llm_proxy';
 import {
-  directAnswer,
-  callSearchToolWithNoIndexSelectedThenAnswer,
+  setupAgentDirectAnswer,
+  setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
 } from '../../onechat_api_integration/utils/proxy_scenario';
 
 export class OneChatPageObject extends FtrService {
@@ -81,12 +81,12 @@ export class OneChatPageObject extends FtrService {
     await this.navigateToApp('conversations/new');
 
     await (withToolCall
-      ? callSearchToolWithNoIndexSelectedThenAnswer({
+      ? setupAgentCallSearchToolWithNoIndexSelectedThenAnswer({
           proxy: llmProxy,
           title,
           response: expectedResponse,
         })
-      : directAnswer({ proxy: llmProxy, title, response: expectedResponse }));
+      : setupAgentDirectAnswer({ proxy: llmProxy, title, response: expectedResponse }));
 
     // Type and send the message
     await this.typeMessage(userMessage);

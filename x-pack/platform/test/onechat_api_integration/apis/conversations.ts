@@ -13,7 +13,7 @@ import type {
   DeleteConversationResponse,
 } from '@kbn/onechat-plugin/common/http_api/conversations';
 import { createLlmProxy, type LlmProxy } from '../utils/llm_proxy';
-import { directAnswer } from '../utils/proxy_scenario';
+import { setupAgentDirectAnswer } from '../utils/proxy_scenario';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
@@ -53,7 +53,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
     });
 
     async function createConversation(input: string, title: string): Promise<string> {
-      await directAnswer({
+      await setupAgentDirectAnswer({
         proxy: llmProxy,
         title,
         response: `Response to: ${input}`,

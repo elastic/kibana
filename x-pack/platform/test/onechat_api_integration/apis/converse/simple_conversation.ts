@@ -10,7 +10,7 @@ import type { Payload } from '@hapi/boom';
 import type { ChatResponse } from '@kbn/onechat-plugin/common/http_api/chat';
 import type { OneChatApiFtrProviderContext } from '../../../onechat/services/api';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
-import { directAnswer } from '../../utils/proxy_scenario';
+import { setupAgentDirectAnswer } from '../../utils/proxy_scenario';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
@@ -43,7 +43,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
       let body: ChatResponse;
 
       before(async () => {
-        await directAnswer({
+        await setupAgentDirectAnswer({
           proxy: llmProxy,
           title: MOCKED_LLM_TITLE,
           response: MOCKED_LLM_RESPONSE,

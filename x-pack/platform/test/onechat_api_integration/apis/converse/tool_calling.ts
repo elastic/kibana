@@ -11,7 +11,7 @@ import { last } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import type { QueryResult, TabularDataResult } from '@kbn/onechat-common';
-import { callSearchToolWithEsqlThenAnswer } from '../../utils/proxy_scenario';
+import { setupAgentCallSearchToolWithEsqlThenAnswer } from '../../utils/proxy_scenario';
 import { createLlmProxy, type LlmProxy } from '../../utils/llm_proxy';
 import {
   createLlmProxyActionConnector,
@@ -47,7 +47,7 @@ export default function ({ getService }: OneChatApiFtrProviderContext) {
       apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
       await generateApmData(apmSynthtraceEsClient);
 
-      await callSearchToolWithEsqlThenAnswer({
+      await setupAgentCallSearchToolWithEsqlThenAnswer({
         proxy: llmProxy,
         title: MOCKED_LLM_TITLE,
         resourceName: 'traces-apm-default',

@@ -6,7 +6,7 @@
  */
 
 export {
-  directAnswer,
-  callSearchToolWithEsqlThenAnswer,
-  callSearchToolWithNoIndexSelectedThenAnswer,
+  setupAgentDirectAnswer,
+  setupAgentCallSearchToolWithEsqlThenAnswer,
+  setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
 } from './scenarios';
