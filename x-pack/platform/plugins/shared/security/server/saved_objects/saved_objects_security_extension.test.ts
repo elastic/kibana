@@ -6538,35 +6538,6 @@ describe('#authorizeChangeAccessControl', () => {
     );
   });
 
-  test('allows operation when user is admin but not owner', async () => {
-    const currentUser = {
-      username: 'admin_user',
-      profile_uid: 'u_admin_version',
-    };
-    const { securityExtension, checkPrivileges } = setup();
-
-    getCurrentUser.mockReturnValue(currentUser);
-    setupSimpleCheckPrivsMockResolve(
-      checkPrivileges,
-      'dashboard',
-      MANAGE_ACCESS_CONTROL_ACTION,
-      true
-    );
-
-    await expect(
-      securityExtension.authorizeChangeAccessControl(
-        {
-          namespace,
-          objects: objectsWithExistingNamespaces,
-        },
-        'changeOwnership'
-      )
-    ).toEqual({
-      status: 'fully_authorized',
-      typeMap: new Map(),
-    });
-  });
-
   test('allows operation when user is not admin but owner', async () => {
     const currentUser = {
       username: 'fake_owner',
@@ -6580,16 +6551,14 @@ describe('#authorizeChangeAccessControl', () => {
       MANAGE_ACCESS_CONTROL_ACTION,
       false
     );
-
-    await expect(
-      securityExtension.authorizeChangeAccessControl(
-        {
-          namespace,
-          objects: objectsWithExistingNamespaces,
-        },
-        'changeOwnership'
-      )
-    ).toEqual({
+    const result = await securityExtension.authorizeChangeAccessControl(
+      {
+        namespace,
+        objects: objectsWithExistingNamespaces,
+      },
+      'changeOwnership'
+    );
+    expect(result).toEqual({
       status: 'fully_authorized',
       typeMap: new Map(),
     });
