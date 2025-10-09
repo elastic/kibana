@@ -328,23 +328,43 @@ async function keyByAutocomplete(
  * If `linear` method is used, it suggests `normalizer` and `weights`.
  */
 async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCommand) {
-  const rrfParameters: MapParameters = {
-    rank_constant: {
-      type: 'number',
-    },
-    weights: { type: 'map' },
-  };
+  const withOption = findCommandOptionByName(command, 'with');
+  if (!withOption) {
+    return [];
+  }
 
-  const linearParameters: MapParameters = {
-    normalizer: {
-      type: 'string',
-      suggestions: [noneValueCompleteItem, minMaxValueCompleteItem],
-    },
-    weights: { type: 'map' },
-  };
+  // Means the map is not present - FUSE WITH /
+  if (withOption.args.length === 0) {
+    return [
+      withAutoSuggest({
+        label: '{ }',
+        kind: 'Reference',
+        detail: '{ ... }',
+        text: '{ $0 }',
+        sortText: '0',
+        asSnippet: true,
+      }),
+    ];
+  }
 
-  const mapParameters =
-    !command.fuseType || command.fuseType.text === 'rrf' ? rrfParameters : linearParameters;
+  // Select map parameters based on fuseType; default to rrf if missing, if unknown keep the empty map and don't suggest nothing
+  let mapParameters: MapParameters = {};
+  if (!command.fuseType || command.fuseType.text === 'rrf') {
+    mapParameters = {
+      rank_constant: {
+        type: 'number',
+      },
+      weights: { type: 'map' },
+    };
+  } else if (command.fuseType.text === 'linear') {
+    mapParameters = {
+      normalizer: {
+        type: 'string',
+        suggestions: [noneValueCompleteItem, minMaxValueCompleteItem],
+      },
+      weights: { type: 'map' },
+    };
+  }
 
   return getCommandMapExpressionSuggestions(innerText, mapParameters);
 }
