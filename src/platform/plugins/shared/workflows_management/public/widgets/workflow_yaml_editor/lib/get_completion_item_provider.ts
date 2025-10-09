@@ -207,6 +207,13 @@ function isInScheduledTriggerWithBlock(yamlDocument: Document, absolutePosition:
           absolutePosition >= withPair.value.range[0] &&
           absolutePosition <= withPair.value.range[2]
         ) {
+          // Check if there's already an existing rrule or every configuration
+          if (hasExistingScheduleConfiguration(withPair.value)) {
+            // Don't show rrule suggestions if there's already a schedule configuration
+            result = false;
+            return visit.BREAK;
+          }
+
           result = true;
           return visit.BREAK;
         }
@@ -215,6 +222,29 @@ function isInScheduledTriggerWithBlock(yamlDocument: Document, absolutePosition:
   });
 
   return result;
+}
+
+/**
+ * Check if there's already an existing schedule configuration (rrule or every) in the with block
+ */
+function hasExistingScheduleConfiguration(withNode: Node): boolean {
+  if (!withNode) {
+    return false;
+  }
+
+  // Check for existing 'rrule' or 'every' properties
+  const items = (withNode as any).items || [];
+
+  for (const item of items) {
+    if (isPair(item) && isScalar(item.key)) {
+      const keyValue = item.key.value;
+      if (keyValue === 'rrule' || keyValue === 'every') {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 export interface LineParseResult {
