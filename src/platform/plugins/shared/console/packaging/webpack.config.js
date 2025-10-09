@@ -105,22 +105,6 @@ module.exports = [
           use: [
             { loader: 'style-loader' },
             { loader: 'css-loader' },
-            {
-              loader: 'postcss-loader',
-              options: {
-                postcssOptions: {
-                  config: require.resolve('./postcss.config.js'),
-                },
-              },
-            },
-            {
-              loader: 'string-replace-loader',
-              options: {
-                search: '__REPLACE_WITH_PUBLIC_PATH__',
-                replace: '/',
-                flags: 'g',
-              },
-            },
           ],
           sideEffects: true,
         },
