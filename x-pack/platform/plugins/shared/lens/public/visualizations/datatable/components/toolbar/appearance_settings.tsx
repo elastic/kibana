@@ -118,6 +118,7 @@ export function DatatableAppearanceSettings({
         data-test-subj="lnsHeaderHeightSettings"
         maxRowHeight={5}
         lineCountInput={lineCounts[ROW_HEIGHT_LINES_KEYS.headerRowHeightLines]}
+        fullWidth
       />
       <RowHeightSettings
         rowHeight={
@@ -137,6 +138,7 @@ export function DatatableAppearanceSettings({
         }}
         data-test-subj="lnsRowHeightSettings"
         lineCountInput={lineCounts[ROW_HEIGHT_LINES_KEYS.rowHeightLines]}
+        fullWidth
       />
       <EuiFormRow
         label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {
