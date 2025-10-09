@@ -103,7 +103,7 @@ export const useToolbarActions = ({
           }
         `,
       },
-    ] as IconButtonGroupProps['buttons'];
+    ];
   }, [isFullscreen, onToggleFullscreen, euiTheme.border.thin]);
 
   return {
