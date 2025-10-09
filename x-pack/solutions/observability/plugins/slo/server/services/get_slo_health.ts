@@ -17,7 +17,6 @@ import {
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '../../common/constants';
-import type { SLODefinition } from '../domain/models';
 import type { HealthStatus, State } from '../domain/models/health';
 import type { SLORepository } from './slo_repository';
 import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
