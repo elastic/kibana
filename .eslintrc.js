@@ -2434,7 +2434,7 @@ module.exports = {
               {
                 group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
                 message:
-                  "Observability solution tests should import from '@kbn/scout-security' instead.",
+                  "Security solution tests should import from '@kbn/scout-security' instead.",
               },
             ],
           },
