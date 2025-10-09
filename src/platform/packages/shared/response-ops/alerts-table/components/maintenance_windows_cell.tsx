@@ -37,7 +37,7 @@ export const MaintenanceWindowBaseCell = memo((props: MaintenanceWindowBaseCellP
             key={`${mw.id}_tooltip`}
             content={<TooltipContent maintenanceWindow={mw} timestamp={timestamp} />}
           >
-            <span key={`${mw.id}_title`}>
+            <span key={`${mw.id}_title`} tabIndex={0}>
               {mw.title}
               {index !== totalLength - 1 && <>, &nbsp;</>}
             </span>
