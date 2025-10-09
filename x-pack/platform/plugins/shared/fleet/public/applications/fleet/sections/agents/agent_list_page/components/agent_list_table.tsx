@@ -75,7 +75,7 @@ interface Props {
     }>
   ) => void;
   clearFilters: () => void;
-  isCurrentRequestIncremented: boolean;
+  queryHasChanged: boolean;
 }
 
 export const AgentListTable: React.FC<Props> = (props: Props) => {
@@ -96,7 +96,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     isUsingFilter,
     setEnrollmentFlyoutState,
     clearFilters,
-    isCurrentRequestIncremented,
+    queryHasChanged,
   } = props;
 
   const authz = useAuthz();
@@ -125,7 +125,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   }, [agents, isAgentSelectable, showUpgradeable, totalAgents]);
 
   const noItemsMessage =
-    isLoading && isCurrentRequestIncremented ? (
+    isLoading && queryHasChanged ? (
       <FormattedMessage
         id="xpack.fleet.agentList.loadingAgentsMessage"
         defaultMessage="Loading agents…"

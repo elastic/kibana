@@ -327,7 +327,11 @@ describe('FORK Autocomplete', () => {
               'FROM a | FORK (STATS AVG(',
               [
                 ...getFieldNamesByType(AVG_TYPES),
-                ...getFunctionSignaturesByReturnType(Location.STATS, AVG_TYPES, { scalar: true }),
+                ...getFunctionSignaturesByReturnType(
+                  Location.STATS,
+                  [...AVG_TYPES, 'aggregate_metric_double'],
+                  { scalar: true }
+                ),
               ],
               mockCallbacks
             );
