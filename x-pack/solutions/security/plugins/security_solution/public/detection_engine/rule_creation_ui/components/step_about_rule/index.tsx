@@ -40,6 +40,7 @@ import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { MaxSignals } from '../max_signals';
 import { ThreatMatchIndicatorPathEdit } from '../../../rule_creation/components/threat_match_indicator_path_edit';
+import { AiAssistantLabelAppend } from '../ai_assistant_label_append';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -137,6 +138,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       indexPatternsFields: indexPattern.fields,
     });
 
+  const ruleContext = {
+    type: ruleType,
+    query: esqlQuery,
+    index,
+  };
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -150,6 +156,14 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 fullWidth: true,
                 disabled: isLoading,
               },
+              labelAppend: (
+                <AiAssistantLabelAppend
+                  getFields={getFields}
+                  setFieldValue={form.setFieldValue}
+                  fieldName="name"
+                  ruleContext={ruleContext}
+                />
+              ),
             }}
           />
           <EuiSpacer size="l" />
@@ -163,6 +177,14 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 compressed: true,
                 fullWidth: true,
               },
+              labelAppend: (
+                <AiAssistantLabelAppend
+                  getFields={getFields}
+                  setFieldValue={form.setFieldValue}
+                  fieldName="description"
+                  ruleContext={ruleContext}
+                />
+              ),
             }}
           />
           <EuiSpacer size="l" />

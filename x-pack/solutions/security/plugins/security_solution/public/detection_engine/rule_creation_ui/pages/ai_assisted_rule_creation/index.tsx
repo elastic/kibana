@@ -5,19 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiFlexGroup,
-  EuiResizableContainer,
-  EuiFlexItem,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiFlexGroup, EuiResizableContainer, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-// import styled from 'styled-components';
-import { css } from '@emotion/react';
-import { ChatActions } from '@kbn/elastic-assistant/impl/assistant/chat_actions';
+
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -30,10 +20,10 @@ import { MaxWidthEuiFlexItem } from '../../../common/helpers';
 import { SecurityPageName } from '../../../../app/types';
 // import { useKibana } from '../../../../common/lib/kibana';
 import { useAIConnectors } from '../../../../common/hooks/use_ai_connectors';
-import { PromptTextArea } from './prompt_textarea';
 import { useAiRuleCreation } from './hooks/use_ai_rule_creation';
 import { CreateRulePage } from './rule_create_form';
 import { useKibana } from '../../../../common/lib/kibana';
+import { PromptComponent } from './prompt';
 
 const AiAssistedCreateRulePageComponent: React.FC = () => {
   const [
@@ -49,7 +39,6 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
   const { addError } = useAppToasts();
   // const { navigateToApp } = useKibana().services.application;
   const isLoading = userInfoLoading || listsConfigLoading;
-  const { euiTheme } = useEuiTheme();
   const collapseFn = useRef<() => void | undefined>();
   const { settings } = useKibana().services;
 
@@ -86,44 +75,44 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
     setPromptValue('');
   }, [handlePromptSubmit, setPromptValue]);
 
-  const promptComponent = (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems={'flexEnd'}
-      css={css`
-        position: relative;
-      `}
-    >
-      <EuiFlexItem
-        css={css`
-          width: 100%;
-        `}
-      >
-        <PromptTextArea
-          onPromptSubmit={handlePromptSubmit}
-          setUserPrompt={setPromptValue}
-          value={promptValue}
-          isDisabled={isLoading}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem
-        css={css`
-          right: 0;
-          position: absolute;
-          margin-right: ${euiTheme.size.s};
-          margin-bottom: ${euiTheme.size.s};
-        `}
-        grow={false}
-      >
-        <ChatActions
-          isDisabled={isLoading && isValid}
-          isLoading={isAiRuleCreationInProgress}
-          onSendMessage={onSendMessage}
-          promptValue={promptValue}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  const mockRule = {
+    query:
+      'FROM packetbeat-8.14.2 METADATA _id,_index,_version\n| EVAL suspicious_score = (bytes_in + bytes_out) + CASE(destination.port >= 1024 AND destination.port NOT IN (80, 443), 5000, 0)\n| SORT suspicious_score DESC\n| KEEP @timestamp, source.ip, source.port, destination.ip, destination.port, bytes_in, _id, bytes_out, suspicious_score\n| LIMIT 10',
+    language: 'esql',
+    type: 'esql',
+    tags: [
+      'Domain: Network',
+      'Use Case: Network Security Monitoring',
+      'Tactic: Command and Control',
+      'Tactic: Exfiltration',
+      'Data Source: Network Traffic',
+      'packetbeat',
+    ],
+    name: 'Top 10 Suspicious Network Connections',
+    description:
+      'Identifies the 10 most suspicious network connections based on data transfer volume and unusual destination ports, highlighting potential anomalies for further investigation.',
+    references: [],
+    severity_mapping: [],
+    risk_score_mapping: [],
+    related_integrations: [],
+    required_fields: [],
+    actions: [],
+    exceptions_list: [],
+    false_positives: [],
+    threat: [],
+    author: [],
+    setup: '',
+    max_signals: 100,
+    interval: '5m',
+    risk_score: 47,
+    severity: 'medium',
+  };
+
+  // mock for easier testing
+  //   return !rule ? (
+  //   <CreateRulePage rule={mockRule} />
+  // ) : (
+
   return rule ? (
     <CreateRulePage rule={rule} />
   ) : (
@@ -152,8 +141,15 @@ const AiAssistedCreateRulePageComponent: React.FC = () => {
                         />
                       </EuiFlexItem>
                       <EuiSpacer size="m" />
-
-                      <EuiPanel hasBorder>{promptComponent}</EuiPanel>
+                      <PromptComponent
+                        handlePromptSubmit={handlePromptSubmit}
+                        setPromptValue={setPromptValue}
+                        promptValue={promptValue}
+                        isLoading={isLoading}
+                        isValid={isValid}
+                        onSendMessage={onSendMessage}
+                        isAiRuleCreationInProgress={isAiRuleCreationInProgress}
+                      />
                     </MaxWidthEuiFlexItem>
                   </EuiFlexGroup>
                 </EuiResizablePanel>

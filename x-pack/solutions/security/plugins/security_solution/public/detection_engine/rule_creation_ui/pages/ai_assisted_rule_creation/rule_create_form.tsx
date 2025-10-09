@@ -874,12 +874,11 @@ const CreateRulePageComponent: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
                 </EuiResizablePanel>
 
                 <EuiResizableButton />
-
                 <EuiResizablePanel
                   id={'preview'}
                   mode="collapsible"
                   initialSize={30}
-                  minSize={'20%'}
+                  minSize={'5%'}
                   onToggleCollapsed={onToggleCollapsedMemo}
                 >
                   <RulePreview
