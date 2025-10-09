@@ -38,7 +38,13 @@ export interface AppliedStatsFunction {
   operator: string;
 }
 
-const supportedStatsFunctions = new Set(['categorize']);
+// list of stats functions we support for grouping in the cascade experience
+const SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS = ['categorize' as const];
+
+export type SupportedStatsFunction = (typeof SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS)[number];
+
+const isSupportedStatsFunction = (fnName: string): fnName is SupportedStatsFunction =>
+  SUPPORTED_STATS_COMMAND_OPTION_FUNCTIONS.includes(fnName as SupportedStatsFunction);
 
 // helper for removing backticks from field names of function names
 const removeBackticks = (str: string) => str.replace(/`/g, '');
@@ -123,7 +129,7 @@ export const getESQLStatsQueryMeta = (queryString: string): ESQLStatsQueryMeta =
 
     if (isFunctionExpression(group.definition)) {
       const functionName = group.definition.name;
-      if (!supportedStatsFunctions.has(functionName)) {
+      if (!isSupportedStatsFunction(functionName)) {
         continue;
       }
     }
@@ -380,7 +386,7 @@ export function mutateQueryStatsGrouping(query: AggregateQuery, pick: string[]):
               );
             } else if (
               isFunctionExpression(cur) &&
-              supportedStatsFunctions.has(
+              isSupportedStatsFunction(
                 cur.subtype === 'variadic-call'
                   ? cur.name
                   : (cur.args[1] as ESQLAstItem[]).find(isFunctionExpression)?.name ?? ''
