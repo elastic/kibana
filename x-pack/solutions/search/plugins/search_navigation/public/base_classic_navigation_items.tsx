@@ -8,26 +8,46 @@
 import React from 'react';
 
 import { EuiText } from '@elastic/eui';
-import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
+import { SEARCH_HOMEPAGE, SEARCH_GETTING_STARTED } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
 import type { ClassicNavItem } from './types';
 
 export const BaseClassicNavItems: ClassicNavItem[] = [
   {
-    'data-test-subj': 'searchSideNav-Home',
-    deepLink: {
-      link: SEARCH_HOMEPAGE,
-      shouldShowActiveForSubroutes: true,
-    },
-    id: 'home',
-    name: (
-      <EuiText size="s">
-        {i18n.translate('xpack.searchNavigation.classicNav.homeTitle', {
-          defaultMessage: 'Home',
-        })}
-      </EuiText>
-    ),
+    id: 'root',
+    items: [
+      {
+        'data-test-subj': 'searchSideNav-Home',
+        deepLink: {
+          link: SEARCH_HOMEPAGE,
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'home',
+        name: (
+          <EuiText size="s">
+            {i18n.translate('xpack.searchNavigation.classicNav.homeTitle', {
+              defaultMessage: 'Home',
+            })}
+          </EuiText>
+        ),
+      },
+      {
+        'data-test-subj': 'searchSideNav-GettingStarted',
+        deepLink: {
+          link: SEARCH_GETTING_STARTED,
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'gettingStarted',
+        name: (
+          <EuiText size="s">
+            {i18n.translate('xpack.searchNavigation.classicNav.gettingStartedTitle', {
+              defaultMessage: 'Getting started',
+            })}
+          </EuiText>
+        ),
+      },
+    ],
   },
   {
     'data-test-subj': 'searchSideNav-Build',

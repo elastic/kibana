@@ -75,7 +75,7 @@ export class SearchGettingStartedPlugin
 
         return renderApp(coreStart, services, element, queryClient);
       },
-      order: 1000,
+      order: 0,
       visibleIn: ['globalSearch', 'sideNav'],
     });
 
