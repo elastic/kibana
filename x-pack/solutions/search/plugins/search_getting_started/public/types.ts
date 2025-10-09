@@ -35,15 +35,14 @@ export interface SearchGettingStartedAppPluginStartDependencies {
 }
 
 export interface SearchGettingStartedConfigType {
-  ui: {
-    enabled: boolean;
-  };
+  enabled: boolean;
 }
 
-export interface SearchGettingStartedServicesContextDeps {
-  history: AppMountParameters['history'];
-  usageCollection?: UsageCollectionStart;
-}
+export type SearchGettingStartedServicesContextDeps =
+  SearchGettingStartedAppPluginStartDependencies & {
+    history: AppMountParameters['history'];
+    usageCollection?: UsageCollectionStart;
+  };
 
 export type SearchGettingStartedServicesContext = CoreStart &
   SearchGettingStartedAppPluginStartDependencies & {

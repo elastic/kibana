@@ -23,6 +23,11 @@ import type {
   SearchGettingStartedConfigType,
 } from './types';
 
+const appInfo = {
+  appRoute: '/app/elasticsearch/getting_started',
+  id: PLUGIN_ID,
+  title: PLUGIN_NAME,
+};
 export class SearchGettingStartedPlugin
   implements
     Plugin<
@@ -44,13 +49,7 @@ export class SearchGettingStartedPlugin
     >,
     deps: {}
   ): SearchGettingStartedPluginSetup {
-    if (!this.config.ui?.enabled) return {};
-
-    const appInfo = {
-      appRoute: '/app/elasticsearch/getting_started',
-      id: PLUGIN_ID,
-      title: PLUGIN_NAME,
-    };
+    if (!this.config?.enabled) return {};
 
     core.application.register({
       id: PLUGIN_ID,
@@ -85,10 +84,9 @@ export class SearchGettingStartedPlugin
     };
   }
 
-  public start(
-    core: CoreStart,
-    deps: SearchGettingStartedAppPluginStartDependencies
-  ): SearchGettingStartedPluginStart {
-    return {};
+  public start(core: CoreStart) {
+    return {
+      app: appInfo,
+    };
   }
 }

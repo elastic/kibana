@@ -7,9 +7,6 @@
 
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { SearchGettingStartedPlugin } from './plugin';
-import { config } from './config';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new SearchGettingStartedPlugin(initContext);
-
-export { config };

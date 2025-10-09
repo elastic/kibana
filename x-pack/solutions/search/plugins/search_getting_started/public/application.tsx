@@ -24,17 +24,19 @@ export const renderApp = async (
   queryClient: QueryClient
 ) => {
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...core, ...services }}>
-      <UsageTrackerContextProvider usageCollection={services.usageCollection}>
-        <QueryClientProvider client={queryClient}>
-          <I18nProvider>
-            <Router history={services.history}>
-              <SearchGettingStartedPage />
-            </Router>
-          </I18nProvider>
-        </QueryClientProvider>
-      </UsageTrackerContextProvider>
-    </KibanaContextProvider>,
+    core.rendering.addContext(
+      <KibanaContextProvider services={{ ...core, ...services }}>
+        <UsageTrackerContextProvider usageCollection={services.usageCollection}>
+          <QueryClientProvider client={queryClient}>
+            <I18nProvider>
+              <Router history={services.history}>
+                <SearchGettingStartedPage />
+              </Router>
+            </I18nProvider>
+          </QueryClientProvider>
+        </UsageTrackerContextProvider>
+      </KibanaContextProvider>
+    ),
     element
   );
 

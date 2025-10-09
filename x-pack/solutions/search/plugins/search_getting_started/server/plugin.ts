@@ -15,7 +15,13 @@ import type {
 } from './types';
 
 export class SearchGettingStartedPlugin
-  implements Plugin<SearchGettingStartedPluginSetup, SearchGettingStartedPluginStart, SearchGettingStartedPluginSetupDeps, SearchGettingStartedPluginStartDeps>
+  implements
+    Plugin<
+      SearchGettingStartedPluginSetup,
+      SearchGettingStartedPluginStart,
+      SearchGettingStartedPluginSetupDeps,
+      SearchGettingStartedPluginStartDeps
+    >
 {
   constructor(private readonly initContext: PluginInitializerContext) {}
 

@@ -8,8 +8,10 @@
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchGettingStartedPluginSetup {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchGettingStartedPluginStart {}
 
 export interface SearchGettingStartedPluginSetupDeps {

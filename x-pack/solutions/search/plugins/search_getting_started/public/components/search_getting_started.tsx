@@ -24,10 +24,9 @@ export const SearchGettingStartedPage: React.FC = () => {
       <KibanaPageTemplate.Header
         pageTitle={PLUGIN_NAME}
         description={i18n.translate('xpack.search.gettingStarted.page.description', {
-          defaultMessage: 'Get started with Elasticsearch.',
+          defaultMessage: 'Get started with Elasticsearch',
         })}
       />
-      <KibanaPageTemplate.Section color="plain">Body</KibanaPageTemplate.Section>
     </SearchGettingStartedPageTemplate>
   );
 };
