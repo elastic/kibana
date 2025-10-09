@@ -29,7 +29,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ThemeContext } from 'styled-components';
 import { SecurityCellActionsTrigger } from '../../../app/actions/constants';
 import { RowAction } from '../../../common/components/control_columns/row_action';
-import { buildBrowserFields } from '../../../data_view_manager/utils/security_browser_fields_manager';
+import { buildBrowserFields } from '../../../data_view_manager/utils/build_browser_fields';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
@@ -59,9 +59,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
   const dispatch = useDispatch();
 
-  const browserFields = useMemo(() => {
-    return buildBrowserFields(dataView.fields).browserFields;
-  }, [dataView.fields]);
+  const browserFields = useMemo(() => buildBrowserFields(dataView.fields), [dataView.fields]);
 
   const controlColumns = useMemo(() => getDefaultControlColumn(MAX_ACTION_BUTTON_COUNT), []);
 
@@ -83,7 +81,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
   const pagination: EuiDataGridPaginationProps & { pageSize: number } = useMemo(
     () => ({
-      pageIndex: 0,
+      pageIndex: currentPageIndex,
       pageSize: itemsPerPage,
       pageSizeOptions: itemsPerPageOptions,
       onChangeItemsPerPage: (perPage) =>
@@ -95,7 +93,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
         ),
       onChangePage: setCurrentPageIndex,
     }),
-    [dispatch, itemsPerPage, itemsPerPageOptions]
+    [currentPageIndex, dispatch, itemsPerPage, itemsPerPageOptions]
   );
 
   const eventIds = useMemo(() => {
@@ -110,6 +108,11 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
     pageIndex: currentPageIndex,
     itemsPerPage,
   });
+
+  // NOTE: sorting change resets pagination
+  useEffect(() => {
+    setCurrentPageIndex(0);
+  }, [sort]);
 
   const leadingControlColumns = useMemo(
     () =>
@@ -136,6 +139,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
 
           return (
             <RowAction
+              key={column.id}
               columnId={column.id ?? ''}
               columnHeaders={defaultHeaders}
               controlColumn={controlColumns[i]}
@@ -177,7 +181,7 @@ const EventsTableForCasesBody: FC<{ dataView: DataView } & CaseViewEventsTablePr
       data={data}
       getFieldSpec={getFieldSpec}
       id={EVENTS_TABLE_FOR_CASES_ID}
-      totalItems={data.length}
+      totalItems={eventIds.length}
       unitCountText={TABLE_UNIT}
       cellActionsTriggerId={SecurityCellActionsTrigger.CASE_EVENTS}
       leadingControlColumns={leadingControlColumns}

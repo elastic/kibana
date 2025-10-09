@@ -52,8 +52,10 @@ export function createIntegrationEntitySource(
     managed: true,
     indexPattern: 'logs-entityanalytics_test.user-default',
     name: '.entity_analytics.monitoring.sources.test-default',
-    matchers: [{ fields: ['user.roles'], values: ['PrivilegedRoleA', 'PrivilegedRoleB'] }],
-    id: '00000000-0000-0000-0000-000000000000',
+    matchers: [
+      { fields: ['user.roles'], values: ['Group Administrator', 'Read-only Administrator'] },
+    ],
+    id: 'AZlHQD20hY07UD0HNBs9',
     ...overrides,
   };
 }

@@ -99,6 +99,7 @@ const basicCase: Case = {
   version: 'WzQ3LDFd',
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
@@ -151,6 +152,7 @@ describe('CasePostRequestRt', () => {
     },
     settings: {
       syncAlerts: true,
+      extractObservables: undefined,
     },
     owner: 'cases',
     severity: CaseSeverity.LOW,
@@ -412,7 +414,7 @@ describe('CasesFindRequestRt', () => {
     page: '1',
     perPage: '10',
     search: 'search text',
-    searchFields: ['title', 'description'],
+    searchFields: ['title', 'description', 'incremental_id.text'],
     to: '1w',
     sortOrder: 'desc',
     sortField: 'createdAt',
@@ -534,7 +536,7 @@ describe('CasesSearchRequestRt', () => {
     page: '1',
     perPage: '10',
     search: 'search text',
-    searchFields: ['title', 'description'],
+    searchFields: ['title', 'description', 'incremental_id.text'],
     to: '1w',
     sortOrder: 'desc',
     sortField: 'createdAt',

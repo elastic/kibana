@@ -104,7 +104,7 @@ describe('getCategoryRequest', () => {
             categories: {
               categorize_text: {
                 field: 'the-field-name',
-                size: 1000,
+                size: 100,
               },
               aggs: {
                 examples: {

@@ -10,6 +10,7 @@ import { EuiFlyoutFooter, EuiPanel, EuiFlexGroup, EuiFlexItem, EuiLink } from '@
 import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
+import { NewChatByTitle } from '@kbn/elastic-assistant';
 import { DocumentEventTypes } from '../../../common/lib/telemetry';
 import { TakeAction } from '../shared/components/take_action';
 import {
@@ -19,18 +20,30 @@ import {
 import { GenericEntityPanelKey } from '../shared/constants';
 import { GENERIC_ENTITY_PREVIEW_BANNER } from '../../document_details/preview/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { ASK_AI_ASSISTANT } from '../shared/translations';
+import { useAssetInventoryAssistant } from './hooks/use_asset_inventory_assistant';
+
+interface GenericEntityFlyoutFooterProps {
+  entityId: EntityEcs['id'];
+  isPreviewMode: boolean;
+  scopeId: string;
+  entityFields: Record<string, string[]>;
+}
 
 export const GenericEntityFlyoutFooter = ({
   entityId,
   isPreviewMode,
   scopeId,
-}: {
-  entityId: EntityEcs['id'];
-  isPreviewMode: boolean;
-  scopeId: string;
-}) => {
+  entityFields,
+}: GenericEntityFlyoutFooterProps) => {
   const { openFlyout } = useExpandableFlyoutApi();
   const { telemetry } = useKibana().services;
+
+  const { showAssistant, showAssistantOverlay } = useAssetInventoryAssistant({
+    entityId,
+    entityFields,
+    isPreviewMode,
+  });
 
   const openDocumentFlyout = useCallback(() => {
     openFlyout({
@@ -70,6 +83,11 @@ export const GenericEntityFlyoutFooter = ({
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           {isPreviewMode && <EuiFlexItem grow={false}>{fullDetailsLink}</EuiFlexItem>}
 
+          {showAssistant && (
+            <EuiFlexItem grow={false}>
+              <NewChatByTitle showAssistantOverlay={showAssistantOverlay} text={ASK_AI_ASSISTANT} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <TakeAction
               isDisabled={!entityId}

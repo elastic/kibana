@@ -111,7 +111,6 @@ describe('getExpressionType', () => {
       { expectedType: 'keyword', expression: '1::keyword' },
       { expectedType: 'long', expression: '1::long' },
       { expectedType: 'keyword', expression: '1::string' },
-      { expectedType: 'keyword', expression: '1::text' },
       { expectedType: 'time_duration', expression: '1::time_duration' },
       { expectedType: 'unsigned_long', expression: '1::unsigned_long' },
       { expectedType: 'version', expression: '"1.2.3"::version' },

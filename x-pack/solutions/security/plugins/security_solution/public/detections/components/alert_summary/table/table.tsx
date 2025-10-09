@@ -90,6 +90,7 @@ export const CASES_CONFIGURATION = {
   featureId: CASES_FEATURE_ID,
   owner: [APP_ID],
   syncAlerts: true,
+  extractObservables: true,
 };
 
 // This will guarantee that ALL cells will have their values vertically centered.

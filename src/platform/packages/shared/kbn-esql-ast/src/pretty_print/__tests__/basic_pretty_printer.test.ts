@@ -107,6 +107,20 @@ describe('single line query', () => {
       });
     });
 
+    describe('INLINE STATS', () => {
+      test('with aggregates assignment', () => {
+        const { text } = reprint('FROM a | INLINE STATS var = avg(field)');
+
+        expect(text).toBe('FROM a | INLINE STATS var = AVG(field)');
+      });
+
+      test('with BY clause', () => {
+        const { text } = reprint('FROM a | INLINE STATS count(), sum(value) by category');
+
+        expect(text).toBe('FROM a | INLINE STATS COUNT(), SUM(value) BY category');
+      });
+    });
+
     describe('GROK', () => {
       test('two basic arguments', () => {
         const { text } = reprint('FROM search-movies | GROK Awards "text"');
@@ -174,9 +188,9 @@ describe('single line query', () => {
       });
 
       test('value and key', () => {
-        const { text } = reprint(`FROM a | CHANGE_POINT value ON key`);
+        const { text } = reprint(`FROM a | CHANGE_POINT value ON type`);
 
-        expect(text).toBe('FROM a | CHANGE_POINT value ON key');
+        expect(text).toBe('FROM a | CHANGE_POINT value ON type');
       });
 
       test('value and target', () => {
@@ -186,9 +200,9 @@ describe('single line query', () => {
       });
 
       test('value, key, and target', () => {
-        const { text } = reprint(`FROM a | CHANGE_POINT value ON key AS type, pvalue`);
+        const { text } = reprint(`FROM a | CHANGE_POINT value ON typeField AS type, pvalue`);
 
-        expect(text).toBe('FROM a | CHANGE_POINT value ON key AS type, pvalue');
+        expect(text).toBe('FROM a | CHANGE_POINT value ON typeField AS type, pvalue');
       });
 
       test('example from docs', () => {
@@ -302,6 +316,16 @@ describe('single line query', () => {
         );
       });
 
+      test('from singlelinewith with options', () => {
+        const { text } =
+          reprint(`FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH { "normalizer": "minmax" }
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH {"normalizer": "minmax"}'
+        );
+      });
+
       test('from multiline', () => {
         const { text } = reprint(`FROM search-movies METADATA _score, _id, _index
   | FORK
@@ -313,6 +337,20 @@ describe('single line query', () => {
 
         expect(text).toBe(
           'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score'
+        );
+      });
+
+      test('from multiline with options', () => {
+        const { text } = reprint(`FROM search-movies
+  | FUSE linear
+        SCORE BY s1
+        KEY BY k1, k2
+        GROUP BY g
+        WITH {"normalizer": "minmax"}
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH {"normalizer": "minmax"}'
         );
       });
     });
@@ -867,10 +905,10 @@ describe('multiline query', () => {
     const query = `FROM kibana_sample_data_logs
 | SORT @timestamp
 | EVAL t = NOW()
-| EVAL key = CASE(timestamp < t - 1 hour AND timestamp > t - 2 hour, "Last hour", "Other")
-| STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) BY key, extension.keyword
-| EVAL sum_last_hour = CASE(key == "Last hour", sum), sum_rest = CASE(key == "Other", sum), count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
-| STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) BY key, extension.keyword
+| EVAL newColumn = CASE(timestamp < t - 1 hour AND timestamp > t - 2 hour, "Last hour", "Other")
+| STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) BY newColumn, extension.keyword
+| EVAL sum_last_hour = CASE(newColumn == "Last hour", sum), sum_rest = CASE(newColumn == "Other", sum), count_last_hour = CASE(newColumn == "Last hour", count), count_rest = CASE(newColumn == "Other", count)
+| STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) BY newColumn, extension.keyword
 | EVAL total_bytes = TO_DOUBLE(COALESCE(sum_last_hour, 0::LONG) + COALESCE(sum_rest, 0::LONG))
 | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
 | EVAL bytes_transform = ROUND(total_bytes / 1000000.0, 1)

@@ -52,6 +52,7 @@ export interface DocLinks {
   };
   readonly cloud: {
     readonly beatsAndLogstashConfiguration: string;
+    readonly elasticsearchBillingManagingCosts: string;
     readonly indexManagement: string;
   };
   readonly console: {
@@ -143,6 +144,7 @@ export interface DocLinks {
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
     readonly e5Model: string;
+    readonly elasticInferenceService: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
@@ -303,6 +305,7 @@ export interface DocLinks {
   readonly securitySolution: {
     readonly aiAssistant: {
       home: string;
+      knowledgeBaseHome: string;
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
@@ -417,6 +420,7 @@ export interface DocLinks {
     uptimeDurationAnomaly: string;
     monitorLogs: string;
     logsStreams: string;
+    wiredStreams: string;
     analyzeMetrics: string;
     monitorUptimeSynthetics: string;
     userExperience: string;
@@ -430,6 +434,7 @@ export interface DocLinks {
     aiAssistant: string;
     elasticManagedLlm: string;
     elasticManagedLlmUsageCost: string;
+    elasticServerlessSearchManagedLlmUsageCost: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;
@@ -493,6 +498,7 @@ export interface DocLinks {
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;
     kibanaDisableLegacyUrlAliasesApi: string;
+    kibanaManageSpaces: string;
   }>;
   readonly watcher: Record<string, string>;
   readonly ccs: Record<string, string>;
@@ -556,6 +562,7 @@ export interface DocLinks {
     remoteESOoutputTroubleshooting: string;
     agentReleaseProcess: string;
     fipsIngest: string;
+    edotCollector: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;

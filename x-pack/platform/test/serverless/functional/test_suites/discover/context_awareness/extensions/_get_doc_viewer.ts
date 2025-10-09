@@ -19,7 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
 
-  describe('extension getDocViewer', () => {
+  describe('extension getDocViewer', function () {
     before(async () => {
       await svlCommonPage.loginAsAdmin();
     });
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle({ rowIndex: 0 });
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.existOrFail('docViewerTab-doc_view_source');
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle({ rowIndex: 0 });
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.existOrFail('docViewerTab-doc_view_source');
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-*');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle({ rowIndex: 0 });
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.existOrFail('docViewerTab-doc_view_source');
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await dataGrid.clickRowToggle({ rowIndex: 0 });
         await testSubjects.existOrFail('docViewerTab-doc_view_table');
         await testSubjects.existOrFail('docViewerTab-doc_view_source');

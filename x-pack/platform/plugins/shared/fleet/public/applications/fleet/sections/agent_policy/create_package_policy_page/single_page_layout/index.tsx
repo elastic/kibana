@@ -148,7 +148,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     queryParamsPolicyId ? SelectedPolicyTab.EXISTING : SelectedPolicyTab.NEW
   );
 
-  // Fetch package info
   const {
     data: packageInfoData,
     error: packageInfoError,
@@ -482,7 +481,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 // agentless doesn't need system integration
                 setWithSysMonitoring(value === SetupTechnology.AGENT_BASED);
               }}
-              showBetaBadge={isAgentlessDefault}
+              isAgentlessDefault={isAgentlessDefault}
+              showBetaBadge={!isAgentlessDefault}
             />
           )}
 

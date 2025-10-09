@@ -19,6 +19,7 @@ import {
   getCasesV3Feature,
   getSecurityV2Feature,
   getSecurityV3Feature,
+  getSecurityV4Feature,
   getTimelineFeature,
   getNotesFeature,
   getSiemMigrationsFeature,
@@ -53,6 +54,7 @@ export class ProductFeaturesService {
       getSecurityFeature({ ...securityFeatureParams, savedObjects: securityV1SavedObjects }),
       getSecurityV2Feature({ ...securityFeatureParams, savedObjects: securityDefaultSavedObjects }),
       getSecurityV3Feature({ ...securityFeatureParams, savedObjects: securityDefaultSavedObjects }),
+      getSecurityV4Feature({ ...securityFeatureParams, savedObjects: securityDefaultSavedObjects }),
     ]);
     this.productFeaturesRegistry.create('cases', [
       getCasesFeature(casesProductFeatureParams),

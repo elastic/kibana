@@ -8,6 +8,7 @@
 import {
   AccessForbidden,
   IndexNotFound,
+  IndexAlreadyExists,
   CannotCreateIndex,
   ReindexTaskCannotBeDeleted,
   ReindexTaskFailed,
@@ -29,6 +30,7 @@ export const createErrorFactory = (symbol: symbol) => (message: string) => {
 
 export const error = {
   indexNotFound: createErrorFactory(IndexNotFound),
+  indexAlreadyExists: createErrorFactory(IndexAlreadyExists),
   accessForbidden: createErrorFactory(AccessForbidden),
   cannotCreateIndex: createErrorFactory(CannotCreateIndex),
   reindexTaskFailed: createErrorFactory(ReindexTaskFailed),

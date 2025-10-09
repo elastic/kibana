@@ -21,7 +21,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common';
+import { type AgentDefinition } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
@@ -67,8 +67,8 @@ export const AgentsList: React.FC = () => {
       width: '48px',
       align: 'center',
       render: (agent) =>
-        agent.id === oneChatDefaultAgentId ? (
-          <EuiIcon type="logoElastic" size="xl" />
+        agent.readonly && !agent.avatar_symbol ? (
+          <EuiIcon type={agent.avatar_icon ?? 'logoElastic'} size="xl" />
         ) : (
           <AgentAvatar agent={agent} size="m" />
         ),
@@ -80,7 +80,7 @@ export const AgentsList: React.FC = () => {
       render: (name: string, agent: AgentDefinition) => (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            {agent.id === oneChatDefaultAgentId ? (
+            {agent.readonly ? (
               <EuiText size="s">{name}</EuiText>
             ) : (
               <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}>
@@ -127,8 +127,7 @@ export const AgentsList: React.FC = () => {
           isPrimary: true,
           showOnHover: true,
           href: (agent) => createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
-          // Don't display edit action for default agent
-          available: (agent) => agent.id !== oneChatDefaultAgentId,
+          available: (agent) => !agent.readonly,
         },
         {
           type: 'icon',
@@ -149,9 +148,6 @@ export const AgentsList: React.FC = () => {
                   <EuiIcon type="trash" color="danger" />
                   <EuiLink
                     onClick={() => {
-                      if (agent.id === oneChatDefaultAgentId) {
-                        return;
-                      }
                       deleteAgent({ agent });
                     }}
                     color="danger"
@@ -162,8 +158,7 @@ export const AgentsList: React.FC = () => {
               </EuiToolTip>
             );
           },
-          // Don't display delete action for default agent
-          available: (agent) => agent.id !== oneChatDefaultAgentId,
+          available: (agent) => !agent.readonly,
         },
       ],
     };

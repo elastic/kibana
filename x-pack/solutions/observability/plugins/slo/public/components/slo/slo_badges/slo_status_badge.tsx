@@ -64,7 +64,7 @@ export function SloStatusBadge({ slo, isLoading }: SloStatusProps) {
               defaultMessage: 'It may take some time before the data is aggregated and available.',
             })}
           >
-            <EuiBadge color={displayStatus[slo.summary.status].badgeColor}>
+            <EuiBadge tabIndex={0} color={displayStatus[slo.summary.status].badgeColor}>
               {displayStatus[slo.summary.status]?.displayText}
             </EuiBadge>
           </EuiToolTip>

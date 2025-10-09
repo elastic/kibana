@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRound, ConversationRoundStep } from '@kbn/onechat-common';
 import React, { useState } from 'react';
-import { useSendMessage } from '../../../../context/send_message_context';
+import { useSendMessage } from '../../../../context/send_message/send_message_context';
 import { RoundFlyout } from '../round_flyout';
 import { RoundSteps } from './steps/round_steps';
 
@@ -77,6 +77,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
       id={thinkingAccordionId}
       arrowDisplay="left"
       css={accordionStyles}
+      data-test-subj="agentBuilderThinkingToggle"
       buttonProps={{
         css: thinkingButtonStyles,
       }}
