@@ -24,9 +24,14 @@ export enum HitsCounterMode {
 export interface HitsCounterProps {
   mode: HitsCounterMode;
   stateContainer: DiscoverStateContainer;
+  hitCounterLabel?: string;
 }
 
-export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }) => {
+export const HitsCounter: React.FC<HitsCounterProps> = ({
+  mode,
+  stateContainer,
+  hitCounterLabel,
+}) => {
   const totalHits$ = stateContainer.dataState.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
   let hitsTotal = totalHitsState.result;
@@ -85,8 +90,16 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
               mode === HitsCounterMode.standalone ? (
                 <FormattedMessage
                   id="discover.hitsCounter.partialHitsPluralTitle"
-                  defaultMessage="≥{formattedHits} {hits, plural, one {result} other {results}}"
-                  values={{ hits: hitsTotal, formattedHits }}
+                  defaultMessage={`≥{formattedHits} {hits, plural, one {{hitCounterLabel}} other {{hitCounterLabel}s}}`}
+                  values={{
+                    hits: hitsTotal,
+                    formattedHits,
+                    hitCounterLabel:
+                      hitCounterLabel ??
+                      i18n.translate('discover.hitsCounter.resultLabel', {
+                        defaultMessage: 'result',
+                      }),
+                  }}
                 />
               ) : (
                 <FormattedMessage
@@ -98,8 +111,16 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
             ) : mode === HitsCounterMode.standalone ? (
               <FormattedMessage
                 id="discover.hitsCounter.hitsPluralTitle"
-                defaultMessage="{formattedHits} {hits, plural, one {result} other {results}}"
-                values={{ hits: hitsTotal, formattedHits }}
+                defaultMessage={`{formattedHits} {hits, plural, one {{hitCounterLabel}} other {{hitCounterLabel}s}}`}
+                values={{
+                  hits: hitsTotal,
+                  formattedHits,
+                  hitCounterLabel:
+                    hitCounterLabel ??
+                    i18n.translate('discover.hitsCounter.resultLabel', {
+                      defaultMessage: 'result',
+                    }),
+                }}
               />
             ) : (
               formattedHits

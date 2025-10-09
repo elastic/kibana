@@ -41,7 +41,7 @@ export { useGetGroupBySelectorRenderer as useGroupBySelectorRenderer } from './b
 
 export interface ESQLDataCascadeProps extends Omit<UnifiedDataTableProps, 'ref'> {
   defaultFilters?: Filter[];
-  viewModeToggle?: React.ReactNode | null;
+  viewModeToggle: React.ReactElement | undefined;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
   cascadeConfig: CascadeDocumentsRestorableState;
 }
@@ -105,11 +105,13 @@ export const ESQLDataCascade = React.memo(
       ]
     );
 
-    const [cascadeGroupData, setCascadeGroupData] = React.useState(() =>
-      (initialData ?? []).map((datum) => ({
-        id: datum.id,
-        ...datum.flattened,
-      }))
+    const cascadeGroupData = React.useMemo(
+      () =>
+        (initialData ?? []).map((datum) => ({
+          id: datum.id,
+          ...datum.flattened,
+        })),
+      [initialData]
     );
 
     const customTableHeading = useEsqlDataCascadeHeaderComponent({

@@ -18,10 +18,11 @@ import {
 } from '@elastic/eui';
 import type { DataCascadeProps } from '@kbn/shared-ux-document-data-cascade';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { ESQLDataGroupNode, DataTableRecord } from './types';
 
 interface UseTableHeaderProps {
-  viewModeToggle: React.ReactNode;
+  viewModeToggle: React.ReactElement | undefined;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
 }
 
@@ -60,7 +61,7 @@ export function useGetGroupBySelectorRenderer({
               data-test-subj="discoverEnableCascadeLayoutSwitch"
             >
               <FormattedMessage
-                id="discover.enableCascadeLayoutSwitchLabel"
+                id="discover.cascade.header.layoutSwitchLabel"
                 defaultMessage="Group By"
               />
             </EuiFilterButton>
@@ -111,8 +112,19 @@ export function useEsqlDataCascadeHeaderComponent({
   >(
     ({ currentSelectedColumns, availableColumns }) => {
       return (
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem>{viewModeToggle}</EuiFlexItem>
+        <EuiFlexGroup
+          justifyContent={viewModeToggle ? 'spaceBetween' : 'flexEnd'}
+          alignItems="center"
+        >
+          {viewModeToggle && (
+            <EuiFlexItem>
+              {React.cloneElement(viewModeToggle!, {
+                hitCounterLabel: i18n.translate('discover.cascade.header.resultLabel', {
+                  defaultMessage: 'group',
+                }),
+              })}
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             {groupBySelectorRenderer(availableColumns, currentSelectedColumns)}
           </EuiFlexItem>

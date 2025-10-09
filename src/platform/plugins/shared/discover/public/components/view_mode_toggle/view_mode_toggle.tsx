@@ -27,6 +27,7 @@ export const DocumentViewModeToggle = ({
   setDiscoverViewMode,
   patternCount,
   dataView,
+  hitCounterLabel,
 }: {
   viewMode: VIEW_MODE;
   isEsqlMode: boolean;
@@ -35,6 +36,7 @@ export const DocumentViewModeToggle = ({
   setDiscoverViewMode: (viewMode: VIEW_MODE) => Promise<VIEW_MODE>;
   patternCount?: number;
   dataView: DataView;
+  hitCounterLabel?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -129,7 +131,11 @@ export const DocumentViewModeToggle = ({
       )}
       <EuiFlexItem grow={false}>
         {showFieldStatisticsTab === false && showPatternAnalysisTab === false ? (
-          <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
+          <HitsCounter
+            mode={HitsCounterMode.standalone}
+            stateContainer={stateContainer}
+            hitCounterLabel={hitCounterLabel}
+          />
         ) : (
           <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
             <EuiTab
@@ -145,7 +151,11 @@ export const DocumentViewModeToggle = ({
                   defaultMessage="Documents"
                 />
               )}
-              <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
+              <HitsCounter
+                mode={HitsCounterMode.appended}
+                stateContainer={stateContainer}
+                hitCounterLabel={hitCounterLabel}
+              />
             </EuiTab>
 
             {showPatternAnalysisTab ? (
