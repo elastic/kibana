@@ -1028,6 +1028,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}solutions/search/elastic-agent-builder`,
       getStarted: `${ELASTIC_DOCS}solutions/search/agent-builder/get-started`,
+      models: `${ELASTIC_DOCS}solutions/search/agent-builder/models`,
       chat: `${ELASTIC_DOCS}solutions/search/agent-builder/chat`,
       agentBuilderAgents: `${ELASTIC_DOCS}solutions/search/agent-builder/agent-builder-agents`,
       tools: `${ELASTIC_DOCS}solutions/search/agent-builder/tools`,
