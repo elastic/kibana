@@ -161,7 +161,9 @@ export const PendingActionsSelector = memo<
       if (option.disabled) {
         return (
           <EuiToolTip position="right" content={toolTipText} display="block">
-            <div style={{ cursor: 'not-allowed' }}>{content}</div>
+            <div style={{ cursor: 'not-allowed' }} tabIndex={0}>
+              {content}
+            </div>
           </EuiToolTip>
         );
       }
@@ -188,7 +190,7 @@ export const PendingActionsSelector = memo<
       panelProps={{ 'data-test-subj': testId('popoverPanel') }}
       button={
         <EuiToolTip content={PENDING_ACTIONS_CONFIG.tooltipText} position="top" display="block">
-          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none" tabIndex={0}>
             <EuiFlexItem grow={false} onClick={handleOpenPopover}>
               <div title={valueText}>{valueText || PENDING_ACTIONS_CONFIG.initialLabel}</div>
             </EuiFlexItem>
