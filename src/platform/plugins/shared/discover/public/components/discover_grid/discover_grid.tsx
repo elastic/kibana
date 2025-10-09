@@ -26,7 +26,7 @@ import type { CascadeDocumentsRestorableState } from '../../application/main/com
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
-  viewModeToggle?: React.ReactNode;
+  viewModeToggle: React.ReactElement | undefined;
   cascadeConfig?: CascadeDocumentsRestorableState;
   isCascadeLayoutEnabled: boolean;
   onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
