@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable @kbn/imports/no_boundary_crossing */
+// This is a packaged standalone version of console that needs to import browser code
+
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { noop } from 'lodash';
 
@@ -28,10 +31,10 @@ import { noop } from 'lodash';
 };
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+
 import { HttpService } from '@kbn/core-http-browser-internal';
 import { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
@@ -105,6 +108,7 @@ export const OneConsole = ({
 
     const rootDomElement = document.getElementById('root')!;
     const fatalErrorsService = new FatalErrorsService(rootDomElement, () => {
+      // eslint-disable-next-line no-console
       console.log('FATAL ERROR OCURRED');
     });
     const fatalErrors = fatalErrorsService.setup({

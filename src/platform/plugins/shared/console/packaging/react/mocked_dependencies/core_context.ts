@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
+// Console statements are allowed here as this is running in a packaged environment
 const createLogger = (name?: string): any => ({
   debug: (...args: any[]) => console.debug(`[DEBUG]${name ? ` [${name}]` : ''}`, ...args),
   info: (...args: any[]) => console.info(`[INFO]${name ? ` [${name}]` : ''}`, ...args),
@@ -17,6 +19,7 @@ const createLogger = (name?: string): any => ({
   log: (...args: any[]) => console.log(`[LOG]${name ? ` [${name}]` : ''}`, ...args),
   get: (childName?: string) => createLogger(name ? `${name}.${childName}` : childName),
 });
+/* eslint-enable no-console */
 
 export const coreContext = {
   coreId: Symbol('core'),

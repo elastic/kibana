@@ -162,6 +162,8 @@ class StandaloneSpecDefinitionsService {
       require('@kbn/babel-register').install();
 
       // Load the JS spec loaders
+      // Dynamic require is necessary here because the path is determined at runtime based on version directories
+      // eslint-disable-next-line import/no-dynamic-require
       const { jsSpecLoaders } = require(jsIndexPath);
 
       if (!jsSpecLoaders || !Array.isArray(jsSpecLoaders)) {
