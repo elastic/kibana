@@ -16,6 +16,9 @@ export type { EvaluationDataset } from './src/types';
 export {
   createDefaultTerminalReporter,
   type EvaluationReporter,
+  formatStatsCell,
+  buildColumnAlignment,
+  convertScoreDocsToDatasets,
 } from './src/utils/report_model_score';
 
 export { EvaluationScoreRepository, type ModelScoreDocument } from './src/utils/score_repository';

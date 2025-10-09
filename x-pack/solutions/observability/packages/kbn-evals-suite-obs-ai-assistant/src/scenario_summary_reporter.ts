@@ -6,90 +6,60 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { EvaluationReporter, EvaluationScoreRepository } from '@kbn/evals';
+import {
+  type EvaluationReporter,
+  type EvaluationScoreRepository,
+  type EvaluatorStats,
+  type DatasetScoreWithStats,
+  formatStatsCell,
+  buildColumnAlignment,
+  calculateOverallStats,
+  convertScoreDocsToDatasets,
+} from '@kbn/evals';
 import { table } from 'table';
 import chalk from 'chalk';
 import { sumBy } from 'lodash';
 
-interface EvaluatorStats {
-  mean: number;
-  stdDev: number;
-  count: number;
-  percentage: number;
-}
-
-interface DatasetInfo {
-  name: string;
-  evaluatorStats: Map<string, EvaluatorStats>;
-  examplesCount: number;
-}
-
 interface ScenarioInfo {
   name: string;
-  datasets: DatasetInfo[];
+  datasets: DatasetScoreWithStats[];
   overallStats: Map<string, EvaluatorStats>;
 }
 
 /**
- * Formats statistics into a multi-line cell content with percentage, mean, and standard deviation.
+ * Extracts scenario name from dataset name using pattern "scenario: dataset-name"
+ * Falls back to "Other" if no scenario prefix is found
  */
-function formatStatisticsCell(
-  percentage: number,
-  mean: number,
-  stdDev: number,
-  isOverall: boolean = false
-): string {
-  const percentageStr = `${percentage.toFixed(1)}%`;
-  const meanStr = `mean: ${mean.toFixed(3)}`;
-  const stdDevStr = `std: ${stdDev.toFixed(3)}`;
-
-  if (isOverall) {
-    return [
-      chalk.bold.yellow(percentageStr),
-      chalk.bold.green(meanStr),
-      chalk.bold.green(stdDevStr),
-    ].join('\n');
-  }
-
-  return [chalk.bold.yellow(percentageStr), chalk.cyan(meanStr), chalk.cyan(stdDevStr)].join('\n');
+function extractScenarioName(datasetName: string): string {
+  const match = datasetName.match(/^([^:]+):/);
+  return match ? match[1].trim() : 'Other';
 }
 
 /**
- * Calculates overall statistics across all scenarios for each evaluator.
+ * Groups datasets by scenario prefix and returns sorted scenario groups with stats
  */
-function calculateOverallStatsForScenarios(
-  scenarios: ScenarioInfo[],
+function groupDatasetsByScenario(
+  datasets: DatasetScoreWithStats[],
   evaluatorNames: string[]
-): Map<string, { mean: number; stdDev: number; percentage: number }> {
-  const overallStats = new Map<string, { mean: number; stdDev: number; percentage: number }>();
+): ScenarioInfo[] {
+  const scenarioMap = new Map<string, DatasetScoreWithStats[]>();
 
-  evaluatorNames.forEach((evaluatorName) => {
-    const allScores: number[] = [];
-
-    scenarios.forEach((scenario) => {
-      scenario.datasets.forEach((dataset) => {
-        const stats = dataset.evaluatorStats.get(evaluatorName);
-        if (stats) {
-          // Note: We're using the stats to reconstruct approximate individual scores
-          for (let i = 0; i < stats.count; i++) {
-            allScores.push(stats.mean);
-          }
-        }
-      });
-    });
-
-    if (allScores.length > 0) {
-      const mean = allScores.reduce((a, b) => a + b, 0) / allScores.length;
-      const variance =
-        allScores.reduce((acc, score) => acc + Math.pow(score - mean, 2), 0) / allScores.length;
-      const stdDev = Math.sqrt(variance);
-      const percentage = (allScores.filter((s) => s >= 0.5).length / allScores.length) * 100;
-
-      overallStats.set(evaluatorName, { mean, stdDev, percentage });
+  datasets.forEach((dataset) => {
+    const scenarioName = extractScenarioName(dataset.name);
+    if (!scenarioMap.has(scenarioName)) {
+      scenarioMap.set(scenarioName, []);
     }
+    scenarioMap.get(scenarioName)!.push(dataset);
   });
 
-  return overallStats;
+  return Array.from(scenarioMap.entries())
+    .map(([scenarioName, scenarioDatasets]) => ({
+      name: scenarioName,
+      datasets: scenarioDatasets,
+      // Calculate overall stats for this scenario's datasets
+      overallStats: calculateOverallStats(scenarioDatasets, evaluatorNames),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
@@ -103,13 +73,18 @@ function createScenarioSummaryTable(
   const headers = ['Scenario', '# Examples', ...evaluatorNames];
 
   const scenarioRows = scenarios.map((scenario) => {
-    const scenarioTotalExamples = sumBy(scenario.datasets, (d) => d.examplesCount);
+    const scenarioTotalExamples = sumBy(scenario.datasets, (d) => d.numExamples);
     const row = [chalk.bold.white(scenario.name), scenarioTotalExamples.toString()];
 
     evaluatorNames.forEach((evaluatorName) => {
       const stats = scenario.overallStats.get(evaluatorName);
       if (stats && stats.count > 0) {
-        const cellContent = formatStatisticsCell(stats.percentage * 100, stats.mean, stats.stdDev);
+        // Use shared formatter - only display percentage, mean, and stdDev
+        const cellContent = formatStatsCell({
+          percentage: stats.percentage,
+          mean: stats.mean,
+          stdDev: stats.stdDev,
+        });
         row.push(cellContent);
       } else {
         row.push(chalk.gray('-'));
@@ -119,26 +94,29 @@ function createScenarioSummaryTable(
     return row;
   });
 
-  // Calculate and add overall row
-  const overallStats = calculateOverallStatsForScenarios(scenarios, evaluatorNames);
+  // Calculate overall statistics across all datasets in all scenarios
+  const allDatasets = scenarios.flatMap((scenario) => scenario.datasets);
+  const overallStats = calculateOverallStats(allDatasets, evaluatorNames);
   const overallRow = [chalk.bold.green('Overall'), chalk.bold.green(totalExamples.toString())];
 
   evaluatorNames.forEach((evaluatorName) => {
     const stats = overallStats.get(evaluatorName);
     if (stats) {
-      const cellContent = formatStatisticsCell(stats.percentage, stats.mean, stats.stdDev, true);
+      const cellContent = formatStatsCell(
+        {
+          percentage: stats.percentage,
+          mean: stats.mean,
+          stdDev: stats.stdDev,
+        },
+        true
+      );
       overallRow.push(cellContent);
     } else {
       overallRow.push(chalk.bold.green('-'));
     }
   });
 
-  const columnConfig: Record<number, { alignment: 'right' | 'left' }> = {
-    0: { alignment: 'left' },
-  };
-  for (let i = 1; i < headers.length; i++) {
-    columnConfig[i] = { alignment: 'right' };
-  }
+  const columnConfig = buildColumnAlignment(headers.length);
 
   return table([headers, ...scenarioRows, overallRow], {
     columns: columnConfig,
@@ -162,107 +140,20 @@ async function getScoresByScenario(
     throw new Error(`No scores found for run ID: ${runId}`);
   }
 
-  // Extract unique evaluator names
-  const uniqueEvaluatorNames = new Set<string>();
-  scores.forEach((score: any) => uniqueEvaluatorNames.add(score.evaluator.name));
-  const sortedEvaluatorNames = Array.from(uniqueEvaluatorNames).sort();
+  // Convert ES documents to DatasetScoreWithStats using shared logic
+  const datasets = convertScoreDocsToDatasets(scores);
 
-  // Group datasets by scenario (extracted from dataset name)
-  const scenarioToDatasetsMap = new Map<
-    string,
-    Array<{
-      name: string;
-      evaluatorStats: Map<string, EvaluatorStats>;
-      examplesCount: number;
-      scores: any[];
-    }>
-  >();
+  // Extract evaluator names
+  const evaluatorNames = Array.from(
+    new Set(scores.map((score: any) => score.evaluator.name))
+  ).sort();
 
-  scores.forEach((score: any) => {
-    const datasetName = score.dataset.name;
-    // Extract scenario name (everything before the first colon)
-    const scenarioNameMatch = datasetName.match(/^([^:]+):/);
-    const extractedScenarioName = scenarioNameMatch ? scenarioNameMatch[1].trim() : 'Other';
-
-    if (!scenarioToDatasetsMap.has(extractedScenarioName)) {
-      scenarioToDatasetsMap.set(extractedScenarioName, []);
-    }
-
-    const scenarioDatasets = scenarioToDatasetsMap.get(extractedScenarioName)!;
-    let existingDataset = scenarioDatasets.find((dataset) => dataset.name === datasetName);
-
-    if (!existingDataset) {
-      existingDataset = {
-        name: datasetName,
-        evaluatorStats: new Map(),
-        examplesCount: score.dataset.examples_count,
-        scores: [],
-      };
-      scenarioDatasets.push(existingDataset);
-    }
-
-    existingDataset.evaluatorStats.set(score.evaluator.name, {
-      mean: score.evaluator.stats.mean,
-      stdDev: score.evaluator.stats.std_dev,
-      count: score.evaluator.stats.count,
-      percentage: score.evaluator.stats.percentage,
-    });
-
-    existingDataset.scores.push(score);
-  });
-
-  // Calculate overall stats per scenario
-  const processedScenarios = Array.from(scenarioToDatasetsMap.entries())
-    .map(([scenarioName, scenarioDatasets]) => {
-      const scenarioOverallStats = new Map<string, EvaluatorStats>();
-
-      sortedEvaluatorNames.forEach((evaluatorName) => {
-        const allEvaluatorScores: number[] = [];
-
-        scenarioDatasets.forEach((dataset) => {
-          const evaluatorStats = dataset.evaluatorStats.get(evaluatorName);
-          if (evaluatorStats) {
-            const datasetEvaluatorScores = dataset.scores
-              .filter((score) => score.evaluator.name === evaluatorName)
-              .flatMap((score) => score.evaluator.scores || []);
-            allEvaluatorScores.push(...datasetEvaluatorScores);
-          }
-        });
-
-        if (allEvaluatorScores.length > 0) {
-          const mean =
-            allEvaluatorScores.reduce((sum, score) => sum + score, 0) / allEvaluatorScores.length;
-          const variance =
-            allEvaluatorScores.reduce((acc, score) => acc + Math.pow(score - mean, 2), 0) /
-            allEvaluatorScores.length;
-          const stdDev = Math.sqrt(variance);
-          const count = allEvaluatorScores.length;
-          const percentage = allEvaluatorScores.filter((score) => score >= 0.5).length / count;
-
-          scenarioOverallStats.set(evaluatorName, {
-            mean,
-            stdDev,
-            count,
-            percentage,
-          });
-        }
-      });
-
-      return {
-        name: scenarioName,
-        datasets: scenarioDatasets.map((dataset) => ({
-          name: dataset.name,
-          evaluatorStats: dataset.evaluatorStats,
-          examplesCount: dataset.examplesCount,
-        })),
-        overallStats: scenarioOverallStats,
-      };
-    })
-    .sort((scenarioA, scenarioB) => scenarioA.name.localeCompare(scenarioB.name));
+  // Group datasets by scenario and calculate per-scenario stats
+  const scenarios = groupDatasetsByScenario(datasets, evaluatorNames);
 
   return {
-    scenarios: processedScenarios,
-    evaluatorNames: sortedEvaluatorNames,
+    scenarios,
+    evaluatorNames,
     metadata: {
       runId,
       timestamp: scores[0]?.['@timestamp'],
@@ -306,7 +197,7 @@ export function createScenarioSummaryReporter(): EvaluationReporter {
       // Calculate total examples
       const totalExamples = sumBy(
         scenarios.flatMap((scenario) => scenario.datasets),
-        (dataset) => dataset.examplesCount
+        (dataset) => dataset.numExamples
       );
 
       // Display scenario summary table

@@ -133,15 +133,10 @@ export async function exportEvaluationToElasticsearch(
 }
 
 /**
- * Formats Elasticsearch documents into structured report data
- * This helper reconstructs the data structure needed for the default terminal reporter
+ * Converts Elasticsearch ModelScoreDocuments to DatasetScoreWithStats array
+ * This is the core transformation logic shared across different reporters
  */
-function formatReportData(docs: ModelScoreDocument[]): PreparedEvaluationData {
-  if (docs.length === 0) {
-    throw new Error('No documents to format');
-  }
-
-  // Group documents by dataset
+export function convertScoreDocsToDatasets(docs: ModelScoreDocument[]): DatasetScoreWithStats[] {
   const datasetMap = new Map<string, DatasetScoreWithStats>();
 
   for (const doc of docs) {
@@ -171,11 +166,25 @@ function formatReportData(docs: ModelScoreDocument[]): PreparedEvaluationData {
     });
   }
 
+  return Array.from(datasetMap.values());
+}
+
+/**
+ * Formats Elasticsearch documents into structured report data
+ * This helper reconstructs the data structure needed for the default terminal reporter
+ */
+function formatReportData(docs: ModelScoreDocument[]): PreparedEvaluationData {
+  if (docs.length === 0) {
+    throw new Error('No documents to format');
+  }
+
+  const datasetScoresWithStats = convertScoreDocsToDatasets(docs);
+
   // Repetitions could be inferred from data if needed, default to 1
   const repetitions = 1;
 
   return {
-    datasetScoresWithStats: Array.from(datasetMap.values()),
+    datasetScoresWithStats,
     model: docs[0].model as Model,
     evaluatorModel: docs[0].evaluatorModel as Model,
     repetitions,
@@ -270,7 +279,7 @@ function createDatasetRow(
 
   evaluatorNames.forEach((evaluatorName) => {
     const stats = dataset.evaluatorStats.get(evaluatorName);
-    row.push(stats && stats.count > 0 ? formatStatsCell(stats, false) : chalk.gray('-'));
+    row.push(stats && stats.count > 0 ? formatStatsCell(stats) : chalk.gray('-'));
   });
 
   return row;
@@ -294,27 +303,43 @@ function createOverallRow(
   return row;
 }
 
-/**
- * Formats statistics into a colored cell content
- */
-function formatStatsCell(stats: EvaluatorStats, isBold: boolean): string {
+export function formatStatsCell(stats: Partial<EvaluatorStats>, isBold: boolean = false): string {
   const colorFn = isBold ? chalk.bold.green : chalk.cyan;
   const percentageColor = isBold ? chalk.bold.yellow : chalk.bold.yellow;
 
-  return [
-    percentageColor(`${(stats.percentage * 100).toFixed(1)}%`),
-    colorFn(`mean: ${stats.mean.toFixed(3)}`),
-    colorFn(`median: ${stats.median.toFixed(3)}`),
-    colorFn(`std: ${stats.stdDev.toFixed(3)}`),
-    colorFn(`min: ${stats.min.toFixed(3)}`),
-    colorFn(`max: ${stats.max.toFixed(3)}`),
-  ].join('\n');
+  const lines: string[] = [];
+
+  if (stats.percentage !== undefined) {
+    lines.push(percentageColor(`${(stats.percentage * 100).toFixed(1)}%`));
+  }
+
+  if (stats.mean !== undefined) {
+    lines.push(colorFn(`mean: ${stats.mean.toFixed(3)}`));
+  }
+
+  if (stats.median !== undefined) {
+    lines.push(colorFn(`median: ${stats.median.toFixed(3)}`));
+  }
+
+  if (stats.stdDev !== undefined) {
+    lines.push(colorFn(`std: ${stats.stdDev.toFixed(3)}`));
+  }
+
+  if (stats.min !== undefined) {
+    lines.push(colorFn(`min: ${stats.min.toFixed(3)}`));
+  }
+
+  if (stats.max !== undefined) {
+    lines.push(colorFn(`max: ${stats.max.toFixed(3)}`));
+  }
+
+  return lines.join('\n');
 }
 
 /**
  * Builds column alignment configuration for the table
  */
-function buildColumnAlignment(
+export function buildColumnAlignment(
   columnCount: number
 ): Record<number, { alignment: 'right' | 'left' }> {
   const config: Record<number, { alignment: 'right' | 'left' }> = {
