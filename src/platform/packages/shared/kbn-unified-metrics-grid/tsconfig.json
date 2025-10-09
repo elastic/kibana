@@ -31,5 +31,6 @@
     "@kbn/es-query",
     "@kbn/discover-utils",
     "@kbn/fields-metadata-plugin",
+    "@kbn/shared-ux-button-toolbar",
   ]
 }
