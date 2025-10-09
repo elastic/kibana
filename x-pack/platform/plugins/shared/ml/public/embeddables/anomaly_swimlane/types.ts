@@ -14,7 +14,7 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing';
-import type { TypeOf } from '@kbn/config-schema/src/types';
+import type { TypeOf } from '@kbn/config-schema';
 import type { SwimlaneType } from '../../application/explorer/explorer_constants';
 
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
