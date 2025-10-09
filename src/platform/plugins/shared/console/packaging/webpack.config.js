@@ -102,10 +102,7 @@ module.exports = [
         {
           test: /\.css$/,
           exclude: /components/,
-          use: [
-            { loader: 'style-loader' },
-            { loader: 'css-loader' },
-          ],
+          use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
           sideEffects: true,
         },
         {

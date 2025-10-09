@@ -131,13 +131,24 @@ export const MonacoEditor = ({
         ? customParsedRequestsProvider(editor.getModel())
         : undefined;
 
-      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, highlightedLinesClassName, customProvider);
+      const provider = new MonacoEditorActionsProvider(
+        editor,
+        setEditorActionsCss,
+        highlightedLinesClassName,
+        customProvider
+      );
       setInputEditor(provider);
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
       setEditorInstace(editor);
     },
-    [setupResizeChecker, setInputEditor, setEditorInstace, customParsedRequestsProvider, highlightedLinesClassName]
+    [
+      setupResizeChecker,
+      setInputEditor,
+      setEditorInstace,
+      customParsedRequestsProvider,
+      highlightedLinesClassName,
+    ]
   );
 
   useEffect(() => {

@@ -61,7 +61,7 @@ export class MonacoEditorActionsProvider {
     private editor: monaco.editor.IStandaloneCodeEditor,
     private setEditorActionsCss: (css: CSSProperties) => void,
     private highlightedLinesClassName: string,
-    customParsedRequestsProvider?: ConsoleParsedRequestsProvider,
+    customParsedRequestsProvider?: ConsoleParsedRequestsProvider
   ) {
     // Use custom provider if provided, otherwise fallback to default
     this.parsedRequestsProvider =
