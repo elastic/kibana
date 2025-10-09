@@ -1060,7 +1060,6 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       consumer,
       roleAuthc,
       spaceId,
-      runSoon = true,
     }: {
       ruleTypeId: string;
       name: string;
@@ -1080,7 +1079,6 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       consumer: string;
       roleAuthc: RoleCredentials;
       spaceId?: string;
-      runSoon?: boolean;
     }) {
       const { body } = await supertestWithoutAuth
         .post(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rule`)
@@ -1089,20 +1087,14 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         .send({
           params,
           consumer,
-          schedule: { interval: '5s' } /* schedule || {
+          schedule: schedule || {
             interval: '5m',
-          },*/,
+          },
           tags,
           name,
           rule_type_id: ruleTypeId,
           actions,
         });
-
-      if (runSoon) {
-        this.runRule(roleAuthc, body.id).catch((error) => {
-          logger.debug(error);
-        });
-      }
       return body;
     },
 
