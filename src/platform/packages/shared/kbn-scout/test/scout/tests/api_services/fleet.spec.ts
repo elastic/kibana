@@ -13,7 +13,7 @@ apiTest.describe('Fleet Integration Management', { tag: ['@svlSecurity', '@ess']
   let integrationName: string;
 
   apiTest.beforeEach(async () => {
-    integrationName = `test-integration-${Date.now()}`;
+    integrationName = `test_integration_${Date.now()}`;
   });
 
   apiTest.afterEach(async ({ apiServices }) => {
