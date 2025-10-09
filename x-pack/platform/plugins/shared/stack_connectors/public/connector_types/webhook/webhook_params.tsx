@@ -31,10 +31,13 @@ const WebhookParamsFields: React.FunctionComponent<ActionParamsProps<WebhookActi
     <EuiCallOut
       announceOnMount
       iconType="info"
-      title={i18n.translate('xpack.stackConnectors.components.webhook.noSetupRequiredCallout', {
-        values: { method: webhookMethod.toUpperCase() },
-        defaultMessage: 'This connector is configured to use the {method} method.',
-      })}
+      title={i18n.translate(
+        'xpack.stackConnectors.components.webhook.noSetupRequiredCalloutTitle',
+        {
+          values: { method: webhookMethod.toUpperCase() },
+          defaultMessage: 'This connector is configured to use the {method} method.',
+        }
+      )}
       data-test-subj="placeholderCallout"
     >
       <p>
