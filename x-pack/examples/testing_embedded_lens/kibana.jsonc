@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/testing-embedded-lens-plugin",
   "owner": "@elastic/kibana-visualizations",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "testingEmbeddedLens",
     "server": false,
