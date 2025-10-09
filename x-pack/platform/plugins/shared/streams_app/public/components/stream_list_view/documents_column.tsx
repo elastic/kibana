@@ -118,6 +118,7 @@ export function DocumentsColumn({
               text-align: right;
               font-family: 'Roboto mono', sans-serif;
             `}
+            data-test-subj={`streamsDocCount-${indexPattern}`}
           >
             {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
           </EuiFlexItem>
