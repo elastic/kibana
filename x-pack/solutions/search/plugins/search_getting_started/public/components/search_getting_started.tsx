@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
-import { PLUGIN_NAME } from '@kbn/search-getting-started/common';
+import { AnalyticsEvents, PLUGIN_NAME } from '../../common';
+import { useUsageTracker } from '../contexts/usage_tracker_context';
 
 export const SearchGettingStartedPage: React.FC = () => {
+  const usageTracker = useUsageTracker();
+
+  useEffect(() => {
+    usageTracker.load(AnalyticsEvents.gettingStartedLoaded);
+  }, [usageTracker]);
+
   return (
     <SearchGettingStartedPageTemplate>
       <KibanaPageTemplate.Header

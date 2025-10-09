@@ -9,6 +9,9 @@ import { i18n } from '@kbn/i18n';
 
 export const PLUGIN_ID = 'searchGettingStarted';
 export const PLUGIN_NAME = i18n.translate('xpack.search.gettingStarted.plugin.name', {
-  defaultMessage: 'Getting Started aaa',
+  defaultMessage: 'Getting Started',
 });
 export const PLUGIN_PATH = '/app/elasticsearch/getting_started';
+export enum AnalyticsEvents {
+  gettingStartedLoaded = 'getting_started_loaded',
+}

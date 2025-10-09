@@ -15,6 +15,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { SearchGettingStartedServicesContextDeps } from './types';
 import { SearchGettingStartedPage } from './components/search_getting_started';
+import { UsageTrackerContextProvider } from './contexts/usage_tracker_context';
 
 export const renderApp = async (
   core: CoreStart,
@@ -24,13 +25,15 @@ export const renderApp = async (
 ) => {
   ReactDOM.render(
     <KibanaContextProvider services={{ ...core, ...services }}>
-      <QueryClientProvider client={queryClient}>
-        <I18nProvider>
-          <Router history={services.history}>
-            <SearchGettingStartedPage />
-          </Router>
-        </I18nProvider>
-      </QueryClientProvider>
+      <UsageTrackerContextProvider usageCollection={services.usageCollection}>
+        <QueryClientProvider client={queryClient}>
+          <I18nProvider>
+            <Router history={services.history}>
+              <SearchGettingStartedPage />
+            </Router>
+          </I18nProvider>
+        </QueryClientProvider>
+      </UsageTrackerContextProvider>
     </KibanaContextProvider>,
     element
   );

@@ -13,16 +13,15 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 
 import type {
   SearchGettingStartedPluginSetup,
   SearchGettingStartedPluginStart,
   SearchGettingStartedAppPluginStartDependencies,
   SearchGettingStartedServicesContextDeps,
+  SearchGettingStartedConfigType,
 } from './types';
-import { config } from './config';
 
 export class SearchGettingStartedPlugin
   implements
@@ -33,9 +32,9 @@ export class SearchGettingStartedPlugin
       SearchGettingStartedAppPluginStartDependencies
     >
 {
-  private config: ReturnType<typeof config.schema.validate>;
+  private config: SearchGettingStartedConfigType;
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get();
+    this.config = initializerContext.config.get<SearchGettingStartedConfigType>();
   }
 
   public setup(
@@ -45,15 +44,12 @@ export class SearchGettingStartedPlugin
     >,
     deps: {}
   ): SearchGettingStartedPluginSetup {
-    console.log('SearchGettingStartedPlugin setup', this.config);
     if (!this.config.ui?.enabled) return {};
 
     const appInfo = {
       appRoute: '/app/elasticsearch/getting_started',
       id: PLUGIN_ID,
-      title: i18n.translate('xpack.searchGettingStarted.appTitle', {
-        defaultMessage: 'Getting Started asdf',
-      }),
+      title: PLUGIN_NAME,
     };
 
     core.application.register({
@@ -66,7 +62,7 @@ export class SearchGettingStartedPlugin
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
 
-        coreStart.chrome.docTitle.change(PLUGIN_NAME);
+        coreStart.chrome.docTitle.change(appInfo.title);
         depsStart.searchNavigation?.handleOnAppMount();
         // Create a QueryClient for the app
         const { QueryClient } = await import('@tanstack/react-query');
@@ -81,8 +77,7 @@ export class SearchGettingStartedPlugin
         return renderApp(coreStart, services, element, queryClient);
       },
       order: 1000,
-      // After turning on feature flag, make it visible in globalSearch and sideNav
-      visibleIn: [],
+      visibleIn: ['globalSearch', 'sideNav'],
     });
 
     return {
@@ -94,16 +89,6 @@ export class SearchGettingStartedPlugin
     core: CoreStart,
     deps: SearchGettingStartedAppPluginStartDependencies
   ): SearchGettingStartedPluginStart {
-    const appInfo = {
-      appRoute: PLUGIN_PATH,
-      id: PLUGIN_ID,
-      title: i18n.translate('xpack.searchGettingStarted.appTitle', {
-        defaultMessage: 'Getting Started ASDF',
-      }),
-    };
-
-    return {
-      app: appInfo,
-    };
+    return {};
   }
 }

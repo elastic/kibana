@@ -7,8 +7,7 @@
 
 import { useEffect } from 'react';
 
-import { i18n } from '@kbn/i18n';
-
+import { PLUGIN_NAME } from '../../common';
 import { useKibana } from './use_kibana';
 
 export const useGettingStartedBreadcrumbs = () => {
@@ -18,10 +17,7 @@ export const useGettingStartedBreadcrumbs = () => {
   useEffect(() => {
     searchNavigation?.breadcrumbs.setSearchBreadCrumbs([
       {
-        text: i18n.translate('xpack.search.gettingStarted.breadcrumbs', {
-          defaultMessage: 'Getting Startedss',
-        }),
-        href: '/app/elasticsearch/getting_started',
+        text: PLUGIN_NAME,
       },
     ]);
 
