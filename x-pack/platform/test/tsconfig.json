@@ -172,6 +172,5 @@
     "@kbn/onechat-plugin",
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
-    "@kbn/test-suites-xpack-platform",
   ]
 }
