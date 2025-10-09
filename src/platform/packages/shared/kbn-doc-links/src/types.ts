@@ -690,6 +690,7 @@ export interface DocLinks {
   readonly agentBuilder: {
     readonly agentBuilder: string;
     readonly getStarted: string;
+    readonly models: string;
     readonly chat: string;
     readonly agentBuilderAgents: string;
     readonly tools: string;
