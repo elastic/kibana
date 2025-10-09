@@ -8,7 +8,6 @@
  */
 
 import React, { useState } from 'react';
-import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -24,7 +23,6 @@ import {
   EuiText,
   EuiIconTip,
   useEuiTheme,
-  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -176,6 +174,29 @@ const response: { origin: Record<string, Project>; linked_projects: Record<strin
       mytag2: 'bar',
       mytag3: 'baz',
     },
+    y023ca7aa8a3r0932f40bd195389s376: {
+      _id: 'y023ca7aa8a3r0932f40bd195389s376',
+      _alias: 'marketing-site-y7021b',
+      _csp: 'gcp',
+      _region: 'N. Virginia (us-east-1)',
+      _type: 'elasticsearch',
+    },
+    u8a3r0932f40bd195389s3761023ca7aa: {
+      _id: 'u8a3r0932f40bd195389s3761023ca7aa',
+      _alias: 'customer-data-u7021b',
+      _csp: 'azure',
+      _region: 'N. Virginia (us-east-1)',
+      _type: 'security',
+      mytag1: 'foo',
+      mytag2: 'bar',
+    },
+    p0932f40bd195389s3761023ca7aa8a3: {
+      _id: 'p0932f40bd195389s3761023ca7aa8a3',
+      _alias: 'customer-analytics-p7021b',
+      _csp: 'aws',
+      _region: 'N. Virginia (us-east-1)',
+      _type: 'observability',
+    },
   },
 };
 
@@ -217,40 +238,6 @@ export const ProjectPicker = () => {
   const projects =
     crossProjectSearchScope === 'origin' ? [originProject] : [originProject, ...linkedProjects];
 
-  const options: EuiSelectableOption[] = projects.map((project: Project) => {
-    const tags = Object.entries(project)
-      .filter(([key]) => !key.startsWith('_'))
-      .map(([key, value]) => `${key}: ${value}`);
-
-    return {
-      key: project._id,
-      label: project._alias,
-      prepend: <EuiIcon type={getSolutionIcon(project._type)} />,
-      append: (
-        <>
-          <EuiText size="s">
-            {`${getCSPLabel(project._csp)}, ${project._region}`}
-            {tags.length ? (
-              <EuiToolTip
-                title={i18n.translate('projectPicker.tagTooltipTitle', {
-                  defaultMessage: 'Custom tags',
-                })}
-                content={tags.map((tag) => (
-                  <EuiBadge>{tag}</EuiBadge>
-                ))}
-              >
-                <EuiBadge iconType="tag" css={{ marginLeft: euiTheme.size.s }}>
-                  {tags.length}
-                </EuiBadge>
-              </EuiToolTip>
-            ) : null}
-          </EuiText>
-        </>
-      ),
-      disabled: true,
-    };
-  });
-
   return (
     <EuiPopover
       button={button}
@@ -260,111 +247,154 @@ export const ProjectPicker = () => {
       anchorPosition="downLeft"
       ownFocus
       panelPaddingSize="none"
-      panelProps={{ css: { width: parseFloat(euiTheme.size.xxxl) * 10 } }}
+      panelProps={{
+        css: {
+          width: '560px',
+        },
+      }}
     >
-      <EuiPopoverTitle paddingSize="s">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <p>{strings.getProjectPickerPopoverTitle()}</p>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={strings.getManageCrossProjectSearchLabel()}
-              delay="long"
-              repositionOnScroll
-            >
-              <EuiButtonIcon
-                display="empty"
-                iconType="gear"
-                aria-label={i18n.translate('projectPicker.settingsButtonLabel', {
-                  defaultMessage: 'Manage cross-project search',
-                })}
-                onClick={() => {
-                  // TODO: redirect to settings?
-                }}
-                size="xs"
-                color="text"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPopoverTitle>
-      <EuiButtonGroup
-        isFullWidth
-        legend={strings.getProjectPickerButtonLabel()}
-        idSelected={crossProjectSearchScope}
-        options={[
-          {
-            id: 'all',
-            value: 'all',
-            label: i18n.translate('projectPicker.allProjectsLabel', {
-              defaultMessage: 'All projects',
-            }),
-          },
-          {
-            id: 'origin',
-            value: 'origin',
-            label: strings.getOriginProjectLabel(),
-          },
-        ]}
-        onChange={(value: string) => setCrossProjectSearchScope(value)}
-        css={{ margin: '8px' }}
-      />
-      <EuiHorizontalRule margin="xs" />
-      <EuiPanel
-        paddingSize="none"
-        hasBorder={false}
-        hasShadow={false}
-        css={{ paddingBottom: euiTheme.size.s }}
+      <EuiFlexGroup
+        gutterSize="none"
+        direction="column"
+        responsive={false}
+        css={{ maxHeight: '400px', overflow: 'hidden' }}
       >
-        <EuiTitle size="xxs">
-          <p css={{ padding: `0 ${euiTheme.size.s}` }}>
-            <FormattedMessage
-              id="projectPicker.numberOfProjectsDescription"
-              defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
-              values={{
-                numberOfProjects:
-                  crossProjectSearchScope === 'origin' ? 1 : linkedProjects.length + 1,
-              }}
-            />
-          </p>
-        </EuiTitle>
-        {projects.map((project) => (
-          <>
-            <EuiHorizontalRule margin="xs" />
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              css={{ padding: `0 ${euiTheme.size.s}` }}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={getSolutionIcon(project._type)} />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="text">
-                      {project._alias || project._id}
-                    </EuiText>
-                  </EuiFlexItem>
-                  {project._id === originProject._id ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip size="s" type="flag" content={strings.getOriginProjectLabel()} />
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiPopoverTitle paddingSize="s">
+            <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <p>{strings.getProjectPickerPopoverTitle()}</p>
+                </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {`${getCSPLabel(project._csp)}, ${project._region}`}
-                </EuiText>
+                <EuiToolTip
+                  content={strings.getManageCrossProjectSearchLabel()}
+                  delay="long"
+                  repositionOnScroll
+                >
+                  <EuiButtonIcon
+                    display="empty"
+                    iconType="gear"
+                    aria-label={i18n.translate('projectPicker.settingsButtonLabel', {
+                      defaultMessage: 'Manage cross-project search',
+                    })}
+                    onClick={() => {
+                      // TODO: redirect to project settings page
+                    }}
+                    size="xs"
+                    color="text"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </>
-        ))}
-      </EuiPanel>
+          </EuiPopoverTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            isFullWidth
+            legend={strings.getProjectPickerButtonLabel()}
+            idSelected={crossProjectSearchScope}
+            options={[
+              {
+                id: 'all',
+                value: 'all',
+                label: i18n.translate('projectPicker.allProjectsLabel', {
+                  defaultMessage: 'All projects',
+                }),
+              },
+              {
+                id: 'origin',
+                value: 'origin',
+                label: strings.getOriginProjectLabel(),
+              },
+            ]}
+            onChange={(value: string) => setCrossProjectSearchScope(value)}
+            css={{ margin: '8px' }}
+          />
+          <EuiHorizontalRule margin="xs" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} css={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}>
+          <EuiTitle size="xxxs">
+            <p css={{ padding: `0 ${euiTheme.size.s}` }}>
+              <FormattedMessage
+                id="projectPicker.numberOfProjectsDescription"
+                defaultMessage="Searching across {numberOfProjects, plural, one {# project} other {# projects}}"
+                values={{
+                  numberOfProjects:
+                    crossProjectSearchScope === 'origin' ? 1 : linkedProjects.length + 1,
+                }}
+              />
+            </p>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem
+          css={{ overflow: 'scroll', backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+        >
+          {projects.map((project) => {
+            const tags = Object.entries(project)
+              .filter(([key]) => !key.startsWith('_'))
+              .map(([key, value]) => `${key}: ${value}`);
+
+            return (
+              <>
+                <EuiHorizontalRule margin="xs" />
+                <EuiFlexGroup
+                  responsive={false}
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  css={{ padding: `0 ${euiTheme.size.s}` }}
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup responsive={false} gutterSize="xs">
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type={getSolutionIcon(project._type)} />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="text">
+                          {project._alias || project._id}
+                        </EuiText>
+                      </EuiFlexItem>
+                      {project._id === originProject._id ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiIconTip
+                            size="s"
+                            type="flag"
+                            content={strings.getOriginProjectLabel()}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {`${getCSPLabel(project._csp)}, ${project._region}`}
+                        </EuiText>
+                      </EuiFlexItem>
+                      {tags.length ? (
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip
+                            title={i18n.translate('projectPicker.tagTooltipTitle', {
+                              defaultMessage: 'Custom tags',
+                            })}
+                            content={tags.map((tag) => (
+                              <EuiBadge>{tag}</EuiBadge>
+                            ))}
+                          >
+                            <EuiBadge iconType="tag">{tags.length}</EuiBadge>
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                      ) : null}
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
+            );
+          })}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPopover>
   );
 };
