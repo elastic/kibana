@@ -12,7 +12,10 @@ import userEvent from '@testing-library/user-event';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { apm } from '@elastic/apm-rum';
-import { TRANSIENT_NAVIGATION_WINDOW_MS } from '../services/error_service';
+import {
+  DEFAULT_MAX_ERROR_DURATION_MS,
+  TRANSIENT_NAVIGATION_WINDOW_MS,
+} from '../services/error_service';
 
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
 import type { KibanaErrorBoundaryServices } from '../../types';
@@ -25,10 +28,21 @@ jest.mock('@elastic/apm-rum');
 
 describe('<KibanaSectionErrorBoundary>', () => {
   let services: KibanaErrorBoundaryServices;
+  let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.useFakeTimers();
     services = getServicesMock();
     (apm.captureError as jest.Mock).mockClear();
+    user = userEvent.setup({
+      advanceTimers: async (ms) => {
+        await jest.advanceTimersByTimeAsync(ms);
+      },
+    });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
@@ -55,13 +69,13 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <ChunkLoadErrorComponent />
       </Template>
     );
-    await userEvent.click(getByTestId('clickForErrorBtn'));
+    await user.click(getByTestId('clickForErrorBtn'));
 
     expect(getByText(strings.section.callout.recoverable.title('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.recoverable.body('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.recoverable.pageReloadButton())).toBeVisible();
 
-    await userEvent.click(getByTestId('sectionErrorBoundaryRecoverBtn'));
+    await user.click(getByTestId('sectionErrorBoundaryRecoverBtn'));
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
@@ -72,7 +86,7 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    await userEvent.click(getByTestId('clickForErrorBtn'));
+    await user.click(getByTestId('clickForErrorBtn'));
 
     expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.fatal.body('test section name'))).toBeVisible();
@@ -80,7 +94,6 @@ describe('<KibanaSectionErrorBoundary>', () => {
   });
 
   it('captures the error event for telemetry', async () => {
-    jest.useFakeTimers();
     const mockDeps = {
       analytics: { reportEvent: jest.fn() },
     };
@@ -91,21 +104,19 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    await userEvent.click(await findByTestId('clickForErrorBtn'));
+    await user.click(await findByTestId('clickForErrorBtn'));
 
-    // Wait until `TRANSIENT_NAVIGATION_WINDOW_MS` settlement
-    jest.advanceTimersByTime(TRANSIENT_NAVIGATION_WINDOW_MS);
+    // Wait until `DEFAULT_MAX_ERROR_DURATION_MS` for auto commit/reporting
+    await jest.advanceTimersByTimeAsync(DEFAULT_MAX_ERROR_DURATION_MS);
 
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
     expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
       component_name: 'BadComponent',
       error_message: 'Error: This is an error to show the test user!',
     });
-    jest.useFakeTimers();
   });
 
   it('captures component and error stack traces in telemetry', async () => {
-    jest.useFakeTimers();
     const mockDeps = {
       analytics: { reportEvent: jest.fn() },
     };
@@ -116,10 +127,10 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    await userEvent.click(await findByTestId('clickForErrorBtn'));
+    await user.click(await findByTestId('clickForErrorBtn'));
 
-    // Wait until `TRANSIENT_NAVIGATION_WINDOW_MS` settlement
-    jest.advanceTimersByTime(TRANSIENT_NAVIGATION_WINDOW_MS);
+    // Wait until `DEFAULT_MAX_ERROR_DURATION_MS` for auto commit/reporting
+    await jest.advanceTimersByTimeAsync(DEFAULT_MAX_ERROR_DURATION_MS);
 
     expect(
       mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack.includes('at BadComponent')
@@ -129,7 +140,6 @@ describe('<KibanaSectionErrorBoundary>', () => {
         'Error: This is an error to show the test user!'
       )
     ).toBe(true);
-    jest.useRealTimers();
   });
 
   it('integrates with apm to capture the error', async () => {
@@ -138,12 +148,73 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    await userEvent.click(await findByTestId('clickForErrorBtn'));
+    await user.click(await findByTestId('clickForErrorBtn'));
 
     expect(apm.captureError).toHaveBeenCalledTimes(1);
     expect(apm.captureError).toHaveBeenCalledWith(
       new Error('This is an error to show the test user!'),
       { labels: { error_type: 'SectionFatalReactError' } }
     );
+  });
+
+  it('reports after transient window when unmounts early', async () => {
+    const mockDeps = { analytics: { reportEvent: jest.fn() } };
+    services.errorService = new KibanaErrorService(mockDeps);
+    const { findByTestId, unmount } = render(
+      <Template>
+        <BadComponent />
+      </Template>
+    );
+
+    await user.click(await findByTestId('clickForErrorBtn'));
+
+    // Unmount early (simulate navigation or teardown before max duration)
+    unmount();
+
+    // Should not have reported yet (still in transient window)
+    expect(mockDeps.analytics.reportEvent).not.toHaveBeenCalled();
+
+    // Advance only the transient navigation window, not the full default max
+    await jest.advanceTimersByTimeAsync(TRANSIENT_NAVIGATION_WINDOW_MS);
+
+    // Should have reported exactly once
+    expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    const payload = mockDeps.analytics.reportEvent.mock.calls[0][1];
+
+    // Duration should reflect early commit (less than full default window, and <= transient window)
+    expect(payload.component_render_min_duration_ms).toBeLessThanOrEqual(
+      TRANSIENT_NAVIGATION_WINDOW_MS
+    );
+    expect(payload.component_name).toBe('BadComponent');
+    expect(payload.error_message).toBe('Error: This is an error to show the test user!');
+  });
+
+  it('reports after max duration if not unmounted early', async () => {
+    const mockDeps = { analytics: { reportEvent: jest.fn() } };
+    services.errorService = new KibanaErrorService(mockDeps);
+    const { findByTestId } = render(
+      <Template>
+        <BadComponent />
+      </Template>
+    );
+
+    await user.click(await findByTestId('clickForErrorBtn'));
+
+    // Should not have reported yet (still in transient window)
+    expect(mockDeps.analytics.reportEvent).not.toHaveBeenCalled();
+
+    // Advance until the max duration has fully elapsed
+    await jest.advanceTimersByTimeAsync(DEFAULT_MAX_ERROR_DURATION_MS);
+
+    // Should have reported exactly once
+    expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    const payload = mockDeps.analytics.reportEvent.mock.calls[0][1];
+
+    // Duration should reflect the max wait time
+    expect(payload.component_render_min_duration_ms).toBeGreaterThanOrEqual(
+      DEFAULT_MAX_ERROR_DURATION_MS
+    );
+    expect(payload.component_name).toBe('BadComponent');
+    expect(payload.error_message).toBe('Error: This is an error to show the test user!');
   });
 });
