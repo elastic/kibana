@@ -59,7 +59,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/search-queries",
     "@kbn/monaco",
-    "@kbn/search-shared-ui"
+    "@kbn/search-shared-ui",
+    "@kbn/license-management-plugin"
   ],
   "exclude": [
     "target/**/*",
