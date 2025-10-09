@@ -7,6 +7,15 @@ steps:
       machineType: n2-standard-2
       diskSizeGb: 100
 
+  - command: .buildkite/scripts/steps/store_cache.sh
+    label: Pre-Build
+    timeout_in_minutes: 10
+    id: store_cache
+    soft_fail: true
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 95
+
   - wait
 
   - command: .buildkite/scripts/steps/build_kibana.sh

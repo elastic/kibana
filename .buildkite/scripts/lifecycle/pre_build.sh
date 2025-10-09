@@ -26,19 +26,3 @@ if [[ "${KIBANA_BUILD_ID:-}" && "${KIBANA_REUSABLE_BUILD_JOB_URL:-}" ]]; then
   See job here: $KIBANA_REUSABLE_BUILD_JOB_URL
 EOF
 fi
-
-# Bootstrap and archive moon cache to avoid remote cache accesses in every step
-buildkite-agent step update outcome passed || echo "Can't set step to passed, maybe it's already passed?"
-buildkite-agent step update state finished || echo "Can't set step to finished, maybe it's already finished?"
-export MOON_CACHE=write
-.buildkite/scripts/bootstrap.sh
-echo "--- Archive moon cache"
-if [[ ! -d .moon/cache ]]; then
-  echo "No moon cache directory found, skipping archive"
-  exit 0
-else
-  tar -czf ~/moon-cache.tar.gz .moon/cache || echo "Failed to archive moon cache"
-  cd ~/
-  buildkite-agent artifact upload moon-cache.tar.gz || echo "Failed to upload moon cache"
-  echo "Moon cache archived as moon-cache.tar.gz"
-fi

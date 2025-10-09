@@ -23,17 +23,12 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
     mv ~/.kibana/.yarn-local-mirror ./
   fi
-  # Check if the download succeeds before trying to extract the cache
-  if (buildkite-agent artifact download --step "pre_build" "moon-cache.tar.gz" ~/); then
+  # Check if there's a cache artifact uploaded from a previous step
+  if (buildkite-agent artifact download --step "store_cache" "moon-cache.tar.gz" ~/); then
     echo "Found moon-cache.tar.gz artifact, extracting to ./.moon/cache"
-    ls -la ~/.kibana-moon-cache || echo "No ~/.kibana-moon-cache directory found"
-    ls -la ./.moon/cache/.kibana-moon-cache || echo "No .kibana-moon-cache directory found inside the moon cache"
     mkdir -p ./.moon/cache
     echo "Extracting moon-cache.tar.gz to ./.moon/cache"
     tar -xzf ~/moon-cache.tar.gz -C ./
-    ls -la ./.moon/cache
-    ls -la ~/.kibana-moon-cache || echo "No ~/.kibana-moon-cache directory found"
-    ls -la ./.moon/cache/.kibana-moon-cache || echo "No .kibana-moon-cache directory found inside the moon cache"
   elif [[ -d ~/.kibana-moon-cache ]]; then
     echo "Using ~/.moon/cache as a starting point"
     mkdir -p ./.moon/cache
