@@ -27,6 +27,9 @@ const baseToolbarOptions: ToolbarOption[] = [
       defaultMessage: 'Legend',
     }),
     iconType: EuiIconLegend as IconType,
+    toolTipContent: i18n.translate('xpack.lens.visualization.toolbar.legend', {
+      defaultMessage: 'Legend',
+    }),
   },
   {
     id: 'style',
@@ -34,6 +37,9 @@ const baseToolbarOptions: ToolbarOption[] = [
       defaultMessage: 'Style',
     }),
     iconType: 'brush',
+    toolTipContent: i18n.translate('xpack.lens.visualization.toolbar.style', {
+      defaultMessage: 'Style',
+    }),
   },
   // TODO: Add filters
   // {
