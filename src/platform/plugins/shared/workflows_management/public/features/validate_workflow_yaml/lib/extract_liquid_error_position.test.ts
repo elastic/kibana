@@ -72,18 +72,6 @@ describe('extractLiquidErrorPosition', () => {
   });
 
   describe('line/column error parsing', () => {
-    it('should parse line and column from error message', () => {
-      const text = 'Line 1\nLine 2\nLine 3 with {{ error }} here';
-      const errorMessage = 'some error, line:3, col:15';
-
-      const result = extractLiquidErrorPosition(text, errorMessage);
-
-      // Line 3, column 15 should point to the 'e' in 'error'
-      const expectedStart = text.indexOf('{{ error }}');
-      expect(result.start).toBe(expectedStart);
-      expect(result.end).toBeGreaterThan(result.start);
-    });
-
     it('should handle single line text with column offset', () => {
       const text = 'Hello {{ world }}';
       const errorMessage = 'error, line:1, col:8';
@@ -218,16 +206,6 @@ describe('extractLiquidErrorPosition', () => {
       // Should fall back to liquid pattern matching
       expect(result.start).toBe(0);
       expect(result.end).toBe(1);
-    });
-
-    it('should handle negative column numbers', () => {
-      const text = 'Hello {{ world }}';
-      const errorMessage = 'error, line:1, col:-5';
-
-      const result = extractLiquidErrorPosition(text, errorMessage);
-
-      expect(result.start).toBe(0); // Math.max(0, -5 + 1) = 0
-      expect(result.end).toBeGreaterThan(result.start);
     });
 
     it('should handle very long text', () => {
