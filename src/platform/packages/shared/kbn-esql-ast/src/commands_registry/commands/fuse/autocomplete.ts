@@ -142,84 +142,6 @@ async function groupByAutocomplete(
 }
 
 /**
- * Returns suggestions for the arguments of the `FUSE` command.
- * Arguments can be placed at any order, except for the `<fuse_method>` which should be the first argument if present.
- * These arguments are: `<fuse_method>`, `SCORE BY`, `GROUP BY`, `KEY BY`, `WITH`.
- * It also suggests a pipe to chain another command after the `FUSE` command.
- */
-function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem[] {
-  const suggestions: ISuggestionItem[] = [pipeCompleteItem];
-
-  const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
-
-  if (command.args.length === 0) {
-    suggestions.push(
-      {
-        label: 'linear',
-        kind: 'Value',
-        detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.linear', {
-          defaultMessage: 'Linear combination of scores',
-        }),
-        text: 'linear ',
-        sortText: '0',
-      },
-      {
-        label: 'rrf',
-        kind: 'Value',
-        detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.rrf', {
-          defaultMessage: 'Reciprocal rank fusion',
-        }),
-        text: 'rrf ',
-        sortText: '0',
-      }
-    );
-  }
-
-  if (!scoreBy) {
-    suggestions.push({
-      label: 'SCORE BY',
-      kind: 'Reference',
-      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.scoreBy', {
-        defaultMessage:
-          'Defaults to _score. Designates which column to use to retrieve the relevance scores of the input',
-      }),
-      text: 'SCORE BY ',
-      sortText: '1',
-    });
-  }
-
-  if (!groupBy) {
-    suggestions.push({
-      label: 'GROUP BY',
-      kind: 'Reference',
-      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.groupBy', {
-        defaultMessage: 'Defaults to _fork. Designates which column represents the result set',
-      }),
-      text: 'GROUP BY ',
-      sortText: '2',
-    });
-  }
-
-  if (!keyBy) {
-    suggestions.push({
-      label: 'KEY BY',
-      kind: 'Reference',
-      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.keyBy', {
-        defaultMessage: 'Defaults to _id, _index. Rows with matching key_columns values are merged',
-      }),
-      text: 'KEY BY ',
-      sortText: '3',
-    });
-  }
-
-  if (!withOption) {
-    suggestions.push({ ...withCompleteItem, sortText: '4' });
-  }
-
-  return suggestions.map((s) => withAutoSuggest(s));
-}
-
-/**
  * Returns suggestions for the `SCORE BY` argument of the `FUSE` command.
  * Returns fields of double type.
  */
@@ -367,4 +289,82 @@ async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCom
   }
 
   return getCommandMapExpressionSuggestions(innerText, mapParameters);
+}
+
+/**
+ * Returns suggestions for the arguments of the `FUSE` command.
+ * Arguments can be placed at any order, except for the `<fuse_method>` which should be the first argument if present.
+ * These arguments are: `<fuse_method>`, `SCORE BY`, `GROUP BY`, `KEY BY`, `WITH`.
+ * It also suggests a pipe to chain another command after the `FUSE` command.
+ */
+function fuseArgumentsAutocomplete(command: ESQLAstFuseCommand): ISuggestionItem[] {
+  const suggestions: ISuggestionItem[] = [pipeCompleteItem];
+
+  const { scoreBy, keyBy, groupBy, withOption } = extractFuseArgs(command);
+
+  if (command.args.length === 0) {
+    suggestions.push(
+      {
+        label: 'linear',
+        kind: 'Value',
+        detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.linear', {
+          defaultMessage: 'Linear combination of scores',
+        }),
+        text: 'linear ',
+        sortText: '0',
+      },
+      {
+        label: 'rrf',
+        kind: 'Value',
+        detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.rrf', {
+          defaultMessage: 'Reciprocal rank fusion',
+        }),
+        text: 'rrf ',
+        sortText: '0',
+      }
+    );
+  }
+
+  if (!scoreBy) {
+    suggestions.push({
+      label: 'SCORE BY',
+      kind: 'Reference',
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.scoreBy', {
+        defaultMessage:
+          'Defaults to _score. Designates which column to use to retrieve the relevance scores of the input',
+      }),
+      text: 'SCORE BY ',
+      sortText: '1',
+    });
+  }
+
+  if (!groupBy) {
+    suggestions.push({
+      label: 'GROUP BY',
+      kind: 'Reference',
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.groupBy', {
+        defaultMessage: 'Defaults to _fork. Designates which column represents the result set',
+      }),
+      text: 'GROUP BY ',
+      sortText: '2',
+    });
+  }
+
+  if (!keyBy) {
+    suggestions.push({
+      label: 'KEY BY',
+      kind: 'Reference',
+      detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.keyBy', {
+        defaultMessage: 'Defaults to _id, _index. Rows with matching key_columns values are merged',
+      }),
+      text: 'KEY BY ',
+      sortText: '3',
+    });
+  }
+
+  if (!withOption) {
+    suggestions.push({ ...withCompleteItem, sortText: '4' });
+  }
+
+  return suggestions.map((s) => withAutoSuggest(s));
 }
