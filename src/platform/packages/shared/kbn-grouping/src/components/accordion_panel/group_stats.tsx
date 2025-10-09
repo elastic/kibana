@@ -99,6 +99,7 @@ const GroupStatsComponent = <T,>({
                 component: (
                   <EuiToolTip position="top" content={stat.badge.value}>
                     <EuiBadge
+                      tabIndex={0}
                       style={{ marginLeft: 10, width: stat.badge.width ?? 35 }}
                       color={stat.badge.color ?? 'hollow'}
                     >
