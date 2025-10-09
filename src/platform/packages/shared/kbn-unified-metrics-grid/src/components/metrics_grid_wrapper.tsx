@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
 import type { SerializedStyles } from '@emotion/serialize';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
@@ -22,6 +22,7 @@ import {
   METRICS_GRID_CLASS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
   METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ,
+  METRICS_GRID_RESTRICT_BODY_CLASS,
 } from '../common/constants';
 import { useToolbarActions } from './toolbar/hooks/use_toolbar_actions';
 import { SearchButton } from './toolbar/right_side_actions/search_button';
@@ -55,6 +56,7 @@ export const MetricsGridWrapper = ({
 
   const { metricsGridId, setMetricsGridWrapper, styles } = useMetricsGridFullScreen();
 
+  const restrictBodyClass = styles[METRICS_GRID_RESTRICT_BODY_CLASS];
   const metricsGridFullScreenClass = styles[METRICS_GRID_FULL_SCREEN_CLASS];
 
   const onKeyDown = useCallback(
@@ -70,6 +72,17 @@ export const MetricsGridWrapper = ({
   const fullHeightCss = css`
     height: 100%;
   `;
+
+  useEffect(() => {
+    // When the metrics grid is fullscreen, we add a class to the body to remove the extra scrollbar and stay above any fixed headers
+    if (isFullscreen) {
+      document.body.classList.add(METRICS_GRID_RESTRICT_BODY_CLASS, restrictBodyClass);
+
+      return () => {
+        document.body.classList.remove(METRICS_GRID_RESTRICT_BODY_CLASS, restrictBodyClass);
+      };
+    }
+  }, [isFullscreen, restrictBodyClass]);
 
   return (
     <EuiFocusTrap

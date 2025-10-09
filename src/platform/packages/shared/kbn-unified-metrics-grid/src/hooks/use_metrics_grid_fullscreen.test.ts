@@ -15,7 +15,6 @@ import {
 } from './use_metrics_grid_fullscreen';
 import {
   METRICS_GRID_FULL_SCREEN_CLASS,
-  METRICS_GRID_RESTRICT_BODY_CLASS,
   METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
 } from '../common/constants';
 
@@ -78,9 +77,8 @@ describe('useMetricsGridFullScreen', () => {
     metricsGrid.classList.add(METRICS_GRID_FULL_SCREEN_CLASS);
     toggleMetricsGridFullScreen(metricsGrid);
     expect(document.body.classList.add).toHaveBeenCalledWith(
-      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
-      METRICS_GRID_RESTRICT_BODY_CLASS,
-      expect.any(String)
+      expect.any(String),
+      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS
     );
   });
 
@@ -88,9 +86,8 @@ describe('useMetricsGridFullScreen', () => {
     const metricsGrid = document.createElement('div');
     toggleMetricsGridFullScreen(metricsGrid);
     expect(document.body.classList.remove).toHaveBeenCalledWith(
-      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
-      METRICS_GRID_RESTRICT_BODY_CLASS,
-      expect.any(String)
+      expect.any(String),
+      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS
     );
   });
 });

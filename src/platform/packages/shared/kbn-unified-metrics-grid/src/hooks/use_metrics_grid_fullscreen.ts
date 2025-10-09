@@ -27,11 +27,7 @@ const fullScreenBodyStyles = css`
   }
 `;
 
-const bodyClassesToToggle = [
-  METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
-  METRICS_GRID_RESTRICT_BODY_CLASS,
-  fullScreenBodyStyles,
-];
+const bodyClassesToToggle = [fullScreenBodyStyles, METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS];
 
 export const toggleMetricsGridFullScreen = (metricsGrid: HTMLElement) => {
   const hasFullScreenClass = metricsGrid.classList.contains(METRICS_GRID_FULL_SCREEN_CLASS);
