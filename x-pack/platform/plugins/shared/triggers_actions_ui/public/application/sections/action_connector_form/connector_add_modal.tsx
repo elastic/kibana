@@ -253,7 +253,7 @@ const ConnectorAddModal = ({
               {actionTypeModel && actionTypeModel.isExperimental && (
                 <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
                   <EuiBetaBadge
-                      data-test-subj="betaBadge"
+                    data-test-subj="betaBadge"
                     label={TECH_PREVIEW_LABEL}
                     tooltipContent={TECH_PREVIEW_DESCRIPTION}
                   />
