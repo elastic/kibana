@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -56,11 +56,15 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const { euiTheme } = useEuiTheme();
   const gridRef = useRef<HTMLDivElement>(null);
+  const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   const [expandedMetric, setExpandedMetric] = useState<
     | {
         metric: MetricField;
         esqlQuery: string;
+        chartId: string;
+        rowIndex: number;
+        colIndex: number;
       }
     | undefined
   >();
@@ -81,21 +85,72 @@ export const MetricsGrid = ({
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(rows.length / gridColumns);
 
-  const { focusedCell, handleKeyDown, handleCellClick, getRowColFromIndex } = useGridNavigation({
-    gridColumns,
-    gridRows,
-    totalRows: rows.length,
-    gridRef,
-  });
+  const { focusedCell, handleKeyDown, getRowColFromIndex, handleFocusCell, focusCell } =
+    useGridNavigation({
+      gridColumns,
+      gridRows,
+      totalRows: rows.length,
+      gridRef,
+    });
 
-  const handleViewDetails = useCallback((esqlQuery: string, metric: MetricField) => {
-    setExpandedMetric({ metric, esqlQuery });
-    dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+  const setChartRef = useCallback((chartId: string, element: HTMLDivElement | null) => {
+    if (element) {
+      chartRefs.current.set(chartId, element);
+    } else {
+      chartRefs.current.delete(chartId);
+    }
   }, []);
+
+  const handleViewDetails = useCallback(
+    (esqlQuery: string, metric: MetricField, chartId: string) => {
+      const chartIndex = rows.findIndex((row) => `chart-${row.key}` === chartId);
+      const { rowIndex, colIndex } = getRowColFromIndex(chartIndex);
+
+      setExpandedMetric({ metric, esqlQuery, chartId, rowIndex, colIndex });
+      dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
+    },
+    [rows, getRowColFromIndex]
+  );
 
   const handleCloseFlyout = useCallback(() => {
+    if (expandedMetric) {
+      // Use setTimeout to ensure the flyout is fully closed before focusing
+      setTimeout(() => {
+        focusCell(expandedMetric.rowIndex, expandedMetric.colIndex);
+      }, 0);
+    }
     setExpandedMetric(undefined);
-  }, []);
+  }, [expandedMetric, focusCell]);
+
+  const getChartRefForFocus = useCallback(() => {
+    if (expandedMetric?.chartId) {
+      const chartElement = chartRefs.current.get(expandedMetric.chartId);
+      if (chartElement) {
+        return { current: chartElement };
+      }
+    }
+    return { current: null };
+  }, [expandedMetric?.chartId]);
+
+  // TODO: find a better way to handle conflicts with other flyouts
+  // https://github.com/elastic/kibana/issues/237965
+  useEffect(() => {
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+
+      if (target.closest('[data-test-subj="embeddablePanelAction-openInspector"]')) {
+        if (expandedMetric) {
+          handleCloseFlyout();
+        }
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, [expandedMetric, handleCloseFlyout]);
 
   const normalizedFields = useMemo(() => (Array.isArray(fields) ? fields : [fields]), [fields]);
 
@@ -125,24 +180,20 @@ export const MetricsGrid = ({
             const { rowIndex, colIndex } = getRowColFromIndex(index);
             const isFocused =
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
+            const chartId = `chart-${key}`;
 
             return (
               // Use the index as a key to prevent the charts from unmounting
               <EuiFlexItem key={index}>
                 <div
+                  ref={(element) => setChartRef(chartId, element)}
                   role="gridcell"
-                  aria-rowindex={rowIndex + 1} // 1-based for ARIA
-                  aria-colindex={colIndex + 1} // 1-based for ARIA
+                  aria-rowindex={rowIndex + 1}
+                  aria-colindex={colIndex + 1}
                   data-grid-cell={`${rowIndex}-${colIndex}`}
                   data-chart-index={index}
                   tabIndex={isFocused ? 0 : -1}
-                  onClick={() => handleCellClick(rowIndex, colIndex)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleCellClick(rowIndex, colIndex);
-                    }
-                  }}
+                  onFocus={() => handleFocusCell(rowIndex, colIndex)}
                   style={{
                     outline: 'none',
                     cursor: 'pointer',
@@ -153,6 +204,7 @@ export const MetricsGrid = ({
                   }}
                 >
                   <Chart
+                    chartId={chartId}
                     metric={metric}
                     size={chartSize}
                     color={colorPalette[index % colorPalette.length]}
@@ -175,6 +227,7 @@ export const MetricsGrid = ({
       </div>
       {expandedMetric && (
         <MetricInsightsFlyout
+          chartRef={getChartRefForFocus()}
           metric={expandedMetric.metric}
           esqlQuery={expandedMetric.esqlQuery}
           isOpen
