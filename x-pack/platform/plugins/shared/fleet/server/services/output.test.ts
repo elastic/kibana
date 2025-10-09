@@ -102,7 +102,9 @@ function getMockedSoClient(
         return mockOutputSO('output-test');
       }
       case outputIdToUuid('existing-default-output'): {
-        return mockOutputSO('existing-default-output');
+        return mockOutputSO('existing-default-output', {
+          is_default: true,
+        });
       }
       case outputIdToUuid('existing-default-monitoring-output'): {
         return mockOutputSO('existing-default-monitoring-output', {
@@ -239,6 +241,40 @@ function getMockedSoClient(
           },
         ],
         total: 1,
+      };
+    }
+
+    // Handle general list() calls for ensureDefaultOutputs - only return existing outputs if we have both perPage and sortField
+    // This is to distinguish ensureDefaultOutputs calls from other find calls
+    if (
+      findOptions.perPage === 10000 &&
+      findOptions.sortField === 'is_default' &&
+      (options?.defaultOutputId || options?.defaultOutputMonitoringId)
+    ) {
+      const savedObjects = [];
+      if (options?.defaultOutputId) {
+        savedObjects.push({
+          score: 0,
+          ...(await soClient.get('ingest-outputs', outputIdToUuid(options.defaultOutputId))),
+        });
+      }
+      if (
+        options?.defaultOutputMonitoringId &&
+        options.defaultOutputMonitoringId !== options.defaultOutputId
+      ) {
+        savedObjects.push({
+          score: 0,
+          ...(await soClient.get(
+            'ingest-outputs',
+            outputIdToUuid(options.defaultOutputMonitoringId)
+          )),
+        });
+      }
+      return {
+        page: 1,
+        per_page: 10000,
+        saved_objects: savedObjects,
+        total: savedObjects.length,
       };
     }
 
@@ -2703,6 +2739,202 @@ describe('Output Service', () => {
       const promise = outputService.backfillAllOutputPresets(soClient, esClientMock);
 
       await expect(promise).resolves.not.toThrow();
+    });
+  });
+
+  describe('ensureDefaultOutputs', () => {
+    beforeEach(() => {
+      mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+        canEncrypt: true,
+      } as any);
+      mockedAppContextService.getConfig.mockReturnValue({
+        agents: {
+          elasticsearch: {
+            ca_sha256: 'test-ca-sha256',
+          },
+        },
+      } as any);
+    });
+
+    it('should create default output when none exists', async () => {
+      const soClient = getMockedSoClient();
+
+      // @ts-expect-error
+      mockedAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+      });
+
+      const result = await outputService.ensureDefaultOutputs(soClient, esClientMock);
+
+      expect(result).toHaveProperty('defaultOutput');
+      expect(soClient.create).toHaveBeenCalledWith(
+        'ingest-outputs',
+        expect.objectContaining({
+          name: 'default',
+          type: 'elasticsearch',
+          is_default: true,
+          is_default_monitoring: true,
+        }),
+        expect.objectContaining({
+          id: outputIdToUuid('fleet-default-output'),
+          overwrite: true,
+        })
+      );
+    });
+
+    it('should return existing default output when one already exists', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-output',
+      });
+
+      // @ts-expect-error
+      mockedAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+      });
+
+      const result = await outputService.ensureDefaultOutputs(soClient, esClientMock);
+
+      expect(result).toHaveProperty('defaultOutput');
+      // Should not create a new default output
+      expect(soClient.create).not.toHaveBeenCalledWith(
+        'ingest-outputs',
+        expect.objectContaining({
+          name: 'default',
+          is_default: true,
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should create ECH agentless output in cloud environment', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-output',
+      });
+
+      // @ts-expect-error
+      mockedAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+      });
+
+      await outputService.ensureDefaultOutputs(soClient, esClientMock);
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'ingest-outputs',
+        expect.objectContaining({
+          name: 'Internal output for agentless',
+          type: 'elasticsearch',
+          is_default: false,
+          is_default_monitoring: false,
+          is_preconfigured: true,
+        }),
+        expect.objectContaining({
+          id: outputIdToUuid('es-agentless-output'),
+          overwrite: true,
+        })
+      );
+    });
+
+    it('should not create ECH agentless output in serverless environment', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-output',
+      });
+
+      // @ts-expect-error
+      mockedAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: true,
+      });
+
+      await outputService.ensureDefaultOutputs(soClient, esClientMock);
+
+      // Should not create the agentless output
+      expect(soClient.create).not.toHaveBeenCalledWith(
+        'ingest-outputs',
+        expect.objectContaining({
+          name: 'Internal output for agentless',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should not create ECH agentless output in non-cloud environment', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-output',
+      });
+
+      // @ts-expect-error
+      mockedAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+      });
+
+      await outputService.ensureDefaultOutputs(soClient, esClientMock);
+
+      // Should not create the agentless output
+      expect(soClient.create).not.toHaveBeenCalledWith(
+        'ingest-outputs',
+        expect.objectContaining({
+          name: 'Internal output for agentless',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should not create ECH agentless output when it already exists', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-output',
+      });
+
+      // Mock the list method to return existing agentless output
+      soClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 10,
+        saved_objects: [
+          mockOutputSO('existing-default-output', { is_default: true }),
+          mockOutputSO('es-agentless-output', {
+            name: 'Internal output for agentless',
+            is_preconfigured: true,
+            is_default: false,
+          }),
+        ],
+        total: 2,
+      } as any);
+
+      // @ts-expect-error
+      mockedAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+      });
+
+      await outputService.ensureDefaultOutputs(soClient, esClientMock);
+
+      // Should not create the agentless output since it already exists
+      expect(soClient.create).not.toHaveBeenCalledWith(
+        'ingest-outputs',
+        expect.objectContaining({
+          name: 'Internal output for agentless',
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should log debug message when creating ECH agentless output', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'existing-default-output',
+      });
+
+      // @ts-expect-error
+      mockedAppContextService.getCloud.mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+      });
+
+      await outputService.ensureDefaultOutputs(soClient, esClientMock);
+
+      expect(mockedLogger.debug).toHaveBeenCalledWith('Creating default output for ECH agentless');
     });
   });
 
