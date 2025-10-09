@@ -9,9 +9,9 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getStepIconType } from '../../../shared/ui/get_step_icon_type';
+import { getStepIconType } from '../../../shared/ui/step_icons/get_step_icon_type';
 import { getAllConnectors } from '../../../../common/schema';
-import type { ActionOptionData } from '../types';
+import { isActionGroup, type ActionOptionData } from '../types';
 
 export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
   const connectors = getAllConnectors();
@@ -70,6 +70,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     description: i18n.translate('workflows.actionsMenu.kibanaDescription', {
       defaultMessage: 'Work with Kibana data and features directly from your workflow',
     }),
+    options: [],
   };
   const httpRequest: ActionOptionData = {
     iconType: 'globe',
@@ -92,6 +93,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     description: i18n.translate('workflows.actionsMenu.externalDescription', {
       defaultMessage: 'Automate actions in external systems and apps.',
     }),
+    options: [],
   };
   const flowControlGroup: ActionOptionData = {
     iconType: 'branch',
@@ -148,13 +150,11 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
     description: i18n.translate('workflows.actionsMenu.elasticsearchDescription', {
       defaultMessage: 'Work with Elastic data and features directly from your workflow',
     }),
+    options: [],
   };
 
   for (const connector of connectors) {
     if (connector.type.startsWith('elasticsearch.')) {
-      if (!elasticSearchGroup.options) {
-        elasticSearchGroup.options = [];
-      }
       elasticSearchGroup.options.push({
         id: connector.type,
         label: connector.description || connector.type,
@@ -162,9 +162,6 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
         iconType: 'logoElasticsearch',
       });
     } else if (connector.type.startsWith('kibana.')) {
-      if (!kibanaGroup.options) {
-        kibanaGroup.options = [];
-      }
       kibanaGroup.options.push({
         id: connector.type,
         label: connector.summary || connector.description || connector.type,
@@ -172,9 +169,6 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
         iconType: 'logoKibana',
       });
     } else {
-      if (!externalGroup.options) {
-        externalGroup.options = [];
-      }
       const [baseType, subtype] = connector.type.split('.');
       let groupOption = externalGroup;
       if (subtype) {
@@ -183,6 +177,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
         if (!connectorGroup) {
           connectorGroup = {
             id: baseType,
+            connectorType: baseType,
             label: baseType,
             iconType: getStepIconType(baseType),
             options: [],
@@ -212,5 +207,7 @@ export function getActionOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptio
 }
 
 export function flattenOptions(options: ActionOptionData[]): ActionOptionData[] {
-  return options.map((option) => [option, ...flattenOptions(option.options || [])]).flat();
+  return options
+    .map((option) => [option, ...flattenOptions(isActionGroup(option) ? option.options : [])])
+    .flat();
 }

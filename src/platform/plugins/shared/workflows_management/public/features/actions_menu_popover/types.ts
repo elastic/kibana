@@ -7,11 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface ActionOptionData {
+interface ActionBase {
   id: string;
   label: string;
   description?: string;
-  iconType: string;
   iconColor?: string;
-  options?: ActionOptionData[];
+}
+
+interface ActionGroup extends ActionBase {
+  iconType: string;
+  options: ActionOptionData[];
+}
+
+interface ActionConnectorGroup extends ActionBase {
+  connectorType: string;
+}
+
+interface ActionOption extends ActionBase {
+  id: string;
+}
+
+interface ActionConnectorOption extends ActionBase {
+  connectorType: string;
+}
+
+export type ActionOptionData =
+  | ActionOption
+  | ActionGroup
+  | ActionConnectorGroup
+  | ActionConnectorOption;
+
+export function isActionGroup(option: ActionOptionData): option is ActionGroup {
+  return 'options' in option;
+}
+
+export function isActionConnectorGroup(option: ActionOptionData): option is ActionConnectorGroup {
+  return 'connectorType' in option && 'options' in option;
+}
+
+export function isActionConnectorOption(option: ActionOptionData): option is ActionConnectorOption {
+  return 'connectorType' in option && !('options' in option);
+}
+
+export function isActionOption(option: ActionOptionData): option is ActionOption {
+  return !('options' in option);
 }
