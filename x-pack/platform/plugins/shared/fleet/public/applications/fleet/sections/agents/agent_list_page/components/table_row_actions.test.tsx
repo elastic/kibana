@@ -62,7 +62,7 @@ describe('TableRowActions', () => {
       enableAgentPrivilegeLevelChange: true,
     } as any);
     mockedUseLicense.mockReturnValue({
-      hasAtLeast: () => false,
+      hasAtLeast: () => true,
     } as unknown as LicenseService);
 
     mockedUseAuthz.mockReturnValue({
@@ -93,10 +93,6 @@ describe('TableRowActions', () => {
     }
 
     it('should render an active action button when agent isnt protected', async () => {
-      mockedUseLicense.mockReturnValue({
-        hasAtLeast: () => true,
-      } as unknown as LicenseService);
-
       const res = renderAndGetMigrateButton({
         agent: {
           active: true,

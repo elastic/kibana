@@ -31,11 +31,13 @@ export {
 export {
   isAgentMigrationSupported,
   MINIMUM_MIGRATE_AGENT_VERSION,
-} from './is_agent_migrate_supported';
+  isAgentEligibleForMigration,
+} from './agent_migration_helpers';
 export {
   isAgentPrivilegeLevelChangeSupported,
   MINIMUM_PRIVILEGE_LEVEL_CHANGE_AGENT_VERSION,
-} from './is_agent_privilege_level_change_supported';
+  isAgentEligibleForPrivilegeLevelChange,
+} from './agent_privilege_level_change_helpers';
 export {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,

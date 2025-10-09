@@ -48,11 +48,11 @@ import {
   SearchAndFilterBar,
   TableRowActions,
   TagsAddRemove,
+  AgentActivityFlyout,
   AgentMigrateFlyout,
+  ChangeAgentPrivilegeLevelFlyout,
 } from './components';
-import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
-import { ChangeAgentPrivilegeLevelFlyout } from './components/change_agent_privilege_level_flyout.tsx';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { cloud } = useStartServices();
@@ -206,7 +206,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const unsupportedPrivilegeLevelChangeAgents = useMemo(() => {
     const alreadyUnprivilegedAgents = Array.isArray(selectedAgents)
-      ? selectedAgents.filter((agent) => agent.local_metadata.elastic.agent.unprivileged === true)
+      ? selectedAgents.filter(
+          (agent) => agent.local_metadata?.elastic?.agent?.unprivileged === true
+        )
       : [];
     const rootAccessNeededAgents = Array.isArray(selectedAgents)
       ? selectedAgents.filter((agent) =>
@@ -467,7 +469,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <AgentMigrateFlyout
             agents={[agentToMigrate]}
             agentCount={1}
-            unsupportedMigrateAgents={unsupportedMigrateAgents ?? []}
+            unsupportedMigrateAgents={[]}
             onClose={() => {
               setAgentToMigrate(undefined);
             }}
@@ -483,7 +485,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <ChangeAgentPrivilegeLevelFlyout
             agents={[agentToChangePrivilege]}
             agentCount={1}
-            unsupportedAgents={unsupportedPrivilegeLevelChangeAgents}
+            unsupportedAgents={[]}
             onClose={() => {
               setAgentToChangePrivilege(undefined);
             }}

@@ -11,13 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LICENSE_FOR_AGENT_MIGRATION } from '../../../../../../../common/constants';
 import { useLicense } from '../../../../hooks';
-import { FLEET_SERVER_PACKAGE } from '../../../../../../../common';
 import { ExperimentalFeaturesService } from '../../../../services';
 import {
-  isAgentMigrationSupported,
-  isAgentPrivilegeLevelChangeSupported,
+  isAgentEligibleForMigration,
+  isAgentEligibleForPrivilegeLevelChange,
   isAgentRequestDiagnosticsSupported,
-  isRootPrivilegeRequired,
 } from '../../../../../../../common/services';
 import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
 import type { Agent, AgentPolicy } from '../../../../types';
@@ -52,19 +50,9 @@ export const TableRowActions: React.FunctionComponent<{
   const { getHref } = useLink();
   const authz = useAuthz();
   const licenseService = useLicense();
-  const isFleetServerAgent =
-    agentPolicy?.package_policies?.some((p) => p.package?.name === FLEET_SERVER_PACKAGE) ?? false;
   const isUnenrolling = agent.status === 'unenrolling';
-  const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   const agentPrivilegeLevelChangeEnabled =
     ExperimentalFeaturesService.get().enableAgentPrivilegeLevelChange;
-  const isPrivilegeLevelChangeAllowed =
-    authz.fleet.allAgents &&
-    isAgentPrivilegeLevelChangeSupported(agent) &&
-    agent.local_metadata?.elastic?.agent?.unprivileged !== true &&
-    !isRootPrivilegeRequired(agentPolicy?.package_policies || []) &&
-    !isFleetServerAgent &&
-    agentPrivilegeLevelChangeEnabled;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
@@ -77,12 +65,7 @@ export const TableRowActions: React.FunctionComponent<{
     </EuiContextMenuItem>,
   ];
 
-  if (
-    authz.fleet.allAgents &&
-    !agentPolicy?.is_protected &&
-    !isFleetServerAgent &&
-    isAgentMigrationSupported(agent)
-  ) {
+  if (authz.fleet.allAgents && isAgentEligibleForMigration(agent, agentPolicy)) {
     menuItems.push(
       <EuiContextMenuItem
         icon="cluster"
@@ -90,7 +73,7 @@ export const TableRowActions: React.FunctionComponent<{
           onMigrateAgentClick();
           setIsMenuOpen(false);
         }}
-        disabled={!agent.active || !doesLicenseAllowMigration}
+        disabled={!agent.active || !licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION)}
         key="migrateAgent"
         data-test-subj="migrateAgentMenuItem"
       >
@@ -205,7 +188,11 @@ export const TableRowActions: React.FunctionComponent<{
     }
   }
 
-  if (isPrivilegeLevelChangeAllowed) {
+  if (
+    authz.fleet.allAgents &&
+    isAgentEligibleForPrivilegeLevelChange(agent, agentPolicy) &&
+    agentPrivilegeLevelChangeEnabled
+  ) {
     menuItems.push(
       <EuiContextMenuItem
         icon="lock"

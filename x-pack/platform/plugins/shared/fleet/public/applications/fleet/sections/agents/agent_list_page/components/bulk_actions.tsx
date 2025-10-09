@@ -38,7 +38,7 @@ import { AgentExportCSVModal } from '../../components/agent_export_csv_modal';
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
 import { AgentMigrateFlyout } from './migrate_agent_flyout';
-import { ChangeAgentPrivilegeLevelFlyout } from './change_agent_privilege_level_flyout.tsx';
+import { ChangeAgentPrivilegeLevelFlyout } from './change_agent_privilege_level_flyout';
 
 export interface Props {
   nAgentsInTable: number;
