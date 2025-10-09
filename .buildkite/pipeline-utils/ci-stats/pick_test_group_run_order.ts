@@ -120,12 +120,25 @@ interface FtrConfigsManifest {
   enabled?: Array<string | { [configPath: string]: { queue: string } }>;
 }
 
+function getAllPatterns(patterns?: string[]) {
+  const trackedBranch = getTrackedBranch();
+  const allPatterns = patterns ?? [];
+
+  // Serverless tests should only run on main or if explicitly included
+  if (trackedBranch !== 'main' && !patterns?.some((p) => p.includes('serverless'))) {
+    allPatterns.push('!**/*serverless*');
+  }
+
+  return allPatterns.length ? allPatterns : undefined;
+}
+
 function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
   const configs: {
     enabled: Array<string | { [configPath: string]: { queue: string } }>;
     defaultQueue: string | undefined;
   } = { enabled: [], defaultQueue: undefined };
   const uniqueQueues = new Set<string>();
+  const allPatterns = getAllPatterns(patterns);
 
   const mappedSolutions = solutions?.map((s) => (s === 'observability' ? 'oblt' : s));
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
@@ -192,7 +205,7 @@ function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
       const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
       const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
 
-      if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
+      if (allPatterns && !allPatterns.some((pattern) => minimatch(path, pattern))) {
         continue;
       }
 
