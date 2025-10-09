@@ -50,11 +50,11 @@ export const createSearchToolGraph = ({
   model: ScopedModel;
   esClient: ElasticsearchClient;
   logger: Logger;
-  events?: ToolEventEmitter;
+  events: ToolEventEmitter;
 }) => {
   const tools = [
     createRelevanceSearchTool({ model, esClient, events }),
-    createNaturalLanguageSearchTool({ model, esClient, events }),
+    createNaturalLanguageSearchTool({ model, esClient, events, logger }),
   ];
 
   const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
