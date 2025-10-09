@@ -26,7 +26,7 @@ describe('AccessControlService', () => {
         })
       : null;
 
-  describe.only('#getTypesRequiringPrivilegeCheck', () => {
+  describe('#getTypesRequiringPrivilegeCheck', () => {
     let service: AccessControlService;
 
     beforeEach(() => {
