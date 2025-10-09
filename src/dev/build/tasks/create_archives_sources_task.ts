@@ -71,12 +71,11 @@ export const CreateArchivesSources: Task = {
         log.debug('Node.js copied into', platform.getNodeArch(), 'specific build directory');
 
         if (platform.isServerless()) {
-          // Remove canvas shareable runtime, and chromium assets
+          // Remove chromium assets
           await deleteAll(
-            [
-              'x-pack/platform/plugins/private/canvas/shareable_runtime/build',
-              'node_modules/@kbn/screenshotting-plugin/server/assets',
-            ].map((path) => build.resolvePathForPlatform(platform, path)),
+            ['node_modules/@kbn/screenshotting-plugin/server/assets'].map((path) =>
+              build.resolvePathForPlatform(platform, path)
+            ),
             log
           );
 
