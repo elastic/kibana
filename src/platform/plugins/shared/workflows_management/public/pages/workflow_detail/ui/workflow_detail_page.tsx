@@ -54,7 +54,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
 
   const canSaveWorkflow = Boolean(application?.capabilities.workflowsManagement.updateWorkflow);
   const canRunWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
-  const canTestWorkflow = Boolean(application?.capabilities.workflowsManagement.executeWorkflow);
 
   const handleSave = useCallback(
     (onSuccess?: () => void) => {
@@ -194,7 +193,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             handleRunClick={handleRun}
             handleSave={handleSave}
             handleToggleWorkflow={handleToggleWorkflow}
-            canTestWorkflow={canTestWorkflow}
             handleTabChange={setActiveTab}
             hasUnsavedChanges={hasChanges}
             highlightDiff={highlightDiff}
