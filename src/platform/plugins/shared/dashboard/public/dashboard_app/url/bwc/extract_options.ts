@@ -15,6 +15,7 @@ export function extractOptions(state: { [key: string]: unknown }): Pick<Dashboar
     return { options: state.options as DashboardState['options'] };
   }
 
+  // <9.3 Options state spread directly into DashboardState
   const options: Partial<Writable<DashboardState['options']>> = {};
 
   if (typeof state.hidePanelTitles === 'boolean') {
