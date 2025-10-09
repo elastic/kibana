@@ -273,6 +273,10 @@ describe('FUSE Autocomplete', () => {
       ]);
     });
 
+    it('suggests 60 as default value for rank_constant parameter', async () => {
+      await fuseExpectSuggestions('FROM a | FUSE rrf WITH { "rank_constant": ', ['60']);
+    });
+
     it('suggests normalizer and weights as parameters when FUSE method is linear', async () => {
       await fuseExpectSuggestions('FROM a | FUSE linear WITH { ', [
         '"normalizer": "$0"',

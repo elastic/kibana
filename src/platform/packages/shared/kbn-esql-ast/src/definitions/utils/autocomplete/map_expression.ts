@@ -92,16 +92,23 @@ export function getCommandMapExpressionSuggestions(
     const match = innerText.match(/"([^"]+)"\s*:\s*"?[^"]*$/);
     const paramName = match ? match[1] : undefined;
     if (paramName && availableParameters[paramName]) {
+      const paramType = availableParameters[paramName].type;
       return (
-        availableParameters[paramName].suggestions?.map((s) => ({
-          ...s,
-          text: finalWord.startsWith('"') ? `"${s.text}` : `"${s.text}"`,
-          filterText: `"${s.text}`,
-          rangeToReplace: {
-            start: innerText.length - finalWord.length,
-            end: innerText.length,
-          },
-        })) ?? []
+        availableParameters[paramName].suggestions?.map((suggestion) => {
+          if (paramType === 'string') {
+            return {
+              ...suggestion,
+              text: finalWord.startsWith('"') ? `"${suggestion.text}` : `"${suggestion.text}"`,
+              filterText: `"${suggestion.text}`,
+              rangeToReplace: {
+                start: innerText.length - finalWord.length,
+                end: innerText.length,
+              },
+            };
+          } else {
+            return suggestion;
+          }
+        }) ?? []
       );
     }
   }

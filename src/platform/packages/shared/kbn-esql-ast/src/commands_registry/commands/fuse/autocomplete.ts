@@ -275,6 +275,17 @@ async function withOptionAutocomplete(innerText: string, command: ESQLAstFuseCom
     mapParameters = {
       rank_constant: {
         type: 'number',
+        suggestions: [
+          {
+            label: '60',
+            text: '60',
+            kind: 'Value',
+            sortText: '1',
+            detail: i18n.translate('kbn-esql-ast.esql.autocomplete.fuse.rank_constant_default', {
+              defaultMessage: 'Default value',
+            }),
+          },
+        ],
       },
       weights: { type: 'map' },
     };
