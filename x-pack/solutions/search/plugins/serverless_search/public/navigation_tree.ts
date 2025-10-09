@@ -242,7 +242,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
           {
             id: 'getting_started',
             title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
-              defaultMessage: 'Getting Started',
+              defaultMessage: 'Getting started',
             }),
             icon: 'launch',
             iconV2: 'launch',

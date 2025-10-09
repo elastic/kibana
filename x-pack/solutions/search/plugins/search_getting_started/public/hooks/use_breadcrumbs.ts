@@ -15,11 +15,15 @@ export const useGettingStartedBreadcrumbs = () => {
   const isServerless = cloud?.isServerlessEnabled ?? false;
 
   useEffect(() => {
-    searchNavigation?.breadcrumbs.setSearchBreadCrumbs([
-      {
-        text: PLUGIN_NAME,
-      },
-    ]);
+    searchNavigation?.breadcrumbs.setSearchBreadCrumbs(
+      isServerless
+        ? []
+        : [
+            {
+              text: PLUGIN_NAME,
+            },
+          ]
+    );
 
     return () => {
       // Clear breadcrumbs on unmount;
