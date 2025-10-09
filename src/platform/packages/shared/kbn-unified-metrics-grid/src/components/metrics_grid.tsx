@@ -32,7 +32,7 @@ export type MetricsGridProps = Pick<
 } & (
     | {
         pivotOn: 'metric';
-        fields: Array<MetricField>;
+        fields: MetricField[];
       }
     | {
         pivotOn: 'dimension';

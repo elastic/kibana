@@ -52,7 +52,7 @@ export const usePaginatedFields = ({
 
     return {
       currentPageFields: filteredFields.slice(start, end),
-      itemsCount: filteredFields.length,
+      filteredFieldsCount: filteredFields.length,
       totalPages,
     };
   }, [fields, dimensionsSet, searchTermLower, pageSize, currentPage]);

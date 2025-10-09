@@ -114,7 +114,7 @@ describe('MetricsExperienceGrid', () => {
 
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 1,
-      itemsCount: 1,
+      filteredFieldsCount: 1,
       currentPageFields: [allFields[0]],
     });
 
@@ -194,7 +194,7 @@ describe('MetricsExperienceGrid', () => {
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 0,
       currentPageFields: [],
-      itemsCount: 0,
+      filteredFieldsCount: 0,
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
@@ -355,7 +355,7 @@ describe('MetricsExperienceGrid', () => {
 
     usePaginatedFieldsMock.mockReturnValue({
       totalPages: 2,
-      itemsCount: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).length,
+      filteredFieldsCount: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).length,
       currentPageFields: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).slice(0, 5),
     });
 
