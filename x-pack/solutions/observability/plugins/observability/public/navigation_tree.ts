@@ -278,13 +278,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
               defaultMessage: 'AI Assistant',
             }),
-            link: 'observabilityAIAssistant',
-          },
-          {
-            id: 'aiAssistantContainer',
-            title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
-              defaultMessage: 'AI Assistant',
-            }),
             iconV2: 'sparkles',
             link: 'observabilityAIAssistant',
           },

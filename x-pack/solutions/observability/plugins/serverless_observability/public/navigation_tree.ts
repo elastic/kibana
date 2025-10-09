@@ -491,7 +491,7 @@ export const createNavigationTree = ({
                 breadcrumbStatus: 'hidden',
                 children: [
                   { link: 'management:triggersActionsAlerts' },
-                  { link: 'observability-overview:rules' },
+                  { link: 'management:triggersActions' },
                   { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
                 ],
               },
