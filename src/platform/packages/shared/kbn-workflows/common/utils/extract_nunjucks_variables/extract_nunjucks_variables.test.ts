@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extractTemplateVariables } from './extract_template_variables';
+import { extractNunjucksVariables } from './extract_nunjucks_variables';
 
-describe('extractTemplateVariables', () => {
-  it('should extract variables from a template string', () => {
+describe('extractNunjucksVariables', () => {
+  it('should extract variables from a Nunjucks template string', () => {
     const template = `
       Hello {{ user.name }}!
       Your order {{ order.id }} is confirmed.
@@ -19,25 +19,8 @@ describe('extractTemplateVariables', () => {
       {% endif %}
     `;
 
-    const variables = extractTemplateVariables(template);
+    const variables = extractNunjucksVariables(template);
     expect(variables).toEqual(['user.name', 'order.id', 'user.isMember']);
-  });
-
-  it('should return an empty array if the template is invalid', () => {
-    const template = `
-      Hello {{ user.name | unclosed
-    `;
-
-    const variables = extractTemplateVariables(template);
-    expect(variables).toEqual([]);
-  });
-
-  it('should return the correct variables if the template contains an invalid filter', () => {
-    const template = `
-      Hello {{ user.name | invalidFilter }}!
-    `;
-    const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['user.name']);
   });
 
   it('should return an empty array if no variables are found', () => {
@@ -46,7 +29,7 @@ describe('extractTemplateVariables', () => {
       This is a static template.
     `;
 
-    const variables = extractTemplateVariables(template);
+    const variables = extractNunjucksVariables(template);
     expect(variables).toEqual([]);
   });
 
@@ -56,15 +39,15 @@ describe('extractTemplateVariables', () => {
       {{order.items[0].name}}
       {% if   user.isAdmin %}
         Admin Panel Access  {% endif %}
-        {{   user.FullName   }}
+        {{   user.getFullName()   }}
     `;
 
-    const variables = extractTemplateVariables(template);
+    const variables = extractNunjucksVariables(template);
     expect(variables).toEqual([
       'user.profile.firstName',
-      'order.items.0.name',
+      'order.items[0].name',
       'user.isAdmin',
-      'user.FullName',
+      'user.getFullName()',
     ]);
   });
 
@@ -79,7 +62,13 @@ describe('extractTemplateVariables', () => {
       Total: {{ order.total }}
     `;
 
-    const variables = extractTemplateVariables(template);
-    expect(variables).toEqual(['order.items', 'order.total']);
+    const variables = extractNunjucksVariables(template);
+    expect(variables).toEqual([
+      'order.items',
+      'item.name',
+      'item.price',
+      'item.onSale',
+      'order.total',
+    ]);
   });
 });
