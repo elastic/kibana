@@ -34,6 +34,47 @@ export class AccessControlService {
     this.userForOperation = user;
   }
 
+  shouldObjectRequireAccessControl(params: {
+    object: AuthorizeObject;
+    currentUser: AuthenticatedUser | null;
+    actions: Set<SecurityAction>;
+  }) {
+    const { object, currentUser, actions } = params;
+
+    if (!this.typeRegistry?.supportsAccessControl(object.type)) {
+      return false;
+    }
+
+    const { accessControl } = object;
+    if (!accessControl) {
+      return false;
+    }
+
+    const actionsIgnoringDefaultMode = new Set([
+      SecurityAction.UPDATE,
+      SecurityAction.BULK_UPDATE,
+      SecurityAction.DELETE,
+      SecurityAction.BULK_DELETE,
+    ]);
+
+    const anyActionsForcingDefaultCheck = Array.from(actions).every(
+      (item) => !actionsIgnoringDefaultMode.has(item)
+    );
+
+    const requiresDefaultCheck =
+      anyActionsForcingDefaultCheck || accessControl.accessMode === 'read_only';
+
+    if (!requiresDefaultCheck) {
+      return false;
+    }
+
+    if (!accessControl.owner || !currentUser) {
+      return false;
+    }
+
+    return accessControl.owner !== currentUser.profile_uid;
+  }
+
   getTypesRequiringPrivilegeCheck({
     objects,
     actions,
@@ -48,39 +89,21 @@ export class AccessControlService {
     const currentUser = this.userForOperation;
     const typesRequiringAccessControl = new Set<string>();
 
-    // This is all here because our authz functions support multiple actions at once.
-    // This is not a real use case, but we need to handle it anyway.
-    const actionsIgnoringDefaultMode = new Set([
-      SecurityAction.UPDATE,
-      SecurityAction.BULK_UPDATE,
-      SecurityAction.DELETE,
-      SecurityAction.BULK_DELETE,
-    ]);
+    const results: AccessControlAuthorizeResult[] = objects.map((object) => {
+      const requiresManageAccessControl = this.shouldObjectRequireAccessControl({
+        object,
+        currentUser,
+        actions,
+      });
 
-    const anyActionsForcingDefaultCheck = Array.from(actions).some(
-      (item) => !actionsIgnoringDefaultMode.has(item)
-    );
-
-    const results: AccessControlAuthorizeResult[] = objects.map((obj) => {
-      let requiresManageAccessControl = false;
-
-      // Alternatively just make two different checks based on anyActionsForcingDefaultCheck just for readability sake
-      if (
-        // ToDo: This logic behaves strangely if accessControl.mode is undefined, which for some reason it can be?
-        // Shouldn't we only need to check that accessControl is defined?
-        this.typeRegistry?.supportsAccessControl(obj.type) &&
-        (obj.accessControl?.accessMode === 'read_only' || anyActionsForcingDefaultCheck) &&
-        obj.accessControl?.owner &&
-        currentUser && // Sid - if we don't have a user, should't we ultimately throw?
-        obj.accessControl.owner !== currentUser.profile_uid
-      ) {
-        typesRequiringAccessControl.add(obj.type);
-        requiresManageAccessControl = true;
+      if (requiresManageAccessControl) {
+        typesRequiringAccessControl.add(object.type);
       }
+
       return {
-        type: obj.type,
-        id: obj.id,
-        ...(obj.name && { name: obj.name }),
+        type: object.type,
+        id: object.id,
+        ...(object.name && { name: object.name }),
         requiresManageAccessControl,
       };
     });
