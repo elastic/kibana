@@ -16,6 +16,11 @@ export interface RoundInput {
    * A text message from the user.
    */
   message: string;
+  /**
+   * Optional additional context to provide to the agent.
+   * This is sent separately from the message and not displayed to the user.
+   */
+  additionalContext?: string;
 }
 
 /**

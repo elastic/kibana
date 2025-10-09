@@ -29,7 +29,12 @@ export const conversationToLangchainMessages = ({
     messages.push(...roundToLangchain(round, { ignoreSteps }));
   }
 
-  messages.push(createUserMessage({ content: nextInput.message }));
+  // Create user message with additional context if provided
+  const userMessageContent = nextInput.additionalContext
+    ? `${nextInput.additionalContext}\n\n${nextInput.message}`
+    : nextInput.message;
+
+  messages.push(createUserMessage({ content: userMessageContent }));
 
   return messages;
 };

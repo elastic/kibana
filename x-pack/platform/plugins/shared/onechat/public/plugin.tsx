@@ -26,6 +26,8 @@ import type {
   OnechatStartDependencies,
 } from './types';
 import { createPublicToolContract } from './services/tools';
+import { createEmbeddableConversation } from './embeddable';
+import { openConversationFlyout } from './flyout';
 
 import { registerLocators } from './locator/register_locators';
 
@@ -91,7 +93,7 @@ export class OnechatPlugin
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
 
-    this.internalServices = {
+    const internalServices: OnechatInternalService = {
       agentService,
       chatService,
       conversationsService,
@@ -99,8 +101,25 @@ export class OnechatPlugin
       startDependencies,
     };
 
+    this.internalServices = internalServices;
+
+    const ConversationComponent = createEmbeddableConversation({
+      services: internalServices,
+      coreStart: core,
+    });
+
     return {
       tools: createPublicToolContract({ toolsService }),
+      components: {
+        Conversation: ConversationComponent,
+      },
+      openConversationFlyout: (options) =>
+        openConversationFlyout(options, {
+          coreStart: core,
+          services: internalServices,
+          startDependencies,
+          ConversationComponent,
+        }),
     };
   }
 }

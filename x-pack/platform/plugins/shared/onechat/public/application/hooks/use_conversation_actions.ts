@@ -26,6 +26,8 @@ import { createNewConversation, newConversationId } from '../utils/new_conversat
 import { useConversationId } from './use_conversation_id';
 import { useNavigation } from './use_navigation';
 import { useOnechatServices } from './use_onechat_service';
+import { useEmbeddableMode } from '../context/embeddable_mode_context';
+import { useConversationIdFromContext } from '../context/conversation_id_context';
 
 const pendingRoundId = '__pending__';
 
@@ -35,6 +37,10 @@ export const useConversationActions = () => {
   const [, setAgentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
   const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
+  const { isEmbeddedMode, onConversationCreated: onConversationCreatedCallback } =
+    useEmbeddableMode();
+  const conversationIdContext = useConversationIdFromContext();
+
   const setConversation = (updater: (conversation?: Conversation) => Conversation) => {
     queryClient.setQueryData<Conversation>(queryKey, updater);
   };
@@ -57,7 +63,18 @@ export const useConversationActions = () => {
     };
   }, []);
   const navigateToConversation = ({ nextConversationId }: { nextConversationId: string }) => {
-    // Navigate to the conversation if redirect is allowed
+    // In embeddable mode, update the conversation ID context instead of navigating
+    if (isEmbeddedMode) {
+      if (conversationIdContext?.setConversationId) {
+        conversationIdContext.setConversationId(nextConversationId);
+      }
+      if (onConversationCreatedCallback) {
+        onConversationCreatedCallback(nextConversationId);
+      }
+      return;
+    }
+
+    // Navigate to the conversation if redirect is allowed (standalone app mode)
     if (shouldAllowConversationRedirectRef.current) {
       const path = appPaths.chat.conversation({ conversationId: nextConversationId });
       const params = undefined;
@@ -192,12 +209,12 @@ export const useConversationActions = () => {
       // Check if we're deleting the current conversation
       const isCurrentConversation = conversationId === id;
 
-      if (isCurrentConversation) {
-        // If deleting current conversation, navigate to new conversation
+      if (isCurrentConversation && !isEmbeddedMode) {
+        // If deleting current conversation in standalone mode, navigate to new conversation
         const path = appPaths.chat.new;
         navigateToOnechatUrl(path, undefined, { shouldStickToBottom: true });
       }
-      // If deleting other conversations, stay at current conversation (no navigation needed)
+      // If deleting in embedded mode or deleting other conversations, stay at current conversation (no navigation needed)
 
       queryClient.removeQueries({ queryKey: queryKeys.conversations.byId(id) });
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });

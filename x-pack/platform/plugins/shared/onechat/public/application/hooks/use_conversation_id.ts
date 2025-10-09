@@ -8,13 +8,24 @@
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { newConversationId } from '../utils/new_conversation';
+import { useConversationIdFromContext } from '../context/conversation_id_context';
 
 export const useConversationId = () => {
+  // Try to get conversationId from context first (for embeddable mode)
+  const contextValue = useConversationIdFromContext();
+
+  // Fallback to router params (for standalone app mode)
   const { conversationId: conversationIdParam } = useParams<{ conversationId?: string }>();
 
   const conversationId = useMemo(() => {
+    // If context is available, use it (embeddable mode)
+    if (contextValue !== null) {
+      return contextValue.conversationId;
+    }
+
+    // Otherwise use router params (standalone app mode)
     return conversationIdParam === newConversationId ? undefined : conversationIdParam;
-  }, [conversationIdParam]);
+  }, [contextValue, conversationIdParam]);
 
   return conversationId;
 };

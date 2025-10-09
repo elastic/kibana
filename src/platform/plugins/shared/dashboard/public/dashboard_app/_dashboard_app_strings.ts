@@ -157,6 +157,14 @@ export const getDashboardBreadcrumb = () =>
   });
 
 export const topNavStrings = {
+  chat: {
+    label: i18n.translate('dashboard.topNav.chatButtonAriaLabel', {
+      defaultMessage: 'AI chat',
+    }),
+    description: i18n.translate('dashboard.topNav.chatConfigDescription', {
+      defaultMessage: 'Open AI chat assistant',
+    }),
+  },
   fullScreen: {
     label: i18n.translate('dashboard.topNave.fullScreenButtonAriaLabel', {
       defaultMessage: 'full screen',

@@ -12,7 +12,11 @@ import { useCallback, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  useBatchedPublishingSubjects,
+  apiPublishesTitle,
+  getTitle,
+} from '@kbn/presentation-publishing';
 
 import useObservable from 'react-use/lib/useObservable';
 import { EuiIconBackgroundTask } from '@kbn/background-search';
@@ -22,7 +26,12 @@ import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_ov
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
 import type { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
-import { coreServices, shareService, dataService } from '../../services/kibana_services';
+import {
+  coreServices,
+  shareService,
+  dataService,
+  onechatService,
+} from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
 import { showAddMenu } from './add_menu/show_add_menu';
@@ -55,6 +64,19 @@ export const useDashboardMenuItems = ({
       dashboardApi.viewMode$
     );
   const disableTopNav = isSaveInProgress || hasOverlays;
+
+  // Get panel titles for AI chat context
+  const dashboardChildren = useObservable(dashboardApi.children$, {});
+  const panelTitles = useMemo(() => {
+    return Object.values(dashboardChildren)
+      .map((childApi) => {
+        if (apiPublishesTitle(childApi)) {
+          return getTitle(childApi);
+        }
+        return undefined;
+      })
+      .filter((title): title is string => Boolean(title));
+  }, [dashboardChildren]);
 
   /**
    * Show the Dashboard app's share menu
@@ -122,8 +144,135 @@ export const useDashboardMenuItems = ({
    * Register all of the top nav configs that can be used by dashboard.
    */
 
+  /**
+   * Open AI chat assistant flyout with dashboard-specific agent
+   */
+  const openChat = useCallback(() => {
+    if (!onechatService || typeof onechatService.openConversationFlyout !== 'function') {
+      // eslint-disable-next-line no-console
+      console.warn('Onechat service or openConversationFlyout method is not available');
+      return;
+    }
+
+    const additionalContext = JSON.stringify({
+      application_name: 'dashboard',
+      current_dashboard_name: dashboardTitle || 'Untitled',
+      dashboard_id: lastSavedId,
+      panel_titles: panelTitles,
+    });
+
+    // Define client-side tools available to the AI
+    const clientTools = {
+      alert_tool: {
+        description: 'Call this when you want to show an alert message to the user',
+        input: {
+          type: 'object' as const,
+          properties: {
+            message: {
+              type: 'string',
+              description: 'The message to display in the alert',
+            },
+          },
+          required: ['message'],
+        },
+        fn: (params: { message: string }) => {
+          alert(params.message);
+        },
+      },
+    };
+
+    try {
+      onechatService.openConversationFlyout({
+        agentId: 'dashboard',
+        additionalContext,
+        clientTools,
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to open chat flyout:', error);
+    }
+  }, [dashboardTitle, lastSavedId, panelTitles]);
+
+  /**
+   * Open AI chat assistant flyout with dashboard-specific agent and auto-submit a summary request
+   */
+  const openChatWithSummary = useCallback(() => {
+    if (!onechatService || typeof onechatService.openConversationFlyout !== 'function') {
+      // eslint-disable-next-line no-console
+      console.warn('Onechat service or openConversationFlyout method is not available');
+      return;
+    }
+
+    const additionalContext = JSON.stringify({
+      application_name: 'dashboard',
+      current_dashboard_name: dashboardTitle || 'Untitled',
+      dashboard_id: lastSavedId,
+      panel_titles: panelTitles,
+    });
+
+    // Define client-side tools available to the AI
+    const clientTools = {
+      alert_tool: {
+        description: 'Call this when you want to show an alert message to the user',
+        input: {
+          type: 'object' as const,
+          properties: {
+            message: {
+              type: 'string',
+              description: 'The message to display in the alert',
+            },
+          },
+          required: ['message'],
+        },
+        fn: (params: { message: string }) => {
+          alert(params.message);
+        },
+      },
+    };
+
+    try {
+      onechatService.openConversationFlyout({
+        agentId: 'dashboard',
+        additionalContext,
+        customMessage: 'Please provide a summary of this dashboard',
+        newChat: true,
+        clientTools,
+      });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to open chat flyout with summary:', error);
+    }
+  }, [dashboardTitle, lastSavedId, panelTitles]);
+
   const menuItems = useMemo(() => {
     return {
+      chat: {
+        ...topNavStrings.chat,
+        id: 'chat',
+        iconType: 'discuss',
+        iconOnly: true,
+        testId: 'dashboardChatButton',
+        disableButton:
+          disableTopNav ||
+          !onechatService ||
+          typeof onechatService?.openConversationFlyout !== 'function',
+        run: openChat,
+      } as TopNavMenuData,
+
+      chatSummary: {
+        label: 'Dashboard summary',
+        description: 'Get an AI-generated summary of this dashboard',
+        id: 'chat-summary',
+        iconType: 'visText',
+        iconOnly: true,
+        testId: 'dashboardChatSummaryButton',
+        disableButton:
+          disableTopNav ||
+          !onechatService ||
+          typeof onechatService?.openConversationFlyout !== 'function',
+        run: openChatWithSummary,
+      } as TopNavMenuData,
+
       fullScreen: {
         ...topNavStrings.fullScreen,
         id: 'full-screen',
@@ -264,6 +413,8 @@ export const useDashboardMenuItems = ({
     resetChanges,
     isResetting,
     appId,
+    openChat,
+    openChatWithSummary,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -303,6 +454,10 @@ export const useDashboardMenuItems = ({
     const { showWriteControls, storeSearchSession } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
+    const chatMenuItem =
+      onechatService && typeof onechatService.openConversationFlyout === 'function'
+        ? [menuItems.chat, menuItems.chatSummary]
+        : [];
     const shareMenuItem = shareService
       ? ([
           // Only show the export button if the current user meets the requirements for at least one registered export integration
@@ -324,12 +479,15 @@ export const useDashboardMenuItems = ({
       ...duplicateMenuItem,
       ...mayberesetChangesMenuItem,
       ...backgroundSearch,
+      ...chatMenuItem,
       ...shareMenuItem,
       ...editMenuItem,
     ];
   }, [
     isLabsEnabled,
     menuItems.labs,
+    menuItems.chat,
+    menuItems.chatSummary,
     menuItems.export,
     menuItems.share,
     menuItems.interactiveSave,
@@ -346,6 +504,10 @@ export const useDashboardMenuItems = ({
     const { storeSearchSession } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
+    const chatMenuItem =
+      onechatService && typeof onechatService.openConversationFlyout === 'function'
+        ? [menuItems.chat, menuItems.chatSummary]
+        : [];
     const shareMenuItem = shareService
       ? ([
           // Only show the export button if the current user meets the requirements for at least one registered export integration
@@ -374,13 +536,15 @@ export const useDashboardMenuItems = ({
         ? [menuItems.backgroundSearch]
         : [];
 
-    // insert share menu item before the last item in edit mode
-    editModeTopNavConfigItems.splice(-2, 0, ...backgroundSearch, ...shareMenuItem);
+    // insert share and chat menu items before the last item in edit mode
+    editModeTopNavConfigItems.splice(-2, 0, ...backgroundSearch, ...chatMenuItem, ...shareMenuItem);
 
     return editModeTopNavConfigItems;
   }, [
     isLabsEnabled,
     menuItems.labs,
+    menuItems.chat,
+    menuItems.chatSummary,
     menuItems.export,
     menuItems.share,
     menuItems.settings,

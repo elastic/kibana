@@ -58,6 +58,14 @@ export function registerChatRoutes({
     input: schema.string({
       meta: { description: 'The user input message to send to the agent.' },
     }),
+    additional_context: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Optional additional context to provide to the agent. This is sent separately from the input and not displayed to the user.',
+        },
+      })
+    ),
     capabilities: schema.maybe(
       schema.object(
         {
@@ -96,6 +104,7 @@ export function registerChatRoutes({
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
+      additional_context: additionalContext,
       capabilities,
     } = payload;
 
@@ -105,7 +114,7 @@ export function registerChatRoutes({
       conversationId,
       capabilities,
       abortSignal,
-      nextInput: { message: input },
+      nextInput: { message: input, additionalContext },
       request,
     });
   };

@@ -6,9 +6,15 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import { useEmbeddableMode } from '../../context/embeddable_mode_context';
 
 export const useConversationGridCenterColumnWidth = () => {
   const { euiTheme } = useEuiTheme();
-  const contentMaxWidth = `calc(${euiTheme.size.xl} * 25)`;
+  const { isEmbeddedMode } = useEmbeddableMode();
+
+  // In embeddable mode (like flyouts), use a more flexible width
+  // In standalone mode, use a fixed max width for better readability
+  const contentMaxWidth = isEmbeddedMode ? '100%' : `calc(${euiTheme.size.xl} * 25)`;
+
   return contentMaxWidth;
 };

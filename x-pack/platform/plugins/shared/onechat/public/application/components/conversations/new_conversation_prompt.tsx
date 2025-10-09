@@ -24,6 +24,7 @@ import { ConversationInputForm } from './conversation_input/conversation_input_f
 import { useConversationGridCenterColumnWidth } from './conversation_grid.styles';
 import { docLinks } from '../../../../common/doc_links';
 import { WelcomeText } from '../common/welcome_text';
+import { useEmbeddableMode } from '../../context/embeddable_mode_context';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -178,12 +179,23 @@ export const NewConversationPrompt: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const centerColumnWidth = useConversationGridCenterColumnWidth();
   const inputRowHeight = `calc(${euiTheme.size.l} * 7)`;
-  const gridStyles = css`
-    display: grid;
-    grid-template-columns: 1fr ${centerColumnWidth} 1fr;
-    grid-template-rows: auto ${inputRowHeight} auto;
-    row-gap: ${euiTheme.size.l};
-  `;
+  const { isEmbeddedMode } = useEmbeddableMode();
+  
+  // In embeddable mode, use a single column layout; in standalone mode, use a 3-column layout
+  const gridStyles = isEmbeddedMode
+    ? css`
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto ${inputRowHeight} auto;
+        row-gap: ${euiTheme.size.l};
+      `
+    : css`
+        display: grid;
+        grid-template-columns: 1fr ${centerColumnWidth} 1fr;
+        grid-template-rows: auto ${inputRowHeight} auto;
+        row-gap: ${euiTheme.size.l};
+      `;
+  
   return (
     <ConversationContentWithMargins css={fullHeightStyles}>
       <div css={gridStyles} data-test-subj="agentBuilderWelcomePage">

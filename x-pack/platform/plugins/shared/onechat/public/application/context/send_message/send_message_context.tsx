@@ -9,7 +9,13 @@ import React, { createContext, useContext } from 'react';
 import { useSendMessageMutation } from './use_send_message_mutation';
 
 interface SendMessageState {
-  sendMessage: ({ message }: { message: string }) => void;
+  sendMessage: ({
+    message,
+    additionalContext,
+  }: {
+    message: string;
+    additionalContext?: string;
+  }) => void;
   isResponseLoading: boolean;
   error: unknown;
   pendingMessage: string | undefined;

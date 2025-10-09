@@ -44,6 +44,7 @@ import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -112,6 +113,7 @@ export interface DashboardStartDependencies {
   noDataPage?: NoDataPagePluginStart;
   lens?: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  onechat?: OnechatPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

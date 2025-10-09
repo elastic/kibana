@@ -22,6 +22,11 @@ export interface ChatParams {
   conversationId?: string;
   capabilities?: AgentCapabilities;
   input: string;
+  /**
+   * Optional additional context to provide to the agent.
+   * This is sent separately from the input and not displayed to the user.
+   */
+  additionalContext?: string;
 }
 
 export class ChatService {
@@ -38,6 +43,7 @@ export class ChatService {
       conversation_id: params.conversationId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
+      additional_context: params.additionalContext,
     };
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {
