@@ -377,9 +377,12 @@ function collectDocumentCounts({ data, input }: CollectorParams): Observable<str
                     probability: number;
                     matching_docs: { doc_count: number };
                   };
+
                   const randomSampleDocCount = sampleAgg.doc_count / sampleAgg.probability;
                   const matchingDocCount = sampleAgg.matching_docs.doc_count;
-                  return percentageFormatter.format(matchingDocCount / randomSampleDocCount);
+                  const percentage =
+                    randomSampleDocCount === 0 ? 0 : matchingDocCount / randomSampleDocCount;
+                  return percentageFormatter.format(percentage);
                 }
                 return undefined;
               }),
