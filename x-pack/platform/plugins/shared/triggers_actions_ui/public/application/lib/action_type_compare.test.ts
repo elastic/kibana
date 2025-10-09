@@ -83,39 +83,3 @@ test('should sort by name when all enabled', async () => {
   expect(result[2]).toEqual(actionTypes[0]);
   expect(result[3]).toEqual(actionTypes[3]);
 });
-
-test('should sort by deprecation status when all enabled', async () => {
-  const actionTypes: ActionType[] = [
-    createMockConnectorType({
-      id: '1',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      name: 'third',
-      isDeprecated: true,
-    }),
-    createMockConnectorType({
-      id: '2',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      name: 'first',
-    }),
-    createMockConnectorType({
-      id: '3',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      name: 'second',
-    }),
-    createMockConnectorType({
-      id: '4',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      name: 'x-fourth',
-      enabledInConfig: false,
-    }),
-  ];
-  const result = [...actionTypes].sort(actionTypeCompare);
-  expect(result[0]).toEqual(actionTypes[1]);
-  expect(result[1]).toEqual(actionTypes[2]);
-  expect(result[2]).toEqual(actionTypes[3]);
-  expect(result[3]).toEqual(actionTypes[0]);
-});

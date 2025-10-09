@@ -832,17 +832,3 @@ export const DEFAULT_RULE_NAME = (ruleTypeName: string) =>
     defaultMessage: `{ruleTypeName} rule`,
     values: { ruleTypeName },
   });
-
-export const DEPRECATED_LABEL = i18n.translate(
-  'responseOpsRuleForm.deprecatedConnectorBadgeLabel',
-  {
-    defaultMessage: 'Deprecated',
-  }
-);
-
-export const DEPRECATED_CONNECTOR_TOOLTIP_CONTENT = i18n.translate(
-  'responseOpsRuleForm.deprecatedConnectorTooltipLabel',
-  {
-    defaultMessage: 'This connector type is deprecated and may be removed in future versions.',
-  }
-);

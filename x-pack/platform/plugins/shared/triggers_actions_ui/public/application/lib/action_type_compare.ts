@@ -15,10 +15,10 @@ export function actionTypeCompare(
   const aEnabled = getIsEnabledValue(a, preconfiguredConnectors);
   const bEnabled = getIsEnabledValue(b, preconfiguredConnectors);
 
-  if ((aEnabled === true && bEnabled === false) || (!a.isDeprecated && b.isDeprecated)) {
+  if (aEnabled === true && bEnabled === false) {
     return -1;
   }
-  if ((aEnabled === false && bEnabled === true) || (a.isDeprecated && !b.isDeprecated)) {
+  if (aEnabled === false && bEnabled === true) {
     return 1;
   }
   return a.name.localeCompare(b.name);
