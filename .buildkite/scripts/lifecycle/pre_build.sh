@@ -37,6 +37,7 @@ if [[ ! -d .moon/cache ]]; then
   exit 0
 else
   tar -czf ~/moon-cache.tar.gz .moon/cache || echo "Failed to archive moon cache"
-  buildkite-agent artifact upload ~/moon-cache.tar.gz || echo "Failed to upload moon cache"
+  cd ~/
+  buildkite-agent artifact upload moon-cache.tar.gz || echo "Failed to upload moon cache"
   echo "Moon cache archived as moon-cache.tar.gz"
 fi
