@@ -83,6 +83,7 @@ import type {
   CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
+  PackagePolicyConfigRecord,
 } from '../../common/types';
 import {
   FleetError,
@@ -3586,8 +3587,7 @@ export function updatePackageInputs(
     });
   }
 
-  const packageInfoVars = packageInfo.vars?.reduce(varsReducer, {});
-  const { vars } = deepMergeVars(basePackagePolicy, { vars: packageInfoVars }, true);
+  const vars = getUpdatedGlobalVars(packageInfo, basePackagePolicy);
 
   const resultingPackagePolicy: NewPackagePolicy = {
     ...basePackagePolicy,
@@ -3874,6 +3874,24 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   }
 
   return result;
+}
+
+function getUpdatedGlobalVars(packageInfo: PackageInfo, packagePolicy: NewPackagePolicy) {
+  if (!packageInfo.vars) {
+    return undefined;
+  }
+
+  const packageInfoVars = packageInfo.vars.reduce(varsReducer, {});
+  const mergedVars = deepMergeVars(packagePolicy, { vars: packageInfoVars }, true)
+    .vars as PackagePolicyConfigRecord;
+
+  // Remove existing global vars that are no longer defined in the package
+  return Object.entries(mergedVars).reduce<PackagePolicyConfigRecord>((acc, [key, val]) => {
+    if (key in packageInfoVars) {
+      acc[key] = val;
+    }
+    return acc;
+  }, {});
 }
 
 async function requireUniqueName(
