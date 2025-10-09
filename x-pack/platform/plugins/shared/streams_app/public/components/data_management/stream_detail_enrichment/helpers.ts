@@ -4,15 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { HttpStart } from '@kbn/core/public';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { hasUnclosedQuote } from '@kbn/console-plugin/public/application/containers/editor/utils/autocomplete_utils';
-import { parseBody } from '@kbn/console-plugin/public/application/containers/editor/utils/tokens_utils';
-
 import type { JsonValue } from '@kbn/utility-types';
-export interface ProcessorSuggestion {
-  name: string;
-  template?: JsonValue;
-}
+import type { ProcessorSuggestion } from '@kbn/streams-plugin/common';
+
+const PROCESSOR_SUGGESTIONS_API = '/internal/streams/ingest/processor_suggestions';
+let suggestionsPromise: Promise<ProcessorSuggestion[]> | null = null;
 
 export const serializeXJson = (v: unknown, defaultVal: string = '{}') => {
   if (!v) {
@@ -45,6 +43,24 @@ export const parseXJsonOrString = (input: string): unknown => {
   }
 };
 
+export const fetchProcessorSuggestions = (http: HttpStart): Promise<ProcessorSuggestion[]> => {
+  if (suggestionsPromise) return suggestionsPromise;
+
+  const fetchPromise = http
+    .get<ProcessorSuggestion[]>(PROCESSOR_SUGGESTIONS_API)
+    .then((result) => result ?? [])
+    .catch(() => []);
+
+  suggestionsPromise = fetchPromise.then((result) => {
+    if (result.length === 0) {
+      suggestionsPromise = null;
+    }
+    return result;
+  });
+
+  return suggestionsPromise;
+};
+
 /**
  * Format a XJson string input as parsed JSON. Replaces the invalid characters
  *  with a placeholder, parses the new string in a JSON format with the expected
@@ -74,7 +90,10 @@ const formatXJsonString = (input: string) => {
   return formattedJsonString;
 };
 
-export const hasOddQuoteCount = (text: string) => hasUnclosedQuote(text);
+export const hasOddQuoteCount = (text: string) => {
+  const matches = text.match(/(?<!\\)"/g);
+  return ((matches?.length ?? 0) % 2) === 1;
+};
 
 export const buildProcessorInsertText = (
   name: string,
@@ -96,15 +115,6 @@ export const buildProcessorInsertText = (
   return insertText;
 };
 
-const ALLOWED_TOKEN_PATHS: string[][] = [
-  ['{', 'processors', '[', '{'],
-  ['{', 'processors', '[', '{', 'on_failure', '[', '{'],
-];
-
-const tokensEndWithPath = (tokens: string[], path: string[]) =>
-  tokens.length >= path.length &&
-  path.every((value, index) => tokens[tokens.length - path.length + index] === value);
-
 export const shouldSuggestProcessorKey = (
   lineBeforeCursor: string,
   nearbyContextBeforeCursor: string
@@ -114,31 +124,27 @@ export const shouldSuggestProcessorKey = (
     return false;
   }
 
-  if (hasUnclosedQuote(lineBeforeCursor)) {
-    return false;
-  }
-
   const tripleQuoteCount = (nearbyContextBeforeCursor.match(/"""/g) || []).length;
   if (tripleQuoteCount % 2 === 1) {
     return false;
   }
 
-  const lastQuoteIndex = trimmedLine.lastIndexOf('"');
-  const prevChar = lastQuoteIndex > 0 ? trimmedLine[lastQuoteIndex - 1] : '';
-  if (!['{', ',', '[', ''].includes(prevChar)) {
-    return false;
+  const lastQuoteGlobal = nearbyContextBeforeCursor.lastIndexOf('"');
+  if (lastQuoteGlobal === -1) return false;
+  let i = lastQuoteGlobal - 1;
+  let prev: string | null = null;
+  while (i >= 0) {
+    const ch = nearbyContextBeforeCursor[i];
+    if (!/\s/.test(ch)) {
+      prev = ch;
+      break;
+    }
+    i--;
   }
 
-  const lastColon = trimmedLine.lastIndexOf(':');
-  if (lastColon > lastQuoteIndex) {
-    return false;
-  }
+  if (prev === ':') return false;
+  if (prev === '[') return false;
+  if (prev === '{' || prev === ',' || prev === null) return true;
 
-  const wrapped = `{"processors": ${nearbyContextBeforeCursor}}`;
-  try {
-    const tokens = parseBody(wrapped);
-    return ALLOWED_TOKEN_PATHS.some((path) => tokensEndWithPath(tokens, path));
-  } catch {
-    return false;
-  }
+  return false;
 };

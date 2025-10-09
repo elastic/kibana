@@ -8,17 +8,11 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { JsonValue } from '@kbn/utility-types';
 
 export interface EsSpecResponse {
   es?: {
     endpoints?: Record<string, unknown>;
   };
-}
-
-export interface ProcessorSuggestion {
-  name: string;
-  template?: JsonValue;
 }
 
 export class ConsoleSpecClient {
@@ -48,27 +42,4 @@ export class ConsoleSpecClient {
     return this.esSpecPromise;
   }
 
-  public async getIngestProcessorSuggestions(): Promise<ProcessorSuggestion[]> {
-    const res = await this.getEsSpec();
-    const endpoints = res?.es?.endpoints ?? {};
-    const ingest = endpoints['ingest.put_pipeline'] as
-      | {
-          data_autocomplete_rules?: {
-            processors?: Array<{ __one_of?: Array<Record<string, { __template?: JsonValue }>> }>;
-          };
-        }
-      | undefined;
-    const oneOf = ingest?.data_autocomplete_rules?.processors?.[0]?.__one_of ?? [];
-    if (!Array.isArray(oneOf) || oneOf.length === 0) {
-      return [];
-    }
-    return oneOf
-      .map((entry) => {
-        const name = Object.keys(entry)[0];
-        if (!name) return undefined;
-        const def = (entry as Record<string, { __template?: JsonValue }>)[name];
-        return { name, template: def?.__template } as ProcessorSuggestion | undefined;
-      })
-      .filter((s): s is ProcessorSuggestion => Boolean(s));
-  }
 }

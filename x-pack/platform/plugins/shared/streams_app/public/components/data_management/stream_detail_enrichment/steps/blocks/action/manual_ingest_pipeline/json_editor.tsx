@@ -14,23 +14,21 @@ import { i18n } from '@kbn/i18n';
 import type { ElasticsearchProcessorType } from '@kbn/streams-schema';
 import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JsonValue } from '@kbn/utility-types';
 import { useKibana } from '../../../../../../../hooks/use_kibana';
 import type { ProcessorFormState } from '../../../../types';
+import type { ProcessorSuggestion } from '@kbn/streams-plugin/common';
 import {
   serializeXJson,
   parseXJsonOrString,
   buildProcessorInsertText,
   hasOddQuoteCount,
   shouldSuggestProcessorKey,
+  fetchProcessorSuggestions,
 } from '../../../../helpers';
 
 export const JsonEditor = () => {
   const {
-    core: { docLinks },
-    dependencies: {
-      start: { console: consoleStart },
-    },
+    core: { docLinks, http },
   } = useKibana();
   const { field, fieldState } = useController<ProcessorFormState, 'processors'>({
     name: 'processors',
@@ -87,16 +85,7 @@ export const JsonEditor = () => {
     field.onChange(parseXJsonOrString(newValue));
   };
 
-  const specClient = consoleStart?.specClient;
-
   const suggestionProvider = React.useMemo<monaco.languages.CompletionItemProvider>(() => {
-    if (!specClient) {
-      return {
-        triggerCharacters: ['"'],
-        provideCompletionItems: () => ({ suggestions: [] }),
-      };
-    }
-
     const isProcessorTypeKeyContext = (
       model: monaco.editor.ITextModel,
       position: monaco.Position
@@ -148,9 +137,9 @@ export const JsonEditor = () => {
         });
         const alreadyOpenedQuote = hasOddQuoteCount(linePrefix);
 
-        let terms: Array<{ name: string; template?: JsonValue }> = [];
+        let terms: ProcessorSuggestion[] = [];
         try {
-          terms = await specClient.getIngestProcessorSuggestions();
+          terms = await fetchProcessorSuggestions(http);
         } catch {
           terms = [];
         }
@@ -160,17 +149,18 @@ export const JsonEditor = () => {
           const insertText = buildProcessorInsertText(label, t.template, alreadyOpenedQuote);
           return {
             label,
-            kind: monaco.languages.CompletionItemKind.Constant,
-            detail: 'API',
+            kind: monaco.languages.CompletionItemKind.Property,
+            detail: 'Processor',
             insertText,
             range,
+            sortText: label,
             insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           };
         });
         return { suggestions };
       },
     };
-  }, [specClient]);
+  }, [http]);
 
   React.useEffect(() => {
     const disposable = monaco.languages.registerCompletionItemProvider('xjson', suggestionProvider);

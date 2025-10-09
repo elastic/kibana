@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonValue } from '@kbn/utility-types';
-
 export interface ConsoleSpecClientContract {
   getEsSpec: () => Promise<{ es?: { endpoints?: Record<string, unknown> } }>;
-  getIngestProcessorSuggestions: () => Promise<Array<{ name: string; template?: JsonValue }>>;
 }

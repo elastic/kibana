@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SemVer } from 'semver';
 
@@ -83,11 +83,15 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     });
   }
 
-  start() {
+  start(_core: CoreStart, _plugins: {}): ConsoleStart {
     const {
       autocompleteDefinitions: { endpointsAvailability: endpointsAvailability },
     } = this.ctx.config.get<ConsoleConfig>();
     this.specDefinitionsService.start({ endpointsAvailability });
+
+    return {
+      getSpecJson: () => this.specDefinitionsService.asJson(),
+    };
   }
 
   stop() {

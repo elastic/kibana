@@ -9,7 +9,7 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-export type { ConsoleSetup, ConsoleStart } from './types';
+export type { ConsoleSetup, ConsoleStart, SpecDefinitionsJson } from './types';
 
 export { config } from './config';
 

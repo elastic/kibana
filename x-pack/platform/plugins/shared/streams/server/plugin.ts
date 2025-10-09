@@ -43,6 +43,7 @@ import type {
 } from './types';
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { SystemService } from './lib/streams/system/system_service';
+import { ProcessorSuggestionsService } from './lib/streams/ingest/processor_suggestions_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -69,11 +70,15 @@ export class StreamsPlugin
   private isDev: boolean;
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
+  private processorSuggestionsService: ProcessorSuggestionsService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.processorSuggestionsService = new ProcessorSuggestionsService({
+      logger: this.logger.get('processor_suggestions'),
+    });
   }
 
   public setup(
@@ -166,6 +171,7 @@ export class StreamsPlugin
         systems: systemService,
         server: this.server,
         telemetry: this.ebtTelemetryService.getClient(),
+        processorSuggestions: this.processorSuggestionsService,
         getScopedClients: async ({
           request,
         }: {
@@ -239,6 +245,8 @@ export class StreamsPlugin
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
       this.server.taskManager = plugins.taskManager;
     }
+
+    this.processorSuggestionsService.setConsoleStart(plugins.console);
 
     return {};
   }

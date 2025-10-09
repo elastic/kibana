@@ -21,6 +21,8 @@ import type { StreamsClient } from '../lib/streams/client';
 import type { EbtTelemetryClient } from '../lib/telemetry';
 import type { StreamsServer } from '../types';
 import type { SystemClient } from '../lib/streams/system/system_client';
+import type { SystemService } from '../lib/streams/system/system_service';
+import type { ProcessorSuggestionsService } from '../lib/streams/ingest/processor_suggestions_service';
 
 type GetScopedClients = ({
   request,
@@ -44,9 +46,11 @@ export interface RouteHandlerScopedClients {
 
 export interface RouteDependencies {
   assets: AssetService;
+  systems: SystemService;
   server: StreamsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
+  processorSuggestions: ProcessorSuggestionsService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;
