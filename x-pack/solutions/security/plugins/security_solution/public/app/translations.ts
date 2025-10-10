@@ -65,13 +65,6 @@ export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
   }
 );
 
-export const ENTITY_ANALYTICS_OVERVIEW = i18n.translate(
-  'xpack.securitySolution.navigation.entityAnalytics.overview',
-  {
-    defaultMessage: 'Entity Analytics overview',
-  }
-);
-
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
@@ -154,9 +147,6 @@ export const CONFIGURATIONS = i18n.translate('xpack.securitySolution.navigation.
   defaultMessage: 'Configurations',
 });
 
-export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {
-  defaultMessage: 'Administration',
-});
 export const ENDPOINTS = i18n.translate('xpack.securitySolution.search.administration.endpoints', {
   defaultMessage: 'Endpoints',
 });
