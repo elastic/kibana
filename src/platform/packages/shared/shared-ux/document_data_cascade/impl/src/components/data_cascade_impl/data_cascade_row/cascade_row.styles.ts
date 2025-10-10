@@ -25,16 +25,9 @@ export const styles = (
     position: 'absolute',
     width: '100%',
     backgroundColor: euiTheme.colors.backgroundBasePlain,
-    borderWidth: `0 ${euiTheme.border.width.thin} ${euiTheme.border.width.thin} ${euiTheme.border.width.thin}`,
+    borderWidth: `0 ${euiTheme.border.width.thin} ${euiTheme.border.width.thin} 0`,
     borderStyle: 'solid',
     borderColor: euiTheme.border.color,
-    display: 'none',
-
-    // make sticky header visible only when the parent has the data attribute
-    '[data-scrolled="true"] &': {
-      // TODO: add transition animation
-      display: 'initial',
-    },
   }),
   rowWrapper: css({
     display: 'flex',
@@ -55,24 +48,10 @@ export const styles = (
       width: '100%',
       height: '100%',
       zIndex: -1,
-      borderLeft: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
       borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
     },
-    [`&[data-row-type="${rootRowAttribute}"]:before`]: {
+    [`&[data-row-type="${rootRowAttribute}"]:not(:first-of-type):before`]: {
       borderTop: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-    },
-    // only apply rounded corner to first row when not scrolled since setting the curved inset border is handled by the header when scrolled
-    [`[data-scrolled="false"] + * &[data-row-type="${rootRowAttribute}"]:first-of-type:before`]: {
-      borderTopLeftRadius: euiTheme.border.radius.small,
-      borderTopRightRadius: euiTheme.border.radius.small,
-    },
-    [`[data-scrolled="true"] + * &[data-row-type="${rootRowAttribute}"]:first-of-type:before`]: {
-      // Remove border radius when scrolled so transition is smooth with the header border radius
-      borderTop: 'unset',
-    },
-    [`&[data-row-type="${rootRowAttribute}"]:last-of-type:not([data-active-sticky]):before`]: {
-      borderBottomLeftRadius: euiTheme.border.radius.small,
-      borderBottomRightRadius: euiTheme.border.radius.small,
     },
     [`&[data-row-type="${rootRowAttribute}"]:last-of-type:before`]: {
       borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
