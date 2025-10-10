@@ -110,7 +110,8 @@ export const getTableColumns = (
   isOnReducedSpaceLayout: boolean,
   actions: Array<CustomItemAction<QueryHistoryItem>>,
   isStarredTab = false,
-  starredQueriesService?: EsqlStarredQueriesService
+  starredQueriesService?: EsqlStarredQueriesService,
+  starredQueries?: StarredQueryItem[] // Add this parameter
 ): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
   const columnsArray = [
     {
@@ -251,6 +252,18 @@ export function QueryList({
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [isDiscardQueryModalVisible, setIsDiscardQueryModalVisible] = useState(false);
+  const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
+
+  // Subscribe to starred queries changes to force re-render
+  useEffect(() => {
+    if (!starredQueriesService) return;
+
+    const subscription = starredQueriesService.queries$.subscribe((nextQueries) => {
+      setStarredQueries(nextQueries);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [starredQueriesService]);
 
   // Add simple sorting state that won't interfere with pagination
   const sorting = useMemo(
@@ -339,9 +352,17 @@ export function QueryList({
       isOnReducedSpaceLayout,
       actions,
       isStarredTab,
-      starredQueriesService
+      starredQueriesService,
+      starredQueries // Pass starredQueries to force re-render when they change
     );
-  }, [containerWidth, isOnReducedSpaceLayout, actions, isStarredTab, starredQueriesService]);
+  }, [
+    containerWidth,
+    isOnReducedSpaceLayout,
+    actions,
+    isStarredTab,
+    starredQueriesService,
+    starredQueries,
+  ]);
 
   const { euiTheme } = theme;
   const extraStyling = isOnReducedSpaceLayout ? getReducedSpaceStyling() : '';
