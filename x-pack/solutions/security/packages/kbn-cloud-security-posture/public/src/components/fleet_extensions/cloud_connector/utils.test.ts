@@ -17,7 +17,7 @@ import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
 } from '@kbn/fleet-plugin/common';
-import { type CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
+import { type CloudConnectorCredentials } from './types';
 
 describe('updateInputVarsWithCredentials', () => {
   let mockInputVars: PackagePolicyConfigRecord;

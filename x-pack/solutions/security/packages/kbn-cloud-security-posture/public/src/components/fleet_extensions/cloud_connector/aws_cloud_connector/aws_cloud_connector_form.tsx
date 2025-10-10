@@ -15,6 +15,7 @@ import {
   updatePolicyWithAwsCloudConnectorCredentials,
   getCloudConnectorRemoteRoleTemplate,
   updateInputVarsWithCredentials,
+  isAwsCredentials,
 } from '../utils';
 import { AWS_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
@@ -82,7 +83,7 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           packageInfo={packageInfo}
           onChange={(key, value) => {
             // Update local credentials state if available
-            if (credentials) {
+            if (credentials && isAwsCredentials(credentials) && setCredentials) {
               const updatedCredentials = { ...credentials };
               if (
                 key === AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN ||

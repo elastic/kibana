@@ -12,13 +12,7 @@ import { EuiText } from '@elastic/eui';
 import { AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import type { CloudConnectorField } from '../types';
-
-// Azure Cloud Connector field names
-const AZURE_CLOUD_CONNECTOR_FIELD_NAMES = {
-  TENANT_ID: 'azure.credentials.tenant_id',
-  CLIENT_ID: 'azure.credentials.client_id',
-  CLOUD_CONNECTOR_ID: 'azure_credentials_cloud_connector_id',
-} as const;
+import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 
 const AZURE_CLOUD_CONNECTOR_FIELD_LABELS = {
   tenant_id: i18n.translate(
@@ -54,7 +48,7 @@ interface AzureCloudConnectorOptions {
 const FIELD_SEQUENCE = [
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID,
   AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID,
-  AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLOUD_CONNECTOR_ID,
+  AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
 ] as const;
 
 export const getAzureCloudConnectorsCredentialsFormOptions = (
@@ -64,9 +58,7 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (
     return;
   }
 
-  const fields: CloudConnectorField[] = [];
-
-  // Create a map of all available fields
+  const fields: CloudConnectorField[] = []; // Create a map of all available fields
   const availableFields = new Map<string, AzureCloudConnectorOptions>();
 
   if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]) {
@@ -91,13 +83,14 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (
     });
   }
 
-  if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLOUD_CONNECTOR_ID]) {
-    availableFields.set(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLOUD_CONNECTOR_ID, {
-      id: AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLOUD_CONNECTOR_ID,
+  if (inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]) {
+    availableFields.set(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID, {
+      id: AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
       label: AZURE_CLOUD_CONNECTOR_FIELD_LABELS.cloud_connector_id,
       type: 'text' as const,
       dataTestSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID,
-      value: inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLOUD_CONNECTOR_ID].value,
+      value:
+        inputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID].value,
     });
   }
 

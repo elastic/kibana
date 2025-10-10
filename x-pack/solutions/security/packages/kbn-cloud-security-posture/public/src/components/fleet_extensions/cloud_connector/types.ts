@@ -13,12 +13,30 @@ import type {
 } from '@kbn/fleet-plugin/common';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CloudConnectorSecretVar } from '@kbn/fleet-plugin/public';
+import type { CloudConnectorSecretReference } from '@kbn/fleet-plugin/public/types';
 import type { CloudConnectorRoleArn } from '@kbn/fleet-plugin/common/types';
 import type { UpdatePolicy } from '../types';
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
-import type { CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
 
 export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER;
+
+// Cloud Connector Credential Types
+export interface AwsCloudConnectorCredentials {
+  roleArn?: string;
+  externalId?: string | CloudConnectorSecretReference;
+  cloudConnectorId?: string;
+}
+
+export interface AzureCloudConnectorCredentials {
+  tenantId?: string;
+  clientId?: string;
+  azure_credentials_cloud_connector_id?: string;
+}
+
+// Union type for backwards compatibility
+export type CloudConnectorCredentials =
+  | AwsCloudConnectorCredentials
+  | AzureCloudConnectorCredentials;
 
 export interface CloudConnectorConfig {
   provider: CloudProviders;
