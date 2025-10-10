@@ -100,10 +100,3 @@ export const NAVIGATION_AUTHENTICATIONS_TITLE = i18n.translate(
     defaultMessage: 'Authentications',
   }
 );
-
-export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(
-  'xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData',
-  {
-    defaultMessage: 'Failed to query authentications data',
-  }
-);
