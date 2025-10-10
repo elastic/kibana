@@ -23,10 +23,16 @@ fileGroups:
     - scripts/**/*
     - '!target/**/*'
 tasks:
+  yarn-help:
+    command: yarn
+    args:
+      - --help
   build-webpack:
     command: yarn
     args:
       - build
+    deps:
+      - '~:yarn-help'
     inputs:
       - '@group(src)'
       - webpack.config.js
