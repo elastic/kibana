@@ -14,7 +14,6 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
   describe('applyFilterlist', () => {
     const mockSalt = 'test-salt';
     let publicKey: string;
-    let privateKey: string;
 
     beforeAll(() => {
       const keyPair = generateKeyPairSync('rsa', {
@@ -29,7 +28,6 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
         },
       });
       publicKey = keyPair.publicKey;
-      privateKey = keyPair.privateKey;
     });
 
     beforeEach(() => {

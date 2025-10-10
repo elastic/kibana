@@ -15,7 +15,6 @@ import {
 
 describe('Security Solution - Health Diagnostic Encryption', () => {
   let publicKey: string;
-  let privateKey: string;
 
   beforeAll(() => {
     const keyPair = generateKeyPairSync('rsa', {
@@ -30,7 +29,6 @@ describe('Security Solution - Health Diagnostic Encryption', () => {
       },
     });
     publicKey = keyPair.publicKey;
-    privateKey = keyPair.privateKey;
   });
 
   describe('generateDEK', () => {
