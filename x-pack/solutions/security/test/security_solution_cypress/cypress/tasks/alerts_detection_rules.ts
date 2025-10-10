@@ -15,6 +15,8 @@ import {
   RULE_SWITCH,
   RULE_SWITCH_LOADER,
   RULES_MANAGEMENT_TABLE,
+  RULES_MONITORING_TABLE,
+  RULES_UPDATES_TABLE,
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
   DUPLICATE_RULE_ACTION_BTN,
@@ -59,10 +61,6 @@ import {
   MANUAL_RULE_RUN_ACTION_BTN,
   RULE_DETAILS_REVERT_RULE_BTN,
   TOASTER_BODY,
-} from '../screens/alerts_detection_rules';
-import type {
-  RULES_MONITORING_TABLE,
-  RULES_UPDATES_TABLE,
 } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
 import {
@@ -174,14 +172,18 @@ export const exportRule = (name: string) => {
 export const filterBySearchTerm = (term: string) => {
   cy.log(`Filter rules by search term: "${term}"`);
   cy.get(RULE_SEARCH_FIELD).type(term, { force: true });
-  cy.get(RULE_SEARCH_FIELD).trigger('search', { waitForAnimations: true });
+  withRulesTableRefresh(() => {
+    cy.get(RULE_SEARCH_FIELD).trigger('search', { waitForAnimations: true });
+  });
 };
 
 export const filterByTags = (tags: string[]) => {
   cy.get(RULES_TAGS_FILTER_BTN).click();
 
   for (const tag of tags) {
-    cy.get(RULES_TAGS_FILTER_POPOVER).contains(tag).click();
+    withRulesTableRefresh(() => {
+      cy.get(RULES_TAGS_FILTER_POPOVER).contains(tag).click();
+    });
   }
 
   // close the popover
@@ -212,22 +214,69 @@ export const waitForRuleExecution = (name: string) => {
   });
 };
 
+/**
+ * Executes an action in the rules table and waits for the table to refresh.
+ *
+ * This helper ensures that actions which trigger a table refresh (such as filtering, toggling enabled/disabled rules,
+ * etc.) complete successfully by verifying that the table's `data-last-updated` timestamp has been updated.
+ * This helps prevent flaky tests by ensuring the table has fully refreshed before subsequent
+ * assertions or actions are performed.
+ *
+ * @param action – A callback function that triggers the table refresh (e.g., clicking a filter button)
+ *
+ * @example
+ * withRulesTableRefresh(() => cy.get(ELASTIC_RULES_BTN).click());
+ */
+export const withRulesTableRefresh = (action: () => void) => {
+  cy.get(`${RULES_MANAGEMENT_TABLE}, ${RULES_MONITORING_TABLE}, ${RULES_UPDATES_TABLE}`)
+    .first()
+    .as('currentRulesTable');
+
+  cy.get('@currentRulesTable')
+    // Grab the timestamp before the action
+    .invoke('attr', 'data-last-updated')
+    .then((timestampBeforeAction) => {
+      // Execute the action that triggers table refresh
+      action();
+
+      // Wait for the timestamp to be GREATER than initial (this will retry until it passes or times out)
+      cy.get('@currentRulesTable')
+        .invoke('attr', 'data-last-updated')
+        .should((timestampAfterAction) => {
+          expect(Number(timestampAfterAction)).to.be.greaterThan(
+            Number(timestampBeforeAction),
+            `Expected timestamp after action to be greater than timestamp before action. Timestamp before action: ${timestampBeforeAction}, timestamp after action: ${timestampAfterAction}.`
+          );
+        });
+    });
+};
+
 export const filterByElasticRules = () => {
-  cy.get(ELASTIC_RULES_BTN).click();
-  waitForRulesTableToBeRefreshed();
+  withRulesTableRefresh(() => {
+    cy.get(ELASTIC_RULES_BTN).click();
+    cy.get(`${ELASTIC_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+  });
 };
 
 export const filterByCustomRules = () => {
-  cy.get(CUSTOM_RULES_BTN).click();
-  waitForRulesTableToBeRefreshed();
+  withRulesTableRefresh(() => {
+    cy.get(CUSTOM_RULES_BTN).click();
+    cy.get(`${CUSTOM_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+  });
 };
 
 export const filterByEnabledRules = () => {
-  cy.get(ENABLED_RULES_BTN).click();
+  withRulesTableRefresh(() => {
+    cy.get(ENABLED_RULES_BTN).click();
+    cy.get(`${ENABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+  });
 };
 
 export const filterByDisabledRules = () => {
-  cy.get(DISABLED_RULES_BTN).click();
+  withRulesTableRefresh(() => {
+    cy.get(DISABLED_RULES_BTN).click();
+    cy.get(`${DISABLED_RULES_BTN}.euiFilterButton-hasActiveFilters`).should('exist');
+  });
 };
 
 export const goToRuleDetailsOf = (ruleName: string) => {
@@ -293,11 +342,6 @@ export const confirmRulesDelete = () => {
 export const waitForRulesTableToShow = () => {
   // Wait up to 5 minutes for the table to show up as in CI containers this can be very slow
   cy.get(RULES_MANAGEMENT_TABLE, { timeout: 300000 }).should('exist');
-};
-
-export const waitForRulesTableToBeRefreshed = () => {
-  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('exist');
-  cy.get(RULES_TABLE_REFRESH_INDICATOR).should('not.exist');
 };
 
 export const waitForPrebuiltDetectionRulesToBeLoaded = () => {

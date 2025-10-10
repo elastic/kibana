@@ -96,6 +96,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       pagination,
       selectedRuleIds,
       sortingOptions,
+      lastUpdated,
     },
     actions: { setIsAllSelected, setPage, setPerPage, setSelectedRuleIds, setSortingOptions },
   } = rulesTableContext;
@@ -394,6 +395,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
                 direction: sortingOptions.order,
               },
             }}
+            data-last-updated={lastUpdated}
             {...tableProps}
           />
         </>
