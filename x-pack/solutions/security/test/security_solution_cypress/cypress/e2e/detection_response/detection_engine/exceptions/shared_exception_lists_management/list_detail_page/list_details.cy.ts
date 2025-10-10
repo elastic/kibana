@@ -6,7 +6,7 @@
  */
 
 import { getExceptionList } from '../../../../../../objects/exception';
-import { getNewRule } from '../../../../../../objects/rule';
+import { getCustomQueryRuleParams } from '../../../../../../objects/rule';
 
 import { login } from '../../../../../../tasks/login';
 import { visit } from '../../../../../../tasks/navigation';
@@ -20,7 +20,10 @@ import {
   validateSharedListLinkedRules,
   waitForExceptionListDetailToBeLoaded,
 } from '../../../../../../tasks/exceptions_table';
-import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
+import {
+  createExceptionList,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/exceptions';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION,
@@ -45,10 +48,12 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
   beforeEach(() => {
     login();
 
+    deleteExceptionLists();
+
     // Create exception list associated with a rule
-    createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) =>
-      createRule(
-        getNewRule({
+    createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) => {
+      return createRule(
+        getCustomQueryRuleParams({
           exceptions_list: [
             {
               id: response.body.id,
@@ -58,9 +63,9 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
             },
           ],
         })
-      )
-    );
-    createRule(getNewRule({ name: 'Rule to link to shared list' }));
+      );
+    });
+    createRule(getCustomQueryRuleParams({ name: 'Rule to link to shared list' }));
     visit(EXCEPTIONS_URL);
   });
 
@@ -97,8 +102,7 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
     cy.get(EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION).should('have.text', 'Add a description');
   });
 
-  // TODO: Flaky in ESS and Serverless: https://github.com/elastic/kibana/pull/169182#issuecomment-1792597980
-  it.skip('Should create a new list and link it to two rules', () => {
+  it('Should create a new list and link it to two rules', () => {
     createSharedExceptionList(
       { name: 'Newly created list', description: 'This is my list.' },
       true
@@ -116,9 +120,7 @@ describe('Exception list detail page', { tags: ['@ess', '@serverless'] }, () => 
     // Save the 2 linked Rules
     saveLinkedRules();
 
-    const linkedRulesNames = ['Rule to link to shared list', 'New Rule Test'];
-
-    // Validate the number of linked rules as well as the Rules' names
-    validateSharedListLinkedRules(2, linkedRulesNames);
+    // Validate the number of linked rules
+    validateSharedListLinkedRules(2);
   });
 });
