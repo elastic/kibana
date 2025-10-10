@@ -8,15 +8,15 @@
  */
 
 import type { Writable } from '@kbn/utility-types';
-import type { DashboardState } from '../../../../common';
+import { DashboardOptions } from '../../../../server/content_management';
 
-export function extractOptions(state: { [key: string]: unknown }): Pick<DashboardState, 'options'> {
+export function extractOptions(state: { [key: string]: unknown }): Partial<DashboardOptions> {
   if (typeof state.options === 'object') {
-    return { options: state.options as DashboardState['options'] };
+    return state.options as Partial<DashboardOptions>;
   }
 
   // <9.3 Options state spread directly into DashboardState
-  const options: Partial<Writable<DashboardState['options']>> = {};
+  const options: Partial<Writable<DashboardOptions>> = {};
 
   if (typeof state.hidePanelTitles === 'boolean') {
     options.hidePanelTitles = state.hidePanelTitles;
@@ -38,5 +38,5 @@ export function extractOptions(state: { [key: string]: unknown }): Pick<Dashboar
     options.syncCursor = state.syncCursor;
   }
 
-  return { options };
+  return options;
 }

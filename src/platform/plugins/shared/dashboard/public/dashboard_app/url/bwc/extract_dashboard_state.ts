@@ -46,10 +46,12 @@ export function extractDashboardState(
     if (typeof stateAsObject.viewMode === 'string')
       dashboardState.viewMode = stateAsObject.viewMode as ViewMode;
 
+    const options = extractOptions(stateAsObject);
+
     dashboardState = {
       ...dashboardState,
       ...extractSearchState(stateAsObject),
-      ...extractOptions(stateAsObject),
+      ...(Object.keys(options).length && { options }),
     };
 
     const { panels, savedObjectReferences } = extractPanelsState(stateAsObject);
