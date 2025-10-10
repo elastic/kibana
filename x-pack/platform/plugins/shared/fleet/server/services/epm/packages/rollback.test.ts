@@ -14,8 +14,9 @@ import { rollbackInstallation } from './rollback';
 
 jest.mock('../..', () => ({
   appContextService: {
-    getLogger: jest.fn().mockReturnValue({ info: jest.fn() } as any),
+    getLogger: jest.fn().mockReturnValue({ info: jest.fn(), debug: jest.fn() } as any),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
+    getTelemetryEventsSender: jest.fn(),
   },
   packagePolicyService: {
     getPackagePolicySavedObjects: jest.fn(),
