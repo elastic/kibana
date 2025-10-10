@@ -56,7 +56,7 @@ export const createStandaloneConsoleParser = () => {
 };
 
 // Interface that matches ConsoleParsedRequestsProvider from @kbn/monaco
-interface ConsoleParsedRequestsProvider {
+export interface ConsoleParsedRequestsProvider {
   getRequests(): Promise<ParsedRequest[]>;
   getErrors(): Promise<ParseError[]>;
 }
