@@ -61,8 +61,7 @@ import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
-import { CoreInjectionService } from '@kbn/core-di-internal';
-import { http as httpModule } from '@kbn/core-di-server-internal';
+import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -410,9 +409,6 @@ export class Server {
       injection: injectionSetup,
       dataStreams: dataStreamsSetup,
     };
-
-    const container = injectionSetup.getContainer();
-    container.loadSync(httpModule);
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;

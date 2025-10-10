@@ -8,15 +8,16 @@
  */
 
 import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createSerializerMock = () => {
-  const mock: jest.Mocked<ISavedObjectsSerializer> = {
+  const mock: jest.Mocked<ISavedObjectsSerializer> = lazyObject({
     isRawSavedObject: jest.fn(),
     rawToSavedObject: jest.fn(),
     savedObjectToRaw: jest.fn(),
     generateRawId: jest.fn(),
     generateRawLegacyUrlAliasId: jest.fn(),
-  };
+  });
   return mock;
 };
 

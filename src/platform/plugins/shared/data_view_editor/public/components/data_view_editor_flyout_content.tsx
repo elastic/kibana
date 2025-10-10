@@ -18,7 +18,10 @@ import {
   EuiLink,
   EuiSkeletonRectangle,
   EuiSkeletonTitle,
+  EuiCallOut,
   type UseEuiTheme,
+  useIsWithinBreakpoints,
+  useEuiTheme,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -71,6 +74,8 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
+  isDuplicating: boolean;
+  onDuplicate?: () => void;
   getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
@@ -91,14 +96,22 @@ const IndexPatternEditorFlyoutContentComponent = ({
   showManagementLink,
   getDataViewHelpText,
   dataViewEditorService,
+  onDuplicate,
+  isDuplicating,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
+  const { euiTheme } = useEuiTheme();
+  const isMobile = useIsWithinBreakpoints(['s', 'xs']);
 
   const {
     services: { application, dataViews, uiSettings, overlays, docLinks },
   } = useKibana<DataViewEditorContext>();
 
   const canSave = dataViews.getCanSaveSync();
+  const isManaged = !!editData?.managed;
+  // onDuplicate is only provided when editing an existing data view
+  // if onDuplicate is undefined we are duplicating a new data view
+  const isEditingExisting = editData && !isDuplicating;
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
@@ -111,8 +124,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
       ...(editData
         ? {
             title: editData.getIndexPattern(),
-            id: editData.id,
-            name: editData.name,
+            id: isDuplicating ? undefined : editData.id,
+            name: isDuplicating ? undefined : editData.name,
             allowHidden: editData.getAllowHidden(),
             ...(editData.timeFieldName === noTimeFieldValue
               ? { timestampField: { label: noTimeFieldLabel, value: noTimeFieldValue } }
@@ -148,7 +161,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         };
       }
 
-      if (editData && editData.getIndexPattern() !== formData.title) {
+      if (isEditingExisting && editData.getIndexPattern() !== formData.title) {
         await editDataViewModal({
           dataViewName: formData.name || formData.title,
           overlays,
@@ -180,6 +193,15 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const rollupIndex = useObservable(dataViewEditorService.rollupIndex$);
   const rollupCaps = useObservable(dataViewEditorService.rollupCaps$);
   const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
+
+  const namesNotAllowed = useMemo(() => {
+    // When duplicating a data view, add the existing name
+    // to the not allowed names list
+    if (isDuplicating && editData) {
+      return [editData.name, ...(existingDataViewNames || [])];
+    }
+    return existingDataViewNames || [];
+  }, [existingDataViewNames, isDuplicating, editData]);
 
   useDebounce(
     () => {
@@ -261,14 +283,48 @@ const IndexPatternEditorFlyoutContentComponent = ({
     <></>
   );
 
+  const FlyoutEditorFooter = () => (
+    <Footer
+      onCancel={onCancel}
+      onSubmit={async (adhoc?: boolean) => {
+        const formData = form.getFormData();
+        if (!formData.name) {
+          form.updateFieldValues({ name: formData.title });
+          await form.getFields().name.validate();
+        }
+        // Ensures timestamp field is validated against current set of options
+        form.validateFields(['timestampField']);
+        form.setFieldValue('isAdHoc', adhoc || false);
+        form.submit();
+      }}
+      submitDisabled={(form.isSubmitted && !form.isValid) || form.isSubmitting}
+      submittingType={
+        form.isSubmitting
+          ? form.getFormData().isAdHoc
+            ? SubmittingType.savingAsAdHoc
+            : SubmittingType.persisting
+          : undefined
+      }
+      hasEditData={!!editData}
+      isPersisted={Boolean(editData && editData.isPersisted())}
+      allowAdHoc={allowAdHoc}
+      canSave={canSave}
+      isManaged={isManaged}
+      onDuplicate={onDuplicate}
+      isDuplicating={isDuplicating}
+    />
+  );
+
   return (
-    <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
+    <FlyoutPanels.Group flyoutClassName="indexPatternEditorFlyout" maxWidth={1180}>
       <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
         <FlyoutPanels.Content>
           <EuiTitle data-test-subj="flyoutTitle">
-            <h2 id="dataViewEditorFlyoutTitle">{editData ? editorTitleEditMode : editorTitle}</h2>
+            <h2 id="dataViewEditorFlyoutTitle">
+              {isEditingExisting ? editorTitleEditMode : editorTitle}
+            </h2>
           </EuiTitle>
-          {showManagementLink && editData && editData.id && (
+          {showManagementLink && isEditingExisting && editData && editData.id && (
             <EuiLink
               href={application.getUrlForApp('management', {
                 path: `/kibana/dataViews/dataView/${editData.id}`,
@@ -278,6 +334,18 @@ const IndexPatternEditorFlyoutContentComponent = ({
                 defaultMessage: 'Manage settings and view field details',
               })}
             </EuiLink>
+          )}
+          {isManaged && (
+            <EuiCallOut
+              title={i18n.translate('indexPatternEditor.managedDataViewCalloutMessage', {
+                defaultMessage:
+                  "You can't edit managed data views. Instead, you can duplicate the data view and make changes to your newly created copy.",
+              })}
+              color="primary"
+              iconType="info"
+              size="s"
+              css={{ marginTop: euiTheme.base }}
+            />
           )}
           <Form
             form={form}
@@ -292,7 +360,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             <EuiSpacer size="l" />
             <EuiFlexGroup>
               <EuiFlexItem>
-                <NameField namesNotAllowed={existingDataViewNames || []} />
+                <NameField namesNotAllowed={namesNotAllowed} disabled={isManaged} />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="l" />
@@ -306,6 +374,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
                     dataViewEditorService.indexPatternValidationProvider
                   }
                   titleHelpText={titleHelpText}
+                  disabled={isManaged}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -316,12 +385,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
                   options$={dataViewEditorService.timestampFieldOptions$}
                   isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
                   matchedIndices$={dataViewEditorService.matchedIndices$}
+                  disabled={isManaged}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
             <AdvancedParamsContent
-              disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
-              disableId={!!editData}
+              disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP || isManaged}
+              disableId={isEditingExisting || isManaged}
               onAllowHiddenChange={() => {
                 form.getFields().title.validate();
               }}
@@ -329,32 +399,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             />
           </Form>
         </FlyoutPanels.Content>
-        <Footer
-          onCancel={onCancel}
-          onSubmit={async (adhoc?: boolean) => {
-            const formData = form.getFormData();
-            if (!formData.name) {
-              form.updateFieldValues({ name: formData.title });
-              await form.getFields().name.validate();
-            }
-            // Ensures timestamp field is validated against current set of options
-            form.validateFields(['timestampField']);
-            form.setFieldValue('isAdHoc', adhoc || false);
-            form.submit();
-          }}
-          submitDisabled={(form.isSubmitted && !form.isValid) || form.isSubmitting}
-          submittingType={
-            form.isSubmitting
-              ? form.getFormData().isAdHoc
-                ? SubmittingType.savingAsAdHoc
-                : SubmittingType.persisting
-              : undefined
-          }
-          isEdit={!!editData}
-          isPersisted={Boolean(editData && editData.isPersisted())}
-          allowAdHoc={allowAdHoc}
-          canSave={canSave}
-        />
+        {!isMobile && <FlyoutEditorFooter />}
       </FlyoutPanels.Item>
       <FlyoutPanels.Item>
         {isLoadingSources ? (
@@ -368,6 +413,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           />
         )}
       </FlyoutPanels.Item>
+      {isMobile && <FlyoutEditorFooter />}
     </FlyoutPanels.Group>
   );
 };

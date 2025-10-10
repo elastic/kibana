@@ -704,7 +704,7 @@
               "\nOverall result of this test group"
             ],
             "signature": [
-              "\"skip\" | \"fail\" | \"pass\""
+              "\"skip\" | \"pass\" | \"fail\""
             ],
             "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
@@ -811,7 +811,7 @@
               "\n\"fail\", \"pass\" or \"skip\", the result of the tests"
             ],
             "signature": [
-              "\"skip\" | \"fail\" | \"pass\""
+              "\"skip\" | \"pass\" | \"fail\""
             ],
             "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
             "deprecated": false,
@@ -1109,7 +1109,7 @@
         "label": "CiStatsTestResult",
         "description": [],
         "signature": [
-          "\"skip\" | \"fail\" | \"pass\""
+          "\"skip\" | \"pass\" | \"fail\""
         ],
         "path": "src/platform/packages/private/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,

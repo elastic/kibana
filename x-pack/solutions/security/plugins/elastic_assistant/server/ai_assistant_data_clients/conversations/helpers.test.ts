@@ -10,10 +10,6 @@ import type { UpdateConversationSchema } from './update_conversation';
 
 const getUpdateConversationMock = (): UpdateConversationSchema => {
   return {
-    summary: {
-      '@timestamp': '2025-08-19T13:26:01.746Z',
-      semantic_content: 'Very nice demo semantic content 4.',
-    },
     updated_at: '2025-08-19T13:26:01.746Z',
     api_config: {
       action_type_id: '.gen-ai',

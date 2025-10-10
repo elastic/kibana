@@ -10,14 +10,10 @@ import expect from 'expect';
 import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
-  createHistoricalPrebuiltRuleAssetSavedObjects,
-  createRuleAssetSavedObject,
-  deleteAllPrebuiltRuleAssets,
   getCustomQueryRuleParams,
   getSimpleRule,
   getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
-  installPrebuiltRules,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
@@ -25,9 +21,8 @@ import {
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
-  const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless @serverlessQA patch_rules', () => {
@@ -40,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .patchRule({ body: { rule_id: 'rule-1', name: 'some other name' } })
           .expect(200);
 
@@ -70,11 +65,11 @@ export default ({ getService }: FtrProviderContext) => {
           required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
         };
 
-        await securitySolutionApi.createRule({
+        await detectionsApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
         });
 
-        const { body: patchedRuleResponse } = await securitySolutionApi
+        const { body: patchedRuleResponse } = await detectionsApi
           .patchRule({
             body: {
               ...rulePatchProperties,
@@ -84,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(patchedRuleResponse).toMatchObject(expectedRule);
 
-        const { body: patchedRule } = await securitySolutionApi
+        const { body: patchedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-1' },
           })
@@ -100,7 +95,7 @@ export default ({ getService }: FtrProviderContext) => {
           await createRule(supertest, log, getSimpleRule('rule-1'));
 
           // patch a simple rule's type to machine learning
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .patchRule({ body: { rule_id: 'rule-1', type: 'machine_learning' } })
             .expect(403);
 
@@ -118,7 +113,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createRuleBody = await createRule(supertest, log, rule);
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .patchRule({ body: { rule_id: createRuleBody.rule_id, name: 'some other name' } })
           .expect(200);
 
@@ -135,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdBody = await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .patchRule({ body: { id: createdBody.id, name: 'some other name' } })
           .expect(200);
 
@@ -152,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .patchRule({ body: { rule_id: 'rule-1', enabled: false } })
           .expect(200);
 
@@ -168,7 +163,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's enabled to false and another property
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .patchRule({ body: { rule_id: 'rule-1', severity: 'low', enabled: false } })
           .expect(200);
 
@@ -186,14 +181,14 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // patch a simple rule's timeline_title
-        await securitySolutionApi
+        await detectionsApi
           .patchRule({
             body: { rule_id: 'rule-1', timeline_title: 'some title', timeline_id: 'some id' },
           })
           .expect(200);
 
         // patch a simple rule's name
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .patchRule({ body: { rule_id: 'rule-1', name: 'some other name' } })
           .expect(200);
 
@@ -209,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give a 404 if it is given a fake id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .patchRule({
             body: { id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d', name: 'some other name' },
           })
@@ -222,7 +217,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should give a 404 if it is given a fake rule_id', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .patchRule({ body: { rule_id: 'fake_id', name: 'some other name' } })
           .expect(404);
 
@@ -232,33 +227,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
-        await deleteAllPrebuiltRuleAssets(es, log);
-        // Install base prebuilt detection rule
-        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
-          createRuleAssetSavedObject({ rule_id: 'rule-1', author: ['elastic'] }),
-        ]);
-        await installPrebuiltRules(es, supertest);
-
-        const { body } = await securitySolutionApi
-          .patchRule({
-            body: {
-              rule_id: 'rule-1',
-              author: ['new user'],
-            },
-          })
-          .expect(400);
-
-        expect(body.message).toEqual('Cannot update "author" field for prebuilt rules');
-      });
-
       describe('max signals', () => {
         it('does NOT patch a rule when max_signals is less than 1', async () => {
-          await securitySolutionApi.createRule({
+          await detectionsApi.createRule({
             body: getCustomQueryRuleParams({ rule_id: 'rule-1', max_signals: 100 }),
           });
 
-          const { body } = await securitySolutionApi
+          const { body } = await detectionsApi
             .patchRule({
               body: {
                 rule_id: 'rule-1',
@@ -274,7 +249,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should not change required_fields when not present in patch body', async () => {
-        await securitySolutionApi.createRule({
+        await detectionsApi.createRule({
           body: getCustomQueryRuleParams({
             rule_id: 'rule-1',
             required_fields: [
@@ -287,7 +262,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // patch a simple rule's name
-        const { body: patchedRule } = await securitySolutionApi
+        const { body: patchedRule } = await detectionsApi
           .patchRule({ body: { rule_id: 'rule-1', name: 'some other name' } })
           .expect(200);
 

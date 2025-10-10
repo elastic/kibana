@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { render } from 'enzyme';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { Download } from '.';
 
 describe('<Download />', () => {
   test('has canvasDownload class', () => {
-    const wrapper = render(
+    const { container } = render(
       <Download fileName="hello" content="world">
         <button>Download it</button>
       </Download>
     );
 
-    expect(wrapper.hasClass('canvasDownload')).toBeTruthy();
+    expect(container.firstChild).toHaveClass('canvasDownload');
   });
 });

@@ -198,6 +198,7 @@ export const GetRuleMigrationRulesRequestQuery = z.object({
   is_partially_translated: BooleanFromString.optional(),
   is_untranslatable: BooleanFromString.optional(),
   is_failed: BooleanFromString.optional(),
+  is_missing_index: BooleanFromString.optional(),
 });
 export type GetRuleMigrationRulesRequestQueryInput = z.input<
   typeof GetRuleMigrationRulesRequestQuery

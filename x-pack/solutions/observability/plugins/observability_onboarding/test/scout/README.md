@@ -7,7 +7,7 @@ First start the servers:
 node scripts/scout.js start-server --stateful
 
 // Serverless
-node scripts/scout.js start-server --serverless=[es|oblt|security]
+node scripts/scout.js start-server --serverless=[es|oblt|oblt-logs-essentials|security]
 ```
 
 Then you can run the tests in another terminal:
@@ -20,6 +20,9 @@ npx playwright test --config x-pack/solutions/observability/plugins/observabilit
 
 // Serverless
 npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep @svlOblt
+
+// Serverless Logs-Essentials
+npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/playwright.config.ts --project=local --grep @svlLogsEssentials
 ```
 
 Some tests are designed to run concurrently (preferred option):
@@ -32,6 +35,10 @@ npx playwright test --config x-pack/solutions/observability/plugins/observabilit
 // Serverless
 npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/parallel_playwright.config.ts
 --project=local --grep @svlOblt
+
+// Serverless Logs-Essentials
+npx playwright test --config x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/parallel_playwright.config.ts
+--project=local --grep @svlLogsEssentials
 ```
 
 Test results are available in `x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/output`

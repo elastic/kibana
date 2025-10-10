@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DashboardMigrationsDataDashboardsClient } from '../dashboard_migrations_dashboards_client';
-import type { DashboardMigrationsDataMigrationClient } from '../dashboard_migrations_migration_client';
+import type { SiemMigrationsDataMigrationClient as DashboardMigrationsDataMigrationClient } from '../../../common/data/siem_migrations_data_migration_client';
+import type { DashboardMigrationsDataDashboardsClient } from '../dashboard_migrations_data_dashboards_client';
 
 export const mockDashboardMigrationDataMigrationClient = {
   create: jest.fn().mockResolvedValue(undefined),

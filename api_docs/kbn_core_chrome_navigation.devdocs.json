@@ -11,7 +11,7 @@
         "label": "Navigation",
         "description": [],
         "signature": [
-          "({ activeItemId, isCollapsed: isCollapsedProp, items, logo, setWidth, }: ",
+          "({ activeItemId, isCollapsed: isCollapsedProp, items, logo, onItemClick, setWidth, sidePanelFooter, ...rest }: ",
           "NavigationProps",
           ") => React.JSX.Element"
         ],
@@ -24,7 +24,7 @@
             "id": "def-public.Navigation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  activeItemId,\n  isCollapsed: isCollapsedProp,\n  items,\n  logo,\n  setWidth,\n}",
+            "label": "{\n  activeItemId,\n  isCollapsed: isCollapsedProp,\n  items,\n  logo,\n  onItemClick,\n  setWidth,\n  sidePanelFooter,\n  ...rest\n}",
             "description": [],
             "signature": [
               "NavigationProps"
@@ -48,13 +48,7 @@
         "signature": [
           "(isCollapsed: boolean, items: ",
           "NavigationStructure",
-          ", logoId: string, activeItemId?: string | undefined) => { navigateTo: (primaryMenuItem: ",
-          "MenuItem",
-          ", secondaryMenuItem?: ",
-          "SecondaryMenuItem",
-          " | undefined) => void; activePageId: string | undefined; activeSubpageId: string | undefined; sidePanelContent: ",
-          "MenuItem",
-          " | null; isCollapsed: boolean; isSidePanelOpen: boolean; }"
+          ", logoId: string, activeItemId?: string | undefined) => NavigationState"
         ],
         "path": "src/core/packages/chrome/navigation/src/hooks/use_navigation.ts",
         "deprecated": false,
@@ -260,6 +254,22 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.NavigationProps.sidePanelFooter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "sidePanelFooter",
+            "description": [
+              "\nContent to display inside the side panel footer."
+            ],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
             "id": "def-public.NavigationProps.isCollapsed",
             "type": "boolean",
             "tags": [],
@@ -305,6 +315,50 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.NavigationProps.onItemClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onItemClick",
+            "description": [
+              "\nCallback fired when a navigation item is clicked."
+            ],
+            "signature": [
+              "((item: ",
+              "SideNavLogo",
+              " | ",
+              "MenuItem",
+              " | ",
+              "SecondaryMenuItem",
+              ") => void) | undefined"
+            ],
+            "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-navigation",
+                "id": "def-public.NavigationProps.onItemClick.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  "SideNavLogo",
+                  " | ",
+                  "MenuItem",
+                  " | ",
+                  "SecondaryMenuItem"
+                ],
+                "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
             "id": "def-public.NavigationProps.setWidth",
             "type": "Function",
             "tags": [],
@@ -336,6 +390,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.NavigationProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "\nOptional data-test-subj attribute for testing purposes."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/chrome/navigation/src/components/navigation.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -514,12 +584,12 @@
           {
             "parentPluginId": "@kbn/core-chrome-navigation",
             "id": "def-public.SecondaryMenuSection.label",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "label",
             "description": [],
             "signature": [
-              "string | null"
+              "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,
@@ -586,6 +656,22 @@
             "label": "iconType",
             "description": [
               "\nThe logo type, e.g. `appObservability`, `appSecurity`, etc."
+            ],
+            "path": "src/core/packages/chrome/navigation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-navigation",
+            "id": "def-public.SideNavLogo.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "\nOptional data-test-subj attribute"
+            ],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/core/packages/chrome/navigation/types.ts",
             "deprecated": false,

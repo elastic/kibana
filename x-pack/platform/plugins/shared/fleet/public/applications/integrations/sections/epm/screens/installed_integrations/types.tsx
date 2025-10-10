@@ -15,7 +15,8 @@ export type InstalledPackagesUIInstallationStatus =
   | 'upgrade_failed'
   | 'upgrading'
   | 'upgrade_available'
-  | 'uninstalling';
+  | 'uninstalling'
+  | 'rolling_back';
 
 export type InstalledPackageUIPackageListItem = PackageListItem & {
   ui: {

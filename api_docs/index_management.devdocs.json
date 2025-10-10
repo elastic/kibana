@@ -203,6 +203,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-public.Index.mode",
+            "type": "string",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-public.Index.isRollupIndex",
             "type": "CompoundType",
             "tags": [],
@@ -1055,6 +1069,20 @@
             "type": "string",
             "tags": [],
             "label": "data_stream",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-server.Index.mode",
+            "type": "string",
+            "tags": [],
+            "label": "mode",
             "description": [],
             "signature": [
               "string | undefined"
@@ -2086,7 +2114,7 @@
             "label": "health",
             "description": [],
             "signature": [
-              "\"green\" | \"yellow\" | \"red\""
+              "\"red\" | \"green\" | \"yellow\""
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -2695,6 +2723,20 @@
             "type": "string",
             "tags": [],
             "label": "data_stream",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.mode",
+            "type": "string",
+            "tags": [],
+            "label": "mode",
             "description": [],
             "signature": [
               "string | undefined"
@@ -3899,7 +3941,7 @@
         "label": "Health",
         "description": [],
         "signature": [
-          "\"green\" | \"yellow\" | \"red\""
+          "\"red\" | \"green\" | \"yellow\""
         ],
         "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
         "deprecated": false,

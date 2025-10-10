@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { RuleMigrationAdapters, StoredSiemMigration } from '../types';
+import type { RuleMigrationAdapters, StoredRuleMigration } from '../types';
 import { RuleMigrationSpaceIndexMigrator } from './rule_migrations_per_space_index_migrator';
 import type { SearchResponseBody } from 'elasticsearch-8.x/lib/api/types';
 
@@ -33,7 +33,7 @@ const mockMigrationsIndexResult = {
   hits: {
     hits: [],
   },
-} as unknown as SearchResponseBody<StoredSiemMigration>;
+} as unknown as SearchResponseBody<StoredRuleMigration>;
 
 const getMockedESSearchFunction = (
   rulesIndexAggResult: typeof mockRuleIndexAggregationsResult = mockRuleIndexAggregationsResult,
@@ -114,7 +114,7 @@ describe('RuleMigrationSpaceIndexMigrator', () => {
           },
         ],
       },
-    } as unknown as SearchResponseBody<StoredSiemMigration>;
+    } as unknown as SearchResponseBody<StoredRuleMigration>;
     esClientMock.search.mockImplementation(
       getMockedESSearchFunction(
         mockRuleIndexAggregationsResult,
@@ -164,7 +164,7 @@ describe('RuleMigrationSpaceIndexMigrator', () => {
           },
         ],
       },
-    } as unknown as SearchResponseBody<StoredSiemMigration>;
+    } as unknown as SearchResponseBody<StoredRuleMigration>;
 
     esClientMock.search.mockImplementation(
       getMockedESSearchFunction(

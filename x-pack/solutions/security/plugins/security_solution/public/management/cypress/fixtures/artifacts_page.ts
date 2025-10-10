@@ -541,18 +541,18 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         },
         {
           type: 'click',
-          customSelector: '[role="option"]:contains("Username")',
+          customSelector: '[role="option"]:contains("Host")',
         },
         {
           type: 'input',
           selector: 'trustedDevices-form-valueField',
-          value: 'test-user',
+          value: 'test-host',
         },
       ],
       checkResults: [
         {
           selector: 'trustedDevicesList-card-criteriaConditions',
-          value: ' OSIS Windows, MacAND user.nameIS test-user',
+          value: ' OSIS Windows, MacAND host.nameIS test-host',
         },
       ],
     },
@@ -583,13 +583,13 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
         {
           type: 'input',
           selector: 'trustedDevices-form-valueField',
-          value: 'updated-user',
+          value: 'updated-host',
         },
       ],
       checkResults: [
         {
           selector: 'trustedDevicesList-card-criteriaConditions',
-          value: ' OSIS Windows, MacAND user.nameIS test-user',
+          value: ' OSIS Windows, MacAND host.nameIS updated-host',
         },
         {
           selector: 'trustedDevicesList-card-header-title',
@@ -611,10 +611,10 @@ export const getArtifactsListTestsData = (): ArtifactsFixtureType[] => [
       list_id: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
       entries: [
         {
-          field: 'user.name',
+          field: 'host.name',
           operator: 'included',
           type: 'match',
-          value: 'test-user',
+          value: 'test-host',
         },
       ],
       os_types: ['windows', 'macos'],

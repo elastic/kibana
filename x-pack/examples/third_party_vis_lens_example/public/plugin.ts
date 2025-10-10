@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-plugin/common/constants';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Plugin, CoreSetup } from '@kbn/core/public';
@@ -51,6 +52,7 @@ function getLensAttributes(defaultDataView: DataView): TypedLensByValueInput['at
   };
 
   return {
+    version: LENS_ITEM_LATEST_VERSION,
     visualizationType: 'rotatingNumber',
     title: 'Prefilled from example app',
     references: [

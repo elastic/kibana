@@ -91,6 +91,7 @@ import type {
   SentinelRunScriptRequestMeta,
   UploadedFileInfo,
   SentinelOneScript,
+  SentinelOneRunScriptResponseMeta,
 } from '../../../../../../common/endpoint/types';
 import type {
   GetProcessesRequestBody,
@@ -459,9 +460,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     // RUN SCRIPT
     if (payload.command === 'runscript') {
-      const parameters = (
-        payload as ResponseActionsClientWriteActionRequestToEndpointIndexOptions<SentinelOneRunScriptActionRequestParams>
-      ).parameters;
+      const runScriptRequestPayload = payload as Mutable<
+        ResponseActionsClientWriteActionRequestToEndpointIndexOptions<SentinelOneRunScriptActionRequestParams>
+      >;
+      const parameters = runScriptRequestPayload.parameters;
       const scriptId = (parameters?.scriptId ?? '').trim();
 
       if (!scriptId) {
@@ -473,10 +475,31 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       const scriptDetails = await this.sendAction<
         SentinelOneGetRemoteScriptsResponse,
         SentinelOneGetRemoteScriptsParams
-      >(SUB_ACTION.GET_REMOTE_SCRIPTS, { ids: scriptId });
+      >(SUB_ACTION.GET_REMOTE_SCRIPTS, { ids: scriptId }).then(
+        (response) => response.data?.data[0]
+      );
 
-      if (scriptDetails.data?.data.length === 0 || scriptDetails.data?.data[0].id !== scriptId) {
+      if (!scriptDetails || scriptDetails.id !== scriptId) {
         throw new ResponseActionsClientError(`Script ID [${scriptId}] not found`, 404);
+      }
+
+      // This validation is needed because, when calling the S1 API to execute a script ID that does not support
+      // the targeted host's OS type, S1 API still returns a successful response, but it includes
+      // no `parentTaskId` - which indicates nothing was actually triggered in S1.
+      if (agentDetails.osType && !scriptDetails.osTypes.includes(agentDetails.osType)) {
+        throw new ResponseActionsClientError(
+          `Script [${scriptDetails.scriptName}] not supported for OS type [${agentDetails.osType}]`,
+          400
+        );
+      }
+
+      // Prepend the script name to the `comment` field for reference
+      const scriptNameComment = `(Script name: ${scriptDetails.scriptName})`;
+
+      if (!(runScriptRequestPayload.comment ?? '').startsWith(scriptNameComment)) {
+        runScriptRequestPayload.comment = `(Script name: ${scriptDetails.scriptName})${
+          runScriptRequestPayload.comment ? ` ${runScriptRequestPayload.comment}` : ''
+        }`;
       }
     }
 
@@ -599,15 +622,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: ResponseActionGetFileRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
-    if (
-      !this.options.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled
-    ) {
-      throw new ResponseActionsClientError(
-        `get-file not supported for ${this.agentType} agent type. Feature disabled`,
-        400
-      );
-    }
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       ResponseActionGetFileParameters,
       ResponseActionGetFileOutputContent,
@@ -702,16 +716,16 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     } = await this.fetchActionRequestEsDoc(actionId);
 
     const {
-      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
       responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
+      responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
     } = this.options.endpointService.experimentalFeatures;
 
     if (
-      (command === 'get-file' && !isGetFileEnabled) ||
-      (command === 'running-processes' && !isRunningProcessesEnabled)
+      (command === 'running-processes' && !isRunningProcessesEnabled) ||
+      (command === 'runscript' && !isRunScriptEnabled)
     ) {
       throw new ResponseActionsClientError(
-        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        `File downloads are not supported for ${this.agentType} ${command}. Feature disabled`,
         400
       );
     }
@@ -751,11 +765,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           }
           break;
 
+        // Response Actions that use S1 scripts
         case 'running-processes':
+        case 'runscript':
           {
             const agentResponse = await this.fetchEsResponseDocForAgentId<
-              GetProcessesActionOutputContent,
-              SentinelOneProcessesResponseMeta
+              EndpointActionResponseDataOutput,
+              { taskId?: string }
             >(actionId, agentId);
             const s1TaskId = agentResponse.meta?.taskId ?? '';
 
@@ -777,7 +793,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
             if (!fileDownloadLink) {
               this.log.debug(
-                `No download link found in SentinelOne for Task Id [${s1TaskId}]. Setting file status to DELETED`
+                `No download link found in SentinelOne for Task Id [${s1TaskId}]. Setting file status to DELETED. (Response action: ${actionId}, Agent Id: {${agentId})`
               );
 
               fileInfo.status = 'DELETED';
@@ -811,16 +827,16 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     } = await this.fetchActionRequestEsDoc(actionId);
 
     const {
-      responseActionsSentinelOneGetFileEnabled: isGetFileEnabled,
       responseActionsSentinelOneProcessesEnabled: isRunningProcessesEnabled,
+      responseActionsSentinelOneRunScriptEnabled: isRunScriptEnabled,
     } = this.options.endpointService.experimentalFeatures;
 
     if (
-      (command === 'get-file' && !isGetFileEnabled) ||
-      (command === 'running-processes' && !isRunningProcessesEnabled)
+      (command === 'running-processes' && !isRunningProcessesEnabled) ||
+      (command === 'runscript' && !isRunScriptEnabled)
     ) {
       throw new ResponseActionsClientError(
-        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        `File downloads are not supported for ${this.agentType} ${command}. Feature disabled`,
         400
       );
     }
@@ -860,10 +876,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           break;
 
         case 'running-processes':
+        case 'runscript':
           {
             const processesAgentResponse = await this.fetchEsResponseDocForAgentId<
               {},
-              SentinelOneProcessesResponseMeta
+              { taskId?: string }
             >(actionId, agentId);
 
             if (!processesAgentResponse.meta?.taskId) {
@@ -1081,10 +1098,12 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
-      SentinelOneRunScriptActionRequestParams,
-      ResponseActionRunScriptOutputContent,
-      Partial<SentinelRunScriptRequestMeta>
+    const reqIndexOptions: Mutable<
+      ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+        SentinelOneRunScriptActionRequestParams,
+        ResponseActionRunScriptOutputContent,
+        Partial<SentinelRunScriptRequestMeta>
+      >
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
@@ -1096,6 +1115,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       let error = (await this.validateRequest(reqIndexOptions)).error;
 
       if (!error) {
+        const scriptId = reqIndexOptions.parameters?.scriptId ?? '';
+
         try {
           const s1Response = await this.sendAction<
             SentinelOneExecuteScriptResponse,
@@ -1105,7 +1126,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               ids: actionRequest.endpoint_ids[0],
             },
             script: {
-              scriptId: reqIndexOptions.parameters?.scriptId ?? '',
+              scriptId,
               taskDescription: this.buildExternalComment(reqIndexOptions),
               requiresApproval: false,
               outputDestination: 'SentinelCloud',
@@ -1276,6 +1297,20 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                     ResponseActionParametersWithProcessName,
                     KillProcessActionOutputContent,
                     SentinelOneKillProcessRequestMeta
+                  >
+                >
+              )
+            );
+            break;
+
+          case 'runscript':
+            addResponsesToQueueIfAny(
+              await this.checkPendingRunScriptActions(
+                typePendingActions as Array<
+                  ResponseActionsClientPendingAction<
+                    ResponseActionRunScriptParameters,
+                    ResponseActionRunScriptOutputContent,
+                    SentinelRunScriptRequestMeta
                   >
                 >
               )
@@ -2060,6 +2095,113 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     this.log.debug(
       () =>
         `${completedResponses.length} kill-process action responses generated:\n${stringify(
+          completedResponses
+        )}`
+    );
+
+    if (warnings.length > 0) {
+      this.log.warn(warnings.join('\n'));
+    }
+
+    return completedResponses;
+  }
+
+  private async checkPendingRunScriptActions(
+    actionRequests: Array<
+      ResponseActionsClientPendingAction<
+        ResponseActionRunScriptParameters,
+        ResponseActionRunScriptOutputContent,
+        SentinelRunScriptRequestMeta
+      >
+    >
+  ): Promise<LogsEndpointActionResponse[]> {
+    // TODO:PT refactor the "checkPending*()" methods to maybe centralize common logic
+
+    const warnings: string[] = [];
+    const completedResponses: LogsEndpointActionResponse[] = [];
+
+    for (const pendingAction of actionRequests) {
+      const actionRequest = pendingAction.action;
+      const s1ParentTaskId = actionRequest.meta?.parentTaskId;
+
+      if (!s1ParentTaskId) {
+        completedResponses.push(
+          this.buildActionResponseEsDoc<
+            ResponseActionRunScriptOutputContent,
+            SentinelRunScriptRequestMeta
+          >({
+            actionId: actionRequest.EndpointActions.action_id,
+            agentId: Array.isArray(actionRequest.agent.id)
+              ? actionRequest.agent.id[0]
+              : actionRequest.agent.id,
+            data: {
+              command: 'runscript',
+              comment: '',
+            },
+            error: {
+              message: `Action request missing SentinelOne 'parentTaskId' value - unable check on its status`,
+            },
+          })
+        );
+
+        warnings.push(
+          `Response Action [${actionRequest.EndpointActions.action_id}] is missing [meta.parentTaskId]! (should not have happened)`
+        );
+      } else {
+        const s1TaskStatusApiResponse =
+          await this.sendAction<SentinelOneGetRemoteScriptStatusApiResponse>(
+            SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
+            { parentTaskId: s1ParentTaskId }
+          );
+
+        if (s1TaskStatusApiResponse.data?.data.length) {
+          const s1ScriptStatus = s1TaskStatusApiResponse.data.data[0];
+          const taskState = this.calculateTaskState(s1ScriptStatus);
+
+          if (!taskState.isPending) {
+            this.log.debug(`Action is completed - generating response doc for it`);
+
+            const error: LogsEndpointActionResponse['error'] = taskState.isError
+              ? {
+                  message: `Action failed to execute in SentinelOne. Message: ${taskState.message}`,
+                }
+              : undefined;
+
+            completedResponses.push(
+              this.buildActionResponseEsDoc<
+                ResponseActionRunScriptOutputContent,
+                SentinelOneRunScriptResponseMeta
+              >({
+                actionId: actionRequest.EndpointActions.action_id,
+                agentId: Array.isArray(actionRequest.agent.id)
+                  ? actionRequest.agent.id[0]
+                  : actionRequest.agent.id,
+                data: {
+                  command: 'runscript',
+                  comment: taskState.message,
+                  output: {
+                    type: 'json',
+                    content: {
+                      stdout: '',
+                      stderr: '',
+                      code: s1ScriptStatus.statusCode ?? s1ScriptStatus.status,
+                    },
+                  },
+                },
+                error,
+                meta: {
+                  taskId: s1ScriptStatus.id,
+                },
+              })
+            );
+          }
+        }
+      }
+    }
+
+    this.log.debug(
+      () =>
+        `${completedResponses.length} runscript action responses generated:\n${stringify(
           completedResponses
         )}`
     );

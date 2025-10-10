@@ -75,6 +75,20 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "sampleDataIngest",
+          "id": "def-public.SampleDataIngestPluginStart.minimumLicenseType",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "minimumLicenseType",
+          "description": [],
+          "signature": [
+            "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\""
+          ],
+          "path": "x-pack/platform/plugins/shared/sample_data_ingest/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -176,6 +190,20 @@
             "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.InstallResponse.dashboardId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -211,6 +239,20 @@
             "type": "string",
             "tags": [],
             "label": "indexName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "sampleDataIngest",
+            "id": "def-common.StatusResponse.dashboardId",
+            "type": "string",
+            "tags": [],
+            "label": "dashboardId",
             "description": [],
             "signature": [
               "string | undefined"
@@ -278,6 +320,21 @@
         ],
         "signature": [
           "\".elser-2-elasticsearch\""
+        ],
+        "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sampleDataIngest",
+        "id": "def-common.MINIMUM_LICENSE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "MINIMUM_LICENSE_TYPE",
+        "description": [],
+        "signature": [
+          "\"enterprise\""
         ],
         "path": "x-pack/platform/plugins/shared/sample_data_ingest/common/index.ts",
         "deprecated": false,

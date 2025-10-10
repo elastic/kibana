@@ -29,6 +29,7 @@ import { DiscoverEBTManager } from '../../ebt_manager';
 import {
   createApmErrorsContextServiceMock,
   createLogsContextServiceMock,
+  createMetricsContextServiceMock,
   createTracesContextServiceMock,
 } from '@kbn/discover-utils/src/__mocks__';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
@@ -205,10 +206,14 @@ const createProfileProviderServicesMock = () => {
     discoverShared: discoverSharedPluginMock.createStartContract(),
     tracesContextService: createTracesContextServiceMock(),
     apmErrorsContextService: createApmErrorsContextServiceMock(),
+    metricsContextService: createMetricsContextServiceMock(),
     core: {
       pricing: pricingServiceMock.createStartContract() as ReturnType<
         typeof pricingServiceMock.createStartContract
       >,
+      featureFlags: {
+        getBooleanValue: jest.fn().mockReturnValue(true),
+      },
     },
   } as unknown as ProfileProviderServices;
 };

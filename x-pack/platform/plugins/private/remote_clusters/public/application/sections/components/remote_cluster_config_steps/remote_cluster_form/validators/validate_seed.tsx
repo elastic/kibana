@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isAddressValid, isPortValid } from './validate_address';
+import { isAddressValid, isPortValid } from '../../../../../../../common/lib';
 
 export function validateSeed(seed?: string): JSX.Element[] {
   const errors: JSX.Element[] = [];
@@ -22,7 +22,7 @@ export function validateSeed(seed?: string): JSX.Element[] {
     errors.push(
       <FormattedMessage
         id="xpack.remoteClusters.remoteClusterForm.localSeedError.invalidCharactersMessage"
-        defaultMessage="Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes."
+        defaultMessage="Seed node must use host:port format. Example: 127.0.0.1:9400, [::1]:9400 or localhost:9400. Hosts can only consist of letters, numbers, and dashes."
       />
     );
   }

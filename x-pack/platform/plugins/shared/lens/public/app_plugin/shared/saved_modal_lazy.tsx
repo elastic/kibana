@@ -45,7 +45,7 @@ export function getSaveModalComponent(
         const lensServicesT = await getLensServices(
           coreStart,
           startDependencies,
-          getLensAttributeService(startDependencies)
+          getLensAttributeService(coreStart.http)
         );
 
         setLensServices(lensServicesT);

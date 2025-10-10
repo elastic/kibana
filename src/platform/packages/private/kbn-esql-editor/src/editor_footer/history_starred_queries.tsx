@@ -26,15 +26,12 @@ import {
   EuiFieldSearch,
   EuiText,
   EuiIconTip,
-  EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
 import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
-import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   type QueryHistoryItem,
   getHistoryItems,
@@ -61,27 +58,24 @@ export function QueryHistoryAction({
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="ESQLEditor-toggle-query-history-icon">
-          <EuiLink
-            onClick={toggleHistory}
-            external={false}
-            data-test-subj="ESQLEditor-hide-queries-link"
+          <EuiToolTip
+            position="top"
+            content={
+              isHistoryOpen
+                ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
+                    defaultMessage: 'Hide recent queries',
+                  })
+                : i18n.translate('esqlEditor.query.showQueriesLabel', {
+                    defaultMessage: 'Show recent queries',
+                  })
+            }
           >
-            <EuiIconTip
-              type="clockCounter"
-              color="primary"
-              size="m"
-              content={
-                isHistoryOpen
-                  ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                      defaultMessage: 'Hide recent queries',
-                    })
-                  : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                      defaultMessage: 'Show recent queries',
-                    })
-              }
-              position="top"
+            <EuiButtonIcon
+              onClick={toggleHistory}
+              iconType="clockCounter"
+              data-test-subj="ESQLEditor-hide-queries-link"
             />
-          </EuiLink>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (
@@ -116,7 +110,8 @@ export const getTableColumns = (
   isOnReducedSpaceLayout: boolean,
   actions: Array<CustomItemAction<QueryHistoryItem>>,
   isStarredTab = false,
-  starredQueriesService?: EsqlStarredQueriesService
+  starredQueriesService?: EsqlStarredQueriesService,
+  starredQueries?: StarredQueryItem[] // Add this parameter
 ): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
   const columnsArray = [
     {
@@ -140,51 +135,48 @@ export const getTableColumns = (
           case 'success':
           default:
             return (
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
                 content={i18n.translate('esqlEditor.query.querieshistory.success', {
                   defaultMessage: 'Query ran successfully',
                 })}
-              >
-                <EuiIcon
-                  type="checkInCircleFilled"
-                  color="success"
-                  size="m"
-                  data-test-subj="ESQLEditor-queryHistory-success"
-                />
-              </EuiToolTip>
+                type="checkInCircleFilled"
+                color="success"
+                size="m"
+                iconProps={{
+                  'data-test-subj': 'ESQLEditor-queryHistory-success',
+                }}
+              />
             );
           case 'error':
             return (
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
                 content={i18n.translate('esqlEditor.query.querieshistory.error', {
                   defaultMessage: 'Query failed',
                 })}
-              >
-                <EuiIcon
-                  type="error"
-                  color="danger"
-                  size="m"
-                  data-test-subj="ESQLEditor-queryHistory-error"
-                />
-              </EuiToolTip>
+                type="error"
+                color="danger"
+                size="m"
+                iconProps={{
+                  'data-test-subj': 'ESQLEditor-queryHistory-error',
+                }}
+              />
             );
           case 'warning':
             return (
-              <EuiToolTip
+              <EuiIconTip
                 position="top"
                 content={i18n.translate('esqlEditor.query.querieshistory.error', {
                   defaultMessage: 'Query failed',
                 })}
-              >
-                <EuiIcon
-                  type="warning"
-                  color="warning"
-                  size="m"
-                  data-test-subj="ESQLEditor-queryHistory-warning"
-                />
-              </EuiToolTip>
+                type="warning"
+                color="warning"
+                size="m"
+                iconProps={{
+                  'data-test-subj': 'ESQLEditor-queryHistory-warning',
+                }}
+              />
             );
         }
       },
@@ -260,14 +252,40 @@ export function QueryList({
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
   const [isDiscardQueryModalVisible, setIsDiscardQueryModalVisible] = useState(false);
+  const [starredQueries, setStarredQueries] = useState<StarredQueryItem[]>([]);
 
-  const { sorting, onTableChange } = useEuiTablePersist<QueryHistoryItem>({
-    tableId: 'esqlQueryHistory',
-    initialSort: {
-      field: 'timeRan',
-      direction: 'desc',
-    },
-  });
+  // Subscribe to starred queries changes to force re-render
+  useEffect(() => {
+    if (!starredQueriesService) return;
+
+    const subscription = starredQueriesService.queries$.subscribe((nextQueries) => {
+      setStarredQueries(nextQueries);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [starredQueriesService]);
+
+  // Add simple sorting state that won't interfere with pagination
+  const sorting = useMemo(
+    () => ({
+      sort: {
+        field: 'timeRan' as keyof QueryHistoryItem,
+        direction: 'desc' as const,
+      },
+    }),
+    []
+  );
+
+  // Only show pagination if more than 20 items
+  const pagination = useMemo(() => {
+    if (listItems.length > 20) {
+      return {
+        initialPageSize: 20,
+        showPerPageOptions: false,
+      };
+    }
+    return undefined;
+  }, [listItems.length]);
 
   const actions: Array<CustomItemAction<QueryHistoryItem>> = useMemo(() => {
     return [
@@ -334,9 +352,17 @@ export function QueryList({
       isOnReducedSpaceLayout,
       actions,
       isStarredTab,
-      starredQueriesService
+      starredQueriesService,
+      starredQueries // Pass starredQueries to force re-render when they change
     );
-  }, [containerWidth, isOnReducedSpaceLayout, actions, isStarredTab, starredQueriesService]);
+  }, [
+    containerWidth,
+    isOnReducedSpaceLayout,
+    actions,
+    isStarredTab,
+    starredQueriesService,
+    starredQueries,
+  ]);
 
   const { euiTheme } = theme;
   const extraStyling = isOnReducedSpaceLayout ? getReducedSpaceStyling() : '';
@@ -383,7 +409,7 @@ export function QueryList({
         items={listItems}
         columns={columns}
         sorting={sorting}
-        onChange={onTableChange}
+        pagination={pagination}
         css={tableStyling}
         tableLayout={containerWidth < 560 ? 'auto' : 'fixed'}
       />
@@ -465,12 +491,14 @@ export function QueryColumn({
 export function HistoryAndStarredQueriesTabs({
   containerCSS,
   containerWidth,
+  isSpaceReduced,
   onUpdateAndSubmit,
   height,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string) => void;
+  isSpaceReduced?: boolean;
   height: number;
 }) {
   const kibana = useKibana<ESQLEditorDeps>();
@@ -542,6 +570,58 @@ export function HistoryAndStarredQueriesTabs({
     );
   }, [starredSearchQuery, starredQueries]);
 
+  // Create stable QueryList components outside of tabs array
+  const historyQueryList = useMemo(
+    () => (
+      <QueryList
+        containerCSS={containerCSS}
+        onUpdateAndSubmit={onUpdateAndSubmit}
+        containerWidth={containerWidth}
+        height={height}
+        listItems={filteredHistoryItems}
+        dataTestSubj="ESQLEditor-queryHistory"
+        tableCaption={i18n.translate('esqlEditor.query.querieshistoryTable', {
+          defaultMessage: 'Queries history table',
+        })}
+        starredQueriesService={starredQueriesService ?? undefined}
+      />
+    ),
+    [
+      containerCSS,
+      onUpdateAndSubmit,
+      containerWidth,
+      height,
+      filteredHistoryItems,
+      starredQueriesService,
+    ]
+  );
+
+  const starredQueryList = useMemo(
+    () => (
+      <QueryList
+        containerCSS={containerCSS}
+        onUpdateAndSubmit={onUpdateAndSubmit}
+        containerWidth={containerWidth}
+        height={height}
+        listItems={filteredStarredQueries}
+        dataTestSubj="ESQLEditor-starredQueries"
+        tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
+          defaultMessage: 'Starred queries table',
+        })}
+        starredQueriesService={starredQueriesService ?? undefined}
+        isStarredTab={true}
+      />
+    ),
+    [
+      containerCSS,
+      onUpdateAndSubmit,
+      containerWidth,
+      height,
+      filteredStarredQueries,
+      starredQueriesService,
+    ]
+  );
+
   const { euiTheme } = useEuiTheme();
   const tabs = useMemo(() => {
     // use typed helper instead of .filter directly to remove falsy values from result type
@@ -555,20 +635,7 @@ export function HistoryAndStarredQueriesTabs({
           defaultMessage: 'Recent',
         }),
         dataTestSubj: 'history-queries-tab',
-        content: (
-          <QueryList
-            containerCSS={containerCSS}
-            onUpdateAndSubmit={onUpdateAndSubmit}
-            containerWidth={containerWidth}
-            height={height}
-            listItems={filteredHistoryItems}
-            dataTestSubj="ESQLEditor-queryHistory"
-            tableCaption={i18n.translate('esqlEditor.query.querieshistoryTable', {
-              defaultMessage: 'Queries history table',
-            })}
-            starredQueriesService={starredQueriesService ?? undefined}
-          />
-        ),
+        content: historyQueryList,
       },
       starredQueriesService !== null && {
         id: HistoryTabId.standardQueries,
@@ -581,33 +648,10 @@ export function HistoryAndStarredQueriesTabs({
             {starredQueries?.length}
           </EuiNotificationBadge>
         ),
-        content: (
-          <QueryList
-            containerCSS={containerCSS}
-            onUpdateAndSubmit={onUpdateAndSubmit}
-            containerWidth={containerWidth}
-            height={height}
-            listItems={filteredStarredQueries}
-            dataTestSubj="ESQLEditor-starredQueries"
-            tableCaption={i18n.translate('esqlEditor.query.starredQueriesTable', {
-              defaultMessage: 'Starred queries table',
-            })}
-            starredQueriesService={starredQueriesService ?? undefined}
-            isStarredTab={true}
-          />
-        ),
+        content: starredQueryList,
       },
     ]);
-  }, [
-    containerCSS,
-    onUpdateAndSubmit,
-    containerWidth,
-    height,
-    filteredHistoryItems,
-    starredQueriesService,
-    starredQueries?.length,
-    filteredStarredQueries,
-  ]);
+  }, [historyQueryList, starredQueriesService, starredQueries?.length, starredQueryList]);
 
   const [selectedTabId, setSelectedTabId] = useRestorableState(
     'historySelectedTabId',
@@ -650,41 +694,42 @@ export function HistoryAndStarredQueriesTabs({
         </EuiTabs>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-            <EuiText
-              size="xs"
-              color="subdued"
-              data-test-subj="ESQLEditor-history-starred-queries-helpText"
-            >
-              <p>
-                {selectedTabId === 'history-queries-tab'
-                  ? (() => {
-                      const stats = getStorageStats();
-                      const displayCount = searchQuery.trim()
-                        ? filteredHistoryItems.length
-                        : stats.queryCount;
-                      return i18n.translate('esqlEditor.history.historyItemsStorage', {
-                        defaultMessage: 'Showing {queryCount} queries ({storageSizeKB}KB used)',
-                        values: {
-                          queryCount: displayCount,
-                          storageSizeKB: stats.storageSizeKB,
-                        },
-                      });
-                    })()
-                  : (() => {
-                      const displayCount = starredSearchQuery.trim()
-                        ? filteredStarredQueries.length
-                        : starredQueries.length;
-                      return i18n.translate('esqlEditor.history.starredItemslimit', {
-                        defaultMessage:
-                          'Showing {starredItemsCount} queries (max {starredItemsLimit})',
-                        values: {
-                          starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
-                          starredItemsCount: displayCount ?? 0,
-                        },
-                      });
-                    })()}
-              </p>
-            </EuiText>
+            {!isSpaceReduced && (
+              <EuiText
+                size="xs"
+                color="subdued"
+                data-test-subj="ESQLEditor-history-starred-queries-helpText"
+              >
+                <p>
+                  {selectedTabId === 'history-queries-tab'
+                    ? (() => {
+                        const stats = getStorageStats();
+                        const displayCount = searchQuery.trim()
+                          ? filteredHistoryItems.length
+                          : stats.queryCount;
+                        return i18n.translate('esqlEditor.history.historyItemsStorage', {
+                          defaultMessage: 'Showing {queryCount} queries',
+                          values: {
+                            queryCount: displayCount,
+                          },
+                        });
+                      })()
+                    : (() => {
+                        const displayCount = starredSearchQuery.trim()
+                          ? filteredStarredQueries.length
+                          : starredQueries.length;
+                        return i18n.translate('esqlEditor.history.starredItemslimit', {
+                          defaultMessage:
+                            'Showing {starredItemsCount} queries (max {starredItemsLimit})',
+                          values: {
+                            starredItemsLimit: ESQL_STARRED_QUERIES_LIMIT,
+                            starredItemsCount: displayCount ?? 0,
+                          },
+                        });
+                      })()}
+                </p>
+              </EuiText>
+            )}
             {selectedTabId === 'history-queries-tab' && (
               <EuiFlexItem grow={false}>
                 <EuiFieldSearch
@@ -696,7 +741,8 @@ export function HistoryAndStarredQueriesTabs({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   data-test-subj="ESQLEditor-history-search"
                   css={css`
-                    width: 400px;
+                    max-width: 400px;
+                    width: ${isSpaceReduced ? '100%' : '400px'};
                   `}
                 />
               </EuiFlexItem>

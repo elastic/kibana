@@ -20,12 +20,12 @@ import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
 import {
+  type EntityRiskScore,
   EntityType,
   type HostRiskScore,
   type UserRiskScore,
-  type EntityRiskScore,
 } from '../../../../common/search_strategy';
-import { DetectionEngineAlertsTable } from '../../../detections/components/alerts_table';
+import { AlertsTable } from '../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../detections/components/alerts_table/alerts_grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -96,7 +96,7 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
-        <DetectionEngineAlertsTable
+        <AlertsTable
           tableType={TableId.alertsRiskInputs}
           inputFilters={[...inputFilters, ...filters, ...groupingFilters]}
         />

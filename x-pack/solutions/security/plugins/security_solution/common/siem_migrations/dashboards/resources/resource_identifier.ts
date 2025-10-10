@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResourceIdentifier } from '../../common/resources';
+import { ResourceIdentifier } from '../../resources';
 import type { SiemMigrationResourceBase } from '../../model/common.gen';
 import type { OriginalDashboard } from '../../model/dashboard_migration.gen';
 import { SplunkXmlDashboardParser } from '../../parsers/splunk/dashboard_xml';

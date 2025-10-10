@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { VECTOR_STYLES } from '../../../../../../common';
-import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../../common/constants';
+import { LAYER_STYLE_TYPE } from '../../../../../../common/constants';
 import {
   labelBorderColorSchema,
   fillColorSchema,
@@ -29,17 +29,6 @@ import {
   symbolizeAsSchema,
 } from './marker_schemas';
 
-export const fieldMetaOptions = schema.object({
-  isEnabled: schema.boolean(),
-  sigma: schema.maybe(schema.number()),
-  percentiles: schema.maybe(schema.arrayOf(schema.number())),
-});
-
-export const styleField = schema.object({
-  name: schema.string(),
-  origin: schema.oneOf([schema.literal(FIELD_ORIGIN.SOURCE), schema.literal(FIELD_ORIGIN.JOIN)]),
-});
-
 export const vectorStylePropertiesSchema = schema.object({
   [VECTOR_STYLES.SYMBOLIZE_AS]: schema.maybe(symbolizeAsSchema),
   [VECTOR_STYLES.FILL_COLOR]: schema.maybe(fillColorSchema),
@@ -59,6 +48,14 @@ export const vectorStylePropertiesSchema = schema.object({
 
 export const vectorStyleSchema = schema.object({
   properties: vectorStylePropertiesSchema,
-  isTimeAware: schema.boolean(),
+  isTimeAware: schema.maybe(
+    schema.boolean({
+      defaultValue: true,
+      meta: {
+        description:
+          'Set to true to apply global time to style metadata requests. When set to true, style metadata will be re-fetched when global time changes.',
+      },
+    })
+  ),
   type: schema.literal(LAYER_STYLE_TYPE.VECTOR),
 });

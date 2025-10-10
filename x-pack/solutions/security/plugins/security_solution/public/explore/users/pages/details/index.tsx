@@ -233,7 +233,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
             <SiemSearchBar
-              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              sourcererDataView={
+                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
+              } // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
               id={InputsModelId.global}
             />
           </FiltersGlobal>

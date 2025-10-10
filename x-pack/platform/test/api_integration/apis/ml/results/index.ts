@@ -18,5 +18,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_partition_fields_values'));
     loadTestFile(require.resolve('./get_anomaly_search'));
     loadTestFile(require.resolve('./get_datafeed_results_chart'));
+    loadTestFile(require.resolve('./get_top_influencers'));
+    loadTestFile(require.resolve('./get_view_by_data'));
   });
 }

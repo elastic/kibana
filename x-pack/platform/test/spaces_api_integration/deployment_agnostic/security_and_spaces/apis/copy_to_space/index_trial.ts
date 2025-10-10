@@ -9,8 +9,6 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 
 export default function ({ loadTestFile, getService }: DeploymentAgnosticFtrProviderContext) {
   describe('spaces api with security', function () {
-    this.tags('skipMKI');
-
-    loadTestFile(require.resolve('./copy_to_space'));
+    loadTestFile(require.resolve('./copy_to_space.common'));
   });
 }

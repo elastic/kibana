@@ -37,6 +37,7 @@ import type {
   UpdateFailureStoreResponse,
   NonAggregatableDatasets,
 } from '../../../common/api_types';
+import type { ITelemetryClient } from '../telemetry';
 
 export type DataStreamDetailsServiceSetup = void;
 
@@ -46,6 +47,7 @@ export interface DataStreamDetailsServiceStart {
 
 export interface DataStreamDetailsServiceStartDeps {
   http: HttpStart;
+  telemetryClient: ITelemetryClient;
 }
 
 export interface IDataStreamDetailsClient {

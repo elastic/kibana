@@ -14,6 +14,7 @@ import type {
   ToolChoice,
   ToolDefinition,
   ToolMessage,
+  UnvalidatedToolCall,
   UserMessage,
 } from '@kbn/inference-common';
 import {
@@ -50,7 +51,10 @@ function addEvent(span: Span, event: MessageEvent) {
 
 export function setChoice(
   span: Span,
-  { content, toolCalls }: { content: string; toolCalls: ToolCall[] }
+  {
+    content,
+    toolCalls,
+  }: { content: string; toolCalls: Array<ToolCall> | Array<UnvalidatedToolCall> }
 ) {
   addEvent(span, {
     name: GenAISemanticConventions.GenAIChoice,
@@ -124,7 +128,7 @@ function mapAssistantResponse({
   toolCalls,
 }: {
   content?: string | null;
-  toolCalls?: ToolCall[];
+  toolCalls?: Array<ToolCall> | Array<UnvalidatedToolCall>;
 }) {
   return {
     content: content || null,
@@ -133,9 +137,10 @@ function mapAssistantResponse({
       return {
         function: {
           name: toolCall.function.name,
-          arguments: JSON.stringify(
-            'arguments' in toolCall.function ? toolCall.function.arguments : {}
-          ),
+          arguments:
+            typeof toolCall.function.arguments === 'string'
+              ? toolCall.function.arguments
+              : JSON.stringify(toolCall.function.arguments),
         },
         id: toolCall.toolCallId,
         type: 'function' as const,

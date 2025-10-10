@@ -51,6 +51,7 @@ export interface AgentExecutorParams<T extends boolean> {
   actionsClient: PublicMethodsOf<ActionsClient>;
   assistantTools?: AssistantTool[];
   connectorId: string;
+  threadId: string;
   conversationId?: string;
   contentReferencesStore: ContentReferencesStore;
   core: CoreRequestHandlerContext;

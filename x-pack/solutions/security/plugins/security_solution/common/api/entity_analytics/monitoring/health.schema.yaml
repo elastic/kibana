@@ -1,0 +1,46 @@
+openapi: 3.0.0
+
+info:
+  title: Health check on Privilege Monitoring
+  version: "2023-10-31"
+paths:
+  /api/entity_analytics/monitoring/privileges/health:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: PrivMonHealth
+      summary: Health check on Privilege Monitoring
+
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: 
+                    $ref: './common.schema.yaml#/components/schemas/PrivilegeMonitoringEngineStatus'
+                  error:
+                    type: object
+                    required:
+                      - status
+                    properties:
+                      message:
+                        type: string
+                  users:
+                    type: object
+                    description: User statistics for privilege monitoring
+                    properties:
+                      current_count:
+                        type: integer
+                        description: Current number of privileged users being monitored
+                      max_allowed:
+                        type: integer
+                        description: Maximum number of privileged users allowed to be monitored
+                    required:
+                      - current_count
+                      - max_allowed
+
+                required:
+                  - status

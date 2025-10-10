@@ -8,6 +8,7 @@ source .buildkite/scripts/steps/functional/common.sh
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
 SCOUT_CONFIG_GROUP_KEY=${SCOUT_CONFIG_GROUP_KEY:-}
 SCOUT_CONFIG_GROUP_TYPE=${SCOUT_CONFIG_GROUP_TYPE:-}
+SCOUT_CONFIG=${SCOUT_CONFIG:-}
 
 echo "=== DEBUG: Environment variables ==="
 echo "BUILDKITE_PARALLEL_JOB: $BUILDKITE_PARALLEL_JOB"
@@ -42,7 +43,7 @@ group=$SCOUT_CONFIG_GROUP_TYPE
 # Define run modes based on group
 declare -A RUN_MODES
 RUN_MODES["platform"]="--stateful --serverless=es --serverless=oblt --serverless=security"
-RUN_MODES["observability"]="--stateful --serverless=oblt"
+RUN_MODES["observability"]="--stateful --serverless=oblt --serverless=oblt-logs-essentials"
 RUN_MODES["search"]="--stateful --serverless=es"
 RUN_MODES["security"]="--stateful --serverless=security"
 
@@ -243,13 +244,7 @@ else
   echo "=== DEBUG: No failed configs to store ==="
 fi
 
-# Upload events
-echo "--- Upload Scout reporter events to AppEx QA's team cluster"
-if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
-  node scripts/scout upload-events --dontFailOnError
-else
-  echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
-fi
+source .buildkite/scripts/steps/test/scout_upload_report_events.sh
 
 echo "=== DEBUG: Final exit code: $FINAL_EXIT_CODE ==="
 exit $FINAL_EXIT_CODE

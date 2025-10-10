@@ -16,7 +16,10 @@ import axios from 'axios';
 
 import apm from 'elastic-apm-node';
 
-import { AgentlessAgentCreateOverProvisionedError } from '../../../common/errors';
+import {
+  AgentlessAgentCreateOverProvisionedError,
+  AgentlessAgentCreateFleetUnreachableError,
+} from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy } from '../../types';
 import type { AgentlessApiDeploymentResponse, FleetServerHost } from '../../../common/types';
@@ -591,7 +594,12 @@ class AgentlessAgentService {
           this.withRequestIdMessage(userMessage, traceId),
           limit
         );
+      } else if (responseData?.code === AGENTLESS_API_ERROR_CODES.FLEET_UNREACHABLE) {
+        return new AgentlessAgentCreateFleetUnreachableError(
+          this.withRequestIdMessage(userMessage, traceId)
+        );
       }
+
       return new AgentlessAgentCreateError(this.withRequestIdMessage(userMessage, traceId));
     }
     if (action === 'delete') {

@@ -14,7 +14,8 @@
     "@kbn/utility-types",
     "@kbn/utility-types-jest",
     "@kbn/core-overlays-browser",
-    "@kbn/core-overlays-browser-internal"
+    "@kbn/core-overlays-browser-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

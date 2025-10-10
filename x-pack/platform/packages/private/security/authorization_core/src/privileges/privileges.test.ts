@@ -575,6 +575,7 @@ describe('features', () => {
         'getBackfill',
         'findBackfill',
         'findGaps',
+        'bulkEditParams',
       ],
       ...[
         'create',
@@ -752,6 +753,7 @@ describe('features', () => {
         'getBackfill',
         'findBackfill',
         'findGaps',
+        'bulkEditParams',
       ],
       ...[
         'create',

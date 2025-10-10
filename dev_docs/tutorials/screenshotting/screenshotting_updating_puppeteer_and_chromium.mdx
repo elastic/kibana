@@ -13,104 +13,182 @@ This document builds off of [Keeping Chromium Up-To-Date](https://docs.google.co
 ## 1. **Installing new puppeteer version**
 
 - Determine the version for the current latest release by checking [here](https://github.com/puppeteer/puppeteer/releases).
-- We can go ahead and install the current version within kibana like so; `yarn add puppeteer@23.3.1` if we assume for the sake of this guide that the latest version is `23.3.1`, on installing this, we'd also want to run `yarn kbn bootstrap` to fix the white space that gets generated which would in turn will cause CI failures if left as is.
+- Install the current version by running `yarn add puppeteer@23.3.1` if we assume for the sake of this guide that the latest version is `23.3.1`. Run `yarn kbn bootstrap` after installing.
+- Determine the version of chromium that's been verified to work with this specific version of puppeteer by running the following utility script
 
-- Next up we want to determine the version of chromium that's been verified to work with this specific version of puppeteer, we so by run a utility script created solely for this purpose within Kibana; `node scripts/chromium_version.js 23.3.1`, On running the aforementioned script we would get a result very similar to the one below;
+ `node scripts/chromium_version.js 23.3.1`
+ 
+ The output of this script looks similar to the following:
 
-  ![image][./chromium_version_command.png]
+  ![image](./chromium_version_command.png)
 
-  The important information to take note of here is the chromium revision and commit value. The revision value is important for selecting the appropriate chromium that has been pre-built by google, whilst the commit version we use to build our variant of headless chromium that gets distributed for linux variants of kibana.
+ Note the Chromium revision and commit values. The revision number is important for selecting the appropriate Chromium that has been pre-built by Google, whilst the commit hash is used to build our variant of headless chromium that gets distributed for Linux variants of Kibana.
 
 ## 2. **Specifying Chromium install version for platform variants**
 
-Kibana provides a verified version of chromium that's guaranteed to work for the version of puppeteer we would be upgrading to. For the Mac and Windows platform we use the pre-built binaries provided by google, whilst for linux we build our own because it doesn't exist and it also allows us to strip down the build to the bare minimum required to run reporting.
+Kibana provides a verified version of Chromium that's guaranteed to work for the version of Puppeteer we are upgrading to. For the Mac and Windows platforms we use the pre-built binaries provided by Google, whilst for Linux we build our own because a pre-built version doesn't exist. This also allows us to strip down the build to the bare minimum required to run reporting.
 
-For the tasks, ahead the file located at [https://github.com/elastic/kibana/blob/main/packages/kbn-screenshotting-server/src/paths.ts](https://github.com/elastic/kibana/blob/main/packages/kbn-screenshotting-server/src/paths.ts) would require some edits.
+For the following tasks, we will be updating the file located at [https://github.com/elastic/kibana/blob/main/src/platform/packages/private/kbn-screenshotting-server/src/paths.ts](https://github.com/elastic/kibana/blob/main/src/platform/packages/private/kbn-screenshotting-server/src/paths.ts).
 
-Taking a look at the aforementioned file, you'd notice there's a `ChromiumArchivePaths` definition that specifies platform, revision, checksum information. This is how Kibana is informed of the appropriate chromium version to install. This information is sourced from [here](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html), and the process is quite manual.
+In this file, you will notice a `ChromiumArchivePaths` definition that specifies platform, version, and checksum information. This is how Kibana knows the appropriate Chromium version to install.
 
-It's worth pointing out that to avoid errors it's recommended to create a separate directory that all the assets for this upgrade would be accessed from.
+We recommend to creating a separate working directory that all the assets for this upgrade would be accessed from.
 
-### **2.1 Determining and specifying chromium version details for Mac and Windows**
+### **2.1 Determining and specifying Chromium version for Mac and Windows**
 
-For example to determine the appropriate version for Mac;
+We pull the pre-built binaries for Mac and Windows from Google using the provided [API endpoint](https://github.com/GoogleChromeLabs/chrome-for-testing#json-api-endpoints). Access the `known-good-versions-with-downloads` JSON file and find the desired version and revision. For example, for version `139.0.7258.138`, revision `1477651`, we find
 
-- We navigate to the following link; [https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html)
+```
+{
+  "version": "139.0.7258.138",
+  "revision": "1477651",
+  "downloads": {
+    "chrome": [
+      {
+            "platform": "linux64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/linux64/chrome-linux64.zip"
+      },
+      {
+            "platform": "mac-arm64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/mac-arm64/chrome-mac-arm64.zip"
+      },
+      {
+            "platform": "mac-x64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/mac-x64/chrome-mac-x64.zip"
+      },
+      {
+            "platform": "win32",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/win32/chrome-win32.zip"
+      },
+      {
+            "platform": "win64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/win64/chrome-win64.zip"
+      }
+    ],
+    "chromedriver": [
+      {
+            "platform": "linux64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/linux64/chromedriver-linux64.zip"
+      },
+      {
+            "platform": "mac-arm64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/mac-arm64/chromedriver-mac-arm64.zip"
+      },
+      {
+            "platform": "mac-x64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/mac-x64/chromedriver-mac-x64.zip"
+      },
+      {
+            "platform": "win32",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/win32/chromedriver-win32.zip"
+      },
+      {
+            "platform": "win64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/win64/chromedriver-win64.zip"
+      }
+    ],
+    "chrome-headless-shell": [
+      {
+            "platform": "linux64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/linux64/chrome-headless-shell-linux64.zip"
+      },
+      {
+            "platform": "mac-arm64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/mac-arm64/chrome-headless-shell-mac-arm64.zip"
+      },
+      {
+            "platform": "mac-x64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/mac-x64/chrome-headless-shell-mac-x64.zip"
+      },
+      {
+            "platform": "win32",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/win32/chrome-headless-shell-win32.zip"
+      },
+      {
+            "platform": "win64",
+            "url": "https://storage.googleapis.com/chrome-for-testing-public/139.0.7258.138/win64/chrome-headless-shell-win64.zip"
+      }
+    ]
+  }
+}
+```
 
-- Select Mac, in the search field we provide the expected revision number for the current puppeteer version, for the purpose of this guide, the revision number to input is `1331488`. It's worth pointing out that it oftentimes happens that the specific revision doesn't exists; As is the case for this specific revision see image below;
+We want to download the archives for `chrome-headless-shell` for the desired platform variants. As of this writing, those are
 
-  ![image][./browser_snapshots_filter1.png]
+  - `chrome-headless-shell-mac-x64.zip`
+  - `chrome-headless-shell-mac-arm64.zip`
+  - `chrome-headless-shell-win64.zip`
 
-  In the event that this is the case, we can opt to delete the last digit from the revision (or whatever heuristics works for you), so we might find an existing revision that's as close as possible to the expected revision number.
+For each of these downloads, we want to calculate the `archiveChecksum` and the `binaryChecksum` and update these values in [https://github.com/elastic/kibana/blob/main/src/platform/packages/private/kbn-screenshotting-server/src/paths.ts](https://github.com/elastic/kibana/blob/main/src/platform/packages/private/kbn-screenshotting-server/src/paths.ts).
 
-  ![image][./browser_snapshots_filter2.png]
+Let's do this for `chrome-headless-shell-mac-x64.zip`:
 
-  On doing this we are presented with a couple of options, in this case we would opt to pick revision `1331485` as it's the closest to the expected `1331488` revision.
+- Download the file
+- Navigate to the download folder and compute the archive checksum using whatever built in checksum utility you have. For example `sha256sum chrome-headless-shell-mac-x64.zip`.
+- Copy the checksum to the `archiveChecksum` field
+- Extract the contents of the archive
+- Compute the binary checksum of the headless shell inside the extracted folder. For example `sha256sum chrome-headless-shell-mac-arm64/chrome-headless-shell`
+- Copy this checksum to the `binaryChecksum` field
 
-- After deciding on a revision copy this value and update the revision value in paths.ts for the selected package with it's archive path titled ‘Mac', we might then go ahead to open the directory, within the directory we would typically be presented with couple of files like so;
+At the end of this step, you should have updated `ChromiumArchivePaths` for `platform=darwin` and `platform=windows`.
 
-  ![image][./browser_snapshots_listing.png]
+### **2.2 Building Chromium for Linux**
 
-  For whichever platform we are performing this task for, we want to download the file that matches the current platform we are updating's `archiveFilename` value, in this case it's titled `chrome-mac.zip`.
-- We then download this file, so we can compute it's checksum, (we use sha256), so that we can verify later on for users that will be downloading this same archive that they got the correct one.
+We build a custom headless chromium variant for Linux on a GCP VM. Before starting this, ensure you have all the required [pre-requisites](#prereqs).
 
-- To compute said checksum we might do so by leveraging pre-installed utils on most unix machines like so; `sha256sum <path-to-just-downloaded-file>`.
+Create a VM in GCP using a VM template (which has been configured with the appropriate compute, network and build requirements):
 
-- We'd then want to copy the checksum value of this file and update the current value of `archiveChecksum`, next we extract the content of this archive, so we might also compute the value of `binaryChecksum` to determine the correct path for the platform; we check the value of `binaryRelativePath` knowing this value we run the sha256sum util against this path and update the current value with the one received from the computation.
+- Navigate to the [GCP Cloud Console](https://console.cloud.google.com/compute/instances?project=elastic-kibana-184716)
+- Click `Create instance` button at the top of the page
+- Ignore the form and click `Create VM from...` button at the top of the page. Select `Instance templates`
+- Select the `rd-build-chromium-linux` from the flyout and click `Customize` (not `Create`)
+- Update the name of the VM. It defaults to something like `rd-build-chromium-linux-20250825-191605`. Update this to something easier to filter on.
+- Click `Create` to create the VM.
 
-  We repeat the same process for Windows.
+**Note that this VM costs $4.22/hr to run! Make sure to delete it when you're done and consider stopping it if you're not working continuously on it.**	
 
-### **2.2 Providing chromium version for Linux**
+Once you have your VM, you can SSH into the instance and follow the instructions for [building chromium](https://github.com/elastic/kibana/tree/main/x-pack/build_chromium).
 
-Given that chromium is typically operated with a GUI and our assumption is that folks that are installing kibana on linux machines are doing so on their servers, hence the variant of chromium that kibana uses on linux machines is slightly different in that by default they are able to run without a GUI for this reason we build our own variant.
-
-However because the chromium codebase is large to say the least, we build the headless chrome on a VM, for the next steps, you'll need to have access to the "elastic-kibana" project on google console. Also have `gcloud` cli tool installed. (You can install this pretty quickly using [brew](https://formulae.brew.sh/cask/google-cloud-sdk), alternatively if you'd rather install from source because reasons, you'd want to [see here](https://cloud.google.com/sdk/docs/install))
-
-  A VM template has been created that fulfills all the compute, network and build requirements so that the build process is sped up as much as possible;
-
-- On GCP, opt to create a VM from an instance template, the template you should select would be the **"rd-build-chromium-linux"** template. On creating this VM, you'd want to take a look at the README file for building chromium **[here](https://github.com/elastic/kibana/tree/main/x-pack/build_chromium)**.
-- Next you'd want to connect to the VM using the gcloud tool we'd initially installed, you can grab the command for your own particular VM by selecting the VM and clicking the SSH option, when you select the view gcloud command. The value displayed to you should be something along the lines of;
-
+- Get the SSH command by navigating to the GCP Cloud Console for your instance, clicking the `SSH` dropdown at the top left of the page and selecting `View gcloud command`. The command will look something like
   ```
   gcloud compute ssh --zone "us-central1-a" "rd-eokoneyo-build-chromium-linux" --project "elastic-kibana-184716" --ssh-key-file ~/.ssh/id_ed25519
   ```
-
   Depending on the setup you have you might not need to pass your SSH key, but if it's slightly different you might need to pass a key that's identifiable by google using the **"--ssh-key-file"** option.
+- Run the command in your local terminal to connect to the VM
 
-- From here on simply run through the steps outlined in the readme.
-
-- If it happens that on completing the build your user doesn't have permissions within the VM to upload the build artifacts to the dedicated storage. This is fine, we'll deal with that later.
-- Next we need to extract said artifact from your VM so we can compute the checksums for the archive and the binary we just built.
-
-- To get the build artifact out of the VM, you'd want to leverage the **scp** functionality provided by gcloud cli; We do this by running a command similar to the one below again only providing the ssh key if it is required to identify yourself, we should replace the host name with the name of your VM and the path to the zip file with the correct path on your vm;
-
+  **Note**: If you have issues connecting, ensure that your local SSH keys are added to your GCP account. You can do this by navigating to the [Metadata section](https://console.cloud.google.com/compute/metadata/sshKeys?project=elastic-kibana-184716) of the GCP Cloud Console and adding your public SSH key.
+- Once you are SSH'd into the instance, follow the instructions in the [build script](https://github.com/elastic/kibana/tree/main/x-pack/build_chromium)  
+- It is likely that you will not have permissions within the VM to upload the build artifacts into the destination bucket. In this case, you will see the following error at the end of the script:
   ```
-  gcloud compute scp --zone "us-central1-a" --project "elastic-kibana-184716" --ssh-key-file ~/.ssh/id_ed25519 rd-eokoneyo-build-chromium-linux:/home/eyo.eyo/chromium/chromium/src/out/headless/chromium-fe621c5-locales-linux_x64.zip .
+   > gsutil cp /home/ying/chromium/chromium/src/out/headless/chromium-884e54e-locales-linux_arm64.zip gs://headless_shell_staging
+  Copying file:///home/ying/chromium/chromium/src/out/headless/chromium-884e54e-locales-linux_arm64.zip [Content-Type=application/zip]...
+  ResumableUploadAbortException: 403 Provided scope(s) are not authorized
+  Traceback (most recent call last):
+  File "/home/ying/chromium/./build_chromium/build.py", line 125, in <module>
+    runcmd('gsutil cp ' + path.join(src_path, zip_filename) + ' gs://headless_shell_staging')
+  File "/home/ying/chromium/build_chromium/build_util.py", line 15, in runcmd
+    raise Exception(cmd + ' returned ' + str(result))
+  Exception: gsutil cp /home/ying/chromium/chromium/src/out/headless/chromium-884e54e-locales-linux_arm64.zip gs://headless_shell_staging returned 256
   ```
+  This is fine, we'll deal with it later.
+- After each build (for `x64` and `arm64`), copy the archives from the VM to your local machine. We want to copy after each build because the build script will clean the directories between builds.
+- Exit the VM and run the following commands to copy the build artifacts:
+  ```
+  # create a working directory to contain the build artifacts
+  mkdir ~/chromium; cd ~/chromium
 
-  Preferably run this command in the same directory we'd created to contain all our build artifacts. This command assumes we just built the linux x64 variant, there will be two files created: a **.zip** and a **.sha256** file (this is useful to verify that the file we download from the build is not corrupted). We'd want to run a similar command to download the .sha256 file too.
-
-  We should perform this step before building another variant (i.e. the arm64) because artifacts from the previous build gets cleaned out.
-
-- On downloading both the .zip and .sha256 file to our machine, we attempt to calculate the checksum of the just downloaded archive; it should equal the value of the contents of the .sha256 file. Assuming all is well we would repeat the same process we did undertake for the mac and windows platform updating path.ts with the checksum value. In every update the value of revision for linux is always the version our script provided.
-
-- Assuming we've completed this step for both variants we currently build for; we might then choose to upload the archives and their respective .sha256 files to the storage buckets so they can be accessed publicly, leveraging gcloud cli this time with the gsutil command that comes bundled with gcloud;
-
-  Running the following command;
-
+  gcloud compute scp --zone "us-central1-a" --project "elastic-kibana-184716" <instanceName>:~/chromium/chromium/src/out/headless/chromium-884e54e-locales-linux_arm64.zip .
+  gcloud compute scp --zone "us-central1-a" --project "elastic-kibana-184716" <instanceName>:~/chromium/chromium/src/out/headless/chromium-884e54e-locales-linux_arm64.sha256 .
+  ```
+  Note that the exact path on the VM may differ and the filename will differ because it is based on the commit hash.
+- Once both files are built and copied, compute the `archiveChecksum` and `binaryChecksum` and update [https://github.com/elastic/kibana/blob/main/src/platform/packages/private/kbn-screenshotting-server/src/paths.ts](https://github.com/elastic/kibana/blob/main/src/platform/packages/private/kbn-screenshotting-server/src/paths.ts). We can use the downloaded `sha256` file as a sanity check.
+- Upload the build artifacts and the sha256 files to the GCP storage buckets:
   ```
   gsutil cp ./chromium-fe621c5-locales-linux_* gs://headless_shell_staging
-  ```
-
-  and
-
-  ```
   gsutil cp ./chromium-fe621c5-locales-linux_* gs://headless_shell
   ```
 
-  Would copy the files to both the staging and production buckets.
-
-If you've made it all the way through, all that's left is testing everything works as it should.
+You are done with the build! At this point you can delete the VM and move on to testing!
 
 ## 3. Testing
 
@@ -134,3 +212,28 @@ This step is required to validate our linux builds, especially considering that 
 ### 3.3 **CI**
 
 CI also runs against the build too pulling the assets we upload to the buckets, to run integration test.
+
+## <span id="prereqs">Pre-requisites</span>
+
+#### Access to the `elastic-kibana` project
+
+You will need access to the `elastic-kibana` project on Google Cloud Console. Check your access [here](https://console.cloud.google.com/compute/instances?project=elastic-kibana-184716). If you do not have access, contact your manager.
+
+#### Google Cloud CLI and `gsutil`
+
+- Install Google Cloud CLI [as explained here](https://cloud.google.com/sdk/docs/install). Alternatively, you can install using [brew](https://formulae.brew.sh/cask/google-cloud-sdk).
+- Install `gsutil` [as explained here](https://cloud.google.com/storage/docs/gsutil_install)
+- Set up and authenticate with the CLI: `gcloud init`
+- When running `gcloud init`, you will be prompted for some inputs. Here are some suggested responses:
+
+ ```
+ Settings from your current configuration [default] are:
+ compute:
+   region: us-central1
+   zone: us-central1-a
+ core:
+   account: <your email>@elastic.co
+   disable_usage_reporting: 'True'
+   project: elastic-kibana-184716
+ ```
+

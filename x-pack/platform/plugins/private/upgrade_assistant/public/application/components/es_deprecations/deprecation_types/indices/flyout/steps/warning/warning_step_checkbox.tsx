@@ -25,7 +25,7 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
-import type { IndexWarning, IndexWarningType } from '../../../../../../../../../common/types';
+import type { IndexWarning, IndexWarningType } from '@kbn/reindex-service-plugin/common';
 
 export const hasIndexWarning = (
   warnings: IndexWarning[],

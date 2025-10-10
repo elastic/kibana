@@ -20,6 +20,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+  const detectionsApi = getService('detectionsApi');
 
   const PREBUILT_RULE_ID = 'prebuilt-rule';
   const CURRENT_PREBUILT_RULE_VERSION = 5;
@@ -51,6 +52,8 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_source: {
             type: 'external',
             is_customized: false,
+            customized_fields: [],
+            has_base_version: true, // Setting to the default value of rule_source, should be calculated on import
           },
         };
 
@@ -86,6 +89,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true, // Setting to the default value of rule_source, should be calculated on import
             },
           };
 
@@ -104,6 +109,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: false,
+                customized_fields: [],
+                has_base_version: false,
               },
             },
           });
@@ -112,7 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('with override (prebuilt rule is installed)', () => {
-      it('imports a non-customized prebuilt rule with a missing base version when import payload is not equal to the installed prebuilt rule', async () => {
+      it('imports a prebuilt rule with a missing base version when import payload IS NOT EQUAL to the installed and non-customized prebuilt rule', async () => {
         await installPrebuiltRules(es, supertest);
 
         const VERSION = CURRENT_PREBUILT_RULE_VERSION - 1;
@@ -124,6 +131,8 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_source: {
             type: 'external',
             is_customized: false,
+            customized_fields: [],
+            has_base_version: true, // Setting to the default value of rule_source, should be calculated on import
           },
         };
 
@@ -142,6 +151,57 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: true,
+              customized_fields: [],
+              has_base_version: false,
+            },
+          },
+        });
+      });
+
+      it('imports a prebuilt rule with a missing base version when import payload IS NOT EQUAL to the installed and customized prebuilt rule', async () => {
+        await installPrebuiltRules(es, supertest);
+        await detectionsApi
+          .patchRule({
+            body: {
+              rule_id: PREBUILT_RULE_ID,
+              name: 'Customized prebuilt rule A',
+              tags: ['custom-tag'],
+            },
+          })
+          .expect(200);
+
+        const VERSION = CURRENT_PREBUILT_RULE_VERSION - 1;
+        const NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = {
+          ...PREBUILT_RULE_ASSET['security-rule'],
+          name: 'Some old prebuilt rule A',
+          description: 'Some old value',
+          version: VERSION,
+          immutable: true,
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+            customized_fields: [],
+            has_base_version: false,
+          },
+        };
+
+        await importRulesWithSuccess({
+          getService,
+          rules: [NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT],
+          overwrite: true,
+        });
+
+        await assertImportedRule({
+          getService,
+          expectedRule: {
+            ...NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
+            version: VERSION,
+            immutable: true,
+            rule_source: {
+              type: 'external',
+              is_customized: true,
+              customized_fields: [],
+              has_base_version: false,
             },
           },
         });
@@ -149,7 +209,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // The test fails most probably due to a bug. It requires  further investigation.
       // https://github.com/elastic/kibana/issues/223253 has been created to track it.
-      it.skip('imports a non-customized prebuilt rule with a missing base version when import payload is equal to the installed prebuilt rule', async () => {
+      it.skip('imports a prebuilt rule with a missing base version when import payload IS EQUAL to the installed and not-customized prebuilt rule', async () => {
         await installPrebuiltRules(es, supertest);
 
         const VERSION = CURRENT_PREBUILT_RULE_VERSION - 1;
@@ -160,6 +220,8 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_source: {
             type: 'external',
             is_customized: false,
+            customized_fields: [],
+            has_base_version: true, // Setting to the default value of rule_source, should be calculated on import
           },
         };
 
@@ -178,23 +240,35 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: false,
             },
           },
         });
       });
 
-      it('imports a customized prebuilt rule with a missing base version when import payload and is equal to the installed customized prebuilt rule', async () => {
+      it('imports a prebuilt rule with a missing base version when import payload IS EQUAL to the installed customized prebuilt rule', async () => {
         await installPrebuiltRules(es, supertest);
+        await detectionsApi
+          .patchRule({
+            body: {
+              rule_id: PREBUILT_RULE_ID,
+              name: 'Customized prebuilt rule A',
+              tags: ['custom-tag'],
+            },
+          })
+          .expect(200);
 
-        const VERSION = CURRENT_PREBUILT_RULE_VERSION - 1;
         const NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT = {
           ...PREBUILT_RULE_ASSET['security-rule'],
+          name: 'Customized prebuilt rule A',
           tags: ['custom-tag'],
-          version: VERSION,
           immutable: true,
           rule_source: {
             type: 'external',
             is_customized: true,
+            customized_fields: [],
+            has_base_version: true, // Setting to the default value of rule_source, should be calculated on import
           },
         };
 
@@ -208,11 +282,12 @@ export default ({ getService }: FtrProviderContext): void => {
           getService,
           expectedRule: {
             ...NON_CUSTOMIZED_PREBUILT_RULE_TO_IMPORT,
-            version: VERSION,
             immutable: true,
             rule_source: {
               type: 'external',
               is_customized: true,
+              customized_fields: [{ field_name: 'name' }, { field_name: 'tags' }],
+              has_base_version: true,
             },
           },
         });

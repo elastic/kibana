@@ -8,12 +8,12 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type {
   IndicesResolutionType,
   ReindexAction,
   UnfreezeAction,
 } from '../../../../../../common/types';
-import { ReindexStatus } from '../../../../../../common/types';
 import { useIndexContext } from './context';
 import { LoadingState } from '../../../types';
 import type { ActionButtonConfig } from '../../common/action_buttons';

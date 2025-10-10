@@ -15,6 +15,7 @@ import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import React from 'react';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
 
 jest.mock('./use_discover_histogram', () => ({
   useDiscoverHistogram: jest.fn(),
@@ -24,22 +25,16 @@ const useDiscoverHistogramMock = useDiscoverHistogram as jest.MockedFunction<
   typeof useDiscoverHistogram
 >;
 
-describe('useUnifiedHistogramWithRuntimeState', () => {
-  const getStateContainer = () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.appState.update({
-      interval: 'auto',
-      hideChart: false,
-    });
-
-    return stateContainer;
-  };
+describe('useUnifiedHistogramRuntimeState', () => {
+  const getStateContainer = () => getDiscoverStateMock({ isTimeBased: true });
 
   const renderUseUnifiedHistogramRuntimeState = (
     {
       stateContainer,
+      localStorageKeyPrefix,
     }: {
       stateContainer: DiscoverStateContainer;
+      localStorageKeyPrefix?: string;
     } = {
       stateContainer: getStateContainer(),
     }
@@ -53,11 +48,14 @@ describe('useUnifiedHistogramWithRuntimeState', () => {
       </DiscoverTestProvider>
     );
 
-    const hook = renderHook(() => useUnifiedHistogramRuntimeState(stateContainer), {
-      wrapper: Wrapper,
-    });
+    const hook = renderHook(
+      () => useUnifiedHistogramRuntimeState(stateContainer, localStorageKeyPrefix),
+      {
+        wrapper: Wrapper,
+      }
+    );
 
-    return { hook };
+    return { hook, stateContainer };
   };
 
   beforeEach(() => {
@@ -65,20 +63,74 @@ describe('useUnifiedHistogramWithRuntimeState', () => {
   });
 
   it('should return the current tab id', () => {
-    const stateContainer = getStateContainer();
-    const { hook } = renderUseUnifiedHistogramRuntimeState({ stateContainer });
+    const { hook, stateContainer } = renderUseUnifiedHistogramRuntimeState();
 
     expect(hook.result.current.currentTabId).toBe(stateContainer.getCurrentTab().id);
   });
 
   it('should call useDiscoverHistogramMock with correct arguments', () => {
-    const stateContainer = getStateContainer();
-    renderUseUnifiedHistogramRuntimeState({ stateContainer });
+    const { stateContainer } = renderUseUnifiedHistogramRuntimeState();
 
     expect(useDiscoverHistogramMock).toBeCalledWith(
       stateContainer,
       expect.objectContaining({
         initialLayoutProps: undefined,
+      })
+    );
+  });
+
+  it('should call useDiscoverHistogramMock with initialLayoutProps for default local storage key prefix', () => {
+    const stateContainer = getStateContainer();
+
+    const histogramConfig$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    ).unifiedHistogramConfig$;
+
+    histogramConfig$.next({
+      ...histogramConfig$.getValue(),
+      layoutPropsMap: {
+        ...histogramConfig$.getValue().layoutPropsMap,
+        [DEFAULT_HISTOGRAM_KEY_PREFIX]: { topPanelHeight: 123 },
+      },
+    });
+
+    renderUseUnifiedHistogramRuntimeState({ stateContainer });
+
+    expect(useDiscoverHistogramMock).toBeCalledWith(
+      stateContainer,
+      expect.objectContaining({
+        initialLayoutProps: { topPanelHeight: 123 },
+      })
+    );
+  });
+
+  it('should call useDiscoverHistogramMock with initialLayoutProps for custom local storage key prefix', () => {
+    const localStorageKeyPrefix = 'customKeyPrefix';
+    const stateContainer = getStateContainer();
+
+    const histogramConfig$ = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    ).unifiedHistogramConfig$;
+
+    histogramConfig$.next({
+      ...histogramConfig$.getValue(),
+      layoutPropsMap: {
+        ...histogramConfig$.getValue().layoutPropsMap,
+        [localStorageKeyPrefix]: { topPanelHeight: 456 },
+      },
+    });
+
+    renderUseUnifiedHistogramRuntimeState({
+      stateContainer,
+      localStorageKeyPrefix,
+    });
+
+    expect(useDiscoverHistogramMock).toBeCalledWith(
+      stateContainer,
+      expect.objectContaining({
+        initialLayoutProps: { topPanelHeight: 456 },
       })
     );
   });

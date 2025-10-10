@@ -6,9 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 
 import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormControlLayout,
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
@@ -21,7 +24,6 @@ import {
   EuiButtonEmpty,
   EuiCopy,
   EuiButton,
-  useEuiFontSize,
   EuiText,
 } from '@elastic/eui';
 import {
@@ -33,7 +35,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as LABELS from '../translations';
-import { DEFAULT_TASK_TYPE } from '../constants';
+import { CHAT_COMPLETION_TASK_TYPE, DEFAULT_TASK_TYPE } from '../constants';
 import type { Config } from '../types/types';
 import type { TaskTypeOption } from '../utils/helpers';
 import { buttonCss, accordionCss } from './inference_service_form_fields';
@@ -53,6 +55,7 @@ interface AdditionalOptionsFieldsProps {
   selectedTaskType?: string;
   taskTypeOptions: TaskTypeOption[];
   isEdit?: boolean;
+  allowContextWindowLength?: boolean;
 }
 
 export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = ({
@@ -61,10 +64,116 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
   selectedTaskType,
   onTaskTypeOptionsSelect,
   isEdit,
+  allowContextWindowLength,
 }) => {
-  const xsFontSize = useEuiFontSize('xs').fontSize;
   const { euiTheme } = useEuiTheme();
   const { setFieldValue } = useFormContext();
+
+  const contextWindowLengthSettings = useMemo(
+    () =>
+      (taskTypeOptions?.some((option) => option.id === CHAT_COMPLETION_TASK_TYPE) ||
+        (isEdit && selectedTaskType === CHAT_COMPLETION_TASK_TYPE)) &&
+      allowContextWindowLength ? (
+        <>
+          <EuiTitle size="xxs" data-test-subj="context-window-length-details-label">
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <h4>
+                  <FormattedMessage
+                    id="xpack.inferenceEndpointUICommon.components.additionalInfo.contextWindowLengthLabel"
+                    defaultMessage="Context window length"
+                  />
+                </h4>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="xs">
+                  {LABELS.OPTIONALTEXT}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiTitle>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.inferenceEndpointUICommon.components.additionalInfo.contextWindowLengthHelpInfo"
+              defaultMessage="Can be set to manually define the context length of the default model used by the connector. Useful for open source or more recent models."
+            />
+          </EuiText>
+          <EuiSpacer size="m" />
+          <UseField
+            path="config.contextWindowLength"
+            config={{
+              validations: [
+                {
+                  validator: fieldValidators.isInteger({
+                    message: LABELS.CONTEXT_WINDOW_VALIDATION_MESSAGE,
+                  }),
+                  isBlocking: true,
+                },
+                {
+                  validator: ({ value, path }) => {
+                    if (value && selectedTaskType !== CHAT_COMPLETION_TASK_TYPE) {
+                      return {
+                        code: 'ERR_FIELD_MISSING',
+                        path,
+                        message: LABELS.CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE,
+                      };
+                    }
+                  },
+                  isBlocking: true,
+                },
+              ],
+            }}
+          >
+            {(field) => {
+              const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+              // This ensures the check happens when task type changes, as well.
+              const taskTypeError =
+                config.contextWindowLength && selectedTaskType !== CHAT_COMPLETION_TASK_TYPE
+                  ? LABELS.CONTEXT_WINDOW_TASK_TYPE_VALIDATION_MESSAGE
+                  : undefined;
+              return (
+                <EuiFormRow
+                  id="contextWindowLength"
+                  fullWidth
+                  isInvalid={isInvalid || Boolean(taskTypeError)}
+                  error={errorMessage || taskTypeError}
+                  data-test-subj={'configuration-formrow-contextWindowLength'}
+                >
+                  <EuiFormControlLayout
+                    fullWidth
+                    clear={{
+                      onClick: (e) => {
+                        setFieldValue('config.contextWindowLength', '');
+                      },
+                    }}
+                  >
+                    <EuiFieldNumber
+                      min={0}
+                      fullWidth
+                      data-test-subj={'contextWindowLengthNumber'}
+                      value={config.contextWindowLength ?? ''}
+                      isInvalid={isInvalid || Boolean(taskTypeError)}
+                      onChange={(e) => {
+                        setFieldValue('config.contextWindowLength', e.target.value);
+                      }}
+                    />
+                  </EuiFormControlLayout>
+                </EuiFormRow>
+              );
+            }}
+          </UseField>
+          <EuiSpacer size="m" />
+        </>
+      ) : null,
+    [
+      selectedTaskType,
+      setFieldValue,
+      config.contextWindowLength,
+      isEdit,
+      allowContextWindowLength,
+      taskTypeOptions,
+    ]
+  );
 
   const taskTypeSettings = useMemo(
     () =>
@@ -78,12 +187,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
               />
             </h4>
           </EuiTitle>
-          <EuiText
-            css={css`
-              font-size: ${xsFontSize};
-              color: ${euiTheme.colors.textSubdued};
-            `}
-          >
+          <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.inferenceEndpointUICommon.components.additionalInfo.taskTypeHelpInfo"
               defaultMessage="Configure the inference task. Task types are specific to the service and model selected."
@@ -127,15 +231,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
           </UseField>
         </>
       ) : null,
-    [
-      selectedTaskType,
-      config.taskType,
-      xsFontSize,
-      euiTheme.colors.textSubdued,
-      isEdit,
-      taskTypeOptions,
-      onTaskTypeOptionsSelect,
-    ]
+    [selectedTaskType, config.taskType, isEdit, taskTypeOptions, onTaskTypeOptionsSelect]
   );
 
   const inferenceUri = useMemo(() => `_inference/${selectedTaskType}/`, [selectedTaskType]);
@@ -170,7 +266,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
       <EuiPanel hasBorder={true}>
         {taskTypeSettings}
         <EuiSpacer size="m" />
-        <EuiTitle size="xxs" data-test-subj="task-type-details-label">
+        <EuiTitle size="xxs" data-test-subj="inference-endpoint-details-label">
           <h4>
             <FormattedMessage
               id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceEndpointLabel"
@@ -178,12 +274,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             />
           </h4>
         </EuiTitle>
-        <EuiText
-          css={css`
-            font-size: ${xsFontSize};
-            color: ${euiTheme.colors.textSubdued};
-          `}
-        >
+        <EuiText size="xs" color="subdued">
           <FormattedMessage
             id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceEndpointHelpLabel"
             defaultMessage="Inference endpoints provide a simplified method for using this configuration, ecpecially from the API"
@@ -245,6 +336,8 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             );
           }}
         </UseField>
+        <EuiSpacer size="m" />
+        {contextWindowLengthSettings}
       </EuiPanel>
     </EuiAccordion>
   );

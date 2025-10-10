@@ -20,7 +20,7 @@ export function validatePlayground(playground: PlaygroundSavedObject): string[] 
   if (playground.name.trim().length === 0) {
     errors.push(
       i18n.translate('xpack.searchPlayground.playgroundNameError', {
-        defaultMessage: 'RAG Playground name cannot be empty',
+        defaultMessage: 'Playground name cannot be empty',
       })
     );
   }

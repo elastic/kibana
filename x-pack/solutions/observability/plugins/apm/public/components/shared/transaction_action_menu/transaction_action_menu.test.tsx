@@ -153,12 +153,6 @@ describe('TransactionActionMenu ', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the discover link when there is adhoc data view', async () => {
-    const { findByText } = await renderTransaction(Transactions.transactionWithMinimalData);
-
-    expect(findByText('View transaction in Discover')).not.toBeNull();
-  });
-
   it('should call logs locators getRedirectUrl function', async () => {
     await renderTransaction(Transactions.transactionWithMinimalData);
 

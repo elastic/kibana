@@ -8,12 +8,8 @@
 import { useMemo } from 'react';
 import { useToolsService } from './use_tools';
 
-export interface UseToolTagsProps {
-  includeSystemTools?: boolean;
-}
-
-export const useToolsTags = ({ includeSystemTools }: UseToolTagsProps = {}) => {
-  const { tools, isLoading, error } = useToolsService({ includeSystemTools });
+export const useToolsTags = () => {
+  const { tools, isLoading, error } = useToolsService();
 
   const tags = useMemo((): string[] => {
     if (isLoading || error) return [];

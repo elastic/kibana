@@ -7,9 +7,9 @@
 
 import {
   DATE_PICKER_APPLY_BUTTON_TIMELINE,
+  DATE_PICKER_START_DATE_POPOVER_BUTTON,
   GET_DATE_PICKER_END_DATE_POPOVER_BUTTON,
   GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
-  DATE_PICKER_START_DATE_POPOVER_BUTTON,
   GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
 } from '../../../screens/date_picker';
 import { HOSTS_NAMES } from '../../../screens/hosts/all_hosts';
@@ -19,8 +19,8 @@ import {
   EXPLORE_PANEL_BTN,
   HOSTS,
   KQL_INPUT,
-  NETWORK,
   LOADING_INDICATOR,
+  NETWORK,
   openNavigationPanel as toggleNavigationPanel,
 } from '../../../screens/security_header';
 import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../../screens/timeline';
@@ -28,9 +28,9 @@ import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../../screens
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import {
-  updateDates,
-  setStartDate,
   setEndDate,
+  setStartDate,
+  updateDates,
   updateTimelineDates,
 } from '../../../tasks/date_picker';
 import { openFirstHostDetails, waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
@@ -207,12 +207,12 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
 
   it('sets kql on network page', () => {
     visit(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
-    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT()).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets kql on hosts page', () => {
     visit(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT()).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets the url state when kql is set', () => {
@@ -235,8 +235,7 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/network?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')" +
+        "/app/security/network?query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')" +
           "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
           "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))"
       );
@@ -252,8 +251,7 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/hosts?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')" +
+        "/app/security/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')" +
           "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
           "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
       );
@@ -261,8 +259,7 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/network?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')" +
+        "/app/security/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')" +
           "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
           "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
       );
@@ -277,8 +274,7 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/hosts/name/siem-kibana/anomalies?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
+        "/app/security/hosts/name/siem-kibana/anomalies?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
           "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
       );
 
@@ -287,8 +283,7 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/hosts?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')" +
+        "/app/security/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')" +
           "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
           "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
       );
@@ -297,8 +292,7 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/hosts/name/siem-kibana?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')" +
+        "/app/security/hosts/name/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')" +
           "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
           "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
       );
@@ -307,7 +301,7 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
   it('Do not clears kql when navigating to a new page', () => {
     visit(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     navigateFromHeaderTo(NETWORK);
-    cy.get(KQL_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
+    cy.get(KQL_INPUT()).should('have.text', 'source.ip: "10.142.0.9"');
   });
 
   it('sets and reads the url state for timeline by id', () => {

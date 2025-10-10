@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -21,9 +21,11 @@ import { getComparisonEnabled } from '../../../shared/time_comparison/get_compar
 
 function FullTraceButton({ isLoading, isDisabled }: { isLoading?: boolean; isDisabled?: boolean }) {
   return (
-    <EuiButton
+    <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.apm.fullTraceButton.viewFullTraceButton.ariaLabel', {
+        defaultMessage: 'View full trace',
+      })}
       data-test-subj="apmFullTraceButtonViewFullTraceButton"
-      fill
       iconType="apmTrace"
       isLoading={isLoading}
       disabled={isDisabled}
@@ -31,7 +33,7 @@ function FullTraceButton({ isLoading, isDisabled }: { isLoading?: boolean; isDis
       {i18n.translate('xpack.apm.transactionDetails.viewFullTraceButtonLabel', {
         defaultMessage: 'View full trace',
       })}
-    </EuiButton>
+    </EuiButtonEmpty>
   );
 }
 

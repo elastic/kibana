@@ -44,6 +44,7 @@ export const logicalOperators: FunctionDefinition[] = [
     Location.STATS,
     Location.STATS_BY,
     Location.STATS_WHERE,
+    Location.RERANK,
   ],
   signatures: [
     {
@@ -70,6 +71,7 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.SORT,
       Location.STATS_BY,
       Location.STATS_WHERE,
+      Location.RERANK,
     ],
     signatures: [
       {
@@ -95,6 +97,7 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.DISSECT,
       Location.COMPLETION,
       Location.RENAME,
+      Location.RERANK,
     ],
     signatures: [
       {

@@ -32,6 +32,7 @@ export const getLensAttributesFromSuggestion = ({
     filters: Filter[];
   };
   title: string;
+  version: 1;
 } => {
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
@@ -65,6 +66,7 @@ export const getLensAttributesFromSuggestion = ({
         }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
+    version: 1 as const,
   };
   return attributes;
 };

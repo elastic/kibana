@@ -12,7 +12,7 @@ const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
 };
 
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
-  return {};
+  return {} as OnechatPluginStart;
 };
 
 export const onechatMocks = {

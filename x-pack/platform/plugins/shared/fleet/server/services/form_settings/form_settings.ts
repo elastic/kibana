@@ -69,7 +69,7 @@ export function _getSettingsValuesForAgentPolicy(
     }
 
     const val = agentPolicy.advanced_settings?.[setting.api_field.name];
-    if (val !== undefined) {
+    if (val !== undefined && val !== '') {
       settingsValues[setting.name] = val;
     }
   });

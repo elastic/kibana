@@ -469,19 +469,25 @@
             "pluginId": "discoverShared",
             "scope": "public",
             "docId": "kibDiscoverSharedPluginApi",
-            "section": "def-public.ObservabilityLogsAIAssistantFeature",
-            "text": "ObservabilityLogsAIAssistantFeature"
+            "section": "def-public.ObservabilityStreamsFeature",
+            "text": "ObservabilityStreamsFeature"
           },
           " | ",
           {
             "pluginId": "discoverShared",
             "scope": "public",
             "docId": "kibDiscoverSharedPluginApi",
-            "section": "def-public.ObservabilityStreamsFeature",
-            "text": "ObservabilityStreamsFeature"
+            "section": "def-public.ObservabilityLogsAIAssistantFeature",
+            "text": "ObservabilityLogsAIAssistantFeature"
           },
           " | ",
           "ObservabilityCreateSLOFeature",
+          " | ",
+          "ObservabilityLogEventsFeature",
+          " | ",
+          "ObservabilityTracesSpanLinksFeature",
+          " | ",
+          "ObservabilityTracesFetchErrorsFeature",
           " | ",
           "SecuritySolutionFeature"
         ],

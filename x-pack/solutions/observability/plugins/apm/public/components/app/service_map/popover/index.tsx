@@ -11,8 +11,7 @@ import {
   EuiHorizontalRule,
   EuiPopover,
   EuiTitle,
-  EuiToolTip,
-  EuiIcon,
+  EuiIconTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
@@ -194,14 +193,13 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
               <h3 style={{ wordBreak: 'break-all' }}>
                 {selectedElementData.label ?? selectedElementId}
                 {kuery && (
-                  <EuiToolTip
+                  <EuiIconTip
                     position="bottom"
                     content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
                       defaultMessage: 'The KQL filter is not applied in the displayed stats.',
                     })}
-                  >
-                    <EuiIcon tabIndex={0} type="info" />
-                  </EuiToolTip>
+                    type="info"
+                  />
                 )}
               </h3>
             </EuiTitle>

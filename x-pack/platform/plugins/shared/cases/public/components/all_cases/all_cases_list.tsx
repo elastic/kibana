@@ -33,6 +33,8 @@ import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumnsSelection } from './use_cases_columns_selection';
 import { DEFAULT_CASES_TABLE_STATE } from '../../containers/constants';
 import { CasesTableUtilityBar } from './utility_bar';
+import { useCheckAlertAttachments } from '../../containers/use_check_alert_attachments';
+import { type GetAttachments } from './selector_modal/use_cases_add_to_existing_case_modal';
 
 const getSortField = (field: string): SortFieldCase =>
   // @ts-ignore
@@ -42,10 +44,11 @@ export interface AllCasesListProps {
   hiddenStatuses?: CaseStatuses[];
   isSelectorView?: boolean;
   onRowClick?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
+  getAttachments?: GetAttachments;
 }
 
 export const AllCasesList = React.memo<AllCasesListProps>(
-  ({ hiddenStatuses = [], isSelectorView = false, onRowClick }) => {
+  ({ hiddenStatuses = [], isSelectorView = false, onRowClick, getAttachments }) => {
     const { owner, permissions } = useCasesContext();
 
     const availableSolutions = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
@@ -62,6 +65,11 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { data = initialData, isFetching: isLoadingCases } = useGetCases({
       filterOptions,
       queryParams,
+    });
+
+    const { disabledCases, isLoading: isLoadingCaseAttachments } = useCheckAlertAttachments({
+      cases: data.cases,
+      getAttachments,
     });
 
     const assigneesFromCases = useMemo(() => {
@@ -141,6 +149,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       onRowClick,
       disableActions: selectedCases.length > 0,
       selectedColumns,
+      disabledCases,
     });
 
     const pagination = useMemo(
@@ -233,7 +242,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           data={data}
           goToCreateCase={onRowClick ? onCreateCasePressed : undefined}
           isCasesLoading={isLoadingCases}
-          isLoadingColumns={isLoadingColumns}
+          isLoadingColumns={isLoadingColumns || isLoadingCaseAttachments}
           isCommentUpdating={isLoadingCases}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}

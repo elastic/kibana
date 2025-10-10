@@ -6,7 +6,6 @@
  */
 
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/index-adapter';
-import type { SiemMigrationResource } from '../../../../../common/siem_migrations/model/common.gen';
 import type {
   DashboardMigration,
   DashboardMigrationDashboardData,
@@ -27,6 +26,7 @@ export const dashboardMigrationsDashboardsFieldMap: FieldMap<
   migration_id: { type: 'keyword', required: true },
   created_by: { type: 'keyword', required: true },
   status: { type: 'keyword', required: true },
+  translation_result: { type: 'keyword', required: true },
   updated_at: { type: 'date', required: true },
   updated_by: { type: 'keyword', required: true },
   original_dashboard: { type: 'object', required: true },
@@ -45,16 +45,17 @@ export const dashboardMigrationsDashboardsFieldMap: FieldMap<
   'original_dashboard.splunk_properties.app': { type: 'keyword', required: true },
   'original_dashboard.splunk_properties.sharing': { type: 'keyword', required: true },
   'original_dashboard.splunk_properties.owner': { type: 'keyword', required: true },
-};
-
-export const dashboardMigrationResourcesFieldMap: FieldMap<
-  SchemaFieldMapKeys<Omit<SiemMigrationResource, 'id'>>
-> = {
-  migration_id: { type: 'keyword', required: true },
-  type: { type: 'keyword', required: true },
-  name: { type: 'keyword', required: true },
-  content: { type: 'text', required: false },
-  metadata: { type: 'object', required: false },
-  updated_at: { type: 'date', required: false },
-  updated_by: { type: 'keyword', required: false },
+  elastic_dashboard: { type: 'object', required: false },
+  'elastic_dashboard.id': { type: 'keyword', required: false },
+  'elastic_dashboard.title': {
+    type: 'text',
+    required: true,
+    fields: { keyword: { type: 'keyword' } },
+  },
+  'elastic_dashboard.description': { type: 'text', required: false },
+  'elastic_dashboard.data': { type: 'text', required: false },
+  comments: { type: 'object', array: true, required: false },
+  'comments.message': { type: 'keyword', required: true },
+  'comments.created_at': { type: 'date', required: true },
+  'comments.created_by': { type: 'keyword', required: true }, // use 'assistant' for llm
 };

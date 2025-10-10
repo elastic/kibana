@@ -47,6 +47,12 @@ export const initTelemetry = (
     // Reverse-mapping APM Server transformations:
     // https://github.com/elastic/apm-data/blob/2f9cdbf722e5be5bf77d99fbcaab7a70a7e83fff/input/otlp/metadata.go#L69-L74
     [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: apmConfig.environment,
+
+    // From https://opentelemetry.io/docs/specs/semconv/resource/process/
+    'process.pid': process.pid,
+    'process.runtime.name': 'nodejs',
+    'process.runtime.version': process.version,
+
     ...(apmConfig.globalLabels as Record<string, unknown>),
   });
 

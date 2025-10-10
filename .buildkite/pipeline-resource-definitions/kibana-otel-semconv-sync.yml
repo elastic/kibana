@@ -19,8 +19,9 @@ spec:
       description: Updates OTel semantic conventions and regenerates TypeScript field definitions
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: '#obs-ux-logs'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        SLACK_NOTIFICATIONS_ON_SUCCESS: 'true'
+        SLACK_NOTIFICATIONS_CHANNEL: '#obs-ux-logs'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main

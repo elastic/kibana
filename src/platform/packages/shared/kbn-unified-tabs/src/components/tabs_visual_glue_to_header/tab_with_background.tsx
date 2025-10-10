@@ -39,7 +39,9 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         // tab main background and another background color on hover
         css={css`
           display: inline-block;
-          background: ${isSelected ? selectedTabBackgroundColor : euiTheme.colors.lightestShade};
+          background: ${isSelected || isDragging
+            ? selectedTabBackgroundColor
+            : euiTheme.colors.lightestShade};
           transition: background ${euiTheme.animation.fast};
           ${isDragging
             ? `

@@ -16,6 +16,7 @@ import {
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { reduce } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { RunscriptActionResult } from '../../runscript_action_result';
 import { RunningProcessesActionResults } from '../../running_processes_action_results';
 import { getAgentTypeName } from '../../../../common/translations';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -216,18 +217,28 @@ const OutputContent = memo<{
         {action.agents.map((agentId) => (
           <div key={agentId}>
             {OUTPUT_MESSAGES.wasSuccessful(command)}
-            <ExecuteActionHostResponse
-              action={action}
-              agentId={agentId}
-              canAccessFileDownloadLink={
-                canAccessEndpointActionsLogManagement || canReadActionsLogManagement
-              }
-              textSize="xs"
-              data-test-subj={getTestId('actionsLogTray')}
-              hideFile={action.agentType === 'crowdstrike'}
-              hideContext={true}
-              showPasscode={action.agentType !== 'microsoft_defender_endpoint'}
-            />
+
+            {action.agentType === 'sentinel_one' ? (
+              <RunscriptActionResult
+                action={action}
+                agentId={agentId}
+                textSize="xs"
+                data-test-subj={getTestId('actionsLogTray')}
+              />
+            ) : (
+              <ExecuteActionHostResponse
+                action={action}
+                agentId={agentId}
+                canAccessFileDownloadLink={
+                  canAccessEndpointActionsLogManagement || canReadActionsLogManagement
+                }
+                textSize="xs"
+                data-test-subj={getTestId('actionsLogTray')}
+                hideFile={action.agentType === 'crowdstrike'}
+                hideContext={true}
+                showPasscode={action.agentType !== 'microsoft_defender_endpoint'}
+              />
+            )}
           </div>
         ))}
       </EuiFlexGroup>

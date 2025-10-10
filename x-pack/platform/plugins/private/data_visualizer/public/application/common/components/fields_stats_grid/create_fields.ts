@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import { roundToDecimalPlace } from '@kbn/ml-number-utils';
 import { getFieldNames, getSupportedFieldType } from './get_field_names';
 import type { FileBasedFieldVisConfig } from '../stats_table/types';

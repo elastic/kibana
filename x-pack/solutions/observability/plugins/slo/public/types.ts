@@ -54,6 +54,7 @@ import type {
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SLORouteRepository } from '../server/routes/get_slo_server_route_repository';
 import type { SLOPlugin } from './plugin';
 
@@ -106,6 +107,7 @@ export interface SLOPublicPluginsStart {
   security?: SecurityPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   apmSourcesAccess: ApmSourceAccessPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export type SLOPublicSetup = ReturnType<SLOPlugin['setup']>;

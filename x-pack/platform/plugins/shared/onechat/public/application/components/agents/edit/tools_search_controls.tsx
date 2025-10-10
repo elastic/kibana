@@ -10,17 +10,14 @@ import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elast
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { countBy } from 'lodash';
-import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import { labels } from '../../../utils/i18n';
-import { ToolFilterOption } from '../../tools/table/tools_table_filter_option';
-import { toolTypeDisplays } from '../../../utils/constants';
+import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
 
 interface ToolsSearchControlsProps {
   displayTools: ToolDefinition[];
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  showGroupedView: boolean;
-  onShowGroupedViewChange?: (showGroupedView: boolean) => void;
   showActiveOnly: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
   disabled: boolean;
@@ -30,8 +27,6 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
   displayTools,
   searchQuery,
   onSearchChange,
-  showGroupedView,
-  onShowGroupedViewChange,
   showActiveOnly,
   onShowActiveOnlyChange,
   disabled,
@@ -45,7 +40,6 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
   }, [displayTools]);
 
   const searchConfig: Search = React.useMemo(() => {
-    const matchesByType = countBy(displayTools, 'type') as Record<ToolType, number>;
     const matchesByTag = countBy(displayTools.flatMap((tool) => tool.tags));
 
     const config: EuiSearchBarProps = {
@@ -56,31 +50,16 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
       filters: [
         {
           type: 'field_value_selection',
-          field: 'type',
-          name: labels.tools.typeFilter,
-          multiSelect: 'or',
-          options: Object.entries(toolTypeDisplays).map(([type, display]) => ({
-            value: type as ToolType,
-            name: display.label,
-            view: (
-              <ToolFilterOption
-                name={display.label}
-                matches={matchesByType[type as ToolType] ?? 0}
-              />
-            ),
-          })),
-        },
-        {
-          type: 'field_value_selection',
           field: 'tags',
           name: labels.tools.tagsFilter,
           multiSelect: 'or',
           options: allTags.map((tag) => ({
             value: tag,
             name: tag,
-            view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
+            view: <FilterOptionWithMatchesBadge name={tag} matches={matchesByTag[tag] ?? 0} />,
           })),
           searchThreshold: 1,
+          autoSortOptions: false,
         },
       ],
       onChange: ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
@@ -100,23 +79,6 @@ export const ToolsSearchControls: React.FC<ToolsSearchControlsProps> = ({
       {Object.keys(searchConfig).length > 0 && (
         <EuiFlexItem>
           <EuiSearchBar {...(searchConfig as EuiSearchBarProps)} />
-        </EuiFlexItem>
-      )}
-      {onShowGroupedViewChange && (
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={i18n.translate('xpack.onechat.tools.groupByType', {
-                  defaultMessage: 'Group by type',
-                })}
-                checked={showGroupedView}
-                onChange={(e) => onShowGroupedViewChange(e.target.checked)}
-                disabled={disabled}
-                compressed
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
         </EuiFlexItem>
       )}
       {onShowActiveOnlyChange && (

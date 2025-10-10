@@ -39,6 +39,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.AGENT_BUILDER_ENABLED_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "AGENT_BUILDER_ENABLED_SETTING_ID",
+        "description": [],
+        "signature": [
+          "\"agentBuilder:enabled\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.AI_ANONYMIZATION_SETTINGS",
         "type": "string",
         "tags": [],
@@ -789,6 +804,36 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR",
+        "type": "string",
+        "tags": [],
+        "label": "GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR",
+        "description": [],
+        "signature": [
+          "\"genAiSettings:defaultAIConnector\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY",
+        "type": "string",
+        "tags": [],
+        "label": "GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY",
+        "description": [],
+        "signature": [
+          "\"genAiSettings:defaultAIConnectorOnly\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.HIDE_ANNOUNCEMENTS_ID",
         "type": "string",
         "tags": [],
@@ -1239,21 +1284,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_STREAMS_UI",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_ENABLE_STREAMS_UI",
-        "description": [],
-        "signature": [
-          "\"observability:enableStreamsUI\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID",
         "type": "string",
         "tags": [],
@@ -1306,6 +1336,36 @@
         "description": [],
         "signature": [
           "\"observability:searchExcludedDataTiers\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS",
+        "description": [],
+        "signature": [
+          "\"observability:streamsEnableContentPacks\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS",
+        "description": [],
+        "signature": [
+          "\"observability:streamsEnableGroupStreams\""
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

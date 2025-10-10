@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiCode } from '@elastic/eui';
-import React, { useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiCode, EuiLink, EuiText } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FailureStoreModal } from '@kbn/failure-store-modal';
 import {
   overviewPanelDatasetQualityIndicatorDegradedDocs,
   overviewPanelDatasetQualityIndicatorFailedDocs,
-  overviewPanelDatasetQualityIndicatorNoFailureStore,
+  enableFailureStoreButtonLabel,
 } from '../../../../../common/translations';
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
 import { useQualityIssuesDocsChart } from '../../../../hooks/use_quality_issues_docs_chart';
 import { useDatasetQualityDetailsState } from '../../../../hooks/use_dataset_quality_details_state';
+import { useFailureStoreModal } from '../../../../hooks/use_failure_store_modal';
 import { DatasetQualityIndicator, QualityPercentageIndicator } from '../../../quality_indicator';
 import { Card } from './card';
 
@@ -60,35 +60,16 @@ export default function QualitySummaryCards({
   } = useOverviewSummaryPanel();
   const { handleDocsTrendChartChange } = useQualityIssuesDocsChart();
   const {
-    canUserReadFailureStore,
-    hasFailureStore,
-    loadingState: { dataStreamSettingsLoading },
-    defaultRetentionPeriod,
-    customRetentionPeriod,
-    updateFailureStore,
+    loadingState: { dataStreamSettingsLoading, dataStreamDetailsLoading },
   } = useDatasetQualityDetailsState();
 
-  const [isFailureStoreModalOpen, setIsFailureStoreModalOpen] = useState(false);
-
-  const closeModal = () => {
-    setIsFailureStoreModalOpen(false);
-  };
-
-  const handleSaveModal = async (data: {
-    failureStoreEnabled: boolean;
-    customRetentionPeriod?: string;
-  }) => {
-    updateFailureStore({
-      failureStoreEnabled: data.failureStoreEnabled,
-      customRetentionPeriod: data.customRetentionPeriod,
-    });
-    closeModal();
-  };
-
-  const onClick = () => {
-    setIsFailureStoreModalOpen(true);
-  };
-
+  const {
+    openModal,
+    canUserReadFailureStore,
+    canUserManageFailureStore,
+    hasFailureStore,
+    renderModal: renderFailureStoreModal,
+  } = useFailureStoreModal();
   return (
     <EuiFlexGroup gutterSize="m" direction="column" style={{ height: '100%' }}>
       <EuiFlexItem grow={true}>
@@ -126,45 +107,15 @@ export default function QualitySummaryCards({
             handleDocsTrendChartChange('degraded');
             setSelectedCard('degraded');
           }}
+          isLoading={dataStreamSettingsLoading || dataStreamDetailsLoading}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        {!dataStreamSettingsLoading && !(hasFailureStore && canUserReadFailureStore) ? (
-          <>
-            <Card
-              isDisabled={true}
-              title={overviewPanelDatasetQualityIndicatorNoFailureStore}
-              titleTooltipContent={failedDocTooltip}
-              kpiValue={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
-                defaultMessage: 'No failure store',
-              })}
-              footer={
-                canUserReadFailureStore && (
-                  <EuiButtonEmpty
-                    onClick={onClick}
-                    data-test-subj="datasetQualityDetailsEnableFailureStoreButton"
-                  >
-                    {i18n.translate('xpack.datasetQuality.enableFailureStore', {
-                      defaultMessage: 'Enable failure store',
-                    })}
-                  </EuiButtonEmpty>
-                )
-              }
-            />
-            {canUserReadFailureStore && isFailureStoreModalOpen && defaultRetentionPeriod && (
-              <FailureStoreModal
-                onCloseModal={closeModal}
-                onSaveModal={handleSaveModal}
-                failureStoreProps={{
-                  failureStoreEnabled: hasFailureStore,
-                  defaultRetentionPeriod,
-                  customRetentionPeriod,
-                }}
-              />
-            )}
-          </>
-        ) : (
+        {dataStreamSettingsLoading ||
+        dataStreamDetailsLoading ||
+        (hasFailureStore && canUserReadFailureStore) ? (
           <Card
+            isLoading={dataStreamSettingsLoading || dataStreamDetailsLoading}
             isDisabled={false}
             isSelected={selectedCard === 'failed'}
             title={overviewPanelDatasetQualityIndicatorFailedDocs}
@@ -199,6 +150,32 @@ export default function QualitySummaryCards({
               setSelectedCard('failed');
             }}
           />
+        ) : (
+          <>
+            <Card
+              isDisabled={true}
+              title={overviewPanelDatasetQualityIndicatorFailedDocs}
+              titleTooltipContent={failedDocTooltip}
+              kpiValue={i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
+                defaultMessage: 'No failure store',
+              })}
+              footer={
+                canUserManageFailureStore && (
+                  <EuiText size="s">
+                    <EuiLink
+                      onClick={openModal}
+                      data-test-subj="datasetQualityDetailsEnableFailureStoreButton"
+                      aria-label={enableFailureStoreButtonLabel}
+                    >
+                      {enableFailureStoreButtonLabel}
+                    </EuiLink>
+                  </EuiText>
+                )
+              }
+              dataTestSubjTitle="noFailureStore"
+            />
+            {renderFailureStoreModal()}
+          </>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

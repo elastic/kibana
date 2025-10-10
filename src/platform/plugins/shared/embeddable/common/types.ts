@@ -10,12 +10,18 @@
 import type { Reference } from '@kbn/content-management-utils';
 
 export type EmbeddableTransforms<
-  StoredState extends object = object,
-  State extends object = object
+  StoredEmbeddableState extends object = object,
+  EmbeddableState extends object = object
 > = {
-  transformOut?: (state: StoredState, references?: Reference[]) => State;
-  transformIn?: (state: State) => {
-    state: StoredState;
+  /**
+   * Converts StoredEmbeddableState and injects references into EmbeddableState
+   */
+  transformOut?: (storedState: StoredEmbeddableState, references?: Reference[]) => EmbeddableState;
+  /**
+   * Converts EmbeddableState into StoredEmbeddableState and extracts references
+   */
+  transformIn?: (state: EmbeddableState) => {
+    state: StoredEmbeddableState;
     references?: Reference[];
   };
 };

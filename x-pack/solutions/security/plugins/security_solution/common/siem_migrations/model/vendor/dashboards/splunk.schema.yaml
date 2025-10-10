@@ -25,7 +25,6 @@ components:
         - id
         - title
         - eai:data
-        - updated
       properties:
         id:
           type: string
@@ -54,6 +53,9 @@ components:
         updated:
           type: string
           description: The last updated timestamp of the dashboard
+        version:
+          type: string
+          description: The version of the dashboard
 
 
 

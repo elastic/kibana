@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-export const getExampleLensBody = (title = `Lens vis - ${Date.now()} - ${Math.random()}`) => ({
+import type { LensCreateRequestBody } from '@kbn/lens-plugin/server';
+
+export const getExampleLensBody = (
+  title = `Lens vis - ${Date.now()} - ${Math.random()}`,
+  description = ''
+): LensCreateRequestBody => ({
   data: {
     title,
-    description: '',
+    description,
     visualizationType: 'lnsMetric',
     state: {
       visualization: {
@@ -60,9 +65,8 @@ export const getExampleLensBody = (title = `Lens vis - ${Date.now()} - ${Math.ra
       },
       internalReferences: [],
       adHocDataViews: {},
+      isNewApiFormat: true, // temporary flag
     },
-  },
-  options: {
     references: [
       {
         type: 'index-pattern',
@@ -71,4 +75,5 @@ export const getExampleLensBody = (title = `Lens vis - ${Date.now()} - ${Math.ra
       },
     ],
   },
+  options: {},
 });

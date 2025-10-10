@@ -8,7 +8,7 @@
  */
 
 import type { MutableRefObject } from 'react';
-import type { GridPanelData } from '../../grid_panel';
+import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
 import { getGridLayoutStateManagerMock } from '../../test_utils/mocks';
 import { getSampleOrderedLayout } from '../../test_utils/sample_layout';
 import { moveAction } from './state_manager_actions';
@@ -34,7 +34,9 @@ describe('panel state manager actions', () => {
       } as any as HTMLDivElement,
     };
     gridLayoutStateManager.layoutRef.current = {
-      getBoundingClientRect: jest.fn().mockReturnValue({ top: 0, height: 100, bottom: 100 }),
+      getBoundingClientRect: jest
+        .fn()
+        .mockReturnValue({ top: 0, height: 100, bottom: 100, left: 0, width: 200, right: 200 }),
     } as any as HTMLDivElement;
   });
 
@@ -134,6 +136,51 @@ describe('panel state manager actions', () => {
         const panel = gridLayoutStateManager.gridLayout$.getValue()['main-0'].panels.panel1;
         expect(panel.height).toBe(2);
         expect(panel.width).toBe(2);
+      });
+
+      it('can extend panel to the full width of the layout when it is offset', () => {
+        gridLayoutStateManager.layoutRef.current = {
+          getBoundingClientRect: jest.fn().mockReturnValue({
+            top: 0,
+            height: 100,
+            bottom: 100,
+            left: 100, // offset the layout by 100 pixels
+            width: 200,
+            right: 100 + 872, // 872 = the width of the layout when column pixel width is 10
+          }),
+        } as any as HTMLDivElement;
+        gridLayoutStateManager.panelRefs.current.panel1 = {
+          getBoundingClientRect: jest.fn().mockReturnValue({
+            top: 0,
+            left: 100, // offset the panel by 100 pixels to the left as well
+            right: 150,
+            bottom: 50,
+            height: 50,
+            width: 50,
+          }),
+          scrollIntoView: jest.fn(),
+        } as any as HTMLDivElement;
+
+        // update the active panel event
+        gridLayoutStateManager.activePanelEvent$.next({
+          ...(gridLayoutStateManager.activePanelEvent$.getValue() as ActivePanelEvent),
+          panelDiv: gridLayoutStateManager.panelRefs.current.panel1!,
+        });
+
+        // bring the mouse **way** to the right to try to make the panel as big as possible
+        moveAction(
+          new MouseEvent('pointerdown', { clientX: 0, clientY: 0 }),
+          gridLayoutStateManager,
+          {
+            clientX: 10000,
+            clientY: 0,
+          },
+          lastRequestedPanelPosition
+        );
+
+        // the panel reaches the end of the layout
+        const panel = gridLayoutStateManager.gridLayout$.getValue()['main-0'].panels.panel1;
+        expect(panel.width).toBe(48);
       });
     });
   });

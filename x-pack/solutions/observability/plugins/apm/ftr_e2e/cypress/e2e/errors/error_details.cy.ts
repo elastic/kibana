@@ -107,10 +107,10 @@ describe('Error details', () => {
         });
       });
 
-      describe('when clicking on View x occurences in discover', () => {
+      describe('when clicking on Open in Discover', () => {
         it('should redirects the user to discover', () => {
           cy.visitKibana(errorDetailsPageHref);
-          cy.contains('View 1 occurrence in Discover').click();
+          cy.contains('Open in Discover').click();
           cy.url().should('include', 'app/discover');
         });
       });

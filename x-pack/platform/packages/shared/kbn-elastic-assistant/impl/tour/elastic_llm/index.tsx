@@ -36,7 +36,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
   zIndex,
   wrapper = true, // Whether to wrap the children in a div with padding
 }) => {
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http, inferenceEnabled, settings } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
   const tourStorageKey = useTourStorageKey(storageKey);
   const [tourState, setTourState] = useLocalStorage<EISUsageCostTourState>(
@@ -67,6 +67,7 @@ const ElasticLLMCostAwarenessTourComponent: React.FC<Props> = ({
   const { data: aiConnectors } = useLoadConnectors({
     http,
     inferenceEnabled,
+    settings,
   });
   const isElasticLLMConnectorSelected = useMemo(
     () =>

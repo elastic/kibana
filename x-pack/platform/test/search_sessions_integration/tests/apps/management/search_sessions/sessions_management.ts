@@ -28,9 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.deleteAllSearchSessions();
         await PageObjects.common.navigateToApp('dashboard');
         log.debug('wait for dashboard landing page');
-        await retry.tryForTime(10000, async () => {
-          testSubjects.existOrFail('dashboardLandingPage');
-        });
+        await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
         await searchSessions.markTourDone();
       });
 
@@ -93,11 +91,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('Should be called "Search Sessions" in the management apps sidebar', async () => {
+      it('Should be called "Background search" in the management apps sidebar', async () => {
         await PageObjects.common.navigateToApp('management');
         const searchSessionsAnchor = await testSubjects.find('search_sessions');
         const anchorText = await searchSessionsAnchor.getVisibleText();
-        expect(anchorText).to.be('Search Sessions');
+        expect(anchorText).to.be('Background Search');
       });
     });
   });

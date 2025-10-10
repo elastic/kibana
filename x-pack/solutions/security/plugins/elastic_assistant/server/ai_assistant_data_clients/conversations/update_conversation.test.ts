@@ -27,9 +27,6 @@ export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => (
   excludeFromLastConversationStorage: false,
   messages: [],
   replacements: {},
-  summary: {
-    semanticContent: 'Updated semantic content.',
-  },
 });
 
 const mockUser1 = authenticatedUser;
@@ -39,10 +36,6 @@ const userAsUser = {
 };
 const getEsConversationMock = (): EsConversationSchema => {
   return {
-    summary: {
-      '@timestamp': '2025-08-19T13:26:01.746Z',
-      semantic_content: 'Very nice demo semantic content 4.',
-    },
     '@timestamp': '2025-08-19T10:49:52.884Z',
     updated_at: '2025-08-19T13:26:01.746Z',
     api_config: {
@@ -143,11 +136,6 @@ describe('updateConversation', () => {
           id: 'test',
           messages: [],
           replacements: [],
-          summary: {
-            '@timestamp': expect.anything(),
-            semantic_content: 'Updated semantic content.',
-            summarized_message_ids: undefined,
-          },
           title: 'test',
           updated_at: expect.anything(),
         },
@@ -179,10 +167,6 @@ describe('updateConversation', () => {
       users: [userAsUser],
       title: 'Viewing the Number of Open Alerts in Elastic Security',
       category: 'assistant',
-      summary: {
-        timestamp: '2025-08-19T13:26:01.746Z',
-        semanticContent: 'Very nice demo semantic content 4.',
-      },
       apiConfig: {
         actionTypeId: '.gen-ai',
         connectorId: 'gpt-4-1',
@@ -323,10 +307,6 @@ describe('transformToUpdateScheme', () => {
           role: 'user',
         },
       ],
-      summary: {
-        '@timestamp': updateAt,
-        semantic_content: 'Updated semantic content.',
-      },
     };
     expect(transformed).toEqual(expected);
   });

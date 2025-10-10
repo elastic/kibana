@@ -14,16 +14,39 @@ clone_otel_repository() {
 generate_resolved_yaml() {
   echo "--- Generating resolved YAML with Docker weaver"
   cd otel-semconv
+
+  # Create output directory with proper permissions for the mapped user
+  mkdir -p ./weaver_output
+  chmod 777 ./weaver_output
+
   docker run --rm \
     --user $(id -u):$(id -g) \
     --env USER=weaver \
     --env HOME=/home/weaver \
     --mount type=bind,source=./model,target=/home/weaver/source,readonly \
-    --mount type=bind,source="$(pwd)",target=/home/weaver/out \
+    --mount type=bind,source=./weaver_output,target=/home/weaver/out \
     docker.io/otel/weaver:v0.17.1@sha256:32523b5e44fb44418786347e9f7dde187d8797adb6d57a2ee99c245346c3cdfe \
     registry resolve \
     --registry=/home/weaver/source \
     --output=/home/weaver/out/resolved_semconv.yaml
+
+  # Debug: Check what files were generated
+  echo "--- Debug: Checking generated files"
+  ls -la ./weaver_output/ || echo "weaver_output directory not found"
+
+  # Move the generated file to the expected location
+  if [ -f "./weaver_output/resolved_semconv.yaml" ]; then
+    cp ./weaver_output/resolved_semconv.yaml ./resolved_semconv.yaml
+    echo "✅ Successfully copied resolved_semconv.yaml"
+    ls -la ./resolved_semconv.yaml
+  else
+    echo "❌ Error: resolved_semconv.yaml not found in weaver_output"
+    exit 1
+  fi
+
+  # Clean up the temporary directory
+  rm -rf ./weaver_output
+
   cd ..
 }
 
@@ -34,13 +57,17 @@ bootstrap_kibana() {
 
 generate_typescript() {
   echo "--- Generating TypeScript definitions"
-  # Move generated YAML to package
-  cp otel-semconv/resolved_semconv.yaml "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
-  
+
+  # Verify the YAML file was already copied by main function
+  echo "--- Debug: Verifying YAML file is in package assets"
+  ls -la "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml" || echo "❌ resolved-semconv.yaml not found in assets directory"
+
   # Generate TypeScript file
+  echo "--- Running TypeScript generation"
   node scripts/generate_otel_semconv.js
-  
+
   # Run ESLint fix
+  echo "--- Running ESLint fix"
   yarn lint:es --fix "$OTEL_PACKAGE_DIR/src/generated/" || true
 }
 
@@ -49,7 +76,7 @@ create_pull_request() {
 
   # Configure Git with machine user
   KIBANA_MACHINE_USERNAME="kibanamachine"
-  
+
   # Define PR details
   PR_TITLE='[One Discover][Logs UX] Update OpenTelemetry Semantic Conventions'
   PR_BODY='This PR updates the OpenTelemetry semantic conventions definitions to the latest version.
@@ -63,7 +90,6 @@ create_pull_request() {
 - ✅ TypeScript compilation successful
 - ✅ Package tests passing
 - ✅ ESLint formatting applied
-- ✅ Generated files follow Kibana coding standards
 
 🤖 Generated automatically by Buildkite workflow'
 
@@ -83,7 +109,7 @@ create_pull_request() {
     echo "=== LABELS ==="
     echo "- Team:obs-ux-logs"
     echo "- release_note:skip"
-    echo "- backport:skip" 
+    echo "- backport:skip"
     echo "- otel-semantic-conventions"
     echo ""
     echo "=== ASSIGNEES & REVIEWERS ==="
@@ -112,7 +138,7 @@ create_pull_request() {
     echo "Update OpenTelemetry semantic conventions"
     echo ""
     echo "- Updated resolved-semconv.yaml with latest OTel conventions"
-    echo "- Regenerated TypeScript definitions with new field metadata"  
+    echo "- Regenerated TypeScript definitions with new field metadata"
     echo "- Generated automatically by Buildkite workflow"
     echo ""
     echo "🔍 DRY_RUN: All PR data collected - no git operations or PR creation performed"
@@ -139,7 +165,7 @@ create_pull_request() {
   # Add the changed files
   git add "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
   git add "$OTEL_PACKAGE_DIR/src/generated/resolved-semconv.ts"
-  
+
   # Create commit with descriptive message
   git commit -m "Update OpenTelemetry semantic conventions
 
@@ -152,7 +178,7 @@ create_pull_request() {
   # Push branch to origin
   git push origin "$BRANCH_NAME"
 
-  # Create pull request with proper labels and team assignment
+  # Create pull request with proper labels and individual assignment
   gh pr create \
     --title "$PR_TITLE" \
     --body "$PR_BODY" \
@@ -161,9 +187,7 @@ create_pull_request() {
     --label 'Team:obs-ux-logs' \
     --label 'release_note:skip' \
     --label 'backport:skip' \
-    --label 'otel-semantic-conventions' \
-    --reviewer 'elastic/obs-ux-logs-team' \
-    --assignee 'elastic/obs-ux-logs-team'
+    --label 'otel-semantic-conventions'
 
   echo "✅ Pull request created successfully!"
 }
@@ -177,33 +201,41 @@ main() {
 
   report_main_step "Cloning OpenTelemetry semantic conventions repository"
   clone_otel_repository
-  
-  report_main_step "Generating resolved YAML with Docker weaver"  
+
+  report_main_step "Generating resolved YAML with Docker weaver"
   generate_resolved_yaml
-  
+
   cd "$KIBANA_DIR"
-  
+
   report_main_step "Checking for YAML changes"
   # Copy new YAML and check for immediate changes
   cp "$PARENT_DIR/otel-semconv/resolved_semconv.yaml" "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
-  
+
   # Check if YAML actually changed
   set +e
   git diff --exit-code --quiet "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
   yaml_changed=$?
   set -e
-  
+
+  echo "--- Git diff exit code: $yaml_changed (0=no changes, 1=changes detected)"
+
   if [ $yaml_changed -eq 0 ]; then
     echo "No changes in semantic conventions YAML. Our work is done here."
     exit 0
   fi
-  
+
+  echo "--- YAML changes detected! Git diff summary:"
+  git diff --stat "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml" || echo "Could not show diff stat"
+  echo "--- First 20 lines of diff:"
+  git diff "$OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml" | head -20 || echo "Could not show diff details"
+  echo "--- End of diff preview"
+
   report_main_step "YAML changes detected. Bootstrapping Kibana"
   bootstrap_kibana
-  
+
   report_main_step "Generating TypeScript definitions"
   generate_typescript
-  
+
   report_main_step "Performing final change detection"
   # Final change detection
   set +e
@@ -213,7 +245,7 @@ main() {
     exit 0
   fi
   set -e
-  
+
   report_main_step "Creating pull request"
   create_pull_request
 }
