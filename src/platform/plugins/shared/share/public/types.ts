@@ -18,7 +18,7 @@ import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 import type { AnonymousAccessServiceContract } from '../common/anonymous_access';
-import type { DraftModeCalloutProps } from './components/draft_mode_callout/draft_mode_callout';
+import type { DraftModeCalloutProps } from './components/common/draft_mode_callout';
 
 export interface ShareRegistryApiStart {
   capabilities: Capabilities;
@@ -40,7 +40,6 @@ type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string,
    * - `true`: Shows the default callout.
    * - `false` or `undefined`: Shows no callout.
    * - `DraftModeCalloutProps`:
-   *   - `isEmbed`: indicates callout type (embed vs link)
    *   - `message`: callout message custom content
    */
   draftModeCallOut?: boolean | DraftModeCalloutProps;

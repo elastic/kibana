@@ -29,7 +29,7 @@ import type { AnonymousAccessState } from '../../../../common';
 
 import type { IShareContext } from '../../context';
 import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
-import { DraftModeCallout } from '../../draft_mode_callout/draft_mode_callout';
+import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type EmbedProps = Pick<
   IShareContext,
@@ -49,6 +49,13 @@ interface UrlParams {
     [queryParam: string]: boolean;
   };
 }
+
+const draftModeCalloutMessage = (
+  <FormattedMessage
+    id="share.embed.draftModeCallout.message"
+    defaultMessage="This code might not work properly. Save your changes to ensure it works as expected."
+  />
+);
 
 export const EmbedContent = ({
   shareableUrlForSavedObject,
@@ -313,7 +320,7 @@ export const EmbedContent = ({
         {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            <DraftModeCallout {...draftModeCalloutContent} isEmbed={true} />
+            <DraftModeCallout message={draftModeCalloutMessage} {...draftModeCalloutContent} />
           </>
         )}
         <EuiSpacer />

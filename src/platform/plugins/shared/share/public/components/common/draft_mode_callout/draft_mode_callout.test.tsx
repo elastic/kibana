@@ -9,8 +9,8 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { DraftModeCallout } from './draft_mode_callout';
 import { I18nProvider } from '@kbn/i18n-react';
+import { DraftModeCallout } from './draft_mode_callout';
 
 describe('DraftModeCallout', () => {
   describe('Default case', () => {
