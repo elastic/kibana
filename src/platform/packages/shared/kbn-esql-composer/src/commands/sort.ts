@@ -40,15 +40,24 @@ export function sort<TQuery extends string, TParams extends Params<TQuery>>(
   if (typeof firstArg === 'string' && firstArg.includes('?')) {
     // Handle parameterized query with optional options
     const thirdArg = restSorts[0];
-    const isOptions = thirdArg && typeof thirdArg === 'object' && !Array.isArray(thirdArg) && 'comment' in thirdArg;
+    const isOptions = 
+      thirdArg && 
+      typeof thirdArg === 'object' && 
+      thirdArg !== null && 
+      !Array.isArray(thirdArg) && 
+      'comment' in thirdArg;
     const options = isOptions ? (thirdArg as CommandOptions) : undefined;
     return append({ command: `SORT ${firstArg}`, params: secondArg as TParams, comment: options?.comment });
   }
 
-  // Check if last argument is options object
+  // Check if last argument is options object (must be an object with 'comment' property, not a string or array)
   const allArgs = [firstArg as SortArgs, ...(secondArg !== undefined ? [secondArg as SortArgs] : []), ...restSorts];
   const lastArg = allArgs[allArgs.length - 1];
-  const isOptions = typeof lastArg === 'object' && !Array.isArray(lastArg) && 'comment' in lastArg;
+  const isOptions = 
+    typeof lastArg === 'object' && 
+    lastArg !== null && 
+    !Array.isArray(lastArg) && 
+    'comment' in lastArg;
   
   const options = isOptions ? (lastArg as CommandOptions) : undefined;
   const sortArgs = isOptions ? allArgs.slice(0, -1) : allArgs;
