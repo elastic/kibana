@@ -76,6 +76,7 @@ export async function identifyFeatures({
     input: {
       stream: {
         name: stream.name,
+        description: stream.description || 'This stream has no description.',
       },
       dataset_analysis: JSON.stringify(
         sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true, dropUnmapped })
