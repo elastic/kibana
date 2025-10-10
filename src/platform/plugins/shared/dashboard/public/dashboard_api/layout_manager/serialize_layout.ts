@@ -26,17 +26,17 @@ export function serializeLayout(
     const panelConfig = childState[panelId]?.rawState ?? {};
     references.push(...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? []));
     // TODO move savedObjectRef extraction into embeddable implemenations
-    const savedObjectId = (panelConfig as { savedObjectId?: string }).savedObjectId;
+    // const savedObjectId = (panelConfig as { savedObjectId?: string }).savedObjectId;
     let panelRefName: string | undefined;
-    if (savedObjectId) {
-      panelRefName = `panel_${panelId}`;
+    // if (savedObjectId) {
+    //   panelRefName = `panel_${panelId}`;
 
-      references.push({
-        name: `${panelId}:panel_${panelId}`,
-        type,
-        id: savedObjectId,
-      });
-    }
+    //   references.push({
+    //     name: `${panelId}:panel_${panelId}`,
+    //     type,
+    //     id: savedObjectId,
+    //   });
+    // }
 
     const { sectionId, ...restOfGridData } = gridData; // drop section ID
     const panelState = {
