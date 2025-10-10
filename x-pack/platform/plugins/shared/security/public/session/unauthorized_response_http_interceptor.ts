@@ -23,6 +23,8 @@ export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
     httpErrorResponse: HttpInterceptorResponseError,
     controller: IHttpInterceptController
   ) {
+    // FIXME temporary for local testing
+    return;
     if (this.anonymousPaths.isAnonymous(window.location.pathname)) {
       return;
     }

@@ -91,7 +91,7 @@ export class AuthenticationService {
   private authenticator?: Authenticator;
   private session?: PublicMethodsOf<Session>;
 
-  constructor(private readonly logger: Logger) { }
+  constructor(private readonly logger: Logger) {}
 
   setup({
     config,
@@ -116,7 +116,8 @@ export class AuthenticationService {
     http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
         this.logger.error(
-          `License information could not be obtained from Elasticsearch due to an error: ${license.getUnavailableReason() ?? 'unknown'
+          `License information could not be obtained from Elasticsearch due to an error: ${
+            license.getUnavailableReason() ?? 'unknown'
           }`
         );
         return response.customError({
@@ -220,13 +221,14 @@ export class AuthenticationService {
       if (!isLoginPageAvailable || isLogoutRoute) {
         const location = http.basePath.prepend(
           `/security/unauthenticated?next=${encodeURIComponent(originalURL)}`
-        )
+        );
         return toolkit.render({
-          body: `<div>You are not authenticated. Click <a href="${location}">here</a> if you are not redirected automatically.</div>`,
+          body: ``,
+          statusCode: 302,
           headers: {
             'Content-Security-Policy': http.csp.header,
             'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
-            Refresh: `10000;url=${location}`,
+            Location: location,
           },
         });
       }
@@ -237,16 +239,18 @@ export class AuthenticationService {
       }
 
       return toolkit.render({
-        body: '<div/>',
+        body: '',
+        statusCode: 302,
         headers: {
-          'Content-Security-Policy': http.csp.header,
-          'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
-          Refresh: `0;url=${http.basePath.prepend(
-            `${needsToLogout ? '/logout' : '/login'
+          location: http.basePath.prepend(
+            `${
+              needsToLogout ? '/logout' : '/login'
             }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
               originalURL
             )}`
-          )}`,
+          ),
+          'Content-Security-Policy': http.csp.header,
+          'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
         },
       });
     });
@@ -417,7 +421,8 @@ export class AuthenticationService {
           );
         } else if (loginResult.failed()) {
           this.logger.error(
-            `Login attempt with "${providerIdentifier}" provider failed: ${loginResult.error ? getDetailedErrorMessage(loginResult.error) : 'unknown error'
+            `Login attempt with "${providerIdentifier}" provider failed: ${
+              loginResult.error ? getDetailedErrorMessage(loginResult.error) : 'unknown error'
             }`
           );
         } else if (loginResult.notHandled()) {

@@ -196,11 +196,12 @@ export class AuthorizationService {
           );
 
           return toolkit.render({
-            body: `<div>Authorization error. Click <a href="${location}">here</a> if you are not redirected automatically.</div>`,
+            body: ``,
+            statusCode: 302,
             headers: {
               'Content-Security-Policy': http.csp.header,
               'Content-Security-Policy-Report-Only': http.csp.reportOnlyHeader,
-              Refresh: `0;url=${location}`,
+              Location: location,
             },
           });
         }
