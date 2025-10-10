@@ -36,7 +36,6 @@ import {
 } from '@kbn/onechat-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
 import type { StateType } from './graph';
-import { answerToolId } from './graph';
 
 export type ConvertedEvents =
   | MessageChunkEvent
@@ -78,8 +77,7 @@ export const convertGraphEvents = ({
           const events: ConvertedEvents[] = [];
 
           // process last emitted message
-          const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
-          const lastMessage = addedMessages[addedMessages.length - 1];
+          const lastMessage: BaseMessage = event.data.output.nextMessage;
 
           const toolCalls = extractToolCalls(lastMessage);
           if (toolCalls.length > 0) {
@@ -87,11 +85,6 @@ export const convertGraphEvents = ({
             const reasoningEvents: ReasoningEvent[] = [];
 
             for (const toolCall of toolCalls) {
-              // we don't log "internal" tool calls
-              if (toolCall.toolName === answerToolId) {
-                continue;
-              }
-
               const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
               const { toolCallId, args } = toolCall;
 
@@ -124,13 +117,10 @@ export const convertGraphEvents = ({
           const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
           const lastMessage = addedMessages[addedMessages.length - 1];
 
-          const toolCalls = extractToolCalls(lastMessage);
-          if (toolCalls.length === 0) {
-            const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
-              messageId,
-            });
-            events.push(messageEvent);
-          }
+          const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
+            messageId,
+          });
+          events.push(messageEvent);
 
           return of(...events);
         }

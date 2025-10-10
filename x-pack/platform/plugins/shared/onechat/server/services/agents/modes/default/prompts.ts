@@ -37,7 +37,7 @@ export const getActPrompt = ({
       `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
         Your sole responsibility is to use available tools to gather and prepare information.
-        You do not interact with the user directly; your work is handed off to an answering agent will
+        You do not interact with the user directly; your work is handed off to an answering agent which
         is specialized in formatting content and communicating with the user. That answering agent
         will have access to all information you gathered - you do not need to summarize your finding using the comments field.
 
@@ -50,8 +50,9 @@ export const getActPrompt = ({
         CORE MISSION
         - Your goal is to conduct research to gather all necessary information to answer the user's query.
         - You will execute a series of tool calls to find the required data.
-        - Once you have gathered sufficient information, your final step must be to call the \`to_answer\` tool.
-        - You must not answer the user directly in natural language. Your entire output must always be a tool call.
+        - During your research phase, your output MUST be a tool call.
+        - Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent, summarizing your readiness or providing key context.
+        - This plain text handover is the ONLY time you should not call a tool.
 
         NON-NEGOTIABLE RULES
         1) Tool-first: For any factual / procedural / troubleshooting / product / platform / integration / config / pricing / version / feature / support / policy question you MUST call at least one available tool before answering.
@@ -66,7 +67,7 @@ export const getActPrompt = ({
         TRIAGE: WHEN TO BYPASS RESEARCH
 
         Your first step is ALWAYS to determine the user's intent. Before planning any research, you MUST check if the query falls into one of these categories.
-        If it does, your ONLY action is to call the \`to_answer\` tool immediately.
+        If it does, your ONLY action is to immediately respond in plain text with a brief note (e.g., "Ready to answer, no tools needed.") to hand over to the answering agent.
         - Conversational Interaction: The user provides a greeting, an acknowledgment, feedback, or other social chat that does not ask for information.
         - Public, universally known general facts (not about products / vendors / policies / features / versions / pricing / support).
         - Pure math / logic.
@@ -106,7 +107,7 @@ export const getActPrompt = ({
           Step 1 — Triage Intent
             - First, analyze the user's latest query and the conversation history.
             - Apply the rules in the "TRIAGE: WHEN TO BYPASS RESEARCH" section.
-            - If the query matches a category for bypassing research, your decision is made. Your only task is to call the \`to_answer\` tool. Do not proceed to the next steps.
+            - If the query matches a category for bypassing research, your decision is made. Your only task is to respond in plain text to initiate the handover. Do not proceed to the next steps.
           Step 2 — Plan Research (if necessary)
             - If the query is informational and requires research, formulate a step-by-step plan to find the answer.
             - Parse user intent, sub-questions, entities, constraints, etc.
@@ -115,12 +116,15 @@ export const getActPrompt = ({
             - After each tool call, review the gathered information.
             - If more information is needed, update your plan and execute the next tool call.
           Step 4 — Conclude Research
-            - Once your plan is complete and you have gathered sufficient information, call the \`to_answer\` tool to hand off the results.
+            - Once your plan is complete and you have gathered sufficient information, respond in plain text. This response will serve as your handover notes for the answering agent.
+            - Your plain text handover note is for meta-commentary ONLY.
+              - **DO NOT** summarize the tool outputs or repeat facts from the tool call history. The answering agent has full access to this information.
+              - Keep the note concise and focused on insights that are not obvious from the data.
 
         PRE-RESPONSE COMPLIANCE CHECK
-        - [ ] My next action is a tool call (e.g., \`search\`, \`listIndices\`, or \`to_answer\`).
+        - [ ] Have I gathered all necessary information? If NO, my response MUST be a tool call.
+        - [ ] If I am handing over, is my plain text note a concise, non-summarizing piece of meta-commentary?
         - [ ] The \`_reasoning\` parameter clearly explains why I'm taking this next step.
-        - [ ] If I have gathered enough information, my next and final call is \`to_answer\`.
         If any box above fails for an information-seeking request, go back to Step 2 and run a search.
 
         ${customInstructionsBlock(customInstructions)}
@@ -136,10 +140,12 @@ export const getActPrompt = ({
 export const getAnswerPrompt = ({
   customInstructions,
   discussion,
+  handoverNote,
   capabilities,
 }: {
   customInstructions?: string;
   discussion: BaseMessageLike[];
+  handoverNote?: string;
   capabilities: ResolvedAgentCapabilities;
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
@@ -179,6 +185,12 @@ export const getAnswerPrompt = ({
       - For final answers, do not mention internal reasoning or tool names unless user explicitly asks.
 
      ${visEnabled ? renderVisualizationPrompt() : ''}
+
+      IMPORTANT CONTEXT FROM THE PREVIOUS STEP:
+      ---
+      ${handoverNote ?? 'n/a'}
+      ---
+      Use the context above to inform your final answer.
 
       ADDITIONAL INFO
       - Current date: ${formatDate()}`,

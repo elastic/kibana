@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
-import { ToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
-import { tool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
-import { createReasoningEvent } from '@kbn/onechat-genai-utils/langchain';
+import { createReasoningEvent, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { getActPrompt, getAnswerPrompt } from './prompts';
 
 const StateAnnotation = Annotation.Root({
@@ -26,42 +23,15 @@ const StateAnnotation = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+  // internals
+  nextMessage: Annotation<AIMessage>(),
+  handoverNote: Annotation<string>(),
   // outputs
   addedMessages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
   }),
 });
-
-export const answerToolId = 'to_answer';
-
-const answerTool = tool(
-  async () => {
-    throw new Error('Answer tool should not be called');
-  },
-  {
-    name: answerToolId,
-    schema: z.object({
-      handoverReason: z
-        .string()
-        .optional()
-        .describe(
-          'Brief explanation of the reason why you are handing the conversation over to the answering agent'
-        ),
-      comments: z
-        .string()
-        .optional()
-        .describe(
-          `(optional) Can be used to provide additional context or feedback to the answering agent.
-           This can be used to ask the agent to ask for clarification in case of ambiguous or unclear questions.`
-        ),
-    }),
-    description: `Use this tool to notify that you are ready to answer the question.
-
-    Notes: The answering agent will have access to all information you gathered - you do not need to summarize your finding in the comments.
-    Instead, this field can be used to leave notes which would be useful for the answering agent to consider when answering the question.`,
-  }
-);
 
 export type StateType = typeof StateAnnotation.State;
 
@@ -80,10 +50,9 @@ export const createAgentGraph = ({
   logger: Logger;
   events: AgentEventEmitter;
 }) => {
-  const allTools = [...tools, answerTool];
-  const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(allTools);
+  const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
-  const model = chatModel.bindTools(allTools, { tool_choice: 'any' }).withConfig({
+  const model = chatModel.bindTools(tools).withConfig({
     tags: ['onechat-agent'],
   });
 
@@ -97,46 +66,31 @@ export const createAgentGraph = ({
       })
     );
     return {
-      addedMessages: [response],
+      nextMessage: response,
     };
   };
 
   const shouldContinue = async (state: StateType) => {
-    const messages = state.addedMessages;
-    const lastMessage: AIMessage = messages[messages.length - 1];
+    const lastMessage = state.nextMessage;
     if (lastMessage && lastMessage.tool_calls?.length) {
-      const toolCall = lastMessage.tool_calls[0];
-      if (toolCall.name === answerToolId) {
-        return 'prepareToAnswer';
-      } else {
-        return 'tools';
-      }
+      return 'tools';
     }
-    return '__end__';
+    return 'handoverToAnswer';
   };
 
   const toolHandler = async (state: StateType) => {
-    const toolNodeResult = await toolNode.invoke(state.addedMessages);
-
+    const toolNodeResult = await toolNode.invoke([state.nextMessage], {});
     return {
-      addedMessages: [...toolNodeResult],
+      addedMessages: [state.nextMessage, ...toolNodeResult],
     };
   };
 
-  const prepareToAnswer = async (state: StateType) => {
-    const messages = state.addedMessages;
-    const lastMessage: AIMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.tool_calls?.length) {
-      return {
-        addedMessages: [
-          new ToolMessage({
-            content: JSON.stringify({ output: 'forwarding_to:answering_agent' }),
-            tool_call_id: lastMessage.tool_calls[0].id!,
-          }),
-        ],
-      };
-    }
-    return {};
+  const handoverToAnswer = async (state: StateType) => {
+    const handoverMessage = state.nextMessage;
+    const messageContent = extractTextContent(handoverMessage);
+    return {
+      handoverNote: messageContent,
+    };
   };
 
   const answeringModel = chatModel.withConfig({
@@ -149,6 +103,7 @@ export const createAgentGraph = ({
       getAnswerPrompt({
         customInstructions,
         capabilities,
+        handoverNote: state.handoverNote,
         discussion: [...state.initialMessages, ...state.addedMessages],
       })
     );
@@ -161,16 +116,15 @@ export const createAgentGraph = ({
   const graph = new StateGraph(StateAnnotation)
     .addNode('agent', callModel)
     .addNode('tools', toolHandler)
-    .addNode('prepareToAnswer', prepareToAnswer)
+    .addNode('handoverToAnswer', handoverToAnswer)
     .addNode('answer', generateAnswer)
     .addEdge('__start__', 'agent')
     .addEdge('tools', 'agent')
     .addConditionalEdges('agent', shouldContinue, {
       tools: 'tools',
-      prepareToAnswer: 'prepareToAnswer',
-      __end__: '__end__',
+      handoverToAnswer: 'handoverToAnswer',
     })
-    .addEdge('prepareToAnswer', 'answer')
+    .addEdge('handoverToAnswer', 'answer')
     .addEdge('answer', '__end__')
     .compile();
 
