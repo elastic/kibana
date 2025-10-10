@@ -445,7 +445,14 @@ export class SearchInterceptor {
 
     if (request.id) {
       // just polling, no need to send body
-      delete request.params?.body;
+      const { params, ...requestWithoutParams } = request;
+      if (params) {
+        const { body, ...paramsWithoutBody } = params;
+        request = {
+          ...requestWithoutParams,
+          params: paramsWithoutBody,
+        };
+      }
     }
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
