@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
+import { RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { IconRules } from '../../../../../common/icons/rules';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { KNOWLEDGE_SOURCE_CARD_TITLE } from './translations';
 import { checkKnowledgeSourceComplete } from './knowledge_source_check_complete';
-import { RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
 
 export const knowledgeSourceCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.knowledgeSource,

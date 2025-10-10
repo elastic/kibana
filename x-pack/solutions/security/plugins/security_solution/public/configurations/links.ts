@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { RULES_UI_READ_PRIVILEGE, SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import {
+  RULES_UI_READ_PRIVILEGE,
+  SECURITY_UI_SHOW_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import { ConfigurationTabs } from './constants';
 import * as i18n from './translations';
 import type { LinkItem } from '..';
@@ -35,7 +38,7 @@ export const configurationsLinks: LinkItem = {
       path: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.basicRules}`,
       skipUrlState: true,
       hideTimeline: true,
-      capabilities: [RULES_UI_READ_PRIVILEGE]
+      capabilities: [RULES_UI_READ_PRIVILEGE],
     },
     {
       id: SecurityPageName.configurationsAiSettings,

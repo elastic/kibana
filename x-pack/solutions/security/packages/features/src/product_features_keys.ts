@@ -155,7 +155,7 @@ export enum ProductFeatureRulesKey {
 
   /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
   externalDetections = 'external_detections',
-  
+
   /**
    * Enables customization of prebuilt Elastic rules
    */

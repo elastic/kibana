@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  RULES_UI_DETECTIONS_PRIVILEGE,
+  RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import { OnboardingTopicId } from './constants';
 import {
   defaultBodyConfig,
@@ -13,7 +17,6 @@ import {
   siemMigrationsBodyConfig,
 } from './components/onboarding_body/body_config';
 import type { TopicConfig } from './types';
-import { RULES_UI_DETECTIONS_PRIVILEGE, RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
 
 export const onboardingConfig: TopicConfig[] = [
   {
