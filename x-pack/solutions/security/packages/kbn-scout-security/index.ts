@@ -81,8 +81,3 @@ export type { RoleApiCredentials } from '@kbn/scout';
 
 // Re-exported Playwright types
 export type { Locator, CDPSession } from '@kbn/scout';
-// Re-exported authentication types
-export type { RoleApiCredentials } from '@kbn/scout';
-
-// Re-exported Playwright types
-export type { Locator, CDPSession } from '@kbn/scout';
