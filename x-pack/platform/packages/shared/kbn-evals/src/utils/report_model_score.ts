@@ -119,6 +119,7 @@ export async function exportEvaluationToElasticsearch(
     model: data.model,
     evaluatorModel: data.evaluatorModel,
     runId: data.runId,
+    repetitions: data.repetitions,
     tags: ['evaluation', 'model-score'],
   });
 
@@ -180,8 +181,8 @@ function formatReportData(docs: ModelScoreDocument[]): PreparedEvaluationData {
 
   const datasetScoresWithStats = convertScoreDocsToDatasets(docs);
 
-  // Repetitions could be inferred from data if needed, default to 1
-  const repetitions = 1;
+  // Assumes all evaluation datasets are repeated the same number of times
+  const repetitions = docs[0].repetitions ?? 1;
 
   return {
     datasetScoresWithStats,

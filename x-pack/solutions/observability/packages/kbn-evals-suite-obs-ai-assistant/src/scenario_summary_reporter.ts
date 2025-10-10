@@ -68,13 +68,23 @@ function groupDatasetsByScenario(
 function createScenarioSummaryTable(
   scenarios: ScenarioInfo[],
   evaluatorNames: string[],
-  totalExamples: number
+  totalExamples: number,
+  repetitions: number
 ): string {
-  const headers = ['Scenario', '# Examples', ...evaluatorNames];
+  const formatExampleCount = (numExamples: number): string => {
+    return repetitions > 1
+      ? `${repetitions} x ${numExamples / repetitions}`
+      : numExamples.toString();
+  };
+
+  const examplesHeader =
+    repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
+
+  const headers = ['Scenario', examplesHeader, ...evaluatorNames];
 
   const scenarioRows = scenarios.map((scenario) => {
     const scenarioTotalExamples = sumBy(scenario.datasets, (d) => d.numExamples);
-    const row = [chalk.bold.white(scenario.name), scenarioTotalExamples.toString()];
+    const row = [chalk.bold.white(scenario.name), formatExampleCount(scenarioTotalExamples)];
 
     evaluatorNames.forEach((evaluatorName) => {
       const stats = scenario.overallStats.get(evaluatorName);
@@ -97,7 +107,10 @@ function createScenarioSummaryTable(
   // Calculate overall statistics across all datasets in all scenarios
   const allDatasets = scenarios.flatMap((scenario) => scenario.datasets);
   const overallStats = calculateOverallStats(allDatasets, evaluatorNames);
-  const overallRow = [chalk.bold.green('Overall'), chalk.bold.green(totalExamples.toString())];
+  const overallRow = [
+    chalk.bold.green('Overall'),
+    chalk.bold.green(formatExampleCount(totalExamples)),
+  ];
 
   evaluatorNames.forEach((evaluatorName) => {
     const stats = overallStats.get(evaluatorName);
@@ -131,7 +144,12 @@ async function getScoresByScenario(
   scoreRepository: EvaluationScoreRepository,
   runId: string,
   log: SomeDevLog
-): Promise<{ scenarios: ScenarioInfo[]; evaluatorNames: string[]; metadata: any }> {
+): Promise<{
+  scenarios: ScenarioInfo[];
+  evaluatorNames: string[];
+  metadata: any;
+  repetitions: number;
+}> {
   log.info(`Retrieving scores for run ID: ${runId} and grouping by scenario`);
 
   const scores = await scoreRepository.getScoresByRunId(runId);
@@ -151,6 +169,8 @@ async function getScoresByScenario(
   // Group datasets by scenario and calculate per-scenario stats
   const scenarios = groupDatasetsByScenario(datasets, evaluatorNames);
 
+  const repetitions = scores[0]?.repetitions ?? 1;
+
   return {
     scenarios,
     evaluatorNames,
@@ -159,6 +179,7 @@ async function getScoresByScenario(
       timestamp: scores[0]?.['@timestamp'],
       model: scores[0]?.model.id,
     },
+    repetitions,
   };
 }
 
@@ -175,7 +196,7 @@ export function createScenarioSummaryReporter(): EvaluationReporter {
     try {
       log.info(chalk.bold.blue('\n🔍 === SCENARIO SUMMARY REPORT ==='));
 
-      const { scenarios, evaluatorNames, metadata } = await getScoresByScenario(
+      const { scenarios, evaluatorNames, metadata, repetitions } = await getScoresByScenario(
         scoreRepository,
         runId,
         log
@@ -193,6 +214,9 @@ export function createScenarioSummaryReporter(): EvaluationReporter {
           metadata.timestamp || 'Unknown time'
         }) - Model: ${chalk.yellow(metadata.model || 'Unknown')}`
       );
+      if (repetitions > 1) {
+        log.info(`Repetitions: ${chalk.cyan(repetitions.toString())}`);
+      }
 
       // Calculate total examples
       const totalExamples = sumBy(
@@ -202,7 +226,12 @@ export function createScenarioSummaryReporter(): EvaluationReporter {
 
       // Display scenario summary table
       log.info(`\n${chalk.bold.blue('═══ SCENARIO SUMMARY ═══')}`);
-      const scenarioTable = createScenarioSummaryTable(scenarios, evaluatorNames, totalExamples);
+      const scenarioTable = createScenarioSummaryTable(
+        scenarios,
+        evaluatorNames,
+        totalExamples,
+        repetitions
+      );
       log.info(`\n${scenarioTable}`);
 
       // Display summary statistics

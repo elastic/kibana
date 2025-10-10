@@ -15,6 +15,7 @@ export interface ModelScoreDocument {
   '@timestamp': string;
   run_id: string;
   experiment_id: string;
+  repetitions: number;
   model: {
     id: string;
     family: string;
@@ -74,6 +75,7 @@ export class EvaluationScoreRepository {
             '@timestamp': { type: 'date' },
             run_id: { type: 'keyword' },
             experiment_id: { type: 'keyword' },
+            repetitions: { type: 'integer' },
             model: {
               type: 'object',
               properties: {
@@ -180,6 +182,7 @@ export class EvaluationScoreRepository {
     model,
     evaluatorModel,
     runId,
+    repetitions,
     tags = [],
   }: {
     datasetScoresWithStats: DatasetScoreWithStats[];
@@ -187,6 +190,7 @@ export class EvaluationScoreRepository {
     model: Model;
     evaluatorModel: Model;
     runId: string;
+    repetitions: number;
     tags?: string[];
   }): Promise<void> {
     try {
@@ -213,6 +217,7 @@ export class EvaluationScoreRepository {
             '@timestamp': timestamp,
             run_id: runId,
             experiment_id: dataset.experimentId,
+            repetitions,
             model: {
               id: model.id || 'unknown',
               family: model.family,
