@@ -9,7 +9,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
-import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@kbn/react-query';
 
 interface UseWorkflowExecutionsParams {
   workflowId: string | null;

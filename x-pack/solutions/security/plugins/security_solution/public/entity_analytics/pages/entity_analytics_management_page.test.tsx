@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management_page';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();

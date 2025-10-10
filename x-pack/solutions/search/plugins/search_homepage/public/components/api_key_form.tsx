@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FormInfoField } from '@kbn/search-shared-ui';
 import { i18n } from '@kbn/i18n';
 import { ApiKeyFlyoutWrapper, useSearchApiKey, Status } from '@kbn/search-api-keys-components';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../hooks/use_kibana';
 import { QueryKeys } from '../constants';
 

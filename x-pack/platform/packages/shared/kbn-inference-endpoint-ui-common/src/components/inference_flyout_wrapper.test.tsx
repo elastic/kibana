@@ -13,7 +13,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 import { InferenceFlyoutWrapper } from './inference_flyout_wrapper';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mockProviders } from '../utils/mock_providers';
 
 const mockMutationFn = jest.fn();

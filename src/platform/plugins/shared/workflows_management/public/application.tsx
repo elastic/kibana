@@ -10,7 +10,7 @@
 import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { WorkflowsRoutes } from './routes';

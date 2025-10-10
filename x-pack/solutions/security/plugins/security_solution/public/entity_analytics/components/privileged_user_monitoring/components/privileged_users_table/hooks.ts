@@ -6,7 +6,7 @@
  */
 
 import { take } from 'lodash/fp';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { getESQLResults, prettifyQuery } from '@kbn/esql-utils';
 import { useMemo } from 'react';
 import { buildEntityNameFilter, EntityType } from '../../../../../../common/search_strategy';

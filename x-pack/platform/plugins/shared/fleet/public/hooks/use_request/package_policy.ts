@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 
 import { packagePolicyRouteService } from '../../services';
 import type {

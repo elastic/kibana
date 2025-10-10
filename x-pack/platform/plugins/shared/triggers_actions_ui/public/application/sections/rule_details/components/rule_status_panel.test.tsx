@@ -15,7 +15,7 @@ import {
 } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { RuleStatusPanelWithApiProps } from './rule_status_panel';
 import { RuleStatusPanel } from './rule_status_panel';

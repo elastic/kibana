@@ -10,7 +10,7 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertDeletePreview } from './use_alert_delete_preview';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getAlertDeletePreview } from './get_alert_delete_preview';
 

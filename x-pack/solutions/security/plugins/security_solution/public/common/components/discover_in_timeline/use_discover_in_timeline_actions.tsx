@@ -14,7 +14,7 @@ import { useDispatch } from 'react-redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useDiscoverState } from '../../../timelines/components/timeline/tabs/esql/use_discover_state';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { TimelineId } from '../../../../common/types';

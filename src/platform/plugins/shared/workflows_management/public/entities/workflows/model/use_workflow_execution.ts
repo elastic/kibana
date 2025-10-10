@@ -9,7 +9,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 export function useWorkflowExecution(workflowExecutionId: string | null) {
   const { http } = useKibana().services;
