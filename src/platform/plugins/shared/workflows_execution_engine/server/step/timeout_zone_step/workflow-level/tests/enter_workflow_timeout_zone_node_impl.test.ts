@@ -67,6 +67,7 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
     } as unknown as StepExecutionRuntime;
 
     wfExecutionRuntimeManagerMock = {
+      setWorkflowError: jest.fn(),
       navigateToNextNode: jest.fn(),
       markWorkflowTimeouted: jest.fn(),
     } as unknown as WorkflowExecutionRuntimeManager;
@@ -237,6 +238,23 @@ describe('EnterWorkflowTimeoutZoneNodeImpl', () => {
       expect(scopeStepExecutionRuntime2.failStep).toHaveBeenCalledWith(expect.any(Error));
 
       expect(wfExecutionRuntimeManagerMock.markWorkflowTimeouted).toHaveBeenCalledTimes(1);
+    });
+
+    it('should erase workflow error to prevent workflow from being marked as failed', async () => {
+      const startTime = new Date().getTime() - 90000; // 90 seconds ago (exceeds 60s timeout)
+      mockParseDuration.mockReturnValue(60000); // 60 seconds
+
+      // Update the step execution mock for this specific test
+      (stepExecutionRuntimeMock as any).stepExecution = {
+        startedAt: new Date(startTime).toISOString(),
+      };
+
+      // Mock empty scope stack (no nested scopes to fail)
+      (monitoredStepExecutionRuntimeMock.scopeStack.isEmpty as jest.Mock).mockReturnValue(true);
+
+      await impl.monitor(monitoredStepExecutionRuntimeMock);
+
+      expect(wfExecutionRuntimeManagerMock.setWorkflowError).toHaveBeenCalledWith(undefined);
     });
 
     it('should handle different timeout formats', async () => {
