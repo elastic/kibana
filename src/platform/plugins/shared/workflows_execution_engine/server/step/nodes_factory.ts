@@ -13,7 +13,6 @@ import type {
   EnterContinueNode,
   EnterForeachNode,
   EnterIfNode,
-  EnterNormalPathNode,
   EnterRetryNode,
   EnterTryBlockNode,
   ExitConditionBranchNode,
@@ -158,12 +157,7 @@ export class NodesFactory {
       case 'exit-try-block':
         return new ExitTryBlockNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'enter-normal-path':
-        return new EnterNormalPathNodeImpl(
-          node as EnterNormalPathNode,
-          stepExecutionRuntime,
-          this.workflowRuntime,
-          stepLogger
-        );
+        return new EnterNormalPathNodeImpl(this.workflowRuntime);
       case 'enter-fallback-path':
         return new EnterFallbackPathNodeImpl(this.workflowRuntime);
       case 'exit-normal-path':
