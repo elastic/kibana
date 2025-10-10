@@ -488,9 +488,9 @@ export class VisualizationsPlugin
         return getTypes().get(visState.type)?.icon ?? '';
       },
     });
-    embeddable.registerTransforms(VISUALIZE_EMBEDDABLE_TYPE, async () => {
-      const { getTransforms } = await import('./embeddable/embeddable_module');
-      return getTransforms(embeddable.transformEnhancementsIn, embeddable.transformEnhancementsOut);
+    embeddable.registerLegacyURLTransform(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const { getTransformOut } = await import('./embeddable/embeddable_module');
+      return getTransformOut(embeddable.transformEnhancementsOut);
     });
 
     contentManagement.registry.register({

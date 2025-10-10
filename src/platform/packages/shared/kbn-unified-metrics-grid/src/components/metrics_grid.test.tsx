@@ -300,7 +300,7 @@ describe('MetricsGrid', () => {
         expect(Chart).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({
-            chartId: 'chart-system.cpu.utilization-0',
+            chartId: 'system.cpu.utilization-0',
           }),
           expect.anything()
         );
@@ -308,7 +308,7 @@ describe('MetricsGrid', () => {
         expect(Chart).toHaveBeenNthCalledWith(
           2,
           expect.objectContaining({
-            chartId: 'chart-system.memory.utilization-1',
+            chartId: 'system.memory.utilization-1',
           }),
           expect.anything()
         );
