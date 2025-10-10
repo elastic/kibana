@@ -143,7 +143,7 @@ describe('validateVariables', () => {
     expect(result[0]).toMatchObject({
       message: 'Failed to get context schema for path',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
       key: 'var1',
     });
@@ -299,7 +299,6 @@ describe('validateVariables', () => {
       id: 'test-error',
       message: 'Test error message',
       severity: 'error',
-      source: 'variable-validation',
       startLineNumber: 5,
       startColumn: 10,
       endLineNumber: 5,
@@ -314,12 +313,12 @@ describe('validateVariables', () => {
       id: 'test-error',
       message: 'Test error message',
       severity: 'error',
-      source: 'variable-validation',
       startLineNumber: 5,
       startColumn: 10,
       endLineNumber: 5,
       endColumn: 20,
       hoverMessage: 'Hover info',
+      owner: 'variable-validation',
     });
   });
 });

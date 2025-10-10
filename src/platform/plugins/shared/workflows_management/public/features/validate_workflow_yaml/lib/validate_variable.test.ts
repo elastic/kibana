@@ -58,7 +58,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Variable is not defined',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -72,7 +72,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Invalid variable path: invalid.path',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -93,7 +93,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: null,
       severity: null,
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property)'),
     });
   });
@@ -116,7 +116,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Foreach parameter can be an array or a JSON string. invalid json is not valid JSON',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -133,7 +133,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Missing closing bracket, Invalid character',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -150,7 +150,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Failed to parse variable path',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -167,7 +167,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Variable test.variable cannot be validated, because the workflow schema is invalid',
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -185,7 +185,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'Variable nonexistent.variable is invalid',
       severity: 'error',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: null,
     });
   });
@@ -208,7 +208,7 @@ describe('validateVariable', () => {
       message:
         'Foreach parameter should be an array or a JSON string. stringVar is unknown string, engine will try to parse it as JSON in runtime, but it might fail',
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property)'),
     });
   });
@@ -229,7 +229,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: 'This variable comes from external source',
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property)'),
     });
   });
@@ -248,7 +248,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: "Variable unknownVar cannot be validated, because it's type is unknown",
       severity: 'warning',
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property) unknownVar:'),
     });
   });
@@ -267,7 +267,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: null,
       severity: null,
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property) test.variable:'),
     });
   });
@@ -286,7 +286,7 @@ describe('validateVariable', () => {
     expect(result).toMatchObject({
       message: null,
       severity: null,
-      source: 'variable-validation',
+      owner: 'variable-validation',
       hoverMessage: expect.stringContaining('(property) response.data.items[0].name:'),
     });
   });
