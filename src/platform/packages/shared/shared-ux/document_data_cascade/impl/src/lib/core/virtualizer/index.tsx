@@ -170,16 +170,6 @@ export const useCascadeVirtualizer = <G extends GroupNode>({
 };
 
 /**
- * @description returns the position style for the header row, in relation to the scrolled virtualized row
- */
-export const getGridHeaderPositioningStyle = (
-  virtualizedRowComputedTranslateValueMap: Map<number, number>
-): CSSProperties => ({
-  top: -(virtualizedRowComputedTranslateValueMap.get(0) ?? 0),
-  transform: `translate3d(0, ${virtualizedRowComputedTranslateValueMap.get(0) ?? 0}px, 0)`,
-});
-
-/**
  * @description returns the position style for the grid row, in relation to the scrolled virtualized row
  */
 export const getGridRowPositioningStyle = (
