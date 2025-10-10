@@ -25,9 +25,10 @@ import {
 } from './evaluation_stats';
 
 /**
- * Prepared evaluation data ready for export and reporting
+ * Evaluation report containing dataset scores with computed statistics
+ * Ready for export to Elasticsearch and display via reporters
  */
-export interface PreparedEvaluationData {
+export interface EvaluationReport {
   datasetScoresWithStats: DatasetScoreWithStats[];
   model: Model;
   evaluatorModel: Model;
@@ -46,10 +47,10 @@ export type EvaluationReporter = (
 ) => Promise<void>;
 
 /**
- * Prepares evaluation data from Phoenix experiments
- * This function aggregates raw experiment data and computes statistics
+ * Builds an evaluation report from Phoenix experiments
+ * Aggregates raw experiment data and computes statistics for each dataset and evaluator
  */
-export async function prepareEvaluationData({
+export async function buildEvaluationReport({
   phoenixClient,
   experiments,
   model,
@@ -63,7 +64,7 @@ export async function prepareEvaluationData({
   evaluatorModel: Model;
   repetitions: number;
   runId?: string;
-}): Promise<PreparedEvaluationData> {
+}): Promise<EvaluationReport> {
   const { datasetScores, evaluatorNames } = await buildEvaluationResults(
     experiments,
     phoenixClient
@@ -96,12 +97,12 @@ export async function prepareEvaluationData({
  * Exports evaluation results to Elasticsearch datastream
  * This ensures results are persisted for analysis and comparison
  */
-export async function exportEvaluationToElasticsearch(
-  data: PreparedEvaluationData,
+export async function exportEvaluations(
+  report: EvaluationReport,
   esClient: EsClient,
   log: SomeDevLog
 ): Promise<void> {
-  if (data.datasetScoresWithStats.length === 0) {
+  if (report.datasetScoresWithStats.length === 0) {
     log.warning('No dataset scores available to export to Elasticsearch');
     return;
   }
@@ -109,17 +110,17 @@ export async function exportEvaluationToElasticsearch(
   log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
   // Derive evaluator names from the dataset scores
-  const evaluatorNames = getUniqueEvaluatorNames(data.datasetScoresWithStats);
+  const evaluatorNames = getUniqueEvaluatorNames(report.datasetScoresWithStats);
 
   const exporter = new EvaluationScoreRepository(esClient, log);
 
   await exporter.exportScores({
-    datasetScoresWithStats: data.datasetScoresWithStats,
+    datasetScoresWithStats: report.datasetScoresWithStats,
     evaluatorNames,
-    model: data.model,
-    evaluatorModel: data.evaluatorModel,
-    runId: data.runId,
-    repetitions: data.repetitions,
+    model: report.model,
+    evaluatorModel: report.evaluatorModel,
+    runId: report.runId,
+    repetitions: report.repetitions,
     tags: ['evaluation', 'model-score'],
   });
 
@@ -127,8 +128,8 @@ export async function exportEvaluationToElasticsearch(
   log.info(
     chalk.gray(
       `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${
-        data.model.id || 'unknown'
-      }" AND run_id:"${data.runId}"`
+        report.model.id || 'unknown'
+      }" AND run_id:"${report.runId}"`
     )
   );
 }
@@ -172,9 +173,8 @@ export function convertScoreDocsToDatasets(docs: ModelScoreDocument[]): DatasetS
 
 /**
  * Formats Elasticsearch documents into structured report data
- * This helper reconstructs the data structure needed for the default terminal reporter
  */
-function formatReportData(docs: ModelScoreDocument[]): PreparedEvaluationData {
+export function formatReportData(docs: ModelScoreDocument[]): EvaluationReport {
   if (docs.length === 0) {
     throw new Error('No documents to format');
   }
@@ -196,11 +196,9 @@ function formatReportData(docs: ModelScoreDocument[]): PreparedEvaluationData {
 /**
  * Default terminal reporter implementation
  * Displays evaluation results as a formatted table in the terminal
- * Queries Elasticsearch for the specified run and formats the results
  */
 export function createDefaultTerminalReporter(): EvaluationReporter {
   return async (scoreRepository: EvaluationScoreRepository, runId: string, log: SomeDevLog) => {
-    // Query ES for this run's results
     const docs = await scoreRepository.getScoresByRunId(runId);
 
     if (docs.length === 0) {
@@ -208,12 +206,10 @@ export function createDefaultTerminalReporter(): EvaluationReporter {
       return;
     }
 
-    // Format ES documents into structured data
-    const data = formatReportData(docs);
+    const report = formatReportData(docs);
 
-    // Build and display the report
-    const header = buildReportHeader(data.model, data.evaluatorModel);
-    const summaryTable = createSummaryTable(data);
+    const header = buildReportHeader(report.model, report.evaluatorModel);
+    const summaryTable = createEvaluationTable(report);
 
     log.info(`\n\n${header.join('\n')}`);
     log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
@@ -230,16 +226,26 @@ function buildReportHeader(model: Model, evaluatorModel: Model): string[] {
   ];
 }
 
-/**
- * Creates a formatted summary table with dataset-level and overall statistics
- */
-function createSummaryTable(data: PreparedEvaluationData): string {
-  const { datasetScoresWithStats, repetitions } = data;
+export interface EvaluationTableOptions {
+  firstColumnHeader?: string;
+  styleRowName?: (name: string) => string;
+  statsToInclude?: Array<keyof EvaluatorStats>;
+}
 
-  // Derive evaluator names and overall stats on demand
+/**
+ * Creates a formatted evaluation table from an EvaluationReport
+ * Can be used by any reporter to display results in a consistent format
+ */
+export function createEvaluationTable(
+  report: EvaluationReport,
+  options: EvaluationTableOptions = {}
+): string {
+  const { firstColumnHeader = 'Dataset', styleRowName = (name) => name, statsToInclude } = options;
+
+  const { datasetScoresWithStats, repetitions } = report;
+
   const evaluatorNames = getUniqueEvaluatorNames(datasetScoresWithStats);
   const overallStats = calculateOverallStats(datasetScoresWithStats, evaluatorNames);
-
   const totalExamples = sumBy(datasetScoresWithStats, (d) => d.numExamples);
 
   const formatExampleCount = (numExamples: number): string => {
@@ -251,17 +257,38 @@ function createSummaryTable(data: PreparedEvaluationData): string {
   const examplesHeader =
     repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
 
-  const tableHeaders = ['Dataset', examplesHeader, ...evaluatorNames];
+  const tableHeaders = [firstColumnHeader, examplesHeader, ...evaluatorNames];
 
-  const datasetRows = datasetScoresWithStats.map((dataset) =>
-    createDatasetRow(dataset, evaluatorNames, formatExampleCount(dataset.numExamples))
-  );
+  const datasetRows = datasetScoresWithStats.map((dataset) => {
+    const row = [styleRowName(dataset.name), formatExampleCount(dataset.numExamples)];
 
-  const overallRow = createOverallRow(
-    evaluatorNames,
-    overallStats,
-    formatExampleCount(totalExamples)
-  );
+    evaluatorNames.forEach((evaluatorName) => {
+      const stats = dataset.evaluatorStats.get(evaluatorName);
+      if (stats && stats.count > 0) {
+        const cellContent = formatStatsCell(stats, false, statsToInclude);
+        row.push(cellContent);
+      } else {
+        row.push(chalk.gray('-'));
+      }
+    });
+
+    return row;
+  });
+
+  const overallRow = [
+    chalk.bold.green('Overall'),
+    chalk.bold.green(formatExampleCount(totalExamples)),
+  ];
+
+  evaluatorNames.forEach((evaluatorName) => {
+    const stats = overallStats.get(evaluatorName);
+    if (stats && stats.count > 0) {
+      const cellContent = formatStatsCell(stats, true, statsToInclude);
+      overallRow.push(cellContent);
+    } else {
+      overallRow.push(chalk.bold.green('-'));
+    }
+  });
 
   const columnConfig = buildColumnAlignment(tableHeaders.length);
 
@@ -269,78 +296,50 @@ function createSummaryTable(data: PreparedEvaluationData): string {
 }
 
 /**
- * Creates a table row for a single dataset
+ * Formats a statistics cell for display in the evaluation table
  */
-function createDatasetRow(
-  dataset: DatasetScoreWithStats,
-  evaluatorNames: string[],
-  exampleCount: string
-): string[] {
-  const row = [dataset.name, exampleCount];
-
-  evaluatorNames.forEach((evaluatorName) => {
-    const stats = dataset.evaluatorStats.get(evaluatorName);
-    row.push(stats && stats.count > 0 ? formatStatsCell(stats) : chalk.gray('-'));
-  });
-
-  return row;
-}
-
-/**
- * Creates the overall statistics row
- */
-function createOverallRow(
-  evaluatorNames: string[],
-  overallStats: Map<string, EvaluatorStats>,
-  exampleCount: string
-): string[] {
-  const row = [chalk.bold.green('Overall'), exampleCount];
-
-  evaluatorNames.forEach((evaluatorName) => {
-    const stats = overallStats.get(evaluatorName);
-    row.push(stats && stats.count > 0 ? formatStatsCell(stats, true) : chalk.bold.green('-'));
-  });
-
-  return row;
-}
-
-export function formatStatsCell(stats: Partial<EvaluatorStats>, isBold: boolean = false): string {
+function formatStatsCell(
+  stats: Partial<EvaluatorStats>,
+  isBold: boolean,
+  statsToInclude?: Array<keyof EvaluatorStats>
+): string {
   const colorFn = isBold ? chalk.bold.green : chalk.cyan;
   const percentageColor = isBold ? chalk.bold.yellow : chalk.bold.yellow;
 
   const lines: string[] = [];
 
-  if (stats.percentage !== undefined) {
+  const shouldInclude = (stat: keyof EvaluatorStats) => {
+    return !statsToInclude || statsToInclude.includes(stat);
+  };
+
+  if (shouldInclude('percentage') && stats.percentage !== undefined) {
     lines.push(percentageColor(`${(stats.percentage * 100).toFixed(1)}%`));
   }
 
-  if (stats.mean !== undefined) {
+  if (shouldInclude('mean') && stats.mean !== undefined) {
     lines.push(colorFn(`mean: ${stats.mean.toFixed(3)}`));
   }
 
-  if (stats.median !== undefined) {
+  if (shouldInclude('median') && stats.median !== undefined) {
     lines.push(colorFn(`median: ${stats.median.toFixed(3)}`));
   }
 
-  if (stats.stdDev !== undefined) {
+  if (shouldInclude('stdDev') && stats.stdDev !== undefined) {
     lines.push(colorFn(`std: ${stats.stdDev.toFixed(3)}`));
   }
 
-  if (stats.min !== undefined) {
+  if (shouldInclude('min') && stats.min !== undefined) {
     lines.push(colorFn(`min: ${stats.min.toFixed(3)}`));
   }
 
-  if (stats.max !== undefined) {
+  if (shouldInclude('max') && stats.max !== undefined) {
     lines.push(colorFn(`max: ${stats.max.toFixed(3)}`));
   }
 
   return lines.join('\n');
 }
 
-/**
- * Builds column alignment configuration for the table
- */
-export function buildColumnAlignment(
+function buildColumnAlignment(
   columnCount: number
 ): Record<number, { alignment: 'right' | 'left' }> {
   const config: Record<number, { alignment: 'right' | 'left' }> = {

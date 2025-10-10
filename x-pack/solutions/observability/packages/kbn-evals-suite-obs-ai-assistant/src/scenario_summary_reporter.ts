@@ -8,23 +8,15 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
   type EvaluationReporter,
+  type EvaluationReport,
   type EvaluationScoreRepository,
-  type EvaluatorStats,
   type DatasetScoreWithStats,
-  formatStatsCell,
-  buildColumnAlignment,
   calculateOverallStats,
-  convertScoreDocsToDatasets,
+  formatReportData,
+  createEvaluationTable,
 } from '@kbn/evals';
-import { table } from 'table';
 import chalk from 'chalk';
 import { sumBy } from 'lodash';
-
-interface ScenarioInfo {
-  name: string;
-  datasets: DatasetScoreWithStats[];
-  overallStats: Map<string, EvaluatorStats>;
-}
 
 /**
  * Extracts scenario name from dataset name using pattern "scenario: dataset-name"
@@ -36,12 +28,13 @@ function extractScenarioName(datasetName: string): string {
 }
 
 /**
- * Groups datasets by scenario prefix and returns sorted scenario groups with stats
+ * Aggregates multiple datasets into scenario-level synthetic datasets
+ * Each returned dataset represents a scenario with aggregated statistics
  */
-function groupDatasetsByScenario(
+function aggregateDatasetsByScenario(
   datasets: DatasetScoreWithStats[],
   evaluatorNames: string[]
-): ScenarioInfo[] {
+): DatasetScoreWithStats[] {
   const scenarioMap = new Map<string, DatasetScoreWithStats[]>();
 
   datasets.forEach((dataset) => {
@@ -53,139 +46,65 @@ function groupDatasetsByScenario(
   });
 
   return Array.from(scenarioMap.entries())
-    .map(([scenarioName, scenarioDatasets]) => ({
-      name: scenarioName,
-      datasets: scenarioDatasets,
-      // Calculate overall stats for this scenario's datasets
-      overallStats: calculateOverallStats(scenarioDatasets, evaluatorNames),
-    }))
+    .map(([scenarioName, scenarioDatasets]) => {
+      // Aggregate raw scores from all datasets in this scenario (not used directly in the reports now, but will be when statistcal tests are added)
+      const aggregatedScores = new Map<string, number[]>();
+      evaluatorNames.forEach((evaluatorName) => {
+        const allScores = scenarioDatasets.flatMap(
+          (d) => d.evaluatorScores.get(evaluatorName) || []
+        );
+        aggregatedScores.set(evaluatorName, allScores);
+      });
+
+      return {
+        id: scenarioName,
+        name: scenarioName,
+        numExamples: sumBy(scenarioDatasets, (d) => d.numExamples),
+        // experimentId is not meaningful for aggregated scenarios (multiple experiments/datasets combined)
+        experimentId: '_',
+        evaluatorScores: aggregatedScores,
+        evaluatorStats: calculateOverallStats(scenarioDatasets, evaluatorNames),
+      };
+    })
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
- * Creates a formatted table displaying scenario evaluation statistics.
+ * Builds a scenario-grouped evaluation report from Elasticsearch
+ * Aggregates individual datasets into scenario-level synthetic datasets
  */
-function createScenarioSummaryTable(
-  scenarios: ScenarioInfo[],
-  evaluatorNames: string[],
-  totalExamples: number,
-  repetitions: number
-): string {
-  const formatExampleCount = (numExamples: number): string => {
-    return repetitions > 1
-      ? `${repetitions} x ${numExamples / repetitions}`
-      : numExamples.toString();
-  };
-
-  const examplesHeader =
-    repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
-
-  const headers = ['Scenario', examplesHeader, ...evaluatorNames];
-
-  const scenarioRows = scenarios.map((scenario) => {
-    const scenarioTotalExamples = sumBy(scenario.datasets, (d) => d.numExamples);
-    const row = [chalk.bold.white(scenario.name), formatExampleCount(scenarioTotalExamples)];
-
-    evaluatorNames.forEach((evaluatorName) => {
-      const stats = scenario.overallStats.get(evaluatorName);
-      if (stats && stats.count > 0) {
-        // Use shared formatter - only display percentage, mean, and stdDev
-        const cellContent = formatStatsCell({
-          percentage: stats.percentage,
-          mean: stats.mean,
-          stdDev: stats.stdDev,
-        });
-        row.push(cellContent);
-      } else {
-        row.push(chalk.gray('-'));
-      }
-    });
-
-    return row;
-  });
-
-  // Calculate overall statistics across all datasets in all scenarios
-  const allDatasets = scenarios.flatMap((scenario) => scenario.datasets);
-  const overallStats = calculateOverallStats(allDatasets, evaluatorNames);
-  const overallRow = [
-    chalk.bold.green('Overall'),
-    chalk.bold.green(formatExampleCount(totalExamples)),
-  ];
-
-  evaluatorNames.forEach((evaluatorName) => {
-    const stats = overallStats.get(evaluatorName);
-    if (stats) {
-      const cellContent = formatStatsCell(
-        {
-          percentage: stats.percentage,
-          mean: stats.mean,
-          stdDev: stats.stdDev,
-        },
-        true
-      );
-      overallRow.push(cellContent);
-    } else {
-      overallRow.push(chalk.bold.green('-'));
-    }
-  });
-
-  const columnConfig = buildColumnAlignment(headers.length);
-
-  return table([headers, ...scenarioRows, overallRow], {
-    columns: columnConfig,
-  });
-}
-
-/**
- * Retrieves evaluation scores and groups them by scenario.
- * Scenarios are extracted from dataset names using the pattern "scenario: dataset-name".
- */
-async function getScoresByScenario(
+async function buildScenarioReport(
   scoreRepository: EvaluationScoreRepository,
   runId: string,
   log: SomeDevLog
-): Promise<{
-  scenarios: ScenarioInfo[];
-  evaluatorNames: string[];
-  metadata: any;
-  repetitions: number;
-}> {
-  log.info(`Retrieving scores for run ID: ${runId} and grouping by scenario`);
+): Promise<EvaluationReport> {
+  log.info(`Building scenario report for run ID: ${runId}`);
 
-  const scores = await scoreRepository.getScoresByRunId(runId);
+  const docs = await scoreRepository.getScoresByRunId(runId);
 
-  if (!scores || scores.length === 0) {
+  if (!docs || docs.length === 0) {
     throw new Error(`No scores found for run ID: ${runId}`);
   }
 
-  // Convert ES documents to DatasetScoreWithStats using shared logic
-  const datasets = convertScoreDocsToDatasets(scores);
+  const baseReport = formatReportData(docs);
 
-  // Extract evaluator names
-  const evaluatorNames = Array.from(
-    new Set(scores.map((score: any) => score.evaluator.name))
-  ).sort();
+  const evaluatorNames = Array.from(new Set(docs.map((doc) => doc.evaluator.name))).sort();
 
-  // Group datasets by scenario and calculate per-scenario stats
-  const scenarios = groupDatasetsByScenario(datasets, evaluatorNames);
-
-  const repetitions = scores[0]?.repetitions ?? 1;
+  const scenarioDatasets = aggregateDatasetsByScenario(
+    baseReport.datasetScoresWithStats,
+    evaluatorNames
+  );
 
   return {
-    scenarios,
-    evaluatorNames,
-    metadata: {
-      runId,
-      timestamp: scores[0]?.['@timestamp'],
-      model: scores[0]?.model.id,
-    },
-    repetitions,
+    ...baseReport,
+    datasetScoresWithStats: scenarioDatasets,
   };
 }
 
 /**
- * Creates a custom reporter that displays evaluation results grouped by scenario.
- * This is specific to Observability AI Assistant where datasets follow the pattern "scenario: dataset-name".
+ * Creates a custom reporter that displays evaluation results grouped by scenario
+ * Aggregates individual datasets into scenario-level views for easier analysis
+ * Datasets should follow the pattern "scenario: dataset-name" for proper grouping
  */
 export function createScenarioSummaryReporter(): EvaluationReporter {
   return async (
@@ -196,51 +115,36 @@ export function createScenarioSummaryReporter(): EvaluationReporter {
     try {
       log.info(chalk.bold.blue('\n🔍 === SCENARIO SUMMARY REPORT ==='));
 
-      const { scenarios, evaluatorNames, metadata, repetitions } = await getScoresByScenario(
-        scoreRepository,
-        runId,
-        log
-      );
+      const report = await buildScenarioReport(scoreRepository, runId, log);
 
-      if (!scenarios || scenarios.length === 0) {
+      if (!report.datasetScoresWithStats || report.datasetScoresWithStats.length === 0) {
         log.warning('⚠️ No scenarios found to display');
         return;
       }
 
-      // Display metadata
       log.info(`\n${chalk.bold.blue('📋 Run Metadata:')}`);
       log.info(
-        `Run: ${chalk.cyan(metadata.runId)} (${
-          metadata.timestamp || 'Unknown time'
-        }) - Model: ${chalk.yellow(metadata.model || 'Unknown')}`
+        `Run: ${chalk.cyan(report.runId)} - Model: ${chalk.yellow(
+          report.model.id || 'Unknown'
+        )} - Evaluator: ${chalk.yellow(report.evaluatorModel.id || 'Unknown')}`
       );
-      if (repetitions > 1) {
-        log.info(`Repetitions: ${chalk.cyan(repetitions.toString())}`);
+      if (report.repetitions > 1) {
+        log.info(`Repetitions: ${chalk.cyan(report.repetitions.toString())}`);
       }
 
-      // Calculate total examples
-      const totalExamples = sumBy(
-        scenarios.flatMap((scenario) => scenario.datasets),
-        (dataset) => dataset.numExamples
-      );
-
-      // Display scenario summary table
       log.info(`\n${chalk.bold.blue('═══ SCENARIO SUMMARY ═══')}`);
-      const scenarioTable = createScenarioSummaryTable(
-        scenarios,
-        evaluatorNames,
-        totalExamples,
-        repetitions
-      );
+      const scenarioTable = createEvaluationTable(report, {
+        firstColumnHeader: 'Scenario',
+        styleRowName: (name) => chalk.bold.white(name),
+        statsToInclude: ['percentage', 'mean', 'stdDev'],
+      });
       log.info(`\n${scenarioTable}`);
 
-      // Display summary statistics
+      const totalExamples = sumBy(report.datasetScoresWithStats, (d) => d.numExamples);
+
       log.info(`\n${chalk.bold.blue('📊 Summary:')}`);
-      log.info(`  • Total Scenarios: ${chalk.green(scenarios.length.toString())}`);
       log.info(
-        `  • Total Datasets: ${chalk.green(
-          scenarios.flatMap((scenario) => scenario.datasets).length.toString()
-        )}`
+        `  • Total Scenarios: ${chalk.green(report.datasetScoresWithStats.length.toString())}`
       );
       log.info(`  • Total Examples: ${chalk.green(totalExamples.toString())}`);
 

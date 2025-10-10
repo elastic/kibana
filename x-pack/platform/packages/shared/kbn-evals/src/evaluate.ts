@@ -23,8 +23,8 @@ import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators } from './types';
 import {
-  prepareEvaluationData,
-  exportEvaluationToElasticsearch,
+  buildEvaluationReport,
+  exportEvaluations,
   createDefaultTerminalReporter,
   type EvaluationReporter,
 } from './utils/report_model_score';
@@ -153,7 +153,7 @@ export const evaluate = base.extend<
 
       await use(phoenixClient);
 
-      const preparedData = await prepareEvaluationData({
+      const report = await buildEvaluationReport({
         phoenixClient,
         experiments: await phoenixClient.getRanExperiments(),
         model,
@@ -163,14 +163,14 @@ export const evaluate = base.extend<
       });
 
       try {
-        await exportEvaluationToElasticsearch(preparedData, esClient, log);
+        await exportEvaluations(report, esClient, log);
       } catch (error) {
         log.warning('Failed to export evaluation results to Elasticsearch:', error);
       }
 
       // Then display results using the reporter (queries Elasticsearch), can be customized by downstream consumers
       const scoreRepository = new EvaluationScoreRepository(esClient, log);
-      await reportModelScore(scoreRepository, preparedData.runId, log);
+      await reportModelScore(scoreRepository, report.runId, log);
     },
     {
       scope: 'worker',

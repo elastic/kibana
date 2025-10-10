@@ -15,10 +15,11 @@ export type { EvaluationDataset } from './src/types';
 
 export {
   createDefaultTerminalReporter,
+  createEvaluationTable,
+  formatReportData,
   type EvaluationReporter,
-  formatStatsCell,
-  buildColumnAlignment,
-  convertScoreDocsToDatasets,
+  type EvaluationReport,
+  type EvaluationTableOptions,
 } from './src/utils/report_model_score';
 
 export { EvaluationScoreRepository, type ModelScoreDocument } from './src/utils/score_repository';
