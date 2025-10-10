@@ -30,37 +30,74 @@ const useCases = {
   'Multiple events and alerts': { uniqueEventsCount: 2, uniqueAlertsCount: 2 },
   'Hundreds of events and alerts': { uniqueEventsCount: 120, uniqueAlertsCount: 120 },
   'Millions of events and alerts': { uniqueEventsCount: 1_200_000, uniqueAlertsCount: 1_200_000 },
-  'With clickable events popover - only events': { uniqueEventsCount: 5, uniqueAlertsCount: 0 },
-  'With clickable events popover - only alerts': { uniqueEventsCount: 0, uniqueAlertsCount: 3 },
-  'With clickable events popover': { uniqueEventsCount: 5, uniqueAlertsCount: 3 },
 };
 
 const Template = () => {
-  // Create popover hooks for each clickable use case
-  const eventsOnlyPopover = useEventDetailsPopover(
-    analyzeDocuments({ uniqueEventsCount: 5, uniqueAlertsCount: 0 }),
-    'With clickable events popover - only events'
+  // Create individual popovers for each use case at the top level (following Rules of Hooks)
+  const singleEventPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 }),
+    'Single event'
   );
-  const alertsOnlyPopover = useEventDetailsPopover(
-    analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 3 }),
-    'With clickable events popover - only alerts'
+  const singleAlertPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 1 }),
+    'Single alert'
   );
-  const mixedPopover = useEventDetailsPopover(
-    analyzeDocuments({ uniqueEventsCount: 5, uniqueAlertsCount: 3 }),
-    'With clickable events popover'
+  const multipleEventsPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 }),
+    'Multiple events'
   );
+  const multipleAlertsPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 2 }),
+    'Multiple alerts'
+  );
+  const hundredsOfEventsPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 120, uniqueAlertsCount: 0 }),
+    'Hundreds of events'
+  );
+  const hundredsOfAlertsPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 120 }),
+    'Hundreds of alerts'
+  );
+  const multipleEventsAndAlertsPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 2 }),
+    'Multiple events and alerts'
+  );
+  const hundredsOfEventsAndAlertsPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 120, uniqueAlertsCount: 120 }),
+    'Hundreds of events and alerts'
+  );
+  const millionsOfEventsAndAlertsPopover = useEventDetailsPopover(
+    analyzeDocuments({ uniqueEventsCount: 1_200_000, uniqueAlertsCount: 1_200_000 }),
+    'Millions of events and alerts'
+  );
+
+  // Create popovers mapping
+  const popovers = useMemo(() => ({
+    'Single event': singleEventPopover,
+    'Single alert': singleAlertPopover,
+    'Multiple events': multipleEventsPopover,
+    'Multiple alerts': multipleAlertsPopover,
+    'Hundreds of events': hundredsOfEventsPopover,
+    'Hundreds of alerts': hundredsOfAlertsPopover,
+    'Multiple events and alerts': multipleEventsAndAlertsPopover,
+    'Hundreds of events and alerts': hundredsOfEventsAndAlertsPopover,
+    'Millions of events and alerts': millionsOfEventsAndAlertsPopover,
+  }), [
+    singleEventPopover,
+    singleAlertPopover,
+    multipleEventsPopover,
+    multipleAlertsPopover,
+    hundredsOfEventsPopover,
+    hundredsOfAlertsPopover,
+    multipleEventsAndAlertsPopover,
+    hundredsOfEventsAndAlertsPopover,
+    millionsOfEventsAndAlertsPopover,
+  ]);
 
   const nodes: LabelNodeViewModel[] = useMemo(
     () =>
       Object.entries(useCases).map(([useCaseName, { uniqueEventsCount, uniqueAlertsCount }]) => {
-        let eventClickHandler;
-        if (useCaseName === 'With clickable events popover - only events') {
-          eventClickHandler = eventsOnlyPopover.onEventClick;
-        } else if (useCaseName === 'With clickable events popover - only alerts') {
-          eventClickHandler = alertsOnlyPopover.onEventClick;
-        } else if (useCaseName === 'With clickable events popover') {
-          eventClickHandler = mixedPopover.onEventClick;
-        }
+        const eventClickHandler = popovers[useCaseName as keyof typeof popovers]?.onEventClick;
 
         return {
           id: useCaseName,
@@ -73,7 +110,7 @@ const Template = () => {
           eventClickHandler,
         };
       }),
-    [eventsOnlyPopover.onEventClick, alertsOnlyPopover.onEventClick, mixedPopover.onEventClick]
+    [popovers]
   );
 
   return (
@@ -87,9 +124,9 @@ const Template = () => {
         edges={[]}
         interactive={true}
       />
-      <eventsOnlyPopover.PopoverComponent />
-      <alertsOnlyPopover.PopoverComponent />
-      <mixedPopover.PopoverComponent />
+      {Object.values(popovers).map((popover, index) => (
+        <popover.PopoverComponent key={index} />
+      ))}
     </ThemeProvider>
   );
 };
