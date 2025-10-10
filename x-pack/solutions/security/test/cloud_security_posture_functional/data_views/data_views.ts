@@ -9,10 +9,8 @@ import expect from '@kbn/expect';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import {
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
-  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V1,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX,
-  CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_V1,
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
 } from '@kbn/cloud-security-posture-common';
 import type { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
@@ -288,7 +286,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('Data View Migration', () => {
       it('Should migrate from v1 to v2 data view when old data view exists', async () => {
-        const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V1}-default`;
+        const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-default`;
         const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
 
         // Create old v1 data view to simulate existing installation
@@ -339,7 +337,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('Should create v2 data view directly for new installations (no migration needed)', async () => {
-        const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V1}-default`;
+        const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-default`;
         const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
 
         // Ensure neither data view exists (simulating fresh installation)
@@ -389,7 +387,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('Should handle migration in non-default space', async () => {
         await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
 
-        const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V1}-${TEST_SPACE}`;
+        const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
         const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
         // Create old v1 data view in test space
@@ -498,7 +496,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('Vulnerabilities Data View Migration', () => {
       it('Should migrate vulnerabilities from v1 to v2 data view when old data view exists', async () => {
-        const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_V1}-default`;
+        const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-default`;
         const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-default`;
 
         // Create old v1 vulnerabilities data view to simulate existing installation
@@ -548,7 +546,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('Should create v2 vulnerabilities data view directly for new installations', async () => {
-        const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_V1}-default`;
+        const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-default`;
         const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-default`;
 
         // Ensure neither data view exists (simulating fresh installation)
@@ -598,7 +596,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       it('Should handle vulnerabilities migration in non-default space', async () => {
         await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
 
-        const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_V1}-${TEST_SPACE}`;
+        const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0]}-${TEST_SPACE}`;
         const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
         // Create old v1 data view in test space
