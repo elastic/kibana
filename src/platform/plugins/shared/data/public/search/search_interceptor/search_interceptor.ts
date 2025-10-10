@@ -444,7 +444,7 @@ export class SearchInterceptor {
     const { abortSignal } = options || {};
 
     if (request.id) {
-      // just polling, no need to send body
+      // just polling an existing search, no need to send body
       const { params, ...requestWithoutParams } = request;
       if (params) {
         const { body, ...paramsWithoutBody } = params;
