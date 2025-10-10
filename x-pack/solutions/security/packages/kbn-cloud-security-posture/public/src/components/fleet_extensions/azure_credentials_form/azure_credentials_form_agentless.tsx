@@ -77,21 +77,7 @@ export const AzureCredentialsFormAgentless = ({
 
   const azureCredentialsType = getAgentlessCredentialsType(input, isAzureCloudConnectorEnabled);
 
-  // Handle cloud connector support policy updates
-  if (
-    azureCredentialsType &&
-    azureCredentialsType === 'cloud_connectors' &&
-    (!newPolicy.supports_cloud_connector || newPolicy.cloud_connector_id)
-  ) {
-    updatePolicy({
-      updatedPolicy: {
-        ...newPolicy,
-        supports_cloud_connector: true,
-        cloud_connector_id: undefined,
-      },
-    });
-  }
-
+  // Ensures the  cloud connector support is false if the credential if azureCredentialsType is not cloud_connectors
   if (
     azureCredentialsType &&
     azureCredentialsType !== 'cloud_connectors' &&
