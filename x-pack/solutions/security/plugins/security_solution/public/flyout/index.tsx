@@ -14,8 +14,8 @@ import type {
   FindingsVulnerabilityPanelExpandableFlyoutPropsNonPreview,
   FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
 } from '@kbn/cloud-security-posture';
-import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
 import type { GraphGroupedNodePreviewPanelProps } from '@kbn/cloud-security-posture-graph';
+import { GraphGroupedNodePreviewPanelKey } from '@kbn/cloud-security-posture-graph';
 import type { GenericEntityDetailsExpandableFlyoutProps } from './entity_details/generic_details_left';
 import {
   GenericEntityDetailsPanel,
@@ -26,6 +26,9 @@ import { GenericEntityPanel } from './entity_details/generic_right';
 import type { AIForSOCDetailsProps } from './ai_for_soc/types';
 import { AIForSOCDetailsProvider } from './ai_for_soc/context';
 import { AIForSOCPanel } from './ai_for_soc';
+import { IOCDetailsProvider } from './ioc_details/context';
+import { IOCPanel } from './ioc_details';
+import { IOCRightPanelKey } from './ioc_details/constants/panel_keys';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
@@ -85,6 +88,7 @@ import {
   VulnerabilityFindingsPreviewPanelKey,
 } from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
+import type { IOCDetailsProps } from './ioc_details/types';
 
 const GraphGroupedNodePreviewPanel = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -272,6 +276,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <FindingsVulnerabilityPanel
         {...(props as FindingsVulnerabilityPanelExpandableFlyoutPropsPreview).params}
       />
+    ),
+  },
+  {
+    key: IOCRightPanelKey,
+    component: (props) => (
+      <IOCDetailsProvider {...(props as IOCDetailsProps).params}>
+        <IOCPanel path={props.path as IOCDetailsProps['path']} />
+      </IOCDetailsProvider>
     ),
   },
 ];

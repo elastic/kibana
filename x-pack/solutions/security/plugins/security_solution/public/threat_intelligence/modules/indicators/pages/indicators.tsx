@@ -10,9 +10,6 @@ import React from 'react';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
-import { useBlockListContext } from '../hooks/use_block_list_context';
-import { BlockListProvider } from '../containers/block_list_provider';
-import { BlockListFlyout } from '../../block_list/containers/flyout';
 import { IndicatorsBarChartWrapper } from '../components/barchart/wrapper';
 import { IndicatorsTable } from '../components/table/table';
 import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
@@ -31,17 +28,13 @@ const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) =
   <ScreenReaderAnnouncementsProvider>
     <IndicatorsFilters>
       <FieldTypesProvider>
-        <InspectorProvider>
-          <BlockListProvider>{children}</BlockListProvider>
-        </InspectorProvider>
+        <InspectorProvider>{children}</InspectorProvider>
       </FieldTypesProvider>
     </IndicatorsFilters>
   </ScreenReaderAnnouncementsProvider>
 );
 
 const IndicatorsPageContent: FC = () => {
-  const { blockListIndicatorValue } = useBlockListContext();
-
   const { sourcererDataView, browserFields } = useTIDataView();
 
   const columnSettings = useColumnSettings();
@@ -78,40 +71,36 @@ const IndicatorsPageContent: FC = () => {
   });
 
   return (
-    <FieldTypesProvider>
-      <DefaultPageLayout
-        pageTitle="Indicators"
-        subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
-      >
-        <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
-        </FiltersGlobal>
+    <DefaultPageLayout
+      pageTitle="Indicators"
+      subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
+    >
+      <FiltersGlobal>
+        <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+      </FiltersGlobal>
 
-        <IndicatorsBarChartWrapper
-          dateRange={dateRange}
-          series={series}
-          timeRange={timeRange}
-          field={selectedField}
-          onFieldChange={onFieldChange}
-          isFetching={isFetchingAggregatedIndicators}
-          isLoading={isLoadingAggregatedIndicators}
-        />
+      <IndicatorsBarChartWrapper
+        dateRange={dateRange}
+        series={series}
+        timeRange={timeRange}
+        field={selectedField}
+        onFieldChange={onFieldChange}
+        isFetching={isFetchingAggregatedIndicators}
+        isLoading={isLoadingAggregatedIndicators}
+      />
 
-        <IndicatorsTable
-          browserFields={browserFields}
-          columnSettings={columnSettings}
-          pagination={pagination}
-          indicatorCount={indicatorCount}
-          indicators={indicators}
-          isLoading={isLoadingIndicators}
-          isFetching={isFetchingIndicators}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onChangePage={onChangePage}
-        />
-
-        {blockListIndicatorValue && <BlockListFlyout indicatorFileHash={blockListIndicatorValue} />}
-      </DefaultPageLayout>
-    </FieldTypesProvider>
+      <IndicatorsTable
+        browserFields={browserFields}
+        columnSettings={columnSettings}
+        pagination={pagination}
+        indicatorCount={indicatorCount}
+        indicators={indicators}
+        isLoading={isLoadingIndicators}
+        isFetching={isFetchingIndicators}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+        onChangePage={onChangePage}
+      />
+    </DefaultPageLayout>
   );
 };
 
