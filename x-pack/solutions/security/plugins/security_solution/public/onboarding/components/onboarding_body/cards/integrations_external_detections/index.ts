@@ -12,7 +12,7 @@ import type { OnboardingCardConfig } from '../../../../types';
 import type { ExternalIntegrationCardMetadata } from './integrations_check_complete';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { OnboardingCardId } from '../../../../constants';
-import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
+import { RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
 
 export const integrationsExternalDetectionsCardConfig: OnboardingCardConfig<ExternalIntegrationCardMetadata> =
   {
@@ -32,5 +32,5 @@ export const integrationsExternalDetectionsCardConfig: OnboardingCardConfig<Exte
         )
     ),
     checkComplete: checkIntegrationsCardComplete,
-    capabilitiesRequired: [`${SECURITY_FEATURE_ID}.external_detections`],
+    capabilitiesRequired: [RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE],
   };

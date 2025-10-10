@@ -12,11 +12,8 @@ export enum ProductFeatureSecurityKey {
   /** Enables Configurations page for AI SOC */
   configurations = 'configurations',
 
-  /** Elastic endpoint detections, includes alerts, rules, investigations */
+  /** Elastic endpoint detections, includes CSP rules which remain provisionally within siem */
   detections = 'detections',
-
-  /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
-  externalDetections = 'external_detections',
   /**
    * Enables Investigation guide in Timeline
    */
@@ -153,10 +150,12 @@ export enum ProductFeatureSiemMigrationsKey {
 }
 
 export enum ProductFeatureRulesKey {
-  /**
-   * Enables Rules
-   */
-  rules = 'rules',
+  /** Elastic endpoint detections, includes alerts, rules, investigations */
+  detections = 'detections',
+
+  /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
+  externalDetections = 'external_detections',
+  
   /**
    * Enables customization of prebuilt Elastic rules
    */

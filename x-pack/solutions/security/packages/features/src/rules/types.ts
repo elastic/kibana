@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ProductFeatureSecurityKey } from '../product_features_keys';
+import type { ProductFeatureRulesKey } from '../product_features_keys';
 import type { ProductFeaturesConfig } from '../types';
 
-export type RulesProductFeaturesConfig = ProductFeaturesConfig<ProductFeatureSecurityKey>;
+export type RulesProductFeaturesConfig = ProductFeaturesConfig<ProductFeatureRulesKey>;
