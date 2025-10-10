@@ -281,6 +281,11 @@ export interface RuleDescriptionFieldWrappers {
   indexPattern: React.ComponentType<{ children: React.ReactNode }>;
   indexPatternItem: React.ComponentType<{ children: React.ReactNode }>;
   codeBlock: React.ComponentType<{ children: React.ReactNode }>;
+  asyncField: <T>(props: {
+    queryKey: string[];
+    queryFn: () => Promise<HttpResponse<T>>;
+    children: (data: T) => React.ReactNode;
+  }) => React.ReactElement;
 }
 
 export type GetDescriptionFieldsFn = ({
@@ -289,6 +294,7 @@ export type GetDescriptionFieldsFn = ({
 }: {
   rule: Rule;
   fieldWrappers: RuleDescriptionFieldWrappers;
+  http: HttpSetup | undefined;
 }) => { type: RuleDetailDescriptionFieldType; description: NonNullable<ReactNode> }[];
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {

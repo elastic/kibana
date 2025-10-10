@@ -262,7 +262,6 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
             type="column"
             listItems={ruleDefinitionList}
             css={{ alignItems: 'start' }}
-            columnWidths={[20, 80]}
           />
         </EuiPanel>
       </EuiFlexItem>
