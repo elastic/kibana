@@ -16,7 +16,7 @@ import type { SearchSessionsMgmtAPI } from '../lib/api';
 import { SearchSessionsMgmtTable } from './table';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import type { SearchUsageCollector } from '../../../collectors';
-import type { SearchSessionEBTManager } from '../../ebt_manager';
+import type { ISearchSessionEBTManager } from '../../ebt_manager';
 
 interface Props {
   core: CoreStart;
@@ -27,7 +27,7 @@ interface Props {
   kibanaVersion: string;
   share: SharePluginStart;
   searchUsageCollector: SearchUsageCollector;
-  searchSessionEBTManager: SearchSessionEBTManager;
+  searchSessionEBTManager: ISearchSessionEBTManager;
 }
 
 export function SearchSessionsMgmtMain({ share, ...tableProps }: Props) {
