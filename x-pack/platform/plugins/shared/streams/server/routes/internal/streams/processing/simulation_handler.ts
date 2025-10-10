@@ -252,7 +252,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
               field: '_errors',
               value: {
                 message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: '{{{ _ingest.on_failure_processor_tag }}}',
+                processor_id: Object.values(processor)[0].tag,
                 type: 'generic_processor_failure',
               },
             },

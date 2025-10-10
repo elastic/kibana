@@ -15,6 +15,7 @@ interface ManagementBottomBarProps {
   disabled?: boolean;
   insufficientPrivileges?: boolean;
   isLoading?: boolean;
+  validationError?: string | null;
   onCancel: () => void;
   onConfirm: () => void;
 }
@@ -24,6 +25,7 @@ export function ManagementBottomBar({
   disabled = false,
   isLoading = false,
   insufficientPrivileges = false,
+  validationError,
   onCancel,
   onConfirm,
 }: ManagementBottomBarProps) {
@@ -58,12 +60,14 @@ export function ManagementBottomBar({
                     defaultMessage: "You don't have sufficient privileges to save changes.",
                   }
                 )
+              : Boolean(validationError)
+              ? String(validationError)
               : undefined
           }
         >
           <EuiButton
             data-test-subj="streamsAppManagementBottomBarButton"
-            disabled={disabled || insufficientPrivileges}
+            disabled={disabled || insufficientPrivileges || Boolean(validationError)}
             color="primary"
             fill
             size="s"

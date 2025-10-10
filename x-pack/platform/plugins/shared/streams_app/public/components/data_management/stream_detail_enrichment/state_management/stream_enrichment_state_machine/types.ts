@@ -26,6 +26,7 @@ import type {
 } from '../simulation_state_machine';
 import type { MappedSchemaField } from '../../../schema_editor/types';
 import type { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
+import type { ValidationActorRef } from '../validation_state_machine/validation_state_machine';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -47,6 +48,7 @@ export interface StreamEnrichmentContextType {
   stepRefs: StepActorRef[];
   grokCollection: GrokCollection;
   simulatorRef: SimulationActorRef;
+  validatorRef: ValidationActorRef;
   urlState: EnrichmentUrlState;
 }
 
@@ -81,4 +83,5 @@ export type StreamEnrichmentEvent =
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
-  | { type: 'url.sync' };
+  | { type: 'url.sync' }
+  | { type: 'validation.trigger' };
