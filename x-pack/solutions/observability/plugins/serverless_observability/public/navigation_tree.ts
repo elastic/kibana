@@ -398,8 +398,8 @@ export const createNavigationTree = ({
           },
           {
             id: 'ingest_and_manage_data',
-            title: i18n.translate('xpack.serverlessObservability.nav.ingestAndManageData', {
-              defaultMessage: 'Ingest and manage data',
+            title: i18n.translate('xpack.serverlessObservability.nav.dataManagement', {
+              defaultMessage: 'Data management',
             }),
             renderAs: 'panelOpener',
             spaceBefore: null,
