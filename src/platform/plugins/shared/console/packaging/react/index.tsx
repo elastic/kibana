@@ -69,11 +69,11 @@ const translations = {
     formats: {},
     messages: {},
   },
-  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports -- Webpack resolves JSON imports at build time
+
   'fr-FR': require('./translations/fr-FR.json'),
-  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports -- Webpack resolves JSON imports at build time
+
   'ja-JP': require('./translations/ja-JP.json'),
-  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports -- Webpack resolves JSON imports at build time
+
   'zh-CN': require('./translations/zh-CN.json'),
 };
 
