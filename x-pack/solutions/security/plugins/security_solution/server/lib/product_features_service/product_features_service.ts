@@ -14,18 +14,18 @@ import {
   getAssistantFeature,
   getAttackDiscoveryFeature,
   getCasesFeature,
-  getSecurityFeature,
   getCasesV2Feature,
   getCasesV3Feature,
+  getNotesFeature,
+  getSecurityFeature,
   getSecurityV2Feature,
   getSecurityV3Feature,
   getSecurityV4Feature,
-  getTimelineFeature,
-  getNotesFeature,
   getSiemMigrationsFeature,
+  getTimelineFeature,
 } from '@kbn/security-solution-features/product_features';
 import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
-import type { ExperimentalFeatures } from '../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { ProductFeatures } from './product_features';
 import { casesProductFeatureParams } from './cases_product_feature_params';
 import {

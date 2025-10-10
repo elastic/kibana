@@ -26,7 +26,7 @@ const mockTheme = getMockTheme({
 });
 
 jest.mock('../../lib/kibana');
-jest.mock('../../hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
 

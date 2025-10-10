@@ -6,8 +6,8 @@
  */
 
 import { DEFAULT_SIGNALS_INDEX, SIGNALS_INDEX_KEY } from '../common/constants';
-import type { ExperimentalFeatures } from '../common/experimental_features';
-import { parseExperimentalConfigValue } from '../common/experimental_features';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import { parseExperimentalConfigValue } from '@kbn/experimental-features';
 import { getDefaultConfigSettings } from '../common/config_settings';
 import type { ConfigType } from './config';
 import { duration } from 'moment';

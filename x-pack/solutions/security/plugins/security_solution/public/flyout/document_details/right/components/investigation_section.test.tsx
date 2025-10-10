@@ -22,7 +22,7 @@ import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
@@ -31,7 +31,7 @@ import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighte
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_highlighted_fields');
-jest.mock('../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../../common/containers/source');
 jest.mock('../../../rule_details/hooks/use_rule_details');
 jest.mock('../../shared/hooks/use_highlighted_fields_privilege');

@@ -16,7 +16,7 @@ import { ArtifactEntryCard } from './artifact_entry_card';
 import { act, fireEvent, getByTestId, waitFor } from '@testing-library/react';
 import type { AnyArtifact } from './types';
 import { isTrustedApp } from './utils';
-import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
+import { getExceptionProviderMock, getTrustedAppProviderMock } from './test_utils';
 import { OS_LINUX, OS_MAC, OS_WINDOWS } from './components/translations';
 import type { TrustedApp } from '../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -27,9 +27,13 @@ import {
   buildSpaceOwnerIdTag,
 } from '../../../../common/endpoint/service/artifacts/utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 jest.mock('../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
+
+jest.mock('@kbn/experimental-features');
+const mockUseIsExperimentalFeatureEnabled = jest.mocked(useIsExperimentalFeatureEnabled);
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -323,7 +327,7 @@ describe.each([
     });
 
     beforeEach(() => {
-      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
       authzMock = appTestContext.getUserPrivilegesMockSetter(mockUserPrivileges);
       authzMock.set({ canManageGlobalArtifacts: false });
       (item as ExceptionListItemSchema).tags = [GLOBAL_ARTIFACT_TAG, buildSpaceOwnerIdTag('foo')];
@@ -334,7 +338,7 @@ describe.each([
     });
 
     it('should render menu if feature flag is disabled', () => {
-      appTestContext.setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: false });
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
       render({ actions });
 
       expect(

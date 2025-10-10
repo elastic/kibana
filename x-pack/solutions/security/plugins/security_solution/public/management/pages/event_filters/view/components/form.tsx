@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { isEqual } from 'lodash';
 import type { EuiButtonGroupOptionProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
-  EuiFieldText,
-  EuiSpacer,
-  EuiFlexGroup,
   EuiButtonGroup,
-  useEuiTheme,
+  EuiFieldText,
+  EuiFlexGroup,
   EuiForm,
   EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
   EuiSuperSelect,
   EuiText,
-  EuiHorizontalRule,
   EuiTextArea,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,21 +29,21 @@ import { css } from '@emotion/react';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_ARTIFACT_OPERATORS,
-  hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
+  hasWrongOperatorWithWildcard,
 } from '@kbn/securitysolution-list-utils';
 import {
-  WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
+  WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
-import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts/use_can_assign_artifact_per_policy';
 import { FormattedError } from '../../../../components/formatted_error';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 import {
   FILTER_PROCESS_DESCENDANTS_TAG,
@@ -61,17 +61,17 @@ import { useFetchIndex } from '../../../../../common/containers/source';
 import { Loader } from '../../../../../common/components/loader';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import { getAddedFieldsCounts, computeHasDuplicateFields } from '../../../../common/utils';
+import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../common/utils';
 
 import {
   ABOUT_EVENT_FILTERS,
-  NAME_LABEL,
-  NAME_ERROR,
   DESCRIPTION_LABEL,
+  NAME_ERROR,
+  NAME_LABEL,
   OS_LABEL,
   RULE_NAME,
 } from '../event_filters_list';
-import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
+import { CONFIRM_WARNING_MODAL_LABELS, OS_TITLES } from '../../../../common/translations';
 import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../constants';
 
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';

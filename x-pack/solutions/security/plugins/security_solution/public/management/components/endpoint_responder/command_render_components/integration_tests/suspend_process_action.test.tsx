@@ -27,7 +27,7 @@ import type {
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 
-jest.mock('../../../../../common/experimental_features_service');
+jest.mock('@kbn/experimental-features');
 
 describe('When using the suspend-process action from response actions console', () => {
   let user: UserEvent;

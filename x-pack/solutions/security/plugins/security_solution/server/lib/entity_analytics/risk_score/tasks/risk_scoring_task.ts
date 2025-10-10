@@ -16,9 +16,9 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../../common/search_strategy';
-import type { ExperimentalFeatures } from '../../../../../common';
 import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
 import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
@@ -26,15 +26,15 @@ import { RiskScoreDataClient } from '../risk_score_data_client';
 import { isRiskScoreCalculationComplete } from '../helpers';
 import {
   defaultState,
-  stateSchemaByVersion,
   type LatestTaskStateSchema as RiskScoringTaskState,
+  stateSchemaByVersion,
 } from './state';
 import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import { buildScopedInternalSavedObjectsClientUnsafe, convertRangeToISO } from './helpers';
 import {
-  RISK_SCORE_EXECUTION_SUCCESS_EVENT,
-  RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
+  RISK_SCORE_EXECUTION_ERROR_EVENT,
+  RISK_SCORE_EXECUTION_SUCCESS_EVENT,
 } from '../../../telemetry/event_based/events';
 import {
   AssetCriticalityDataClient,

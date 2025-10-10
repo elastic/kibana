@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import type { ExperimentalFeatures } from '../../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { ResolverSchema } from '../../../../../../common/endpoint/types';
 import {
   CORE_SECURITY_MODULES,

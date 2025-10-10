@@ -19,7 +19,7 @@ import { createAppRootMockRenderer } from '../../../../mock/endpoint';
 import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 
-jest.mock('../../../../hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../../../management/hooks/agents/use_get_agent_status');
 
 const useGetAgentStatusMock = _useGetAgentStatus as jest.Mock;

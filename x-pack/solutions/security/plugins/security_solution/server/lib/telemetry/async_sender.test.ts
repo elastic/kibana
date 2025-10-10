@@ -6,22 +6,22 @@
  */
 import axios from 'axios';
 
-import type { QueueConfig, IAsyncTelemetryEventsSender } from './async_sender.types';
+import type { IAsyncTelemetryEventsSender, QueueConfig } from './async_sender.types';
 import {
+  AsyncTelemetryEventsSender,
   DEFAULT_QUEUE_CONFIG,
   DEFAULT_RETRY_CONFIG,
-  AsyncTelemetryEventsSender,
 } from './async_sender';
 import { TelemetryChannel, TelemetryCounter } from './types';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
-  createMockTelemetryReceiver,
   createMockTelemetryPluginSetup,
   createMockTelemetryPluginStart,
+  createMockTelemetryReceiver,
   createMockUsageCounter,
 } from './__mocks__';
 import { TelemetryEventsSender } from './sender';
-import type { ExperimentalFeatures } from '../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 
 jest.mock('axios');
 jest.mock('./receiver');

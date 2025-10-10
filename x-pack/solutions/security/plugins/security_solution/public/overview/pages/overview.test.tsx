@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { merge } from 'lodash';
@@ -20,7 +20,7 @@ import { useFetchIndex } from '../../common/containers/source';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
 import type { EndpointPrivileges } from '../../../common/endpoint/types';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
@@ -100,7 +100,7 @@ jest.mock('../../entity_analytics/api/hooks/use_risk_score');
 const useRiskScoreMock = useRiskScore as jest.Mock;
 useRiskScoreMock.mockReturnValue({ loading: false, data: [], hasEngineBeenInstalled: false });
 
-jest.mock('../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 

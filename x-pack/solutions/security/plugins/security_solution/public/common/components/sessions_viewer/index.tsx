@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/public';
 import { useDispatch } from 'react-redux';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
-import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
+import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';
@@ -25,7 +26,6 @@ import { useLicense } from '../../hooks/use_license';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { SecurityCellActionsTrigger } from '../cell_actions';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 

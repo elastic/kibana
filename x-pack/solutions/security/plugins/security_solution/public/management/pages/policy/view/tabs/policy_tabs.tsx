@@ -11,40 +11,40 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { EventFiltersProcessDescendantIndicator } from '../../../../components/artifact_entry_card/components/card_decorators/event_filters_process_descendant_indicator';
 import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
 import { useLicense } from '../../../../../common/hooks/use_license';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { ProtectionUpdatesLayout } from '../protection_updates/protection_updates_layout';
 import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
-  getPolicyDetailPath,
-  getPolicyEventFiltersPath,
-  getPolicyHostIsolationExceptionsPath,
-  getPolicyTrustedAppsPath,
+  getBlocklistsListPath,
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
-  getTrustedAppsListPath,
-  getPolicyDetailsArtifactsListPath,
-  getBlocklistsListPath,
   getPolicyBlocklistsPath,
+  getPolicyDetailPath,
+  getPolicyDetailsArtifactsListPath,
+  getPolicyEventFiltersPath,
+  getPolicyHostIsolationExceptionsPath,
   getPolicyProtectionUpdatesPath,
-  getTrustedDevicesListPath,
+  getPolicyTrustedAppsPath,
   getPolicyTrustedDevicesPath,
+  getTrustedAppsListPath,
+  getTrustedDevicesListPath,
 } from '../../../../common/routing';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
 import {
+  isOnBlocklistsView,
   isOnHostIsolationExceptionsView,
   isOnPolicyEventFiltersView,
   isOnPolicyFormView,
   isOnPolicyTrustedAppsView,
-  isOnBlocklistsView,
+  isOnPolicyTrustedDevicesView,
+  isOnProtectionUpdatesView,
   policyDetails,
   policyIdFromParams,
-  isOnProtectionUpdatesView,
-  isOnPolicyTrustedDevicesView,
 } from '../../store/policy_details/selectors';
 import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
 import { usePolicyDetailsSelector } from '../policy_hooks';

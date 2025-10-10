@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 import { convertKueryToElasticSearchQuery } from '../../common/lib/kuery';
@@ -24,7 +25,6 @@ import { buildGlobalQuery } from '../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../timelines/components/timeline/query_bar';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const RULE_FROM_TIMELINE_URL_PARAM = 'createRuleFromTimeline';

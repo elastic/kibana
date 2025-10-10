@@ -14,7 +14,7 @@ import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { TestProviders } from '../../../../common/mock';
 import type { RulePreviewProps } from '.';
-import { RulePreview, REASONABLE_INVOCATION_COUNT } from '.';
+import { REASONABLE_INVOCATION_COUNT, RulePreview } from '.';
 import { usePreviewRoute } from './use_preview_route';
 import { DataSourceType } from '../../../common/types';
 import {
@@ -35,7 +35,7 @@ jest.mock('../../../../common/containers/use_global_time', () => ({
   }),
 }));
 jest.mock('./use_preview_invocation_count');
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 

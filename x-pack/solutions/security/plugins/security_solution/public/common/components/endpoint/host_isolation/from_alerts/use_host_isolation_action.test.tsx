@@ -22,10 +22,13 @@ import {
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from '../..';
 import { HostStatus } from '../../../../../../common/endpoint/types';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../../user_privileges');
-
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('useHostIsolationAction', () => {
   let appContextMock: AppContextTestRender;
@@ -60,7 +63,8 @@ describe('useHostIsolationAction', () => {
       onAddIsolationStatusClick: jest.fn(),
     };
     apiMock = agentStatusGetHttpMock(appContextMock.coreStart.http);
-    appContextMock.setExperimentalFlag({
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
     });
     authMockSetter.set({

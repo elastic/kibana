@@ -8,8 +8,8 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { UserItem } from '../../../../common/search_strategy';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';

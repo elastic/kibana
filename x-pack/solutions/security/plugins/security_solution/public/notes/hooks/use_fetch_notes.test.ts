@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useDispatch } from 'react-redux';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { fetchNotesByDocumentIds } from '../store/notes.slice';
 import { useFetchNotes } from './use_fetch_notes';
 import { useUserPrivileges } from '../../common/components/user_privileges';
@@ -16,7 +16,7 @@ jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),
 }));
 
-jest.mock('../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 

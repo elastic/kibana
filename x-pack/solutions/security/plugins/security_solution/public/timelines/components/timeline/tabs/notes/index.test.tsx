@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import NotesTabContentComponent, { FETCH_NOTES_ERROR, NO_NOTES } from '.';
 import { render } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../../common/mock';
@@ -21,7 +21,7 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import type { State } from '../../../../../common/store';
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 jest.mock('../../../../../common/components/user_privileges');
 
 const mockAddError = jest.fn();

@@ -17,6 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import {
   PrivilegeMonitoringEngineStatusEnum,
   type PrivMonHealthResponse,
@@ -33,7 +34,6 @@ import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { HeaderPage } from '../../common/components/header_page';
 import { useEntityAnalyticsRoutes } from '../api/api';

@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
@@ -23,7 +24,6 @@ import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
 import { SourcererScopeName } from '../../sourcerer/store/model';
-import { useEnableExperimental } from '../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
 
 export interface UseCreateTimelineParams {
@@ -57,7 +57,7 @@ export const useCreateTimeline = ({
     sourcererSelectors.defaultDataView
   ) ?? { id: '', patternList: [] };
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const {
     id: experimentalSecurityDefaultDataViewId,

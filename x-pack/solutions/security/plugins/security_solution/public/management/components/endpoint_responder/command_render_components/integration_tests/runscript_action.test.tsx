@@ -23,6 +23,10 @@ import { getEndpointConsoleCommands } from '../..';
 import React from 'react';
 import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
 import { enterConsoleCommand, getConsoleSelectorsAndActionMock } from '../../../console/mocks';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('When using runscript action from response console', () => {
   let mockedContext: AppContextTestRender;
@@ -91,7 +95,10 @@ describe('When using runscript action from response console', () => {
 
       render = () => _render('sentinel_one');
 
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneRunScriptEnabled: true });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        responseActionsSentinelOneRunScriptEnabled: true,
+      });
 
       apiMocks.responseProvider.fetchScriptList.mockReturnValue({
         data: [
@@ -128,7 +135,10 @@ describe('When using runscript action from response console', () => {
     });
 
     it('should error when the feature flag is disabled', async () => {
-      mockedContext.setExperimentalFlag({ responseActionsSentinelOneRunScriptEnabled: false });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        responseActionsSentinelOneRunScriptEnabled: false,
+      });
       await render();
       await enterConsoleCommand(renderResult, user, 'runscript');
 

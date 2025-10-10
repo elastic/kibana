@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ExperimentalFeatures } from '../../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { getFieldAsString, getSupportedSchemas } from './supported_schemas';
 import type { ResolverEntityIndex } from '../../../../../../common/endpoint/types';
 

@@ -6,9 +6,9 @@
  */
 
 import {
+  type AnalyticsServiceSetup,
   type CoreStart,
   type Logger,
-  type AnalyticsServiceSetup,
   SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import type {
@@ -20,15 +20,15 @@ import type {
 
 import moment from 'moment';
 import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
 
-import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
+import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from '../constants';
 import {
   defaultState,
-  stateSchemaByVersion,
   type LatestTaskStateSchema as PrivilegeMonitoringTaskState,
+  stateSchemaByVersion,
 } from './state';
 import { getApiKeyManager } from '../auth/api_key';
 import { PrivilegeMonitoringDataClient } from '../engine/data_client';

@@ -19,9 +19,13 @@ import type { EndpointPrivileges } from '../../../../../../common/endpoint/types
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { ExceptionsListItemGenerator } from '../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
 
 jest.mock('../../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('When on the Event Filters list page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -103,7 +107,10 @@ describe('When on the Event Filters list page', () => {
     });
 
     it('should not show indication if feature flag is disabled', async () => {
-      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: false });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        filterProcessDescendantsForEventFiltersEnabled: false,
+      });
 
       await renderWithData();
 
@@ -116,7 +123,10 @@ describe('When on the Event Filters list page', () => {
     });
 
     it('should indicate to user if event filter filters process descendants', async () => {
-      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        filterProcessDescendantsForEventFiltersEnabled: true,
+      });
 
       await renderWithData();
 
@@ -129,7 +139,10 @@ describe('When on the Event Filters list page', () => {
     });
 
     it('should display additional `event.category is process` entry in tooltip', async () => {
-      mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        ...allowedExperimentalValues,
+        filterProcessDescendantsForEventFiltersEnabled: true,
+      });
       const prefix = 'EventFiltersListPage-card-decorator-processDescendantIndicationTooltip';
 
       await renderWithData();

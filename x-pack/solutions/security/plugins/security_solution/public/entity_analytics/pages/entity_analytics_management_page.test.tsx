@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management_page';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
@@ -30,7 +30,7 @@ jest.mock('../hooks/use_missing_risk_engine_privileges', () => ({
   useMissingRiskEnginePrivileges: () => ({ isLoading: false, hasAllRequiredPrivileges: true }),
 }));
 
-jest.mock('../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: () => true,
 }));
 

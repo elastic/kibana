@@ -8,12 +8,12 @@
 import type { LicenseType } from '@kbn/licensing-types';
 import type { IconType } from '@elastic/eui';
 import type {
-  NavigationLink as GenericNavigationLink,
   LinkCategories as GenericLinkCategories,
+  NavigationLink as GenericNavigationLink,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { RequiredCapabilities } from '../lib/capabilities';
 
 export interface LinkItem {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { AskAiAssistant } from './ask_ai_assistant';
 import { TestProviders } from '../../../../../common/mock';
 import type { EntityType } from '../../../../../../common/search_strategy';
@@ -21,8 +21,8 @@ jest.mock('@kbn/elastic-assistant-common', () => {
   };
 });
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => {
-  const actual = jest.requireActual('../../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features', () => {
+  const actual = jest.requireActual('@kbn/experimental-features');
   return {
     ...actual,
     useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false), // default to false because we use a negative FF riskScoreAssistantToolDisabled

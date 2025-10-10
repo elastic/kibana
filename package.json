@@ -562,6 +562,7 @@
     "@kbn/event-log-plugin": "link:x-pack/platform/plugins/shared/event_log",
     "@kbn/event-stacktrace": "link:x-pack/platform/packages/shared/kbn-event-stacktrace",
     "@kbn/expandable-flyout": "link:x-pack/solutions/security/packages/expandable-flyout",
+    "@kbn/experimental-features": "link:x-pack/solutions/security/packages/experimental-features",
     "@kbn/exploratory-view-example-plugin": "link:x-pack/examples/exploratory_view_example",
     "@kbn/exploratory-view-plugin": "link:x-pack/solutions/observability/plugins/exploratory_view",
     "@kbn/expression-gauge-plugin": "link:src/platform/plugins/shared/chart_expressions/expression_gauge",

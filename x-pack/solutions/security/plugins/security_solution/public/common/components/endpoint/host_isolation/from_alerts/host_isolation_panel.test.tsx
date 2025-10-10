@@ -21,7 +21,15 @@ const queryClient = new QueryClient({
   },
 });
 
-jest.mock('../../../../experimental_features_service');
+jest.mock('@kbn/experimental-features', () => ({
+  ExperimentalFeaturesService: {
+    get: jest.fn().mockReturnValue({
+      responseActionsSentinelOneRunScriptEnabled: true,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+      responseActionsMSDefenderEndpointEnabled: true,
+    }),
+  },
+}));
 
 const useKibanaMock = mockUseKibana as jest.Mock;
 jest.mock('../../../../lib/kibana');

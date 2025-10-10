@@ -11,8 +11,8 @@ import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { LicenseService } from '../../../common/license';
 import { createDefaultPolicy } from './create_default_policy';
-import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
+import { ProtectionModes } from '../../../common/endpoint/types';
 import { policyFactory } from '../../../common/endpoint/models/policy_config';
 import * as PolicyConfigHelpers from '../../../common/endpoint/models/policy_config_helpers';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
@@ -24,7 +24,7 @@ import type {
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
-import type { ExperimentalFeatures } from '../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();

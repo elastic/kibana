@@ -11,7 +11,7 @@ import { securitySolutionMock } from '@kbn/security-solution-plugin/public/mocks
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { Services } from '..';
-import { allowedExperimentalValues as genericAllowedExperimentalValues } from '@kbn/security-solution-plugin/common';
+import { allowedExperimentalValues as genericAllowedExperimentalValues } from '@kbn/experimental-features';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 export const mockServices: Services = {

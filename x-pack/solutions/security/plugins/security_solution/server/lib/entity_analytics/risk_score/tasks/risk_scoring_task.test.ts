@@ -15,16 +15,16 @@ import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScoringTaskMock } from './risk_scoring_task.mock';
 import { riskEngineDataClientMock } from '../../risk_engine/risk_engine_data_client.mock';
 import {
+  getRiskScoringTaskStatus,
   registerRiskScoringTask,
-  startRiskScoringTask,
   removeRiskScoringTask,
   runTask,
-  getRiskScoringTaskStatus,
   scheduleNow,
+  startRiskScoringTask,
 } from './risk_scoring_task';
 import type { ConfigType } from '../../../../config';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { EntityType } from '../../../../../common/search_strategy';
 
 const ISO_8601_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;

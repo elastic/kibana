@@ -20,28 +20,28 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY } from '../../../../common/endpoint/service/artifacts/constants';
-import type { ExperimentalFeatures } from '../../../../common';
 import { isFilterProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
 import type {
   InternalArtifactCompleteSchema,
+  TranslatedEntriesOfDescendantOf,
   TranslatedEntry,
-  TranslatedPerformantEntries,
   TranslatedEntryMatcher,
   TranslatedEntryMatchWildcard,
   TranslatedEntryMatchWildcardMatcher,
   TranslatedEntryNestedEntry,
   TranslatedExceptionListItem,
+  TranslatedPerformantEntries,
   WrappedTranslatedExceptionList,
-  TranslatedEntriesOfDescendantOf,
 } from '../../schemas';
 import {
-  translatedPerformantEntries as translatedPerformantEntriesType,
   translatedEntry as translatedEntryType,
   translatedEntryMatchAnyMatcher,
   translatedEntryMatchMatcher,
   translatedEntryMatchWildcardMatcher,
   translatedEntryNestedEntry,
+  translatedPerformantEntries as translatedPerformantEntriesType,
   wrappedTranslatedExceptionList,
 } from '../../schemas';
 

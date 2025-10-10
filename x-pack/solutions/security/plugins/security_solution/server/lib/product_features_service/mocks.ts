@@ -13,7 +13,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
 import { coreLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
-import { allowedExperimentalValues, type ExperimentalFeatures } from '../../../common';
+import { allowedExperimentalValues, type ExperimentalFeatures } from '@kbn/experimental-features';
 import { ProductFeaturesService } from './product_features_service';
 import type { SecuritySolutionPluginSetupDependencies } from '../../plugin_contract';
 

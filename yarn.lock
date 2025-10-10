@@ -6040,6 +6040,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/experimental-features@link:x-pack/solutions/security/packages/experimental-features":
+  version "0.0.0"
+  uid ""
+
 "@kbn/exploratory-view-example-plugin@link:x-pack/examples/exploratory_view_example":
   version "0.0.0"
   uid ""

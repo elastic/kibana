@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { css } from '@emotion/react';
 
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -20,7 +21,6 @@ import { LensEmbeddable } from './lens_embeddable';
 import type { EmbeddableData, VisualizationEmbeddableProps } from './types';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useVisualizationResponse } from './use_visualization_response';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> = (props) => {
   const dispatch = useDispatch();

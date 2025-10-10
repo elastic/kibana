@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { screen, cleanup, act, fireEvent, getByTestId } from '@testing-library/react';
+import { act, cleanup, fireEvent, getByTestId, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
-import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
@@ -30,6 +30,7 @@ import { licenseService } from '../../../../../common/hooks/use_license';
 import { forceHTMLElementOffsetWidth } from '../../../../components/effected_policy_select/test_utils';
 import type { TrustedAppConditionEntry } from '../../../../../../common/endpoint/types';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/containers/source');
@@ -44,6 +45,9 @@ jest.mock('../../../../../common/hooks/use_license', () => {
     },
   };
 });
+
+jest.mock('@kbn/experimental-features');
+const mockUseIsExperimentalFeatureEnabled = jest.mocked(useIsExperimentalFeatureEnabled);
 
 describe('Trusted apps form', () => {
   const formPrefix = 'trustedApps-form';
@@ -183,7 +187,7 @@ describe('Trusted apps form', () => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
-    mockedContext.setExperimentalFlag({ trustedAppsAdvancedMode: true });
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     latestUpdatedItem = createItem();
     (useFetchIndex as jest.Mock).mockImplementation(() => [
       false,

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ExperimentalFeatures as GenericExperimentalFeatures } from '@kbn/security-solution-plugin/common';
+
+import type { ExperimentalFeatures as GenericExperimentalFeatures } from '@kbn/experimental-features';
 
 export type ServerlessExperimentalFeatures = Record<
   keyof typeof allowedExperimentalValues,

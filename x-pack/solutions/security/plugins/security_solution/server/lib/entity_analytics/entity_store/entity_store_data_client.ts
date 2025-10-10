@@ -6,15 +6,15 @@
  */
 
 import type {
-  Logger,
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  AuditLogger,
-  IScopedClusterClient,
-  AuditEvent,
-  IUiSettingsClient,
   AnalyticsServiceSetup,
+  AuditEvent,
+  AuditLogger,
+  ElasticsearchClient,
+  IScopedClusterClient,
+  IUiSettingsClient,
   KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { EntityClient } from '@kbn/entityManager-plugin/server/lib/entity_client';
@@ -24,14 +24,15 @@ import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isEqual } from 'lodash/fp';
 import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
-import type { EntityStoreCapability, EntityDefinition } from '@kbn/entities-schema';
+import type { EntityDefinition, EntityStoreCapability } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
 import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
 import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
 import {
-  ENTITY_STORE_INDEX_PATTERN,
   ENTITY_STORE_HISTORY_INDEX_PATTERN,
+  ENTITY_STORE_INDEX_PATTERN,
   ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
   ENTITY_STORE_UPDATES_INDEX_PATTERN,
@@ -43,7 +44,6 @@ import {
 } from '../../../../common/entity_analytics/privileges';
 import { merge } from '../../../../common/utils/objects/merge';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import type { ExperimentalFeatures } from '../../../../common';
 import type {
   GetEntityStoreStatusRequestQuery,
   GetEntityStoreStatusResponse,
@@ -53,54 +53,54 @@ import type {
   InitEntityStoreResponse,
 } from '../../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { AppClient } from '../../..';
-import { EngineComponentResourceEnum } from '../../../../common/api/entity_analytics';
 import type {
-  Entity,
+  EngineComponentResource,
+  EngineComponentStatus,
   EngineDataviewUpdateResult,
+  Entity,
   InitEntityEngineRequestBody,
   InitEntityEngineResponse,
   InspectQuery,
   ListEntityEnginesResponse,
-  EngineComponentStatus,
-  EngineComponentResource,
 } from '../../../../common/api/entity_analytics';
+import { EngineComponentResourceEnum } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
 import {
+  defaultOptions,
   ENGINE_STATUS,
   ENTITY_STORE_STATUS,
   MAX_SEARCH_RESPONSE_SIZE,
-  defaultOptions,
 } from './constants';
 import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import {
-  startEntityStoreFieldRetentionEnrichTask,
-  removeEntityStoreFieldRetentionEnrichTask,
-  getEntityStoreFieldRetentionEnrichTaskState as getEntityStoreFieldRetentionEnrichTaskStatus,
-  removeEntityStoreDataViewRefreshTask,
-  startEntityStoreDataViewRefreshTask,
   getEntityStoreDataViewRefreshTaskState,
-  startEntityStoreSnapshotTask,
-  removeEntityStoreSnapshotTask,
+  getEntityStoreFieldRetentionEnrichTaskState as getEntityStoreFieldRetentionEnrichTaskStatus,
   getEntityStoreSnapshotTaskState,
+  removeEntityStoreDataViewRefreshTask,
+  removeEntityStoreFieldRetentionEnrichTask,
+  removeEntityStoreSnapshotTask,
+  startEntityStoreDataViewRefreshTask,
+  startEntityStoreFieldRetentionEnrichTask,
+  startEntityStoreSnapshotTask,
 } from './tasks';
 import {
   createEntityIndex,
-  deleteEntityIndex,
-  createPlatformPipeline,
-  deletePlatformPipeline,
   createEntityIndexComponentTemplate,
-  deleteEntityIndexComponentTemplate,
-  createFieldRetentionEnrichPolicy,
-  executeFieldRetentionEnrichPolicy,
-  deleteFieldRetentionEnrichPolicy,
-  getPlatformPipelineStatus,
-  getFieldRetentionEnrichPolicyStatus,
-  getEntityIndexStatus,
-  getEntityIndexComponentTemplateStatus,
-  deleteAllEntitySnapshotIndices,
   createEntityResetIndex,
+  createFieldRetentionEnrichPolicy,
+  createPlatformPipeline,
+  deleteAllEntitySnapshotIndices,
+  deleteEntityIndex,
+  deleteEntityIndexComponentTemplate,
   deleteEntityResetIndex,
+  deleteFieldRetentionEnrichPolicy,
+  deletePlatformPipeline,
+  executeFieldRetentionEnrichPolicy,
+  getEntityIndexComponentTemplateStatus,
+  getEntityIndexStatus,
   getEntityResetIndexStatus,
+  getFieldRetentionEnrichPolicyStatus,
+  getPlatformPipelineStatus,
 } from './elasticsearch_assets';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {

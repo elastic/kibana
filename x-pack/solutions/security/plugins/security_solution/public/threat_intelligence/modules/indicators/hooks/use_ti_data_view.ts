@@ -6,10 +6,10 @@
  */
 
 import { useMemo } from 'react';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { SelectedDataView } from '../../../../sourcerer/store/model';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
 import { DESCRIPTION } from './translations';

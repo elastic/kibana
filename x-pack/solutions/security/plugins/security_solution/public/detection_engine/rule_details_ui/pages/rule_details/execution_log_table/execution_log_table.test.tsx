@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { noop } from 'lodash/fp';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 
 import { TestProviders } from '../../../../../common/mock';
@@ -25,7 +25,7 @@ jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../rule_monitoring/components/execution_results_table/use_execution_results');
 jest.mock('../rule_details_context');
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../common/hooks/use_experimental_features', () => {
+jest.mock('@kbn/experimental-features', () => {
   return {
     useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
   };

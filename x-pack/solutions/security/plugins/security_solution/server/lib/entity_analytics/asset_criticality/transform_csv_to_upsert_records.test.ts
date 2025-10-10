@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { allowedExperimentalValues } from '../../../../common';
+import { allowedExperimentalValues } from '@kbn/experimental-features';
 import { transformCSVToUpsertRecords } from './transform_csv_to_upsert_records';
-
-const experimentalFeatures = allowedExperimentalValues;
 
 describe('transformCSVToUpsertRecords', () => {
   it('should transform a valid row', (done) => {
-    const stream = transformCSVToUpsertRecords(experimentalFeatures);
+    const stream = transformCSVToUpsertRecords(allowedExperimentalValues);
     stream.on('data', (data) => {
       expect(data).toEqual({
         idField: 'host.name',
@@ -25,7 +23,7 @@ describe('transformCSVToUpsertRecords', () => {
   });
 
   it('Should stream invalid rows not emit error', (done) => {
-    const stream = transformCSVToUpsertRecords(experimentalFeatures);
+    const stream = transformCSVToUpsertRecords(allowedExperimentalValues);
     stream.on('data', (data) => {
       expect(data).toBeInstanceOf(Error);
       done();

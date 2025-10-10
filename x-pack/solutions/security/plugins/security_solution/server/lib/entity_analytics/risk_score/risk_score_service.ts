@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import { ENABLE_ESQL_RISK_SCORING } from '../../../../common/constants';
-import type { ExperimentalFeatures } from '../../../../common';
 import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics';
 import type {
   CalculateAndPersistScoresParams,

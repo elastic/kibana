@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExperimentalFeatures } from '../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
 import type { SecuritySubPlugin } from '../app/types';
 import { getSiemMigrationsRoutes } from './routes';
 

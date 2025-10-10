@@ -21,6 +21,7 @@ import { css } from '@emotion/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import type { TimelineModel } from '../../../../..';
 import { SaveTimelineCallout } from '../../../notes/save_timeline';
 import { AddNote } from '../../../../../notes/components/add_note';
@@ -35,10 +36,10 @@ import { defaultToEmptyTag, getEmptyValue } from '../../../../../common/componen
 import { selectTimelineById } from '../../../../store/selectors';
 import {
   fetchNotesBySavedObjectIds,
+  makeSelectNotesBySavedObjectId,
   ReqStatus,
   selectFetchNotesBySavedObjectIdsError,
   selectFetchNotesBySavedObjectIdsStatus,
-  makeSelectNotesBySavedObjectId,
 } from '../../../../../notes';
 import type { Note } from '../../../../../../common/api/timeline';
 import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
@@ -46,7 +47,6 @@ import { NotesList } from '../../../../../notes/components/notes_list';
 import { OldNotes } from '../../../notes/old_notes';
 import { Participants } from '../../../notes/participants';
 import { NOTES } from '../../../notes/translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { getScrollToTopSelector } from '../selectors';
 import { useScrollToTop } from '../../../../../common/components/scroll_to_top';

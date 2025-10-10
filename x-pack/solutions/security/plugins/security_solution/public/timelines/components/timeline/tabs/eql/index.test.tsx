@@ -19,9 +19,11 @@ import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import type { ExperimentalFeatures } from '../../../../../../common';
-import { allowedExperimentalValues } from '../../../../../../common';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import {
+  allowedExperimentalValues,
+  useIsExperimentalFeatureEnabled,
+} from '@kbn/experimental-features';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import * as notesApi from '../../../../../notes/api/api';
 import { timelineActions } from '../../../../store';
@@ -48,7 +50,7 @@ jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
-jest.mock('../../../../../common/hooks/use_experimental_features');
+jest.mock('@kbn/experimental-features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;

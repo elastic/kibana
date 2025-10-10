@@ -6,7 +6,7 @@
  */
 
 import type { ChangeEventHandler } from 'react';
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
@@ -17,35 +17,36 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
-  EuiSuperSelect,
-  EuiTextArea,
-  EuiText,
-  EuiTitle,
   EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
+  EuiTextArea,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
+import {
+  ConditionEntryField,
+  hasSimpleExecutableName,
+  isPathValid,
+  OperatingSystem,
+  validateHasWildcardWithWrongOperator,
+} from '@kbn/securitysolution-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_ARTIFACT_OPERATORS,
-  hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
+  hasWrongOperatorWithWildcard,
 } from '@kbn/securitysolution-list-utils';
-import {
-  hasSimpleExecutableName,
-  validateHasWildcardWithWrongOperator,
-  isPathValid,
-  ConditionEntryField,
-  OperatingSystem,
-} from '@kbn/securitysolution-utils';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
+import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
 import {
   PartialCodeSignatureCallout,
   WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
-import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useCanAssignArtifactPerPolicy, useGetUpdatedTags } from '../../../../hooks/artifacts';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
@@ -56,12 +57,12 @@ import {
 } from '../../../../../../common/endpoint/constants';
 import { FormattedError } from '../../../../components/formatted_error';
 import type {
-  TrustedAppConditionEntry,
   NewTrustedApp,
+  TrustedAppConditionEntry,
 } from '../../../../../../common/endpoint/types';
 import {
-  isValidHash,
   getDuplicateFields,
+  isValidHash,
 } from '../../../../../../common/endpoint/service/artifacts/validations';
 
 import { isSignerFieldExcluded } from '../../state/type_guards';
@@ -69,9 +70,9 @@ import { isSignerFieldExcluded } from '../../state/type_guards';
 import {
   CONDITIONS_HEADER,
   CONDITIONS_HEADER_DESCRIPTION,
+  DESCRIPTION_LABEL,
   DETAILS_HEADER,
   DETAILS_HEADER_DESCRIPTION,
-  DESCRIPTION_LABEL,
   INPUT_ERRORS,
   NAME_LABEL,
   POLICY_SELECT_DESCRIPTION,
@@ -79,7 +80,7 @@ import {
   USING_ADVANCED_MODE,
   USING_ADVANCED_MODE_DESCRIPTION,
 } from '../translations';
-import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
+import { CONFIRM_WARNING_MODAL_LABELS, OS_TITLES } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
@@ -93,7 +94,6 @@ import type { ArtifactFormComponentProps } from '../../../../components/artifact
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 import { isAdvancedModeEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { ADVANCED_MODE_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { TrustedAppsApiClient } from '../../service';
 import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
 import { Loader } from '../../../../../common/components/loader';

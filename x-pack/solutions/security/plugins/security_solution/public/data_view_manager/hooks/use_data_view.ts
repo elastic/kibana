@@ -10,9 +10,9 @@ import { DataView } from '@kbn/data-views-plugin/public';
 
 import { useSelector } from 'react-redux';
 import { type FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useKibana } from '../../common/lib/kibana';
 import { DataViewManagerScopeName } from '../constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
 

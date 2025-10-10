@@ -8,10 +8,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { SecuritySolutionPageWrapper } from '.';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { TestProviders } from '../../mock';
 
-jest.mock('../../hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 

@@ -22,6 +22,10 @@ import {
 import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('When using `useAlertResponseActionsSupport()` hook', () => {
   let appContextMock: AppContextTestRender;
@@ -64,7 +68,8 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
     appContextMock = createAppRootMockRenderer();
 
     // Enable feature flags by default
-    appContextMock.setExperimentalFlag({
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
       responseActionsMSDefenderEndpointEnabled: true,
     });
@@ -183,12 +188,14 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
         // SentinelOne is always enabled now
         return;
       case 'crowdstrike':
-        appContextMock.setExperimentalFlag({
+        mockedExperimentalFeaturesService.get.mockReturnValue({
+          ...allowedExperimentalValues,
           responseActionsCrowdstrikeManualHostIsolationEnabled: false,
         });
         break;
       case 'microsoft_defender_endpoint':
-        appContextMock.setExperimentalFlag({
+        mockedExperimentalFeaturesService.get.mockReturnValue({
+          ...allowedExperimentalValues,
           responseActionsMSDefenderEndpointEnabled: false,
         });
         break;

@@ -31,7 +31,7 @@ import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
-jest.mock('../../../../../common/experimental_features_service');
+jest.mock('@kbn/experimental-features');
 
 describe('When using execute action from response actions console', () => {
   let user: UserEvent;

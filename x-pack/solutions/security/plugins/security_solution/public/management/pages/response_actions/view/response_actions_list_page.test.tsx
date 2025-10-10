@@ -37,6 +37,19 @@ jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list', () => 
   };
 });
 
+jest.mock('@kbn/experimental-features', () => ({
+  ExperimentalFeaturesService: {
+    get: jest.fn().mockReturnValue({
+      microsoftDefenderEndpointRunScriptEnabled: true,
+      crowdstrikeRunScriptEnabled: true,
+      microsoftDefenderEndpointCancelEnabled: true,
+    }),
+  },
+  useIsExperimentalFeatureEnabled: jest.fn().mockImplementation((flag) => {
+    if (flag === 'responseActionsMSDefenderEndpointEnabled') return true;
+  }),
+}));
+
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {

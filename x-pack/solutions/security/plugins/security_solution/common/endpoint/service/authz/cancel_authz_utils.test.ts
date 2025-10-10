@@ -6,19 +6,19 @@
  */
 
 import type { EndpointAuthz } from '../../types/authz';
-import type { ExperimentalFeatures } from '../../../experimental_features';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import { allowedExperimentalValues } from '@kbn/experimental-features';
 import type {
   ResponseActionAgentType,
   ResponseActionsApiCommandNames,
 } from '../response_actions/constants';
 import {
   canUserCancelCommand,
-  isCancelFeatureAvailable,
   checkCancelPermission,
+  isCancelFeatureAvailable,
 } from './cancel_authz_utils';
 import { isActionSupportedByAgentType } from '../response_actions/is_response_action_supported';
 import { getEndpointAuthzInitialState } from './authz';
-import { allowedExperimentalValues } from '../../../experimental_features';
 
 describe('cancel authorization utilities', () => {
   let mockAuthz: EndpointAuthz;

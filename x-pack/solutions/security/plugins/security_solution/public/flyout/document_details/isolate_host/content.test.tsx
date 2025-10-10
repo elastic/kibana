@@ -10,6 +10,10 @@ import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../common/mock/endpoint';
 import { FLYOUT_HOST_ISOLATION_PANEL_TEST_ID } from './test_ids';
 import { IsolateHostPanelContent } from './content';
+import { allowedExperimentalValues, ExperimentalFeaturesService } from '@kbn/experimental-features';
+
+jest.mock('@kbn/experimental-features');
+const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 describe('<IsolateHostPanelContent />', () => {
   let appContextMock: AppContextTestRender;
@@ -18,7 +22,8 @@ describe('<IsolateHostPanelContent />', () => {
     jest.clearAllMocks();
     appContextMock = createAppRootMockRenderer();
 
-    appContextMock.setExperimentalFlag({
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      ...allowedExperimentalValues,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
     });
   });

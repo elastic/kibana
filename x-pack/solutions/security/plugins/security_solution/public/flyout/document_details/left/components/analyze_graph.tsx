@@ -6,10 +6,11 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { EuiPanel } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -22,7 +23,6 @@ import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/
 import { AnalyzerPreviewNoDataMessage } from '../../right/components/analyzer_preview_container';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
 
@@ -48,7 +48,7 @@ export const AnalyzeGraph: FC = () => {
   const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
   const filters = useMemo(() => ({ from, to }), [from, to]);
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { selectedPatterns: oldAnalyzerPatterns } = useSourcererDataView(
     SourcererScopeName.analyzer
   );

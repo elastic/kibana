@@ -39,9 +39,12 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint
 import { useGetEndpointActionList as _useGetEndpointActionList } from '../../../hooks/response_actions/use_get_endpoint_action_list';
 import { OUTPUT_MESSAGES } from '../translations';
 import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { ExperimentalFeatures } from '../../../../../common';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
+
+jest.mock('@kbn/experimental-features');
+const mockUseIsExperimentalFeatureEnabled = jest.mocked(useIsExperimentalFeatureEnabled);
 
 jest.mock('../../../hooks/response_actions/use_get_endpoint_action_list', () => {
   const original = jest.requireActual(
@@ -1520,15 +1523,12 @@ describe('Response actions history', () => {
   });
 
   describe('Actions filter', () => {
-    let featureFlags: Partial<ExperimentalFeatures>;
-
     beforeEach(() => {
-      featureFlags = {
-        crowdstrikeRunScriptEnabled: true,
-        microsoftDefenderEndpointCancelEnabled: true,
-      };
-
-      mockedContext.setExperimentalFlag(featureFlags);
+      mockUseIsExperimentalFeatureEnabled.mockImplementation((flag) => {
+        if (flag === 'crowdstrikeRunScriptEnabled') return true;
+        if (flag === 'microsoftDefenderEndpointCancelEnabled') return true;
+        return false;
+      });
     });
 
     const filterPrefix = 'actions-filter';
@@ -1572,12 +1572,10 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of actions (without `cancel`) when cancel feature flag is disabled', async () => {
-      // Set the cancel feature flag to false
-      const featureFlagsWithoutCancel = {
-        ...featureFlags,
-        microsoftDefenderEndpointCancelEnabled: false,
-      };
-      mockedContext.setExperimentalFlag(featureFlagsWithoutCancel);
+      mockUseIsExperimentalFeatureEnabled.mockImplementation((flag) => {
+        if (flag === 'microsoftDefenderEndpointCancelEnabled') return false;
+        return false;
+      });
 
       render({ 'data-test-height': 350 });
       const { getByTestId, getAllByTestId } = renderResult;
@@ -1894,9 +1892,10 @@ describe('Response actions history', () => {
     });
 
     it('should show a list of agents and action types when opened in page view', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsCrowdstrikeManualHostIsolationEnabled: true,
-        responseActionsMSDefenderEndpointEnabled: true,
+      mockUseIsExperimentalFeatureEnabled.mockImplementation((flag) => {
+        if (flag === 'responseActionsCrowdstrikeManualHostIsolationEnabled') return true;
+        if (flag === 'responseActionsMSDefenderEndpointEnabled') return true;
+        return false;
       });
       render({ isFlyout: false });
       const { getByTestId, getAllByTestId } = renderResult;

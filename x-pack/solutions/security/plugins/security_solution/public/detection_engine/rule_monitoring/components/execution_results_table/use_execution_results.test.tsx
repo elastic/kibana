@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { cleanup, waitFor, renderHook } from '@testing-library/react';
+import { cleanup, renderHook, waitFor } from '@testing-library/react';
 
 import { useExecutionResults } from './use_execution_results';
 import { useToasts } from '../../../../common/lib/kibana';
 import { api } from '../../api';
 import { createReactQueryWrapper } from '../../../../common/mock';
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 

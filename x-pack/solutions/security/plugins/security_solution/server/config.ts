@@ -8,10 +8,10 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { SIGNALS_INDEX_KEY, DEFAULT_SIGNALS_INDEX } from '../common/constants';
-import type { ExperimentalFeatures } from '../common/experimental_features';
-import { parseExperimentalConfigValue } from '../common/experimental_features';
-import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import { parseExperimentalConfigValue } from '@kbn/experimental-features';
+import { DEFAULT_SIGNALS_INDEX, SIGNALS_INDEX_KEY } from '../common/constants';
+import { type ConfigSettings, parseConfigSettings } from '../common/config_settings';
 
 /**
  * Validates if the value provided is a valid duration for use with Task Manager (ex. 5m, 4s)
@@ -88,7 +88,7 @@ export const configSchema = schema.object({
    * For internal use. A list of string values (comma delimited) that will enable experimental
    * type of functionality that is not yet released. Valid values for this settings need to
    * be defined in:
-   * `x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts`
+   * `x-pack/solutions/security/packages/experimental-features/src/constants/experimental_features.ts`
    * under the `allowedExperimentalValues` object
    *
    * @example

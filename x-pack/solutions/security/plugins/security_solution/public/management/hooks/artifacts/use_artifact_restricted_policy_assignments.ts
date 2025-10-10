@@ -8,8 +8,8 @@
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useEffect, useMemo, useState } from 'react';
 import { keyBy } from 'lodash';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useBulkFetchFleetIntegrationPolicies } from '../policy/use_bulk_fetch_fleet_integration_policies';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getPolicyIdsFromArtifact } from '../../../../common/endpoint/service/artifacts';
 
 export interface ArtifactRestrictedPolicyAssignments {

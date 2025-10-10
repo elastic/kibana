@@ -12,7 +12,7 @@ import type { EndpointAppContextService } from '../../../../../../endpoint/endpo
 import type { EndpointAppContext } from '../../../../../../endpoint/types';
 import { RelatedEntitiesQueries } from '../../../../../../../common/search_strategy/security_solution/related_entities';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
+import { allowedExperimentalValues } from '@kbn/experimental-features';
 import { createMockConfig } from '../../../../../../lib/detection_engine/routes/__mocks__';
 import type { RelatedHostsRequestOptions } from '../../../../../../../common/api/search_strategy';
 

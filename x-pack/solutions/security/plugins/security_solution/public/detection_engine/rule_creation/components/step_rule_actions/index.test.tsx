@@ -45,7 +45,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => mockUseKibana(),
 }));
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
 

@@ -7,8 +7,9 @@
 
 import type { ReactElement } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiSpacer, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import type { PackageCustomExtensionComponentProps } from '@kbn/fleet-plugin/public';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { NoPrivileges } from '../../../../../../common/components/no_privileges';
 import { useCanAccessSomeArtifacts } from '../hooks/use_can_access_some_artifacts';
@@ -35,7 +36,6 @@ import {
 import { useLicense } from '../../../../../../common/hooks/use_license';
 
 import { TrustedDevicesApiClient } from '../../../../trusted_devices/service/api_client';
-import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 const TrustedAppsArtifactCard = memo<PackageCustomExtensionComponentProps>((props) => {
   const http = useHttp();

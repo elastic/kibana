@@ -7,16 +7,17 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeader,
   EuiHorizontalRule,
-  EuiButton,
   EuiLoadingSpinner,
+  EuiPageHeader,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { RiskScorePreviewSection } from '../components/risk_score_management/risk_score_preview_section';
 import { RiskScoreEnableSection } from '../components/risk_score_management/risk_score_enable_section';
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
@@ -32,7 +33,6 @@ import { getEntityAnalyticsRiskScorePageStyles } from '../components/risk_score_
 import { useConfigurableRiskEngineSettings } from '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 import { RiskScoreSaveBar } from '../components/risk_score_management/risk_score_save_bar';
 import { RiskScoreGeneralSection } from '../components/risk_score_management/risk_score_general_section';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const TEN_SECONDS = 10000;
 

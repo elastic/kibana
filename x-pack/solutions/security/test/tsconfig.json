@@ -24,7 +24,7 @@
     "security_solution_api_integration/**/*",
     "security_solution_endpoint/**/*",
     "*/packages/**/*",
-    "*/*/packages/**/*",
+    "*/*/packages/**/*"
   ],
   "kbn_references": [
     "@kbn/security-solution-test-api-clients",
@@ -63,5 +63,6 @@
     "@kbn/rison",
     "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
+    "@kbn/experimental-features"
   ]
 }

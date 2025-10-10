@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPanel, EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexGroup, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { StatItemHeader } from './stat_item_header';
 import { useToggleStatus } from './use_toggle_status';
 import type { StatItemsProps } from './types';
-import { FlexItem, ChartHeight } from './utils';
+import { ChartHeight, FlexItem } from './utils';
 import { MetricEmbeddable } from './metric_embeddable';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 
 export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from, id, to }) => {

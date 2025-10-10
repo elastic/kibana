@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { get } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 
 export const useIsInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
   const microsoftDefenderEndpointDataInAnalyzerEnabled = useIsExperimentalFeatureEnabled(

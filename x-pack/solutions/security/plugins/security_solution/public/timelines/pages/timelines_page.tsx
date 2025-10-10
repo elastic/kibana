@@ -8,6 +8,7 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useIsExperimentalFeatureEnabled } from '@kbn/experimental-features';
 import { NewTimelineButton } from '../components/new_timeline';
 import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { HeaderPage } from '../../common/components/header_page';
@@ -20,7 +21,6 @@ import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { DataViewManagerScopeName } from '../../data_view_manager/constants';
 import { useSourcererDataView } from '../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 

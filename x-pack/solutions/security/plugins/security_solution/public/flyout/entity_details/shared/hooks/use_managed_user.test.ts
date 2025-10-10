@@ -39,7 +39,7 @@ jest.mock('../../../../common/hooks/use_space_id', () => ({
 
 const mockUseIsExperimentalFeatureEnabled = jest.fn().mockReturnValue(true);
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('@kbn/experimental-features', () => ({
   useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
 }));
 

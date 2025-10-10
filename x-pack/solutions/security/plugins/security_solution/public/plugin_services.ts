@@ -6,14 +6,14 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn/core/public';
-import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { ExperimentalFeatures } from '@kbn/experimental-features';
+import { ExperimentalFeaturesService } from '@kbn/experimental-features';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
-import type { ExperimentalFeatures } from '../common/experimental_features';
 import { licenseService } from './common/hooks/use_license';
-import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import type { PluginContract } from './plugin_contract';
 import type { ConfigSettings } from '../common/config_settings';
 import { parseConfigSettings } from '../common/config_settings';
