@@ -67,6 +67,11 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         counts[type] = rawCounts[type] ?? 0;
       }
 
+      if (counts['index-pattern'] > 1) {
+        const ips = await client.find({ type: 'index-pattern' });
+        throw new Error(JSON.stringify(ips.saved_objects, null, 2));
+      }
+
       const body: v1.ScrollCountResponseHTTP = counts;
 
       return res.ok({
