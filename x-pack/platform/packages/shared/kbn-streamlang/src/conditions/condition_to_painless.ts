@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { isBoolean, isString } from 'lodash';
+import { isBoolean, isString, isNil } from 'lodash';
 import type {
   Condition,
   FilterCondition,
   RangeCondition,
   ShorthandBinaryFilterCondition,
   ShorthandUnaryFilterCondition,
+  StringOrNumberOrBoolean,
 } from '../../types/conditions';
 import { BINARY_OPERATORS } from '../../types/conditions';
 
@@ -23,13 +24,17 @@ function safePainlessField(conditionOrField: FilterCondition | string) {
   return `$('${conditionOrField.field}', null)`;
 }
 
-function encodeValue(value: string | number | boolean) {
+function encodeValue(value: StringOrNumberOrBoolean | null | undefined) {
   if (isString(value)) {
     return `"${value}"`;
   }
   if (isBoolean(value)) {
     return value ? 'true' : 'false';
   }
+  if (isNil(value)) {
+    return 'null';
+  }
+
   return value;
 }
 
@@ -144,7 +149,7 @@ function shorthandBinaryToPainless(condition: ShorthandBinaryFilterCondition) {
       const operator = op === 'neq' ? '!=' : '==';
       return `((${safeFieldAccessor} instanceof Number && ${safeFieldAccessor}.toString() ${operator} ${encodeValue(
         String(value)
-      )}) || ${safeFieldAccessor} ${operator} ${encodeValue(value as string | boolean)})`;
+      )}) || ${safeFieldAccessor} ${operator} ${encodeValue(value as StringOrNumberOrBoolean)})`;
   }
 }
 
