@@ -58,19 +58,10 @@ export const StreamSystemsFlyout = ({
           <h2>
             <FormattedMessage
               id="xpack.streams.streamSystemsFlyout.title"
-              defaultMessage="System identification"
+              defaultMessage="Feature identification"
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.streams.streamSystemsFlyout.description"
-              defaultMessage="We analyzed your stream and identified the following systems. Select the ones you want to add to your stream."
-            />
-          </p>
-        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         className={css`
