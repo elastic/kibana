@@ -269,11 +269,11 @@ export default function ({ getService }: FtrProviderContext) {
           .set('cookie', otherOwnerCookie.cookieString())
           .send({ id: objectId, type: READ_ONLY_TYPE, isReadOnly: true })
           .expect(403);
-
+        
         expect(overwriteResponse.body).to.have.property('error', 'Forbidden');
         expect(overwriteResponse.body).to.have.property(
           'message',
-          'Unable to create read_only_type'
+          `Unable to create read_only_type, access control restrictions for read_only_type:${objectId}`
         );
       });
     });
@@ -498,9 +498,8 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(403);
 
         expect(res.body).to.have.property('error', 'Forbidden');
-        expect(res.body).to.have.property('message', 'Unable to bulk_create read_only_type');
+        expect(res.body).to.have.property('message', `Unable to bulk_create read_only_type, access control restrictions for read_only_type:${objectId2},read_only_type:${objectId1}`); // ToDo: figure out why this is always backwards
 
-        // ToDo: read back objects and confirm the owner has not changed
         const getResponse = await supertestWithoutAuth
           .get(`/read_only_objects/${objectId1}`)
           .set('kbn-xsrf', 'true')
@@ -1041,7 +1040,7 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(403);
           expect(res.body).to.have.property('message');
-          expect(res.body.message).to.equal('Unable to bulk_delete read_only_type');
+          expect(res.body).to.have.property('message', `Unable to bulk_delete read_only_type, access control restrictions for read_only_type:${objectId2},read_only_type:${objectId1}`); // ToDo: figure out why this is always backwards
         });
 
         it('allows non-owner non-admin to bulk delete objects in default mode', async () => {
@@ -1232,7 +1231,7 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(403);
           expect(res.body).to.have.property('message');
-          expect(res.body.message).to.equal('Unable to bulk_delete read_only_type');
+          expect(res.body).to.have.property('message', `Unable to bulk_delete read_only_type, access control restrictions for read_only_type:${objectId2},read_only_type:${objectId1}`); //ToDo: figure out why this is always backwards
         });
       });
     });

@@ -58,6 +58,19 @@ export interface CheckAuthorizationResult<A extends string> {
 }
 
 /**
+ * The AuthorizationResult interface contains the overall status of an
+ * authorization check, the specific authorized privileges as an
+ * AuthorizationTypeMap, and the inaccessible objects that were restricted
+ * due to access control.
+ */
+export interface AuthorizationResult<A extends string> extends CheckAuthorizationResult<A> {
+  /**
+   * A set of all inaccessible objects that were restricted due to access control
+   */
+  inaccessibleObjects?: Set<ObjectRequiringPrivilegeCheckResult>;
+}
+
+/**
  * The AuthorizeObject interface contains information to specify an
  * object for authorization. This is a base interface which is
  * extended by other interfaces for specific actions.
@@ -157,16 +170,16 @@ export interface AuthorizeChangeAccessControlObject extends AuthorizeObjectWithE
   objectNamespace?: string;
 }
 
-export interface AccessControlAuthorizeResult {
+export interface ObjectRequiringPrivilegeCheckResult {
   type: string;
   id: string;
   name?: string;
   requiresManageAccessControl: boolean;
 }
 
-export interface GetTypesRequiringAccessControlCheckResult {
-  typesRequiringAccessControl: Set<string>;
-  results: AccessControlAuthorizeResult[];
+export interface GetObjectsRequiringPrivilegeCheckResult {
+  types: Set<string>;
+  objects: ObjectRequiringPrivilegeCheckResult[];
 }
 
 /**
@@ -378,83 +391,81 @@ export interface ISavedObjectsSecurityExtension {
   /**
    * Performs authorization for the CREATE security action
    * @param params the namespace and object to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeCreate: <A extends string>(
     params: AuthorizeCreateParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the BULK_CREATE security action
    * @param params the namespace and objects to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeBulkCreate: <A extends string>(
     params: AuthorizeBulkCreateParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the UPDATE security action
    * @param params the namespace and object to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeUpdate: <A extends string>(
     params: AuthorizeUpdateParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the BULK_UPDATE security action
    * @param params the namespace and objects to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeBulkUpdate: <A extends string>(
     params: AuthorizeBulkUpdateParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the DELETE security action
    * @param params the namespace and object to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeDelete: <A extends string>(
     params: AuthorizeDeleteParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the BULK_DELETE security action
    * @param params the namespace and objects to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeBulkDelete: <A extends string>(
     params: AuthorizeBulkDeleteParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the GET security action
    * @param params the namespace, object to authorize, and whether or not the object was found
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
-  authorizeGet: <A extends string>(
-    params: AuthorizeGetParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  authorizeGet: <A extends string>(params: AuthorizeGetParams) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the BULK_GET security action
    * @param params the namespace and objects to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeBulkGet: <A extends string>(
     params: AuthorizeBulkGetParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the CHECK_CONFLICTS security action
    * @param params the namespace and objects to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeCheckConflicts: <A extends string>(
     params: AuthorizeCheckConflictsParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the REMOVE_REFERENCES security action. Checks for authorization
@@ -464,35 +475,35 @@ export interface ISavedObjectsSecurityExtension {
    * (e.g. deleting a tag).
    * See discussion here: https://github.com/elastic/kibana/issues/135259#issuecomment-1482515139
    * @param params the namespace and object to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeRemoveReferences: <A extends string>(
     params: AuthorizeDeleteParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the OPEN_POINT_IN_TIME security action
    * @param params the namespaces and types to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeOpenPointInTime: <A extends string>(
     params: AuthorizeOpenPointInTimeParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the CHANGE_OWNERSHIP or CHANGE_ACCESS_MODE security actions
    * @param params the namespace and object to authorize for changing ownership
    * @param operation the operation to authorize - one of 'changeAccessMode' or 'changeOwnership'
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeChangeAccessControl: <A extends string>(
     params: AuthorizeChangeAccessControlParams,
     operation: 'changeAccessMode' | 'changeOwnership'
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   getTypesRequiringAccessControlCheck: (
     objects: AuthorizeObject[]
-  ) => GetTypesRequiringAccessControlCheckResult;
+  ) => GetObjectsRequiringPrivilegeCheckResult;
 
   /**
    * Performs audit logging for the CLOSE_POINT_IN_TIME security action
@@ -527,22 +538,20 @@ export interface ISavedObjectsSecurityExtension {
   /**
    * Performs authorization for the UPDATE_OBJECTS_SPACES security action
    * @param params - namespace, spacesToAdd, spacesToRemove, and objects to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
   authorizeUpdateSpaces: <A extends string>(
     params: AuthorizeUpdateSpacesParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  ) => Promise<AuthorizationResult<A>>;
 
   /**
    * Performs authorization for the FIND security action
    * This method is the first of two security steps for the find operation (saved objects repository's find method)
    * This method should be called first in order to provide data needed to construct the type-to-namespace map for the search DSL
    * @param params - namespaces and types to authorize
-   * @returns CheckAuthorizationResult - the resulting authorization level and authorization map
+   * @returns AuthorizationResult - the resulting authorization level and authorization map
    */
-  authorizeFind: <A extends string>(
-    params: AuthorizeFindParams
-  ) => Promise<CheckAuthorizationResult<A>>;
+  authorizeFind: <A extends string>(params: AuthorizeFindParams) => Promise<AuthorizationResult<A>>;
 
   /**
    * Gets an updated type map for redacting results of the FIND security action

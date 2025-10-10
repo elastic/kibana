@@ -174,6 +174,8 @@ export const performBulkCreate = async <T>(
     preflightCheckObjects
   );
 
+  console.log(`**** PREFLIGHT RESPONSE: ${JSON.stringify(preflightCheckResponse)}`);
+
   const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
     const { object, preflightCheckIndex } = element.value;
 
@@ -201,6 +203,12 @@ export const performBulkCreate = async <T>(
     objects: authObjects,
   });
 
+  console.log(`**** authorizationResult: ${JSON.stringify(authorizationResult)}`);
+
+  const inaccessibleObjects = authorizationResult?.inaccessibleObjects
+    ? Array.from(authorizationResult.inaccessibleObjects)
+    : [];
+
   let bulkRequestIndexCounter = 0;
   const bulkCreateParams: object[] = [];
   type ExpectedBulkResult = Either<
@@ -211,6 +219,29 @@ export const performBulkCreate = async <T>(
     expectedResults.map<Promise<ExpectedBulkResult>>(async (expectedBulkGetResult) => {
       if (isLeft(expectedBulkGetResult)) {
         return expectedBulkGetResult;
+      }
+
+      // ToDo: move this to the security extension/access control service
+      if (
+        inaccessibleObjects.find(
+          (obj) =>
+            obj.type === expectedBulkGetResult.value.object.type &&
+            obj.id === expectedBulkGetResult.value.object.id
+        )
+      ) {
+        return left({
+          id: expectedBulkGetResult.value.object.id,
+          type: expectedBulkGetResult.value.object.type,
+          error: {
+            ...errorContent(
+              SavedObjectsErrorHelpers.decorateForbiddenError(
+                new Error(
+                  `Overwriting objects in read-only mode that are owned by another user requires the manage_access_control privilege.`
+                )
+              )
+            ),
+          },
+        });
       }
 
       let savedObjectNamespace: string | undefined;

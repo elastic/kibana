@@ -47,7 +47,11 @@ import type {
   SetAccessControlToWriteParams,
   WithAuditName,
 } from '@kbn/core-saved-objects-server';
-import type { GetTypesRequiringAccessControlCheckResult } from '@kbn/core-saved-objects-server/src/extensions/security';
+import type {
+  AuthorizationResult,
+  GetObjectsRequiringPrivilegeCheckResult,
+  ObjectRequiringPrivilegeCheckResult,
+} from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import type {
@@ -210,7 +214,7 @@ interface EnforceAuthorizationParams<A extends string> {
 
   hasAllPrivileges?: boolean;
   enforceAccessControl?: {
-    typesRequiringAccessControl?: Set<string>;
+    objectsRequiringPrivilegeCheck?: GetObjectsRequiringPrivilegeCheckResult;
   };
 }
 
@@ -589,12 +593,53 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
   }
 
+  private allAccessControlObjectsAreInaccessible(
+    allAccessControlObjects: ObjectRequiringPrivilegeCheckResult[],
+    inaccessibleObjects: Set<ObjectRequiringPrivilegeCheckResult>
+  ): boolean {
+    return (
+      inaccessibleObjects.size > 0 &&
+      inaccessibleObjects.size === allAccessControlObjects.length &&
+      allAccessControlObjects.every((obj) => inaccessibleObjects.has(obj))
+    );
+  }
+
+   private allRequestedObjectAreInaccessible(
+    typesAndSpaces: Map<string, Set<string>>,
+    unauthorizedTypes: Set<string>,
+    inaccessibleTypes: Set<string>,
+    allAccessControlObjects: ObjectRequiringPrivilegeCheckResult[],
+    inaccessibleObjects: Set<ObjectRequiringPrivilegeCheckResult>
+   ): boolean {
+    const allTypes = [...typesAndSpaces.keys()];
+
+    console.log(`**** All types: ${JSON.stringify(allTypes)}`);
+    console.log(`**** Inaccessible types: ${JSON.stringify(Array.from(inaccessibleTypes))}`);
+
+    const allAccessControlObjectsAreInaccessible = this.allAccessControlObjectsAreInaccessible(
+      allAccessControlObjects,
+      inaccessibleObjects
+    );
+     
+    console.log(`**** allAccessControlObjectsAreInaccessible: ${JSON.stringify(allAccessControlObjectsAreInaccessible)}`);
+
+    return (
+      allAccessControlObjectsAreInaccessible && allTypes.length === inaccessibleTypes.size &&
+      allTypes.every((type) => inaccessibleTypes.has(type))
+    );
+  }
+
   /*
    * The enforce method uses the result of an authorization check authorization map) and a map
    * of types to spaces (type map) to determine if the action is authorized for all types and spaces
    * within the type map. If unauthorized for any type this method will throw.
+   * Enforce also optionally enforces access control restrictions, throwing if the user does not
+   * have the manage access control privilege for any objects that require it (owned by another user).
+   * Enforce will return a set of objects that were inaccessible due to access control restrictions,
    */
-  private enforceAuthorization<A extends string>(params: EnforceAuthorizationParams<A>) {
+  private enforceAuthorization<A extends string>(
+    params: EnforceAuthorizationParams<A>
+  ): Set<ObjectRequiringPrivilegeCheckResult> {
     const { typesAndSpaces, action, typeMap, auditOptions, enforceAccessControl } = params;
     const {
       objects: auditObjects,
@@ -606,8 +651,20 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const { authzAction, auditAction } = this.decodeSecurityAction(action);
 
+    const allAccessControlObjects =
+      enforceAccessControl?.objectsRequiringPrivilegeCheck?.objects ?? [];
+
+    const accessControlObjectsToCheck =
+      enforceAccessControl?.objectsRequiringPrivilegeCheck?.objects?.filter(
+        (obj) => obj.requiresManageAccessControl
+      ) ?? [];
+
+    const typesRequiringPrivilegeCheck =
+      enforceAccessControl?.objectsRequiringPrivilegeCheck?.types ?? new Set<string>();
+
     const unauthorizedTypes = new Set<string>();
     const inaccessibleTypes = new Set<string>();
+    const inaccessibleObjects = new Set<ObjectRequiringPrivilegeCheckResult>();
 
     for (const [type, spaces] of typesAndSpaces) {
       const spacesArray = [...spaces];
@@ -616,19 +673,41 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           unauthorizedTypes.add(type);
         }
       }
-      if (enforceAccessControl?.typesRequiringAccessControl?.has(type)) {
+      if (typesRequiringPrivilegeCheck.has(type)) {
         if (
           !isAuthorizedInAllSpaces(type, MANAGE_ACCESS_CONTROL_ACTION as A, spacesArray, typeMap)
         ) {
           inaccessibleTypes.add(type);
+          accessControlObjectsToCheck
+            ?.filter((obj) => obj.type === type)
+            .forEach((obj) => inaccessibleObjects.add(obj));
         }
       }
     }
 
-    if (unauthorizedTypes.size > 0 || inaccessibleTypes.size > 0) {
+    const allRequestedObjectAreInaccessible = this.allRequestedObjectAreInaccessible(
+      typesAndSpaces,
+      unauthorizedTypes,
+      inaccessibleTypes,
+      allAccessControlObjects,
+      inaccessibleObjects
+    );
+
+    console.log(`**** allRequestedObjectAreInaccessible: ${JSON.stringify(allRequestedObjectAreInaccessible)}`);
+
+    if (unauthorizedTypes.size > 0 || allRequestedObjectAreInaccessible) {
       const uniqueTypes = new Set([...unauthorizedTypes, ...inaccessibleTypes]);
       const targetTypes = [...uniqueTypes].sort().join(',');
-      const msg = `Unable to ${authzAction} ${targetTypes}`;
+      const inaccessibleObjectsString = [...inaccessibleObjects]
+        .map((obj) => `${obj.type}:${obj.id}`)
+        .sort()
+        .join(',');
+      const msg = `Unable to ${authzAction} ${targetTypes}${
+        inaccessibleObjects.size > 0
+          ? ', access control restrictions for ' + inaccessibleObjectsString
+          : ''
+      }`; // could potnentially include the list of objects that were inaccessible
+      // if we are bypassing all auditing, or bypassing failure auditing, do not log the event
       const error = this.errors.decorateForbiddenError(new Error(msg));
       if (auditAction && bypass !== 'always' && bypass !== 'on_failure') {
         this.auditHelper({
@@ -652,6 +731,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         deleteFromSpaces,
       });
     }
+
+    return inaccessibleObjects;
   }
 
   /**
@@ -669,7 +750,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    */
   async authorize<A extends string>(
     params: InternalAuthorizeParams
-  ): Promise<CheckAuthorizationResult<string>> {
+  ): Promise<AuthorizationResult<string>> {
     if (params.actions.size === 0) {
       throw new Error('No actions specified for authorization');
     }
@@ -688,8 +769,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     const accessControlObjects = params.auditOptions?.objects?.filter(({ type }) =>
       this.typeRegistry?.supportsAccessControl(type)
     );
-    const { typesRequiringAccessControl } =
-      this.accessControlService.getTypesRequiringPrivilegeCheck({
+    const objectsRequiringPrivilegeCheck =
+      this.accessControlService.getObjectsRequiringPrivilegeCheck({
         objects: accessControlObjects || [],
         actions: params.actions,
       });
@@ -700,29 +781,33 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       actions: authzActions,
       options: {
         allowGlobalResource: params.options?.allowGlobalResource === true,
-        ...(typesRequiringAccessControl.size > 0 && { typesRequiringAccessControl }),
+        ...(objectsRequiringPrivilegeCheck.types.size > 0 && {
+          typesRequiringAccessControl: objectsRequiringPrivilegeCheck.types,
+        }),
       },
     });
 
     const typesAndSpaces = params.enforceMap;
 
+    const allInaccessibleObjects = new Set<ObjectRequiringPrivilegeCheckResult>();
     if (typesAndSpaces !== undefined && checkResult) {
-      params.actions.forEach((action) =>
-        this.enforceAuthorization({
+      params.actions.forEach((action) => {
+        const inaccessibleObjects = this.enforceAuthorization({
           typesAndSpaces,
           action,
           typeMap: checkResult.typeMap,
           auditOptions: params.auditOptions,
-          ...(typesRequiringAccessControl?.size > 0 && {
+          ...(objectsRequiringPrivilegeCheck.objects?.length > 0 && {
             enforceAccessControl: {
-              typesRequiringAccessControl,
+              objectsRequiringPrivilegeCheck,
             },
           }),
-        })
-      );
+        });
+        inaccessibleObjects.forEach((obj) => allInaccessibleObjects.add(obj));
+      });
     }
 
-    return checkResult;
+    return { ...checkResult, inaccessibleObjects: allInaccessibleObjects };
   }
 
   private maybeRedactSavedObject(
@@ -778,7 +863,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeCreate<A extends string>(
     params: AuthorizeCreateParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     return this.internalAuthorizeCreate({
       namespace: params.namespace,
       objects: [params.object],
@@ -787,14 +872,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeBulkCreate<A extends string>(
     params: AuthorizeBulkCreateParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     return this.internalAuthorizeCreate(params, { forceBulkAction: true });
   }
 
   private async internalAuthorizeCreate<A extends string>(
     params: AuthorizeBulkCreateParams,
     options?: InternalAuthorizeOptions
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
 
@@ -843,7 +928,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeUpdate<A extends string>(
     params: AuthorizeUpdateParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     return this.internalAuthorizeUpdate({
       namespace: params.namespace,
       objects: [params.object],
@@ -852,14 +937,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeBulkUpdate<A extends string>(
     params: AuthorizeBulkUpdateParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     return this.internalAuthorizeUpdate(params, { forceBulkAction: true });
   }
 
   private async internalAuthorizeUpdate<A extends string>(
     params: AuthorizeBulkUpdateParams,
     options?: InternalAuthorizeOptions
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
 
@@ -904,7 +989,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeDelete<A extends string>(
     params: AuthorizeDeleteParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     return this.internalAuthorizeDelete({
       namespace: params.namespace,
       // delete params does not contain existingNamespaces because authz
@@ -916,14 +1001,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeBulkDelete<A extends string>(
     params: AuthorizeBulkDeleteParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     return this.internalAuthorizeDelete(params, { forceBulkAction: true });
   }
 
   private async internalAuthorizeDelete<A extends string>(
     params: AuthorizeBulkDeleteParams,
     options?: InternalAuthorizeOptions
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     const namespaceString = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
     const enforceMap = new Map<string, Set<string>>();
@@ -958,7 +1043,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeGet<A extends string>(
     params: AuthorizeGetParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     const { namespace, object, objectNotFound } = params;
     const spacesToEnforce = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
     const existingNamespaces = object.existingNamespaces;
@@ -974,7 +1059,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeBulkGet<A extends string>(
     params: AuthorizeBulkGetParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     const action = SecurityAction.BULK_GET;
     const namespace = SavedObjectsUtils.namespaceIdToString(params.namespace);
     const { objects } = params;
@@ -1033,7 +1118,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeCheckConflicts<A extends string>(
     params: AuthorizeCheckConflictsParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     const action = SecurityAction.CHECK_CONFLICTS;
     const { namespace, objects } = params;
     this.assertObjectsArrayNotEmpty(objects, action);
@@ -1058,7 +1143,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeRemoveReferences<A extends string>(
     params: AuthorizeDeleteParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     // TODO: Improve authorization and auditing (https://github.com/elastic/kibana/issues/135259)
     const { namespace, object } = params;
     const spaces = new Set([SavedObjectsUtils.namespaceIdToString(namespace)]); // Always check/enforce authZ for the active space
@@ -1073,7 +1158,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   async authorizeOpenPointInTime<A extends string>(
     params: AuthorizeOpenPointInTimeParams
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     const { namespaces, types } = params;
 
     const preAuthorizationResult = await this.authorize({
@@ -1104,7 +1189,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   async authorizeChangeAccessControl<A extends string>(
     params: AuthorizeChangeAccessControlParams,
     operation: 'changeAccessMode' | 'changeOwnership'
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     const action =
       operation === 'changeAccessMode'
         ? SecurityAction.CHANGE_ACCESS_MODE
@@ -1121,7 +1206,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   async internalAuthorizeChangeAccessControl<A extends string>(
     params: AuthorizeChangeAccessControlParams,
     action: SecurityAction
-  ): Promise<CheckAuthorizationResult<A>> {
+  ): Promise<AuthorizationResult<A>> {
     if (!this.typeRegistry) {
       throw new Error('Type registry is not defined');
     }
@@ -1146,8 +1231,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     const spacesToAuthorize = new Set<string>([namespaceString]);
 
-    const { typesRequiringAccessControl } =
-      this.accessControlService.getTypesRequiringPrivilegeCheck({
+    const { types: typesRequiringAccessControl } =
+      this.accessControlService.getObjectsRequiringPrivilegeCheck({
         objects,
         actions: new Set([action]),
       });
@@ -1197,12 +1282,12 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   getTypesRequiringAccessControlCheck(
     objects: AuthorizeObject[],
-    action: SecurityAction = SecurityAction.CHANGE_OWNERSHIP
+    action: SecurityAction = SecurityAction.CHANGE_ACCESS_MODE // default action to create, because this is used to check conflicts (perhaps we really just need a bespoke "check access control conflicts" function)
   ) {
-    return this.accessControlService.getTypesRequiringPrivilegeCheck({
+    return this.accessControlService.getObjectsRequiringPrivilegeCheck({
       objects,
       actions: new Set([action]),
-    }) as GetTypesRequiringAccessControlCheckResult;
+    }) as GetObjectsRequiringPrivilegeCheckResult;
   }
 
   auditClosePointInTime() {
