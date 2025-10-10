@@ -10,15 +10,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { getSloHealthStateText } from '../../../../lib/slo_health_helpers';
-import { SloHealthIssuesList } from './slo_health_issues_list';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
-// export function HealthCallout({ sloList }: { sloList: SLOWithSummaryResponse[] }) {
 export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryResponse[] }) {
-  const { http } = useKibana().services;
   const { isLoading, isError, data: results } = useFetchSloHealth({ list: sloList });
   const [showCallOut, setShowCallOut] = useState(
     !sessionStorage.getItem(CALLOUT_SESSION_STORAGE_KEY)
@@ -97,11 +93,6 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
                 }}
               />
             </span>
-            <SloHealthIssuesList
-              results={unhealthyAndMissingSloList}
-              linkToTransformPage={false}
-              externalLinkTextSize="s"
-            />
           </EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="xs">
             <EuiFlexItem grow={false}>
