@@ -19,6 +19,7 @@ import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
+import { getSearchSessionEBTManagerMock } from '../../mocks';
 const setup = async () => {
   const mockCoreSetup = coreMock.createSetup();
   mockCoreSetup.uiSettings.get.mockImplementation((key: string) => {
@@ -68,6 +69,7 @@ const setup = async () => {
           kibanaVersion={'8.0.0'}
           searchUsageCollector={mockSearchUsageCollector}
           share={mockShareStart}
+          searchSessionEBTManager={getSearchSessionEBTManagerMock()}
         />
       </LocaleWrapper>
     );
