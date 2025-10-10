@@ -10,10 +10,18 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/react-kibana-context-render",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/i18n",
+    "@kbn/usage-collection-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/console-plugin",
+    "@kbn/search-navigation",
+    "@kbn/cloud-plugin",
+    "@kbn/serverless",
+    "@kbn/analytics",
+    "@kbn/config-schema",
   ],
   "exclude": [
     "target/**/*"
