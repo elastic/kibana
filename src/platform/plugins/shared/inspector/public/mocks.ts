@@ -25,6 +25,7 @@ const createSetupContract = (): Setup => {
 
   const setupContract: Setup = {
     registerView: jest.fn(views.register.bind(views)),
+    registerViewAsync: jest.fn(views.registerAsync.bind(views)),
   };
   return setupContract;
 };
@@ -38,8 +39,8 @@ const createStartContract = (): Start => {
   const openResult = {
     onClose: Promise.resolve(undefined),
     close: jest.fn(() => Promise.resolve(undefined)),
-  } as ReturnType<Start['open']>;
-  startContract.open.mockImplementation(() => openResult);
+  };
+  startContract.open.mockImplementation(() => Promise.resolve(openResult));
 
   return startContract;
 };
