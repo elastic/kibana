@@ -490,7 +490,7 @@ paths:
     };
 
     expect(() => compileTemplate(vars, template)).toThrowError(
-      'YAMLException: Duplicated key "processors" found in agent policy yaml, please verify your yaml variables.'
+      'YAMLException: Duplicated key "processors" found in agent policy yaml, please check your yaml variables.'
     );
   });
 });

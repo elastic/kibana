@@ -76,7 +76,7 @@ function handleYamlError(err: any, yaml: string): string {
         position++;
       }
     }
-    return `YAMLException: Duplicated key "${key}" found in agent policy yaml, please verify your yaml variables.`;
+    return `YAMLException: Duplicated key "${key}" found in agent policy yaml, please check your yaml variables.`;
   }
 
   return err.message;
