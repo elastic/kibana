@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
@@ -19,7 +19,6 @@ import type { LensWrapperProps } from './lens_wrapper';
 import { LensWrapper } from './lens_wrapper';
 import { useChartLayers } from './hooks/use_chart_layers';
 import { useLensProps } from './hooks/use_lens_props';
-import { ChartLoadingIcon } from '../empty_state/empty_state';
 
 const ChartSizes = {
   s: 230,
@@ -137,7 +136,9 @@ export const Chart = ({
           alignItems="center"
           responsive={false}
         >
-          <ChartLoadingIcon />
+          <EuiFlexItem grow={false}>
+            <EuiLoadingChart size="l" />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
     </div>
