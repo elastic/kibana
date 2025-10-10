@@ -309,6 +309,9 @@ export class ScoutPlaywrightReporter implements Reporter {
       event: {
         action: ScoutReportEventAction.RUN_END,
       },
+      process: {
+        duration: process.uptime() * 1000,
+      },
     });
 
     // Save, upload events & conclude the report

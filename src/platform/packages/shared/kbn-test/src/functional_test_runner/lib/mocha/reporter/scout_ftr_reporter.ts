@@ -215,9 +215,6 @@ export class ScoutFTRReporter {
         ...this.baseTestRunInfo,
         status: this.runner.stats?.failures === 0 ? 'passed' : 'failed',
         duration: this.runner.stats?.duration || 0,
-        process: {
-          duration: process.uptime() * 1000,
-        },
         tests: {
           passes,
           failures,
@@ -227,6 +224,9 @@ export class ScoutFTRReporter {
       },
       event: {
         action: ScoutReportEventAction.RUN_END,
+      },
+      process: {
+        duration: process.uptime() * 1000,
       },
     });
 
