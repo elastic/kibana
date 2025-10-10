@@ -55,12 +55,7 @@ export const getSerializedState = ({
     timeRestore,
     description,
 
-    // Dashboard options
-    useMargins,
-    syncColors,
-    syncCursor,
-    syncTooltips,
-    hidePanelTitles,
+    options,
     controlGroupInput,
   } = dashboardState;
 
@@ -75,14 +70,6 @@ export const getSerializedState = ({
     // ControlGroup Component is keyed on dashboard id so changing dashboard id mounts new ControlGroup Component.
     //
   }
-
-  const options = {
-    useMargins,
-    syncColors,
-    syncCursor,
-    syncTooltips,
-    hidePanelTitles,
-  };
 
   /**
    * Parse global time filter settings
@@ -115,9 +102,10 @@ export const getSerializedState = ({
   // TODO Provide tags as an array of tag names in the attribute. In that case, tag references
   // will be extracted by the server.
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
-  const references = savedObjectsTaggingApi?.ui.updateTagsReferences
-    ? savedObjectsTaggingApi?.ui.updateTagsReferences([], tags)
-    : [];
+  const references =
+    tags && savedObjectsTaggingApi?.ui.updateTagsReferences
+      ? savedObjectsTaggingApi?.ui.updateTagsReferences([], tags)
+      : [];
 
   const allReferences = [
     ...references,

@@ -47,12 +47,14 @@ export function transformDashboardOut(
         }
       : undefined;
 
+  const options = transformOptionsOut(optionsJSON ?? '{}');
+
   // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
     ...(description && { description }),
     ...transformSearchSourceOut(kibanaSavedObjectMeta, references),
-    ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
+    ...(Object.keys(options).length && { options }),
     ...((panelsJSON || sections) && {
       panels: transformPanelsOut(panelsJSON, sections, references),
     }),

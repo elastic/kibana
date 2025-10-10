@@ -31,10 +31,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { DashboardSettings } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { savedObjectsTaggingService } from '../../services/kibana_services';
+import type { DashboardSettings } from '../../dashboard_api/settings_manager';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -135,7 +135,7 @@ export const DashboardSettingsFlyout = ({ onClose, ariaLabelledBy }: DashboardSe
         }
       >
         <savedObjectsTaggingApi.ui.components.TagSelector
-          selected={localSettings.tags}
+          selected={localSettings.tags ?? []}
           onTagsSelected={(selectedTags) => updateDashboardSetting({ tags: selectedTags })}
         />
       </EuiFormRow>

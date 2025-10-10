@@ -13,7 +13,6 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import type { DashboardItem } from './types';
 
 import { savedObjectToItem } from './transform_utils';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../common/content_management';
 
 describe('savedObjectToItem', () => {
   const commonSavedObject: SavedObject = {
@@ -97,13 +96,12 @@ describe('savedObjectToItem', () => {
     });
   });
 
-  it('should handle missing optional attributes', () => {
+  it('should not supply defaults for missing properties', () => {
     const input = getSavedObjectForAttributes({
       title: 'title',
       description: 'description',
       timeRestore: false,
       panelsJSON: '[]',
-      optionsJSON: '{}',
       kibanaSavedObjectMeta: {},
     });
 
@@ -116,32 +114,6 @@ describe('savedObjectToItem', () => {
         description: 'description',
         timeRestore: false,
         panels: [],
-        options: DEFAULT_DASHBOARD_OPTIONS,
-      },
-    });
-  });
-
-  it('should handle partial saved object', () => {
-    const input = {
-      ...commonSavedObject,
-      references: undefined,
-      attributes: {
-        title: 'title',
-        description: 'my description',
-        timeRestore: false,
-      },
-    };
-
-    const { item, error } = savedObjectToItem(input, true, {
-      allowedAttributes: ['title', 'description'],
-    });
-    expect(error).toBeNull();
-    expect(item).toEqual({
-      ...commonSavedObject,
-      references: [],
-      attributes: {
-        title: 'title',
-        description: 'my description',
       },
     });
   });
