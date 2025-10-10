@@ -139,6 +139,7 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
             aria-label={setDefaultAriaLabel}
             data-test-subj="setDefaultIndexPatternButton"
             color="text"
+            flush="both"
           >
             {setDefaultTooltip}
           </EuiButtonEmpty>
