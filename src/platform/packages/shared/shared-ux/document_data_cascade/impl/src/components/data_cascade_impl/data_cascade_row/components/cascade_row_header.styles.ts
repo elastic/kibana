@@ -23,10 +23,10 @@ export const styles = (euiTheme: UseEuiTheme['euiTheme'], size: CascadeSizing) =
   }),
   rowHeaderSlotContainer: css({
     minWidth: 0,
-    overflow: 'hidden',
+    overflowX: 'auto',
     justifyContent: 'center',
   }),
-  rowHeaderSlotContainerInner: css({ overflow: 'scroll', flexGrow: 0 }),
+  rowHeaderSlotContainerInner: css({ flexGrow: 0 }),
   rowHeaderSlotItemWrapper: css({
     justifyContent: 'center',
     alignItems: 'center',
