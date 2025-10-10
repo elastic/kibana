@@ -745,6 +745,7 @@ describe('#rawToSavedObject', () => {
         expect(actual).not.toHaveProperty('accessControl');
       });
     });
+  });
 });
 
 describe('#savedObjectToRaw', () => {

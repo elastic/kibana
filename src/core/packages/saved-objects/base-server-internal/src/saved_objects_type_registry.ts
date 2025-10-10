@@ -72,7 +72,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
         `Type ${type.name}: Cannot specify 'supportsAccessControl' as 'true' unless 'namespaceType' is either 'multiple' or 'multiple-isolated'.`
       );
     }
-    const supportsAccessControl = (this.accessControlEnabled && type.supportsAccessControl) ?? false;
+    const supportsAccessControl = this.accessControlEnabled ? type.supportsAccessControl : false;
 
     const typeWithAccessControl = { ...type, supportsAccessControl };
 
