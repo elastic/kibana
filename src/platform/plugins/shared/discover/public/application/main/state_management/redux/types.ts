@@ -49,9 +49,6 @@ export interface TabState extends TabItem {
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
   controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
-  /**
-   * ESQL query variables
-   */
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
