@@ -16,7 +16,7 @@ import {
   removeQueryParam,
   url,
 } from '@kbn/kibana-utils-plugin/public';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../../constants';
 
 export interface DiscoverSearchSessionManagerDeps {
@@ -87,7 +87,7 @@ export class DiscoverSearchSessionManager {
 
     query[SEARCH_SESSION_ID_QUERY_PARAM] = searchSessionId;
 
-    const newSearch = stringify(url.encodeQuery(query), { sort: false, encode: false });
+    const newSearch = queryString.stringify(url.encodeQuery(query), { sort: false, encode: false });
     const newLocation: Location = {
       ...oldLocation,
       search: newSearch,
