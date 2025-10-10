@@ -63,17 +63,17 @@ import { AutocompleteInfo, setAutocompleteInfo } from '../../public/services';
 import type { OneConsoleProps } from './types';
 
 // Import all translation files statically so webpack includes them in the bundle
-// JSON imports via require() are resolved by Webpack at build time, not by TypeScript
+// JSON imports via require() are resolved by Webpack at build time, not by TypeScript/ESLint
 const translations = {
   en: {
     formats: {},
     messages: {},
   },
-  // @ts-expect-error - Webpack resolves these JSON imports at build time
+  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports -- Webpack resolves JSON imports at build time
   'fr-FR': require('./translations/fr-FR.json'),
-  // @ts-expect-error - Webpack resolves these JSON imports at build time
+  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports -- Webpack resolves JSON imports at build time
   'ja-JP': require('./translations/ja-JP.json'),
-  // @ts-expect-error - Webpack resolves these JSON imports at build time
+  // eslint-disable-next-line @kbn/imports/no_unresolvable_imports -- Webpack resolves JSON imports at build time
   'zh-CN': require('./translations/zh-CN.json'),
 };
 
