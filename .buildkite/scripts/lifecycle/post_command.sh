@@ -21,6 +21,15 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'target/kibana-security-solution/cypress/videos/**/*'
   buildkite-agent artifact upload 'kibana/target/kibana-security-solution/cypress/screenshots/**/*'
   buildkite-agent artifact upload 'kibana/target/kibana-security-solution/cypress/videos/**/*'
+
+  # For flaky test runner (when PWD is kibana/ subdirectory and target is in parent)
+  if [[ -d ../target/kibana-security-solution/cypress ]]; then
+    CURRENT_DIR=$(pwd)
+    cd ..
+    buildkite-agent artifact upload 'target/kibana-security-solution/cypress/screenshots/**/*'
+    buildkite-agent artifact upload 'target/kibana-security-solution/cypress/videos/**/*'
+    cd "$CURRENT_DIR"
+  fi
   buildkite-agent artifact upload 'target/kibana-osquery/**/*.png'
   buildkite-agent artifact upload 'target/kibana-osquery/**/*.mp4'
   buildkite-agent artifact upload 'target/kibana-fleet/**/*.png'
