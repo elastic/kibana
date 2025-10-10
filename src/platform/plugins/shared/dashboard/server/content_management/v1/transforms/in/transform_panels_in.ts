@@ -76,7 +76,7 @@ function transformPanelIn(panel: DashboardPanel): {
   try {
     if (transforms?.transformIn) {
       const transformed = transforms.transformIn(config);
-      transformedPanelConfig = transformed.state as Record<string, unknown>;
+      transformedPanelConfig = transformed.state;
       references = transformed.references;
     }
   } catch (transformInError) {
