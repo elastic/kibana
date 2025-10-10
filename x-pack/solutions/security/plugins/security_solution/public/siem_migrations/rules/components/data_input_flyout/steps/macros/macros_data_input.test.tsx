@@ -12,6 +12,8 @@ import { DataInputStep } from '../constants';
 import { getRuleMigrationStatsMock } from '../../../../__mocks__';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 import { TestProviders } from '../../../../../../common/mock';
+import { useAppToasts } from '../../../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../../../common/hooks/use_app_toasts.mock';
 
 const mockAddError = jest.fn();
 const mockAddSuccess = jest.fn();
@@ -37,14 +39,22 @@ jest.mock('../../../../../../common/lib/kibana/kibana_react', () => ({
     },
   }),
 }));
+jest.mock('../../../../../../common/hooks/use_app_toasts');
 
 describe('MacrosDataInput', () => {
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+
   const defaultProps = {
     onMissingResourcesFetched: jest.fn(),
     dataInputStep: DataInputStep.Macros,
     migrationStats: getRuleMigrationStatsMock({ status: SiemMigrationTaskStatus.READY }),
     missingMacros: ['macro1', 'macro2'],
   };
+
+  beforeEach(() => {
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
