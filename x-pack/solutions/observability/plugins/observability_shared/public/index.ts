@@ -62,6 +62,7 @@ export { useQuickTimeRanges } from './hooks/use_quick_time_ranges';
 export { useTimeZone } from './hooks/use_time_zone';
 export { useChartThemes } from './hooks/use_chart_theme';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
+export { useObservabilityAlertingCapabilities } from './hooks/use_observability_alerting_capabilities';
 export type { LinkDescriptor, Options as UseLinkPropsOptions } from './hooks/use_link_props';
 export { NavigationWarningPromptProvider, Prompt } from './components/navigation_warning_prompt';
 
