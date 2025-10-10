@@ -10,7 +10,7 @@ import type React from 'react';
 import type { Moment } from 'moment';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart, HttpResponse } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
