@@ -14,10 +14,12 @@ import type {
 } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type {
+  AccessControlImportTransformsFactory,
   ISavedObjectTypeRegistry,
   SavedObjectsImportHook,
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   checkReferenceOrigins,
   validateReferences,
@@ -60,6 +62,10 @@ export interface ImportSavedObjectsOptions {
    * If provided, Kibana will apply the given option to the `managed` property.
    */
   managed?: boolean;
+  /** The request originating the import operation */
+  request: KibanaRequest;
+  /** The factory function for creating the access control import transforms */
+  createAccessControlImportTransforms?: AccessControlImportTransformsFactory;
   log: Logger;
 }
 
@@ -82,6 +88,8 @@ export async function importSavedObjectsFromStream({
   compatibilityMode,
   managed,
   log,
+  request,
+  createAccessControlImportTransforms,
 }: ImportSavedObjectsOptions): Promise<SavedObjectsImportResponse> {
   log.debug(
     `Importing with overwrite ${overwrite ? 'enabled' : 'disabled'} and size limit ${objectLimit}`
@@ -95,6 +103,9 @@ export async function importSavedObjectsFromStream({
     objectLimit,
     supportedTypes,
     managed,
+    request,
+    typeRegistry,
+    createAccessControlImportTransforms,
   });
   log.debug(
     `Importing types: ${[
@@ -160,6 +171,12 @@ export async function importSavedObjectsFromStream({
       ...pendingOverwrites,
       ...checkOriginConflictsResult.pendingOverwrites,
     ]);
+
+    // Check access control conflicts
+    // This should look like the above check conflict functions, but it would check for overwrites to any objects owned by someone other than the current user
+    // It would be nice to work this into the check conflicts API
+    // The alternative is to let this fall through to the create operation and have the import fail there, but this is not ideal
+    // savedObjectsClient.performCheckAccessControl();
   }
 
   // Create objects in bulk

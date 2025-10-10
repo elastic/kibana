@@ -62,6 +62,55 @@ export interface SavedObjectsImportUnsupportedTypeError {
 }
 
 /**
+ * Represents a failure to import due to missing access control mode metadata.
+ * This metadata is required only for objects that support access control when
+ * an Admin chooses to apply access control on import.
+ * @public
+ */
+export interface SavedObjectsImportMissingAccessControlModeMetadataError {
+  type: 'missing_access_control_mode';
+}
+
+/**
+ * Represents a failure to import due to missing access control owner metadata.
+ * This metadata is required only for objects that support access control when
+ * an Admin chooses to apply access control on import.
+ * @public
+ */
+export interface SavedObjectsImportMissingAccessControlOwnerMetadataError {
+  type: 'missing_access_control_owner';
+}
+
+/**
+ * Represents a failure to import due to unexpected access control metadata.
+ * This metadata is required only for objects that support access control.
+ * @public
+ */
+export interface SavedObjectsImportUnexpectedAccessControlMetadataError {
+  type: 'unexpected_access_control_metadata';
+}
+
+/**
+ * Represents a failure to import due to an access control conflict.
+ * This happens when attempting to import and overwrite an object owned by another user.
+ * @public
+ */
+export interface SavedObjectsImportAccessControlConflict {
+  type: 'access_control_conflict';
+}
+
+/**
+ * Represents a failure to import due to requiring a profile ID when the
+ * current user does not have one (never activated), or there is no
+ * authenticated user.
+ * The profile ID is required only for objects that support access control.
+ * @public
+ */
+export interface SavedObjectsImportRequiresProfileIdError {
+  type: 'requires_profile_id';
+}
+
+/**
  * Represents a failure to import due to an unknown reason.
  * @public
  */
@@ -98,7 +147,12 @@ export interface SavedObjectsImportFailure {
     | SavedObjectsImportAmbiguousConflictError
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
-    | SavedObjectsImportUnknownError;
+    | SavedObjectsImportUnknownError
+    | SavedObjectsImportMissingAccessControlOwnerMetadataError
+    | SavedObjectsImportMissingAccessControlModeMetadataError
+    | SavedObjectsImportRequiresProfileIdError
+    | SavedObjectsImportUnexpectedAccessControlMetadataError
+    | SavedObjectsImportAccessControlConflict;
 }
 
 /**

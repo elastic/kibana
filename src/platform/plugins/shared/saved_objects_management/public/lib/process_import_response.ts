@@ -17,6 +17,10 @@ import type {
   SavedObjectsImportFailure,
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
+  SavedObjectsImportMissingAccessControlMetadataError,
+  SavedObjectsImportRequiresProfileIdError,
+  SavedObjectsImportUnexpectedAccessControlMetadataError,
+  SavedObjectsImportAccessControlConflict,
 } from '@kbn/core/public';
 
 export interface FailedImport {
@@ -26,7 +30,11 @@ export interface FailedImport {
     | SavedObjectsImportAmbiguousConflictError
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
-    | SavedObjectsImportUnknownError;
+    | SavedObjectsImportUnknownError
+    | SavedObjectsImportMissingAccessControlMetadataError
+    | SavedObjectsImportRequiresProfileIdError
+    | SavedObjectsImportUnexpectedAccessControlMetadataError
+    | SavedObjectsImportAccessControlConflict;
 }
 
 interface UnmatchedReference {

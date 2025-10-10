@@ -6,12 +6,16 @@
  */
 
 import type {
+  SavedObjectsImportAccessControlConflict,
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
   SavedObjectsImportFailure,
+  SavedObjectsImportMissingAccessControlMetadataError,
   SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportRequiresProfileIdError,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
+  SavedObjectsImportUnexpectedAccessControlMetadataError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportUnsupportedTypeError,
 } from '@kbn/core/public';
@@ -23,7 +27,11 @@ export interface FailedImport {
     | SavedObjectsImportAmbiguousConflictError
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
-    | SavedObjectsImportUnknownError;
+    | SavedObjectsImportUnknownError
+    | SavedObjectsImportMissingAccessControlMetadataError
+    | SavedObjectsImportRequiresProfileIdError
+    | SavedObjectsImportUnexpectedAccessControlMetadataError
+    | SavedObjectsImportAccessControlConflict;
 }
 
 export interface ProcessedImportResponse {
