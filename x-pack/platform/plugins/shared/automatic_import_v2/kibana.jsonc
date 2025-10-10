@@ -8,7 +8,7 @@
   "plugin": {
     "id": "automaticImportVTwo",
     "server": true,
-    "browser": true,
+    "browser": false,
     "configPath": [
       "xpack",
       "automatic_import_v2"
