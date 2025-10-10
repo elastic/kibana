@@ -36,7 +36,7 @@ export const command = {
       {
         pipe: true,
       }
-    ).then((err) => {
+    ).catch((err) => {
       console.error('Error in shared moon :build-webpack runs', err);
       throw err;
     });

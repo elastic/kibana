@@ -330,9 +330,6 @@ export async function buildWebpackBundles({ quiet, dist }: { quiet: boolean; dis
     : ['inherit', 'inherit', 'inherit'];
 
   // eslint-disable-next-line no-console
-  console.log('Testing yarn:', options);
-  await execa('yarn', ['help'], { stdio });
-  // eslint-disable-next-line no-console
   console.log("Running 'yarn kbn build-shared' with options:", options);
   try {
     await execa('yarn', ['kbn', 'build-shared', ...options], { cwd: REPO_ROOT, stdio });
