@@ -18,7 +18,8 @@ import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { ExternalLinkDisplayText } from './external_link_display_text';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
-  const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
+  const { isLoading, isError, data: resultData } = useFetchSloHealth({ list: [slo] });
+  const { data } = resultData ?? {};
 
   const {
     share: {
