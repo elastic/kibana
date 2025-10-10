@@ -62,5 +62,6 @@
     "@kbn/serverless-security-settings",
     "@kbn/rison",
     "@kbn/core-chrome-browser",
+    "@kbn/management-settings-ids",
   ]
 }
