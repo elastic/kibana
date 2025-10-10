@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { par } from '../nodes';
+import { par, dpar } from '../nodes';
 
 test('can construct a param', () => {
   const node1 = par('my_param');
@@ -22,6 +22,14 @@ test('can construct a param', () => {
 
 test('can construct a double param', () => {
   const node = par('??my_param');
+
+  expect(node.paramKind).toBe('??');
+
+  expect(node + '').toBe('??my_param');
+});
+
+test('can construct a double param using dpar() method', () => {
+  const node = dpar('my_param');
 
   expect(node.paramKind).toBe('??');
 

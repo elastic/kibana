@@ -305,36 +305,23 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('selects a file and loads visualizer results');
           await ml.dataVisualizerFileBased.selectFile(testData.filePath);
 
-          await ml.testExecution.logTestStep('displays the components of the file details page');
-          await ml.dataVisualizerFileBased.assertFileTitle(testData.expected.results.title);
-          await ml.dataVisualizerFileBased.assertFileContentPanelExists();
-          await ml.dataVisualizerFileBased.assertFileContentHighlightingSwitchExists(
-            testData.expected.results.highlightedText
-          );
-          await ml.dataVisualizerFileBased.assertFileContentHighlighting(
-            testData.expected.results.highlightedText,
-            testData.expected.totalFieldsCount - 1 // -1 for the message field
-          );
+          await ml.testExecution.logTestStep('displays the components of the file upload page');
+          await ml.dataVisualizerFileBased.assertFileTitle(testData.expected.results.title, 0);
+          await ml.dataVisualizerFileBased.assertFilePreviewPanelExists(0);
+
+          await ml.dataVisualizerFileBased.selectAnalysisExplanationButton(0);
           await ml.dataVisualizerFileBased.assertSummaryPanelExists();
-          await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
+          await ml.dataVisualizerFileBased.assertAnalysisExplanationPanelExists();
+          await ml.dataVisualizerFileBased.closeAnalysisExplanationPanel();
+
+          await ml.dataVisualizerFileBased.selectFieldStatsTab(0);
 
           await ml.testExecution.logTestStep(
             `displays elements in the data visualizer table correctly`
           );
-          await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
-          await ml.dataVisualizerIndexBased.assertVisibleMetricFieldsCount(
-            testData.expected.visibleMetricFieldsCount
-          );
-          await ml.dataVisualizerIndexBased.assertTotalMetricFieldsCount(
-            testData.expected.totalMetricFieldsCount
-          );
-          await ml.dataVisualizerIndexBased.assertVisibleFieldsCount(
-            testData.expected.totalFieldsCount
-          );
-          await ml.dataVisualizerIndexBased.assertTotalFieldsCount(
-            testData.expected.totalFieldsCount
-          );
+          await ml.dataVisualizerFileBased.assertFileStatsPanelExists(0);
+          await ml.dataVisualizerIndexBased.assertDataVisualizerTableExist();
 
           await ml.testExecution.logTestStep(
             'displays details for metric fields and non-metric fields correctly'
@@ -361,6 +348,19 @@ export default function ({ getService }: FtrProviderContext) {
             );
           }
 
+          await ml.dataVisualizerIndexBased.assertVisibleMetricFieldsCount(
+            testData.expected.visibleMetricFieldsCount
+          );
+          await ml.dataVisualizerIndexBased.assertTotalMetricFieldsCount(
+            testData.expected.totalMetricFieldsCount
+          );
+          await ml.dataVisualizerIndexBased.assertVisibleFieldsCount(
+            testData.expected.totalFieldsCount
+          );
+          await ml.dataVisualizerIndexBased.assertTotalFieldsCount(
+            testData.expected.totalFieldsCount
+          );
+
           await ml.testExecution.logTestStep('sets and resets field type filter correctly');
           await ml.dataVisualizerTable.setFieldTypeFilter(
             testData.fieldTypeFilters,
@@ -381,29 +381,17 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.totalFieldsCount
           );
 
-          await ml.testExecution.logTestStep('loads the import settings page');
-          await ml.dataVisualizerFileBased.navigateToFileImport();
-
           await ml.testExecution.logTestStep('sets the index name');
           await ml.dataVisualizerFileBased.setIndexName(testData.indexName);
 
           await ml.testExecution.logTestStep('sets the create data view checkbox');
+          await ml.dataVisualizerFileBased.openAdvancedSettings();
           await ml.dataVisualizerFileBased.setCreateIndexPatternCheckboxState(
             testData.createIndexPattern
           );
 
           await ml.testExecution.logTestStep('imports the file');
           await ml.dataVisualizerFileBased.startImportAndWaitForProcessing();
-
-          await ml.dataVisualizerFileBased.assertIngestedDocCount(
-            testData.expected.ingestedDocCount
-          );
-
-          await ml.testExecution.logTestStep('creates filebeat config');
-          await ml.dataVisualizerFileBased.selectCreateFilebeatConfig();
-
-          await ml.testExecution.logTestStep('closes filebeat config');
-          await ml.dataVisualizerFileBased.closeCreateFilebeatConfig();
 
           await ml.dataVisualizerFileBased.assertDocCountInIndex(
             testData.indexName,

@@ -132,7 +132,7 @@ export function rollbackTrackedLayerState(state: MapState, layerId: string): Map
 
   return {
     ...state,
-    layerList: setLayer(state.layerList, rolledbackLayer),
+    layerList: setLayer(state.layerList, rolledbackLayer as LayerDescriptor),
   };
 }
 

@@ -16,9 +16,14 @@ import { getUnifiedDocViewerServices } from '../../../../plugin';
 interface TraceIdLinkProps {
   traceId: string;
   formattedTraceId: React.ReactNode;
+  'data-test-subj': string;
 }
 
-export function TraceIdLink({ traceId, formattedTraceId }: TraceIdLinkProps) {
+export function TraceIdLink({
+  traceId,
+  formattedTraceId,
+  'data-test-subj': dataTestSubj,
+}: TraceIdLinkProps) {
   const {
     share: { url: urlService },
     core,
@@ -56,10 +61,7 @@ export function TraceIdLink({ traceId, formattedTraceId }: TraceIdLinkProps) {
   return (
     <>
       {canViewApm && routeLinkProps ? (
-        <EuiLink
-          {...routeLinkProps}
-          data-test-subj="unifiedDocViewerObservabilityTracesTraceIdLink"
-        >
+        <EuiLink {...routeLinkProps} data-test-subj={dataTestSubj}>
           {formattedTraceId}
         </EuiLink>
       ) : (

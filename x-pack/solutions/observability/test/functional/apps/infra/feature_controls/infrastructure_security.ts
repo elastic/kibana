@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('~noDataPage');
+          await testSubjects.existOrFail('kbnNoDataPage');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -99,7 +99,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await retry.try(async () => {
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.tryForTime(5000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
             await testSubjects.existOrFail('~waffleMap');
           });
@@ -177,7 +180,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
           });
-          await testSubjects.existOrFail('~noDataPage');
+          await testSubjects.existOrFail('kbnNoDataPage');
         });
 
         it(`shows read-only badge`, async () => {
@@ -206,7 +209,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await PageObjects.header.waitUntilLoadingHasFinished();
 
-          await retry.try(async () => {
+          await retry.tryForTime(5000, async () => {
             await PageObjects.infraHome.goToTime(DATE_WITH_DATA);
             await testSubjects.existOrFail('~waffleMap');
           });

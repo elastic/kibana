@@ -193,14 +193,32 @@ export const defaultSplunkLookupResource = {
   updated_at: '2025-05-21T15:23:15.505Z',
 };
 
+export const executeTaskInBatches = async <T>({
+  items,
+  batchSize,
+  executor,
+}: {
+  items: T[];
+  batchSize: number;
+  executor: (batch: T[], batchNumber: number) => Promise<void>;
+}) => {
+  const batches = Math.ceil(items.length / batchSize);
+  for (let i = 0; i < batches; i++) {
+    const batch = items.slice(i * batchSize, (i + 1) * batchSize);
+    await executor(batch, i);
+  }
+};
+
 export const createMacrosForMigrationId = async ({
   es,
   migrationId,
   count,
+  index = SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN,
 }: {
   es: Client;
   migrationId: string;
   count: number;
+  index?: string;
 }) => {
   const macros = [];
   for (let i = 0; i < count; i++) {
@@ -211,14 +229,20 @@ export const createMacrosForMigrationId = async ({
     });
   }
 
-  const createMacroOperations = macros.flatMap((macro) => [
-    { create: { _index: SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN } },
-    macro,
-  ]);
+  await executeTaskInBatches({
+    items: macros,
+    batchSize: 1000,
+    executor: async (batch) => {
+      const createMacroOperations = batch.flatMap((macro) => [
+        { create: { _index: index } },
+        macro,
+      ]);
 
-  await es.bulk({
-    refresh: 'wait_for',
-    operations: [...createMacroOperations],
+      await es.bulk({
+        refresh: 'wait_for',
+        operations: [...createMacroOperations],
+      });
+    },
   });
 };
 
@@ -226,10 +250,12 @@ export const createLookupsForMigrationId = async ({
   es,
   migrationId,
   count,
+  index = SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN,
 }: {
   es: Client;
   migrationId: string;
   count: number;
+  index?: string;
 }) => {
   const lookups = [];
   for (let i = 0; i < count; i++) {
@@ -240,13 +266,18 @@ export const createLookupsForMigrationId = async ({
     });
   }
 
-  const createLookupOperations = lookups.flatMap((lookup) => [
-    { create: { _index: SIEM_MIGRATIONS_RESOURCES_INDEX_PATTERN } },
-    lookup,
-  ]);
-
-  await es.bulk({
-    refresh: 'wait_for',
-    operations: [...createLookupOperations],
+  await executeTaskInBatches({
+    items: lookups,
+    batchSize: 1000,
+    executor: async (batch) => {
+      const createLookupOperations = batch.flatMap((lookup) => [
+        { create: { _index: index } },
+        lookup,
+      ]);
+      await es.bulk({
+        refresh: 'wait_for',
+        operations: [...createLookupOperations],
+      });
+    },
   });
 };

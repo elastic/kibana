@@ -8,16 +8,14 @@
  */
 
 import { fromCounterRateAPItoLensState, fromCounterRateLensStateToAPI } from './counter_rate';
-import type { CounterRateIndexPatternColumn, MaxIndexPatternColumn } from '@kbn/lens-plugin/public';
-import type { LensApiCounterRateOperation } from '../../schema/metric_ops';
+import type { CounterRateIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { LensApiCounterRateOperation, LensApiMetricOperation } from '../../schema/metric_ops';
 
 describe('Counter Rate Transforms', () => {
   const testRef = { id: 'maxId', field: 'bytes' };
-  const columnRef: MaxIndexPatternColumn = {
-    operationType: 'max',
-    sourceField: 'bytes',
-    dataType: 'number',
-    isBucketed: false,
+  const columnRef: LensApiMetricOperation = {
+    operation: 'max',
+    field: 'bytes',
     label: 'Max of bytes',
   };
   describe('fromCounterRateAPItoLensState', () => {

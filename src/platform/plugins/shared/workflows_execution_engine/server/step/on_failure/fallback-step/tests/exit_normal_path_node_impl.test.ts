@@ -7,27 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExitNormalPathNode } from '@kbn/workflows';
+import type { ExitNormalPathNode } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitNormalPathNodeImpl } from '../exit_normal_path_node_impl';
 
 describe('ExitNormalPathNodeImpl', () => {
   let underTest: ExitNormalPathNodeImpl;
-  let step: ExitNormalPathNode;
+  let node: ExitNormalPathNode;
   let workflowRuntime: WorkflowExecutionRuntimeManager;
 
   beforeEach(() => {
-    step = {
+    node = {
       id: 'exitNormalPath1',
       type: 'exit-normal-path',
+      stepId: 'exitNormalPath1',
+      stepType: 'on-failure',
       exitOnFailureZoneNodeId: 'exitOnFailureZone1',
       enterNodeId: 'enterNormalPath1',
     };
     workflowRuntime = {} as unknown as WorkflowExecutionRuntimeManager;
     workflowRuntime.exitScope = jest.fn();
-    workflowRuntime.goToStep = jest.fn();
+    workflowRuntime.navigateToNode = jest.fn();
 
-    underTest = new ExitNormalPathNodeImpl(step, workflowRuntime);
+    underTest = new ExitNormalPathNodeImpl(node, workflowRuntime);
   });
 
   describe('run', () => {
@@ -38,7 +40,7 @@ describe('ExitNormalPathNodeImpl', () => {
 
     it('should go to exit on failure zone node', async () => {
       await underTest.run();
-      expect(workflowRuntime.goToStep).toHaveBeenCalledWith(step.exitOnFailureZoneNodeId);
+      expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.exitOnFailureZoneNodeId);
     });
 
     it('should execute steps in correct order', async () => {
@@ -46,7 +48,7 @@ describe('ExitNormalPathNodeImpl', () => {
       workflowRuntime.exitScope = jest.fn().mockImplementation(() => {
         calls.push('exitScope');
       });
-      workflowRuntime.goToStep = jest.fn().mockImplementation(() => {
+      workflowRuntime.navigateToNode = jest.fn().mockImplementation(() => {
         calls.push('goToStep');
       });
 

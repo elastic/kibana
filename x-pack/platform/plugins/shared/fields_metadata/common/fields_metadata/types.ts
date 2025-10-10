@@ -129,6 +129,7 @@ const optionalMetadataPlainRT = rt.partial({
   source: fieldSourceRT,
   type: rt.string,
   documentation_url: rt.string,
+  otel_equivalent: rt.string,
 });
 
 export const partialFieldMetadataPlainRT = rt.intersection([
@@ -162,4 +163,5 @@ export type FieldName = MetadataFieldName | EcsFieldName | OtelFieldName | Integ
 export type FieldMetadataPlain = rt.TypeOf<typeof fieldMetadataPlainRT>;
 export type PartialFieldMetadataPlain = rt.TypeOf<typeof partialFieldMetadataPlainRT>;
 
+export type FieldSource = rt.TypeOf<typeof fieldSourceRT>;
 export type FieldAttribute = rt.TypeOf<typeof fieldAttributeRT>;

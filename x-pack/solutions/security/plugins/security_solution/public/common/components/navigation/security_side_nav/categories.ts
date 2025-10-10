@@ -25,6 +25,10 @@ export const CATEGORIES: SeparatorLinkCategory[] = [
   },
   {
     type: LinkCategoryType.separator,
+    linkIds: [SecurityPageName.siemMigrationsLanding],
+  },
+  {
+    type: LinkCategoryType.separator,
     linkIds: [
       SecurityPageName.entityAnalyticsLanding,
       SecurityPageName.exploreLanding,

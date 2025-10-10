@@ -12,6 +12,7 @@ export type {
   FieldAttribute,
   FieldMetadataPlain,
   FieldName,
+  FieldSource,
   IntegrationFieldName,
   OtelFieldName,
   PartialFieldMetadataPlain,

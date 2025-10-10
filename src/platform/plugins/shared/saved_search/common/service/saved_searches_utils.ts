@@ -10,11 +10,10 @@
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
-import type { SavedSearch, SavedSearchAttributes } from '..';
-import { extractTabs, fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '..';
-import type { SerializableSavedSearch } from '../types';
-
-export { getSavedSearchFullPathUrl, getSavedSearchUrl } from '..';
+import type { SavedSearch } from '..';
+import { fromSavedSearchAttributes as fromSavedSearchAttributesCommon } from '../saved_searches_utils';
+import type { SavedSearchAttributes, SerializableSavedSearch } from '../types';
+import { extractTabs } from './extract_tabs';
 
 export const fromSavedSearchAttributes = (
   id: string | undefined,
@@ -49,6 +48,7 @@ export const toSavedSearchAttributes = (
     headerRowHeight: savedSearch.headerRowHeight,
     isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
     usesAdHocDataView: savedSearch.usesAdHocDataView,
+    controlGroupJson: savedSearch.controlGroupJson,
     timeRestore: savedSearch.timeRestore ?? false,
     timeRange: savedSearch.timeRange ? pick(savedSearch.timeRange, ['from', 'to']) : undefined,
     refreshInterval: savedSearch.refreshInterval,
@@ -57,4 +57,4 @@ export const toSavedSearchAttributes = (
     density: savedSearch.density,
     breakdownField: savedSearch.breakdownField,
     visContext: savedSearch.visContext,
-  }) as SavedSearchAttributes;
+  });

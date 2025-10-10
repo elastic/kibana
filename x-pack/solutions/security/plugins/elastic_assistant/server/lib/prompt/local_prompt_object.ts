@@ -29,6 +29,7 @@ import {
   RULE_ANALYSIS,
   DATA_QUALITY_ANALYSIS,
   ALERT_EVALUATION,
+  ENTITY_ANALYSIS,
   starterPromptTitle1,
   starterPromptDescription1,
   starterPromptIcon1,
@@ -45,6 +46,8 @@ import {
   starterPromptTitle4,
   starterPromptIcon4,
   starterPromptPrompt4,
+  costSavingsInsightPart1,
+  costSavingsInsightPart2,
 } from './prompts';
 
 export const promptGroupId = {
@@ -60,6 +63,8 @@ export const promptGroupId = {
 export const promptDictionary = {
   alertSummary: `alertSummary`,
   alertSummarySystemPrompt: `alertSummarySystemPrompt`,
+  costSavingsInsightPart1: `costSavingsInsightPart1`,
+  costSavingsInsightPart2: `costSavingsInsightPart2`,
   systemPrompt: `systemPrompt`,
   userPrompt: `userPrompt`,
   chatTitle: `chatTitle`,
@@ -97,6 +102,7 @@ export const promptDictionary = {
     'defendInsights-policyResponseFailureRemediationLink',
   // context prompts
   alertEvaluation: `alertEvaluation`,
+  assetAnalysis: `assetAnalysis`,
   dataQualityAnalysis: 'dataQualityAnalysis',
   ruleAnalysis: 'ruleAnalysis',
   // starter prompts
@@ -392,10 +398,31 @@ export const localPrompts: Prompt[] = [
     },
   },
   {
+    promptId: promptDictionary.costSavingsInsightPart1,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: costSavingsInsightPart1,
+    },
+  },
+  {
+    promptId: promptDictionary.costSavingsInsightPart2,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: costSavingsInsightPart2,
+    },
+  },
+  {
     promptId: promptDictionary.alertEvaluation,
     promptGroupId: promptGroupId.aiAssistant,
     prompt: {
       default: ALERT_EVALUATION,
+    },
+  },
+  {
+    promptId: promptDictionary.assetAnalysis,
+    promptGroupId: promptGroupId.aiAssistant,
+    prompt: {
+      default: ENTITY_ANALYSIS,
     },
   },
   {

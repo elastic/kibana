@@ -6,7 +6,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { DashboardMigrationTaskStats } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type {
   CreateDashboardMigrationDashboardsRequestBody,
   StartDashboardsMigrationResponse,
@@ -29,16 +28,21 @@ import { requiredDashboardMigrationCapabilities } from './capabilities';
 import { SiemMigrationsServiceBase } from '../../common/service';
 import type { GetMigrationsStatsAllParams, GetMigrationStatsParams } from '../../common/types';
 import { START_STOP_POLLING_SLEEP_SECONDS } from '../../common/constants';
+import type { DashboardMigrationStats } from '../types';
+import { SiemDashboardMigrationsTelemetry } from './telemetry';
 
 export const CREATE_MIGRATION_BODY_BATCH_SIZE = 50;
 
-export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<DashboardMigrationTaskStats> {
+export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<DashboardMigrationStats> {
+  public telemetry: SiemDashboardMigrationsTelemetry;
+
   constructor(
     core: CoreStart,
     plugins: StartPluginsDependencies,
-    _telemetryService: TelemetryServiceStart
+    telemetryService: TelemetryServiceStart
   ) {
     super(core, plugins);
+    this.telemetry = new SiemDashboardMigrationsTelemetry(telemetryService);
   }
 
   /** Accessor for the dashboard migrations API client */
@@ -62,7 +66,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
       automaticDashboardsMigration &&
       !siemMigrationsDisabled &&
       licenseService.isEnterprise() &&
-      !this.hasMissingCapabilities('all')
+      !this.hasMissingCapabilities('minimum')
     );
   }
 
@@ -77,10 +81,12 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
     }
 
     // Batching creation to avoid hitting the max payload size limit of the API
+    const batches = [];
     for (let i = 0; i < dashboardsCount; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
       const dashboardsBatch = dashboards.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-      await api.addDashboardsToDashboardMigration({ migrationId, body: dashboardsBatch });
+      batches.push(api.addDashboardsToDashboardMigration({ migrationId, body: dashboardsBatch }));
     }
+    await Promise.all(batches);
   }
 
   /** Creates a dashboard migration with a name and adds the dashboards to it, returning the migration ID */
@@ -113,10 +119,12 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
       throw new Error(i18n.EMPTY_DASHBOARDS_ERROR);
     }
     // Batching creation to avoid hitting the max payload size limit of the API
+    const batches = [];
     for (let i = 0; i < count; i += CREATE_MIGRATION_BODY_BATCH_SIZE) {
       const bodyBatch = body.slice(i, i + CREATE_MIGRATION_BODY_BATCH_SIZE);
-      await api.upsertDashboardMigrationResources({ migrationId, body: bodyBatch });
+      batches.push(api.upsertDashboardMigrationResources({ migrationId, body: bodyBatch }));
     }
+    await Promise.all(batches);
   }
 
   /** Starts a dashbaord migration task and waits for the task to start running */
@@ -153,11 +161,11 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
 
     const result = await api.startDashboardMigration(params);
 
-    // Should take a few seconds to stop the task, so we poll until it is not running anymore
+    // Should take a few seconds to start the task, so we poll until it is running
     await this.migrationTaskPollingUntil(
       migrationId,
-      ({ status }) => status !== SiemMigrationTaskStatus.RUNNING, // may be STOPPED, FINISHED or INTERRUPTED
-      { sleepSecs: START_STOP_POLLING_SLEEP_SECONDS, timeoutSecs: 90 } // wait up to 90 seconds for the task to stop
+      ({ status }) => status === SiemMigrationTaskStatus.RUNNING,
+      { sleepSecs: START_STOP_POLLING_SLEEP_SECONDS, timeoutSecs: 90 } // wait up to 90 seconds for the task to start
     );
 
     this.startPolling();
@@ -191,7 +199,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
 
   protected async startMigrationFromStats(
     connectorId: string,
-    taskStats: DashboardMigrationTaskStats
+    taskStats: DashboardMigrationStats
   ): Promise<void> {
     await api.startDashboardMigration({
       migrationId: taskStats.id,
@@ -201,18 +209,28 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
 
   protected async fetchMigrationStats({
     migrationId,
-  }: GetMigrationStatsParams): Promise<DashboardMigrationTaskStats> {
+  }: GetMigrationStatsParams): Promise<DashboardMigrationStats> {
     const stats = await api.getDashboardMigrationStats({ migrationId });
     return stats;
   }
   protected async fetchMigrationsStatsAll(
     params: GetMigrationsStatsAllParams = {}
-  ): Promise<DashboardMigrationTaskStats[]> {
+  ): Promise<DashboardMigrationStats[]> {
     const allStats = await api.getDashboardMigrationAllStats(params);
     return allStats;
   }
 
-  protected sendFinishedMigrationNotification(taskStats: DashboardMigrationTaskStats) {
+  protected sendFinishedMigrationNotification(taskStats: DashboardMigrationStats) {
     this.core.notifications.toasts.addSuccess(getSuccessToast(taskStats, this.core));
+  }
+
+  /** Deletes a dashboard migration by its ID, refreshing the stats to remove it from the list */
+  public async deleteMigration(migrationId: string): Promise<string> {
+    await api.deleteDashboardMigration({ migrationId });
+
+    // Refresh stats to remove the deleted migration from the list. All UI observables will be updated automatically
+    await this.getMigrationsStats();
+
+    return migrationId;
   }
 }

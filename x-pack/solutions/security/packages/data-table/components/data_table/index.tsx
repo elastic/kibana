@@ -447,28 +447,26 @@ export const DataTableComponent = React.memo<DataTableProps>(
     ]);
 
     return (
-      <>
-        <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
-          <EuiDataGrid
-            {...otherProps}
-            id={'body-data-grid'}
-            data-test-subj="body-data-grid"
-            aria-label={DATA_TABLE_ARIA_LABEL}
-            columns={columnsWithCellActions}
-            columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
-            gridStyle={gridStyle}
-            leadingControlColumns={leadingControlColumns}
-            toolbarVisibility={toolbarVisibility}
-            rowCount={totalItems}
-            renderCellValue={renderTableCellValue}
-            sorting={{ columns: sortingColumns, onSort }}
-            onColumnResize={onColumnResize}
-            pagination={pagination}
-            ref={dataGridRef}
-            rowHeightsOptions={undefined}
-          />
-        </EuiDataGridContainer>
-      </>
+      <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
+        <EuiDataGrid
+          {...otherProps}
+          id={'body-data-grid'}
+          data-test-subj="body-data-grid"
+          aria-label={DATA_TABLE_ARIA_LABEL}
+          columns={columnsWithCellActions}
+          columnVisibility={{ visibleColumns, setVisibleColumns: onSetVisibleColumns }}
+          gridStyle={gridStyle}
+          leadingControlColumns={leadingControlColumns}
+          toolbarVisibility={toolbarVisibility}
+          rowCount={totalItems}
+          renderCellValue={renderTableCellValue}
+          sorting={{ columns: sortingColumns, onSort }}
+          onColumnResize={onColumnResize}
+          pagination={pagination}
+          ref={dataGridRef}
+          rowHeightsOptions={undefined}
+        />
+      </EuiDataGridContainer>
     );
   }
 );

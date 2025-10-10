@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
+import { TabsEventDataKeys } from '@kbn/unified-tabs';
 import type { BehaviorSubject } from 'rxjs';
 import type { DiscoverStartPlugins } from '../types';
 import type { DiscoverEBTContextProps } from './types';
@@ -16,8 +17,10 @@ import type { DiscoverEBTContextProps } from './types';
  * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
  */
 export const FIELD_USAGE_EVENT_TYPE = 'discover_field_usage';
+export const QUERY_FIELDS_USAGE_EVENT_TYPE = 'discover_query_fields_usage';
 export const FIELD_USAGE_EVENT_NAME = 'eventName';
 export const FIELD_USAGE_FIELD_NAME = 'fieldName';
+export const QUERY_FIELDS_USAGE_FIELD_NAMES = 'fieldNames';
 export const FIELD_USAGE_FILTER_OPERATION = 'filterOperation';
 
 /**
@@ -27,6 +30,8 @@ export const FIELD_USAGE_FILTER_OPERATION = 'filterOperation';
 export const CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE = 'discover_profile_resolved';
 export const CONTEXTUAL_PROFILE_LEVEL = 'contextLevel';
 export const CONTEXTUAL_PROFILE_ID = 'profileId';
+
+export const TABS_EVENT_TYPE = 'discover_tabs';
 
 /**
  * This function is statically imported since analytics registrations must happen at setup,
@@ -68,7 +73,8 @@ export const registerDiscoverEBTManagerAnalytics = (
       [FIELD_USAGE_FIELD_NAME]: {
         type: 'keyword',
         _meta: {
-          description: "Field name if it's a part of ECS schema",
+          description:
+            "Field name if it is part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
           optional: true,
         },
       },
@@ -77,6 +83,29 @@ export const registerDiscoverEBTManagerAnalytics = (
         _meta: {
           description: "Operation type when a filter is added i.e. '+', '-', '_exists_'",
           optional: true,
+        },
+      },
+    },
+  });
+
+  core.analytics.registerEventType({
+    eventType: QUERY_FIELDS_USAGE_EVENT_TYPE,
+    schema: {
+      [FIELD_USAGE_EVENT_NAME]: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The name of the event that is tracked in the metrics i.e. kqlQuery, esqlQuery',
+        },
+      },
+      [QUERY_FIELDS_USAGE_FIELD_NAMES]: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description:
+              "List of field names if they are part of ECS schema. For non ECS compliant fields, there's a <non-ecs> placeholder",
+          },
         },
       },
     },
@@ -96,6 +125,68 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'keyword',
         _meta: {
           description: 'The resolved name of the active profile',
+        },
+      },
+    },
+  });
+
+  core.analytics.registerEventType({
+    eventType: TABS_EVENT_TYPE,
+    schema: {
+      [TabsEventDataKeys.TABS_EVENT_NAME]: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The name of the tab event that is tracked in the metrics i.e. tabCreated, tabClosed',
+        },
+      },
+      [TabsEventDataKeys.TOTAL_TABS_OPEN]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of total tabs open at the time of an event',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.REMAINING_TABS_COUNT]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of remaining tabs after an event',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.CLOSED_TABS_COUNT]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of tabs closed in a single action',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.TAB_ID]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The unique identifier of the tab',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.FROM_INDEX]: {
+        type: 'integer',
+        _meta: {
+          description: 'The original index of the tab being moved',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.TO_INDEX]: {
+        type: 'integer',
+        _meta: {
+          description: 'The new index of the tab being moved',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.SHORTCUT_USED]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The keyboard key used for tab navigation',
+          optional: true,
         },
       },
     },

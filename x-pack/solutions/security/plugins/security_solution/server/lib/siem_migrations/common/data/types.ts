@@ -10,8 +10,6 @@ import type { SiemMigrationStatus } from '../../../../../common/siem_migrations/
 import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
-export type MigrationType = 'rule' | 'dashboard';
-
 export type SiemMigrationTaskStats = RuleMigrationTaskStats | DashboardMigrationTaskStats;
 export type SiemMigrationDataStats = Omit<SiemMigrationTaskStats, 'name' | 'status'>;
 export type SiemMigrationAllDataStats = SiemMigrationDataStats[];

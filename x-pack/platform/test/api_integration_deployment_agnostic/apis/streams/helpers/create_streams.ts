@@ -5,49 +5,29 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
+import { emptyAssets, type Streams } from '@kbn/streams-schema';
 import expect from '@kbn/expect';
 import type { StreamsSupertestRepositoryClient } from './repository_client';
 
-type StreamPutItem = Omit<Streams.WiredStream.UpsertRequest, 'dashboards' | 'queries'> & {
+type StreamPutItem = Streams.WiredStream.UpsertRequest & {
   name: string;
 };
 
 const streams: StreamPutItem[] = [
   {
     name: 'logs',
-    rules: [],
     stream: {
       description: '',
       ingest: {
         lifecycle: { dsl: {} },
-        processing: {
-          steps: [],
-        },
+        processing: { steps: [] },
+        settings: {},
         wired: {
           fields: {
             '@timestamp': {
               type: 'date',
             },
-            'scope.dropped_attributes_count': {
-              type: 'long',
-            },
-            dropped_attributes_count: {
-              type: 'long',
-            },
-            'resource.dropped_attributes_count': {
-              type: 'long',
-            },
-            'resource.schema_url': {
-              type: 'keyword',
-            },
             'scope.name': {
-              type: 'keyword',
-            },
-            'scope.schema_url': {
-              type: 'keyword',
-            },
-            'scope.version': {
               type: 'keyword',
             },
             trace_id: {
@@ -107,17 +87,16 @@ const streams: StreamPutItem[] = [
         },
       },
     },
+    ...emptyAssets,
   },
   {
     name: 'logs.test',
-    rules: [],
     stream: {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: {
-          steps: [],
-        },
+        processing: { steps: [] },
+        settings: {},
         wired: {
           routing: [],
           fields: {
@@ -128,14 +107,15 @@ const streams: StreamPutItem[] = [
         },
       },
     },
+    ...emptyAssets,
   },
   {
     name: 'logs.test2',
-    rules: [],
     stream: {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
+        settings: {},
         processing: {
           steps: [
             {
@@ -156,17 +136,16 @@ const streams: StreamPutItem[] = [
         },
       },
     },
+    ...emptyAssets,
   },
   {
     name: 'logs.deeply.nested.streamname',
-    rules: [],
     stream: {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: {
-          steps: [],
-        },
+        settings: {},
+        processing: { steps: [] },
         wired: {
           fields: {
             'attributes.field2': {
@@ -177,6 +156,7 @@ const streams: StreamPutItem[] = [
         },
       },
     },
+    ...emptyAssets,
   },
 ];
 
@@ -185,11 +165,7 @@ export async function createStreams(apiClient: StreamsSupertestRepositoryClient)
     await apiClient
       .fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
-          body: {
-            ...stream,
-            dashboards: [],
-            queries: [],
-          },
+          body: stream,
           path: { name },
         },
       })

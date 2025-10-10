@@ -18,11 +18,12 @@ export const DiamondHoverShape = memo<HoverShapeProps>(({ stroke }) => (
 ));
 DiamondHoverShape.displayName = 'DiamondHoverShape';
 
-export const DiamondShape = memo<ShapeProps>(({ stroke, fill }) => (
+export const DiamondShape = memo<ShapeProps>(({ stroke, fill, ...rest }) => (
   <path
     d="M34.1967 3.01041C37.1256 0.0814755 41.8744 0.0814755 44.8033 3.01041L75.4896 33.6967C78.4185 36.6256 78.4185 41.3744 75.4896 44.3033L44.8033 74.9896C41.8744 77.9185 37.1256 77.9185 34.1967 74.9896L3.51041 44.3033C0.581475 41.3744 0.581475 36.6256 3.51041 33.6967L34.1967 3.01041Z"
     fill={fill}
     stroke={stroke}
+    {...rest}
   />
 ));
 DiamondShape.displayName = 'DiamondShape';

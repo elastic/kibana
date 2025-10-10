@@ -25,8 +25,7 @@ import {
   mockStop as mockDashboardsStop,
 } from './dashboards/__mocks__/mocks';
 import type { ConfigType } from '../../config';
-import type { RuleMigrationsClientDependencies } from './rules/types';
-import type { DashboardMigrationsClientDependencies } from './dashboards/types';
+import type { SiemMigrationsClientDependencies } from './common/types';
 
 jest.mock('./rules/siem_rule_migrations_service');
 jest.mock('./dashboards/siem_dashboard_migration_service');
@@ -37,7 +36,7 @@ jest.mock('rxjs', () => ({
   ReplaySubject: jest.fn().mockImplementation(() => mockReplaySubject$),
 }));
 
-const ruleMigrationDependencies = {} as RuleMigrationsClientDependencies;
+const ruleMigrationDependencies = {} as SiemMigrationsClientDependencies;
 
 describe('SiemMigrationsService', () => {
   let siemMigrationsService: SiemMigrationsService;
@@ -79,7 +78,7 @@ describe('SiemMigrationsService', () => {
       });
 
       it('should create dashboards client', async () => {
-        const dashboardClientDependencies = {} as unknown as DashboardMigrationsClientDependencies;
+        const dashboardClientDependencies = {} as unknown as SiemMigrationsClientDependencies;
         const createDashboardsClientParams = {
           spaceId: 'default',
           request: httpServerMock.createKibanaRequest(),

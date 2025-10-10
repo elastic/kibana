@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger, LoggerFactory } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  KibanaRequest,
+  Logger,
+  LoggerFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   AgentService,
@@ -20,6 +27,7 @@ import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/servi
 import type { Space, SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ConfigType } from '../../common/config';
 import type { TelemetryEventsSender } from './telemetry/sender';
+import { getIntegrationNamespaces } from '../utils/get_integration_namespaces';
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<
@@ -86,8 +94,33 @@ export class OsqueryAppContextService {
   public getFleetActionsClient(): FleetActionsClientInterface | undefined {
     return this.fleetActionsClient;
   }
+
   public getActiveSpace(httpRequest: KibanaRequest): Promise<Space> | undefined {
     return this.spacesService?.getActiveSpace(httpRequest);
+  }
+
+  /**
+   * Retrieves namespaces used by specified integrations.
+   */
+  public async getIntegrationNamespaces(
+    integrationNames: string[],
+    soClient: SavedObjectsClientContract,
+    logger: Logger
+  ): Promise<Record<string, string[]>> {
+    const packagePolicyService = this.getPackagePolicyService();
+    const agentPolicyService = this.getAgentPolicyService();
+
+    if (!packagePolicyService || !agentPolicyService) {
+      throw new Error('Fleet services are not available');
+    }
+
+    return getIntegrationNamespaces({
+      logger,
+      soClient,
+      packagePolicyService,
+      agentPolicyService,
+      integrationNames,
+    });
   }
 }
 

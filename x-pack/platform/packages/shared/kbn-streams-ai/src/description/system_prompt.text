@@ -1,0 +1,43 @@
+Write a description of a system. Start out with describing the system briefly. Then identify properties of a system that are useful in understanding what kinds of log messages or events it may produce. Focus on system identity and context such as runtime, environment, operating system, cloud platform, frameworks, and similar factors. Provide examples for each category. Write this description in a way that it can be displayed as-is in the UI. Avoid "I", or statements around how you want to approach this task or follow-up suggestions.
+
+Consider the following categories:
+
+1. **System Runtime and Execution Context**
+
+   * Programming language and runtime versions (example: Java 11, Java 17)
+   * Frameworks and libraries in use with their versions (example: Spring Boot 2.x, Spring Boot 3.x, Elasticsearch 7.x, Elasticsearch 8.x)
+   * Application server or container (example: Tomcat, Jetty, Netty)
+   * Interpreter or runtime flags (example: JVM `-XX:+PrintGCDetails`, Node.js with experimental features enabled)
+
+2. **Operating System and Host Environment**
+
+   * OS family and version (example: Linux systemd logs, Windows Event Viewer logs)
+   * Distribution-specific details (example: Ubuntu logs, RHEL logs)
+   * Kernel version or patches (example: network stack errors, memory exhaustion messages)
+   * Filesystem and storage type (example: ext4, XFS, AWS EBS)
+
+3. **Cloud Platform and Infrastructure Layer**
+
+   * Cloud provider (example: AWS, GCP, Azure)
+   * Platform services (example: EKS, GKE, AKS)
+   * Resource identifiers (example: instance types, storage classes, networking modes)
+   * Service mesh or orchestration (example: Istio proxy logs, Linkerd logs, Kubernetes events)
+
+4. **Deployment and Build Context**
+
+   * Application build version or commit hash
+   * Deployment strategy (example: canary deployments, rolling updates)
+   * Configuration and environment variables (example: feature flags enabled or disabled)
+
+5. **Observability Stack Context**
+
+   * Log format and logging library (example: Log4j, SLF4J, Winston, Bunyan)
+   * Structured versus unstructured logs (example: JSON logs with fields like `level`, `service`, `component`)
+   * Instrumentation libraries (example: OpenTelemetry logs with error codes and attributes)
+
+6. **Domain- or Application-Specific Context**
+
+   * Application type (example: web application, database, distributed job scheduler, stream processor)
+   * Critical subsystems (example: authentication, payment processing, message queues)
+   * Regulatory or industry constraints (example: PCI-compliant logs with masked fields)
+

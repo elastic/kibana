@@ -62,6 +62,7 @@ import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/publ
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -90,6 +91,7 @@ import type { TopValuesPopoverService } from './app/components/top_values_popove
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
+import type { SecuritySolutionUiConfigType } from './common/types';
 import type { OnboardingService } from './onboarding/service';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
@@ -155,6 +157,7 @@ export interface StartPlugins {
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
   elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
+  inference: InferencePublicStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -171,6 +174,7 @@ export interface ContractStartServices {
 export type StartServices = CoreStart &
   StartPlugins &
   ContractStartServices & {
+    config: SecuritySolutionUiConfigType;
     configSettings: ConfigSettings;
     storage: Storage;
     sessionStorage: Storage;

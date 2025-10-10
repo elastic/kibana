@@ -6,19 +6,24 @@
  */
 
 import { evaluate as base } from '@kbn/evals';
-import { KnowledgeBaseClient } from './knowledge_base_client';
+import { KnowledgeBaseClient } from './clients/knowledge_base_client';
+import { ConversationsClient } from './clients/conversations_client';
 import { ObservabilityAIAssistantEvaluationChatClient } from './chat_client';
+import type { EvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
+import { createEvaluateObservabilityAIAssistantDataset } from './evaluate_dataset';
 
 export const evaluate = base.extend<
   {},
   {
     knowledgeBaseClient: KnowledgeBaseClient;
+    conversationsClient: ConversationsClient;
     chatClient: ObservabilityAIAssistantEvaluationChatClient;
+    evaluateDataset: EvaluateObservabilityAIAssistantDataset;
   }
 >({
   knowledgeBaseClient: [
-    async ({ fetch, log }, use) => {
-      const kbClient = new KnowledgeBaseClient(fetch, log);
+    async ({ fetch, log, esClient }, use) => {
+      const kbClient = new KnowledgeBaseClient(fetch, log, esClient);
 
       await use(kbClient);
     },
@@ -26,14 +31,38 @@ export const evaluate = base.extend<
       scope: 'worker',
     },
   ],
+  conversationsClient: [
+    async ({ log, esClient }, use) => {
+      const convClient = new ConversationsClient(log, esClient);
+      await use(convClient);
+    },
+    {
+      scope: 'worker',
+    },
+  ],
   chatClient: [
-    async ({ fetch, log, connector }, use, testInfo) => {
-      const chatClient = new ObservabilityAIAssistantEvaluationChatClient(fetch, log, connector.id);
+    async ({ fetch, log, connector, knowledgeBaseClient }, use) => {
+      // Ensure the KB fixture is initialized before creating the chat client.
+      // This guarantees KB is installed even if no spec references knowledgeBaseClient directly.
+      await knowledgeBaseClient.ensureInstalled();
 
+      const chatClient = new ObservabilityAIAssistantEvaluationChatClient(fetch, log, connector.id);
       await use(chatClient);
     },
     {
       scope: 'worker',
     },
+  ],
+  evaluateDataset: [
+    ({ chatClient, evaluators, phoenixClient }, use) => {
+      use(
+        createEvaluateObservabilityAIAssistantDataset({
+          chatClient,
+          evaluators,
+          phoenixClient,
+        })
+      );
+    },
+    { scope: 'worker' },
   ],
 });

@@ -82,9 +82,11 @@ const getPreviewQuery = (query: TabPreviewData['query'] | undefined): TabPreview
     };
   }
 
+  const trimmedQuery = typeof query.query === 'string' ? query.query.trim() : query.query;
+
   return {
     ...query,
-    query: query.query.trim() || DEFAULT_PREVIEW_QUERY.query,
+    query: trimmedQuery || DEFAULT_PREVIEW_QUERY.query,
   };
 };
 
@@ -111,7 +113,7 @@ const getPreviewDataObservable = (
         appState.state$.pipe(startWith(appState.get())),
       ]).pipe(
         map(([{ fetchStatus }, { query }]) => ({ fetchStatus, query })),
-        distinctUntilChanged(isEqual),
+        distinctUntilChanged((prev, curr) => isEqual(prev, curr)),
         map(({ fetchStatus, query }) => ({
           status: getPreviewStatus(fetchStatus),
           query: getPreviewQuery(query),

@@ -20,7 +20,7 @@ export type StreamsAppLocatorParams = SerializableRecord &
       }
     | {
         name: string;
-        managementTab: 'enrich';
+        managementTab: 'processing';
         pageState: EnrichmentUrlState;
       }
     | {

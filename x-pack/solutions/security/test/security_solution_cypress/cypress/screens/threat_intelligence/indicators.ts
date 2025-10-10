@@ -54,36 +54,29 @@ export const FLYOUT_CLOSE_BUTTON = getDataTestSubjectSelector('euiFlyoutCloseBut
 export const FLYOUT_TITLE = getDataTestSubjectSelector('tiIndicatorFlyoutTitle');
 export const FLYOUT_TABS = getDataTestSubjectSelector('tiIndicatorFlyoutTabs');
 export const FLYOUT_TABLE = getDataTestSubjectSelector('tiFlyoutTable');
-export const FLYOUT_JSON = getDataTestSubjectSelector('tiFlyoutJsonCodeBlock');
+export const FLYOUT_JSON = getDataTestSubjectSelector('indicators-flyoutjsonView');
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewTableRowFilterInButton'
+  'actionItem-security-default-cellActions-filterIn'
 );
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewTableRowFilterOutButton'
+  'actionItem-security-default-cellActions-filterOut'
 );
 export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM = getDataTestSubjectSelector(
   'tiFlyoutOverviewHighLevelBlocksItem'
 );
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksFilterInButton'
+  'actionItem-security-default-cellActions-filterIn'
 );
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksFilterOutButton'
+  'actionItem-security-default-cellActions-filterOut'
 );
 export const FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE = getDataTestSubjectSelector(
   'tiFlyoutOverviewTableRow'
 );
-export const FLYOUT_TABLE_MORE_ACTIONS_BUTTON = `${getDataTestSubjectSelector(
-  'tiFlyoutOverviewTableRowPopoverButton'
-)} button`;
-export const FLYOUT_BLOCK_MORE_ACTIONS_BUTTON = `${getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksPopoverButton'
-)} button`;
-export const FLYOUT_TABLE_TAB_ROW_FILTER_IN_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutTableFilterInButton'
-);
+export const FLYOUT_BLOCK_MORE_ACTIONS_BUTTON =
+  getDataTestSubjectSelector('showExtraActionsButton');
 export const FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
-  'tiFlyoutTableFilterOutButton'
+  'actionItem-security-default-cellActions-filterOut'
 );
 
 export const FLYOUT_TAKE_ACTION_BUTTON = getDataTestSubjectSelector(

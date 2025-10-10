@@ -9,6 +9,9 @@ import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { useGroupTakeActionsItems } from './use_group_take_action_items';
+jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => ({
+  useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true }),
+}));
 
 describe('useGroupTakeActionsItems', () => {
   const wrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
@@ -29,7 +32,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => expect(result.current(getActionItemsParams).length).toEqual(3));
+    await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(3));
   });
 
   it('returns all take actions items if currentStatus is []', async () => {
@@ -43,7 +46,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => expect(result.current(getActionItemsParams).length).toEqual(3));
+    await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(3));
   });
 
   it('returns all take actions items if currentStatus.length > 1', async () => {
@@ -57,7 +60,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => expect(result.current(getActionItemsParams).length).toEqual(3));
+    await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(3));
   });
 
   it('returns acknowledged & closed take actions items if currentStatus === ["open"]', async () => {
@@ -73,9 +76,9 @@ describe('useGroupTakeActionsItems', () => {
     );
     await waitFor(() => {
       const currentParams = result.current(getActionItemsParams);
-      expect(currentParams.length).toEqual(2);
-      expect(currentParams[0].key).toEqual('acknowledge');
-      expect(currentParams[1].key).toEqual('close');
+      expect(currentParams.items.length).toEqual(2);
+      expect(currentParams.items[0].key).toEqual('acknowledge');
+      expect(currentParams.items[1].key).toEqual('close-alert-with-reason');
     });
   });
 
@@ -92,9 +95,9 @@ describe('useGroupTakeActionsItems', () => {
     );
     await waitFor(() => {
       const currentParams = result.current(getActionItemsParams);
-      expect(currentParams.length).toEqual(2);
-      expect(currentParams[0].key).toEqual('open');
-      expect(currentParams[1].key).toEqual('acknowledge');
+      expect(currentParams.items.length).toEqual(2);
+      expect(currentParams.items[0].key).toEqual('open');
+      expect(currentParams.items[1].key).toEqual('acknowledge');
     });
   });
 
@@ -111,9 +114,9 @@ describe('useGroupTakeActionsItems', () => {
     );
     await waitFor(() => {
       const currentParams = result.current(getActionItemsParams);
-      expect(currentParams.length).toEqual(2);
-      expect(currentParams[0].key).toEqual('open');
-      expect(currentParams[1].key).toEqual('close');
+      expect(currentParams.items.length).toEqual(2);
+      expect(currentParams.items[0].key).toEqual('open');
+      expect(currentParams.items[1].key).toEqual('close-alert-with-reason');
     });
   });
 
@@ -127,7 +130,7 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => expect(result.current(getActionItemsParams).length).toEqual(0));
+    await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(0));
   });
 
   it('returns array take actions items if showAlertStatusActions is true', async () => {
@@ -140,6 +143,6 @@ describe('useGroupTakeActionsItems', () => {
         wrapper: wrapperContainer,
       }
     );
-    await waitFor(() => expect(result.current(getActionItemsParams).length).toEqual(3));
+    await waitFor(() => expect(result.current(getActionItemsParams).items.length).toEqual(3));
   });
 });

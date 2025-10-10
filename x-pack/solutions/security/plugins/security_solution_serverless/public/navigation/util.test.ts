@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import { getProjectFeaturesUrl } from './util';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-
-const cloud = {
-  serverless: {
-    projectId: '1234',
-  },
-  projectsUrl: 'https://cloud.elastic.co/projects/',
-} as CloudStart;
+import { getProjectFeaturesUrl } from './util';
 
 describe('util', () => {
   describe('getProductFeaturesUrl', () => {
+    let cloud: jest.Mocked<CloudStart>;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      cloud = cloudMock.createStart();
+      cloud.serverless = {
+        projectId: '1234',
+      };
+    });
+
     it('should return undefined if the projectId is not present', () => {
       expect(getProjectFeaturesUrl({ ...cloud, serverless: { projectId: undefined } })).toBe(
         undefined
@@ -24,12 +28,17 @@ describe('util', () => {
     });
 
     it('should return undefined if the projectsUrl is not present', () => {
-      expect(getProjectFeaturesUrl({ ...cloud, projectsUrl: undefined })).toBe(undefined);
+      expect(getProjectFeaturesUrl(cloud)).toBe(undefined);
     });
 
     it('should return the correct url', () => {
+      cloud.getUrls = jest.fn().mockReturnValue({
+        projectsUrl: 'https://cloud.elastic.co/projects/',
+      });
       expect(getProjectFeaturesUrl(cloud)).toBe(
-        `${cloud.projectsUrl}security/${cloud.serverless?.projectId}?open=securityProjectFeatures`
+        `${cloud.getUrls().projectsUrl}security/${
+          cloud.serverless?.projectId
+        }?open=securityProjectFeatures`
       );
     });
   });

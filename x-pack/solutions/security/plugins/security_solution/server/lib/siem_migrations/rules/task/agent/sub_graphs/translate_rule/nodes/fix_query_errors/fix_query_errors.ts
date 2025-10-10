@@ -8,7 +8,7 @@
 import {
   getFixEsqlQueryErrors,
   type GetFixEsqlQueryErrorsParams,
-} from '../../../../../../../common/task/agent/tools/fix_esql_query_errors';
+} from '../../../../../../../common/task/agent/helpers/fix_esql_query_errors';
 import type { GraphNode } from '../../types';
 
 export const getFixQueryErrorsNode = (params: GetFixEsqlQueryErrorsParams): GraphNode => {

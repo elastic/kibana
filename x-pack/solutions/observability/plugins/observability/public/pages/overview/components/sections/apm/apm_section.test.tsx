@@ -64,6 +64,7 @@ describe('APMSection', () => {
           uptime: { enabled: false },
         },
       },
+      managedOtlpServiceUrl: '',
     };
 
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({

@@ -33,6 +33,15 @@ const INITIAL_EDITOR_VALUE = `{
   }
 }`;
 
+const styles = {
+  container: css`
+    height: 100%;
+  `,
+  editorContainer: css`
+    overflow: hidden;
+  `,
+};
+
 /**
  * This component should only need to render once.
  *
@@ -108,14 +117,7 @@ export const ProfileQueryEditor = memo(() => {
   const tooltipContent = isDisabled ? tooltipContentDisabled : tooltipContentEnabled;
 
   return (
-    <EuiFlexGroup
-      responsive={false}
-      gutterSize="none"
-      direction="column"
-      css={css`
-        height: 100%;
-      `}
-    >
+    <EuiFlexGroup responsive={false} gutterSize="none" direction="column" css={styles.container}>
       {/* Form */}
       <EuiFlexItem grow={false}>
         <EuiForm>
@@ -160,12 +162,7 @@ export const ProfileQueryEditor = memo(() => {
       </EuiFlexItem>
 
       {/* Editor */}
-      <EuiFlexItem
-        grow={1}
-        css={css`
-          overflow: hidden;
-        `}
-      >
+      <EuiFlexItem grow={1} css={styles.editorContainer}>
         <Editor
           onEditorReady={onEditorReady}
           setEditorValue={(val) => (editorValue.current = val)}

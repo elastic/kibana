@@ -8,15 +8,15 @@
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
+  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
-  EuiButtonGroup,
   EuiText,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
 import { isEqual } from 'lodash';
@@ -25,8 +25,8 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SetRuleQuery } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
+import type { SetRuleQuery } from '../../../../detections/hooks/use_rule_from_timeline';
+import { useRuleFromTimeline } from '../../../../detections/hooks/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
 import type { DefineStepRule, RuleStepProps } from '../../../common/types';
@@ -37,6 +37,7 @@ import { QueryBarField } from '../query_bar_field';
 import { SelectRuleType } from '../select_rule_type';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
+import type { FormHook } from '../../../../shared_imports';
 import {
   Field,
   Form,
@@ -45,18 +46,17 @@ import {
   UseField,
   useFormData,
 } from '../../../../shared_imports';
-import type { FormHook } from '../../../../shared_imports';
 import { schema } from './schema';
 import { useExperimentalFeatureFieldsTransform } from './use_experimental_feature_fields_transform';
 import * as i18n from './translations';
 import {
   isEqlRule,
+  isEsqlRule,
   isNewTermsRule,
+  isQueryRule,
+  isSuppressionRuleInGA,
   isThreatMatchRule,
   isThresholdRule as getIsThresholdRule,
-  isQueryRule,
-  isEsqlRule,
-  isSuppressionRuleInGA,
 } from '../../../../../common/detection_engine/utils';
 import { EqlQueryEdit } from '../../../rule_creation/components/eql_query_edit';
 import { DataViewSelectorField } from '../data_view_selector_field';

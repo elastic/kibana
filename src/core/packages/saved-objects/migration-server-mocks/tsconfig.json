@@ -14,7 +14,8 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-saved-objects-migration-server-internal",
-    "@kbn/core-saved-objects-base-server-mocks"
+    "@kbn/core-saved-objects-base-server-mocks",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

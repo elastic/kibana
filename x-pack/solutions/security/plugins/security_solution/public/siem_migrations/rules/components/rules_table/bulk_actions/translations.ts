@@ -7,68 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INSTALL_SELECTED_RULES = (numberOfSelectedRules: number) => {
-  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.installSelectedRules', {
-    defaultMessage: 'Install selected ({numberOfSelectedRules})',
-    values: { numberOfSelectedRules },
-  });
-};
-
-export const REPROCESS_FAILED_RULES = (numberOfFailedRules: number) => {
-  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.reprocessFailedRules', {
-    defaultMessage: 'Reprocess failed ({numberOfFailedRules})',
-    values: { numberOfFailedRules },
-  });
-};
-
-export const REPROCESS_FAILED_SELECTED_RULES = (numberOfSelectedRules: number) => {
-  return i18n.translate(
-    'xpack.securitySolution.siemMigrations.rules.table.reprocessFailedSelectedRules',
-    {
-      defaultMessage: 'Reprocess selected failed ({numberOfSelectedRules})',
-      values: { numberOfSelectedRules },
-    }
-  );
-};
-
-export const INSTALL_SELECTED_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.installSelectedButtonAriaLabel',
-  {
-    defaultMessage: 'Install selected translated rules',
-  }
-);
-
-export const INSTALL_TRANSLATED_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.installTranslatedButtonAriaLabel',
-  {
-    defaultMessage: 'Install all translated rules',
-  }
-);
-
-export const INSTALL_TRANSLATED_RULES = (numberOfAllRules: number) => {
-  return i18n.translate(
-    'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRules',
-    {
-      defaultMessage: 'Install translated ({numberOfAllRules})',
-      values: { numberOfAllRules },
-    }
-  );
-};
-
-export const INSTALL_TRANSLATED_RULES_EMPTY_STATE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRulesEmptyState',
-  {
-    defaultMessage: 'Install translated',
-  }
-);
-
-export const REPROCESS_FAILED_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.reprocessFailedRulesButtonAriaLabel',
-  {
-    defaultMessage: 'Reprocess failed',
-  }
-);
-
 export const UPDATE_MISSING_INDEX_PATTERN = (numberOfRulesWithMissingIndex: number) => {
   return i18n.translate(
     'xpack.securitySolution.siemMigrations.rules.table.updateMissingIndexPattern',
@@ -95,10 +33,3 @@ export const UPDATE_MISSING_INDEX_PATTERN_SELECTED_RULES = (numberOfSelectedRule
     }
   );
 };
-
-export const UPDATE_MISSING_INDEX_PATTERN_SELECTED_RULES_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.updateMissingIndexPatternSelectedRulesButtonAriaLabel',
-  {
-    defaultMessage: 'Update selected missing index pattern',
-  }
-);
