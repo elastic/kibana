@@ -176,6 +176,14 @@ steps:
         expect(workflowExecutionDoc?.error).toBe(undefined);
       });
 
+      it('should have correct currentNodeId in workflow execution', async () => {
+        const workflowExecutionDoc =
+          workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+            'fake_workflow_execution_id'
+          );
+        expect(workflowExecutionDoc?.currentNodeId).toBe('enterRetry_constantlyFailingStep');
+      });
+
       it('should create resume task', async () => {
         expect(workflowRunFixture.taskManagerMock.schedule).toHaveBeenCalledTimes(1);
         const scheduleCalls = (workflowRunFixture.taskManagerMock.schedule as jest.Mock).mock.calls;
