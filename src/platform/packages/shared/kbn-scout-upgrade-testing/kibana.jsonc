@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/scout-upgrade-testing",
+  "owner": "@appex-qa",
+  "devOnly": true
+}
