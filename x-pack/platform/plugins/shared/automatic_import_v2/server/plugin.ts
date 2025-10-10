@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreStart,
+  Plugin,
+  Logger,
+  FeatureFlagsStart,
+} from '@kbn/core/server';
 
-import { ReplaySubject, type Subject } from 'rxjs';
+import { ReplaySubject, type Subject, exhaustMap, takeWhile, takeUntil } from 'rxjs';
 import type {
   AutomaticImportPluginCoreSetupDependencies,
   AutomaticImportPluginSetup,
@@ -18,6 +24,17 @@ import type {
 } from './types';
 import { RequestContextFactory } from './request_context_factory';
 import { FeatureFlagAutomaticImportV2Enabled } from '../common/feature_flags';
+
+interface FeatureFlagDefinition {
+  featureFlagName: string;
+  fallbackValue: boolean;
+  /**
+   * Function to execute when the feature flag is evaluated.
+   * @param enabled If the feature flag is enabled or not.
+   * @return `true` if susbscription needs to stay active, `false` if it can be unsubscribed.
+   */
+  fn: (enabled: boolean) => boolean | Promise<boolean>;
+}
 
 export class AutomaticImportPlugin
   implements
@@ -50,20 +67,22 @@ export class AutomaticImportPlugin
   ) {
     this.logger.debug('automaticImportV2: Setup');
 
-    const automaticImportV2FeatureEnabled = core.getStartServices().then(async ([coreStart]) => {
-      const enabled = await coreStart.featureFlags.getBooleanValue(
-        FeatureFlagAutomaticImportV2Enabled,
-        false
-      );
-      return enabled;
-    });
+    const featureFlagDefinitions: FeatureFlagDefinition[] = [
+      {
+        featureFlagName: FeatureFlagAutomaticImportV2Enabled,
+        fallbackValue: false,
+        fn: (enabled) => {
+          return enabled;
+        },
+      },
+    ];
 
-    Promise.all([automaticImportV2FeatureEnabled]).then(([enabled]) => {
-      if (!enabled) {
-        this.logger.debug('automaticImportV2: Feature flag is disabled, skipping setup');
-        return;
-      }
-    });
+    core
+      .getStartServices()
+      .then(([{ featureFlags }]) => this.evaluateFeatureFlags(featureFlagDefinitions, featureFlags))
+      .catch((error) => {
+        this.logger.error(`error in automatic import v2 plugin setup: ${error}`);
+      });
 
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
@@ -108,5 +127,31 @@ export class AutomaticImportPlugin
   public stop() {
     this.pluginStop$.next();
     this.pluginStop$.complete();
+  }
+
+  private evaluateFeatureFlags(
+    featureFlagDefinitions: FeatureFlagDefinition[],
+    featureFlags: FeatureFlagsStart
+  ) {
+    featureFlagDefinitions.forEach(({ featureFlagName, fallbackValue, fn }) => {
+      featureFlags
+        .getBooleanValue$(featureFlagName, fallbackValue)
+        .pipe(
+          takeUntil(this.pluginStop$),
+          exhaustMap(async (enabled) => {
+            let continueSubscription = true;
+            try {
+              continueSubscription = await fn(enabled);
+            } catch (error) {
+              this.logger.error(
+                `Error during setup based on feature flag ${featureFlagName}: ${error}`
+              );
+            }
+            return continueSubscription;
+          }),
+          takeWhile((continueSubscription) => continueSubscription)
+        )
+        .subscribe();
+    });
   }
 }
