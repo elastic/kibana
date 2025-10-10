@@ -57,7 +57,7 @@ describe('CoreThemeProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme: CoreTheme = { darkMode: true, name: 'amsterdam' };
+    const coreTheme: CoreTheme = { darkMode: true, name: 'borealis' };
 
     const wrapper = mountWithIntl(
       <CoreThemeProvider theme$={of(coreTheme)} userProfile={userProfile}>
@@ -71,7 +71,7 @@ describe('CoreThemeProvider', () => {
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true, name: 'amsterdam' });
+    const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: true, name: 'borealis' });
 
     const wrapper = mountWithIntl(
       <CoreThemeProvider theme$={coreTheme$} userProfile={userProfile}>
@@ -84,7 +84,7 @@ describe('CoreThemeProvider', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      coreTheme$.next({ darkMode: false, name: 'amsterdam' });
+      coreTheme$.next({ darkMode: false, name: 'borealis' });
     });
 
     await refresh(wrapper);
