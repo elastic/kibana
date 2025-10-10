@@ -243,7 +243,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           />
         </EuiFlexItem>
 
-        {workflowExecuteModalOpen && workflow && (
+        {workflowExecuteModalOpen && definitionFromCurrentYaml && (
           <WorkflowExecuteModal
             definition={definitionFromCurrentYaml}
             onClose={closeModal}

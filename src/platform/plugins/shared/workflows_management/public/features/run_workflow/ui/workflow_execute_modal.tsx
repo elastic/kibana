@@ -52,7 +52,7 @@ export function WorkflowExecuteModal({
   onClose,
   onSubmit,
 }: {
-  definition: WorkflowYaml | null;
+  definition: WorkflowYaml;
   onClose: () => void;
   onSubmit: (data: Record<string, any>) => void;
 }) {
@@ -79,23 +79,34 @@ export function WorkflowExecuteModal({
     [setExecutionInput, setSelectedTrigger]
   );
 
+  const shouldAutoRun = useMemo(() => {
+    if (definition.triggers?.some((trigger) => trigger.type === 'alert') || definition.inputs) {
+      return false;
+    }
+    return true;
+  }, [definition]);
+
   useEffect(() => {
-    if (!definition) {
+    if (shouldAutoRun) {
+      onSubmit({});
+      onClose();
       return;
     }
+    // Default trigger selection
     if (definition.triggers?.some((trigger) => trigger.type === 'alert')) {
       setSelectedTrigger('alert');
       return;
     }
-    if (!definition.inputs) {
-      // no inputs, and no alert trigger, we can run the workflow right away and close
-      onSubmit({});
-      onClose();
-      return;
-    } else {
+    if (definition.inputs) {
       setSelectedTrigger('manual');
+      return;
     }
-  }, [definition, onClose, onSubmit]);
+  }, [shouldAutoRun, onSubmit, onClose, definition]);
+
+  if (shouldAutoRun) {
+    // Not rendered if the workflow should auto run, will close the modal automatically
+    return null;
+  }
 
   return (
     <>
