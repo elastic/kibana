@@ -34,6 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'src/platform/test/api_integration/fixtures/es_archiver/metrics_experience'
       );
+      await toggleMetricsExperienceFeature(supertest, true);
     });
 
     it('should return 200 when the metrics experience feature flag is enabled', async () => {
