@@ -50,7 +50,7 @@ export const getSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
           })
         ).uptime.save ?? false;
 
-      if (!Boolean(canSave)) {
+      if (Boolean(canSave)) {
         // only user with write permissions can decrypt the monitor
         const monitor = await monitorConfigRepository.getDecrypted(monitorId, spaceId);
         return {
