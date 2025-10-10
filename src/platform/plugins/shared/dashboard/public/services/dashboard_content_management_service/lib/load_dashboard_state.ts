@@ -10,7 +10,11 @@
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
 import { getDashboardContentManagementCache } from '..';
-import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
+import type {
+  DashboardAttributes,
+  DashboardGetIn,
+  DashboardGetOut,
+} from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
@@ -95,7 +99,7 @@ export const loadDashboardState = async ({
     query,
     timeRange,
     title,
-  } = attributes;
+  } = attributes as DashboardAttributes;
 
   return {
     managed,

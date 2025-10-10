@@ -16,26 +16,23 @@ import { embeddableService } from '../../services/kibana_services';
 export async function transformPanels(
   panels: DashboardAttributes['panels'],
   references?: Reference[]
-) {
+): Promise<DashboardAttributes['panels']> {
   function filterReferences(panelId?: string) {
     return !references || !panelId ? undefined : getReferencesForPanelId(panelId, references);
   }
 
   return await asyncMap(panels, async (panel) => {
     if (isDashboardSection(panel)) {
-      const panelsInSection = await asyncMap(
-        panel.panels as DashboardPanel[],
-        async (panelInSection) => {
-          return await transformPanel(panelInSection, filterReferences(panelInSection.uid));
-        }
-      );
+      const panelsInSection = await asyncMap(panel.panels, async (panelInSection) => {
+        return await transformPanel(panelInSection, filterReferences(panelInSection.uid));
+      });
       return {
         ...panel,
         panels: panelsInSection,
       };
     }
 
-    return await transformPanel(panel as DashboardPanel, filterReferences(panel.uid));
+    return await transformPanel(panel, filterReferences(panel.uid));
   });
 }
 
@@ -47,7 +44,7 @@ async function transformPanel(panel: DashboardPanel, references?: Reference[]) {
     const transformedPanelConfig = transformOut(panel.config, references);
     return {
       ...panel,
-      config: transformedPanelConfig,
+      config: transformedPanelConfig as Record<string, unknown>,
     };
   } catch (transformOutError) {
     // eslint-disable-next-line no-console

@@ -114,7 +114,8 @@ export function ShowShareModal({
   };
 
   const unsavedDashboardState =
-    getDashboardBackupService().getState(savedObjectId) ?? ({} as DashboardLocatorParams);
+    (getDashboardBackupService().getState(savedObjectId) as DashboardLocatorParams) ??
+    ({} as DashboardLocatorParams);
 
   const hasPanelChanges = unsavedDashboardState.panels !== undefined;
 

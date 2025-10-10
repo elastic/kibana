@@ -23,7 +23,7 @@ export function serializeLayout(
   const references: DashboardState['references'] = [];
   const panels: DashboardState['panels'] = [];
   Object.entries(layout.panels).forEach(([panelId, { grid, type }]) => {
-    const config = childState[panelId]?.rawState ?? {};
+    const config = (childState[panelId]?.rawState ?? {}) as Record<string, unknown>;
     references.push(...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? []));
 
     const { sectionId, ...restOfGridData } = grid; // drop section ID
