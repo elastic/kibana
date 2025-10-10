@@ -14330,7 +14330,9 @@
           " | ",
           "ESQLAstRerankCommand",
           " | ",
-          "ESQLAstCompletionCommand"
+          "ESQLAstCompletionCommand",
+          " | ",
+          "ESQLAstFuseCommand"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
         "deprecated": false,
@@ -14404,6 +14406,8 @@
           "ESQLAstRerankCommand",
           " | ",
           "ESQLAstCompletionCommand",
+          " | ",
+          "ESQLAstFuseCommand",
           " | ",
           {
             "pluginId": "@kbn/esql-ast",
