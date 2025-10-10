@@ -12,6 +12,6 @@ module.exports = {
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-eslint-plugin-i18n'],
   globals: {
-    structuredClone: {},
+    // structuredClone: {},
   },
 };
