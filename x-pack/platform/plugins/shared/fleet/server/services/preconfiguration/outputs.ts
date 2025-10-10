@@ -29,6 +29,7 @@ import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT, ECH_AGENTLESS_OUTPUT_ID } from '../.
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { isAgentlessEnabled } from '../utils/agentless';
 
 import { isDifferent } from './utils';
 
@@ -46,6 +47,23 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
             hosts: config?.agents.elasticsearch.hosts,
             ca_sha256: config?.agents.elasticsearch.ca_sha256,
             ca_trusted_fingerprint: config?.agents.elasticsearch.ca_trusted_fingerprint,
+            is_preconfigured: true,
+          } as PreconfiguredOutput,
+        ]
+      : []),
+    // Include ECH agentless output when agentless is enabled and not in serverless environment
+    ...(isAgentlessEnabled() && !appContextService.getCloud()?.isServerlessEnabled
+      ? [
+          {
+            id: ECH_AGENTLESS_OUTPUT_ID,
+            name: 'Internal output for agentless',
+            type: 'elasticsearch' as const,
+            hosts: appContextService.getCloud()?.elasticsearchUrl
+              ? [appContextService.getCloud()!.elasticsearchUrl]
+              : config?.agents.elasticsearch.hosts || ['http://localhost:9200'],
+            ca_sha256: config?.agents.elasticsearch.ca_sha256,
+            is_default: false,
+            is_default_monitoring: false,
             is_preconfigured: true,
           } as PreconfiguredOutput,
         ]
@@ -208,10 +226,7 @@ export async function cleanPreconfiguredOutputs(
 ) {
   const existingOutputs = await outputService.list(soClient);
   const existingPreconfiguredOutput = existingOutputs.items.filter(
-    (o) =>
-      o.is_preconfigured === true &&
-      // Skip cleanup for ECH agentless output
-      o.id !== ECH_AGENTLESS_OUTPUT_ID
+    (o) => o.is_preconfigured === true
   );
 
   const logger = appContextService.getLogger();

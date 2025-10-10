@@ -103,7 +103,7 @@ describe('setupFleet', () => {
     (upgradeAgentPolicySchemaVersion as jest.Mock).mockResolvedValue(undefined);
     (createCCSIndexPatterns as jest.Mock).mockResolvedValue(undefined);
     (getSpaceAwareSaveobjectsClients as jest.Mock).mockReturnValue({});
-    (outputService.ensureDefaultOutputs as jest.Mock).mockResolvedValue({
+    (outputService.ensureDefaultOutput as jest.Mock).mockResolvedValue({
       defaultOutput: { id: 'test-default-output', name: 'test' },
     });
   });
@@ -150,7 +150,7 @@ describe('setupFleet', () => {
 
     await setupFleet(soClient, esClient);
 
-    expect(outputService.ensureDefaultOutputs).toHaveBeenCalledWith(soClient, esClient);
+    expect(outputService.ensureDefaultOutput).toHaveBeenCalledWith(soClient, esClient);
   });
 
   it('should return non fatal errors when generateKeyPair result has errors', async () => {

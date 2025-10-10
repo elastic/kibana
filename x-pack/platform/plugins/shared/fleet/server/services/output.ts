@@ -46,7 +46,6 @@ import {
   OUTPUT_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
   MAX_CONCURRENT_BACKFILL_OUTPUTS_PRESETS,
-  ECH_AGENTLESS_OUTPUT_ID,
 } from '../constants';
 import {
   SO_SEARCH_LIMIT,
@@ -85,7 +84,7 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
-import { isAgentlessEnabled } from './utils/agentless';
+
 import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
@@ -498,58 +497,30 @@ class OutputService {
     }
   }
 
-  public async ensureDefaultOutputs(
+  public async ensureDefaultOutput(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
-    const logger = appContextService.getLogger();
-    const cloudSetup = appContextService.getCloud();
-    const isServerless = cloudSetup?.isServerlessEnabled;
     const outputs = await this.list(soClient);
 
-    // Ensure general default output
-    const currentDefaultOutput = outputs.items.find((o) => o.is_default);
-    const currentDefaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
-    let defaultOutput = currentDefaultOutput;
+    const defaultOutput = outputs.items.find((o) => o.is_default);
+    const defaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
 
-    if (!currentDefaultOutput) {
+    if (!defaultOutput) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
         hosts: this.getDefaultESHosts(),
         ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
-        is_default_monitoring: !currentDefaultMonitoringOutput,
+        is_default_monitoring: !defaultMonitoringOutput,
       } as NewOutput;
 
-      defaultOutput = await this.create(soClient, esClient, newDefaultOutput, {
+      return await this.create(soClient, esClient, newDefaultOutput, {
         id: DEFAULT_OUTPUT_ID,
         overwrite: true,
       });
     }
 
-    // Ensure default output exists for ECH agentless
-    if (isAgentlessEnabled() && !isServerless) {
-      const defaultAgentlessOutput = outputs.items.find((o) => o.id === ECH_AGENTLESS_OUTPUT_ID);
-      if (!defaultAgentlessOutput) {
-        logger.debug('Creating default output for ECH agentless');
-        const newDefaultAgentlessOutput = {
-          name: 'Internal output for agentless',
-          type: outputType.Elasticsearch,
-          hosts: this.getDefaultESHosts(),
-          ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
-          is_default: false,
-          is_default_monitoring: false,
-          is_preconfigured: true, // Fake preconfiguration status to prevent user modification
-        } as NewOutput;
-
-        await this.create(soClient, esClient, newDefaultAgentlessOutput, {
-          id: ECH_AGENTLESS_OUTPUT_ID,
-          overwrite: true,
-          fromPreconfiguration: true,
-        });
-      }
-    }
-
-    return { defaultOutput } as { defaultOutput: Output };
+    return defaultOutput;
   }
 
   public getDefaultESHosts(): string[] {

@@ -44,6 +44,7 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
   const { fleetServerHosts: fleetServerHostsFromConfig } = config;
 
   const legacyFleetServerHostsConfig = getConfigFleetServerHosts(config);
+  const cloudServerHosts = getCloudFleetServersHosts();
 
   const fleetServerHosts: FleetServerHost[] = (fleetServerHostsFromConfig || []).concat([
     ...(legacyFleetServerHostsConfig
@@ -53,6 +54,18 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
             is_default: true,
             id: DEFAULT_FLEET_SERVER_HOST_ID,
             host_urls: legacyFleetServerHostsConfig,
+          },
+        ]
+      : []),
+    // Include ECH agentless Fleet Server host when agentless is enabled and not in serverless environment
+    ...(isAgentlessEnabled() && cloudServerHosts
+      ? [
+          {
+            id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+            name: 'Internal Fleet Server for agentless',
+            host_urls: cloudServerHosts,
+            is_default: false,
+            is_preconfigured: true,
           },
         ]
       : []),
@@ -75,7 +88,7 @@ export async function ensurePreconfiguredFleetServerHosts(
     esClient,
     preconfiguredFleetServerHosts
   );
-  await createCloudFleetServerHostsIfNeeded(soClient, esClient);
+  await createCloudFleetServerHostIfNeeded(soClient, esClient);
   await cleanPreconfiguredFleetServerHosts(soClient, esClient, preconfiguredFleetServerHosts);
 }
 
@@ -141,18 +154,15 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
   );
 }
 
-export async function createCloudFleetServerHostsIfNeeded(
+export async function createCloudFleetServerHostIfNeeded(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
-  const cloudSetup = appContextService.getCloud();
-  const isServerless = cloudSetup?.isServerlessEnabled;
   const cloudServerHosts = getCloudFleetServersHosts();
   if (!cloudServerHosts || cloudServerHosts.length === 0) {
     return;
   }
 
-  // Ensure default Fleet Server host exists for ECH
   const defaultFleetServerHost = await fleetServerHostService.getDefaultFleetServerHost(soClient);
   if (!defaultFleetServerHost) {
     await fleetServerHostService.create(
@@ -167,29 +177,6 @@ export async function createCloudFleetServerHostsIfNeeded(
       { id: DEFAULT_FLEET_SERVER_HOST_ID, overwrite: true, fromPreconfiguration: true }
     );
   }
-
-  // Ensure internal Fleet Server host exists for ECH agentless.
-  // This "duplicate" ensure that agentless agents use an unmodifiable
-  // Fleet Server host that is hidden from the user.
-  if (isAgentlessEnabled() && !isServerless) {
-    const agentlessFleetServerHost = await fleetServerHostService.get(
-      soClient,
-      ECH_AGENTLESS_FLEET_SERVER_HOST_ID
-    );
-    if (!agentlessFleetServerHost) {
-      await fleetServerHostService.create(
-        soClient,
-        esClient,
-        {
-          name: 'Internal Fleet Server for agentless',
-          host_urls: cloudServerHosts,
-          is_default: false,
-          is_preconfigured: true, // Fake preconfiguration status to prevent user modification
-        },
-        { id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID, overwrite: true, fromPreconfiguration: true }
-      );
-    }
-  }
 }
 
 export async function cleanPreconfiguredFleetServerHosts(
@@ -199,10 +186,7 @@ export async function cleanPreconfiguredFleetServerHosts(
 ) {
   const existingFleetServerHosts = await fleetServerHostService.list(soClient);
   const existingPreconfiguredHosts = existingFleetServerHosts.items.filter(
-    (o) =>
-      o.is_preconfigured === true &&
-      // Skip cleanup for ECH agentless Fleet Server host
-      o.id !== ECH_AGENTLESS_FLEET_SERVER_HOST_ID
+    (o) => o.is_preconfigured === true
   );
 
   for (const existingFleetServerHost of existingPreconfiguredHosts) {

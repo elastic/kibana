@@ -172,7 +172,7 @@ async function createSetupSideEffects(
     getPreconfiguredOutputFromConfig(appContextService.getConfig())
   );
 
-  const { defaultOutput } = await outputService.ensureDefaultOutputs(soClient, esClient);
+  const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
   logger.debug('Backfilling output performance presets');
   await outputService.backfillAllOutputPresets(soClient, esClient);
