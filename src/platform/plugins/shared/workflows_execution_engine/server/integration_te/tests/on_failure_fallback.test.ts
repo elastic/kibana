@@ -32,7 +32,7 @@ steps:
     on-failure:
       fallback:
         - name: fallbackStep
-          type: slack
+          type: ${FakeConnectors.slack1.actionTypeId}
           connector-id: ${FakeConnectors.slack1.name}
           with:
             message: 'Fallback message executed'
@@ -40,7 +40,7 @@ steps:
       message: 'Hi there! Are you alive?'
 
   - name: finalStep
-    type: slack
+    type: ${FakeConnectors.slack2.actionTypeId}
     connector-id: ${FakeConnectors.slack2.name}
     with:
       message: 'Final message!'
@@ -53,7 +53,7 @@ settings:
   on-failure:
     fallback:
       - name: fallbackStep
-        type: slack
+        type: ${FakeConnectors.slack1.actionTypeId}
         connector-id: ${FakeConnectors.slack1.name}
         with:
           message: 'Fallback message executed'
@@ -65,7 +65,7 @@ steps:
       message: 'Hi there! Are you alive?'
 
   - name: finalStep
-    type: slack
+    type: ${FakeConnectors.slack2.actionTypeId}
     connector-id: ${FakeConnectors.slack2.name}
     with:
       message: 'Final message!'
@@ -108,10 +108,11 @@ steps:
       // Note: Fallback steps are currently not executed when a step fails without retry
       // This is a known limitation and will be addressed in the future
       // The following tests document the current behavior
-      it('should execute fallback step (known limitation)', async () => {
+      it('should execute fallback step', async () => {
         const fallbackStepExecutions = Array.from(
           workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-        ).filter((se) => se.stepId === 'fallbackStep');
+        ).filter((se) => se.stepType === 'fallback');
+
         // Currently, fallback is not executed without retry
         expect(fallbackStepExecutions.length).toBe(1);
       });

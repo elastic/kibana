@@ -31,12 +31,11 @@ steps:
       retry:
         max-attempts: 1
       fallback:
-        steps:
-          - name: fallbackStep
-            type: slack
-            connector-id: ${FakeConnectors.slack1.name}
-            with:
-              message: 'Fallback message: {{steps.innerForeachChildConnectorStep.result}}'
+        - name: fallbackStep
+          type: slack
+          connector-id: ${FakeConnectors.slack1.name}
+          with:
+            message: 'Fallback message: {{steps.innerForeachChildConnectorStep.result}}'
     with:
       message: 'Hi there! Are you alive?'
   - name: finalStep
@@ -101,16 +100,14 @@ steps:
       });
     });
 
-    // This test is commented out because fallback step is not executed if retry also fails
-    // This is a known issue and will be addressed in future
-    // it('should execute fallback step once', async () => {
-    //   const fallbackStepExecutions = Array.from(
-    //     workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-    //   ).filter((se) => se.stepId === 'fallbackStep');
-    //   expect(fallbackStepExecutions.length).toBe(1);
-    //   expect(fallbackStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
-    //   expect(fallbackStepExecutions[0].error).toBe(undefined);
-    // });
+    it('should execute fallback step once', async () => {
+      const fallbackStepExecutions = Array.from(
+        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
+      ).filter((se) => se.stepId === 'fallbackStep');
+      expect(fallbackStepExecutions.length).toBe(1);
+      expect(fallbackStepExecutions[0].status).toBe(ExecutionStatus.COMPLETED);
+      expect(fallbackStepExecutions[0].error).toBe(undefined);
+    });
   });
 
   describe('when continue is false', () => {
