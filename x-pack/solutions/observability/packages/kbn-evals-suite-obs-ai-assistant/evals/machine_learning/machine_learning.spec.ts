@@ -8,37 +8,18 @@
 import type { MlGetJobsResponse, MlPutJobRequest } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { evaluate as base } from '../../src/evaluate';
-import type { EvaluateMLDataset } from './evaluate_ml_dataset';
-import { createEvaluateMLDataset } from './evaluate_ml_dataset';
 import {
   cleanupMachineLearningJobs,
   setupMLJobAndDatafeed,
 } from '../../utils/machine_learning_jobs';
 import { loadSampleData } from '../../utils/load_sample_data';
+import { evaluate } from '../../src/evaluate';
 
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
  * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/machine_learning/index.spec.ts
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
-
-const evaluate = base.extend<{
-  evaluateMLDataset: EvaluateMLDataset;
-}>({
-  evaluateMLDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
-      use(
-        createEvaluateMLDataset({
-          chatClient,
-          evaluators,
-          phoenixClient,
-        })
-      );
-    },
-    { scope: 'test' },
-  ],
-});
 
 evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
   const TEST_INDEX = 'my-index-000001';
@@ -203,15 +184,15 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
   });
 
   evaluate.describe('Machine learning (ML) jobs', () => {
-    evaluate('returns the ML jobs configuration', async ({ evaluateMLDataset }) => {
-      await evaluateMLDataset({
+    evaluate('returns the ML jobs configuration', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'ml: jobs',
           description: 'Returns the machine learning jobs configuration.',
           examples: [
             {
               input: {
-                prompt:
+                question:
                   'List all machine learning jobs with details such as id, state, and description, datafeed indices, influencers and bucket span',
               },
               output: {
@@ -228,15 +209,15 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
       });
     });
 
-    evaluate('returns the ML jobs stats details', async ({ evaluateMLDataset }) => {
-      await evaluateMLDataset({
+    evaluate('returns the ML jobs stats details', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'ml: jobs stats',
           description: 'Returns the machine learning jobs statistics details.',
           examples: [
             {
               input: {
-                prompt:
+                question:
                   'List all the machine learning job statistics, including processed record counts, model size stats, timing/bucket counts, memory status and current node information.',
               },
               output: {
@@ -253,15 +234,15 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
       });
     });
 
-    evaluate('returns open ML jobs', async ({ evaluateMLDataset }) => {
-      await evaluateMLDataset({
+    evaluate('returns open ML jobs', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'ml: open jobs',
           description: 'Returns the open machine learning jobs.',
           examples: [
             {
               input: {
-                prompt: 'Which machine learning jobs are open?',
+                question: 'Which machine learning jobs are open?',
               },
               output: {
                 criteria: [
@@ -277,16 +258,16 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
       });
     });
 
-    evaluate('returns closed ML jobs', async ({ evaluateMLDataset }) => {
+    evaluate('returns closed ML jobs', async ({ evaluateDataset }) => {
       const closedJobIds = jobIds.filter((jobId) => jobId !== TEST_JOB_ID);
-      await evaluateMLDataset({
+      await evaluateDataset({
         dataset: {
           name: 'ml: closed jobs',
           description: 'Returns the closed machine learning jobs.',
           examples: [
             {
               input: {
-                prompt: 'Which machine learning jobs are closed?',
+                question: 'Which machine learning jobs are closed?',
               },
               output: {
                 criteria: [
@@ -303,15 +284,15 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
       });
     });
 
-    evaluate('returns failed or stopped ML jobs', async ({ evaluateMLDataset }) => {
-      await evaluateMLDataset({
+    evaluate('returns failed or stopped ML jobs', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'ml: failed or stopped jobs',
           description: 'Returns the failed or stopped machine learning jobs.',
           examples: [
             {
               input: {
-                prompt: 'List all failed or stopped machine learning jobs',
+                question: 'List all failed or stopped machine learning jobs',
               },
               output: {
                 criteria: [
@@ -327,15 +308,15 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
       });
     });
 
-    evaluate('returns specific ML job status', async ({ evaluateMLDataset }) => {
-      await evaluateMLDataset({
+    evaluate('returns specific ML job status', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'ml: specific job status',
           description: 'Returns the status of a specific machine learning job.',
           examples: [
             {
               input: {
-                prompt: `What is the status of machine learning job with the ID ${TEST_JOB_ID}?`,
+                question: `What is the status of machine learning job with the ID ${TEST_JOB_ID}?`,
               },
               output: {
                 criteria: [
@@ -350,15 +331,15 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
       });
     });
 
-    evaluate('lists open ML jobs for specific apps', async ({ evaluateMLDataset }) => {
-      await evaluateMLDataset({
+    evaluate('lists open ML jobs for specific apps', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'ml: open jobs for specific apps',
           description: 'Returns the open machine learning jobs for specific applications.',
           examples: [
             {
               input: {
-                prompt: `List all open machine learning jobs for app ${SERVICE_TEST_NAME}`,
+                question: `List all open machine learning jobs for app ${SERVICE_TEST_NAME}`,
               },
               output: {
                 criteria: [
@@ -376,15 +357,15 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
 
     evaluate(
       `reports whether ML job ids ${TEST_JOB_ID} and ${TEST_JOB_ID_2} is running and the last time evaluate ran`,
-      async ({ evaluateMLDataset }) => {
-        await evaluateMLDataset({
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'ml: job running status and last run time',
             description: `Reports whether machine learning job ids ${TEST_JOB_ID} and ${TEST_JOB_ID_2} is running and the last time evaluate ran.`,
             examples: [
               {
                 input: {
-                  prompt: `Are the machine learning jobs ${TEST_JOB_ID} and ${TEST_JOB_ID_2} running now? When was the last time evaluate ran?`,
+                  question: `Are the machine learning jobs ${TEST_JOB_ID} and ${TEST_JOB_ID_2} running now? When was the last time evaluate ran?`,
                 },
                 output: {
                   criteria: [
@@ -404,15 +385,15 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
   evaluate.describe('Anomaly detection', () => {
     evaluate(
       'returns anomalies and explain what the anomaly is about?',
-      async ({ evaluateMLDataset }) => {
-        await evaluateMLDataset({
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'ml: anomalies',
             description: 'Returns anomalies detected by machine learning jobs.',
             examples: [
               {
                 input: {
-                  prompt: `List anomalies and explain what the anomaly is about.`,
+                  question: `List anomalies and explain what the anomaly is about.`,
                 },
                 output: {
                   criteria: [
@@ -431,9 +412,9 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
 
     evaluate(
       'returns anomalies in indices and explain what the anomaly is about?',
-      async ({ evaluateMLDataset }) => {
+      async ({ evaluateDataset }) => {
         const listJobIds = jobIds.join(', ');
-        await evaluateMLDataset({
+        await evaluateDataset({
           dataset: {
             name: 'ml: anomalies for specific indices',
             description:
@@ -441,7 +422,7 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
             examples: [
               {
                 input: {
-                  prompt: `List anomalies in ${listJobIds} indices and explain what the anomaly is about.`,
+                  question: `List anomalies in ${listJobIds} indices and explain what the anomaly is about.`,
                 },
                 output: {
                   criteria: [
@@ -459,8 +440,8 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
 
     evaluate(
       'list ML job anomalies with score > 50 and links them to jobs',
-      async ({ evaluateMLDataset }) => {
-        await evaluateMLDataset({
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'ml: anomalies with score > 50',
             description:
@@ -468,7 +449,7 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
             examples: [
               {
                 input: {
-                  prompt: 'Any anomalies with anomaly score > 50? List them with job id.',
+                  question: 'Any anomalies with anomaly score > 50? List them with job id.',
                 },
                 output: {
                   criteria: [
@@ -486,8 +467,8 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
 
     evaluate(
       'explains anomalies for a ML job id with cause analysis',
-      async ({ evaluateMLDataset }) => {
-        await evaluateMLDataset({
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'ml: explain anomalies for a job with cause analysis',
             description:
@@ -495,7 +476,7 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
             examples: [
               {
                 input: {
-                  prompt: `Explain ${TEST_JOB_ID} anomaly alerts and indicate probable cause.`,
+                  question: `Explain ${TEST_JOB_ID} anomaly alerts and indicate probable cause.`,
                 },
                 output: {
                   criteria: [
@@ -513,8 +494,8 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
 
     evaluate(
       'explains anomalies for a specific application with probable cause',
-      async ({ evaluateMLDataset }) => {
-        await evaluateMLDataset({
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'ml: explain anomalies for a specific application with probable cause',
             description:
@@ -522,7 +503,7 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
             examples: [
               {
                 input: {
-                  prompt: `Explain ${SERVICE_TEST_NAME} anomaly alerts and indicate the probable cause.`,
+                  question: `Explain ${SERVICE_TEST_NAME} anomaly alerts and indicate the probable cause.`,
                 },
                 output: {
                   criteria: [
@@ -541,8 +522,8 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
 
     evaluate(
       'performs root cause analysis on the top influencer for anomalies',
-      async ({ evaluateMLDataset }) => {
-        await evaluateMLDataset({
+      async ({ evaluateDataset }) => {
+        await evaluateDataset({
           dataset: {
             name: 'ml: root cause analysis on top influencer for anomalies',
             description:
@@ -550,7 +531,8 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
             examples: [
               {
                 input: {
-                  prompt: 'Determine the top influencer field and value responsible for anomalies.',
+                  question:
+                    'Determine the top influencer field and value responsible for anomalies.',
                 },
                 output: {
                   criteria: [
@@ -569,15 +551,15 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
   });
 
   evaluate.describe('ML jobs Alerts', () => {
-    evaluate('summarizes ML jobs alerts', async ({ evaluateMLDataset }) => {
-      await evaluateMLDataset({
+    evaluate('summarizes ML jobs alerts', async ({ evaluateDataset }) => {
+      await evaluateDataset({
         dataset: {
           name: 'ml: jobs alerts summary',
           description: 'Summarizes machine learning jobs alerts.',
           examples: [
             {
               input: {
-                prompt: 'Summarize machine learning jobs alerts',
+                question: 'Summarize machine learning jobs alerts',
               },
               output: {
                 criteria: [
@@ -592,32 +574,29 @@ evaluate.describe('Machine learning (ML)', { tag: '@svlOblt' }, () => {
       });
     });
 
-    evaluate(
-      'lists ML jobs alerts in the past hour with severity',
-      async ({ evaluateMLDataset }) => {
-        await evaluateMLDataset({
-          dataset: {
-            name: 'ml: jobs alerts in the past hour',
-            description: 'Lists machine learning jobs alerts in the past hour with severity.',
-            examples: [
-              {
-                input: {
-                  prompt:
-                    'Any alerts raised for the past 1 hour? List them with job id and severity.',
-                },
-                output: {
-                  criteria: [
-                    'Executes a query on the ML alerts index or uses the Elasticsearch API',
-                    'Filters by timestamp within the last 1 hour',
-                    'Returns job_id and severity',
-                  ],
-                },
-                metadata: {},
+    evaluate('lists ML jobs alerts in the past hour with severity', async ({ evaluateDataset }) => {
+      await evaluateDataset({
+        dataset: {
+          name: 'ml: jobs alerts in the past hour',
+          description: 'Lists machine learning jobs alerts in the past hour with severity.',
+          examples: [
+            {
+              input: {
+                question:
+                  'Any alerts raised for the past 1 hour? List them with job id and severity.',
               },
-            ],
-          },
-        });
-      }
-    );
+              output: {
+                criteria: [
+                  'Executes a query on the ML alerts index or uses the Elasticsearch API',
+                  'Filters by timestamp within the last 1 hour',
+                  'Returns job_id and severity',
+                ],
+              },
+              metadata: {},
+            },
+          ],
+        },
+      });
+    });
   });
 });
