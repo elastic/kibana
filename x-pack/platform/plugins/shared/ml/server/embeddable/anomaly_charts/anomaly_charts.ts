@@ -1,7 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
+import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from '@kbn/ml-anomaly-utils';
 import { serializedTitlesSchema } from '../schemas';
-import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from '../../../../../../packages/shared/ml/anomaly_utils';
 import { mlEntityFieldSchema } from '../../../../../../packages/shared/ml/anomaly_utils/schemas';
 
 export const severityThresholdSchema = schema.object({
@@ -36,4 +43,3 @@ export const anomalyChartsEmbeddableStateSchema = schema.object({
   ...serializedTitlesSchema.getPropSchemas(),
   ...anomalyChartsEmbeddableOverridableStateSchema.getPropSchemas(),
 });
-
