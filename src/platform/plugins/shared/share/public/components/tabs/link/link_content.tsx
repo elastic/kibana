@@ -23,7 +23,7 @@ import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { TimeTypeSection } from './time_type_section';
 import type { IShareContext } from '../../context';
 import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
-import { DraftModeCallout } from '../../draft_mode_callout/draft_mode_callout';
+import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type LinkProps = Pick<
   IShareContext,

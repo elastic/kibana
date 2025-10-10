@@ -35,7 +35,7 @@ import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
 import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
-import { DraftModeCallout } from '../draft_mode_callout/draft_mode_callout';
+import { DraftModeCallout } from '../common/draft_mode_callout';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (

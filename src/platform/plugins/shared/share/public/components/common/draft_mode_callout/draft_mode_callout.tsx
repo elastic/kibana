@@ -14,18 +14,10 @@ import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface DraftModeCalloutProps extends CommonProps {
-  isEmbed?: boolean;
   message?: React.ReactNode;
 }
 
-const codeMessage = (
-  <FormattedMessage
-    id="share.draftModeCallout.embedMessage"
-    defaultMessage="This code might not work properly. Save your changes to ensure it works as expected."
-  />
-);
-
-const linkMessage = (
+const defaultCalloutMessage = (
   <FormattedMessage
     id="share.draftModeCallout.message"
     defaultMessage="This link might not be permanent. Save your changes to ensure it works as expected."
@@ -36,8 +28,7 @@ const linkMessage = (
  * A warning callout to indicate the user has unsaved changes.
  */
 export const DraftModeCallout = ({
-  isEmbed = false,
-  message = isEmbed ? codeMessage : linkMessage,
+  message = defaultCalloutMessage,
   ['data-test-subj']: dataTestSubj = 'unsavedChangesDraftModeCallOut',
 }: DraftModeCalloutProps) => {
   return (
