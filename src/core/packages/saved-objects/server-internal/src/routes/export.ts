@@ -173,7 +173,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
               schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
                 meta: {
                   description:
-                    'The saved object types to include in the export. Use `*` to export all the types.',
+                    'The saved object types to include in the export. Use `*` to export all the types. Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.',
                 },
               })
             ),
@@ -187,7 +187,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
                   maxSize: maxImportExportSize,
                   meta: {
                     description:
-                      'A list of objects to export. NOTE: this optiona cannot be combined with `types` option',
+                      'A list of objects to export. NOTE: this optional parameter cannot be combined with the `types` option',
                   },
                 }
               )
