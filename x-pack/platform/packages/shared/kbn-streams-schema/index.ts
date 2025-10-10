@@ -74,7 +74,11 @@ export {
   streamQuerySchema,
 } from './src/queries';
 
-export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
+export {
+  findInheritedLifecycle,
+  findInheritingStreams,
+  effectiveToIngestLifecycle,
+} from './src/helpers/lifecycle';
 
 export { streamObjectNameSchema } from './src/shared/stream_object_name';
 
@@ -85,6 +89,7 @@ export {
   type IlmPolicyPhase,
   type IlmPolicyHotPhase,
   type IlmPolicyDeletePhase,
+  type IngestStreamLifecycleAll,
   type IngestStreamLifecycleILM,
   type IngestStreamLifecycleDSL,
   type IngestStreamLifecycleDisabled,

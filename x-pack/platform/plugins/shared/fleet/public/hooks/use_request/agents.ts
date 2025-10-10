@@ -94,8 +94,21 @@ export function useGetAgentsQuery(
   });
 }
 
+/**
+ * @deprecated use sendGetAgentsForRq or useGetAgentsQuery instead
+ */
 export function sendGetAgents(query: GetAgentsRequest['query'], options?: RequestOptions) {
   return sendRequest<GetAgentsResponse>({
+    method: 'get',
+    path: agentRouteService.getListPath(),
+    version: API_VERSIONS.public.v1,
+    query,
+    ...options,
+  });
+}
+
+export function sendGetAgentsForRq(query: GetAgentsRequest['query'], options?: RequestOptions) {
+  return sendRequestForRq<GetAgentsResponse>({
     method: 'get',
     path: agentRouteService.getListPath(),
     version: API_VERSIONS.public.v1,
@@ -135,8 +148,8 @@ export function sendGetAgentStatus(
   });
 }
 
-export function sendGetAgentTags(query: GetAgentsRequest['query'], options?: RequestOptions) {
-  return sendRequest<GetAgentTagsResponse>({
+export function sendGetAgentTagsForRq(query: GetAgentsRequest['query'], options?: RequestOptions) {
+  return sendRequestForRq<GetAgentTagsResponse>({
     method: 'get',
     path: agentRouteService.getListTagsPath(),
     query,

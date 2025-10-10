@@ -27,6 +27,9 @@ export const useFullScreenStyles = () => {
         position: fixed;
         inset: 0;
         background-color: ${euiTheme.colors.backgroundBasePlain};
+        [id^='echAnchorMainTooltip'] {
+          z-index: ${fullScreenZIndex + 1} !important;
+        }
       `,
       [METRICS_GRID_RESTRICT_BODY_CLASS]: css`
         ${logicalCSS('height', '100vh')}
@@ -57,7 +60,7 @@ const fullScreenBodyStyles = css`
       [data-euiportal='true'],
       [data-euiportal='true'] *
     ) {
-    z-index: unset !important;
+    z-index: unset;
   }
 `;
 

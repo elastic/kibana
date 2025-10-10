@@ -15,6 +15,8 @@ import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_stor
 import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
 import { useFailureStoreStats } from '../hooks/use_failure_store_stats';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { useAggregations } from '../hooks/use_ingestion_rate';
 
 // Lazy load the FailureStoreModal to reduce bundle size
 const LazyFailureStoreModal = React.lazy(async () => ({
@@ -34,6 +36,17 @@ export const StreamDetailFailureStore = ({
     core: { notifications },
   } = useKibana();
 
+  const { timeState } = useTimefilter();
+  const {
+    aggregations,
+    isLoading: isLoadingAggregations,
+    error: aggregationsError,
+  } = useAggregations({
+    definition,
+    timeState,
+    isFailureStore: true,
+  });
+
   const {
     privileges: {
       read_failure_store: readFailureStorePrivilege,
@@ -50,7 +63,7 @@ export const StreamDetailFailureStore = ({
     isLoading: isLoadingStats,
     error: statsError,
     refresh,
-  } = useFailureStoreStats({ definition });
+  } = useFailureStoreStats({ definition, timeState, aggregations });
 
   const handleSaveModal = async (update: {
     failureStoreEnabled: boolean;
@@ -103,6 +116,10 @@ export const StreamDetailFailureStore = ({
                 isLoadingStats={isLoadingStats}
                 stats={data?.stats}
                 config={data?.config}
+                timeState={timeState}
+                isLoadingAggregations={isLoadingAggregations}
+                aggregationsError={aggregationsError}
+                aggregations={aggregations}
               />
             ) : (
               <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} definition={definition} />

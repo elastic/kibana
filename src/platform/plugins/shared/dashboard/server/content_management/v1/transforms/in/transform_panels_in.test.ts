@@ -22,7 +22,6 @@ describe('transformPanelsIn', () => {
         },
         grid: {
           h: 15,
-          i: '2e814ac0-33c2-4676-9d29-e1f868cddebd',
           w: 24,
           x: 0,
           y: 0,
@@ -33,7 +32,6 @@ describe('transformPanelsIn', () => {
       {
         collapsed: true,
         grid: {
-          i: 'bcebc09a-270f-42ef-8d45-daf5f5f4f511',
           y: 15,
         },
         panels: [
@@ -43,7 +41,6 @@ describe('transformPanelsIn', () => {
             },
             grid: {
               h: 15,
-              i: 'd724d87b-2256-4c8b-8aa3-55bc0b8881c6',
               w: 24,
               x: 0,
               y: 0,
@@ -53,6 +50,7 @@ describe('transformPanelsIn', () => {
           },
         ],
         title: 'Section 1',
+        uid: 'bcebc09a-270f-42ef-8d45-daf5f5f4f511',
       },
     ];
     const results = transformPanelsIn(panels);

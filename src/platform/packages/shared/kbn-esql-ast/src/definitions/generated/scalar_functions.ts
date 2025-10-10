@@ -3517,10 +3517,54 @@ const knnDefinition: FunctionDefinition = {
     defaultMessage:
       'Finds the k nearest vectors to a query vector, as measured by a similarity metric. knn function finds nearest vectors through approximate search on indexed dense_vectors or semantic_text fields.',
   }),
-  ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'dense_vector',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'dense_vector',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.Defaults to 1.0.'}, {name='min_candidates', values=[10], description='The minimum number of nearest neighbor candidates to consider per shard while doing knn search.  KNN may use a higher number of candidates in case the query can't use a approximate results. Cannot exceed 10,000. Increasing min_candidates tends to improve the accuracy of the final results. Defaults to 1.5 * LIMIT used for the query.'}, {name='rescore_oversample', values=[3.5], description='Applies the specified oversampling for rescoring quantized vectors. See [oversampling and rescoring quantized vectors](docs-content://solutions/search/vector/knn.md#dense-vector-knn-search-rescoring) for details.'}, {name='similarity', values=[0.01], description='The minimum similarity required for a document to be considered a match. The similarity value calculated relates to the raw similarity used, not the document score.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'query',
+          type: 'dense_vector',
+          optional: false,
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='boost', values=[2.5], description='Floating point number used to decrease or increase the relevance scores of the query.Defaults to 1.0.'}, {name='min_candidates', values=[10], description='The minimum number of nearest neighbor candidates to consider per shard while doing knn search.  KNN may use a higher number of candidates in case the query can't use a approximate results. Cannot exceed 10,000. Increasing min_candidates tends to improve the accuracy of the final results. Defaults to 1.5 * LIMIT used for the query.'}, {name='rescore_oversample', values=[3.5], description='Applies the specified oversampling for rescoring quantized vectors. See [oversampling and rescoring quantized vectors](docs-content://solutions/search/vector/knn.md#dense-vector-knn-search-rescoring) for details.'}, {name='similarity', values=[0.01], description='The minimum similarity required for a document to be considered a match. The similarity value calculated relates to the raw similarity used, not the document score.'}",
+          optional: true,
+        },
+      ],
+      returnType: 'boolean',
+    },
+  ],
   locationsAvailable: [
     Location.EVAL,
     Location.ROW,
@@ -13056,7 +13100,58 @@ const toAggregateMetricDoubleDefinition: FunctionDefinition = {
   }),
   preview: false,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'aggregate_metric_double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'aggregate_metric_double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'aggregate_metric_double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'aggregate_metric_double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'aggregate_metric_double',
+    },
+  ],
   locationsAvailable: [
     Location.EVAL,
     Location.ROW,
@@ -13686,10 +13781,50 @@ const toDenseVectorDefinition: FunctionDefinition = {
     defaultMessage:
       'Converts a multi-valued input of numbers, or a hexadecimal string, to a dense_vector.',
   }),
-  ignoreAsSuggestion: true,
-  preview: false,
+  preview: true,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+      ],
+      returnType: 'dense_vector',
+    },
+  ],
   locationsAvailable: [
     Location.EVAL,
     Location.ROW,
@@ -14676,6 +14811,16 @@ const toStringDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'aggregate_metric_double',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'boolean',
           optional: false,
         },
@@ -14717,6 +14862,16 @@ const toStringDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'dense_vector',
           optional: false,
         },
       ],
@@ -15338,7 +15493,23 @@ const vCosineDefinition: FunctionDefinition = {
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
   locationsAvailable: [
     Location.EVAL,
     Location.ROW,
@@ -15366,7 +15537,23 @@ const vDotProductDefinition: FunctionDefinition = {
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
   locationsAvailable: [
     Location.EVAL,
     Location.ROW,
@@ -15394,7 +15581,23 @@ const vHammingDefinition: FunctionDefinition = {
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
   locationsAvailable: [
     Location.EVAL,
     Location.ROW,
@@ -15422,7 +15625,23 @@ const vL1NormDefinition: FunctionDefinition = {
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
   locationsAvailable: [
     Location.EVAL,
     Location.ROW,
@@ -15450,7 +15669,23 @@ const vL2NormDefinition: FunctionDefinition = {
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'dense_vector',
+          optional: false,
+        },
+        {
+          name: 'right',
+          type: 'dense_vector',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
   locationsAvailable: [
     Location.EVAL,
     Location.ROW,
@@ -15478,7 +15713,18 @@ const vMagnitudeDefinition: FunctionDefinition = {
   ignoreAsSuggestion: true,
   preview: true,
   alias: undefined,
-  signatures: [],
+  signatures: [
+    {
+      params: [
+        {
+          name: 'input',
+          type: 'dense_vector',
+          optional: false,
+        },
+      ],
+      returnType: 'double',
+    },
+  ],
   locationsAvailable: [
     Location.EVAL,
     Location.ROW,

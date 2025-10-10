@@ -305,7 +305,6 @@ const prepareIngestSimulationBody = (
   const { docs, processors } = simulationData;
 
   const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
-  const mappings = streamIndex.mappings;
 
   const pipelineSubstitutions: SimulateIngestRequest['pipeline_substitutions'] = {};
 
@@ -336,13 +335,11 @@ const prepareIngestSimulationBody = (
     // But the ingest simulation API does not validate correctly the mappings unless they are specified in the simulation body.
     // So we need to merge the mappings from the stream index with the detected fields.
     // This is a workaround until the ingest simulation API works as expected.
-    mapping_addition: {
-      ...mappings,
-      properties: {
-        ...(mappings && mappings.properties),
-        ...(detected_fields && computeMappingProperties(detected_fields)),
+    ...(detected_fields && {
+      mapping_addition: {
+        properties: computeMappingProperties(detected_fields),
       },
-    },
+    }),
   };
 
   return simulationBody;

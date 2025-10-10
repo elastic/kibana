@@ -18,7 +18,7 @@ import { createSettingsUserActionBuilder } from './settings';
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
-describe('createStatusUserActionBuilder ', () => {
+describe('createSettingsUserActionBuilder ', () => {
   const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {

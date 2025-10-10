@@ -88,6 +88,8 @@ export class BasicPrettyPrinter {
       ? BasicPrettyPrinter.query(node, opts)
       : node.type === 'command'
       ? BasicPrettyPrinter.command(node, opts)
+      : node.type === 'header-command'
+      ? BasicPrettyPrinter.command(node as any, opts)
       : BasicPrettyPrinter.expression(node, opts);
   };
 

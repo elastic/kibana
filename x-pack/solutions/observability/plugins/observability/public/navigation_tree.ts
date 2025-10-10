@@ -500,7 +500,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 spaceBefore: null,
                 children: [
                   {
-                    link: 'observability-overview:rules',
+                    link: 'management:triggersActions',
                   },
                   {
                     link: 'management:triggersActionsConnectors',
@@ -599,6 +599,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   },
                   {
                     link: 'management:dataViews',
+                  },
+                  {
+                    link: 'management:search_sessions',
                   },
                 ],
               },

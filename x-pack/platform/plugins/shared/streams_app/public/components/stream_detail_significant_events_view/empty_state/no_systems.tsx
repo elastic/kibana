@@ -33,14 +33,14 @@ export function NoSystemsEmptyState({
       <EuiTitle size="s">
         <h2>
           {i18n.translate('xpack.streams.significantEvents.noSystems.title', {
-            defaultMessage: 'System description missing',
+            defaultMessage: 'Stream features missing',
           })}
         </h2>
       </EuiTitle>
       <EuiText size="s" textAlign="center" css={{ maxWidth: 480 }}>
         {i18n.translate('xpack.streams.significantEvents.noSystems.description', {
           defaultMessage:
-            'Descriptive context in natural language of your stream. Think of it like logical groupings, that give us insights, for better analysis.',
+            'Feature identification generates logical subsets of the data in that stream. This is useful for generating better significant events.',
         })}
       </EuiText>
       <EuiFlexGroup direction="row" gutterSize="s">
@@ -51,7 +51,7 @@ export function NoSystemsEmptyState({
           disabled={!aiFeatures?.genAiConnectors?.selectedConnector}
         >
           {i18n.translate('xpack.streams.significantEvents.noSystems.systemDetectionButtonLabel', {
-            defaultMessage: 'System detection',
+            defaultMessage: 'Identify features',
           })}
         </EuiButton>
         <EuiButtonEmpty onClick={onManualEntryClick}>

@@ -186,6 +186,10 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 /** This Kibana Advanced Setting sets a default AI connector for serverless AI features (AI for SOC) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
 
+/** Feature flag for the default AI connector setting */
+export const AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED =
+  'aiAssistant.defaultLlmSettingEnabled' as const;
+
 /** This Kibana Advanced Setting sets a default AI value report minutes per alert */
 export const DEFAULT_VALUE_REPORT_MINUTES = 'securitySolution:defaultValueReportMinutes' as const;
 

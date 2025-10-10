@@ -2442,14 +2442,8 @@
             "label": "getSuggestionProvider",
             "description": [],
             "signature": [
-              "(callbacks?: ",
-              {
-                "pluginId": "@kbn/esql-validation-autocomplete",
-                "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
-                "section": "def-common.ESQLCallbacks",
-                "text": "ESQLCallbacks"
-              },
+              "(deps?: ",
+              "ESQLDependencies",
               " | undefined) => ",
               "languages",
               ".CompletionItemProvider"
@@ -2461,18 +2455,12 @@
               {
                 "parentPluginId": "@kbn/monaco",
                 "id": "def-common.ESQLLang.getSuggestionProvider.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "callbacks",
+                "label": "deps",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/esql-validation-autocomplete",
-                    "scope": "common",
-                    "docId": "kibKbnEsqlValidationAutocompletePluginApi",
-                    "section": "def-common.ESQLCallbacks",
-                    "text": "ESQLCallbacks"
-                  },
+                  "ESQLDependencies",
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",

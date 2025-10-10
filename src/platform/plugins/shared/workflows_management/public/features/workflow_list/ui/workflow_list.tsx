@@ -9,7 +9,6 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,9 +34,11 @@ import { StatusBadge, WorkflowStatus, getRunWorkflowTooltipContent } from '../..
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
 import type { WorkflowsSearchParams } from '../../../types';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
+import { WorkflowTags } from '../../../widgets/workflow_tags/workflow_tags';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { WorkflowsUtilityBar } from './workflows_utility_bar';
+import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -212,16 +213,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         field: 'tags',
         name: 'Tags',
         width: '15%',
-        render: (value: any, item: WorkflowListItemDto) => {
-          const tags = item.definition?.tags;
-          if (!tags || tags.length === 0) {
-            return null;
-          }
-          return tags.map((tag: string) => (
-            <EuiBadge key={tag} color="hollow">
-              {tag}
-            </EuiBadge>
-          ));
+        render: (value: any, workflow: WorkflowListItemDto) => {
+          return <WorkflowTags tags={workflow.definition?.tags} />;
         },
       },
       {
@@ -229,7 +222,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         name: 'Trigger',
         width: '16%',
         render: (value: any, item: WorkflowListItemDto) => (
-          <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
+          <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
+            <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
+          </NextExecutionTime>
         ),
       },
       {
@@ -318,19 +313,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                 defaultMessage: 'Run',
               }),
             onClick: (item: WorkflowListItemDto) => {
-              let needInput: boolean | undefined = false;
-              if (item.definition?.triggers) {
-                needInput =
-                  item.definition.triggers.some((trigger) => trigger.type === 'alert') ||
-                  (item.definition.triggers.some((trigger) => trigger.type === 'manual') &&
-                    item.definition.inputs &&
-                    Object.keys(item.definition.inputs).length > 0);
-              }
-              if (needInput) {
-                setExecuteWorkflow(item);
-              } else {
-                handleRunWorkflow(item.id, {});
-              }
+              setExecuteWorkflow(item);
             },
           },
           {
@@ -391,16 +374,15 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       },
     ],
     [
+      canUpdateWorkflow,
+      handleToggleWorkflow,
+      canExecuteWorkflow,
       application,
       canCreateWorkflow,
-      canDeleteWorkflow,
-      canExecuteWorkflow,
-      canUpdateWorkflow,
       handleCloneWorkflow,
+      canDeleteWorkflow,
       handleDeleteWorkflow,
-      handleRunWorkflow,
       setExecuteWorkflow,
-      handleToggleWorkflow,
     ]
   );
 

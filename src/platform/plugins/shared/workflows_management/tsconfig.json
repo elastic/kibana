@@ -50,7 +50,16 @@
     "@kbn/core-i18n-browser-mocks",
     "@kbn/core-lifecycle-browser-mocks",
     "@kbn/serverless",
-    "@kbn/resizable-layout"
+    "@kbn/field-types",
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/es-query",
+    "@kbn/data-plugin",
+    "@kbn/rrule",
+    "@kbn/resizable-layout",
+    "@kbn/es-types",
+    "@kbn/search-types"
   ],
   "exclude": ["target/**/*"]
 }

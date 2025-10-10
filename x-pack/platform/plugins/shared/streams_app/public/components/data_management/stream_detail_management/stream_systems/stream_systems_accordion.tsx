@@ -30,7 +30,7 @@ export const StreamSystemsAccordion = ({
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             {i18n.translate('xpack.streams.streamSystemsAccordion.buttonLabel', {
-              defaultMessage: 'Existing stream systems',
+              defaultMessage: 'Stream features',
             })}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

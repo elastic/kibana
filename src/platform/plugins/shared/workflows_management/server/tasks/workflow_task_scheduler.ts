@@ -12,6 +12,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
 import type { WorkflowTrigger } from '../lib/schedule_utils';
 import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
+import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
@@ -64,6 +65,16 @@ export class WorkflowTaskScheduler {
     request?: KibanaRequest
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
+
+    // Log RRule-specific scheduling details
+    if ('rrule' in schedule && schedule.rrule) {
+      const freqText = getReadableFrequency(schedule.rrule.freq);
+      const intervalText = getReadableInterval(schedule.rrule.freq, schedule.rrule.interval);
+
+      this.logger.info(
+        `RRule schedule created for workflow ${workflowId}: ${freqText} every ${schedule.rrule.interval} ${intervalText}`
+      );
+    }
 
     const taskInstance = {
       id: `workflow:${workflowId}:${trigger.type}`,

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Scalar } from 'yaml';
-import { YAMLParseError, isScalar, parseDocument } from 'yaml';
+import type { Scalar, Document, Pair, Node } from 'yaml';
+import { YAMLParseError, isPair, isScalar, parseDocument, visit } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
 import type { BuiltInStepType, TriggerType } from '@kbn/workflows';
@@ -34,7 +34,10 @@ import {
 } from '../../../../common/lib/regex';
 import { generateConnectorSnippet } from './snippets/generate_connector_snippet';
 import { generateBuiltInStepSnippet } from './snippets/generate_builtin_step_snippet';
-import { generateTriggerSnippet } from './snippets/generate_trigger_snippet';
+import {
+  generateTriggerSnippet,
+  generateRRuleTriggerSnippet,
+} from './snippets/generate_trigger_snippet';
 import { getCachedAllConnectors } from './connectors_cache';
 import { getIndentLevel } from './get_indent_level';
 
@@ -169,6 +172,70 @@ function isInTriggersContext(path: any[]): boolean {
   // Check if the path includes 'triggers' at any level
   // Examples: ['triggers'], ['triggers', 0], ['triggers', 0, 'with'], etc.
   return path.length > 0 && path[0] === 'triggers';
+}
+
+/**
+ * Detect if we're in a scheduled trigger's with block
+ */
+function isInScheduledTriggerWithBlock(yamlDocument: Document, absolutePosition: number): boolean {
+  let result = false;
+
+  visit(yamlDocument, {
+    Map(key, node, ancestors) {
+      if (!node.range || node.get('type') !== 'scheduled') return;
+
+      // Check if we're inside this trigger's range
+      if (absolutePosition < node.range[0] || absolutePosition > node.range[2]) return;
+
+      // Find the 'with' property node within this trigger
+      const withPair = node.items.find(
+        (item: any) => isPair(item) && isScalar(item.key) && item.key.value === 'with'
+      ) as Pair<Scalar, Node> | undefined;
+
+      if (withPair?.value?.range) {
+        // Check if the current position is within the with block's range
+        if (
+          absolutePosition >= withPair.value.range[0] &&
+          absolutePosition <= withPair.value.range[2]
+        ) {
+          // Check if there's already an existing rrule or every configuration
+          if (hasExistingScheduleConfiguration(withPair.value)) {
+            // Don't show rrule suggestions if there's already a schedule configuration
+            result = false;
+            return visit.BREAK;
+          }
+
+          result = true;
+          return visit.BREAK;
+        }
+      }
+    },
+  });
+
+  return result;
+}
+
+/**
+ * Check if there's already an existing schedule configuration (rrule or every) in the with block
+ */
+function hasExistingScheduleConfiguration(withNode: Node): boolean {
+  if (!withNode) {
+    return false;
+  }
+
+  // Check for existing 'rrule' or 'every' properties
+  const items = (withNode as any).items || [];
+
+  for (const item of items) {
+    if (isPair(item) && isScalar(item.key)) {
+      const keyValue = item.key.value;
+      if (keyValue === 'rrule' || keyValue === 'every') {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 export interface LineParseResult {
@@ -917,6 +984,65 @@ function getTriggerTypeSuggestions(
   return suggestions;
 }
 
+/**
+ * Get RRule scheduling pattern suggestions
+ */
+function getRRuleSchedulingSuggestions(range: monaco.IRange): monaco.languages.CompletionItem[] {
+  const suggestions: monaco.languages.CompletionItem[] = [];
+
+  const rrulePatterns = [
+    {
+      label: 'Daily at 9 AM',
+      description: 'Run daily at 9:00 AM UTC',
+      pattern: 'daily' as const,
+    },
+    {
+      label: 'Business hours (weekdays 8 AM & 5 PM)',
+      description: 'Run on weekdays at 8 AM and 5 PM EST',
+      pattern: 'weekly' as const,
+    },
+    {
+      label: 'Monthly on 1st and 15th',
+      description: 'Run monthly on 1st and 15th at 10:30 AM UTC',
+      pattern: 'monthly' as const,
+    },
+    {
+      label: 'Custom RRule',
+      description: 'Create a custom RRule configuration with all options',
+      pattern: 'custom' as const,
+    },
+  ];
+
+  rrulePatterns.forEach(({ label, description, pattern }) => {
+    const snippetText = generateRRuleTriggerSnippet(pattern, {
+      monacoSuggestionFormat: true,
+    });
+
+    // Extended range for multi-line insertion
+    const extendedRange = {
+      startLineNumber: range.startLineNumber,
+      endLineNumber: range.endLineNumber,
+      startColumn: range.startColumn,
+      endColumn: Math.max(range.endColumn, 1000),
+    };
+
+    suggestions.push({
+      label,
+      kind: monaco.languages.CompletionItemKind.Snippet,
+      insertText: snippetText,
+      insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+      range: extendedRange,
+      documentation: description,
+      filterText: label,
+      sortText: `!rrule-${pattern}`, // Priority prefix for RRule suggestions
+      detail: 'RRule scheduling pattern',
+      preselect: false,
+    });
+  });
+
+  return suggestions;
+}
+
 export function getSuggestion(
   key: string,
   context: monaco.languages.CompletionContext,
@@ -1140,6 +1266,17 @@ export function getCompletionItemProvider(
         // First check if we're in a connector's with block (using enhanced detection)
         const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
         // Detected connector type
+
+        // Check if we're in a scheduled trigger's with block for RRule suggestions
+        if (isInScheduledTriggerWithBlock(yamlDocument, absolutePosition)) {
+          // We're in a scheduled trigger's with block - provide RRule suggestions
+          const rruleSuggestions = getRRuleSchedulingSuggestions(range);
+
+          return {
+            suggestions: rruleSuggestions,
+            incomplete: false,
+          };
+        }
 
         // If we're in a connector with block, prioritize connector-specific suggestions
         if (connectorType) {

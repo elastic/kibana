@@ -149,7 +149,10 @@ export function Wrapper({
                     {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                     {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}
                     {Streams.ingest.all.GetResponse.is(definition) && (
-                      <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+                      <LifecycleBadge
+                        lifecycle={definition.effective_lifecycle}
+                        dataTestSubj={`lifecycleBadge-${streamId}`}
+                      />
                     )}
                     <DatasetQualityIndicator
                       quality={quality}

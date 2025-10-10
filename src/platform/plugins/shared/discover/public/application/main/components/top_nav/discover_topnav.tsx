@@ -70,8 +70,8 @@ export const DiscoverTopNav = ({
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
   const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
-  const discoverSessionTitle = useInternalStateSelector(
-    (state) => state.persistedDiscoverSession?.title
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
   );
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
@@ -171,7 +171,10 @@ export const DiscoverTopNav = ({
     [dataView.id, dispatch, services, stateContainer]
   );
 
-  const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
+  const { topNavBadges, topNavMenu } = useDiscoverTopNav({
+    stateContainer,
+    persistedDiscoverSession,
+  });
 
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
@@ -249,7 +252,7 @@ export const DiscoverTopNav = ({
         onSavedQueryIdChange={updateSavedQueryId}
         query={query}
         savedQueryId={savedQuery}
-        screenTitle={discoverSessionTitle}
+        screenTitle={persistedDiscoverSession?.title}
         showDatePicker={showDatePicker}
         allowSavingQueries
         showSearchBar={true}

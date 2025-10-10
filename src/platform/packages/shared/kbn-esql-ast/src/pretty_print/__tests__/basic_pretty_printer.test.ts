@@ -316,6 +316,16 @@ describe('single line query', () => {
         );
       });
 
+      test('from singlelinewith with options', () => {
+        const { text } =
+          reprint(`FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH { "normalizer": "minmax" }
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH {"normalizer": "minmax"}'
+        );
+      });
+
       test('from multiline', () => {
         const { text } = reprint(`FROM search-movies METADATA _score, _id, _index
   | FORK
@@ -327,6 +337,20 @@ describe('single line query', () => {
 
         expect(text).toBe(
           'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score'
+        );
+      });
+
+      test('from multiline with options', () => {
+        const { text } = reprint(`FROM search-movies
+  | FUSE linear
+        SCORE BY s1
+        KEY BY k1, k2
+        GROUP BY g
+        WITH {"normalizer": "minmax"}
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH {"normalizer": "minmax"}'
         );
       });
     });

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import type {
   UnifiedHistogramApi,
   UnifiedHistogramState,
@@ -207,7 +206,6 @@ export const useDiscoverHistogram = (
   /**
    * Request params
    */
-  const { query, filters } = useQuerySubscriber({ data: services.data });
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const {
     timeRangeRelative: relativeTimeRange,
@@ -299,13 +297,18 @@ export const useDiscoverHistogram = (
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
+  const query = useAppStateSelector((state) => state.query);
+  const appFilters = useAppStateSelector((state) => state.filters);
+  const { filters: globalFilters } = useCurrentTabSelector((state) => state.globalState);
+
   const filtersMemoized = useMemo(() => {
-    const allFilters = [...(filters ?? [])];
+    const allFilters = [...(globalFilters ?? []), ...(appFilters ?? [])];
     return allFilters.length ? allFilters : EMPTY_FILTERS;
-  }, [filters]);
+  }, [appFilters, globalFilters]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
+
   const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
     internalStateActions.setOverriddenVisContextAfterInvalidation
   );
@@ -399,7 +402,7 @@ export const useDiscoverHistogram = (
     },
     dataView: isEsqlMode ? esqlDataView : dataView,
     query: isEsqlMode ? esqlQuery : query,
-    filters: filtersMemoized,
+    filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
     timeRange: timeRangeMemoized,
     relativeTimeRange,
     columns: isEsqlMode ? esqlColumns : undefined,

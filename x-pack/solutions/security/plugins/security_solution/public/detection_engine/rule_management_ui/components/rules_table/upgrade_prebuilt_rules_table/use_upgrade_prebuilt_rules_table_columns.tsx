@@ -132,6 +132,7 @@ const MODIFIED_COLUMN: TableColumn = {
           color="hollow"
           data-test-subj="upgradeRulesTableModifiedColumnBadge"
           aria-label={i18n.MODIFIED_LABEL}
+          tabIndex={0}
         >
           {i18n.MODIFIED_LABEL}
         </EuiBadge>
@@ -155,6 +156,7 @@ const CONFLICT_COLUMN: TableColumn = {
               color="warning"
               data-test-subj="upgradeRulesTableSolvableConflictColumnBadge"
               aria-label={i18n.SOLVABLE_CONFLICT_LABEL}
+              tabIndex={0}
             >
               {i18n.SOLVABLE_CONFLICT_LABEL}
             </EuiBadge>
@@ -168,6 +170,7 @@ const CONFLICT_COLUMN: TableColumn = {
               color="danger"
               data-test-subj="upgradeRulesTableUnsolvableConflictColumnBadge"
               aria-label={i18n.NON_SOLVABLE_CONFLICT_LABEL}
+              tabIndex={0}
             >
               {i18n.NON_SOLVABLE_CONFLICT_LABEL}
             </EuiBadge>

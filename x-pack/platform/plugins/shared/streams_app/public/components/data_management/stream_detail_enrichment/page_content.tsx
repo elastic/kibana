@@ -9,12 +9,10 @@ import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiCode,
-  EuiFlexGroup,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
@@ -184,8 +182,6 @@ export function StreamDetailEnrichmentContentImpl() {
 }
 
 const StepsEditor = React.memo(() => {
-  const { euiTheme } = useEuiTheme();
-
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
@@ -234,40 +230,42 @@ const StepsEditor = React.memo(() => {
                   <strong>
                     {i18n.translate(
                       'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
-                      { defaultMessage: 'Some fields were ignored during the simulation.' }
+                      { defaultMessage: 'Malformed fields detected.' }
                     )}
                   </strong>
                 }
               >
                 <EuiText component="p" size="s">
                   <p>
+                    <FormattedMessage
+                      id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
+                      defaultMessage="Some fields are malformed and won’t be stored correctly: {fields}"
+                      values={{
+                        fields: errors.ignoredFields.map((field) => (
+                          <>
+                            <EuiCode key={field}>{field}</EuiCode>{' '}
+                          </>
+                        )),
+                      }}
+                    />
+                  </p>
+                  <p>
                     {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
+                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.causesLabel',
                       {
                         defaultMessage:
-                          'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
+                          'This can happen due to type mismatches or fields exceeding configured limits.',
                       }
                     )}
                   </p>
                   <p>
-                    <FormattedMessage
-                      id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
-                      defaultMessage="The ignored fields are: {fields}"
-                      values={{
-                        fields: (
-                          <EuiFlexGroup
-                            gutterSize="s"
-                            css={css`
-                              margin-top: ${euiTheme.size.s};
-                            `}
-                          >
-                            {errors.ignoredFields.map((field) => (
-                              <EuiCode key={field}>{field}</EuiCode>
-                            ))}
-                          </EuiFlexGroup>
-                        ),
-                      }}
-                    />
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.suggestionsLabel',
+                      {
+                        defaultMessage:
+                          'Check your field mappings, add processors to normalize values, or remove the conflicting fields.',
+                      }
+                    )}
                   </p>
                 </EuiText>
               </EuiAccordion>

@@ -88,5 +88,7 @@
     "@kbn/storage-adapter",
     "@kbn/cloud-plugin",
     "@kbn/es-ui-shared-plugin",
+    "@kbn/deeplinks-security",
+    "@kbn/spaces-plugin",
   ]
 }
