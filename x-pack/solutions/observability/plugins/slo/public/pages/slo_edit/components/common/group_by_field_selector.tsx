@@ -48,6 +48,7 @@ export function GroupByFieldSelector({ indexFields, isDisabled, isLoading }: Pro
 
   return (
     <EuiFormRow
+      fullWidth
       label={
         <span>
           {i18n.translate('xpack.slo.sloEdit.groupBy.label', {
@@ -72,6 +73,7 @@ export function GroupByFieldSelector({ indexFields, isDisabled, isLoading }: Pro
           return (
             <EuiComboBox<string>
               {...field}
+              fullWidth
               async
               placeholder={placeholder}
               aria-label={placeholder}
