@@ -60,7 +60,8 @@ module.exports = {
     : ['html', 'text'],
 
   snapshotSerializers: [],
-  setupFiles: ['<rootDir>/src/setup_node_env/polyfill.ts'],
+  // setupFiles: ['<rootDir>/src/setup_node_env/polyfill.ts'],
+  setupFiles: [],
   haste: {
     ...preset.haste,
     throwOnModuleCollision: true,
