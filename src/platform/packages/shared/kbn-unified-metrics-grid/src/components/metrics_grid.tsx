@@ -14,13 +14,13 @@ import { i18n } from '@kbn/i18n';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
+import { css } from '@emotion/react';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import { Chart } from './chart';
 import { MetricInsightsFlyout } from './flyout/metrics_insights_flyout';
 import { EmptyState } from './empty_state/empty_state';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../context/fields_metadata';
-
 export type MetricsGridProps = Pick<
   ChartSectionProps,
   'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
@@ -54,9 +54,9 @@ export const MetricsGrid = ({
   discoverFetch$,
   filters = [],
 }: MetricsGridProps) => {
-  const { euiTheme } = useEuiTheme();
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const { euiTheme } = useEuiTheme();
 
   const [expandedMetric, setExpandedMetric] = useState<
     | {
@@ -93,13 +93,16 @@ export const MetricsGrid = ({
       gridRef,
     });
 
-  const setChartRef = useCallback((chartId: string, element: HTMLDivElement | null) => {
-    if (element) {
-      chartRefs.current.set(chartId, element);
-    } else {
-      chartRefs.current.delete(chartId);
-    }
-  }, []);
+  const setChartRef = useCallback(
+    (chartId: string) => (element: HTMLDivElement | null) => {
+      if (element) {
+        chartRefs.current.set(chartId, element);
+      } else {
+        chartRefs.current.delete(chartId);
+      }
+    },
+    []
+  );
 
   const handleViewDetails = useCallback(
     (esqlQuery: string, metric: MetricField, chartId: string) => {
@@ -114,10 +117,10 @@ export const MetricsGrid = ({
 
   const handleCloseFlyout = useCallback(() => {
     if (expandedMetric) {
-      // Use setTimeout to ensure the flyout is fully closed before focusing
-      setTimeout(() => {
+      // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
+      requestAnimationFrame(() => {
         focusCell(expandedMetric.rowIndex, expandedMetric.colIndex);
-      }, 0);
+      });
     }
     setExpandedMetric(undefined);
   }, [expandedMetric, focusCell]);
@@ -160,20 +163,15 @@ export const MetricsGrid = ({
 
   return (
     <FieldsMetadataProvider fields={normalizedFields} services={services}>
-      <div
+      <A11yGridWrapper
         ref={gridRef}
-        role="grid"
         aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
           defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
         })}
-        aria-rowcount={gridRows}
-        aria-colcount={gridColumns}
+        gridRows={gridRows}
+        gridColumns={gridColumns}
         onKeyDown={handleKeyDown}
         data-test-subj="unifiedMetricsExperienceGrid"
-        tabIndex={0}
-        style={{
-          outline: 'none',
-        }}
       >
         <EuiFlexGrid columns={columns} gutterSize="s">
           {rows.map(({ key, metric }, index) => {
@@ -184,23 +182,13 @@ export const MetricsGrid = ({
 
             return (
               <EuiFlexItem key={key}>
-                <div
-                  ref={(element) => setChartRef(chartId, element)}
-                  role="gridcell"
-                  aria-rowindex={rowIndex + 1}
-                  aria-colindex={colIndex + 1}
-                  data-grid-cell={`${rowIndex}-${colIndex}`}
-                  data-chart-index={index}
-                  tabIndex={isFocused ? 0 : -1}
-                  onFocus={() => handleFocusCell(rowIndex, colIndex)}
-                  style={{
-                    outline: 'none',
-                    cursor: 'pointer',
-                    ...(isFocused && {
-                      boxShadow: `inset 0 0 0 2px ${euiTheme.colors.primary}`,
-                      borderRadius: euiTheme.border.radius.medium,
-                    }),
-                  }}
+                <A11yGridCell
+                  ref={setChartRef(chartId)}
+                  rowIndex={rowIndex}
+                  colIndex={colIndex}
+                  index={index}
+                  isFocused={isFocused}
+                  onFocus={handleFocusCell}
                 >
                   <Chart
                     chartId={chartId}
@@ -218,12 +206,12 @@ export const MetricsGrid = ({
                     onFilter={onFilter}
                     onViewDetails={handleViewDetails}
                   />
-                </div>
+                </A11yGridCell>
               </EuiFlexItem>
             );
           })}
         </EuiFlexGrid>
-      </div>
+      </A11yGridWrapper>
       {expandedMetric && (
         <MetricInsightsFlyout
           chartRef={getChartRefForFocus()}
@@ -236,3 +224,92 @@ export const MetricsGrid = ({
     </FieldsMetadataProvider>
   );
 };
+
+const A11yGridWrapper = React.forwardRef(
+  (
+    {
+      children,
+      gridRows,
+      gridColumns,
+      onKeyDown,
+    }: React.PropsWithChildren<{
+      gridRows: number;
+      gridColumns: number;
+      onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
+    }>,
+    ref: React.Ref<HTMLDivElement>
+  ) => {
+    return (
+      <div
+        ref={ref}
+        role="grid"
+        aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
+          defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
+        })}
+        aria-rowcount={gridRows}
+        aria-colcount={gridColumns}
+        onKeyDown={onKeyDown}
+        data-test-subj="unifiedMetricsExperienceGrid"
+        tabIndex={0}
+        style={{
+          outline: 'none',
+        }}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+const A11yGridCell = React.forwardRef(
+  (
+    {
+      children,
+      rowIndex,
+      colIndex,
+      index,
+      isFocused,
+      onFocus,
+    }: React.PropsWithChildren<{
+      rowIndex: number;
+      colIndex: number;
+      index: number;
+      isFocused: boolean;
+      onFocus: (rowIndex: number, colIndex: number) => void;
+    }>,
+    ref: React.Ref<HTMLDivElement>
+  ) => {
+    const { euiTheme } = useEuiTheme();
+
+    const handleFocusCell = useCallback(
+      () => onFocus(rowIndex, colIndex),
+      [onFocus, rowIndex, colIndex]
+    );
+
+    return (
+      <div
+        ref={ref}
+        role="gridcell"
+        aria-rowindex={rowIndex + 1}
+        aria-colindex={colIndex + 1}
+        data-grid-cell={`${rowIndex}-${colIndex}`}
+        data-chart-index={index}
+        tabIndex={isFocused ? 0 : -1}
+        onFocus={handleFocusCell}
+        css={css`
+          outline: none,
+          cursor: pointer,
+          ${
+            isFocused && {
+              boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
+              borderRadius: euiTheme.border.radius.medium,
+            }
+          }
+
+        `}
+      >
+        {children}
+      </div>
+    );
+  }
+);

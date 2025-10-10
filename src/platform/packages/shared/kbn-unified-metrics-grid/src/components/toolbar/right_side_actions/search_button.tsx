@@ -7,58 +7,73 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
   useEuiTheme,
+  keys,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
-import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { useToolbarActions } from '../hooks/use_toolbar_actions';
 
-interface RightSideActionsProps
-  extends Pick<ChartSectionProps, 'requestParams' | 'renderToggleActions'> {
-  searchTerm: string;
-  onSearchTermChange: (value: string) => void;
+interface RightSideActionsProps {
+  value: string;
   'data-test-subj'?: string;
-  fields: MetricField[];
-  indexPattern: string;
+  isFullscreen: boolean;
+  onSearchTermChange: (value: string) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
-export const RightSideActions = ({
-  searchTerm,
-  onSearchTermChange,
+const searchButtonLabel = i18n.translate('metricsExperience.searchButton', {
+  defaultMessage: 'Search',
+});
+
+const DEBOUNCE_TIME = 300;
+
+export const SearchButton = ({
+  value,
+  isFullscreen,
   'data-test-subj': dataTestSubj,
-  fields,
-  indexPattern,
-  renderToggleActions,
-  requestParams,
+  onSearchTermChange,
+  onKeyDown,
 }: RightSideActionsProps) => {
   const { euiTheme } = useEuiTheme();
-  const {
-    onShowSearch,
-    showSearchInput,
-    isFullscreen,
-    onToggleFullscreen,
-    onClearSearch,
-    onKeyDown,
-  } = useToolbarActions({
-    fields,
-    indexPattern,
-    renderToggleActions,
-    requestParams,
-  });
+
+  const [searchTerm, setSearchTerm] = useState(value);
+
+  const [showSearchInput, setShowSearchInput] = useState(false);
+
+  useDebounce(() => onSearchTermChange(searchTerm), DEBOUNCE_TIME, [searchTerm]);
+
+  const onShowSearch = useCallback(() => {
+    setShowSearchInput(true);
+  }, []);
+
+  const onClearSearch = useCallback(() => {
+    setShowSearchInput(false);
+    setSearchTerm('');
+  }, [setSearchTerm]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.key === keys.ESCAPE && !isFullscreen && showSearchInput) {
+        onClearSearch();
+      }
+
+      onKeyDown(e);
+    },
+    [isFullscreen, showSearchInput, onClearSearch, onKeyDown]
+  );
 
   const onSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      onSearchTermChange(e.target.value);
+      setSearchTerm(e.target.value);
     },
-    [onSearchTermChange]
+    [setSearchTerm]
   );
 
   const onBlur = useCallback(() => {
@@ -66,18 +81,6 @@ export const RightSideActions = ({
       onClearSearch();
     }
   }, [onClearSearch, searchTerm]);
-
-  const searchButtonLabel = i18n.translate('metricsExperience.searchButton', {
-    defaultMessage: 'Search',
-  });
-
-  const fullscreenButtonLabel = isFullscreen
-    ? i18n.translate('metricsExperience.fullScreenExitButton', {
-        defaultMessage: 'Exit fullscreen (esc)',
-      })
-    : i18n.translate('metricsExperience.fullScreenButton', {
-        defaultMessage: 'Enter fullscreen',
-      });
 
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
@@ -89,7 +92,7 @@ export const RightSideActions = ({
                 autoFocus
                 value={searchTerm}
                 onChange={onSearchChange}
-                onKeyDown={onKeyDown}
+                onKeyDown={handleKeyDown}
                 onBlur={onBlur}
                 placeholder={i18n.translate('metricsExperience.searchInputPlaceholder', {
                   defaultMessage: 'Search metrics',
@@ -103,7 +106,12 @@ export const RightSideActions = ({
                 css={css`
                   border-top-right-radius: 0;
                   border-bottom-right-radius: 0;
+                  border-right: 0;
                   min-width: 200px;
+
+                  &::after {
+                    border-right: 0;
+                  }
                 `}
               />
             </EuiFlexItem>
@@ -118,31 +126,18 @@ export const RightSideActions = ({
                 size="s"
                 css={css`
                   border: ${euiTheme.border.thin};
-                  border-right: none;
                   border-top-right-radius: 0;
                   border-bottom-right-radius: 0;
+
+                  &:focus {
+                    outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+                    outline-offset: -${euiTheme.focus.width};
+                  }
                 `}
                 color="text"
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
-              aria-label={fullscreenButtonLabel}
-              title={fullscreenButtonLabel}
-              onClick={onToggleFullscreen}
-              data-test-subj="metricsExperienceToolbarFullScreen"
-              size="s"
-              css={css`
-                border: ${euiTheme.border.thin};
-                border-left: ${showSearchInput ? 'none' : euiTheme.border.thin};
-                border-top-left-radius: 0;
-                border-bottom-left-radius: 0;
-              `}
-              color="text"
-            />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

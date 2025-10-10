@@ -11,9 +11,14 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 export const FIELD_VALUE_SEPARATOR = String.fromCharCode(0x1d);
 
 // Full screen classes
+export const METRICS_GRID_CLASS = 'metricsExperienceGrid';
 export const METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS = 'metricsExperienceGridWrapper--fullScreen';
-export const METRICS_GRID_FULL_SCREEN_CLASS = 'metricsExperienceGrid--fullScreen';
-export const METRICS_GRID_RESTRICT_BODY_CLASS = 'metricsExperienceGrid--restrictBody';
+export const METRICS_GRID_FULL_SCREEN_CLASS = `${METRICS_GRID_CLASS}--fullScreen`;
+export const METRICS_GRID_RESTRICT_BODY_CLASS = `${METRICS_GRID_CLASS}--restrictBody`;
+
+// data-test-subj
+export const METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ = 'metricsExperienceBreakdownSelector';
+export const METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ = 'metricsExperienceValuesSelector';
 
 // Selection limits
 export const MAX_VALUES_SELECTIONS = 10;
