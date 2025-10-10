@@ -8,11 +8,14 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { omit } from 'lodash';
+import { omit, uniq } from 'lodash';
 import { systemIndicesSuperuser, createEsClientForFtrConfig } from '@kbn/test';
 import { castArray } from 'lodash';
 import pLimit from 'p-limit';
-import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesPutIndexTemplateIndexTemplateMapping,
+  IndicesPutIndexTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { FtrProviderContext } from './ftr_provider_context';
 
 export async function EsProvider({ getService }: FtrProviderContext): Promise<Client> {
@@ -87,6 +90,7 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
         ignore_missing_component_templates: castArray(
           tpl.index_template.ignore_missing_component_templates ?? []
         ),
+        composed_of: uniq([...tpl.index_template.composed_of, 'fast_refresh']),
       };
 
       // there are some templates where the priority is higher than ES' parser supports
@@ -98,23 +102,40 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     })
   );
 
+  function wrapTemplate(tpl: IndicesPutIndexTemplateIndexTemplateMapping = {}) {
+    return {
+      ...tpl,
+      settings: {
+        ...tpl.settings,
+        refresh_interval: refreshInterval,
+      },
+    };
+  }
+
   // Wrap putIndexTemplate to always include 'fast_refresh' in composed_of
   // @ts-expect-error
   wrap(client.indices, 'putIndexTemplate', function putIndexTemplate(originalPutIndexTemplate) {
     return function (indexTemplateRequest, options) {
-      const nextRequest: IndicesPutIndexTemplateRequest = {
+      const nextRequest = {
         ...indexTemplateRequest,
-        template: {
-          ...indexTemplateRequest.template,
-          settings: {
-            ...indexTemplateRequest.template?.settings,
-            refresh_interval: refreshInterval,
-          },
-        },
+        ...('body' in indexTemplateRequest && typeof indexTemplateRequest.body !== 'string'
+          ? {
+              body: {
+                ...indexTemplateRequest.body,
+                template: wrapTemplate(indexTemplateRequest.body?.template),
+              },
+            }
+          : {
+              template: wrapTemplate(indexTemplateRequest.template),
+            }),
       };
 
       // Call original with both arguments to preserve signature
-      return originalPutIndexTemplate.call(this, nextRequest, options);
+      return originalPutIndexTemplate.call(
+        this,
+        nextRequest as IndicesPutIndexTemplateRequest,
+        options
+      );
     };
   });
 
