@@ -7,6 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LazyUnifiedMetricsExperienceGrid as UnifiedMetricsExperienceGrid } from './src/components/lazy_unified_metrics_experience_grid';
-export { LazyTraceMetricsGrid as TraceMetricsGrid } from './src/components/trace_metrics_grid/lazy_trace_metrics_grid';
-export type { DataSource } from './src/components/trace_metrics_grid';
+function splitFilters(value: string) {
+  return value
+    .split(/\bwhere\b/i)
+    .filter((item) => item !== '')
+    .map((item) => item.trim());
+}
+
+export function extractFilters(query: string) {
+  return query
+    .split('|')
+    .flatMap((item) => {
+      const value = item.trim();
+      if (/\bwhere\b/i.test(value)) {
+        return splitFilters(value);
+      }
+      return [];
+    })
+    .filter((item) => item !== '');
+}
