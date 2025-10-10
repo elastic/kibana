@@ -79,6 +79,7 @@ export const updateMaintenanceWindowRoute = (
 
         const body: UpdateMaintenanceWindowRequestBodyV1 = req.body;
         const params: UpdateMaintenanceWindowRequestParamsV1 = req.params;
+        const customSchedule = body?.schedule?.custom;
 
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
@@ -91,7 +92,19 @@ export const updateMaintenanceWindowRoute = (
           transformInternalMaintenanceWindowToExternalV1(maintenanceWindow);
 
         return res.ok({
-          body: response,
+          body: {
+            ...response,
+            schedule: {
+              custom: {
+                ...response.schedule.custom,
+                ...{
+                  duration: customSchedule?.duration
+                    ? customSchedule.duration
+                    : response.schedule.custom.duration,
+                },
+              },
+            },
+          },
         });
       })
     )
