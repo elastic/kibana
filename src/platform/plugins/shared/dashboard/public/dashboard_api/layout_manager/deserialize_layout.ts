@@ -48,7 +48,7 @@ export function deserializeLayout(
         collapsed: false,
         ...restOfSection,
       };
-      (sectionPanels).forEach((panel) => {
+      sectionPanels.forEach((panel) => {
         pushPanel(panel, sectionId);
       });
     } else {

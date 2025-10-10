@@ -34,7 +34,7 @@ export function transformPanelsIn(widgets: DashboardAttributes['panels'] | undef
       const { panels: sectionPanels, grid, uid, ...restOfSection } = widget as DashboardSection;
       const idx = uid ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
-      (sectionPanels).forEach((panel) => {
+      sectionPanels.forEach((panel) => {
         const { storedPanel, references } = transformPanelIn(panel);
         panels.push({
           ...storedPanel,
