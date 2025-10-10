@@ -219,7 +219,7 @@ export const PendingActionsSelector = memo<
             error ? (
               <FormattedMessage
                 id="xpack.securitySolution.baseArgumentSelector.errorLoading"
-                defaultMessage="Error loading data"
+                defaultMessage="Error loading pending actions"
               />
             ) : undefined
           }
