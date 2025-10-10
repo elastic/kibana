@@ -23,28 +23,57 @@ Create a new data view version when:
 
 #### How to Update Data View Version
 
-1. **Update Constants** in `common/constants.ts`:
+1. **Update Constants** in `packages/kbn-cloud-security-posture/common/constants.ts`:
 
-   - Keep the old constant with a `_v{n}` suffix for migration
+   - Add the current version to the OLD_VERSIONS array
    - Update the main constant to the new version `_v{n+1}`
 
    ```typescript
-   // Old version (keep for migration)
-   export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V2 =
-     'security_solution_cdr_latest_misconfigurations_v2';
+   // Array of old data view IDs for migration purposes
+   export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS = [
+     'security_solution_cdr_latest_misconfigurations', // v1
+     'security_solution_cdr_latest_misconfigurations_v2', // v2 - Add current version here when moving to v3
+     // Future deprecated versions will be added here
+   ];
 
-   // New version
+   // Current data view ID - increment version when making breaking changes
    export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
-     'security_solution_cdr_latest_misconfigurations_v3';
+     'security_solution_cdr_latest_misconfigurations_v3'; // Updated to v3
    ```
 
-2. **Update Migration Logic** in `server/saved_objects/data_views.ts`:
-   - Add migration for the old version in `setupCdrDataViews`
-3. **Add Tests** in `test/cloud_security_posture_functional/data_views/data_views.ts`:
+2. **Migration Logic** in `server/saved_objects/data_views.ts`:
+   - The `migrateOldDataViews` function automatically handles all versions in the array
+   - No code changes needed - just the constants update
 
+3. **Add Tests** in `test/cloud_security_posture_functional/data_views/data_views.ts`:
    - Test migration from old to new version
    - Test fresh installations
    - Test multi-space scenarios
+   - Test migration when multiple old versions exist (simulating version skipping)
+
+#### Migration System Features
+
+- **Array-based Migration**: All old versions are stored in arrays (`CDR_*_DATA_VIEW_ID_PREFIX_OLD_VERSIONS`)
+- **Skip-Version Support**: Users can upgrade from v1 directly to v3+ without issues
+- **Automatic Cleanup**: All old data views are automatically removed during migration
+- **Space-Aware**: Migration works across all Kibana spaces
+- **Idempotent**: Migration can run multiple times safely
+
+#### Example: Moving from v2 to v3
+
+```typescript
+// Step 1: Update the OLD_VERSIONS array in packages/kbn-cloud-security-posture/common/constants.ts
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS = [
+  'security_solution_cdr_latest_misconfigurations', // v1
+  'security_solution_cdr_latest_misconfigurations_v2', // v2 - Added current version
+];
+
+// Step 2: Update the current version
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
+  'security_solution_cdr_latest_misconfigurations_v3'; // Now v3
+
+// That's it! The migration system will handle the rest automatically
+```
 
 ## Testing
 
