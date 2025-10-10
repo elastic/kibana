@@ -48,6 +48,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const [hasChanges, setHasChanges] = useState(false);
   const [highlightDiff, setHighlightDiff] = useState(false);
 
+  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
+  const closeModal = useCallback(() => {
+    setWorkflowExecuteModalOpen(false);
+  }, []);
+
   const yamlValue = selectedExecutionId && execution ? execution.yaml : workflowYaml;
 
   const { updateWorkflow, testWorkflow } = useWorkflowActions();
@@ -77,8 +82,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     },
     [id, workflowYaml, updateWorkflow, notifications?.toasts]
   );
-
-  const [workflowExecuteModalOpen, setWorkflowExecuteModalOpen] = useState(false);
 
   const definitionFromCurrentYaml: WorkflowYaml | null = useMemo(() => {
     const parsingResult = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
@@ -243,7 +246,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         {workflowExecuteModalOpen && workflow && (
           <WorkflowExecuteModal
             definition={definitionFromCurrentYaml}
-            onClose={() => setWorkflowExecuteModalOpen(false)}
+            onClose={closeModal}
             onSubmit={handleRunWorkflow}
           />
         )}

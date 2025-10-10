@@ -21,7 +21,7 @@ import {
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Global, css } from '@emotion/react';
@@ -66,15 +66,36 @@ export function WorkflowExecuteModal({
 
   const { euiTheme } = useEuiTheme();
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     onSubmit(JSON.parse(executionInput));
     onClose();
-  };
+  }, [onSubmit, onClose, executionInput]);
 
-  const handleChangeTrigger = (trigger: TriggerType): void => {
-    setExecutionInput('');
-    setSelectedTrigger(trigger);
-  };
+  const handleChangeTrigger = useCallback(
+    (trigger: TriggerType): void => {
+      setExecutionInput('');
+      setSelectedTrigger(trigger);
+    },
+    [setExecutionInput, setSelectedTrigger]
+  );
+
+  useEffect(() => {
+    if (!definition) {
+      return;
+    }
+    if (definition.triggers?.some((trigger) => trigger.type === 'alert')) {
+      setSelectedTrigger('alert');
+      return;
+    }
+    if (!definition.inputs) {
+      // no inputs, and no alert trigger, we can run the workflow right away and close
+      onSubmit({});
+      onClose();
+      return;
+    } else {
+      setSelectedTrigger('manual');
+    }
+  }, [definition, onClose, onSubmit]);
 
   return (
     <>
