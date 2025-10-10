@@ -85,10 +85,15 @@ describe('WorkflowsService', () => {
     mockLogger.error = jest.fn();
 
     const mockEsClientPromise = Promise.resolve(mockEsClient);
-    const mockGetActionsClient = jest.fn().mockResolvedValue({} as IUnsecuredActionsClient);
-    const mockGetActionsClientWithRequest = jest
-      .fn()
-      .mockResolvedValue({} as PublicMethodsOf<ActionsClient>);
+    const mockGetActionsClient = jest.fn().mockResolvedValue({
+      getAll: jest.fn().mockResolvedValue([]),
+      execute: jest.fn(),
+      bulkEnqueueExecution: jest.fn(),
+    } as unknown as IUnsecuredActionsClient);
+    const mockGetActionsClientWithRequest = jest.fn().mockResolvedValue({
+      listTypes: jest.fn().mockResolvedValue([]),
+      getAll: jest.fn().mockResolvedValue({ data: [] }),
+    } as unknown as PublicMethodsOf<ActionsClient>);
 
     service = new WorkflowsService(
       mockEsClientPromise,
