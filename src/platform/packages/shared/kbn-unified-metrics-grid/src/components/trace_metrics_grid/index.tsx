@@ -129,7 +129,7 @@ function TraceMetricsGrid({
               align-content: center;
             `}
           >
-            <EuiFlexGrid columns={3}>
+            <EuiFlexGrid columns={3} gutterSize="s">
               <EuiFlexItem>
                 <LatencyChart />
               </EuiFlexItem>
