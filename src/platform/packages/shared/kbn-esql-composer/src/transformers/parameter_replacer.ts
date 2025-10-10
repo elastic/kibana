@@ -115,7 +115,7 @@ export class ParameterReplacer {
 
     const value = this.resolveParamValue(node);
 
-    if (!value) {
+    if (value === null || value === undefined) {
       return node;
     }
 
