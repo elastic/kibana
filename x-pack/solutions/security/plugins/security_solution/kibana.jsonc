@@ -36,6 +36,7 @@
       "licensing",
       "maps",
       "navigation",
+      "onechat",
       "ruleRegistry",
       "sessionView",
       "spaces",
@@ -60,7 +61,7 @@
       "discoverShared",
       "productDocBase",
       "telemetry",
-      "elasticAssistantSharedState",
+      "elasticAssistantSharedState"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

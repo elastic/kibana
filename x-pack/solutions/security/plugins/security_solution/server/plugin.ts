@@ -95,7 +95,15 @@ import {
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 
 import { RequestContextFactory } from './request_context_factory';
-
+import { openAndAcknowledgedAlertsInternalTool } from './assistant/tools/open_and_acknowledged_alerts';
+import { alertCountsInternalTool } from './assistant/tools/alert_counts';
+import { productDocumentationInternalTool } from './assistant/tools/product_docs';
+import { entityRiskScoreToolInternal } from './assistant/tools/entity_risk_score/entity_risk_score_tool_internal';
+import { siemAgentCreator } from './assistant/siem_agent_creator';
+import { knowledgeBaseRetrievalInternalTool } from './assistant/tools/knowledge_base/knowledge_base_retrieval_internal_tool';
+import { knowledgeBaseWriteInternalTool } from './assistant/tools/knowledge_base/knowledge_base_write_internal_tool';
+import { securityLabsKnowledgeInternalTool } from './assistant/tools/security_labs/security_labs_knowledge_internal_tool';
+import { createFetchSiemPromptsTool } from './assistant/tools/fetch_siem_prompts';
 import type {
   ISecuritySolutionPlugin,
   PluginInitializerContext,
@@ -248,6 +256,18 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.ruleMonitoringService.setup(core, plugins);
+
+    // Register onechat tools
+    plugins.onechat.tools.register(openAndAcknowledgedAlertsInternalTool());
+    plugins.onechat.tools.register(alertCountsInternalTool());
+    plugins.onechat.tools.register(productDocumentationInternalTool(core.getStartServices));
+    plugins.onechat.tools.register(knowledgeBaseRetrievalInternalTool(core.getStartServices));
+    plugins.onechat.tools.register(knowledgeBaseWriteInternalTool(core.getStartServices));
+    plugins.onechat.tools.register(securityLabsKnowledgeInternalTool(core.getStartServices));
+    plugins.onechat.tools.register(createFetchSiemPromptsTool(core.getStartServices));
+    plugins.onechat.tools.register(entityRiskScoreToolInternal());
+
+    plugins.onechat.agents.register(siemAgentCreator());
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
