@@ -25,7 +25,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('GET /internal/metrics_experience/index_pattern_metadata/:indexPattern', () => {
     before(async () => {
-      await toggleMetricsExperienceFeature(supertest, true);
       await esArchiver.load(
         'src/platform/test/api_integration/fixtures/es_archiver/metrics_experience'
       );
