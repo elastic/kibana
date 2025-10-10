@@ -71,6 +71,15 @@ export interface ScoutTestRunInfo {
   };
   status?: string;
   duration?: number;
+  process?: {
+    duration?: number;
+  };
+  tests?: {
+    passes?: number;
+    pending?: number;
+    failures?: number;
+    total?: number;
+  };
 }
 
 /**
