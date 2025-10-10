@@ -107,7 +107,7 @@ export type DashboardApi = CanExpandPanels &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesDescription &
-  Pick<PublishesTitle, 'title$'> &
+  Pick<PublishesTitle, 'title$' | 'hideTitle$'> &
   PublishesReload &
   PublishesSavedObjectId &
   PublishesESQLVariables &

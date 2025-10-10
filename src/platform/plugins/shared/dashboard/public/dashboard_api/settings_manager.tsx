@@ -74,6 +74,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
     api: {
       description$: stateManager.api.description$,
       getSettings: stateManager.getLatestState,
+      hideTitle$: stateManager.api.hidePanelTitles$,
       settings: {
         syncColors$: stateManager.api.syncColors$,
         syncCursor$: stateManager.api.syncCursor$,
