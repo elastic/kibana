@@ -35,6 +35,10 @@ export const command = {
       [':build-webpack'].concat(!cache ? ['-u'] : []).concat(dist ? ['--', '--dist'] : []),
       {
         pipe: true,
+        env: {
+          ...process.env,
+          ...(dist ? { MOON_CACHE: 'off' } : {}),
+        },
       }
     ).catch((err) => {
       console.error('Error in shared moon :build-webpack runs', err);
