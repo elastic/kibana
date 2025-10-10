@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
+import { keys } from '@elastic/eui';
 import { useMetricsGridState } from '../../../hooks';
 import { DimensionsSelector } from '../dimensions_selector';
 import { ValuesSelector } from '../values_selector';
@@ -47,6 +48,54 @@ export const useToolbarActions = ({
     setShowSearchInput(false);
     onClearSearchTerm();
   }, [onClearSearchTerm]);
+
+  // Check if dimensions or values selector portals are open
+  const areSelectorPortalsOpen = useCallback(() => {
+    const portals = document.querySelectorAll('[data-euiportal]');
+
+    for (const portal of portals) {
+      const hasBreakdownSelector = portal.querySelector(
+        '[data-test-subj*="metricsExperienceBreakdownSelector"]'
+      );
+      const hasValuesSelector = portal.querySelector(
+        '[data-test-subj*="metricsExperienceValuesSelector"]'
+      );
+      const hasSelectableList = portal.querySelector('[data-test-subj*="Selectable"]');
+
+      if (hasBreakdownSelector || hasValuesSelector || hasSelectableList) {
+        // Check if the portal is visible and has focusable content
+        const style = window.getComputedStyle(portal);
+        if (style.display !== 'none' && style.visibility !== 'hidden') {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }, []);
+
+  const onExitFullscreen = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.key === keys.ESCAPE && isFullscreen) {
+        if (!areSelectorPortalsOpen()) {
+          onToggleFullscreen();
+        }
+      }
+    },
+    [onToggleFullscreen, isFullscreen, areSelectorPortalsOpen]
+  );
+
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLElement>) => {
+      if (e.key === keys.ESCAPE && isFullscreen) {
+        onToggleFullscreen();
+      }
+      if (e.key === keys.ESCAPE && !isFullscreen && showSearchInput) {
+        onClearSearch();
+      }
+    },
+    [isFullscreen, showSearchInput, onToggleFullscreen, onClearSearch]
+  );
 
   const leftSideActions = useMemo(
     () => [
@@ -91,5 +140,7 @@ export const useToolbarActions = ({
     isFullscreen,
     onToggleFullscreen,
     onShowSearch,
+    onExitFullscreen,
+    onKeyDown,
   };
 };

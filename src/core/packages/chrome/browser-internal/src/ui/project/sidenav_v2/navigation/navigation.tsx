@@ -66,7 +66,13 @@ export const Navigation = (props: ChromeNavigationProps) => {
 
   return (
     <>
-      <NavigationTour tourManager={props.navigationTourManager} />
+      <NavigationTour
+        tourManager={props.navigationTourManager}
+        key={
+          // Force remount (and reset position) the tour when the nav is collapsed/expanded
+          props.isCollapsed ? 'collapsed' : 'expanded'
+        }
+      />
       <RedirectNavigationAppLinks application={props.application}>
         <NavigationComponent
           items={navItems}

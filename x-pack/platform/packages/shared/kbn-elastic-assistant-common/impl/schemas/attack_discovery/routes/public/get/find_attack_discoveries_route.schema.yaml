@@ -1,0 +1,212 @@
+openapi: 3.0.0
+info:
+  title: Find Attack discoveries API endpoint
+  version: '2023-10-31'
+paths:
+  /api/attack_discovery/_find:
+    get:
+      x-codegen-enabled: true
+      x-code-samples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request GET 'http://localhost:5601/api/attack_discovery/_find?end=now&include_unique_alert_ids=false&page=1&per_page=10&search=&sort_field=%40timestamp&sort_order=desc&start=now-24h&status=open&status=acknowledged' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json"
+      x-labels: [ess, serverless]
+      operationId: AttackDiscoveryFind
+      summary: Finds Attack discoveries that match the search criteria
+      description: Finds Attack discoveries that match the search criteria. Supports free text search, filtering, pagination, and sorting.
+      tags:
+        - Attack discovery API
+      parameters:
+        - name: 'alert_ids'
+          description: Filter results to Attack discoveries that include any of the provided alert IDs
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: 'connector_names'
+          description: Filter results to Attack discoveries created by any of the provided human readable connector names. Note that values must match the human readable `connector_name` property of an Attack discovery, e.g. "GPT-5 Chat", which are distinct from `connector_id` values used to generate Attack discoveries.
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: 'enable_field_rendering'
+          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+          in: query
+          required: false
+          schema:
+            default: false
+            type: boolean
+          example: false
+        - name: 'end'
+          description: End of the time range for the search. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now", "now-24h").
+          in: query
+          required: false
+          schema:
+            type: string
+          example: "now"
+        - name: 'ids'
+          description: Filter results to the Attack discoveries with the specified IDs
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: 'include_unique_alert_ids'
+          description: If `true`, the response will include `unique_alert_ids` and `unique_alert_ids_count` aggregated across the matched Attack discoveries
+          in: query
+          required: false
+          schema:
+            type: boolean
+          example: false
+        - name: 'page'
+          description: Page number to return (used for pagination). Defaults to 1.
+          in: query
+          required: false
+          schema:
+            default: 1
+            minimum: 1
+            type: integer
+          example: 1
+        - name: 'per_page'
+          description: Number of Attack discoveries to return per page (used for pagination). Defaults to 10.
+          in: query
+          required: false
+          schema:
+            default: 10
+            minimum: 1
+            type: integer
+          example: 10
+        - name: 'search'
+          description: Free-text search query applied to relevant text fields of Attack discoveries (title, description, tags, etc.)
+          in: query
+          required: false
+          schema:
+            type: string
+          example: ""
+        - name: 'shared'
+          description: Whether to filter by shared visibility. If omitted, both shared and privately visible Attack discoveries are returned. Use `true` to return only shared discoveries, `false` to return only those visible to the current user.
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: 'sort_field'
+          description: Field used to sort results. See `AttackDiscoveryFindSortField` for allowed values.
+          in: query
+          required: false
+          schema:
+            default: '@timestamp'
+            $ref: '#/components/schemas/AttackDiscoveryFindSortField'
+          example: "@timestamp"
+        - name: 'sort_order'
+          description: Sort order direction `asc` for ascending or `desc` for descending. Defaults to `desc`.
+          in: query
+          required: false
+          schema:
+            default: 'desc'
+            $ref: '../../../../common_attributes.schema.yaml#/components/schemas/SortOrder'
+          example: "desc"
+        - name: 'start'
+          description: Start of the time range for the search. Accepts absolute timestamps (ISO 8601) or relative date math (e.g. "now-7d").
+          in: query
+          required: false
+          schema:
+            type: string
+          example: "now-24h"
+        - name: 'status'
+          description: Filter by alert workflow status. Provide one or more of the allowed workflow states.
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - 'acknowledged'
+                - 'closed'
+                - 'open'
+          example: ['open','acknowledged']
+        - name: 'with_replacements'
+          description: When true, return the created Attack discoveries with text replacements applied to the detailsMarkdown, entitySummaryMarkdown, summaryMarkdown, and title fields. Defaults to `true`.
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+          example: true
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  connector_names:
+                    type: array
+                    description: List of human readable connector names that are present in the matched Attack discoveries. Useful for building client filters or summaries.
+                    items:
+                      type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '../../../attack_discovery_api_alert.schema.yaml#/components/schemas/AttackDiscoveryApiAlert'
+                    description: Array of matched Attack discovery objects. Each item follows the `AttackDiscoveryApiAlert` schema.
+                  page:
+                    type: integer
+                    description: Current page number of the paginated result set.
+                  per_page:
+                    type: integer
+                    description: Number of items requested per page.
+                  total:
+                    type: integer
+                    description: Total number of Attack discoveries matching the query (across all pages).
+                  unique_alert_ids:
+                    type: array
+                    items:
+                      type: string
+                    description: List of unique alert IDs aggregated from the matched Attack discoveries. Only present if `include_unique_alert_ids=true` in the request.
+                  unique_alert_ids_count:
+                    type: integer
+                    description: Number of unique alert IDs across all matched Attack discoveries. Only present if `include_unique_alert_ids=true` in the request.
+                required:
+                  - connector_names
+                  - data
+                  - page
+                  - per_page
+                  - total
+                  - unique_alert_ids_count
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status_code:
+                    type: number
+                    description: HTTP status code
+                    example: 400
+                  error:
+                    type: string
+                    description: Error type
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    description: Human-readable error message
+                    example: "Invalid request payload."
+components:
+  schemas:
+    AttackDiscoveryFindSortField:
+      type: string
+      description: Allowed field names to sort Attack discovery results by. Clients should only pass one of the listed values.
+      enum:
+        - '@timestamp'

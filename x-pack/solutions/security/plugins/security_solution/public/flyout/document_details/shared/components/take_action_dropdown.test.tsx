@@ -102,6 +102,7 @@ describe('take action dropdown', () => {
             helpers: {
               canUseCases: jest.fn().mockReturnValue(allCasesPermissions()),
               getRuleIdFromEvent: () => null,
+              getObservablesFromEcs: jest.fn().mockReturnValue([]),
             },
           },
           osquery: {

@@ -105,7 +105,7 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
       return false;
     }
     return items.every((item) => {
-      if (!item.isEditable) {
+      if (!item.isEditable || item.isInternallyManaged) {
         return true;
       }
       if (isAllSelected) {
@@ -140,9 +140,11 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
   const onSelectPage = useCallback(() => {
     const { selectedIds, isAllSelected } = state;
 
-    // Select current page in non-select all mode. Ignore rules that cannot be edited
+    // Select current page in non-select all mode. Ignore rules that cannot be edited (including internally managed ones)
     if (!isPageSelected && !isAllSelected) {
-      const idsToSelect = items.filter((item) => item.isEditable).map((item) => item.id);
+      const idsToSelect = items
+        .filter((item) => item.isEditable && !item.isInternallyManaged)
+        .map((item) => item.id);
       dispatch({ type: ActionTypes.SET_SELECTION, payload: [...selectedIds, ...idsToSelect] });
     }
     // Unselect current page in non-select all mode.
@@ -153,7 +155,7 @@ export function useBulkEditSelect(props: UseBulkEditSelectProps) {
     // Select current page in select all mode. Ignore rules that cannot be edited
     if (!isPageSelected && isAllSelected) {
       items.forEach((item) => {
-        if (item.isEditable) {
+        if (item.isEditable || item.isInternallyManaged) {
           selectedIds.delete(item.id);
         }
       });

@@ -67,6 +67,10 @@
               "path": "x-pack/platform/plugins/private/logstash/public/plugin.ts"
             },
             {
+              "plugin": "monitoring",
+              "path": "x-pack/platform/plugins/private/monitoring/public/plugin.ts"
+            },
+            {
               "plugin": "painlessLab",
               "path": "x-pack/platform/plugins/private/painless_lab/public/plugin.tsx"
             },

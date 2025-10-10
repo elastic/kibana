@@ -90,7 +90,7 @@ describe('stringifyUrlParams', () => {
     };
 
     expect(stringifyUrlParams(urlParams)).toMatchInlineSnapshot(
-      `"cases=(assignees:!(),category:!(),customFields:(my_field:!(foo,bar)),owner:!(),page:1,perPage:10,reporters:!(),search:'',searchFields:!(title,description),severity:!(),sortField:createdAt,sortOrder:desc,status:!(),tags:!())"`
+      `"cases=(assignees:!(),category:!(),customFields:(my_field:!(foo,bar)),owner:!(),page:1,perPage:10,reporters:!(),search:'',searchFields:!(title,description,incremental_id.text),severity:!(),sortField:createdAt,sortOrder:desc,status:!(),tags:!())"`
     );
   });
 
