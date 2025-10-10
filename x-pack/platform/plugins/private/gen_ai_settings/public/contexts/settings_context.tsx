@@ -128,15 +128,8 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
       if (settings && !isEmpty(unsavedChanges)) {
         // Validate fields before saving
         if (customValidationErrors.length > 0) {
-          // Show validation errors as toast
-          customValidationErrors.forEach((error) => {
-            notifications.toasts.addDanger({
-              title: i18n.translate('xpack.gen_ai_settings.validation.error.title', {
-                defaultMessage: 'Validation Error',
-              }),
-              text: error.message,
-            });
-          });
+          // Throw error to prevent save
+          throw new Error(customValidationErrors.map((error) => error.message).join('\n'));
         }
 
         const updateErrors: Error[] = [];
@@ -166,6 +159,21 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
         }
       }
       return false;
+    },
+    onSuccess() {
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.gen_ai_settings.save.success', {
+          defaultMessage: 'Settings saved',
+        }),
+      });
+    },
+    onError(error: Error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.gen_ai_settings.save.error', {
+          defaultMessage: 'Failed to save settings',
+        }),
+        text: error.message ?? 'Unknown error',
+      });
     },
   });
 

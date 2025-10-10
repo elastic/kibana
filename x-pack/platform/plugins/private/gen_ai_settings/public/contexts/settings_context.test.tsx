@@ -29,6 +29,7 @@ describe('settings_context', () => {
             notifications: {
               toasts: {
                 addDanger: jest.fn(),
+                addSuccess: jest.fn(),
               },
             },
             settings: {
@@ -266,6 +267,82 @@ describe('settings_context', () => {
 
       expect(set).toHaveBeenCalledTimes(1);
       expect(set).toHaveBeenCalledWith('test', 'testValue');
+    });
+
+    it('should show success toast when settings are saved successfully', async () => {
+      const addSuccess = jest.fn();
+      const set = jest.fn().mockResolvedValue(undefined);
+
+      // We need to setup the context with a way to access the addSuccess mock
+      const setupWithSuccessMock = () => {
+        const queryClient = new QueryClient();
+
+        const rendered = renderHook(() => useSettingsContext(), {
+          wrapper: ({ children }) => (
+            <KibanaContextProvider
+              services={{
+                notifications: {
+                  toasts: {
+                    addDanger: jest.fn(),
+                    addSuccess,
+                  },
+                },
+                settings: {
+                  client: {
+                    getUpdateErrors$: () => new Subject(),
+                    isOverridden: () => false,
+                    isCustom: () => false,
+                    set,
+                    getAll: jest.fn().mockReturnValue({
+                      'genAiSettings:defaultAIConnector': {
+                        readonlyMode: 'ui',
+                        value: 'NO_DEFAULT_CONNECTOR',
+                        userValue: 'pmeClaudeV37SonnetUsEast1',
+                      },
+                      'genAiSettings:defaultAIConnectorOnly': {
+                        readonlyMode: 'ui',
+                        value: false,
+                        userValue: true,
+                      },
+                    }),
+                  },
+                },
+              }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <SettingsContextProvider>{children}</SettingsContextProvider>
+              </QueryClientProvider>
+            </KibanaContextProvider>
+          ),
+        });
+
+        return { result: rendered.result };
+      };
+
+      const { result: successResult } = setupWithSuccessMock();
+
+      await waitFor(() => {
+        expect(successResult.current.fields).toBeDefined();
+      });
+
+      // Add unsaved changes
+      act(() => {
+        successResult.current.handleFieldChange('test', {
+          type: 'string',
+          unsavedValue: 'testValue',
+        });
+      });
+
+      // Save all settings
+      await act(async () => {
+        await successResult.current.saveAll();
+      });
+
+      // Verify that the success toast was called
+      expect(addSuccess).toHaveBeenCalledTimes(1);
+      expect(addSuccess).toHaveBeenCalledWith({
+        title: 'Settings saved',
+      });
     });
   });
 
