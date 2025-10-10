@@ -8,7 +8,6 @@
  */
 
 import * as Rx from 'rxjs';
-import agent from 'elastic-apm-node';
 import type { Lifecycle } from '../lifecycle';
 import type { Mocha } from '../../fake_mocha_types';
 

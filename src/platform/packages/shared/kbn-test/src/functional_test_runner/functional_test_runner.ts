@@ -42,7 +42,7 @@ export class FunctionalTestRunner {
         : new EsVersion(esVersion);
   }
 
-  async run(abortSignal?: AbortSignal): Promise<any> {
+  async run(abortSignal?: AbortSignal) {
     const testStats = await this.getTestStats();
 
     return await this.runHarness(async (lifecycle, coreProviders) => {

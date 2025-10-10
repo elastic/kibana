@@ -14,8 +14,6 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
-import apm from 'elastic-apm-node';
-import { withSpan } from '@kbn/apm-utils';
 import { applyFipsOverrides } from '../lib/fips_overrides';
 import { Config, readConfigFile } from '../../functional_test_runner';
 
@@ -91,17 +89,13 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       });
       if (!hasTests) {
         // just run the FTR, no Kibana or ES, which will quickly report a skipped test group to ci-stats and continue
-        await withSpan('run_ftr', () =>
-          runFtr({
-            log,
-            config,
-            esVersion: options.esVersion,
-          })
-        );
+        await runFtr({
+          log,
+          config,
+          esVersion: options.esVersion,
+        });
         return;
       }
-
-      const tx = apm.startTransaction('run_tests', 'run_tests');
 
       await withProcRunner(log, async (procs) => {
         const abortCtrl = new AbortController();
@@ -111,31 +105,27 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           abortCtrl.abort();
         };
 
-        let shutdownEs: any;
+        let shutdownEs;
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await withSpan('start_elasticsearch', () =>
-              runElasticsearch({ ...options, log, config, onEarlyExit })
-            );
+            shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit });
             if (abortCtrl.signal.aborted) {
               return;
             }
           }
 
-          await withSpan('run_kibana_server', () =>
-            runKibanaServer({
-              procs,
-              config,
-              logsDir: options.logsDir,
-              installDir: options.installDir,
-              onEarlyExit,
-              extraKbnOpts: [
-                config.get('serverless')
-                  ? '--server.versioned.versionResolution=newest'
-                  : '--server.versioned.versionResolution=oldest',
-              ],
-            })
-          );
+          await runKibanaServer({
+            procs,
+            config,
+            logsDir: options.logsDir,
+            installDir: options.installDir,
+            onEarlyExit,
+            extraKbnOpts: [
+              config.get('serverless')
+                ? '--server.versioned.versionResolution=newest'
+                : '--server.versioned.versionResolution=oldest',
+            ],
+          });
 
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
@@ -174,14 +164,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             return;
           }
 
-          await withSpan('run_ftr', () =>
-            runFtr({
-              log,
-              config,
-              esVersion: options.esVersion,
-              signal: abortCtrl.signal,
-            })
-          );
+          await runFtr({
+            log,
+            config,
+            esVersion: options.esVersion,
+            signal: abortCtrl.signal,
+          });
         } finally {
           try {
             const delay = config.get('kbnTestServer.delayShutdown');
@@ -190,20 +178,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               await setTimeout(delay);
             }
 
-            await withSpan('stop_kibana', () => procs.stop('kibana'));
+            await procs.stop('kibana');
           } finally {
             if (shutdownEs) {
-              await withSpan('shutdown_es', () => shutdownEs());
+              await shutdownEs();
             }
           }
-        }
-      }).finally(async () => {
-        tx.end();
-
-        if (apm.isStarted()) {
-          await apm.flush().catch((error) => {
-            log.error(error);
-          });
         }
       });
     });
