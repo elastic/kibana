@@ -11,8 +11,8 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import {
   cleanupMachineLearningJobs,
   setupMLJobAndDatafeed,
-} from '../../utils/machine_learning_jobs';
-import { loadSampleData } from '../../utils/load_sample_data';
+} from '../../src/data_generators/machine_learning_jobs';
+import { loadSampleData } from '../../src/data_generators/load_sample_data';
 import { evaluate } from '../../src/evaluate';
 
 /**
