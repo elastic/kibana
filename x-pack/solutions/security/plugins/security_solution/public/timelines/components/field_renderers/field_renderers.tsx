@@ -21,6 +21,7 @@ import { ReputationLink, WhoIsLink } from '../../../common/components/links';
 import * as i18n from '../../../explore/network/components/details/translations';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
+import { DefaultFieldRenderer } from './default_renderer';
 
 export const IpOverviewId = 'ip-overview';
 
@@ -104,33 +105,31 @@ export const hostIdRenderer = ({
   noLink,
   scopeId,
   isFlyoutOpen,
-}: HostIdRendererTypes): React.ReactElement =>
-  host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
+}: HostIdRendererTypes): React.ReactElement => {
+  const hostName = host.name && host.name[0];
+  return host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
-      {host.name && host.name[0] != null ? (
-        <DefaultDraggable
-          id={`host-id-renderer-default-draggable-${IpOverviewId}-${
-            contextID ? `${contextID}-` : ''
-          }host-id`}
-          field="host.id"
-          value={host.id[0]}
-          isAggregatable={true}
-          fieldType={'keyword'}
+      {hostName != null ? (
+        <DefaultFieldRenderer
+          rowItems={host.id}
+          attrName={'host.id'}
+          idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
           scopeId={scopeId}
-        >
-          {noLink ? (
-            <>{host.id}</>
-          ) : (
-            <FlyoutLink
-              field={'host.name'}
-              value={host.name[0]}
-              scopeId={scopeId}
-              isFlyoutOpen={isFlyoutOpen}
-            >
-              {host.id}
-            </FlyoutLink>
-          )}
-        </DefaultDraggable>
+          render={(id) =>
+            noLink ? (
+              <>{id}</>
+            ) : (
+              <FlyoutLink
+                field={'host.name'}
+                value={hostName}
+                scopeId={scopeId}
+                isFlyoutOpen={isFlyoutOpen}
+              >
+                {id}
+              </FlyoutLink>
+            )
+          }
+        />
       ) : (
         <>{host.id}</>
       )}
@@ -138,6 +137,7 @@ export const hostIdRenderer = ({
   ) : (
     getEmptyTagValue()
   );
+};
 
 interface HostNameRendererTypes {
   scopeId: SourcererScopeName;

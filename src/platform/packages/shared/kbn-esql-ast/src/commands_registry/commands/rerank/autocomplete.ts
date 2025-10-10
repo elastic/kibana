@@ -24,6 +24,7 @@ import {
 } from '../../../definitions/utils/autocomplete/helpers';
 import { suggestForExpression } from '../../../definitions/utils';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
+import type { MapParameters } from '../../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../../complete_items';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
@@ -117,8 +118,11 @@ export async function autocomplete(
 
     case CaretPosition.WITHIN_MAP_EXPRESSION: {
       const endpoints = context?.inferenceEndpoints;
-      const availableParameters = {
-        inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+      const availableParameters: MapParameters = {
+        inference_id: {
+          type: 'string',
+          suggestions: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+        },
       };
 
       return getCommandMapExpressionSuggestions(innerText, availableParameters);
