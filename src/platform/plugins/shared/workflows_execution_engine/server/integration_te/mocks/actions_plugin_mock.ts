@@ -17,7 +17,7 @@ export const FakeConnectors = {
     actionTypeId: 'slack',
     name: 'fake_slack_connector_1',
   },
-  slack_failing: {
+  constantlyFailing: {
     id: 'b2c3d4e5-f6a7-8901-bc23-de45fa678901',
     actionTypeId: 'slack',
     name: 'fake_slack_failing_connector',
@@ -65,8 +65,8 @@ export class UnsecuredActionsClientMock implements IUnsecuredActionsClient {
           data: { text: 'ok' },
         };
       }
-      case FakeConnectors.slack_failing.name: {
-        throw new Error('Bad Gateway (502)');
+      case FakeConnectors.constantlyFailing.name: {
+        throw new Error('Error: Constantly failing connector');
       }
       case FakeConnectors.slow_3sec_inference.name: {
         await new Promise<void>((resolve) => setTimeout(() => resolve(), 3000));

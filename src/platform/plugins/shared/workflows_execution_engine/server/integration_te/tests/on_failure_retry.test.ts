@@ -30,8 +30,8 @@ describe('workflow with retry', () => {
           return `
 steps:
   - name: constantlyFailingStep
-    type: ${FakeConnectors.slack_failing.actionTypeId}
-    connector-id: ${FakeConnectors.slack_failing.name}
+    type: ${FakeConnectors.constantlyFailing.actionTypeId}
+    connector-id: ${FakeConnectors.constantlyFailing.name}
     on-failure:
       retry:
         max-attempts: 2
@@ -56,8 +56,8 @@ settings:
       delay: ${delay}
 steps:
   - name: constantlyFailingStep
-    type: ${FakeConnectors.slack_failing.actionTypeId}
-    connector-id: ${FakeConnectors.slack_failing.name}
+    type: ${FakeConnectors.constantlyFailing.actionTypeId}
+    connector-id: ${FakeConnectors.constantlyFailing.name}
 
     with:
       message: 'Hi there! Are you alive?'
@@ -113,12 +113,12 @@ steps:
         ).filter(
           (se) =>
             se.stepId === 'constantlyFailingStep' &&
-            se.stepType === FakeConnectors.slack_failing.actionTypeId
+            se.stepType === FakeConnectors.constantlyFailing.actionTypeId
         );
         expect(stepExecutions.length).toBe(3);
         stepExecutions.forEach((se) => {
           expect(se.status).toBe(ExecutionStatus.FAILED);
-          expect(se.error).toBe('Bad Gateway (502)');
+          expect(se.error).toBe('Error: Constantly failing connector');
         });
       });
 
@@ -128,7 +128,7 @@ steps:
         ).filter(
           (se) =>
             se.stepId === 'constantlyFailingStep' &&
-            se.stepType === FakeConnectors.slack_failing.actionTypeId
+            se.stepType === FakeConnectors.constantlyFailing.actionTypeId
         );
         expect(stepExecutions.length).toBe(3);
         const firstExecution = stepExecutions[0];
