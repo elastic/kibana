@@ -59,9 +59,16 @@ describe(
         archiveName: 'siem_migrations/dashboards/migrations',
       });
 
-      createBedrockConnector().then((response) => {
-        bedrockConnectorId = response.body.id;
-      });
+      cy.waitUntil(
+        () => {
+          return createBedrockConnector()
+            .then((response) => {
+              bedrockConnectorId = response.body.id;
+            })
+            .then(() => true);
+        },
+        { interval: 500, timeout: 12000 }
+      );
 
       role.login();
       visit(GET_STARTED_URL);
