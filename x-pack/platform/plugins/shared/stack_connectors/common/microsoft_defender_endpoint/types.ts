@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 
 import type {
   MicrosoftDefenderEndpointSecretsSchema,
@@ -23,13 +23,13 @@ import type {
   CancelParamsSchema,
 } from './schema';
 
-export type MicrosoftDefenderEndpointConfig = TypeOf<typeof MicrosoftDefenderEndpointConfigSchema>;
+export type MicrosoftDefenderEndpointConfig = z.infer<typeof MicrosoftDefenderEndpointConfigSchema>;
 
-export type MicrosoftDefenderEndpointSecrets = TypeOf<
+export type MicrosoftDefenderEndpointSecrets = z.infer<
   typeof MicrosoftDefenderEndpointSecretsSchema
 >;
 
-export type MicrosoftDefenderEndpointBaseApiResponse = TypeOf<
+export type MicrosoftDefenderEndpointBaseApiResponse = z.infer<
   typeof MicrosoftDefenderEndpointBaseApiResponseSchema
 >;
 
@@ -37,9 +37,9 @@ export interface MicrosoftDefenderEndpointTestConnector {
   results: string[];
 }
 
-export type MicrosoftDefenderEndpointAgentDetailsParams = TypeOf<typeof AgentDetailsParamsSchema>;
+export type MicrosoftDefenderEndpointAgentDetailsParams = z.infer<typeof AgentDetailsParamsSchema>;
 
-export type MicrosoftDefenderEndpointAgentListParams = TypeOf<typeof AgentListParamsSchema>;
+export type MicrosoftDefenderEndpointAgentListParams = z.infer<typeof AgentListParamsSchema>;
 
 export interface MicrosoftDefenderEndpointAgentListResponse {
   '@odata.context': string;
@@ -51,7 +51,7 @@ export interface MicrosoftDefenderEndpointAgentListResponse {
   value: MicrosoftDefenderEndpointMachine[];
 }
 
-export type MicrosoftDefenderEndpointGetActionsParams = TypeOf<typeof GetActionsParamsSchema>;
+export type MicrosoftDefenderEndpointGetActionsParams = z.infer<typeof GetActionsParamsSchema>;
 
 export interface MicrosoftDefenderEndpointGetActionsResponse {
   '@odata.context': string;
@@ -180,15 +180,17 @@ export interface MicrosoftDefenderEndpointMachineAction {
   troubleshootInfo?: string;
 }
 
-export type MicrosoftDefenderEndpointTestConnectorParams = TypeOf<typeof TestConnectorParamsSchema>;
+export type MicrosoftDefenderEndpointTestConnectorParams = z.infer<
+  typeof TestConnectorParamsSchema
+>;
 
-export type MicrosoftDefenderEndpointIsolateHostParams = TypeOf<typeof IsolateHostParamsSchema>;
+export type MicrosoftDefenderEndpointIsolateHostParams = z.infer<typeof IsolateHostParamsSchema>;
 
-export type MicrosoftDefenderEndpointReleaseHostParams = TypeOf<typeof ReleaseHostParamsSchema>;
-export type MicrosoftDefenderEndpointRunScriptParams = TypeOf<typeof RunScriptParamsSchema>;
-export type MicrosoftDefenderEndpointCancelParams = TypeOf<typeof CancelParamsSchema>;
+export type MicrosoftDefenderEndpointReleaseHostParams = z.infer<typeof ReleaseHostParamsSchema>;
+export type MicrosoftDefenderEndpointRunScriptParams = z.infer<typeof RunScriptParamsSchema>;
+export type MicrosoftDefenderEndpointCancelParams = z.infer<typeof CancelParamsSchema>;
 
-export type MicrosoftDefenderEndpointActionParams = TypeOf<
+export type MicrosoftDefenderEndpointActionParams = z.infer<
   typeof MicrosoftDefenderEndpointActionParamsSchema
 >;
 
@@ -199,7 +201,7 @@ export interface MicrosoftDefenderEndpointApiTokenResponse {
   access_token: string;
 }
 
-export type MicrosoftDefenderGetLibraryFilesResponse = TypeOf<typeof GetLibraryFilesResponse>;
+export type MicrosoftDefenderGetLibraryFilesResponse = z.infer<typeof GetLibraryFilesResponse>;
 
 /**
  * Represents a single command execution entry as returned by Microsoft Defender API.

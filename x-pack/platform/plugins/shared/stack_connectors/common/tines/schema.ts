@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
 // Connector schema
-export const TinesConfigSchema = schema.object({ url: schema.string() });
-export const TinesSecretsSchema = schema.object({ email: schema.string(), token: schema.string() });
+export const TinesConfigSchema = z.object({ url: z.string() });
+export const TinesSecretsSchema = z.object({ email: z.string(), token: z.string() });
 
 // Stories action schema
 export const TinesStoriesActionParamsSchema = null;
-export const TinesStoryObjectSchema = schema.object({
-  id: schema.number(),
-  name: schema.string(),
-  published: schema.boolean(),
+export const TinesStoryObjectSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  published: z.boolean(),
 });
-export const TinesStoriesActionResponseSchema = schema.object({
-  stories: schema.arrayOf(TinesStoryObjectSchema),
-  incompleteResponse: schema.boolean(),
+export const TinesStoriesActionResponseSchema = z.object({
+  stories: z.array(TinesStoryObjectSchema),
+  incompleteResponse: z.boolean(),
 });
 
 // Webhooks action schema
-export const TinesWebhooksActionParamsSchema = schema.object({ storyId: schema.number() });
-export const TinesWebhookObjectSchema = schema.object({
-  id: schema.number(),
-  name: schema.string(),
-  storyId: schema.number(),
-  path: schema.string(),
-  secret: schema.string(),
+export const TinesWebhooksActionParamsSchema = z.object({ storyId: z.number() });
+export const TinesWebhookObjectSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  storyId: z.number(),
+  path: z.string(),
+  secret: z.string(),
 });
-export const TinesWebhooksActionResponseSchema = schema.object({
-  webhooks: schema.arrayOf(TinesWebhookObjectSchema),
-  incompleteResponse: schema.boolean(),
+export const TinesWebhooksActionResponseSchema = z.object({
+  webhooks: z.array(TinesWebhookObjectSchema),
+  incompleteResponse: z.boolean(),
 });
 
 // Run action schema
-export const TinesRunActionParamsSchema = schema.object({
-  webhook: schema.maybe(TinesWebhookObjectSchema),
-  webhookUrl: schema.maybe(schema.string()),
-  body: schema.string(),
+export const TinesRunActionParamsSchema = z.object({
+  webhook: TinesWebhookObjectSchema.optional(),
+  webhookUrl: z.string().optional(),
+  body: z.string(),
 });
-export const TinesRunActionResponseSchema = schema.object({}, { unknowns: 'ignore' });
+export const TinesRunActionResponseSchema = z.object({});
