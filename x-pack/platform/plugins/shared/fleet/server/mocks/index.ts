@@ -381,6 +381,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     createFleetActionsClient: jest.fn((_) => fleetActionsClient),
     getPackageSpecTagId: jest.fn(getPackageSpecTagId),
     createOutputClient: jest.fn(async (_) => createOutputClientMock()),
+    runWithCache: jest.fn(),
   };
 
   return startContract;
