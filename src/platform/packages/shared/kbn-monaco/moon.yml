@@ -27,10 +27,13 @@ tasks:
     command: yarn
     args:
       - --help
+    options:
+      cache: false
   build-webpack:
     command: yarn
     args:
       - build
+      - --verbose
     deps:
       - '~:yarn-help'
     inputs:

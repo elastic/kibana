@@ -68,6 +68,7 @@ run(
 )
   .then(() => {})
   .catch((e) => {
+    toolingLog.error('Error in individual package build: ' + (e as any).message);
     toolingLog.error(e.message);
     throw e;
   });
