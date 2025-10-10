@@ -87,6 +87,7 @@ export const GraphVisualization: React.FC = memo(() => {
     (node: NodeViewModel) => {
       const singleDocumentData = getSingleDocumentData(node);
       const docMode = getNodeDocumentMode(node);
+      const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
 
       const showEntityPreview = (item: { id?: string }) => {
         openPreviewPanel({
@@ -130,7 +131,7 @@ export const GraphVisualization: React.FC = memo(() => {
         );
       } else if (docMode === 'single-entity' && singleDocumentData) {
         showEntityPreview(singleDocumentData);
-      } else if (docMode === 'grouped-entities' && node.documentsData) {
+      } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
         openPreviewPanel({
           id: GraphGroupedNodePreviewPanelKey,
           params: {
@@ -150,7 +151,7 @@ export const GraphVisualization: React.FC = memo(() => {
               })),
           },
         });
-      } else if (docMode === 'grouped-events' && node.documentsData) {
+      } else if (docMode === 'grouped-events' && documentsData.length > 0) {
         openPreviewPanel({
           id: GraphGroupedNodePreviewPanelKey,
           params: {
