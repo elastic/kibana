@@ -7,15 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  HasEditCapabilities,
-  CanOverrideHoverActions,
-  PublishesUnsavedChanges,
-} from '@kbn/presentation-publishing';
-import type { MarkdownEmbeddableState } from '../server';
-
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEmbeddableState> &
-  PublishesUnsavedChanges &
-  HasEditCapabilities &
-  CanOverrideHoverActions;
+export const MARKDOWN_EMBEDDABLE_TYPE = 'DASHBOARD_MARKDOWN';

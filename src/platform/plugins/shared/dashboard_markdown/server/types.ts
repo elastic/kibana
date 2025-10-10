@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  HasEditCapabilities,
-  CanOverrideHoverActions,
-  PublishesUnsavedChanges,
-} from '@kbn/presentation-publishing';
-import type { MarkdownEmbeddableState } from '../server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEmbeddableState> &
-  PublishesUnsavedChanges &
-  HasEditCapabilities &
-  CanOverrideHoverActions;
+export interface SetupDeps {
+  embeddable: EmbeddableSetup;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface StartDeps {}

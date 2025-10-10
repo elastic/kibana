@@ -7,15 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  HasEditCapabilities,
-  CanOverrideHoverActions,
-  PublishesUnsavedChanges,
-} from '@kbn/presentation-publishing';
-import type { MarkdownEmbeddableState } from '../server';
+import { schema } from '@kbn/config-schema';
 
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEmbeddableState> &
-  PublishesUnsavedChanges &
-  HasEditCapabilities &
-  CanOverrideHoverActions;
+export const serializedTitlesSchema = schema.object({
+  description: schema.maybe(schema.string()),
+  hidePanelTitles: schema.maybe(schema.boolean()),
+  title: schema.maybe(schema.string()),
+});

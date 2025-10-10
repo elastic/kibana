@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  HasEditCapabilities,
-  CanOverrideHoverActions,
-  PublishesUnsavedChanges,
-} from '@kbn/presentation-publishing';
-import type { MarkdownEmbeddableState } from '../server';
+export type { MarkdownEditorState, MarkdownEmbeddableState } from './schemas';
 
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEmbeddableState> &
-  PublishesUnsavedChanges &
-  HasEditCapabilities &
-  CanOverrideHoverActions;
+export const plugin = async () => {
+  const { MarkdownPlugin } = await import('./plugin');
+  return new MarkdownPlugin();
+};

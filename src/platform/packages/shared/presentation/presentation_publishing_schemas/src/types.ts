@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  HasEditCapabilities,
-  CanOverrideHoverActions,
-  PublishesUnsavedChanges,
-} from '@kbn/presentation-publishing';
-import type { MarkdownEmbeddableState } from '../server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { Writable } from '@kbn/utility-types';
+import type { serializedTitlesSchema } from './titles_schema';
 
-export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEmbeddableState> &
-  PublishesUnsavedChanges &
-  HasEditCapabilities &
-  CanOverrideHoverActions;
+export type SerializedTitles = Writable<TypeOf<typeof serializedTitlesSchema>>;
