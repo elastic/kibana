@@ -17,7 +17,6 @@ delete presetClone.testEnvironment; // simply redefining as `testEnvironment: 'n
 module.exports = {
   ...presetClone,
   snapshotSerializers: [],
-  // setupFiles: ['<rootDir>/src/setup_node_env/polyfill.ts'],
   setupFiles: [],
   haste: {
     ...preset.haste,
