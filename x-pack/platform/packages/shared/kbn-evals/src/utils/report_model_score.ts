@@ -14,7 +14,11 @@ import { table } from 'table';
 import chalk from 'chalk';
 import { hostname } from 'os';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
-import { EvaluationScoreRepository, type ModelScoreDocument } from './score_repository';
+import {
+  EvaluationScoreRepository,
+  type ModelScoreDocument,
+  parseScoreDocuments,
+} from './score_repository';
 import {
   buildEvaluationResults,
   calculateEvaluatorStats,
@@ -65,17 +69,13 @@ export async function buildEvaluationReport({
   repetitions: number;
   runId?: string;
 }): Promise<EvaluationReport> {
-  const { datasetScores, evaluatorNames } = await buildEvaluationResults(
-    experiments,
-    phoenixClient
-  );
+  const { datasetScores } = await buildEvaluationResults(experiments, phoenixClient);
 
   // Add evaluator stats to dataset scores
   const datasetScoresWithStats: DatasetScoreWithStats[] = datasetScores.map((dataset) => ({
     ...dataset,
     evaluatorStats: new Map(
-      evaluatorNames.map((evaluatorName) => {
-        const scores = dataset.evaluatorScores.get(evaluatorName) || [];
+      Array.from(dataset.evaluatorScores.entries()).map(([evaluatorName, scores]) => {
         const stats = calculateEvaluatorStats(scores, dataset.numExamples);
         return [evaluatorName, stats];
       })
@@ -109,14 +109,10 @@ export async function exportEvaluations(
 
   log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-  // Derive evaluator names from the dataset scores
-  const evaluatorNames = getUniqueEvaluatorNames(report.datasetScoresWithStats);
-
   const exporter = new EvaluationScoreRepository(esClient, log);
 
   await exporter.exportScores({
     datasetScoresWithStats: report.datasetScoresWithStats,
-    evaluatorNames,
     model: report.model,
     evaluatorModel: report.evaluatorModel,
     runId: report.runId,
@@ -135,61 +131,24 @@ export async function exportEvaluations(
 }
 
 /**
- * Converts Elasticsearch ModelScoreDocuments to DatasetScoreWithStats array
- * This is the core transformation logic shared across different reporters
- */
-export function convertScoreDocsToDatasets(docs: ModelScoreDocument[]): DatasetScoreWithStats[] {
-  const datasetMap = new Map<string, DatasetScoreWithStats>();
-
-  for (const doc of docs) {
-    if (!datasetMap.has(doc.dataset.id)) {
-      datasetMap.set(doc.dataset.id, {
-        id: doc.dataset.id,
-        name: doc.dataset.name,
-        numExamples: doc.dataset.examples_count,
-        evaluatorScores: new Map(),
-        evaluatorStats: new Map(),
-        experimentId: doc.experiment_id,
-      });
-    }
-
-    const dataset = datasetMap.get(doc.dataset.id)!;
-
-    // Add evaluator scores and stats
-    dataset.evaluatorScores.set(doc.evaluator.name, doc.evaluator.scores);
-    dataset.evaluatorStats.set(doc.evaluator.name, {
-      mean: doc.evaluator.stats.mean,
-      median: doc.evaluator.stats.median,
-      stdDev: doc.evaluator.stats.std_dev,
-      min: doc.evaluator.stats.min,
-      max: doc.evaluator.stats.max,
-      count: doc.evaluator.stats.count,
-      percentage: doc.evaluator.stats.percentage,
-    });
-  }
-
-  return Array.from(datasetMap.values());
-}
-
-/**
  * Formats Elasticsearch documents into structured report data
  */
-export function formatReportData(docs: ModelScoreDocument[]): EvaluationReport {
-  if (docs.length === 0) {
+export function formatReportData(scores: ModelScoreDocument[]): EvaluationReport {
+  if (scores.length === 0) {
     throw new Error('No documents to format');
   }
 
-  const datasetScoresWithStats = convertScoreDocsToDatasets(docs);
+  const scoresWithStats = parseScoreDocuments(scores);
 
   // Assumes all evaluation datasets are repeated the same number of times
-  const repetitions = docs[0].repetitions ?? 1;
+  const repetitions = scores[0].repetitions ?? 1;
 
   return {
-    datasetScoresWithStats,
-    model: docs[0].model as Model,
-    evaluatorModel: docs[0].evaluatorModel as Model,
+    datasetScoresWithStats: scoresWithStats,
+    model: scores[0].model as Model,
+    evaluatorModel: scores[0].evaluatorModel as Model,
     repetitions,
-    runId: docs[0].run_id,
+    runId: scores[0].run_id,
   };
 }
 
@@ -209,7 +168,7 @@ export function createDefaultTerminalReporter(): EvaluationReporter {
     const report = formatReportData(docs);
 
     const header = buildReportHeader(report.model, report.evaluatorModel);
-    const summaryTable = createEvaluationTable(report);
+    const summaryTable = createEvaluationReportTable(report);
 
     log.info(`\n\n${header.join('\n')}`);
     log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
@@ -233,10 +192,10 @@ export interface EvaluationTableOptions {
 }
 
 /**
- * Creates a formatted evaluation table from an EvaluationReport
+ * Creates a formatted table from an EvaluationReport
  * Can be used by any reporter to display results in a consistent format
  */
-export function createEvaluationTable(
+export function createEvaluationReportTable(
   report: EvaluationReport,
   options: EvaluationTableOptions = {}
 ): string {
@@ -245,7 +204,7 @@ export function createEvaluationTable(
   const { datasetScoresWithStats, repetitions } = report;
 
   const evaluatorNames = getUniqueEvaluatorNames(datasetScoresWithStats);
-  const overallStats = calculateOverallStats(datasetScoresWithStats, evaluatorNames);
+  const overallStats = calculateOverallStats(datasetScoresWithStats);
   const totalExamples = sumBy(datasetScoresWithStats, (d) => d.numExamples);
 
   const formatExampleCount = (numExamples: number): string => {

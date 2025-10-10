@@ -113,12 +113,11 @@ export function getUniqueEvaluatorNames(datasetScores: DatasetScore[]): string[]
 /**
  * Calculate overall statistics across all datasets for each evaluator
  */
-export function calculateOverallStats(
-  datasetScores: DatasetScore[],
-  evaluatorNames: string[]
-): Map<string, EvaluatorStats> {
+export function calculateOverallStats(datasetScores: DatasetScore[]): Map<string, EvaluatorStats> {
   const overallStats = new Map<string, EvaluatorStats>();
   const totalExamples = datasetScores.reduce((sum, d) => sum + d.numExamples, 0);
+
+  const evaluatorNames = getUniqueEvaluatorNames(datasetScores);
 
   evaluatorNames.forEach((evaluatorName) => {
     // Get all scores across all datasets for this evaluator
@@ -165,12 +164,10 @@ export async function buildEvaluationResults(
   phoenixClient: KibanaPhoenixClient
 ): Promise<{
   datasetScores: DatasetScore[];
-  evaluatorNames: string[];
   overallStats: Map<string, EvaluatorStats>;
 }> {
   const datasetScores = await processExperimentsToDatasetScores(experiments, phoenixClient);
-  const evaluatorNames = getUniqueEvaluatorNames(datasetScores);
-  const overallStats = calculateOverallStats(datasetScores, evaluatorNames);
+  const overallStats = calculateOverallStats(datasetScores);
 
-  return { datasetScores, evaluatorNames, overallStats };
+  return { datasetScores, overallStats };
 }

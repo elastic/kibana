@@ -13,7 +13,7 @@ import {
   type DatasetScoreWithStats,
   calculateOverallStats,
   formatReportData,
-  createEvaluationTable,
+  createEvaluationReportTable,
 } from '@kbn/evals';
 import chalk from 'chalk';
 import { sumBy } from 'lodash';
@@ -31,10 +31,7 @@ function extractScenarioName(datasetName: string): string {
  * Aggregates multiple datasets into scenario-level synthetic datasets
  * Each returned dataset represents a scenario with aggregated statistics
  */
-function aggregateDatasetsByScenario(
-  datasets: DatasetScoreWithStats[],
-  evaluatorNames: string[]
-): DatasetScoreWithStats[] {
+function aggregateDatasetsByScenario(datasets: DatasetScoreWithStats[]): DatasetScoreWithStats[] {
   const scenarioMap = new Map<string, DatasetScoreWithStats[]>();
 
   datasets.forEach((dataset) => {
@@ -47,9 +44,17 @@ function aggregateDatasetsByScenario(
 
   return Array.from(scenarioMap.entries())
     .map(([scenarioName, scenarioDatasets]) => {
+      // Collect unique evaluator names from all datasets in this scenario
+      const evaluatorNamesSet = new Set<string>();
+      scenarioDatasets.forEach((d) => {
+        d.evaluatorScores.forEach((_, evaluatorName) => {
+          evaluatorNamesSet.add(evaluatorName);
+        });
+      });
+
       // Aggregate raw scores from all datasets in this scenario (not used directly in the reports now, but will be when statistcal tests are added)
       const aggregatedScores = new Map<string, number[]>();
-      evaluatorNames.forEach((evaluatorName) => {
+      evaluatorNamesSet.forEach((evaluatorName) => {
         const allScores = scenarioDatasets.flatMap(
           (d) => d.evaluatorScores.get(evaluatorName) || []
         );
@@ -63,7 +68,7 @@ function aggregateDatasetsByScenario(
         // experimentId is not meaningful for aggregated scenarios (multiple experiments/datasets combined)
         experimentId: '_',
         evaluatorScores: aggregatedScores,
-        evaluatorStats: calculateOverallStats(scenarioDatasets, evaluatorNames),
+        evaluatorStats: calculateOverallStats(scenarioDatasets),
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -88,12 +93,7 @@ async function buildScenarioReport(
 
   const baseReport = formatReportData(docs);
 
-  const evaluatorNames = Array.from(new Set(docs.map((doc) => doc.evaluator.name))).sort();
-
-  const scenarioDatasets = aggregateDatasetsByScenario(
-    baseReport.datasetScoresWithStats,
-    evaluatorNames
-  );
+  const scenarioDatasets = aggregateDatasetsByScenario(baseReport.datasetScoresWithStats);
 
   return {
     ...baseReport,
@@ -133,7 +133,7 @@ export function createScenarioSummaryReporter(): EvaluationReporter {
       }
 
       log.info(`\n${chalk.bold.blue('═══ SCENARIO SUMMARY ═══')}`);
-      const scenarioTable = createEvaluationTable(report, {
+      const scenarioTable = createEvaluationReportTable(report, {
         firstColumnHeader: 'Scenario',
         styleRowName: (name) => chalk.bold.white(name),
         statsToInclude: ['percentage', 'mean', 'stdDev'],

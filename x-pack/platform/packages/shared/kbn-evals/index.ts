@@ -15,14 +15,18 @@ export type { EvaluationDataset } from './src/types';
 
 export {
   createDefaultTerminalReporter,
-  createEvaluationTable,
+  createEvaluationReportTable,
   formatReportData,
   type EvaluationReporter,
   type EvaluationReport,
   type EvaluationTableOptions,
 } from './src/utils/report_model_score';
 
-export { EvaluationScoreRepository, type ModelScoreDocument } from './src/utils/score_repository';
+export {
+  EvaluationScoreRepository,
+  type ModelScoreDocument,
+  parseScoreDocuments,
+} from './src/utils/score_repository';
 
 export { getUniqueEvaluatorNames, calculateOverallStats } from './src/utils/evaluation_stats';
 export type {

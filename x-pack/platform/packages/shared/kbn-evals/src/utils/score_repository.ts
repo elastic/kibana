@@ -50,6 +50,42 @@ export interface ModelScoreDocument {
   tags: string[];
 }
 
+/**
+ * Parses Elasticsearch ModelScoreDocuments to DatasetScoreWithStats array
+ * This is the core transformation logic shared across different reporters
+ */
+export function parseScoreDocuments(docs: ModelScoreDocument[]): DatasetScoreWithStats[] {
+  const datasetMap = new Map<string, DatasetScoreWithStats>();
+
+  for (const doc of docs) {
+    if (!datasetMap.has(doc.dataset.id)) {
+      datasetMap.set(doc.dataset.id, {
+        id: doc.dataset.id,
+        name: doc.dataset.name,
+        numExamples: doc.dataset.examples_count,
+        evaluatorScores: new Map(),
+        evaluatorStats: new Map(),
+        experimentId: doc.experiment_id,
+      });
+    }
+
+    const dataset = datasetMap.get(doc.dataset.id)!;
+
+    dataset.evaluatorScores.set(doc.evaluator.name, doc.evaluator.scores);
+    dataset.evaluatorStats.set(doc.evaluator.name, {
+      mean: doc.evaluator.stats.mean,
+      median: doc.evaluator.stats.median,
+      stdDev: doc.evaluator.stats.std_dev,
+      min: doc.evaluator.stats.min,
+      max: doc.evaluator.stats.max,
+      count: doc.evaluator.stats.count,
+      percentage: doc.evaluator.stats.percentage,
+    });
+  }
+
+  return Array.from(datasetMap.values());
+}
+
 const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
 const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
 const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
@@ -178,7 +214,6 @@ export class EvaluationScoreRepository {
 
   async exportScores({
     datasetScoresWithStats,
-    evaluatorNames,
     model,
     evaluatorModel,
     runId,
@@ -186,7 +221,6 @@ export class EvaluationScoreRepository {
     tags = [],
   }: {
     datasetScoresWithStats: DatasetScoreWithStats[];
-    evaluatorNames: string[];
     model: Model;
     evaluatorModel: Model;
     runId: string;
@@ -206,10 +240,9 @@ export class EvaluationScoreRepository {
       const timestamp = new Date().toISOString();
 
       for (const dataset of datasetScoresWithStats) {
-        for (const evaluatorName of evaluatorNames) {
-          const stats = dataset.evaluatorStats.get(evaluatorName);
+        for (const [evaluatorName, stats] of dataset.evaluatorStats.entries()) {
           const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-          if (!stats || stats.count === 0) {
+          if (stats.count === 0) {
             continue;
           }
 
