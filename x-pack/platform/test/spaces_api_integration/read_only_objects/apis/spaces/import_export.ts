@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { result } from 'lodash';
 import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
@@ -365,6 +366,93 @@ export default function ({ getService }: FtrProviderContext) {
               overwrite: true,
             },
           ]);
+        });
+
+        it('should throw if there th import only contains objects are not overwritable by the current user', async () => {
+          const { cookie: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin();
+
+          let createResponse = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: 'read_only_type', isReadOnly: true })
+            .expect(200);
+          expect(createResponse.body.type).to.eql('read_only_type');
+          expect(createResponse.body).to.have.property('accessControl');
+          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
+          const firstObjId = createResponse.body.id;
+
+          createResponse = await supertestWithoutAuth
+            .post('/read_only_objects/create')
+            .set('kbn-xsrf', 'true')
+            .set('cookie', adminCookie.cookieString())
+            .send({ type: 'read_only_type', isReadOnly: true })
+            .expect(200);
+          expect(createResponse.body.type).to.eql('read_only_type');
+          expect(createResponse.body).to.have.property('accessControl');
+          expect(createResponse.body.accessControl).to.have.property('accessMode', 'read_only');
+          expect(createResponse.body.accessControl).to.have.property('owner', adminProfileId);
+          const secondObjId = createResponse.body.id;
+
+          const { cookie: testUserCookie } = await loginAsNotObjectOwner('test_user', 'changeme');
+
+          const toImport = [
+            {
+              // this first object will be rejected because it is owned by another user
+              accessControl: { accessMode: 'read_only', owner: adminProfileId },
+              attributes: { description: 'test' },
+              coreMigrationVersion: '8.8.0',
+              created_at: '2025-07-16T10:03:03.253Z',
+              created_by: adminProfileId,
+              id: firstObjId,
+              managed: false,
+              references: [],
+              type: READ_ONLY_TYPE,
+              updated_at: '2025-07-16T10:03:03.253Z',
+              updated_by: adminProfileId,
+              version: 'WzY5LDFd',
+            },
+            {
+              // this second object will be rejected because it is owned by another user
+              accessControl: { accessMode: 'read_only', owner: adminProfileId },
+              attributes: { description: 'test' },
+              coreMigrationVersion: '8.8.0',
+              created_at: '2025-07-16T10:03:03.253Z',
+              created_by: adminProfileId,
+              id: secondObjId,
+              managed: false,
+              references: [],
+              type: READ_ONLY_TYPE,
+              updated_at: '2025-07-16T10:03:03.253Z',
+              updated_by: adminProfileId,
+              version: 'WzY5LDFd',
+              // there are no other imported object, so the import with throw rather than succeed with partial success
+            },
+            {
+              excludedObjects: [],
+              excludedObjectsCount: 0,
+              exportedCount: 2,
+              missingRefCount: 0,
+              missingReferences: [],
+            },
+          ];
+
+          const importResponse = await performImport(
+            toImport,
+            testUserCookie.cookieString(),
+            true, // overwrite = true,
+            false, // createNewCopies = false
+            403 // entire import fails
+          );
+          const results = importResponse.text.split('\n').map((str) => JSON.parse(str));
+          expect(Array.isArray(results)).to.be(true);
+          expect(results.length).to.be(1);
+          expect(results[0]).to.be.eql({
+            statusCode: 403,
+            error: 'Forbidden',
+            message: `Unable to bulk_create read_only_type}, access control restrictions for read_only_type:${firstObjId},read_only_type:${secondObjId}`,
+          });
         });
 
         it('should allow overwrite of owned objects, but maintain original access control metadata, if owned by the current user', async () => {
