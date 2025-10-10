@@ -28,6 +28,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { UnifiedSearchStartDependencies } from '../types';
 
 const strings = {
   getProjectPickerButtonAriaLabel: () =>
@@ -212,6 +214,8 @@ export const ProjectPicker = () => {
   );
 
   const { euiTheme } = useEuiTheme();
+  const { services } = useKibana<UnifiedSearchStartDependencies>();
+  const projectsUrl = services.cloud?.projectsUrl || '';
 
   const originProject: Project = Object.values(response.origin)[0];
 
@@ -249,13 +253,14 @@ export const ProjectPicker = () => {
         .map(([key, value]) => `${key}: ${value}`);
 
       return (
-        <>
+        <span key={project._id}>
           {index > 0 && <EuiHorizontalRule margin="xs" />}
           <EuiFlexGroup
             responsive={false}
             alignItems="center"
             justifyContent="spaceBetween"
             css={{ padding: `0 ${euiTheme.size.s}` }}
+            key={project._id}
           >
             <EuiFlexItem grow={false}>
               <EuiFlexGroup responsive={false} gutterSize="xs">
@@ -298,7 +303,7 @@ export const ProjectPicker = () => {
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
+        </span>
       );
     });
 
@@ -331,26 +336,29 @@ export const ProjectPicker = () => {
                   <p>{strings.getProjectPickerPopoverTitle()}</p>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={strings.getManageCrossProjectSearchLabel()}
-                  delay="long"
-                  repositionOnScroll
-                >
-                  <EuiButtonIcon
-                    display="empty"
-                    iconType="gear"
-                    aria-label={i18n.translate('projectPicker.settingsButtonLabel', {
-                      defaultMessage: 'Manage cross-project search',
-                    })}
-                    onClick={() => {
-                      // TODO: redirect to project settings page
-                    }}
-                    size="xs"
-                    color="text"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
+              {projectsUrl ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={strings.getManageCrossProjectSearchLabel()}
+                    delay="long"
+                    repositionOnScroll
+                  >
+                    <EuiButtonIcon
+                      display="empty"
+                      iconType="gear"
+                      aria-label={i18n.translate('projectPicker.settingsButtonLabel', {
+                        defaultMessage: 'Manage cross-project search',
+                      })}
+                      onClick={() => {
+                        // TODO: verify this is the correct URL
+                        window.open(projectsUrl);
+                      }}
+                      size="xs"
+                      color="text"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiPopoverTitle>
         </EuiFlexItem>
