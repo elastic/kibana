@@ -112,12 +112,16 @@ export function loadEmbeddableData(
   };
 
   const onRenderComplete = () => {
-    performance.mark('render_complete');
     // list performance marks
     performance.measure('time_to_navigate', 'navigate_to_dashboard', 'dashboard_render_initiated');
     performance.measure(
-      'time_until_embeddable_requested',
+      'time_until_embeddable_factory_requested',
       'dashboard_render_initiated',
+      'embeddable_factory_requested'
+    );
+    performance.measure(
+      'time_until_embeddable_requested',
+      'embeddable_factory_requested',
       'embeddable_requested'
     );
     performance.measure(
@@ -144,7 +148,7 @@ export function loadEmbeddableData(
       .sort((a, b) => a.startTime - b.startTime);
     const totalTime = measures.reduce((sum, m) => sum + m.duration, 0);
 
-    const maxNameLength = Math.max(...measures.map((m) => m.name.length));
+    const maxNameLength = Math.max(...measures.map((m) => m.name.length)) + 5;
     const header = `${'Measure'.padEnd(maxNameLength)} | Duration  | Percentage`;
     const separator = `${'-'.repeat(maxNameLength)}-|-----------|-----------`;
     const rows = measures.map((m) => {
