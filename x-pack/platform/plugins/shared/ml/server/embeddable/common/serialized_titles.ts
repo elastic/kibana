@@ -6,7 +6,8 @@
  */
 import { schema } from '@kbn/config-schema';
 
-/* Serialized titles schema will soon be importable from a
+/*
+ ** Serialized titles schema will soon be importable from a
  ** @kbn/presentation-publishing-schemas package.
  ** See https://github.com/elastic/kibana/pull/235977.
  */
