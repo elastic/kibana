@@ -15,7 +15,6 @@ import type {
   TaskInstanceWithDeprecatedFields,
   ScheduleOptions,
 } from '@kbn/task-manager-plugin/server/task';
-import { v4 } from 'uuid';
 
 export class TaskManagerMock implements Partial<TaskManagerStartContract> {
   public static create(): TaskManagerMock {
@@ -28,7 +27,7 @@ export class TaskManagerMock implements Partial<TaskManagerStartContract> {
     taskInstance: TaskInstanceWithDeprecatedFields,
     options?: ScheduleOptions | undefined
   ): Promise<ConcreteTaskInstance> {
-    const taskId = taskInstance.id ?? v4();
+    const taskId = taskInstance.id ?? 'fake_task_id';
 
     return {
       id: taskId,

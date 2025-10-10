@@ -75,6 +75,8 @@ export class WorkflowRunFixture {
     inputs?: Record<string, any>;
     event?: Record<string, any>;
   }) {
+    // clean up before running workflow
+    this.cleanup();
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: 'fake_workflow_execution_id',
@@ -110,5 +112,12 @@ export class WorkflowRunFixture {
       config: this.configMock,
       fakeRequest: this.fakeKibanaRequest,
     });
+  }
+
+  private cleanup() {
+    jest.clearAllMocks();
+    this.workflowExecutionRepositoryMock.workflowExecutions.clear();
+    this.stepExecutionRepositoryMock.stepExecutions.clear();
+    this.logsRepositoryMock.logs.clear();
   }
 }
