@@ -3,6 +3,8 @@
   "id": "@kbn/v8-profiler-examples-plugin",
   "owner": "@elastic/response-ops",
   "description": "Provides access to the v8 cpu profiler and heap profiler running this app",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     // umm, vs code says I can't use digits in the id field?
     "id": "vEIGHTProfilerExamples",
