@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { EsqlToolFieldTypes, ToolType } from '@kbn/onechat-common';
+import type { EsqlToolFieldTypes, EsqlToolParamValue, ToolType } from '@kbn/onechat-common';
 
 export interface EsqlParam {
   name: string;
   type: EsqlToolFieldTypes;
   description: string;
   optional: boolean;
+  defaultValue?: EsqlToolParamValue;
 }
 
 export enum EsqlParamSource {

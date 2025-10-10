@@ -59,6 +59,7 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
               type: ES_FIELD_TYPES.TEXT,
               source: EsqlParamSource.Inferred,
               optional: false,
+              defaultValue: undefined,
             };
       }
     );
@@ -161,6 +162,7 @@ export const EsqlParams = () => {
         type: ES_FIELD_TYPES.TEXT,
         source: EsqlParamSource.Custom,
         optional: false,
+        defaultValue: undefined,
       });
     },
     [appendParamField]
