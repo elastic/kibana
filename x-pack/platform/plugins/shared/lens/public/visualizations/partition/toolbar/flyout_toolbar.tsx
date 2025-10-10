@@ -12,8 +12,10 @@ import { i18n } from '@kbn/i18n';
 import type { ContentMap } from '../../../shared_components/flyout_toolbar';
 import { FlyoutToolbar } from '../../../shared_components/flyout_toolbar';
 import type { VisualizationToolbarProps } from '../../../types';
-import type { PieVisualizationState } from '../../../../common/types';
-import { PartitionAppearanceSettings, PartitionTitlesAndTextSettings } from './toolbar';
+import { EmptySizeRatios, type PieVisualizationState } from '../../../../common/types';
+import { PartitionAppearanceSettings } from './appearance_settings';
+import { PartitionTitlesAndTextSettings } from './titles_and_text_setttings';
+import { PartitionChartsMeta } from '../partition_charts_meta';
 
 export function PartitionFlyoutToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const datatableToolbarContentMap: ContentMap<PieVisualizationState> = {
@@ -23,19 +25,37 @@ export function PartitionFlyoutToolbar(props: VisualizationToolbarProps<PieVisua
 }
 
 function PartitionStyleSettings(props: VisualizationToolbarProps<PieVisualizationState>) {
+  const { state } = props;
+
+  const layer = state.layers[0];
+  const { emptySizeRatioOptions, isDisabled } = PartitionChartsMeta[state.shape].toolbarPopover;
+
+  const selectedOption = emptySizeRatioOptions
+    ? emptySizeRatioOptions.find(
+        ({ value }) =>
+          value === (state.shape === 'pie' ? 0 : layer.emptySizeRatio ?? EmptySizeRatios.SMALL)
+      )
+    : undefined;
+
+  const showAppearanceSettings = emptySizeRatioOptions?.length && selectedOption;
+
   return (
     <>
-      <EuiAccordion
-        id={''}
-        buttonContent={i18n.translate('xpack.lens.visualization.toolbar.appearance', {
-          defaultMessage: 'Appearance',
-        })}
-        paddingSize="s"
-        initialIsOpen
-      >
-        <PartitionAppearanceSettings {...props} />
-      </EuiAccordion>
-      <EuiHorizontalRule margin="m" />
+      {showAppearanceSettings && (
+        <>
+          <EuiAccordion
+            id={''}
+            buttonContent={i18n.translate('xpack.lens.visualization.toolbar.appearance', {
+              defaultMessage: 'Appearance',
+            })}
+            paddingSize="s"
+            initialIsOpen
+          >
+            <PartitionAppearanceSettings {...props} />
+          </EuiAccordion>
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       <EuiAccordion
         id={''}
         buttonContent={i18n.translate('xpack.lens.visualization.toolbar.titlesAndText', {
@@ -43,6 +63,8 @@ function PartitionStyleSettings(props: VisualizationToolbarProps<PieVisualizatio
         })}
         paddingSize="s"
         initialIsOpen
+        isDisabled={!!isDisabled}
+        {...(!!isDisabled && { forceState: 'closed' })}
       >
         <PartitionTitlesAndTextSettings {...props} />
       </EuiAccordion>

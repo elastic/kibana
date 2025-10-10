@@ -7,30 +7,21 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFormRow,
-  EuiComboBox,
-  EuiIcon,
-  EuiFieldNumber,
-  EuiButtonGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import { LegendValue } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-utils';
 import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
-import { DEFAULT_PERCENT_DECIMALS } from '../constants';
 import { PartitionChartsMeta } from '../partition_charts_meta';
 import type { PieVisualizationState, SharedPieLayerState } from '../../../../common/types';
 import { EmptySizeRatios } from '../../../../common/types';
-import { LegendDisplay, NumberDisplay } from '../../../../common/constants';
+import { LegendDisplay } from '../../../../common/constants';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getLegendStats } from '../render_helpers';
+import { PartitionAppearanceSettings } from './appearance_settings';
+import { PartitionTitlesAndTextSettings } from './titles_and_text_setttings';
 
 const partitionLegendValues = [
   {
@@ -41,41 +32,9 @@ const partitionLegendValues = [
   },
 ];
 
-const legendOptions: Array<{
-  value: SharedPieLayerState['legendDisplay'];
-  label: string;
-  id: string;
-}> = [
-  {
-    id: 'pieLegendDisplay-default',
-    value: LegendDisplay.DEFAULT,
-    label: i18n.translate('xpack.lens.pieChart.legendVisibility.auto', {
-      defaultMessage: 'Auto',
-    }),
-  },
-  {
-    id: 'pieLegendDisplay-show',
-    value: LegendDisplay.SHOW,
-    label: i18n.translate('xpack.lens.pieChart.legendVisibility.show', {
-      defaultMessage: 'Show',
-    }),
-  },
-  {
-    id: 'pieLegendDisplay-hide',
-    value: LegendDisplay.HIDE,
-    label: i18n.translate('xpack.lens.pieChart.legendVisibility.hide', {
-      defaultMessage: 'Hide',
-    }),
-  },
-];
-
 const PANEL_STYLE = {
   width: '500px',
 };
-
-const emptySizeRatioLabel = i18n.translate('xpack.lens.pieChart.donutHole', {
-  defaultMessage: 'Donut hole',
-});
 
 export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationState>) {
   const { state, setState, frame } = props;
@@ -214,187 +173,30 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 }
 
-const DecimalPlaceInput = ({
-  value,
-  setValue,
-}: {
-  value: number;
-  setValue: (value: number) => void;
-}) => {
-  const { inputValue, handleInputChange } = useDebouncedValue(
-    {
-      value,
-      onChange: setValue,
-    },
-    { allowFalsyValue: true }
-  );
-  return (
-    <EuiFieldNumber
-      data-test-subj="indexPattern-dimension-formatDecimals"
-      value={inputValue}
-      min={0}
-      max={10}
-      prepend={i18n.translate('xpack.lens.pieChart.decimalPlaces', {
-        defaultMessage: 'Decimal places',
-      })}
-      compressed
-      onChange={(e) => {
-        handleInputChange(Number(e.currentTarget.value));
-      }}
-    />
-  );
-};
-
-export function PartitionAppearanceSettings(
-  props: VisualizationToolbarProps<PieVisualizationState>
-) {
-  const { state, setState } = props;
-  const layer = state.layers[0];
-  const { emptySizeRatioOptions } = PartitionChartsMeta[state.shape].toolbarPopover;
-
-  const onEmptySizeRatioChange = useCallback(
-    ([option]: Array<EuiComboBoxOptionOption<string>>) => {
-      if (option.value === 'none') {
-        setState({ ...state, shape: 'pie', layers: [{ ...layer, emptySizeRatio: undefined }] });
-      } else {
-        const emptySizeRatio = emptySizeRatioOptions?.find(({ id }) => id === option.value)?.value;
-        setState({
-          ...state,
-          shape: 'donut',
-          layers: [{ ...layer, emptySizeRatio }],
-        });
-      }
-    },
-    [emptySizeRatioOptions, layer, setState, state]
-  );
-
-  const options =
-    emptySizeRatioOptions &&
-    emptySizeRatioOptions.map(({ id, label, icon }) => ({
-      value: id,
-      label,
-      prepend: icon ? <EuiIcon type={icon} /> : undefined,
-    }));
-
-  const selectedOption = emptySizeRatioOptions
-    ? emptySizeRatioOptions.find(
-        ({ value }) =>
-          value === (state.shape === 'pie' ? 0 : layer.emptySizeRatio ?? EmptySizeRatios.SMALL)
-      )
-    : undefined;
-
-  const selectedOptions = selectedOption
-    ? [{ value: selectedOption.id, label: selectedOption.label }]
-    : undefined;
-
-  return (
-    <EuiFormRow label={emptySizeRatioLabel} display="columnCompressed" fullWidth>
-      <EuiComboBox
-        fullWidth
-        compressed
-        data-test-subj="lnsEmptySizeRatioOption"
-        aria-label={i18n.translate('xpack.lens.pieChart.donutHole', {
-          defaultMessage: 'Donut hole',
-        })}
-        onChange={onEmptySizeRatioChange}
-        isClearable={false}
-        options={options}
-        selectedOptions={selectedOptions}
-        singleSelection={{ asPlainText: true }}
-        prepend={selectedOption?.icon ? <EuiIcon type={selectedOption.icon} /> : undefined}
-      />
-    </EuiFormRow>
-  );
-}
-
-export function PartitionTitlesAndTextSettings(
-  props: VisualizationToolbarProps<PieVisualizationState>
-) {
-  const { state, setState } = props;
-  const layer = state.layers[0];
-  const { categoryOptions, numberOptions } = PartitionChartsMeta[state.shape].toolbarPopover;
-
-  const onStateChange = useCallback(
-    (part: Record<string, unknown>) => {
-      setState({
-        ...state,
-        layers: [{ ...layer, ...part }],
-      });
-    },
-    [layer, state, setState]
-  );
-
-  const onCategoryDisplayChange = useCallback(
-    (option: unknown) => onStateChange({ categoryDisplay: option }),
-    [onStateChange]
-  );
-
-  const onNumberDisplayChange = useCallback(
-    (option: unknown) => onStateChange({ numberDisplay: option }),
-    [onStateChange]
-  );
-
-  const onPercentDecimalsChange = useCallback(
-    (option: unknown) => {
-      onStateChange({ percentDecimals: option });
-    },
-    [onStateChange]
-  );
-
-  return (
-    <>
-      {categoryOptions.length ? (
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
-            defaultMessage: 'Slice labels',
-          })}
-          fullWidth
-          display="columnCompressed"
-        >
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.lens.pieChart.labelSliceLabels', {
-              defaultMessage: 'Slice labels',
-            })}
-            options={categoryOptions}
-            idSelected={layer.categoryDisplay}
-            onChange={onCategoryDisplayChange}
-            buttonSize="compressed"
-            isFullWidth
-          />
-        </EuiFormRow>
-      ) : null}
-
-      {/* TODO: Instead of hidding the setting, we can disable it as we did with the metric appearance options */}
-      {numberOptions.length && layer.categoryDisplay !== 'hide' ? (
-        <>
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.pieChart.sliceValues', {
-              defaultMessage: 'Slice values',
-            })}
-            fullWidth
-            display="columnCompressed"
-          >
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.lens.pieChart.sliceValues', {
-                defaultMessage: 'Slice values',
-              })}
-              options={numberOptions}
-              idSelected={layer.numberDisplay}
-              onChange={onNumberDisplayChange}
-              buttonSize="compressed"
-              isFullWidth
-            />
-          </EuiFormRow>
-          {layer.numberDisplay === NumberDisplay.PERCENT && (
-            <EuiFormRow label=" " fullWidth display="columnCompressed">
-              <DecimalPlaceInput
-                value={layer.percentDecimals ?? DEFAULT_PERCENT_DECIMALS}
-                setValue={onPercentDecimalsChange}
-              />
-            </EuiFormRow>
-          )}
-        </>
-      ) : null}
-    </>
-  );
-}
+const legendOptions: Array<{
+  value: SharedPieLayerState['legendDisplay'];
+  label: string;
+  id: string;
+}> = [
+  {
+    id: 'pieLegendDisplay-default',
+    value: LegendDisplay.DEFAULT,
+    label: i18n.translate('xpack.lens.pieChart.legendVisibility.auto', {
+      defaultMessage: 'Auto',
+    }),
+  },
+  {
+    id: 'pieLegendDisplay-show',
+    value: LegendDisplay.SHOW,
+    label: i18n.translate('xpack.lens.pieChart.legendVisibility.show', {
+      defaultMessage: 'Show',
+    }),
+  },
+  {
+    id: 'pieLegendDisplay-hide',
+    value: LegendDisplay.HIDE,
+    label: i18n.translate('xpack.lens.pieChart.legendVisibility.hide', {
+      defaultMessage: 'Hide',
+    }),
+  },
+];
