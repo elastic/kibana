@@ -43,6 +43,9 @@ import type {
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
+import { anomalyChartsEmbeddableStateSchema } from '../../server/embeddable/schemas';
+import { TypeOf } from '@kbn/config-schema';
+
 
 export type {
   AnomalySwimLaneEmbeddableState,
@@ -136,9 +139,9 @@ export interface AnomalyChartsDataLoadingApi {
 /**
  * Persisted state for the Anomaly Charts Embeddable.
  */
-export interface AnomalyChartsEmbeddableState
-  extends SerializedTitles,
-    AnomalyChartsEmbeddableOverridableState {}
+export type AnomalyChartsEmbeddableState = TypeOf<
+  typeof anomalyChartsEmbeddableStateSchema
+>;
 
 export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoadingApi;
 
@@ -165,13 +168,6 @@ export interface AnomalyChartsAttachmentApi extends AnomalyChartsApi {
     timeRange$: BehaviorSubject<TimeRange | undefined>;
   };
 }
-
-/**
- * Persisted state for the Anomaly Charts Embeddable.
- */
-export interface AnomalyChartsEmbeddableState
-  extends SerializedTitles,
-    AnomalyChartsEmbeddableOverridableState {}
 
 /** Manual input by the user */
 export interface SingleMetricViewerEmbeddableUserInput {
