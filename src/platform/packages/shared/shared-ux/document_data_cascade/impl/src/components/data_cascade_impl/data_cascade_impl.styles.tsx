@@ -15,30 +15,36 @@ export const overflowYAuto = css({ overflowY: 'auto' });
 export const relativePosition = css({ position: 'relative' });
 
 export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
-  container: css({ flex: '1 1 auto' }),
-  cascadeTreeGridHeader: css({
+  container: css({
+    flex: '1 1 auto',
+  }),
+  containerInner: css([relativePosition, { height: '100%' }]),
+  cascadeTreeGridBlock: css([
+    overflowYAuto,
+    relativePosition,
+    {
+      scrollbarGutter: 'auto',
+      scrollbarWidth: 'thin',
+      border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+      borderRadius: euiTheme.border.radius.small,
+    },
+  ]),
+  cascadeTreeGridHeaderStickyRenderSlot: css({
     position: 'sticky',
-    willChange: 'transform',
+    top: 0,
+    left: 0,
+    right: 0,
     zIndex: euiTheme.levels.header,
-    background: euiTheme.colors.backgroundBasePlain,
+  }),
+  cascadeTreeGridWrapper: css({
+    background: euiTheme.colors.backgroundBaseSubdued,
 
-    // preserves the round edges on the top bar on scroll
-    '&[data-scrolled="true"]::before': {
+    '&:before': {
       content: '""',
       position: 'absolute',
       height: '100%',
       width: '100%',
-      borderRadius: euiTheme.border.radius.small,
-      boxShadow: `inset ${euiTheme.border.color} 0px ${euiTheme.border.width.thin} 0px`,
-      top: `calc(100% - ${euiTheme.border.radius.small} + ${euiTheme.border.width.thin})`,
-      pointerEvents: 'none',
+      borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
     },
-  }),
-  cascadeTreeGridHeaderScrolled: css({
-    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
-  }),
-  cascadeTreeGridHeaderStickyRenderSlot: css(relativePosition, {}),
-  cascadeTreeGridWrapper: css({
-    background: euiTheme.colors.backgroundBaseSubdued,
   }),
 });

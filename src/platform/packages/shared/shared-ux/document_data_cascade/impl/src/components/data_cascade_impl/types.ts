@@ -176,7 +176,7 @@ export type DataCascadeRowProps<G extends GroupNode, L extends LeafNode> = Pick<
 
 export interface CascadeHeaderPrimitiveProps<G extends GroupNode> {
   tableInstance: Table<G>;
-  onCascadeGroupingChange: SelectionDropdownProps['onSelectionChange'];
+  onCascadeGroupingChange?: SelectionDropdownProps['onSelectionChange'];
   customTableHeader?: (props: {
     availableColumns: string[];
     currentSelectedColumns: string[];

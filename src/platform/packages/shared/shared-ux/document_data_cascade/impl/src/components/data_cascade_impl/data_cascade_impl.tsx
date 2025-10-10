@@ -16,7 +16,6 @@ import { type GroupNode, type LeafNode } from '../../store_provider';
 import { TableHeader, useCascadeTable, type Table, type CellContext } from '../../lib/core/table';
 import {
   useCascadeVirtualizer,
-  getGridHeaderPositioningStyle,
   VirtualizedCascadeRowList,
   type VirtualizedCascadeListProps,
 } from '../../lib/core/virtualizer';
@@ -24,7 +23,7 @@ import {
   useRegisterCascadeAccessibilityHelpers,
   useTreeGridContainerARIAAttributes,
 } from '../../lib/core/accessibility';
-import { dataCascadeImplStyles, relativePosition, overflowYAuto } from './data_cascade_impl.styles';
+import { dataCascadeImplStyles, relativePosition } from './data_cascade_impl.styles';
 import type { DataCascadeImplProps, DataCascadeRowProps, DataCascadeRowCellProps } from './types';
 
 /**
@@ -72,7 +71,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   const { euiTheme } = useEuiTheme();
 
-  const scrollElementRef = useRef(null);
+  const scrollElementRef = useRef<HTMLDivElement | null>(null);
   const cascadeWrapperRef = useRef<HTMLDivElement | null>(null);
   const activeStickyRenderSlotRef = useRef<HTMLDivElement | null>(null);
   const virtualizerInstance = useRef<ReturnType<typeof useCascadeVirtualizer>>();
@@ -137,7 +136,6 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     getVirtualItems,
     getTotalSize,
     activeStickyIndex,
-    scrollOffset: virtualizerScrollOffset,
     measureElement,
     virtualizedRowComputedTranslateValue,
     scrollToVirtualizedIndex,
@@ -172,39 +170,27 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
 
   return (
     <div ref={cascadeWrapperRef} data-test-subj="data-cascade" css={styles.container}>
-      <EuiAutoSizer doNotBailOutOnEmptyChildren>
-        {(containerSize) => (
-          <div ref={scrollElementRef} css={overflowYAuto} style={{ ...containerSize }}>
-            <EuiFlexGroup
-              direction="column"
-              gutterSize="none"
-              css={relativePosition}
-              style={{ width: containerSize.width }}
-            >
-              <EuiFlexItem
-                grow={false}
-                css={styles.cascadeTreeGridHeader}
-                style={getGridHeaderPositioningStyle(virtualizedRowComputedTranslateValue)}
-                data-scrolled={
-                  // mark the header as scrolled if the first row has been scrolled out of view
-                  (virtualizerScrollOffset ?? 0) > virtualizedRowComputedTranslateValue.get(0)!
-                }
+      <EuiFlexGroup direction="column" gutterSize="none" css={styles.containerInner}>
+        <EuiFlexItem grow={false}>
+          <TableHeader headerColumns={headerColumns} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={true}>
+          <EuiAutoSizer doNotBailOutOnEmptyChildren>
+            {(scrollContainerSize) => (
+              <div
+                ref={scrollElementRef}
+                css={styles.cascadeTreeGridBlock}
+                style={{
+                  ...scrollContainerSize,
+                }}
               >
-                <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem>
-                    <TableHeader headerColumns={headerColumns} />
-                  </EuiFlexItem>
-                  <React.Fragment>
-                    {activeStickyIndex !== null && enableStickyGroupHeader && (
-                      <EuiFlexItem
-                        ref={activeStickyRenderSlotRef}
-                        css={styles.cascadeTreeGridHeaderStickyRenderSlot}
-                      />
-                    )}
-                  </React.Fragment>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
+                <React.Fragment>
+                  {activeStickyIndex !== null && enableStickyGroupHeader && (
+                    <div css={styles.cascadeTreeGridHeaderStickyRenderSlot}>
+                      <div ref={activeStickyRenderSlotRef} />
+                    </div>
+                  )}
+                </React.Fragment>
                 <div css={styles.cascadeTreeGridWrapper} style={{ height: getTotalSize() }}>
                   <div
                     {...treeGridContainerARIAAttributes}
@@ -223,11 +209,11 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                     </VirtualizedCascadeRowList>
                   </div>
                 </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        )}
-      </EuiAutoSizer>
+              </div>
+            )}
+          </EuiAutoSizer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 }
