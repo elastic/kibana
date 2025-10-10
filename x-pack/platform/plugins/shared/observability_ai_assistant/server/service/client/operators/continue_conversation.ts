@@ -19,9 +19,16 @@ import {
   of,
   shareReplay,
   switchMap,
+  tap,
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
+import type { AnalyticsServiceStart } from '@kbn/core/server';
+import type { Connector } from '@kbn/actions-plugin/server';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
+import type { ToolCallEvent } from '../../../analytics/tool_call';
+import { toolCallEventType } from '../../../analytics/tool_call';
 import type { Message, CompatibleJSONSchema, MessageAddEvent } from '../../../../common';
 import {
   CONTEXT_FUNCTION_NAME,
@@ -44,7 +51,7 @@ const MAX_FUNCTION_RESPONSE_TOKEN_COUNT = 4000;
 
 const EXIT_LOOP_FUNCTION_NAME = 'exit_loop';
 
-function executeFunctionAndCatchError({
+export function executeFunctionAndCatchError({
   name,
   args,
   functionClient,
@@ -54,6 +61,9 @@ function executeFunctionAndCatchError({
   logger,
   connectorId,
   simulateFunctionCalling,
+  analytics,
+  connector,
+  scopes,
 }: {
   name: string;
   args: string | undefined;
@@ -64,6 +74,9 @@ function executeFunctionAndCatchError({
   logger: Logger;
   connectorId: string;
   simulateFunctionCalling: boolean;
+  analytics: AnalyticsServiceStart;
+  connector?: Connector;
+  scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   return withExecuteToolSpan(name, { tool: { input: args } }, (span) => {
     // hide token count events from functions to prevent them from
@@ -88,6 +101,13 @@ function executeFunctionAndCatchError({
     );
 
     return executeFunctionResponse$.pipe(
+      tap(() => {
+        analytics.reportEvent<ToolCallEvent>(toolCallEventType, {
+          toolName: name,
+          connector: getInferenceConnectorInfo(connector),
+          scopes,
+        });
+      }),
       catchError((error) => {
         span?.recordException(error);
         logger.error(`Encountered error running function ${name}: ${JSON.stringify(error)}`);
@@ -194,6 +214,9 @@ export function continueConversation({
   disableFunctions,
   connectorId,
   simulateFunctionCalling,
+  analytics,
+  connector,
+  scopes,
 }: {
   messages: Message[];
   functionClient: ChatFunctionClient;
@@ -206,6 +229,9 @@ export function continueConversation({
   disableFunctions: boolean;
   connectorId: string;
   simulateFunctionCalling: boolean;
+  analytics: AnalyticsServiceStart;
+  connector?: Connector;
+  scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
 
@@ -310,6 +336,9 @@ export function continueConversation({
       logger,
       connectorId,
       simulateFunctionCalling,
+      analytics,
+      connector,
+      scopes,
     });
   }
 
@@ -362,6 +391,9 @@ export function continueConversation({
               disableFunctions,
               connectorId,
               simulateFunctionCalling,
+              analytics,
+              connector,
+              scopes,
             });
           })
         )

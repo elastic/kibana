@@ -116,8 +116,9 @@ export class SecuritySolutionServerlessPlugin
             aiConnectors,
             isNewDefaultConnectorEnabled ? 'ui' : undefined
           );
+
           coreSetup.uiSettings.register({
-            ...(defaultAIConnectorSetting !== null ? defaultAIConnectorSetting : {}),
+            ...defaultAIConnectorSetting,
             ...getDefaultValueReportSettings(),
           });
         } catch (error) {
