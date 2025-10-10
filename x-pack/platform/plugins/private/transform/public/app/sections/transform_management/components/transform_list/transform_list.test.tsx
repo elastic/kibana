@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, type UseQueryResult } from '@kbn/react-query';
-import * as ReactQuery from '@kbn/react-query';
+import * as ReactQuery from '@tanstack/react-query';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 

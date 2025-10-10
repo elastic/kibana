@@ -10,11 +10,11 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useGetUserProfileQuery } from './use_get_user_profile_query';
 import type { UserProfileService } from '@kbn/core/public';
 import { QueryClientProvider } from '@kbn/react-query';
-import * as reactQuery from '@kbn/react-query';
+import * as ReactQuery from '@tanstack/react-query';
 import type { PropsWithChildren } from 'react';
 import { testQueryClient } from '../test_utils/test_query_client';
 
-const useQuerySpy = jest.spyOn(reactQuery, 'useQuery');
+const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
 
 const mockUserProfileService = {
   getCurrent: jest.fn(),
