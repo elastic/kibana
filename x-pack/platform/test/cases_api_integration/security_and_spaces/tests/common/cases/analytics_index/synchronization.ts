@@ -13,10 +13,7 @@ import {
 } from '@kbn/cases-plugin/common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import {
-  runActivitySynchronizationTask,
-  runAttachmentsSynchronizationTask,
-  runCasesSynchronizationTask,
-  runCommentsSynchronizationTask,
+  runCAISynchronizationTask,
   runSchedulerTask,
 } from '../../../../../common/lib/api/analytics';
 import {
@@ -101,7 +98,7 @@ export default ({ getService }: FtrProviderContext): void => {
         200
       );
 
-      await runCasesSynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest);
 
       await retry.tryForTime(300000, async () => {
         const caseAnalytics = await esClient.get({
@@ -188,7 +185,7 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      await runAttachmentsSynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest);
 
       await retry.tryForTime(300000, async () => {
         const firstAttachmentAnalytics = await esClient.get({
@@ -219,7 +216,7 @@ export default ({ getService }: FtrProviderContext): void => {
         params: { ...postCommentUserReq, owner: SECURITY_SOLUTION_OWNER },
       });
 
-      await runCommentsSynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest);
 
       await retry.try(async () => {
         const commentAnalytics = await esClient.get({
@@ -278,7 +275,7 @@ export default ({ getService }: FtrProviderContext): void => {
         },
       });
 
-      await runActivitySynchronizationTask(supertest);
+      await runCAISynchronizationTask(supertest);
 
       let activityArray: any[] = [];
       await retry.try(async () => {

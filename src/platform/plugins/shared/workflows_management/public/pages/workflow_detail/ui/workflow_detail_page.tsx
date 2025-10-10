@@ -161,10 +161,13 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     setHasChanges(false);
   }, [workflow]);
 
-  const handleChange = (wfString: string = '') => {
-    setWorkflowYaml(wfString);
-    setHasChanges(originalWorkflowYaml !== wfString);
-  };
+  const handleChange = useCallback(
+    (wfString: string = '') => {
+      setWorkflowYaml(wfString);
+      setHasChanges(originalWorkflowYaml !== wfString);
+    },
+    [originalWorkflowYaml]
+  );
 
   if (workflowError) {
     const error = workflowError as Error;

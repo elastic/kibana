@@ -115,7 +115,7 @@ export const WorkflowExecutionList = ({
     content = (
       <EuiFlexGroup direction="column" gutterSize="s">
         {executions.results.map((execution) => (
-          <EuiFlexItem key={execution.id}>
+          <EuiFlexItem key={execution.id} grow={false}>
             <WorkflowExecutionListItem
               status={execution.status}
               startedAt={new Date(execution.startedAt)}
