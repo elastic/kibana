@@ -12,7 +12,6 @@ import { createStandaloneParsedRequestsProvider } from './standalone_console_par
 // Create a provider factory for packaging environment
 export const createPackagingParsedRequestsProvider = () => {
   return (model: any) => {
-    // Add null check for model
     if (!model) {
       // eslint-disable-next-line no-console
       console.warn('Monaco editor model is null, creating fallback provider');
