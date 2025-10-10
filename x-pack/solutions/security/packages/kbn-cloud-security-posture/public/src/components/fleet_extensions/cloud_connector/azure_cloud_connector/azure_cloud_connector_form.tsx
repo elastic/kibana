@@ -15,17 +15,12 @@ import { AzureArmTemplateGuide } from './azure_arm_template_guide';
 import {
   getCloudConnectorRemoteRoleTemplate,
   getElasticStackId,
+  isAzureCredentials,
   updateInputVarsWithCredentials,
 } from '../utils';
+import { AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 import { getAzureCloudConnectorsCredentialsFormOptions } from './azure_cloud_connector_options';
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
-
-// Azure-specific field names
-const AZURE_CLOUD_CONNECTOR_FIELD_NAMES = {
-  TENANT_ID: 'azure.credentials.tenant_id',
-  CLIENT_ID: 'azure.credentials.client_id',
-  CLOUD_CONNECTOR_ID: 'azure_credentials_cloud_connector_id',
-} as const;
 
 export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   input,
@@ -145,14 +140,16 @@ export const AzureCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
           packageInfo={packageInfo}
           onChange={(key, value) => {
             // Update local credentials state if available
-            if (credentials && setCredentials) {
+            if (credentials && isAzureCredentials(credentials) && setCredentials) {
               const updatedCredentials = { ...credentials };
               if (key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID) {
                 updatedCredentials.tenantId = value;
               } else if (key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID) {
                 updatedCredentials.clientId = value;
-              } else if (key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLOUD_CONNECTOR_ID) {
-                updatedCredentials.cloudConnectorId = value;
+              } else if (
+                key === AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID
+              ) {
+                updatedCredentials.azure_credentials_cloud_connector_id = value;
               }
               setCredentials(updatedCredentials);
             } else {

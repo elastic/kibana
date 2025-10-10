@@ -8,15 +8,14 @@
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import type { CloudConnectorOption, ComboBoxOption } from '../types';
+import type { AwsCloudConnectorCredentials, CloudConnectorOption, ComboBoxOption } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
-import type { CloudConnectorCredentials } from '../hooks/use_cloud_connector_setup';
 
 export const AWSReusableConnectorForm: React.FC<{
   cloudConnectorId: string | undefined;
   isEditPage: boolean;
-  credentials: CloudConnectorCredentials;
-  setCredentials: (credentials: CloudConnectorCredentials) => void;
+  credentials: AwsCloudConnectorCredentials;
+  setCredentials: (credentials: AwsCloudConnectorCredentials) => void;
 }> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors();
 

@@ -9,7 +9,7 @@ import React from 'react';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { AWSReusableConnectorForm } from '../aws_cloud_connector/aws_reusable_connector_form';
 import { AzureReusableConnectorForm } from '../azure_cloud_connector/azure_reusable_connector_form';
-import type { CloudConnectorCredentials } from '../hooks/use_cloud_connector_setup';
+import type { CloudConnectorCredentials } from '../types';
 
 export const ReusableCloudConnectorForm: React.FC<{
   credentials: CloudConnectorCredentials;

@@ -39,7 +39,7 @@ export const AWS_CLOUD_CONNECTOR_FIELD_NAMES = {
 export const AZURE_CLOUD_CONNECTOR_FIELD_NAMES = {
   TENANT_ID: 'azure.credentials.tenant_id',
   CLIENT_ID: 'azure.credentials.client_id',
-  CLOUD_CONNECTOR_ID: 'azure_credentials_cloud_connector_id',
+  AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID: 'azure_credentials_cloud_connector_id',
 } as const;
 
 // Minimum version required for cloud connector reusability feature

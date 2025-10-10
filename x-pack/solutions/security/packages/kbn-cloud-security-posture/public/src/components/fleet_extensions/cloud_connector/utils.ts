@@ -14,9 +14,15 @@ import type {
 import semver from 'semver';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
-import type { CloudProviders } from './types';
+import type {
+  AwsCloudConnectorCredentials,
+  AzureCloudConnectorCredentials,
+  CloudConnectorCredentials,
+  CloudProviders,
+} from './types';
 import {
   AWS_CLOUD_CONNECTOR_FIELD_NAMES,
+  AZURE_CLOUD_CONNECTOR_FIELD_NAMES,
   CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
   ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
   CLOUD_CONNECTOR_ASSET_INVENTORY_REUSABLE_MIN_VERSION,
@@ -24,7 +30,35 @@ import {
   AWS_PROVIDER,
   AZURE_PROVIDER,
 } from './constants';
-import type { CloudConnectorCredentials } from './hooks/use_cloud_connector_setup';
+
+// Type guards for better type safety
+export function isAwsCredentials(
+  credentials: CloudConnectorCredentials
+): credentials is AwsCloudConnectorCredentials {
+  return 'roleArn' in credentials;
+}
+
+export function isAzureCredentials(
+  credentials: CloudConnectorCredentials
+): credentials is AzureCloudConnectorCredentials {
+  return 'tenantId' in credentials;
+}
+
+export function hasValidNewConnectionCredentials(
+  credentials: CloudConnectorCredentials,
+  provider?: string
+): boolean {
+  if (!provider) return false;
+
+  switch (provider) {
+    case 'aws':
+      return isAwsCredentials(credentials) && !!credentials.roleArn;
+    case 'azure':
+      return isAzureCredentials(credentials) && !!credentials.tenantId;
+    default:
+      return false;
+  }
+}
 
 const getCloudProviderFromCloudHost = (cloudHost: string | undefined): string | undefined => {
   if (!cloudHost) return undefined;
@@ -209,21 +243,21 @@ export const updatePolicyWithAwsCloudConnectorCredentials = (
 };
 
 /**
- * Updates input variables with current credentials
+ * Updates input variables with AWS credentials
  * @param inputVars - The original input variables
- * @param credentials - The current credentials to apply
- * @returns Updated input variables with credentials applied
+ * @param credentials - The AWS credentials to apply
+ * @returns Updated input variables with AWS credentials applied
  */
-export const updateInputVarsWithCredentials = (
+export const updateInputVarsWithAwsCredentials = (
   inputVars: PackagePolicyConfigRecord | undefined,
-  credentials: CloudConnectorCredentials | undefined
+  credentials: AwsCloudConnectorCredentials | undefined
 ): PackagePolicyConfigRecord | undefined => {
-  if (!inputVars) return inputVars;
+  if (!inputVars || !credentials) return inputVars;
 
   const updatedInputVars: PackagePolicyConfigRecord = { ...inputVars };
 
   // Update role_arn fields
-  if (credentials?.roleArn !== undefined) {
+  if (credentials.roleArn !== undefined) {
     if (updatedInputVars.role_arn) {
       updatedInputVars.role_arn.value = credentials.roleArn;
     }
@@ -241,7 +275,7 @@ export const updateInputVarsWithCredentials = (
   }
 
   // Update external_id fields
-  if (credentials?.externalId !== undefined) {
+  if (credentials.externalId !== undefined) {
     if (updatedInputVars.external_id) {
       updatedInputVars.external_id = { value: credentials.externalId };
     }
@@ -261,6 +295,96 @@ export const updateInputVarsWithCredentials = (
   }
 
   return updatedInputVars;
+};
+
+/**
+ * Updates input variables with Azure credentials
+ * @param inputVars - The original input variables
+ * @param credentials - The Azure credentials to apply
+ * @returns Updated input variables with Azure credentials applied
+ */
+export const updateInputVarsWithAzureCredentials = (
+  inputVars: PackagePolicyConfigRecord | undefined,
+  credentials: AzureCloudConnectorCredentials | undefined
+): PackagePolicyConfigRecord | undefined => {
+  if (!inputVars || !credentials) return inputVars;
+
+  const updatedInputVars: PackagePolicyConfigRecord = { ...inputVars };
+
+  // Update Azure-specific fields
+  if (credentials.tenantId !== undefined) {
+    if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]) {
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID].value = credentials.tenantId;
+    } else {
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID] = {
+        value: credentials.tenantId,
+      };
+    }
+  } else {
+    // Clear tenant_id field when tenantId is undefined
+    if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID]) {
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID] = { value: undefined };
+    }
+  }
+
+  if (credentials.clientId !== undefined) {
+    if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]) {
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID].value = credentials.clientId;
+    } else {
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID] = {
+        value: credentials.clientId,
+      };
+    }
+  } else {
+    // Clear client_id field when clientId is undefined
+    if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID]) {
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID] = { value: undefined };
+    }
+  }
+
+  if (credentials.azure_credentials_cloud_connector_id !== undefined) {
+    if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]) {
+      updatedInputVars[
+        AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID
+      ].value = credentials.azure_credentials_cloud_connector_id;
+    } else {
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID] = {
+        value: credentials.azure_credentials_cloud_connector_id,
+      };
+    }
+  } else {
+    // Clear azure_credentials_cloud_connector_id field when azure_credentials_cloud_connector_id is undefined
+    if (updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]) {
+      updatedInputVars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID] = {
+        value: undefined,
+      };
+    }
+  }
+
+  return updatedInputVars;
+};
+
+/**
+ * Updates input variables with current credentials
+ * @param inputVars - The original input variables
+ * @param credentials - The current credentials to apply
+ * @returns Updated input variables with credentials applied
+ */
+export const updateInputVarsWithCredentials = (
+  inputVars: PackagePolicyConfigRecord | undefined,
+  credentials: CloudConnectorCredentials | undefined
+): PackagePolicyConfigRecord | undefined => {
+  if (!inputVars || !credentials) return inputVars;
+
+  if (isAwsCredentials(credentials)) {
+    return updateInputVarsWithAwsCredentials(inputVars, credentials);
+  }
+
+  if (isAzureCredentials(credentials)) {
+    return updateInputVarsWithAzureCredentials(inputVars, credentials);
+  }
+
+  return inputVars;
 };
 
 /**

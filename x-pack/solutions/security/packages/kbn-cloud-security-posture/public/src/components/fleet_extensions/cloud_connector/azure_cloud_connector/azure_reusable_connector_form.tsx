@@ -8,9 +8,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import type { ComboBoxOption } from '../types';
+import type { ComboBoxOption, AzureCloudConnectorCredentials } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
-import type { AwsCloudConnectorCredentials } from '../hooks/use_cloud_connector_setup';
 
 // Azure-specific cloud connector vars interface (extending Fleet's CloudConnectorVars)
 interface AzureCloudConnectorVars extends Record<string, unknown> {
@@ -27,12 +26,6 @@ interface AzureCloudConnectorOption {
   id: string;
   tenantId?: { value: string };
   clientId?: { value: string };
-}
-
-// Extended Azure credentials interface
-interface AzureCloudConnectorCredentials extends AwsCloudConnectorCredentials {
-  tenantId?: string;
-  clientId?: string;
 }
 
 export const AzureReusableConnectorForm: React.FC<{

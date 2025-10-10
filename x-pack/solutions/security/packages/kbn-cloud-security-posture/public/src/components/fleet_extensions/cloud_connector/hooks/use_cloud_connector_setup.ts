@@ -7,18 +7,14 @@
 
 import { useState, useCallback } from 'react';
 import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import type {
-  CloudConnectorSecretReference,
-  PackagePolicyConfigRecord,
-} from '@kbn/fleet-plugin/public/types';
+import type { PackagePolicyConfigRecord } from '@kbn/fleet-plugin/public/types';
 import type { UpdatePolicy } from '../../types';
+import type {
+  CloudConnectorCredentials,
+  AwsCloudConnectorCredentials,
+  AzureCloudConnectorCredentials,
+} from '../types';
 import { updateInputVarsWithCredentials, updatePolicyInputs } from '../utils';
-
-export interface CloudConnectorCredentials {
-  roleArn?: string;
-  externalId?: string | CloudConnectorSecretReference;
-  cloudConnectorId?: string;
-}
 
 export interface UseCloudConnectorSetupReturn {
   // State for new connection form
@@ -34,31 +30,73 @@ export interface UseCloudConnectorSetupReturn {
   updatePolicyWithExistingCredentials: (credentials: CloudConnectorCredentials) => void;
 }
 
+const getFieldNamesIfExists = (inputVars: PackagePolicyConfigRecord) => {
+  const roleArnFieldName = Object.keys(inputVars).find((key) => key.toLowerCase() === 'role_arn');
+  const externalIdFieldName = Object.keys(inputVars).find((key) =>
+    key.toLowerCase().includes('external_id')
+  );
+  const tenantIdFieldName = Object.keys(inputVars).find((key) =>
+    key.toLowerCase().includes('tenant_id')
+  );
+  const clientIdFieldName = Object.keys(inputVars).find((key) =>
+    key.toLowerCase().includes('client_id')
+  );
+  const azureCloudConnectorIdFieldName = Object.keys(inputVars).find((key) =>
+    key.toLowerCase().includes('azure_credentials_cloud_connector_id')
+  );
+
+  return {
+    roleArnFieldName,
+    externalIdFieldName,
+    tenantIdFieldName,
+    clientIdFieldName,
+    azureCloudConnectorIdFieldName,
+  };
+};
+
 export const useCloudConnectorSetup = (
   input: NewPackagePolicyInput,
   newPolicy: NewPackagePolicy,
   updatePolicy: UpdatePolicy
 ): UseCloudConnectorSetupReturn => {
-  // State for new connection form
+  // State for new connection form - initialize based on existing vars
   const [newConnectionCredentials, setNewConnectionCredentials] =
     useState<CloudConnectorCredentials>(() => {
       const vars = input.streams[0]?.vars ?? {};
-      const externalIdKey = Object.keys(vars).find((key) =>
-        key.toLowerCase().includes('external_id')
-      );
-      return {
-        roleArn: vars.role_arn?.value,
-        externalId: externalIdKey ? vars[externalIdKey]?.value : undefined,
-      };
+      const {
+        roleArnFieldName,
+        externalIdFieldName,
+        tenantIdFieldName,
+        clientIdFieldName,
+        azureCloudConnectorIdFieldName,
+      } = getFieldNamesIfExists(vars);
+
+      // Check if this appears to be AWS or Azure based on existing vars
+      const hasAwsFields = roleArnFieldName || externalIdFieldName;
+      const hasAzureFields =
+        tenantIdFieldName || clientIdFieldName || azureCloudConnectorIdFieldName;
+
+      if (hasAzureFields && !hasAwsFields) {
+        // Initialize as Azure credentials
+        return {
+          tenantId: tenantIdFieldName ? vars[tenantIdFieldName]?.value : undefined,
+          clientId: clientIdFieldName ? vars[clientIdFieldName]?.value : undefined,
+          azure_credentials_cloud_connector_id: azureCloudConnectorIdFieldName
+            ? vars[azureCloudConnectorIdFieldName]?.value
+            : undefined,
+        } as AzureCloudConnectorCredentials;
+      } else {
+        // Default to AWS credentials
+        return {
+          roleArn: roleArnFieldName ? vars[roleArnFieldName]?.value : undefined,
+          externalId: externalIdFieldName ? vars[externalIdFieldName]?.value : undefined,
+        } as AwsCloudConnectorCredentials;
+      }
     });
 
-  // State for existing connection form
+  // State for existing connection form - initialize as empty object to be populated based on provider
   const [existingConnectionCredentials, setExistingConnectionCredentials] =
-    useState<CloudConnectorCredentials>({
-      roleArn: undefined,
-      externalId: undefined,
-      cloudConnectorId: undefined,
-    });
+    useState<CloudConnectorCredentials>({});
 
   // Update policy with new connection credentials
   const updatePolicyWithNewCredentials = useCallback(
@@ -109,7 +147,15 @@ export const useCloudConnectorSetup = (
         );
         updatedPolicy.inputs = updatedPolicyWithInputs.inputs;
       }
-      updatedPolicy.cloud_connector_id = credentials.cloudConnectorId;
+      // Set cloud_connector_id based on credential type
+      if ('cloudConnectorId' in credentials && credentials.cloudConnectorId) {
+        updatedPolicy.cloud_connector_id = credentials.cloudConnectorId;
+      } else if (
+        'azure_credentials_cloud_connector_id' in credentials &&
+        credentials.azure_credentials_cloud_connector_id
+      ) {
+        updatedPolicy.cloud_connector_id = credentials.azure_credentials_cloud_connector_id;
+      }
 
       updatePolicy({ updatedPolicy });
     },
