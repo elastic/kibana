@@ -7,32 +7,16 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
-import type {
-  SearchGettingStartedPluginSetup,
-  SearchGettingStartedPluginStart,
-  SearchGettingStartedPluginSetupDeps,
-  SearchGettingStartedPluginStartDeps,
-} from './types';
+export class SearchGettingStartedPlugin implements Plugin {
+  constructor(_initContext: PluginInitializerContext) {}
 
-export class SearchGettingStartedPlugin
-  implements
-    Plugin<
-      SearchGettingStartedPluginSetup,
-      SearchGettingStartedPluginStart,
-      SearchGettingStartedPluginSetupDeps,
-      SearchGettingStartedPluginStartDeps
-    >
-{
-  constructor(private readonly initContext: PluginInitializerContext) {}
-
-  public setup(
-    core: CoreSetup<SearchGettingStartedPluginStartDeps, SearchGettingStartedPluginStart>,
-    deps: SearchGettingStartedPluginSetupDeps
-  ) {
+  public setup(core: CoreSetup) {
+    // Minimal server plugin - no setup needed
     return {};
   }
 
-  public start(core: CoreStart, deps: SearchGettingStartedPluginStartDeps) {
+  public start(core: CoreStart) {
+    // Minimal server plugin - no start logic needed
     return {};
   }
 }

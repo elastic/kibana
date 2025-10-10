@@ -8,10 +8,8 @@
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
 export interface SearchGettingStartedAppInfo {
@@ -26,17 +24,13 @@ export interface SearchGettingStartedPluginStart {}
 
 export interface SearchGettingStartedAppPluginStartDependencies {
   console?: ConsolePluginStart;
-  share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
   cloud?: CloudStart;
   searchNavigation?: SearchNavigationPluginStart;
-  licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
 }
 
-export interface SearchGettingStartedConfigType {
-  enabled: boolean;
-}
+export type { SearchGettingStartedConfigType } from '../server/config';
 
 export type SearchGettingStartedServicesContextDeps =
   SearchGettingStartedAppPluginStartDependencies & {

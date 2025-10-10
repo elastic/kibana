@@ -15,4 +15,3 @@ export const plugin = async (initContext: PluginInitializerContext) => {
 };
 
 export { config };
-export type { SearchGettingStartedPluginSetup, SearchGettingStartedPluginStart } from './types';

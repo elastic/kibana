@@ -14,8 +14,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
     "@kbn/i18n",
-    "@kbn/share-plugin",
-    "@kbn/licensing-plugin"
   ],
   "exclude": [
     "target/**/*"
