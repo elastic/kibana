@@ -163,8 +163,8 @@ export class EmbeddableStateTransfer {
   }
 
   /**
-   * Retrieves incoming embeddable package states from session storage.
-   * Always expects and returns an array format. Filters results using the provided type guard.
+   * Retrieves incoming embeddable package states from session storage, handling both single items and arrays.
+   * Always returns an array format. Filters results using the provided type guard.
    *
    * @param guard - Type guard function to validate state items
    * @param appId - The application ID to fetch state for
@@ -187,15 +187,24 @@ export class EmbeddableStateTransfer {
 
     const incomingState = embeddableState[key]?.[appId];
 
-    if (!incomingState || !Array.isArray(incomingState)) {
+    if (!incomingState) {
       return undefined;
     }
 
-    // Collect all valid states that pass the guard
-    const validStates = incomingState.filter((item) => guard(item));
-    if (validStates.length > 0) {
+    // Handle array case: collect all valid states that pass the guard
+    if (Array.isArray(incomingState)) {
+      const validStates = incomingState.filter((item) => guard(item));
+      if (validStates.length > 0) {
+        this.removeKeysFromStorage(embeddableState, options);
+        return validStates.map((item) => cloneDeep(item) as IncomingStateType);
+      }
+      return undefined;
+    }
+
+    // Handle single item case
+    if (guard(incomingState)) {
       this.removeKeysFromStorage(embeddableState, options);
-      return validStates.map((item) => cloneDeep(item) as IncomingStateType);
+      return [cloneDeep(incomingState)];
     }
 
     return undefined;
