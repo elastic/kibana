@@ -34,7 +34,7 @@ export const ConversationAgentSelector: React.FC<ConversationAgentSelectorProps>
   const currentAgent = agents.find((agent) => agent.id === agentId);
 
   return hasActiveConversation ? (
-    <EuiText color="subdued" size="s" data-test-subj="agentBuilderConversationAgent">
+    <EuiText color="subdued" size="s">
       {currentAgent?.name}
     </EuiText>
   ) : (

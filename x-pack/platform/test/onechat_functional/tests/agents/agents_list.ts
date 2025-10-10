@@ -27,6 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { onechat } = getPageObjects(['onechat']);
   const testSubjects = getService('testSubjects');
   const es = getService('es');
+  const browser = getService('browser');
 
   describe('Agents List', function () {
     before(async function () {
@@ -54,30 +55,55 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('lists created agents', async function () {
-      await onechat.navigateToApp('agents');
       expect(await onechat.countAgentsListRows()).to.be.greaterThan(2);
       for (const agent of agents) {
-        expect(await onechat.isAgentInList(agent.id)).to.be(true);
+        await onechat.agentInList(agent.id).existOrFail();
       }
     });
 
     it('filters on search', async function () {
-      await onechat.navigateToApp('agents');
-      await onechat.searchAgentsList(agents[0].name);
+      const search = onechat.agentsListSearch();
+      await search.type(agents[0].name);
       expect(await onechat.countAgentsListRows()).to.equal(1);
-      expect(await onechat.isAgentInList(agents[0].id)).to.be(true);
+      await onechat.agentInList(agents[0].id).existOrFail();
+      await search.clear();
     });
 
     it('filters on labels', async function () {
-      await onechat.navigateToApp('agents');
       await onechat.selectAgentLabel(agents[0].labels[0]);
       expect(await onechat.countAgentsListRows()).to.equal(1);
-      expect(await onechat.isAgentInList(agents[0].id)).to.be(true);
+      await onechat.agentInList(agents[0].id).existOrFail();
     });
 
     it('chats with agent', async function () {
-      await onechat.navigateToApp('agents');
       await onechat.clickAgentChat(agents[0].id);
+      await browser.waitForUrlToBe(`/app/agent_builder/conversations/new?agent_id=${agents[0].id}`);
+      const agentText = await testSubjects.getVisibleText('agentBuilderAgentSelectorButton');
+      expect(agentText).to.contain(agents[0].name);
+      // go back to agents list
+      await onechat.navigateToApp('agents');
+    });
+
+    it('has edit link with correct href', async function () {
+      const hasEditLink = await onechat.hasAgentEditLink(agents[0].id);
+      expect(hasEditLink).to.be(true);
+    });
+
+    it('has clone link with correct href', async function () {
+      const hasCloneLink = await onechat.hasAgentCloneLink(agents[0].id);
+      expect(hasCloneLink).to.be(true);
+    });
+
+    it('deletes agent', async function () {
+      const agent = onechat.agentInList(agents[1].id);
+      await agent.existOrFail();
+
+      const modal = await onechat.openAgentDeleteModal(agents[1].id);
+      const expectedTitle = `Delete ${agents[1].name}`;
+      expect(await modal.getTitle()).to.contain(expectedTitle);
+
+      await modal.clickConfirm();
+      await agent.missingOrFail();
     });
   });
 }

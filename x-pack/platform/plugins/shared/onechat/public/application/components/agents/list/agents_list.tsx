@@ -114,7 +114,7 @@ export const AgentsList: React.FC = () => {
           icon: 'comment',
           name: actionLabels.chat,
           description: actionLabels.chatDescription,
-          'data-test-subj': 'agentBuilderAgentsListChat',
+          'data-test-subj': (agent) => `agentBuilderAgentsListChat-${agent.id}`,
           isPrimary: true,
           showOnHover: true,
           href: (agent) =>
@@ -125,7 +125,7 @@ export const AgentsList: React.FC = () => {
           icon: 'pencil',
           name: actionLabels.edit,
           description: actionLabels.editDescription,
-          'data-test-subj': 'agentBuilderAgentsListEdit',
+          'data-test-subj': (agent) => `agentBuilderAgentsListEdit-${agent.id}`,
           isPrimary: true,
           showOnHover: true,
           href: (agent) => createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
@@ -136,7 +136,7 @@ export const AgentsList: React.FC = () => {
           icon: 'copy',
           name: actionLabels.clone,
           description: actionLabels.cloneDescription,
-          'data-test-subj': 'agentBuilderAgentsListClone',
+          'data-test-subj': (agent) => `agentBuilderAgentsListClone-${agent.id}`,
           showOnHover: true,
           href: (agent) =>
             createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
@@ -150,7 +150,7 @@ export const AgentsList: React.FC = () => {
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiIcon type="trash" color="danger" />
                   <EuiLink
-                    data-test-subj="agentBuilderAgentsListDelete"
+                    data-test-subj={`agentBuilderAgentsListDelete-${agent.id}`}
                     onClick={() => {
                       deleteAgent({ agent });
                     }}
