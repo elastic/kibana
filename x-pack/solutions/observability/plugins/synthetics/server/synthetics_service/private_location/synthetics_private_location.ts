@@ -271,7 +271,9 @@ export class SyntheticsPrivateLocation {
     maintenanceWindows: MaintenanceWindow[]
   ) {
     if (configs.length === 0) {
-      return {};
+      return {
+        failedUpdates: [],
+      };
     }
 
     return this.runWithCache(async () => {
