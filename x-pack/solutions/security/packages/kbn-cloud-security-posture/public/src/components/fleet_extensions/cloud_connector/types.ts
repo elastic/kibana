@@ -14,7 +14,7 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { CloudConnectorSecretVar } from '@kbn/fleet-plugin/public';
 import type { CloudConnectorSecretReference } from '@kbn/fleet-plugin/public/types';
-import type { CloudConnectorRoleArn } from '@kbn/fleet-plugin/common/types';
+import type { CloudConnectorVar } from '@kbn/fleet-plugin/common/types';
 import type { UpdatePolicy } from '../types';
 import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 
@@ -65,7 +65,7 @@ export interface CloudConnectorOption {
   label: string;
   value: string;
   id: string;
-  roleArn?: CloudConnectorRoleArn;
+  roleArn?: CloudConnectorVar;
   externalId?: CloudConnectorSecretVar;
 }
 

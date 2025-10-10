@@ -76,10 +76,21 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
           `CloudConnectorService Package policy must contain ${cloudProvider} input vars`
         );
       }
-      const name =
-        cloudConnector.cloudProvider === 'aws' && vars.role_arn?.value
-          ? vars.role_arn.value
-          : cloudConnector.name;
+      let name = cloudConnector.name;
+
+      // For AWS, use role ARN as name if available
+      if (cloudConnector.cloudProvider === 'aws' && vars.role_arn?.value) {
+        name = vars.role_arn.value;
+      }
+
+      // For Azure, use provided name or generate one from tenant ID
+      if (
+        cloudConnector.cloudProvider === 'azure' &&
+        !name &&
+        vars['azure.credentials.tenant_id']?.value
+      ) {
+        name = `azure-connector-${vars['azure.credentials.tenant_id'].value.substring(0, 8)}`;
+      }
 
       // Check if space awareness is enabled for namespace handling
       const { isSpaceAwarenessEnabled } = await import('./spaces/helpers');
@@ -92,8 +103,19 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         namespace,
         cloudProvider,
         vars: {
+          // AWS variables
           ...(vars.role_arn?.value && { role_arn: vars.role_arn }),
           ...(vars.external_id?.value && { external_id: vars.external_id }),
+          // Azure variables
+          ...(vars['azure.credentials.tenant_id']?.value && {
+            'azure.credentials.tenant_id': vars['azure.credentials.tenant_id'],
+          }),
+          ...(vars['azure.credentials.client_id']?.value && {
+            'azure.credentials.client_id': vars['azure.credentials.client_id'],
+          }),
+          ...(vars.azure_credentials_cloud_connector_id?.value && {
+            azure_credentials_cloud_connector_id: vars.azure_credentials_cloud_connector_id,
+          }),
         },
         packagePolicyCount: 1,
         created_at: new Date().toISOString(),
@@ -214,8 +236,16 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       if (updates.vars) {
         updateAttributes.vars = {
+          // AWS variables
           ...(updates.vars.role_arn?.value && { role_arn: updates.vars.role_arn }),
           ...(updates.vars.external_id?.value && { external_id: updates.vars.external_id }),
+          // Azure variables
+          ...(updates.vars['azure.credentials.tenant_id']?.value && {
+            'azure.credentials.tenant_id': updates.vars['azure.credentials.tenant_id'],
+          }),
+          ...(updates.vars['azure.credentials.client_id']?.value && {
+            'azure.credentials.client_id': updates.vars['azure.credentials.client_id'],
+          }),
         };
       }
 
@@ -326,6 +356,23 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (!isValidExternalId) {
         logger.error('External ID secret reference must be a valid secret reference');
         throw new CloudConnectorInvalidVarsError('External ID secret reference is not valid');
+      }
+    } else if (cloudConnector.cloudProvider === 'azure') {
+      const tenantId = vars['azure.credentials.tenant_id']?.value;
+      const clientId = vars['azure.credentials.client_id']?.value;
+
+      if (!tenantId) {
+        logger.error('Package policy must contain azure.credentials.tenant_id variable');
+        throw new CloudConnectorInvalidVarsError(
+          'Package policy must contain azure.credentials.tenant_id variable'
+        );
+      }
+
+      if (!clientId) {
+        logger.error('Package policy must contain azure.credentials.client_id variable');
+        throw new CloudConnectorInvalidVarsError(
+          'Package policy must contain azure.credentials.client_id variable'
+        );
       }
     } else {
       logger.error(`Unsupported cloud provider: ${cloudConnector.cloudProvider}`);

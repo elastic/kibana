@@ -36,6 +36,8 @@ export const AzureReusableConnectorForm: React.FC<{
 }> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors();
 
+  console.log('AzureReusableConnectorForm cloudConnectors:', cloudConnectors);
+
   // Filter Azure cloud connectors only - check for Azure-specific variables
   const azureConnectors = cloudConnectors.filter((connector) => {
     const vars = connector.vars as AzureCloudConnectorVars;

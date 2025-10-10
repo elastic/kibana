@@ -131,6 +131,8 @@ import {
 import {
   AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
   AWS_ROLE_ARN_VAR_NAME,
+  AZURE_TENANT_ID_VAR_NAME,
+  AZURE_CLIENT_ID_VAR_NAME,
 } from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -302,6 +304,29 @@ const extractPackagePolicyVars = (
       };
 
       return awsCloudConnectorVars;
+    }
+  }
+
+  if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
+    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+    if (!vars) {
+      logger.error('Package policy must contain vars');
+      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+    }
+
+    const tenantId: string =
+      vars['azure.credentials.tenant_id']?.value || vars[AZURE_TENANT_ID_VAR_NAME]?.value;
+    const clientId: string =
+      vars['azure.credentials.client_id']?.value || vars[AZURE_CLIENT_ID_VAR_NAME]?.value;
+
+    if (tenantId && clientId) {
+      const azureCloudConnectorVars: CloudConnectorVars = {
+        'azure.credentials.tenant_id': { type: 'text', value: tenantId },
+        'azure.credentials.client_id': { type: 'text', value: clientId },
+      };
+
+      return azureCloudConnectorVars;
     }
   }
 };

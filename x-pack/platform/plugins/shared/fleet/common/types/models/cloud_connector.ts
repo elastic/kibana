@@ -11,7 +11,7 @@ export interface CloudConnectorSecretReference {
   id: string;
 }
 
-export interface CloudConnectorRoleArn {
+export interface CloudConnectorVar {
   type?: 'text';
   value: string;
 }
@@ -25,14 +25,23 @@ export interface CloudConnectorSecretVar {
 }
 
 export interface AwsCloudConnectorVars {
-  role_arn: CloudConnectorRoleArn;
+  role_arn: CloudConnectorVar;
   external_id: CloudConnectorSecretVar;
 }
 
+export interface AzureCloudConnectorVars {
+  'azure.credentials.tenant_id': CloudConnectorVar;
+  'azure.credentials.client_id': CloudConnectorVar;
+  azure_credentials_cloud_connector_id: CloudConnectorSecretVar;
+}
+
 export interface CloudConnectorVars {
-  role_arn?: CloudConnectorRoleArn;
+  role_arn?: CloudConnectorVar;
   external_id?: CloudConnectorSecretVar;
-  // TODO: Add other cloud providers vars
+  // Azure variables
+  'azure.credentials.tenant_id'?: CloudConnectorVar;
+  'azure.credentials.client_id'?: CloudConnectorVar;
+  azure_credentials_cloud_connector_id?: CloudConnectorSecretVar;
 }
 
 export interface CloudConnector {
