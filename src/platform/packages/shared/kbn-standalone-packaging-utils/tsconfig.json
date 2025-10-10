@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core-injected-metadata-browser-internal",
-    "@kbn/core-base-browser-internal"
+    "@kbn/core-base-browser-internal",
+    "@kbn/node-libs-browser-webpack-plugin"
   ]
 }
