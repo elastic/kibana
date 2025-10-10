@@ -39,7 +39,7 @@ const createStartContractMock = () => {
             numberOfHostsConfigured: 1,
             pingTimeoutMs: 30000,
             requestHeadersWhitelistConfigured: false,
-            requestTimeoutMs: 120000,
+            requestTimeoutMs: 30000,
             shardTimeoutMs: 120000,
             sniffIntervalMs: -1,
             sniffOnConnectionFault: false,

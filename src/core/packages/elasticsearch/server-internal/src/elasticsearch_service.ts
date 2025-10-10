@@ -42,7 +42,6 @@ import { isInlineScriptingEnabled } from './is_scripting_enabled';
 import { mergeConfig } from './merge_config';
 import { type ClusterInfo, getClusterInfo$ } from './get_cluster_info';
 import { getElasticsearchCapabilities } from './get_capabilities';
-import { bufferStatusFlapping } from './buffer_status_flapping';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -106,6 +105,8 @@ export class ElasticsearchService
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
       healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
+      healthCheckRetry: config.healthCheckRetry,
+      healthCheckRequestTimeout: config.healthCheckRequestTimeout.asMilliseconds(),
       log: this.log,
       internalClient: this.client.asInternalUser,
     }).pipe(takeUntil(this.stop$));
@@ -128,9 +129,7 @@ export class ElasticsearchService
       },
       clusterInfo$: this.clusterInfo$,
       esNodesCompatibility$,
-      status$: calculateStatus$(
-        esNodesCompatibility$.pipe(bufferStatusFlapping(config.bufferThreshold))
-      ),
+      status$: calculateStatus$(esNodesCompatibility$),
       setUnauthorizedErrorHandler: (handler) => {
         if (this.unauthorizedErrorHandler) {
           throw new Error('setUnauthorizedErrorHandler can only be called once.');
@@ -209,7 +208,7 @@ export class ElasticsearchService
 
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
-    this.stop$.next();
+    this.stop$.next(); // unubscribe from polling nodes info
     if (this.client) {
       await this.client.close();
     }

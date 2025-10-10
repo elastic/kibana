@@ -80,7 +80,7 @@ describe('fake elasticsearch', () => {
     kibanaServer = createRootWithCorePlugins({
       status: { allowAnonymous: true },
       elasticsearch: {
-        bufferThreshold: 1,
+        healthCheckRetry: 1,
       },
     });
     esServer = createFakeElasticsearchServer();

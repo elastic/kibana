@@ -74,8 +74,8 @@ beforeEach(() => {
   mockConfig$ = new BehaviorSubject({
     hosts: ['http://1.2.3.4'],
     healthCheck: {
-      delay: duration(TICK),
-      startupDelay: duration(TICK),
+      delay: duration(TICK), // default unit ms, configured default is 2500ms = 2.5s
+      startupDelay: duration(TICK), // default unit ms≈
     },
     ssl: {
       verificationMode: 'none',
@@ -189,7 +189,7 @@ describe('#preboot', () => {
 
       expect(config).toMatchInlineSnapshot(`
         Object {
-          "bufferThreshold": 3,
+          "healthCheckRetry": 3,
           "healthCheckDelay": "PT0.01S",
           "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
@@ -461,7 +461,7 @@ describe('#start', () => {
 
       expect(config).toMatchInlineSnapshot(`
         Object {
-          "bufferThreshold": 3,
+          "healthCheckRetry": 3,
           "healthCheckDelay": "PT0.01S",
           "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [

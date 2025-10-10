@@ -26,6 +26,8 @@ import {
   tap,
   startWith,
   shareReplay,
+  retry,
+  take,
 } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -39,9 +41,11 @@ export interface PollEsNodesVersionOptions {
   internalClient: ElasticsearchClient;
   log: Logger;
   kibanaVersion: string;
-  ignoreVersionMismatch: boolean;
-  healthCheckInterval: number;
-  healthCheckStartupInterval?: number;
+  ignoreVersionMismatch: boolean; // can only be true in dev mode
+  healthCheckInterval: number; // 2500ms
+  healthCheckStartupInterval?: number; // 500ms
+  healthCheckRetry: number; // 3
+  healthCheckRequestTimeout: number; // 120000ms
 }
 
 /** @public */
@@ -166,6 +170,8 @@ export const pollEsNodesVersion = ({
   ignoreVersionMismatch,
   healthCheckInterval,
   healthCheckStartupInterval,
+  healthCheckRetry,
+  healthCheckRequestTimeout,
 }: PollEsNodesVersionOptions): Observable<NodesVersionCompatibility> => {
   log.debug('Checking Elasticsearch version');
 
@@ -175,38 +181,47 @@ export const pollEsNodesVersion = ({
   const isStartup$ = new BehaviorSubject(hasStartupInterval);
 
   const checkInterval$ = isStartup$.pipe(
-    distinctUntilChanged(),
+    distinctUntilChanged(), // emits when isStartup changes
     map((useStartupInterval) =>
       useStartupInterval ? healthCheckStartupInterval! : healthCheckInterval
     )
   );
 
-  return checkInterval$.pipe(
-    switchMap((checkInterval) => interval(checkInterval)),
-    startWith(0),
+  const tick$ = checkInterval$.pipe(
+    switchMap((checkInterval) => interval(checkInterval).pipe(startWith(0))), // restart interval when checkInterval changes. Emits immediately
+    shareReplay(1) // allows late subscribers to get the last emitted interval value (so they don't have to wait for the next interval to elapse
+  );
+
+  return tick$.pipe(
     exhaustMap(() => {
+      // ensures incomming triggers get ignored while the previous one is still running
+      // creates an observable from the promise returned by internalClient.nodes.info
       return from(
-        internalClient.nodes.info({
-          node_id: '_all',
-          metric: '_none',
-          filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
-        })
+        internalClient.nodes.info(
+          {
+            node_id: '_all',
+            metric: '_none',
+            filter_path: ['nodes.*.version', 'nodes.*.http.publish_address', 'nodes.*.ip'],
+          },
+          { requestTimeout: healthCheckRequestTimeout }
+        )
       ).pipe(
+        retry({ count: healthCheckRetry, delay: () => tick$.pipe(take(1)) }), // if error, prevent propagation and retry the request
         catchError((nodesInfoRequestError) => {
-          return of({ nodes: {}, nodesInfoRequestError });
+          return of({ nodes: {}, nodesInfoRequestError }); // emit an object with an error property once only
         })
       );
     }),
     map((nodesInfoResponse: NodesInfo & { nodesInfoRequestError?: Error }) => {
-      return mapNodesVersionCompatibility(nodesInfoResponse, kibanaVersion, ignoreVersionMismatch);
+      return mapNodesVersionCompatibility(nodesInfoResponse, kibanaVersion, ignoreVersionMismatch); // "then" we map the response to the NodesVersionCompatibility object
     }),
     // Only emit if there are new nodes or versions or if we return an error and that error changes
     distinctUntilChanged(compareNodes),
     tap((nodesVersionCompatibility) => {
       if (nodesVersionCompatibility.isCompatible) {
-        isStartup$.next(false);
+        isStartup$.next(false); // if nodes are compatible, we can stop using the startup interval
       }
     }),
-    shareReplay({ refCount: true, bufferSize: 1 })
+    shareReplay({ refCount: true, bufferSize: 1 }) // unsed to share the last result with new subscribers, drops the subscription once there are no more subscribers, drops old results once the timer has elapsed. bufferSize of 1 ensures new subscribers always get the last result immediately(and only that result)
   );
 };

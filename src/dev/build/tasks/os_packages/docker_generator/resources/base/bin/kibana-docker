@@ -143,7 +143,6 @@ kibana_vars=(
     savedObjects.allowHttpApiAccess
     security.showInsecureClusterWarning
     server.basePath
-    server.bufferThreshold
     server.cdn.url
     server.compression.enabled
     server.compression.referrerWhitelist

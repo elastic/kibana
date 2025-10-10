@@ -305,7 +305,7 @@ describe('pollEsNodesVersion', () => {
     })
       .pipe(take(4))
       .subscribe({
-        next: (result) => expect(result).toBeDefined(),
+        next: (result) => expect(result).toBeDefined(), // takes the result from mapNodesVersionCompatibility, which will have 4 resuls
         complete: done,
         error: done,
       });

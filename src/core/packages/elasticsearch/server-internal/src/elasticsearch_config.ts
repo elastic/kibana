@@ -116,7 +116,7 @@ export const configSchema = schema.object({
     },
   }),
   shardTimeout: schema.duration({ defaultValue: '30s' }),
-  requestTimeout: schema.duration({ defaultValue: '120s' }),
+  requestTimeout: schema.duration({ defaultValue: '30s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
   logQueries: schema.boolean({ defaultValue: false }),
   ssl: schema.object(
@@ -156,6 +156,8 @@ export const configSchema = schema.object({
   healthCheck: schema.object({
     delay: schema.duration({ defaultValue: 2500 }),
     startupDelay: schema.duration({ defaultValue: 500 }),
+    retry: schema.number({ defaultValue: 3, min: 1 }),
+    requestTimeout: schema.duration({ defaultValue: 120000 }),
   }),
   ignoreVersionMismatch: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
@@ -197,7 +199,6 @@ export const configSchema = schema.object({
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
   publicBaseUrl: schema.maybe(hostURISchema),
-  bufferThreshold: schema.number({ defaultValue: 3, min: 1 }),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -305,18 +306,6 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
  */
 export class ElasticsearchConfig implements IElasticsearchConfig {
   /**
-   * @internal
-   * The maximum number of consecutive failures allowed for the nodes info request
-   * until the ES status is set
-   */
-  public readonly bufferThreshold: number;
-
-  /**
-   * @internal
-   * Only valid in dev mode. Skip the valid connection check during startup. The connection check allows
-   * Kibana to ensure that the Elasticsearch connection is valid before allowing
-   * any other services to be set up.
-   *
    * @remarks
    * You should disable this check at your own risk: Other services in Kibana
    * may fail if this step is not completed.
@@ -330,6 +319,14 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    * The interval between health check requests Kibana sends to the Elasticsearch after the first green signal.
    */
   public readonly healthCheckDelay: Duration;
+  /**
+   * The number of times to retry the health check request
+   */
+  public readonly healthCheckRetry: number;
+  /**
+   * Timeout after which health checks will be aborted and retried.
+   */
+  public readonly healthCheckRequestTimeout: Duration;
   /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
@@ -480,6 +477,8 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.sniffInterval = rawConfig.sniffInterval;
     this.healthCheckDelay = rawConfig.healthCheck.delay;
     this.healthCheckStartupDelay = rawConfig.healthCheck.startupDelay;
+    this.healthCheckRetry = rawConfig.healthCheck.retry ? rawConfig.healthCheck.retry : 3;
+    this.healthCheckRequestTimeout = rawConfig.healthCheck.requestTimeout;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;
@@ -494,7 +493,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
     this.dnsCacheTtl = rawConfig.dnsCacheTtl;
     this.publicBaseUrl = rawConfig.publicBaseUrl;
-    this.bufferThreshold = rawConfig.bufferThreshold ? rawConfig.bufferThreshold : 3;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

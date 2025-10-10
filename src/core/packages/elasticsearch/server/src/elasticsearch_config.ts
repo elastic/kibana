@@ -24,6 +24,16 @@ export interface IElasticsearchConfig {
   readonly healthCheckDelay: Duration;
 
   /**
+   * The number of times to retry the health check request
+   */
+  readonly healthCheckRetry: number;
+
+  /**
+   * Timeout after which health check request will be aborted and retried.
+   */
+  readonly healthCheckRequestTimeout: Duration;
+
+  /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
   readonly ignoreVersionMismatch: boolean;
@@ -156,13 +166,6 @@ export interface IElasticsearchConfig {
    * Set to 0 to disable the cache (default Node.js behavior)
    */
   readonly dnsCacheTtl: Duration;
-
-  /**
-   * The number of consecutive nodes info request errors before the status is set to red.
-   * This is used to avoid status flapping when there are transient network issues.
-   * @default 3
-   */
-  readonly bufferThreshold: number;
 }
 
 /**

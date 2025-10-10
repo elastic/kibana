@@ -57,7 +57,7 @@ describe('config schema', () => {
           "elasticsearch": Object {
             "apiVersion": "master",
             "apisToRedactInLogs": Array [],
-            "bufferThreshold": 3,
+            "healthCheckRetry": 3,
             "compression": false,
             "customHeaders": Object {},
             "dnsCacheTtl": "P0D",
@@ -72,12 +72,12 @@ describe('config schema', () => {
             "maxIdleSockets": 256,
             "maxResponseSize": false,
             "maxSockets": 800,
-            "pingTimeout": "PT2M",
+            "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [
               "authorization",
               "es-client-authentication",
             ],
-            "requestTimeout": "PT2M",
+            "requestTimeout": "PT30S",
             "shardTimeout": "PT30S",
             "skipStartupConnectionCheck": false,
             "sniffInterval": false,

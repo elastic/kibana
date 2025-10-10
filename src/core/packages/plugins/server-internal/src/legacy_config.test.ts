@@ -25,8 +25,8 @@ describe('Legacy config', () => {
       expect(legacyConfig).toStrictEqual({
         elasticsearch: {
           shardTimeout: duration(30, 's'),
-          requestTimeout: duration(120, 's'),
-          pingTimeout: duration(120, 's'),
+          requestTimeout: duration(30, 's'),
+          pingTimeout: duration(30, 's'),
         },
         path: { data: fromRoot('data') },
         savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
@@ -43,8 +43,8 @@ describe('Legacy config', () => {
       expect(legacyConfig).toStrictEqual({
         elasticsearch: {
           shardTimeout: duration(30, 's'),
-          requestTimeout: duration(120, 's'),
-          pingTimeout: duration(120, 's'),
+          requestTimeout: duration(30, 's'),
+          pingTimeout: duration(30, 's'),
         },
         path: { data: fromRoot('data') },
         savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
