@@ -31,12 +31,11 @@ steps:
     connector-id: ${FakeConnectors.constantlyFailing.name}
     on-failure:
       fallback:
-        steps:
-          - name: fallbackStep
-            type: slack
-            connector-id: ${FakeConnectors.slack1.name}
-            with:
-              message: 'Fallback message executed'
+        - name: fallbackStep
+          type: slack
+          connector-id: ${FakeConnectors.slack1.name}
+          with:
+            message: 'Fallback message executed'
     with:
       message: 'Hi there! Are you alive?'
 
@@ -53,12 +52,11 @@ steps:
 settings:
   on-failure:
     fallback:
-      steps:
-        - name: fallbackStep
-          type: slack
-          connector-id: ${FakeConnectors.slack1.name}
-          with:
-            message: 'Fallback message executed'
+      - name: fallbackStep
+        type: slack
+        connector-id: ${FakeConnectors.slack1.name}
+        with:
+          message: 'Fallback message executed'
 steps:
   - name: constantlyFailingStep
     type: ${FakeConnectors.constantlyFailing.actionTypeId}
