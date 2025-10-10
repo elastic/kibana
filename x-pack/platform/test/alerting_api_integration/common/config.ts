@@ -40,7 +40,7 @@ interface CreateTestConfigOptions {
   disabledRuleTypes?: string[];
   enabledRuleTypes?: string[];
   maxAlerts?: number;
-  indexRefreshInterval?: string;
+  indexRefreshInterval?: string | false;
 }
 
 // test.not-enabled is specifically not enabled
