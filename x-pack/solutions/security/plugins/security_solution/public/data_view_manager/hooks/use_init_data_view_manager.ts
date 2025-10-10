@@ -42,6 +42,7 @@ export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const attacksAlertAlignment = useIsExperimentalFeatureEnabled('attacksAlertAlignment');
 
   const {
     loading: loadingSignalIndex,
@@ -80,13 +81,16 @@ export const useInitDataViewManager = () => {
     }
 
     // NOTE: init listener contains logic that preloads default security solution data view
-    const dataViewsLoadingListener = createInitListener({
-      dataViews: services.dataViews,
-      http: services.http,
-      uiSettings: services.uiSettings,
-      application: services.application,
-      spaces: services.spaces,
-    });
+    const dataViewsLoadingListener = createInitListener(
+      {
+        dataViews: services.dataViews,
+        http: services.http,
+        uiSettings: services.uiSettings,
+        application: services.application,
+        spaces: services.spaces,
+      },
+      attacksAlertAlignment
+    );
 
     dispatch(addListener(dataViewsLoadingListener));
 
@@ -117,6 +121,7 @@ export const useInitDataViewManager = () => {
       });
     };
   }, [
+    attacksAlertAlignment,
     dispatch,
     newDataViewPickerEnabled,
     services.application,
