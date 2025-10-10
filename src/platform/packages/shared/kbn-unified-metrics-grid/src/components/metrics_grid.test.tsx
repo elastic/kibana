@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MetricsGridProps } from './metrics_grid';
 import { MetricsGrid } from './metrics_grid';
@@ -264,6 +264,130 @@ describe('MetricsGrid', () => {
       await user.keyboard('{ArrowUp}');
       expect(gridCells[2]).toHaveAttribute('tabindex', '-1');
       expect(gridCells[0]).toHaveAttribute('tabindex', '0');
+    });
+  });
+
+  describe('MetricsGrid focus management', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      // Mock setTimeout to run synchronously in tests
+      jest.spyOn(global, 'setTimeout').mockImplementation((callback: any) => {
+        callback();
+        return 0 as any;
+      });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    describe('Chart ref management', () => {
+      it('should generate unique chart IDs for each metric', () => {
+        render(
+          <MetricsGrid
+            columns={2}
+            dimensions={[]}
+            pivotOn="metric"
+            discoverFetch$={new Subject()}
+            fields={fields}
+            requestParams={requestParams}
+            services={services}
+            filters={[]}
+          />
+        );
+
+        // Verify Chart components receive unique chartId props
+        expect(Chart).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            chartId: 'chart-system.cpu.utilization-0',
+          }),
+          expect.anything()
+        );
+
+        expect(Chart).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            chartId: 'chart-system.memory.utilization-1',
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should store chart refs with proper data attributes', () => {
+        render(
+          <MetricsGrid
+            columns={2}
+            dimensions={[]}
+            pivotOn="metric"
+            discoverFetch$={new Subject()}
+            fields={fields}
+            requestParams={requestParams}
+            services={services}
+            filters={[]}
+          />
+        );
+
+        const gridCells = screen.getAllByRole('gridcell');
+
+        // Verify grid cells have proper tracking attributes
+        expect(gridCells[0]).toHaveAttribute('data-grid-cell', '0-0');
+        expect(gridCells[1]).toHaveAttribute('data-grid-cell', '0-1');
+      });
+    });
+
+    describe('Focus state management', () => {
+      it('should update focus state when cell receives focus', async () => {
+        const user = userEvent.setup();
+
+        render(
+          <MetricsGrid
+            columns={2}
+            dimensions={[]}
+            pivotOn="metric"
+            discoverFetch$={new Subject()}
+            fields={fields}
+            requestParams={requestParams}
+            services={services}
+            filters={[]}
+          />
+        );
+
+        const gridCells = screen.getAllByRole('gridcell');
+
+        // Focus the second cell
+        await user.click(gridCells[1]);
+
+        // Verify focus state updated correctly
+        expect(gridCells[0]).toHaveAttribute('tabindex', '-1');
+        expect(gridCells[1]).toHaveAttribute('tabindex', '0');
+      });
+
+      it('should handle programmatic focus correctly', () => {
+        render(
+          <MetricsGrid
+            columns={2}
+            dimensions={[]}
+            pivotOn="metric"
+            discoverFetch$={new Subject()}
+            fields={fields}
+            requestParams={requestParams}
+            services={services}
+            filters={[]}
+          />
+        );
+
+        const gridCells = screen.getAllByRole('gridcell');
+
+        // Simulate programmatic focus (like from flyout closing)
+        gridCells[1].focus();
+        fireEvent.focus(gridCells[1]);
+
+        // Verify focus state and DOM focus
+        expect(document.activeElement).toBe(gridCells[1]);
+        expect(gridCells[1]).toHaveAttribute('tabindex', '0');
+        expect(gridCells[0]).toHaveAttribute('tabindex', '-1');
+      });
     });
   });
 });
