@@ -18,6 +18,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'Value Lists Integration Tests - ESS Env - Trial License',
     },
-    indexRefreshInterval: '1s',
+    indexRefreshInterval: false,
   };
 }
