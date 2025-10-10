@@ -9,6 +9,7 @@
 
 import type { Params, QueryOperator, CommandOptions } from '../types';
 import { append } from '../pipeline/append';
+import { isCommandOptions } from '../utils/extract_options';
 
 export enum SortOrder {
   Asc = 'ASC',
@@ -37,30 +38,30 @@ export function sort<TQuery extends string, TParams extends Params<TQuery>>(
   secondArg?: TParams | SortArgs | CommandOptions,
   ...restSorts: Array<SortArgs | CommandOptions>
 ): QueryOperator {
+  // Handle parameterized query case
   if (typeof firstArg === 'string' && firstArg.includes('?')) {
-    // Handle parameterized query with optional options
     const thirdArg = restSorts[0];
-    const isOptions = 
-      thirdArg && 
-      typeof thirdArg === 'object' && 
-      thirdArg !== null && 
-      !Array.isArray(thirdArg) && 
-      'comment' in thirdArg;
-    const options = isOptions ? (thirdArg as CommandOptions) : undefined;
-    return append({ command: `SORT ${firstArg}`, params: secondArg as TParams, comment: options?.comment });
+    const options = isCommandOptions(thirdArg) ? thirdArg : undefined;
+    // When firstArg is a parameterized string, secondArg is the params object
+    // Type assertion is necessary here due to TypeScript's limitation with overload resolution
+    const params = secondArg;
+    return append({ 
+      command: `SORT ${firstArg}`, 
+      params: params as TParams, 
+      comment: options?.comment 
+    });
   }
 
-  // Check if last argument is options object (must be an object with 'comment' property, not a string or array)
-  const allArgs = [firstArg as SortArgs, ...(secondArg !== undefined ? [secondArg as SortArgs] : []), ...restSorts];
-  const lastArg = allArgs[allArgs.length - 1];
-  const isOptions = 
-    typeof lastArg === 'object' && 
-    lastArg !== null && 
-    !Array.isArray(lastArg) && 
-    'comment' in lastArg;
+  // Handle variadic sort arguments case
+  const allArgs: Array<SortArgs | CommandOptions> = [
+    firstArg,
+    ...(secondArg !== undefined ? [secondArg] : []),
+    ...restSorts
+  ];
   
-  const options = isOptions ? (lastArg as CommandOptions) : undefined;
-  const sortArgs = isOptions ? allArgs.slice(0, -1) : allArgs;
+  const lastArg = allArgs[allArgs.length - 1];
+  const options = isCommandOptions(lastArg) ? lastArg : undefined;
+  const sortArgs = options ? allArgs.slice(0, -1) : allArgs;
 
   const allSorts = sortArgs
     .flatMap((sortInstruction) => sortInstruction)
@@ -68,7 +69,10 @@ export function sort<TQuery extends string, TParams extends Params<TQuery>>(
       if (typeof sortInstruction === 'string') {
         return { column: sortInstruction, order: SortOrder.Asc };
       }
-      const column = Object.keys(sortInstruction)[0] as keyof typeof sortInstruction;
+      const column = Object.keys(sortInstruction)[0];
+      if (!column) {
+        throw new Error('Sort object must have at least one property');
+      }
 
       return {
         column,

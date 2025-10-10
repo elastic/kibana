@@ -9,6 +9,7 @@
 
 import { append } from '../pipeline/append';
 import type { CommandOptions } from '../types';
+import { extractOptions } from '../utils/extract_options';
 
 /**
  * Appends a `KEEP` command to the ESQL composer pipeline.
@@ -20,16 +21,7 @@ import type { CommandOptions } from '../types';
 export function keep(columns: Array<string | string[]>, options?: CommandOptions): ReturnType<typeof append>;
 export function keep(...columns: Array<string | string[]>): ReturnType<typeof append>;
 export function keep(...args: Array<string | string[] | CommandOptions>): ReturnType<typeof append> {
-  // Check if last argument is options object (must be an object with 'comment' property, not a string or array)
-  const lastArg = args[args.length - 1];
-  const isOptions = 
-    typeof lastArg === 'object' && 
-    lastArg !== null && 
-    !Array.isArray(lastArg) && 
-    'comment' in lastArg;
-  
-  const options = isOptions ? (lastArg as CommandOptions) : undefined;
-  const columns = isOptions ? args.slice(0, -1) : args;
+  const { options, remaining: columns } = extractOptions<string | string[]>(args);
   
   const command = `KEEP ${columns.flatMap((column) => column).join(', ')}`;
 
