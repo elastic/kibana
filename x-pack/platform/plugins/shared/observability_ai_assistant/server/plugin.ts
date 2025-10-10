@@ -25,6 +25,9 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { aiAssistantCapabilities } from '../common/capabilities';
 import { runStartupMigrations } from './service/startup_migrations/run_startup_migrations';
+import { toolCallEvent } from './analytics/tool_call';
+import { conversationDeleteEvent } from './analytics/conversation_delete';
+import { conversationDuplicateEvent } from './analytics/conversation_duplicate';
 export class ObservabilityAIAssistantPlugin
   implements
     Plugin<
@@ -138,6 +141,9 @@ export class ObservabilityAIAssistantPlugin
     });
 
     core.analytics.registerEventType(recallRankingEvent);
+    core.analytics.registerEventType(toolCallEvent);
+    core.analytics.registerEventType(conversationDeleteEvent);
+    core.analytics.registerEventType(conversationDuplicateEvent);
 
     return {
       service,

@@ -197,6 +197,7 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
             <EuiFlexItem grow={2}>
               <EuiDatePickerRange
                 fullWidth
+                data-test-subj="alertsFilterTimeframe"
                 startDateControl={
                   <EuiDatePicker
                     showTimeSelect
@@ -205,7 +206,6 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
                     timeFormat={timeFormat}
                     selected={moment().set('hour', startH).set('minute', startM)}
                     onChange={onChangeHours('start')}
-                    data-test-subj="alertsFilterTimeframeStart"
                   />
                 }
                 endDateControl={
@@ -216,7 +216,6 @@ export const RuleActionsAlertsFilterTimeframe: React.FC<RuleActionsAlertsFilterT
                     timeFormat={timeFormat}
                     selected={moment().set('hour', endH).set('minute', endM)}
                     onChange={onChangeHours('end')}
-                    data-test-subj="alertsFilterTimeframeEnd"
                   />
                 }
               />

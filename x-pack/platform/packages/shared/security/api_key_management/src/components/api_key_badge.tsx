@@ -25,7 +25,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
         />
       }
     >
-      <EuiBadge color="hollow" iconType="cluster">
+      <EuiBadge tabIndex={0} color="hollow" iconType="cluster">
         <FormattedMessage
           id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
           defaultMessage="Cross-Cluster"
@@ -41,7 +41,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
         />
       }
     >
-      <EuiBadge color="hollow" iconType="gear">
+      <EuiBadge tabIndex={0} color="hollow" iconType="gear">
         <FormattedMessage
           id="xpack.security.accountManagement.apiKeyBadge.managedTitle"
           defaultMessage="Managed"
@@ -57,7 +57,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
         />
       }
     >
-      <EuiBadge color="hollow" iconType="user">
+      <EuiBadge tabIndex={0} color="hollow" iconType="user">
         <FormattedMessage
           id="xpack.security.accountManagement.apiKeyBadge.restTitle"
           defaultMessage="Personal"

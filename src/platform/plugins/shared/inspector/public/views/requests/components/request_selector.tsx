@@ -120,6 +120,7 @@ export class RequestSelector extends Component<RequestSelectorProps> {
             >
               <EuiBadge
                 data-test-subj="inspectorRequestTotalTime"
+                tabIndex={0}
                 color={selectedRequest.status === RequestStatus.OK ? 'success' : 'danger'}
                 iconType={selectedRequest.status === RequestStatus.OK ? 'check' : 'cross'}
               >
