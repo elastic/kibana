@@ -9,8 +9,7 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*",
-    ".storybook/**/*",
-    "integration_tests"
+    ".storybook/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -20,7 +19,9 @@
     "@kbn/task-manager-plugin",
     "@kbn/apm-utils",
     "@kbn/es-query",
-    "@kbn/core-elasticsearch-server"
+    "@kbn/core-elasticsearch-server",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
