@@ -56,6 +56,8 @@ export class EnterWorkflowTimeoutZoneNodeImpl implements NodeImplementation, Mon
         }
       }
 
+      // Errase error because otherwise execution will be marked "failed"
+      this.wfExecutionRuntimeManager.setWorkflowError(undefined);
       this.wfExecutionRuntimeManager.markWorkflowTimeouted();
     }
 
