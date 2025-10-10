@@ -470,23 +470,27 @@ export class StreamsClient {
     return wrapEsCall(
       this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({ name })
     ).then((response) => {
+      const notFoundErrorBody = {
+        meta: {
+          aborted: false,
+          attempts: 1,
+          connection: null,
+          context: null,
+          name: 'resource_not_found_exception',
+          request: {} as unknown as DiagnosticResult['meta']['request'],
+        },
+        warnings: [],
+        body: 'resource_not_found_exception',
+        statusCode: 404,
+      };
       if (response.data_streams.length === 0) {
-        throw new errors.ResponseError({
-          meta: {
-            aborted: false,
-            attempts: 1,
-            connection: null,
-            context: null,
-            name: 'resource_not_found_exception',
-            request: {} as unknown as DiagnosticResult['meta']['request'],
-          },
-          warnings: [],
-          body: 'resource_not_found_exception',
-          statusCode: 404,
-        });
+        throw new errors.ResponseError(notFoundErrorBody);
       }
 
       const dataStream = response.data_streams[0];
+      if (!dataStream) {
+        throw new errors.ResponseError(notFoundErrorBody);
+      }
       return dataStream;
     });
   }
