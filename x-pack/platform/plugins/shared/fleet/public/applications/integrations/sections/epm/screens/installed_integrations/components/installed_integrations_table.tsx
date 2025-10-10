@@ -26,6 +26,8 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 import { useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
+import { ExperimentalFeaturesService } from '../../../../../services';
+
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
 import { DashboardsCell } from './dashboards_cell';
@@ -62,6 +64,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
       bulkRollbackIntegrationsWithConfirmModal,
     },
   } = useInstalledIntegrationsActions();
+  const { enablePackageRollback } = ExperimentalFeaturesService.get();
 
   const { setPagination } = pagination;
   const handleTablePagination = React.useCallback(
@@ -314,38 +317,42 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   }
                 )
               ),
-              wrapActionWithDisabledTooltip(
-                {
-                  name: i18n.translate(
-                    'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
-                    {
-                      defaultMessage: 'Rollback integration',
-                    }
-                  ),
-                  icon: 'returnKey',
-                  type: 'icon',
-
-                  onClick: (item) => bulkRollbackIntegrationsWithConfirmModal([item]),
-                  enabled: (item) => hasPreviousVersion(item),
-                  description: (item) =>
-                    i18n.translate(
-                      'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
+              ...(enablePackageRollback
+                ? [
+                    wrapActionWithDisabledTooltip(
                       {
-                        defaultMessage: !hasPreviousVersion(item)
-                          ? "You can't rollback this integration because it does not have a previous version saved."
-                          : 'Rollback integration',
-                      }
+                        name: i18n.translate(
+                          'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
+                          {
+                            defaultMessage: 'Rollback integration',
+                          }
+                        ),
+                        icon: 'returnKey',
+                        type: 'icon',
+
+                        onClick: (item) => bulkRollbackIntegrationsWithConfirmModal([item]),
+                        enabled: (item) => hasPreviousVersion(item),
+                        description: (item) =>
+                          i18n.translate(
+                            'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
+                            {
+                              defaultMessage: !hasPreviousVersion(item)
+                                ? "You can't rollback this integration because it does not have a previous version saved."
+                                : 'Rollback integration',
+                            }
+                          ),
+                      },
+                      !authz.integrations.installPackages,
+                      i18n.translate(
+                        'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsRequiredPermissionTooltip',
+                        {
+                          defaultMessage:
+                            "You don't have permissions to rollback integrations. Contact your administrator.",
+                        }
+                      )
                     ),
-                },
-                !authz.integrations.installPackages,
-                i18n.translate(
-                  'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsRequiredPermissionTooltip',
-                  {
-                    defaultMessage:
-                      "You don't have permissions to rollback integrations. Contact your administrator.",
-                  }
-                )
-              ),
+                  ]
+                : []),
             ],
           },
         ]}
