@@ -2650,10 +2650,9 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.5.0.tgz#99ca807edeb157baf38fef9e39fd031f19b702a5"
   integrity sha512-dW6U7N4HAdSst+Iqhaw1In8zxT8rE4AMnIJIN6C/vNM8XDKmFyzkw/AddpvW5oZHdV0D7+3w/VI9petN4RnWBQ==
 
-"@elastic/eui-theme-borealis@3.6.0":
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-3.6.0.tgz#95a8106981112eff010d691590ca758ab2950462"
-  integrity sha512-mQMtVfBB50Cnq0myytWTec4vwxxg1sgSoTpMK/i4lsr+xcfUbkjGQRIpPWfJaiWGnrUYhJeL1GyG8dHxEPeyYg==
+"@elastic/eui-theme-borealis@file:./eui_theme_borealis_3.5.0_remove_amsterdam_01.tgz":
+  version "3.5.0"
+  resolved "file:./eui_theme_borealis_3.5.0_remove_amsterdam_01.tgz#065cc1667a909f3057daf7da026b57d72499aa41"
 
 "@elastic/eui-theme-common@5.0.0":
   version "5.0.0"
@@ -2664,10 +2663,17 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@107.0.1":
-  version "107.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-107.0.1.tgz#7d7bcae7115b5e6c92a1994971170190149f817b"
-  integrity sha512-Uk8W3yI4DOdWRHHJiAZ+Q3tr8COeU6MiC+AitZLDbBGNiQ7a3lr/C8pNc8yFhpOVCPQpjofALEZiENg2AzFrGA==
+"@elastic/eui-theme-common@file:./eui_theme_common_4.0.0_remove_amsterdam_02.tgz":
+  version "4.0.0"
+  resolved "file:./eui_theme_common_4.0.0_remove_amsterdam_02.tgz#2610399d9f3fcab1f41202871917649baf6e21c7"
+  dependencies:
+    "@types/lodash" "^4.14.202"
+    chroma-js "^2.4.2"
+    lodash "^4.17.21"
+
+"@elastic/eui@file:./eui_106.7.0_remove_amsterdam_01.tgz":
+  version "106.7.0"
+  resolved "file:./eui_106.7.0_remove_amsterdam_01.tgz#255fbb1247a766a3a241e08b73ff89911f9e4094"
   dependencies:
     "@elastic/eui-theme-common" "5.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
