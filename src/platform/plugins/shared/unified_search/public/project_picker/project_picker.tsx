@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -209,18 +209,22 @@ const response: { origin: Record<string, Project>; linked_projects: Record<strin
 export const ProjectPicker = () => {
   const [crossProjectSearchScope, setCrossProjectSearchScope] = useState<string>('all');
   const [showProjectPickerPopover, setShowProjectPickerPopover] = useState(false);
-  const [linkedProjects, setProjects] = useState<Project[]>(
-    Object.values(response.linked_projects)
-  );
+  const [linkedProjects, setProjects] = useState<Project[]>([]);
 
   const { euiTheme } = useEuiTheme();
   const { services } = useKibana<UnifiedSearchStartDependencies>();
+
   const projectsUrl = services.cloud?.projectsUrl || '';
 
   const originProject: Project = Object.values(response.origin)[0];
 
   const projects =
     crossProjectSearchScope === 'origin' ? [originProject] : [originProject, ...linkedProjects];
+
+  useEffect(() => {
+    // TODO: replace with fetch linked projects from cross project API
+    setProjects(Object.values(response.linked_projects));
+  }, []);
 
   const button = (
     <EuiToolTip
@@ -231,7 +235,7 @@ export const ProjectPicker = () => {
       <EuiButtonIcon
         type="link"
         display="base"
-        iconType="cluster"
+        iconType="cluster" // TODO: replace with cross project icon when available in EUI
         aria-label={strings.getProjectPickerButtonAriaLabel()}
         data-test-subj="addFilter"
         onClick={() => setShowProjectPickerPopover(!showProjectPickerPopover)}
@@ -381,7 +385,11 @@ export const ProjectPicker = () => {
                 label: strings.getOriginProjectLabel(),
               },
             ]}
-            onChange={(value: string) => setCrossProjectSearchScope(value)}
+            onChange={(value: string) => {
+              // TODO: add telemetry for project scope change?
+              // TODO: propagate the scope change to search settings
+              setCrossProjectSearchScope(value);
+            }}
             css={{ margin: '8px' }}
           />
           <EuiHorizontalRule margin="none" />
