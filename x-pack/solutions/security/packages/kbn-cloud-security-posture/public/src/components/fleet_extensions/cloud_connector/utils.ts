@@ -18,10 +18,6 @@ import type {
   AwsCloudConnectorVars,
   AzureCloudConnectorVars,
 } from '@kbn/fleet-plugin/common/types';
-import {
-  ROLE_ARN_VAR_NAME,
-  AZURE_TENANT_ID_VAR_NAME,
-} from '@kbn/fleet-plugin/common/constants/cloud_connector';
 import type {
   AwsCloudConnectorCredentials,
   AzureCloudConnectorCredentials,
@@ -43,7 +39,7 @@ export const isAwsCloudConnectorVars = (
   vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
   provider: string
 ): vars is AwsCloudConnectorVars => {
-  return ROLE_ARN_VAR_NAME in vars && provider === 'aws';
+  return 'role_arn' in vars && provider === 'aws';
 };
 
 export function isAwsCredentials(
@@ -56,7 +52,7 @@ export const isAzureCloudConnectorVars = (
   vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
   provider: string
 ): vars is AzureCloudConnectorVars => {
-  return AZURE_TENANT_ID_VAR_NAME in vars && provider === 'azure';
+  return 'azure.credentials.tenant_id' in vars && provider === 'azure';
 };
 
 export function isAzureCredentials(
