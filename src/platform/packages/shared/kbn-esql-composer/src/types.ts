@@ -13,6 +13,10 @@ export interface Command {
   body: string;
 }
 
+export interface CommandOptions {
+  comment?: string;
+}
+
 type StringToUnion<S> = S extends `${infer First}${infer Rest}`
   ? First | StringToUnion<Rest>
   : never;

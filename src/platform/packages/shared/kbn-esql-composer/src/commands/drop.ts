@@ -8,17 +8,29 @@
  */
 
 import { append } from '../pipeline/append';
+import type { CommandOptions } from '../types';
 
 /**
  * Appends a `DROP` command to the ESQL composer pipeline.
  *
  * @param columns The columns to drop.
+ * @param options Optional configuration including comment.
  * @returns A `QueryPipeline` instance with the `DROP` command appended.
  */
-export function drop(...columns: Array<string | string[]>) {
+export function drop(columns: Array<string | string[]>, options?: CommandOptions): ReturnType<typeof append>;
+export function drop(...columns: Array<string | string[]>): ReturnType<typeof append>;
+export function drop(...args: Array<string | string[] | CommandOptions>): ReturnType<typeof append> {
+  // Check if last argument is options object
+  const lastArg = args[args.length - 1];
+  const isOptions = typeof lastArg === 'object' && !Array.isArray(lastArg) && 'comment' in lastArg;
+  
+  const options = isOptions ? (lastArg as CommandOptions) : undefined;
+  const columns = isOptions ? args.slice(0, -1) : args;
+  
   const command = `DROP ${columns.flatMap((column) => column).join(', ')}`;
 
   return append({
     command,
+    comment: options?.comment,
   });
 }
