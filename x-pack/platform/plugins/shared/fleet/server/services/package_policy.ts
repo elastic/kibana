@@ -80,10 +80,10 @@ import type {
   PreconfiguredInputs,
   CloudProvider,
   CloudConnector,
-  CloudConnectorVars,
   CloudConnectorSecretVar,
   AwsCloudConnectorVars,
   PackagePolicyConfigRecord,
+  AzureCloudConnectorVars,
 } from '../../common/types';
 import {
   FleetError,
@@ -133,6 +133,7 @@ import {
   AWS_ROLE_ARN_VAR_NAME,
   AZURE_TENANT_ID_VAR_NAME,
   AZURE_CLIENT_ID_VAR_NAME,
+  AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
 } from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -278,17 +279,17 @@ const extractPackagePolicyVars = (
   cloudProvider: CloudProvider,
   packagePolicy: NewPackagePolicy,
   logger: Logger
-): CloudConnectorVars | undefined => {
+): AwsCloudConnectorVars | AzureCloudConnectorVars | undefined => {
   logger.get('extract package policy vars');
 
+  const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
+
+  if (!vars) {
+    logger.error('Package policy must contain vars');
+    throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
+  }
+
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'aws') {
-    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
-
-    if (!vars) {
-      logger.error('Package policy must contain vars');
-      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
-    }
-
     const roleArn: string = vars.role_arn?.value || vars[AWS_ROLE_ARN_VAR_NAME]?.value;
 
     if (roleArn) {
@@ -308,22 +309,19 @@ const extractPackagePolicyVars = (
   }
 
   if (packagePolicy.supports_cloud_connector && cloudProvider === 'azure') {
-    const vars = packagePolicy.inputs.find((input) => input.enabled)?.streams[0]?.vars;
-
-    if (!vars) {
-      logger.error('Package policy must contain vars');
-      throw new CloudConnectorInvalidVarsError('Package policy must contain vars');
-    }
-
     const tenantId: string =
       vars['azure.credentials.tenant_id']?.value || vars[AZURE_TENANT_ID_VAR_NAME]?.value;
     const clientId: string =
       vars['azure.credentials.client_id']?.value || vars[AZURE_CLIENT_ID_VAR_NAME]?.value;
+    const cloudConnectorId: string =
+      vars.azure_credentials_cloud_connector_id?.value ||
+      vars[AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME]?.value;
 
-    if (tenantId && clientId) {
-      const azureCloudConnectorVars: CloudConnectorVars = {
+    if (tenantId && clientId && cloudConnectorId) {
+      const azureCloudConnectorVars: AzureCloudConnectorVars = {
         'azure.credentials.tenant_id': { type: 'text', value: tenantId },
         'azure.credentials.client_id': { type: 'text', value: clientId },
+        azure_credentials_cloud_connector_id: { type: 'text', value: cloudConnectorId },
       };
 
       return azureCloudConnectorVars;

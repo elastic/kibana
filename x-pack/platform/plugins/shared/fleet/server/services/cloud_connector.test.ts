@@ -205,6 +205,144 @@ describe('CloudConnectorService', () => {
         /Package policy must contain valid external_id secret reference/
       );
     });
+
+    it('should create Azure cloud connector with string tenant_id value', async () => {
+      const azureRequest: CreateCloudConnectorRequest = {
+        name: 'azure-test-connector',
+        cloudProvider: 'azure',
+        vars: {
+          'azure.credentials.tenant_id': {
+            value: 'test-tenant-id-12345',
+            type: 'text',
+          },
+          'azure.credentials.client_id': {
+            value: 'test-client-id',
+            type: 'text',
+          },
+          azure_credentials_cloud_connector_id: {
+            value: 'test-connector-id',
+            type: 'text',
+          },
+        },
+      };
+
+      const mockAzureSavedObject = {
+        id: 'azure-cloud-connector-123',
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {
+          name: 'azure-connector-test-ten',
+          namespace: '*',
+          cloudProvider: 'azure',
+          vars: {
+            'azure.credentials.tenant_id': {
+              value: 'test-tenant-id-12345',
+              type: 'text',
+            },
+            'azure.credentials.client_id': {
+              value: 'test-client-id',
+              type: 'text',
+            },
+            azure_credentials_cloud_connector_id: {
+              value: 'test-connector-id',
+              type: 'text',
+            },
+          },
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+      };
+
+      jest
+        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+        .mockResolvedValue(true);
+      mockSoClient.create.mockResolvedValue(mockAzureSavedObject);
+
+      const result = await service.create(mockSoClient, azureRequest);
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          name: 'azure-connector-test-ten',
+          namespace: '*',
+          cloudProvider: 'azure',
+          packagePolicyCount: 1,
+        })
+      );
+
+      expect(result.name).toBe('azure-connector-test-ten');
+      expect(result.cloudProvider).toBe('azure');
+    });
+
+    it('should handle Azure cloud connector name generation gracefully', async () => {
+      const azureRequest: CreateCloudConnectorRequest = {
+        name: 'azure-test-connector',
+        cloudProvider: 'azure',
+        vars: {
+          'azure.credentials.tenant_id': {
+            value: 'very-long-tenant-id-12345678901234567890',
+            type: 'text',
+          },
+          'azure.credentials.client_id': {
+            value: 'test-client-id',
+            type: 'text',
+          },
+          azure_credentials_cloud_connector_id: {
+            value: 'test-connector-id',
+            type: 'text',
+          },
+        },
+      };
+
+      const mockAzureSavedObject = {
+        id: 'azure-cloud-connector-456',
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {
+          name: 'azure-connector-very-lon',
+          namespace: '*',
+          cloudProvider: 'azure',
+          vars: {
+            'azure.credentials.tenant_id': {
+              value: 'very-long-tenant-id-12345678901234567890',
+              type: 'text',
+            },
+            'azure.credentials.client_id': {
+              value: 'test-client-id',
+              type: 'text',
+            },
+            azure_credentials_cloud_connector_id: {
+              value: 'test-connector-id',
+              type: 'text',
+            },
+          },
+          packagePolicyCount: 1,
+          created_at: '2023-01-01T00:00:00.000Z',
+          updated_at: '2023-01-01T00:00:00.000Z',
+        },
+      };
+
+      jest
+        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+        .mockResolvedValue(true);
+      mockSoClient.create.mockResolvedValue(mockAzureSavedObject);
+
+      const result = await service.create(mockSoClient, azureRequest);
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          name: 'azure-connector-very-lon',
+          namespace: '*',
+          cloudProvider: 'azure',
+          packagePolicyCount: 1,
+        })
+      );
+
+      expect(result.name).toBe('azure-connector-very-lon');
+      expect(result.cloudProvider).toBe('azure');
+    });
   });
 
   describe('getList', () => {

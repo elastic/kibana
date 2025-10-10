@@ -8,8 +8,14 @@
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
-import type { AwsCloudConnectorCredentials, CloudConnectorOption, ComboBoxOption } from '../types';
+import type { AwsCloudConnectorVars } from '@kbn/fleet-plugin/common/types';
+import type {
+  AwsCloudConnectorCredentials,
+  AwsCloudConnectorOption,
+  ComboBoxOption,
+} from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
+import { isAwsCloudConnectorVars } from '../utils';
 
 export const AWSReusableConnectorForm: React.FC<{
   cloudConnectorId: string | undefined;
@@ -19,30 +25,39 @@ export const AWSReusableConnectorForm: React.FC<{
 }> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors();
 
-  console.log('AWSReusableConnectorForm cloudConnectors:', cloudConnectors);
+  // Memoize AWS-specific connector data
+  const awsConnectionData: AwsCloudConnectorOption[] = useMemo(() => {
+    return cloudConnectors
+      .filter((connector) => isAwsCloudConnectorVars(connector.vars, 'aws'))
+      .map((connector) => {
+        // Type assertion after filtering for AWS connectors
+        const awsVars = connector.vars as AwsCloudConnectorVars;
+        return {
+          label: connector.name,
+          value: connector.id,
+          id: connector.id,
+          roleArn: awsVars.role_arn,
+          externalId: awsVars.external_id,
+        };
+      });
+  }, [cloudConnectors]);
 
   // Convert cloud connectors to combo box options (only standard properties for EuiComboBox)
-  const comboBoxOptions: ComboBoxOption[] = cloudConnectors.map((connector) => ({
-    label: connector.name,
-    value: connector.id, // Use ID as value for easier lookup
-  }));
-
-  // Keep full connector data for reference
-  const cloudConnectorData: CloudConnectorOption[] = cloudConnectors.map((connector) => ({
-    label: connector.name,
-    value: connector.id,
-    id: connector.id,
-    roleArn: connector.vars.role_arn,
-    externalId: connector.vars.external_id,
-  }));
+  const comboBoxOptions: ComboBoxOption[] = useMemo(
+    () =>
+      cloudConnectors
+        .filter((connector) => isAwsCloudConnectorVars(connector.vars, 'aws'))
+        .map((connector) => ({
+          label: connector.name,
+          value: connector.id,
+        })),
+    [cloudConnectors]
+  );
 
   // Find the currently selected connector based on credentials
   const selectedConnector = useMemo(() => {
-    return (isEditPage && cloudConnectorId) || credentials?.cloudConnectorId
-      ? comboBoxOptions.find(
-          (opt) => opt.value === credentials.cloudConnectorId || opt.value === cloudConnectorId
-        ) || null
-      : null;
+    const targetId = (isEditPage && cloudConnectorId) || credentials?.cloudConnectorId;
+    return targetId ? comboBoxOptions.find((opt) => opt.value === targetId) || null : null;
   }, [isEditPage, cloudConnectorId, credentials?.cloudConnectorId, comboBoxOptions]);
 
   const handleConnectorChange = useCallback(
@@ -50,8 +65,9 @@ export const AWSReusableConnectorForm: React.FC<{
       const [selectedOption] = selected;
 
       if (selectedOption?.value) {
-        const connector = cloudConnectorData.find((opt) => opt.id === selectedOption.value);
-        if (connector?.roleArn && connector?.externalId) {
+        const connector = awsConnectionData.find((opt) => opt.id === selectedOption.value);
+
+        if (connector?.roleArn?.value && connector?.externalId?.value) {
           setCredentials({
             roleArn: connector.roleArn.value,
             externalId: connector.externalId.value,
@@ -59,14 +75,15 @@ export const AWSReusableConnectorForm: React.FC<{
           });
         }
       } else {
+        // Handle deselection
         setCredentials({
-          roleArn: undefined,
-          externalId: undefined,
+          roleArn: '',
+          externalId: '',
           cloudConnectorId: undefined,
         });
       }
     },
-    [cloudConnectorData, setCredentials]
+    [awsConnectionData, setCredentials]
   );
 
   return (
