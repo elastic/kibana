@@ -32,7 +32,12 @@ export const FakeConnectors = {
     actionTypeId: 'inference',
     name: 'slow_3sec_inference_connector',
   },
-  slow_3sec_faling_inference: {
+  slow_1sec_inference: {
+    id: 'e5f6a7b8-b8c9-0123-de45-cd34ef567890',
+    actionTypeId: 'inference',
+    name: 'slow_2sec_inference_connector',
+  },
+  slow_3sec_failing_inference: {
     id: 'e5f6a7b8-c9d0-1234-ef56-ab78cd901234',
     actionTypeId: 'inference',
     name: 'slow_3sec_faling_inference_connector',
@@ -67,6 +72,18 @@ export class UnsecuredActionsClientMock implements IUnsecuredActionsClient {
       }
       case FakeConnectors.constantlyFailing.name: {
         throw new Error('Error: Constantly failing connector');
+      }
+      case FakeConnectors.slow_1sec_inference.name: {
+        await new Promise<void>((resolve) => setTimeout(() => resolve(), 1000));
+        return {
+          status: 'ok',
+          actionId: id,
+          data: [
+            {
+              result: 'Hello! How can I help you?',
+            },
+          ],
+        };
       }
       case FakeConnectors.slow_3sec_inference.name: {
         await new Promise<void>((resolve) => setTimeout(() => resolve(), 3000));
