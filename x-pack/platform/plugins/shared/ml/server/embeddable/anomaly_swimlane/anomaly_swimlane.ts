@@ -14,19 +14,22 @@ const SWIMLANE_TYPE = {
   VIEW_BY: 'viewBy',
 } as const;
 
-const swimlaneTypeSchema = schema.oneOf([
-  schema.literal(SWIMLANE_TYPE.OVERALL),
-  schema.literal(SWIMLANE_TYPE.VIEW_BY),
-]);
-
-const anomalySwimlaneEmbeddableUserInputSchema = schema.object({
+const commonUserInputProps = {
   jobIds: schema.arrayOf(schema.string()),
-  swimlaneType: swimlaneTypeSchema,
-  viewBy: schema.maybe(schema.string()),
+};
+
+const anomalySwimlaneOverallSchema = schema.object({
+  swimlaneType: schema.literal(SWIMLANE_TYPE.OVERALL),
+  ...commonUserInputProps,
 });
 
-export const anomalySwimlaneEmbeddableCustomInputSchema = schema.object({
-  ...anomalySwimlaneEmbeddableUserInputSchema.getPropSchemas(),
+const anomalySwimlaneViewBySchema = schema.object({
+  swimlaneType: schema.literal(SWIMLANE_TYPE.VIEW_BY),
+  viewBy: schema.string(),
+  ...commonUserInputProps,
+});
+
+const anomalySwimlaneEmbeddableCustomInputCommonSchema = schema.object({
   id: schema.maybe(schema.string()),
   perPage: schema.maybe(schema.number()),
   filters: schema.maybe(schema.arrayOf(filterSchema)),
@@ -35,7 +38,28 @@ export const anomalySwimlaneEmbeddableCustomInputSchema = schema.object({
   refreshConfig: schema.maybe(refreshIntervalSchema),
 });
 
-export const anomalySwimLaneEmbeddableStateSchema = schema.object({
-  ...serializedTitlesSchema.getPropSchemas(),
-  ...anomalySwimlaneEmbeddableCustomInputSchema.getPropSchemas(),
+const anomalySwimlaneEmbeddableCustomInputViewBySchema = schema.object({
+  ...anomalySwimlaneViewBySchema.getPropSchemas(),
+  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
 });
+
+const anomalySwimlaneEmbeddableCustomInputOverallSchema = schema.object({
+  ...anomalySwimlaneOverallSchema.getPropSchemas(),
+  ...anomalySwimlaneEmbeddableCustomInputCommonSchema.getPropSchemas(),
+});
+
+export const anomalySwimlaneEmbeddableCustomInputSchema = schema.oneOf([
+  anomalySwimlaneEmbeddableCustomInputViewBySchema,
+  anomalySwimlaneEmbeddableCustomInputOverallSchema,
+]);
+
+export const anomalySwimLaneEmbeddableStateSchema = schema.oneOf([
+  schema.object({
+    ...serializedTitlesSchema.getPropSchemas(),
+    ...anomalySwimlaneEmbeddableCustomInputViewBySchema.getPropSchemas(),
+  }),
+  schema.object({
+    ...serializedTitlesSchema.getPropSchemas(),
+    ...anomalySwimlaneEmbeddableCustomInputOverallSchema.getPropSchemas(),
+  }),
+]);
