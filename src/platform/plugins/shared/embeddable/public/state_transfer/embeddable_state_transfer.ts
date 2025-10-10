@@ -120,13 +120,20 @@ export class EmbeddableStateTransfer {
       path?: string;
       openInNewTab?: boolean;
       skipAppLeave?: boolean;
-      state: EmbeddableEditorState;
+      state: EmbeddableEditorState; // Single state
     }
   ): Promise<void> {
     this.isTransferInProgress = true;
-    await this.navigateToWithState<EmbeddableEditorState>(appId, EMBEDDABLE_EDITOR_STATE_KEY, {
-      ...options,
-    });
+    // Wraps the single editor state in an array before sending it
+    const stateArray: Array<EmbeddableEditorState> = options?.state ? [options.state] : [];
+    await this.navigateToWithState<Array<EmbeddableEditorState>>(
+      appId,
+      EMBEDDABLE_EDITOR_STATE_KEY,
+      {
+        ...options,
+        state: stateArray.length > 0 ? stateArray : undefined, // Send the array state
+      }
+    );
   }
 
   /**
@@ -213,17 +220,11 @@ export class EmbeddableStateTransfer {
   ): Promise<void> {
     const existingAppState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key] || {};
 
-    // Ensure editor states are wrapped in arrays, but keep package states as-is
-    let stateToStore = options?.state;
-    if (key === EMBEDDABLE_EDITOR_STATE_KEY && stateToStore) {
-      stateToStore = [stateToStore] as OutgoingStateType;
-    }
-
     const stateObject = {
       ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY),
       [key]: {
         ...existingAppState,
-        [appId]: stateToStore,
+        [appId]: options?.state,
       },
     };
     this.storage.set(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY, stateObject);
