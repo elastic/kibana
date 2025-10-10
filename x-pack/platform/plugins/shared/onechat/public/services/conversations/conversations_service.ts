@@ -7,10 +7,14 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/onechat-common';
-import type { ListConversationsResponse } from '../../../common/http_api/conversations';
+import type {
+  ListConversationsResponse,
+  DeleteConversationResponse,
+} from '../../../common/http_api/conversations';
 import type {
   ConversationListOptions,
   ConversationGetOptions,
+  ConversationDeleteOptions,
 } from '../../../common/conversations';
 import { publicApiPath } from '../../../common/constants';
 
@@ -37,7 +41,9 @@ export class ConversationsService {
     return await this.http.get<Conversation>(`${publicApiPath}/conversations/${conversationId}`);
   }
 
-  async delete({ conversationId }: { conversationId: string }): Promise<void> {
-    await this.http.delete(`/api/chat/conversations/${conversationId}`);
+  async delete({ conversationId }: ConversationDeleteOptions) {
+    return await this.http.delete<DeleteConversationResponse>(
+      `${publicApiPath}/conversations/${conversationId}`
+    );
   }
 }

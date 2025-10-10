@@ -6,21 +6,12 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormInfoField } from '@kbn/search-shared-ui';
 import { i18n } from '@kbn/i18n';
 import { ApiKeyFlyoutWrapper, useSearchApiKey, Status } from '@kbn/search-api-keys-components';
 import { useQueryClient } from '@tanstack/react-query';
-import { useGetApiKeys } from '../hooks/api/use_api_key';
 import { useKibana } from '../hooks/use_kibana';
 import { QueryKeys } from '../constants';
 
@@ -47,27 +38,51 @@ const ApiKeyFormContent = ({
   const [showFlyout, setShowFlyout] = useState(false);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexStart" responsive={false}>
+    <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexStart">
       {apiKey ? (
-        <EuiFlexItem grow={0}>
-          <FormInfoField
-            value={status === Status.showPreviewKey ? apiKey : API_KEY_MASK}
-            copyValue={apiKey}
-            dataTestSubj="searchHomepageApiKeyFormAPIKey"
-            copyValueDataTestSubj="searchHomepageAPIKeyButtonCopy"
-            actions={[
-              <EuiButtonIcon
-                iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}
-                color="text"
-                onClick={toggleApiKeyVisibility}
-                data-test-subj="searchHomepageShowAPIKeyButton"
-                aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.showApiKey', {
-                  defaultMessage: 'Show API key',
-                })}
-              />,
-            ]}
-          />
-        </EuiFlexItem>
+        <>
+          <EuiFlexItem grow={false}>
+            <span>
+              <FormattedMessage
+                id="xpack.searchHomepage.connectToElasticsearch.apiKeysLabel"
+                defaultMessage="API key:"
+              />
+            </span>
+          </EuiFlexItem>
+          <EuiFlexItem grow={0}>
+            <FormInfoField
+              value={status === Status.showPreviewKey ? apiKey : API_KEY_MASK}
+              copyValue={apiKey}
+              dataTestSubj="searchHomepageApiKeyFormAPIKey"
+              copyValueDataTestSubj="searchHomepageAPIKeyButtonCopy"
+              actions={[
+                <EuiButtonIcon
+                  size="s"
+                  iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}
+                  color="text"
+                  display="base"
+                  onClick={toggleApiKeyVisibility}
+                  data-test-subj="searchHomepageShowAPIKeyButton"
+                  aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.showApiKey', {
+                    defaultMessage: 'Show API key',
+                  })}
+                />,
+                <EuiButtonIcon
+                  size="s"
+                  display="base"
+                  color="text"
+                  iconType="gear"
+                  href={manageKeysLink}
+                  target="_blank"
+                  aria-label={i18n.translate('xpack.searchHomepage.apiKeyForm.manageApiKeys', {
+                    defaultMessage: 'Manage API keys',
+                  })}
+                  data-test-subj="manageApiKeysButton"
+                />,
+              ]}
+            />
+          </EuiFlexItem>
+        </>
       ) : (
         <EuiFlexItem grow={0}>
           <EuiButton
@@ -94,19 +109,6 @@ const ApiKeyFormContent = ({
           )}
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="s"
-          iconType="gear"
-          href={manageKeysLink}
-          data-test-subj="manageApiKeysButton"
-        >
-          <FormattedMessage
-            id="xpack.searchHomepage.apiKeyForm.manageKeysButton"
-            defaultMessage="Manage"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -125,7 +127,6 @@ const ApiKeysUserPrivilegesError = () => (
 
 export const ApiKeyForm: React.FC<ApiKeyFormProps> = () => {
   const { apiKey, status, updateApiKey, toggleApiKeyVisibility } = useSearchApiKey();
-  const { data } = useGetApiKeys();
   const { share } = useKibana().services;
   const locator = share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
   const manageKeysLink = locator?.useUrl({ sectionId: 'security', appId: 'api_keys' });
@@ -137,25 +138,6 @@ export const ApiKeyForm: React.FC<ApiKeyFormProps> = () => {
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiTitle size="xxs">
-            <span>
-              {i18n.translate('xpack.searchHomepage.connectToElasticsearch.apiKeysLabel', {
-                defaultMessage: 'API keys',
-              })}
-            </span>
-          </EuiTitle>
-          <EuiFlexItem grow={false}>
-            <EuiBadge
-              data-test-subj="activeApiKeysBadge"
-              color={(data?.apiKeys?.length ?? 0) > 0 ? 'success' : 'warning'}
-            >
-              {data?.apiKeys?.length ?? 0} active
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
       <EuiFlexItem>
         {status === Status.showUserPrivilegesError ? (
           <ApiKeysUserPrivilegesError />

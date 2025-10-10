@@ -15,8 +15,8 @@ import type {
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { ConversationSettings } from '../../../../services/types';
-import { useTimer } from '../../../hooks/use_timer';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundThinking } from './round_thinking/round_thinking';
 
@@ -33,7 +33,6 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   steps,
   isLoading,
 }) => {
-  const timer = useTimer({ isLoading });
   const { conversationSettingsService } = useOnechatServices();
 
   // Subscribe to conversation settings to get the commentActionsMounter
@@ -43,8 +42,8 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   );
 
   const commentActionsMounter = conversationSettings?.commentActionsMounter;
-  const showThinking = timer.showTimer || steps.length > 0;
 
+  const showThinking = steps.length > 0;
   return (
     <EuiFlexGroup
       direction="column"
@@ -52,19 +51,24 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       aria-label={i18n.translate('xpack.onechat.round.assistantResponse', {
         defaultMessage: 'Assistant response',
       })}
+      data-test-subj="agentBuilderRoundResponse"
     >
       {showThinking && (
         <EuiFlexItem grow={false}>
-          <RoundThinking steps={steps} isLoading={isLoading} timer={timer} rawRound={rawRound} />
+          <RoundThinking steps={steps} isLoading={isLoading} rawRound={rawRound} />
         </EuiFlexItem>
       )}
 
       <EuiFlexItem>
-        <ChatMessageText
-          content={message}
-          steps={steps}
-          contentReferences={rawRound.metadata?.contentReferences}
-        />
+        {isLoading ? (
+          <StreamingText content={message} steps={steps} />
+        ) : (
+          <ChatMessageText
+            content={message}
+            steps={steps}
+            contentReferences={rawRound.metadata?.contentReferences}
+          />
+        )}
       </EuiFlexItem>
 
       {/* Render comment actions if available */}

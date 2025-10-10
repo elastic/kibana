@@ -29,6 +29,10 @@ export {
   MINIMUM_DIAGNOSTICS_AGENT_VERSION,
 } from './is_agent_request_diagnostics_supported';
 export {
+  isAgentMigrationSupported,
+  MINIMUM_MIGRATE_AGENT_VERSION,
+} from './is_agent_migrate_supported';
+export {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,

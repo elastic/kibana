@@ -28,7 +28,7 @@ import { buildStateSubscribe } from './utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverDataStateContainer } from './discover_data_state_container';
 import { getDataStateContainer } from './discover_data_state_container';
-import { DiscoverSearchSessionManager } from './discover_search_session';
+import type { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverAppLocatorParams } from '../../../../common';
 import { DISCOVER_APP_LOCATOR } from '../../../../common';
 import type { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
@@ -79,6 +79,10 @@ export interface DiscoverStateContainerParams {
    * State manager for runtime state that can't be stored in Redux
    */
   runtimeStateManager: RuntimeStateManager;
+  /**
+   * Manages search sessions and search session URL state
+   */
+  searchSessionManager: DiscoverSearchSessionManager;
 }
 
 export interface DiscoverStateContainer {
@@ -175,7 +179,7 @@ export interface DiscoverStateContainer {
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
      */
-    onOpenSavedSearch: (savedSearchId: string) => void;
+    onOpenSavedSearch: (savedSearchId: string) => Promise<void>;
     /**
      * Triggered when the unified search bar query is updated
      * @param payload
@@ -222,17 +226,10 @@ export function getDiscoverStateContainer({
   stateStorageContainer: stateStorage,
   internalState,
   runtimeStateManager,
+  searchSessionManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
-
-  /**
-   * Search session logic
-   */
-  const searchSessionManager = new DiscoverSearchSessionManager({
-    history: services.history,
-    session: services.data.search.session,
-  });
 
   /**
    * Saved Search State Container, the persisted saved object of Discover
@@ -331,10 +328,10 @@ export function getDiscoverStateContainer({
 
   const onOpenSavedSearch = async (newSavedSearchId: string) => {
     addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
-    const currentSavedSearch = savedSearchContainer.getState();
-    if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
+    const { persistedDiscoverSession } = internalState.getState();
+    if (persistedDiscoverSession?.id === newSavedSearchId) {
       addLog('[discoverState] undo changes since saved search did not change');
-      await undoSavedSearchChanges();
+      await internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
     } else {
       addLog('[discoverState] onOpenSavedSearch open view URL');
       services.locator.navigate({
@@ -357,11 +354,23 @@ export function getDiscoverStateContainer({
     });
   };
 
+  const clearTimeFieldFromSort = (
+    sort: DiscoverAppState['sort'],
+    timeFieldName: string | undefined
+  ) => {
+    if (!Array.isArray(sort) || !timeFieldName) return sort;
+
+    const filteredSort = sort.filter(([field]) => field !== timeFieldName);
+
+    return filteredSort;
+  };
+
   const transitionFromDataViewToESQL = (dataView: DataView) => {
     const appState = appStateContainer.get();
-    const { query } = appState;
+    const { query, sort } = appState;
     const filterQuery = query && isOfQueryType(query) ? query : undefined;
     const queryString = getInitialESQLQuery(dataView, true, filterQuery);
+    const clearedSort = clearTimeFieldFromSort(sort, dataView?.timeFieldName);
 
     appStateContainer.update({
       query: { esql: queryString },
@@ -370,6 +379,7 @@ export function getDiscoverStateContainer({
         type: DataSourceType.Esql,
       },
       columns: [],
+      sort: clearedSort,
     });
 
     // clears pinned filters

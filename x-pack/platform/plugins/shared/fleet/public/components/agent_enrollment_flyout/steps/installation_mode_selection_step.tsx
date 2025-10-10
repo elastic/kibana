@@ -66,9 +66,9 @@ export const InstallationModeSelectionStep = ({
         options={[
           {
             id: `managed_${radioSuffix}`,
+            'data-test-subj': 'agentFlyoutManagedRadioButtons',
             label: (
               <FormattedMessage
-                data-test-subj="agentFlyoutManagedRadioButtons"
                 id="xpack.fleet.agentFlyout.managedRadioOption"
                 defaultMessage="{managed} – Enroll in Elastic Agent in Fleet to automatically deploy updates and centrally manage the agent."
                 values={{

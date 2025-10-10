@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import path from 'node:path';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
@@ -24,10 +25,7 @@ import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { getTechnicalPreviewWarning } from './utils';
 import type { OnechatRequestHandlerContext } from '../types';
-
-const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic Chat API');
 
 export function registerChatRoutes({
   router,
@@ -38,11 +36,50 @@ export function registerChatRoutes({
   const wrapHandler = getHandlerWrapper({ logger });
 
   const conversePayloadSchema = schema.object({
-    agent_id: schema.string({ defaultValue: oneChatDefaultAgentId }),
-    connector_id: schema.maybe(schema.string()),
-    conversation_id: schema.maybe(schema.string()),
-    input: schema.string(),
     tool_parameters: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    agent_id: schema.string({
+      defaultValue: oneChatDefaultAgentId,
+      meta: {
+        description: 'The ID of the agent to chat with. Defaults to the default Elastic AI agent.',
+      },
+    }),
+    connector_id: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Optional connector ID for the agent to use for external integrations.',
+        },
+      })
+    ),
+    conversation_id: schema.maybe(
+      schema.string({
+        meta: {
+          description: 'Optional existing conversation ID to continue a previous conversation.',
+        },
+      })
+    ),
+    input: schema.string({
+      meta: { description: 'The user input message to send to the agent.' },
+    }),
+    capabilities: schema.maybe(
+      schema.object(
+        {
+          visualizations: schema.maybe(
+            schema.boolean({
+              meta: {
+                description:
+                  'When true, allows the agent to render tabular data from tool results as interactive visualizations using custom XML elements in responses.',
+              },
+            })
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Controls agent capabilities during conversation. Currently supports visualization rendering for tabular tool results.',
+          },
+        }
+      )
+    ),
   });
 
   const callConverse = ({
@@ -64,12 +101,14 @@ export function registerChatRoutes({
       conversation_id: conversationId,
       input,
       tool_parameters: toolParameters,
+      capabilities,
     } = payload;
 
     return chatService.converse({
       agentId,
       connectorId,
       conversationId,
+      capabilities,
       abortSignal,
       nextInput: { message: input },
       request,
@@ -85,11 +124,14 @@ export function registerChatRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'Converse with an agent',
-      description: TECHNICAL_PREVIEW_WARNING,
+      summary: 'Send chat message',
+      description:
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
       options: {
+        tags: ['oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -98,6 +140,9 @@ export function registerChatRoutes({
         version: '2023-10-31',
         validate: {
           request: { body: conversePayloadSchema },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -146,13 +191,15 @@ export function registerChatRoutes({
       security: {
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
-
       access: 'public',
-      summary: 'Converse with an agent and stream events',
-      description: TECHNICAL_PREVIEW_WARNING,
+      summary: 'Send chat message (streaming)',
+      description:
+        "Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.",
       options: {
+        tags: ['oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
+          since: '9.2.0',
         },
       },
     })
@@ -161,6 +208,9 @@ export function registerChatRoutes({
         version: '2023-10-31',
         validate: {
           request: { body: conversePayloadSchema },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_converse_async.yaml'),
         },
       },
       wrapHandler(async (ctx, request, response) => {

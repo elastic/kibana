@@ -17,8 +17,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ExperimentalFeaturesService } from '../../../../services';
-
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
@@ -26,7 +24,11 @@ import {
   AgentUpgradeAgentModal,
 } from '../../components';
 import { useAuthz, useLicense } from '../../../../hooks';
-import { LICENSE_FOR_SCHEDULE_UPGRADE, AGENTS_PREFIX } from '../../../../../../../common/constants';
+import {
+  LICENSE_FOR_SCHEDULE_UPGRADE,
+  AGENTS_PREFIX,
+  LICENSE_FOR_AGENT_MIGRATION,
+} from '../../../../../../../common/constants';
 
 import { getCommonTags } from '../utils';
 
@@ -38,6 +40,7 @@ import { AgentExportCSVModal } from '../../components/agent_export_csv_modal';
 
 import type { SelectionMode } from './types';
 import { TagsAddRemove } from './tags_add_remove';
+import { AgentMigrateFlyout } from './migrate_agent_flyout';
 
 export interface Props {
   nAgentsInTable: number;
@@ -51,7 +54,7 @@ export interface Props {
   agentPolicies: AgentPolicy[];
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
-  onBulkMigrateClicked: (agents: Agent[]) => void;
+  unsupportedMigrateAgents: Agent[];
 }
 
 export const AgentBulkActions: React.FunctionComponent<Props> = ({
@@ -66,12 +69,12 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   agentPolicies,
   sortField,
   sortOrder,
-  onBulkMigrateClicked,
+  unsupportedMigrateAgents,
 }) => {
   const licenseService = useLicense();
   const authz = useAuthz();
   const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
-  const agentMigrationsEnabled = ExperimentalFeaturesService.get().enableAgentMigrations;
+  const doesLicenseAllowMigration = licenseService.hasAtLeast(LICENSE_FOR_AGENT_MIGRATION);
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -89,6 +92,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isRequestDiagnosticsModalOpen, setIsRequestDiagnosticsModalOpen] =
     useState<boolean>(false);
   const [isExportCSVModalOpen, setIsExportCSVModalOpen] = useState<boolean>(false);
+  const [isMigrateModalOpen, setIsMigrateModalOpen] = useState<boolean>(false);
 
   // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
   const selectionQuery = useMemo(() => {
@@ -126,6 +130,24 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       onClick: (event: any) => {
         setTagsPopoverButton((event.target as Element).closest('button')!);
         setIsTagAddVisible(!isTagAddVisible);
+      },
+    },
+    {
+      name: (
+        <FormattedMessage
+          id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
+          data-test-subj="agentBulkActionsBulkMigrate"
+          defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
+          values={{
+            agentCount,
+          }}
+        />
+      ),
+      icon: <EuiIcon type="cluster" size="m" />,
+      disabled: !authz.fleet.allAgents || !doesLicenseAllowMigration,
+      onClick: (event: any) => {
+        closeMenu();
+        setIsMigrateModalOpen(true);
       },
     },
     {
@@ -252,26 +274,6 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       },
     },
   ];
-  if (agentMigrationsEnabled) {
-    menuItems.splice(1, 0, {
-      name: (
-        <FormattedMessage
-          id="xpack.fleet.agentBulkActions.bulkMigrateAgents"
-          data-test-subj="agentBulkActionsBulkMigrate"
-          defaultMessage="Migrate {agentCount, plural, one {# agent} other {# agents}}"
-          values={{
-            agentCount,
-          }}
-        />
-      ),
-      icon: <EuiIcon type="cluster" size="m" />,
-      disabled: !authz.fleet.allAgents || !agentMigrationsEnabled,
-      onClick: (event: any) => {
-        setIsMenuOpen(false);
-        onBulkMigrateClicked(selectedAgents);
-      },
-    });
-  }
   const panels = [
     {
       id: 0,
@@ -362,6 +364,22 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             agentCount={agentCount}
             onClose={() => {
               setIsRequestDiagnosticsModalOpen(false);
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isMigrateModalOpen && (
+        <EuiPortal>
+          <AgentMigrateFlyout
+            agents={agents}
+            agentCount={agentCount}
+            unsupportedMigrateAgents={unsupportedMigrateAgents}
+            onClose={() => {
+              setIsMigrateModalOpen(false);
+            }}
+            onSave={() => {
+              setIsMigrateModalOpen(false);
+              refreshAgents();
             }}
           />
         </EuiPortal>

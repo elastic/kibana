@@ -26,6 +26,13 @@ export const VIEW_YOUR_MODELS_LINK = i18n.translate(
   }
 );
 
+export const EIS_DOCUMENTATION_LINK = i18n.translate(
+  'xpack.searchInferenceEndpoints.eisDocumentationLink',
+  {
+    defaultMessage: 'Elastic Inference Service',
+  }
+);
+
 export const API_DOCUMENTATION_LINK = i18n.translate(
   'xpack.searchInferenceEndpoints.apiDocumentationLink',
   {

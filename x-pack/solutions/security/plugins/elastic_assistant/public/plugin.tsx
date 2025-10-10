@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React, { Suspense } from 'react';
 import { createHashHistory } from 'history';
@@ -34,6 +34,10 @@ import { KnowledgeBaseEntryReference } from './src/components/get_comments/conte
 
 export type ElasticAssistantPublicPluginSetup = ReturnType<ElasticAssistantPublicPlugin['setup']>;
 export type ElasticAssistantPublicPluginStart = ReturnType<ElasticAssistantPublicPlugin['start']>;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ConfigSchema {}
+
 export class ElasticAssistantPublicPlugin
   implements
     Plugin<
@@ -45,6 +49,11 @@ export class ElasticAssistantPublicPlugin
 {
   private readonly storage = new Storage(localStorage);
   private readonly telemetry: TelemetryService = new TelemetryService();
+  isServerless: boolean;
+
+  constructor(context: PluginInitializerContext<ConfigSchema>) {
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
+  }
 
   public setup(coreSetup: CoreSetup) {
     this.telemetry.setup({ analytics: coreSetup.analytics });
@@ -103,6 +112,7 @@ export class ElasticAssistantPublicPlugin
     services: StartServices
   ) {
     const history = createHashHistory();
+    const { openChat$, completeOpenChat } = services.aiAssistantManagementSelection;
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider
@@ -115,7 +125,11 @@ export class ElasticAssistantPublicPlugin
             <NavigationProvider core={services}>
               <ReactQueryClientProvider>
                 <AssistantSpaceIdProvider>
-                  <AssistantProvider>
+                  <AssistantProvider
+                    isServerless={this.isServerless}
+                    openChatTrigger$={openChat$}
+                    completeOpenChat={completeOpenChat}
+                  >
                     <Suspense fallback={null}>
                       <AssistantNavLink />
                       <Router history={history}>

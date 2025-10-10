@@ -183,7 +183,7 @@ export async function upgradeBatch(
   const total = options.total ?? givenAgents.length;
   const namespaces = spaceIds ? spaceIds : [];
 
-  await createAgentAction(esClient, {
+  await createAgentAction(esClient, soClient, {
     id: actionId,
     created_at: now,
     data,

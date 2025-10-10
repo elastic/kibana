@@ -16,6 +16,7 @@ export type OtelLogDocument = Fields &
   Partial<{
     _index?: string;
     trace_id?: string;
+    span_id?: string;
     attributes?: Record<string, unknown>;
     severity_text?: string;
     resource?: {

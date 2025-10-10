@@ -312,6 +312,20 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'forkTooManyBranches':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.forkTooManyBranches', {
+          defaultMessage: '[FORK] Supports a maximum of 8 branches.',
+        }),
+        type: 'error',
+      };
+    case 'forkTooFewBranches':
+      return {
+        message: i18n.translate('kbn-esql-ast.esql.validation.forkTooFewBranches', {
+          defaultMessage: '[FORK] Must include at least two branches.',
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -487,6 +501,12 @@ export const errors = {
 
   dropTimestampWarning: ({ location }: ESQLColumn): ESQLMessage =>
     errors.byId('dropTimestampWarning', location, {}),
+
+  forkTooManyBranches: (command: ESQLCommand): ESQLMessage =>
+    errors.byId('forkTooManyBranches', command.location, {}),
+
+  forkTooFewBranches: (command: ESQLCommand): ESQLMessage =>
+    errors.byId('forkTooFewBranches', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

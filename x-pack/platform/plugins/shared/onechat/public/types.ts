@@ -19,6 +19,11 @@ import type {
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { ToolServiceStartContract } from '@kbn/onechat-browser';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { OnechatInternalService } from './services';
 import type { OnechatServicesContext } from './application/context/onechat_services_context';
 import type { ContentReferenceRegistry } from './application/components/conversations/content_reference/content_reference_registry';
@@ -33,23 +38,35 @@ export interface OnechatSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   discover: DiscoverSetup;
+  licenseManagement?: LicenseManagementUIPluginSetup;
   management: ManagementSetup;
   share: SharePluginSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface OnechatStartDependencies {
+  inference: InferencePublicStart;
   lens: LensPublicStart;
+  licensing: LicensingPluginStart;
   dataViews: DataViewsPublicPluginStart;
   spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   discover: DiscoverStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  uiActions: UiActionsStart;
 }
 
 export interface OnechatPluginSetup {}
 
+/**
+ * Public start contract for the browser-side onechat plugin.
+ */
 export interface OnechatPluginStart {
+  /**
+   * Tool service contract, can be used to list or execute tools.
+   */
+  tools: ToolServiceStartContract;
   internalServices: OnechatInternalService;
   contentReferenceRegistry: ContentReferenceRegistry;
 }

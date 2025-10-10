@@ -50,6 +50,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
           duration: parseDuration('1m28s'),
+          stepId: 'my_first_step',
         },
         {
           id: '1',
@@ -58,6 +59,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
           duration: parseDuration('1h2m'),
+          stepId: 'my_first_step',
         },
         {
           id: '2',
@@ -66,6 +68,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           spaceId: 'default',
           duration: parseDuration('1d2h'),
+          stepId: 'my_first_step',
         },
         {
           id: '4',
@@ -74,6 +77,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('1w2d'),
           spaceId: 'default',
+          stepId: 'my_first_step',
         },
         {
           id: '5',
@@ -82,6 +86,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('1m28s'),
           spaceId: 'default',
+          stepId: 'my_first_step',
         },
         {
           id: '6',
@@ -90,6 +95,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('280ms'),
           spaceId: 'default',
+          stepId: 'my_first_step',
         },
         {
           id: '7',
@@ -98,6 +104,7 @@ export const Default: Story = {
           finishedAt: new Date().toISOString(),
           duration: parseDuration('28s'),
           spaceId: 'default',
+          stepId: 'my_first_step',
         },
       ],
       _pagination: {

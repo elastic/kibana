@@ -13,12 +13,23 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { AGENT_BUILDER_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
+import { docLinks } from '../common/doc_links';
+import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
+import { registerLocators } from './locator/register_locators';
 import { registerAnalytics, registerApp, registerManagementSection } from './register';
-import type { OnechatInternalService } from './services';
-import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
 import { ConversationSettingsService } from './services/conversations/conversations_settings';
 import { contentReferenceRegistry } from './application/components/conversations/content_reference/content_reference_registry';
 
+import {
+  AgentBuilderAccessChecker,
+  AgentService,
+  ChatService,
+  ConversationsService,
+  NavigationService,
+  ToolsService,
+  type OnechatInternalService,
+} from './services';
+import { createPublicToolContract } from './services/tools';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -26,7 +37,6 @@ import type {
   OnechatSetupDependencies,
   OnechatStartDependencies,
 } from './types';
-import { ONECHAT_FEATURE_ID, uiPrivileges } from '../common/features';
 
 export class OnechatPlugin
   implements
@@ -40,6 +50,9 @@ export class OnechatPlugin
   logger: Logger;
   private internalServices?: OnechatInternalService;
   private conversationSettingsService: ConversationSettingsService;
+  private setupServices?: {
+    navigationService: NavigationService;
+  };
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -54,6 +67,13 @@ export class OnechatPlugin
       false
     );
 
+    const navigationService = new NavigationService({
+      management: deps.management.locator,
+      licenseManagement: deps.licenseManagement?.locator,
+    });
+
+    this.setupServices = { navigationService };
+
     if (isOnechatUiEnabled) {
       registerApp({
         core,
@@ -66,6 +86,7 @@ export class OnechatPlugin
       });
 
       registerAnalytics({ analytics: core.analytics });
+      registerLocators(deps.share);
     }
 
     try {
@@ -82,25 +103,39 @@ export class OnechatPlugin
     return {};
   }
 
-  start({ http }: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
+  start(core: CoreStart, startDependencies: OnechatStartDependencies): OnechatPluginStart {
+    const { http } = core;
+    const { licensing, inference } = startDependencies;
+    docLinks.setDocLinks(core.docLinks.links);
+
     const agentService = new AgentService({ http });
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const conversationSettingsService = this.conversationSettingsService.start();
     const toolsService = new ToolsService({ http });
+    const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
+
+    if (!this.setupServices) {
+      throw new Error('plugin start called before plugin setup');
+    }
+
+    const { navigationService } = this.setupServices;
 
     this.internalServices = {
       agentService,
       chatService,
       conversationsService,
+      navigationService,
       toolsService,
       startDependencies,
       conversationSettingsService,
+      accessChecker,
     };
 
     return {
       internalServices: this.internalServices,
       contentReferenceRegistry,
+      tools: createPublicToolContract({ toolsService }),
     };
   }
 

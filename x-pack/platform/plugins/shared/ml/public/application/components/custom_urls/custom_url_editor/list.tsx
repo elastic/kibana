@@ -6,7 +6,7 @@
  */
 
 import type { FC, ChangeEvent } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 
 import {
   EuiButtonIcon,
@@ -34,13 +34,13 @@ import { parseUrlState } from '@kbn/ml-url-state';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
 import { css } from '@emotion/react';
+import type { Job } from '../../../../../common';
 import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_utils';
 import { getTestUrl } from './utils';
 
 import { TIME_RANGE_TYPE } from './constants';
-import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.
@@ -50,6 +50,47 @@ function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
 
   const interval = parseInterval(timeRange);
   return interval !== null;
+}
+
+function findDFADataViewId(
+  dfaJob: DataFrameAnalyticsConfig,
+  dataViewListItems?: DataViewListItem[],
+  isPartialDFAJob?: boolean
+): string | undefined {
+  const sourceIndex = Array.isArray(dfaJob.source.index)
+    ? dfaJob.source.index.join()
+    : dfaJob.source.index;
+  const indexName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
+  const backupIndexName = sourceIndex;
+  const dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
+  if (!dataViewId) {
+    return dataViewListItems?.find((item) => item.title === backupIndexName)?.id;
+  }
+  return dataViewId;
+}
+
+/**
+ * Finds the data view ID for a custom URL.
+ * For dashboards URLs: Returns the job's destination index data view ID.
+ * Uses source index for partial DFA jobs since destination index doesn't exist yet.
+ * For discover URLs: Extracts data view ID directly from the URL state.
+ */
+export function extractDataViewIdFromCustomUrl(
+  dfaJob: DataFrameAnalyticsConfig,
+  customUrl: MlKibanaUrlConfig,
+  dataViewListItems?: DataViewListItem[],
+  isPartialDFAJob?: boolean
+): string | undefined {
+  let dataViewId;
+
+  if (customUrl.url_value.includes('dashboards')) {
+    dataViewId = findDFADataViewId(dfaJob, dataViewListItems, isPartialDFAJob);
+  } else {
+    const urlState = parseUrlState(customUrl.url_value);
+    dataViewId = urlState._a?.index;
+  }
+
+  return dataViewId;
 }
 
 export interface CustomUrlListProps {
@@ -81,6 +122,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   const mlApi = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
   const [expandedUrlIndex, setExpandedUrlIndex] = useState<number | null>(null);
+  const [showTimeRange, setShowTimeRange] = useState<boolean[]>([]);
 
   const styles = useMemo(
     () => ({
@@ -96,6 +138,89 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     }),
     [euiTheme.size.xl, euiTheme.size.xxxxl]
   );
+
+  const hasTimeField = useCallback(
+    async (dataViewId: string | undefined): Promise<boolean> => {
+      if (!dataViewId) return false;
+      try {
+        const dataView = await dataViews.get(dataViewId);
+        return dataView?.timeFieldName !== undefined && dataView?.timeFieldName !== '';
+      } catch {
+        return true;
+      }
+    },
+    [dataViews]
+  );
+
+  const getDiscoverTimeFieldStatus = useCallback(
+    async (kibanaUrl: MlKibanaUrlConfig): Promise<boolean | undefined> => {
+      if (!kibanaUrl.url_value.includes('discover')) {
+        return undefined;
+      }
+      const urlState = parseUrlState(kibanaUrl.url_value);
+      const dataViewId = urlState._a?.index;
+      return dataViewId ? await hasTimeField(dataViewId) : true;
+    },
+    [hasTimeField]
+  );
+
+  const getDFATimeFieldStatus = useCallback(async (): Promise<boolean | undefined> => {
+    const dataViewId = findDFADataViewId(
+      job as DataFrameAnalyticsConfig,
+      dataViewListItems,
+      isPartialDFAJob
+    );
+
+    return dataViewId ? await hasTimeField(dataViewId) : true;
+  }, [dataViewListItems, hasTimeField, isPartialDFAJob, job]);
+
+  useEffect(() => {
+    if (customUrls.length === 0) return;
+
+    const checkTimeRangeVisibility = async () => {
+      const results = await Promise.all(
+        customUrls.map(async (customUrl) => {
+          const kibanaUrl = customUrl as MlKibanaUrlConfig;
+
+          let dfaHasTimeField: boolean | undefined;
+          if (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob) {
+            dfaHasTimeField = await getDFATimeFieldStatus();
+          }
+          const discoverHasTimeField = await getDiscoverTimeFieldStatus(kibanaUrl);
+
+          // Anomaly Detection Jobs logic
+          if (dfaHasTimeField === undefined) {
+            if (kibanaUrl.url_value.includes('discover')) return discoverHasTimeField === true;
+            return true; // Show for dashboards/other/unknown URLs
+          }
+
+          // Data Frame Analytics Jobs logic
+          if (kibanaUrl.url_value.includes('discover')) {
+            // For discover URLs: show only if both DFA and Discover have time fields
+            return dfaHasTimeField === true && discoverHasTimeField === true;
+          }
+
+          if (kibanaUrl.url_value.includes('dashboards')) {
+            // For dashboard URLs: show only if DFA has time field
+            return dfaHasTimeField === true;
+          }
+
+          return true;
+        })
+      );
+      setShowTimeRange(results);
+    };
+
+    checkTimeRangeVisibility();
+  }, [
+    customUrls,
+    job,
+    dataViewListItems,
+    isPartialDFAJob,
+    dataViews,
+    getDFATimeFieldStatus,
+    getDiscoverTimeFieldStatus,
+  ]);
 
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
     if (index < customUrls.length) {
@@ -153,28 +278,16 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       customUrl.time_range !== undefined &&
       customUrl.time_range !== TIME_RANGE_TYPE.AUTO
     ) {
-      // Ensure cast as dfaJob if it's just a partial from the wizard
-      const dfaJob = job as DataFrameAnalyticsConfig;
-      let dataViewId;
-      // DFA job url - need the timefield to test the URL. Get it from the job config. Use source index when partial job since dest index does not exist yet.
-      if (customUrl.url_value.includes('dashboards')) {
-        const sourceIndex = Array.isArray(dfaJob.source.index)
-          ? dfaJob.source.index.join()
-          : dfaJob.source.index;
-        // need to get the dataview from the dashboard to get timefield
-        const indexName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
-        const backupIndexName = sourceIndex;
-        dataViewId = dataViewListItems?.find((item) => item.title === indexName)?.id;
-        if (!dataViewId) {
-          dataViewId = dataViewListItems?.find((item) => item.title === backupIndexName)?.id;
-        }
-      } else {
-        const urlState = parseUrlState(customUrl.url_value);
-        dataViewId = urlState._a?.index;
-      }
+      const dataViewId = extractDataViewIdFromCustomUrl(
+        job as DataFrameAnalyticsConfig,
+        customUrl,
+        dataViewListItems,
+        isPartialDFAJob
+      );
 
       if (dataViewId) {
         const dataView = await dataViews.get(dataViewId);
+        // DFA job url - need the timefield to test the URL.
         timefieldName = dataView?.timeFieldName ?? null;
       }
     }
@@ -333,7 +446,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            {isCustomTimeRange === false ? (
+            {isCustomTimeRange === false && showTimeRange[index] ? (
               <EuiFlexItem css={styles.narrowField} grow={2}>
                 <EuiFormRow
                   fullWidth={true}

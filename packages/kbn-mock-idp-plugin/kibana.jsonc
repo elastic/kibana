@@ -2,11 +2,16 @@
   "type": "plugin",
   "id": "@kbn/mock-idp-plugin",
   "owner": "@elastic/kibana-security",
+  "group": "platform",
+  "visibility": "private",
   "devOnly": true,
   "plugin": {
     "id": "mockIdpPlugin",
     "server": true,
     "browser": true,
+    "configPath": [
+      "mockIdpPlugin"
+    ],
     "enabledOnAnonymousPages": true,
     "requiredPlugins": [
       "cloud"

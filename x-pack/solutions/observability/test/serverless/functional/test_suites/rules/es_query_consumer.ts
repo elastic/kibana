@@ -32,6 +32,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     it('should open the rule creation flyout', async () => {
+      await testSubjects.existOrFail('createRuleButton');
       await testSubjects.click('createRuleButton');
       const isCreateRuleFlyoutVisible = await testSubjects.exists('ruleTypeModal');
       expect(isCreateRuleFlyoutVisible).toBe(true);

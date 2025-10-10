@@ -9,6 +9,7 @@ import type {
   ConversationCreatedEvent,
   ConversationUpdatedEvent,
   Conversation,
+  ConversationIdSetEvent,
 } from '@kbn/onechat-common';
 import { ChatEventType } from '@kbn/onechat-common';
 
@@ -33,6 +34,17 @@ export const createConversationUpdatedEvent = (
     data: {
       conversation_id: conversation.id,
       title: conversation.title,
+    },
+  };
+};
+
+export const createConversationIdSetEvent = (
+  conversationId: Conversation['id']
+): ConversationIdSetEvent => {
+  return {
+    type: ChatEventType.conversationIdSet,
+    data: {
+      conversation_id: conversationId,
     },
   };
 };

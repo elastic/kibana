@@ -27,6 +27,7 @@
     "*/*/packages/**/*",
   ],
   "kbn_references": [
+    "@kbn/security-solution-test-api-clients",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",
@@ -58,17 +59,9 @@
     "@kbn/repo-info",
     "@kbn/es-archiver",
     "@kbn/task-manager-plugin",
-    "@kbn/openapi-common",
-    "@kbn/spaces-plugin",
-    "@kbn/securitysolution-exceptions-common",
-    "@kbn/securitysolution-endpoint-exceptions-common",
-    "@kbn/securitysolution-lists-common",
-    "@kbn/osquery-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/rison",
     "@kbn/core-chrome-browser",
-    "@kbn/openapi-common",
-    "@kbn/spaces-plugin",
     "@kbn/management-settings-ids",
   ]
 }

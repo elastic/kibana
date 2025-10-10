@@ -23,13 +23,14 @@ import {
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
 import type { ContentReferences } from '@kbn/onechat-common/chat/conversation';
+import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
 import {
   Cursor,
   esqlLanguagePlugin,
-  getVisualizationHandler,
+  createVisualizationRenderer,
   loadingCursorPlugin,
-  visualizationPlugin,
+  visualizationTagParser,
 } from './markdown_plugins';
 import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
 import { contentReferenceParser } from '../content_reference/content_reference_parser';
@@ -127,7 +128,7 @@ export function ChatMessageText({
           </EuiTableRowCell>
         );
       },
-      visualization: getVisualizationHandler({
+      [visualizationElement.tagName]: createVisualizationRenderer({
         startDependencies,
         stepsFromCurrentRound,
         stepsFromPrevRounds,
@@ -138,7 +139,7 @@ export function ChatMessageText({
       parsingPluginList: [
         loadingCursorPlugin,
         esqlLanguagePlugin,
-        visualizationPlugin,
+        visualizationTagParser,
         ...parsingPlugins,
         ...(contentReferences ? [contentReferenceParser({ contentReferences })] : []),
       ],

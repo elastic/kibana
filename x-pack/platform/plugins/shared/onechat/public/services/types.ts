@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type React from 'react';
+import type { AgentBuilderAccessChecker } from './access/access';
 import type { OnechatStartDependencies } from '../types';
 import type { AgentService } from './agents';
 import type { ChatService } from './chat';
 import type { ConversationsService } from './conversations';
 import type { ToolsService } from './tools';
+import type { NavigationService } from './navigation';
 import type { AIConnector } from '../application/components/settings/connector_selector';
 
 export interface StarterPrompt {
@@ -40,10 +41,12 @@ export interface OnechatInternalService {
   agentService: AgentService;
   chatService: ChatService;
   conversationsService: ConversationsService;
+  navigationService: NavigationService;
   toolsService: ToolsService;
   conversationSettingsService: {
     setConversationSettings: (conversationSettings: ConversationSettings) => () => void;
     getConversationSettings$: () => any;
   };
   startDependencies: OnechatStartDependencies;
+  accessChecker: AgentBuilderAccessChecker;
 }

@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useSendMessage } from '../context/send_message_context';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
 import { useConversationId } from './use_conversation_id';
@@ -18,6 +18,9 @@ import { useOnechatServices } from './use_onechat_service';
 import { useOnechatLastConversation } from './use_space_aware_context/use_last_conversation';
 import { useOnechatSpaceId } from './use_space_aware_context/use_space_id';
 import type { ConversationSettings } from '../../services/types';
+import { storageKeys } from '../storage_keys';
+import { useSendMessage } from '../context/send_message/send_message_context';
+import { useValidateAgentId } from './agents/use_validate_agent_id';
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -29,6 +32,7 @@ export const useConversation = () => {
   const {
     data: conversation,
     isLoading,
+    isFetching,
     isFetched,
   } = useQuery({
     queryKey,
@@ -48,12 +52,26 @@ export const useConversation = () => {
     },
   });
 
-  return { conversation, isLoading, isFetched };
+  return { conversation, isLoading, isFetching, isFetched };
 };
 
 export const useConversationStatus = () => {
-  const { isLoading, isFetched } = useConversation();
-  return { isLoading, isFetched };
+  const { isLoading, isFetching, isFetched } = useConversation();
+  return { isLoading, isFetching, isFetched };
+};
+
+const useGetNewConversationAgentId = () => {
+  const [agentIdStorage] = useLocalStorage<string>(storageKeys.agentId);
+  const validateAgentId = useValidateAgentId();
+
+  // Ensure we always return a string
+  return (): string => {
+    const isAgentIdValid = validateAgentId(agentIdStorage);
+    if (isAgentIdValid) {
+      return agentIdStorage;
+    }
+    return oneChatDefaultAgentId;
+  };
 };
 
 export const useAgentId = () => {
@@ -64,6 +82,20 @@ export const useAgentId = () => {
     conversationSettingsService.getConversationSettings$(),
     {}
   );
+
+  const agentId = conversation?.agent_id;
+  const conversationId = useConversationId();
+  const isNewConversation = !conversationId;
+  const getNewConversationAgentId = useGetNewConversationAgentId();
+
+  if (agentId) {
+    return agentId;
+  }
+
+  // For new conversations, agent id must be defined
+  if (isNewConversation) {
+    return getNewConversationAgentId();
+  }
 
   // Return the agent_id from conversation if available, otherwise return the defaultAgentId from settings
   // If no defaultAgentId is set in settings, fall back to the oneChatDefaultAgentId constant

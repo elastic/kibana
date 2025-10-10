@@ -26,6 +26,7 @@ describe('generateLayer', () => {
         // simulate DSL lifecycle
         dsl: { data_retention: '30d' },
       },
+      settings: {},
     },
   };
 

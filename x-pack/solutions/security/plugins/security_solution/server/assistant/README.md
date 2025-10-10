@@ -53,39 +53,42 @@ The agent has access to the following tools:
 
 ### Implementation
 
-The SIEM agent is created using the `SiemAgentCreator` class in the `Plugin.start()` method of the Security Solution plugin:
+The SIEM agent is registered using the new onechat registry mechanism in the `Plugin.setup()` method of the Security Solution plugin:
 
 ```typescript
 // In plugin.ts
-const siemAgentCreator = createSiemAgentCreator({
-  onechatPlugin: plugins.onechat,
-  core,
-  logger: this.logger,
-});
-siemAgentCreator.createSiemAgent().catch((error) => {
-  this.logger.warn('Failed to create SIEM agent', { error: error.message });
-});
+import { siemAgentCreator } from './assistant/siem_agent_creator';
+
+// During setup phase
+plugins.onechat.agents.register(siemAgentCreator());
 ```
 
-The `SiemAgentCreator` class is defined in `siem_agent_creator.ts` and encapsulates all the agent creation logic:
+The `siemAgentCreator` factory function is defined in `siem_agent_creator.ts` and returns a `BuiltInAgentDefinition`:
 
 ```typescript
 // In siem_agent_creator.ts
-export class SiemAgentCreator {
-  async createSiemAgent(): Promise<void> {
-    // Creates the agent with specialized configuration
-    // Includes error handling and logging
-  }
-}
+export const siemAgentCreator = (): BuiltInAgentDefinition => {
+  return {
+    id: 'siem-security-analyst',
+    name: 'SIEM Security Analyst',
+    description: DEFAULT_SYSTEM_PROMPT,
+    labels: ['security', 'siem', 'threat-detection', 'incident-response'],
+    avatar_color: '#ff6b6b',
+    avatar_symbol: '🛡️',
+    configuration: {
+      instructions: '...',
+      tools: [...]
+    }
+  };
+};
 ```
 
-### Agent Creation Flow
+### Agent Registration Flow
 
-1. **Startup**: During plugin startup, the `SiemAgentCreator` is instantiated and `createSiemAgent` method is called
-2. **Existence Check**: Verifies if the agent already exists to avoid duplicates
-3. **Tool Registration**: Registers the `open-and-acknowledged-alerts-internal-tool` and `alert-counts-internal-tool`
-4. **Agent Creation**: Creates the agent with comprehensive security analysis instructions
-5. **Error Handling**: Logs success or failure with appropriate error details
+1. **Setup Phase**: During plugin setup, the agent definition is registered with the onechat agent registry
+2. **Static Definition**: The agent is defined statically as a `BuiltInAgentDefinition` object
+3. **Tool References**: The agent configuration references tools by their IDs
+4. **Automatic Management**: The onechat plugin handles agent lifecycle and persistence
 
 ### Usage
 
@@ -100,27 +103,18 @@ POST /api/chat/converse
 }
 ```
 
-### Testing
-
-The implementation includes comprehensive tests in `create_siem_agent.test.ts` that verify:
-
-- Agent creation when it doesn't exist
-- Skipping creation when agent already exists
-- Proper error handling and logging
-- Correct tool configuration
-
 ### Customization
 
-The agent can be customized by modifying the `SiemAgentCreator` class in `siem_agent_creator.ts`:
+The agent can be customized by modifying the `siemAgentCreator` factory function in `siem_agent_creator.ts`:
 
-- **Instructions**: Update the `instructions` field for different behavior
-- **Tools**: Add or remove tools from the `tools` array
+- **Instructions**: Update the `instructions` field in the configuration for different behavior
+- **Tools**: Add or remove tool IDs from the `tools` array
 - **Labels**: Modify labels for better organization
-- **Avatar**: Change the visual representation
+- **Avatar**: Change the `avatar_symbol` and `avatar_color` properties
 
 ### Security Considerations
 
-- The agent uses a mock request for internal creation (no user context required)
+- The agent is registered at setup time with a static definition
 - Tool access is controlled through the onechat tool registry
-- All operations are logged for audit purposes
-- Error handling prevents plugin startup failures
+- All registered tools must be available in the tool registry before use
+- The agent definition is read-only and cannot be modified by users

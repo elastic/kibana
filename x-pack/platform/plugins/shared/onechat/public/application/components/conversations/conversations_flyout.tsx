@@ -22,7 +22,7 @@ import styled from '@emotion/styled';
 import { OnechatConversationsView } from './conversations_view';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import { useSpaceId } from '../../hooks/use_space_id';
-import { SendMessageProvider } from '../../context/send_message_context';
+import { SendMessageProvider } from '../../context/send_message/send_message_context';
 import { OnechatSpaceIdProvider } from '../../hooks/use_space_aware_context';
 import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
 import { ConversationHeader } from './conversation_header';

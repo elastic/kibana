@@ -30,8 +30,9 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     elasticsearch,
     modelProviderFactory,
     toolsService,
-    logger,
+    resultStore,
     contentReferencesStore,
+    logger,
   } = manager.deps;
   return {
     request,
@@ -44,6 +45,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       getRunner: manager.getRunner,
       request,
     }),
+    resultStore,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     contentReferencesStore,
   };
@@ -62,8 +64,8 @@ export const runAgent = async ({
   const manager = parentManager.createChild(context);
 
   const { agentsService, request } = manager.deps;
-  const agentClient = await agentsService.getScopedClient({ request });
-  const agent = await agentClient.get(agentId);
+  const agentRegistry = await agentsService.getRegistry({ request });
+  const agent = await agentRegistry.get(agentId);
 
   const agentResult = await withAgentSpan({ agent }, async () => {
     const agentHandler = createAgentHandler({ agent });

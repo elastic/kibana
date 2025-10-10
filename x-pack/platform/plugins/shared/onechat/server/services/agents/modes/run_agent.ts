@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ConversationRound, RoundInput, ToolSelection } from '@kbn/onechat-common';
+import type {
+  AgentCapabilities,
+  ConversationRound,
+  RoundInput,
+  ToolSelection,
+} from '@kbn/onechat-common';
 import type { AgentHandlerContext } from '@kbn/onechat-server';
 import { runDefaultAgentMode } from './default';
 
@@ -22,6 +27,10 @@ export interface RunAgentParams {
    * Optional custom instructions to add to the prompts.
    */
   customInstructions?: string;
+  /**
+   * Capabilities to enable. if not specified will use the default capabilities.
+   */
+  capabilities?: AgentCapabilities;
   /**
    * Selection of tools which will be exposed to the agent.
    * Defaults to exposing all available tools.

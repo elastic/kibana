@@ -17,6 +17,7 @@ import type {
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowExecution,
   EsWorkflowStepExecution,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
@@ -34,11 +35,11 @@ import type {
   WorkflowStatsDto,
 } from '@kbn/workflows/types/v1';
 import { v4 as generateUuid } from 'uuid';
-import { WorkflowValidationError } from '../../common/lib/errors';
+import { InvalidYamlSchemaError, WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 
 import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
-import { getWorkflowZodSchemaLoose } from '../../common/schema';
+import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
@@ -261,6 +262,7 @@ export class WorkflowsService {
 
       const authenticatedUser = getAuthenticatedUser(request, this.security);
       const now = new Date();
+      const validationErrors: string[] = [];
 
       const updatedData: Partial<WorkflowProperties> = {
         lastUpdatedBy: authenticatedUser,
@@ -277,37 +279,47 @@ export class WorkflowsService {
 
       // Handle yaml updates - this will also update definition and validation
       if (workflow.yaml) {
-        const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, getWorkflowZodSchemaLoose());
+        // we always update the yaml, even if it's not valid, to allow users to save draft
+        updatedData.yaml = workflow.yaml;
+        const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, getWorkflowZodSchema());
         if (!parsedYaml.success) {
           updatedData.definition = undefined;
           updatedData.enabled = false;
           updatedData.valid = false;
+          if (
+            parsedYaml.error instanceof InvalidYamlSchemaError &&
+            parsedYaml.error.formattedZodError
+          ) {
+            validationErrors.push(
+              ...parsedYaml.error.formattedZodError.issues.map((error) => error.message)
+            );
+          } else {
+            validationErrors.push(parsedYaml.error.message);
+          }
           shouldUpdateScheduler = true;
         } else {
           // Validate step name uniqueness
           const stepValidation = validateStepNameUniqueness(parsedYaml.data as WorkflowYaml);
           if (!stepValidation.isValid) {
-            const errorMessages = stepValidation.errors.map((error) => error.message);
-            throw new WorkflowValidationError(
-              'Workflow validation failed: Step names must be unique throughout the workflow.',
-              errorMessages
+            updatedData.definition = undefined;
+            updatedData.enabled = false;
+            updatedData.valid = false;
+            validationErrors.push(...stepValidation.errors.map((error) => error.message));
+            shouldUpdateScheduler = true;
+          } else {
+            const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
+              parsedYaml.data as WorkflowYaml
             );
+            // Update all fields from the transformed YAML, not just definition
+            updatedData.definition = workflowDef.definition;
+            updatedData.name = workflowDef.name;
+            updatedData.enabled = workflowDef.enabled;
+            updatedData.description = workflowDef.description;
+            updatedData.tags = workflowDef.tags;
+            updatedData.valid = true;
+            updatedData.yaml = workflow.yaml;
+            shouldUpdateScheduler = true;
           }
-          const workflowDef = transformWorkflowYamlJsontoEsWorkflow(
-            parsedYaml.data as WorkflowYaml
-          );
-          // Update all fields from the transformed YAML, not just definition
-          updatedData.definition = workflowDef.definition;
-          updatedData.name = workflowDef.name;
-          // Update all fields from the transformed YAML, not just definition
-          updatedData.definition = workflowDef.definition;
-          updatedData.name = workflowDef.name;
-          updatedData.enabled = workflowDef.enabled;
-          updatedData.description = workflowDef.description;
-          updatedData.tags = workflowDef.tags;
-          updatedData.valid = true;
-          updatedData.yaml = workflow.yaml;
-          shouldUpdateScheduler = true;
         }
       }
 
@@ -409,6 +421,8 @@ export class WorkflowsService {
         id,
         lastUpdatedAt: new Date(finalData.updated_at),
         lastUpdatedBy: finalData.lastUpdatedBy,
+        enabled: finalData.enabled,
+        validationErrors,
         valid: finalData.valid,
       };
     } catch (error) {
@@ -579,18 +593,25 @@ export class WorkflowsService {
           throw new Error('Missing _source in search result');
         }
         const workflow = this.transformStorageDocumentToWorkflowDto(hit._id!, hit._source);
-        // Skip workflows with null definition for the list
-        if (!workflow.definition) {
-          return null;
-        }
         return {
           ...workflow,
           description: workflow.description || '',
           definition: workflow.definition,
-          history: [], // History is loaded separately when needed for performance
+          history: [] as WorkflowExecutionHistoryModel[], // Will be populated below
         };
       })
       .filter((workflow): workflow is NonNullable<typeof workflow> => workflow !== null);
+
+    // Fetch recent execution history for all workflows
+    if (workflows.length > 0) {
+      const workflowIds = workflows.map((w) => w.id);
+      const executionHistory = await this.getRecentExecutionsForWorkflows(workflowIds, spaceId);
+
+      // Populate history for each workflow
+      workflows.forEach((workflow) => {
+        workflow.history = executionHistory[workflow.id] || [];
+      });
+    }
 
     return {
       _pagination: {
@@ -848,6 +869,102 @@ export class WorkflowsService {
         duration,
       };
     });
+  }
+
+  /**
+   * Efficiently fetch the most recent execution for multiple workflows
+   */
+  private async getRecentExecutionsForWorkflows(
+    workflowIds: string[],
+    spaceId: string
+  ): Promise<Record<string, WorkflowExecutionHistoryModel[]>> {
+    if (!this.esClient || workflowIds.length === 0) {
+      return {};
+    }
+
+    try {
+      const response = await this.esClient.search<EsWorkflowExecution>({
+        index: this.workflowsExecutionIndex,
+        size: 0, // We only want aggregations
+        query: {
+          bool: {
+            must: [
+              { terms: { workflowId: workflowIds } },
+              {
+                bool: {
+                  should: [
+                    { term: { spaceId } },
+                    // Backward compatibility for objects without spaceId
+                    { bool: { must_not: { exists: { field: 'spaceId' } } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+        aggs: {
+          workflows: {
+            terms: {
+              field: 'workflowId',
+              size: workflowIds.length,
+            },
+            aggs: {
+              recent_executions: {
+                top_hits: {
+                  size: 1, // Get only the most recent execution per workflow
+                  sort: [{ finishedAt: { order: 'desc' } }],
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const result: Record<string, WorkflowExecutionHistoryModel[]> = {};
+
+      if (response.aggregations?.workflows && 'buckets' in response.aggregations.workflows) {
+        const buckets = response.aggregations.workflows.buckets as Array<{
+          key: string;
+          recent_executions: {
+            hits: {
+              hits: Array<{
+                _source: EsWorkflowExecution;
+              }>;
+            };
+          };
+        }>;
+
+        buckets.forEach((bucket) => {
+          const workflowId = bucket.key;
+          const hits = bucket.recent_executions.hits.hits;
+
+          if (hits.length > 0) {
+            const execution = hits[0]._source;
+            result[workflowId] = [
+              {
+                id: execution.id,
+                workflowId: execution.workflowId,
+                workflowName: execution.workflowDefinition?.name || 'Unknown Workflow',
+                status: execution.status,
+                startedAt: execution.startedAt,
+                finishedAt: execution.finishedAt || execution.startedAt,
+                duration:
+                  execution.finishedAt && execution.startedAt
+                    ? new Date(execution.finishedAt).getTime() -
+                      new Date(execution.startedAt).getTime()
+                    : null,
+              },
+            ];
+          }
+        });
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Failed to fetch recent executions for workflows: ${error}`);
+      return {};
+    }
   }
 
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {

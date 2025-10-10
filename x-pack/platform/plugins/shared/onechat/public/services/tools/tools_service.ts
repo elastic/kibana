@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
+import type { ExecuteToolParams } from '@kbn/onechat-browser';
 import type {
   ListToolsResponse,
   GetToolResponse,
@@ -17,6 +18,9 @@ import type {
   BulkDeleteToolResponse,
   ExecuteToolResponse,
   ResolveSearchSourcesResponse,
+  ListWorkflowsResponse,
+  GetWorkflowResponse,
+  GetToolTypeInfoResponse,
 } from '../../../common/http_api/tools';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 
@@ -26,6 +30,8 @@ export class ToolsService {
   constructor({ http }: { http: HttpSetup }) {
     this.http = http;
   }
+
+  // public APIs
 
   async list() {
     const { results } = await this.http.get<ListToolsResponse>(`${publicApiPath}/tools`, {});
@@ -40,12 +46,6 @@ export class ToolsService {
     return await this.http.delete<DeleteToolResponse>(`${publicApiPath}/tools/${toolId}`, {});
   }
 
-  async bulkDelete(toolsIds: string[]) {
-    return await this.http.post<BulkDeleteToolResponse>(`${internalApiPath}/tools/_bulk_delete`, {
-      body: JSON.stringify({ ids: toolsIds }),
-    });
-  }
-
   async create(tool: CreateToolPayload) {
     return await this.http.post<CreateToolResponse>(`${publicApiPath}/tools`, {
       body: JSON.stringify(tool),
@@ -58,12 +58,21 @@ export class ToolsService {
     });
   }
 
-  async execute(toolId: string, toolParams: Record<string, unknown>) {
+  async execute({ toolId, toolParams, connectorId }: ExecuteToolParams) {
     return await this.http.post<ExecuteToolResponse>(`${publicApiPath}/tools/_execute`, {
       body: JSON.stringify({
         tool_id: toolId,
         tool_params: toolParams,
+        connector_id: connectorId,
       }),
+    });
+  }
+
+  // internal APIs
+
+  async bulkDelete(toolsIds: string[]) {
+    return await this.http.post<BulkDeleteToolResponse>(`${internalApiPath}/tools/_bulk_delete`, {
+      body: JSON.stringify({ ids: toolsIds }),
     });
   }
 
@@ -72,5 +81,24 @@ export class ToolsService {
       `${internalApiPath}/tools/_resolve_search_sources`,
       { query: { pattern } }
     );
+  }
+
+  async getWorkflow(workflowId: string) {
+    return await this.http.get<GetWorkflowResponse>(
+      `${internalApiPath}/tools/_get_workflow/${workflowId}`
+    );
+  }
+
+  async listWorkflows({ page, limit }: { page?: number; limit?: number }) {
+    return await this.http.get<ListWorkflowsResponse>(`${internalApiPath}/tools/_list_workflows`, {
+      query: { page, limit },
+    });
+  }
+
+  async getToolTypes() {
+    const response = await this.http.get<GetToolTypeInfoResponse>(
+      `${internalApiPath}/tools/_types_info`
+    );
+    return response.toolTypes;
   }
 }

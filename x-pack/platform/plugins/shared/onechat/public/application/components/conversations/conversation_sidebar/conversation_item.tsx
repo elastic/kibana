@@ -7,9 +7,10 @@
 
 import { EuiListGroupItem, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import type { ConversationWithoutRounds } from '@kbn/onechat-common';
-import React, { useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import React, { useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ConversationSettings } from '../../../../services/types';
 import { useConversationId } from '../../../hooks/use_conversation_id';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -82,32 +83,38 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
       {showDeleteModal && (
         <EuiConfirmModal
           aria-labelledby={confirmModalTitleId}
-          title={i18n.translate('xpack.onechat.conversationItem.deleteConversationModal.title', {
-            defaultMessage: 'Delete conversation',
-          })}
+          title={
+            <FormattedMessage
+              id="xpack.onechat.conversationItem.deleteConversationModal.title"
+              defaultMessage="Delete conversation"
+            />
+          }
           titleProps={{ id: confirmModalTitleId }}
           onCancel={() => setShowDeleteModal(false)}
           onConfirm={handleDelete}
-          cancelButtonText={i18n.translate(
-            'xpack.onechat.conversationItem.deleteConversationModal.cancelButton',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          confirmButtonText={i18n.translate(
-            'xpack.onechat.conversationItem.deleteConversationModal.confirmButton',
-            {
-              defaultMessage: 'Delete',
-            }
-          )}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.onechat.conversationItem.deleteConversationModal.cancelButton"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.onechat.conversationItem.deleteConversationModal.confirmButton"
+              defaultMessage="Delete"
+            />
+          }
           buttonColor="danger"
           defaultFocusedButton="confirm"
         >
           <p>
-            {i18n.translate('xpack.onechat.conversationItem.deleteConversationModal.description', {
-              defaultMessage:
-                'Are you sure you want to delete this conversation? This action cannot be undone.',
-            })}
+            <FormattedMessage
+              id="xpack.onechat.conversationItem.deleteConversationModal.description"
+              defaultMessage="Are you sure you want to delete the conversation {title}? This action cannot be undone."
+              values={{
+                title: <strong>{conversation.title}</strong>,
+              }}
+            />
           </p>
         </EuiConfirmModal>
       )}

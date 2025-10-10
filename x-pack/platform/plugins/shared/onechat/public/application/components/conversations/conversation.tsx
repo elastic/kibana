@@ -9,6 +9,7 @@ import { EuiButtonIcon, EuiResizableContainer, useEuiScrollBar, useEuiTheme } fr
 import { css } from '@emotion/react';
 import React, { useEffect, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useLocation } from 'react-router-dom';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { ConversationInputForm } from './conversation_input/conversation_input_form';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
@@ -17,9 +18,11 @@ import { useSyncAgentId } from '../../hooks/use_sync_agent_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import type { ConversationSettings } from '../../../services/types';
 import { useConversationId } from '../../hooks/use_conversation_id';
-import { useSendMessage } from '../../context/send_message_context';
+import { useSendMessage } from '../../context/send_message/send_message_context';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
+import { ConversationContent } from './conversation_grid';
+import type { LocationState } from '../../hooks/use_navigation';
 
 const fullHeightStyles = css`
   height: 100%;
@@ -44,6 +47,9 @@ export const Conversation: React.FC<{}> = () => {
     conversationSettingsService.getConversationSettings$(),
     {}
   );
+  const location = useLocation<LocationState>();
+
+  const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const {
@@ -59,14 +65,14 @@ export const Conversation: React.FC<{}> = () => {
 
   const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
 
-  // Stick to bottom only on initial conversation load or when {conversationId} is changed
+  // Stick to bottom only when user returns to an existing conversation (conversationId is defined and changes)
   useEffect(() => {
-    if (isFetched && conversationId) {
+    if (isFetched && conversationId && shouldStickToBottom) {
       requestAnimationFrame(() => {
         stickToBottom();
       });
     }
-  }, [stickToBottom, isFetched, conversationId]);
+  }, [stickToBottom, isFetched, conversationId, shouldStickToBottom]);
 
   const scrollContainerStyles = css`
     overflow-y: auto;
@@ -82,6 +88,14 @@ export const Conversation: React.FC<{}> = () => {
     left: 50%;
     transform: translateX(-50%);
   `;
+  const contentStyles = css`
+    ${fullHeightStyles}
+    align-items: stretch;
+  `;
+
+  if (!hasActiveConversation) {
+    return <NewConversationPrompt />;
+  }
 
   return (
     <EuiResizableContainer direction="vertical" css={conversationContainerStyles}>
@@ -119,9 +133,12 @@ export const Conversation: React.FC<{}> = () => {
                 starterPrompt={starterPrompt}
                 contextPrompt={conversationSettings?.contextPrompt}
                 onSubmit={() => {
-                  scrollToMostRecentRoundTop;
+                  scrollToMostRecentRoundTop();
                 }}
               />
+              <ConversationContent css={contentStyles}>
+                <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
+              </ConversationContent>
             </EuiResizablePanel>
           </>
         );

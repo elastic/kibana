@@ -31,15 +31,14 @@ export const maintenanceWindowMappings: SavedObjectsTypeMappingDefinition = {
     updatedAt: {
       type: 'date',
     },
+    createdBy: {
+      type: 'keyword',
+    },
     // NO NEED TO BE INDEXED
     // duration: {
     //   type: 'long',
     // },
     // rRule: rRuleMappingsField,
-    // createdBy: {
-    //   index: false,
-    //   type: 'keyword',
-    // },
     // updatedBy: {
     //   index: false,
     //   type: 'keyword',

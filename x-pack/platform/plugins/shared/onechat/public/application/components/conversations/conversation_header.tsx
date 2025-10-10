@@ -12,7 +12,12 @@ import useObservable from 'react-use/lib/useObservable';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
 import { ConversationActions } from './conversation_actions';
-import { ConversationGrid } from './conversation_grid';
+import {
+  ConversationCenter,
+  ConversationGrid,
+  ConversationLeft,
+  ConversationRight,
+} from './conversation_grid';
 import { ConversationSidebarToggle } from './conversation_sidebar/conversation_sidebar_toggle';
 import { ConversationTitle } from './conversation_title';
 import type { ConversationSettings } from '../../../services/types';
@@ -63,9 +68,19 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
     </EuiFlexGroup>
   ) : (
     <ConversationGrid>
-      <ConversationSidebarToggle isSidebarOpen={isSidebarOpen} onToggle={onToggleSidebar} />
-      {hasActiveConversation && <ConversationTitle />}
-      <ConversationActions />
+      <ConversationLeft>
+        <ConversationSidebarToggle isSidebarOpen={isSidebarOpen} onToggle={onToggleSidebar} />
+      </ConversationLeft>
+      {hasActiveConversation && (
+        <>
+          <ConversationCenter>
+            <ConversationTitle />
+          </ConversationCenter>
+          <ConversationRight>
+            <ConversationActions />
+          </ConversationRight>
+        </>
+      )}
     </ConversationGrid>
   );
 

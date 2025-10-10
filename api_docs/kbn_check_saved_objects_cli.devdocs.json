@@ -37,6 +37,23 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/check-saved-objects-cli",
+        "id": "def-common.runCheckSavedObjectsCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCheckSavedObjectsCli",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-check-saved-objects-cli/src/commands/run_check_saved_objects_cli.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],

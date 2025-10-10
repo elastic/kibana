@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { AtomicGraphNode } from '@kbn/workflows/types/execution/nodes/base';
-import type { StepImplementation } from '../step_base';
+import type { AtomicGraphNode } from '@kbn/workflows/graph';
+import type { NodeImplementation } from '../node_implementation';
 import { ConnectorStepImpl } from '../connector_step';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -30,7 +30,7 @@ import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_
  * @param connectorExecutor - Executes connector operations for the step.
  * @param workflowState - Manages the runtime state of workflow execution.
  */
-export class AtomicStepImpl implements StepImplementation {
+export class AtomicStepImpl implements NodeImplementation {
   constructor(
     private node: AtomicGraphNode,
     private contextManager: WorkflowContextManager,

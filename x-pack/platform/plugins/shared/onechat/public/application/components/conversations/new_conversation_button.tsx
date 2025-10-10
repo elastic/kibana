@@ -6,7 +6,7 @@
  */
 
 import { EuiButton } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import type { ConversationSettings } from '../../../services/types';
@@ -14,13 +14,13 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
 import { useConversationId } from '../../hooks/use_conversation_id';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
-import { useConversationActions } from '../../hooks/use_conversation_actions';
+import { useIsSendingMessage } from '../../hooks/use_is_sending_message';
+import { useSendMessage } from '../../context/send_message/send_message_context';
 
 export const NewConversationButton: React.FC<{}> = () => {
   const { createOnechatUrl } = useNavigation();
   const conversationId = useConversationId();
   const { conversationSettingsService } = useOnechatServices();
-  const { setSelectedConversation } = useConversationActions();
 
   // Subscribe to conversation settings to get the isFlyoutMode
   const conversationSettings = useObservable<ConversationSettings>(
@@ -29,11 +29,17 @@ export const NewConversationButton: React.FC<{}> = () => {
   );
 
   const isFlyoutMode = conversationSettings?.isFlyoutMode;
-  const isDisabled = !conversationId;
-
-  const handleClick = useCallback(() => {
-    setSelectedConversation({ conversationId: undefined });
-  }, [setSelectedConversation]);
+  const isNewConversation = !conversationId;
+  const isSendingMessage = useIsSendingMessage();
+  const { cleanConversation } = useSendMessage();
+  // Only disable when we are on /new and there is a message being sent
+  const isDisabled = isNewConversation && isSendingMessage;
+  const handleClick = () => {
+    // For new conversations, there isn't anywhere to navigate to, so instead we clean the conversation state
+    if (isNewConversation) {
+      cleanConversation();
+    }
+  };
 
   const buttonProps = isDisabled
     ? {
@@ -57,7 +63,14 @@ export const NewConversationButton: React.FC<{}> = () => {
   };
 
   return (
-    <EuiButton iconType="plus" iconSide="left" aria-label={labels.ariaLabel} {...buttonProps}>
+    <EuiButton
+      iconType="plus"
+      iconSide="left"
+      aria-label={labels.ariaLabel}
+      onClick={handleClick}
+      data-test-subj="agentBuilderNewConversationButton"
+      {...buttonProps}
+    >
       {labels.display}
     </EuiButton>
   );

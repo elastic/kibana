@@ -43,23 +43,9 @@ export const allowedExperimentalValues = Object.freeze({
   socTrendsEnabled: false,
 
   /**
-   * Enables the `upload` endpoint response action (v8.9)
-   */
-  responseActionUploadEnabled: true,
-
-  /**
    * Enables Automated Endpoint Process actions
    */
   automatedProcessActionsEnabled: true,
-
-  /**
-   * Enables the ability to send Response actions to SentinelOne and persist the results
-   * in ES. Adds API changes to support `agentType` and supports `isolate` and `release`
-   * response actions in Response Console.
-   *
-   * Release: v8.13.0
-   */
-  responseActionsSentinelOneV1Enabled: true,
 
   /**
    * Enables use of SentinelOne response actions that complete asynchronously
@@ -67,9 +53,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: v8.14.0
    */
   responseActionsSentinelOneV2Enabled: true,
-
-  /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: true,
 
   /** Enables the `kill-process` response action for SentinelOne */
   responseActionsSentinelOneKillProcessEnabled: true,
@@ -126,9 +109,19 @@ export const allowedExperimentalValues = Object.freeze({
   riskScoringRoutesEnabled: true,
 
   /**
-   * Enables the Risk Score AI Assistant tool.
+   * Disables ESQL-based risk scoring
    */
-  riskScoreAssistantToolEnabled: false,
+  disableESQLRiskScoring: false,
+
+  /**
+   * Enable resetting risk scores to zero for outdated entities
+   */
+  enableRiskScoreResetToZero: true,
+
+  /**
+   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   */
+  riskScoreAssistantToolDisabled: false,
 
   /**
    * disables ES|QL rules
@@ -153,21 +146,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
-   * Enables experimental Experimental S1 integration data to be available in Analyzer
-   */
-  sentinelOneDataInAnalyzerEnabled: true,
-
-  /**
    * Enables SentinelOne manual host isolation response actions directly through the connector
    * sub-actions framework.
    * v8.12.0
    */
   sentinelOneManualHostActionsEnabled: true,
-
-  /**
-   * Enables experimental Crowdstrike integration data to be available in Analyzer
-   */
-  crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
    * Enables Response actions telemetry collection
@@ -176,9 +159,9 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsTelemetryEnabled: true,
 
   /**
-   * Enables experimental JAMF integration data to be available in Analyzer
+   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
    */
-  jamfDataInAnalyzerEnabled: true,
+  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
 
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
@@ -204,12 +187,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables scheduling gap fills for rules
    */
   bulkFillRuleGapsEnabled: true,
-
-  /**
-   * Allows users to see the advanced setting that changes the behavior of the suppression window on alert closure
-   */
-
-  continueSuppressionWindowAdvancedSettingEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
@@ -241,16 +218,8 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
    */
   serviceEntityStoreEnabled: true,
-
   /**
-   * Enables Privilege Monitoring
-   */
-  privilegedUserMonitoringDisabled: false,
 
-  /**
-   * Enables Integrations Sync for Privileged User Monitoring
-   */
-  integrationsSyncEnabled: false,
 
   /**
    * Disables the siem migrations feature
@@ -258,14 +227,9 @@ export const allowedExperimentalValues = Object.freeze({
   siemMigrationsDisabled: false,
 
   /**
-   * Enables the Defend Insights feature
-   */
-  defendInsights: true,
-
-  /**
    * Enables the Defend Insights Policy Response Failure feature
    */
-  defendInsightsPolicyResponseFailure: false,
+  defendInsightsPolicyResponseFailure: true,
 
   /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
@@ -300,10 +264,10 @@ export const allowedExperimentalValues = Object.freeze({
   eventCollectionDataReductionBannerEnabled: true,
 
   /** Enables new Data View Picker */
-  newDataViewPickerEnabled: false,
+  newDataViewPickerEnabled: true,
 
   /**
-   * Enables Microsoft Defender for  Endpoint's RunScript RTR command
+   * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1
    */
   microsoftDefenderEndpointRunScriptEnabled: true,
@@ -328,6 +292,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the SIEM Readiness Dashboard feature
    */
   siemReadinessDashboard: false,
+  /**
+   * Enables Microsoft Defender for Endpoint's Cancel command
+   * Release: 9.2.0
+   */
+  microsoftDefenderEndpointCancelEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

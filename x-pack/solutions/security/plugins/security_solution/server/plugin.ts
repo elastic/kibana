@@ -99,7 +99,7 @@ import { openAndAcknowledgedAlertsInternalTool } from './assistant/tools/open_an
 import { alertCountsInternalTool } from './assistant/tools/alert_counts';
 import { productDocumentationInternalTool } from './assistant/tools/product_docs';
 import { entityRiskScoreToolInternal } from './assistant/tools/entity_risk_score/entity_risk_score_tool_internal';
-import { createSiemAgentCreator } from './assistant/siem_agent_creator';
+import { siemAgentCreator } from './assistant/siem_agent_creator';
 
 import type {
   ISecuritySolutionPlugin,
@@ -125,7 +125,10 @@ import {
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
-import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/tasks';
+import {
+  registerEntityStoreFieldRetentionEnrichTask,
+  registerEntityStoreSnapshotTask,
+} from './lib/entity_analytics/entity_store/tasks';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   latestRiskScoreIndexPattern,
@@ -183,6 +186,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private telemetryUsageCounter?: UsageCounter;
   private endpointContext: EndpointAppContext;
 
+  private isServerless: boolean;
+
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
 
@@ -222,6 +227,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.completeExternalResponseActionsTask = new CompleteExternalResponseActionsTask({
       endpointAppContext: this.endpointContext,
     });
+    this.isServerless = context.env.packageInfo.buildFlavor === 'serverless';
 
     this.logger.debug('plugin initialized');
 
@@ -261,6 +267,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.onechat.tools.register(securityLabsKnowledgeInternalTool(core.getStartServices));
     plugins.onechat.tools.register(createFetchSiemPromptsTool(core.getStartServices));
     plugins.onechat.tools.register(entityRiskScoreToolInternal());
+
+    plugins.onechat.agents.register(siemAgentCreator());
 
     registerDeprecations({ core, config: this.config, logger: this.logger });
 
@@ -305,6 +313,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         entityStoreConfig: config.entityAnalytics.entityStore,
         experimentalFeatures,
         kibanaVersion: pluginContext.env.packageInfo.version,
+        isServerless: this.isServerless,
+      });
+
+      registerEntityStoreSnapshotTask({
+        getStartServices: core.getStartServices,
+        logger: this.logger,
+        taskManager: plugins.taskManager,
       });
     }
 
@@ -315,6 +330,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       telemetry: core.analytics,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      config: this.config,
     });
 
     const requestContextFactory = new RequestContextFactory({
@@ -385,8 +401,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     ruleDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
     const previewIlmPolicy = previewPolicy.policy;
 
-    const isServerless = this.pluginContext.env.packageInfo.buildFlavor === 'serverless';
-
     previewRuleDataClient = ruleDataService.initializeIndex({
       ...ruleDataServiceOptions,
       additionalPrefix: '.preview',
@@ -408,7 +422,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures: config.experimentalFeatures,
       alerting: plugins.alerting,
       analytics: core.analytics,
-      isServerless,
+      isServerless: this.isServerless,
       eventsTelemetry: this.telemetryEventsSender,
       licensing: plugins.licensing,
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
@@ -459,7 +473,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       securityRuleTypeOptions,
       previewRuleDataClient,
       this.telemetryReceiver,
-      isServerless,
+      this.isServerless,
       core.docLinks,
       this.endpointContext
     );
@@ -601,7 +615,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     securityWorkflowInsightsService.setup({
       kibanaVersion: pluginContext.env.packageInfo.version,
       logger: this.logger,
-      isFeatureEnabled: config.experimentalFeatures.defendInsights,
+      // isFeatureEnabled: config.experimentalFeatures.defendInsights,
       endpointContext: this.endpointAppContextService,
     });
 
@@ -655,9 +669,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
 
     // Assistant Tool and Feature Registration
-    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolEnabled
-      ? assistantTools
-      : assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID);
+    const filteredTools = config.experimentalFeatures.riskScoreAssistantToolDisabled
+      ? assistantTools.filter(({ id }) => id !== ENTITY_RISK_SCORE_TOOL_ID)
+      : assistantTools;
 
     plugins.elasticAssistant.registerTools(APP_UI_ID, filteredTools);
     const features = {
@@ -667,16 +681,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
-
-    // Create SIEM agent with open-and-acknowledged-alerts-internal-tool
-    const siemAgentCreator = createSiemAgentCreator({
-      onechatPlugin: plugins.onechat,
-      core,
-      logger: this.logger,
-      actionsPlugin: plugins.actions,
-      assistantPlugin: plugins.elasticAssistant,
-    });
-    siemAgentCreator.createSiemAgent();
 
     const manifestManager = new ManifestManager({
       savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects, core.http),

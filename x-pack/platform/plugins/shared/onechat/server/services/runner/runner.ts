@@ -19,11 +19,13 @@ import type {
   Runner,
   RunToolReturn,
   RunAgentReturn,
+  WritableToolResultStore,
 } from '@kbn/onechat-server';
 import type { ToolsServiceStart } from '../tools';
 import type { AgentsServiceStart } from '../agents';
 import type { ModelProviderFactoryFn } from './model_provider';
 import { createEmptyRunContext } from './utils/run_context';
+import { createResultStore } from './tool_result_store';
 import { runTool } from './run_tool';
 import { runAgent } from './run_agent';
 
@@ -40,9 +42,14 @@ export interface CreateScopedRunnerDeps {
   request: KibanaRequest;
   defaultConnectorId?: string;
   contentReferencesStore: ContentReferencesStore;
+  // context-aware deps
+  resultStore: WritableToolResultStore;
 }
 
-export type CreateRunnerDeps = Omit<CreateScopedRunnerDeps, 'request' | 'defaultConnectorId'>;
+export type CreateRunnerDeps = Omit<
+  CreateScopedRunnerDeps,
+  'request' | 'defaultConnectorId' | 'resultStore'
+>;
 
 export class RunnerManager {
   public readonly deps: CreateScopedRunnerDeps;
@@ -97,13 +104,15 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
   return {
     runTool: (runToolParams) => {
       const { request, defaultConnectorId, ...otherParams } = runToolParams;
-      const allDeps = { ...deps, request, defaultConnectorId };
+      const resultStore = createResultStore();
+      const allDeps = { ...deps, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runTool(otherParams);
     },
     runAgent: (params) => {
       const { request, defaultConnectorId, ...otherParams } = params;
-      const allDeps = { ...deps, request, defaultConnectorId };
+      const resultStore = createResultStore(params.agentParams.conversation);
+      const allDeps = { ...deps, request, defaultConnectorId, resultStore };
       const runner = createScopedRunner(allDeps);
       return runner.runAgent(otherParams);
     },

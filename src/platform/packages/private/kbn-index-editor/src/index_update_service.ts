@@ -12,7 +12,7 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { groupBy, times, zipObject } from 'lodash';
 import {
   BehaviorSubject,
@@ -50,6 +50,7 @@ import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
 import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
+import type { IndexEditorTelemetryService } from './telemetry/telemetry_service';
 
 const DOCS_PER_FETCH = 1000;
 
@@ -118,15 +119,21 @@ export class IndexUpdateService {
     private readonly http: HttpStart,
     private readonly data: DataPublicPluginStart,
     private readonly notifications: NotificationsStart,
+    private readonly telemetry: IndexEditorTelemetryService,
     public readonly canEditIndex: boolean
   ) {
     this.listenForUpdates();
   }
 
+  private indexHasNewFields: boolean = false;
+
   /** Indicates the service has been completed */
   private readonly _completed$ = new Subject<{
     indexName: string | null;
     isIndexCreated: boolean;
+
+    // Indicates if new fields have been saved during the session
+    indexHasNewFields: boolean;
   }>();
   public readonly completed$ = this._completed$.asObservable();
 
@@ -254,7 +261,7 @@ export class IndexUpdateService {
       : esql`FROM ${indexName}`;
 
     if (qstr) {
-      query.pipe`WHERE qstr(${`*${qstr}*`})`;
+      query.pipe`WHERE qstr(${`*${qstr}* OR ${qstr}`})`;
     }
 
     query.pipe`LIMIT ${DOCS_PER_FETCH}`;
@@ -403,32 +410,24 @@ export class IndexUpdateService {
           });
         });
 
-      return (
-        dataView.fields
-          .concat(unsavedFields)
-          // Exclude metadata fields. TODO check if this is the right way to do it
-          // @ts-ignore
-          .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
-          .map((field) => {
-            return {
-              name: field.name,
-              id: field.name,
-              isNull: field.isNull,
-              meta: {
-                type: field.type,
-                params: {
-                  id: field.name,
-                  sourceParams: {
-                    fieldName: field.name,
-                  },
-                },
-                aggregatable: field.aggregatable,
-                searchable: field.searchable,
-                esTypes: field.esTypes,
+      return dataView.fields
+        .concat(unsavedFields)
+        .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
+        .map((field) => {
+          const datatableColumn: DatatableColumn = {
+            name: field.name,
+            id: field.name,
+            isNull: field.isNull,
+            meta: {
+              type: field.type as DatatableColumnType,
+              params: {
+                id: field.name,
               },
-            } as DatatableColumn;
-          })
-      );
+              esType: field.esTypes?.at(0),
+            },
+          };
+          return datatableColumn;
+        });
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
@@ -444,7 +443,9 @@ export class IndexUpdateService {
 
     const esqlQuery = esql`FROM ${indexName}`.print();
 
-    const newDataView = await getESQLAdHocDataview(esqlQuery, this.data.dataViews, true);
+    const newDataView = await getESQLAdHocDataview(esqlQuery, this.data.dataViews, {
+      allowNoIndex: true,
+    });
 
     // If at some point the index existed, the dataView fields are present in the browser cache, we need to force refresh it.
     await this.data.dataViews.refreshFields(newDataView, false, true);
@@ -457,9 +458,13 @@ export class IndexUpdateService {
       this.bufferState$
         .pipe(
           map((actions) =>
-            actions.some((action) =>
-              (['add-doc', 'delete-doc'] as Array<keyof ActionMap>).includes(action.type)
-            )
+            actions.some((action) => {
+              if (action.type === 'add-doc') {
+                // Only consider rows with at least one value
+                return Object.keys(action.payload.value).length > 0;
+              }
+              return action.type === 'delete-doc';
+            })
           )
         )
         .subscribe(this._hasUnsavedChanges$)
@@ -509,11 +514,12 @@ export class IndexUpdateService {
           map(([, updates]) => updates),
           skipWhile(() => !this.isIndexCreated()),
           filter((updates) => updates.length > 0),
+          map((updates) => ({ updates, startTime: Date.now() })),
           tap(() => {
             this._isSaving$.next(true);
           }),
           // Save updates
-          exhaustMap((updates) => {
+          exhaustMap(({ updates, startTime }) => {
             return from(this.bulkUpdate(updates)).pipe(
               catchError((errors) => {
                 return of({
@@ -526,6 +532,7 @@ export class IndexUpdateService {
                   updates,
                   response: response.bulkResponse,
                   bulkOperations: response.bulkOperations,
+                  startTime,
                 };
               })
             );
@@ -533,7 +540,7 @@ export class IndexUpdateService {
           withLatestFrom(this._flush$, this._docs$, this.dataView$, this._savingDocs$),
           switchMap(
             ([
-              { updates, response, bulkOperations },
+              { updates, response, bulkOperations, startTime },
               { exitAfterFlush },
               docs,
               dataView,
@@ -541,20 +548,55 @@ export class IndexUpdateService {
             ]) =>
               // Refresh the data view fields to get new columns types if any
               from(this.data.dataViews.refreshFields(dataView, false, true)).pipe(
-                map(() => ({ updates, response, bulkOperations, exitAfterFlush, docs, savingDocs }))
+                map(() => ({
+                  updates,
+                  response,
+                  bulkOperations,
+                  exitAfterFlush,
+                  docs,
+                  savingDocs,
+                  startTime,
+                }))
               )
           )
         )
         .subscribe({
-          next: ({ updates, response, bulkOperations, exitAfterFlush, docs, savingDocs }) => {
+          next: ({
+            updates,
+            response,
+            bulkOperations,
+            exitAfterFlush,
+            docs,
+            savingDocs,
+            startTime,
+          }) => {
             this._isSaving$.next(false);
+
+            const { newRowsCount, newColumnsCount, cellsEditedCount } = this.summarizeSavingUpdates(
+              savingDocs,
+              updates
+            );
+
+            if (newColumnsCount > 0) {
+              this.indexHasNewFields = true;
+            }
+
+            // Send telemetry about the save event
+            this.telemetry.trackSaveSubmitted({
+              pendingRowsAdded: newRowsCount,
+              pendingColsAdded: newColumnsCount,
+              pendingCellsEdited: cellsEditedCount,
+              action: exitAfterFlush ? 'save_and_exit' : 'save',
+              outcome: response.errors ? 'error' : 'success',
+              latency: Date.now() - startTime,
+            });
 
             if (!response.errors) {
               if (exitAfterFlush) {
                 this.destroy();
               }
             } else {
-              const errorDetail = response.items
+              const errorDetail = response?.items
                 .map((item) => Object.values(item)[0])
                 .filter((res) => res.error)
                 .map((res) => `- ${res.error?.type}: ${res.error?.reason}`)
@@ -749,6 +791,22 @@ export class IndexUpdateService {
     );
   }
 
+  private summarizeSavingUpdates(savingDocs: PendingSave, updates: BulkUpdateOperations) {
+    const newRowsCount = Array.from(savingDocs.keys()).filter((id) =>
+      id.startsWith(ROW_PLACEHOLDER_PREFIX)
+    ).length;
+
+    const newColumnsCount = this._pendingColumnsToBeSaved$
+      .getValue()
+      .filter((col) => !isPlaceholderColumn(col.name)).length;
+
+    const cellsEditedCount = updates.filter(
+      (update) => isDocUpdate(update) && !update.payload.id.startsWith(ROW_PLACEHOLDER_PREFIX)
+    ).length;
+
+    return { newRowsCount, newColumnsCount, cellsEditedCount };
+  }
+
   private completeWithPlaceholders(currentColumnsCount: number) {
     const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - currentColumnsCount;
     return missingPlaceholders > 0
@@ -792,6 +850,8 @@ export class IndexUpdateService {
   public addEmptyRow() {
     const newDocId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
     this.addAction('add-doc', { id: newDocId, value: {} });
+
+    this.telemetry.trackEditInteraction({ actionType: 'add_row' });
   }
 
   /* Partial doc update */
@@ -804,11 +864,15 @@ export class IndexUpdateService {
       {}
     );
     this.addAction('add-doc', { id, value: parsedUpdate });
+
+    this.telemetry.trackEditInteraction({ actionType: 'edit_cell' });
   }
 
   /** Schedules documents for deletion */
   public deleteDoc(ids: string[]) {
     this.addAction('delete-doc', { ids });
+
+    this.telemetry.trackEditInteraction({ actionType: 'delete_row' });
   }
 
   /**
@@ -885,14 +949,20 @@ export class IndexUpdateService {
 
   public addNewColumn() {
     this.addAction('add-column');
+
+    this.telemetry.trackEditInteraction({ actionType: 'add_column' });
   }
 
   public editColumn(name: string, previousName: string) {
     this.addAction('edit-column', { name, previousName });
+
+    this.telemetry.trackEditInteraction({ actionType: 'edit_column' });
   }
 
   public deleteColumn(name: string) {
     this.addAction('delete-column', { name });
+
+    this.telemetry.trackEditInteraction({ actionType: 'delete_column' });
   }
 
   public setExitAttemptWithUnsavedChanges(value: boolean) {
@@ -918,6 +988,7 @@ export class IndexUpdateService {
     this._completed$.next({
       indexName: this.getIndexName(),
       isIndexCreated: this.isIndexCreated(),
+      indexHasNewFields: this.indexHasNewFields,
     });
     this._completed$.complete();
 

@@ -7,13 +7,9 @@
 
 import { newContentReferencesStore } from '@kbn/elastic-assistant-common';
 import type { RunnerFactoryDeps } from './types';
-import type { CreateScopedRunnerExtraParams, RunnerFactory } from './types';
+import type { RunnerFactory } from './types';
 import { createModelProviderFactory } from './model_provider';
-import {
-  createScopedRunner as createScopedRunnerInternal,
-  createRunner,
-  type CreateRunnerDeps,
-} from './runner';
+import { createRunner, type CreateRunnerDeps } from './runner';
 
 export class RunnerFactoryImpl implements RunnerFactory {
   private readonly deps: RunnerFactoryDeps;
@@ -24,13 +20,6 @@ export class RunnerFactoryImpl implements RunnerFactory {
 
   getRunner() {
     return createRunner(this.createRunnerDeps());
-  }
-
-  createScopedRunner(scopedParams: CreateScopedRunnerExtraParams) {
-    return createScopedRunnerInternal({
-      ...this.createRunnerDeps(),
-      ...scopedParams,
-    });
   }
 
   private createRunnerDeps(): CreateRunnerDeps {

@@ -244,6 +244,8 @@ describe('DetectionRulesClient.importRule', () => {
           rule_source: {
             type: 'external' as const,
             is_customized: true,
+            customized_fields: [{ field_name: 'name' }],
+            has_base_version: true,
           },
         },
         allowMissingConnectorSecrets,
@@ -257,6 +259,8 @@ describe('DetectionRulesClient.importRule', () => {
               ruleSource: {
                 isCustomized: true,
                 type: 'external',
+                customizedFields: [{ fieldName: 'name' }],
+                hasBaseVersion: true,
               },
             }),
           }),
@@ -368,6 +372,8 @@ describe('DetectionRulesClient.importRule', () => {
           rule_source: {
             type: 'external' as const,
             is_customized: true,
+            customized_fields: [{ field_name: 'name' }],
+            has_base_version: true,
           },
         },
         allowMissingConnectorSecrets,
@@ -381,6 +387,8 @@ describe('DetectionRulesClient.importRule', () => {
               ruleSource: {
                 isCustomized: true,
                 type: 'external',
+                customizedFields: [{ fieldName: 'name' }],
+                hasBaseVersion: true,
               },
             }),
           }),

@@ -58,7 +58,7 @@ export const createDashboardMigration = async ({
   signal,
   name,
 }: WithSignal<CreateDashboardMigrationRequestBody>): Promise<CreateDashboardMigrationResponse> => {
-  return KibanaServices.get().http.post<CreateDashboardMigrationResponse>(
+  return KibanaServices.get().http.put<CreateDashboardMigrationResponse>(
     SIEM_DASHBOARD_MIGRATIONS_PATH,
     {
       version: VERSION,
@@ -220,7 +220,7 @@ export const upsertDashboardMigrationResources = async ({
 }: WithSignal<GetDashboardMigrationParams> &
   Body<UpsertDashboardMigrationResourcesRequestBody>) => {
   return KibanaServices.get().http.post<UpsertDashboardMigrationResourcesResponse>(
-    replaceParams(SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH, { migration_id: migrationId }),
+    replaceParams(SIEM_DASHBOARD_MIGRATION_RESOURCES_PATH, { migration_id: migrationId }),
     {
       version: VERSION,
       body: JSON.stringify(body),
