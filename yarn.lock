@@ -13541,7 +13541,7 @@ acorn@^7.0.0:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
-acorn@^8.0.4, acorn@^8.1.0, acorn@^8.11.0, acorn@^8.14.0, acorn@^8.4.1, acorn@^8.8.0, acorn@^8.8.2, acorn@^8.9.0:
+acorn@^8.0.4, acorn@^8.1.0, acorn@^8.11.0, acorn@^8.14.0, acorn@^8.4.1, acorn@^8.8.0, acorn@^8.9.0:
   version "8.14.0"
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.14.0.tgz#063e2c70cac5fb4f6467f0b11152e04c682795b0"
   integrity sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==
@@ -30241,23 +30241,13 @@ terser-webpack-plugin@^5.3.1, terser-webpack-plugin@^5.3.10:
     serialize-javascript "^6.0.1"
     terser "^5.26.0"
 
-terser@^5.10.0, terser@^5.9.0:
+terser@^5.10.0, terser@^5.26.0, terser@^5.36.0, terser@^5.9.0:
   version "5.40.0"
   resolved "https://registry.yarnpkg.com/terser/-/terser-5.40.0.tgz#839a80db42bfee8340085f44ea99b5cba36c55c8"
   integrity sha512-cfeKl/jjwSR5ar7d0FGmave9hFGJT8obyo0z+CrQOylLDbk7X81nPU6vq9VORa5jU30SkDnT2FXjLbR8HLP+xA==
   dependencies:
     "@jridgewell/source-map" "^0.3.3"
     acorn "^8.14.0"
-    commander "^2.20.0"
-    source-map-support "~0.5.20"
-
-terser@^5.26.0, terser@^5.36.0:
-  version "5.36.0"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-5.36.0.tgz#8b0dbed459ac40ff7b4c9fd5a3a2029de105180e"
-  integrity sha512-IYV9eNMuFAV4THUspIRXkLakHnV6XO7FEdtKjf/mDyrnqUg9LnlOn6/RwRvM9SZjR4GUq8Nk8zj67FzVARr74w==
-  dependencies:
-    "@jridgewell/source-map" "^0.3.3"
-    acorn "^8.8.2"
     commander "^2.20.0"
     source-map-support "~0.5.20"
 
