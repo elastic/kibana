@@ -37,7 +37,7 @@ export const command = {
         pipe: !quiet,
         env: {
           ...process.env,
-          ...(!cache || dist ? { MOON_CACHE: 'off' } : {}),
+          ...(!cache ? { MOON_CACHE: 'off' } : {}),
         },
       }
     );
