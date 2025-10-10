@@ -8,205 +8,21 @@
  */
 
 require('@kbn/babel-register').install();
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
-
-const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
-const isProd = process.env.NODE_ENV === 'production';
-const BUILD_OUTPUT_DIR = process.env.BUILD_OUTPUT_DIR || path.resolve(__dirname, '../target');
-
-const BABEL_PRESET = require.resolve('@kbn/babel-preset/webpack_preset');
+const { createStandaloneWebpackConfig } = require('@kbn/standalone-packaging-utils/src/webpack');
 
 module.exports = [
-  {
-    mode: process.env.NODE_ENV || 'development',
+  createStandaloneWebpackConfig({
     entry: require.resolve('./react/index.tsx'),
-    context: __dirname,
-    devtool: 'cheap-source-map',
-    output: {
-      libraryTarget: 'commonjs',
-      path: path.resolve(BUILD_OUTPUT_DIR),
-      filename: 'index.js',
-      chunkFilename: '[name].chunk.js',
-      publicPath: 'auto',
-      chunkLoadingGlobal: 'webpackChunk_console_react_bundle',
+    outputPath: process.env.BUILD_OUTPUT_DIR || path.resolve(__dirname, '../target'),
+    kibanaRoot: path.resolve(__dirname, '../../../../../..'),
+    enableBundleAnalyzer: false,
+    additionalExternals: {
+      // Console-specific externals
+      'react-markdown': 'commonjs react-markdown',
+      'monaco-editor': 'commonjs monaco-editor',
+      rxjs: 'commonjs rxjs',
+      lodash: 'commonjs lodash',
     },
-    target: 'web',
-    devtool: 'source-map',
-    externals: [
-      {
-        '@elastic/eui': 'commonjs @elastic/eui',
-        '@emotion/css': 'commonjs @emotion/css',
-        '@emotion/react': 'commonjs @emotion/react',
-        classnames: 'commonjs classnames',
-        react: 'commonjs react',
-        lodash: 'commonjs lodash',
-        'react-dom': 'commonjs react-dom',
-        'react-markdown': 'commonjs react-markdown',
-        moment: 'commonjs moment',
-        '@elastic/eui': 'commonjs @elastic/eui',
-        rxjs: 'commonjs rxjs',
-        'moment-duration-format': 'commonjs moment-duration-format',
-        'moment-timezone': 'commonjs moment-timezone',
-        '@elastic/datemath': 'commonjs @elastic/datemath',
-        'monaco-editor': 'commonjs monaco-editor',
-      },
-      // Handle react-dom internal imports only
-      function (context, request, callback) {
-        if (/^react-dom\//.test(request)) {
-          return callback(null, 'commonjs ' + request);
-        }
-        callback();
-      },
-      function (context, request, callback) {
-        if (/^monaco-editor\/(esm\/vs|esm|lib|min)/.test(request)) {
-          return callback(null, 'commonjs ' + request);
-        }
-        callback();
-      },
-    ],
-    module: {
-      rules: [
-        {
-          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
-          type: 'asset',
-          parser: {
-            dataUrlCondition: {
-              maxSize: 8192,
-            },
-          },
-        },
-        {
-          test: /\.peggy$/,
-          loader: require.resolve('@kbn/peggy-loader'),
-        },
-        {
-          test: /\.(js|tsx?)$/,
-          exclude: /node_modules/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              envName: process.env.NODE_ENV || 'development',
-              presets: [BABEL_PRESET],
-            },
-          },
-        },
-        {
-          test: /\.html$/,
-          loader: 'html-loader',
-          exclude: /node_modules/,
-        },
-        {
-          test: /\.css$/,
-          exclude: /components/,
-          use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
-          sideEffects: true,
-        },
-        {
-          test: /\.module\.s(a|c)ss$/,
-          use: [
-            'style-loader',
-            {
-              loader: 'css-loader',
-              options: {
-                modules: {
-                  localIdentName: '[name]__[local]___[hash:base64:5]',
-                  exportLocalsConvention: 'camelCase',
-                },
-                sourceMap: !isProd,
-              },
-            },
-            {
-              loader: 'postcss-loader',
-              options: {
-                postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
-                },
-              },
-            },
-            {
-              loader: 'sass-loader',
-              options: {
-                implementation: require('sass-embedded'),
-                sourceMap: !isProd,
-                sassOptions: {
-                  quietDeps: true,
-                },
-              },
-            },
-          ],
-        },
-        {
-          test: /\.scss$/,
-          exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
-          use: [
-            {
-              loader: 'style-loader',
-            },
-            {
-              loader: 'css-loader',
-              options: {
-                sourceMap: !isProd,
-              },
-            },
-            {
-              loader: 'postcss-loader',
-              options: {
-                sourceMap: !isProd,
-                postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config'),
-                },
-              },
-            },
-            {
-              loader: 'sass-loader',
-              options: {
-                additionalData(content, loaderContext) {
-                  const req = JSON.stringify(
-                    loaderContext.utils.contextify(
-                      loaderContext.context || loaderContext.rootContext,
-                      path.resolve(
-                        KIBANA_ROOT,
-                        'src/core/public/styles/core_app/_globals_v8light.scss'
-                      )
-                    )
-                  );
-                  return `@import ${req};\n${content}`;
-                },
-                implementation: require('sass-embedded'),
-                sassOptions: {
-                  outputStyle: 'expanded',
-                  includePaths: [path.resolve(KIBANA_ROOT, 'node_modules')],
-                  quietDeps: true,
-                },
-              },
-            },
-          ],
-        },
-      ],
-    },
-
-    resolve: {
-      alias: {},
-      extensions: ['.js', '.ts', '.tsx', '.scss', '.css'],
-    },
-
-    optimization: {
-      minimize: false,
-      noEmitOnErrors: true,
-      splitChunks: false,
-      runtimeChunk: false,
-    },
-
-    plugins: [
-      new NodeLibsBrowserPlugin(),
-      new CleanWebpackPlugin({
-        cleanOnceBeforeBuildPatterns: [path.resolve(BUILD_OUTPUT_DIR, 'react/**/*')],
-      }),
-      new BundleAnalyzerPlugin(),
-    ],
-  },
+  }),
 ];

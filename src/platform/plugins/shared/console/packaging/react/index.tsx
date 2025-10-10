@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @kbn/imports/no_boundary_crossing */
 // This is a packaged standalone version of console that needs to import browser code
+/* eslint-disable @kbn/imports/no_boundary_crossing */
 
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { noop } from 'lodash';
 
-// Disable Monaco workers entirely to prevent "Unexpected usage" errors
-// This sacrifices some language features but allows the editor to work in external apps
+// Disable Monaco workers entirely, in case monaco ever decides to spawn any for some reason.
+// Console doesnt use any of the monaco features that require workers, since we provide
+// our own language tokenizer and autocompletion provider.
 (window as any).MonacoEnvironment = {
   getWorker() {
     // Return a minimal mock worker that doesn't actually do anything
@@ -62,19 +63,15 @@ import { createApi, createEsHostService } from '../../public/application/lib';
 import { AutocompleteInfo, setAutocompleteInfo } from '../../public/services';
 import type { OneConsoleProps } from './types';
 
-// Import all translation files statically so webpack includes them in the bundle
-// JSON imports via require() are resolved by Webpack at build time, not by TypeScript/ESLint
 const translations = {
   en: {
     formats: {},
     messages: {},
   },
-
   'fr-FR': require('./translations/fr-FR.json'),
-
   'ja-JP': require('./translations/ja-JP.json'),
-
   'zh-CN': require('./translations/zh-CN.json'),
+  'de-DE': require('./translations/de-DE.json'),
 };
 
 export const OneConsole = ({

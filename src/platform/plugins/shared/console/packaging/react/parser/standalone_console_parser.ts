@@ -36,7 +36,7 @@ export const createStandaloneConsoleParser = () => {
     }
 
     try {
-      const result = originalParser(text);
+      const result = originalParser(text, undefined);
       return {
         requests: result.requests || [],
         errors: result.errors || [],

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { injectedMetadata } from './injected_metadata';
-export { coreContext } from './core_context';
-export { trackUiMetric } from './track_ui_metric';
+export {
+  createStandaloneWebpackConfig,
+  type StandaloneWebpackOptions,
+} from './create_standalone_webpack_config';
