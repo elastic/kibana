@@ -21,13 +21,15 @@ import type { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from './constants';
 export type CloudProviders = typeof AWS_PROVIDER | typeof GCP_PROVIDER | typeof AZURE_PROVIDER;
 
 // Cloud Connector Credential Types
-export interface AwsCloudConnectorCredentials {
-  roleArn?: string;
-  externalId?: string | CloudConnectorSecretReference;
+interface BaseCloudConnectorCredentials {
   cloudConnectorId?: string;
 }
+export interface AwsCloudConnectorCredentials extends BaseCloudConnectorCredentials {
+  roleArn?: string;
+  externalId?: string | CloudConnectorSecretReference;
+}
 
-export interface AzureCloudConnectorCredentials {
+export interface AzureCloudConnectorCredentials extends BaseCloudConnectorCredentials {
   tenantId?: string;
   clientId?: string;
   azure_credentials_cloud_connector_id?: string;

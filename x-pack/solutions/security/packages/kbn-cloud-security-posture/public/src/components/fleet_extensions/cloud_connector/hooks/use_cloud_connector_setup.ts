@@ -15,6 +15,7 @@ import type {
   AzureCloudConnectorCredentials,
 } from '../types';
 import { updateInputVarsWithCredentials, updatePolicyInputs } from '../utils';
+import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 
 export interface UseCloudConnectorSetupReturn {
   // State for new connection form
@@ -31,18 +32,42 @@ export interface UseCloudConnectorSetupReturn {
 }
 
 const getFieldNamesIfExists = (inputVars: PackagePolicyConfigRecord) => {
-  const roleArnFieldName = Object.keys(inputVars).find((key) => key.toLowerCase() === 'role_arn');
-  const externalIdFieldName = Object.keys(inputVars).find((key) =>
-    key.toLowerCase().includes('external_id')
-  );
-  const tenantIdFieldName = Object.keys(inputVars).find((key) =>
-    key.toLowerCase().includes('tenant_id')
-  );
-  const clientIdFieldName = Object.keys(inputVars).find((key) =>
-    key.toLowerCase().includes('client_id')
-  );
-  const azureCloudConnectorIdFieldName = Object.keys(inputVars).find((key) =>
-    key.toLowerCase().includes('azure_credentials_cloud_connector_id')
+  // Helper function to find field name using constants first, then fallback to string search
+  const findFieldName = (constantName: string, fallbackSearchTerms: string[]) => {
+    // First try to find using the constant field name
+    if (inputVars[constantName]) {
+      return constantName;
+    }
+
+    // Fallback to searching by terms if constant field not found
+    return Object.keys(inputVars).find((key) =>
+      fallbackSearchTerms.some((term) => key.toLowerCase().includes(term.toLowerCase()))
+    );
+  };
+
+  // AWS field names - use constants first, fallback to string search
+  const roleArnFieldName = findFieldName(AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_ROLE_ARN, [
+    'role_arn',
+    AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN,
+  ]);
+
+  const externalIdFieldName = findFieldName(AWS_CLOUD_CONNECTOR_FIELD_NAMES.AWS_EXTERNAL_ID, [
+    'external_id',
+    AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID,
+  ]);
+
+  // Azure field names - use constants first, fallback to string search
+  const tenantIdFieldName = findFieldName(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.TENANT_ID, [
+    'tenant_id',
+  ]);
+
+  const clientIdFieldName = findFieldName(AZURE_CLOUD_CONNECTOR_FIELD_NAMES.CLIENT_ID, [
+    'client_id',
+  ]);
+
+  const azureCloudConnectorIdFieldName = findFieldName(
+    AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
+    ['azure_credentials_cloud_connector_id']
   );
 
   return {
@@ -54,6 +79,36 @@ const getFieldNamesIfExists = (inputVars: PackagePolicyConfigRecord) => {
   };
 };
 
+// Helper function to create initial credentials based on existing vars
+const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnectorCredentials => {
+  const fieldNames = getFieldNamesIfExists(vars);
+
+  // Determine provider type based on which fields exist
+  const isAzureProvider = fieldNames.tenantIdFieldName || fieldNames.clientIdFieldName;
+
+  if (isAzureProvider) {
+    return {
+      tenantId: fieldNames.tenantIdFieldName
+        ? vars[fieldNames.tenantIdFieldName]?.value
+        : undefined,
+      clientId: fieldNames.clientIdFieldName
+        ? vars[fieldNames.clientIdFieldName]?.value
+        : undefined,
+      azure_credentials_cloud_connector_id: fieldNames.azureCloudConnectorIdFieldName
+        ? vars[fieldNames.azureCloudConnectorIdFieldName]?.value
+        : undefined,
+    } as AzureCloudConnectorCredentials;
+  }
+
+  // Default to AWS credentials
+  return {
+    roleArn: fieldNames.roleArnFieldName ? vars[fieldNames.roleArnFieldName]?.value : undefined,
+    externalId: fieldNames.externalIdFieldName
+      ? vars[fieldNames.externalIdFieldName]?.value
+      : undefined,
+  } as AwsCloudConnectorCredentials;
+};
+
 export const useCloudConnectorSetup = (
   input: NewPackagePolicyInput,
   newPolicy: NewPackagePolicy,
@@ -63,35 +118,7 @@ export const useCloudConnectorSetup = (
   const [newConnectionCredentials, setNewConnectionCredentials] =
     useState<CloudConnectorCredentials>(() => {
       const vars = input.streams[0]?.vars ?? {};
-      const {
-        roleArnFieldName,
-        externalIdFieldName,
-        tenantIdFieldName,
-        clientIdFieldName,
-        azureCloudConnectorIdFieldName,
-      } = getFieldNamesIfExists(vars);
-
-      // Check if this appears to be AWS or Azure based on existing vars
-      const hasAwsFields = roleArnFieldName || externalIdFieldName;
-      const hasAzureFields =
-        tenantIdFieldName || clientIdFieldName || azureCloudConnectorIdFieldName;
-
-      if (hasAzureFields && !hasAwsFields) {
-        // Initialize as Azure credentials
-        return {
-          tenantId: tenantIdFieldName ? vars[tenantIdFieldName]?.value : undefined,
-          clientId: clientIdFieldName ? vars[clientIdFieldName]?.value : undefined,
-          azure_credentials_cloud_connector_id: azureCloudConnectorIdFieldName
-            ? vars[azureCloudConnectorIdFieldName]?.value
-            : undefined,
-        } as AzureCloudConnectorCredentials;
-      } else {
-        // Default to AWS credentials
-        return {
-          roleArn: roleArnFieldName ? vars[roleArnFieldName]?.value : undefined,
-          externalId: externalIdFieldName ? vars[externalIdFieldName]?.value : undefined,
-        } as AwsCloudConnectorCredentials;
-      }
+      return createInitialCredentials(vars);
     });
 
   // State for existing connection form - initialize as empty object to be populated based on provider
