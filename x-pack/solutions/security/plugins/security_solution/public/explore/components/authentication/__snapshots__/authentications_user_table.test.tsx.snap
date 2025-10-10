@@ -370,6 +370,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <nav
+        aria-label="Table pagination"
         class="euiPagination emotion-euiPagination"
         data-test-subj="numberedPagination"
       >
