@@ -15,5 +15,4 @@ export default createServerlessTestConfig<typeof services>({
   junit: {
     reportName: 'Serverless Observability - Deployment-agnostic API Integration Tests',
   },
-  indexRefreshInterval: '1s',
 });
