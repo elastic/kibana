@@ -7,38 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import { action } from '@storybook/addon-actions';
-import { KibanaErrorService } from '../../src/services/error_service';
+import type { AnalyticsMock } from './analytics_mock';
 import { createAnalyticsMock } from './analytics_mock';
 import type { KibanaErrorBoundaryServices } from '../../types';
+import { KibanaErrorService } from '../../src/services/error_service';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface Params {}
+export function createServicesWithAnalyticsMock(): {
+  services: KibanaErrorBoundaryServices;
+  mock: AnalyticsMock;
+} {
+  const onClickRefresh = action('Reload window');
+  const mock = createAnalyticsMock();
+  const analytics = mock.analytics;
 
-export class KibanaErrorBoundaryStorybookMock extends AbstractStorybookMock<
-  {},
-  KibanaErrorBoundaryServices
-> {
-  propArguments = {};
-
-  serviceArguments = {};
-
-  dependencies = [];
-
-  getServices(params: Params = {}): KibanaErrorBoundaryServices {
-    const onClickRefresh = action('Reload window');
-    const mock = createAnalyticsMock();
-    const analytics = mock.analytics;
-
-    return {
-      ...params,
+  return {
+    services: {
       onClickRefresh,
       errorService: new KibanaErrorService({ analytics }),
-    };
-  }
-
-  getProps(params: Params) {
-    return params;
-  }
+    },
+    mock,
+  };
 }
