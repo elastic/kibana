@@ -121,10 +121,6 @@ export class RepoSourceClassifier {
       return 'common package';
     }
 
-    if (root === 'shareable_runtime') {
-      return 'non-package';
-    }
-
     if (root === 'tasks') {
       return 'tests or mocks';
     }
