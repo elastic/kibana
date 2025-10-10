@@ -7,7 +7,7 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import * as ReactQuery from '@kbn/react-query';
+import * as ReactQuery from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core/public';
 import React from 'react';
 

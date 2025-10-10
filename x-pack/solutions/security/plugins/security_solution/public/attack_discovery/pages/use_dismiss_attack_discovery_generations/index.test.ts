@@ -13,7 +13,7 @@ import {
 import { type PostAttackDiscoveryGenerationsDismissResponse } from '@kbn/elastic-assistant-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import * as ReactQuery from '@kbn/react-query';
+import * as ReactQuery from '@tanstack/react-query';
 
 import { useDismissAttackDiscoveryGeneration } from '.';
 import { TestProviders } from '../../../common/mock/test_providers';
