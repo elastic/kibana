@@ -86,73 +86,144 @@ export const SideNavPopover = ({
   const [shouldFocusOnOpen, setShouldFocusOnOpen] = useState(false);
   const [wasKeyboardUsed, setWasKeyboardUsed] = useState(false);
 
-  const setOpenedByClick = useCallback(() => setIsOpenedByClick(true), []);
+  const setOpenedByClick = useCallback(() => {
+    console.log(`*** [Popover:${label}] setOpenedByClick()`);
+    setIsOpenedByClick(true);
+  }, [label]);
 
-  const clearOpenedByClick = useCallback(() => setIsOpenedByClick(false), []);
+  const clearOpenedByClick = useCallback(() => {
+    console.log(`*** [Popover:${label}] clearOpenedByClick()`);
+    setIsOpenedByClick(false);
+  }, [label]);
 
   const open = useCallback(() => {
+    console.log(`*** [Popover:${label}] open() - setting isOpen=true, anyPopoverOpen=true`);
+    console.log(
+      `*** [Popover:${label}] open() - isSidePanelOpen=${isSidePanelOpen}, previous anyPopoverOpen=${anyPopoverOpen}`
+    );
     setIsOpen(true);
     anyPopoverOpen = true;
-  }, []);
+  }, [label, isSidePanelOpen]);
 
   const close = useCallback(() => {
+    console.log(`*** [Popover:${label}] close() - setting isOpen=false, anyPopoverOpen=false`);
+    console.log(`*** [Popover:${label}] close() - previous anyPopoverOpen=${anyPopoverOpen}`);
     setIsOpen(false);
     clearOpenedByClick();
     clearTimeout();
     setShouldFocusOnOpen(false);
     anyPopoverOpen = false;
-  }, [clearOpenedByClick, clearTimeout]);
+  }, [clearOpenedByClick, clearTimeout, label]);
 
   const handleClose = useCallback(() => {
+    console.log(`*** [Popover:${label}] handleClose()`);
     clearTimeout();
     close();
-  }, [clearTimeout, close]);
+  }, [clearTimeout, close, label]);
 
   const tryOpen = useCallback(() => {
+    console.log(
+      `*** [Popover:${label}] tryOpen() - isSidePanelOpen=${isSidePanelOpen}, anyPopoverOpen=${getIsAnyPopoverOpenNow()}`
+    );
     if (!isSidePanelOpen && !getIsAnyPopoverOpenNow()) {
+      console.log(`*** [Popover:${label}] tryOpen() - conditions met, calling open()`);
       open();
+    } else {
+      console.log(`*** [Popover:${label}] tryOpen() - conditions NOT met, skipping open`);
     }
-  }, [isSidePanelOpen, open]);
+  }, [isSidePanelOpen, open, label]);
 
   const handleMouseEnter = useCallback(() => {
+    console.log(
+      `*** [Popover:${label}] handleMouseEnter() - persistent=${persistent}, isOpenedByClick=${isOpenedByClick}`
+    );
     if (!persistent || !isOpenedByClick) {
       clearTimeout();
       if (getIsAnyPopoverOpenNow()) {
+        console.log(
+          `*** [Popover:${label}] handleMouseEnter() - another popover open, scheduling tryOpen`
+        );
         setTimeout(tryOpen, POPOVER_HOVER_DELAY);
       } else if (!isSidePanelOpen) {
+        console.log(`*** [Popover:${label}] handleMouseEnter() - no popover open, scheduling open`);
         setTimeout(open, POPOVER_HOVER_DELAY);
+      } else {
+        console.log(`*** [Popover:${label}] handleMouseEnter() - side panel open, not opening`);
       }
+    } else {
+      console.log(
+        `*** [Popover:${label}] handleMouseEnter() - persistent and opened by click, ignoring`
+      );
     }
-  }, [persistent, isOpenedByClick, isSidePanelOpen, clearTimeout, open, setTimeout, tryOpen]);
+  }, [
+    persistent,
+    isOpenedByClick,
+    isSidePanelOpen,
+    clearTimeout,
+    open,
+    setTimeout,
+    tryOpen,
+    label,
+  ]);
 
   const handleMouseLeave = useCallback(() => {
+    console.log(
+      `*** [Popover:${label}] handleMouseLeave() - persistent=${persistent}, isOpenedByClick=${isOpenedByClick}`
+    );
     if (!persistent || !isOpenedByClick) {
+      console.log(`*** [Popover:${label}] handleMouseLeave() - scheduling close`);
       setTimeout(handleClose, POPOVER_HOVER_DELAY);
+    } else {
+      console.log(
+        `*** [Popover:${label}] handleMouseLeave() - persistent and opened by click, not closing`
+      );
     }
-  }, [persistent, isOpenedByClick, setTimeout, handleClose]);
+  }, [persistent, isOpenedByClick, setTimeout, handleClose, label]);
 
   const scrollStyles = useScroll(true);
 
   const handleTriggerClick = useCallback(() => {
+    console.log(
+      `*** [Popover:${label}] handleTriggerClick() - persistent=${persistent}, isOpen=${isOpen}, isOpenedByClick=${isOpenedByClick}`
+    );
     if (persistent) {
       if (isOpen && isOpenedByClick) {
+        console.log(`*** [Popover:${label}] handleTriggerClick() - closing persistent popover`);
         handleClose();
       } else {
+        console.log(`*** [Popover:${label}] handleTriggerClick() - opening persistent popover`);
         clearTimeout();
         open();
         setOpenedByClick();
       }
+    } else {
+      console.log(`*** [Popover:${label}] handleTriggerClick() - not persistent, ignoring click`);
     }
-  }, [persistent, isOpen, isOpenedByClick, handleClose, clearTimeout, open, setOpenedByClick]);
+  }, [
+    persistent,
+    isOpen,
+    isOpenedByClick,
+    handleClose,
+    clearTimeout,
+    open,
+    setOpenedByClick,
+    label,
+  ]);
 
   const handleTriggerKeyDown: KeyboardEventHandler = useCallback(
     (e) => {
+      console.log(
+        `*** [Popover:${label}] handleTriggerKeyDown() - key=${e.key}, hasContent=${hasContent}`
+      );
       if (e.key === 'Enter' || e.key === ' ') {
         trigger.props.onKeyDown?.(e);
 
         if (hasContent) {
           // Required for entering the popover with Enter or Space key
           // Otherwise the navigation happens immediately
+          console.log(
+            `*** [Popover:${label}] handleTriggerKeyDown() - opening with keyboard, will focus`
+          );
           e.preventDefault();
           setShouldFocusOnOpen(true);
           open();
@@ -161,18 +232,21 @@ export const SideNavPopover = ({
         trigger.props.onKeyDown?.(e);
       }
     },
-    [trigger, hasContent, open]
+    [trigger, hasContent, open, label]
   );
 
   const handlePopoverKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback(
     (e) => {
+      console.log(`*** [Popover:${label}] handlePopoverKeyDown() - key=${e.key}`);
       if (e.key === 'Escape') {
+        console.log(`*** [Popover:${label}] handlePopoverKeyDown() - Escape pressed, closing`);
         handleClose();
         triggerRef.current?.focus();
         return;
       }
 
       if (e.key === 'Tab') {
+        console.log(`*** [Popover:${label}] handlePopoverKeyDown() - Tab pressed, closing`);
         e.preventDefault();
         handleClose();
         focusAdjacentTrigger(triggerRef, e.shiftKey ? -1 : 1);
@@ -181,12 +255,16 @@ export const SideNavPopover = ({
 
       handleRovingIndex(e);
     },
-    [handleClose]
+    [handleClose, label]
   );
 
   const handleBlur: FocusEventHandler = useCallback(
     (e) => {
-      if (!wasKeyboardUsed) return;
+      console.log(`*** [Popover:${label}] handleBlur() - wasKeyboardUsed=${wasKeyboardUsed}`);
+      if (!wasKeyboardUsed) {
+        console.log(`*** [Popover:${label}] handleBlur() - keyboard not used, ignoring`);
+        return;
+      }
 
       clearTimeout();
 
@@ -195,19 +273,25 @@ export const SideNavPopover = ({
         nextFocused &&
         (triggerRef.current?.contains(nextFocused) || popoverRef.current?.contains(nextFocused));
 
+      console.log(
+        `*** [Popover:${label}] handleBlur() - isStayingInComponent=${isStayingInComponent}`
+      );
       if (!isStayingInComponent) {
+        console.log(`*** [Popover:${label}] handleBlur() - leaving component, closing`);
         handleClose();
       }
     },
-    [clearTimeout, handleClose, wasKeyboardUsed]
+    [clearTimeout, handleClose, wasKeyboardUsed, label]
   );
 
   useEffect(() => {
+    console.log(`*** [Popover:${label}] mounted`);
     return () => {
+      console.log(`*** [Popover:${label}] unmounting - cleaning up`);
       clearTimeout();
       handleClose();
     };
-  }, [clearTimeout, handleClose]);
+  }, [clearTimeout, handleClose, label]);
 
   // TODO: refactor to use non-portalled popover
   // Track if the user has used the keyboard to interact with the popover.
@@ -216,9 +300,11 @@ export const SideNavPopover = ({
   // on the page.
   useEffect(() => {
     const handleKeyDown = () => {
+      console.log(`*** [Popover:${label}] keyboard used, setting wasKeyboardUsed=true`);
       setWasKeyboardUsed(true);
     };
     const handleMouseDown = () => {
+      console.log(`*** [Popover:${label}] mouse used, setting wasKeyboardUsed=false`);
       setWasKeyboardUsed(false);
     };
 
@@ -229,7 +315,7 @@ export const SideNavPopover = ({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('mousedown', handleMouseDown);
     };
-  }, []);
+  }, [label]);
 
   const enhancedTrigger = useMemo(
     () =>
@@ -263,6 +349,11 @@ export const SideNavPopover = ({
     z-index: calc(${euiTheme.levels.menu} - 1);
   `;
 
+  const euiPopoverIsOpen = hasContent && !isSidePanelOpen && isOpen;
+  console.log(
+    `*** [Popover:${label}] render - EuiPopover isOpen=${euiPopoverIsOpen} (hasContent=${hasContent}, isSidePanelOpen=${isSidePanelOpen}, isOpen=${isOpen})`
+  );
+
   return (
     <div
       css={wrapperStyles}
@@ -280,7 +371,7 @@ export const SideNavPopover = ({
         container={container}
         display="block"
         hasArrow={false}
-        isOpen={hasContent && !isSidePanelOpen && isOpen}
+        isOpen={euiPopoverIsOpen}
         offset={POPOVER_OFFSET}
         ownFocus={false}
         panelPaddingSize="none"
