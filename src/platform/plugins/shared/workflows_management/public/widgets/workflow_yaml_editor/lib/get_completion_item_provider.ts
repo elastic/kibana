@@ -49,6 +49,8 @@ let builtInStepTypesCache: Array<{
   icon: monaco.languages.CompletionItemKind;
 }> | null = null;
 
+const TIMEZONE_NAMES_SORTED = moment.tz.names().sort();
+
 /**
  * Extract built-in step types from the workflow schema (single source of truth)
  */
@@ -184,7 +186,6 @@ function isInScheduledTriggerWithBlock(yamlDocument: Document, absolutePosition:
   visit(yamlDocument, {
     Map(key, node, ancestors) {
       if (!node.range) return;
-
       if (node.get('type') !== 'scheduled') return;
 
       // Check if we're inside this trigger's range
@@ -1055,14 +1056,12 @@ function getTimezoneSuggestions(
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
 
-  const timezoneNames = moment.tz.names().sort();
-
   const filteredTimezones = prefix
-    ? timezoneNames.filter((tz) => tz.toLowerCase().includes(prefix.toLowerCase()))
-    : timezoneNames;
+    ? TIMEZONE_NAMES_SORTED.filter((tz) => tz.toLowerCase().includes(prefix.toLowerCase()))
+    : TIMEZONE_NAMES_SORTED;
 
-  // Limit to 50 suggestions for performance
-  const limitedTimezones = filteredTimezones.slice(0, 50);
+  // Limit to 25 suggestions for performance
+  const limitedTimezones = filteredTimezones.slice(0, 25);
 
   limitedTimezones.forEach((timezone) => {
     const offset = moment.tz(timezone).format('Z');
@@ -1318,33 +1317,33 @@ export function getCompletionItemProvider(
         const connectorType = getConnectorTypeFromContext(yamlDocument, path, model, position);
         // Detected connector type
 
+        // Check if we're editing a timezone field (tzid or timezone) - works in any context
+        const timezoneLine = model.getLineContent(position.lineNumber);
+        const tzidLineUpToCursor = timezoneLine.substring(0, position.column - 1);
+        const timezoneFieldMatch = tzidLineUpToCursor.match(/^\s*(?:tzid|timezone)\s*:\s*(.*)$/);
+
+        if (timezoneFieldMatch) {
+          const prefix = timezoneFieldMatch[1].trim();
+
+          const tzidValueStart =
+            timezoneFieldMatch.index! + timezoneFieldMatch[0].indexOf(timezoneFieldMatch[1]);
+          const tzidValueRange = {
+            startLineNumber: position.lineNumber,
+            endLineNumber: position.lineNumber,
+            startColumn: tzidValueStart + 1,
+            endColumn: position.column,
+          };
+
+          const timezoneSuggestions = getTimezoneSuggestions(tzidValueRange, prefix);
+
+          return {
+            suggestions: timezoneSuggestions,
+            incomplete: true,
+          };
+        }
+
         // Check if we're in a scheduled trigger's with block for RRule suggestions
         if (isInScheduledTriggerWithBlock(yamlDocument, absolutePosition)) {
-          // Check if we're specifically in the tzid field for timezone suggestions
-          const currentLine = model.getLineContent(position.lineNumber);
-          const tzidLineUpToCursor = currentLine.substring(0, position.column - 1);
-          const tzidMatch = tzidLineUpToCursor.match(/^\s*tzid\s*:\s*(.*)$/);
-
-          if (tzidMatch) {
-            const prefix = tzidMatch[1].trim();
-
-            // Create a range that covers the entire value after tzid: (including spaces)
-            const tzidValueStart = tzidMatch.index! + tzidMatch[0].indexOf(tzidMatch[1]);
-            const tzidValueRange = {
-              startLineNumber: position.lineNumber,
-              endLineNumber: position.lineNumber,
-              startColumn: tzidValueStart + 1,
-              endColumn: position.column,
-            };
-
-            const timezoneSuggestions = getTimezoneSuggestions(tzidValueRange, prefix);
-
-            return {
-              suggestions: timezoneSuggestions,
-              incomplete: true,
-            };
-          }
-
           // We're in a scheduled trigger's with block - provide RRule suggestions
           const rruleSuggestions = getRRuleSchedulingSuggestions(range);
 
