@@ -88,8 +88,8 @@ export function createEvaluateObservabilityAIAssistantDataset({
             evaluators.correctnessAnalysis().evaluate(qualitativeAnalysisInput),
             evaluators.groundednessAnalysis().evaluate(qualitativeAnalysisInput),
           ]);
-          const correctnessAnalysis = correctnessResult.metadata;
-          const groundednessAnalysis = groundednessResult.metadata;
+          const correctnessAnalysis = correctnessResult.metadata ?? undefined;
+          const groundednessAnalysis = groundednessResult.metadata ?? undefined;
 
           return {
             errors: response.errors,

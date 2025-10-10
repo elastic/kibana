@@ -16,7 +16,7 @@ import { hostname } from 'os';
 import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
 import {
   EvaluationScoreRepository,
-  type ModelScoreDocument,
+  type EvaluationScoreDocument,
   parseScoreDocuments,
 } from './score_repository';
 import {
@@ -117,7 +117,6 @@ export async function exportEvaluations(
     evaluatorModel: report.evaluatorModel,
     runId: report.runId,
     repetitions: report.repetitions,
-    tags: ['evaluation', 'model-score'],
   });
 
   log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
@@ -133,7 +132,7 @@ export async function exportEvaluations(
 /**
  * Formats Elasticsearch documents into structured report data
  */
-export function formatReportData(scores: ModelScoreDocument[]): EvaluationReport {
+export function formatReportData(scores: EvaluationScoreDocument[]): EvaluationReport {
   if (scores.length === 0) {
     throw new Error('No documents to format');
   }

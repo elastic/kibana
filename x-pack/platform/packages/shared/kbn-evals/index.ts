@@ -24,7 +24,7 @@ export {
 
 export {
   EvaluationScoreRepository,
-  type ModelScoreDocument,
+  type EvaluationScoreDocument,
   parseScoreDocuments,
 } from './src/utils/score_repository';
 

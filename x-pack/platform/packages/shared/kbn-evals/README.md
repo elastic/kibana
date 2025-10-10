@@ -115,7 +115,7 @@ By default, evaluation results are displayed in the terminal as a formatted tabl
 import {
   evaluate as base,
   type EvaluationScoreRepository,
-  type ModelScoreDocument,
+  type EvaluationScoreDocument,
 } from '@kbn/evals';
 
 export const evaluate = base.extend({

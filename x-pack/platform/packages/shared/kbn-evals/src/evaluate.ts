@@ -120,7 +120,7 @@ export const evaluate = base.extend<
     ) => {
       const config = getPhoenixConfig();
 
-      function buildInferenceConnectorAndModel(connectorWithId: AvailableConnectorWithId): Model {
+      function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Model {
         const inferenceConnector: InferenceConnector = {
           type: connectorWithId.actionTypeId as InferenceConnectorType,
           config: connectorWithId.config,
@@ -140,8 +140,8 @@ export const evaluate = base.extend<
         return model;
       }
 
-      const model = buildInferenceConnectorAndModel(connector);
-      const evaluatorModel = buildInferenceConnectorAndModel(evaluationConnector);
+      const model = buildModelFromConnector(connector);
+      const evaluatorModel = buildModelFromConnector(evaluationConnector);
 
       const phoenixClient = new KibanaPhoenixClient({
         config,
@@ -165,7 +165,13 @@ export const evaluate = base.extend<
       try {
         await exportEvaluations(report, esClient, log);
       } catch (error) {
-        log.warning('Failed to export evaluation results to Elasticsearch:', error);
+        log.error(
+          new Error(
+            `Failed to export evaluation results to Elasticsearch for run ID: ${report.runId}.`,
+            { cause: error }
+          )
+        );
+        throw error;
       }
 
       const scoreRepository = new EvaluationScoreRepository(esClient, log);

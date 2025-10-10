@@ -6,12 +6,12 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { hostname } from 'os';
 import type { DatasetScoreWithStats } from './evaluation_stats';
+import type { EvaluationReport } from './report_model_score';
 
-export interface ModelScoreDocument {
+export interface EvaluationScoreDocument {
   '@timestamp': string;
   run_id: string;
   experiment_id: string;
@@ -47,17 +47,16 @@ export interface ModelScoreDocument {
   environment: {
     hostname: string;
   };
-  tags: string[];
 }
 
 /**
- * Parses Elasticsearch ModelScoreDocuments to DatasetScoreWithStats array
+ * Parses Elasticsearch EvaluationScoreDocuments to DatasetScoreWithStats array
  * This is the core transformation logic shared across different reporters
  */
-export function parseScoreDocuments(docs: ModelScoreDocument[]): DatasetScoreWithStats[] {
+export function parseScoreDocuments(documents: EvaluationScoreDocument[]): DatasetScoreWithStats[] {
   const datasetMap = new Map<string, DatasetScoreWithStats>();
 
-  for (const doc of docs) {
+  for (const doc of documents) {
     if (!datasetMap.has(doc.dataset.id)) {
       datasetMap.set(doc.dataset.id, {
         id: doc.dataset.id,
@@ -164,7 +163,6 @@ export class EvaluationScoreRepository {
                 hostname: { type: 'keyword' },
               },
             },
-            tags: { type: 'keyword' },
           },
         },
       },
@@ -218,15 +216,7 @@ export class EvaluationScoreRepository {
     evaluatorModel,
     runId,
     repetitions,
-    tags = [],
-  }: {
-    datasetScoresWithStats: DatasetScoreWithStats[];
-    model: Model;
-    evaluatorModel: Model;
-    runId: string;
-    repetitions: number;
-    tags?: string[];
-  }): Promise<void> {
+  }: EvaluationReport): Promise<void> {
     try {
       await this.ensureIndexTemplate();
       await this.ensureDatastream();
@@ -236,7 +226,7 @@ export class EvaluationScoreRepository {
         return;
       }
 
-      const documents: ModelScoreDocument[] = [];
+      const documents: EvaluationScoreDocument[] = [];
       const timestamp = new Date().toISOString();
 
       for (const dataset of datasetScoresWithStats) {
@@ -246,7 +236,7 @@ export class EvaluationScoreRepository {
             continue;
           }
 
-          const document: ModelScoreDocument = {
+          const document: EvaluationScoreDocument = {
             '@timestamp': timestamp,
             run_id: runId,
             experiment_id: dataset.experimentId,
@@ -282,7 +272,6 @@ export class EvaluationScoreRepository {
             environment: {
               hostname: hostname(),
             },
-            tags,
           };
 
           documents.push(document);
@@ -323,7 +312,7 @@ export class EvaluationScoreRepository {
     }
   }
 
-  async getScoresByRunId(runId: string): Promise<ModelScoreDocument[]> {
+  async getScoresByRunId(runId: string): Promise<EvaluationScoreDocument[]> {
     try {
       const query = {
         bool: {

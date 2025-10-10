@@ -22,20 +22,29 @@ import { sumBy } from 'lodash';
  * Extracts scenario name from dataset name using pattern "scenario: dataset-name"
  * Falls back to "Other" if no scenario prefix is found
  */
-function extractScenarioName(datasetName: string): string {
+function extractScenarioName(datasetName: string, log: SomeDevLog): string {
   const match = datasetName.match(/^([^:]+):/);
-  return match ? match[1].trim() : 'Other';
+  if (!match) {
+    log.warning(
+      `Dataset "${datasetName}" does not match expected "scenario: name" pattern. Grouping under "Other".`
+    );
+    return 'Other';
+  }
+  return match[1].trim();
 }
 
 /**
  * Aggregates multiple datasets into scenario-level synthetic datasets
  * Each returned dataset represents a scenario with aggregated statistics
  */
-function aggregateDatasetsByScenario(datasets: DatasetScoreWithStats[]): DatasetScoreWithStats[] {
+function aggregateDatasetsByScenario(
+  datasets: DatasetScoreWithStats[],
+  log: SomeDevLog
+): DatasetScoreWithStats[] {
   const scenarioMap = new Map<string, DatasetScoreWithStats[]>();
 
   datasets.forEach((dataset) => {
-    const scenarioName = extractScenarioName(dataset.name);
+    const scenarioName = extractScenarioName(dataset.name, log);
     if (!scenarioMap.has(scenarioName)) {
       scenarioMap.set(scenarioName, []);
     }
@@ -93,7 +102,7 @@ async function buildScenarioReport(
 
   const baseReport = formatReportData(docs);
 
-  const scenarioDatasets = aggregateDatasetsByScenario(baseReport.datasetScoresWithStats);
+  const scenarioDatasets = aggregateDatasetsByScenario(baseReport.datasetScoresWithStats, log);
 
   return {
     ...baseReport,
