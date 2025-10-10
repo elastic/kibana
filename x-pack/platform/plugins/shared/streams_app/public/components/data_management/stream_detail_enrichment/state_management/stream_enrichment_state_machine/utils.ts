@@ -94,7 +94,13 @@ export function getDataSourcesSamples(
  * - If no processor is being edited: returns all new processors
  * - If a processor is being edited: returns new processors up to and including the one being edited
  */
-export function getStepsForSimulation({ stepRefs }: Pick<StreamEnrichmentContextType, 'stepRefs'>) {
+export function getStepsForSimulation({
+  stepRefs,
+  includeExistingSteps = false,
+}: Pick<StreamEnrichmentContextType, 'stepRefs'> & { includeExistingSteps?: boolean }) {
+  if (includeExistingSteps) {
+    return stepRefs.map((proc) => proc.getSnapshot().context.step);
+  }
   let newStepSnapshots = stepRefs
     .map((procRef) => procRef.getSnapshot())
     .filter((snapshot) => isWhereBlock(snapshot.context.step) || snapshot.context.isNew);

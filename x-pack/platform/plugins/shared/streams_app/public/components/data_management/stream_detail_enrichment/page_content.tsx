@@ -11,6 +11,7 @@ import {
   EuiCode,
   EuiPanel,
   EuiResizableContainer,
+  EuiSpacer,
   EuiSplitPanel,
   EuiText,
 } from '@elastic/eui';
@@ -85,6 +86,12 @@ export function StreamDetailEnrichmentContentImpl() {
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
+  const validationErrors = useStreamEnrichmentSelector(
+    (state) => state.context.validatorRef?.getSnapshot().context.validationResult?.errors
+  );
+  const isValidating = useStreamEnrichmentSelector(
+    (state) => state.context.validatorRef?.getSnapshot().matches('running') ?? false
+  );
 
   const canManage = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.manage
@@ -172,8 +179,9 @@ export function StreamDetailEnrichmentContentImpl() {
               ? openConfirmationModal
               : saveChanges
           }
-          isLoading={isSavingChanges}
-          disabled={!hasChanges}
+          isLoading={isSavingChanges || isValidating}
+          disabled={!hasChanges || isValidating}
+          validationError={validationErrors?.length ? validationErrors.join('. ') : null}
           insufficientPrivileges={!canManage}
         />
       )}
@@ -185,6 +193,9 @@ const StepsEditor = React.memo(() => {
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
 
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
+  const validationErrors = useStreamEnrichmentSelector(
+    (state) => state.context.validatorRef?.getSnapshot().context.validationResult?.errors
+  );
 
   const errors = useMemo(() => {
     if (!simulation) {
@@ -219,6 +230,22 @@ const StepsEditor = React.memo(() => {
   return (
     <>
       {hasSteps ? <RootSteps stepRefs={stepRefs} /> : <NoStepsEmptyPrompt />}
+      {!isEmpty(validationErrors) && (
+        <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+          <EuiText>
+            <FormattedMessage
+              id="xpack.streams.streamDetailView.managementTab.enrichment.validationErrors.title"
+              defaultMessage="Validation errors found"
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
+          {validationErrors.map((error: any) => (
+            <EuiText key={error} size="s">
+              {error}
+            </EuiText>
+          ))}
+        </EuiPanel>
+      )}
       {(!isEmpty(errors.ignoredFields) || !isEmpty(errors.mappingFailures)) && (
         <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
           {!isEmpty(errors.ignoredFields) && (

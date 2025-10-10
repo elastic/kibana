@@ -26,6 +26,7 @@ import {
   handleProcessingGrokSuggestions,
   processingGrokSuggestionsSchema,
 } from './grok_suggestions_handler';
+import { validateProcessing } from './validation_handler';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
@@ -153,8 +154,41 @@ export const processingDateSuggestionsRoute = createServerRoute({
   },
 });
 
+const processingValidationSchema = z.object({
+  path: z.object({ name: z.string() }),
+  body: z.object({
+    processing: streamlangDSLSchema,
+  }),
+});
+
+export const validateProcessingRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/processing/_validate',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: processingValidationSchema,
+  handler: async ({ params, request, getScopedClients }) => {
+    const { scopedClusterClient, streamsClient } = await getScopedClients({
+      request,
+    });
+
+    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
+    if (!read) {
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
+    }
+
+    return validateProcessing({ params, scopedClusterClient, streamsClient });
+  },
+});
+
 export const internalProcessingRoutes = {
   ...simulateProcessorRoute,
   ...processingGrokSuggestionRoute,
   ...processingDateSuggestionsRoute,
+  ...validateProcessingRoute,
 };
