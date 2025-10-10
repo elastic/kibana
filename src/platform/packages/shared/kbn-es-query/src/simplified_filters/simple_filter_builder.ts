@@ -21,22 +21,6 @@ export class SimpleFilterBuilder {
   }
 
   /**
-   * Set a display label for the filter
-   */
-  label(label: string): this {
-    this.condition.label = label;
-    return this;
-  }
-
-  /**
-   * Mark the filter as disabled
-   */
-  disabled(disabled = true): this {
-    this.condition.disabled = disabled;
-    return this;
-  }
-
-  /**
    * Field equals value
    */
   is(value: FilterValue): SimpleFilterCondition {

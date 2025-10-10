@@ -73,6 +73,22 @@ export class FilterBuilder {
   }
 
   /**
+   * Set a display label for the filter
+   */
+  label(label: string): this {
+    this.filter.label = label;
+    return this;
+  }
+
+  /**
+   * Negate the filter
+   */
+  negate(negate = true): this {
+    this.filter.negate = negate;
+    return this;
+  }
+
+  /**
    * Create a simple condition filter
    */
   condition(condition: SimpleFilterCondition): SimplifiedFilter {
@@ -126,10 +142,9 @@ export class FilterBuilder {
   /**
    * Create a raw DSL filter with query
    */
-  dslQuery(query: Record<string, any>, label?: string): SimplifiedFilter {
+  dslQuery(query: Record<string, any>): SimplifiedFilter {
     return this.rawDSL({
       query,
-      label,
     });
   }
 }
@@ -169,10 +184,9 @@ export function or(): FilterGroupBuilder {
 /**
  * Create a raw DSL filter
  */
-export function dsl(query: Record<string, any>, label?: string): RawDSLFilter {
+export function dsl(query: Record<string, any>): RawDSLFilter {
   return {
     query,
-    label,
   };
 }
 

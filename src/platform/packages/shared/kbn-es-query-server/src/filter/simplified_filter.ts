@@ -48,28 +48,48 @@ export const rangeValueSchema = schema.object({
 
 /**
  * Schema for all possible filter values
+ * Supports single values, arrays, and range objects
  */
 export const filterValueSchema = schema.oneOf([
   schema.string(),
   schema.number(),
   schema.boolean(),
-  schema.arrayOf(schema.string()),
-  schema.arrayOf(schema.number()),
+  schema.arrayOf(schema.oneOf([schema.string(), schema.number(), schema.boolean()])),
   rangeValueSchema,
 ]);
 
 // ====================================================================
-// DISCRIMINATED FILTER CONDITION SCHEMAS
+// BASE FILTER PROPERTIES (SHARED BY ALL SIMPLIFIED FILTERS)
 // ====================================================================
 
 /**
- * Base properties shared by all filter conditions
+ * Base properties shared by all simplified filters
+ */
+const baseFilterPropertiesSchema = {
+  id: schema.maybe(schema.string()),
+  pinned: schema.maybe(schema.boolean()),
+  disabled: schema.maybe(schema.boolean()),
+  controlledBy: schema.maybe(schema.string()),
+  indexPattern: schema.maybe(schema.string()),
+  metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  negate: schema.maybe(schema.boolean()),
+  label: schema.maybe(schema.string()),
+};
+
+// ====================================================================
+// SIMPLE FILTER CONDITION SCHEMAS
+// ====================================================================
+
+/**
+ * Base schema for simple filter conditions
  */
 const baseFilterConditionSchema = {
   field: schema.string(),
-  label: schema.maybe(schema.string()),
-  disabled: schema.maybe(schema.boolean()),
 };
+
+// ====================================================================
+// DISCRIMINATED FILTER CONDITION SCHEMAS
+// ====================================================================
 
 /**
  * Schema for filter conditions that require a value
@@ -110,6 +130,7 @@ export const simpleFilterConditionSchema = schema.oneOf([
 /**
  * Schema for logical filter groups with recursive structure
  * Uses lazy schema to handle recursive references
+ * Note: Groups only contain logical structure (type, conditions) - no metadata properties
  */
 export const filterGroupSchema = schema.object(
   {
@@ -120,9 +141,6 @@ export const filterGroupSchema = schema.object(
         schema.lazy('filterGroup'), // Recursive reference
       ])
     ),
-    negate: schema.maybe(schema.boolean()),
-    label: schema.maybe(schema.string()),
-    disabled: schema.maybe(schema.boolean()),
   },
   { meta: { id: 'filterGroup' } }
 );
@@ -136,25 +154,11 @@ export const filterGroupSchema = schema.object(
  */
 export const rawDSLFilterSchema = schema.object({
   query: schema.recordOf(schema.string(), schema.any()),
-  label: schema.maybe(schema.string()),
-  disabled: schema.maybe(schema.boolean()),
 });
 
 // ====================================================================
 // SIMPLIFIED FILTER DISCRIMINATED UNION SCHEMA
 // ====================================================================
-
-/**
- * Base properties shared by all simplified filters
- */
-const baseFilterPropertiesSchema = {
-  id: schema.maybe(schema.string()),
-  pinned: schema.maybe(schema.boolean()),
-  disabled: schema.maybe(schema.boolean()),
-  controlledBy: schema.maybe(schema.string()),
-  indexPattern: schema.maybe(schema.string()),
-  metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-};
 
 /**
  * Schema for simple condition filters (Tier 1)
