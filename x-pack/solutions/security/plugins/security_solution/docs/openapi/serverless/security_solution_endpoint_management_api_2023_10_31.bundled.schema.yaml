@@ -2029,26 +2029,21 @@ components:
                 type: object
                 properties:
                   content:
-                    allOf:
-                      - type: object
-                        properties:
-                          code:
-                            type: string
-                      - oneOf:
-                          - $ref: >-
-                              #/components/schemas/RunningProcessesOutputEndpoint
-                          - $ref: >-
-                              #/components/schemas/RunningProcessesOutputSentinelOne
                     discriminator:
                       mapping:
                         endpoint: '#/components/schemas/RunningProcessesOutputEndpoint'
                         sentinel_one: '#/components/schemas/RunningProcessesOutputSentinelOne'
                       propertyName: agentType
+                    oneOf:
+                      - $ref: '#/components/schemas/RunningProcessesOutputEndpoint'
+                      - $ref: '#/components/schemas/RunningProcessesOutputSentinelOne'
               type: object
     RunningProcessesOutputEndpoint:
       description: Processes output for `agentType` of `endpoint`
       type: object
       properties:
+        code:
+          type: string
         entries:
           items:
             type: object
@@ -2067,6 +2062,9 @@ components:
         - $ref: '#/components/schemas/DownloadUri'
         - description: Processes output for `agentType` of `sentinel_one`
           type: object
+          properties:
+            code:
+              type: string
     Runscript:
       allOf:
         - $ref: '#/components/schemas/ResponseActionDetails'
