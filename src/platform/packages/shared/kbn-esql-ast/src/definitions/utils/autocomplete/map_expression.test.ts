@@ -111,8 +111,8 @@ describe('getCommandMapExpressionSuggestions', () => {
       const innerText = '{"param1": "';
       const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters);
       expect(suggestions).toMatchObject([
-        { label: 'value1', text: '"value1', kind: 'Constant', detail: 'value1' },
-        { label: 'value2', text: '"value2', kind: 'Constant', detail: 'value2' },
+        { label: 'value1', text: '"value1"', kind: 'Constant', detail: 'value1' },
+        { label: 'value2', text: '"value2"', kind: 'Constant', detail: 'value2' },
       ]);
     });
 
@@ -120,8 +120,8 @@ describe('getCommandMapExpressionSuggestions', () => {
       const innerText = '{"param1":  "';
       const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters);
       expect(suggestions).toMatchObject([
-        { label: 'value1', text: '"value1', kind: 'Constant', detail: 'value1' },
-        { label: 'value2', text: '"value2', kind: 'Constant', detail: 'value2' },
+        { label: 'value1', text: '"value1"', kind: 'Constant', detail: 'value1' },
+        { label: 'value2', text: '"value2"', kind: 'Constant', detail: 'value2' },
       ]);
     });
 

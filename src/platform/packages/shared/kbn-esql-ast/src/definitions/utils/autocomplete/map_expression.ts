@@ -91,6 +91,7 @@ export function getCommandMapExpressionSuggestions(
   if (/:\s*"?[^"]*$/i.test(innerText)) {
     const match = innerText.match(/"([^"]+)"\s*:\s*"?[^"]*$/);
     const paramName = match ? match[1] : undefined;
+
     if (paramName && availableParameters[paramName]) {
       const paramType = availableParameters[paramName].type;
       return (
@@ -98,11 +99,11 @@ export function getCommandMapExpressionSuggestions(
           if (paramType === 'string') {
             return {
               ...suggestion,
-              text: finalWord.startsWith('"') ? `"${suggestion.text}` : `"${suggestion.text}"`,
-              filterText: `"${suggestion.text}`,
+              text: `"${suggestion.text}"`,
+              filterText: `"${suggestion.text}"`,
               rangeToReplace: {
                 start: innerText.length - finalWord.length,
-                end: innerText.length,
+                end: finalWord.startsWith('"') ? innerText.length + 2 : innerText.length, // to also replace the closing quote and avoid duplicate end quotes.
               },
             };
           } else {

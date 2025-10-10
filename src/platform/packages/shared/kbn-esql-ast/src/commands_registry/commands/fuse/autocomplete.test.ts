@@ -286,8 +286,8 @@ describe('FUSE Autocomplete', () => {
 
     it('suggests parameter values for normalizer parameter', async () => {
       await fuseExpectSuggestions('FROM a | FUSE linear WITH { "normalizer": "', [
-        '"none',
-        '"minmax',
+        '"none"',
+        '"minmax"',
       ]);
     });
 
