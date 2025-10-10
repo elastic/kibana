@@ -61,12 +61,21 @@ export interface NewCloudConnectorFormProps {
 }
 
 // Define the interface for connector options
-export interface CloudConnectorOption {
+export interface AwsCloudConnectorOption {
   label: string;
   value: string;
   id: string;
   roleArn?: CloudConnectorVar;
   externalId?: CloudConnectorSecretVar;
+}
+
+export interface AzureCloudConnectorOption {
+  label: string;
+  value: string;
+  id: string;
+  tenantId?: CloudConnectorVar;
+  clientId?: CloudConnectorVar;
+  azure_credentials_cloud_connector_id?: CloudConnectorVar;
 }
 
 // Interface for EuiComboBox options (only standard properties)

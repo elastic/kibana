@@ -32,7 +32,7 @@ export interface AwsCloudConnectorVars {
 export interface AzureCloudConnectorVars {
   'azure.credentials.tenant_id': CloudConnectorVar;
   'azure.credentials.client_id': CloudConnectorVar;
-  azure_credentials_cloud_connector_id: CloudConnectorSecretVar;
+  azure_credentials_cloud_connector_id: CloudConnectorVar;
 }
 
 export interface CloudConnectorVars {
@@ -48,7 +48,7 @@ export interface CloudConnector {
   id: string;
   name: string;
   cloudProvider: CloudProvider;
-  vars: CloudConnectorVars;
+  vars: AwsCloudConnectorVars | AzureCloudConnectorVars;
   packagePolicyCount: number;
   created_at: string;
   updated_at: string;

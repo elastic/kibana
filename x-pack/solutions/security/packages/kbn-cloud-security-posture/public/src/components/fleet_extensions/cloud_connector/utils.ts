@@ -15,6 +15,14 @@ import semver from 'semver';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type {
+  AwsCloudConnectorVars,
+  AzureCloudConnectorVars,
+} from '@kbn/fleet-plugin/common/types';
+import {
+  ROLE_ARN_VAR_NAME,
+  AZURE_TENANT_ID_VAR_NAME,
+} from '@kbn/fleet-plugin/common/constants/cloud_connector';
+import type {
   AwsCloudConnectorCredentials,
   AzureCloudConnectorCredentials,
   CloudConnectorCredentials,
@@ -31,12 +39,25 @@ import {
   AZURE_PROVIDER,
 } from './constants';
 
-// Type guards for better type safety
+export const isAwsCloudConnectorVars = (
+  vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
+  provider: string
+): vars is AwsCloudConnectorVars => {
+  return ROLE_ARN_VAR_NAME in vars && provider === 'aws';
+};
+
 export function isAwsCredentials(
   credentials: CloudConnectorCredentials
 ): credentials is AwsCloudConnectorCredentials {
   return 'roleArn' in credentials;
 }
+
+export const isAzureCloudConnectorVars = (
+  vars: AwsCloudConnectorVars | AzureCloudConnectorVars,
+  provider: string
+): vars is AzureCloudConnectorVars => {
+  return AZURE_TENANT_ID_VAR_NAME in vars && provider === 'azure';
+};
 
 export function isAzureCredentials(
   credentials: CloudConnectorCredentials
