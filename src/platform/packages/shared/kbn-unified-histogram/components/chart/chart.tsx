@@ -122,6 +122,7 @@ export function UnifiedHistogramChart({
   onTotalHitsChange,
   onChartLoad,
   columns,
+  esqlVariables,
   controlsState,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
@@ -221,6 +222,7 @@ export function UnifiedHistogramChart({
     getTimeRange,
     fetch$,
     visContext,
+    esqlVariables,
     onLoad,
   });
 
