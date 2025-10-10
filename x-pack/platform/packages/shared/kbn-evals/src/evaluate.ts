@@ -168,7 +168,6 @@ export const evaluate = base.extend<
         log.warning('Failed to export evaluation results to Elasticsearch:', error);
       }
 
-      // Then display results using the reporter (queries Elasticsearch), can be customized by downstream consumers
       const scoreRepository = new EvaluationScoreRepository(esClient, log);
       await reportModelScore(scoreRepository, report.runId, log);
     },

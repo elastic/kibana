@@ -35,20 +35,3 @@ EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --co
 # Repeatedly evaluate every example by specifying the number of repetitions
 EVALUATION_REPETITIONS=3 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 ```
-
-## Scenario Summary Report
-
-After running evaluations, you can generate a scenario-grouped summary report that aggregates results by functional area (alerts, apm, esql, etc.). The report groups evaluation datasets by their logical scenarios and provides aggregated statistics at both scenario and overall levels.
-
-```bash
-# Generate scenario summary report for a completed run
-EVALUATION_RUN_ID=<run-id> node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/reporting.playwright.config.ts
-```
-
-**Finding Run IDs**: Run IDs are automatically generated and displayed in the evaluation logs. Look for `run_id:"..."` in the export details, or query the `.kibana-evaluations` datastream in Elasticsearch/Kibana.
-
-The report displays results in a consolidated table with one row per scenario (alerts, apm, esql, etc.), showing aggregated statistics across all datasets within each scenario, plus an overall summary row.
-
-## Evaluation Scenarios
-
-Scenarios are automatically extracted from dataset names using the pattern `scenario: dataset-name`. See individual spec files in the `evals/` directory for details on each scenario's test cases.

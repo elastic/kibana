@@ -146,7 +146,7 @@ export function formatReportData(scores: ModelScoreDocument[]): EvaluationReport
   return {
     datasetScoresWithStats: scoresWithStats,
     model: scores[0].model as Model,
-    evaluatorModel: scores[0].evaluatorModel as Model,
+    evaluatorModel: scores[0].evaluator_model as Model,
     repetitions,
     runId: scores[0].run_id,
   };

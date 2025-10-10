@@ -139,18 +139,6 @@ export function createScenarioSummaryReporter(): EvaluationReporter {
         statsToInclude: ['percentage', 'mean', 'stdDev'],
       });
       log.info(`\n${scenarioTable}`);
-
-      const totalExamples = sumBy(report.datasetScoresWithStats, (d) => d.numExamples);
-
-      log.info(`\n${chalk.bold.blue('📊 Summary:')}`);
-      log.info(
-        `  • Total Scenarios: ${chalk.green(report.datasetScoresWithStats.length.toString())}`
-      );
-      log.info(`  • Total Examples: ${chalk.green(totalExamples.toString())}`);
-
-      log.info(
-        chalk.green(`\n✅ Scenario summary report generated successfully for run ID: ${runId}`)
-      );
     } catch (error: any) {
       log.error(`❌ Failed to generate scenario summary report: ${error.message}`);
       throw error;

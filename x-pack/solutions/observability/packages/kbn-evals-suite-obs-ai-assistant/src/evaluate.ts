@@ -68,7 +68,7 @@ export const evaluate = base.extend<
   ],
   reportModelScore: [
     async ({}, use) => {
-      // Override default reporter with scenario summary reporter
+      // Override default reporter with scenario summary reporter specific to Obs AI Assistant
       await use(createScenarioSummaryReporter());
     },
     { scope: 'worker' },

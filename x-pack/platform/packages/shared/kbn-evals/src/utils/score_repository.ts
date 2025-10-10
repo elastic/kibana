@@ -21,7 +21,7 @@ export interface ModelScoreDocument {
     family: string;
     provider: string;
   };
-  evaluatorModel: {
+  evaluator_model: {
     id: string;
     family: string;
     provider: string;
@@ -120,7 +120,7 @@ export class EvaluationScoreRepository {
                 provider: { type: 'keyword' },
               },
             },
-            evaluatorModel: {
+            evaluator_model: {
               type: 'object',
               properties: {
                 id: { type: 'keyword' },
@@ -256,7 +256,7 @@ export class EvaluationScoreRepository {
               family: model.family,
               provider: model.provider,
             },
-            evaluatorModel: {
+            evaluator_model: {
               id: evaluatorModel.id || 'unknown',
               family: evaluatorModel.family,
               provider: evaluatorModel.provider,
