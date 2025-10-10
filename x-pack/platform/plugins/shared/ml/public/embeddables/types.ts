@@ -28,7 +28,6 @@ import type { SeverityThreshold } from '../../common/types/anomalies';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
-import type { SwimlaneType } from '../application/explorer/explorer_constants';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
 import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
@@ -44,7 +43,11 @@ import type {
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
-import type { anomalySwimlaneEmbeddableCustomInputSchema } from '../../server/embeddable/schemas';
+import type {
+  anomalySwimlaneEmbeddableCustomInputSchema,
+  anomalySwimlaneEmbeddableUserInputSchema,
+  anomalySwimlaneInitialInputSchema,
+} from '../../server/embeddable/schemas';
 
 export type {
   AnomalySwimLaneEmbeddableState,
@@ -61,12 +64,11 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
 
 /** Manual input by the user */
-export interface AnomalySwimlaneEmbeddableUserInput {
-  jobIds: JobId[];
-  panelTitle?: string;
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-}
+export type AnomalySwimlaneEmbeddableUserInput = TypeOf<
+  typeof anomalySwimlaneEmbeddableUserInputSchema
+>;
+
+export type AnomalySwimlaneInitialInput = TypeOf<typeof anomalySwimlaneInitialInputSchema>;
 
 export type AnomalySwimlaneEmbeddableCustomInput = TypeOf<
   typeof anomalySwimlaneEmbeddableCustomInputSchema
