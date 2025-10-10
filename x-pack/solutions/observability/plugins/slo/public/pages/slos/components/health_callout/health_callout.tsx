@@ -11,6 +11,8 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { useFetchSloHealth } from '../../../../hooks/use_fetch_slo_health';
 import { getSloHealthStateText } from '../../../../lib/slo_health_helpers';
+import { ExternalLinkDisplayText } from '../../../slo_details/components/external_link_display_text';
+import { paths } from '../../../../../common/locators/paths';
 
 const CALLOUT_SESSION_STORAGE_KEY = 'slo_health_callout_hidden';
 
@@ -79,8 +81,7 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
             <span data-test-subj="sloHealthCalloutDescription">
               <FormattedMessage
                 id="xpack.slo.sloList.healthCallout.description"
-                defaultMessage="The following {count, plural, one {SLO is} other {SLOs are}}
-          in an unhealthy state. Data may be missing or incomplete. You can inspect {count, plural, one {it} other {each one}} here:"
+                defaultMessage="The following {count, plural, one {transform is} other {transforms are}} in {stateText} state. You can inspect {count, plural, it {one} other {each one}} here:"
                 values={{
                   count: unhealthyAndMissingSloList.reduce(
                     (acc, result) =>
@@ -93,6 +94,17 @@ export function HealthCallout({ sloList = [] }: { sloList: SLOWithSummaryRespons
                 }}
               />
             </span>
+            <ul>
+              {unhealthyAndMissingSloList.map((result) => (
+                <li key={result.sloId}>
+                  <ExternalLinkDisplayText
+                    textSize="xs"
+                    content={result.sloName}
+                    url={paths.sloDetails(result.sloId, '*', undefined, 'overview')}
+                  />
+                </li>
+              ))}
+            </ul>
           </EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="xs">
             <EuiFlexItem grow={false}>
