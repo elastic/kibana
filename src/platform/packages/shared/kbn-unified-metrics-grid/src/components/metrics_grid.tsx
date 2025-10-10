@@ -174,12 +174,11 @@ export const MetricsGrid = ({
       >
         <EuiFlexGrid columns={columns} gutterSize="s">
           {rows.map(({ key, metric }, index) => {
-            const chartId = `chart-${key}`;
-
             return (
-              <EuiFlexItem key={key}>
+              // Use the index as a key to prevent the charts from unmounting
+              <EuiFlexItem key={index}>
                 <ChartItem
-                  chartId={chartId}
+                  chartId={key}
                   metric={metric}
                   index={index}
                   getRowColFromIndex={getRowColFromIndex}

@@ -296,8 +296,8 @@ describe('MetricsGrid', () => {
           />
         );
 
-        const chartDiv1 = document.getElementById('chart-system.cpu.utilization-0');
-        const chartDiv2 = document.getElementById('chart-system.memory.utilization-1');
+        const chartDiv1 = document.getElementById('system.cpu.utilization-0');
+        const chartDiv2 = document.getElementById('system.memory.utilization-1');
 
         expect(chartDiv1).toBeTruthy();
         expect(chartDiv2).toBeTruthy();
