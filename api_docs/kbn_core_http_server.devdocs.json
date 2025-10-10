@@ -14507,10 +14507,6 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/download.ts"
-              },
-              {
-                "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/find.ts"
               },
               {
@@ -15607,10 +15603,6 @@
               },
               {
                 "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/download.test.ts"
-              },
-              {
-                "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/templates/list.test.ts"
               },
               {
@@ -16182,10 +16174,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/create.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/zip.ts"
               },
               {
                 "plugin": "canvas",
@@ -17314,10 +17302,6 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/create.test.ts"
-              },
-              {
-                "plugin": "canvas",
-                "path": "x-pack/platform/plugins/private/canvas/server/routes/shareables/zip.test.ts"
               },
               {
                 "plugin": "canvas",
