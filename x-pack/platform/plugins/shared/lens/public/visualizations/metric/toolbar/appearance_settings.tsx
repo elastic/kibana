@@ -13,8 +13,6 @@ import { EuiFormRow, EuiFieldText, EuiButtonGroup, EuiHorizontalRule, EuiText } 
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { hasIcon } from '@kbn/visualization-ui-components';
-import type { ToolbarPopoverProps } from '../../../shared_components';
-import { ToolbarPopover } from '../../../shared_components';
 import type {
   MetricVisualizationState,
   TitleFontWeight,
@@ -50,13 +48,17 @@ const getDefaultLayoutConfig = (
   return config;
 };
 
-interface AppearancePopoverProps {
+/**
+ * This component contains the actual settings UI.
+ * It is reused by both the Popover and the Flyout.
+ */
+export function MetricAppearanceSettings({
+  state,
+  setState,
+}: {
   state: MetricVisualizationState;
   setState: (newState: MetricVisualizationState) => void;
-  groupPosition?: ToolbarPopoverProps['groupPosition'];
-}
-
-export function AppearancePopover({ state, setState, groupPosition }: AppearancePopoverProps) {
+}) {
   const hasSecondaryMetric = !!state.secondaryMetricAccessor;
   const hasMetricIcon = hasIcon(state.icon);
 
@@ -67,14 +69,7 @@ export function AppearancePopover({ state, setState, groupPosition }: Appearance
   };
 
   return (
-    <ToolbarPopover
-      title={i18n.translate('xpack.lens.metric.appearancePopover.title', {
-        defaultMessage: 'Appearance',
-      })}
-      type="visualOptions"
-      groupPosition={groupPosition}
-      buttonDataTestSubj="lnsTextOptionsButton"
-    >
+    <>
       <AppearanceOptionGroup
         title={i18n.translate('xpack.lens.metric.appearancePopover.primaryMetric.title', {
           defaultMessage: 'Primary metric',
@@ -216,7 +211,7 @@ export function AppearancePopover({ state, setState, groupPosition }: Appearance
           dataTestSubj="lens-metric-appearance-other-icon-position-btn"
         />
       </AppearanceOptionGroup>
-    </ToolbarPopover>
+    </>
   );
 }
 
@@ -289,7 +284,7 @@ function AppearanceOption<OptionType extends string>({
   };
 
   return (
-    <EuiFormRow display="columnCompressed" label={label}>
+    <EuiFormRow display="columnCompressed" fullWidth label={label}>
       <EuiButtonGroup
         isFullWidth
         legend={label}

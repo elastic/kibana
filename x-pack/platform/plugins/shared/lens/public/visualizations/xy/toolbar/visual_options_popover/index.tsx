@@ -29,7 +29,7 @@ import {
 import type { FramePublicAPI } from '../../../../types';
 import { getDataLayers } from '../../visualization_helpers';
 
-function getValueLabelDisableReason({
+export function getValueLabelDisableReason({
   isAreaPercentage,
   isHistogramSeries,
 }: {
@@ -61,11 +61,8 @@ export interface VisualOptionsPopoverProps {
   datasourceLayers: FramePublicAPI['datasourceLayers'];
 }
 
-export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
-  state,
-  setState,
-  datasourceLayers,
-}) => {
+export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = (props) => {
+  const { state, datasourceLayers } = props;
   const dataLayers = getDataLayers(state.layers);
   const isAreaPercentage = dataLayers.some(
     ({ seriesType }) => seriesType === 'area_percentage_stacked'
@@ -81,15 +78,8 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
     isAreaPercentage,
     isHistogramSeries,
   });
-  const isHorizontal = isHorizontalChart(state.layers);
 
   const isDisabled = !isFittingEnabled && !isCurveTypeEnabled && isHasNonBarSeries;
-
-  const barSeriesLayers = getBarSeriesLayers(dataLayers);
-
-  const hasAnyBarSetting = !!barSeriesLayers.length;
-  const hasAreaSettings = hasAreaSeries(dataLayers);
-  const shouldDisplayDividerHr = !!(hasAnyBarSetting && isHasNonBarSeries);
 
   return (
     <TooltipWrapper tooltipContent={valueLabelsDisabledReason} condition={isDisabled}>
@@ -104,83 +94,109 @@ export const VisualOptionsPopover: React.FC<VisualOptionsPopoverProps> = ({
         isDisabled={isDisabled}
         panelStyle={PANEL_STYLE}
       >
-        {hasAnyBarSetting ? (
-          <BarOrientationSettings
-            isDisabled={isHasNonBarSeries}
-            barOrientation={isHorizontal ? 'horizontal' : 'vertical'}
-            onBarOrientationChange={() => {
-              const newSeriesType = flipSeriesType(dataLayers[0].seriesType);
+        <XyAppearanceSettings {...props} />
+      </ToolbarPopover>
+    </TooltipWrapper>
+  );
+};
+
+export const XyAppearanceSettings: React.FC<VisualOptionsPopoverProps> = ({ state, setState }) => {
+  const dataLayers = getDataLayers(state.layers);
+  const isAreaPercentage = dataLayers.some(
+    ({ seriesType }) => seriesType === 'area_percentage_stacked'
+  );
+
+  const isHasNonBarSeries = hasNonBarSeries(dataLayers);
+
+  const isFittingEnabled = isHasNonBarSeries && !isAreaPercentage;
+  const isCurveTypeEnabled = isHasNonBarSeries || isAreaPercentage;
+
+  const isHorizontal = isHorizontalChart(state.layers);
+
+  const barSeriesLayers = getBarSeriesLayers(dataLayers);
+
+  const hasAnyBarSetting = !!barSeriesLayers.length;
+  const hasAreaSettings = hasAreaSeries(dataLayers);
+  const shouldDisplayDividerHr = !!(hasAnyBarSetting && isHasNonBarSeries);
+
+  return (
+    <>
+      {hasAnyBarSetting ? (
+        <BarOrientationSettings
+          isDisabled={isHasNonBarSeries}
+          barOrientation={isHorizontal ? 'horizontal' : 'vertical'}
+          onBarOrientationChange={() => {
+            const newSeriesType = flipSeriesType(dataLayers[0].seriesType);
+            setState({
+              ...state,
+              layers: state.layers.map((layer) =>
+                isBarLayer(layer)
+                  ? {
+                      ...layer,
+                      seriesType: newSeriesType,
+                    }
+                  : layer
+              ),
+            });
+          }}
+        />
+      ) : null}
+
+      {shouldDisplayDividerHr ? <ToolbarDivider /> : null}
+
+      {hasAreaSettings ? (
+        <>
+          <FillOpacityOption
+            isFillOpacityEnabled={true}
+            value={state?.fillOpacity ?? 0.3}
+            onChange={(newValue) => {
               setState({
                 ...state,
-                layers: state.layers.map((layer) =>
-                  isBarLayer(layer)
-                    ? {
-                        ...layer,
-                        seriesType: newSeriesType,
-                      }
-                    : layer
-                ),
+                fillOpacity: newValue,
               });
             }}
           />
-        ) : null}
 
-        {shouldDisplayDividerHr ? <ToolbarDivider /> : null}
+          <ToolbarDivider />
+        </>
+      ) : null}
 
-        {hasAreaSettings ? (
-          <>
-            <FillOpacityOption
-              isFillOpacityEnabled={true}
-              value={state?.fillOpacity ?? 0.3}
-              onChange={(newValue) => {
-                setState({
-                  ...state,
-                  fillOpacity: newValue,
-                });
-              }}
-            />
+      <PointVisibilityOption
+        enabled={isHasNonBarSeries}
+        selectedPointVisibility={state?.pointVisibility ?? PointVisibilityOptions.AUTO}
+        onChange={(newValue) => {
+          setState({
+            ...state,
+            pointVisibility: newValue,
+          });
+        }}
+      />
 
-            <ToolbarDivider />
-          </>
-        ) : null}
-
-        <PointVisibilityOption
-          enabled={isHasNonBarSeries}
-          selectedPointVisibility={state?.pointVisibility ?? PointVisibilityOptions.AUTO}
-          onChange={(newValue) => {
-            setState({
-              ...state,
-              pointVisibility: newValue,
-            });
-          }}
-        />
-
-        <LineCurveOption
-          enabled={isCurveTypeEnabled}
-          value={state?.curveType}
-          onChange={(curveType) => {
-            setState({
-              ...state,
-              curveType,
-            });
-          }}
-        />
-        <MissingValuesOptions
-          isFittingEnabled={isFittingEnabled}
-          fittingFunction={state?.fittingFunction}
-          emphasizeFitting={state?.emphasizeFitting}
-          endValue={state?.endValue}
-          onFittingFnChange={(newVal) => {
-            setState({ ...state, fittingFunction: newVal });
-          }}
-          onEmphasizeFittingChange={(newVal) => {
-            setState({ ...state, emphasizeFitting: newVal });
-          }}
-          onEndValueChange={(newVal) => {
-            setState({ ...state, endValue: newVal });
-          }}
-        />
-      </ToolbarPopover>
-    </TooltipWrapper>
+      <LineCurveOption
+        enabled={isCurveTypeEnabled}
+        value={state?.curveType}
+        onChange={(curveType) => {
+          setState({
+            ...state,
+            curveType,
+          });
+        }}
+      />
+      <MissingValuesOptions
+        isFittingEnabled={isFittingEnabled}
+        fittingFunction={state?.fittingFunction}
+        emphasizeFitting={state?.emphasizeFitting}
+        endValue={state?.endValue}
+        onFittingFnChange={(newVal) => {
+          setState({ ...state, fittingFunction: newVal });
+        }}
+        onEmphasizeFittingChange={(newVal) => {
+          setState({ ...state, emphasizeFitting: newVal });
+        }}
+        onEndValueChange={(newVal) => {
+          setState({ ...state, endValue: newVal });
+        }}
+      />
+    </>
   );
 };

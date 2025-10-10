@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { Toolbar } from './toolbar';
-export { MetricFlyoutToolbar } from './flyout_toolbar';
+export { PieToolbar } from './toolbar';
+export { PartitionFlyoutToolbar } from './flyout_toolbar';

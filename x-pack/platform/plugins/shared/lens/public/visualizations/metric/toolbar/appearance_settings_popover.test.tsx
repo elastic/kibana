@@ -9,7 +9,7 @@ import React from 'react';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { Alignment, MetricVisualizationState, PrimaryMetricPosition } from '../types';
-import { AppearancePopover } from './appearance_popover';
+import { AppearanceSettingsPopover } from './appearance_settings_popover';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 import { METRIC_LAYOUT_BY_POSITION } from '../constants';
 
@@ -70,10 +70,13 @@ const alignmentTransitions: [Alignment, string, Alignment, string][] = [
 describe('AppearancePopover', () => {
   const renderToolbarOptions = (stateOverrides: Partial<MetricVisualizationState> = {}) => {
     const state = { ...fullState, ...stateOverrides } as MetricVisualizationState;
-    const { ...rtlRest } = render(<AppearancePopover state={state} setState={mockSetState} />, {
-      // fails in concurrent mode
-      legacyRoot: true,
-    });
+    const { ...rtlRest } = render(
+      <AppearanceSettingsPopover state={state} setState={mockSetState} />,
+      {
+        // fails in concurrent mode
+        legacyRoot: true,
+      }
+    );
 
     const clickOnToolbarButton = () => {
       const button = screen.getByTestId('lnsTextOptionsButton');

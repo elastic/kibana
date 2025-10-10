@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { Toolbar } from './toolbar';
-export { MetricFlyoutToolbar } from './flyout_toolbar';
+export { HeatmapToolbar } from './toolbar_component';
+export { HeatmapFlyoutToolbar } from './flyout_toolbar';

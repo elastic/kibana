@@ -44,7 +44,9 @@ import {
   getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
-import { XyToolbar, updateLayer } from './xy_config_panel';
+import { XyToolbar } from './toolbar';
+import { XyFlyoutToolbar } from './toolbar/flyout_toolbar'; // TODO: Update import
+import { updateLayer } from './toolbar'; // TODO: Update this import
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
@@ -744,6 +746,10 @@ export const getXyVisualization = ({
 
   ToolbarComponent(props) {
     return <XyToolbar {...props} />;
+  },
+
+  FlyoutToolbarComponent(props) {
+    return <XyFlyoutToolbar {...props} />;
   },
 
   DimensionEditorComponent(props) {
