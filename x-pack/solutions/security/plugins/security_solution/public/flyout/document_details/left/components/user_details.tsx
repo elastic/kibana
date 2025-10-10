@@ -15,23 +15,23 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { UserOverview } from '../../../../overview/components/user_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
@@ -41,7 +41,6 @@ import { DefaultFieldRenderer } from '../../../../timelines/components/field_ren
 import { CellActions } from '../../shared/components/cell_actions';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
@@ -74,7 +73,6 @@ import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { buildUserNamesFilter } from '../../../../../common/search_strategy';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const USER_DETAILS_ID = 'entities-users-details';
@@ -104,14 +102,7 @@ export interface UserDetailsProps {
  */
 export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, scopeId }) => {
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns();
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-
+  const selectedPatterns = useSelectedPatterns();
   const dispatch = useDispatch();
   const { telemetry } = useKibana().services;
   // create a unique, but stable (across re-renders) query id

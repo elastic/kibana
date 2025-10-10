@@ -42,7 +42,7 @@ const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) =
 const IndicatorsPageContent: FC = () => {
   const { blockListIndicatorValue } = useBlockListContext();
 
-  const { sourcererDataView, browserFields } = useTIDataView();
+  const { browserFields } = useTIDataView();
 
   const columnSettings = useColumnSettings();
 
@@ -84,7 +84,7 @@ const IndicatorsPageContent: FC = () => {
         subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
       >
         <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+          <SiemSearchBar id={InputsModelId.global} />
         </FiltersGlobal>
 
         <IndicatorsBarChartWrapper

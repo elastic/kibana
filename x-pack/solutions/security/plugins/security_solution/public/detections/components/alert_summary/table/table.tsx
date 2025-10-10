@@ -12,17 +12,10 @@ import { getEsQueryConfig } from '@kbn/data-service';
 import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
-import type {
-  AlertsTableImperativeApi,
-  AlertsTableProps,
-} from '@kbn/response-ops-alerts-table/types';
+import type { AlertsTableImperativeApi, AlertsTableProps, } from '@kbn/response-ops-alerts-table/types';
 import { ALERT_RULE_NAME, ALERT_SEVERITY, AlertConsumers, TIMESTAMP } from '@kbn/rule-data-utils';
 import { ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
-import type {
-  EuiDataGridProps,
-  EuiDataGridStyle,
-  EuiDataGridToolBarVisibilityOptions,
-} from '@elastic/eui';
+import type { EuiDataGridProps, EuiDataGridStyle, EuiDataGridToolBarVisibilityOptions, } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import styled from '@emotion/styled';
 import { RELATED_INTEGRATION } from '../../../constants';
@@ -173,9 +166,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     [globalFilters, groupingFilters, timeRangeFilter]
   );
 
-  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
-
-  const browserFields = useBrowserFields(DataViewManagerScopeName.detections, dataView);
+  const browserFields = useBrowserFields(DataViewManagerScopeName.detections);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
@@ -184,7 +175,6 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     const combinedQuery = combineQueries({
       config: getEsQueryConfig(uiSettings),
       dataProviders: [],
-      dataViewSpec,
       dataView,
       browserFields,
       filters,
@@ -202,7 +192,7 @@ export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) 
     } catch {
       return { bool: {} };
     }
-  }, [browserFields, dataView, dataViewSpec, filters, globalQuery, uiSettings]);
+  }, [browserFields, dataView, filters, globalQuery, uiSettings]);
 
   const renderAdditionalToolbarControls = useCallback(
     () => <AdditionalToolbarControls dataView={dataView} />,

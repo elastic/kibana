@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiWindowEvent,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiWindowEvent, } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -19,9 +13,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
-import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import {
   useAssetCriticalityData,
@@ -47,10 +39,7 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
-import {
-  HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
-  HostOverview,
-} from '../../../../overview/components/host_overview';
+import { HOST_OVERVIEW_RISK_SCORE_QUERY_ID, HostOverview, } from '../../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
@@ -70,12 +59,13 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../common/components/endpoint/responder';
-import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
+import {
+  useRefetchOverviewPageRiskScore
+} from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
@@ -124,23 +114,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [dispatch]
   );
 
-  const {
-    indicesExist: oldIndicesExist,
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
-  } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
-
-  const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView.matchedIndices?.length
-    : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const selectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+  const indicesExist = !!dataView.matchedIndices?.length;
 
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
@@ -154,9 +130,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     try {
       return [
         buildEsQuery(
-          newDataViewPickerEnabled
-            ? experimentalDataView
-            : dataViewSpecToViewBase(oldSourcererDataView),
+          dataView,
           [query],
           [...hostDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -165,15 +139,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     } catch (e) {
       return [undefined, e];
     }
-  }, [
-    newDataViewPickerEnabled,
-    experimentalDataView,
-    oldSourcererDataView,
-    query,
-    hostDetailsPageFilters,
-    globalFilters,
-    uiSettings,
-  ]);
+  }, [dataView, query, hostDetailsPageFilters, globalFilters, uiSettings]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -223,7 +189,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     onChange: calculateEntityRiskScore,
   });
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -233,12 +199,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar
-              id={InputsModelId.global}
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              }
-            />
+            <SiemSearchBar id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper

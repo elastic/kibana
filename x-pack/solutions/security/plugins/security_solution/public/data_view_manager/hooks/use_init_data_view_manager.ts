@@ -19,7 +19,6 @@ import { createInitListener } from '../redux/listeners/init_listener';
 import { sharedDataViewManagerSlice } from '../redux/slices';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
 import { DataViewManagerScopeName } from '../constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useUserInfo } from '../../detections/components/user_info';
 
 type OriginalListener = Parameters<typeof originalAddListener>[0];
@@ -41,7 +40,6 @@ const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
 export const useInitDataViewManager = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const {
     loading: loadingSignalIndex,
@@ -61,12 +59,6 @@ export const useInitDataViewManager = () => {
   }, [dispatch, loadingSignalIndex, signalIndexMappingOutdated, signalIndexName]);
 
   useEffect(() => {
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    // Also, make sure it works exactly as x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/use_init_sourcerer.tsx
-    if (!newDataViewPickerEnabled) {
-      return;
-    }
-
     onSignalIndexUpdated();
     // because we only want onSignalIndexUpdated to run when signalIndexName updates,
     // but we want to know about the updates from the dependencies of onSignalIndexUpdated
@@ -74,11 +66,6 @@ export const useInitDataViewManager = () => {
   }, [signalIndexName]);
 
   useEffect(() => {
-    // TODO: (new data view picker) remove this in cleanup phase https://github.com/elastic/security-team/issues/12665
-    if (!newDataViewPickerEnabled) {
-      return;
-    }
-
     // NOTE: init listener contains logic that preloads default security solution data view
     const dataViewsLoadingListener = createInitListener({
       dataViews: services.dataViews,
@@ -118,7 +105,6 @@ export const useInitDataViewManager = () => {
     };
   }, [
     dispatch,
-    newDataViewPickerEnabled,
     services.application,
     services.dataViews,
     services.http,

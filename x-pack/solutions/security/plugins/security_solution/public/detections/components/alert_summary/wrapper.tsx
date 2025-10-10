@@ -75,7 +75,7 @@ export const Wrapper = memo(({ packages }: WrapperProps) => {
             <div data-test-subj={CONTENT_TEST_ID}>
               <IntegrationSection packages={packages} />
               <EuiHorizontalRule />
-              <SearchBarSection dataView={dataView} packages={packages} />
+              <SearchBarSection packages={packages} />
               <EuiSpacer />
               <KPIsSection signalIndexName={signalIndexName} />
               <EuiSpacer />

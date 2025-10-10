@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useBrowserFields } from './use_browser_fields';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
+import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { useDataView } from './use_data_view';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -91,12 +91,9 @@ describe('useBrowserFields', () => {
       // @ts-expect-error: DataView constructor expects more, but this is enough for our test
       fieldFormats: { getDefaultInstance: () => ({}) },
     });
-    const wrapper = renderHook(
-      () => useBrowserFields(DataViewManagerScopeName.default, oldDataView),
-      {
-        wrapper: TestProviders,
-      }
-    );
+    const wrapper = renderHook(() => useBrowserFields(DataViewManagerScopeName.default), {
+      wrapper: TestProviders,
+    });
 
     expect(wrapper.result.current).toMatchInlineSnapshot(`
       Object {

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { useIntegrations } from '../../../hooks/alert_summary/use_integrations';
@@ -18,10 +17,6 @@ export const SEARCH_BAR_TEST_ID = 'alert-summary-search-bar';
 
 export interface SearchBarSectionProps {
   /**
-   * DataView created for the alert summary page
-   */
-  dataView: DataView;
-  /**
    * List of installed AI for SOC integrations
    */
   packages: PackageListItem[];
@@ -32,10 +27,8 @@ export interface SearchBarSectionProps {
  * The component leverages the Security Solution SiemSearchBar which has a lot of logic tied to url and redux to store its values.
  * The component also has a filter button to the left of the KQL bar that allows user to select integrations.
  */
-export const SearchBarSection = memo(({ dataView, packages }: SearchBarSectionProps) => {
+export const SearchBarSection = memo(({ packages }: SearchBarSectionProps) => {
   const { integrations } = useIntegrations({ packages });
-
-  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
 
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
@@ -48,7 +41,6 @@ export const SearchBarSection = memo(({ dataView, packages }: SearchBarSectionPr
           hideFilterBar
           hideQueryMenu
           id={InputsModelId.global}
-          sourcererDataView={dataViewSpec}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

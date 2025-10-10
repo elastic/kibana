@@ -103,7 +103,6 @@ import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
 } from '../../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import {
   canEditRuleWithActions,
@@ -268,13 +267,8 @@ export const RuleDetailsPage = connector(
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 
-    const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-      useSourcererDataView(SourcererScopeName.detections);
-    const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-    const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.detections);
-    const isLoadingIndexPattern = newDataViewPickerEnabled
-      ? status !== 'ready'
-      : oldIsLoadingIndexPattern;
+    const { dataView, status } = useDataView(SourcererScopeName.detections);
+    const isLoadingIndexPattern = status !== 'ready';
 
     const loading = userInfoLoading || listsConfigLoading;
     const { detailName: ruleId } = useParams<{
@@ -645,9 +639,7 @@ export const RuleDetailsPage = connector(
             <SiemSearchBar
               id={InputsModelId.global}
               pollForSignalIndex={pollForSignalIndex}
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataViewSpec
-              }
+              sourcererDataView={dataView}
             />
           </FiltersGlobal>
           <RuleDetailsContextProvider>
@@ -822,8 +814,7 @@ export const RuleDetailsPage = connector(
                           <GroupedAlertsTable
                             accordionButtonContent={defaultGroupTitleRenderers}
                             accordionExtraActionGroupStats={accordionExtraActionGroupStats}
-                            dataViewSpec={oldSourcererDataViewSpec} // TODO: newDataViewPickerEnabled Should be removed after migrating to new data view picker
-                            dataView={experimentalDataView}
+                            dataView={dataView}
                             defaultFilters={alertMergedFilters}
                             defaultGroupingOptions={defaultGroupingOptions}
                             from={from}

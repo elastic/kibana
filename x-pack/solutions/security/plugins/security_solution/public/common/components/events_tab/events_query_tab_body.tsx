@@ -81,8 +81,6 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
 }) => {
   let ACTION_BUTTON_COUNT = MAX_ACTION_BUTTON_COUNT;
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
@@ -198,9 +196,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
           filterQuery={filterQuery}
           {...(showExternalAlerts ? alertsHistogramConfig : eventsHistogramConfig)}
           subtitle={getHistogramSubtitle}
-          sourcererScopeId={
-            newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
-          }
+          sourcererScopeId={SourcererScopeName.explore}
         />
       )}
       <StatefulEventsViewer
@@ -211,9 +207,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={
-          newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
-        }
+        sourcererScope={SourcererScopeName.explore}
         tableId={tableId}
         unit={showExternalAlerts ? i18n.EXTERNAL_ALERTS_UNIT : i18n.EVENTS_UNIT}
         defaultModel={defaultModel}

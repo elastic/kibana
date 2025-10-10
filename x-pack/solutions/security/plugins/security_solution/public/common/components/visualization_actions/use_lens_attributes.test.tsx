@@ -12,14 +12,13 @@ import { useLensAttributes } from './use_lens_attributes';
 import {
   fieldNameExistsFilter,
   getDetailsPageFilter,
-  getIndexFilters,
-  sourceOrDestinationIpExistsFilter,
-  getNetworkDetailsPageFilter,
   getESQLGlobalFilters,
+  getIndexFilters,
+  getNetworkDetailsPageFilter,
+  sourceOrDestinationIpExistsFilter,
 } from './utils';
 
 import { filterFromSearchBar, queryFromSearchBar, wrapper } from './mocks';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import { SecurityPageName } from '../../../app/types';
@@ -27,16 +26,12 @@ import type { Query } from '@kbn/es-query';
 import { getEventsHistogramLensAttributes } from './lens_attributes/common/events';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import {
-  defaultImplementation,
-  withIndices,
-} from '../../../data_view_manager/hooks/__mocks__/use_data_view';
+import { defaultImplementation, withIndices, } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('generated-uuid'),
 }));
 
-jest.mock('../../../sourcerer/containers');
 jest.mock('../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn(),
 }));
@@ -56,12 +51,6 @@ describe('useLensAttributes', () => {
   });
 
   beforeEach(() => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      dataViewId: 'security-solution-default',
-      indicesExist: true,
-      selectedPatterns: ['auditbeat-*'],
-      sourcererDataView: {},
-    });
     (useRouteSpy as jest.Mock).mockReturnValue([
       {
         detailName: 'mockHost',
@@ -290,12 +279,6 @@ describe('useLensAttributes', () => {
   it('should return null if no indices exist', () => {
     jest.mocked(useDataView).mockImplementation(defaultImplementation);
 
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      dataViewId: 'security-solution-default',
-      indicesExist: false,
-      selectedPatterns: ['auditbeat-*'],
-      sourcererDataView: {},
-    });
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -309,12 +292,6 @@ describe('useLensAttributes', () => {
   });
 
   it('should return null if stackByField is an empty string', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      dataViewId: 'security-solution-default',
-      indicesExist: false,
-      selectedPatterns: ['auditbeat-*'],
-      sourcererDataView: {},
-    });
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -328,12 +305,6 @@ describe('useLensAttributes', () => {
   });
 
   it('should return null if extraOptions.breakDownField is an empty string', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      dataViewId: 'security-solution-default',
-      indicesExist: false,
-      selectedPatterns: ['auditbeat-*'],
-      sourcererDataView: {},
-    });
     const { result } = renderHook(
       () =>
         useLensAttributes({
@@ -350,12 +321,6 @@ describe('useLensAttributes', () => {
   });
 
   it('should return Lens attributes if adHocDataViews exist', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      dataViewId: 'security-solution-default',
-      indicesExist: false,
-      selectedPatterns: ['auditbeat-*'],
-      sourcererDataView: {},
-    });
     const { result } = renderHook(
       () =>
         useLensAttributes({

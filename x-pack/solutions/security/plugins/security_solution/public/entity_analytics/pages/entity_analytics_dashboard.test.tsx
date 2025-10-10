@@ -6,27 +6,17 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { EntityAnalyticsPage } from './entity_analytics_dashboard';
 import { TestProviders } from '../../common/mock';
 
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn(() => ({
-    indicesExist: true,
-    loading: false,
-    sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
-  })),
-}));
-
 jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn((flag: string) => {
-    if (flag === 'newDataViewPickerEnabled') return false;
     if (flag === 'entityStoreDisabled') return false;
     return false;
   }),
@@ -79,14 +69,7 @@ describe('EntityAnalyticsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: true,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
-    });
-
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((flag: string) => {
-      if (flag === 'newDataViewPickerEnabled') return false;
       if (flag === 'entityStoreDisabled') return false;
       return false;
     });
@@ -131,12 +114,6 @@ describe('EntityAnalyticsPage', () => {
   });
 
   it('renders loading spinner when sourcerer is loading', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: true,
-      loading: true,
-      sourcererDataView: { id: 'test', matchedIndices: ['index-1'] },
-    });
-
     render(
       <MemoryRouter>
         <EntityAnalyticsPage />
@@ -166,12 +143,6 @@ describe('EntityAnalyticsPage', () => {
   });
 
   it('renders EmptyPrompt when indices do not exist', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: false,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: [] },
-    });
-
     render(
       <MemoryRouter>
         <EntityAnalyticsPage />
@@ -184,12 +155,6 @@ describe('EntityAnalyticsPage', () => {
   });
 
   it('skips EmptyPrompt and renders main content when onSkip is called', async () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      indicesExist: false,
-      loading: false,
-      sourcererDataView: { id: 'test', matchedIndices: [] },
-    });
-
     render(
       <MemoryRouter>
         <EntityAnalyticsPage />

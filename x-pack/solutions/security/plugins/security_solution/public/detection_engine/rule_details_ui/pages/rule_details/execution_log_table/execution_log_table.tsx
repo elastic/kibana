@@ -10,23 +10,23 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import moment from 'moment';
 import type {
-  OnTimeChangeProps,
-  OnRefreshProps,
-  OnRefreshChangeProps,
-  EuiSwitchEvent,
   CriteriaWithPagination,
+  EuiSwitchEvent,
+  OnRefreshChangeProps,
+  OnRefreshProps,
+  OnTimeChangeProps,
 } from '@elastic/eui';
 import {
-  EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSuperDatePicker,
-  EuiSpacer,
-  EuiSwitch,
   EuiBasicTable,
   EuiButton,
   EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiSuperDatePicker,
+  EuiSwitch,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -36,9 +36,6 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { dataViewSpecToViewBase } from '../../../../../common/lib/kuery';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 
 import {
@@ -57,7 +54,6 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -80,9 +76,9 @@ import { TextBlock } from '../../../../rule_monitoring/components/basic/text/tex
 import * as i18n from './translations';
 import {
   EXECUTION_LOG_COLUMNS,
-  getMessageColumn,
-  getExecutionLogMetricsColumns,
   expanderColumn,
+  getExecutionLogMetricsColumns,
+  getMessageColumn,
   getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
@@ -162,13 +158,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     },
   } = useRuleDetailsContext();
 
-  // Index for `add filter` action and toasts for errors
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView } = useDataView(SourcererScopeName.detections);
 
   const { addError, addSuccess, remove } = useAppToasts();
 
@@ -243,11 +233,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   // Cache UUID field from data view as it can be expensive to iterate all data view fields
   const uuidDataViewField = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataView.fields?.getByName(EXECUTION_UUID_FIELD_NAME)
-        : oldSourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
-    [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataView.fields]
+    () => dataView.fields?.getByName(EXECUTION_UUID_FIELD_NAME),
+    [dataView]
   );
 
   // Callbacks
@@ -313,20 +300,12 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const onFilterByExecutionIdCallback = useCallback(
     (executionId: string, executionStart: string) => {
-      const dataViewAsViewBase = newDataViewPickerEnabled
-        ? experimentalDataView
-        : dataViewSpecToViewBase(oldSourcererDataView);
-
-      if (
-        uuidDataViewField != null &&
-        typeof uuidDataViewField !== 'undefined' &&
-        dataViewAsViewBase
-      ) {
+      if (uuidDataViewField != null && typeof uuidDataViewField !== 'undefined' && dataView) {
         // Update cached global query state with current state as a rollback point
         cachedGlobalQueryState.current = { filters, query, timerange };
         // Create filter & daterange constraints
         const filter = buildFilter(
-          dataViewAsViewBase,
+          dataView,
           uuidDataViewField,
           FILTERS.PHRASE,
           false,
@@ -372,9 +351,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       }
     },
     [
-      newDataViewPickerEnabled,
-      experimentalDataView,
-      oldSourcererDataView,
+      dataView,
       uuidDataViewField,
       filters,
       query,

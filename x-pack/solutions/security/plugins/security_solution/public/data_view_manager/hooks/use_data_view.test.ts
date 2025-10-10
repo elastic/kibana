@@ -8,9 +8,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { DataView } from '@kbn/data-views-plugin/public';
 
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
+import { DataViewManagerScopeName, DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { useDataView } from './use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSelector } from 'react-redux';
 import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 
@@ -55,7 +54,6 @@ jest.mock('../../common/lib/kibana', () => {
 describe('useDataView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
     jest
       .mocked(useSelector)
       .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'ready' });
@@ -106,16 +104,6 @@ describe('useDataView', () => {
     await waitFor(() => {
       expect(result.current.status).toEqual('loading');
     });
-  });
-
-  it('should not call get if newDataViewPickerEnabled is false', async () => {
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
-
-    const { result, rerender } = renderHook(() => useDataView(DataViewManagerScopeName.default));
-
-    await act(async () => rerender(DataViewManagerScopeName.default));
-    expect(mockGet).not.toHaveBeenCalled();
-    expect(result.current.status).toBe('pristine');
   });
 
   it('should not call get if dataViewId is missing', async () => {

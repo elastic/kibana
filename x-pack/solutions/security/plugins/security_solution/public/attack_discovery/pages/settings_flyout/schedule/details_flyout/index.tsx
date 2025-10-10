@@ -20,7 +20,6 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { RuleAction } from '@kbn/alerting-types';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
@@ -31,7 +30,6 @@ import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
@@ -84,8 +82,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
       id: scheduleId,
     });
 
-  const { sourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.detections);
+  const { dataView } = useDataView(DataViewManagerScopeName.detections);
 
   const [isEditing, setIsEditing] = useState(false);
 
@@ -104,9 +101,8 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           scheduleData,
           alertsIndexPattern ?? '',
           connector,
-          sourcererDataView,
           uiSettings,
-          experimentalDataView
+          dataView
         );
         await updateAttackDiscoverySchedule({ id: scheduleId, scheduleToUpdate });
         setIsEditing(false);
@@ -117,9 +113,8 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     [
       aiConnectors,
       alertsIndexPattern,
-      sourcererDataView,
       uiSettings,
-      experimentalDataView,
+      dataView,
       updateAttackDiscoverySchedule,
       scheduleId,
     ]

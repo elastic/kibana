@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiWindowEvent,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiWindowEvent, } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
@@ -21,8 +15,6 @@ import { buildEsQuery } from '@kbn/es-query';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
 import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import {
   useAssetCriticalityData,
@@ -54,17 +46,13 @@ import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
 import { getUsersDetailsPageFilters } from './helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import type { UserSummaryProps } from '../../../../overview/components/user_overview';
-import {
-  USER_OVERVIEW_RISK_SCORE_QUERY_ID,
-  UserOverview,
-} from '../../../../overview/components/user_overview';
+import { USER_OVERVIEW_RISK_SCORE_QUERY_ID, UserOverview, } from '../../../../overview/components/user_overview';
 import { useObservedUserDetails } from '../../containers/users/observed_details';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
@@ -73,7 +61,9 @@ import { UsersType } from '../../store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
-import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
+import {
+  useRefetchOverviewPageRiskScore
+} from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
@@ -110,31 +100,15 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
-  const {
-    indicesExist: oldIndicesExist,
-    selectedPatterns: oldSelectedPatterns,
-    sourcererDataView: oldSourcererDataView,
-  } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
-  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
-
-  const indicesExist = newDataViewPickerEnabled
-    ? experimentalDataView.hasMatchedIndices()
-    : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const selectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
+  const indicesExist = dataView.hasMatchedIndices();
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
       return [
         buildEsQuery(
-          newDataViewPickerEnabled
-            ? experimentalDataView
-            : dataViewSpecToViewBase(oldSourcererDataView),
+          dataView,
           [query],
           [...usersDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -143,15 +117,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     } catch (e) {
       return [undefined, e];
     }
-  }, [
-    experimentalDataView,
-    globalFilters,
-    newDataViewPickerEnabled,
-    oldSourcererDataView,
-    query,
-    uiSettings,
-    usersDetailsPageFilters,
-  ]);
+  }, [dataView, globalFilters, query, uiSettings, usersDetailsPageFilters]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -222,7 +188,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     onChange: calculateEntityRiskScore,
   });
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 
@@ -232,12 +198,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar
-              sourcererDataView={
-                newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView
-              } // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
-              id={InputsModelId.global}
-            />
+            <SiemSearchBar id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -282,11 +243,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   narrowDateRange={narrowDateRange}
                   indexPatterns={selectedPatterns}
                   jobNameById={jobNameById}
-                  scopeId={
-                    newDataViewPickerEnabled
-                      ? SourcererScopeName.explore
-                      : SourcererScopeName.default
-                  }
+                  scopeId={SourcererScopeName.explore}
                 />
               )}
             </AnomalyTableProvider>

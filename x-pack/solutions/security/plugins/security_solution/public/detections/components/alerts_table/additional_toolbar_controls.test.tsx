@@ -8,9 +8,8 @@
 import React from 'react';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
@@ -25,7 +24,6 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/hooks/use_selector');
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
@@ -42,14 +40,6 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-const sourcererDataView = {
-  indicesExist: true,
-  loading: false,
-  indexPattern: {
-    fields: [],
-  },
-  browserFields: {},
-};
 const mockOptions = [
   { label: 'ruleName', key: 'kibana.alert.rule.name' },
   { label: 'userName', key: 'user.name' },
@@ -70,11 +60,6 @@ describe('AdditionalToolbarControls', () => {
       showBuildBlockAlerts: false,
     });
     jest.clearAllMocks();
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      ...sourcererDataView,
-      selectedPatterns: ['myFakebeat-*'],
-      sourcererDataView: {},
-    });
   });
 
   afterEach(() => {

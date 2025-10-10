@@ -6,21 +6,20 @@
  */
 
 import type { ComponentProps } from 'react';
-import React, { useCallback, useMemo, memo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import {
   dataTableActions,
   dataTableSelectors,
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
-import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { GetSecurityAlertsTableProp } from './types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { SummaryViewSelector } from '../../../common/components/events_viewer/summary_view_select';
 import { updateGroups } from '../../../common/store/grouping/actions';
@@ -30,7 +29,6 @@ import { useDataTableFilters } from '../../../common/hooks/use_data_table_filter
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { AdditionalFiltersAction } from './additional_filters_action';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const { changeViewMode } = dataTableActions;
 
@@ -45,12 +43,7 @@ const AdditionalToolbarControlsComponent = ({
     services: { telemetry },
   } = useKibana();
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
-
-  const isNewDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
+  const { dataView } = useDataView(SourcererScopeName.detections);
 
   const groupId = useMemo(() => groupIdSelector(), []);
   const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
@@ -79,13 +72,7 @@ const AdditionalToolbarControlsComponent = ({
     [dispatch, tableType, trackGroupChange]
   );
 
-  const fields = useMemo(
-    () =>
-      isNewDataViewPickerEnabled
-        ? experimentalDataView.fields.map((field) => field.spec)
-        : Object.values(oldSourcererDataView.fields || {}),
-    [experimentalDataView.fields, isNewDataViewPickerEnabled, oldSourcererDataView.fields]
-  );
+  const fields = useMemo(() => dataView.fields.map((field) => field.spec), [dataView.fields]);
 
   const groupSelector = useGetGroupSelectorStateless({
     groupingId: tableType,
