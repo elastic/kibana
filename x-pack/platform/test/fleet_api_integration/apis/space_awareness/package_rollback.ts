@@ -23,11 +23,14 @@ export default function (providerContext: FtrProviderContext) {
 
   describe('package rollback', function () {
     skipIfNoDockerRegistry(providerContext);
-    const apiClient = new SpaceTestApiClient(supertestWithoutAuth, {
+    const apiClientDefaultSpace = new SpaceTestApiClient(supertestWithoutAuth, {
       username: testUsers.fleet_all_int_all_default_space_only.username,
       password: testUsers.fleet_all_int_all_default_space_only.password,
     });
-
+    const apiClientAllSpaces = new SpaceTestApiClient(supertestWithoutAuth, {
+      username: testUsers.fleet_all_int_all.username,
+      password: testUsers.fleet_all_int_all.password,
+    });
     before(async () => {
       await setupTestUsers(getService('security'), true);
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
@@ -37,7 +40,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       await cleanFleetIndices(esClient);
 
-      await apiClient.postEnableSpaceAwareness();
+      await apiClientDefaultSpace.postEnableSpaceAwareness();
 
       await createTestSpace(providerContext, TEST_SPACE_1);
     });
@@ -54,13 +57,13 @@ export default function (providerContext: FtrProviderContext) {
     const policyIdInOtherSpace = 'multiple-versions-3';
 
     beforeEach(async () => {
-      await apiClient.installPackage({
+      await apiClientDefaultSpace.installPackage({
         pkgName: 'multiple_versions',
         force: true,
         pkgVersion: '0.1.0',
       });
       // Create package policies
-      await apiClient.createPackagePolicy(undefined, {
+      await apiClientDefaultSpace.createPackagePolicy(undefined, {
         id: packagePolicyId,
         policy_ids: [],
         package: {
@@ -73,22 +76,18 @@ export default function (providerContext: FtrProviderContext) {
         inputs: {},
       });
 
-      await supertest
-        .post(`/s/${TEST_SPACE_1}/api/fleet/package_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          id: policyIdInOtherSpace,
-          policy_ids: [],
-          package: {
-            name: 'multiple_versions',
-            version: '0.1.0',
-          },
-          name: policyIdInOtherSpace,
-          description: '',
-          namespace: '',
-          inputs: {},
-        })
-        .expect(200);
+      await apiClientAllSpaces.createPackagePolicy(TEST_SPACE_1, {
+        id: policyIdInOtherSpace,
+        policy_ids: [],
+        package: {
+          name: 'multiple_versions',
+          version: '0.1.0',
+        },
+        name: policyIdInOtherSpace,
+        description: '',
+        namespace: '',
+        inputs: {},
+      });
     });
 
     afterEach(async () => {
@@ -98,8 +97,8 @@ export default function (providerContext: FtrProviderContext) {
         .send({ force: true })
         .expect(200);
 
-      await apiClient.deletePackagePolicy(packagePolicyId);
-      await apiClient.deletePackagePolicy(policyIdInOtherSpace);
+      await apiClientDefaultSpace.deletePackagePolicy(packagePolicyId);
+      await apiClientDefaultSpace.deletePackagePolicy(policyIdInOtherSpace);
     });
 
     async function assertPackagePoliciesVersion(expectedVersion: string) {
@@ -190,13 +189,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should fail _bulk_rollback if not allowed to update package policies in all spaces', async () => {
       await upgradePackage('multiple_versions', '0.1.0', '0.2.0', true);
-      await supertest
-        .post(`/s/${TEST_SPACE_1}/api/fleet/package_policies/upgrade`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          packagePolicyIds: [policyIdInOtherSpace],
-        })
-        .expect(200);
+      await apiClientAllSpaces.upgradePackagePolicies(TEST_SPACE_1, [policyIdInOtherSpace]);
 
       const res = await supertestWithoutAuth
         .post(`/api/fleet/epm/packages/_bulk_rollback`)
@@ -213,11 +206,7 @@ export default function (providerContext: FtrProviderContext) {
       await verifyBulkRollbackFailedResult(res.body.taskId);
 
       // Verify rollback succeeds if user has permissions in all spaces
-      await supertestWithoutAuth
-        .post(`/api/fleet/epm/packages/multiple_versions/rollback`)
-        .auth(testUsers.fleet_all_int_all.username, testUsers.fleet_all_int_all.password)
-        .set('kbn-xsrf', 'xxxx')
-        .expect(200);
+      await apiClientAllSpaces.rollbackPackage({ pkgName: 'multiple_versions' });
 
       await assertPackageInstallVersion('0.1.0');
       await assertPackagePoliciesVersion('0.1.0');
