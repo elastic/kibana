@@ -263,6 +263,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
       const saveButton = (
         <EuiButton
+          data-test-subj="agentFormSaveButton"
           form={agentFormId}
           size={size}
           type="submit"

@@ -8,6 +8,7 @@
 import { last } from 'lodash';
 
 import type { ToolType } from '@kbn/onechat-common';
+import { subj } from '@kbn/test-subj-selector';
 import { AGENT_BUILDER_APP_ID } from '../../onechat/common/constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { FtrService } from '../ftr_provider_context';
@@ -18,6 +19,7 @@ import {
 } from '../../onechat_api_integration/utils/proxy_scenario';
 
 export class OneChatPageObject extends FtrService {
+  private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
@@ -360,5 +362,71 @@ export class OneChatPageObject extends FtrService {
     await this.clickToolsBulkDelete();
     await this.confirmModalConfirm();
     await this.testSubjects.click('toastCloseButton');
+  }
+
+  /*
+   * ==========================
+   * Agents
+   * ==========================
+   */
+  async createAgentViaUI({ id, name, labels }: { id: string; name: string; labels: string[] }) {
+    await this.navigateToApp('agents/new');
+    const selectors = {
+      inputs: {
+        id: 'agentSettingsIdInput',
+        displayName: 'agentSettingsDisplayNameInput',
+        description: 'agentSettingsDescriptionInput',
+        labels: 'comboBoxSearchInput',
+      },
+      saveButton: 'agentFormSaveButton',
+      labelsComboBox: 'agentSettingsLabelsComboBox',
+    };
+    await this.testSubjects.append(selectors.inputs.id, id);
+    await this.testSubjects.append(selectors.inputs.displayName, name);
+    await this.testSubjects.append(selectors.inputs.description, `Agent for testing ${id}`);
+    const labelsComboBox = await this.testSubjects.find(selectors.labelsComboBox);
+    const labelsInput = await this.testSubjects.findDescendant(
+      selectors.inputs.labels,
+      labelsComboBox
+    );
+    for (const label of labels) {
+      await labelsInput.click();
+      await labelsInput.type(label);
+      await labelsInput.pressKeys(this.browser.keys.ENTER);
+    }
+    await this.testSubjects.click(selectors.saveButton);
+  }
+
+  async searchAgentsList(term: string) {
+    const contentSelector = subj('agentBuilderAgentsListContent');
+    const searchSelector = `${contentSelector} .euiFieldSearch`;
+    const searchbox = await this.find.byCssSelector(searchSelector);
+    await searchbox.click();
+    await searchbox.type(term);
+  }
+
+  async selectAgentLabel(label: string) {
+    const contentSelector = subj('agentBuilderAgentsListContent');
+    const labelsButtonSelector = `${contentSelector} button[type="button"][aria-label="Labels Selection"]`;
+    const optionSelector = `ul[role="listbox"][aria-label="Labels"] > li[role="option"][title="${label}"]`;
+
+    const labelsButton = await this.find.byCssSelector(labelsButtonSelector);
+    await labelsButton.click();
+    await this.find.clickByCssSelector(optionSelector);
+  }
+
+  async countAgentsListRows() {
+    const rows = await this.testSubjects.findAll('^agentBuilderAgentsListRow');
+    return rows.length;
+  }
+
+  isAgentInList(agentId: string) {
+    return this.testSubjects.exists(`agentBuilderAgentsListRow-${agentId}`);
+  }
+
+  async clickAgentChat(agentId: string) {
+    const row = await this.testSubjects.find(`agentBuilderAgentsListRow-${agentId}`);
+    const chatButton = await this.testSubjects.findDescendant('agentBuilderAgentsListChat', row);
+    await chatButton.click();
   }
 }

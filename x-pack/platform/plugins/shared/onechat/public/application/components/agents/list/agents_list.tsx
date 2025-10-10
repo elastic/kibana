@@ -114,6 +114,7 @@ export const AgentsList: React.FC = () => {
           icon: 'comment',
           name: actionLabels.chat,
           description: actionLabels.chatDescription,
+          'data-test-subj': 'agentBuilderAgentsListChat',
           isPrimary: true,
           showOnHover: true,
           href: (agent) =>
@@ -124,6 +125,7 @@ export const AgentsList: React.FC = () => {
           icon: 'pencil',
           name: actionLabels.edit,
           description: actionLabels.editDescription,
+          'data-test-subj': 'agentBuilderAgentsListEdit',
           isPrimary: true,
           showOnHover: true,
           href: (agent) => createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
@@ -134,6 +136,7 @@ export const AgentsList: React.FC = () => {
           icon: 'copy',
           name: actionLabels.clone,
           description: actionLabels.cloneDescription,
+          'data-test-subj': 'agentBuilderAgentsListClone',
           showOnHover: true,
           href: (agent) =>
             createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
@@ -147,6 +150,7 @@ export const AgentsList: React.FC = () => {
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiIcon type="trash" color="danger" />
                   <EuiLink
+                    data-test-subj="agentBuilderAgentsListDelete"
                     onClick={() => {
                       deleteAgent({ agent });
                     }}
@@ -188,6 +192,8 @@ export const AgentsList: React.FC = () => {
 
   return (
     <EuiInMemoryTable
+      data-test-subj="agentBuilderAgentsListTable"
+      rowProps={(row) => ({ 'data-test-subj': `agentBuilderAgentsListRow-${row.id}` })}
       items={agents}
       itemId={(agent) => agent.id}
       columns={columns}
