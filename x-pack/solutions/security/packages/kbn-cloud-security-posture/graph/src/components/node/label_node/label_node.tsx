@@ -100,7 +100,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
             >
               <EuiTextTruncate truncation="end" text={text} />
             </EuiText>
-              <LabelNodeBadges analysis={analysis} onEventClick={eventClickHandler} />
+            <LabelNodeBadges analysis={analysis} onEventClick={eventClickHandler} />
           </div>
         </LabelShape>
         {showStackedShape(numEvents + numAlerts) && (
