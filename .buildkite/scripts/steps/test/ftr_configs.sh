@@ -55,7 +55,7 @@ while read -r config; do
   FULL_COMMAND="node scripts/functional_tests --bail --config $config $EXTRA_ARGS"
 
   CONFIG_EXECUTION_KEY="${config}_executed"
-  IS_CONFIG_EXECUTION=$(buildkite-agent meta-data get "$CONFIG_EXECUTION_KEY" --default "false")
+  IS_CONFIG_EXECUTION=$(buildkite-agent meta-data get "$CONFIG_EXECUTION_KEY" --default "false" --log-level error)
 
   if [[ "${IS_CONFIG_EXECUTION}" == "true" ]]; then
     echo "--- [ already-tested ] $FULL_COMMAND"
