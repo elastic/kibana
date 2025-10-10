@@ -6,6 +6,7 @@
  */
 
 import { AUTHENTICATION } from '../../../common/lib/authentication';
+import { createSpaces, deleteSpaces } from '../../../common/lib/space_test_utils';
 import { SPACES } from '../../../common/lib/spaces';
 import { getAllTestSuiteFactory } from '../../../common/suites/get_all.agnostic';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
@@ -30,7 +31,17 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
     shareSavedObjectsIntoSpace: false,
   };
 
+  const spacesService = context.getService('spaces');
+  const isServerless = context.getService('config').get('serverless');
+
   describe('get all', () => {
+    before(async () => {
+      await createSpaces(spacesService, isServerless);
+    });
+
+    after(async () => {
+      await deleteSpaces(spacesService);
+    });
     /* eslint-disable @typescript-eslint/naming-convention */
     [
       {
