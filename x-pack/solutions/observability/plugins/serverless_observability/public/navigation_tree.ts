@@ -62,7 +62,9 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.overview.title', {
               defaultMessage: 'Observability',
             }),
-            link: 'observability-overview' as const,
+            link: overviewAvailable
+              ? ('observability-overview' as const)
+              : ('observabilityOnboarding' as const),
             renderAs: 'home',
             icon: 'logoObservability',
             sideNavVersion: 'v2',
