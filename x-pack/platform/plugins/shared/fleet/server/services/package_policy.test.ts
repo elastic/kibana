@@ -213,20 +213,27 @@ const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof audi
 
 type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
 
-const mockAgentPolicyGet = (spaceIds: string[] = ['default']) => {
+const mockAgentPolicyGet = (spaceIds: string[] = ['default'], additionalProps?: any) => {
+  const basePolicy = {
+    id: 'agentPolicy1',
+    name: 'Test Agent Policy',
+    namespace: 'test',
+    status: 'active',
+    is_managed: false,
+    updated_at: new Date().toISOString(),
+    updated_by: 'test',
+    revision: 1,
+    is_protected: false,
+    space_ids: spaceIds,
+    ...additionalProps,
+  };
+
   mockAgentPolicyService.get.mockImplementation(
-    (_soClient: SavedObjectsClientContract, id: string, _force = false, _errorMessage?: string) => {
+    (_soClient: SavedObjectsClientContract, id: string, withPackagePolicies?: boolean) => {
       return Promise.resolve({
         id,
-        name: 'Test Agent Policy',
-        namespace: 'test',
-        status: 'active',
-        is_managed: false,
-        updated_at: new Date().toISOString(),
-        updated_by: 'test',
-        revision: 1,
-        is_protected: false,
-        space_ids: spaceIds,
+        withPackagePolicies,
+        ...basePolicy,
       });
     }
   );
@@ -3146,19 +3153,194 @@ describe('Package policy service', () => {
   });
 
   describe('delete', () => {
-    // TODO: Add tests
-    it('should allow to delete a package policy', async () => {});
+    const mockPackagePolicy = {
+      id: 'test-package-policy',
+      type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      attributes: createPackagePolicyMock(),
+      references: [],
+    };
+
+    it('should allow to delete package policies from ES index', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+
+      mockAgentPolicyGet();
+
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: idToDelete, type: 'ingest-package-policies' }],
+        { force: true }
+      );
+    });
+    it('should allow to delete orphaned package policies from ES index', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+
+      // agent policy not found
+      mockAgentPolicyService.get.mockRejectedValueOnce({
+        output: { statusCode: 404, payload: { message: 'policy not found' } },
+      });
+
+      mockAgentPolicyService.getByIDs.mockResolvedValueOnce([
+        {
+          id: 'agentPolicy1',
+          name: 'Test Agent Policy',
+          namespace: 'test',
+          status: 'active',
+          is_managed: false,
+          updated_at: new Date().toISOString(),
+          updated_by: 'test',
+          revision: 1,
+          is_protected: false,
+          space_ids: ['default'],
+        },
+      ]);
+
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete]);
+
+      expect(soClient.bulkDelete).toHaveBeenCalledWith(
+        [{ id: idToDelete, type: 'ingest-package-policies' }],
+        { force: true }
+      );
+    });
+
+    it('should not allow to delete managed package policies', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+
+      soClient.get.mockResolvedValueOnce({
+        ...mockPackagePolicy,
+      });
+      const managedAgentPolicy = {
+        id: 'agentPolicy1',
+        name: 'Test Agent Policy',
+        namespace: 'test',
+        status: 'active',
+        is_managed: true,
+        updated_at: new Date().toISOString(),
+        updated_by: 'test',
+        revision: 1,
+        is_protected: false,
+        space_ids: ['default'],
+      } as any;
+      // agent policy not found
+      mockAgentPolicyService.get.mockResolvedValueOnce(managedAgentPolicy);
+
+      mockAgentPolicyService.getByIDs.mockResolvedValueOnce([managedAgentPolicy]);
+
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+
+      expect(await packagePolicyService.delete(soClient, esClient, [idToDelete])).toEqual([
+        {
+          body: {
+            message:
+              'Cannot remove integrations of hosted agent policy in Fleet because the agent policy is managed by an external orchestration solution, such as Elastic Cloud, Kubernetes, etc. Please make changes using your orchestration solution.',
+          },
+          id: 'c6d16e42-c32d-4dce-8a88-113cfe276ad1',
+          statusCode: 400,
+          success: false,
+        },
+      ]);
+
+      expect(soClient.bulkDelete).not.toHaveBeenCalled();
+    });
 
     it('should call audit logger', async () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      const mockPackagePolicy = {
-        id: 'test-package-policy',
-        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-        attributes: {},
-        references: [],
-      };
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [{ ...mockPackagePolicy }],
+      });
 
       soClient.get.mockResolvedValueOnce({
         ...mockPackagePolicy,
@@ -3175,6 +3357,13 @@ describe('Package policy service', () => {
         id: 'test-package-policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
+    });
+
+    it('should return empty array if no package policies are found', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const res = await packagePolicyService.delete(soClient, esClient, ['test-package-policy']);
+      expect(res).toEqual([]);
     });
   });
 
