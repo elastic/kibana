@@ -1184,7 +1184,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
             unauthorizedTypes: [...typesRequiringAccessControl],
             unauthorizedSpaces: [...spacesToAuthorize],
           });
-          throw SavedObjectsErrorHelpers.decorateForbiddenError(err);
         },
       });
 

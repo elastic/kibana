@@ -1300,7 +1300,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(transferResponse.body).to.have.property('message');
         expect(transferResponse.body.message).to.contain(
-          `Unable to manage_access_control for types read_only_type`
+          `Access denied: Unable to manage access control for read_only_type`
         );
       });
 
@@ -1560,7 +1560,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(403);
         expect(updateResponse.body).to.have.property('message');
         expect(updateResponse.body.message).to.contain(
-          `Unable to manage_access_control for types read_only_type`
+          `Access denied: Unable to manage access control for read_only_type`
         );
       });
 

@@ -180,9 +180,7 @@ export const performBulkCreate = async <T>(
     const preflightResult =
       preflightCheckIndex !== undefined ? preflightCheckResponse[preflightCheckIndex] : undefined;
 
-    // ToDo: replace this ts expect error
-    // @ts-expect-error MultiGetHit._source is optional
-    const existingAccessControl = preflightResult?._source?.accessControl;
+    const existingAccessControl = preflightResult?.existingDocument?._source?.accessControl;
 
     const accessControlToWrite = existingAccessControl
       ? existingAccessControl
