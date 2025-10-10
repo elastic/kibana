@@ -18,7 +18,7 @@ export const ruleUpgradeFlyoutButtonClickEvent: RuleUpgradeTelemetryEvent = {
         optional: false,
       },
     },
-    hasMissingBaseVersion: {
+    hasBaseVersion: {
       type: 'boolean',
       _meta: {
         description: 'Indicates if the rule has a missing base version',
@@ -44,7 +44,7 @@ export const ruleUpgradeSingleButtonClickEvent: RuleUpgradeTelemetryEvent = {
 export const ruleUpgradeOpenFlyoutEvent: RuleUpgradeTelemetryEvent = {
   eventType: RuleUpgradeEventTypes.RuleUpgradeFlyoutOpen,
   schema: {
-    hasMissingBaseVersion: {
+    hasBaseVersion: {
       type: 'boolean',
       _meta: {
         description: 'Indicates if the rule has a missing base version',
