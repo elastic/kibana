@@ -57,7 +57,10 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
+import {
+  ESQLEditorTelemetryService,
+  TelemetryQuerySubmittedProps,
+} from './telemetry/telemetry_service';
 import {
   clearCacheWhenOld,
   filterDataErrors,
@@ -194,22 +197,34 @@ const ESQLEditorInternal = function ESQLEditor({
     [onTextLangQueryChange]
   );
 
-  const onQuerySubmit = useCallback(() => {
-    if (isQueryLoading && isLoading && allowQueryCancellation) {
-      abortController?.abort();
-      setIsQueryLoading(false);
-    } else {
-      setIsQueryLoading(true);
-      const abc = new AbortController();
-      setAbortController(abc);
+  const onQuerySubmit = useCallback(
+    async (
+      source: TelemetryQuerySubmittedProps['exec_source'],
+      sourceUI: TelemetryQuerySubmittedProps['exec_source_ui']
+    ) => {
+      if (isQueryLoading && isLoading && allowQueryCancellation) {
+        abortController?.abort();
+        setIsQueryLoading(false);
+      } else {
+        setIsQueryLoading(true);
+        const abc = new AbortController();
+        setAbortController(abc);
 
-      const currentValue = editor1.current?.getValue();
-      if (currentValue != null) {
-        setCodeStateOnSubmission(currentValue);
+        const currentValue = editor1.current?.getValue();
+        if (currentValue != null) {
+          setCodeStateOnSubmission(currentValue);
+        }
+
+        //TODO: add rest of options
+        telemetryService.trackQuerySubmitted({
+          exec_source: source,
+          exec_source_ui: sourceUI,
+        });
+        await onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
       }
-      onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
-    }
-  }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
+    },
+    [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]
+  );
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -364,7 +379,7 @@ const ESQLEditorInternal = function ESQLEditor({
   editor1.current?.addCommand(
     // eslint-disable-next-line no-bitwise
     monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-    onQuerySubmit
+    () => onQuerySubmit('manual', 'manual')
   );
 
   const styles = esqlEditorStyles(
@@ -841,6 +856,26 @@ const ESQLEditorInternal = function ESQLEditor({
     };
   }, []);
 
+  const getErrorType = (error: Error) => {
+    console.log(error);
+    if (error.message.includes('parse')) {
+      return 'parse';
+    }
+    if (error.message.includes('verification_exception')) {
+      return 'validation';
+    }
+
+    return 'unknown';
+  };
+  useEffect(() => {
+    if (serverErrors) {
+      const errorType = getErrorType(serverErrors[0]);
+      telemetryService.trackQueryError(errorType);
+    } else {
+      telemetryService.trackQuerySuccess();
+    }
+  }, [serverErrors]);
+
   // When the layout changes, and the editor is not focused, we want to
   // recalculate the visible code so it fills up the available space. We
   // use a ref because editorDidMount is only called once, and the reference
@@ -946,7 +981,7 @@ const ESQLEditorInternal = function ESQLEditor({
               >
                 <EuiButton
                   color={queryRunButtonProperties.color as EuiButtonColor}
-                  onClick={onQuerySubmit}
+                  onClick={() => onQuerySubmit('manual', 'external')}
                   iconType={queryRunButtonProperties.iconType}
                   size="s"
                   isLoading={isLoading && !allowQueryCancellation}
