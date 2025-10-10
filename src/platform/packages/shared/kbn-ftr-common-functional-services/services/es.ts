@@ -31,6 +31,11 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
         }
   );
 
+  const refreshInterval = config.get('indexRefreshInterval');
+  if (refreshInterval === false) {
+    return client;
+  }
+
   const idxPatterns = [
     '.kibana*',
     '.internal*',
@@ -40,8 +45,6 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     'filebeat*',
     'metricbeat*',
   ];
-
-  const refreshInterval = config.get('indexRefreshInterval');
 
   function wrap<T, U extends keyof T>(obj: T, prop: U, cb: (m: T[U]) => T[U]) {
     const original = obj[prop];
