@@ -120,7 +120,9 @@ export interface WorkflowYAMLEditorProps {
   value: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
   onChange?: (value: string | undefined) => void;
-  onSave?: (value: string) => void;
+  onSave: () => void;
+  onRun: () => void;
+  onSaveAndRun: () => void;
   esHost?: string;
   kibanaHost?: string;
   selectedExecutionId?: string;
@@ -140,6 +142,8 @@ export const WorkflowYAMLEditor = ({
   onMount,
   onChange,
   onSave,
+  onRun,
+  onSaveAndRun,
   esHost = 'http://localhost:9200',
   kibanaHost,
   selectedExecutionId,
@@ -261,12 +265,30 @@ export const WorkflowYAMLEditor = ({
 
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useRegisterKeyboardCommands();
 
+  // YML dependant callbacks (save, run, save&run) update on every yaml string change,
+  // we need stable references to use in the keyboard action handlers.
+  const saveRef = useRef(onSave);
+  useEffect(() => {
+    saveRef.current = onSave;
+  }, [onSave]);
+  const runRef = useRef(onRun);
+  useEffect(() => {
+    runRef.current = onRun;
+  }, [onRun]);
+  const saveAndRunRef = useRef(onSaveAndRun);
+  useEffect(() => {
+    saveAndRunRef.current = onSaveAndRun;
+  }, [onSaveAndRun]);
+
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
 
     registerKeyboardCommands({
       editor,
       openActionsPopover,
+      save: () => saveRef.current(),
+      run: () => runRef.current(),
+      saveAndRun: () => saveAndRunRef.current(),
     });
 
     // Listen to content changes to detect typing
