@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const ERROR_TIMELINE_EVENTS = i18n.translate(
-  'xpack.securitySolution.timelineEvents.errorSearchDescription',
-  {
-    defaultMessage: `An error has occurred on timeline events search`,
-  }
-);
+export const SLACK_CONNECTOR_ID = '.slack';
