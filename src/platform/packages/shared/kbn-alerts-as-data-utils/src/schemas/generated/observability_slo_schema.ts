@@ -84,7 +84,6 @@ const ObservabilitySloAlertOptional = rt.partial({
     })
   ),
   'kibana.alert.grouping': schemaUnknown,
-  'kibana.alert.state.alert_state': schemaString,
   'slo.dataViewId': schemaString,
   'slo.id': schemaString,
   'slo.instanceId': schemaString,

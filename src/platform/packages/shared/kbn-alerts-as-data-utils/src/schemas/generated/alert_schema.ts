@@ -97,7 +97,6 @@ const AlertOptional = rt.partial({
   'kibana.alert.last_detected': schemaDate,
   'kibana.alert.last_scheduled_actions.date': schemaString,
   'kibana.alert.last_scheduled_actions.group': schemaString,
-  'kibana.alert.last_scheduled_actions.throttled': schemaUnknown,
   'kibana.alert.maintenance_window_ids': schemaStringArray,
   'kibana.alert.pending_recovered_count': schemaStringOrNumber,
   'kibana.alert.previous_action_group': schemaString,

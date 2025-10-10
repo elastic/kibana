@@ -131,10 +131,7 @@ export const setRecoveredAlertsContext = async <ActionGroupIds extends string>({
   }
 };
 
-export const uptimeRuleTypeFieldMap = {
-  ...uptimeRuleFieldMap,
-  ...legacyExperimentalFieldMap,
-};
+export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
 
 const stringAsKeywords: MappingDynamicTemplate = {
   path_match: `${ALERT_GROUPING}.*`,

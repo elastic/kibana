@@ -76,9 +76,6 @@ const StackAlertOptional = rt.partial({
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaString,
   'kibana.alert.grouping': schemaUnknown,
-  'kibana.alert.state.date_end': schemaDate,
-  'kibana.alert.state.date_start': schemaDate,
-  'kibana.alert.state.latest_timestamp': schemaDate,
   'kibana.alert.title': schemaString,
 });
 

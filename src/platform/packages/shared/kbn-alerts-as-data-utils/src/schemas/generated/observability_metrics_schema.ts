@@ -84,7 +84,6 @@ const ObservabilityMetricsAlertOptional = rt.partial({
     })
   ),
   'kibana.alert.grouping': schemaUnknown,
-  'kibana.alert.state.alert_state': schemaString,
 });
 
 // prettier-ignore
