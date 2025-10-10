@@ -24,7 +24,7 @@ export async function transformPanels(
   return await asyncMap(panels, async (panel) => {
     if (isDashboardSection(panel)) {
       const panelsInSection = await asyncMap(
-        panel.panels as DashboardPanel[],
+        panel.panels,
         async (panelInSection) => {
           return await transformPanel(panelInSection, filterReferences(panelInSection.uid));
         }
@@ -35,7 +35,7 @@ export async function transformPanels(
       };
     }
 
-    return await transformPanel(panel as DashboardPanel, filterReferences(panel.uid));
+    return await transformPanel(panel, filterReferences(panel.uid));
   });
 }
 
