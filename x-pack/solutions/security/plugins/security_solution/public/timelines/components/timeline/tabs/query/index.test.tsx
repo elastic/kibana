@@ -11,8 +11,8 @@ import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
+import { useSourcererDataView } from '../../../../../sourcerer';
+import { mockSourcererScope } from '../../../../../sourcerer/__mocks__';
 import {
   createMockStore,
   createSecuritySolutionStorageMock,
@@ -21,7 +21,7 @@ import {
   TestProviders,
 } from '../../../../../common/mock';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
-import { render, screen, waitFor, fireEvent, within, cleanup } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../../types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -30,8 +30,8 @@ import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
-  defaultUdtHeaders,
   defaultColumnHeaderType,
+  defaultUdtHeaders,
 } from '../../body/column_headers/default_headers';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
@@ -68,8 +68,8 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers');
-jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
+jest.mock('../../../../../sourcerer/hooks/use_sourcerer_data_view');
+jest.mock('../../../../../sourcerer/hooks/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 

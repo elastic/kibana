@@ -38,7 +38,7 @@ import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
-import { initialSourcererState, SourcererScopeName } from '../../sourcerer/store/model';
+import { initialSourcererState, SourcererScopeName } from '../../sourcerer';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
 import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { mockBrowserFields, mockIndexFields } from '../containers/source/mock';

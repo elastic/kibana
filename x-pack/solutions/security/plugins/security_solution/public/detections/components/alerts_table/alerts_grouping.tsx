@@ -28,7 +28,7 @@ import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import type { RunTimeMappings } from '../../../sourcerer/store/model';
+import type { RunTimeMappings } from '../../../sourcerer';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { AlertsEventTypes, track } from '../../../common/lib/telemetry';

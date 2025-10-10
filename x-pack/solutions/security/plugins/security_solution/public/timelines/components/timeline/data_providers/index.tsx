@@ -10,14 +10,13 @@ import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import { EuiToolTip, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../../sourcerer';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 
 import { Empty } from './empty';

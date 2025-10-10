@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import { ALERTS_PAGE_LOADING_TEST_ID, AlertsPage } from './alerts';
 import { useUserData } from '../../components/user_info';
 import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
-import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
+import { useSignalHelpers } from '../../../sourcerer';
 import { TestProviders } from '../../../common/mock';
 import { USER_UNAUTHENTICATED_TEST_ID } from '../../components/alerts/empty_pages/user_unauthenticated_empty_page';
 import { NO_INDEX_TEST_ID } from '../../components/alerts/empty_pages/no_index_empty_page';
@@ -20,7 +20,7 @@ import { useMissingPrivileges } from '../../../common/hooks/use_missing_privileg
 
 jest.mock('../../components/user_info');
 jest.mock('../../containers/detection_engine/lists/use_lists_config');
-jest.mock('../../../sourcerer/containers/use_signal_helpers');
+jest.mock('../../../sourcerer');
 jest.mock('../../../common/hooks/use_missing_privileges');
 jest.mock('../../components/alerts/wrapper', () => ({
   Wrapper: () => <div data-test-subj={'alerts-page-data-view-wrapper'} />,

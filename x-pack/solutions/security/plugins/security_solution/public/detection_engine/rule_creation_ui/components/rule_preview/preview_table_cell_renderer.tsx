@@ -10,7 +10,7 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { LegacyField } from '@kbn/alerting-types';
 import type { CellValueElementProps } from '../../../../../common/types';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../../sourcerer';
 import { CellValue } from '../../../../detections/configurations/security_solution_detections';
 
 const emptyUserProfiles = { profiles: [], isLoading: false };

@@ -14,8 +14,7 @@ import { useNormalizedAppLinks } from '../../links/links_hooks';
 import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
-import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { SourcererScopeName, useSourcererDataView } from '../../../sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const useHiddenTimelineRoutes = () => {

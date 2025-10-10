@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiHeaderLink,
   EuiHeaderLinks,
@@ -21,16 +22,12 @@ import { SECURITY_FEATURE_ID } from '../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
-import { Sourcerer } from '../../../sourcerer/components';
+import { isDashboardViewPath, isDetectionsPath } from '../../../helpers';
+import { getScopeFromPath, showSourcererByPath, Sourcerer } from '../../../sourcerer';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import {
-  getScopeFromPath,
-  showSourcererByPath,
-} from '../../../sourcerer/containers/sourcerer_paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 

@@ -11,11 +11,11 @@ import { act, render, screen } from '@testing-library/react';
 import { Filters } from './filters';
 import { useCreateDataView } from '../../../../../../common/hooks/use_create_data_view';
 import { TestProviders } from '../../../../../../common/mock';
-import { useSourcererDataView } from '../../../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../../../sourcerer';
 import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../../../common/hooks/use_create_data_view');
-jest.mock('../../../../../../sourcerer/containers');
+jest.mock('../../../../../../sourcerer');
 jest.mock('../../../../../../common/hooks/use_experimental_features');
 
 const mockUseCreateDataView = useCreateDataView as jest.MockedFunction<typeof useCreateDataView>;

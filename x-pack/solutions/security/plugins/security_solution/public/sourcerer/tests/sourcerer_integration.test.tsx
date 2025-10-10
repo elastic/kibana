@@ -10,19 +10,19 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 
 import { SourcererScopeName } from '../store/model';
-import { Sourcerer } from '.';
-import { useSignalHelpers } from '../containers/use_signal_helpers';
+import { Sourcerer } from '../components';
+import { useSignalHelpers } from '../hooks/use_signal_helpers';
 import { sourcererActions, sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
-import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
-import { useSourcererDataView } from '../containers';
+import { sortWithExcludesAtEnd } from '../utils/sourcerer';
+import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
 
 const mockDispatch = jest.fn();
 
-jest.mock('../containers');
-jest.mock('../containers/use_signal_helpers');
+jest.mock('../hooks/use_sourcerer_data_view');
+jest.mock('../hooks/use_signal_helpers');
 const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);
-jest.mock('./use_update_data_view', () => ({
+jest.mock('../hooks/use_update_data_view', () => ({
   useUpdateDataView: () => mockUseUpdateDataView,
 }));
 jest.mock('react-redux', () => {

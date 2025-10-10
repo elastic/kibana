@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { act, waitFor, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
-import { useSourcererDataView } from '.';
-import { getScopeFromPath } from './sourcerer_paths';
-import { mockPatterns } from './mocks';
+import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
+import { getScopeFromPath } from '../constants/sourcerer_paths';
+import { mockPatterns } from '../__mocks__';
 import type { RouteSpyState } from '../../common/utils/route/types';
 import {
   DEFAULT_DATA_VIEW_ID,
@@ -19,20 +19,20 @@ import {
   SECURITY_FEATURE_ID,
   SecurityPageName,
 } from '../../../common/constants';
-import { useUserInfo, initialState as userInfoState } from '../../detections/components/user_info';
+import { initialState as userInfoState, useUserInfo } from '../../detections/components/user_info';
 import {
+  createMockStore,
   mockGlobalState,
   mockSourcererState,
   TestProviders,
-  createMockStore,
 } from '../../common/mock';
 import type { SelectedDataView } from '../store/model';
 import { SourcererScopeName } from '../store/model';
-import * as source from '../../common/containers/source/use_data_view';
+import { useDataView } from '../hooks/use_data_view';
 import { sourcererActions } from '../store';
 import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
-import { createSourcererDataView } from './create_sourcerer_data_view';
-import { useInitSourcerer } from './use_init_sourcerer';
+import { createSourcererDataView } from '../containers/create_sourcerer_data_view';
+import { useInitSourcerer } from '../hooks/use_init_sourcerer';
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
@@ -45,7 +45,7 @@ const mockDispatch = jest.fn();
 const mockUseUserInfo = useUserInfo as jest.Mock;
 jest.mock('../../common/lib/apm/use_track_http_request');
 jest.mock('../../detections/components/user_info');
-jest.mock('./create_sourcerer_data_view');
+jest.mock('../containers/create_sourcerer_data_view');
 jest.mock('../../common/utils/global_query_string');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -171,6 +171,7 @@ describe.skip('Sourcerer Hooks', () => {
     store = createMockStore();
     mockUseUserInfo.mockImplementation(() => userInfoState);
   });
+
   it('initializes loading default and timeline index patterns', async () => {
     const { rerender } = renderHook(() => useInitSourcerer(), {
       wrapper: StoreProvider,
@@ -190,6 +191,7 @@ describe.skip('Sourcerer Hooks', () => {
       },
     });
   });
+
   it('sets signal index name', async () => {
     const mockNewDataViews = {
       defaultDataView: mockSourcererState.defaultDataView,
@@ -410,6 +412,7 @@ describe.skip('Sourcerer Hooks', () => {
       },
     });
   });
+
   it('index field search is not repeated when default and timeline have same dataViewId', async () => {
     const { rerender } = renderHook(() => useInitSourcerer(), {
       wrapper: StoreProvider,
@@ -420,6 +423,7 @@ describe.skip('Sourcerer Hooks', () => {
       expect(mockSearch).toHaveBeenCalledTimes(1);
     });
   });
+
   it('index field search called twice when default and timeline have different dataViewId', async () => {
     store = createMockStore({
       ...mockGlobalState,
@@ -443,16 +447,16 @@ describe.skip('Sourcerer Hooks', () => {
       expect(mockSearch).toHaveBeenCalledTimes(2);
     });
   });
+
   describe('initialization settings', () => {
     const mockIndexFieldsSearch = jest.fn();
     beforeAll(() => {
-      // 👇️ not using dot-notation + the ignore clears up a ts error
-      // @ts-ignore
-      // eslint-disable-next-line dot-notation
-      source['useDataView'] = jest.fn(() => ({
+      (useDataView as jest.Mock).mockImplementation({
+        // @ts-ignore
         indexFieldsSearch: mockIndexFieldsSearch,
-      }));
+      });
     });
+
     it('does not needToBeInit if scope is default and selectedPatterns/missingPatterns have values', async () => {
       const { rerender } = renderHook(() => useInitSourcerer(), {
         wrapper: StoreProvider,

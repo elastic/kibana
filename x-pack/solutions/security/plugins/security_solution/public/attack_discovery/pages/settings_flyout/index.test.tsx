@@ -16,11 +16,11 @@ import { getDefaultQuery } from '../helpers';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { SCHEDULE_TAB_ID, SETTINGS_TAB_ID } from './constants';
-import { useSourcererDataView } from '../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../sourcerer';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../sourcerer/containers');
+jest.mock('../../../sourcerer');
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),
   useLocation: jest.fn().mockReturnValue({

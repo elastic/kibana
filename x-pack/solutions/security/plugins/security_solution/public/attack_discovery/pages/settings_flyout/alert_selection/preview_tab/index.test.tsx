@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { PreviewTab } from '.';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../../sourcerer';
 
 const mockDispatch = jest.fn();
 
 jest.mock('../../../../../common/lib/kibana');
-jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../sourcerer');
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('react-router-dom', () => ({
   matchPath: jest.fn(),

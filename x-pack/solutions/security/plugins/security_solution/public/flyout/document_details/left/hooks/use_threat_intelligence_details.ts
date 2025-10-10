@@ -16,10 +16,9 @@ import {
   parseExistingEnrichments,
   timelineDataToEnrichment,
 } from '../../shared/utils/threat_intelligence';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../../sourcerer';
 import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useDocumentDetailsContext } from '../../shared/context';
 

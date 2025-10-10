@@ -7,13 +7,13 @@
 
 import { renderHook } from '@testing-library/react';
 import {
-  useSyncSourcererUrlState,
   useRestoreDataViewManagerStateFromURL,
+  useSyncSourcererUrlState,
 } from './use_sync_url_state';
 import * as reactRedux from 'react-redux';
 import * as experimentalFeatures from '../../common/hooks/use_experimental_features';
 import * as globalQueryString from '../../common/utils/global_query_string';
-import { SourcererScopeName } from '../../sourcerer/store/model';
+import { SourcererScopeName } from '../../sourcerer';
 
 jest.mock('react-redux');
 jest.mock('../../common/hooks/use_experimental_features');

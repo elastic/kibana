@@ -9,11 +9,11 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
 import {
-  INSIGHTS_HEADER_TEST_ID,
-  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   CORRELATIONS_TEST_ID,
   INSIGHTS_CONTENT_TEST_ID,
   INSIGHTS_ENTITIES_TEST_ID,
+  INSIGHTS_HEADER_TEST_ID,
+  INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   PREVALENCE_TEST_ID,
 } from './test_ids';
 import { TestProviders } from '../../../../common/mock';
@@ -73,7 +73,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../sourcerer/containers', () => {
+jest.mock('../../../../sourcerer', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };

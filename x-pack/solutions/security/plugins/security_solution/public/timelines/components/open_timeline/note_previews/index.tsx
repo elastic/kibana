@@ -6,16 +6,16 @@
  */
 
 import { uniqBy } from 'lodash/fp';
+import type { EuiConfirmModalProps } from '@elastic/eui';
 import {
   EuiAvatar,
   EuiButtonIcon,
   EuiCommentList,
+  EuiConfirmModal,
   EuiScreenReaderOnly,
   EuiText,
-  EuiConfirmModal,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { EuiConfirmModalProps } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -26,19 +26,18 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { TimelineResultNote } from '../types';
-import { getEmptyValue, defaultToEmptyTag } from '../../../../common/components/empty_value';
+import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import { timelineActions, timelineSelectors } from '../../../store';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../../sourcerer';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};

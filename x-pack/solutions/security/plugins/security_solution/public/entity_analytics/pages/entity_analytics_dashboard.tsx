@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useSourcererDataView } from '../../sourcerer';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
 import { EmptyPrompt } from '../../common/components/empty_prompt';

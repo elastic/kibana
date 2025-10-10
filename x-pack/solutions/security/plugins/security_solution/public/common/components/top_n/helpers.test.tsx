@@ -12,15 +12,15 @@ import {
   alertEvents,
   allEvents,
   defaultOptions,
+  detectionAlertsTables,
   getOptions,
   getSourcererScopeName,
   isDetectionsAlertsTable,
   rawEvents,
   removeIgnoredAlertFilters,
   shouldIgnoreAlertFilters,
-  detectionAlertsTables,
 } from './helpers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { SourcererScopeName } from '../../../sourcerer';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 /** the following scopes are NOT detection alert tables */

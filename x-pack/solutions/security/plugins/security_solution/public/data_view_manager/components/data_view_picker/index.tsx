@@ -6,12 +6,12 @@
  */
 
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
-import React, { useCallback, useRef, useMemo, memo } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SourcererUrlState } from '../../../sourcerer/store/model';
+import type { SourcererUrlState } from '../../../sourcerer';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useKibana } from '../../../common/lib/kibana';

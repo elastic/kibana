@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer } from '@elastic/eui';
@@ -15,16 +15,16 @@ import { HeaderSection } from '../header_section';
 import { Panel } from '../panel';
 
 import type {
+  MatrixHistogramConfigs,
   MatrixHistogramOption,
   MatrixHistogramQueryProps,
-  MatrixHistogramConfigs,
 } from './types';
 import { HoverVisibilityContainer } from '../hover_visibility_container';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { VISUALIZATION_ACTIONS_BUTTON_CLASS } from '../visualization_actions/utils';
 import { VisualizationEmbeddable } from '../visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../visualization_actions/use_visualization_response';
-import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import type { SourcererScopeName } from '../../../sourcerer';
 import { NO_BREAKDOWN_STACK_BY_VALUE } from '../events_tab/histogram_configurations';
 
 export type MatrixHistogramComponentProps = MatrixHistogramQueryProps &

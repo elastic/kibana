@@ -16,8 +16,7 @@ import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browse
 import { TimelineId } from '../../../../../common/types';
 import type { State } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { SourcererScopeName, useSourcererDataView } from '../../../../sourcerer';
 import { TimelineKPIs } from './kpis';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { useKibana } from '../../../../common/lib/kibana';

@@ -36,6 +36,7 @@ import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
@@ -45,7 +46,7 @@ import { DefaultFieldRenderer } from '../../../../timelines/components/field_ren
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { CellActions } from '../../shared/components/cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useSourcererDataView } from '../../../../sourcerer';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
@@ -80,7 +81,6 @@ import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';

@@ -8,8 +8,8 @@
 import type { ChangeEventHandler } from 'react';
 import React from 'react';
 import { EuiButton, EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ResetButton, StyledFormRow } from './helpers';
-import * as i18n from './translations';
+import { ResetButton, StyledFormRow } from '../utils/helpers';
+import * as i18n from '../translations';
 
 interface SourcererCalloutProps {
   isOnlyDetectionAlerts: boolean;
@@ -19,7 +19,13 @@ interface SourcererCalloutProps {
 export const SourcererCallout = React.memo<SourcererCalloutProps>(
   ({ isOnlyDetectionAlerts, title }) =>
     isOnlyDetectionAlerts ? (
-      <EuiCallOut data-test-subj="sourcerer-callout" iconType="info" size="s" title={title} />
+      <EuiCallOut
+        announceOnMount
+        data-test-subj="sourcerer-callout"
+        iconType="info"
+        size="s"
+        title={title}
+      />
     ) : null
 );
 

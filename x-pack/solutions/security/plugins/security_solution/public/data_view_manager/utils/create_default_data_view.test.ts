@@ -6,12 +6,11 @@
  */
 
 import {
-  type CreateDefaultDataViewDependencies,
   createDefaultDataView,
+  type CreateDefaultDataViewDependencies,
 } from './create_default_data_view';
-import { initDataView } from '../../sourcerer/store/model';
+import { createSourcererDataView, initDataView } from '../../sourcerer';
 import * as helpersAccess from '../../helpers_access';
-import * as createSourcererDataViewModule from '../../sourcerer/containers/create_sourcerer_data_view';
 import {
   DEFAULT_ALERT_DATA_VIEW_ID,
   DEFAULT_DATA_VIEW_ID,
@@ -54,7 +53,7 @@ describe('createDefaultDataView', () => {
     mockSpaces.getActiveSpace.mockResolvedValue({ id: 'space1' });
     (helpersAccess.hasAccessToSecuritySolution as jest.Mock).mockReturnValue(true);
     mockHttp.fetch.mockResolvedValue({ name: 'signal-index', index_mapping_outdated: false });
-    (createSourcererDataViewModule.createSourcererDataView as jest.Mock).mockResolvedValue({
+    (createSourcererDataView as jest.Mock).mockResolvedValue({
       defaultDataView: { id: 'dv1', title: 'title1' },
       alertDataView: { id: 'dv2', title: 'title2' },
       kibanaDataViews: [{ id: 'dv1', title: 'title1' }],
@@ -74,7 +73,7 @@ describe('createDefaultDataView', () => {
       mockApplication.capabilities
     );
     expect(mockHttp.fetch).toHaveBeenCalledWith(DETECTION_ENGINE_INDEX_URL, expect.any(Object));
-    expect(createSourcererDataViewModule.createSourcererDataView).toHaveBeenCalledWith(
+    expect(createSourcererDataView).toHaveBeenCalledWith(
       expect.objectContaining({
         body: { patternList: ['pattern-*', 'signal-index'] },
         dataViewService: mockDataViewService,
@@ -97,7 +96,7 @@ describe('createDefaultDataView', () => {
   });
 
   it('returns error in defaultDataView if an exception is thrown', async () => {
-    (createSourcererDataViewModule.createSourcererDataView as jest.Mock).mockImplementation(() => {
+    (createSourcererDataView as jest.Mock).mockImplementation(() => {
       throw new Error('fail');
     });
     const result = await createDefaultDataView(defaultDeps);
