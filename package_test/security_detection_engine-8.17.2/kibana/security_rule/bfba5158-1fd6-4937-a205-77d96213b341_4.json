@@ -1,0 +1,64 @@
+{
+  "attributes": {
+    "anomaly_threshold": 75,
+    "author": [
+      "Elastic"
+    ],
+    "description": "A machine learning job has detected data exfiltration to a particular geo-location (by region name). Data transfers to geo-locations that are outside the normal traffic patterns of an organization could indicate exfiltration over command and control channels.",
+    "from": "now-6h",
+    "interval": "15m",
+    "license": "Elastic License v2",
+    "machine_learning_job_id": "ded_high_sent_bytes_destination_region_name",
+    "name": "Potential Data Exfiltration Activity to an Unusual Region",
+    "references": [
+      "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html",
+      "https://docs.elastic.co/en/integrations/ded",
+      "https://www.elastic.co/blog/detect-data-exfiltration-activity-with-kibanas-new-integration"
+    ],
+    "related_integrations": [
+      {
+        "package": "ded",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "network_traffic",
+        "version": "^1.1.0"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "bfba5158-1fd6-4937-a205-77d96213b341",
+    "setup": "## Setup\n\nThe rule requires the Data Exfiltration Detection integration assets to be installed, as well as network and file events collected by integrations such as Elastic Defend and Network Packet Capture (for network events only).  \n\n### Data Exfiltration Detection Setup\nThe Data Exfiltration Detection integration detects data exfiltration activity by identifying abnormalities in network and file events. Anomalies are detected using Elastic's Anomaly Detection feature. \n\n#### Prerequisite Requirements:\n- Fleet is required for Data Exfiltration Detection.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n- Network events collected by the [Elastic Defend](https://docs.elastic.co/en/integrations/endpoint) or [Network Packet Capture](https://docs.elastic.co/integrations/network_traffic) integration.\n- To install Elastic Defend, refer to the [documentation](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n- To add the Network Packet Capture integration to an Elastic Agent policy, refer to [this](https://www.elastic.co/guide/en/fleet/current/add-integration-to-policy.html) guide.\n\n#### The following steps should be executed to install assets associated with the Data Exfiltration Detection integration:\n- Go to the Kibana homepage. Under Management, click Integrations.\n- In the query bar, search for Data Exfiltration Detection and select the integration to see more details about it.\n- Follow the instructions under the **Installation** section.\n- For this rule to work, complete the instructions through **Add preconfigured anomaly detection jobs**.\n",
+    "severity": "low",
+    "tags": [
+      "Use Case: Data Exfiltration Detection",
+      "Rule Type: ML",
+      "Rule Type: Machine Learning",
+      "Tactic: Exfiltration"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0010",
+          "name": "Exfiltration",
+          "reference": "https://attack.mitre.org/tactics/TA0010/"
+        },
+        "technique": [
+          {
+            "id": "T1041",
+            "name": "Exfiltration Over C2 Channel",
+            "reference": "https://attack.mitre.org/techniques/T1041/"
+          }
+        ]
+      }
+    ],
+    "type": "machine_learning",
+    "version": 4
+  },
+  "id": "bfba5158-1fd6-4937-a205-77d96213b341_4",
+  "type": "security-rule"
+}

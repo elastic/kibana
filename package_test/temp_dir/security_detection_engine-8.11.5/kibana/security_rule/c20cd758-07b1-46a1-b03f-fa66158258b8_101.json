@@ -1,0 +1,131 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies digitally signed (trusted) processes loading unsigned DLLs. Attackers may plant their payloads into the application folder and invoke the legitimate application to execute the payload, masking actions they perform under a legitimate, trusted, and potentially elevated system or software process.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Unsigned DLL Loaded by a Trusted Process",
+        "query": "library where host.os.type == \"windows\" and\n   (dll.Ext.relative_file_creation_time \u003c= 500 or\n    dll.Ext.relative_file_name_modify_time \u003c= 500 or\n    dll.Ext.device.product_id : (\"Virtual DVD-ROM\", \"Virtual Disk\")) and dll.hash.sha256 != null and\n    process.code_signature.status :\"trusted\" and not dll.code_signature.status : (\"trusted\", \"errorExpired\", \"errorCode_endpoint*\") and\n    /* DLL loaded from the process.executable current directory */\n    endswith~(substring(dll.path, 0, length(dll.path) - (length(dll.name) + 1)), substring(process.executable, 0, length(process.executable) - (length(process.name) + 1)))\n    and not user.id : \"S-1-5-18\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": false,
+                "name": "dll.Ext.device.product_id",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "dll.Ext.relative_file_creation_time",
+                "type": "unknown"
+            },
+            {
+                "ecs": false,
+                "name": "dll.Ext.relative_file_name_modify_time",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "dll.code_signature.status",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dll.hash.sha256",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dll.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "dll.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.status",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "c20cd758-07b1-46a1-b03f-fa66158258b8",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1574",
+                        "name": "Hijack Execution Flow",
+                        "reference": "https://attack.mitre.org/techniques/T1574/",
+                        "subtechnique": [
+                            {
+                                "id": "T1574.001",
+                                "name": "DLL Search Order Hijacking",
+                                "reference": "https://attack.mitre.org/techniques/T1574/001/"
+                            },
+                            {
+                                "id": "T1574.002",
+                                "name": "DLL Side-Loading",
+                                "reference": "https://attack.mitre.org/techniques/T1574/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 101
+    },
+    "id": "c20cd758-07b1-46a1-b03f-fa66158258b8_101",
+    "type": "security-rule"
+}

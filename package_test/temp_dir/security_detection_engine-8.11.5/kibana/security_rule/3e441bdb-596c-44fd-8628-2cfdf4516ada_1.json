@@ -1,0 +1,147 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the execution of the built-in Windows Installer, msiexec.exe, to install a remote package. Adversaries may abuse msiexec.exe to launch local or network accessible MSI files.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Remote File Execution via MSIEXEC",
+        "query": "sequence with maxspan=1m\n [process where host.os.type == \"windows\" and event.action == \"start\" and\n    process.name : \"msiexec.exe\" and process.args : \"/V\"] by process.entity_id\n [network where host.os.type == \"windows\" and process.name : \"msiexec.exe\" and\n    event.action == \"connection_attempted\"] by process.entity_id\n [process where host.os.type == \"windows\" and event.action == \"start\" and\n  process.parent.name : \"msiexec.exe\" and user.id : (\"S-1-5-21-*\", \"S-1-5-12-1-*\") and\n  not process.executable : (\"?:\\\\Windows\\\\SysWOW64\\\\msiexec.exe\",\n                            \"?:\\\\Windows\\\\System32\\\\msiexec.exe\",\n                            \"?:\\\\Windows\\\\System32\\\\srtasks.exe\",\n                            \"?:\\\\Windows\\\\SysWOW64\\\\srtasks.exe\",\n                            \"?:\\\\Windows\\\\System32\\\\taskkill.exe\",\n                            \"?:\\\\Windows\\\\Installer\\\\MSI*.tmp\",\n                            \"?:\\\\Program Files\\\\*.exe\",\n                            \"?:\\\\Program Files (x86)\\\\*.exe\",\n                            \"?:\\\\Windows\\\\System32\\\\ie4uinit.exe\",\n                            \"?:\\\\Windows\\\\SysWOW64\\\\ie4uinit.exe\",\n                            \"?:\\\\Windows\\\\System32\\\\sc.exe\",\n                            \"?:\\\\Windows\\\\system32\\\\Wbem\\\\mofcomp.exe\",\n                            \"?:\\\\Windows\\\\twain_32\\\\fjscan32\\\\SOP\\\\crtdmprc.exe\",\n                            \"?:\\\\Windows\\\\SysWOW64\\\\taskkill.exe\",\n                            \"?:\\\\Windows\\\\SysWOW64\\\\schtasks.exe\",\n                            \"?:\\\\Windows\\\\system32\\\\schtasks.exe\",\n                            \"?:\\\\Windows\\\\System32\\\\sdbinst.exe\") and\n  not (process.code_signature.subject_name == \"Citrix Systems, Inc.\" and process.code_signature.trusted == true) and\n  not (process.name : (\"regsvr32.exe\", \"powershell.exe\", \"rundll32.exe\", \"wscript.exe\") and\n       process.Ext.token.integrity_level_name == \"high\" and\n       process.args : (\"?:\\\\Program Files\\\\*\", \"?:\\\\Program Files (x86)\\\\*\")) and\n  not (process.executable : (\"?:\\\\Program Files\\\\*.exe\", \"?:\\\\Program Files (x86)\\\\*.exe\") and process.code_signature.trusted == true) and\n  not (process.name : \"rundll32.exe\" and process.args : \"printui.dll,PrintUIEntry\")\n  ] by process.parent.entity_id\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "process.Ext.token.integrity_level_name",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.entity_id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.entity_id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "3e441bdb-596c-44fd-8628-2cfdf4516ada",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Initial Access",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0001",
+                    "name": "Initial Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0001/"
+                },
+                "technique": [
+                    {
+                        "id": "T1566",
+                        "name": "Phishing",
+                        "reference": "https://attack.mitre.org/techniques/T1566/",
+                        "subtechnique": [
+                            {
+                                "id": "T1566.002",
+                                "name": "Spearphishing Link",
+                                "reference": "https://attack.mitre.org/techniques/T1566/002/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1218",
+                        "name": "System Binary Proxy Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1218/",
+                        "subtechnique": [
+                            {
+                                "id": "T1218.007",
+                                "name": "Msiexec",
+                                "reference": "https://attack.mitre.org/techniques/T1218/007/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "3e441bdb-596c-44fd-8628-2cfdf4516ada_1",
+    "type": "security-rule"
+}

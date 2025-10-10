@@ -1,0 +1,74 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies attempts to revoke an Okta API token. An adversary may attempt to revoke or delete an Okta API token to disrupt an organization's business operations.",
+        "false_positives": [
+            "If the behavior of revoking Okta API tokens is expected, consider adding exceptions to this rule to filter false positives."
+        ],
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Attempt to Revoke Okta API Token",
+        "note": "## Triage and analysis\n\n### Investigating Attempt to Revoke Okta API Token\n\nThe rule alerts when attempts are made to revoke an Okta API token. The API tokens are critical for integration services, and revoking them may lead to disruption in services. Therefore, it's important to validate these activities.\n\n#### Possible investigation steps:\n- Identify the actor associated with the API token revocation attempt. You can use the `okta.actor.alternate_id` field for this purpose.\n- Determine the client used by the actor. Review the `okta.client.device`, `okta.client.ip`, `okta.client.user_agent.raw_user_agent`, `okta.client.ip_chain.ip`, and `okta.client.geographical_context` fields.\n- Verify if the API token revocation was authorized or part of some planned activity.\n- Check the `okta.outcome.result` and `okta.outcome.reason` fields to see if the attempt was successful or failed.\n- Analyze the past activities of the actor involved in this action. An actor who usually performs such activities may indicate a legitimate reason.\n- Evaluate the actions that happened just before and after this event. It can help understand the full context of the activity.\n\n### False positive analysis:\n- It might be a false positive if the action was part of a planned activity or was performed by an authorized person.\n\n### Response and remediation:\n- If unauthorized revocation attempts are confirmed, initiate the incident response process.\n- Block the IP address or device used in the attempts, if they appear suspicious.\n- Reset the user's password and enforce MFA re-enrollment, if applicable.\n- Conduct a review of Okta policies and ensure they are in accordance with security best practices.\n- If the revoked token was used for critical integrations, coordinate with the relevant team to minimize the impact.",
+        "query": "event.dataset:okta.system and event.action:system.api_token.revoke\n",
+        "references": [
+            "https://developer.okta.com/docs/reference/api/system-log/",
+            "https://developer.okta.com/docs/reference/api/event-types/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "676cff2b-450b-4cf1-8ed2-c0c58a4a2dd7",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "low",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Data Source: Okta",
+            "Tactic: Impact"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0040",
+                    "name": "Impact",
+                    "reference": "https://attack.mitre.org/tactics/TA0040/"
+                },
+                "technique": [
+                    {
+                        "id": "T1531",
+                        "name": "Account Access Removal",
+                        "reference": "https://attack.mitre.org/techniques/T1531/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 105
+    },
+    "id": "676cff2b-450b-4cf1-8ed2-c0c58a4a2dd7_105",
+    "type": "security-rule"
+}

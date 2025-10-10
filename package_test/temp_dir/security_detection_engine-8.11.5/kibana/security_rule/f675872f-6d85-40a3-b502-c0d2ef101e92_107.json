@@ -1,0 +1,98 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies use of the fsutil.exe to delete the volume USNJRNL. This technique is used by attackers to eliminate evidence of files created during post-exploitation activities.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Delete Volume USN Journal with Fsutil",
+        "note": "## Triage and analysis\n\n### Investigating Delete Volume USN Journal with Fsutil\n\nThe Update Sequence Number (USN) Journal is a feature in the NTFS file system used by Microsoft Windows operating systems to keep track of changes made to files and directories on a disk volume. The journal records metadata for changes such as file creation, deletion, modification, and permission changes. It is used by the operating system for various purposes, including backup and recovery, file indexing, and file replication.\n\nThis artifact can provide valuable information in forensic analysis, such as programs executed (prefetch file operations), file modification events in suspicious directories, deleted files, etc. Attackers may delete this artifact in an attempt to cover their tracks, and this rule identifies the usage of the `fsutil.exe` utility to accomplish it.\n\nConsider using the Elastic Defend integration instead of USN Journal, as the Elastic Defend integration provides more visibility and context in the file operations it records.\n\n#### Possible investigation steps\n\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n- Investigate other alerts associated with the user/host during the past 48 hours.\n  - Verify if any other anti-forensics behaviors were observed.\n- Review file operation logs from Elastic Defend for suspicious activity the attacker tried to hide.\n\n### False positive analysis\n\n- This activity is unlikely to happen legitimately. Benign true positives (B-TPs) can be added as exceptions if necessary.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  (process.name : \"fsutil.exe\" or process.pe.original_file_name == \"fsutil.exe\") and\n  process.args : \"deletejournal\" and process.args : \"usn\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.pe.original_file_name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "f675872f-6d85-40a3-b502-c0d2ef101e92",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Endgame",
+            "Resources: Investigation Guide",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1070",
+                        "name": "Indicator Removal",
+                        "reference": "https://attack.mitre.org/techniques/T1070/",
+                        "subtechnique": [
+                            {
+                                "id": "T1070.004",
+                                "name": "File Deletion",
+                                "reference": "https://attack.mitre.org/techniques/T1070/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 107
+    },
+    "id": "f675872f-6d85-40a3-b502-c0d2ef101e92_107",
+    "type": "security-rule"
+}

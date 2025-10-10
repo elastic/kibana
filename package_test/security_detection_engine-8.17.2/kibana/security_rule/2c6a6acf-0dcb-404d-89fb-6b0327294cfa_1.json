@@ -1,0 +1,123 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the Foxmail client spawning a child process with argument pointing to the Foxmail temp directory. This may indicate the successful exploitation of a Foxmail vulnerability for initial access and execution via a malicious email.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.*",
+      "endgame-*",
+      "logs-system.security*",
+      "logs-windows.sysmon_operational-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "logs-m365_defender.event-*",
+      "logs-endpoint.events.process-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Foxmail Exploitation",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and \n process.parent.name : \"Foxmail.exe\" and process.args : (\"?:\\\\Users\\\\*\\\\AppData\\\\*\", \"\\\\\\\\*\")\n\n",
+    "references": [
+      "https://mp.weixin.qq.com/s/F8hNyESBdKhwXkQPgtGpew"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^0.1.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "2c6a6acf-0dcb-404d-89fb-6b0327294cfa",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Initial Access",
+      "Tactic: Execution",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon",
+      "Data Source: System",
+      "Data Source: Elastic Endgame",
+      "Data Source: SentinelOne",
+      "Data Source: Microsoft Defender for Endpoint"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1203",
+            "name": "Exploitation for Client Execution",
+            "reference": "https://attack.mitre.org/techniques/T1203/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0001",
+          "name": "Initial Access",
+          "reference": "https://attack.mitre.org/tactics/TA0001/"
+        },
+        "technique": [
+          {
+            "id": "T1189",
+            "name": "Drive-by Compromise",
+            "reference": "https://attack.mitre.org/techniques/T1189/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "2c6a6acf-0dcb-404d-89fb-6b0327294cfa_1",
+  "type": "security-rule"
+}

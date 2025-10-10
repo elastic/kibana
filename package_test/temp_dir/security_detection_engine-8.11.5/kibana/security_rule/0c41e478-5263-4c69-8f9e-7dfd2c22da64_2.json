@@ -1,0 +1,141 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule is triggered when an IP address indicator from the Threat Intel Filebeat module or integrations has a match against a network event.",
+        "from": "now-65m",
+        "index": [
+            "auditbeat-*",
+            "endgame-*",
+            "filebeat-*",
+            "logs-*",
+            "packetbeat-*",
+            "winlogbeat-*"
+        ],
+        "interval": "1h",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Threat Intel IP Address Indicator Match",
+        "note": "## Triage and Analysis\n\n### Investigating Threat Intel IP Address Indicator Match\n\nThreat Intel indicator match rules allow matching from a local observation, such as an endpoint event that records a file hash with an entry of a file hash stored within the Threat Intel integrations index. \n\nMatches are based on threat intelligence data that's been ingested during the last 30 days. Some integrations don't place expiration dates on their threat indicators, so we strongly recommend validating ingested threat indicators and reviewing match results. When reviewing match results, check associated activity to determine whether the event requires additional investigation.\n\nThis rule is triggered when an IP address indicator from the Threat Intel Filebeat module or a threat intelligence integration matches against a network event.\n\n#### Possible investigation steps\n\n- Gain context about the field that matched the local observation so you can understand the nature of the connection. This information can be found in the `threat.indicator.matched.field` field.\n- Investigate the IP address, which can be found in the `threat.indicator.matched.atomic` field:\n  - Check the reputation of the IP address in resources like VirusTotal, Hybrid-Analysis, CISCO Talos, Any.run, etc. \n  - Execute a reverse DNS lookup to retrieve hostnames associated with the given IP address.\n- Assess whether this behavior is prevalent in the environment by looking for similar occurrences across hosts.\n- Identify the process responsible for the connection, and investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Retrieve the involved process executable and examine the host for derived artifacts that indicate suspicious activities:\n  - Analyze the process executable using a private sandboxed analysis system.\n  - Observe and collect information about the following activities in both the sandbox and the alert subject host:\n    - Attempts to contact external domains and addresses.\n      - Use the Elastic Defend network events to determine domains and addresses contacted by the subject process by filtering by the process' `process.entity_id`.\n      - Examine the DNS cache for suspicious or anomalous entries.\n        - $osquery_0\n    - Use the Elastic Defend registry events to examine registry keys accessed, modified, or created by the related processes in the process tree.\n    - Examine the host services for suspicious or anomalous entries.\n      - $osquery_1\n      - $osquery_2\n      - $osquery_3\n- Using the data collected through the analysis, scope users targeted and other machines infected in the environment.\n\n### False Positive Analysis\n\n- When a match is found, it's important to consider the indicator's initial release date. Threat intelligence is useful for augmenting existing security processes but can quickly become outdated. In other words, some threat intelligence only represents a specific set of activity observed at a specific time. For example, an IP address may have hosted malware observed in a Dridex campaign months ago, but it's possible that IP has been remediated and no longer represents any threat.\n- False positives might occur after large and publicly written campaigns if curious employees interact with attacker infrastructure.\n- Some feeds may include internal or known benign addresses by mistake (e.g., 8.8.8.8, google.com, 127.0.0.1, etc.). Make sure you understand how blocking a specific domain or address might impact the organization or normal system functioning.\n\n### Response and Remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n\nThis rule needs threat intelligence indicators to work. Threat intelligence indicators can be collected using an [Elastic Agent integration](https://www.elastic.co/guide/en/security/current/es-threat-intel-integrations.html#agent-ti-integration), the [Threat Intel module](https://www.elastic.co/guide/en/security/current/es-threat-intel-integrations.html#ti-mod-integration), or a [custom integration](https://www.elastic.co/guide/en/security/current/es-threat-intel-integrations.html#custom-ti-integration).\n\nMore information can be found [here](https://www.elastic.co/guide/en/security/current/es-threat-intel-integrations.html).",
+        "query": "source.ip:* or destination.ip:*\n",
+        "references": [
+            "https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-module-threatintel.html",
+            "https://www.elastic.co/guide/en/security/master/es-threat-intel-integrations.html",
+            "https://www.elastic.co/security/tip"
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "destination.ip",
+                "type": "ip"
+            },
+            {
+                "ecs": true,
+                "name": "source.ip",
+                "type": "ip"
+            }
+        ],
+        "risk_score": 99,
+        "rule_id": "0c41e478-5263-4c69-8f9e-7dfd2c22da64",
+        "setup": "This rule needs threat intelligence indicators to work. Threat intelligence indicators can be collected using an Elastic Agent integration, the Threat Intel module, or a custom integration.\n\nMore information can be found here.",
+        "severity": "critical",
+        "tags": [
+            "OS: Windows",
+            "Data Source: Elastic Endgame",
+            "Rule Type: Indicator Match"
+        ],
+        "threat_filters": [
+            {
+                "$state": {
+                    "store": "appState"
+                },
+                "meta": {
+                    "disabled": false,
+                    "key": "event.category",
+                    "negate": false,
+                    "params": {
+                        "query": "threat"
+                    },
+                    "type": "phrase"
+                },
+                "query": {
+                    "match_phrase": {
+                        "event.category": "threat"
+                    }
+                }
+            },
+            {
+                "$state": {
+                    "store": "appState"
+                },
+                "meta": {
+                    "disabled": false,
+                    "key": "event.kind",
+                    "negate": false,
+                    "params": {
+                        "query": "enrichment"
+                    },
+                    "type": "phrase"
+                },
+                "query": {
+                    "match_phrase": {
+                        "event.kind": "enrichment"
+                    }
+                }
+            },
+            {
+                "$state": {
+                    "store": "appState"
+                },
+                "meta": {
+                    "disabled": false,
+                    "key": "event.type",
+                    "negate": false,
+                    "params": {
+                        "query": "indicator"
+                    },
+                    "type": "phrase"
+                },
+                "query": {
+                    "match_phrase": {
+                        "event.type": "indicator"
+                    }
+                }
+            }
+        ],
+        "threat_index": [
+            "filebeat-*",
+            "logs-ti_*"
+        ],
+        "threat_indicator_path": "threat.indicator",
+        "threat_language": "kuery",
+        "threat_mapping": [
+            {
+                "entries": [
+                    {
+                        "field": "source.ip",
+                        "type": "mapping",
+                        "value": "threat.indicator.ip"
+                    }
+                ]
+            },
+            {
+                "entries": [
+                    {
+                        "field": "destination.ip",
+                        "type": "mapping",
+                        "value": "threat.indicator.ip"
+                    }
+                ]
+            }
+        ],
+        "threat_query": "@timestamp \u003e= \"now-30d/d\" and event.module:(threatintel or ti_*) and threat.indicator.ip:* and not labels.is_ioc_transform_source:\"true\"",
+        "timeline_id": "495ad7a7-316e-4544-8a0f-9c098daee76e",
+        "timeline_title": "Generic Threat Match Timeline",
+        "type": "threat_match",
+        "version": 2
+    },
+    "id": "0c41e478-5263-4c69-8f9e-7dfd2c22da64_2",
+    "type": "security-rule"
+}

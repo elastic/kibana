@@ -1,0 +1,74 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies indirect command execution via Program Compatibility Assistant (pcalua.exe) or forfiles.exe.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Indirect Command Execution via Forfiles/Pcalua",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  process.parent.name : (\"pcalua.exe\", \"forfiles.exe\")\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "98843d35-645e-4e66-9d6a-5049acd96ce1",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Defend",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1202",
+                        "name": "Indirect Command Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1202/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "98843d35-645e-4e66-9d6a-5049acd96ce1_1",
+    "type": "security-rule"
+}

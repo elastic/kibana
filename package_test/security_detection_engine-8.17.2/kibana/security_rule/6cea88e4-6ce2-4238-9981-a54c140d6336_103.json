@@ -1,0 +1,68 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "A new GitHub repository was created.",
+    "from": "now-9m",
+    "index": [
+      "logs-github.audit-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "GitHub Repo Created",
+    "query": "configuration where event.dataset == \"github.audit\" and event.action == \"repo.create\"\n",
+    "related_integrations": [
+      {
+        "package": "github",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "6cea88e4-6ce2-4238-9981-a54c140d6336",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Use Case: UEBA",
+      "Tactic: Execution",
+      "Rule Type: BBR",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1648",
+            "name": "Serverless Execution",
+            "reference": "https://attack.mitre.org/techniques/T1648/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 103
+  },
+  "id": "6cea88e4-6ce2-4238-9981-a54c140d6336_103",
+  "type": "security-rule"
+}

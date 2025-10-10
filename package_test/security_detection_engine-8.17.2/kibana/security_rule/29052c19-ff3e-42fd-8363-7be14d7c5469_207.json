@@ -1,0 +1,121 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic",
+      "Austin Songer"
+    ],
+    "description": "Identifies a change to an AWS Security Group Configuration. A security group is like a virtual firewall, and modifying configurations may allow unauthorized access. Threat actors may abuse this to establish persistence, exfiltrate data, or pivot in an AWS environment.",
+    "false_positives": [
+      "A security group may be created by a system or network administrator. Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Security group creations by unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    ],
+    "from": "now-9m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "investigation_fields": {
+      "field_names": [
+        "@timestamp",
+        "user.name",
+        "aws.cloudtrail.user_identity.arn",
+        "aws.cloudtrail.user_identity.type",
+        "user_agent.original",
+        "aws.cloudtrail.flattened.request_parameters.instanceId",
+        "event.action",
+        "event.outcome",
+        "cloud.region",
+        "event.provider",
+        "aws.cloudtrail.request_parameters",
+        "aws.cloudtrail.response_elements"
+      ]
+    },
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS EC2 Security Group Configuration Change",
+    "note": "### Investigating AWS EC2 Security Group Configuration Change\n\nThis rule identifies any changes to an AWS Security Group, which functions as a virtual firewall controlling inbound and outbound traffic for resources like EC2 instances. Modifications to a security group configuration could expose critical assets to unauthorized access. Threat actors may exploit such changes to establish persistence, exfiltrate data, or pivot within an AWS environment.\n\n#### Possible Investigation Steps\n\n1. **Identify the Modified Security Group**:\n   - **Security Group ID**: Check the `aws.cloudtrail.flattened.request_parameters.groupId` field to identify the specific security group affected.\n   - **Rule Changes**: Review `aws.cloudtrail.flattened.response_elements.securityGroupRuleSet` to determine the new rules or configurations, including any added or removed IP ranges, protocol changes, and port specifications.\n\n2. **Review User Context**:\n   - **User Identity**: Inspect the `aws.cloudtrail.user_identity.arn` field to determine which user or role made the modification. Verify if this is an authorized administrator or a potentially compromised account.\n   - **Access Patterns**: Analyze whether this user regularly interacts with security group configurations or if this event is out of the ordinary for their account.\n\n3. **Analyze the Configuration Change**:\n   - **Egress vs. Ingress**: Determine if the change affected inbound (ingress) or outbound (egress) traffic by reviewing fields like `isEgress` in the `securityGroupRuleSet`. Unauthorized changes to outbound traffic can indicate data exfiltration attempts.\n   - **IP Ranges and Ports**: Assess any added IP ranges, especially `0.0.0.0/0`, which exposes resources to the internet. Port changes should also be evaluated to ensure only necessary ports are open.\n\n4. **Check User Agent and Source IP**:\n   - **User Agent Analysis**: Examine the `user_agent.original` field to identify the tool or application used, such as `AWS Console` or `Terraform`, which may reveal if the action was automated or manual.\n   - **Source IP and Geolocation**: Use `source.address` and `source.geo` fields to verify if the IP address and geolocation match expected locations for your organization. Unexpected IPs or regions may indicate unauthorized access.\n\n5. **Evaluate for Persistence Indicators**:\n   - **Repeated Changes**: Investigate if similar changes were recently made across multiple security groups, which may suggest an attempt to maintain or expand access.\n   - **Permissions Review**: Confirm that the user’s IAM policies are configured to limit changes to security groups only as necessary.\n\n6. **Correlate with Other CloudTrail Events**:\n   - **Cross-Reference Other Security Events**: Look for related actions like `AuthorizeSecurityGroupIngress`, `CreateSecurityGroup`, or `RevokeSecurityGroupIngress` that may indicate additional or preparatory steps for unauthorized access.\n   - **Monitor for IAM or Network Changes**: Check for IAM modifications, network interface changes, or other configuration updates in the same timeframe to detect broader malicious activities.\n\n### False Positive Analysis\n\n- **Routine Security Changes**: Security group modifications may be part of regular infrastructure maintenance. Verify if this action aligns with known, scheduled administrative activities.\n- **Automated Configuration Management**: If you are using automated tools like `Terraform` or `CloudFormation`, confirm if the change matches expected configuration drift corrections or deployments.\n\n### Response and Remediation\n\n- **Revert Unauthorized Changes**: If unauthorized, revert the security group configuration to its previous state to secure the environment.\n- **Restrict Security Group Permissions**: Remove permissions to modify security groups from any compromised or unnecessary accounts to limit future access.\n- **Quarantine Affected Resources**: If necessary, isolate any affected instances or resources to prevent further unauthorized activity.\n- **Audit IAM and Security Group Policies**: Regularly review permissions related to security groups to ensure least privilege access and prevent excessive access.\n\n### Additional Information\n\nFor more details on managing AWS Security Groups and best practices, refer to the [AWS EC2 Security Groups Documentation](https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-security-groups.html) and AWS security best practices.\n",
+    "query": "event.dataset: \"aws.cloudtrail\"\n    and event.provider: \"ec2.amazonaws.com\"\n    and event.action:(\n            \"AuthorizeSecurityGroupEgress\" or\n            \"CreateSecurityGroup\" or\n            \"ModifyInstanceAttribute\" or\n            \"ModifySecurityGroupRules\" or\n            \"RevokeSecurityGroupEgress\" or\n            \"RevokeSecurityGroupIngress\")\n    and event.outcome: \"success\"\n",
+    "references": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-security-groups.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "29052c19-ff3e-42fd-8363-7be14d7c5469",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS EC2",
+      "Use Case: Network Security Monitoring",
+      "Resources: Investigation Guide",
+      "Tactic: Persistence",
+      "Tactic: Defense Evasion"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": []
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1562",
+            "name": "Impair Defenses",
+            "reference": "https://attack.mitre.org/techniques/T1562/",
+            "subtechnique": [
+              {
+                "id": "T1562.007",
+                "name": "Disable or Modify Cloud Firewall",
+                "reference": "https://attack.mitre.org/techniques/T1562/007/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 207
+  },
+  "id": "29052c19-ff3e-42fd-8363-7be14d7c5469_207",
+  "type": "security-rule"
+}

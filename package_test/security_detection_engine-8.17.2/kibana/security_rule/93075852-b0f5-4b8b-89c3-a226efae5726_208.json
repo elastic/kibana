@@ -1,0 +1,121 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic",
+      "Austin Songer"
+    ],
+    "description": "Identifies when a user has assumed a role in AWS Security Token Service (STS). Users can assume a role to obtain temporary credentials and access AWS resources. Adversaries can use this technique for credential access and privilege escalation.",
+    "false_positives": [
+      "AWS administrators or automated processes might regularly assume roles for legitimate administrative purposes.",
+      "Applications integrated with AWS might assume roles to access AWS resources.",
+      "Automated workflows might assume roles to perform periodic tasks such as data backups, updates, or deployments."
+    ],
+    "history_window_start": "now-10d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS STS Temporary Credentials via AssumeRole",
+    "new_terms_fields": [
+      "user.id",
+      "aws.cloudtrail.flattened.request_parameters.roleArn"
+    ],
+    "note": "",
+    "query": "event.dataset:aws.cloudtrail\n    and event.provider:sts.amazonaws.com\n    and event.action:AssumeRole*\n    and event.outcome:success\n    and user.id:*\n",
+    "references": [
+      "https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "user.id",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "93075852-b0f5-4b8b-89c3-a226efae5726",
+    "setup": "The AWS Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS STS",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Privilege Escalation"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0004",
+          "name": "Privilege Escalation",
+          "reference": "https://attack.mitre.org/tactics/TA0004/"
+        },
+        "technique": [
+          {
+            "id": "T1548",
+            "name": "Abuse Elevation Control Mechanism",
+            "reference": "https://attack.mitre.org/techniques/T1548/"
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0008",
+          "name": "Lateral Movement",
+          "reference": "https://attack.mitre.org/tactics/TA0008/"
+        },
+        "technique": [
+          {
+            "id": "T1550",
+            "name": "Use Alternate Authentication Material",
+            "reference": "https://attack.mitre.org/techniques/T1550/",
+            "subtechnique": [
+              {
+                "id": "T1550.001",
+                "name": "Application Access Token",
+                "reference": "https://attack.mitre.org/techniques/T1550/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 208
+  },
+  "id": "93075852-b0f5-4b8b-89c3-a226efae5726_208",
+  "type": "security-rule"
+}

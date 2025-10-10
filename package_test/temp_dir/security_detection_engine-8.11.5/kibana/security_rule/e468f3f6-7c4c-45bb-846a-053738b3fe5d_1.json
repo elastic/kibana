@@ -1,0 +1,95 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies a new credentials logon type performed by an unusual process. This may indicate the existence of an access token forging capability that are often abused to bypass access control restrictions.",
+        "from": "now-9m",
+        "history_window_start": "now-7d",
+        "index": [
+            "winlogbeat-*",
+            "logs-system.*",
+            "logs-windows.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "First Time Seen NewCredentials Logon Process",
+        "new_terms_fields": [
+            "process.executable"
+        ],
+        "query": "event.category:\"authentication\" and host.os.type:\"windows\" and winlog.logon.type:\"NewCredentials\" and winlog.event_data.LogonProcessName:(Advapi* or \"Advapi  \")\n",
+        "references": [
+            "https://www.elastic.co/pt/blog/how-attackers-abuse-access-token-manipulation"
+        ],
+        "related_integrations": [
+            {
+                "package": "system",
+                "version": "^1.6.4"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.LogonProcessName",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.logon.type",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "e468f3f6-7c4c-45bb-846a-053738b3fe5d",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Privilege Escalation"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1134",
+                        "name": "Access Token Manipulation",
+                        "reference": "https://attack.mitre.org/techniques/T1134/",
+                        "subtechnique": [
+                            {
+                                "id": "T1134.001",
+                                "name": "Token Impersonation/Theft",
+                                "reference": "https://attack.mitre.org/techniques/T1134/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 1
+    },
+    "id": "e468f3f6-7c4c-45bb-846a-053738b3fe5d_1",
+    "type": "security-rule"
+}

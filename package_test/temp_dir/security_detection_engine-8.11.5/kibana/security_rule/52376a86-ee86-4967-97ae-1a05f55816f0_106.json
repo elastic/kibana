@@ -1,0 +1,137 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the abuse of a Linux binary to break out of a restricted shell or environment by spawning an interactive system shell. The activity of spawning a shell from a binary is not common behavior for a user or system administrator, and may indicate an attempt to evade detection, increase capabilities or enhance the stability of an adversary.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Linux Restricted Shell Breakout via Linux Binary(s)",
+        "note": "## Triage and analysis\n\n### Investigating Shell Evasion via Linux Utilities\nDetection alerts from this rule indicate that a Linux utility has been abused to breakout of restricted shells or\nenvironments by spawning an interactive system shell.\nHere are some possible avenues of investigation:\n- Examine the entry point to the host and user in action via the Analyse View.\n  - Identify the session entry leader and session user\n- Examine the contents of session leading to the abuse via the Session View.\n  - Examine the command execution pattern in the session, which may lead to suspricous activities\n- Examine the execution of commands in the spawned shell.\n  - Identify imment threat to the system from the executed commands\n  - Take necessary incident response actions to contain any malicious behviour caused via this execution.\n\n### Related rules\n\n- A malicious spawned shell can execute any of the possible MITTRE ATT\u0026CK vectors mainly to impair defences.\n- Hence its adviced to enable defence evasion and privilige escalation rules accordingly in your environment\n\n### Response and remediation\n\nInitiate the incident response process based on the outcome of the triage.\n\n- If the triage releaved suspicious netwrok activity from the malicious spawned shell,\n  - Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware execution via the maliciously spawned shell,\n  - Search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- If the triage revelaed defence evasion for imparing defenses\n  - Isolate the involved host to prevent further post-compromise behavior.\n  - Identified the disabled security guard components on the host and take necessary steps in renebaling the same.\n  - If any tools have been disbaled / uninstalled or config tampered work towards reenabling the same.\n- If the triage revelaed addition of persistence mechanism exploit like auto start scripts\n  - Isolate further login to the systems that can initae auto start scripts.\n  - Identify the auto start scripts and disable and remove the same from the systems\n- If the triage revealed data crawling or data export via remote copy\n  - Investigate credential exposure on systems compromised / used / decoded by the attacker during the data crawling\n  - Intiate compromised credential deactivation and credential rotation process for all exposed crednetials.\n  - Investiagte if any IPR data was accessed during the data crawling and take appropriate actions.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).",
+        "query": "process where host.os.type == \"linux\" and event.type == \"start\" and\n(\n  /* launching shell from capsh */\n  (process.name == \"capsh\" and process.args == \"--\") or\n  \n  /* launching shells from unusual parents or parent+arg combos */\n  (process.name : \"*sh\" and (\n    (process.parent.name : (\"byebug\", \"ftp\", \"strace\", \"zip\", \"*awk\", \"git\", \"tar\") and \n    (\n      process.parent.args : \"BEGIN {system(*)}\" or\n      (process.parent.args : (\"*PAGER*\", \"!*sh\", \"exec *sh\") or process.args : (\"*PAGER*\", \"!*sh\", \"exec *sh\")) or\n      (\n        (process.parent.args : \"exec=*sh\" or (process.parent.args : \"-I\" and process.parent.args : \"*sh\")) or\n        (process.args : \"exec=*sh\" or (process.args : \"-I\" and process.args : \"*sh\"))\n        )\n      )\n    ) or\n    \n    /* shells specified in parent args */\n    /* nice rule is broken in 8.2 */\n    (process.parent.args : \"*sh\" and\n      (\n        (process.parent.name == \"nice\") or\n        (process.parent.name == \"cpulimit\" and process.parent.args == \"-f\") or\n        (process.parent.name == \"find\" and process.parent.args == \"-exec\" and process.parent.args == \";\" and process.parent.args == \"-p\") or\n        (process.parent.name == \"flock\" and process.parent.args == \"-u\" and process.parent.args == \"/\")\n      )\n    )\n  )) or\n\n  /* shells specified in args */\n  (process.args : \"*sh\" and (\n    (process.parent.name == \"crash\" and process.parent.args == \"-h\") or\n    (process.name == \"sensible-pager\" and process.parent.name in (\"apt\", \"apt-get\") and process.parent.args == \"changelog\")\n    /* scope to include more sensible-pager invoked shells with different parent process to reduce noise and remove false positives */\n    \n  )) or\n  (process.name == \"busybox\" and event.action == \"exec\" and process.args_count == 2 and process.args : \"*sh\" and not process.executable : \"/var/lib/docker/overlay2/*/merged/bin/busybox\") or\n  (process.name == \"env\" and process.args_count == 2 and process.args : \"*sh\") or\n  (process.parent.name in (\"vi\", \"vim\") and process.parent.args == \"-c\" and process.parent.args : \":!*sh\") or\n  (process.parent.name in (\"c89\", \"c99\", \"gcc\") and process.parent.args : \"*sh,-s\" and process.parent.args == \"-wrapper\") or\n  (process.parent.name == \"expect\" and process.parent.args == \"-c\" and process.parent.args : \"spawn *sh;interact\") or\n  (process.parent.name == \"mysql\" and process.parent.args == \"-e\" and process.parent.args : \"\\\\!*sh\") or\n  (process.parent.name == \"ssh\" and process.parent.args == \"-o\" and process.parent.args : \"ProxyCommand=;*sh 0\u003c\u00262 1\u003e\u00262\")\n)\n",
+        "references": [
+            "https://gtfobins.github.io/gtfobins/apt/",
+            "https://gtfobins.github.io/gtfobins/apt-get/",
+            "https://gtfobins.github.io/gtfobins/nawk/",
+            "https://gtfobins.github.io/gtfobins/mawk/",
+            "https://gtfobins.github.io/gtfobins/awk/",
+            "https://gtfobins.github.io/gtfobins/gawk/",
+            "https://gtfobins.github.io/gtfobins/busybox/",
+            "https://gtfobins.github.io/gtfobins/c89/",
+            "https://gtfobins.github.io/gtfobins/c99/",
+            "https://gtfobins.github.io/gtfobins/cpulimit/",
+            "https://gtfobins.github.io/gtfobins/crash/",
+            "https://gtfobins.github.io/gtfobins/env/",
+            "https://gtfobins.github.io/gtfobins/expect/",
+            "https://gtfobins.github.io/gtfobins/find/",
+            "https://gtfobins.github.io/gtfobins/flock/",
+            "https://gtfobins.github.io/gtfobins/gcc/",
+            "https://gtfobins.github.io/gtfobins/mysql/",
+            "https://gtfobins.github.io/gtfobins/nice/",
+            "https://gtfobins.github.io/gtfobins/ssh/",
+            "https://gtfobins.github.io/gtfobins/vi/",
+            "https://gtfobins.github.io/gtfobins/vim/",
+            "https://gtfobins.github.io/gtfobins/capsh/",
+            "https://gtfobins.github.io/gtfobins/byebug/",
+            "https://gtfobins.github.io/gtfobins/git/",
+            "https://gtfobins.github.io/gtfobins/ftp/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args_count",
+                "type": "long"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "52376a86-ee86-4967-97ae-1a05f55816f0",
+        "setup": "The session view analysis for the command alerted is avalible in versions 8.2 and above.",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Execution",
+            "Data Source: Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.004",
+                                "name": "Unix Shell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 106
+    },
+    "id": "52376a86-ee86-4967-97ae-1a05f55816f0_106",
+    "type": "security-rule"
+}

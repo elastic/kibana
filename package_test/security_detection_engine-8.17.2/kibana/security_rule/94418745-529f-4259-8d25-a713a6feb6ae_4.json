@@ -1,0 +1,126 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule monitors for the addition of an executable bit for scripts that are located in directories which are commonly abused for persistence. An alert of this rule is an indicator that a persistence mechanism is being set up within your environment. Adversaries may create these scripts to execute malicious code at start-up, or at a set interval to gain persistence onto the system.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process*",
+      "endgame-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Executable Bit Set for Potential Persistence Script",
+    "query": "process where host.os.type == \"linux\" and event.type == \"start\" and event.action in (\"exec\", \"exec_event\") and\nprocess.args : (\n  // Misc.\n  \"/etc/rc.local\", \"/etc/rc.common\", \"/etc/rc.d/rc.local\", \"/etc/init.d/*\", \"/etc/update-motd.d/*\",\n  \"/etc/apt/apt.conf.d/*\", \"/etc/cron*\", \"/etc/init/*\",\n\n  // XDG\n  \"/etc/xdg/autostart/*\", \"/home/*/.config/autostart/*\", \"/root/.config/autostart/*\",\n  \"/home/*/.local/share/autostart/*\", \"/root/.local/share/autostart/*\", \"/home/*/.config/autostart-scripts/*\",\n  \"/root/.config/autostart-scripts/*\", \"/etc/xdg/autostart/*\", \"/usr/share/autostart/*\",\n  \n  // udev\n  \"/lib/udev/*\", \"/etc/udev/rules.d/*\", \"/usr/lib/udev/rules.d/*\", \"/run/udev/rules.d/*\"\n\n) and (\n  (process.name == \"chmod\" and process.args : (\"+x*\", \"1*\", \"3*\", \"5*\", \"7*\")) or\n  (process.name == \"install\" and process.args : \"-m*\" and process.args : (\"7*\", \"5*\", \"3*\", \"1*\"))\n) and not process.parent.executable : \"/var/lib/dpkg/*\"\n",
+    "references": [
+      "https://www.intezer.com/blog/malware-analysis/hiddenwasp-malware-targeting-linux-systems/",
+      "https://pberba.github.io/security/2022/02/06/linux-threat-hunting-for-persistence-initialization-scripts-and-shell-configuration/#8-boot-or-logon-initialization-scripts-rc-scripts",
+      "https://www.cyberciti.biz/faq/how-to-enable-rc-local-shell-script-on-systemd-while-booting-linux-system/",
+      "https://www.elastic.co/security-labs/sequel-on-persistence-mechanisms"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "94418745-529f-4259-8d25-a713a6feb6ae",
+    "setup": "## Setup\n\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Elastic Defend\" and select the integration to see more details about it.\n- Click \"Add Elastic Defend\".\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either \"Traditional Endpoints\" or \"Cloud Workloads\".\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest selecting \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in \"New agent policy name\". If other agent policies already exist, you can click the \"Existing hosts\" tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click \"Save and Continue\".\n- To complete the integration, select \"Add Elastic Agent to your hosts\" and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Persistence",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1037",
+            "name": "Boot or Logon Initialization Scripts",
+            "reference": "https://attack.mitre.org/techniques/T1037/",
+            "subtechnique": [
+              {
+                "id": "T1037.004",
+                "name": "RC Scripts",
+                "reference": "https://attack.mitre.org/techniques/T1037/004/"
+              }
+            ]
+          },
+          {
+            "id": "T1053",
+            "name": "Scheduled Task/Job",
+            "reference": "https://attack.mitre.org/techniques/T1053/",
+            "subtechnique": [
+              {
+                "id": "T1053.003",
+                "name": "Cron",
+                "reference": "https://attack.mitre.org/techniques/T1053/003/"
+              }
+            ]
+          },
+          {
+            "id": "T1547",
+            "name": "Boot or Logon Autostart Execution",
+            "reference": "https://attack.mitre.org/techniques/T1547/",
+            "subtechnique": [
+              {
+                "id": "T1547.013",
+                "name": "XDG Autostart Entries",
+                "reference": "https://attack.mitre.org/techniques/T1547/013/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 4
+  },
+  "id": "94418745-529f-4259-8d25-a713a6feb6ae_4",
+  "type": "security-rule"
+}

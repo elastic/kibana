@@ -1,0 +1,127 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies the creation of a symbolic link to a suspicious file or location. A symbolic link is a reference to a file or directory that acts as a pointer or shortcut, allowing users to access the target file or directory from a different location in the file system. An attacker can potentially leverage symbolic links for privilege escalation by tricking a privileged process into following the symbolic link to a sensitive file, giving the attacker access to data or capabilities they would not normally have.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Symbolic Link Created",
+        "query": "process where host.os.type == \"linux\" and event.action in (\"exec\", \"exec_event\") and\nevent.type == \"start\" and process.name == \"ln\" and process.args in (\"-s\", \"-sf\") and \n  (\n    /* suspicious files */\n    (process.args in (\"/etc/shadow\", \"/etc/shadow-\", \"/etc/shadow~\", \"/etc/gshadow\", \"/etc/gshadow-\") or \n    (process.working_directory == \"/etc\" and process.args in (\"shadow\", \"shadow-\", \"shadow~\", \"gshadow\", \"gshadow-\"))) or \n    \n    /* suspicious bins */\n    (process.args in (\"/bin/bash\", \"/bin/dash\", \"/bin/sh\", \"/bin/tcsh\", \"/bin/csh\", \"/bin/zsh\", \"/bin/ksh\", \"/bin/fish\") or \n    (process.working_directory == \"/bin\" and process.args : (\"bash\", \"dash\", \"sh\", \"tcsh\", \"csh\", \"zsh\", \"ksh\", \"fish\"))) or \n    (process.args in (\"/usr/bin/bash\", \"/usr/bin/dash\", \"/usr/bin/sh\", \"/usr/bin/tcsh\", \"/usr/bin/csh\", \"/usr/bin/zsh\", \"/usr/bin/ksh\", \"/usr/bin/fish\") or \n    (process.working_directory == \"/usr/bin\" and process.args in (\"bash\", \"dash\", \"sh\", \"tcsh\", \"csh\", \"zsh\", \"ksh\", \"fish\"))) or\n    \n    /* suspicious locations */\n    (process.args : (\"/etc/cron.d/*\", \"/etc/cron.daily/*\", \"/etc/cron.hourly/*\", \"/etc/cron.weekly/*\", \"/etc/cron.monthly/*\")) or\n    (process.args : (\"/home/*/.ssh/*\", \"/root/.ssh/*\",\"/etc/sudoers.d/*\", \"/dev/shm/*\"))\n  ) and \n  process.parent.name in (\"bash\", \"dash\", \"ash\", \"sh\", \"tcsh\", \"csh\", \"zsh\", \"ksh\", \"fish\") and \n  not user.Ext.real.id == \"0\" and not group.Ext.real.id == \"0\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "group.Ext.real.id",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.working_directory",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "user.Ext.real.id",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "8a024633-c444-45c0-a4fe-78128d8c1ab6",
+        "setup": "\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Elastic Defend\" and select the integration to see more details about it.\n- Click \"Add Elastic Defend\".\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either \"Traditional Endpoints\" or \"Cloud Workloads\".\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest selecting \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in \"New agent policy name\". If other agent policies already exist, you can click the \"Existing hosts\" tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click \"Save and Continue\".\n- To complete the integration, select \"Add Elastic Agent to your hosts\" and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Privilege Escalation",
+            "Tactic: Credential Access",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1548",
+                        "name": "Abuse Elevation Control Mechanism",
+                        "reference": "https://attack.mitre.org/techniques/T1548/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": [
+                            {
+                                "id": "T1003.008",
+                                "name": "/etc/passwd and /etc/shadow",
+                                "reference": "https://attack.mitre.org/techniques/T1003/008/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 4
+    },
+    "id": "8a024633-c444-45c0-a4fe-78128d8c1ab6_4",
+    "type": "security-rule"
+}

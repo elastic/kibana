@@ -1,0 +1,57 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies potential brute-force attempts against Microsoft 365 user accounts by detecting a high number of failed interactive or non-interactive login attempts within a 30-minute window from a single source. Attackers may attempt to brute force user accounts to gain unauthorized access to Microsoft 365 services via different services such as Exchange, SharePoint, or Teams.",
+    "false_positives": [
+      "Automated processes that attempt to authenticate using expired credentials or have misconfigured authentication settings may lead to false positives."
+    ],
+    "from": "now-30m",
+    "interval": "10m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "Azure Entra Sign-in Brute Force Microsoft 365 Accounts by Repeat Source",
+    "note": "This rule relies on Azure Entra ID sign-in logs, but filters for Microsoft 365 resources.",
+    "query": "from logs-azure.signinlogs*\n| WHERE\n  event.dataset == \"azure.signinlogs\"\n  and event.category == \"authentication\"\n  and to_lower(azure.signinlogs.properties.resource_display_name) rlike \"(.*)365(.*)\"\n  and azure.signinlogs.category in (\"NonInteractiveUserSignInLogs\", \"SignInLogs\")\n  and event.outcome != \"success\"\n\n  // For tuning, review azure.signinlogs.properties.status.error_code\n  // https://learn.microsoft.com/en-us/entra/identity-platform/reference-error-codes\n\n// Count the number of unique targets per source IP\n| stats\n  target_count = count_distinct(azure.signinlogs.properties.user_principal_name) by source.ip\n\n// Filter for at least 10 distinct failed login attempts from a single source\n| where target_count >= 10\n",
+    "references": [
+      "https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-unauthenticated-enum-and-initial-entry/az-password-spraying",
+      "https://github.com/0xZDH/o365spray"
+    ],
+    "risk_score": 47,
+    "rule_id": "c6655282-6c79-11ef-bbb5-f661ea17fbcc",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Domain: SaaS",
+      "Data Source: Azure",
+      "Data Source: Entra ID",
+      "Data Source: Entra ID Sign-in",
+      "Use Case: Identity and Access Audit",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1110",
+            "name": "Brute Force",
+            "reference": "https://attack.mitre.org/techniques/T1110/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "c6655282-6c79-11ef-bbb5-f661ea17fbcc_1",
+  "type": "security-rule"
+}

@@ -1,0 +1,43 @@
+{
+    "attributes": {
+        "anomaly_threshold": 75,
+        "author": [
+            "Elastic"
+        ],
+        "description": "A machine learning job detected an unusually large spike in network activity to one destination country in the network logs. This could be due to unusually large amounts of reconnaissance or enumeration traffic. Data exfiltration activity may also produce such a surge in traffic to a destination country that does not normally appear in network traffic or business workflows. Malware instances and persistence mechanisms may communicate with command-and-control (C2) infrastructure in their country of origin, which may be an unusual destination country for the source network.",
+        "false_positives": [
+            "Business workflows that occur very occasionally, and involve an unusual surge in network traffic to one destination country, can trigger this alert. A new business workflow or a surge in business activity in a particular country may trigger this alert. Business travelers who roam to many countries for brief periods may trigger this alert if they engage in volumetric network activity."
+        ],
+        "from": "now-30m",
+        "interval": "15m",
+        "license": "Elastic License v2",
+        "machine_learning_job_id": "high_count_by_destination_country",
+        "name": "Spike in Network Traffic To a Country",
+        "note": "## Triage and analysis\n\n### Investigating Spike in Network Traffic To a Country\n\nMonitoring network traffic for anomalies is a good methodology for uncovering various potentially suspicious activities. For example, data exfiltration or infected machines may communicate with a command-and-control (C2) server in another country your company doesn't have business with.\n\nThis rule uses a machine learning job to detect a significant spike in the network traffic to a country, which can indicate reconnaissance or enumeration activities, an infected machine being used as a bot in a DDoS attack, or potentially data exfiltration.\n\n#### Possible investigation steps\n\n- Identify the specifics of the involved assets, such as role, criticality, and associated users.\n- Investigate other alerts associated with the involved assets during the past 48 hours.\n- Examine the data available and determine the exact users and processes involved in those connections.\n- Investigate the process execution chain (parent process tree) for unknown processes. Examine their executable files for prevalence, whether they are located in expected locations, and if they are signed with valid digital signatures.\n- Consider the time of day. If the user is a human (not a program or script), did the activity occurs during working hours?\n- If this activity is suspicious, contact the account owner and confirm whether they are aware of it.\n\n### False positive analysis\n\n- Understand the context of the connections by contacting the asset owners. If this activity is related to a new business process or newly implemented (approved) technology, consider adding exceptions \u2014 preferably with a combination of user and source conditions.\n\n### Response and remediation\n\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved hosts to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n  - Remove and block malicious artifacts identified during triage.\n- Consider implementing temporary network border rules to block or alert connections to the target country, if relevant.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+        "references": [
+            "https://www.elastic.co/guide/en/security/current/prebuilt-ml-jobs.html"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "network_traffic",
+                "version": "^1.1.0"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "c7db5533-ca2a-41f6-a8b0-ee98abe0f573",
+        "severity": "low",
+        "tags": [
+            "Use Case: Threat Detection",
+            "Rule Type: ML",
+            "Rule Type: Machine Learning"
+        ],
+        "type": "machine_learning",
+        "version": 104
+    },
+    "id": "c7db5533-ca2a-41f6-a8b0-ee98abe0f573_104",
+    "type": "security-rule"
+}

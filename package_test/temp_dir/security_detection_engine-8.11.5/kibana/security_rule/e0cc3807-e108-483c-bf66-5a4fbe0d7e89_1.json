@@ -1,0 +1,83 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "This rule monitors for the execution of suspicious commands via screen and tmux. When launching a command and detaching directly, the commands will be executed in the background via its parent process. Attackers may leverage screen or tmux to execute commands while attempting to evade detection.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potentially Suspicious Process Started via tmux or screen",
+        "query": "process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and \nprocess.parent.name in (\"screen\", \"tmux\") and process.name : (\n  \"nmap\", \"nc\", \"ncat\", \"netcat\", \"socat\", \"nc.openbsd\", \"ngrok\", \"ping\", \"java\", \"python*\", \"php*\", \"perl\", \"ruby\",\n  \"lua*\", \"openssl\", \"telnet\", \"awk\", \"wget\", \"curl\", \"whoami\", \"id\"\n  )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "e0cc3807-e108-483c-bf66-5a4fbe0d7e89",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Defend",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1218",
+                        "name": "System Binary Proxy Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1218/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "e0cc3807-e108-483c-bf66-5a4fbe0d7e89_1",
+    "type": "security-rule"
+}

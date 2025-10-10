@@ -1,0 +1,68 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Access to private GitHub organization resources was revoked for a PAT.",
+    "from": "now-9m",
+    "index": [
+      "logs-github.audit-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "GitHub PAT Access Revoked",
+    "query": "configuration where event.dataset == \"github.audit\" and event.action == \"personal_access_token.access_revoked\"\n",
+    "related_integrations": [
+      {
+        "package": "github",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "8a0fd93a-7df8-410d-8808-4cc5e340f2b9",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Use Case: UEBA",
+      "Tactic: Impact",
+      "Rule Type: BBR",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0040",
+          "name": "Impact",
+          "reference": "https://attack.mitre.org/tactics/TA0040/"
+        },
+        "technique": [
+          {
+            "id": "T1531",
+            "name": "Account Access Removal",
+            "reference": "https://attack.mitre.org/techniques/T1531/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "8a0fd93a-7df8-410d-8808-4cc5e340f2b9_1",
+  "type": "security-rule"
+}

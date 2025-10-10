@@ -1,0 +1,114 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects PowerShell scripts that contain the default exported functions used on Invoke-NinjaCopy. Attackers can use Invoke-NinjaCopy to read SYSTEM files that are normally locked, such as the NTDS.dit file or registry hives.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "PowerShell Invoke-NinjaCopy script",
+        "query": "event.category:process and host.os.type:windows and\n  powershell.file.script_block_text : (\n    \"StealthReadFile\" or\n    \"StealthReadFileAddr\" or\n    \"StealthCloseFileDelegate\" or\n    \"StealthOpenFile\" or\n    \"StealthCloseFile\" or\n    \"StealthReadFile\" or\n    \"Invoke-NinjaCopy\"\n   )\n  and not user.id : \"S-1-5-18\"\n",
+        "references": [
+            "https://github.com/BC-SECURITY/Empire/blob/main/empire/server/data/module_source/collection/Invoke-NinjaCopy.ps1"
+        ],
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "powershell.file.script_block_text",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "b8386923-b02c-4b94-986a-d223d9b01f88",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Credential Access",
+            "Data Source: PowerShell Logs"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1003",
+                        "name": "OS Credential Dumping",
+                        "reference": "https://attack.mitre.org/techniques/T1003/",
+                        "subtechnique": [
+                            {
+                                "id": "T1003.002",
+                                "name": "Security Account Manager",
+                                "reference": "https://attack.mitre.org/techniques/T1003/002/"
+                            },
+                            {
+                                "id": "T1003.003",
+                                "name": "NTDS",
+                                "reference": "https://attack.mitre.org/techniques/T1003/003/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.001",
+                                "name": "PowerShell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 3
+    },
+    "id": "b8386923-b02c-4b94-986a-d223d9b01f88_3",
+    "type": "security-rule"
+}

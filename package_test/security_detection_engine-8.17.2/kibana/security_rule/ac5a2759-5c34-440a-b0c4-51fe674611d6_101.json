@@ -1,0 +1,123 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies modifications in registry keys associated with abuse of the Outlook Home Page functionality for command and control or persistence.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.registry-*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Outlook Home Page Registry Modification",
+    "query": "registry where host.os.type == \"windows\" and event.action != \"deletion\" and registry.value : \"URL\" and\n    registry.path : (\n        \"HKCU\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Office\\\\*\\\\Outlook\\\\Webview\\\\Inbox\\\\URL\",\n        \"HKEY_USERS\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Office\\\\*\\\\Outlook\\\\Webview\\\\Inbox\\\\URL\",\n        \"HKU\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Office\\\\*\\\\Outlook\\\\Webview\\\\Inbox\\\\URL\",\n        \"\\\\REGISTRY\\\\USER\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Office\\\\*\\\\Outlook\\\\Webview\\\\Inbox\\\\URL\",\n        \"USER\\\\*\\\\SOFTWARE\\\\Microsoft\\\\Office\\\\*\\\\Outlook\\\\Webview\\\\Inbox\\\\URL\"\n    ) and registry.data.strings : \"*http*\"\n",
+    "references": [
+      "https://cloud.google.com/blog/topics/threat-intelligence/breaking-the-rules-tough-outlook-for-home-page-attacks/",
+      "https://github.com/trustedsec/specula"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "registry.data.strings",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "registry.path",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "registry.value",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "ac5a2759-5c34-440a-b0c4-51fe674611d6",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Command and Control",
+      "Tactic: Persistence",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "reference": "https://attack.mitre.org/tactics/TA0011/"
+        },
+        "technique": []
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1137",
+            "name": "Office Application Startup",
+            "reference": "https://attack.mitre.org/techniques/T1137/",
+            "subtechnique": [
+              {
+                "id": "T1137.004",
+                "name": "Outlook Home Page",
+                "reference": "https://attack.mitre.org/techniques/T1137/004/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 101
+  },
+  "id": "ac5a2759-5c34-440a-b0c4-51fe674611d6_101",
+  "type": "security-rule"
+}

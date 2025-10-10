@@ -1,0 +1,118 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "This rule monitors for the copying or moving of a system binary. Adversaries may copy/move and rename system binaries to evade detection. Copying a system binary to a different location should not occur often, so if it does, the activity should be investigated.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.file*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "System Binary Moved or Copied",
+    "query": "file where host.os.type == \"linux\" and event.type == \"change\" and event.action == \"rename\" and process.name != null and\nfile.Ext.original.path : (\n  \"/bin/*\", \"/usr/bin/*\", \"/usr/local/bin/*\", \"/sbin/*\", \"/usr/sbin/*\", \"/usr/local/sbin/*\"\n) and not (\n  process.executable in (\n    \"/bin/dpkg\", \"/usr/bin/dpkg\", \"/bin/dockerd\", \"/usr/bin/dockerd\", \"/usr/sbin/dockerd\", \"/bin/microdnf\",\n    \"/usr/bin/microdnf\", \"/bin/rpm\", \"/usr/bin/rpm\", \"/bin/snapd\", \"/usr/bin/snapd\", \"/bin/yum\", \"/usr/bin/yum\",\n    \"/bin/dnf\", \"/usr/bin/dnf\", \"/bin/podman\", \"/usr/bin/podman\", \"/bin/dnf-automatic\", \"/usr/bin/dnf-automatic\",\n    \"/bin/pacman\", \"/usr/bin/pacman\", \"/usr/bin/dpkg-divert\", \"/bin/dpkg-divert\", \"/sbin/apk\", \"/usr/sbin/apk\",\n    \"/usr/local/sbin/apk\", \"/usr/bin/apt\", \"/usr/sbin/pacman\", \"/bin/podman\", \"/usr/bin/podman\", \"/usr/bin/puppet\",\n    \"/bin/puppet\", \"/opt/puppetlabs/puppet/bin/puppet\", \"/usr/bin/chef-client\", \"/bin/chef-client\",\n    \"/bin/autossl_check\", \"/usr/bin/autossl_check\", \"/proc/self/exe\", \"/dev/fd/*\",  \"/usr/bin/pamac-daemon\",\n    \"/bin/pamac-daemon\", \"/usr/lib/snapd/snapd\", \"/usr/local/bin/dockerd\", \"/usr/libexec/netplan/generate\",\n    \"/usr/bin/update-alternatives\", \"/bin/update-alternatives\", \"/usr/sbin/update-alternatives\",\n    \"/sbin/update-alternatives\", \"/usr/bin/pip3\", \"/bin/pip3\", \"/usr/local/bin/pip3\", \"/usr/local/bin/node\",\n    \"/bin/node\", \"/usr/bin/node\", \"/sbin/apk\", \"/usr/sbin/apk\", \"/usr/local/sbin/apk\", \"/usr/bin/pip\", \"/bin/pip\",\n    \"/usr/local/bin/pip\", \"/usr/libexec/platform-python\", \"/usr/bin/platform-python\", \"/bin/platform-python\",\n    \"/usr/lib/systemd/systemd\", \"/usr/sbin/sshd\", \"/sbin/sshd\", \"/usr/local/sbin/sshd\", \"/usr/sbin/crond\", \"/sbin/crond\",\n    \"/usr/local/sbin/crond\", \"/usr/sbin/gdm\"\n  ) or\n  process.name like (\n    \"python*\", \"packagekitd\", \"systemd\", \"ln\", \"platform-python\", \"dnf_install\", \"runc\", \"apt-get\", \"ssm-agent-worker\",\n    \"convert-usrmerge\", \"updatenow.static-cpanelsync\", \"apk\", \"exe\", \"php\", \"containerd-shim-runc-v2\", \"dpkg\", \"sed\",\n    \"platform-python*\", \"gedit\", \"crond\", \"sshd\", \"ruby\", \"sudo\", \"chainctl\", \"update-alternatives\", \"pip*\"\n  ) or\n  file.Ext.original.path : (\n    \"/bin/*.tmp\", \"/usr/bin/*.tmp\", \"/usr/local/bin/*.tmp\", \"/sbin/*.tmp\", \"/usr/sbin/*.tmp\", \"/usr/local/sbin/*.tmp\"\n  ) or\n  file.extension in (\"swp\", \"swpx\", \"swx\", \"dpkg-remove\") or\n  file.Ext.original.extension == \"dpkg-new\" or\n  process.executable : (\"/nix/store/*\", \"/var/lib/dpkg/*\", \"/tmp/vmis.*\", \"/snap/*\", \"/dev/fd/*\") or\n  process.executable == null or\n  (process.name == \"sed\" and file.name : \"sed*\") or\n  (process.name == \"perl\" and file.name : \"e2scrub_all.tmp*\") \n)\n",
+    "references": [
+      "https://intezer.com/blog/research/kaiji-new-chinese-linux-malware-turning-to-golang/",
+      "https://www.elastic.co/security-labs/sequel-on-persistence-mechanisms"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "file.Ext.original.extension",
+        "type": "unknown"
+      },
+      {
+        "ecs": false,
+        "name": "file.Ext.original.path",
+        "type": "unknown"
+      },
+      {
+        "ecs": true,
+        "name": "file.extension",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "file.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "fda1d332-5e08-4f27-8a9b-8c802e3292a6",
+    "setup": "## Setup\n\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows the Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click \"Add integrations\".\n- In the query bar, search for \"Elastic Defend\" and select the integration to see more details about it.\n- Click \"Add Elastic Defend\".\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either \"Traditional Endpoints\" or \"Cloud Workloads\".\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest selecting \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in \"New agent policy name\". If other agent policies already exist, you can click the \"Existing hosts\" tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click \"Save and Continue\".\n- To complete the integration, select \"Add Elastic Agent to your hosts\" and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1036",
+            "name": "Masquerading",
+            "reference": "https://attack.mitre.org/techniques/T1036/",
+            "subtechnique": [
+              {
+                "id": "T1036.003",
+                "name": "Rename System Utilities",
+                "reference": "https://attack.mitre.org/techniques/T1036/003/"
+              }
+            ]
+          },
+          {
+            "id": "T1564",
+            "name": "Hide Artifacts",
+            "reference": "https://attack.mitre.org/techniques/T1564/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 13
+  },
+  "id": "fda1d332-5e08-4f27-8a9b-8c802e3292a6_13",
+  "type": "security-rule"
+}

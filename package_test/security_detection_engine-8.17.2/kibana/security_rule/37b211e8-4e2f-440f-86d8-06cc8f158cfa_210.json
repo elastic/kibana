@@ -1,0 +1,97 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects the execution of commands or scripts on EC2 instances using AWS Systems Manager (SSM), such as `RunShellScript`, `RunPowerShellScript` or custom documents. While legitimate users may employ these commands for management tasks, they can also be exploited by attackers with credentials to establish persistence, install malware, or execute reverse shells for further access to compromised instances. This is a [New Terms](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-new-terms-rule) rule that looks for the first instance of this behavior by the `aws.cloudtrail.user_identity.arn` field in the last 7 days.",
+    "false_positives": [
+      "Verify whether the user identity, user agent, and/or hostname should be making changes in your environment. Suspicious commands from unfamiliar users or hosts should be investigated. If known behavior is causing false positives, it can be exempted from the rule."
+    ],
+    "from": "now-9m",
+    "history_window_start": "now-7d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS SSM `SendCommand` Execution by Rare User",
+    "new_terms_fields": [
+      "aws.cloudtrail.user_identity.arn"
+    ],
+    "note": "## Triage and Analysis\n\n### Investigating AWS SSM `SendCommand` Execution by Rare User\n\nThis rule detects the execution of commands or scripts on EC2 instances using AWS Systems Manager (SSM) by an unexpected or new user. The SSM `SendCommand` action can enable remote command execution, which adversaries may exploit to install backdoors, deploy malware, or interact with compromised instances through reverse shells.\n\n#### Possible Investigation Steps\n\n- **Identify the Target Instance**:\n  - **Instance ID**: Review the `aws.cloudtrail.flattened.request_parameters.targets` field to identify which EC2 instances were targeted by this command. Confirm if these instances are expected to be managed through SSM.\n  - **Document Used**: Check the `aws.cloudtrail.flattened.request_parameters.documentName` field, which specifies the document or script being executed. Commands such as `RunShellScript` or `RunPowerShellScript` can indicate interactive sessions or script-based interactions.\n\n- **Review User Context**:\n  - **User Identity**: Inspect the `aws.cloudtrail.user_identity.arn` field to determine the user or role executing the `SendCommand`. If this user is not typically involved in EC2 or SSM interactions, this could indicate unauthorized access.\n  - **Access Patterns**: Validate whether the user typically has permissions to perform `SendCommand` operations on instances and whether the frequency of this action matches expected behavior.\n\n- **Analyze Command Parameters**:\n  - **Document Contents**: While the exact command may not be visible in CloudTrail, use logs to determine the purpose of the script, especially if the document name suggests encryption, data transfer, or reverse shell capabilities.\n  - **Timing and Context**: Compare this command execution with other recent SSM actions in your environment. A single `SendCommand` event by an unusual user can indicate an early stage of a larger attack.\n\n- **Check User Agent and Source IP**:\n  - **User Agent Analysis**: Review the `user_agent.original` field to verify the tool or client used (e.g., `aws-cli`). This can provide insight into whether this action was automated, scripted, or executed manually.\n  - **Source IP and Geolocation**: Use `source.address` and `source.geo` fields to check if the IP address and geolocation align with expected regions for your organization. Unusual IP addresses or locations can indicate external adversaries.\n\n- **Evaluate for Persistence Indicators**:\n  - **Command Consistency**: Investigate if this action is part of a recurring pattern, such as repeated command executions across instances, which may suggest an attempt to maintain access.\n  - **Permissions**: Ensure that the IAM policies associated with the user limit `SendCommand` actions to necessary use cases. Consider adding alerts for commands executed by users with minimal roles or permissions.\n\n- **Correlate with Other CloudTrail Events**:\n  - **Cross-Reference SSM Actions**: Look for other recent SSM actions like `CreateDocument`, `UpdateDocument`, or additional `SendCommand` events that could indicate preparation for further exploitation.\n  - **Monitor Data Access or Modification**: Correlate with `S3` access patterns, IAM changes, or EC2 modifications in recent events to detect broader malicious activities.\n\n### False Positive Analysis\n\n- **Routine Automation**: SSM `SendCommand` may be used by automation scripts or management tools. Verify if this event aligns with known, routine automated workflows.\n- **Maintenance Activity**: Confirm if legitimate administrative activities, such as patching or updates, are expected at this time, which may involve similar commands executed on multiple instances.\n\n### Response and Remediation\n\n- **Limit SSM Permissions**: If unauthorized, immediately revoke `SendCommand` permissions from the user or role to prevent further access.\n- **Quarantine Target Instance**: If malicious behavior is confirmed, isolate the affected EC2 instance(s) to limit lateral movement or data exfiltration.\n- **Investigate and Contain User Account**: If the action was performed by a compromised account, review recent activity and reset access credentials as necessary.\n- **Audit SSM and IAM Configurations**: Periodically review permissions associated with SSM usage and ensure least privilege access principles are in place.\n\n### Additional Information\n\nFor further details on managing AWS SSM and security best practices for EC2 instances, refer to the [AWS Systems Manager Documentation](https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-plugins.html) and AWS best practices.\n",
+    "query": "event.dataset: \"aws.cloudtrail\"\n    and event.provider: \"ssm.amazonaws.com\"\n    and event.action: \"SendCommand\"\n    and event.outcome: \"success\"\n    and not aws.cloudtrail.user_identity.arn: *AWSServiceRoleForAmazonSSM/StateManagerService*\n",
+    "references": [
+      "https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-plugins.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.user_identity.arn",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "37b211e8-4e2f-440f-86d8-06cc8f158cfa",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS SSM",
+      "Use Case: Log Auditing",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Resources: Investigation Guide"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1651",
+            "name": "Cloud Administration Command",
+            "reference": "https://attack.mitre.org/techniques/T1651/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 210
+  },
+  "id": "37b211e8-4e2f-440f-86d8-06cc8f158cfa_210",
+  "type": "security-rule"
+}

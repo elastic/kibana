@@ -1,0 +1,85 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects successful single sign-on (SSO) events to Okta applications from an unrecognized or \"unknown\" client device, as identified by the user-agent string. This activity may be indicative of exploitation of a vulnerability in Okta's Classic Engine, which could allow an attacker to bypass application-specific sign-on policies, such as device or network restrictions. The vulnerability potentially enables unauthorized access to applications using only valid, stolen credentials, without requiring additional authentication factors.",
+    "from": "now-9m",
+    "history_window_start": "now-14d",
+    "index": [
+      "filebeat-*",
+      "logs-okta*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Successful Application SSO from Rare Unknown Client Device",
+    "new_terms_fields": [
+      "client.user.name",
+      "okta.client.user_agent.raw_user_agent"
+    ],
+    "query": "event.dataset: \"okta.system\"\n    and event.action: \"user.authentication.sso\"\n    and event.outcome: \"success\"\n    and okta.client.device: (\"Unknown\" or \"unknown\")\n",
+    "references": [
+      "https://trust.okta.com/security-advisories/okta-classic-application-sign-on-policy-bypass-2024/"
+    ],
+    "related_integrations": [
+      {
+        "package": "okta",
+        "version": "^3.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "okta.client.device",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "1502a836-84b2-11ef-b026-f661ea17fbcc",
+    "severity": "medium",
+    "tags": [
+      "Domain: SaaS",
+      "Data Source: Okta",
+      "Use Case: Threat Detection",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Initial Access"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0001",
+          "name": "Initial Access",
+          "reference": "https://attack.mitre.org/tactics/TA0001/"
+        },
+        "technique": [
+          {
+            "id": "T1078",
+            "name": "Valid Accounts",
+            "reference": "https://attack.mitre.org/techniques/T1078/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 2
+  },
+  "id": "1502a836-84b2-11ef-b026-f661ea17fbcc_2",
+  "type": "security-rule"
+}
