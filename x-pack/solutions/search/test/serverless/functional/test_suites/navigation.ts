@@ -70,8 +70,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
             },
             {
               link: { navId: 'agent_builder' },
-              breadcrumbs: ['Agent Chat'],
-              pageTestSubject: 'onechatPageConversations',
+              breadcrumbs: [],
+              pageTestSubject: 'agentBuilderWrapper',
             },
             {
               link: { deepLinkId: 'discover' },
