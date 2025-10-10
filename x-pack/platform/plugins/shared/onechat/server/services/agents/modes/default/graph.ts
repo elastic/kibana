@@ -16,6 +16,7 @@ import type { ResolvedAgentCapabilities } from '@kbn/onechat-common';
 import type { AgentEventEmitter } from '@kbn/onechat-server';
 import { createReasoningEvent, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { getActPrompt, getAnswerPrompt } from './prompts';
+import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
 
 const StateAnnotation = Annotation.Root({
   // inputs
@@ -57,7 +58,7 @@ export const createAgentGraph = ({
   });
 
   const callModel = async (state: StateType) => {
-    events.emit(createReasoningEvent('Thinking about my next action'));
+    events.emit(createReasoningEvent(getRandomThinkingMessage(), { transient: true }));
     const response = await model.invoke(
       getActPrompt({
         customInstructions,
@@ -98,7 +99,7 @@ export const createAgentGraph = ({
   });
 
   const generateAnswer = async (state: StateType) => {
-    events.emit(createReasoningEvent('Summarizing my findings'));
+    events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
     const response = await answeringModel.invoke(
       getAnswerPrompt({
         customInstructions,
