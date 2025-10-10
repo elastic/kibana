@@ -51,6 +51,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { RuleDetailDescriptionFieldType } from '@kbn/alerting-types/rule_detail_description_type';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -69,7 +70,6 @@ import type { CreateConnectorFlyoutProps } from './application/sections/action_c
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 import type { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
-import type { RuleDescriptionFieldType } from './common/constants/rule_definition_field_types';
 
 export type {
   ActionConnectorFieldsProps,
@@ -277,17 +277,19 @@ export interface RuleTypeParamsExpressionProps<
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
+export interface RuleDescriptionFieldWrappers {
+  indexPattern: React.ComponentType<{ children: React.ReactNode }>;
+  indexPatternItem: React.ComponentType<{ children: React.ReactNode }>;
+  codeBlock: React.ComponentType<{ children: React.ReactNode }>;
+}
+
 export type GetDescriptionFieldsFn = ({
   rule,
-  contentWrappers,
+  fieldWrappers,
 }: {
   rule: Rule;
-  contentWrappers: {
-    indexPattern: React.ComponentType<{ children: React.ReactNode }>;
-    indexPatternItem: React.ComponentType<{ children: React.ReactNode }>;
-    customQuery: React.ComponentType<{ children: React.ReactNode }>;
-  };
-}) => { type: RuleDescriptionFieldType; description: NonNullable<ReactNode> }[];
+  fieldWrappers: RuleDescriptionFieldWrappers;
+}) => { type: RuleDetailDescriptionFieldType; description: NonNullable<ReactNode> }[];
 
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;

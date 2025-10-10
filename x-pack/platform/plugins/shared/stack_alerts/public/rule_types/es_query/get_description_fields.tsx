@@ -6,21 +6,21 @@
  */
 import React from 'react';
 import type { GetDescriptionFieldsFn } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { RULE_DESCRIPTION_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public/common/constants/rule_definition_field_types';
+import { RULE_DETAIL_DESCRIPTION_FIELD_TYPES } from '@kbn/alerting-types/rule_detail_description_type';
 
-export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, contentWrappers }) => {
+export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, fieldWrappers }) => {
   if (!rule) return [];
 
   const {
-    customQuery: CustomQueryWrapper,
+    codeBlock: CodeBlockWrapper,
     indexPattern: IndexPatternWrapper,
     indexPatternItem: IndexPatternItemWrapper,
-  } = contentWrappers;
+  } = fieldWrappers;
 
   if (rule.params.searchType === 'esQuery') {
     return [
       {
-        type: RULE_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN,
+        type: RULE_DETAIL_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN,
         description: (
           <IndexPatternWrapper>
             {(rule.params.index as string[]).map((index) => (
@@ -30,8 +30,8 @@ export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, contentWrap
         ),
       },
       {
-        type: RULE_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY,
-        description: <CustomQueryWrapper>{rule.params.esQuery as string}</CustomQueryWrapper>,
+        type: RULE_DETAIL_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY,
+        description: <CodeBlockWrapper>{rule.params.esQuery as string}</CodeBlockWrapper>,
       },
     ];
   }
@@ -39,11 +39,9 @@ export const getDescriptionFields: GetDescriptionFieldsFn = ({ rule, contentWrap
   if (rule.params.searchType === 'esqlQuery') {
     return [
       {
-        type: RULE_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY,
+        type: RULE_DETAIL_DESCRIPTION_FIELD_TYPES.ESQL_QUERY,
         description: (
-          <CustomQueryWrapper>
-            {(rule.params.esqlQuery as { esql: string }).esql}
-          </CustomQueryWrapper>
+          <CodeBlockWrapper>{(rule.params.esqlQuery as { esql: string }).esql}</CodeBlockWrapper>
         ),
       },
     ];

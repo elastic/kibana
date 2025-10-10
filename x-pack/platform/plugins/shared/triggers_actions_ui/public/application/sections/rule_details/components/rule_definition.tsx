@@ -15,16 +15,12 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
   EuiDescriptionList,
-  EuiCodeBlock,
-  useEuiTheme,
-  EuiBadge,
 } from '@elastic/eui';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { AlertConsumers, getEditRuleRoute, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
-import { RULE_DESCRIPTION_FIELD_TYPES } from '../../../../common/constants/rule_definition_field_types';
 import type { RuleDefinitionProps } from '../../../../types';
 import type { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -34,23 +30,9 @@ import {
   hasShowActionsCapability,
 } from '../../../lib/capabilities';
 import { RuleActions } from './rule_actions';
+import { useRuleDescriptionFields } from './use_rule_description_fields';
 
 const INITIAL_FILTERED_RULE_TYPES: string[] = [];
-
-const translatedTypeTitles = {
-  [RULE_DESCRIPTION_FIELD_TYPES.CUSTOM_QUERY]: i18n.translate(
-    'xpack.triggersActionsUI.ruleDetails.customQueryTitle',
-    {
-      defaultMessage: 'Custom query',
-    }
-  ),
-  [RULE_DESCRIPTION_FIELD_TYPES.INDEX_PATTERN]: i18n.translate(
-    'xpack.triggersActionsUI.ruleDetails.indexPatternTitle',
-    {
-      defaultMessage: 'Index pattern',
-    }
-  ),
-};
 
 export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo(
   ({
@@ -66,7 +48,6 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
       http,
       notifications: { toasts },
     } = useKibana().services;
-    const { euiTheme } = useEuiTheme();
 
     const [ruleType, setRuleType] = useState<RuleType>();
 
@@ -138,40 +119,10 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
       return '';
     }, [rule, ruleTypeRegistry]);
 
-    const getDescriptionFields = useMemo(() => {
-      if (!rule || !rule.ruleTypeId || !ruleTypeRegistry.has(rule.ruleTypeId)) {
-        return;
-      }
-      return ruleTypeRegistry.get(rule.ruleTypeId).getDescriptionFields;
-    }, [rule, ruleTypeRegistry]);
-
-    const customDescriptionContentWrappers = useMemo(() => {
-      return {
-        customQuery: ({ children }: { children: React.ReactNode }) => {
-          return (
-            <EuiCodeBlock
-              language="text"
-              isCopyable
-              overflowHeight={100}
-              paddingSize="m"
-              css={{ border: euiTheme.border.thin }}
-            >
-              {children}
-            </EuiCodeBlock>
-          );
-        },
-        indexPattern: ({ children }: { children: React.ReactNode }) => {
-          return (
-            <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
-              {children}
-            </EuiFlexGroup>
-          );
-        },
-        indexPatternItem: ({ children }: { children: React.ReactNode }) => {
-          return <EuiBadge color="hollow">{children}</EuiBadge>;
-        },
-      };
-    }, [euiTheme.border.thin]);
+    const { descriptionFields } = useRuleDescriptionFields({
+      rule,
+      ruleTypeRegistry,
+    });
 
     const onEditRuleClick = () => {
       if (navigateToEditRuleForm) {
@@ -252,11 +203,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo
             },
           ]
         : []),
-      ...(getDescriptionFields
-        ? getDescriptionFields({ rule, contentWrappers: customDescriptionContentWrappers }).map(
-            ({ type, description }) => ({ title: translatedTypeTitles[type], description })
-          )
-        : []),
+      ...descriptionFields,
       {
         title: i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
           defaultMessage: 'Actions',
