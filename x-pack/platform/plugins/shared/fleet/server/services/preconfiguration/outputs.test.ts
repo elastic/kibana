@@ -12,6 +12,7 @@ import type { PreconfiguredOutput } from '../../../common/types';
 import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
+import { ECH_AGENTLESS_OUTPUT_ID } from '../../constants';
 
 import {
   createOrUpdatePreconfiguredOutputs,
@@ -1197,6 +1198,50 @@ describe('Outputs preconfiguration', () => {
             is_preconfigured: false,
           }),
           { fromPreconfiguration: true }
+        );
+      });
+
+      it('should not delete ECH agentless output during cleanup', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        mockedOutputService.list.mockResolvedValue({
+          items: [
+            { id: 'output1', is_preconfigured: true } as Output,
+            { id: ECH_AGENTLESS_OUTPUT_ID, is_preconfigured: true } as Output,
+            { id: 'output2', is_preconfigured: true } as Output,
+          ],
+          page: 1,
+          perPage: 10000,
+          total: 3,
+        });
+        await cleanPreconfiguredOutputs(soClient, esClient, [
+          {
+            id: 'output1',
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Output 1',
+            type: 'elasticsearch',
+            hosts: ['http://es.co:9201'],
+          },
+        ]);
+
+        // Should delete output2 but not ECH agentless output
+        expect(mockedOutputService.delete).toBeCalledTimes(1);
+        expect(mockedOutputService.delete).toBeCalledWith(soClient, 'output2', {
+          fromPreconfiguration: true,
+        });
+        // Should not attempt to delete or update ECH agentless output
+        expect(mockedOutputService.delete).not.toHaveBeenCalledWith(
+          soClient,
+          ECH_AGENTLESS_OUTPUT_ID,
+          expect.anything()
+        );
+        expect(mockedOutputService.update).not.toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          ECH_AGENTLESS_OUTPUT_ID,
+          expect.anything(),
+          expect.anything()
         );
       });
     });

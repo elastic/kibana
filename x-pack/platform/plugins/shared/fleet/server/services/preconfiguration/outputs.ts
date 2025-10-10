@@ -25,7 +25,7 @@ import type {
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
-import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT } from '../../constants';
+import { DEFAULT_OUTPUT_ID, DEFAULT_OUTPUT, ECH_AGENTLESS_OUTPUT_ID } from '../../constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
@@ -208,7 +208,10 @@ export async function cleanPreconfiguredOutputs(
 ) {
   const existingOutputs = await outputService.list(soClient);
   const existingPreconfiguredOutput = existingOutputs.items.filter(
-    (o) => o.is_preconfigured === true
+    (o) =>
+      o.is_preconfigured === true &&
+      // Skip cleanup for ECH agentless output
+      o.id !== ECH_AGENTLESS_OUTPUT_ID
   );
 
   const logger = appContextService.getLogger();

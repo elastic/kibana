@@ -199,7 +199,10 @@ export async function cleanPreconfiguredFleetServerHosts(
 ) {
   const existingFleetServerHosts = await fleetServerHostService.list(soClient);
   const existingPreconfiguredHosts = existingFleetServerHosts.items.filter(
-    (o) => o.is_preconfigured === true
+    (o) =>
+      o.is_preconfigured === true &&
+      // Skip cleanup for ECH agentless Fleet Server host
+      o.id !== ECH_AGENTLESS_FLEET_SERVER_HOST_ID
   );
 
   for (const existingFleetServerHost of existingPreconfiguredHosts) {

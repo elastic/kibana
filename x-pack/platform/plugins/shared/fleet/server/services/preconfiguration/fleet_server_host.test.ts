@@ -9,6 +9,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import { appContextService } from '../app_context';
 import { fleetServerHostService } from '../fleet_server_host';
+import { ECH_AGENTLESS_FLEET_SERVER_HOST_ID } from '../../constants';
 
 import type { FleetServerHost } from '../../../common/types';
 
@@ -17,6 +18,7 @@ import {
   getCloudFleetServersHosts,
   getPreconfiguredFleetServerHostFromConfig,
   createOrUpdatePreconfiguredFleetServerHosts,
+  cleanPreconfiguredFleetServerHosts,
 } from './fleet_server_host';
 import { hashSecret } from './outputs';
 
@@ -875,5 +877,108 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
     ]);
     expect(mockedFleetServerHostService.create).not.toBeCalled();
     expect(mockedFleetServerHostService.update).not.toBeCalled();
+  });
+});
+
+describe('cleanPreconfiguredFleetServerHosts', () => {
+  afterEach(() => {
+    mockedFleetServerHostService.list.mockReset();
+    mockedFleetServerHostService.delete.mockReset();
+    mockedFleetServerHostService.update.mockReset();
+  });
+
+  it('should not delete ECH agentless Fleet Server host during cleanup', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedFleetServerHostService.list.mockResolvedValue({
+      items: [
+        { id: 'host1', is_preconfigured: true } as FleetServerHost,
+        { id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID, is_preconfigured: true } as FleetServerHost,
+        { id: 'host2', is_preconfigured: true } as FleetServerHost,
+      ],
+      page: 1,
+      perPage: 10000,
+      total: 3,
+    });
+
+    await cleanPreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'host1',
+        name: 'Host 1',
+        is_default: false,
+        is_preconfigured: true,
+        host_urls: ['http://host1.co:8220'],
+      },
+    ]);
+
+    // Should delete host2 but not ECH agentless Fleet Server host
+    expect(mockedFleetServerHostService.delete).toBeCalledTimes(1);
+    expect(mockedFleetServerHostService.delete).toBeCalledWith(soClient, esClient, 'host2', {
+      fromPreconfiguration: true,
+    });
+
+    // Should not attempt to delete or update ECH agentless Fleet Server host
+    expect(mockedFleetServerHostService.delete).not.toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+      expect.anything()
+    );
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
+  it('should not delete or update ECH agentless Fleet Server host even when default', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    mockedFleetServerHostService.list.mockResolvedValue({
+      items: [
+        { id: 'host1', is_preconfigured: true, is_default: true } as FleetServerHost,
+        {
+          id: ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+          is_preconfigured: true,
+          is_default: false,
+        } as FleetServerHost,
+      ],
+      page: 1,
+      perPage: 10000,
+      total: 2,
+    });
+
+    await cleanPreconfiguredFleetServerHosts(soClient, esClient, []);
+
+    // Should update host1 (default) but not ECH agentless Fleet Server host
+    expect(mockedFleetServerHostService.update).toBeCalledTimes(1);
+    expect(mockedFleetServerHostService.update).toBeCalledWith(
+      soClient,
+      esClient,
+      'host1',
+      expect.objectContaining({
+        is_preconfigured: false,
+      }),
+      { fromPreconfiguration: true }
+    );
+
+    // Should not attempt to delete or update ECH agentless Fleet Server host
+    expect(mockedFleetServerHostService.delete).not.toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+      expect.anything()
+    );
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalledWith(
+      soClient,
+      esClient,
+      ECH_AGENTLESS_FLEET_SERVER_HOST_ID,
+      expect.anything(),
+      expect.anything()
+    );
   });
 });
