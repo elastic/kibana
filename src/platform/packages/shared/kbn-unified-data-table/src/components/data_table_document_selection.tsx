@@ -174,6 +174,8 @@ export function DataTableDocumentToolbarBtn({
   const { selectAllDocs, clearAllSelectedDocs, selectedDocsCount, docIdsInSelectionOrder } =
     selectedDocsState;
 
+  const { euiTheme } = useEuiTheme();
+
   const closePopover = useCallback(() => {
     setIsSelectionPopoverOpen(false);
   }, [setIsSelectionPopoverOpen]);
@@ -329,7 +331,9 @@ export function DataTableDocumentToolbarBtn({
           badgeContent={fieldFormats
             .getDefaultInstance(KBN_FIELD_TYPES.NUMBER, [ES_FIELD_TYPES.INTEGER])
             .convert(selectedDocsCount)}
+          size="s"
           css={css`
+            border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
             .euiButtonEmpty__content {
               flex-direction: row-reverse;
             }
