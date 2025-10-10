@@ -42,8 +42,8 @@ Create a new data view version when:
    ```
 
 2. **Migration Logic** in `server/saved_objects/data_views.ts`:
+
    - The `migrateOldDataViews` function automatically handles all versions in the array
-   - No code changes needed - just the constants update
 
 3. **Add Tests** in `test/cloud_security_posture_functional/data_views/data_views.ts`:
    - Test migration from old to new version
@@ -71,8 +71,6 @@ export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS = [
 // Step 2: Update the current version
 export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
   'security_solution_cdr_latest_misconfigurations_v3'; // Now v3
-
-// That's it! The migration system will handle the rest automatically
 ```
 
 ## Testing
