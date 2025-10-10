@@ -36,12 +36,13 @@ export { cli } from '@kbn/scout';
 
 // Observability-specific types
 export type {
-  ObltApiServicesFixture,
-  ObltPageObjects,
-  ObltTestFixtures,
-  ObltWorkerFixtures,
-  ObltParallelTestFixtures,
-  ObltParallelWorkerFixtures,
+  SecurityApiServicesFixture,
+  SecurityPageObjects,
+  SecurityTestFixtures,
+  SecurityWorkerFixtures,
+  SecurityParallelTestFixtures,
+  SecurityParallelApiServicesFixture,
+  SecurityParallelWorkerFixtures,
 } from './src/playwright';
 
 // Re-exported Scout core types
