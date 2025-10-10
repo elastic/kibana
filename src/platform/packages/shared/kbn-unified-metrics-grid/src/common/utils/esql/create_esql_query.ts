@@ -8,11 +8,11 @@
  */
 
 import type { QueryOperator } from '@kbn/esql-composer';
-import { drop, evaluate, stats, timeseries, where, rename } from '@kbn/esql-composer';
+import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
 import { type MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DIMENSION_TYPES } from '../../constants';
-import { DIMENSIONS_COLUMN } from './constants';
+import { DIMENSIONS_COLUMN, TECHNICAL_PREVIEW_COMMENT } from './constants';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
 interface CreateESQLQueryParams {
@@ -72,6 +72,8 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
   const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
 
   const unfilteredDimensions = (dimensions ?? []).filter((dim) => !valuesByField.has(dim));
+  const shouldAddTechnicalPreviewComment = (dimensions ?? []).length >= 2;
+  
   const queryPipeline = source.pipe(
     ...whereConditions,
     unfilteredDimensions.length > 0
@@ -90,7 +92,7 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
     ),
     ...((dimensions ?? []).length > 0
       ? dimensions.length === 1
-        ? [rename(`??dim as ${DIMENSIONS_COLUMN}`, { dim: dimensions[0] })]
+        ? [] // For single dimension, don't rename - keep the original field name
         : [
             evaluate(
               `${DIMENSIONS_COLUMN} = CONCAT(${dimensions
@@ -105,5 +107,16 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
       : [])
   );
 
-  return queryPipeline.toString();
+  let queryString = queryPipeline.toString();
+  
+  // Add technical preview comment for multi-dimension queries
+  if (shouldAddTechnicalPreviewComment) {
+    // Insert comment before the EVAL command
+    queryString = queryString.replace(
+      /(\n\s*\| EVAL __DIMENSIONS__)/,
+      `\n  ${TECHNICAL_PREVIEW_COMMENT}$1`
+    );
+  }
+
+  return queryString;
 }

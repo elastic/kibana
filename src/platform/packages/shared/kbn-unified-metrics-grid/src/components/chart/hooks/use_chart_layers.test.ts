@@ -55,6 +55,22 @@ describe('useChartLayers', () => {
 
     const [layer] = result.current;
     expect(layer.seriesType).toBe('line');
+    expect(layer.breakdown).toBe('service.name');
+    expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
+    expect(layer.yAxis[0].seriesColor).toBe('#FFF');
+  });
+
+  it('should use DIMENSIONS_COLUMN as breakdown when multiple dimensions are provided', () => {
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metric: mockMetric,
+        dimensions: ['service.name', 'host.name'],
+        color: '#FFF',
+      })
+    );
+
+    const [layer] = result.current;
+    expect(layer.seriesType).toBe('line');
     expect(layer.breakdown).toBe(DIMENSIONS_COLUMN);
     expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
     expect(layer.yAxis[0].seriesColor).toBe('#FFF');

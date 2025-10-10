@@ -8,3 +8,6 @@
  */
 
 export const DIMENSIONS_COLUMN = '__DIMENSIONS__';
+
+export const TECHNICAL_PREVIEW_COMMENT =
+  '// Technical preview: The following two commands are needed during the preview and will be removed once the feature is generally available (GA)';
