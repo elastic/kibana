@@ -114,7 +114,7 @@ export const routingSamplesMachine = setup({
     conditionUpdateDebounceTime: 500,
   },
   guards: {
-    isValidSnapshot: (_, params: { context?: SampleDocument[] | number }) =>
+    isValidSnapshot: (_, params: { context?: SampleDocument[] | number | null }) =>
       params.context !== undefined,
   },
 }).createMachine({
@@ -295,7 +295,7 @@ export function createDocumentsCountCollectorActor({
   data,
 }: Pick<RoutingSamplesMachineDeps, 'data'>) {
   return fromObservable<
-    number | undefined,
+    number | null | undefined,
     Pick<SearchParams, 'condition' | 'definition' | 'documentMatchFilter'>
   >(({ input }) => {
     return collectDocumentCounts({ data, input });
@@ -332,7 +332,10 @@ function collectDocuments({ data, input }: CollectorParams): Observable<SampleDo
   });
 }
 
-function collectDocumentCounts({ data, input }: CollectorParams): Observable<number | undefined> {
+function collectDocumentCounts({
+  data,
+  input,
+}: CollectorParams): Observable<number | null | undefined> {
   const abortController = new AbortController();
 
   const { start, end } = getAbsoluteTimestamps(data);

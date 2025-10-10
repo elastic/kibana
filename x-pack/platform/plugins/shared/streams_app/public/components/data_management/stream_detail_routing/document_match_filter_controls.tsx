@@ -36,9 +36,6 @@ export const DocumentMatchFilterControls = ({
   const documentMatchFilter = useStreamSamplesSelector(
     (snapshot) => snapshot.context.documentMatchFilter
   );
-  const isLoading = useStreamSamplesSelector((snapshot) =>
-    snapshot.matches({ fetching: { documentCounts: 'loading' } })
-  );
 
   const handleFilterChanged = useCallback(
     (value: DocumentMatchFilterOptions) => {
@@ -50,10 +47,7 @@ export const DocumentMatchFilterControls = ({
   );
 
   const hasNoValue =
-    isDisabled ||
-    isLoading ||
-    matchedDocumentPercentage === undefined ||
-    matchedDocumentPercentage === null;
+    isDisabled || matchedDocumentPercentage === undefined || matchedDocumentPercentage === null;
 
   return (
     <EuiFlexItem grow={false} data-test-subj="routingPreviewFilterControls">
@@ -69,7 +63,6 @@ export const DocumentMatchFilterControls = ({
               hasActiveFilters={documentMatchFilter === 'matched'}
               onClick={() => handleFilterChanged('matched')}
               isDisabled={hasNoValue}
-              isLoading={isLoading}
               isSelected={documentMatchFilter === 'matched'}
               badgeColor="success"
               grow={false}
@@ -91,7 +84,6 @@ export const DocumentMatchFilterControls = ({
               hasActiveFilters={documentMatchFilter === 'unmatched'}
               onClick={() => handleFilterChanged('unmatched')}
               isDisabled={hasNoValue}
-              isLoading={isLoading}
               isSelected={documentMatchFilter === 'unmatched'}
               badgeColor="accent"
               grow={false}
