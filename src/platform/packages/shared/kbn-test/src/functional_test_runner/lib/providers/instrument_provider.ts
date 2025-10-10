@@ -6,6 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-require('../src/setup_node_env');
-require('../src/cli/apm')('functional-test-server', process.argv);
-require('@kbn/test').startServersCli();
+
+import { instrumentAsyncMethods } from '@kbn/apm-utils';
+
+export function instrumentProvider(name: string, instance: object) {
+  instrumentAsyncMethods(name, instance, (prevSpanOptions) => {
+    prevSpanOptions.type = 'functional_test_service_call';
+    prevSpanOptions.type = name;
+    return prevSpanOptions;
+  });
+}

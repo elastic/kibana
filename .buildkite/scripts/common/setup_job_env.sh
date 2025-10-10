@@ -122,11 +122,11 @@ EOF
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
-  ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
-  export ELASTIC_APM_SERVER_URL
+  # ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
+  # export ELASTIC_APM_SERVER_URL
 
-  ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
-  export ELASTIC_APM_API_KEY
+  # ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
+  # export ELASTIC_APM_API_KEY
 }
 
 # Set up GenAI keys

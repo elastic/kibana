@@ -45,6 +45,7 @@ export async function runKibanaServer(options: {
       FORCE_COLOR: 1,
       ...process.env,
       ...options.config.get('kbnTestServer.env'),
+      ELASTIC_APM_ACTIVE: false,
     },
     wait: runOptions.wait,
     onEarlyExit: options.onEarlyExit,
