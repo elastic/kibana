@@ -43,11 +43,11 @@ export function generateNewPanelIds(panels: DashboardState['panels'], references
         ...section,
         uid: newSectionId,
         panels: section.panels.map((panelInSection) => {
-          return generateNewPanelId(panelInSection);
+          return generateNewPanelId(panelInSection as DashboardPanel);
         }),
       });
     } else {
-      newPanels.push(generateNewPanelId(panel));
+      newPanels.push(generateNewPanelId(panel as DashboardPanel));
     }
   }
   return { newPanels, newPanelReferences };

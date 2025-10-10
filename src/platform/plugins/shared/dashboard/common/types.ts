@@ -60,8 +60,6 @@ export type DashboardLocatorParams = Partial<
 
     references?: DashboardState['references'] & SerializableRecord;
 
-    panels?: DashboardState['panels'] & SerializableRecord;
-
     viewMode?: ViewMode;
 
     /**

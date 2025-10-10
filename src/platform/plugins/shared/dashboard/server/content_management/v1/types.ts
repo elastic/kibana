@@ -32,21 +32,9 @@ export type DashboardPanel = Omit<TypeOf<ReturnType<typeof schema.getPanelSchema
   // Typing as Record to enforce this contract.
   config: Record<string, unknown>;
 };
-
-export type DashboardSection = Omit<
-  TypeOf<ReturnType<typeof schema.getSectionSchema>>,
-  'panels'
-> & {
-  panels: DashboardPanel[];
-};
-
+export type DashboardSection = TypeOf<ReturnType<typeof schema.getSectionSchema>>;
 // TODO rename to DashboardState once DashboardState in src/platform/plugins/shared/dashboard/common/types.ts is merged with this type
-export type DashboardAttributes = Omit<
-  TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>,
-  'panels'
-> & {
-  panels: Array<DashboardPanel | DashboardSection>;
-};
+export type DashboardAttributes = TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>;
 
 export type DashboardItem = TypeOf<ReturnType<typeof schema.getDashboardItemSchema>>;
 export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
@@ -58,7 +46,7 @@ export type GridData = TypeOf<typeof schema.panelGridDataSchema>;
 
 export type DashboardGetIn = GetIn<typeof CONTENT_ID>;
 export type DashboardAPIGetOut = GetResult<
-  DashboardAttributes,
+  TypeOf<ReturnType<typeof schema.getDashboardDataSchema>>,
   TypeOf<typeof schema.dashboardGetResultMetaSchema>
 >;
 export type DashboardGetOut = TypeOf<ReturnType<typeof schema.getDashboardGetResultSchema>>;

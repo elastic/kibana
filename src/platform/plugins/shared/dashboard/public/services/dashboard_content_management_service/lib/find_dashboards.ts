@@ -81,7 +81,7 @@ export async function findDashboardById(id: string): Promise<FindDashboardsByIdR
     return {
       id,
       status: 'success',
-      attributes: cachedDashboard.item.attributes as DashboardAttributes,
+      attributes: cachedDashboard.item.attributes,
       references: cachedDashboard.item.references,
     };
   }
@@ -101,7 +101,7 @@ export async function findDashboardById(id: string): Promise<FindDashboardsByIdR
     return {
       id,
       status: 'success',
-      attributes: response.item.attributes as DashboardAttributes,
+      attributes: response.item.attributes,
       references: response.item.references ?? [],
     };
   } catch (e) {

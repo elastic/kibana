@@ -48,12 +48,12 @@ export function deserializeLayout(
         collapsed: false,
         ...restOfSection,
       };
-      sectionPanels.forEach((panel) => {
+      (sectionPanels as DashboardPanel[]).forEach((panel) => {
         pushPanel(panel, sectionId);
       });
     } else {
       // if not a section, then this widget is a panel
-      pushPanel(widget);
+      pushPanel(widget as DashboardPanel);
     }
   });
   return { layout, childState };
