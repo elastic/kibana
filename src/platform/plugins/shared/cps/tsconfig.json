@@ -8,7 +8,10 @@
     "public/**/*",
     "server/**/*",
   ],
-  "kbn_references": [],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+  ],
   "exclude": [
     "target/**/*",
   ]
