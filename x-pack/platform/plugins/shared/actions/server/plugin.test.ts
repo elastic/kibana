@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
-import { schema, ByteSizeValue } from '@kbn/config-schema';
+import { ByteSizeValue } from '@kbn/config-schema';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -18,7 +18,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
-import type { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
+import type { ActionType, ActionsApiRequestHandlerContext } from './types';
 import type { ActionsConfig } from './config';
 import { ActionTypeRegistry } from './action_type_registry';
 import type { ActionsPluginsSetup, ActionsPluginsStart, PluginSetupContract } from './plugin';
@@ -30,10 +30,7 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-
-const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
-  return { status: 'ok', actionId: options.actionId };
-};
+import { getConnectorType } from './fixtures';
 
 function getConfig(overrides = {}) {
   return {
@@ -63,6 +60,30 @@ function getConfig(overrides = {}) {
     ...overrides,
   };
 }
+
+const sampleConnectorType = getConnectorType({
+  id: 'test',
+  name: 'test',
+});
+const indexConnectorType = getConnectorType({
+  id: '.index',
+  name: 'Index',
+});
+const serverLogConnectorType = getConnectorType({
+  id: '.server-log',
+  name: 'Server log',
+});
+const slackConnectorType = getConnectorType({
+  id: '.slack',
+  name: 'Slack',
+  minimumLicenseRequired: 'gold',
+});
+const casesConnectorType = getConnectorType({
+  id: '.cases',
+  name: 'Cases',
+  minimumLicenseRequired: 'platinum',
+  isSystemActionType: true,
+});
 
 describe('Actions Plugin', () => {
   describe('setup()', () => {
@@ -208,19 +229,7 @@ describe('Actions Plugin', () => {
          * a system action by another plugin
          * in the setup
          */
-        pluginSetup.registerType({
-          id: '.cases',
-          name: 'Cases',
-          minimumLicenseRequired: 'platinum',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          isSystemActionType: true,
-          executor,
-        });
+        pluginSetup.registerType(casesConnectorType);
 
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0];
 
@@ -280,20 +289,6 @@ describe('Actions Plugin', () => {
 
     describe('registerType()', () => {
       let setup: PluginSetupContract;
-      const sampleActionType: ActionType = {
-        id: 'test',
-        name: 'test',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        async executor(options) {
-          return { status: 'ok', actionId: options.actionId };
-        },
-      };
 
       beforeEach(async () => {
         // coreMock.createSetup doesn't support Plugin generics
@@ -304,7 +299,7 @@ describe('Actions Plugin', () => {
       it('should throw error when license type is invalid', async () => {
         expect(() =>
           setup.registerType({
-            ...sampleActionType,
+            ...sampleConnectorType,
             // we're faking an invalid value, this requires stripping the typing
 
             minimumLicenseRequired: 'foo' as any,
@@ -315,7 +310,7 @@ describe('Actions Plugin', () => {
       it('should throw error when license type is less than gold', async () => {
         expect(() =>
           setup.registerType({
-            ...sampleActionType,
+            ...sampleConnectorType,
             minimumLicenseRequired: 'basic',
           })
         ).toThrowErrorMatchingInlineSnapshot(
@@ -325,14 +320,14 @@ describe('Actions Plugin', () => {
 
       it('should not throw when license type is gold', async () => {
         setup.registerType({
-          ...sampleActionType,
+          ...sampleConnectorType,
           minimumLicenseRequired: 'gold',
         });
       });
 
       it('should not throw when license type is higher than gold', async () => {
         setup.registerType({
-          ...sampleActionType,
+          ...sampleConnectorType,
           minimumLicenseRequired: 'platinum',
         });
       });
@@ -396,30 +391,8 @@ describe('Actions Plugin', () => {
         };
         const pluginStart = plugin.start(coreStart, pluginsStart);
 
-        pluginSetup.registerType({
-          id: '.server-log',
-          name: 'Server log',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        });
-        pluginSetup.registerType({
-          id: '.slack',
-          name: 'Slack',
-          minimumLicenseRequired: 'gold',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        });
+        pluginSetup.registerType(serverLogConnectorType);
+        pluginSetup.registerType(slackConnectorType);
         pluginSetup.setEnabledConnectorTypes(['.server-log']);
         expect(pluginStart.isActionTypeEnabled('.server-log')).toBeTruthy();
         expect(pluginStart.isActionTypeEnabled('.slack')).toBeFalsy();
@@ -431,30 +404,8 @@ describe('Actions Plugin', () => {
 
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
-        pluginSetup.registerType({
-          id: '.server-log',
-          name: 'Server log',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        });
-        pluginSetup.registerType({
-          id: '.slack',
-          name: 'Slack',
-          minimumLicenseRequired: 'gold',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        });
+        pluginSetup.registerType(serverLogConnectorType);
+        pluginSetup.registerType(slackConnectorType);
         pluginSetup.setEnabledConnectorTypes(['.server-log']);
 
         // checking isActionTypeEnabled via plugin setup, not plugin start
@@ -476,30 +427,8 @@ describe('Actions Plugin', () => {
         };
         const pluginStart = plugin.start(coreStart, pluginsStart);
 
-        pluginSetup.registerType({
-          id: '.server-log',
-          name: 'Server log',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        });
-        pluginSetup.registerType({
-          id: '.index',
-          name: 'Index',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        });
+        pluginSetup.registerType(serverLogConnectorType);
+        pluginSetup.registerType(indexConnectorType);
         pluginSetup.setEnabledConnectorTypes(['*']);
         expect(pluginStart.isActionTypeEnabled('.server-log')).toBeTruthy();
         expect(pluginStart.isActionTypeEnabled('.index')).toBeTruthy();
@@ -519,30 +448,8 @@ describe('Actions Plugin', () => {
         };
         const pluginStart = plugin.start(coreStart, pluginsStart);
 
-        pluginSetup.registerType({
-          id: '.server-log',
-          name: 'Server log',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        });
-        pluginSetup.registerType({
-          id: '.index',
-          name: 'Index',
-          minimumLicenseRequired: 'basic',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          executor,
-        });
+        pluginSetup.registerType(serverLogConnectorType);
+        pluginSetup.registerType(indexConnectorType);
         pluginSetup.setEnabledConnectorTypes([]);
         expect(pluginStart.isActionTypeEnabled('.server-log')).toBeFalsy();
         expect(pluginStart.isActionTypeEnabled('.index')).toBeFalsy();
@@ -622,18 +529,7 @@ describe('Actions Plugin', () => {
         serverless: serverlessPluginMock.createSetupContract(),
       });
 
-      pluginSetup.registerType({
-        id: '.server-log',
-        name: 'Server log',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      pluginSetup.registerType(serverLogConnectorType);
 
       pluginSetup.setEnabledConnectorTypes(['.server-log', 'non-existing']);
 
@@ -703,18 +599,7 @@ describe('Actions Plugin', () => {
           // coreMock.createSetup doesn't support Plugin generics
 
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
-          pluginSetup.registerType({
-            id: '.server-log',
-            name: 'Server log',
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-            validate: {
-              config: { schema: schema.object({}) },
-              secrets: { schema: schema.object({}) },
-              params: { schema: schema.object({}) },
-            },
-            executor,
-          });
+          pluginSetup.registerType(serverLogConnectorType);
 
           const pluginStart = await plugin.start(coreStart, pluginsStart);
 
@@ -728,18 +613,7 @@ describe('Actions Plugin', () => {
           setup(getConfig({ preconfiguredAlertHistoryEsIndex: true }));
 
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
-          pluginSetup.registerType({
-            id: '.index',
-            name: 'ES Index',
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-            validate: {
-              config: { schema: schema.object({}) },
-              secrets: { schema: schema.object({}) },
-              params: { schema: schema.object({}) },
-            },
-            executor,
-          });
+          pluginSetup.registerType(indexConnectorType);
 
           const pluginStart = await plugin.start(coreStart, pluginsStart);
 
@@ -787,19 +661,7 @@ describe('Actions Plugin', () => {
           // @ts-ignore
           plugin.licenseState.updateInformation(platinumLicense);
 
-          pluginSetup.registerType({
-            id: '.cases',
-            name: 'Cases',
-            minimumLicenseRequired: 'platinum',
-            supportedFeatureIds: ['alerting'],
-            validate: {
-              config: { schema: schema.object({}) },
-              secrets: { schema: schema.object({}) },
-              params: { schema: schema.object({}) },
-            },
-            isSystemActionType: true,
-            executor,
-          });
+          pluginSetup.registerType(casesConnectorType);
 
           const pluginStart = await plugin.start(coreStart, pluginsStart);
 
@@ -849,19 +711,14 @@ describe('Actions Plugin', () => {
 
           const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
-          pluginSetup.registerType({
-            id: 'test.system-action',
-            name: 'Test',
-            minimumLicenseRequired: 'platinum',
-            supportedFeatureIds: ['alerting'],
-            validate: {
-              config: { schema: schema.object({}) },
-              secrets: { schema: schema.object({}) },
-              params: { schema: schema.object({}) },
-            },
-            isSystemActionType: true,
-            executor,
-          });
+          pluginSetup.registerType(
+            getConnectorType({
+              id: 'test.system-action',
+              name: 'Test',
+              minimumLicenseRequired: 'platinum',
+              isSystemActionType: true,
+            })
+          );
 
           await expect(async () =>
             plugin.start(coreStart, pluginsStart)
@@ -873,18 +730,9 @@ describe('Actions Plugin', () => {
     });
 
     describe('isActionTypeEnabled()', () => {
-      const actionType: ActionType = {
-        id: 'my-action-type',
-        name: 'My action type',
+      const actionType: ActionType = getConnectorType({
         minimumLicenseRequired: 'gold',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor: jest.fn(),
-      };
+      });
 
       it('passes through the notifyUsage option when set to true', async () => {
         // coreMock.createSetup doesn't support Plugin generics
@@ -893,9 +741,9 @@ describe('Actions Plugin', () => {
         pluginSetup.registerType(actionType);
         const pluginStart = plugin.start(coreStart, pluginsStart);
 
-        pluginStart.isActionTypeEnabled('my-action-type', { notifyUsage: true });
+        pluginStart.isActionTypeEnabled('my-connector-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
-          'Connector: My action type'
+          'Connector: My connector type'
         );
       });
     });
@@ -915,18 +763,9 @@ describe('Actions Plugin', () => {
     });
 
     describe('isActionExecutable()', () => {
-      const actionType: ActionType = {
-        id: 'my-action-type',
-        name: 'My action type',
+      const actionType: ActionType = getConnectorType({
         minimumLicenseRequired: 'gold',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor: jest.fn(),
-      };
+      });
 
       it('passes through the notifyUsage option when set to true', async () => {
         // coreMock.createSetup doesn't support Plugin generics
@@ -935,9 +774,9 @@ describe('Actions Plugin', () => {
         pluginSetup.registerType(actionType);
         const pluginStart = plugin.start(coreStart, pluginsStart);
 
-        pluginStart.isActionExecutable('123', 'my-action-type', { notifyUsage: true });
+        pluginStart.isActionExecutable('123', 'my-connector-type', { notifyUsage: true });
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
-          'Connector: My action type'
+          'Connector: My connector type'
         );
       });
     });
@@ -967,19 +806,7 @@ describe('Actions Plugin', () => {
 
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
-        pluginSetup.registerType({
-          id: '.cases',
-          name: 'Cases',
-          minimumLicenseRequired: 'platinum',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          isSystemActionType: true,
-          executor,
-        });
+        pluginSetup.registerType(casesConnectorType);
 
         const pluginStart = await plugin.start(coreStart, pluginsStart);
         expect(pluginStart.isSystemActionConnector('system-connector-.cases')).toBe(true);
@@ -990,19 +817,7 @@ describe('Actions Plugin', () => {
 
         const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
 
-        pluginSetup.registerType({
-          id: '.cases',
-          name: 'Cases',
-          minimumLicenseRequired: 'platinum',
-          supportedFeatureIds: ['alerting'],
-          validate: {
-            config: { schema: schema.object({}) },
-            secrets: { schema: schema.object({}) },
-            params: { schema: schema.object({}) },
-          },
-          isSystemActionType: true,
-          executor,
-        });
+        pluginSetup.registerType(casesConnectorType);
 
         const pluginStart = await plugin.start(coreStart, pluginsStart);
         expect(pluginStart.isSystemActionConnector('preconfiguredServerLog')).toBe(false);
