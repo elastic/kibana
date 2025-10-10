@@ -10,6 +10,7 @@ import { EuiIcon, EuiSpacer, EuiSuperSelect } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { useTheme } from 'styled-components';
 
 import type { FleetServerHost } from '../../../types';
@@ -62,6 +63,9 @@ export const FleetServerHostSelect: React.FunctionComponent<FleetServerHostSelec
     <>
       <EuiSuperSelect
         fullWidth
+        aria-label={i18n.translate('xpack.fleet.fleetServerSetup.fleetServerHostsLabel', {
+          defaultMessage: 'Fleet Server Hosts',
+        })}
         data-test-subj="fleetServerSetup.fleetServerHostsSelect"
         prepend={
           <EuiText size="relative" color={''}>

@@ -21,7 +21,7 @@ import {
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Global, css } from '@emotion/react';
@@ -32,6 +32,20 @@ import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
 
 type TriggerType = 'manual' | 'index' | 'alert';
+
+function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
+  if (!definition) {
+    return 'alert';
+  }
+
+  const hasManualTrigger = definition.triggers?.some((trigger) => trigger.type === 'manual');
+  const hasInputs = definition.inputs && definition.inputs.length > 0;
+
+  if (hasManualTrigger && hasInputs) {
+    return 'manual';
+  }
+  return 'alert';
+}
 
 export function WorkflowExecuteModal({
   definition,
@@ -44,7 +58,8 @@ export function WorkflowExecuteModal({
 }) {
   const modalTitleId = useGeneratedHtmlId();
   const enabledTriggers = ['alert', 'index', 'manual'];
-  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>('alert');
+  const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
+  const [selectedTrigger, setSelectedTrigger] = useState<TriggerType>(defaultTrigger);
 
   const [executionInput, setExecutionInput] = useState<string>('');
   const [executionInputErrors, setExecutionInputErrors] = useState<string | null>(null);
