@@ -8,17 +8,20 @@
  */
 
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { createQueryStringInput } from './query_string_input/get_query_string_input';
-import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
+
 import type { ConfigSchema } from '../server/config';
-import { setCoreStart, setIndexPatterns } from './services';
+import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions/constants';
 import { AutocompleteService } from './autocomplete/autocomplete_service';
-import { createSearchBar } from './search_bar/create_search_bar';
+import { FiltersBuilderLazy } from './filters_builder';
 import { createIndexPatternSelect } from './index_pattern_select';
+import { createQueryStringInput } from './query_string_input/get_query_string_input';
+import { createSearchBar } from './search_bar/create_search_bar';
+import { setCoreStart, setIndexPatterns } from './services';
+import { UPDATE_FILTER_REFERENCES_TRIGGER, updateFilterReferencesTrigger } from './triggers';
 import type {
   UnifiedSearchStartDependencies,
   UnifiedSearchSetupDependencies,
@@ -26,8 +29,6 @@ import type {
   UnifiedSearchPublicPluginStart,
   UnifiedSearchPublicPluginStartUi,
 } from './types';
-import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions/constants';
-import { FiltersBuilderLazy } from './filters_builder';
 
 export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
@@ -62,7 +63,7 @@ export class UnifiedSearchPublicPlugin
 
   public start(
     core: CoreStart,
-    { data, dataViews, uiActions, screenshotMode }: UnifiedSearchStartDependencies
+    { data, dataViews, uiActions, screenshotMode, cloud }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
     setCoreStart(core);
     setIndexPatterns(dataViews);
@@ -87,6 +88,7 @@ export class UnifiedSearchPublicPlugin
         unifiedSearch: {
           autocomplete: autocompleteStart,
         },
+        cloud,
       });
 
     const SearchBar = getCustomSearchBar();
