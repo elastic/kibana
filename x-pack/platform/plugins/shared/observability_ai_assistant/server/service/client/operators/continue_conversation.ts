@@ -24,10 +24,10 @@ import {
   throwError,
 } from 'rxjs';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { Connector } from '@kbn/actions-plugin/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { CONTEXT_FUNCTION_NAME } from '../../../functions/context/context';
 import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
 import type { ToolCallEvent } from '../../../analytics/tool_call';
 import { toolCallEventType } from '../../../analytics/tool_call';
