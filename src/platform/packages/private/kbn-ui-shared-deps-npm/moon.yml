@@ -30,6 +30,7 @@ tasks:
       - '^:build-webpack'
     args:
       - build
+      - --verbose
     inputs:
       - '@group(src)'
       - 'webpack.config.js'

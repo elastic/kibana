@@ -26,7 +26,7 @@ export const command = {
   `,
   async run({ log, args }) {
     const dist = args.getBooleanValue('dist') ?? false;
-    const quiet = args.getBooleanValue('quiet') ?? false;
+    // const quiet = args.getBooleanValue('quiet') ?? false;
     const cache = args.getBooleanValue('cache') ?? true;
 
     log.info('building shared packages with webpack');
@@ -34,7 +34,7 @@ export const command = {
       'moon',
       [':build-webpack'].concat(!cache ? ['-u'] : []).concat(dist ? ['--', '--dist'] : []),
       {
-        pipe: !quiet,
+        pipe: true,
       }
     ).then((err) => {
       console.error('Error in shared moon :build-webpack runs', err);
