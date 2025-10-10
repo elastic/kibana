@@ -51,7 +51,7 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
           } as PreconfiguredOutput,
         ]
       : []),
-    // Include ECH agentless output when agentless is enabled and not in serverless environment
+    // Include agentless output in ECH
     ...(isAgentlessEnabled() && !appContextService.getCloud()?.isServerlessEnabled
       ? [
           {

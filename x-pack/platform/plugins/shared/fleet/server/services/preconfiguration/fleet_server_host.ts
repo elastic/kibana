@@ -25,10 +25,12 @@ import { hashSecret, isSecretDifferent } from './outputs';
 
 export function getCloudFleetServersHosts() {
   const cloudSetup = appContextService.getCloud();
-  const isCloud = cloudSetup?.isCloudEnabled;
-  const isServerless = cloudSetup?.isServerlessEnabled;
-
-  if (isCloud && !isServerless && cloudSetup.cloudHost) {
+  if (
+    cloudSetup &&
+    !cloudSetup.isServerlessEnabled &&
+    cloudSetup.isCloudEnabled &&
+    cloudSetup.cloudHost
+  ) {
     // Fleet Server url are formed like this `https://<deploymentId>.fleet.<host>
     return [
       `https://${cloudSetup.deploymentId}.fleet.${cloudSetup.cloudHost}${
@@ -57,7 +59,7 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
           },
         ]
       : []),
-    // Include ECH agentless Fleet Server host when agentless is enabled and not in serverless environment
+    // Include agentless Fleet Server host in ECH
     ...(isAgentlessEnabled() && cloudServerHosts
       ? [
           {
