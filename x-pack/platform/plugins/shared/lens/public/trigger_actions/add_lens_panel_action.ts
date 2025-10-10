@@ -21,15 +21,17 @@ export function getAddLensPanelAction(deps: LensPluginStartDependencies) {
       const stateTransferService = deps.embeddable.getStateTransfer();
       stateTransferService.navigateToEditor(lensVisTypeAlias.alias!.app, {
         path: lensVisTypeAlias.alias!.path,
-        state: {
-          originatingApp: apiHasAppContext(embeddable)
-            ? embeddable.getAppContext().currentAppId
-            : '',
-          originatingPath: apiHasAppContext(embeddable)
-            ? embeddable.getAppContext().getCurrentPath?.()
-            : undefined,
-          searchSessionId: deps.data.search.session.getSessionId(),
-        },
+        state: [
+          {
+            originatingApp: apiHasAppContext(embeddable)
+              ? embeddable.getAppContext().currentAppId
+              : '',
+            originatingPath: apiHasAppContext(embeddable)
+              ? embeddable.getAppContext().getCurrentPath?.()
+              : undefined,
+            searchSessionId: deps.data.search.session.getSessionId(),
+          },
+        ],
       });
     },
     grouping: [ADD_PANEL_VISUALIZATION_GROUP],

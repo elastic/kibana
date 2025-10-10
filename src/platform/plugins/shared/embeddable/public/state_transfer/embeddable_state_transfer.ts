@@ -120,20 +120,13 @@ export class EmbeddableStateTransfer {
       path?: string;
       openInNewTab?: boolean;
       skipAppLeave?: boolean;
-      state: EmbeddableEditorState; // Single state
+      state: EmbeddableEditorState[];
     }
   ): Promise<void> {
     this.isTransferInProgress = true;
-    // Wraps the single editor state in an array before sending it
-    const stateArray: Array<EmbeddableEditorState> = options?.state ? [options.state] : [];
-    await this.navigateToWithState<Array<EmbeddableEditorState>>(
-      appId,
-      EMBEDDABLE_EDITOR_STATE_KEY,
-      {
-        ...options,
-        state: stateArray.length > 0 ? stateArray : undefined, // Send the array state
-      }
-    );
+    await this.navigateToWithState<EmbeddableEditorState[]>(appId, EMBEDDABLE_EDITOR_STATE_KEY, {
+      ...options,
+    });
   }
 
   /**
@@ -219,7 +212,6 @@ export class EmbeddableStateTransfer {
     }
   ): Promise<void> {
     const existingAppState = this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY)?.[key] || {};
-
     const stateObject = {
       ...this.storage.get(EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY),
       [key]: {

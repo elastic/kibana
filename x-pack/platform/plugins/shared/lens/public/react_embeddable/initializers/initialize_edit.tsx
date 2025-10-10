@@ -117,13 +117,15 @@ export function initializeEditApi(
       const currentState = getState();
       await stateTransfer.navigateToEditor(APP_ID, {
         path: getEditPath(currentState.savedObjectId),
-        state: {
-          embeddableId: uuid,
-          valueInput: currentState,
-          originatingApp: parentApiContext.currentAppId ?? 'dashboards',
-          originatingPath: parentApiContext.getCurrentPath?.(),
-          searchSessionId: currentState.searchSessionId,
-        },
+        state: [
+          {
+            embeddableId: uuid,
+            valueInput: currentState,
+            originatingApp: parentApiContext.currentAppId ?? 'dashboards',
+            originatingPath: parentApiContext.getCurrentPath?.(),
+            searchSessionId: currentState.searchSessionId,
+          },
+        ],
         skipAppLeave,
       });
     };
