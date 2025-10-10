@@ -28,7 +28,15 @@ export type SyntheticsUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 export const useGetUrlParams: GetUrlParams = () => {
   const { search } = useLocation();
 
-  const urlParams = useMemo(() => getSupportedUrlParams(getParsedParams(search)), [search]);
+  const urlParams = useMemo(
+    () =>
+      getSupportedUrlParams(
+        getParsedParams(search) as {
+          [key: string]: string | (string | null)[] | null | undefined;
+        }
+      ),
+    [search]
+  );
 
   return urlParams;
 };

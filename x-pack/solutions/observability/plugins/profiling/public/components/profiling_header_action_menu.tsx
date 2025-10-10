@@ -30,11 +30,11 @@ export function ProfilingHeaderActionMenu() {
             const query = qs.parse(window.location.search);
             const storageExplorerURL = url.format({
               pathname: '/storage-explorer',
-              query: {
+              search: qs.stringify({
                 kuery: query.kuery,
                 rangeFrom: query.rangeFrom || 'now-15m',
                 rangeTo: query.rangeTo || 'now',
-              },
+              }),
             });
             history.push(storageExplorerURL);
           }}

@@ -26,7 +26,11 @@ export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 export const useGetUrlParams: GetUrlParams = () => {
   const { search } = useLocation();
 
-  return getSupportedUrlParams(getParsedParams(search));
+  return getSupportedUrlParams(
+    getParsedParams(search) as {
+      [key: string]: string | (string | null)[] | null | undefined;
+    }
+  );
 };
 
 const getMapFromFilters = (value: any): Map<string, any> | undefined => {
