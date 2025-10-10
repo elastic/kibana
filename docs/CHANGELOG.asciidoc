@@ -112,16 +112,16 @@ IMPORTANT: The 7.17.29 release contains fixes for potential security vulnerabili
 === Known issues
 
 // tag::known-issue-227976[]
-.Dashboard Copy link doesn't work when sharing from a space other than the default space
+.Short URL issue when sharing from a space other than the default space or when using custom Kibana basepaths
 [%collapsible]
 ====
 **This issue is resolved in versions 8 and 9 of {kib}** ({kibana-pull}227625[#227625]).
 
 *Details* +
-When attempting to share a dashboard from a space that isn't the default space, the **Copy link** action never completes.
+When attempting to enable short URLs in the **Share** menu from non default spaces or when using custom Kibana basepaths, the toggle doesn't change state and produces console errors. Only snapshots with short URLs enabled are affected. Existing URLs created on older versions are unaffected, and snapshots with long URLs and saved object URLs work as expected.
 
 *Workaround* +
-To avoid this issue, don't upgrade {kib} to one of the affected versions, or upgrade to a higher version, when available.
+To avoid this issue, use long URLs when sharing snapshots or upgrade to a higher version, when available.
 
 ====
 // end::known-issue-227976[]
