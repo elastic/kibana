@@ -53,12 +53,9 @@ import {
   getAccessorByDimension,
   getColumnByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import {
-  DEFAULT_LEGEND_SIZE,
-  LegendSizeToPixels,
-} from '@kbn/visualizations-plugin/common/constants';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import { DEFAULT_LEGEND_SIZE, LegendSizeToPixels } from '@kbn/chart-expressions-common';
 import { getOverridesFor } from '@kbn/chart-expressions-common';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';

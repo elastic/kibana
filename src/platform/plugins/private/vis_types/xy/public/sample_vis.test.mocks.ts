@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LegendSize } from '@kbn/visualizations-plugin/common';
+import type {
+  LegendSize,
+} from '@kbn/chart-expressions-common';
 
 const mockUiStateGet = jest.fn().mockReturnValue(() => false);
 

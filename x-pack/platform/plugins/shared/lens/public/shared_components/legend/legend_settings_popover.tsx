@@ -19,7 +19,9 @@ import {
 } from '@elastic/eui';
 import type { VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { Position, LegendValue } from '@elastic/charts';
-import type { LegendSize } from '@kbn/visualizations-plugin/public';
+import type {
+ LegendSize
+} from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarDivider } from '../toolbar_divider';

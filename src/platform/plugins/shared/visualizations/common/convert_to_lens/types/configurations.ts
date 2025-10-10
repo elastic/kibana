@@ -16,7 +16,7 @@ import type {
 import type { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { KibanaQueryOutput } from '@kbn/data-plugin/common';
-import type { LegendSize } from '../../constants';
+import type { ExpressionValueVisDimension, LegendSize } from '@kbn/chart-expressions-common';
 import { type XYLegendValue, type PartitionLegendValue } from '../../constants';
 import type {
   CategoryDisplayTypes,
@@ -35,7 +35,6 @@ import type {
   GaugeCentralMajorModes,
   CollapseFunctions,
 } from '../constants';
-import type { ExpressionValueVisDimension } from '../../expression_functions';
 
 export type ChartShapes = 'heatmap';
 

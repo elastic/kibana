@@ -11,7 +11,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import type {
   ExpressionRenderDefinition,

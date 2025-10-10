@@ -9,7 +9,9 @@
 
 import type { PaletteOutput } from '@kbn/coloring';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import type {
+  ExpressionValueVisDimension,
+} from '@kbn/chart-expressions-common';
 
 interface TagCloudCommonParams {
   scale: 'linear' | 'log' | 'square root';

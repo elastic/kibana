@@ -63,13 +63,9 @@ export type {
 export {
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,
-  LegendSize,
-  LegendSizeToPixels,
-  DEFAULT_LEGEND_SIZE,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../common/constants';
 export type { SavedVisState, VisParams, Dimension } from '../common';
-export type { ExpressionValueVisDimension } from '../common/expression_functions/vis_dimension';
 export type {
   ExpressionValueXYDimension,
   DateHistogramParams,

@@ -19,7 +19,9 @@ import {
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import { LegendValue } from '@elastic/charts';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import {
+ LegendSize
+} from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';

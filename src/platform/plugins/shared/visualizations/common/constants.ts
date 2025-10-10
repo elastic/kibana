@@ -32,29 +32,6 @@ export const VisualizeConstants = {
   APP_ID: 'visualize',
 };
 
-export enum LegendSize {
-  AUTO = 'auto',
-  SMALL = 'small',
-  MEDIUM = 'medium',
-  LARGE = 'large',
-  EXTRA_LARGE = 'xlarge',
-}
-
-export enum LegendLayout {
-  Table = 'table',
-  List = 'list',
-}
-
-export const LegendSizeToPixels = {
-  [LegendSize.AUTO]: undefined,
-  [LegendSize.SMALL]: 80,
-  [LegendSize.MEDIUM]: 130,
-  [LegendSize.LARGE]: 180,
-  [LegendSize.EXTRA_LARGE]: 230,
-} as const;
-
-export const DEFAULT_LEGEND_SIZE = LegendSize.MEDIUM;
-
 export const SUPPORTED_AGGREGATIONS = [
   ...Object.values(METRIC_TYPES),
   ...Object.values(BUCKET_TYPES),

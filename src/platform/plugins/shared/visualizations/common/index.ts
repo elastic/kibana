@@ -34,11 +34,7 @@ export {
   getFormatByAccessor,
   getStopsWithColorsFromRanges,
 } from './utils';
-export type {
-  Arguments,
-  ExpressionValueVisDimension,
-  ExpressionFunctionVisDimension,
-} from './expression_functions';
+export type { Arguments, ExpressionFunctionVisDimension } from './expression_functions';
 export { range, visDimension } from './expression_functions';
 export type {
   AggBasedColumn,
@@ -186,11 +182,4 @@ export {
 } from './convert_to_lens';
 export { convertToSchemaConfig } from './vis_schemas';
 
-export {
-  LegendSize,
-  LegendSizeToPixels,
-  DEFAULT_LEGEND_SIZE,
-  LegendLayout,
-  type XYLegendValue,
-  type PartitionLegendValue,
-} from './constants';
+export { type XYLegendValue, type PartitionLegendValue } from './constants';

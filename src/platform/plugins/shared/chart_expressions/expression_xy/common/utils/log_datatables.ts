@@ -14,7 +14,9 @@ import type {
   DefaultInspectorAdapters,
   ExecutionContext,
 } from '@kbn/expressions-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type {
+  ExpressionValueVisDimension,
+} from '@kbn/chart-expressions-common';
 import type { Dimension, LayerDimension } from '@kbn/visualizations-plugin/common/utils';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';

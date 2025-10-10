@@ -16,7 +16,7 @@ import type {
   DatatableColumn,
 } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import type { ExpressionValueVisDimension } from './vis_dimension';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 
 export interface DateHistogramParams {
   date: boolean;

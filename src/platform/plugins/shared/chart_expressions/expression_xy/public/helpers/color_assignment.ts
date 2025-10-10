@@ -11,7 +11,9 @@ import { mapValues } from 'lodash';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type {
+  ExpressionValueVisDimension,
+} from '@kbn/chart-expressions-common';
 import { isDataLayer } from './visualization';
 import type { CommonXYDataLayerConfig, CommonXYLayerConfig } from '../../common';
 import type {
