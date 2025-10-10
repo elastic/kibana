@@ -12,7 +12,7 @@ import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import type { ParsedQuery } from 'query-string';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
@@ -96,7 +96,7 @@ export async function mountApp({
   const renderDashboard = (
     routeProps: RouteComponentProps<{ id?: string; expandedPanelId?: string }>
   ) => {
-    const routeParams = parse(routeProps.history.location.search);
+    const routeParams = queryString.parse(routeProps.history.location.search);
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
     }
@@ -114,7 +114,7 @@ export async function mountApp({
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
     coreServices.chrome.docTitle.change(getDashboardPageTitle());
-    const routeParams = parse(routeProps.history.location.search);
+    const routeParams = queryString.parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;
     return (

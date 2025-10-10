@@ -11,7 +11,6 @@ import qs from 'query-string';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { parse } from 'query-string';
 
 import type {
   EuiInMemoryTableProps,
@@ -176,7 +175,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
     const isDefaultFilterConfiguration = isQueryEmpty && isDefaultFilters;
 
     if (!isDefaultFilterConfiguration) {
-      const { pipeline } = parse(location.search.substring(1));
+      const { pipeline } = qs.parse(location.search.substring(1));
       history.push({
         pathname: '',
         search:

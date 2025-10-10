@@ -8,7 +8,7 @@
  */
 
 import { format as formatUrl } from 'url';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';
 import { parseUrl, parseUrlHash } from '../../../common/state_management/parse';
@@ -268,14 +268,20 @@ export function getRelativeToHistoryPath(absoluteUrl: string, history: History):
     // @ts-expect-error `urlUtils.encodeQuery` expects key/value pairs with values of type `string | string[] | null`,
     // however `@types/node` says that `url.query` has values of type `string | string[] | undefined`.
     // After investigating this, it seems that no matter what the values will be of type `string | string[]`
-    search: stringify(urlUtils.encodeQuery(parsedUrl.query), { sort: false, encode: false }),
+    search: queryString.stringify(urlUtils.encodeQuery(parsedUrl.query), {
+      sort: false,
+      encode: false,
+    }),
     hash: parsedHash
       ? formatUrl({
           pathname: parsedHash.pathname,
           // @ts-expect-error `urlUtils.encodeQuery` expects key/value pairs with values of type `string | string[] | null`,
           // however `@types/node` says that `url.query` has values of type `string | string[] | undefined`.
           // After investigating this, it seems that no matter what the values will be of type `string | string[]`
-          search: stringify(urlUtils.encodeQuery(parsedHash.query), { sort: false, encode: false }),
+          search: queryString.stringify(urlUtils.encodeQuery(parsedHash.query), {
+            sort: false,
+            encode: false,
+          }),
         })
       : parsedUrl.hash,
   });

@@ -9,7 +9,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { parse, stringify } from 'query-string';
+import queryString from 'query-string';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
 
@@ -25,7 +25,7 @@ export function useWorkflowUrlState() {
   const location = useLocation();
 
   const urlState = useMemo(() => {
-    const params = parse(location.search);
+    const params = queryString.parse(location.search);
     return {
       tab: (params.tab as WorkflowUrlStateTabType) || 'workflow',
       executionId: params.executionId as string | undefined,
@@ -36,7 +36,7 @@ export function useWorkflowUrlState() {
 
   const updateUrlState = useCallback(
     (updates: Partial<WorkflowUrlState>) => {
-      const currentParams = parse(location.search);
+      const currentParams = queryString.parse(location.search);
 
       // Update the params with new values
       const newParams = {
@@ -53,7 +53,7 @@ export function useWorkflowUrlState() {
       });
 
       // Update the URL without causing a full page reload
-      const newSearch = stringify(cleanParams, { encode: false });
+      const newSearch = queryString.stringify(cleanParams, { encode: false });
       const newLocation = {
         ...location,
         search: newSearch ? `?${newSearch}` : '',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import rison from '@kbn/rison';
 import { url as urlUtils } from '@kbn/kibana-utils-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
@@ -33,7 +33,7 @@ function fromQuery(query: Record<string, any>) {
     encodeURIComponent(value).replace(/%3A/g, ':')
   );
 
-  return stringify(encodedQuery, { sort: false, encode: false });
+  return queryString.stringify(encodedQuery, { sort: false, encode: false });
 }
 
 export class AlertsLocatorDefinition implements LocatorDefinition<AlertsLocatorParams> {

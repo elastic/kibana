@@ -60,8 +60,8 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   const { showAgentless } = useAgentlessResources();
   const [search, setSearch] = useState<string>(
     Array.isArray(urlParams.kuery)
-      ? urlParams.kuery[urlParams.kuery.length - 1]
-      : urlParams.kuery ?? ''
+      ? urlParams.kuery[urlParams.kuery.length - 1] || ''
+      : urlParams.kuery || ''
   );
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const { sorting, setSorting } = useSorting<AgentPolicy>({

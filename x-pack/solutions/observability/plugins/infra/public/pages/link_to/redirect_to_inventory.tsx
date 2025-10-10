@@ -7,7 +7,7 @@
 
 import type React from 'react';
 import { useEffect } from 'react';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { INVENTORY_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
@@ -20,7 +20,7 @@ export const RedirectToInventory: React.FC<RouteComponentProps> = ({ location })
   const baseLocator = share.url.locators.get(INVENTORY_LOCATOR_ID);
 
   useEffect(() => {
-    const parsedQueryString = parse(location.search || '', { sort: false });
+    const parsedQueryString = queryString.parse(location.search || '', { sort: false });
     const currentTime = parseFloat((parsedQueryString.timestamp ?? '') as string);
 
     baseLocator?.navigate({

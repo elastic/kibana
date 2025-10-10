@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '../../../../locator';
 import type { MlRoute, PageProps } from '../../router';
@@ -32,7 +32,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
     from,
     to,
     query,
-  }: Record<string, any> = parse(location.search, {
+  }: Record<string, any> = queryString.parse(location.search, {
     sort: false,
   });
   const {

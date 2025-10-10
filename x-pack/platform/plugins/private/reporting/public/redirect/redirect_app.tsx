@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 
@@ -52,7 +52,9 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
       try {
         let locatorParams: undefined | LocatorParams;
 
-        const { jobId, scheduledReportId, page, perPage } = parse(window.location.search);
+        const { jobId, scheduledReportId, page, perPage } = queryString.parse(
+          window.location.search
+        );
 
         if (scheduledReportId) {
           const scheduledReport = await apiClient.getScheduledReportInfo(

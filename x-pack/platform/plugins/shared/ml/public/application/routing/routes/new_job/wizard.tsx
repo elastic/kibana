@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -191,7 +191,9 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );
 
-  const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
+  const { index, savedSearchId }: Record<string, any> = queryString.parse(location.search, {
+    sort: false,
+  });
 
   const {
     services: {

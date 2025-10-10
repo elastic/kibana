@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { usePrefixPathWithBasepath } from './use_prefix_path_with_basepath';
@@ -107,7 +107,7 @@ export const useLinkProps = (
 };
 
 const encodeSearch = (search: Search) => {
-  return stringify(urlUtils.encodeQuery(search), { sort: false, encode: false });
+  return queryString.stringify(urlUtils.encodeQuery(search), { sort: false, encode: false });
 };
 
 const validateParams = ({ app, pathname, hash, search }: LinkDescriptor) => {

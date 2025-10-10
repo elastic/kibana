@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { parse } from 'query-string';
+import queryString from 'query-string';
 
 export function getParsedParams(search: string) {
-  return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};
+  return search
+    ? queryString.parse(search[0] === '?' ? search.slice(1) : search, { sort: false })
+    : {};
 }

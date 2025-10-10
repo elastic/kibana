@@ -49,7 +49,7 @@ pageLoadAssetSize:
   enterpriseSearch: 38494
   esql: 18000
   esqlDataGrid: 10209
-  esUiShared: 101220
+  esUiShared: 104000
   eventAnnotation: 22361
   eventAnnotationListing: 13164
   exploratoryView: 45177
@@ -103,7 +103,7 @@ pageLoadAssetSize:
   mapsEms: 6767
   metricsDataAccess: 49711
   metricsExperience: 10000
-  ml: 89000
+  ml: 90700
   mockIdpPlugin: 7544
   monitoring: 28983
   navigation: 13598
@@ -143,7 +143,7 @@ pageLoadAssetSize:
   searchIndices: 10564
   searchInferenceEndpoints: 8071
   searchNavigation: 7404
-  searchNotebooks: 18826
+  searchNotebooks: 20000
   searchPlayground: 10993
   searchprofiler: 18361
   searchQueryRules: 6689

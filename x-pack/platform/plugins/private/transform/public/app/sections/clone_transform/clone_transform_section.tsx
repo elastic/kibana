@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +30,7 @@ import { overrideTransformForCloning } from '../../common/transform';
 type Props = RouteComponentProps<{ transformId: string }>;
 
 export const CloneTransformSection: FC<Props> = ({ match, location }) => {
-  const { dataViewId }: Record<string, any> = parse(location.search, {
+  const { dataViewId }: Record<string, any> = queryString.parse(location.search, {
     sort: false,
   });
   // Set breadcrumb and page title
