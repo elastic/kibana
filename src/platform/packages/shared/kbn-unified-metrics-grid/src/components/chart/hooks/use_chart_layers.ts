@@ -34,7 +34,7 @@ interface UseChartLayersParams {
  * @returns An array of LensSeriesLayer configurations.
  */
 export const useChartLayers = ({
-  dimensions,
+  dimensions = [],
   metric,
   color,
   seriesType,
@@ -46,7 +46,7 @@ export const useChartLayers = ({
       metricName: metric.name,
       customFunction,
     });
-    const hasDimensions = dimensions ? dimensions.length > 0 : false;
+    const hasDimensions = dimensions.length > 0;
 
     return [
       {
