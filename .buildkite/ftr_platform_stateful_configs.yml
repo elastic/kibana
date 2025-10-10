@@ -316,6 +316,8 @@ enabled:
   - x-pack/platform/test/security_api_integration/features.config.ts
   - x-pack/platform/test/security_api_integration/session_cookie.config.ts
   - x-pack/platform/test/security_api_integration/session_idle.config.ts
+  - x-pack/platform/test/security_api_integration/session_idle.config.full.ts
+  - x-pack/platform/test/security_api_integration/session_idle.config.hack.ts
   - x-pack/platform/test/security_api_integration/session_shard_missing.config.ts
   - x-pack/platform/test/security_api_integration/session_invalidate.config.ts
   - x-pack/platform/test/security_api_integration/session_lifespan.config.ts
