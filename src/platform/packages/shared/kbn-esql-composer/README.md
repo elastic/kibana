@@ -332,7 +332,7 @@ const query = from('metrics-*')
     )
   );
 
-console.log(query.toString());
+console.log(query.toString({ withComments: true }));
 ```
 
 Output:
@@ -369,6 +369,26 @@ const query = from('logs-*')
       { comment: 'Calculate average duration by service' }
     )
   );
+```
+
+### Rendering Comments
+
+By default, `toString()` uses the basic pretty printer which doesn't render comments. To see comments in the output, use the `withComments` option:
+
+```ts
+const query = from('logs-*')
+  .pipe(evaluate('new_field = old_field * 2', undefined, { comment: 'Calculate doubled value' }));
+
+// Without comments (default behavior)
+console.log(query.toString());
+// FROM logs-*
+//   | EVAL new_field = old_field * 2
+
+// With comments
+console.log(query.toString({ withComments: true }));
+// FROM logs-*
+//   // Calculate doubled value
+//   | EVAL new_field = old_field * 2
 ```
 
 ### Backward Compatibility

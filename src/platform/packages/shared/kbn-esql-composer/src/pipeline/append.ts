@@ -24,7 +24,7 @@ export function append({
 
     // Attach comment to the command if provided
     if (comment) {
-      const commentNode = Builder.comment('single-line', `// ${comment}`);
+      const commentNode = Builder.comment('single-line', ` ${comment}`);
       commandAst.formatting = {
         top: [commentNode],
       };
