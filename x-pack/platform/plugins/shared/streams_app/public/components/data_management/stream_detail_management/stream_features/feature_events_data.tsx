@@ -35,7 +35,7 @@ export const FeatureEventsData = ({ feature }: { feature: Feature }) => {
             aria-label={i18n.translate(
               'xpack.streams.identifiedFeatureEvents.viewAllLinkAriaLabel',
               {
-                defaultMessage: 'Open in discover',
+                defaultMessage: 'Open in Discover',
               }
             )}
           >
