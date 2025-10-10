@@ -34,7 +34,7 @@ URL
 :   The request URL. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
 
 Authentication
-:   The authentication type: none, basic, SSL, or {applies_to}`stack: ga 9.2` Oauth 2.0 authentication. 
+:   The authentication type: none, basic, SSL, or {applies_to}`stack: ga 9.2` OAuth 2.0 authentication. 
 
     Basic
     :   If you choose basic authentication, you must provide a user name and password.
