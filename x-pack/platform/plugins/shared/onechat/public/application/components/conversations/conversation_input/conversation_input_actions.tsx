@@ -5,85 +5,36 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { css } from '@emotion/react';
-import { useAgentId, useHasActiveConversation } from '../../../hooks/use_conversation';
-import { useConversationActions } from '../../../hooks/use_conversation_actions';
-import { AgentDisplay } from '../agent_display';
-import { AgentSelectDropdown } from '../agent_select_dropdown';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { ConversationAgentSelector } from '../conversation_agent_selector';
+import { ConversationActionButton } from './conversation_action_button';
+
 interface ConversationInputActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   resetToPendingMessage: () => void;
+  agentId?: string;
 }
-
-const labels = {
-  cancel: i18n.translate('xpack.onechat.conversationInputForm.cancel', {
-    defaultMessage: 'Cancel',
-  }),
-  submit: i18n.translate('xpack.onechat.conversationInputForm.submit', {
-    defaultMessage: 'Submit',
-  }),
-};
 
 export const ConversationInputActions: React.FC<ConversationInputActionsProps> = ({
   onSubmit,
   isSubmitDisabled,
   resetToPendingMessage,
+  agentId,
 }) => {
-  const { setAgentId } = useConversationActions();
-  const agentId = useAgentId();
-  const hasActiveConversation = useHasActiveConversation();
-  const { canCancel, cancel } = useSendMessage();
-  const { euiTheme } = useEuiTheme();
-  const cancelButtonStyles = css`
-    background-color: ${euiTheme.colors.backgroundLightText};
-  `;
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          {hasActiveConversation ? (
-            <AgentDisplay selectedAgentId={agentId} />
-          ) : (
-            <AgentSelectDropdown
-              selectedAgentId={agentId}
-              onAgentChange={(newAgentId: string) => {
-                setAgentId(newAgentId);
-              }}
-            />
-          )}
+          <ConversationAgentSelector agentId={agentId} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {canCancel ? (
-            <EuiButtonIcon
-              aria-label={labels.cancel}
-              data-test-subj="onechatAppConversationInputFormCancelButton"
-              iconType="stopFilled"
-              size="m"
-              color="text"
-              css={cancelButtonStyles}
-              onClick={() => {
-                if (canCancel) {
-                  cancel();
-                  resetToPendingMessage();
-                }
-              }}
-            />
-          ) : (
-            <EuiButtonIcon
-              aria-label={labels.submit}
-              data-test-subj="onechatAppConversationInputFormSubmitButton"
-              iconType="sortUp"
-              display="fill"
-              size="m"
-              disabled={isSubmitDisabled}
-              onClick={onSubmit}
-            />
-          )}
+          <ConversationActionButton
+            onSubmit={onSubmit}
+            isSubmitDisabled={isSubmitDisabled}
+            resetToPendingMessage={resetToPendingMessage}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

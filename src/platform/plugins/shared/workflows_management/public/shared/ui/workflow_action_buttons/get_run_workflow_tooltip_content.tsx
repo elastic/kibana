@@ -12,21 +12,22 @@ import { i18n } from '@kbn/i18n';
 export function getRunWorkflowTooltipContent(
   isValid: boolean,
   canRunWorkflow: boolean,
-  isEnabled: boolean
+  isEnabled: boolean,
+  isTest: boolean
 ) {
   if (!isValid) {
     return i18n.translate('workflows.actionButtons.runWorkflow.invalid', {
       defaultMessage: 'Fix errors to run workflow',
     });
   }
-  if (!isEnabled) {
-    return i18n.translate('workflows.actionButtons.runWorkflow.disabled', {
-      defaultMessage: 'Enable the workflow to run it',
-    });
-  }
   if (!canRunWorkflow) {
     return i18n.translate('workflows.actionButtons.runWorkflow.notAllowed', {
       defaultMessage: 'You are not allowed to run workflows',
+    });
+  }
+  if (!isEnabled && !isTest) {
+    return i18n.translate('workflows.actionButtons.runWorkflow.disabled', {
+      defaultMessage: 'Enable the workflow to run it',
     });
   }
   return null;

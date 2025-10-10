@@ -22,7 +22,9 @@ export function useSignificantEventPreviewFetch({
   kqlQuery,
   timeState,
   isQueryValid,
+  noOfBuckets = 10,
 }: {
+  noOfBuckets?: number;
   name: string;
   system?: {
     name: string;
@@ -47,7 +49,7 @@ export function useSignificantEventPreviewFetch({
       const { from, to } = getAbsoluteTimeRange(timeState.timeRange);
 
       const bucketSize = calculateAuto
-        .near(10, moment.duration(moment(to).diff(from)))
+        .near(noOfBuckets, moment.duration(moment(to).diff(from)))
         ?.asSeconds()!;
 
       const effectiveSystem = system && system.name === NO_SYSTEM.name ? undefined : system;
@@ -75,7 +77,15 @@ export function useSignificantEventPreviewFetch({
         }
       );
     },
-    [timeState, name, system, kqlQuery, streams.streamsRepositoryClient, isQueryValid]
+    [
+      isQueryValid,
+      timeState.timeRange,
+      noOfBuckets,
+      system,
+      streams.streamsRepositoryClient,
+      name,
+      kqlQuery,
+    ]
   );
 
   return previewFetch;

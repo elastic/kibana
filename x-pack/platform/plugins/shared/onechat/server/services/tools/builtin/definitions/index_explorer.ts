@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { platformCoreTools } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { indexExplorer } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -28,6 +28,7 @@ const indexExplorerSchema = z.object({
 export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
   return {
     id: platformCoreTools.indexExplorer,
+    type: ToolType.builtin,
     description: `List relevant indices, aliases and datastreams based on a natural language query.
 
 The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
