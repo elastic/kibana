@@ -7,19 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { SettingsEditor as SettingsEditorComponent } from './settings_editor';
 
 export { type Props } from './settings_editor';
 export { type AutocompleteOptions } from './types';
-
-/**
- * The Lazily-loaded `SettingsEditorLazy` component.
- */
-export const SettingsEditorLazy = React.lazy(() =>
-  import('./settings_editor').then(({ SettingsEditor }) => ({
-    default: SettingsEditor,
-  }))
-);
 
 export const SettingsEditor = SettingsEditorComponent;

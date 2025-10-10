@@ -7,19 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { VariablesEditor as VariablesEditorComponent } from './variables_editor';
 
 export { type Props } from './variables_editor';
 export { type DevToolsVariable } from './types';
-
-/**
- * The Lazily-loaded `VariablesEditorLazy` component.
- */
-export const VariablesEditorLazy = React.lazy(() =>
-  import('./variables_editor').then(({ VariablesEditor }) => ({
-    default: VariablesEditor,
-  }))
-);
 
 export const VariablesEditor = VariablesEditorComponent;
