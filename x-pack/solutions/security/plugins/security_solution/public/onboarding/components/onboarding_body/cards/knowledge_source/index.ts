@@ -11,7 +11,7 @@ import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { KNOWLEDGE_SOURCE_CARD_TITLE } from './translations';
 import { checkKnowledgeSourceComplete } from './knowledge_source_check_complete';
-import { SECURITY_FEATURE_ID } from '../../../../../../common/constants';
+import { RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
 
 export const knowledgeSourceCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.knowledgeSource,
@@ -25,5 +25,5 @@ export const knowledgeSourceCardConfig: OnboardingCardConfig = {
       )
   ),
   checkComplete: checkKnowledgeSourceComplete,
-  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.external_detections`],
+  capabilitiesRequired: [RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE],
 };

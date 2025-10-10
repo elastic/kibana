@@ -22,19 +22,6 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
       },
     },
   },
-
-  [ProductFeatureSecurityKey.externalDetections]: {
-    privileges: {
-      all: {
-        ui: ['external_detections'],
-        api: [],
-      },
-      read: {
-        ui: ['external_detections'],
-        api: [],
-      },
-    },
-  },
   [ProductFeatureSecurityKey.detections]: {
     privileges: {
       all: {
@@ -42,14 +29,11 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
         api: [
           'cloud-security-posture-all',
           'cloud-security-posture-read',
-          'cloud-defend-all',
-          'cloud-defend-read',
-          'bulkGetUserProfiles',
         ],
       },
       read: {
         ui: ['detections'],
-        api: ['cloud-security-posture-read', 'cloud-defend-read', 'bulkGetUserProfiles'],
+        api: ['cloud-security-posture-read', 'cloud-defend-read'],
       },
     },
   },
