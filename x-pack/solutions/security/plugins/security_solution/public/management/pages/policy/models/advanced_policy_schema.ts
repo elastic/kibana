@@ -2280,6 +2280,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.security.event_disabled',
+    first_supported_version: '9.2.0',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.event_disabled',
+      {
+        defaultMessage:
+          'A comma separated list of security event IDs to selectively disable. example: 4624,4800,4801. Default: none.',
+      }
+    ),
+  },
+  {
     key: 'linux.advanced.alerts.hash.md5',
     first_supported_version: '8.16',
     documentation: i18n.translate(
