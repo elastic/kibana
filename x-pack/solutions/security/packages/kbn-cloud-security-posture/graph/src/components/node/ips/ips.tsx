@@ -25,7 +25,7 @@ import { createPreviewItems } from '../utils';
 
 export const VISIBLE_IPS_LIMIT = 1;
 
-const toolTipAriaLabel = i18n.translate('securitySolutionPackages.csp.graph.ips.toolTipAriaLabel', {
+const popoverTipAriaLabel = i18n.translate('securitySolutionPackages.csp.graph.ips.popoverAriaLabel', {
   defaultMessage: 'Show IP address details',
 });
 
@@ -93,7 +93,7 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
           color="text"
           data-test-subj={GRAPH_IPS_PLUS_COUNT_BUTTON_ID}
           onClick={onIpClick}
-          aria-label={toolTipAriaLabel}
+          aria-label={popoverTipAriaLabel}
           flush="both"
           css={css`
             font-weight: medium;
@@ -105,7 +105,7 @@ export const Ips = ({ ips, onIpClick }: IpsProps) => {
         <EuiText
           size="xs"
           color="subdued"
-          aria-label={toolTipAriaLabel}
+          aria-label={popoverTipAriaLabel}
           data-test-subj={GRAPH_IPS_PLUS_COUNT_ID}
           css={css`
             font-weight: medium;
