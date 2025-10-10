@@ -95,7 +95,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { signalIndexName } = useSignalIndex();
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const { hasSiemRead: hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();

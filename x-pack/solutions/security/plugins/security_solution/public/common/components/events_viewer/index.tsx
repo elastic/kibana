@@ -128,7 +128,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     itemsPerPage,
     itemsPerPageOptions,
     showCheckboxes,
-    sort,
+    sort = [],
     queryFields,
     selectAll,
     selectedEventIds,

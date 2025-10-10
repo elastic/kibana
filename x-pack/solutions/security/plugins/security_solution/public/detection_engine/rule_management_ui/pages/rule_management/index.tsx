@@ -16,7 +16,6 @@ import { getDetectionEngineUrl } from '../../../../common/components/link_to/red
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useKibana } from '../../../../common/lib/kibana';
-import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { MissingPrivilegesCallOut } from '../../../../common/components/missing_privileges';
 import { MlJobCompatibilityCallout } from '../../components/ml_job_compatibility_callout';
@@ -38,6 +37,7 @@ import {
   CREATE_NEW_RULE_TOUR_ANCHOR,
   RuleFeatureTour,
 } from '../../components/rules_table/feature_tour/rules_feature_tour';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -45,15 +45,9 @@ const RulesPageComponent: React.FC = () => {
   const kibanaServices = useKibana().services;
   const { navigateToApp } = kibanaServices.application;
 
-  const [
-    {
-      loading: userInfoLoading,
-      isSignalIndexExists,
-      isAuthenticated,
-      hasEncryptionKey,
-      canUserCRUD,
-    },
-  ] = useUserData();
+  const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
+    useUserData();
+  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,
@@ -88,7 +82,7 @@ const RulesPageComponent: React.FC = () => {
   // user still can import value lists, so button should not be disabled if user has enough other privileges
   const cantCreateNonExistentListIndex = needsListsIndex && !canCreateListsIndex;
   const isImportValueListDisabled =
-    cantCreateNonExistentListIndex || !canWriteListsIndex || !canUserCRUD || loading;
+    cantCreateNonExistentListIndex || !canWriteListsIndex || !canEditRules || loading;
 
   return (
     <>
@@ -106,7 +100,7 @@ const RulesPageComponent: React.FC = () => {
           <HeaderPage title={i18n.PAGE_TITLE}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
               <EuiFlexItem grow={false}>
-                <AddElasticRulesButton isDisabled={!canUserCRUD || loading} />
+                <AddElasticRulesButton isDisabled={!canEditRules || loading} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
@@ -131,7 +125,7 @@ const RulesPageComponent: React.FC = () => {
                 <EuiButtonEmpty
                   data-test-subj="rules-import-modal-button"
                   iconType="importAction"
-                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  isDisabled={!canEditRules || loading}
                   onClick={showImportModal}
                 >
                   {i18n.IMPORT_RULE}
@@ -142,7 +136,7 @@ const RulesPageComponent: React.FC = () => {
                   data-test-subj="create-new-rule"
                   fill
                   iconType="plusInCircle"
-                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  isDisabled={!canEditRules || loading}
                   deepLinkId={SecurityPageName.rulesCreate}
                 >
                   {i18n.ADD_NEW_RULE}
