@@ -470,7 +470,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               helpText={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.writeToStreamsHelpText"
-                  defaultMessage="When enabled, agents will be granted additional permissions to write data to {streamsLink}. {learnMore}."
+                  defaultMessage="When enabled, agents will be granted additional permissions to write data to {streamsLink}. To learn more, refer to the {learnMore} documentation."
                   values={{
                     streamsLink: (
                       <EuiLink href={docLinks.links.observability.logsStreams} target="_blank">
@@ -484,7 +484,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                       <EuiLink href={docLinks.links.observability.wiredStreams} target="_blank">
                         <FormattedMessage
                           id="xpack.fleet.settings.editOutputFlyout.learnMore"
-                          defaultMessage="Learn more"
+                          defaultMessage="wired streams"
                         />
                       </EuiLink>
                     ),
