@@ -27,4 +27,4 @@ export { rename } from './src/commands/rename';
 export { sort, SortOrder } from './src/commands/sort';
 export { replaceParameters } from './src/pipeline/replace_parameters';
 
-export type { QueryOperator, CommandOptions } from './src/types';
+export type { QueryOperator, CommandOptions, ToStringOptions } from './src/types';
