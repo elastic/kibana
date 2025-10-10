@@ -281,26 +281,16 @@ async function buildDashboardUrlFromSettings(
   }
   const dashboard = responses[0];
 
-  // Query from the datafeed config will be saved as custom filters
-  // Use them if there are set.
-  let filters = settings?.kibanaSettings?.filters;
-
-  // Use the query from the dashboard only if no job entities are selected.
-  let query;
-
-  // Override with filters and queries from saved dashboard if they are available.
-  const { searchSource } = dashboard.attributes.kibanaSavedObjectMeta;
-  if (searchSource !== undefined) {
-    if (Array.isArray(searchSource.filters) && searchSource.filters.length > 0) {
-      filters = searchSource.filters;
-    }
-    query = searchSource.query;
-  }
+  const filters =
+    Array.isArray(dashboard.attributes.filters) && dashboard.attributes.filters.length > 0
+      ? dashboard.attributes.filters
+      : settings?.kibanaSettings?.filters;
 
   const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames ?? []);
-  if (queryFromEntityFieldNames !== undefined) {
-    query = queryFromEntityFieldNames;
-  }
+  const query =
+    queryFromEntityFieldNames !== undefined
+      ? queryFromEntityFieldNames
+      : dashboard.attributes.query;
 
   const { from, to } = getUrlRangeFromSettings(settings);
 
