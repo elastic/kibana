@@ -76,7 +76,7 @@ export interface CreateTestEsClusterOptions {
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
-    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType' | 'dataPath'
+    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType' | 'dataPath' | 'namePrefix'
   >;
   esJavaOpts?: string;
   /**
@@ -270,6 +270,8 @@ export function createTestEsCluster<
           kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
           waitForReady: true,
         });
+        // Keep the original cluster instance so it can stop the serverless Docker nodes
+        this.nodes = [firstNode];
         return;
       } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;
@@ -326,7 +328,8 @@ export function createTestEsCluster<
     async stop() {
       const results = await Promise.allSettled(
         this.nodes.map(async (node, i) => {
-          log.info(`[es] stopping node ${nodes[i].name}`);
+          const nodeName = nodes[i]?.name ?? `node-${i + 1}`;
+          log.info(`[es] stopping node ${nodeName}`);
           await node.stop();
         })
       );
@@ -397,7 +400,8 @@ export function createTestEsCluster<
       log.info('[es] killing', this.nodes.length === 1 ? 'node' : `${this.nodes.length} nodes`);
       const results = await Promise.allSettled(
         this.nodes.map(async (node, i) => {
-          log.info(`[es] stopping node ${nodes[i].name}`);
+          const nodeName = nodes[i]?.name ?? `node-${i + 1}`;
+          log.info(`[es] stopping node ${nodeName}`);
           // we are deleting this install, stop ES more aggressively
           await node.kill();
         })
