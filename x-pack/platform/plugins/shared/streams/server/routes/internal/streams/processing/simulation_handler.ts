@@ -253,7 +253,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
               field: '_errors',
               value: {
                 message: '{{{ _ingest.on_failure_message }}}',
-                processor_id: '{{{ _ingest.on_failure_processor_tag }}}',
+                processor_id: processorConfig.tag,
                 type: 'generic_processor_failure',
               },
             },
@@ -448,17 +448,8 @@ function propagateProcessorResultsPipelineTags(
       return result;
     }
 
-    // If:
-    // - we should apply the tag
-    // - this result has doc._ingest.pipeline set
-    // - has no tag set
-    if (
-      applyTag &&
-      !result.tag &&
-      result.doc &&
-      result.doc._ingest &&
-      typeof result.doc._ingest.pipeline === 'string'
-    ) {
+    // If 1. we should apply the tag 2. this result is not from the root simulated pipeline 3. has no tag set
+    if (applyTag && !result.tag && result.doc?._ingest?.pipeline !== '_simulate_pipeline') {
       // Apply the last pipeline tag
       return { ...result, tag: lastPipelineTag };
     }
