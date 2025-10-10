@@ -75,6 +75,27 @@ export function getAcceptedTypesForParamContext(
       }
     }
 
+    // Homogeneous functions (COALESCE/GREATEST/LEAST-like): from the second argument onward,
+    // constrain accepted types to the first argument's type (text/keyword interchangeable).
+    if (isHomogeneousFunction(options.functionSignatures)) {
+      const { firstArgumentType } = options;
+      if (firstArgumentType && firstArgumentType !== 'unknown') {
+        // Special case: boolean homogeneity → allow any (user can build boolean via operators)
+        if (
+          (firstArgumentType as FunctionParameterType) === 'boolean' &&
+          computedTypes.length === 1 &&
+          computedTypes[0] === 'boolean'
+        ) {
+          return ['any'];
+        }
+
+        const isTextual = firstArgumentType === 'text' || firstArgumentType === 'keyword';
+        return isTextual
+          ? (['text', 'keyword'] as FunctionParameterType[])
+          : ([firstArgumentType as FunctionParameterType] as FunctionParameterType[]);
+      }
+    }
+
     // Special case: boolean parameters in homogeneous functions accept any type
     // because user can build boolean expressions with operators
     if (firstParamIsBoolean && computedTypes.length === 1 && computedTypes[0] === 'boolean') {
@@ -91,6 +112,33 @@ export function getAcceptedTypesForParamContext(
   return ['any'];
 }
 
+/** Returns true if signatures indicate a homogeneous function (COALESCE/GREATEST/LEAST-like) */
+export function isHomogeneousFunction(
+  functionSignatures:
+    | Array<{ params: Array<{ type: FunctionParameterType }>; minParams?: number }>
+    | undefined
+): boolean {
+  if (!functionSignatures || functionSignatures.length === 0) {
+    return false;
+  }
+  const isText = (t: FunctionParameterType) => t === 'keyword' || t === 'text';
+
+  return functionSignatures.every((sig) => {
+    const isVariadic = sig.minParams != null;
+
+    if (!isVariadic && (!sig.params || sig.params.length < 2)) {
+      return false;
+    }
+
+    const first = sig.params[0]?.type;
+    if (!first || first === 'any') {
+      return false;
+    }
+
+    return sig.params.every(({ type }) => type === first || (isText(first) && isText(type)));
+  });
+}
+
 /** Returns true if we should suggest opening a list for the right operand */
 export function shouldSuggestOpenListForOperand(operand: any): boolean {
   return (
@@ -103,4 +151,24 @@ export function shouldSuggestOpenListForOperand(operand: any): boolean {
 /** Suggestions for logical continuations after a complete list or null-check operator */
 export function getLogicalContinuationSuggestions(): ISuggestionItem[] {
   return logicalOperators.map(getOperatorSuggestion);
+}
+
+/**
+ * Detects when the current innerText ends with an IN or NOT IN token,
+ * before the parser has formed the operator node in the AST.
+ * Useful inside function-argument contexts (e.g., CASE(... IN ▌)).
+ */
+export function endsWithInOrNotInToken(innerText: string): boolean {
+  return /\b(?:not\s+)?in\s*$/i.test(innerText.trimEnd());
+}
+
+/** Detects trailing LIKE/RLIKE (with optional NOT) before AST forms the operator */
+export function endsWithLikeOrRlikeToken(innerText: string): boolean {
+  return /\b(?:not\s+)?r?like\s*$/i.test(innerText.trimEnd());
+}
+
+/** Detects trailing IS or IS NOT (partial) before AST forms the operator */
+export function endsWithIsOrIsNotToken(innerText: string): boolean {
+  const text = innerText.trimEnd();
+  return /\bis\s*(?:not\s*)?$/i.test(text);
 }

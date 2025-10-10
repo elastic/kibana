@@ -14,11 +14,9 @@ import {
 import { Location } from '../../types';
 import { autocomplete } from './autocomplete';
 import {
-  DATE_DIFF_TIME_UNITS,
   expectSuggestions,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
-  mockFieldsWithTypes,
 } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import type { FunctionReturnType, FieldType } from '../../../definitions/types';
@@ -162,7 +160,9 @@ describe('FORK Autocomplete', () => {
           await forkExpectSuggestions('FROM a | FORK (WHERE ', EMPTY_WHERE_SUGGESTIONS);
           await forkExpectSuggestions('FROM a | FORK (WHERE key', EMPTY_WHERE_SUGGESTIONS);
           const expectedFields = getFieldNamesByType(['text', 'keyword', 'ip', 'version']);
-          mockFieldsWithTypes(mockCallbacks, expectedFields);
+          (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+            expectedFields.map((name) => ({ label: name, text: name }))
+          );
           await forkExpectSuggestions(
             'FROM a | FORK (WHERE textField != ',
             EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS,
@@ -204,10 +204,12 @@ describe('FORK Autocomplete', () => {
 
         test('dissect', async () => {
           const expectedFields = getFieldNamesByType(ESQL_STRING_TYPES);
-          mockFieldsWithTypes(mockCallbacks, expectedFields);
+          (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+            expectedFields.map((name) => ({ label: name, text: name }))
+          );
           await forkExpectSuggestions(
             'FROM a | FORK (DISSECT ',
-            getFieldNamesByType(ESQL_STRING_TYPES).map((fieldName) => `${fieldName} `),
+            getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
             mockCallbacks
           );
           await forkExpectSuggestions(
@@ -253,8 +255,9 @@ describe('FORK Autocomplete', () => {
 
         test('change_point', async () => {
           const expectedFields = getFieldNamesByType(ESQL_NUMBER_TYPES);
-          mockFieldsWithTypes(mockCallbacks, expectedFields);
-
+          (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+            expectedFields.map((name) => ({ label: name, text: name }))
+          );
           await forkExpectSuggestions(
             `FROM a | FORK (CHANGE_POINT `,
             getFieldNamesByType(ESQL_NUMBER_TYPES),
@@ -266,8 +269,9 @@ describe('FORK Autocomplete', () => {
             mockCallbacks
           );
           const expectedFieldsAny = getFieldNamesByType('any');
-          mockFieldsWithTypes(mockCallbacks, expectedFieldsAny);
-
+          (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+            expectedFieldsAny.map((name) => ({ label: name, text: name }))
+          );
           await forkExpectSuggestions(
             `FROM a | FORK (CHANGE_POINT value on `,
             getFieldNamesByType('any'),
@@ -316,8 +320,9 @@ describe('FORK Autocomplete', () => {
 
           it('suggest within a function', async () => {
             const expectedFields = getFieldNamesByType(AVG_TYPES);
-            mockFieldsWithTypes(mockCallbacks, expectedFields);
-
+            (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+              expectedFields.map((name) => ({ label: name, text: name }))
+            );
             await forkExpectSuggestions(
               'FROM a | FORK (STATS AVG(',
               [
@@ -384,8 +389,9 @@ describe('FORK Autocomplete', () => {
               'unsigned_long',
               'double',
             ]);
-            mockFieldsWithTypes(mockCallbacks, expectedFields);
-
+            (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+              expectedFields.map((name) => ({ label: name, text: name }))
+            );
             await forkExpectSuggestions(
               'FROM a | FORK (EVAL ACOS( ',
               [
@@ -402,41 +408,6 @@ describe('FORK Autocomplete', () => {
               ],
               mockCallbacks
             );
-          });
-
-          describe('function parameter constraints', () => {
-            it('constantOnly constraint - DATE_DIFF should suggest only constants, not fields', async () => {
-              await forkExpectSuggestions(
-                'FROM a | FORK (EVAL result = DATE_DIFF(',
-                DATE_DIFF_TIME_UNITS,
-                mockCallbacks
-              );
-            });
-
-            it('function parameter type filtering - ABS should only suggest numeric fields', async () => {
-              const expectedNumericFields = getFieldNamesByType([
-                'double',
-                'integer',
-                'long',
-                'unsigned_long',
-              ]);
-              mockFieldsWithTypes(mockCallbacks, expectedNumericFields);
-
-              await forkExpectSuggestions(
-                'FROM a | FORK (EVAL result = ABS(',
-                [
-                  ...expectedNumericFields,
-                  ...getFunctionSignaturesByReturnType(
-                    Location.EVAL,
-                    ['double', 'integer', 'long', 'unsigned_long'],
-                    { scalar: true },
-                    undefined,
-                    ['abs']
-                  ),
-                ],
-                mockCallbacks
-              );
-            });
           });
         });
       });

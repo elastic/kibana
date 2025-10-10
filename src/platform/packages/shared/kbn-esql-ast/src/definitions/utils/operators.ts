@@ -105,7 +105,7 @@ const getNullCheckOperators = () => {
 };
 
 /** Suggest complete "IS [NOT] NULL" operators when the user has started typing "IS ..." */
-const getNullCheckOperatorSuggestions = (
+export const getNullCheckOperatorSuggestions = (
   queryText: string,
   location: Location,
   leftParamType: FunctionParameterType

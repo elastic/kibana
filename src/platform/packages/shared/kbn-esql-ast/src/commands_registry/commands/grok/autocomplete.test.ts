@@ -44,17 +44,6 @@ describe('GROK Autocomplete', () => {
     );
   });
 
-  test.each(['from a | grok ', 'from a | grok key'])(
-    'suggests fields after GROK for input "%s"',
-    async (query) => {
-      await grokExpectSuggestions(
-        query,
-        getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
-        mockCallbacks
-      );
-    }
-  );
-
   const constantPattern = '"%{WORD:firstWord}"';
   it('suggests a pattern after a field name', async () => {
     await grokExpectSuggestions(

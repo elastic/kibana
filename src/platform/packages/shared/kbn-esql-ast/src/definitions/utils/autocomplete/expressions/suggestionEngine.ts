@@ -17,6 +17,15 @@ import type {
   SuggestForExpressionParams,
 } from './types';
 import { isNullCheckOperator } from './utils';
+import { dispatchOperators } from './operators/dispatcher';
+import {
+  endsWithInOrNotInToken,
+  endsWithLikeOrRlikeToken,
+  endsWithIsOrIsNotToken,
+} from './operators/utils';
+import type { ESQLFunction } from '../../../../types';
+import { getExpressionType } from '../../expressions';
+import { getNullCheckOperatorSuggestions } from '../../operators';
 
 const WHITESPACE_REGEX = /\s/;
 const LAST_WORD_BOUNDARY_REGEX = /\b\w(?=\w*$)/;
@@ -26,12 +35,76 @@ export async function suggestForExpression(
   params: SuggestForExpressionParams
 ): Promise<ISuggestionItem[]> {
   const baseCtx = buildContext(params);
+  // Pre-pass: handle partial operators (IN/NOT IN, LIKE/RLIKE/NOT LIKE, IS/IS NOT)
+  const preSuggestions = await trySuggestForPartialOperators(baseCtx);
+  if (preSuggestions?.length) {
+    return attachRanges(baseCtx, preSuggestions);
+  }
   const position: ExpressionPosition = getPosition(baseCtx.innerText, baseCtx.expressionRoot);
 
   const ctx = { ...baseCtx, position };
   const suggestions = await dispatchStates(ctx, position);
 
   return attachRanges(ctx, suggestions);
+}
+
+/**
+ * Pre-pass for partial operator tokens before the AST exists.
+ * - Detects trailing IN/NOT IN, LIKE/RLIKE/NOT LIKE, IS/IS NOT.
+ * - IN/LIKE: synthesize a temporary binary node and dispatch operator handlers.
+ * - IS: return null-check suggestions based on the left type.
+ * Purpose: provide operator-specific suggestions (e.g. list/patterns) even inside
+ * function args (e.g. CASE(field IN ▌)) before the parser forms the operator node.
+ */
+async function trySuggestForPartialOperators(
+  ctx: ExpressionContext
+): Promise<ISuggestionItem[] | null> {
+  const { innerText, expressionRoot } = ctx;
+  const trimmed = innerText.trimEnd();
+  const low = trimmed.toLowerCase();
+
+  const buildSyntheticBinary = (opName: 'in' | 'not in' | 'like' | 'rlike'): ESQLFunction => {
+    const L = innerText.length;
+    return {
+      type: 'function',
+      name: opName,
+      subtype: 'binary-expression',
+      args: [expressionRoot as any, undefined as any],
+      incomplete: true,
+      location: { min: L, max: L },
+      text: opName,
+    } as unknown as ESQLFunction;
+  };
+
+  // LIKE / RLIKE / NOT LIKE / NOT RLIKE
+  if (endsWithLikeOrRlikeToken(trimmed)) {
+    const opName = (low.endsWith('rlike') || low.endsWith('not rlike') ? 'rlike' : 'like') as
+      | 'like'
+      | 'rlike';
+    const synthetic = buildSyntheticBinary(opName);
+
+    return (await dispatchOperators({ ...ctx, expressionRoot: synthetic })) ?? [];
+  }
+
+  // IN / NOT IN
+  if (endsWithInOrNotInToken(trimmed)) {
+    const opName: 'in' | 'not in' = low.endsWith('not in') ? 'not in' : 'in';
+    const synthetic = buildSyntheticBinary(opName);
+
+    return (await dispatchOperators({ ...ctx, expressionRoot: synthetic })) ?? [];
+  }
+
+  // IS / IS NOT
+  if (endsWithIsOrIsNotToken(trimmed)) {
+    const leftType = getExpressionType(expressionRoot as any, ctx.context?.columns);
+    const leftParamType = (
+      leftType === 'unknown' || leftType === 'unsupported' ? 'any' : leftType
+    ) as any;
+
+    return getNullCheckOperatorSuggestions(innerText, ctx.location, leftParamType);
+  }
+
+  return null;
 }
 
 /** Derives innerText and option flags from the incoming params.*/

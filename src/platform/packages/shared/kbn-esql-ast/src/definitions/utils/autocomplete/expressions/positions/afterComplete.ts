@@ -23,7 +23,7 @@ import type { ExpressionContext, FunctionParameterContext } from '../types';
 import { isLiteral } from '../../../../../ast/is';
 import { isNumericType, FunctionDefinitionTypes } from '../../../../types';
 import { commaCompleteItem } from '../../../../../commands_registry/complete_items';
-import { getAcceptedTypesForParamContext } from '../operators/utils';
+import { getAcceptedTypesForParamContext, isHomogeneousFunction } from '../operators/utils';
 import {
   getActiveProductFromCtx,
   getColumnsByTypeFromCtx,
@@ -237,6 +237,11 @@ function shouldSuggestOperatorsForContext(
     return true;
   }
 
+  // Single-argument string functions (e.g., TRIM/LTRIM/RTRIM) don't benefit from operators
+  if (isSingleArgumentStringFunction(functionParameterContext)) {
+    return false;
+  }
+
   const paramDefs = functionParameterContext.paramDefinitions;
 
   if (!paramDefs || paramDefs.length === 0) {
@@ -356,6 +361,29 @@ function shouldSuggestOperatorsForContext(
   return false;
 }
 
+// Returns true if the current function (from context) is a single-argument string function
+function isSingleArgumentStringFunction(
+  functionParameterContext: FunctionParameterContext
+): boolean {
+  const fnDef = functionParameterContext.functionDefinition;
+  const signatures = fnDef?.signatures;
+
+  if (!signatures || signatures.length === 0) {
+    return false;
+  }
+
+  // Must be non-variadic and exactly 1 parameter of type text/keyword
+  return signatures.every(({ minParams, params }) => {
+    if (minParams != null) return false;
+    if (!params || params.length !== 1) {
+      return false;
+    }
+
+    const type = params[0].type;
+    return type === 'text' || type === 'keyword';
+  });
+}
+
 /** Handles suggestions for expressions with unknown types within function parameters */
 async function handleUnknownType(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
   const { location, context, options } = ctx;
@@ -458,18 +486,6 @@ async function handleUnknownType(ctx: ExpressionContext): Promise<ISuggestionIte
   return suggestions;
 }
 
-/** Checks if current parameter accepts only numeric values */
-function isNumericParameter(
-  functionParameterContext: FunctionParameterContext | undefined
-): boolean {
-  if (!functionParameterContext?.paramDefinitions) {
-    return false;
-  }
-
-  // Check if ALL param definitions accept numeric types
-  return functionParameterContext.paramDefinitions.every((param) => isNumericType(param.type));
-}
-
 /** Gets standard operator suggestions based on expression type and position */
 function getStandardOperatorSuggestions(
   ctx: ExpressionContext,
@@ -487,13 +503,12 @@ function getStandardOperatorSuggestions(
     allowed = allLogicalOperators
       .filter(({ locationsAvailable }) => locationsAvailable.includes(location))
       .map(({ name }) => name);
-  }
-
-  // Filter operators for numeric parameters: only arithmetic operators
-  // This applies to any function (scalar, aggregation) when parameter is numeric
-  if (isNumericParameter(options.functionParameterContext) && isNumericType(expressionType)) {
-    // Only suggest arithmetic operators for numeric parameters
-    allowed = arithmeticOperators.map(({ name }) => name);
+  } else {
+    // Restrict to arithmetic operators when the current parameter context is numeric-only
+    allowed = determineAllowedOperatorsFromFunctionContext(
+      options.functionParameterContext,
+      expressionType
+    );
   }
 
   return getOperatorSuggestions(
@@ -506,4 +521,47 @@ function getStandardOperatorSuggestions(
     getLicenseCheckerFromCtx(ctx),
     getActiveProductFromCtx(ctx)
   );
+}
+
+// Derive allowed operators from the accepted types of the current parameter (signature-aware)
+function determineAllowedOperatorsFromFunctionContext(
+  functionParameterContext: FunctionParameterContext | undefined,
+  expressionType: string
+): string[] | undefined {
+  if (!functionParameterContext?.paramDefinitions) {
+    return undefined;
+  }
+
+  // Do not constrain the first parameter for homogeneous functions (COALESCE/GREATEST/LEAST-like):
+  // the user may pivot the signature to boolean by adding comparisons (==, >, IN, LIKE)
+  const { functionDefinition, currentParameterIndex } = functionParameterContext;
+  const signatures = functionDefinition?.signatures;
+  const isHomogeneous = isHomogeneousFunction(signatures);
+
+  if (isHomogeneous && (currentParameterIndex ?? 0) === 0) {
+    return undefined;
+  }
+
+  const accepted = getAcceptedTypesForParamContext(functionParameterContext.paramDefinitions, {
+    firstArgumentType: functionParameterContext.firstArgumentType,
+    functionSignatures: signatures,
+  });
+
+  // If the parameter accepts only numeric types, restrict operators to arithmetic
+  const acceptsBooleanOrAny = accepted.includes('boolean') || accepted.includes('any');
+  const numericOnly = isNumericOnlyContext(accepted, acceptsBooleanOrAny);
+
+  if (numericOnly && isNumericType(expressionType)) {
+    return arithmeticOperators.map(({ name }) => name);
+  }
+
+  return undefined;
+}
+
+// True if accepted types are exclusively numeric-like (no boolean/any), including aggregated numeric
+function isNumericOnlyContext(acceptedTypes: string[], acceptsBoolean: boolean): boolean {
+  if (acceptsBoolean) return false;
+  if (acceptedTypes.length === 0) return false;
+
+  return acceptedTypes.every((t) => isNumericType(t) || t === 'aggregate_metric_double');
 }
