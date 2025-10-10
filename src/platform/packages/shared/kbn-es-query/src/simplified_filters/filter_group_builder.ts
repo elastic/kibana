@@ -11,7 +11,7 @@
  * FilterGroupBuilder: Fluent API for creating filter groups
  */
 
-import type { FilterGroup, SimpleFilterCondition } from './types';
+import type { FilterGroup, SimpleFilterCondition } from '@kbn/es-query-server';
 
 export class FilterGroupBuilder {
   private group: Partial<FilterGroup> = {
