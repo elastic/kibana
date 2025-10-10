@@ -117,7 +117,7 @@ export function ClassicStreamDetailManagement({
               'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
           })}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
               defaultMessage: 'Retention',
             })}
@@ -145,7 +145,7 @@ export function ClassicStreamDetailManagement({
           defaultMessage: 'View details about this classic stream’s data quality',
         })}
       >
-        <span>
+        <span tabIndex={0}>
           {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
             defaultMessage: 'Data quality',
           })}
@@ -181,7 +181,7 @@ export function ClassicStreamDetailManagement({
               'View technical details about this classic stream’s underlying index setup',
           })}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.advancedTab', {
               defaultMessage: 'Advanced',
             })}
