@@ -89,7 +89,9 @@ export const DocumentMatchFilterControls = ({
               grow={false}
               isToggle
               numActiveFilters={
-                hasNoValue ? '' : percentageFormatter.format(1 - matchedDocumentPercentage)
+                hasNoValue
+                  ? ''
+                  : percentageFormatter.format(Math.max(1 - matchedDocumentPercentage, 0))
               }
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.unmatched', {
