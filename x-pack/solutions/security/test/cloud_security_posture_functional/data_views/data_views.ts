@@ -7,8 +7,14 @@
 
 import expect from '@kbn/expect';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
-import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
-import { CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-plugin/common/constants';
+import {
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V1,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
+  CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX,
+  CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_V1,
+  CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
+} from '@kbn/cloud-security-posture-common';
 import type { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -275,6 +281,424 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
               'default'
             );
             expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+          },
+        });
+      });
+    });
+
+    describe('Data View Migration', () => {
+      it('Should migrate from v1 to v2 data view when old data view exists', async () => {
+        const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V1}-default`;
+        const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
+
+        // Create old v1 data view to simulate existing installation
+        await kibanaServer.savedObjects.create({
+          type: 'index-pattern',
+          id: oldDataViewId,
+          attributes: {
+            title:
+              'logs-*_latest_misconfigurations_cdr,logs-cloud_security_posture.findings_latest-default',
+            name: 'Old Misconfiguration Data View',
+            timeFieldName: '@timestamp',
+            allowNoIndex: true,
+          },
+          overwrite: true,
+        });
+
+        // Verify old data view exists
+        expect(await getDataViewSafe(kibanaServer.savedObjects, oldDataViewId, 'default')).to.be(
+          true
+        );
+
+        // Navigate to findings page to trigger migration
+        await findings.navigateToLatestFindingsPage();
+
+        // Wait for migration to complete
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            // Verify old data view is deleted
+            const oldDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              oldDataViewId,
+              'default'
+            );
+            expect(oldDataViewExists).to.be(false);
+
+            // Verify new v2 data view is created
+            const newDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              newDataViewId,
+              'default'
+            );
+            expect(newDataViewExists).to.be(true);
+          },
+        });
+      });
+
+      it('Should create v2 data view directly for new installations (no migration needed)', async () => {
+        const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V1}-default`;
+        const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
+
+        // Ensure neither data view exists (simulating fresh installation)
+        if (await getDataViewSafe(kibanaServer.savedObjects, oldDataViewId, 'default')) {
+          await kibanaServer.savedObjects.delete({
+            type: 'index-pattern',
+            id: oldDataViewId,
+            space: 'default',
+          });
+        }
+        if (await getDataViewSafe(kibanaServer.savedObjects, newDataViewId, 'default')) {
+          await kibanaServer.savedObjects.delete({
+            type: 'index-pattern',
+            id: newDataViewId,
+            space: 'default',
+          });
+        }
+
+        // Navigate to findings page
+        await findings.navigateToLatestFindingsPage();
+
+        // Wait for data view creation
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            // Verify old v1 data view was not created
+            const oldDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              oldDataViewId,
+              'default'
+            );
+            expect(oldDataViewExists).to.be(false);
+
+            // Verify new v2 data view is created
+            const newDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              newDataViewId,
+              'default'
+            );
+            expect(newDataViewExists).to.be(true);
+          },
+        });
+      });
+
+      it('Should handle migration in non-default space', async () => {
+        await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
+
+        const oldDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V1}-${TEST_SPACE}`;
+        const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
+
+        // Create old v1 data view in test space
+        // Note: The space is already part of the data view ID and we've switched to the space
+        await kibanaServer.savedObjects.create({
+          type: 'index-pattern',
+          id: oldDataViewId,
+          attributes: {
+            title:
+              'logs-*_latest_misconfigurations_cdr,logs-cloud_security_posture.findings_latest-default',
+            name: 'Old Misconfiguration Data View',
+            timeFieldName: '@timestamp',
+            allowNoIndex: true,
+          },
+          overwrite: true,
+        });
+
+        // Switch to test space
+        await pageObjects.spaceSelector.openSpacesNav();
+        await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
+        await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
+
+        // Navigate to findings page to trigger migration
+        await findings.navigateToLatestFindingsPage();
+
+        // Wait for migration to complete
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            // Verify old data view is deleted
+            const oldDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              oldDataViewId,
+              TEST_SPACE
+            );
+            expect(oldDataViewExists).to.be(false);
+
+            // Verify new v2 data view is created
+            const newDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              newDataViewId,
+              TEST_SPACE
+            );
+            expect(newDataViewExists).to.be(true);
+          },
+        });
+      });
+
+      it('Should migrate all old data view versions when multiple exist', async () => {
+        const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-default`;
+
+        // Create multiple old data views to simulate upgrading from different versions
+        for (const oldVersion of CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS) {
+          const oldDataViewId = `${oldVersion}-default`;
+          await kibanaServer.savedObjects.create({
+            type: 'index-pattern',
+            id: oldDataViewId,
+            attributes: {
+              title: 'logs-*_old_pattern',
+              name: `Old Data View ${oldVersion}`,
+              timeFieldName: '@timestamp',
+              allowNoIndex: true,
+            },
+            overwrite: true,
+          });
+
+          // Verify old data view was created
+          expect(await getDataViewSafe(kibanaServer.savedObjects, oldDataViewId, 'default')).to.be(
+            true
+          );
+        }
+
+        // Navigate to findings page to trigger migration
+        await findings.navigateToLatestFindingsPage();
+
+        // Wait for migration to complete
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            // Verify all old data views are deleted
+            for (const oldVersion of CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS) {
+              const oldDataViewId = `${oldVersion}-default`;
+              const oldDataViewExists = await getDataViewSafe(
+                kibanaServer.savedObjects,
+                oldDataViewId,
+                'default'
+              );
+              expect(oldDataViewExists).to.be(false);
+            }
+
+            // Verify new v2 data view is created
+            const newDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              newDataViewId,
+              'default'
+            );
+            expect(newDataViewExists).to.be(true);
+          },
+        });
+      });
+    });
+
+    describe('Vulnerabilities Data View Migration', () => {
+      it('Should migrate vulnerabilities from v1 to v2 data view when old data view exists', async () => {
+        const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_V1}-default`;
+        const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-default`;
+
+        // Create old v1 vulnerabilities data view to simulate existing installation
+        await kibanaServer.savedObjects.create({
+          type: 'index-pattern',
+          id: oldDataViewId,
+          attributes: {
+            title: 'logs-cloud_security_posture.vulnerabilities_latest-default',
+            name: 'Old Vulnerabilities Data View',
+            timeFieldName: '@timestamp',
+            allowNoIndex: true,
+          },
+          overwrite: true,
+        });
+
+        // Verify old data view exists
+        expect(await getDataViewSafe(kibanaServer.savedObjects, oldDataViewId, 'default')).to.be(
+          true
+        );
+
+        // Navigate to vulnerabilities page to trigger migration
+        await findings.navigateToLatestVulnerabilitiesPage();
+
+        // Wait for migration to complete
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            // Verify old data view is deleted
+            const oldDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              oldDataViewId,
+              'default'
+            );
+            expect(oldDataViewExists).to.be(false);
+
+            // Verify new v2 data view is created
+            const newDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              newDataViewId,
+              'default'
+            );
+            expect(newDataViewExists).to.be(true);
+          },
+        });
+      });
+
+      it('Should create v2 vulnerabilities data view directly for new installations', async () => {
+        const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_V1}-default`;
+        const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-default`;
+
+        // Ensure neither data view exists (simulating fresh installation)
+        if (await getDataViewSafe(kibanaServer.savedObjects, oldDataViewId, 'default')) {
+          await kibanaServer.savedObjects.delete({
+            type: 'index-pattern',
+            id: oldDataViewId,
+            space: 'default',
+          });
+        }
+        if (await getDataViewSafe(kibanaServer.savedObjects, newDataViewId, 'default')) {
+          await kibanaServer.savedObjects.delete({
+            type: 'index-pattern',
+            id: newDataViewId,
+            space: 'default',
+          });
+        }
+
+        // Navigate to vulnerabilities page
+        await findings.navigateToLatestVulnerabilitiesPage();
+
+        // Wait for data view creation
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            // Verify old v1 data view was not created
+            const oldDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              oldDataViewId,
+              'default'
+            );
+            expect(oldDataViewExists).to.be(false);
+
+            // Verify new v2 data view is created
+            const newDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              newDataViewId,
+              'default'
+            );
+            expect(newDataViewExists).to.be(true);
+          },
+        });
+      });
+
+      it('Should handle vulnerabilities migration in non-default space', async () => {
+        await spacesService.create({ id: TEST_SPACE, name: 'space_one', disabledFeatures: [] });
+
+        const oldDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_V1}-${TEST_SPACE}`;
+        const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
+
+        // Create old v1 data view in test space
+        // Note: The space is already part of the data view ID and we've switched to the space
+        await kibanaServer.savedObjects.create({
+          type: 'index-pattern',
+          id: oldDataViewId,
+          attributes: {
+            title: 'logs-cloud_security_posture.vulnerabilities_latest-default',
+            name: 'Old Vulnerabilities Data View',
+            timeFieldName: '@timestamp',
+            allowNoIndex: true,
+          },
+          overwrite: true,
+        });
+
+        // Switch to test space
+        await pageObjects.spaceSelector.openSpacesNav();
+        await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
+        await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
+
+        // Navigate to vulnerabilities page to trigger migration
+        await findings.navigateToLatestVulnerabilitiesPage();
+
+        // Wait for migration to complete
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            // Verify old data view is deleted
+            const oldDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              oldDataViewId,
+              TEST_SPACE
+            );
+            expect(oldDataViewExists).to.be(false);
+
+            // Verify new v2 data view is created
+            const newDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              newDataViewId,
+              TEST_SPACE
+            );
+            expect(newDataViewExists).to.be(true);
+          },
+        });
+      });
+
+      it('Should migrate all old vulnerabilities data view versions when multiple exist', async () => {
+        const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-default`;
+
+        // Create multiple old data views to simulate upgrading from different versions
+        for (const oldVersion of CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS) {
+          const oldDataViewId = `${oldVersion}-default`;
+          await kibanaServer.savedObjects.create({
+            type: 'index-pattern',
+            id: oldDataViewId,
+            attributes: {
+              title: 'logs-*_old_vuln_pattern',
+              name: `Old Vulnerabilities Data View ${oldVersion}`,
+              timeFieldName: '@timestamp',
+              allowNoIndex: true,
+            },
+            overwrite: true,
+          });
+
+          // Verify old data view was created
+          expect(await getDataViewSafe(kibanaServer.savedObjects, oldDataViewId, 'default')).to.be(
+            true
+          );
+        }
+
+        // Navigate to vulnerabilities page to trigger migration
+        await findings.navigateToLatestVulnerabilitiesPage();
+
+        // Wait for migration to complete
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            // Verify all old data views are deleted
+            for (const oldVersion of CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS) {
+              const oldDataViewId = `${oldVersion}-default`;
+              const oldDataViewExists = await getDataViewSafe(
+                kibanaServer.savedObjects,
+                oldDataViewId,
+                'default'
+              );
+              expect(oldDataViewExists).to.be(false);
+            }
+
+            // Verify new v2 data view is created
+            const newDataViewExists = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              newDataViewId,
+              'default'
+            );
+            expect(newDataViewExists).to.be(true);
           },
         });
       });

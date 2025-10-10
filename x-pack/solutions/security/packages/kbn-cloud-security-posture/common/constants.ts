@@ -41,8 +41,22 @@ export const STATUS_API_CURRENT_VERSION = '1';
 /** The base path for all cloud security posture pages. */
 export const CLOUD_SECURITY_POSTURE_BASE_PATH = '/cloud_security_posture';
 
+// Array of old data view IDs for migration purposes
+// Add new deprecated versions here when updating to a new version
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS = [
+  'security_solution_cdr_latest_misconfigurations', // v1 - original version
+  // Add future deprecated versions here, e.g.:
+  // 'security_solution_cdr_latest_misconfigurations_v2', // v2 - when moving to v3
+];
+
+// Current data view ID - increment version when making breaking changes
 export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
-  'security_solution_cdr_latest_misconfigurations';
+  'security_solution_cdr_latest_misconfigurations_v2';
+
+// Backward compatibility - export V1 constant for existing code
+export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V1 =
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0];
+
 export const SECURITY_DEFAULT_DATA_VIEW_ID = 'security-solution-default';
 
 export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
@@ -51,6 +65,24 @@ export const CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN =
   'security_solution-*.vulnerability_latest';
 export const CDR_VULNERABILITIES_INDEX_PATTERN = `${CDR_LATEST_THIRD_PARTY_VULNERABILITIES_INDEX_PATTERN},${CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN}`;
 export const LATEST_VULNERABILITIES_RETENTION_POLICY = '3d';
+
+export const CDR_VULNERABILITIES_DATA_VIEW_NAME = 'Latest Cloud Security Vulnerabilities';
+
+// Array of old vulnerabilities data view IDs for migration purposes
+// Add new deprecated versions here when updating to a new version
+export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS = [
+  'security_solution_cdr_latest_vulnerabilities', // v1 - original version
+  // Add future deprecated versions here, e.g.:
+  // 'security_solution_cdr_latest_vulnerabilities_v2', // v2 - when moving to v3
+];
+
+// Current vulnerabilities data view ID - increment version when making breaking changes
+export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX =
+  'security_solution_cdr_latest_vulnerabilities_v2';
+
+// Backward compatibility - export V1 constant for existing code
+export const CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_V1 =
+  CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS[0];
 
 // meant as a temp workaround to get good enough posture view for 3rd party integrations, see https://github.com/elastic/security-team/issues/10683 and https://github.com/elastic/security-team/issues/10801
 export const CDR_EXTENDED_VULN_RETENTION_POLICY = '90d';

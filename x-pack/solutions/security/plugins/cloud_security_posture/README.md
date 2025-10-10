@@ -8,6 +8,44 @@ Cloud Posture automates the identification and remediation of risks across cloud
 
 Read [Kibana Contributing Guide](https://github.com/elastic/kibana/blob/main/CONTRIBUTING.md) for more details
 
+### Data View Versioning
+
+When making changes to CSP data views, follow these guidelines:
+
+#### When to Update Data View Version
+
+Create a new data view version when:
+
+1. **Index Pattern Changes**: Updating the underlying index pattern (e.g., from `logs-*` to `security_solution-*`)
+2. **Field Mapping Updates**: Making significant changes to field mappings that could affect existing queries
+3. **Breaking Changes**: Any change that would break existing saved searches, visualizations, or dashboards
+4. **Data Source Migration**: Moving from one data source to another (e.g., from native to CDR indices)
+
+#### How to Update Data View Version
+
+1. **Update Constants** in `common/constants.ts`:
+
+   - Keep the old constant with a `_v{n}` suffix for migration
+   - Update the main constant to the new version `_v{n+1}`
+
+   ```typescript
+   // Old version (keep for migration)
+   export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_V2 =
+     'security_solution_cdr_latest_misconfigurations_v2';
+
+   // New version
+   export const CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX =
+     'security_solution_cdr_latest_misconfigurations_v3';
+   ```
+
+2. **Update Migration Logic** in `server/saved_objects/data_views.ts`:
+   - Add migration for the old version in `setupCdrDataViews`
+3. **Add Tests** in `test/cloud_security_posture_functional/data_views/data_views.ts`:
+
+   - Test migration from old to new version
+   - Test fresh installations
+   - Test multi-space scenarios
+
 ## Testing
 
 For general guidelines, read [Kibana Testing Guide](https://www.elastic.co/guide/en/kibana/current/development-tests.html) for more details

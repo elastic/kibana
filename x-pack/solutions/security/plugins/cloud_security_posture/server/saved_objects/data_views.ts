@@ -13,13 +13,13 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   CDR_MISCONFIGURATIONS_INDEX_PATTERN,
   CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX,
+  CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
   CDR_MISCONFIGURATIONS_DATA_VIEW_NAME,
   CDR_VULNERABILITIES_INDEX_PATTERN,
-} from '@kbn/cloud-security-posture-common';
-import {
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX,
+  CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
   CDR_VULNERABILITIES_DATA_VIEW_NAME,
-} from '../../common/constants';
+} from '@kbn/cloud-security-posture-common';
 
 const DATA_VIEW_TIME_FIELD = '@timestamp';
 
@@ -48,6 +48,44 @@ const getCurrentSpaceId = (
   request: KibanaRequest
 ): string => {
   return spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
+};
+
+const deleteDataViewSafe = async (
+  soClient: ISavedObjectsRepository,
+  dataViewId: string,
+  namespace: string,
+  logger: Logger
+): Promise<void> => {
+  try {
+    await soClient.delete('index-pattern', dataViewId, { namespace });
+    logger.info(`Deleted old data view: ${dataViewId}`);
+  } catch (e) {
+    // Ignore if doesn't exist - expected behavior for new installations
+    return;
+  }
+};
+
+const migrateOldDataViews = async (
+  soClient: ISavedObjectsRepository,
+  spacesService: SpacesServiceStart | undefined,
+  request: KibanaRequest,
+  oldDataViewIdPrefixes: string[],
+  logger: Logger
+): Promise<void> => {
+  const currentSpaceId = getCurrentSpaceId(spacesService, request);
+
+  // Iterate through all old data view versions
+  for (const oldDataViewIdPrefix of oldDataViewIdPrefixes) {
+    const oldDataViewId = `${oldDataViewIdPrefix}-${currentSpaceId}`;
+
+    // Check if old data view exists in the current space before attempting deletion
+    const oldDataView = await getDataViewSafe(soClient, currentSpaceId, oldDataViewId);
+
+    if (oldDataView) {
+      logger.info(`Migrating data view from ${oldDataViewId} to new version`);
+      await deleteDataViewSafe(soClient, oldDataViewId, currentSpaceId, logger);
+    }
+  }
 };
 
 export const installDataView = async (
@@ -105,6 +143,27 @@ export const setupCdrDataViews = async (
   request: KibanaRequest,
   logger: Logger
 ) => {
+  // Migrate all old misconfigurations data view versions
+  // This ensures users upgrading from any old version get the latest data view
+  await migrateOldDataViews(
+    soClient,
+    spacesService,
+    request,
+    CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
+    logger
+  );
+
+  // Migrate all old vulnerabilities data view versions
+  // This ensures users upgrading from any old version get the latest data view
+  await migrateOldDataViews(
+    soClient,
+    spacesService,
+    request,
+    CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_OLD_VERSIONS,
+    logger
+  );
+
+  // Install the current misconfigurations data view
   await installDataView(
     esClient,
     soClient,
@@ -117,6 +176,7 @@ export const setupCdrDataViews = async (
     logger
   );
 
+  // Install the current vulnerabilities data view
   await installDataView(
     esClient,
     soClient,

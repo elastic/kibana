@@ -11,7 +11,7 @@ import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_
 import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
 import { EuiSpacer } from '@elastic/eui';
 import { VULNERABILITIES_PAGE } from './test_subjects';
-import { CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX } from '../../../common/constants';
+import { CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 import { NoVulnerabilitiesStates } from '../../components/no_vulnerabilities_states';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { LatestVulnerabilitiesContainer } from './latest_vulnerabilities_container';
