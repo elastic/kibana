@@ -19,7 +19,7 @@ import {
   getDashboardStateSchema,
 } from './schema';
 
-export function getServiceDefinition() {
+export function getServiceDefinition(): ServicesDefinition {
   return {
     get: {
       out: {
@@ -60,5 +60,5 @@ export function getServiceDefinition() {
         },
       },
     },
-  } as ServicesDefinition;
+  };
 }
