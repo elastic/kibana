@@ -82,7 +82,7 @@ const getCalloutText = ({
               : installFailedTooltip
           }
         >
-          <>{installedLabel}</>
+          <span tabIndex={0}>{installedLabel}</span>
         </EuiToolTip>
       ),
     };

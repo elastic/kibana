@@ -385,6 +385,9 @@ export interface DocLinks {
     createRoleMappingTemplates: string;
     createRollupJobsRequest: string;
     createApiKey: string;
+    createApiKeyMetadata: string;
+    createApiKeyRoleDescriptors: string;
+    createCrossClusterApiKey: string;
     createPipeline: string;
     createTransformRequest: string;
     cronExpressions: string;
@@ -562,6 +565,7 @@ export interface DocLinks {
     remoteESOoutputTroubleshooting: string;
     agentReleaseProcess: string;
     fipsIngest: string;
+    edotCollector: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -687,6 +691,7 @@ export interface DocLinks {
   readonly agentBuilder: {
     readonly agentBuilder: string;
     readonly getStarted: string;
+    readonly models: string;
     readonly chat: string;
     readonly agentBuilderAgents: string;
     readonly tools: string;
