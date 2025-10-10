@@ -383,7 +383,7 @@ export class SearchInterceptor {
         id = response.id;
 
         if (!isRunningResponse(response)) {
-          searchTracker?.complete();
+          searchTracker?.complete(response);
         }
       }),
       map((response) => {
@@ -415,7 +415,7 @@ export class SearchInterceptor {
             })
           );
         } else {
-          searchTracker?.error();
+          searchTracker?.error(e);
           cancel();
           return throwError(e);
         }

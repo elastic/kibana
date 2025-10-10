@@ -23,6 +23,7 @@ import type { SearchSessionSavedObject } from '../../types';
 import { ACTION } from '../../types';
 import { getPersistedSearchSessionSavedObjectAttributesMock } from '../../../mocks';
 import { columns } from '.';
+import { SearchSessionEBTManager } from '../../../ebt_manager';
 
 export default {
   title: 'components/SearchSessionsMgmtTable',
@@ -48,6 +49,7 @@ const Component = ({
   const sessionsClient = new SessionsClient({
     http: mockCoreSetup.http,
   });
+  const ebtManager = new SearchSessionEBTManager({ core: mockCoreSetup });
 
   const mockConfig = {
     defaultExpiration: moment.duration('7d'),
@@ -83,6 +85,8 @@ const Component = ({
         kibanaVersion="8.0.0"
         locators={mockShareStart.url.locators}
         searchUsageCollector={mockSearchUsageCollector}
+        from=""
+        searchSessionEBTManager={ebtManager}
         {...props}
       />
     </IntlProvider>
