@@ -36,6 +36,7 @@ export const ToolQuickActions = ({ tool }: ToolQuickActionsProps) => {
       component="span"
     >
       <EuiButtonIcon
+        data-test-subj="agentBuilderToolsRowEditButton"
         iconType="documentEdit"
         onClick={() => {
           editTool(tool.id);
@@ -43,6 +44,7 @@ export const ToolQuickActions = ({ tool }: ToolQuickActionsProps) => {
         aria-label={labels.tools.editToolButtonLabel}
       />
       <EuiButtonIcon
+        data-test-subj="agentBuilderToolsRowDeleteButton"
         iconType="trash"
         color="danger"
         onClick={() => {
