@@ -1,0 +1,25 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "server/**/*.ts",
+    "../../../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/logging",
+    "@kbn/core-http-server",
+    "@kbn/actions-plugin",
+    "@kbn/inference-plugin",
+    "@kbn/config-schema",
+    "@kbn/spaces-plugin",
+    "@kbn/security-plugin"
+  ]
+}
