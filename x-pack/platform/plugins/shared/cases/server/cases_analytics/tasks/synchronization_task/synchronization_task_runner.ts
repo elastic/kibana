@@ -60,12 +60,17 @@ export class SynchronizationTaskRunner implements CancellableTask {
 
   public async run() {
     if (!this.analyticsConfig.index.enabled) {
-      this.logDebug('Analytics index is disabled, skipping synchronization task.');
+      this.logger.debug(
+        `[synchronization-task-runner] Analytics index is disabled, skipping synchronization task.`,
+        {
+          tags: ['cai-synchronization', 'synchronization-task-runner'],
+        }
+      );
       return;
     }
 
     const esClient = await this.getESClient();
-    const runners = CAISyncTypes.map((syncType) => {
+    const subTasks = CAISyncTypes.map((syncType) => {
       const stateForSyncType = this.previousTaskState
         ? this.previousTaskState[syncType]
         : undefined;
@@ -84,7 +89,9 @@ export class SynchronizationTaskRunner implements CancellableTask {
       }).run();
     });
 
-    const results = await Promise.all(runners);
+    // We're not catching errors here so that sub task errors are bubbled up and handled by the task manager
+    const results = await Promise.all(subTasks);
+
     const newTaskState = results.reduce<Partial<SynchronizationTaskStateBySyncType>>(
       (acc, result) => {
         if (result?.syncType) {
@@ -102,12 +109,6 @@ export class SynchronizationTaskRunner implements CancellableTask {
         ...newTaskState,
       },
     };
-  }
-
-  public logDebug(message: string) {
-    this.logger.debug(`[synchronization-task-runner] ${message}`, {
-      tags: ['cai-synchronization', 'synchronization-task-runner'],
-    });
   }
 
   public async cancel() {}
