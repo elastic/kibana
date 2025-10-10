@@ -17,7 +17,6 @@ import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
 import { getSloHealthStateText } from '../../../lib/slo_health_helpers';
 import { getSLOTransformId, getSLOSummaryTransformId } from '../../../../common/constants';
 import { ExternalLinkDisplayText } from './external_link_display_text';
-import { SloHealthIssuesList } from '../../slos/components/health_callout/slo_health_issues_list';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
@@ -70,6 +69,11 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
   const missingRollup = health.rollup === 'missing';
   const missingSummary = health.summary === 'missing';
 
+  const unhealthyRollupContent = `${rollupTransformId} (unhealthy)`;
+  const unhealthySummaryContent = `${summaryTransformId} (unhealthy)`;
+  const missingRollupContent = `${rollupTransformId} (missing)`;
+  const missingSummaryContent = `${summaryTransformId} (missing)`;
+
   const count = [unhealthyRollup, unhealthySummary, missingRollup, missingSummary].filter(
     Boolean
   ).length;
@@ -95,13 +99,41 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
             values={{ count, stateText }}
           />
           <ul>
-            {health.rollup !== 'healthy' && !!rollupUrl && (
+            {health.rollup === 'unhealthy' && !!rollupUrl && (
               <li key={`${slo.id}-rollup-unhealthy`}>
-                <ExternalLinkDisplayText textSize="s" content={rollupTransformId} url={rollupUrl} />
+                <ExternalLinkDisplayText
+                  textSize="s"
+                  content={unhealthyRollupContent}
+                  url={rollupUrl}
+                  isMissing={false}
+                />
               </li>
             )}
-            {health.summary !== 'healthy' && !!summaryUrl && (
-              <ExternalLinkDisplayText textSize="s" content={summaryTransformId} url={summaryUrl} />
+            {health.summary === 'unhealthy' && !!summaryUrl && (
+              <ExternalLinkDisplayText
+                textSize="s"
+                content={unhealthySummaryContent}
+                url={summaryUrl}
+                isMissing={false}
+              />
+            )}
+            {health.rollup === 'missing' && !!rollupUrl && (
+              <li key={`${slo.id}-rollup-missing`}>
+                <ExternalLinkDisplayText
+                  textSize="s"
+                  content={missingRollupContent}
+                  url={rollupUrl}
+                  isMissing={true}
+                />
+              </li>
+            )}
+            {health.summary === 'missing' && !!summaryUrl && (
+              <ExternalLinkDisplayText
+                textSize="s"
+                content={missingSummaryContent}
+                url={summaryUrl}
+                isMissing={true}
+              />
             )}
           </ul>
         </EuiFlexItem>
