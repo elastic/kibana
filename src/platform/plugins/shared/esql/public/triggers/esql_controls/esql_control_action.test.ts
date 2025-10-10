@@ -40,6 +40,7 @@ describe('CreateESQLControlAction', () => {
     esqlVariables: [],
     onSaveControl: jest.fn(),
     onCancelControl: jest.fn(),
+    parentApi: searchMock,
   };
 
   beforeEach(() => {
