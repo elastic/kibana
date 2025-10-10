@@ -163,7 +163,6 @@ export const setupCdrDataViews = async (
     logger
   );
 
-  // Install the current misconfigurations data view
   await installDataView(
     esClient,
     soClient,
@@ -176,7 +175,6 @@ export const setupCdrDataViews = async (
     logger
   );
 
-  // Install the current vulnerabilities data view
   await installDataView(
     esClient,
     soClient,
