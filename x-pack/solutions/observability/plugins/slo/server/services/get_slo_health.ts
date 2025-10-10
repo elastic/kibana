@@ -55,6 +55,7 @@ export class GetSLOHealth {
       return {
         sloId: item.sloId,
         sloRevision: item.sloRevision,
+        sloInstanceId: item.sloInstanceId,
         sloName: item.sloName,
         state,
         health,
@@ -69,7 +70,14 @@ export class GetSLOHealth {
      */
     const mappedResults = Array.from(
       new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
-    );
+    ).map((item) => ({
+      sloId: item.sloId,
+      sloRevision: item.sloRevision,
+      sloInstanceId: item.sloInstanceId,
+      sloName: sloById[item.sloId]?.name ?? '',
+      state: item.state,
+      health: item.health,
+    }));
     return fetchSLOHealthResponseSchema.encode(mappedResults);
   }
 
