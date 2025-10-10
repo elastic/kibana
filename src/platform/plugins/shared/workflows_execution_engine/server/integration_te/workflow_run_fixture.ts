@@ -28,6 +28,7 @@ import {
   WorkflowExecutionRepositoryMock,
 } from './mocks';
 import { runWorkflow } from '../execution_functions/run_workflow';
+import { TaskManagerMock } from './mocks/task_manager_mock';
 
 export class WorkflowRunFixture {
   /** This prop is just to satisfy runWorkflow function params. Consider having real mock once needed. */
@@ -40,9 +41,7 @@ export class WorkflowRunFixture {
       } as IClusterClient,
     } as ElasticsearchServiceStart,
   } as CoreStart;
-  public readonly taskManagerMock = {
-    schedule: jest.fn() as any,
-  } as TaskManagerStartContract;
+  public readonly taskManagerMock = TaskManagerMock.create() as TaskManagerStartContract;
   public readonly loggerMock = {
     info: jest.fn(),
     warn: jest.fn(),

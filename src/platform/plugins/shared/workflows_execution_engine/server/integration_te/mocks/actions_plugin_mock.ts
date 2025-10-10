@@ -13,14 +13,29 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 
 export const FakeConnectors = {
   slack1: {
-    id: '57750ec9-e673-4f79-b0d8-20253d21402e',
-    actionTypeId: '.slack',
+    id: 'a1b2c3d4-e5f6-7890-ab12-cd34ef567890',
+    actionTypeId: 'slack',
     name: 'fake_slack_connector_1',
   },
+  slack_failing: {
+    id: 'b2c3d4e5-f6a7-8901-bc23-de45fa678901',
+    actionTypeId: 'slack',
+    name: 'fake_slack_failing_connector',
+  },
   slack2: {
-    id: '61150ec9-e673-4f79-c0d8-30253d21405e',
-    actionTypeId: '.slack',
+    id: 'c3d4e5f6-a7b8-9012-cd34-ef56ab789012',
+    actionTypeId: 'slack',
     name: 'fake_slack_connector_2',
+  },
+  slow_3sec_inference: {
+    id: 'd4e5f6a7-b8c9-0123-de45-fa67bc890123',
+    actionTypeId: 'inference',
+    name: 'slow_3sec_inference_connector',
+  },
+  slow_3sec_faling_inference: {
+    id: 'e5f6a7b8-c9d0-1234-ef56-ab78cd901234',
+    actionTypeId: 'inference',
+    name: 'slow_3sec_faling_inference_connector',
   },
 };
 
@@ -31,7 +46,7 @@ export class UnsecuredActionsClientMock implements IUnsecuredActionsClient {
   execute = jest.fn().mockImplementation((options) => this.returnMockedConnectorResult(options));
   bulkEnqueueExecution = jest.fn().mockResolvedValue(undefined);
 
-  private returnMockedConnectorResult({
+  private async returnMockedConnectorResult({
     id,
   }: {
     id: string;
@@ -41,12 +56,30 @@ export class UnsecuredActionsClientMock implements IUnsecuredActionsClient {
   }): Promise<ActionTypeExecutorResult<unknown>> {
     const fakeConnector = Object.values(FakeConnectors).find((c) => c.id === id);
 
-    if (fakeConnector) {
-      return Promise.resolve({
-        status: 'ok',
-        actionId: id,
-        data: { text: 'ok' },
-      });
+    switch (fakeConnector?.name) {
+      case FakeConnectors.slack1.name:
+      case FakeConnectors.slack2.name: {
+        return {
+          status: 'ok',
+          actionId: id,
+          data: { text: 'ok' },
+        };
+      }
+      case FakeConnectors.slack_failing.name: {
+        throw new Error('Bad Gateway (502)');
+      }
+      case FakeConnectors.slow_3sec_inference.name: {
+        await new Promise<void>((resolve) => setTimeout(() => resolve(), 3000));
+        return {
+          status: 'ok',
+          actionId: id,
+          data: [
+            {
+              result: 'Hello! How can I help you?',
+            },
+          ],
+        };
+      }
     }
 
     throw new Error(`Connector with id ${id} not found in mock`);

@@ -79,7 +79,7 @@ export class WorkflowsExecutionEnginePlugin
               const stepExecutionRepository = new StepExecutionRepository(esClient);
               const logsRepository = new LogsRepository(esClient, logger);
 
-              runWorkflow({
+              await runWorkflow({
                 workflowRunId,
                 spaceId,
                 workflowExecutionRepository,

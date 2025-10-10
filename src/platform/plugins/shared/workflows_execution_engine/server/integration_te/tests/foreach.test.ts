@@ -123,17 +123,6 @@ steps:
       expect(stepExecutions.length).toBe(outerArray.length);
     });
 
-    it('should correctly set scopeStack', async () => {
-      await workflowRunFixture.runWorkflow({
-        workflowYaml: buildYaml(),
-        inputs: { innerArray },
-      });
-      const stepExecutions = Array.from(
-        workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
-      ).filter((se) => se.stepId === 'innerForeachStep');
-      expect(stepExecutions.length).toBe(outerArray.length);
-    });
-
     it('should invoke connector with correct foreach context in innerForeachChildConnectorStep', async () => {
       await workflowRunFixture.runWorkflow({
         workflowYaml: buildYaml(),
