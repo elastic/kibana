@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 import { BehaviorSubject, distinctUntilChanged, type Observable } from 'rxjs';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, Toast } from '@kbn/core/public';
 import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
@@ -43,6 +43,7 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
   private isPolling = false;
   public connectorIdStorage: MigrationsStorage<string>;
   public traceOptionsStorage: MigrationsStorage<TraceOptions>;
+  public toasts: Toast[] = [];
 
   constructor(
     protected readonly core: CoreStart,
@@ -202,5 +203,14 @@ export abstract class SiemMigrationsServiceBase<T extends MigrationTaskStats> {
         await this.sleep(TASK_STATS_POLLING_SLEEP_SECONDS);
       }
     } while (pendingMigrationIds.length > 0);
+  }
+
+  public removeFinishedMigrationsNotification() {
+    if (this.toasts.length > 0) {
+      this.toasts.forEach((toast) => {
+        this.core.notifications.toasts.remove(toast);
+      });
+      this.toasts = [];
+    }
   }
 }
