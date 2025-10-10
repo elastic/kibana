@@ -20,14 +20,14 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import YAML from 'yaml';
 import type { EsWorkflowExecution, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { UnsecuredActionsClientMock } from './mocks/actions_plugin_mock';
 import {
   LogsRepositoryMock,
   StepExecutionRepositoryMock,
   WorkflowExecutionRepositoryMock,
 } from './mocks';
-import { runWorkflow } from '../execution_functions/run_workflow';
+import { runWorkflow } from '../server/execution_functions/run_workflow';
 import { TaskManagerMock } from './mocks/task_manager_mock';
 
 export class WorkflowRunFixture {

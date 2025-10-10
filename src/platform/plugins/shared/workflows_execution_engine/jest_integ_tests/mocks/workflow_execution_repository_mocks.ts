@@ -8,7 +8,7 @@
  */
 
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
+import type { WorkflowExecutionRepository } from '../../server/repositories/workflow_execution_repository';
 
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepository> {
   public workflowExecutions = new Map<string, EsWorkflowExecution>();

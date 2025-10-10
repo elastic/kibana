@@ -8,7 +8,7 @@
  */
 
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
+import type { StepExecutionRepository } from '../../server/repositories/step_execution_repository';
 
 export class StepExecutionRepositoryMock implements Required<StepExecutionRepository> {
   public stepExecutions = new Map<string, EsWorkflowStepExecution>();
