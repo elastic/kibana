@@ -21,4 +21,10 @@ export type {
   AggregateQuery,
   Query,
   SimplifiedFilter,
+  SimpleFilterCondition,
+  FilterGroup,
+  RawDSLFilter,
+  FilterOperator,
+  FilterValue,
+  RangeValue,
 } from './src/types';

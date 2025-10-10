@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { Writable } from '@kbn/utility-types';
+import type { RecursiveWritable, Writable } from '@kbn/utility-types';
 import type {
   timeRangeSchema,
   absoluteTimeRangeSchema,
@@ -16,7 +16,15 @@ import type {
 } from './time_range';
 import type { aggregateQuerySchema, querySchema } from './query';
 import type { filterSchema, filterMetaSchema } from './filter/stored_filter';
-import type { simplifiedFilterSchema } from './filter/simplified_filter';
+import type {
+  simplifiedFilterSchema,
+  simpleFilterConditionSchema,
+  filterGroupSchema,
+  rawDSLFilterSchema,
+  filterOperatorSchema,
+  filterValueSchema,
+  rangeValueSchema,
+} from './filter/simplified_filter';
 
 export type TimeRange = Writable<TypeOf<typeof timeRangeSchema>>;
 export type AbsoluteTimeRange = TypeOf<typeof absoluteTimeRangeSchema>;
@@ -25,10 +33,18 @@ export type RelativeTimeRange = TypeOf<typeof relativeTimeRangeSchema>;
 export type Query = Writable<TypeOf<typeof querySchema>>;
 export type AggregateQuery = Writable<TypeOf<typeof aggregateQuerySchema>>;
 
-export type Filter = Writable<TypeOf<typeof filterSchema>>;
+export type Filter = RecursiveWritable<TypeOf<typeof filterSchema>>;
 export type FilterMeta = Writable<TypeOf<typeof filterMetaSchema>>;
 
 /**
- * Simplified Filter Type for * as Code APIs
+ * Schema-inferred types for Simplified Filter API
+ *
+ * These types are inferred from validation schemas and provide runtime validation compatibility.
  */
 export type SimplifiedFilter = Writable<TypeOf<typeof simplifiedFilterSchema>>;
+export type SimpleFilterCondition = Writable<TypeOf<typeof simpleFilterConditionSchema>>;
+export type FilterGroup = Writable<TypeOf<typeof filterGroupSchema>>;
+export type RawDSLFilter = Writable<TypeOf<typeof rawDSLFilterSchema>>;
+export type FilterOperator = Writable<TypeOf<typeof filterOperatorSchema>>;
+export type FilterValue = Writable<TypeOf<typeof filterValueSchema>>;
+export type RangeValue = Writable<TypeOf<typeof rangeValueSchema>>;
