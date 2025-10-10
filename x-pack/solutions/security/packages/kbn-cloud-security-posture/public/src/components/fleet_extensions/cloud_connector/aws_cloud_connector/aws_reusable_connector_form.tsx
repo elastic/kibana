@@ -19,6 +19,8 @@ export const AWSReusableConnectorForm: React.FC<{
 }> = ({ credentials, setCredentials, isEditPage, cloudConnectorId }) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors();
 
+  console.log('AWSReusableConnectorForm cloudConnectors:', cloudConnectors);
+
   // Convert cloud connectors to combo box options (only standard properties for EuiComboBox)
   const comboBoxOptions: ComboBoxOption[] = cloudConnectors.map((connector) => ({
     label: connector.name,
