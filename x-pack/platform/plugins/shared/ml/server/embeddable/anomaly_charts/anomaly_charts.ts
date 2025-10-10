@@ -2,6 +2,7 @@ import { schema } from '@kbn/config-schema';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { serializedTitlesSchema } from '../schemas';
 import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from '../../../../../../packages/shared/ml/anomaly_utils';
+import { mlEntityFieldSchema } from '../../../../../../packages/shared/ml/anomaly_utils/schemas';
 
 export const severityThresholdSchema = schema.object({
   min: schema.number(),
@@ -18,14 +19,6 @@ export const mlEntityFieldOperationSchema = schema.oneOf([
   schema.literal(ML_ENTITY_FIELD_OPERATIONS.ADD),
   schema.literal(ML_ENTITY_FIELD_OPERATIONS.REMOVE),
 ]);
-
-export const mlEntityFieldSchema = schema.object({
-  fieldName: schema.string(),
-  fieldValue: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
-  fieldType: schema.maybe(mlEntityFieldTypeSchema),
-  operation: schema.maybe(mlEntityFieldOperationSchema),
-  cardinality: schema.maybe(schema.number()),
-});
 
 export const anomalyChartsEmbeddableRuntimeStateSchema = schema.object({
   jobIds: schema.arrayOf(schema.string()),
