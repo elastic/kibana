@@ -29,7 +29,6 @@ import type {
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
-import { uptimeRuleStateFieldMap } from '@kbn/uptime-plugin/common/rules/uptime_rule_state_field_map';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 import type { MonitorStatusActionGroup } from '../../common/constants/synthetics_alerts';
@@ -558,7 +557,6 @@ export const generateFilterDSL = async (
 
 export const syntheticsRuleTypeFieldMap = {
   ...syntheticsRuleFieldMap,
-  ...uptimeRuleStateFieldMap,
   ...legacyExperimentalFieldMap,
 };
 

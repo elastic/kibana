@@ -10,7 +10,6 @@ import {
   SLO_ID_FIELD,
   SLO_INSTANCE_ID_FIELD,
   SLO_REVISION_FIELD,
-  ALERT_STATE_ALERT_STATE,
 } from '../../../../common/field_names/slo';
 
 export const sloRuleFieldMap = {
@@ -30,11 +29,6 @@ export const sloRuleFieldMap = {
     required: false,
   },
   [SLO_DATA_VIEW_ID_FIELD]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [ALERT_STATE_ALERT_STATE]: {
     type: 'keyword',
     array: false,
     required: false,

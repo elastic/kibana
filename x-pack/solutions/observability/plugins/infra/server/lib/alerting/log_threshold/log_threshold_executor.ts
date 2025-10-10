@@ -85,7 +85,6 @@ import {
   buildFiltersFromCriteria,
   positiveComparators,
 } from '../../../../common/alerting/logs/log_threshold/query_helpers';
-import { ALERT_STATE_ALERT_STATE } from '../register_rule_types';
 
 export type LogThresholdActionGroups = ActionGroupIdsOf<typeof FIRED_ACTIONS>;
 export type LogThresholdRuleTypeState = RuleTypeState; // no specific state used
@@ -196,7 +195,6 @@ export const createLogThresholdExecutor =
             [ALERT_CONTEXT]: alertContext,
             [ALERT_GROUP]: groups,
             [ALERT_GROUPING]: grouping,
-            [ALERT_STATE_ALERT_STATE]: AlertStates.ALERT as unknown as string,
             ...flattenAdditionalContext(rootLevelContext),
             ...getEcsGroupsFromFlattenGrouping(flattenGrouping),
           };
