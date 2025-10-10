@@ -19,11 +19,13 @@ import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import { Flyout } from './flyout';
 import type { BackgroundSearchOpenedHandler } from '../types';
 import { FLYOUT_WIDTH } from './constants';
+import type { SearchSessionEBTManager } from '../../ebt_manager';
 
 export function openSearchSessionsFlyout({
   coreStart,
   kibanaVersion,
   usageCollector,
+  ebtManager,
   config,
   sessionsClient,
   share,
@@ -31,6 +33,7 @@ export function openSearchSessionsFlyout({
   coreStart: CoreStart;
   kibanaVersion: string;
   usageCollector: SearchUsageCollector;
+  ebtManager: SearchSessionEBTManager;
   config: SearchSessionsConfigSchema;
   sessionsClient: ISessionsClient;
   share: SharePluginStart;
@@ -60,6 +63,7 @@ export function openSearchSessionsFlyout({
               api={api}
               coreStart={coreStart}
               usageCollector={usageCollector}
+              ebtManager={ebtManager}
               config={config}
               kibanaVersion={kibanaVersion}
               locators={share.url.locators}

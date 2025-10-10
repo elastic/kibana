@@ -26,11 +26,13 @@ import { getStatusFilter } from './utils/get_status_filter';
 import type { SearchUsageCollector } from '../../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
 import { mapToUISession } from './utils/map_to_ui_session';
+import type { SearchSessionEBTManager } from '../../../ebt_manager/search_session_ebt_manager';
 
 interface Props {
   core: CoreStart;
   locators: LocatorsStart;
   api: SearchSessionsMgmtAPI;
+  searchSessionEBTManager: SearchSessionEBTManager;
   timezone: string;
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
@@ -48,6 +50,7 @@ interface Props {
     onActionComplete: OnActionComplete;
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
   }) => Array<EuiBasicTableColumn<UISession>>;
+  from: string;
 }
 
 export type GetColumnsFn = Props['getColumns'];
@@ -58,12 +61,14 @@ export function SearchSessionsMgmtTable({
   api,
   timezone,
   config,
+  searchSessionEBTManager,
   kibanaVersion,
   searchUsageCollector,
   hideRefreshButton = false,
   getColumns = getDefaultColumns,
   appId,
   onBackgroundSearchOpened,
+  from,
   ...props
 }: Props) {
   const [tableData, setTableData] = useState<UISession[]>([]);
@@ -96,6 +101,10 @@ export function SearchSessionsMgmtTable({
     250,
     [isLoading]
   );
+
+  useEffect(() => {
+    searchSessionEBTManager.trackBgsListView({ entryPoint: from });
+  }, [searchSessionEBTManager, from]);
 
   // refresh behavior
   const doRefresh = useCallback(async () => {
