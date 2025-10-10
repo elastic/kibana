@@ -17,7 +17,7 @@ import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import type { SearchUsageCollector } from '../../../collectors';
-import type { SearchSessionEBTManager } from '../../ebt_manager';
+import type { ISearchSessionEBTManager } from '../../ebt_manager';
 
 interface Props {
   documentation: AsyncSearchIntroDocumentation;
@@ -29,7 +29,7 @@ interface Props {
   kibanaVersion: string;
   share: SharePluginStart;
   searchUsageCollector: SearchUsageCollector;
-  searchSessionEBTManager: SearchSessionEBTManager;
+  searchSessionEBTManager: ISearchSessionEBTManager;
 }
 
 export function SearchSessionsMgmtMain({ documentation, share, ...tableProps }: Props) {

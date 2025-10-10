@@ -17,7 +17,7 @@ import { SEARCH_SESSIONS_MANAGEMENT_ID } from '../constants';
 import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import type { SearchSessionsConfigSchema } from '../../../../server/config';
-import type { SearchSessionEBTManager } from '../ebt_manager';
+import type { ISearchSessionEBTManager } from '../ebt_manager';
 
 export { openSearchSessionsFlyout } from './flyout/get_flyout';
 export type { BackgroundSearchOpenedHandler } from './types';
@@ -26,7 +26,7 @@ export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;
   searchUsageCollector: SearchUsageCollector;
   sessionsClient: ISessionsClient;
-  searchSessionEBTManager: SearchSessionEBTManager;
+  searchSessionEBTManager: ISearchSessionEBTManager;
 }
 
 export interface IManagementSectionsPluginsStart {
@@ -44,7 +44,7 @@ export interface AppDependencies {
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
   searchUsageCollector: SearchUsageCollector;
-  searchSessionEBTManager: SearchSessionEBTManager;
+  searchSessionEBTManager: ISearchSessionEBTManager;
 }
 
 export const APP = {

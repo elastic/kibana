@@ -44,7 +44,7 @@ import type { ISessionsClient } from './sessions_client';
 import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
-import type { SearchSessionEBTManager } from './ebt_manager';
+import type { ISearchSessionEBTManager } from './ebt_manager';
 
 /**
  * Polling interval for keeping completed searches alive
@@ -196,7 +196,7 @@ export class SessionService {
   private hasAccessToSearchSessions: boolean = false;
 
   private toastService?: ToastService;
-  private searchSessionEBTManager?: SearchSessionEBTManager;
+  private searchSessionEBTManager?: ISearchSessionEBTManager;
 
   private sessionSnapshots: LRUCache<string, SessionSnapshot>;
   private logger: Logger;
@@ -204,7 +204,7 @@ export class SessionService {
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
     getStartServices: StartServicesAccessor,
-    searchSessionEBTManager: SearchSessionEBTManager,
+    searchSessionEBTManager: ISearchSessionEBTManager,
     private readonly sessionsClient: ISessionsClient,
     private readonly nowProvider: NowProviderInternalContract,
     private readonly usageCollector?: SearchUsageCollector,

@@ -69,7 +69,7 @@ import { createUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
-import type { ISessionsClient, ISessionService } from './session';
+import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
 import {
   SessionsClient,
   SessionService,
@@ -104,7 +104,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private usageCollector?: SearchUsageCollector;
   private sessionService!: ISessionService;
   private sessionsClient!: ISessionsClient;
-  private searchSessionEBTManager!: SearchSessionEBTManager;
+  private searchSessionEBTManager!: ISearchSessionEBTManager;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 

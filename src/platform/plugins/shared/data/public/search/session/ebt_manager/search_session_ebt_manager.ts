@@ -10,6 +10,7 @@
 import type { CoreSetup } from '@kbn/core/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { PublicContract } from '@kbn/utility-types';
 import type { SearchSessionSavedObject } from '../sessions_client';
 import {
   BG_SEARCH_CANCEL,
@@ -19,6 +20,8 @@ import {
   BG_SEARCH_OPEN,
   BG_SEARCH_START,
 } from './constants';
+
+export type ISearchSessionEBTManager = PublicContract<SearchSessionEBTManager>;
 
 export class SearchSessionEBTManager {
   private reportEventCore: CoreSetup['analytics']['reportEvent'];

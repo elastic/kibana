@@ -26,13 +26,13 @@ import { getStatusFilter } from './utils/get_status_filter';
 import type { SearchUsageCollector } from '../../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../../server/config';
 import { mapToUISession } from './utils/map_to_ui_session';
-import type { SearchSessionEBTManager } from '../../../ebt_manager/search_session_ebt_manager';
+import type { ISearchSessionEBTManager } from '../../../ebt_manager';
 
 interface Props {
   core: CoreStart;
   locators: LocatorsStart;
   api: SearchSessionsMgmtAPI;
-  searchSessionEBTManager: SearchSessionEBTManager;
+  searchSessionEBTManager: ISearchSessionEBTManager;
   timezone: string;
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;

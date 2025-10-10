@@ -127,7 +127,7 @@ export const createConnectedSearchSessionIndicator = ({
 
     const onCancel = useCallback(() => {
       usageCollector?.trackSessionCancelled();
-      sessionService.cancel();
+      sessionService.cancel({ source: 'user' });
     }, []);
 
     const onViewSearchSessions = useCallback(() => {
