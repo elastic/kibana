@@ -91,7 +91,7 @@ Object {
         "field": "attributes.not_nested",
         "if": "
   try {
-  if (!((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == \\"1\\")) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == \\"2\\"))))) {
+  if (!((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == 1)) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == 2))))) {
     return true;
   }
   return false;
@@ -192,7 +192,7 @@ Object {
         "field": "attributes.prod_flag",
         "if": "
   try {
-  if (($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == \\"1\\")) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == \\"2\\"))) {
+  if (($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == 1)) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == 2))) {
     return true;
   }
   return false;
@@ -208,7 +208,7 @@ Object {
         "field": "attributes.department_flag",
         "if": "
   try {
-  if ((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == \\"1\\")) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == \\"2\\"))) && ($('attributes.department', null) !== null && (($('attributes.department', null) instanceof Number && $('attributes.department', null).toString() == \\"legal\\") || $('attributes.department', null) == \\"legal\\"))) {
+  if ((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == 1)) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == 2))) && ($('attributes.department', null) !== null && (($('attributes.department', null) instanceof Number && $('attributes.department', null).toString() == \\"legal\\") || $('attributes.department', null) == \\"legal\\"))) {
     return true;
   }
   return false;
@@ -224,7 +224,7 @@ Object {
         "field": "attributes.test",
         "if": "
   try {
-  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\")) || (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"inactive\\") || $('attributes.status', null) == \\"inactive\\")) && ($('attributes.read_only', null) !== null && (($('attributes.read_only', null) instanceof Number && $('attributes.read_only', null).toString() == \\"false\\") || $('attributes.read_only', null) == \\"false\\")))) {
+  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\")) || (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"inactive\\") || $('attributes.status', null) == \\"inactive\\")) && ($('attributes.read_only', null) !== null && (($('attributes.read_only', null) instanceof Number && $('attributes.read_only', null).toString() == \\"false\\") || $('attributes.read_only', null) == false)))) {
     return true;
   }
   return false;
