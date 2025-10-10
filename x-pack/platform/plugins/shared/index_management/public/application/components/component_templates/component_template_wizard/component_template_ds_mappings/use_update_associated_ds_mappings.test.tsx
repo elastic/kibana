@@ -9,11 +9,11 @@ import { renderHook } from '@testing-library/react';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 
-import { useUpdateAssociatedDatastreamsMappings } from './use_update_associated_datastreams_mappings';
+import { useUpdateAssociatedDsMappings } from './use_update_associated_ds_mappings';
 
 jest.mock('../../component_templates_context');
 
-describe('useUpdateAssociatedDatastreamsMappings', () => {
+describe('useUpdateAssociatedDsMappings', () => {
   beforeEach(() => {
     jest.mocked(useComponentTemplatesContext).mockReturnValue({
       api: {
@@ -32,11 +32,11 @@ describe('useUpdateAssociatedDatastreamsMappings', () => {
 
     const {
       result: {
-        current: { updateAssociatedDatastreamsMappings },
+        current: { updateAssociatedDsMappings },
       },
-    } = renderHook(() => useUpdateAssociatedDatastreamsMappings());
+    } = renderHook(() => useUpdateAssociatedDsMappings());
 
-    await updateAssociatedDatastreamsMappings('logs-test.data@custom');
+    await updateAssociatedDsMappings('logs-test.data@custom');
   });
 
   it('should try to update mappings if there is impacted data_streams', async () => {
@@ -58,11 +58,11 @@ describe('useUpdateAssociatedDatastreamsMappings', () => {
 
     const {
       result: {
-        current: { updateAssociatedDatastreamsMappings },
+        current: { updateAssociatedDsMappings },
       },
-    } = renderHook(() => useUpdateAssociatedDatastreamsMappings());
+    } = renderHook(() => useUpdateAssociatedDsMappings());
 
-    await updateAssociatedDatastreamsMappings('logs-test.data@custom');
+    await updateAssociatedDsMappings('logs-test.data@custom');
 
     expect(api.postDataStreamMappingsFromTemplate).toBeCalledTimes(1);
     expect(startServices.overlays.openModal).not.toBeCalled();
@@ -87,11 +87,11 @@ describe('useUpdateAssociatedDatastreamsMappings', () => {
 
     const {
       result: {
-        current: { updateAssociatedDatastreamsMappings },
+        current: { updateAssociatedDsMappings },
       },
-    } = renderHook(() => useUpdateAssociatedDatastreamsMappings());
+    } = renderHook(() => useUpdateAssociatedDsMappings());
 
-    await updateAssociatedDatastreamsMappings('logs-test.data@custom');
+    await updateAssociatedDsMappings('logs-test.data@custom');
     expect(startServices.overlays.openModal).toBeCalled();
   });
 });

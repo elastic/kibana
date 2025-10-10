@@ -18,7 +18,7 @@ import { ComponentTemplateForm } from '../component_template_form';
 import { useRedirectPath } from '../../../../hooks/redirect_path';
 
 import { useStepFromQueryString } from '../use_step_from_query_string';
-import { useUpdateAssociatedDatastreamsMappings } from '../component_template_datastreams_mappings/use_update_associated_datastreams_mappings';
+import { useUpdateAssociatedDsMappings } from '../component_template_ds_mappings/use_update_associated_ds_mappings';
 
 interface MatchParams {
   name: string;
@@ -50,7 +50,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
     [refIndexTemplate]
   );
 
-  const { updateAssociatedDatastreamsMappings } = useUpdateAssociatedDatastreamsMappings();
+  const { updateAssociatedDsMappings } = useUpdateAssociatedDsMappings();
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.componentTemplateEdit);
@@ -73,7 +73,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
     // the component template is referenced by a managed package index template. Each data stream
     // updates its mappings from its index template. If updating fails, a modal prompts to rollover.
     if (updatedComponentTemplate.name.endsWith('@custom') || canRollover) {
-      await updateAssociatedDatastreamsMappings(updatedComponentTemplate.name);
+      await updateAssociatedDsMappings(updatedComponentTemplate.name);
     }
 
     redirectTo({
@@ -133,6 +133,7 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       {componentTemplate?.deprecated && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.componentTemplateEdit.deprecatedTemplateWarningTitle"

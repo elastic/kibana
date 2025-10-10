@@ -9,11 +9,11 @@ import React, { useCallback } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
-import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover_modal';
+import { MappingsDsRolloverModal } from './mappings_ds_rollover_modal';
 
 export const test = {};
 
-export function useUpdateAssociatedDatastreamsMappings() {
+export function useUpdateAssociatedDsMappings() {
   const { api, startServices } = useComponentTemplatesContext();
 
   /**
@@ -22,7 +22,7 @@ export function useUpdateAssociatedDatastreamsMappings() {
    * If mappings cannot be updated due to incompatible changes, a modal is shown to
    * propose rolling over the data streams.
    */
-  const updateAssociatedDatastreamsMappings = useCallback(
+  const updateAssociatedDsMappings = useCallback(
     async (componentTemplateName: string) => {
       const { data: dataStreamResponse } = await api.getComponentTemplateDatastreams(
         componentTemplateName
@@ -47,7 +47,7 @@ export function useUpdateAssociatedDatastreamsMappings() {
         const { overlays, ...mountServices } = startServices;
         const ref = overlays.openModal(
           toMountPoint(
-            <MappingsDatastreamRolloverModal
+            <MappingsDsRolloverModal
               componentTemplatename={componentTemplateName}
               dataStreams={dataStreamsToRollover}
               api={api}
@@ -66,6 +66,6 @@ export function useUpdateAssociatedDatastreamsMappings() {
   );
 
   return {
-    updateAssociatedDatastreamsMappings,
+    updateAssociatedDsMappings,
   };
 }
