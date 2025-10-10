@@ -34,7 +34,16 @@ URL
 :   The request URL. If you are using the [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings) setting, make sure the hostname is added to the allowed hosts.
 
 Authentication
-:   The authentication type: none, basic, or SSL. If you choose basic authentication, you must provide a user name and password. If you choose SSL authentication, you must provide SSL server certificate authentication data in a CRT and key file format or a PFX file format. You can also optionally provide a passphrase if the files are password-protected.
+:   The authentication type: none, basic, SSL, or {applies_to}`stack: ga 9.2` Oauth 2.0 authentication. 
+
+    Basic
+    :   If you choose basic authentication, you must provide a user name and password.
+
+    SSL
+    :   If you choose SSL authentication, you must provide SSL server certificate authentication data in a CRT and key file format or a PFX file format. You can also optionally provide a passphrase if the files are password-protected.
+
+    Oauth 2.0 authentication {applies_to}`stack: ga 9.2` 
+    :   If you choose Oauth 2.0 authentication, you must provide an access token URL, client ID, and client secret. The scope of the authentication is optional. Specifying additional fields is also optional. In the additional fields text box, specify any additonal fields that are needed for authentication. 
 
 HTTP headers
 :   A set of key-value pairs sent as headers with the request. For example, set `Content-Type` to the appropriate media type for your requests.
