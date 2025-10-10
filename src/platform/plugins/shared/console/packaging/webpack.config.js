@@ -10,7 +10,7 @@
 require('@kbn/babel-register').install();
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
-// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 
 const KIBANA_ROOT = path.resolve(__dirname, '../../../../../..');
@@ -89,7 +89,7 @@ module.exports = [
             loader: 'babel-loader',
             options: {
               babelrc: false,
-              envName: 'production',
+              envName: process.env.NODE_ENV || 'development',
               presets: [BABEL_PRESET],
             },
           },
@@ -206,7 +206,7 @@ module.exports = [
       new CleanWebpackPlugin({
         cleanOnceBeforeBuildPatterns: [path.resolve(BUILD_OUTPUT_DIR, 'react/**/*')],
       }),
-      // new BundleAnalyzerPlugin(),
+      new BundleAnalyzerPlugin(),
     ],
   },
 ];
