@@ -34,7 +34,7 @@ export interface TraceWaterfallContextProps {
   showLegend: boolean;
   serviceName?: string;
   showFullTrace: boolean;
-  toggleFullTrace: () => void;
+  toggleFullTrace?: () => void;
 }
 
 export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
@@ -51,7 +51,6 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   showLegend: false,
   serviceName: '',
   showFullTrace: false,
-  toggleFullTrace: () => {},
 });
 
 export type OnNodeClick = (id: string) => void;
@@ -75,7 +74,7 @@ interface Props {
   showLegend: boolean;
   serviceName?: string;
   showFullTrace: boolean;
-  toggleFullTrace: () => void;
+  toggleFullTrace?: () => void;
 }
 
 export function TraceWaterfallContextProvider({

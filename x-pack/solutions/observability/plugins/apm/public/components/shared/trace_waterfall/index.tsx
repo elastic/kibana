@@ -53,7 +53,13 @@ export function TraceWaterfall({
   showLegend = false,
   serviceName,
 }: Props) {
-  const [showFullTrace, { toggle }] = useBoolean(false);
+  const isFullTrace = useMemo(
+    () => traceItems.every((item) => item.serviceName === serviceName),
+    [traceItems, serviceName]
+  );
+  const [showFullTrace, { toggle }] = useBoolean(isFullTrace);
+
+  const toggleFullTrace = useMemo(() => (!isFullTrace ? toggle : undefined), [isFullTrace, toggle]);
 
   return (
     <TraceWaterfallContextProvider
@@ -68,7 +74,7 @@ export function TraceWaterfall({
       showLegend={showLegend}
       serviceName={serviceName}
       showFullTrace={showFullTrace}
-      toggleFullTrace={toggle}
+      toggleFullTrace={toggleFullTrace}
     >
       <TraceWarning>
         <TraceWaterfallComponent />
@@ -100,7 +106,7 @@ function TraceWaterfallComponent() {
               <WaterfallLegends serviceName={serviceName} legends={legends} type={colorBy} />
             </EuiFlexItem>
           )}
-          {serviceName && (
+          {serviceName && toggleFullTrace && (
             <EuiFlexItem grow={0}>
               <EuiSwitch
                 label={FULL_TRACE_TOGGLE}
