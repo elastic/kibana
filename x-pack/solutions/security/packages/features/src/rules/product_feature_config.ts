@@ -25,11 +25,7 @@ export const rulesDefaultProductFeaturesConfig: RulesProductFeaturesConfig = {
     privileges: {
       all: {
         ui: ['detections'],
-        api: [
-          'cloud-security-posture-all',
-          'cloud-security-posture-read',
-          'bulkGetUserProfiles',
-        ],
+        api: ['cloud-security-posture-all', 'cloud-security-posture-read', 'bulkGetUserProfiles'],
       },
       read: {
         ui: ['detections'],
@@ -37,4 +33,4 @@ export const rulesDefaultProductFeaturesConfig: RulesProductFeaturesConfig = {
       },
     },
   },
-}
+};

@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RULES_UI_DETECTIONS_PRIVILEGE, RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE } from '@kbn/security-solution-features/constants';
+import {
+  RULES_UI_DETECTIONS_PRIVILEGE,
+  RULES_UI_EXTERNAL_DETECTIONS_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import type { OnboardingConfigAvailabilityProps } from '../../types';
 import * as i18n from './translations';
 

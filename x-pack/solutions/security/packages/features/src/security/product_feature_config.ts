@@ -26,10 +26,7 @@ export const securityDefaultProductFeaturesConfig: SecurityProductFeaturesConfig
     privileges: {
       all: {
         ui: ['detections'],
-        api: [
-          'cloud-security-posture-all',
-          'cloud-security-posture-read',
-        ],
+        api: ['cloud-security-posture-all', 'cloud-security-posture-read'],
       },
       read: {
         ui: ['detections'],
