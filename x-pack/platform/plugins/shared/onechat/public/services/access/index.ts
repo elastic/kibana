@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const EQL_QUERY_BAR_LABEL = i18n.translate(
-  'xpack.securitySolution.timeline.EqlQueryBarLabel',
-  {
-    defaultMessage: 'EQL query',
-  }
-);
+export { AgentBuilderAccessChecker } from './access';
