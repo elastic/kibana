@@ -66,10 +66,10 @@ export class LogsRepository {
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
-    await this.esClient.bulk({
-      index: this.indexName,
-      body: logEvents,
+    await this.esClient?.bulk({
       refresh: 'wait_for',
+      index: this.indexName,
+      body: logEvents.flatMap((logEvent) => [{ create: {} }, { doc: logEvent }]),
     });
   }
 

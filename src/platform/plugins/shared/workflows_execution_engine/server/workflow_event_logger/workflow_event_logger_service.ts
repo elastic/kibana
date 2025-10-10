@@ -99,19 +99,6 @@ export class WorkflowEventLoggerService {
     });
   }
 
-  // public async searchLogs(query: any): Promise<LogSearchResult> {
-  //   if (!this.initialized) {
-  //     throw new Error('WorkflowEventLoggerService not initialized. Call initialize() first.');
-  //   }
-
-  //   try {
-  //     return awa
-  //   } catch (error) {
-  //     this.logger.error('Failed to search workflow logs', error);
-  //     throw error;
-  //   }
-  // }
-
   public getExecutionLogs(executionId: string): Promise<LogSearchResult> {
     return this.logsRepository.getExecutionLogs(executionId);
   }

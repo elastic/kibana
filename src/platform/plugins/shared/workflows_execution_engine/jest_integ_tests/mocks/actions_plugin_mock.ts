@@ -40,7 +40,7 @@ export const FakeConnectors = {
   slow_3sec_failing_inference: {
     id: 'e5f6a7b8-c9d0-1234-ef56-ab78cd901234',
     actionTypeId: 'inference',
-    name: 'slow_3sec_faling_inference_connector',
+    name: 'slow_3sec_failing_inference_connector',
   },
 };
 
