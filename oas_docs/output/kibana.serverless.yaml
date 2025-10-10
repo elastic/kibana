@@ -76996,24 +76996,21 @@ components:
                 type: object
                 properties:
                   content:
-                    allOf:
-                      - type: object
-                        properties:
-                          code:
-                            type: string
-                      - oneOf:
-                          - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputEndpoint'
-                          - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne'
                     discriminator:
                       mapping:
                         endpoint: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputEndpoint'
                         sentinel_one: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne'
                       propertyName: agentType
+                    oneOf:
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputEndpoint'
+                      - $ref: '#/components/schemas/Security_Endpoint_Management_API_RunningProcessesOutputSentinelOne'
               type: object
     Security_Endpoint_Management_API_RunningProcessesOutputEndpoint:
       description: Processes output for `agentType` of `endpoint`
       type: object
       properties:
+        code:
+          type: string
         entries:
           items:
             type: object
@@ -77032,6 +77029,9 @@ components:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_DownloadUri'
         - description: Processes output for `agentType` of `sentinel_one`
           type: object
+          properties:
+            code:
+              type: string
     Security_Endpoint_Management_API_Runscript:
       allOf:
         - $ref: '#/components/schemas/Security_Endpoint_Management_API_ResponseActionDetails'
