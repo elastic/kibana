@@ -442,5 +442,102 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsOnlyRole);
       await samlAuth.deleteCustomRole();
     });
+
+    it('should read the param key with custom role with ALL permissions', async () => {
+      const syntheticsAllRole = {
+        elasticsearch: {
+          indices: [
+            {
+              names: ['*'],
+              privileges: ['all'],
+            },
+          ],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: ['*'],
+            feature: {
+              uptime: ['all'],
+            },
+          },
+        ],
+      };
+
+      await samlAuth.setCustomRole(syntheticsAllRole);
+      const syntheticsAllRoleAuth = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+
+      // Create a param first as admin
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(adminRoleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(testParam)
+        .expect(200);
+
+      // Read params as user with ALL permissions
+      const getResponse = await supertest
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsAllRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      expect(getResponse.body[0].key).eql(testParam.key);
+      expect(getResponse.body[0].value).eql(undefined);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsAllRoleAuth);
+      await samlAuth.deleteCustomRole();
+    });
+
+    it('should add param keys with custom role with ALL permissions', async () => {
+      const syntheticsAllRole = {
+        elasticsearch: {
+          indices: [
+            {
+              names: ['*'],
+              privileges: ['all'],
+            },
+          ],
+        },
+        kibana: [
+          {
+            base: [],
+            spaces: ['*'],
+            feature: {
+              uptime: ['all'],
+            },
+          },
+        ],
+      };
+
+      await samlAuth.setCustomRole(syntheticsAllRole);
+      const syntheticsAllRoleAuth = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+
+      const newParam = {
+        key: 'testAllRole',
+        value: 'testAllRoleValue',
+      };
+
+      // Add a param as user with ALL permissions
+      await supertest
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsAllRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(newParam)
+        .expect(200);
+
+      // Verify the param was created
+      const getResponse = await supertest
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set(syntheticsAllRoleAuth.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .expect(200);
+
+      const createdParam = getResponse.body.find((param: any) => param.key === newParam.key);
+      expect(createdParam).to.not.be(undefined);
+      expect(createdParam.key).eql(newParam.key);
+      expect(createdParam.value).eql(undefined);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(syntheticsAllRoleAuth);
+      await samlAuth.deleteCustomRole();
+    });
   });
 }
