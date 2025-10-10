@@ -180,12 +180,12 @@ export const MetricsGrid = ({
             const { rowIndex, colIndex } = getRowColFromIndex(index);
             const isFocused =
               focusedCell.rowIndex === rowIndex && focusedCell.colIndex === colIndex;
-            const chartId = `chart-${key}`;
 
             return (
-              <EuiFlexItem key={key}>
+              // Use the index as a key to prevent the charts from unmounting
+              <EuiFlexItem key={index}>
                 <div
-                  ref={(element) => setChartRef(chartId, element)}
+                  ref={(element) => setChartRef(key, element)}
                   role="gridcell"
                   aria-rowindex={rowIndex + 1}
                   aria-colindex={colIndex + 1}
@@ -203,7 +203,7 @@ export const MetricsGrid = ({
                   }}
                 >
                   <Chart
-                    chartId={chartId}
+                    chartId={key}
                     metric={metric}
                     size={chartSize}
                     color={colorPalette[index % colorPalette.length]}

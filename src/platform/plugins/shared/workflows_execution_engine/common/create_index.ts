@@ -14,7 +14,7 @@ interface CreateIndexOptions {
   esClient: ElasticsearchClient;
   indexName: string;
   mappings: MappingTypeMapping;
-  logger: Logger;
+  logger?: Logger;
 }
 
 export const createIndexWithMappings = async ({
@@ -30,11 +30,11 @@ export const createIndexWithMappings = async ({
     });
 
     if (indexExists) {
-      logger.debug(`Index ${indexName} already exists`);
+      logger?.debug(`Index ${indexName} already exists`);
       return;
     }
 
-    logger.debug(`Creating index ${indexName} with mappings`);
+    logger?.debug(`Creating index ${indexName} with mappings`);
 
     // Create the index with proper mappings
     await esClient.indices.create({
@@ -42,15 +42,15 @@ export const createIndexWithMappings = async ({
       mappings,
     });
 
-    logger.info(`Successfully created index ${indexName}`);
+    logger?.info(`Successfully created index ${indexName}`);
   } catch (error) {
     // If the index already exists, we can ignore the error
     if (error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
-      logger.debug(`Index ${indexName} already exists (created by another process)`);
+      logger?.debug(`Index ${indexName} already exists (created by another process)`);
       return;
     }
 
-    logger.error(`Failed to create index ${indexName}: ${error}`);
+    logger?.error(`Failed to create index ${indexName}: ${error}`);
     throw error;
   }
 };
@@ -81,14 +81,14 @@ export const createOrUpdateIndex = async ({
           index: indexName,
           ...mappings,
         });
-        logger.debug(`Updated mappings for existing index ${indexName}`);
+        logger?.debug(`Updated mappings for existing index ${indexName}`);
       } catch (mappingError) {
-        logger.warn(`Failed to update mappings for index ${indexName}: ${mappingError.message}`);
+        logger?.warn(`Failed to update mappings for index ${indexName}: ${mappingError.message}`);
         // Continue - the index exists and can be used
       }
     }
   } catch (error) {
-    logger.error(`Failed to create or update index ${indexName}: ${error}`);
+    logger?.error(`Failed to create or update index ${indexName}: ${error}`);
     throw error;
   }
 };
