@@ -95,8 +95,6 @@
     "@kbn/tooling-log",
     "@kbn/core-elasticsearch-server-utils",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/inference-common",
-    "@kbn/inference-plugin",
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/core-notifications-browser-mocks",
