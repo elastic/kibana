@@ -402,6 +402,8 @@ components:
       type: object
       description: Processes output for `agentType` of `endpoint`
       properties:
+        code:
+          type: string
         entries:
           type: array
           items:
@@ -421,6 +423,9 @@ components:
         - $ref: '#/components/schemas/DownloadUri'
         - type: object
           description: Processes output for `agentType` of `sentinel_one`
+          properties:
+            code:
+              type: string
 
     RunningProcesses:
       allOf:
@@ -433,14 +438,9 @@ components:
                 type: object
                 properties:
                   content:
-                    allOf:
-                      - type: object
-                        properties:
-                          code:
-                            type: string
-                      - oneOf:
-                          - $ref: '#/components/schemas/RunningProcessesOutputEndpoint'
-                          - $ref: '#/components/schemas/RunningProcessesOutputSentinelOne'
+                    oneOf:
+                      - $ref: '#/components/schemas/RunningProcessesOutputEndpoint'
+                      - $ref: '#/components/schemas/RunningProcessesOutputSentinelOne'
                     discriminator:
                       propertyName: agentType
                       mapping:
