@@ -52,13 +52,13 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
    * Alignment of the label and value for the legacy metric.
    * For example, align the label to the bottom and the value to the right.
    */
-  alignment: schema.object({
+  alignments: schema.object({
     /**
      * Alignment for label. Possible values:
      * - 'top': Align label to the top of the value (default)
      * - 'bottom': Align label to the bottom of the value
      */
-    label: verticalAlignmentSchema({ defaultValue: 'top' }),
+    labels: verticalAlignmentSchema({ defaultValue: 'top' }),
     /**
      * Alignment for value. Possible values:
      * - 'left': Align value to the left (default)
@@ -68,19 +68,13 @@ const legacyMetricStateMetricOptionsSchema = schema.object({
     value: horizontalAlignmentSchema({ defaultValue: 'left' }),
   }),
   /**
+   * Where to apply the color (background or value)
+   */
+  apply_color_to: schema.maybe(applyColorToSchema),
+  /**
    * Color configuration
    */
-  color: schema.maybe(
-    schema.allOf([
-      schema.object({
-        /**
-         * Where to apply the color (background or value)
-         */
-        apply_color_to: applyColorToSchema,
-      }),
-      colorByValueSchema,
-    ])
-  ),
+  color: schema.maybe(colorByValueSchema),
 });
 
 export const legacyMetricStateSchemaNoESQL = schema.object({

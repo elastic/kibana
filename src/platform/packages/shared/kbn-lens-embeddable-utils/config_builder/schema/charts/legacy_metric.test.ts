@@ -37,10 +37,11 @@ describe('Legacy Metric Schema', () => {
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated.metric.size).toBe('m');
-      expect(validated.metric.alignment).toEqual({
-        label: 'top',
+      expect(validated.metric.alignments).toEqual({
+        labels: 'top',
         value: 'left',
       });
+      expect(validated.metric.apply_color_to).toBeUndefined();
       expect(validated.metric.color).toBeUndefined();
     });
 
@@ -52,8 +53,8 @@ describe('Legacy Metric Schema', () => {
           field: 'test_field',
           size: 's',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-          alignment: {
-            label: 'bottom',
+          alignments: {
+            labels: 'bottom',
             value: 'right',
           },
         },
@@ -69,10 +70,10 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'average',
           field: 'temperature',
-          alignment: { label: 'top', value: 'left' },
+          alignments: { labels: 'top', value: 'left' },
           size: 'l',
+          apply_color_to: 'value',
           color: {
-            apply_color_to: 'value',
             type: 'dynamic',
             min: 0,
             max: 100,
@@ -108,8 +109,8 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'count',
           field: 'test_field',
-          alignment: {
-            label: 'invalid',
+          alignments: {
+            labels: 'invalid',
           },
         },
       };
@@ -136,8 +137,8 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'sum',
           field: 'sales',
+          apply_color_to: 'invalid',
           color: {
-            apply_color_to: 'invalid',
             type: 'dynamic',
             min: 0,
             max: 100,
@@ -165,12 +166,12 @@ describe('Legacy Metric Schema', () => {
           field: 'sales',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           size: 'xl',
-          alignment: {
-            label: 'bottom',
+          alignments: {
+            labels: 'bottom',
             value: 'right',
           },
+          apply_color_to: 'background',
           color: {
-            apply_color_to: 'background',
             type: 'dynamic',
             min: 0,
             max: 1000,
@@ -201,8 +202,8 @@ describe('Legacy Metric Schema', () => {
           operation: 'value',
           column: 'unique_count',
           size: 'xxl',
-          alignment: {
-            label: 'top',
+          alignments: {
+            labels: 'top',
             value: 'center',
           },
         },
