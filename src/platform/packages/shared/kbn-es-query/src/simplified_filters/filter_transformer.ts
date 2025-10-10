@@ -91,9 +91,9 @@ export class FilterTransformer {
           store: simplified.pinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
         },
         meta: {
-          alias: null,
+          alias: simplified.label || null,
           disabled: simplified.disabled || false,
-          negate: false,
+          negate: simplified.negate || false,
           controlledBy: simplified.controlledBy,
           index: simplified.indexPattern,
         },
@@ -206,6 +206,8 @@ export class FilterTransformer {
       controlledBy: storedFilter.meta?.controlledBy || undefined,
       indexPattern: storedFilter.meta?.index || undefined,
       metadata: storedFilter.meta?.params || undefined,
+      negate: storedFilter.meta?.negate || undefined,
+      label: storedFilter.meta?.alias || undefined,
     };
   }
 
@@ -333,17 +335,12 @@ export class FilterTransformer {
     return {
       type,
       conditions,
-      negate: storedFilter.meta?.negate,
-      label: storedFilter.meta?.alias,
-      disabled: storedFilter.meta?.disabled,
     };
   }
 
   private static convertToDSLFilter(storedFilter: any): RawDSLFilter {
     return {
       query: storedFilter.query || {},
-      label: storedFilter.meta?.alias,
-      disabled: storedFilter.meta?.disabled,
     };
   }
 
@@ -355,8 +352,6 @@ export class FilterTransformer {
     let query: Record<string, any>;
     let meta: Serializable = {
       ...baseStored.meta,
-      alias: condition.label || null,
-      disabled: condition.disabled || false,
       key: condition.field,
       field: condition.field,
       type: this.getFilterTypeForOperator(condition.operator),
@@ -416,9 +411,6 @@ export class FilterTransformer {
   ): StoredFilter {
     const meta = {
       ...baseStored.meta,
-      alias: group.label || null,
-      disabled: group.disabled || false,
-      negate: group.negate || false,
     };
 
     // Convert conditions to query clauses
@@ -453,8 +445,6 @@ export class FilterTransformer {
   private static convertFromDSLFilter(dsl: RawDSLFilter, baseStored: StoredFilter): StoredFilter {
     const meta = {
       ...baseStored.meta,
-      alias: dsl.label || null,
-      disabled: dsl.disabled || false,
       type: 'custom',
     };
 

@@ -23,30 +23,6 @@ export class FilterGroupBuilder {
   }
 
   /**
-   * Set a display label for the group
-   */
-  label(label: string): this {
-    this.group.label = label;
-    return this;
-  }
-
-  /**
-   * Mark the group as disabled
-   */
-  disabled(disabled = true): this {
-    this.group.disabled = disabled;
-    return this;
-  }
-
-  /**
-   * Negate the entire group
-   */
-  negate(negate = true): this {
-    this.group.negate = negate;
-    return this;
-  }
-
-  /**
    * Add a simple condition to the group
    */
   addCondition(condition: SimpleFilterCondition): this {

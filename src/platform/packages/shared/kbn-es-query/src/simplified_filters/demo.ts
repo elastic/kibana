@@ -75,11 +75,11 @@ export function demoFilterTransformation() {
     id: 'status-filter',
     indexPattern: 'logs-*',
     pinned: true,
+    label: 'Active Status Only',
     condition: {
       field: 'status',
       operator: 'is',
       value: 'active',
-      label: 'Active Status Only',
     },
   };
 
@@ -149,10 +149,10 @@ export function demoDashboardFilters() {
   // Complex business logic filter
   const businessFilter = createFilter()
     .indexPattern('business-metrics-*')
+    .label('High Value Customers')
     .metadata({ createdBy: 'business-dashboard', version: '2.1.0' })
     .group(
       and()
-        .label('High Value Customers')
         .addCondition(field('customer.tier').is('premium'))
         .addCondition(field('transaction.amount').gte(1000))
         .addCondition(field('customer.region').isOneOf(['north-america', 'europe']))
