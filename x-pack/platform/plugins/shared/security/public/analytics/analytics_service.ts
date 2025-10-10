@@ -17,6 +17,7 @@ import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-publ
 
 import { registerUserContext } from './register_user_context';
 import type { SecurityLicense } from '../../common';
+import { is } from '@elastic/eui/src/utils/prop_types/is';
 
 interface AnalyticsServiceSetupParams {
   securityLicense: SecurityLicense;
@@ -77,6 +78,10 @@ export class AnalyticsService {
   }
 
   private static async recordAuthTypeAnalytics(http: HttpStart) {
+    if (http.anonymousPaths.isAnonymous(window.location.pathname)) {
+      return;
+    }
+
     localStorage.setItem(
       AnalyticsService.AuthTypeInfoStorageKey,
       JSON.stringify(
