@@ -425,21 +425,19 @@ describe('PendingActionsSelector', () => {
         statuses: ['pending'],
       },
       {
-        enabled: true,
-        refetchInterval: false,
+        enabled: false,
       }
     );
   });
 
-  test('enables refetch interval when popover is open and disables when closed', async () => {
+  test('fetch data when popover is open and not when popover is closed', async () => {
     // Test with popover closed (default state)
     await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
 
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({
-        refetchInterval: false, // Should be false when popover is closed
-        enabled: true,
+        enabled: false,
       })
     );
 
@@ -454,7 +452,6 @@ describe('PendingActionsSelector', () => {
     expect(mockUseGetEndpointActionList).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({
-        refetchInterval: 3000, // Should be 3000ms when popover is open
         enabled: true,
       })
     );
