@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public/common';
+import { STACK_CONNECTOR_LOGOS } from '@kbn/stack-connectors-plugin/public/common/logos';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { HARDCODED_ICONS } from './icons/hardcoded_icons';
