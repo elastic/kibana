@@ -38,6 +38,16 @@ export const useNavigation = (
   const openerNode = primaryItem;
   const isSidePanelOpen = !isCollapsed && !!openerNode?.sections;
 
+  console.log(`*** [useNavigation] isCollapsed=${isCollapsed}, isSidePanelOpen=${isSidePanelOpen}`);
+  console.log(
+    `*** [useNavigation] openerNode=${
+      openerNode?.id || 'null'
+    }, hasSection=${!!openerNode?.sections}`
+  );
+  console.log(
+    `*** [useNavigation] activeItemId="${activeItemId}", visuallyActivePageId="${visuallyActivePageId}"`
+  );
+
   const state: NavigationState = {
     actualActiveItemId,
     visuallyActivePageId,

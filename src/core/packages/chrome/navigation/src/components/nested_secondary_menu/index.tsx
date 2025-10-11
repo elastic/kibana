@@ -38,12 +38,20 @@ export const NestedSecondaryMenu: NestedSecondaryMenuComponent = ({
   const [panelStack, setPanelStack] = useState<Array<{ id: string; returnFocusId?: string }>>([]);
   const [returnFocusId, setReturnFocusId] = useState<string | undefined>();
 
+  console.log(
+    `*** [NestedSecondaryMenu] render - currentPanel="${currentPanel}", panelStackDepth=${panelStack.length}`
+  );
+
   const goToPanel = useCallback(
     (panelId: string, focusId?: string) => {
-      setPanelStack((prev) => [
-        ...prev,
-        { id: currentPanel, returnFocusId: focusId || returnFocusId },
-      ]);
+      console.log(
+        `*** [NestedSecondaryMenu] goToPanel() - from="${currentPanel}" to="${panelId}", focusId="${focusId}"`
+      );
+      setPanelStack((prev) => {
+        const newStack = [...prev, { id: currentPanel, returnFocusId: focusId || returnFocusId }];
+        console.log(`*** [NestedSecondaryMenu] goToPanel() - new stack depth=${newStack.length}`);
+        return newStack;
+      });
       setCurrentPanel(panelId);
       setReturnFocusId(undefined);
     },
@@ -51,16 +59,23 @@ export const NestedSecondaryMenu: NestedSecondaryMenuComponent = ({
   );
 
   const goBack = useCallback(() => {
+    console.log(`*** [NestedSecondaryMenu] goBack() - from="${currentPanel}"`);
     setPanelStack((prev) => {
       const previousPanel = prev[prev.length - 1];
-      if (!previousPanel) return prev;
+      if (!previousPanel) {
+        console.log(
+          `*** [NestedSecondaryMenu] goBack() - no previous panel, staying at "${currentPanel}"`
+        );
+        return prev;
+      }
 
+      console.log(`*** [NestedSecondaryMenu] goBack() - to="${previousPanel.id}"`);
       setCurrentPanel(previousPanel.id);
       setReturnFocusId(previousPanel.returnFocusId);
 
       return prev.slice(0, -1);
     });
-  }, []);
+  }, [currentPanel]);
 
   const contextValue = {
     canGoBack: panelStack.length > 0,
