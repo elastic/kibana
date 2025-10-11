@@ -136,12 +136,13 @@ export const getAnomalySwimLaneEmbeddableFactory = (
       const chartWidth$ = new BehaviorSubject<number | undefined>(undefined);
 
       function serializeState() {
+        const rawState: AnomalySwimLaneEmbeddableState = {
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...swimlaneManager.getLatestState(),
+        } as AnomalySwimLaneEmbeddableState;
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...timeRangeManager.getLatestState(),
-            ...swimlaneManager.getLatestState(),
-          },
+          rawState,
           references: [],
         };
       }
@@ -364,6 +365,7 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                 >
                   {error ? (
                     <EuiCallOut
+                      announceOnMount
                       title={
                         <FormattedMessage
                           id="xpack.ml.swimlaneEmbeddable.errorMessage"
