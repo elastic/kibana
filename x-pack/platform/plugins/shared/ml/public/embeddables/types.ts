@@ -23,11 +23,10 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { type BehaviorSubject } from 'rxjs';
-import type { SeverityThreshold } from '../../common/types/anomalies';
-import type { JobId } from '../../common/types/anomaly_detection_jobs';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
-import type { SwimlaneType } from '../application/explorer/explorer_constants';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalyDetectorService } from '../application/services/anomaly_detector_service';
 import type { AnomalyExplorerChartsService } from '../application/services/anomaly_explorer_charts_service';
@@ -57,26 +56,6 @@ export interface MlEmbeddableBaseApi<StateType extends object = object>
     PublishesTimeRange {}
 
 export type MlEntity = Record<string, MlEntityField['fieldValue']>;
-
-/** Manual input by the user */
-export interface AnomalySwimlaneEmbeddableUserInput {
-  jobIds: JobId[];
-  panelTitle?: string;
-  swimlaneType: SwimlaneType;
-  viewBy?: string;
-}
-
-export interface AnomalySwimlaneEmbeddableCustomInput
-  extends Omit<AnomalySwimlaneEmbeddableUserInput, 'panelTitle'> {
-  id?: string;
-  perPage?: number;
-
-  // Embeddable inputs which are not included in the default interface
-  filters?: Filter[];
-  query?: Query;
-  refreshConfig?: RefreshInterval;
-  timeRange?: TimeRange;
-}
 
 export interface AnomalySwimlaneServices {
   anomalyDetectorService: AnomalyDetectorService;

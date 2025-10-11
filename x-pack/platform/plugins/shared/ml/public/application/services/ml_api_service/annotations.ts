@@ -6,10 +6,10 @@
  */
 
 import { useMemo } from 'react';
+import type { Annotation, GetAnnotationsResponse } from '@kbn/ml-common-types/annotations';
 import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
-import type { Annotation, GetAnnotationsResponse } from '../../../../common/types/annotations';
 
 export const annotationsApiProvider = (httpService: HttpService) => ({
   getAnnotations$(obj: {

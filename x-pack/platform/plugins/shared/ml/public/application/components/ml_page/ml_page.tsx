@@ -27,7 +27,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
-import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '../../../../common/constants/locator';
+import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '@kbn/ml-common-types/locator_deprecated_routes';
 import * as routes from '../../routing/routes';
 import * as overviewRoutes from '../../routing/routes/overview_management';
 import * as anomalyDetectionRoutes from '../../routing/routes/anomaly_detection_management';

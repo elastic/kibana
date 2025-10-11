@@ -12,9 +12,10 @@ import type { MlCustomSettings } from '@elastic/elasticsearch/lib/api/types';
 import type { CombinedJob, CombinedJobWithStats } from './combined_job';
 import type { MlAnomalyDetectionAlertRule } from '../alerts';
 import type { MlJobBlocked } from './job';
-import type { JobActionState } from '../../constants/job_actions';
 export type { Datafeed } from './datafeed';
 export type { DatafeedStats } from './datafeed_stats';
+
+export type JobActionState = 'deleting' | 'resetting' | 'reverting';
 
 export type SummaryJobState = estypes.MlJobState | JobActionState;
 

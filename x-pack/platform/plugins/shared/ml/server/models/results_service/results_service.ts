@@ -19,17 +19,18 @@ import {
   ML_JOB_ID,
   ML_PARTITION_FIELD_VALUE,
 } from '@kbn/ml-anomaly-utils';
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import { getIndicesOptions } from '../../../common/util/datafeed_utils';
-import { buildAnomalyTableItems } from './build_anomaly_table_items';
-import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
-import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
   DatafeedResultsChartDataParams,
-} from '../../../common/types/results';
-import { defaultSearchQuery } from '../../../common/types/results';
+  CriteriaField,
+} from '@kbn/ml-common-types/results';
+import { defaultSearchQuery } from '@kbn/ml-common-types/results';
+import { getIndicesOptions } from '../../../common/util/datafeed_utils';
+import { buildAnomalyTableItems } from './build_anomaly_table_items';
+import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
+import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
 import { annotationServiceProvider } from '../annotation_service';
@@ -39,12 +40,6 @@ import { anomalyChartsDataProvider } from './anomaly_charts';
 // ML Results dashboards.
 
 const DEFAULT_MAX_EXAMPLES = 500;
-
-export interface CriteriaField {
-  fieldType?: string;
-  fieldName: string;
-  fieldValue: any;
-}
 
 interface Influencer {
   fieldName: string;

@@ -28,8 +28,7 @@ import {
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import type { SeverityThreshold } from '../../../common/types/anomalies';
-import type { MlClient } from '../../lib/ml_client';
+import type { SeverityThreshold } from '@kbn/ml-common-types/anomalies';
 import type {
   MetricData,
   ModelPlotOutput,
@@ -40,7 +39,10 @@ import type {
   ChartPoint,
   SeriesConfig,
   ExplorerChartsData,
-} from '../../../common/types/results';
+} from '@kbn/ml-common-types/results';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import {
   isMappableJob,
   isModelPlotChartableForDetector,
@@ -49,8 +51,7 @@ import {
   ML_MEDIAN_PERCENTS,
   mlFunctionToESAggregation,
 } from '../../../common/util/job_utils';
-import type { CriteriaField } from './results_service';
-import type { CombinedJob, Datafeed } from '../../shared';
+import type { MlClient } from '../../lib/ml_client';
 
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { findAggField } from '../../../common/util/validation_utils';

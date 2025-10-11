@@ -39,8 +39,8 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import type { TimeRangeBounds } from '@kbn/ml-time-buckets';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { useTableSeverity } from '../components/controls/select_severity';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/anomaly_charts_initializer';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';

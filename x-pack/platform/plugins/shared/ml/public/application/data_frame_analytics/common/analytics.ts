@@ -19,7 +19,7 @@ import {
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { estypes } from '@elastic/elasticsearch';
-import type { Dictionary } from '../../../../common/types/common';
+import type { Dictionary } from '@kbn/ml-common-types/common';
 import type { MlApi } from '../../services/ml_api_service';
 
 export type IndexPattern = string;
