@@ -9,6 +9,7 @@
 
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +19,7 @@ import {
   EuiInputPopover,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPopover,
   EuiSelectable,
   EuiText,
 } from '@elastic/eui';
@@ -45,6 +47,48 @@ interface WorkflowOption {
   };
   [key: string]: any;
 }
+
+const TagsBadge: React.FC<{ tags: string[] }> = ({ tags }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  if (tags.length === 0) {
+    return null;
+  }
+
+  const handlePopoverToggle = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    event.preventDefault();
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+
+  return (
+    <EuiPopover
+      button={
+        <EuiBadge
+          color="hollow"
+          iconType="tag"
+          onClick={handlePopoverToggle}
+          onClickAriaLabel="Show tags"
+          style={{ cursor: 'pointer' }}
+        >
+          {tags.length}
+        </EuiBadge>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="s"
+      anchorPosition="downLeft"
+    >
+      <EuiBadgeGroup>
+        {tags.map((tag) => (
+          <EuiBadge key={tag} color="hollow" style={{ maxWidth: '150px' }}>
+            {tag}
+          </EuiBadge>
+        ))}
+      </EuiBadgeGroup>
+    </EuiPopover>
+  );
+};
 
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
   actionParams,
@@ -206,23 +250,15 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
             prependElement = <EuiBadge color="default">{i18n.DISABLED_BADGE_LABEL}</EuiBadge>;
           }
 
-          // Create tags badges if workflow has tags
           const workflowTags = workflow.definition?.tags || [];
-          const tagsElement =
-            workflowTags.length > 0 ? (
-              <EuiFlexGroup gutterSize="xs" wrap>
-                {workflowTags.map((tag: string, tagIndex: number) => (
-                  <EuiFlexItem grow={false} key={tagIndex}>
-                    <EuiBadge color="hollow">{tag}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            ) : undefined;
 
-          // Create the append element with tags and workflow link
           const appendElement = (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {tagsElement && <EuiFlexItem grow={false}>{tagsElement}</EuiFlexItem>}
+              {workflowTags.length > 0 && (
+                <EuiFlexItem grow={false}>
+                  <TagsBadge tags={workflowTags} />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
                   iconType="popout"
