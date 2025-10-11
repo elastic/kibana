@@ -8,10 +8,7 @@ import { getSeverityColor, parseSeverityData } from './helpers';
 import * as mock from './mock_data';
 import type { AlertsBySeverityAgg } from './types';
 import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
-import {
-  getMockEuiAmsterdamTheme,
-  getMockEuiBorealisTheme,
-} from '../../../../common/utils/__mocks__/severity_colors';
+import { getMockEuiBorealisTheme } from '../../../../common/utils/__mocks__/severity_colors';
 
 describe('parse severity data', () => {
   test('parse alerts with data', () => {
@@ -39,8 +36,7 @@ describe.each([
   { severity: 'medium', colorToken: '#D6BF57', themeName: 'Borealis' },
   { severity: 'low', colorToken: '#54B399', themeName: 'Borealis' },
 ])('$themeName: getSeverityColor', ({ severity, colorToken, themeName }) => {
-  const mockEuiTheme =
-    themeName === 'Amsterdam' ? getMockEuiAmsterdamTheme() : getMockEuiBorealisTheme();
+  const mockEuiTheme = getMockEuiBorealisTheme();
 
   test(`returns color for given severity: ${severity}`, () => {
     expect(getSeverityColor(severity, mockEuiTheme)).toEqual(colorToken);
