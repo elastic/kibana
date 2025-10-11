@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-const colorByValueSchema = schema.object({
+export const colorByValueSchema = schema.object({
   type: schema.literal('dynamic'), // Specifies that the color assignment is dynamic (by value). Possible value: 'dynamic'
   /**
    * The minimum value for the color range. Used as the lower bound for value-based color assignment.
@@ -206,3 +206,13 @@ export const coloringTypeSchema = schema.oneOf([
   staticColorSchema,
   colorMappingSchema,
 ]);
+
+/**
+ * Schema for where to apply the color (to value or background).
+ */
+export const applyColorToSchema = schema.oneOf(
+  [schema.literal('value'), schema.literal('background')],
+  {
+    meta: { description: 'Where to apply the color' },
+  }
+);
