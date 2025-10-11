@@ -14,7 +14,7 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 import { workflowExecutionLoop } from '../workflow_execution_loop';
 import type { WorkflowsExecutionEnginePluginStartDeps } from '../types';
 import type { WorkflowsExecutionEngineConfig } from '../config';
-import { createContainer } from './create_container';
+import { setupDependencies } from './setup_dependencies';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
 
@@ -56,7 +56,7 @@ export async function runWorkflow({
     clientToUse,
     fakeRequest: fakeRequestFromContainer,
     coreStart: coreStartFromContainer,
-  } = await createContainer(
+  } = await setupDependencies(
     workflowRunId,
     spaceId,
     actions,

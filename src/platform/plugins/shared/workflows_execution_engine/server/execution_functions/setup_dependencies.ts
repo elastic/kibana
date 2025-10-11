@@ -27,7 +27,7 @@ import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_log
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
 
-export async function createContainer(
+export async function setupDependencies(
   workflowRunId: string,
   spaceId: string,
   actionsPlugin: ActionsPluginStartContract,
