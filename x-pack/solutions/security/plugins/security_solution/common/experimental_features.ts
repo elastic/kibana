@@ -47,13 +47,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   automatedProcessActionsEnabled: true,
 
-  /**
-   * Enables use of SentinelOne response actions that complete asynchronously
-   *
-   * Release: v8.14.0
-   */
-  responseActionsSentinelOneV2Enabled: true,
-
   /** Enables the `kill-process` response action for SentinelOne */
   responseActionsSentinelOneKillProcessEnabled: true,
 
