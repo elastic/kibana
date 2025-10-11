@@ -38,6 +38,7 @@ import { getTheHiveConnectorType } from './thehive';
 import { getCrowdStrikeConnectorType } from './crowdstrike';
 import { getXSOARConnectorType } from './xsoar';
 import { getJiraServiceManagementConnectorType } from './jira-service-management';
+import { getHttpRequestConnectorType, getTemplatedConnectorTypes } from './http_request';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -79,6 +80,10 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getD3SecurityConnectorType());
   connectorTypeRegistry.register(getTheHiveConnectorType());
   connectorTypeRegistry.register(getXSOARConnectorType());
+  connectorTypeRegistry.register(getHttpRequestConnectorType());
+  for (const connectorType of getTemplatedConnectorTypes()) {
+    connectorTypeRegistry.register(connectorType);
+  }
 
   if (ExperimentalFeaturesService.get().sentinelOneConnectorOn) {
     connectorTypeRegistry.register(getSentinelOneConnectorType());
