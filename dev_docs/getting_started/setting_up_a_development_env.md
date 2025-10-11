@@ -3,16 +3,14 @@ id: kibDevTutorialSetupDevEnv
 slug: /kibana-dev-docs/getting-started/setup-dev-env
 title: Set up a Development Environment
 description: Learn how to setup a development environment for contributing to the Kibana repository
-date: 2024-08-09
+date: 2025-08-21
 tags: ['kibana', 'onboarding', 'dev', 'architecture', 'setup', 'devcontainer']
 ---
 
 Setting up a development environment is pretty easy.
 
-<DocCallOut title="A note about Windows">
-  We do not support Windows native development anymore and in order to develop Kibana on Windows you must use **WSL** which will give you a much better experience.
-  Please check our <DocLink id="kibDevTutorialSetupWindowsDevWSL" text="tutorial"/> to know how to setup the environment and then follow the rest of this guide inside **WSL**.
-</DocCallOut>
+> [!NOTE]
+> **A note about Windows:** We do not support Windows native development anymore and in order to develop Kibana on Windows you must use **WSL** which will give you a much better experience. Please check our [tutorial](../tutorials/development_windows.mdx) to know how to setup the environment and then follow the rest of this guide inside **WSL**.
 
 ## Get the code
 
@@ -91,7 +89,7 @@ In case you want to run a couple of checks like linting or check the file casing
 node scripts/register_git_hook
 ```
 
-After the script completes the pre-commit hook will be created within the file `.git/hooks/pre-commit`. If you choose to not install it, don’t worry, we still run a quick CI check to provide feedback earliest as we can about the same checks.
+After the script completes the pre-commit hook will be created within the file `.git/hooks/pre-commit`. If you choose to not install it, don't worry, we still run a quick CI check to provide feedback earliest as we can about the same checks.
 
 ## Using the Kibana Dev Container (optional)
 
