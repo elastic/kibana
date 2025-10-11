@@ -196,7 +196,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let defaultSpaceMonitorId = '';
 
       it('add a test private location in multiple spaces', async () => {
-        const apiRes = await testPrivateLocations.addFleetPolicy('Test Fleet Policy 2');
+        const apiRes = await testPrivateLocations.addFleetPolicy('Test Fleet Policy 2', [
+          'default',
+          SPACE_ID,
+        ]);
         testFleetPolicyID = apiRes.body.item.id;
 
         privateLocations = await testPrivateLocations.setTestLocations(

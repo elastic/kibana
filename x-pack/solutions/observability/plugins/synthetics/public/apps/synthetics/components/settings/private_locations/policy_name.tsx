@@ -15,7 +15,6 @@ import { selectAgentPolicies } from '../../../state/agent_policies';
 
 export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
   const { canReadAgentPolicies } = useFleetPermissions();
-
   const { basePath } = useSyntheticsSettingsContext();
 
   const { data: policies, loading } = useSelector(selectAgentPolicies);
@@ -39,7 +38,7 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
             </EuiLink>
           ) : (
             <EuiText color="danger" size="s" className="eui-displayInline">
-              {POLICY_IS_DELETED}
+              {POLICY_NOT_FOUND}
             </EuiText>
           )}
         </EuiTextColor>
@@ -59,8 +58,8 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
   );
 };
 
-const POLICY_IS_DELETED = i18n.translate('xpack.synthetics.monitorManagement.deletedPolicy', {
-  defaultMessage: 'Policy is deleted',
+const POLICY_NOT_FOUND = i18n.translate('xpack.synthetics.monitorManagement.policyNotFound', {
+  defaultMessage: 'Policy not found in the current space',
 });
 
 const AGENTS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.agents', {
