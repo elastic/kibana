@@ -51,8 +51,42 @@ describe('configuration', () => {
 
   beforeAll(async () => {
     await removeFile(logFilePath);
-
-    const servers = await setupTestServers(logFilePath);
+    const settings = {
+      xpack: {
+        securitySolution: {
+          cdn: {
+            url: 'https://artifacts.security.elastic.co',
+            publicKey: `
+-----BEGIN PUBLIC KEY-----
+MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA6AB2sJ5M1ImN/bkQ7Te6
+uI7vMXjN2yupEmh2rYz4gNzWS351d4JOhuQH3nzxfKdayHgusP/Kq2MXVqALH8Ru
+Yu2AF08GdvYlQXPgEVI+tB/riekwU7PXZHdA1dY5/mEZ8SUSM25kcDJ3vTCzFTlL
+gl2RNAdkR80d9nhvNSWlhWMwr8coQkr6NmujVU/Wa0w0EXbN1arjcG4qzbOCaR+b
+cgQ9LRUoFfK9w+JJHDNjOI7rOmaIDA6Ep4oeDLy5AcGCE8bNmQzxZhRW7NvlNUGS
+NTgU0CZTatVsL9AyP15W3k635Cpmy2SMPX+d/CFgvr8QPxtqdrz3q9iOeU3a1LMY
+gDcFVmSzn5zieQEPfo/FcQID/gnCmkX0ADVMf1Q20ew66H7UCOejGaerbFZXYnTz
+5AgQBWF2taOSSE7gDjGAHereeKp+1PR+tCkoDZIrPEjo0V6+KaTMuYS3oZj1/RZN
+oTjQrdfeDj02mEIL+XkcWKAp03PYlWylVwgTMa178DDVuTWtS5lZL8j5LijlH9+6
+xH8o++ghwfxp6ENLKDZPV5IvHHG7Vth9HScoPTQWQ+s8Bt26QENPUV2AbyxbJykY
+mJfTDke3bEemHZzRbAmwiQ7VpJjJ4OfLGRy8Pp2AHo8kYIvWyM5+aLMxcxUaYdA9
+5SxoDOgcDBA4lLb6XFLYiDUCAwEAAQ==
+-----END PUBLIC KEY-----
+`,
+          },
+        },
+        fleet: {
+          internal: {
+            registry: {
+              // Since `endpoint` is not available in EPR yet for
+              // kibana 9 (e.g., https://epr.elastic.co/search?package=endpoint&kibana.version=9.0.0)
+              // we need to ignore version checks
+              kibanaVersionCheckEnabled: false,
+            },
+          },
+        },
+      },
+    };
+    const servers = await setupTestServers(logFilePath, settings);
 
     esServer = servers.esServer;
     kibanaServer = servers.kibanaServer;
