@@ -13,6 +13,7 @@ import { useAIFeatures } from '../../stream_detail_significant_events_view/add_s
 import { useStreamSystemsApi } from '../../../hooks/use_stream_systems_api';
 import { StreamSystemsFlyout } from './stream_systems/stream_systems_flyout';
 import { StreamSystemsAccordion } from './stream_systems/stream_systems_accordion';
+import { GenerateSuggestionButton } from '../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 
 interface StreamConfigurationProps {
   definition: Streams.all.Definition;
@@ -49,13 +50,12 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              disabled={!aiFeatures?.genAiConnectors.selectedConnector}
-              iconType="sparkles"
-              onClick={() => {
+            <GenerateSuggestionButton
+              aiFeatures={aiFeatures!}
+              onClick={(connectorId) => {
                 setIsLoading(true);
                 setIsFlyoutVisible(!isFlyoutVisible);
-                identifySystems(aiFeatures?.genAiConnectors.selectedConnector!, 'now', 'now-24h')
+                identifySystems(connectorId, 'now', 'now-24h')
                   .then((data) => {
                     setSystems(data.systems);
                   })
@@ -63,11 +63,14 @@ export function StreamSystemConfiguration({ definition }: StreamConfigurationPro
                     setIsLoading(false);
                   });
               }}
+              size="s"
+              iconType="sparkles"
+              isLoading={isLoading}
             >
               {i18n.translate('xpack.streams.streamDetailView.systemDetectionButtonLabel', {
                 defaultMessage: 'Detect systems',
               })}
-            </EuiButton>
+            </GenerateSuggestionButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
