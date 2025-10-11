@@ -84,6 +84,7 @@ import {
 } from './secrets';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
+
 import {
   canEnableSyncIntegrations,
   createOrUpdateFleetSyncedIntegrationsIndex,
