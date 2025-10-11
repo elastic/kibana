@@ -27,7 +27,8 @@ export const searchAfterAndBulkCreate = async (
       wrappedAlerts: wrappedDocs,
       sharedParams,
       services,
-      maxAlerts: sharedParams.tuple.maxSignals - toReturn.createdSignalsCount,
+      maxAlerts:
+        (params.maxSignalsOverride ?? sharedParams.tuple.maxSignals) - toReturn.createdSignalsCount,
     });
     addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
     return bulkCreateResult;

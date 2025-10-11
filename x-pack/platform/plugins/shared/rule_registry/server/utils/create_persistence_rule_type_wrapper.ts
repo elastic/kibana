@@ -166,7 +166,7 @@ export const suppressAlertsInMemory = <
   alertCandidates: T[];
   suppressedAlerts: T[];
 } => {
-  const idsMap: Record<string, { count: number; suppressionEnd: Date }> = {};
+  const idsMap: Record<string, { count: number; suppressionEnd: Date; timestamps: Date[] }> = {};
   const suppressedAlerts: T[] = [];
 
   const filteredAlerts = sortBy(alerts, (alert) => alert._source[ALERT_SUPPRESSION_START]).filter(
@@ -177,6 +177,7 @@ export const suppressAlertsInMemory = <
 
       if (instanceId && idsMap[instanceId] != null) {
         idsMap[instanceId].count += suppressionDocsCount + 1;
+        idsMap[instanceId].timestamps.push(suppressionEnd);
         // store the max value of suppression end boundary
         if (suppressionEnd > idsMap[instanceId].suppressionEnd) {
           idsMap[instanceId].suppressionEnd = suppressionEnd;
@@ -184,7 +185,11 @@ export const suppressAlertsInMemory = <
         suppressedAlerts.push(alert);
         return false;
       } else {
-        idsMap[instanceId] = { count: suppressionDocsCount, suppressionEnd };
+        idsMap[instanceId] = {
+          count: suppressionDocsCount,
+          suppressionEnd,
+          timestamps: [suppressionEnd],
+        };
         return true;
       }
     },
@@ -196,6 +201,7 @@ export const suppressAlertsInMemory = <
     if (instanceId) {
       alert._source[ALERT_SUPPRESSION_DOCS_COUNT] = idsMap[instanceId].count;
       alert._source[ALERT_SUPPRESSION_END] = idsMap[instanceId].suppressionEnd;
+      alert._source['kibana.alert.suppression.timestamps'] = idsMap[instanceId].timestamps;
     }
     return alert;
   });
@@ -544,6 +550,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
                   const existingDocsCount =
                     existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
+                  const existingTimestamps: Date[] =
+                    existingAlert._source?.['kibana.alert.suppression.timestamps'] ?? [];
 
                   return [
                     {
@@ -563,6 +571,9 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                         [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
                         [ALERT_SUPPRESSION_DOCS_COUNT]:
                           existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
+                        ['kibana.alert.suppression.timestamps']: existingTimestamps.concat(
+                          alert._source?.['kibana.alert.suppression.timestamps']
+                        ),
                       },
                     },
                   ];
