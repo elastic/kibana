@@ -3,18 +3,18 @@ id: kibBestPractices
 slug: /kibana-dev-docs/contributing/best-practices
 title: Best practices
 description: Best practices to follow when building a Kibana plugin.
-date: 2021-03-17
+date: 2025-08-21
 tags: ['kibana', 'onboarding', 'dev', 'architecture']
 ---
 
 ## General
 
-Be sure to follow our <DocLink id="kibDevPrinciples" text="development principles"/>
-and <DocLink id="kibStandards" text="standards and guidelines"/>.
+Be sure to follow our [development principles](dev_principles.mdx)
+and [standards and guidelines](standards.mdx).
  
 ## Documentation
 
-Documentation best practices can be found <DocLink id="kibDocumentation" text="here"/>.
+Documentation best practices can be found [here](documentation.mdx).
 
 ## Performance
 
@@ -25,7 +25,7 @@ Build with scalability in mind.
 - Consider large data sets, that span a long time range
 - Consider slow internet and low bandwidth environments
 
-<DocLink id="kibDevPerformance" text="Read more about performance."/>
+[Read more about performance.](../key_concepts/performance/index.mdx)
 
 ## Accessibility
 
@@ -36,17 +36,15 @@ all of our apps are accessible.
 - Learn how [EUI tackles accessibility](https://elastic.github.io/eui/#/guidelines/accessibility)
 - If you don't use EUI, follow the same EUI accessibility standards
 
-<DocCallOut title="Internal only">
-  Elasticians, check out the #accessibility channel to ask questions and receive guidance.
-</DocCallOut>
+> [!NOTE]
+> **Internal only:** Elasticians, check out the #accessibility channel to ask questions and receive guidance.
 
 ## Localization
 
 Kibana is translated into other languages. Use our i18n utilities to ensure your public facing strings will be translated to ensure all Kibana apps are localized. Read and adhere to our [i18n guidelines](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-i18n/GUIDELINE.md)
 
-<DocCallOut title="Internal only">
-  Elasticians, check out the #kibana-localization channel to ask questions and receive guidance.
-</DocCallOut>
+> [!NOTE]
+> **Internal only:** Elasticians, check out the #kibana-localization channel to ask questions and receive guidance.
 
 ## Styleguide
 
@@ -70,38 +68,32 @@ const dataView = savedObjectsClient.get(dataViewId) as DataView;
 
 ## Resusable react components
 
-Use [EUI](https://elastic.github.io/eui) for all your basic UI components to create a consistent UI experience. We also have generic UI components offered from the <DocLink id="kibKibanaReactPluginApi" text="kibana_react" /> plugin.
+Use [EUI](https://elastic.github.io/eui) for all your basic UI components to create a consistent UI experience. We also have generic UI components offered from the `kibana_react` plugin.
 
 ## Don't export code that doesn't need to be public
 
-Don't export <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public APIs"/> without reason. Make your public APIs as small as possible. You will have to maintain them, and consider backward compatibility when making changes.
+Don't export [public APIs](../migrated_docs/kibana_platform_plugin_intro.md#public-plugin-api) without reason. Make your public APIs as small as possible. You will have to maintain them, and consider backward compatibility when making changes.
 
 ## Re-inventing the wheel
 
-Over-refactoring can be a problem in it's own right, but it's still important to be aware of the existing services that are out there and use them when it makes sense. Check out our <DocLink id="kibBuildingBlocks" text="building blocks"/> to see what high-level services are at your disposal. In addition, our <DocLink id="kibDevDocsApiWelcome" text="API documentation" /> lists additional services.
+Over-refactoring can be a problem in it's own right, but it's still important to be aware of the existing services that are out there and use them when it makes sense. Check out our [building blocks](../migrated_docs/building_blocks.md) to see what high-level services are at your disposal. In addition, our API documentation lists additional services.
 
 ## Feature development
 
 ### Timing
 
-<DocCallOut title="Internal only">
-
-Try not to put your PR in review mode, or merge large changes, right before Feature Freeze. It's inevitably one of the most volatile times for the
-Kibana code base, try not to contribute to this volatility. Doing this can:
-
-- increase the likelihood of conflicts from other features being merged at the last minute
-- means your feature has less QA time
-- means your feature gets less careful review as reviewers are often swamped at this time
-
-All of the above contributes to more bugs being found in the QA cycle and can cause a delay in the release. Prefer instead to merge
-your large change right _after_ feature freeze. If you are worried about missing your initial release version goals, review our
-<DocLink id="devTimeBasedReleases" text="release train philosophy"/>. It's okay!
-
-</DocCallOut>
+> [!NOTE]
+> **Internal only:** Try not to put your PR in review mode, or merge large changes, right before Feature Freeze. It's inevitably one of the most volatile times for the Kibana code base, try not to contribute to this volatility. Doing this can:
+> 
+> - increase the likelihood of conflicts from other features being merged at the last minute
+> - means your feature has less QA time
+> - means your feature gets less careful review as reviewers are often swamped at this time
+> 
+> All of the above contributes to more bugs being found in the QA cycle and can cause a delay in the release. Prefer instead to merge your large change right _after_ feature freeze. If you are worried about missing your initial release version goals, review our release train philosophy. It's okay!
 
 ### Size
 
-When possible, build features with incremental sets of small and focused PRs, but don't check in unused code, and don't expose any feature on main that you would not be comfortable releasing.
+When possible, build features with incremental sets of small and focused PRs, but don't check in unused code, and don't expose any feature on main that you would not be comfortable releasing.
 
 ![product_stages](../assets/product_stages.png)
 
@@ -159,21 +151,18 @@ auto-fixing to migration all existing and new uses of this export to the proper 
 
 - Do not log sensitive information (personally identifiable information, passwords, api keys, etc.), regardless of the log level. Err on the side of caution. Personally identifiable information is common in user input; for example, dashboard titles, index names and Elasticsearch `_search` queries.
 - Logs should include just enough information to be actionable.
-- Use the right log level, see <DocLink id="kibCoreLogging" section="log-level" text="Log Levels"/>.
+- Use the right log level, see Log Levels.
 - Use ECS format for any additional LogMeta you add to your logging statements.
 - Logs are read by customers, a large number of Elastic employees, and Kibana contributors. As such, log messages should use language that is understandable to a wide audience and should avoid disclosing implementation details (unless they're at the `debug`/`trace` level).
 
 ## Licensing
 
-<DocCallOut title="Internal only">
-
-Has there been a discussion about which license this feature should be available under? Open up a license issue in [https://github.com/elastic/dev](https://github.com/elastic/dev) if you are unsure.
-
-</DocCallOut>
+> [!NOTE]
+> **Internal only:** Has there been a discussion about which license this feature should be available under? Open up a license issue in [https://github.com/elastic/dev](https://github.com/elastic/dev) if you are unsure.
 
 ## Testing scenarios
 
-Every PR submitted should be accompanied by tests. Read through the <DocLink id="kibDevTutorialTestingPlugins" text="testing plugins tutorial" /> for how to test.
+Every PR submitted should be accompanied by tests. Read through the testing plugins tutorial for how to test.
 
 ### Browser coverage
 
@@ -201,18 +190,18 @@ Does the feature work efficiently on the below listed browsers
 - Kibana should be fully [cross cluster search](https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-cross-cluster-search.html) compatible (aside from admin UIs which only work on the local cluster).
 - How does your plugin behave when optional dependencies are disabled?
 - How does your app behave under anonymous access, or with security disabled?
-- Make sure to test your PR in a cloud environment. Read about the <DocLink id="kibDevTutorialCI" section="labels" text="ci:deploy cloud" /> label which makes this very easy.
+- Make sure to test your PR in a cloud environment. Read about the ci:deploy cloud label which makes this very easy.
 
 
 ## Backward compatibility
 
-Any time you change state that is part of a Saved Object you will have to write a <DocLink id="kibDevDocsSavedObjectsIntro" section="migrations-and-backward-compatibility" text="migration" />.
+Any time you change state that is part of a Saved Object you will have to write a [migration](../migrated_docs/saved_objects.md#migrations-and-backward-compatibility).
 
-Never store state from another plugin in your Saved Objects or URLs unless it implements the <DocLink id="kibDevDocsPersistableStateIntro" text="persistable state interface"/>. Remember to check for migrations when deserializing that state.
+Never store state from another plugin in your Saved Objects or URLs unless it implements the [persistable state interface](../migrated_docs/persistable_state.md). Remember to check for migrations when deserializing that state.
 
-If you expose state and you wish to allow other plugins to persist you must ensure it implements the <DocLink id="kibDevDocsPersistableStateIntro" text="persistable state interface"/>. This is very common for `by value` entities, like visualizations that exist on a dashboard but are not part of the visualization library. If you make a breaking change to this state you must remember to register a migration for it.
+If you expose state and you wish to allow other plugins to persist you must ensure it implements the [persistable state interface](../migrated_docs/persistable_state.md). This is very common for `by value` entities, like visualizations that exist on a dashboard but are not part of the visualization library. If you make a breaking change to this state you must remember to register a migration for it.
 
-Saved objects exported from past Kibana versions should always continue to work. Bookmarked URLs should also always work. Check out <DocLink id="kibDevKeyConceptsNavigation" section="specifying-state" text="URL Locators" /> to learn about migrating state in URLs.
+Saved objects exported from past Kibana versions should always continue to work. Bookmarked URLs should also always work. Check out [URL Locators](../migrated_docs/navigation.md#specifying-state) to learn about migrating state in URLs.
 
 ## Avoid these common mistakes
 
