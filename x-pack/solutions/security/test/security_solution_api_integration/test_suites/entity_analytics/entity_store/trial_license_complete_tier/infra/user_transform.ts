@@ -12,7 +12,7 @@ import type { EntityField } from '@kbn/security-solution-plugin/common/api/entit
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { TIMEOUT_MS } from './constants';
 
-const USER_TRANSFORM_ID: string = 'entities-v1-latest-security_user_default';
+export const USER_TRANSFORM_ID: string = 'entities-v1-latest-security_user_default';
 
 function buildUserTransformDocument(
   doc: EntityStoreSourceDocument,
