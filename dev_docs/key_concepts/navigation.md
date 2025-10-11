@@ -3,7 +3,7 @@ id: kibDevKeyConceptsNavigation
 slug: /kibana-dev-docs/routing-and-navigation
 title: Routing, Navigation and URL
 description: Learn best practices about navigation inside Kibana
-date: 2023-11-07
+date: 2025-08-21
 tags: ['kibana', 'dev', 'architecture', 'contributor']
 ---
 
@@ -128,8 +128,8 @@ const MyApp = () =>
 </RedirectAppLinks>
 ```
 
-NOTE: There may be cases where you need a full page reload. While rare and should be avoided, rather than implement your own navigation, 
-you can use the `navigateToUrl` `forceRedirect` option.
+> [!NOTE]
+> There may be cases where you need a full page reload. While rare and should be avoided, rather than implement your own navigation, you can use the `navigateToUrl` `forceRedirect` option.
 
 ```tsx
 const MyForcedPageReloadLink = () => 
@@ -173,9 +173,8 @@ const MyInternalLink = () => <Link to="/my-other-page"></Link>
 
 Try to avoid using `window.location` and `window.history` directly.
 
-<DocCallOut>
-  Instead, use [ScopedHistory](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md) instance provided by `core`.
-</DocCallOut>
+> [!IMPORTANT]
+> Instead, use [ScopedHistory](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md) instance provided by `core`.
 
 - This way `core` will know about location changes triggered within your app, and it would act accordingly.
 - Some plugins are listening to location changes. Triggering location change manually could lead to unpredictable and hard-to-catch bugs.
@@ -195,7 +194,8 @@ Those query params follow the convention:
 - `_g` (*global*) - global UI state that should be shared and synced across multiple apps. common example from Analyze group apps: time range, refresh interval, *pinned* filters.
 - `_a` (*application*) - UI state scoped to current app.
 
-NOTE: After migrating to KP platform we got navigations without page reloads. Since then there is no real need to follow `_g` and `_a` separation anymore. It's up you to decide if you want to follow this pattern or if you prefer a single query param or something else. The need for this separation earlier is explained in the next section.
+> [!NOTE]
+> After migrating to KP platform we got navigations without page reloads. Since then there is no real need to follow `_g` and `_a` separation anymore. It's up you to decide if you want to follow this pattern or if you prefer a single query param or something else. The need for this separation earlier is explained in the next section.
 
 There are utils to help you to implement such kind of state syncing.
 
@@ -211,9 +211,8 @@ There are utils to help you to implement such kind of state syncing.
 
 - Adding a query param flag or simple key/value to the URL.
 
-<DocCallOut>
-  Follow [these docs](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/docs/state_sync/README.md) to learn more.
-</DocCallOut>
+> [!IMPORTANT]
+> Follow [these docs](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/docs/state_sync/README.md) to learn more.
 
 ## Preserving state between navigations
 
@@ -236,5 +235,5 @@ you'd notice that state is stored inside that link, and it also gets updated whe
 This is where separation into `_a` and `_g` query params comes into play. What is considered a *global* state gets constantly updated in those navigation links. In the example above it was a time filter.
 This is backed by [KbnUrlTracker](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57) util. You can use it to achieve similar behavior.
 
-NOTE: After migrating to KP navigation works without page reloads and all plugins are loaded simultaneously.
-Hence, likely there are simpler ways to preserve state of your application, unless you want to do it through URL.
+> [!NOTE]
+> After migrating to KP navigation works without page reloads and all plugins are loaded simultaneously. Hence, likely there are simpler ways to preserve state of your application, unless you want to do it through URL.
