@@ -80,6 +80,8 @@ export const useConversationActions = () => {
             id: pendingRoundId,
             input: { message: userMessage },
             response: { message: '' },
+            started_at: new Date().toISOString(),
+            took: 0,
             steps: [],
           };
 
