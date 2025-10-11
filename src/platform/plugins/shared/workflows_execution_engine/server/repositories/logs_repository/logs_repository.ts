@@ -9,8 +9,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
-import { createIndexWithMappings } from './create_index';
 import { WORKFLOW_EXECUTION_LOGS_INDEX_MAPPINGS } from './index_mappings';
+import { createIndexWithMappings } from '../../../common/create_index';
 
 export interface WorkflowLogEvent {
   '@timestamp'?: string;
