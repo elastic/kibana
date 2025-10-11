@@ -72,27 +72,30 @@ const Template = () => {
   );
 
   // Create popovers mapping
-  const popovers = useMemo(() => ({
-    'Single event': singleEventPopover,
-    'Single alert': singleAlertPopover,
-    'Multiple events': multipleEventsPopover,
-    'Multiple alerts': multipleAlertsPopover,
-    'Hundreds of events': hundredsOfEventsPopover,
-    'Hundreds of alerts': hundredsOfAlertsPopover,
-    'Multiple events and alerts': multipleEventsAndAlertsPopover,
-    'Hundreds of events and alerts': hundredsOfEventsAndAlertsPopover,
-    'Millions of events and alerts': millionsOfEventsAndAlertsPopover,
-  }), [
-    singleEventPopover,
-    singleAlertPopover,
-    multipleEventsPopover,
-    multipleAlertsPopover,
-    hundredsOfEventsPopover,
-    hundredsOfAlertsPopover,
-    multipleEventsAndAlertsPopover,
-    hundredsOfEventsAndAlertsPopover,
-    millionsOfEventsAndAlertsPopover,
-  ]);
+  const popovers = useMemo(
+    () => ({
+      'Single event': singleEventPopover,
+      'Single alert': singleAlertPopover,
+      'Multiple events': multipleEventsPopover,
+      'Multiple alerts': multipleAlertsPopover,
+      'Hundreds of events': hundredsOfEventsPopover,
+      'Hundreds of alerts': hundredsOfAlertsPopover,
+      'Multiple events and alerts': multipleEventsAndAlertsPopover,
+      'Hundreds of events and alerts': hundredsOfEventsAndAlertsPopover,
+      'Millions of events and alerts': millionsOfEventsAndAlertsPopover,
+    }),
+    [
+      singleEventPopover,
+      singleAlertPopover,
+      multipleEventsPopover,
+      multipleAlertsPopover,
+      hundredsOfEventsPopover,
+      hundredsOfAlertsPopover,
+      multipleEventsAndAlertsPopover,
+      hundredsOfEventsAndAlertsPopover,
+      millionsOfEventsAndAlertsPopover,
+    ]
+  );
 
   const nodes: LabelNodeViewModel[] = useMemo(
     () =>

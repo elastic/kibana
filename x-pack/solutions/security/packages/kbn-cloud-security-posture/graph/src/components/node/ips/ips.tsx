@@ -25,9 +25,12 @@ import { createPreviewItems } from '../utils';
 
 export const VISIBLE_IPS_LIMIT = 1;
 
-const popoverTipAriaLabel = i18n.translate('securitySolutionPackages.csp.graph.ips.popoverAriaLabel', {
-  defaultMessage: 'Show IP address details',
-});
+const popoverTipAriaLabel = i18n.translate(
+  'securitySolutionPackages.csp.graph.ips.popoverAriaLabel',
+  {
+    defaultMessage: 'Show IP address details',
+  }
+);
 
 export type UseIpPopoverReturn = UseNodeDetailsPopoverReturn & {
   onIpClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
