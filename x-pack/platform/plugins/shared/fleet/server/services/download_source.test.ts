@@ -6,14 +6,12 @@
  */
 
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-
 import type { Logger } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import type { DownloadSourceSOAttributes } from '../types';
-
 import { DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE } from '../constants';
 
 import { downloadSourceService } from './download_source';
@@ -135,6 +133,39 @@ function getMockedSoClient(options: { defaultDownloadSourceId?: string; sameName
 
   return soClient;
 }
+
+function getMockedEncryptedSoClient() {
+  const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+    getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  };
+
+  esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type: string, id: string) => {
+    switch (id) {
+      case 'download-source-test': {
+        return mockDownloadSourceSO('download-source-test', {
+          is_default: false,
+          name: 'Test',
+          host: 'http://test.co',
+        });
+      }
+      case 'existing-default-download-source': {
+        return mockDownloadSourceSO('existing-default-download-source', {
+          is_default: true,
+          name: 'Default host',
+          host: 'http://artifacts.co',
+        });
+      }
+      default:
+        throw new Error('not found: ' + id);
+    }
+  });
+
+  mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
+
+  return esoClientMock;
+}
+
 let mockedLogger: jest.Mocked<Logger>;
 describe('Download Service', () => {
   beforeEach(() => {
@@ -154,7 +185,9 @@ describe('Download Service', () => {
     mockedAppContextService.getInternalUserSOClient.mockReset();
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReset();
   });
+
   const esClient = elasticsearchServiceMock.createInternalClient();
+  const esoClientMock = getMockedEncryptedSoClient();
 
   describe('create', () => {
     it('work with a predefined id', async () => {
@@ -305,7 +338,7 @@ describe('Download Service', () => {
   describe('delete', () => {
     it('Call removeDefaultSourceFromAll before deleting the value', async () => {
       const soClient = getMockedSoClient();
-      await downloadSourceService.delete(soClient, 'download-source-test');
+      await downloadSourceService.delete('download-source-test');
       expect(mockedAgentPolicyService.removeDefaultSourceFromAll).toBeCalled();
       expect(soClient.delete).toBeCalled();
     });
@@ -313,10 +346,9 @@ describe('Download Service', () => {
 
   describe('get', () => {
     it('works with a predefined id', async () => {
-      const soClient = getMockedSoClient();
-      const downloadSource = await downloadSourceService.get(soClient, 'download-source-test');
+      const downloadSource = await downloadSourceService.get('download-source-test');
 
-      expect(soClient.get).toHaveBeenCalledWith(
+      expect(esoClientMock.getDecryptedAsInternalUser).toHaveBeenCalledWith(
         DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
         'download-source-test'
       );
@@ -327,10 +359,10 @@ describe('Download Service', () => {
 
   describe('getDefaultDownloadSourceId', () => {
     it('works with a predefined id', async () => {
-      const soClient = getMockedSoClient({
+      getMockedSoClient({
         defaultDownloadSourceId: 'existing-default-download-source',
       });
-      const defaultId = await downloadSourceService.getDefaultDownloadSourceId(soClient);
+      const defaultId = await downloadSourceService.getDefaultDownloadSourceId();
 
       expect(defaultId).toEqual('existing-default-download-source');
     });
@@ -338,20 +370,20 @@ describe('Download Service', () => {
 
   describe('requireUniqueName', () => {
     it('throws an error if the name already exists', async () => {
-      const soClient = getMockedSoClient({
+      getMockedSoClient({
         defaultDownloadSourceId: 'download-source-test',
         sameName: true,
       });
       await expect(
-        async () => await downloadSourceService.requireUniqueName(soClient, { name: 'Test' })
+        async () => await downloadSourceService.requireUniqueName({ name: 'Test' })
       ).rejects.toThrow(`Download Source 'download-source-test' already exists with name 'Test'`);
     });
     it('does not throw if the name is unique', () => {
-      const soClient = getMockedSoClient({
+      getMockedSoClient({
         defaultDownloadSourceId: 'download-source-test',
       });
       expect(
-        async () => await downloadSourceService.requireUniqueName(soClient, { name: 'Test' })
+        async () => await downloadSourceService.requireUniqueName({ name: 'Test' })
       ).not.toThrow();
     });
   });

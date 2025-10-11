@@ -64,10 +64,7 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
   try {
     // Check that the output ID exists
     if (correctOutputId && agentlessOutputIdsToFix?.length > 0) {
-      const output = await outputService.get(
-        internalSoClientWithoutSpaceExtension,
-        correctOutputId
-      );
+      const output = await outputService.get(correctOutputId);
       fixOutput = output != null;
     }
   } catch (e) {
@@ -77,10 +74,7 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
   try {
     // Check that the fleet server host ID exists
     if (correctFleetServerId && agentlessFleetServerIdsToFix?.length > 0) {
-      const fleetServerHost = await fleetServerHostService.get(
-        internalSoClientWithoutSpaceExtension,
-        correctFleetServerId
-      );
+      const fleetServerHost = await fleetServerHostService.get(correctFleetServerId);
       fixFleetServer = fleetServerHost != null;
     }
   } catch (e) {

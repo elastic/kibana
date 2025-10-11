@@ -7,12 +7,11 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-
 import type { Logger } from '@kbn/core/server';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { createSavedObjectClientMock } from '../mocks';
-
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
@@ -22,7 +21,6 @@ import {
 } from '../constants';
 
 import { appContextService } from './app_context';
-
 import { fleetServerHostService, migrateSettingsToFleetServerHost } from './fleet_server_host';
 import { agentPolicyService } from './agent_policy';
 import { getAgentsByKuery } from './agents';
@@ -43,13 +41,6 @@ const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof ge
 function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSettings?: boolean }) {
   const soClient = createSavedObjectClientMock();
   mockedAppContextService.getInternalUserSOClient.mockReturnValue(soClient);
-
-  soClient.get.mockImplementation(async (t: string, id: string) => {
-    return {
-      id: 'test1',
-      attributes: {},
-    } as any;
-  });
 
   soClient.create.mockImplementation(async (type, data, createOptions) => {
     return {
@@ -127,6 +118,24 @@ function getMockedSoClient(options?: { id?: string; findHosts?: boolean; findSet
   });
 
   return soClient;
+}
+
+function getMockedEncryptedSoClient() {
+  const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+    getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
+  };
+
+  esoClientMock.getDecryptedAsInternalUser.mockImplementation(async (type: string, id: string) => {
+    return {
+      id: 'test1',
+      attributes: {},
+    } as any;
+  });
+
+  mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
+
+  return esoClientMock;
 }
 
 describe('migrateSettingsToFleetServerHost', () => {
@@ -253,9 +262,10 @@ describe('delete fleetServerHost', () => {
   });
 
   it('should removeFleetServerHostFromAll agent policies without force if not deleted from preconfiguration', async () => {
-    const soMock = getMockedSoClient();
     const esMock = elasticsearchServiceMock.createInternalClient();
-    await fleetServerHostService.delete(soMock, esMock, 'test1', {});
+    getMockedSoClient();
+    getMockedEncryptedSoClient();
+    await fleetServerHostService.delete(esMock, 'test1', {});
 
     expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toBeCalledWith(
       esMock,
@@ -266,10 +276,11 @@ describe('delete fleetServerHost', () => {
     );
   });
   it('should removeFleetServerHostFromAll agent policies with force if deleted from preconfiguration', async () => {
-    const soMock = getMockedSoClient();
-
     const esMock = elasticsearchServiceMock.createInternalClient();
-    await (fleetServerHostService.delete as jest.Mock)(soMock, esMock, 'test1', {
+    getMockedSoClient();
+    getMockedEncryptedSoClient();
+
+    await (fleetServerHostService.delete as jest.Mock)(esMock, 'test1', {
       fromPreconfiguration: true,
     });
 

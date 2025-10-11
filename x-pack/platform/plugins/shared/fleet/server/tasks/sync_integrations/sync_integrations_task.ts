@@ -199,7 +199,7 @@ export class SyncIntegrationsTask {
     soClient: SavedObjectsClient,
     abortController: AbortController
   ) => {
-    const outputs = await outputService.list(soClient);
+    const outputs = await outputService.list();
     const remoteESOutputs = outputs.items.filter(
       (output) => output.type === outputType.RemoteElasticsearch
     );
