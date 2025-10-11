@@ -17,8 +17,9 @@ import type { Streams } from '@kbn/streams-schema';
 import { migrateOnRead } from './migrate_on_read';
 
 const streamsStorageSettings = {
+  version: 1, // Increment this to apply new storage settings!
   name: '.kibana_streams',
-  schema: {
+  mappings: {
     properties: {
       name: types.keyword(),
       description: types.text(),
@@ -46,7 +47,7 @@ export function createStreamsStorageClient(
     logger,
     streamsStorageSettings,
     {
-      migrateSource: migrateOnRead,
+      deserializeSource: migrateOnRead,
     }
   );
 

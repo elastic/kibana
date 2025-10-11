@@ -12,17 +12,17 @@ import type {
   SimpleIStorageClient,
   StorageClientBulkResponse,
   StorageClientIndexResponse,
-  StorageDocumentOf,
+  StorageDocumentFromSettings,
 } from '../../..';
 import { StorageIndexAdapter, type StorageSettings } from '../../..';
 import type { Logger } from '@kbn/core/server';
-import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SimpleStorageIndexAdapter, StorageIndexAdapterOptions } from '..';
 import type { Client } from '@elastic/elasticsearch';
 
 const TEST_INDEX_NAME = 'test_index';
+const TEST_CONCRETE_INDEX_NAME = `${TEST_INDEX_NAME}-000001`;
 
 const createLoggerMock = (): jest.Mocked<Logger> => {
   const logger = {
@@ -40,12 +40,12 @@ const createLoggerMock = (): jest.Mocked<Logger> => {
 describe('StorageIndexAdapter', () => {
   let esServer: TestElasticsearchUtils;
   let esClient: Client;
-
   let loggerMock: jest.Mocked<Logger>;
 
   const storageSettings = {
     name: TEST_INDEX_NAME,
-    schema: {
+    version: 1,
+    mappings: {
       properties: {
         foo: {
           type: 'keyword',
@@ -53,11 +53,16 @@ describe('StorageIndexAdapter', () => {
       },
     },
   } satisfies StorageSettings;
-
   let adapter: SimpleStorageIndexAdapter<typeof storageSettings>;
   let client: SimpleIStorageClient<typeof storageSettings>;
+
+  afterAll(async () => {
+    await stopServers();
+  });
+
   beforeAll(async () => {
     await createServers();
+    resetAdapterClient();
   });
 
   afterAll(async () => {
@@ -176,6 +181,65 @@ describe('StorageIndexAdapter', () => {
     it('deletes the document', async () => {
       await verifyClean();
     });
+
+    describe('serializes and deserializes a document', () => {
+      let serdeClient: SimpleIStorageClient<typeof storageSettings>;
+      beforeAll(async () => {
+        adapter = createStorageIndexAdapter(storageSettings, {
+          deserializeSource: (source) => {
+            return {
+              ...source,
+              foo: String(source.foo).toLowerCase(),
+            } as StorageDocumentFromSettings<typeof storageSettings>;
+          },
+          serializeSource: (source) => {
+            return {
+              ...source,
+              foo: String(source.foo).toUpperCase(),
+            };
+          },
+        });
+        serdeClient = adapter.getClient();
+        await serdeClient.index({
+          id: 'otherdoc',
+          document: { foo: 'xyz' } as StorageDocumentFromSettings<typeof storageSettings>,
+        });
+      });
+
+      afterAll(async () => {
+        await client.clean();
+      });
+
+      it('returns the deserialized document on get', async () => {
+        const getResponse = await serdeClient.get({ id: 'otherdoc' });
+        expect(getResponse._source).toMatchObject({
+          foo: 'xyz',
+        });
+      });
+
+      it('returns the deserialized document on search', async () => {
+        const searchResponse = await serdeClient.search({
+          track_total_hits: true,
+          size: 1,
+          query: {
+            match: {
+              foo: 'XYZ', // Must be serialized source value!
+            },
+          },
+        });
+
+        expect(searchResponse.hits.hits[0]._source).toMatchObject({
+          foo: 'xyz',
+        });
+      });
+
+      it('stores the serialized document', async () => {
+        const getResponse = await esClient.get({ index: TEST_INDEX_NAME, id: 'otherdoc' });
+        expect(getResponse._source).toMatchObject({
+          foo: 'XYZ',
+        });
+      });
+    });
   });
 
   describe('when bulk indexing into a clean Elasticsearch instance', () => {
@@ -254,24 +318,30 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
-    describe('migrates a document with a legacy property', () => {
-      let migratingClient: SimpleIStorageClient<typeof storageSettings>;
+    describe('serializes and deserializes a document', () => {
+      let serdeClient: SimpleIStorageClient<typeof storageSettings>;
       beforeAll(async () => {
         adapter = createStorageIndexAdapter(storageSettings, {
-          migrateSource: (source) => {
+          deserializeSource: (source) => {
             return {
               ...source,
-              migratedProp: String(source.foo).toUpperCase(),
-            } as StorageDocumentOf<typeof storageSettings>;
+              foo: String(source.foo).toLowerCase(),
+            } as StorageDocumentFromSettings<typeof storageSettings>;
+          },
+          serializeSource: (source) => {
+            return {
+              ...source,
+              foo: String(source.foo).toUpperCase(),
+            };
           },
         });
-        migratingClient = adapter.getClient();
-        await client.bulk({
+        serdeClient = adapter.getClient();
+        await serdeClient.bulk({
           operations: [
             {
               index: {
                 _id: 'otherdoc',
-                document: { foo: 'xyz' } as StorageDocumentOf<typeof storageSettings>,
+                document: { foo: 'xyz' } as StorageDocumentFromSettings<typeof storageSettings>,
               },
             },
           ],
@@ -282,65 +352,89 @@ describe('StorageIndexAdapter', () => {
         await client.clean();
       });
 
-      it('returns the migrated document on get', async () => {
-        const getResponse = await migratingClient.get({ id: 'otherdoc' });
+      it('returns the deserialized document on get', async () => {
+        const getResponse = await serdeClient.get({ id: 'otherdoc' });
         expect(getResponse._source).toMatchObject({
           foo: 'xyz',
-          migratedProp: 'XYZ',
         });
       });
 
-      it('returns the migrated document on search', async () => {
-        const searchResponse = await migratingClient.search({
+      it('returns the deserialized document on search', async () => {
+        const searchResponse = await serdeClient.search({
           track_total_hits: true,
           size: 1,
           query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    foo: 'xyz',
-                  },
-                },
-              ],
+            match: {
+              foo: 'XYZ', // Must be serialized source value!
             },
           },
         });
 
         expect(searchResponse.hits.hits[0]._source).toMatchObject({
-          migratedProp: 'XYZ',
           foo: 'xyz',
+        });
+      });
+
+      it('stores the serialized document when bulk indexing', async () => {
+        const getResponse = await esClient.get({ index: TEST_INDEX_NAME, id: 'otherdoc' });
+        expect(getResponse._source).toMatchObject({
+          foo: 'XYZ',
         });
       });
     });
   });
 
-  describe('when writing/bootstrapping with an legacy index', () => {
-    beforeAll(async () => {
+  describe('when writing/bootstrapping with an n-1 version index', () => {
+    beforeEach(async () => {
       await client.index({ id: 'foo', document: { foo: 'bar' } });
-
-      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('next_version');
-
-      await client.index({ id: 'foo', document: { foo: 'bar' } });
+      await verifyIndex({ version: 1 });
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await client?.clean();
+      resetAdapterClient();
     });
-    it('updates the existing write index in place', async () => {
-      await verifyIndex({ version: 'next_version' });
 
-      const getIndicesResponse = await esClient.indices.get({
-        index: TEST_INDEX_NAME,
-      });
+    it('updates the existing write index in place to v2', async () => {
+      const putMappingSpy = jest.spyOn(esClient.indices, 'putMapping');
+      const storageSettingsV2 = {
+        ...storageSettings,
+        version: 2,
+      } satisfies StorageSettings;
+      client = new StorageIndexAdapter(esClient, loggerMock, storageSettingsV2).getClient();
 
-      const indices = Object.keys(getIndicesResponse);
+      for (const _ of [1, 2, 3]) {
+        await client.index({ id: 'foo', document: { foo: 'bar' } });
+        await verifyIndex({ version: 2 });
+      }
+      expect(putMappingSpy).toHaveBeenCalledTimes(1);
+    });
 
-      const writeIndexName = `${TEST_INDEX_NAME}-000001`;
+    it('does not update the existing write index in place if the version is the same, even if mappings changed', async () => {
+      const storageSettingsNotQuiteV2 = {
+        ...storageSettings,
+        mappings: {
+          ...storageSettings.mappings,
+          properties: {
+            // change the mappings
+            ...storageSettings.mappings.properties,
+            bar: {
+              type: 'keyword',
+            },
+          },
+        },
+        version: 1,
+      } satisfies StorageSettings;
+      client = new StorageIndexAdapter(esClient, loggerMock, storageSettingsNotQuiteV2).getClient();
+      await client.index({ id: 'foo', document: { foo: 'bar' } });
+      await verifyIndex({ version: 1 });
 
-      expect(indices).toEqual([writeIndexName]);
+      const {
+        [TEST_CONCRETE_INDEX_NAME]: { mappings },
+      } = await esClient.indices.get({ index: TEST_INDEX_NAME });
 
-      expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('next_version');
+      expect(mappings!._meta?.version).toEqual(1);
+      expect(mappings!.properties).toEqual(storageSettings.mappings.properties);
     });
 
     it('deletes the documents', async () => {
@@ -348,13 +442,38 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
+  describe('when writing/bootstrapping with a legacy-style version index', () => {
+    beforeAll(async () => {
+      // This represents an index that was created before the versioning system was introduced
+      await esClient.indices.create({
+        index: TEST_CONCRETE_INDEX_NAME,
+        aliases: {
+          [TEST_INDEX_NAME]: {
+            is_write_index: true,
+          },
+        },
+        mappings: {
+          _meta: {
+            version: 'abc', // not a number!
+          },
+          properties: storageSettings.mappings.properties,
+        },
+      });
+    });
+
+    afterAll(async () => {
+      await client?.clean();
+    });
+
+    it('updates the version to v1', async () => {
+      await client.index({ id: 'foo', document: { foo: 'bar' } });
+      await verifyIndex({ version: 1 });
+    });
+  });
+
   describe('when writing/bootstrapping with an existing, incompatible index', () => {
     beforeAll(async () => {
       await client.index({ id: 'foo', document: { foo: 'bar' } });
-
-      jest
-        .spyOn(getSchemaVersionModule, 'getSchemaVersion')
-        .mockReturnValue('incompatible_version');
     });
 
     afterAll(async () => {
@@ -364,7 +483,8 @@ describe('StorageIndexAdapter', () => {
     it('fails when indexing', async () => {
       const incompatibleAdapter = createStorageIndexAdapter({
         ...storageSettings,
-        schema: {
+        version: 2,
+        mappings: {
           properties: {
             foo: {
               type: 'text',
@@ -390,9 +510,14 @@ describe('StorageIndexAdapter', () => {
 
   function createStorageIndexAdapter<TStorageSettings extends StorageSettings>(
     settings: TStorageSettings,
-    options?: StorageIndexAdapterOptions<StorageDocumentOf<TStorageSettings>>
+    options?: StorageIndexAdapterOptions<StorageDocumentFromSettings<TStorageSettings>>
   ): SimpleStorageIndexAdapter<TStorageSettings> {
     return new StorageIndexAdapter(esClient, loggerMock, settings, options);
+  }
+
+  function resetAdapterClient() {
+    adapter = createStorageIndexAdapter(storageSettings);
+    client = adapter.getClient();
   }
 
   async function createServers() {
@@ -409,11 +534,8 @@ describe('StorageIndexAdapter', () => {
 
     esServer = await startES();
 
-    jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
     esClient = esServer.es.getClient();
     loggerMock = createLoggerMock();
-    adapter = createStorageIndexAdapter(storageSettings);
-    client = adapter.getClient();
   }
 
   async function stopServers() {
@@ -448,8 +570,8 @@ describe('StorageIndexAdapter', () => {
     expect(getIndexResponse).toEqual({});
   }
 
-  async function verifyIndex(options: { writeIndexName?: string; version?: string } = {}) {
-    const { writeIndexName = `${TEST_INDEX_NAME}-000001`, version = 'current_version' } = options;
+  async function verifyIndex(options: { writeIndexName?: string; version?: number } = {}) {
+    const { writeIndexName = TEST_CONCRETE_INDEX_NAME, version = 1 } = options;
 
     const getIndexResponse = await esClient.indices
       .get({
