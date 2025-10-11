@@ -9037,6 +9037,26 @@
                     "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "observabilityAIAssistant",
+                    "id": "def-server.ObservabilityAIAssistantClient.Unnamed.$1.analytics",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "analytics",
+                    "description": [],
+                    "signature": [
+                      "{ optIn: (optInConfig: ",
+                      "OptInConfig",
+                      ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+                      "Observable",
+                      "<",
+                      "TelemetryCounter",
+                      ">; }"
+                    ],
+                    "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/client/index.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
