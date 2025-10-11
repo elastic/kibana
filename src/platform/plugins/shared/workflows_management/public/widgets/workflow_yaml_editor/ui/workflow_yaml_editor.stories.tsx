@@ -91,7 +91,6 @@ export const Default: Story = {
     onMount: () => {},
     onChange: () => {},
     onSave: () => {},
-    onValidationErrors: () => {},
     value: workflowYaml,
   },
 };

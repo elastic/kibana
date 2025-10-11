@@ -9,24 +9,123 @@
 
 import { z } from '@kbn/zod';
 import { getCachedAllConnectors } from './connectors_cache';
-import type { EnhancedConnectorDefinition } from '../../../../common/enhanced_es_connectors';
+// import type { EnhancedConnectorDefinition } from '../../../../common/enhanced_es_connectors';
+
+/**
+ * Get required parameters for a connector type from generated schemas
+ */
+// export function getRequiredParamsForConnector(
+//   connectorType: string
+// ): Array<{ name: string; example?: string; defaultValue?: string }> {
+//   // Get all connectors (both static and generated)
+//   const allConnectors = getCachedAllConnectors();
+
+//   // Find the connector by type
+//   const connector = allConnectors.find((c) => c.type === connectorType);
+
+//   if (connector && connector.paramsSchema) {
+//     try {
+//       // Check if this connector has enhanced examples
+//       const hasEnhancedExamples = (connector as EnhancedConnectorDefinition).examples?.params;
+
+//       // Processing enhanced examples for connector
+
+//       if (hasEnhancedExamples) {
+//         // Use examples directly from enhanced connector
+//         const exampleParams = (connector as any).examples.params;
+//         // Using enhanced examples
+//         const result: Array<{ name: string; example?: any; defaultValue?: string }> = [];
+
+//         for (const [key, value] of Object.entries(exampleParams)) {
+//           // Include common important parameters for ES APIs
+//           if (
+//             [
+//               'index',
+//               'id',
+//               'body',
+//               'query',
+//               'size',
+//               'from',
+//               'sort',
+//               'aggs',
+//               'aggregations',
+//               'format',
+//             ].includes(key)
+//           ) {
+//             result.push({ name: key, example: value });
+//             // Added enhanced example
+//           }
+//         }
+
+//         if (result.length > 0) {
+//           // Returning enhanced examples
+//           return result;
+//         }
+//       }
+
+//       // Fallback to extracting from schema
+//       const params = extractRequiredParamsFromSchema(connector.paramsSchema);
+
+//       // Return only required parameters, or most important ones if no required ones
+//       const requiredParams = params.filter((p) => p.required);
+//       if (requiredParams.length > 0) {
+//         return requiredParams.map((p) => ({ name: p.name, example: p.example }));
+//       }
+
+//       // If no required params, return the most important ones for ES APIs
+//       const importantParams = params.filter((p) =>
+//         [
+//           'index',
+//           'id',
+//           'body',
+//           'query',
+//           'size',
+//           'from',
+//           'sort',
+//           'aggs',
+//           'aggregations',
+//           'format',
+//         ].includes(p.name)
+//       );
+//       if (importantParams.length > 0) {
+//         return importantParams.slice(0, 3).map((p) => ({ name: p.name, example: p.example }));
+//       }
+//     } catch (error) {
+//       // Silently continue with fallback parameters
+//     }
+//   }
+
+//   // Fallback to basic hardcoded ones for non-ES connectors
+//   const basicConnectorParams: Record<string, Array<{ name: string; example?: string }>> = {
+//     console: [{ name: 'message', example: 'Hello World' }],
+//     slack: [{ name: 'message', example: 'Hello Slack' }],
+//     http: [
+//       { name: 'url', example: 'https://api.example.com' },
+//       { name: 'method', example: 'GET' },
+//     ],
+//     wait: [{ name: 'duration', example: '5s' }],
+//   };
+
+//   return basicConnectorParams[connectorType] || [];
+// }
 
 /**
  * Get required parameters for a connector type from generated schemas
  */
 export function getRequiredParamsForConnector(
-  connectorType: string
+  connectorType: string,
+  dynamicConnectorTypes?: Record<string, any>
 ): Array<{ name: string; example?: string; defaultValue?: string }> {
   // Get all connectors (both static and generated)
-  const allConnectors = getCachedAllConnectors();
+  const allConnectors = getCachedAllConnectors(dynamicConnectorTypes);
 
   // Find the connector by type
-  const connector = allConnectors.find((c) => c.type === connectorType);
+  const connector = allConnectors.find((c: any) => c.type === connectorType);
 
   if (connector && connector.paramsSchema) {
     try {
       // Check if this connector has enhanced examples
-      const hasEnhancedExamples = (connector as EnhancedConnectorDefinition).examples?.params;
+      const hasEnhancedExamples = (connector as any).examples?.params;
 
       // Processing enhanced examples for connector
 
@@ -110,55 +209,6 @@ export function getRequiredParamsForConnector(
 }
 
 /**
- * Extract example for body parameter based on its schema
- */
-function extractBodyExample(bodySchema: z.ZodType): any {
-  try {
-    // Handle ZodOptional wrapper
-    let schema = bodySchema;
-    if (bodySchema instanceof z.ZodOptional) {
-      schema = bodySchema._def.innerType;
-    }
-
-    // If it's a ZodObject, try to extract its shape and build YAML-compatible example
-    if (schema instanceof z.ZodObject) {
-      const shape = schema._def.shape();
-      const example: any = {};
-
-      // Extract examples from each field
-      for (const [key, fieldSchema] of Object.entries(shape)) {
-        const field = fieldSchema as z.ZodType;
-        const description = (field as any)?._def?.description || '';
-
-        // Extract example from description if available
-        const stringExampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
-        const objectExampleMatch = description.match(/e\.g\.,?\s*(\{[^}]+\})/);
-
-        if (stringExampleMatch) {
-          example[key] = stringExampleMatch[1];
-        } else if (objectExampleMatch) {
-          try {
-            example[key] = JSON.parse(objectExampleMatch[1]);
-          } catch {
-            // If JSON parse fails, use as string
-            example[key] = objectExampleMatch[1];
-          }
-        }
-        // No fallback - only use examples explicitly defined in enhanced connectors
-      }
-
-      if (Object.keys(example).length > 0) {
-        return example; // Return object, not JSON string
-      }
-    }
-  } catch (error) {
-    // Fallback to empty object
-  }
-
-  return {};
-}
-
-/**
  * Extract required parameters from a Zod schema
  */
 function extractRequiredParamsFromSchema(
@@ -228,4 +278,53 @@ function extractRequiredParamsFromSchema(
   }
 
   return params;
+}
+
+/**
+ * Extract example for body parameter based on its schema
+ */
+function extractBodyExample(bodySchema: z.ZodType): any {
+  try {
+    // Handle ZodOptional wrapper
+    let schema = bodySchema;
+    if (bodySchema instanceof z.ZodOptional) {
+      schema = bodySchema._def.innerType;
+    }
+
+    // If it's a ZodObject, try to extract its shape and build YAML-compatible example
+    if (schema instanceof z.ZodObject) {
+      const shape = schema._def.shape();
+      const example: any = {};
+
+      // Extract examples from each field
+      for (const [key, fieldSchema] of Object.entries(shape)) {
+        const field = fieldSchema as z.ZodType;
+        const description = (field as any)?._def?.description || '';
+
+        // Extract example from description if available
+        const stringExampleMatch = description.match(/e\.g\.,?\s*"([^"]+)"/);
+        const objectExampleMatch = description.match(/e\.g\.,?\s*(\{[^}]+\})/);
+
+        if (stringExampleMatch) {
+          example[key] = stringExampleMatch[1];
+        } else if (objectExampleMatch) {
+          try {
+            example[key] = JSON.parse(objectExampleMatch[1]);
+          } catch {
+            // If JSON parse fails, use as string
+            example[key] = objectExampleMatch[1];
+          }
+        }
+        // No fallback - only use examples explicitly defined in enhanced connectors
+      }
+
+      if (Object.keys(example).length > 0) {
+        return example; // Return object, not JSON string
+      }
+    }
+  } catch (error) {
+    // Fallback to empty object
+  }
+
+  return {};
 }

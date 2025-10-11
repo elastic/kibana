@@ -8,14 +8,15 @@
  */
 
 import type { ConnectorContract } from '@kbn/workflows';
-import { getAllConnectors } from '../../../../common/schema';
+import { getAllConnectors, getAllConnectorsWithDynamic } from '../../../../common/schema';
 
-// Global cache for connectors (they don't change during runtime)
-let allConnectorsCache: ConnectorContract[] | null = null;
-
-export function getCachedAllConnectors() {
-  if (allConnectorsCache === null) {
-    allConnectorsCache = getAllConnectors(); // Now uses lazy loading with require()
+// Use the provided dynamic connectors or fall back to global cache
+export function getCachedAllConnectors(
+  dynamicConnectorTypes?: Record<string, any>
+): ConnectorContract[] {
+  if (dynamicConnectorTypes) {
+    // Use the same function that generates the schema to ensure consistency
+    return getAllConnectorsWithDynamic(dynamicConnectorTypes);
   }
-  return allConnectorsCache;
+  return getAllConnectors();
 }

@@ -160,10 +160,35 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
         .getStartServices()
         .then(([, pluginsStart]) => (pluginsStart as any).workflowsExecutionEngine);
 
+    // Create function to get actions client (available after start)
+    const getActionsClient = () =>
+      core
+        .getStartServices()
+        .then(([, pluginsStart]) =>
+          (
+            pluginsStart as WorkflowsExecutionEnginePluginStartDeps
+          ).actions.getUnsecuredActionsClient()
+        );
+
+    // Create function to get actions client with request (for listTypes)
+    const getActionsClientWithRequest = (request: KibanaRequest) =>
+      core
+        .getStartServices()
+        .then(([, pluginsStart]) =>
+          (
+            pluginsStart as WorkflowsExecutionEnginePluginStartDeps
+          ).actions.getActionsClientWithRequest(request)
+        );
+
     this.workflowsService = new WorkflowsService(
       esClientPromise,
       this.logger,
-      this.config.logging.console
+      WORKFLOWS_EXECUTIONS_INDEX,
+      WORKFLOWS_STEP_EXECUTIONS_INDEX,
+      WORKFLOWS_EXECUTION_LOGS_INDEX,
+      this.config.logging.console,
+      getActionsClient,
+      getActionsClientWithRequest
     );
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;

@@ -8,7 +8,9 @@
  */
 
 import { z } from '@kbn/zod';
+import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import type { ConnectorInstance } from '../../types/v1';
 import {
   BaseConnectorStepSchema,
   getForEachStepSchema,
@@ -26,9 +28,27 @@ export interface ConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
   connectorIdRequired?: boolean;
+  connectorId?: z.ZodType;
   outputSchema: z.ZodType;
   description?: string;
   summary?: string;
+  instances?: ConnectorInstance[];
+}
+
+export interface DynamicConnectorContract extends ConnectorContract {
+  /** Action type ID from Kibana actions plugin */
+  actionTypeId: string;
+  /** Available connector instances */
+  instances: Array<{
+    id: string;
+    name: string;
+    isPreconfigured: boolean;
+    isDeprecated: boolean;
+  }>;
+  /** Whether this connector type is enabled */
+  enabled?: boolean;
+  /** Whether this is a system action type */
+  isSystemActionType?: boolean;
 }
 
 export interface InternalConnectorContract extends ConnectorContract {
@@ -116,7 +136,7 @@ export function generateYamlSchemaFromConnectors(
   });
 }
 
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType) {
+export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type {
   try {
     // Generate the full schema - this should work and give us the full schema
     const jsonSchema = zodToJsonSchema(yamlSchema, {
