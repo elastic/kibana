@@ -9,28 +9,25 @@ import React from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface ConfirmDisableReportModalProps {
+interface ReportDestructiveActionConfirmationModalProps {
   title: string;
   message: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-const DisableReportConfirmationModalComponent: React.FC<ConfirmDisableReportModalProps> = ({
-  title,
-  message,
-  onCancel,
-  onConfirm,
-}) => {
+const ReportDestructiveActionConfirmationModalComponent: React.FC<
+  ReportDestructiveActionConfirmationModalProps
+> = ({ title, message, onCancel, onConfirm }) => {
   const titleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
       buttonColor="danger"
-      cancelButtonText={i18n.translate('xpack.reporting.schedules.disable.cancel', {
+      cancelButtonText={i18n.translate('xpack.reporting.schedules.destructiveAction.cancel', {
         defaultMessage: 'Cancel',
       })}
-      data-test-subj="confirm-disable-modal"
+      data-test-subj="confirm-destructive-action-modal"
       defaultFocusedButton="confirm"
       onCancel={onCancel}
       onConfirm={onConfirm}
@@ -38,8 +35,8 @@ const DisableReportConfirmationModalComponent: React.FC<ConfirmDisableReportModa
       titleProps={{
         id: titleId,
       }}
-      confirmButtonText={i18n.translate('xpack.reporting.schedules.disable.confirm', {
-        defaultMessage: 'Disable',
+      confirmButtonText={i18n.translate('xpack.reporting.schedules.destructiveAction.confirm', {
+        defaultMessage: 'Continue',
       })}
       aria-labelledby={titleId}
     >
@@ -47,6 +44,8 @@ const DisableReportConfirmationModalComponent: React.FC<ConfirmDisableReportModa
     </EuiConfirmModal>
   );
 };
-DisableReportConfirmationModalComponent.displayName = 'DisableReportConfirmationModal';
+ReportDestructiveActionConfirmationModalComponent.displayName = 'DisableReportConfirmationModal';
 
-export const DisableReportConfirmationModal = React.memo(DisableReportConfirmationModalComponent);
+export const ReportDestructiveActionConfirmationModal = React.memo(
+  ReportDestructiveActionConfirmationModalComponent
+);

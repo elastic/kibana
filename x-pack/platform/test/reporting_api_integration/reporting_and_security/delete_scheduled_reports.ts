@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');
 
-  describe('Disable Scheduled Reports', () => {
+  describe('Delete Scheduled Reports', () => {
     const scheduledReportIds: string[] = [];
 
     before(async () => {
@@ -22,11 +22,11 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
-      await reportingAPI.deleteScheduledReports(scheduledReportIds);
+      await reportingAPI.deleteReportSchedules(scheduledReportIds);
       await reportingAPI.deleteTasks(scheduledReportIds);
     });
 
-    it('should allow reporting user to disable their own scheduled report', async () => {
+    it('should allow reporting user to delete their own scheduled report', async () => {
       const report = await reportingAPI.schedulePdf(
         reportingAPI.REPORTING_USER_USERNAME,
         reportingAPI.REPORTING_USER_PASSWORD,
@@ -45,8 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       scheduledReportIds.push(reportId);
 
-      // report created by reporting user, reporting user should be able to disable
-      const res = await reportingAPI.disableReportSchedules(
+      // report created by reporting user, reporting user should be able to delete
+      const res = await reportingAPI.deleteReportSchedules(
         [reportId],
         reportingAPI.REPORTING_USER_USERNAME,
         reportingAPI.REPORTING_USER_PASSWORD
@@ -55,12 +55,12 @@ export default function ({ getService }: FtrProviderContext) {
       expect(res).to.eql({ scheduled_report_ids: [reportId], errors: [], total: 1 });
 
       const soResult = await reportingAPI.getScheduledReports(reportId);
-      expect(soResult.body._source.scheduled_report.enabled).to.eql(false);
+      expect(soResult.body.found).to.eql(false);
       const taskResult = await reportingAPI.getTask(reportId);
-      expect(taskResult.body._source?.task.enabled).to.eql(false);
+      expect(taskResult.body.found).to.eql(false);
     });
 
-    it('should not allow user to disable other users reports when no ManageReporting feature privilege', async () => {
+    it('should not allow user to delete other users reports when no ManageReporting feature privilege', async () => {
       const report = await reportingAPI.schedulePdf(
         reportingAPI.MANAGE_REPORTING_USER_USERNAME,
         reportingAPI.MANAGE_REPORTING_USER_PASSWORD,
@@ -79,8 +79,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       scheduledReportIds.push(reportId);
 
-      // report created by manage reporting user, reporting user should not be able to disable
-      const res = await reportingAPI.disableReportSchedules(
+      // report created by manage reporting user, reporting user should not be able to delete
+      const res = await reportingAPI.deleteReportSchedules(
         [reportId],
         reportingAPI.REPORTING_USER_USERNAME,
         reportingAPI.REPORTING_USER_PASSWORD
@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(taskResult.body._source?.task.enabled).to.eql(true);
     });
 
-    it('should allow user to disable other users reports when they have ManageReporting feature privilege', async () => {
+    it('should allow user to delete other users reports when they have ManageReporting feature privilege', async () => {
       const report1 = await reportingAPI.scheduleCsv(
         {
           browserTimezone: 'UTC',
@@ -144,8 +144,8 @@ export default function ({ getService }: FtrProviderContext) {
       scheduledReportIds.push(report1Id);
       scheduledReportIds.push(report2Id);
 
-      // manage reporting user should be able to disable their own report and reporting user report
-      const res = await reportingAPI.disableReportSchedules(
+      // manage reporting user should be able to delete their own report and reporting user report
+      const res = await reportingAPI.deleteReportSchedules(
         [report1Id, report2Id],
         reportingAPI.MANAGE_REPORTING_USER_USERNAME,
         reportingAPI.MANAGE_REPORTING_USER_PASSWORD
@@ -154,13 +154,13 @@ export default function ({ getService }: FtrProviderContext) {
       expect(res).to.eql({ scheduled_report_ids: [report1Id, report2Id], errors: [], total: 2 });
 
       const soResult1 = await reportingAPI.getScheduledReports(report1Id);
-      expect(soResult1.body._source.scheduled_report.enabled).to.eql(false);
+      expect(soResult1.body.found).to.eql(false);
       const soResult2 = await reportingAPI.getScheduledReports(report2Id);
-      expect(soResult2.body._source.scheduled_report.enabled).to.eql(false);
+      expect(soResult2.body.found).to.eql(false);
       const taskResult1 = await reportingAPI.getTask(report1Id);
-      expect(taskResult1.body._source?.task.enabled).to.eql(false);
+      expect(taskResult1.body.found).to.eql(false);
       const taskResult2 = await reportingAPI.getTask(report2Id);
-      expect(taskResult2.body._source?.task.enabled).to.eql(false);
+      expect(taskResult2.body.found).to.eql(false);
     });
   });
 }
