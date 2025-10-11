@@ -173,6 +173,20 @@ export const getNavigationTreeDefinition = ({
               children: [
                 {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return pathNameSerialized.startsWith(
+                      prepend('/app/elasticsearch/getting_started')
+                    );
+                  },
+                  icon: 'launch',
+                  iconV2: 'launch',
+                  id: 'getting_started',
+                  link: 'searchGettingStarted',
+                  title: i18n.translate('xpack.serverlessSearch.nav.gettingStarted', {
+                    defaultMessage: 'Getting started',
+                  }),
+                },
+                {
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
                     return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
                   },
                   icon: 'code',
