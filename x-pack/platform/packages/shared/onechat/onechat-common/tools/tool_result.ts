@@ -11,7 +11,9 @@ import type { ChartType } from '@kbn/visualization-utils';
 export enum ToolResultType {
   resource = 'resource',
   tabularData = 'tabular_data',
+  dashboard = 'dashboard',
   query = 'query',
+  visualization = 'visualization',
   other = 'other',
   error = 'error',
 }
@@ -47,6 +49,17 @@ export type TabularDataResult = ToolResultMixin<
 
 export type QueryResult = ToolResultMixin<ToolResultType.query, { esql: string }>;
 
+export interface VisualizationResult {
+  tool_result_id: string;
+  type: ToolResultType.visualization;
+  data: {
+    query: string;
+    visualization: Record<string, unknown>;
+    chartType: string;
+    esqlQuery: string;
+  };
+}
+
 export type OtherResult = ToolResultMixin<ToolResultType.other, Record<string, unknown>>;
 
 export type ErrorResult = ToolResultMixin<
@@ -62,6 +75,7 @@ export type ToolResult =
   | ResourceResult
   | TabularDataResult
   | QueryResult
+  | VisualizationResult
   | OtherResult
   | ErrorResult;
 

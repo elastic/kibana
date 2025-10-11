@@ -7,35 +7,26 @@
 
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { ChartType } from '@kbn/visualization-utils';
 import React from 'react';
-import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { useLensInput } from './use_lens_input';
 import { BaseVisualization } from '../shared/base_visualization';
 
-export function VisualizeESQL({
+export function VisualizeLens({
   lens,
   dataViews,
   uiActions,
-  esqlColumns,
-  esqlQuery,
-  preferredChartType,
+  lensConfig,
 }: {
   lens: LensPublicStart;
   dataViews: DataViewsServicePublic;
-  esqlColumns: TabularDataResult['data']['columns'] | undefined;
   uiActions: UiActionsStart;
-  esqlQuery: string;
-  preferredChartType?: ChartType;
-  errorMessages?: string[];
+  lensConfig: any;
 }) {
   const { lensInput, setLensInput, isLoading } = useLensInput({
     lens,
     dataViews,
-    esqlQuery,
-    esqlColumns,
-    preferredChartType,
+    lensConfig,
   });
 
   return (

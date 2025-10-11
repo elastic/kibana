@@ -15,6 +15,7 @@ import {
   getIndexMappingsTool,
   listIndicesTool,
   indexExplorerTool,
+  createVisualizationTool,
 } from './definitions';
 
 export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegistry }) => {
@@ -26,6 +27,7 @@ export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegist
     getIndexMappingsTool(),
     listIndicesTool(),
     indexExplorerTool(),
+    createVisualizationTool(),
   ];
 
   tools.forEach((tool) => {

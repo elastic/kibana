@@ -68,6 +68,8 @@ export class ServiceManager {
       getRunner,
       spaces,
       elasticsearch,
+      uiSettings,
+      savedObjects,
     });
 
     const agents = this.services.agents.start({
@@ -76,6 +78,8 @@ export class ServiceManager {
       elasticsearch,
       getRunner,
       toolsService: tools,
+      uiSettings,
+      savedObjects,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
