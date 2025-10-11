@@ -80,6 +80,11 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       require.resolve('../../serverless/shared/config.base.ts')
     );
 
+    const alertingPlugin = path.resolve(
+      __dirname,
+      '../../alerting_api_integration/common/plugins/alerts'
+    );
+
     return {
       ...svlSharedConfig.getAll(),
 
@@ -139,6 +144,8 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
                 ])}`,
               ]
             : []),
+          // This ensures that we register the testing alerting endpoints.
+          `--plugin-path=${alertingPlugin}`,
         ],
       },
       testFiles: options.testFiles,
