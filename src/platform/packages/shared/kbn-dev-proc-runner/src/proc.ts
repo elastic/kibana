@@ -190,12 +190,21 @@ export function startProc(name: string, options: ProcOptions, log: ToolingLog) {
     );
   }
 
+  function sendSignal(signal: NodeJS.Signals) {
+    if (!childProcess.pid) {
+      throw new Error(`Proc "${name}" does not have a process id to signal`);
+    }
+
+    process.kill(childProcess.pid, signal);
+  }
+
   return {
     name,
     lines$,
     outcome$,
     outcomePromise,
     stop,
+    signal: sendSignal,
     stopWasCalled() {
       return stopCalled;
     },

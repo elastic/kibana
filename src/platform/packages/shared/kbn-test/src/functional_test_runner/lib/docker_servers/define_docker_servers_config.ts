@@ -20,6 +20,8 @@ export interface DockerServerSpec {
   waitFor?: (server: DockerServer, logLine$: Rx.Observable<string>) => Rx.Observable<unknown>;
   /* additional command line arguments passed to docker run */
   args?: string[];
+  /** keep the container running after tests complete, allowing reuse */
+  keepRunning?: boolean;
 }
 
 export interface DockerServer extends DockerServerSpec {

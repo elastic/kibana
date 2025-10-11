@@ -14,14 +14,17 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
+import apm from 'elastic-apm-node';
+import { withSpan } from '@kbn/apm-utils';
 import { applyFipsOverrides } from '../lib/fips_overrides';
 import { Config, readConfigFile } from '../../functional_test_runner';
+import type { DockerServerSpec } from '../../functional_test_runner/lib/docker_servers/define_docker_servers_config';
+import { DockerServersService } from '../../functional_test_runner/lib/docker_servers/docker_servers_service';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
 import type { RunTestsOptions } from './flags';
-
 /**
  * Run servers and tests for each config
  */
@@ -64,6 +67,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
   for (const [i, path] of options.configs.entries()) {
     await log.indent(0, async () => {
+      const tx = apm.startTransaction(`RUN ${Path.relative(REPO_ROOT, path)}`, 'config');
+
       if (options.configs.length > 1) {
         const progress = `${i + 1}/${options.configs.length}`;
         log.write(`--- [${progress}] Running ${Path.relative(REPO_ROOT, path)}`);
@@ -97,6 +102,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         return;
       }
 
+      let dockerWarmupPromise: Promise<void> | undefined;
+      if (config.has('dockerServers')) {
+        const dockerServersConfig = config.get('dockerServers') as Record<string, DockerServerSpec>;
+        dockerWarmupPromise = DockerServersService.warmUpServers(dockerServersConfig, log);
+      }
+
       await withProcRunner(log, async (procs) => {
         const abortCtrl = new AbortController();
 
@@ -105,71 +116,133 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
           abortCtrl.abort();
         };
 
-        let shutdownEs;
-        try {
-          if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit });
-            if (abortCtrl.signal.aborted) {
-              return;
-            }
+        const shouldStartEs = process.env.TEST_ES_DISABLE_STARTUP !== 'true';
+        const kibanaProcs = config.get('kbnTestServer.useDedicatedTaskRunner')
+          ? ['kbn-ui', 'kbn-tasks']
+          : ['kibana'];
+
+        const kibanaExtraOptions = [
+          ...(shouldStartEs ? ['--setup-on-signal'] : []),
+          config.get('serverless')
+            ? '--server.versioned.versionResolution=newest'
+            : '--server.versioned.versionResolution=oldest',
+        ];
+
+        let shutdownEs: (() => Promise<void>) | undefined;
+        let fleetRegistryOverrideArg: string | undefined;
+
+        // Ensure Kibana receives the dynamically assigned Fleet registry port.
+        const applyFleetRegistryOverride = () => {
+          const resolvedRegistryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+          if (!resolvedRegistryPort) {
+            return;
           }
 
-          await runKibanaServer({
-            procs,
-            config,
-            logsDir: options.logsDir,
-            installDir: options.installDir,
-            onEarlyExit,
-            extraKbnOpts: [
-              config.get('serverless')
-                ? '--server.versioned.versionResolution=newest'
-                : '--server.versioned.versionResolution=oldest',
-            ],
-          });
+          const overrideArg = `--xpack.fleet.registryUrl=http://localhost:${resolvedRegistryPort}`;
+          if (!kibanaExtraOptions.includes(overrideArg)) {
+            kibanaExtraOptions.push(overrideArg);
+          }
+
+          fleetRegistryOverrideArg = overrideArg;
+        };
+
+        try {
+          if (dockerWarmupPromise) {
+            await dockerWarmupPromise;
+            dockerWarmupPromise = undefined;
+            applyFleetRegistryOverride();
+          }
+
+          const startKibana = () =>
+            withSpan('start_kibana', () =>
+              runKibanaServer({
+                procs,
+                config,
+                logsDir: options.logsDir,
+                installDir: options.installDir,
+                onEarlyExit,
+                extraKbnOpts: kibanaExtraOptions,
+              })
+            );
+
+          if (shouldStartEs) {
+            log.info('Starting Kibana');
+
+            const kibanaPromise = startKibana();
+
+            log.info('Starting Elasticsearch');
+
+            const shutdownEsPromise = withSpan('start_elasticsearch', () =>
+              runElasticsearch({ ...options, log, config, onEarlyExit })
+            );
+
+            shutdownEs = await shutdownEsPromise;
+
+            log.info('Started Elasticsearch, ready to send signal to', kibanaProcs.join(', '));
+
+            try {
+              kibanaProcs.forEach((procName) => {
+                procs.signal(procName, 'SIGUSR1');
+                log.info(`Sent SIGUSR1 to ${procName} to resume Kibana setup.`);
+              });
+            } catch (error) {
+              throw error;
+            }
+
+            await kibanaPromise;
+          } else {
+            await startKibana();
+          }
 
           const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
           if (startRemoteKibana) {
-            await runKibanaServer({
-              procs,
-              config: new Config({
-                settings: {
-                  ...config.getAll(),
-                  kbnTestServer: {
-                    sourceArgs: ['--no-base-path'],
-                    serverArgs: [
-                      ...config.get('kbnTestServer.serverArgs'),
-                      `--xpack.fleet.syncIntegrations.taskInterval=5s`,
-                      `--elasticsearch.hosts=http://localhost:9221`,
-                      `--server.port=5621`,
-                    ],
+            await withSpan('start_remote_kibana', () =>
+              runKibanaServer({
+                procs,
+                config: new Config({
+                  settings: {
+                    ...config.getAll(),
+                    kbnTestServer: {
+                      sourceArgs: ['--no-base-path'],
+                      serverArgs: [
+                        ...config.get('kbnTestServer.serverArgs'),
+                        `--xpack.fleet.syncIntegrations.taskInterval=5s`,
+                        `--elasticsearch.hosts=http://localhost:9221`,
+                        `--server.port=5621`,
+                        ...(fleetRegistryOverrideArg ? [fleetRegistryOverrideArg] : []),
+                      ],
+                    },
                   },
-                },
-                path: config.path,
-                module: config.module,
-              }),
-              logsDir: options.logsDir,
-              installDir: options.installDir,
-              onEarlyExit,
-              extraKbnOpts: [
-                config.get('serverless')
-                  ? '--server.versioned.versionResolution=newest'
-                  : '--server.versioned.versionResolution=oldest',
-              ],
-              remote: true,
-            });
+                  path: config.path,
+                  module: config.module,
+                }),
+                logsDir: options.logsDir,
+                installDir: options.installDir,
+                onEarlyExit,
+                extraKbnOpts: [
+                  config.get('serverless')
+                    ? '--server.versioned.versionResolution=newest'
+                    : '--server.versioned.versionResolution=oldest',
+                  ...(fleetRegistryOverrideArg ? [fleetRegistryOverrideArg] : []),
+                ],
+                remote: true,
+              })
+            );
           }
 
           if (abortCtrl.signal.aborted) {
             return;
           }
 
-          await runFtr({
-            log,
-            config,
-            esVersion: options.esVersion,
-            signal: abortCtrl.signal,
-          });
+          await withSpan('run_tests', () =>
+            runFtr({
+              log,
+              config,
+              esVersion: options.esVersion,
+              signal: abortCtrl.signal,
+            })
+          );
         } finally {
           try {
             const delay = config.get('kbnTestServer.delayShutdown');
@@ -178,12 +251,14 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               await setTimeout(delay);
             }
 
-            await procs.stop('kibana');
+            await withSpan('shutdown_kibana', () => procs.stop('kibana'));
           } finally {
             if (shutdownEs) {
-              await shutdownEs();
+              await withSpan('shutdown_es', () => shutdownEs!());
             }
           }
+
+          tx.end();
         }
       });
     });

@@ -76,6 +76,7 @@ export async function runKibanaServer(options: {
   }
 
   const mainName = (useTaskRunner ? 'kbn-ui' : 'kibana') + (options.remote ? '-remote' : '');
+
   const promises = [
     // main process
     procs.run(mainName, {

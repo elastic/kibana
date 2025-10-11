@@ -239,7 +239,8 @@ export default function (program) {
       []
     )
     .option('--allow-root', 'Required if Kibana is ran as root')
-    .option('--optimize', 'Deprecated, running the optimizer is no longer required');
+    .option('--optimize', 'Deprecated, running the optimizer is no longer required')
+    .option('--setup-on-signal', 'Delay setup/start until Kibana receives SIGUSR1');
 
   if (!isKibanaDistributable()) {
     command
@@ -324,6 +325,7 @@ export default function (program) {
       dist: !!opts.dist,
       serverless: isServerlessMode,
       uiam: isServerlessSamlSupported && !!opts.uiam,
+      setupOnSignal: !!opts.setupOnSignal,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode

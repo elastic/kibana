@@ -98,6 +98,7 @@ export function createRootWithSettings(
         watch: false,
         basePath: false,
         runExamples: false,
+        setupOnSignal: false,
         disableOptimizer: true,
         cache: true,
         dist: false,

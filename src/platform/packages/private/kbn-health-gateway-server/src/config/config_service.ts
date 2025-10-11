@@ -29,6 +29,7 @@ const KIBANA_CLI_ARGS: CliArgs = {
   dist: false,
   oss: false,
   runExamples: false,
+  setupOnSignal: false,
 };
 
 export function getConfigService({ logger }: { logger: LoggerFactory }) {

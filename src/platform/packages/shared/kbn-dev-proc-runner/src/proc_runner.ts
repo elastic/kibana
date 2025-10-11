@@ -162,6 +162,27 @@ export class ProcRunner {
     }
   }
 
+  signal(name: string, signal: NodeJS.Signals) {
+    const proc = this.getProc(name);
+
+    if (!proc) {
+      this.log.warning('[%s] not running, cannot send %s', name, signal);
+      return;
+    }
+
+    try {
+      proc.signal(signal);
+      this.log.debug(`Sent "${signal}" to proc "${name}"`);
+    } catch (error) {
+      this.log.error(
+        `Failed to send "${signal}" to proc "${name}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw error;
+    }
+  }
+
   /**
    *  Wait for all running processes to stop naturally
    *  @return {Promise<undefined>}
