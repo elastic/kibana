@@ -15,7 +15,7 @@ const FALLBACK_WARNING = i18n.translate(
   'xpack.apm.traceWaterfallContext.warningMessage.fallbackWarning',
   {
     defaultMessage:
-      'The trace document is incomplete and not all spans have arrived yet. Try refreshing the page or adjusting the time range.',
+      'The trace document is incomplete and not all spans are available. Try toggling to the full view or try refreshing the page or adjusting the time range.',
   }
 );
 
