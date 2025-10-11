@@ -47,6 +47,8 @@ type AdHocRunSORule = Pick<
 // rule ID injected from the SO references array
 type AdHocRunRule = Omit<AdHocRunSORule, 'actions'> & Pick<RuleDomain, 'id' | 'actions'>;
 
+export type AdHocRunInitiator = 'user' | 'system';
+
 export interface AdHocRunSO extends Record<string, unknown> {
   apiKeyId: string;
   apiKeyToUse: string;
@@ -54,6 +56,8 @@ export interface AdHocRunSO extends Record<string, unknown> {
   duration: string;
   enabled: boolean;
   end?: string;
+  initiator: AdHocRunInitiator;
+  initiatorId?: string;
   rule: AdHocRunSORule;
   spaceId: string;
   start: string;
@@ -69,6 +73,8 @@ export interface AdHocRun {
   enabled: boolean;
   end?: string;
   id: string;
+  initiator: AdHocRunInitiator;
+  initiatorId?: string;
   rule: AdHocRunRule;
   spaceId: string;
   start: string;

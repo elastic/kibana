@@ -76,6 +76,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: rule.id,
+            initiator: 'user',
             ranges: testBatch.flatMap(getGapScheduleRange),
           },
         ],
@@ -155,6 +156,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: rule.id,
+            initiator: 'user',
             ranges: clampedGapsBatch.flatMap(getGapScheduleRange),
           },
         ],
@@ -211,6 +213,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: rule.id,
+            initiator: 'user',
             ranges: processedGaps.flatMap(getGapScheduleRange),
           },
         ],

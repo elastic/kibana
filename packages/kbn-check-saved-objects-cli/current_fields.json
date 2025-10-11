@@ -10,6 +10,8 @@
     "apiKeyId",
     "createdAt",
     "end",
+    "initiator",
+    "initiatorId",
     "rule",
     "rule.alertTypeId",
     "rule.consumer",
