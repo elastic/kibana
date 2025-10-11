@@ -32,6 +32,7 @@ import {
   EuiContextMenu,
   EuiCallOut,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
@@ -128,6 +129,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   dataStreamName,
   onClose,
 }) => {
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'dataStreamDetailFlyoutTitle' });
   const [isManagePopOverOpen, setManagePopOver] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isEditingDataRetention, setIsEditingDataRetention] = useState<boolean>(false);
@@ -623,13 +625,13 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       <EuiFlyout
         onClose={() => onClose()}
         data-test-subj="dataStreamDetailPanel"
-        aria-labelledby="dataStreamDetailPanelTitle"
+        aria-labelledby={flyoutTitleId}
         size="m"
         maxWidth={500}
       >
         <EuiFlyoutHeader>
           <EuiTitle size="m">
-            <h2 id="dataStreamDetailPanelTitle" data-test-subj="dataStreamDetailPanelTitle">
+            <h2 id={flyoutTitleId} data-test-subj="dataStreamDetailPanelTitle">
               {dataStreamName}
               <DiscoverLink indexName={dataStreamName} />
               {dataStream && <DataStreamsBadges dataStream={dataStream} />}

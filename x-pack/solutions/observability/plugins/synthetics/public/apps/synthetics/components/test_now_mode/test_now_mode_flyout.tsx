@@ -16,6 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiLoadingSpinner,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
@@ -48,18 +49,19 @@ export function TestNowModeFlyout({
   onClose: () => void;
   onDone: (testRunId: string) => void;
 }) {
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'testNowModeFlyoutTitle' });
   const flyout = (
     <EuiFlyout
       type="push"
       size="m"
       paddingSize="m"
       maxWidth="44%"
-      aria-labelledby={TEST_RESULT}
+      aria-labelledby={flyoutTitleId}
       onClose={onClose}
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>
+          <h2 id={flyoutTitleId}>
             {name}-{TEST_RESULTS}
           </h2>
         </EuiTitle>
@@ -99,10 +101,6 @@ export function TestNowModeFlyout({
 
   return testRun || inProgress ? flyout : null;
 }
-
-const TEST_RESULT = i18n.translate('xpack.synthetics.monitorManagement.testResult', {
-  defaultMessage: 'Test result',
-});
 
 const TEST_RESULTS = i18n.translate('xpack.synthetics.monitorManagement.testResults', {
   defaultMessage: 'Test results',

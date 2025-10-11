@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiCallOut,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -55,6 +56,7 @@ function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolea
 
 export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFlyoutProps) {
   const { euiTheme } = useEuiTheme();
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'diagnosticFlyoutTitle' });
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
@@ -137,12 +139,13 @@ export function DiagnosticFlyout({ onClose, isOpen, selectedNode }: DiagnosticFl
       style={{ zIndex: 1001 }}
       maxWidth={1000}
       data-test-subj="diagnosticFlyout"
+      aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2>
+              <h2 id={flyoutTitleId}>
                 {i18n.translate('xpack.apm.serviceMap.diagnosticFlyout.title', {
                   defaultMessage: 'Diagnostic tool',
                 })}

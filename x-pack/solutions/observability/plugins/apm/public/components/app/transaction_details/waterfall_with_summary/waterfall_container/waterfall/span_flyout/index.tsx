@@ -19,6 +19,7 @@ import {
   EuiTabbedContent,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
@@ -126,17 +127,18 @@ export function SpanFlyout({
   );
 
   const { span, parentTransaction } = data;
+  const flyoutTitleId = useGeneratedHtmlId();
 
   const isLoading = isPending(status);
 
   return (
     <EuiPortal>
-      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true} titleId={flyoutTitleId}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>
+                <h2 id={flyoutTitleId}>
                   {i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle', {
                     defaultMessage: 'Span details',
                   })}

@@ -20,6 +20,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiIcon,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../../common/constants';
@@ -46,6 +47,7 @@ export const ActionStatusesPanel = () => {
   const [actionStatuses, setActionStatuses] = useState<ActionStatus[]>([]);
   const [isActionStatusLoading, setIsActionStatusLoading] = useState<boolean>(false);
   const [selectedErrorAction, setSelectedErrorAction] = useState<string | null>(null);
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'actionErrorsFlyoutTitle' });
 
   const { id: watchId, watchErrors, watchStatus, isSystemWatch } = watchDetail;
 
@@ -224,13 +226,13 @@ export const ActionStatusesPanel = () => {
       {selectedErrorAction && (
         <EuiFlyout
           size="s"
-          aria-labelledby="flyoutActionErrorTitle"
+          aria-labelledby={flyoutTitleId}
           data-test-subj="actionErrorsFlyout"
           onClose={() => setSelectedErrorAction(null)}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s">
-              <h2 id="flyoutActionErrorTitle" data-test-subj="title">
+              <h2 id={flyoutTitleId} data-test-subj="title">
                 {selectedErrorAction}
               </h2>
             </EuiTitle>

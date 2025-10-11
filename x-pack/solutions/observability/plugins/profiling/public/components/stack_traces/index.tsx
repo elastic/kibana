@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiCallOut,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
@@ -69,6 +70,7 @@ export function StackTraces({
   const [selectedSubchart, setSelectedSubchart] = useState<TopNSubchart | undefined>(undefined);
   const isExecutableType = type === TopNType.Executables;
   const displayAgentCallout = charts.length === 1 && charts[0]?.Category === 'Other';
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'stackTracesFlyoutTitle' });
 
   function handleChartClick(selectedChart: TopNSubchart) {
     // When clicking on the charts on the Traces view, the flyout must open
@@ -85,6 +87,7 @@ export function StackTraces({
         {state.status === AsyncStatus.Settled && isExecutableType && displayAgentCallout && (
           <EuiFlexItem grow={false}>
             <EuiCallOut
+              announceOnMount
               iconType="warning"
               title={i18n.translate('xpack.profiling.stackTraces.euiCallOut.wrongAgentTitle', {
                 defaultMessage: 'No executable names available',
@@ -169,6 +172,7 @@ export function StackTraces({
           onClose={() => {
             setSelectedSubchart(undefined);
           }}
+          aria-labelledby="Sub chart flyout title"
         >
           <SubChart
             style={{ overflow: 'auto' }}
@@ -184,6 +188,7 @@ export function StackTraces({
             showAxes
             showFrames={isTracesType}
             padTitle
+            titleId={flyoutTitleId}
           />
         </EuiFlyout>
       )}

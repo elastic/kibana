@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +33,7 @@ import { type ChangePointType } from './constants';
 
 export const ChangePointDetectionPage: FC = () => {
   const [isFlyoutVisible, setFlyoutVisible] = useState<boolean>(false);
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'changePointChartsflyoutTitle' });
 
   const {
     requestParams,
@@ -62,6 +64,7 @@ export const ChangePointDetectionPage: FC = () => {
   if (metricFieldOptions.length === 0) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.aiops.index.dataViewWithoutMetricNotificationTitle', {
           defaultMessage: 'The data view "{dataViewTitle}" does not contain any metric fields.',
           values: { dataViewTitle: dataView.getName() },
@@ -149,13 +152,13 @@ export const ChangePointDetectionPage: FC = () => {
         <EuiFlyout
           ownFocus
           onClose={setFlyoutVisible.bind(null, false)}
-          aria-labelledby={'change_point_charts'}
+          aria-labelledby={flyoutTitleId}
           size={'l'}
           data-test-subj={'aiopsChangePointDetectionSelectedCharts'}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h2 id={'change_point_charts'}>
+              <h2 id={flyoutTitleId}>
                 <FormattedMessage
                   id="xpack.aiops.changePointDetection.selectedChangePointsHeader"
                   defaultMessage="Selected change points"

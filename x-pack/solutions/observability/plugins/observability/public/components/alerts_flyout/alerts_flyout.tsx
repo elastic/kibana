@@ -17,6 +17,7 @@ import {
   EuiTitle,
   EuiButton,
   EuiFlyoutFooter,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutHeader } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
@@ -55,6 +56,7 @@ export function AlertsFlyout({
   observabilityRuleTypeRegistry,
   headerAppend,
 }: AlertsFlyoutProps) {
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'alertsFlyoutTitleId' });
   const {
     http: {
       basePath: { prepend },
@@ -127,12 +129,12 @@ export function AlertsFlyout({
       onClose={onClose}
       size="m"
       data-test-subj="alertsFlyout"
-      aria-label={ariaLabel}
+      aria-labelledby={flyoutTitleId}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiSpacer size="s" />
         <EuiTitle size="m" data-test-subj="alertsFlyoutTitle">
-          <h2>
+          <h2 id={flyoutTitleId}>
             {alert
               ? getAlertTitle(alert[ALERT_RULE_CATEGORY]?.[0] as string)
               : i18n.translate('xpack.observability.alertFlyout.defaultTitle', {

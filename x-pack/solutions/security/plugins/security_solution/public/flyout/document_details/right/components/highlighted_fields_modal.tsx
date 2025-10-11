@@ -203,6 +203,7 @@ export const HighlightedFieldsModal: FC<HighlightedFieldsModalProps> = ({
       data-test-subj={HIGHLIGHTED_FIELDS_MODAL_TEST_ID}
       id={modalTitleId}
       onClose={onCancel}
+      aria-labelledby={modalTitleId}
     >
       <EuiModalHeader data-test-subj={HIGHLIGHTED_FIELDS_MODAL_TITLE_TEST_ID}>
         <EuiModalHeaderTitle id={modalTitleId} size="s">

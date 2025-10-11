@@ -99,10 +99,11 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
         size="m"
         maxWidth={true}
         maskProps={{ headerZindexLocation: 'below' }}
+        aria-labelledby="spaceAwarePrivilegeFormTitle"
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
+            <h2 id="spaceAwarePrivilegeFormTitle">
               {this.state.mode === 'create' ? (
                 <FormattedMessage
                   id="xpack.security.management.editRole.spacePrivilegeForm.modalTitleCreate"
