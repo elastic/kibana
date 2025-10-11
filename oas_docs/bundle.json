@@ -20675,6 +20675,9 @@
                     "is_space_awareness_enabled": {
                       "type": "boolean"
                     },
+                    "is_ssl_secrets_storage_enabled": {
+                      "type": "boolean"
+                    },
                     "missing_optional_features": {
                       "items": {
                         "enum": [
@@ -46296,6 +46299,9 @@
                         "secret_storage_requirements_met": {
                           "type": "boolean"
                         },
+                        "ssl_secret_storage_requirements_met": {
+                          "type": "boolean"
+                        },
                         "use_space_awareness_migration_started_at": {
                           "nullable": true,
                           "type": "string"
@@ -46493,6 +46499,9 @@
                           "type": "boolean"
                         },
                         "secret_storage_requirements_met": {
+                          "type": "boolean"
+                        },
+                        "ssl_secret_storage_requirements_met": {
                           "type": "boolean"
                         },
                         "use_space_awareness_migration_started_at": {

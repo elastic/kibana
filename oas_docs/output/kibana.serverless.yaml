@@ -26855,6 +26855,8 @@ paths:
                     type: boolean
                   is_space_awareness_enabled:
                     type: boolean
+                  is_ssl_secrets_storage_enabled:
+                    type: boolean
                   isReady:
                     type: boolean
                   missing_optional_features:
@@ -42492,6 +42494,8 @@ paths:
                         type: boolean
                       secret_storage_requirements_met:
                         type: boolean
+                      ssl_secret_storage_requirements_met:
+                        type: boolean
                       use_space_awareness_migration_started_at:
                         nullable: true
                         type: string
@@ -42626,6 +42630,8 @@ paths:
                       prerelease_integrations_enabled:
                         type: boolean
                       secret_storage_requirements_met:
+                        type: boolean
+                      ssl_secret_storage_requirements_met:
                         type: boolean
                       use_space_awareness_migration_started_at:
                         nullable: true
