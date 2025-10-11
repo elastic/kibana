@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
+
 import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
 import { SAMLAuthenticationProvider, SAMLLogin } from '../../authentication';
+import { securityTelemetry } from '../../otel/instrumentation';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
 /**
@@ -42,6 +45,8 @@ export function defineSAMLRoutes({ router, getAuthenticationService }: RouteDefi
       },
     },
     async (context, request, response) => {
+      const startTime = performance.now();
+
       // When authenticating using SAML we _expect_ to redirect to the Kibana target location.
       const authenticationResult = await getAuthenticationService().login(request, {
         provider: { type: SAMLAuthenticationProvider.type },
@@ -52,11 +57,17 @@ export function defineSAMLRoutes({ router, getAuthenticationService }: RouteDefi
         },
       });
 
+      const duration = performance.now() - startTime;
+
       if (authenticationResult.redirected()) {
+        securityTelemetry.recordSamlLoginDuration(duration, { outcome: 'success' });
+
         return response.redirected({
           headers: { location: authenticationResult.redirectURL! },
         });
       }
+
+      securityTelemetry.recordSamlLoginDuration(duration, { outcome: 'failure' });
 
       return response.unauthorized({ body: authenticationResult.error });
     }

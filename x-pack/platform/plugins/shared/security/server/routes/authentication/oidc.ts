@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
+
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
@@ -13,6 +15,7 @@ import type { RouteDefinitionParams } from '..';
 import { OIDCAuthenticationProvider, OIDCLogin } from '../../authentication';
 import type { ProviderLoginAttempt } from '../../authentication/providers/oidc';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import { securityTelemetry } from '../../otel/instrumentation';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
@@ -255,6 +258,8 @@ export function defineOIDCRoutes({
     response: KibanaResponseFactory,
     loginAttempt: ProviderLoginAttempt
   ) {
+    const startTime = performance.now();
+
     try {
       // We handle the fact that the user might get redirected to Kibana while already having a session
       // Return an error notifying the user they are already logged in.
@@ -263,7 +268,12 @@ export function defineOIDCRoutes({
         value: loginAttempt,
       });
 
+      const duration = performance.now() - startTime;
+
       if (authenticationResult.succeeded()) {
+        // Record successful OIDC login
+        securityTelemetry.recordOidcLoginDuration(duration, { outcome: 'success' });
+
         return response.forbidden({
           body: i18n.translate('xpack.security.conflictingSessionError', {
             defaultMessage:
@@ -274,13 +284,20 @@ export function defineOIDCRoutes({
       }
 
       if (authenticationResult.redirected()) {
+        securityTelemetry.recordOidcLoginDuration(duration, { outcome: 'success' });
+
         return response.redirected({
           headers: { location: authenticationResult.redirectURL! },
         });
       }
 
+      securityTelemetry.recordOidcLoginDuration(duration, { outcome: 'failure' });
+
       return response.unauthorized({ body: authenticationResult.error });
     } catch (error) {
+      const duration = performance.now() - startTime;
+      securityTelemetry.recordOidcLoginDuration(duration, { outcome: 'failure' });
+
       return response.customError(wrapIntoCustomErrorResponse(error));
     }
   }
