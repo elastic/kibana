@@ -9,5 +9,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Dataset Quality', function () {
     loadTestFile(require.resolve('./data_stream_details'));
+    loadTestFile(require.resolve('./update_failure_store'));
   });
 }
