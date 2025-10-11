@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type React from 'react';
 import type { Moment } from 'moment';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart, HttpResponse } from '@kbn/core/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -51,6 +51,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { RuleDetailDescriptionFieldType } from '@kbn/alerting-types/rule_detail_description_type';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -276,9 +277,30 @@ export interface RuleTypeParamsExpressionProps<
   unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
+export interface RuleDescriptionFieldWrappers {
+  indexPattern: React.ComponentType<{ children: React.ReactNode }>;
+  indexPatternItem: React.ComponentType<{ children: React.ReactNode }>;
+  codeBlock: React.ComponentType<{ children: React.ReactNode }>;
+  asyncField: <T>(props: {
+    queryKey: string[];
+    queryFn: () => Promise<HttpResponse<T>>;
+    children: (data: T) => React.ReactNode;
+  }) => React.ReactElement;
+}
+
+export type GetDescriptionFieldsFn = ({
+  rule,
+  fieldWrappers,
+}: {
+  rule: Rule;
+  fieldWrappers: RuleDescriptionFieldWrappers;
+  http: HttpSetup | undefined;
+}) => { type: RuleDetailDescriptionFieldType; description: NonNullable<ReactNode> }[];
+
 export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
   id: string;
   description: string;
+  getDescriptionFields?: GetDescriptionFieldsFn;
   iconClass: string;
   documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (ruleParams: Params, isServerless?: boolean) => ValidationResult;
