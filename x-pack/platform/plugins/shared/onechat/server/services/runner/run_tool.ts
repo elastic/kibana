@@ -105,7 +105,6 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
     resultStore,
     logger,
   } = manager.deps;
-
   return {
     request,
     logger,
