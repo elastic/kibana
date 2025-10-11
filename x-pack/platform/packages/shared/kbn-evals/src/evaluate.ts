@@ -68,11 +68,15 @@ export const evaluate = base.extend<
   ],
   evaluationConnector: [
     async ({ fetch, log, connector }, use, testInfo) => {
-      const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
-        .connector;
+      const predefinedConnector = (
+        testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
+      ).evaluationConnector;
 
       if (predefinedConnector.id !== connector.id) {
         await createConnectorFixture({ predefinedConnector, fetch, log, use });
+      } else {
+        // If the evaluation connector is the same as the main connector, reuse it
+        await use(connector);
       }
     },
     {

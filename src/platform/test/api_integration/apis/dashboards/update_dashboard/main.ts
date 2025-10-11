@@ -16,6 +16,7 @@ const updatedDashboard = {
   options: { useMargins: false },
   panels: [
     {
+      config: {},
       type: 'visualization',
       grid: { x: 0, y: 0, w: 48, h: 60 },
       uid: '1',

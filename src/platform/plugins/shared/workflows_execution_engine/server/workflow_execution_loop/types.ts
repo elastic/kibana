@@ -16,10 +16,12 @@ import type { WorkflowEventLogger } from '../workflow_event_logger/workflow_even
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { NodesFactory } from '../step/nodes_factory';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 
 export interface WorkflowExecutionLoopParams {
   workflowExecutionGraph: WorkflowGraph;
   workflowRuntime: WorkflowExecutionRuntimeManager;
+  stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
   workflowExecutionState: WorkflowExecutionState;
   workflowLogger: WorkflowEventLogger;
   workflowExecutionRepository: WorkflowExecutionRepository;

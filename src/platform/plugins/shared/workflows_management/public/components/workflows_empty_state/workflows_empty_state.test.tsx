@@ -34,8 +34,7 @@ describe('WorkflowsEmptyState', () => {
     renderWithIntl(<WorkflowsEmptyState />);
 
     expect(screen.getByText('Get Started with Workflows')).toBeInTheDocument();
-    expect(screen.getByText(/Workflows let you automate and orchestrate/)).toBeInTheDocument();
-    expect(screen.getByText(/Start by creating a workflow/)).toBeInTheDocument();
+    expect(screen.getByText(/Workflows let you automate repetitive tasks/)).toBeInTheDocument();
   });
 
   it('renders the create button when user can create workflows', () => {

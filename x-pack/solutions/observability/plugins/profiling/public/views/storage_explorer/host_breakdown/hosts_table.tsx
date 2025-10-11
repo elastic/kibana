@@ -132,7 +132,7 @@ export function HostsTable({ data = [], hasDistinctProbabilisticValues }: Props)
                           }
                         )}
                       >
-                        <EuiBadge color="hollow" isDisabled={index > 0}>
+                        <EuiBadge color="hollow" isDisabled={index > 0} tabIndex={0}>
                           {value.value}
                         </EuiBadge>
                       </EuiToolTip>

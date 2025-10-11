@@ -32,9 +32,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should have side nav link for agents', async () => {
         await solutionNavigation.sidenav.expectLinkExists({ deepLinkId: 'agent_builder' });
         await solutionNavigation.sidenav.clickLink({ deepLinkId: 'agent_builder' });
-        await testSubjects.existOrFail('onechatPageConversations');
+        await testSubjects.existOrFail('agentBuilderWrapper');
         await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'agent_builder' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Agent Chat' });
       });
     });
     describe('classic navigation', function () {
@@ -57,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await appsMenu.openCollapsibleNav();
         await appsMenu.linkExists('Agent Builder');
         await appsMenu.clickLink('Agent Builder');
-        await testSubjects.existOrFail('onechatPageConversations');
+        await testSubjects.existOrFail('agentBuilderWrapper');
       });
     });
   });

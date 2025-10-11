@@ -6,8 +6,6 @@
  */
 
 import {
-  GET_UNIFIED_DATA_GRID_CELL,
-  GET_UNIFIED_DATA_GRID_CELL_HEADER,
   HOST_DETAILS_LINK,
   TIMELINE_DETAILS_FLYOUT,
   TIMELINE_DETAILS_FLYOUT_BTN,
@@ -25,14 +23,6 @@ export const openHostDetailsFlyout = (rowIndex: number) => {
 
 export const openUserDetailsFlyout = (rowIndex: number) => {
   cy.get(USER_DETAILS_LINK).eq(rowIndex).click();
-};
-
-export const getUnifiedTableHeaderColumn = (columnName: string) => {
-  return cy.get(GET_UNIFIED_DATA_GRID_CELL_HEADER(columnName));
-};
-
-export const getUnifiedTableHeaderColumnCell = (columnName: string, rowIndex: number) => {
-  return cy.get(GET_UNIFIED_DATA_GRID_CELL(columnName, rowIndex));
 };
 
 export const closeTimelineFlyout = () => {

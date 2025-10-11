@@ -351,6 +351,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
                       color="subdued"
                       size="s"
                       data-test-subj="isDeprecatedBadge"
+                      tabIndex={0}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>

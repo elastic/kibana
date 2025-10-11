@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { schema } from '@kbn/config-schema';
 import { transformPanelsIn } from './transform_panels_in';
 
 jest.mock('uuid', () => ({
@@ -99,5 +100,65 @@ describe('transformPanelsIn', () => {
         },
       ]
     `);
+  });
+
+  describe('validation', () => {
+    const TEST_EMBEDDABLE_TYPE = 'test';
+    const TestEmbeddableSchema = schema.object({
+      lessThan10: schema.number({
+        max: 10,
+      }),
+    });
+
+    beforeAll(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../../../../kibana_services').embeddableService = {
+        getTransforms: () => ({ schema: TestEmbeddableSchema }),
+      };
+    });
+
+    it('should throw badRequest error when panel config fails validation', () => {
+      const panels = [
+        {
+          config: {
+            lessThan10: 11, // 11 is greater then 10 so validation should fail
+          },
+          grid: {
+            h: 15,
+            w: 24,
+            x: 0,
+            y: 0,
+          },
+          type: TEST_EMBEDDABLE_TYPE,
+          uid: 'panel1',
+        },
+      ];
+      expect(() => transformPanelsIn(panels)).toThrowErrorMatchingInlineSnapshot(
+        `"Panel config validation failed. Panel uid: panel1, type: test, validation error: [lessThan10]: Value must be equal to or lower than [10]."`
+      );
+    });
+
+    it('should not throw when panel config passes validation', () => {
+      const panels = [
+        {
+          config: {
+            lessThan10: 7, // 7 is less then 10 so validation should pass
+          },
+          grid: {
+            h: 15,
+            w: 24,
+            x: 0,
+            y: 0,
+          },
+          type: TEST_EMBEDDABLE_TYPE,
+        },
+      ];
+      const results = transformPanelsIn(panels);
+      expect(JSON.parse(results.panelsJSON)[0].embeddableConfig).toMatchInlineSnapshot(`
+        Object {
+          "lessThan10": 7,
+        }
+      `);
+    });
   });
 });

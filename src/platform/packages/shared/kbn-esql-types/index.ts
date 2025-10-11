@@ -18,6 +18,7 @@ export {
   type PublishesESQLVariables,
   apiPublishesESQLVariable,
   apiPublishesESQLVariables,
+  controlHasVariableName,
 } from './src/variables_types';
 
 export {

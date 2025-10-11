@@ -416,7 +416,7 @@
         "label": "SetupTechnologySelector",
         "description": [],
         "signature": [
-          "({ disabled, allowedSetupTechnologies, setupTechnology, onSetupTechnologyChange, isAgentlessDefault, showBetaBadge, showLimitationsMessage, useDescribedFormGroup, }: SetupTechnologySelectorProps) => React.JSX.Element"
+          "({ disabled, allowedSetupTechnologies, setupTechnology, onSetupTechnologyChange, isAgentlessDefault, showBetaBadge, useDescribedFormGroup, }: SetupTechnologySelectorProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/public/services/setup_technology_selector.tsx",
         "deprecated": false,
@@ -427,7 +427,7 @@
             "id": "def-public.SetupTechnologySelector.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  disabled,\n  allowedSetupTechnologies = [SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS],\n  setupTechnology,\n  onSetupTechnologyChange,\n  isAgentlessDefault = false,\n  showBetaBadge = true,\n  showLimitationsMessage = false,\n  useDescribedFormGroup = true,\n}",
+            "label": "{\n  disabled,\n  allowedSetupTechnologies = [SetupTechnology.AGENT_BASED, SetupTechnology.AGENTLESS],\n  setupTechnology,\n  onSetupTechnologyChange,\n  isAgentlessDefault = false,\n  showBetaBadge = true,\n  useDescribedFormGroup = true,\n}",
             "description": [],
             "signature": [
               "SetupTechnologySelectorProps"

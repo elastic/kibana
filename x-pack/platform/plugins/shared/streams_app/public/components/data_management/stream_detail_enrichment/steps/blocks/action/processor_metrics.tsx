@@ -74,7 +74,7 @@ export const ProcessorMetricBadges = ({
               values: { failedRate },
             })}
           >
-            <>
+            <span tabIndex={0}>
               <EuiTextColor color="danger">
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
@@ -83,7 +83,7 @@ export const ProcessorMetricBadges = ({
                   <EuiFlexItem>{failedRate}</EuiFlexItem>
                 </EuiFlexGroup>
               </EuiTextColor>
-            </>
+            </span>
           </EuiToolTip>
         </EuiFlexItem>
       )}

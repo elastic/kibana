@@ -13,15 +13,15 @@ import type {
   DeleteConversationResponse,
 } from '@kbn/onechat-plugin/common/http_api/conversations';
 import { createLlmProxy, type LlmProxy } from '../utils/llm_proxy';
+import { setupAgentDirectAnswer } from '../utils/proxy_scenario';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../utils/llm_proxy/llm_proxy_action_connector';
 import { createOneChatApiClient } from '../utils/one_chat_client';
-import { toolCallMock } from '../utils/llm_proxy/mocks';
-import type { OneChatFtrProviderContext } from '../configs/ftr_provider_context';
+import type { OneChatApiFtrProviderContext } from '../../onechat/services/api';
 
-export default function ({ getService }: OneChatFtrProviderContext) {
+export default function ({ getService }: OneChatApiFtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
   const oneChatApiClient = createOneChatApiClient(supertest);
@@ -53,12 +53,11 @@ export default function ({ getService }: OneChatFtrProviderContext) {
     });
 
     async function createConversation(input: string, title: string): Promise<string> {
-      void llmProxy.interceptors.toolChoice({
-        name: 'set_title',
-        response: toolCallMock('set_title', { title }),
+      await setupAgentDirectAnswer({
+        proxy: llmProxy,
+        title,
+        response: `Response to: ${input}`,
       });
-
-      void llmProxy.interceptors.userMessage({ response: `Response to: ${input}` });
 
       const response = await oneChatApiClient.converse({
         input,

@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  aiAssistantManagementSelection: 8988
+  aiAssistantManagementSelection: 9214
   aiops: 19890
   alerting: 28395
   apm: 38573
@@ -116,7 +116,7 @@ pageLoadAssetSize:
   observabilityLogsExplorer: 4918
   observabilityOnboarding: 12872
   observabilityShared: 82382
-  onechat: 17322
+  onechat: 19088
   osquery: 47588
   painlessLab: 6299
   presentationPanel: 11484
@@ -149,7 +149,7 @@ pageLoadAssetSize:
   searchQueryRules: 6689
   searchSynonyms: 6371
   security: 79987
-  securitySolution: 106289
+  securitySolution: 120431
   securitySolutionEss: 43319
   securitySolutionServerless: 62964
   serverless: 10682

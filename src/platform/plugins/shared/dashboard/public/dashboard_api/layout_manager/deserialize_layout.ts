@@ -53,7 +53,7 @@ export function deserializeLayout(
       });
     } else {
       // if not a section, then this widget is a panel
-      pushPanel(widget);
+      pushPanel(widget as DashboardPanel);
     }
   });
   return { layout, childState };

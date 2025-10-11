@@ -6,7 +6,7 @@
  */
 
 import type { AlertAttachmentAttributes } from '../../../common/types/domain';
-import { AttachmentType } from '../../../common/types/domain';
+import { AttachmentType, CaseStatuses } from '../../../common/types/domain';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { createCasesClientMockArgs } from '../../client/mocks';
 import {
@@ -30,6 +30,8 @@ import {
 
 describe('CaseCommentModel', () => {
   const theCase = mockCases[0];
+  const closedCase = mockCases[3];
+
   const clientArgs = createCasesClientMockArgs();
   const createdDate = '2023-04-07T12:18:36.941Z';
 
@@ -401,6 +403,29 @@ describe('CaseCommentModel', () => {
             createdDate,
           })
         ).resolves.not.toThrow();
+      });
+
+      it('throws if trying to add an event or alert to a closed case', async () => {
+        expect(closedCase.attributes.status).toEqual(CaseStatuses.closed);
+        clientArgs.services.caseService.getCase.mockResolvedValue(closedCase);
+
+        const modelForClosedCase = await CaseCommentModel.create(closedCase.id, clientArgs);
+
+        await expect(
+          modelForClosedCase.createComment({
+            id: 'comment-1',
+            commentReq: alertComment,
+            createdDate,
+          })
+        ).rejects.toThrow();
+
+        await expect(
+          modelForClosedCase.createComment({
+            id: 'comment-1',
+            commentReq: eventComment,
+            createdDate,
+          })
+        ).rejects.toThrow();
       });
     });
   });

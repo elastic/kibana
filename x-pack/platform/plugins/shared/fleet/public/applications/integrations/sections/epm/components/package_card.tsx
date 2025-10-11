@@ -121,7 +121,9 @@ export function PackageCard({
               width: 100%;
             `}
           >
-            <EuiBadge color="warning">{DEFERRED_ASSETS_WARNING_LABEL} </EuiBadge>
+            <EuiBadge color="warning" tabIndex={0}>
+              {DEFERRED_ASSETS_WARNING_LABEL}{' '}
+            </EuiBadge>
           </EuiToolTip>
         </span>
       </EuiFlexItem>

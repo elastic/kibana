@@ -15,7 +15,7 @@ export const ChartTitle = ({
   searchTerm,
   title,
 }: {
-  searchTerm: string;
+  searchTerm?: string;
   title: string;
 }): React.ReactNode => {
   const { euiTheme } = useEuiTheme();

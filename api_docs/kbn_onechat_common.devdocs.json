@@ -2442,6 +2442,29 @@
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.EsqlToolParam.defaultValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [
+              "\nDefault value for the parameter when it's optional and not provided.\nMust be compatible with the parameter's type (see EsqlToolParamValue)."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.EsqlToolParamValue",
+                "text": "EsqlToolParamValue"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3824,6 +3847,23 @@
         "description": [],
         "signature": [
           "\"boolean\" | \"object\" | \"nested\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"float\" | \"double\""
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.EsqlToolParamValue",
+        "type": "Type",
+        "tags": [],
+        "label": "EsqlToolParamValue",
+        "description": [
+          "\nValid types for parameter values and default values"
+        ],
+        "signature": [
+          "string | number | boolean | Record<string, unknown> | Record<string, unknown>[]"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/tools/types/esql.ts",
         "deprecated": false,

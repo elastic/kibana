@@ -27,6 +27,9 @@ export function ErrorBudgetActions({ setDashboardAttachmentReady }: Props) {
       data-test-subj="o11yErrorBudgetActionsButton"
       iconType={'boxesHorizontal'}
       onClick={() => setIsActionsPopoverOpen(!isActionsPopoverOpen)}
+      aria-label={i18n.translate('xpack.slo.item.actions.openMenuAriaLabel', {
+        defaultMessage: 'Error budget actions context menu',
+      })}
     />
   );
   return (

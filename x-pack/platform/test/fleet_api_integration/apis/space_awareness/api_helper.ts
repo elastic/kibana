@@ -144,6 +144,21 @@ export class SpaceTestApiClient {
     expectStatusCode200(res);
   }
 
+  async upgradePackagePolicies(
+    spaceId?: string,
+    packagePolicyIds: string[] = []
+  ): Promise<CreatePackagePolicyResponse> {
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies/upgrade`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ packagePolicyIds });
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
   async getPackagePolicy(
     packagePolicyId: string,
     spaceId?: string
@@ -515,6 +530,18 @@ export class SpaceTestApiClient {
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send({ force });
+
+    expectStatusCode200(res);
+
+    return res.body;
+  }
+
+  async rollbackPackage({ pkgName }: { pkgName: string }, spaceId?: string) {
+    const res = await this.supertest
+      .post(`${this.getBaseUrl(spaceId)}/api/fleet/epm/packages/${pkgName}/rollback`)
+      .auth(this.auth.username, this.auth.password)
+      .set('kbn-xsrf', 'xxxx')
+      .send({});
 
     expectStatusCode200(res);
 

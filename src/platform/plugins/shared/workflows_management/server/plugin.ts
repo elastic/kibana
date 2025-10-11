@@ -19,11 +19,6 @@ import type {
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
-import {
-  WORKFLOWS_EXECUTION_LOGS_INDEX,
-  WORKFLOWS_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-} from '../common';
 import type { WorkflowsManagementConfig } from './config';
 
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
@@ -168,9 +163,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.workflowsService = new WorkflowsService(
       esClientPromise,
       this.logger,
-      WORKFLOWS_EXECUTIONS_INDEX,
-      WORKFLOWS_STEP_EXECUTIONS_INDEX,
-      WORKFLOWS_EXECUTION_LOGS_INDEX,
       this.config.logging.console
     );
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);

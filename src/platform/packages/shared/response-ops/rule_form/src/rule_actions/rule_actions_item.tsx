@@ -617,7 +617,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
                 : RUN_WHEN_GROUP_TITLE(selectedActionGroup!.name.toLocaleLowerCase())
             }
           >
-            <EuiBadge iconType="clock" />
+            <EuiBadge tabIndex={0} iconType="clock" />
           </EuiToolTip>
         </EuiFlexItem>
       );
@@ -635,7 +635,12 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
       return (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={ACTION_WARNING_TITLE}>
-            <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning" />
+            <EuiBadge
+              tabIndex={0}
+              data-test-subj="warning-badge"
+              iconType="warning"
+              color="warning"
+            />
           </EuiToolTip>
         </EuiFlexItem>
       );

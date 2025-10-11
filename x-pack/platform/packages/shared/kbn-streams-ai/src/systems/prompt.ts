@@ -64,6 +64,7 @@ export const IdentifySystemsPrompt = createPrompt({
   input: z.object({
     stream: z.object({
       name: z.string(),
+      description: z.string(),
     }),
     dataset_analysis: z.string(),
     initial_clustering: z.string(),
