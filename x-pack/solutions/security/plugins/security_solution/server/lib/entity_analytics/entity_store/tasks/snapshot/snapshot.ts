@@ -149,8 +149,8 @@ const removeAllFieldsAndResetTimestamp: string = minifyPainless(`
     Map newDoc = new HashMap();
 
     // Keep the entity.id field
+    newDoc.entity = new HashMap();
     if (ctx._source.entity?.id != null) {
-      newDoc.entity = new HashMap();
       newDoc.entity.id = ctx._source.entity.id;
     }
     // Keep host/user/service identity fields if present
@@ -164,6 +164,16 @@ const removeAllFieldsAndResetTimestamp: string = minifyPainless(`
 
     // Set the entity.last_seen_timestamp field to the current time
     newDoc.entity.last_seen_timestamp = params.timestampNow;
+
+    // Reset entity.behaviors fields if they exist
+    if (ctx._source.entity?.behaviors != null) {
+      newDoc.entity.behaviors = new HashMap();
+      for (String key : ctx._source.entity.behaviors.keySet()) {
+        if (ctx._source.entity.behaviors[key] instanceof Boolean) {
+          newDoc.entity.behaviors[key] = false;
+        }
+      }
+    }
 
     // Replace the existing document with the new filtered document
     ctx._source = newDoc;
