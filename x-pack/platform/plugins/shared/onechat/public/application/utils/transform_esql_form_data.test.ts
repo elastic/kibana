@@ -10,6 +10,7 @@ import type { EsqlToolDefinition } from '@kbn/onechat-common';
 import { ToolType } from '@kbn/onechat-common';
 import type { CreateToolPayload } from '../../../common/http_api/tools';
 import {
+  convertDefaultValueToType,
   transformEsqlFormDataForCreate,
   transformEsqlFormDataForUpdate,
   transformEsqlToolToFormData,
@@ -197,6 +198,98 @@ describe('transformEsqlFormData', () => {
 
       const result = transformEsqlFormDataForUpdate(mockFormData);
       expect(result).toEqual(toolWithoutIdAndType);
+    });
+  });
+
+  describe('convertDefaultValueToType', () => {
+    describe('integer and long types', () => {
+      it('should return number as-is when already an integer', () => {
+        expect(convertDefaultValueToType(42, 'integer')).toBe(42);
+        expect(convertDefaultValueToType(42, 'long')).toBe(42);
+      });
+
+      it('should convert valid string to integer', () => {
+        expect(convertDefaultValueToType('42', 'integer')).toBe(42);
+        expect(convertDefaultValueToType(' 42 ', 'long')).toBe(42);
+      });
+
+      it('should throw error for invalid string', () => {
+        expect(() => convertDefaultValueToType('abc', 'integer')).toThrow(
+          'Invalid integer value: abc'
+        );
+        expect(() => convertDefaultValueToType('not-a-number', 'long')).toThrow(
+          'Invalid integer value: not-a-number'
+        );
+      });
+
+      it('should throw error for non-string non-number', () => {
+        expect(() => convertDefaultValueToType(true, 'integer')).toThrow(
+          'Invalid integer value: true'
+        );
+      });
+    });
+
+    describe('double and float types', () => {
+      it('should return number as-is when already a number', () => {
+        expect(convertDefaultValueToType(42.5, 'double')).toBe(42.5);
+        expect(convertDefaultValueToType(42.5, 'float')).toBe(42.5);
+      });
+
+      it('should convert valid string to number', () => {
+        expect(convertDefaultValueToType('42.5', 'double')).toBe(42.5);
+        expect(convertDefaultValueToType(' 42.5 ', 'float')).toBe(42.5);
+      });
+
+      it('should throw error for invalid string', () => {
+        expect(() => convertDefaultValueToType('abc', 'double')).toThrow(
+          'Invalid number value: abc'
+        );
+      });
+
+      it('should throw error for non-string non-number', () => {
+        expect(() => convertDefaultValueToType(true, 'float')).toThrow(
+          'Invalid number value: true'
+        );
+      });
+    });
+
+    describe('boolean type', () => {
+      it('should return boolean as-is when already a boolean', () => {
+        expect(convertDefaultValueToType(true, 'boolean')).toBe(true);
+        expect(convertDefaultValueToType(false, 'boolean')).toBe(false);
+      });
+
+      it('should convert valid string to boolean', () => {
+        expect(convertDefaultValueToType('true', 'boolean')).toBe(true);
+        expect(convertDefaultValueToType('TRUE', 'boolean')).toBe(true);
+        expect(convertDefaultValueToType('false', 'boolean')).toBe(false);
+        expect(convertDefaultValueToType('FALSE', 'boolean')).toBe(false);
+        expect(convertDefaultValueToType(' true ', 'boolean')).toBe(true);
+      });
+
+      it('should throw error for invalid string', () => {
+        expect(() => convertDefaultValueToType('yes', 'boolean')).toThrow(
+          'Invalid boolean value: yes'
+        );
+        expect(() => convertDefaultValueToType('1', 'boolean')).toThrow('Invalid boolean value: 1');
+      });
+
+      it('should throw error for non-string non-boolean', () => {
+        expect(() => convertDefaultValueToType(42, 'boolean')).toThrow('Invalid boolean value: 42');
+      });
+    });
+
+    describe('text, keyword, and date types', () => {
+      it('should return string as-is when already a string', () => {
+        expect(convertDefaultValueToType('hello', 'text')).toBe('hello');
+        expect(convertDefaultValueToType('world', 'keyword')).toBe('world');
+        expect(convertDefaultValueToType('2023-01-01', 'date')).toBe('2023-01-01');
+      });
+
+      it('should convert other types to string', () => {
+        expect(convertDefaultValueToType(42, 'text')).toBe('42');
+        expect(convertDefaultValueToType(true, 'keyword')).toBe('true');
+      });
     });
   });
 });
