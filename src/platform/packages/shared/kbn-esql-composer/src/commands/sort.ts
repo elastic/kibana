@@ -28,6 +28,44 @@ type SortArgs = Sort | string | Array<Sort | string>;
  * @param restArgs Additional sort criteria or options.
  * @returns A `QueryPipeline` instance with the `SORT` command appended.
  */
+/**
+ * Processes sort arguments into normalized sort instructions
+ */
+function processSortArgs(sortArgs: SortArgs[]): Array<{ column: string; order: SortOrder }> {
+  return sortArgs
+    .flatMap((sortInstruction): Array<string | Sort> => {
+      if (Array.isArray(sortInstruction)) {
+        return sortInstruction;
+      }
+      return [sortInstruction];
+    })
+    .map((sortInstruction): { column: string; order: SortOrder } => {
+      if (typeof sortInstruction === 'string') {
+        return { column: sortInstruction, order: SortOrder.Asc };
+      }
+      const column = Object.keys(sortInstruction)[0];
+      if (!column) {
+        throw new Error('Sort object must have at least one property');
+      }
+
+      return {
+        column,
+        order: sortInstruction[column],
+      };
+    });
+}
+
+/**
+ * Generates a SORT command string from sort instructions
+ */
+function generateSortCommand(
+  sortInstructions: Array<{ column: string; order: SortOrder }>
+): string {
+  return `SORT ${sortInstructions
+    .map((sortInstruction) => `${sortInstruction.column} ${sortInstruction.order}`)
+    .join(', ')}`;
+}
+
 export function sort(
   firstArg: string | SortArgs,
   secondArg?: Params | SortArgs | CommandOptions,
@@ -50,65 +88,15 @@ export function sort(
   if (isCommandOptions(secondArg)) {
     const options = secondArg;
     const sortArgs = [firstArg];
-
-    const allSorts = sortArgs
-      .flatMap((sortInstruction): Array<string | Sort> => {
-        if (Array.isArray(sortInstruction)) {
-          return sortInstruction;
-        }
-        return [sortInstruction];
-      })
-      .map((sortInstruction): { column: string; order: SortOrder } => {
-        if (typeof sortInstruction === 'string') {
-          return { column: sortInstruction, order: SortOrder.Asc };
-        }
-        const column = Object.keys(sortInstruction)[0];
-        if (!column) {
-          throw new Error('Sort object must have at least one property');
-        }
-
-        return {
-          column,
-          order: sortInstruction[column],
-        };
-      });
-
-    const command = `SORT ${allSorts
-      .map((sortInstruction) => `${sortInstruction.column} ${sortInstruction.order}`)
-      .join(', ')}`;
-
+    const allSorts = processSortArgs(sortArgs);
+    const command = generateSortCommand(allSorts);
     return append({ command, comment: options?.comment });
   }
 
   // Handle variadic sort arguments case
   const allArgs = [firstArg, ...(secondArg !== undefined ? [secondArg] : []), ...restArgs];
   const { options, remaining: sortArgs } = extractOptions(allArgs);
-
-  const allSorts = sortArgs
-    .flatMap((sortInstruction): Array<string | Sort> => {
-      if (Array.isArray(sortInstruction)) {
-        return sortInstruction;
-      }
-      return [sortInstruction as string | Sort];
-    })
-    .map((sortInstruction): { column: string; order: SortOrder } => {
-      if (typeof sortInstruction === 'string') {
-        return { column: sortInstruction, order: SortOrder.Asc };
-      }
-      const column = Object.keys(sortInstruction)[0];
-      if (!column) {
-        throw new Error('Sort object must have at least one property');
-      }
-
-      return {
-        column,
-        order: sortInstruction[column],
-      };
-    });
-
-  const command = `SORT ${allSorts
-    .map((sortInstruction) => `${sortInstruction.column} ${sortInstruction.order}`)
-    .join(', ')}`;
-
+  const allSorts = processSortArgs(sortArgs as SortArgs[]);
+  const command = generateSortCommand(allSorts);
   return append({ command, comment: options?.comment });
 }
