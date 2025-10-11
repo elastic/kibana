@@ -31,6 +31,8 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { IndexPatternAdapter } from '@kbn/index-adapter';
 import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import type { ESSearchRequest } from '@kbn/es-types';
 import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -883,7 +885,7 @@ export class AIAssistantService {
     }
   }
 
-  private async createDefaultAnonymizationFields(spaceId: string) {
+  public async createDefaultAnonymizationFields(spaceId: string) {
     const dataClient = new AIAssistantDataClient({
       logger: this.options.logger,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
@@ -893,17 +895,41 @@ export class AIAssistantService {
       currentUser: null,
     });
 
-    const existingAnonymizationFields = await (
+    const defaultAnonymizationFields = getDefaultAnonymizationFields(spaceId);
+    // ElasticSearch query to returns all default anonymization fields
+    const defaultAnonymizationFieldsQuery = {
+      terms: { field: defaultAnonymizationFields.map((field) => field.field) },
+    };
+
+    const existingAnonymizationFieldsResponse = await (
       await dataClient?.getReader()
-    ).search({
-      size: 1,
+    ).search<ESSearchRequest, AnonymizationFieldResponse>({
+      size: defaultAnonymizationFields.length,
       allow_no_indices: true,
+      query: defaultAnonymizationFieldsQuery,
     });
-    if (existingAnonymizationFields.hits.total.value === 0) {
+
+    if (
+      existingAnonymizationFieldsResponse.hits.total.value !== defaultAnonymizationFields.length
+    ) {
+      const existingAnonymizationFields = existingAnonymizationFieldsResponse.hits.hits.map(
+        (doc) => doc._source
+      );
+
+      const existingAnonymizationFieldsMap = new Map(
+        existingAnonymizationFields.map((doc) => [doc.field, doc])
+      );
+
+      const documentsToCreate = defaultAnonymizationFields.filter(
+        (field) => !existingAnonymizationFieldsMap.has(field.field)
+      );
+
       const writer = await dataClient?.getWriter();
+
       const res = await writer?.bulk({
-        documentsToCreate: getDefaultAnonymizationFields(spaceId),
+        documentsToCreate,
       });
+
       this.options.logger.info(`Created default anonymization fields: ${res?.docs_created.length}`);
     }
   }
