@@ -23,6 +23,7 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import { type BehaviorSubject } from 'rxjs';
+import type { TypeOf } from '@kbn/config-schema';
 import type { SeverityThreshold } from '../../common/types/anomalies';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
@@ -43,6 +44,7 @@ import type {
   AnomalySwimLaneEmbeddableType,
   MlEmbeddableTypes,
 } from './constants';
+import type { anomalyChartsEmbeddableStateSchema } from '../../server/embeddable/schemas';
 
 export type {
   AnomalySwimLaneEmbeddableState,
@@ -136,9 +138,7 @@ export interface AnomalyChartsDataLoadingApi {
 /**
  * Persisted state for the Anomaly Charts Embeddable.
  */
-export interface AnomalyChartsEmbeddableState
-  extends SerializedTitles,
-    AnomalyChartsEmbeddableOverridableState {}
+export type AnomalyChartsEmbeddableState = TypeOf<typeof anomalyChartsEmbeddableStateSchema>;
 
 export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoadingApi;
 
@@ -165,13 +165,6 @@ export interface AnomalyChartsAttachmentApi extends AnomalyChartsApi {
     timeRange$: BehaviorSubject<TimeRange | undefined>;
   };
 }
-
-/**
- * Persisted state for the Anomaly Charts Embeddable.
- */
-export interface AnomalyChartsEmbeddableState
-  extends SerializedTitles,
-    AnomalyChartsEmbeddableOverridableState {}
 
 /** Manual input by the user */
 export interface SingleMetricViewerEmbeddableUserInput {
