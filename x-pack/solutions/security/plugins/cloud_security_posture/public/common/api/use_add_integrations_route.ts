@@ -13,8 +13,11 @@ export const useAddIntegrationRoute = (
 ) => {
   const { application } = useKibana().services;
   const integrationsPath = application.getUrlForApp(INTEGRATIONS_PLUGIN_ID);
+  const navLinkAccess = application.capabilities.navLinks?.[INTEGRATIONS_PLUGIN_ID];
 
-  const addIntegrationPath = `${integrationsPath}/browse/security/${category}`;
+  const addIntegrationPath = navLinkAccess
+    ? `${integrationsPath}/browse/security/${category}`
+    : undefined;
 
   return addIntegrationPath;
 };
