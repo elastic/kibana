@@ -39,6 +39,24 @@ import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../definitions/utils/ast';
 
+export const DATE_DIFF_TIME_UNITS = (() => {
+  const dateDiffDefinition = scalarFunctionDefinitions.find(
+    ({ name }) => name.toLowerCase() === 'date_diff'
+  );
+  const suggestedValues = dateDiffDefinition?.signatures?.[0]?.params?.[0]?.suggestedValues ?? [];
+
+  return suggestedValues.map((unit) => `"${unit}", `);
+})();
+
+export const mockFieldsWithTypes = (
+  mockCallbacks: ICommandCallbacks,
+  fieldNames: string[]
+): void => {
+  (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+    fieldNames.map((fieldName) => ({ label: fieldName, text: fieldName }))
+  );
+};
+
 export const suggest = (
   query: string,
   context = mockContext,

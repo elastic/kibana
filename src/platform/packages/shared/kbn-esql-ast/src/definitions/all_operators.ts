@@ -14,9 +14,21 @@ import { operatorFunctionDefinitions } from './generated/operators';
 
 // Retrieve the definitions from the operatorFunctionDefinitions. In the operatorFunctionDefinitions there is no distinction between
 // other operators and the comparison ones, so we do this here.
+export const arithmeticOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === '+' || name === '-' || name === '*' || name === '/' || name === '%'
+);
+
 export const comparisonFunctions: FunctionDefinition[] = operatorFunctionDefinitions.filter(
   ({ name }) =>
     name === '==' || name === '!=' || name === '<' || name === '>' || name === '<=' || name === '>='
+);
+
+export const nullCheckOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === 'is null' || name === 'is not null'
+);
+
+export const inOperators: FunctionDefinition[] = operatorFunctionDefinitions.filter(
+  ({ name }) => name === 'in' || name === 'not in'
 );
 
 export const logicalOperators: FunctionDefinition[] = [

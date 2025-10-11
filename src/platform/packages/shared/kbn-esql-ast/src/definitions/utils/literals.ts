@@ -12,8 +12,21 @@ import { withAutoSuggest } from './autocomplete/helpers';
 import type { ISuggestionItem } from '../../commands_registry/types';
 import { timeUnitsToSuggest } from '../constants';
 import { getControlSuggestion } from './autocomplete/helpers';
+import type { FunctionParameterType, SupportedDataType } from '../types';
+import { commaCompleteItem } from '../../commands_registry/complete_items';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
+
+// Targeted: define option interfaces for constants/date literals
+export interface BuildConstantsOptions {
+  advanceCursorAndOpenSuggestions?: boolean;
+  addComma?: boolean;
+}
+
+export interface DateLiteralsOptions {
+  advanceCursorAndOpenSuggestions?: boolean;
+  addComma?: boolean;
+}
 
 export const buildConstantsDefinitions = (
   userConstants: string[],
@@ -22,7 +35,7 @@ export const buildConstantsDefinitions = (
   /**
    * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
    */
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean },
+  options?: BuildConstantsOptions,
   documentationValue?: string
 ): ISuggestionItem[] =>
   userConstants.map((label) => {
@@ -45,10 +58,7 @@ export const buildConstantsDefinitions = (
     return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });
 
-export function getDateLiterals(options?: {
-  advanceCursorAndOpenSuggestions?: boolean;
-  addComma?: boolean;
-}) {
+export function getDateLiterals(options?: DateLiteralsOptions) {
   return [
     ...buildConstantsDefinitions(
       TIME_SYSTEM_PARAMS,
@@ -91,20 +101,38 @@ export function getUnitDuration(unit: number = 1) {
 }
 
 /**
- * Given information about the current command and the parameter type, suggest
+ * Returns time unit literals (e.g., "1 day", "1 hour") and optionally appends a trailing comma item.
+ * Generic literal builder (no policy), controlled via options.
+ */
+export function getTimeUnitLiterals(
+  addComma: boolean,
+  advanceCursorAndOpenSuggestions: boolean
+): ISuggestionItem[] {
+  const items: ISuggestionItem[] = [
+    ...buildConstantsDefinitions(
+      timeUnitsToSuggest.map(({ name }) => name),
+      undefined,
+      undefined,
+      {
+        addComma,
+        advanceCursorAndOpenSuggestions,
+      }
+    ),
+  ];
+
+  if (addComma || advanceCursorAndOpenSuggestions) {
+    items.push(commaCompleteItem);
+  }
+
+  return items;
+}
+
+/**
+ * Given information about the current parameter type, suggest
  * some literals that may make sense.
- *
- * TODO — this currently tries to cover both command-specific suggestions and type
- * suggestions. We could consider separating the two... or just using parameter types
- * and forgetting about command-specific suggestions altogether.
- *
- * Another thought... should literal suggestions be defined in the definitions file?
- * That approach might allow for greater specificity in the suggestions and remove some
- * "magical" logic. Maybe this is really the same thing as the literalOptions parameter
- * definition property...
  */
 export function getCompatibleLiterals(
-  types: string[],
+  types: (FunctionParameterType | SupportedDataType | 'unknown')[],
   options?: {
     advanceCursorAndOpenSuggestions?: boolean;
     addComma?: boolean;
@@ -131,16 +159,15 @@ export function getCompatibleLiterals(
     // filter plural for now and suggest only unit + singular
     suggestions.push(...timeLiteralSuggestions); // i.e. 1 year
   }
-  // this is a special type built from the suggestion system, not inherited from the AST
-  if (types.includes('time_literal_unit')) {
+
+  if (types.includes('date')) {
     suggestions.push(
-      ...buildConstantsDefinitions(
-        timeUnitsToSuggest.map(({ name }) => name),
-        undefined,
-        undefined,
-        options
-      )
-    ); // i.e. year, month, ...
+      ...getDateLiterals({
+        addComma: options?.addComma,
+        advanceCursorAndOpenSuggestions: options?.advanceCursorAndOpenSuggestions,
+      })
+    );
   }
+
   return suggestions;
 }

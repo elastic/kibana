@@ -10,9 +10,11 @@ import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtur
 import { Location } from '../../types';
 import { autocomplete } from './autocomplete';
 import {
+  DATE_DIFF_TIME_UNITS,
   expectSuggestions,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
+  mockFieldsWithTypes,
 } from '../../../__tests__/autocomplete';
 import type { ICommandCallbacks } from '../../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
@@ -78,39 +80,24 @@ describe('WHERE Autocomplete', () => {
       }
       return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
     };
-    test('after a field name', async () => {
-      await whereExpectSuggestions('from a | where keywordField ', [
-        // all functions compatible with a keywordField type
-        ...getFunctionSignaturesByReturnType(
-          Location.WHERE,
-          'boolean',
-          {
-            operators: true,
-          },
-          undefined,
-          ['and', 'or', 'not']
-        ),
-      ]);
-
-      await whereExpectSuggestions('from a | where keywordField I', [
-        // all functions compatible with a keywordField type
-        ...getFunctionSignaturesByReturnType(
-          Location.WHERE,
-          'boolean',
-          {
-            operators: true,
-          },
-          undefined,
-          ['and', 'or', 'not']
-        ),
-      ]);
-    });
+    test.each(['from a | where keywordField ', 'from a | where keywordField I'])(
+      'after a field name (%s)',
+      async (query) => {
+        await whereExpectSuggestions(query, [
+          ...getFunctionSignaturesByReturnType(
+            Location.WHERE,
+            'boolean',
+            { operators: true },
+            undefined,
+            ['and', 'or', 'not']
+          ),
+        ]);
+      }
+    );
 
     test('suggests dates after a comparison with a date', async () => {
       const expectedFields = getFieldNamesByType(['date', 'date_nanos']);
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-        expectedFields.map((name) => ({ label: name, text: name }))
-      );
+      mockFieldsWithTypes(mockCallbacks, expectedFields);
       const expectedComparisonWithDateSuggestions = [
         ...getDateLiterals().map((item) => item.text),
         ...getFieldNamesByType(['date']),
@@ -140,9 +127,7 @@ describe('WHERE Autocomplete', () => {
 
     test('after a comparison with a string field', async () => {
       const expectedFields = getFieldNamesByType(['text', 'keyword', 'ip', 'version']);
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-        expectedFields.map((name) => ({ label: name, text: name }))
-      );
+      mockFieldsWithTypes(mockCallbacks, expectedFields);
       await whereExpectSuggestions(
         'from a | where textField >= ',
         EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS,
@@ -173,9 +158,7 @@ describe('WHERE Autocomplete', () => {
     });
     test('after a logical operator numeric', async () => {
       const expectedFieldsNumeric = getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES);
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-        expectedFieldsNumeric.map((name) => ({ label: name, text: name }))
-      );
+      mockFieldsWithTypes(mockCallbacks, expectedFieldsNumeric);
       for (const op of ['and', 'or']) {
         await whereExpectSuggestions(
           `from a | where keywordField >= keywordField ${op} doubleField == `,
@@ -281,9 +264,7 @@ describe('WHERE Autocomplete', () => {
       await whereExpectSuggestions('from index | WHERE doubleField in ', ['( $0 )']);
       await whereExpectSuggestions('from index | WHERE doubleField not in ', ['( $0 )']);
       const expectedFields = getFieldNamesByType(['double']);
-      (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-        expectedFields.map((name) => ({ label: name, text: name }))
-      );
+      mockFieldsWithTypes(mockCallbacks, expectedFields);
       await whereExpectSuggestions(
         'from index | WHERE doubleField not in (',
         [
@@ -374,6 +355,16 @@ describe('WHERE Autocomplete', () => {
           end: 34,
         });
       });
+    });
+  });
+
+  describe('function parameter constraints', () => {
+    it('constantOnly constraint - DATE_DIFF should suggest only constants', async () => {
+      await whereExpectSuggestions(
+        'from a | where DATE_DIFF(',
+        DATE_DIFF_TIME_UNITS,
+        mockCallbacks
+      );
     });
   });
 });
