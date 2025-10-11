@@ -48,6 +48,8 @@ export const tinesAgentsResponse = {
   },
 };
 
+export const tinesActionsResponse = structuredClone(tinesAgentWebhook);
+
 export const tinesWebhookSuccessResponse = {
   status: 'ok',
 };
@@ -92,7 +94,7 @@ export class TinesSimulator extends Simulator {
     } else if (request.url?.match('/webhook')) {
       body = tinesWebhookSuccessResponse;
     } else if (request.url?.match('/actions/1')) {
-      body = tinesAgentWebhook;
+      body = tinesActionsResponse;
     }
     response.end(JSON.stringify(body, null, 4));
   }
@@ -147,7 +149,7 @@ export function initPlugin(router: IRouter, path: string) {
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
-      return res.ok({ body: tinesAgentWebhook });
+      return res.ok({ body: tinesActionsResponse });
     }
   );
 

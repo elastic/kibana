@@ -35,13 +35,10 @@ export const TinesWebhookObjectSchema = schema.object(
 );
 
 // Webhooks action configuration schema
-export const TinesWebhookActionConfigSchema = schema.object(
-  {
-    path: schema.string(),
-    secret: schema.string(),
-  },
-  { unknowns: 'ignore' }
-);
+export const TinesWebhookActionConfigSchema = schema.object({
+  path: schema.string(),
+  secret: schema.string(),
+});
 
 export const TinesWebhooksActionResponseSchema = schema.object({
   webhooks: schema.arrayOf(TinesWebhookObjectSchema),
