@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { difference, isEmpty, pickBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -26,19 +26,34 @@ import { useLinkInfo } from '../../links';
  * @param onInitialize Called once when initializing. It must not change.
  * @param newUrlParamKey If we want to register the value under a new key.
  */
+interface InitializeUrlParamOptions {
+  skip?: boolean;
+}
+
 export const useInitializeUrlParam = <State extends {}>(
   urlParamKey: string,
   /**
    * @param state Decoded URL param value.
    */
   onInitialize: (state: State | null) => void,
-  newUrlParamKey?: string
+  newUrlParamKey?: string,
+  options?: InitializeUrlParamOptions
 ) => {
   const dispatch = useDispatch();
 
   const getInitialUrlParamValue = useGetInitialUrlParamValue(urlParamKey);
+  const shouldSkip = options?.skip ?? false;
+  const onInitializeRef = useRef(onInitialize);
 
   useEffect(() => {
+    onInitializeRef.current = onInitialize;
+  }, [onInitialize]);
+
+  useEffect(() => {
+    if (shouldSkip) {
+      return undefined;
+    }
+
     const key = newUrlParamKey && newUrlParamKey !== '' ? newUrlParamKey : urlParamKey;
     const value = getInitialUrlParamValue();
 
@@ -50,13 +65,12 @@ export const useInitializeUrlParam = <State extends {}>(
     );
 
     // execute consumer initialization
-    onInitialize(value as State);
+    onInitializeRef.current(value as State);
 
     return () => {
       dispatch(globalUrlParamActions.deregisterUrlParam({ key }));
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- It must run only once when the application is initializing.
-  }, []);
+  }, [dispatch, getInitialUrlParamValue, newUrlParamKey, shouldSkip, urlParamKey]);
 };
 
 /**

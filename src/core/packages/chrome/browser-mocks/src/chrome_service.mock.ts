@@ -96,6 +96,26 @@ const createStartContractMock = () => {
       updateSolutionNavigations: jest.fn(),
       navigationTourManager: {} as any,
     }),
+    workspace: lazyObject({
+      getState: jest.fn(),
+      getStoreProvider: jest.fn(),
+      isEnabled: jest.fn(),
+      header: lazyObject({
+        getBreadcrumbs: jest.fn(),
+        getState: jest.fn(),
+      }),
+      sidebar: lazyObject({
+        registerSidebarApp: jest.fn(),
+        getSidebarApps: jest.fn(),
+        getSidebarApp: jest.fn(),
+        getState: jest.fn(),
+      }),
+      navigation: lazyObject({
+        getItems: jest.fn(),
+        getState: jest.fn(),
+      }),
+      subscribe: jest.fn(),
+    }),
   });
 
   return startContract;

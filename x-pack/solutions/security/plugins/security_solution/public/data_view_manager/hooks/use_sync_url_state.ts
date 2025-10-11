@@ -75,7 +75,14 @@ export const useSyncSourcererUrlState = (
     [dispatch, newDataViewPickerEnabled, scopeDataViewId, scopeId, selectedPatterns, updateUrlParam]
   );
 
-  useInitializeUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer, onInitializeUrlParam);
+  useInitializeUrlParam<SourcererUrlState>(
+    URL_PARAM_KEY.sourcerer,
+    onInitializeUrlParam,
+    undefined,
+    {
+      skip: newDataViewPickerEnabled,
+    }
+  );
 };
 
 /**
@@ -126,5 +133,12 @@ export const useRestoreDataViewManagerStateFromURL = (
     [initDataViewPickerWithSelection, newDataViewPickerEnabled, scopeId]
   );
 
-  useInitializeUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer, onInitializeUrlParam);
+  useInitializeUrlParam<SourcererUrlState>(
+    URL_PARAM_KEY.sourcerer,
+    onInitializeUrlParam,
+    undefined,
+    {
+      skip: !newDataViewPickerEnabled,
+    }
+  );
 };

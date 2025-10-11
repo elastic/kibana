@@ -14,9 +14,25 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { LayoutProjectSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
 
 export interface LayoutServiceStartDeps {
-  application: InternalApplicationStart;
-  chrome: InternalChromeStart;
-  overlays: OverlayStart;
+  application: Pick<
+    InternalApplicationStart,
+    'getComponent' | 'navigateToUrl' | 'currentActionMenu$'
+  >;
+  chrome: Pick<
+    InternalChromeStart,
+    | 'getLegacyHeaderComponentForFixedLayout'
+    | 'getHeaderBanner'
+    | 'getChromelessHeader'
+    | 'getProjectAppMenuComponent'
+    | 'workspace'
+    | 'getIsVisible$'
+    | 'getChromeStyle$'
+    | 'hasHeaderBanner$'
+    | 'getProjectSideNavV2ComponentForGridLayout'
+    | 'getProjectHeaderComponentForGridLayout'
+    | 'getClassicHeaderComponentForGridLayout'
+  >;
+  overlays: Pick<OverlayStart, 'banners'>;
 }
 
 export interface LayoutServiceParams {

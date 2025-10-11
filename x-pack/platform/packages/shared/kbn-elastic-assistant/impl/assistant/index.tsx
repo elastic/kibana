@@ -474,7 +474,7 @@ const AssistantComponent: React.FC<Props> = ({
                   max-width: 100%;
                 `}
               >
-                <EuiFlyoutHeader hasBorder>
+                <EuiFlyoutHeader hasBorder color="transparent">
                   <AssistantHeader
                     chatHistoryVisible={chatHistoryVisible}
                     conversations={conversations}

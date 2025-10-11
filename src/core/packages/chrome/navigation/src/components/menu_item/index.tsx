@@ -72,6 +72,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
       outline: none !important;
 
       .iconWrapper {
+        background-color: transparent;
         position: relative;
         display: flex;
         justify-content: center;
@@ -83,7 +84,7 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
           ? euiTheme.components.buttons.backgroundPrimary
           : isHorizontal
           ? euiTheme.colors.backgroundBaseSubdued
-          : euiTheme.components.buttons.backgroundText};
+          : 'transparent'};
         z-index: 1;
       }
 

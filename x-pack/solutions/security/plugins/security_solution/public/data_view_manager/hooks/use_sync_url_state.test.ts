@@ -70,11 +70,14 @@ describe('useSyncSourcererUrlState', () => {
       .mockReturnValueOnce('test-id') // scopeDataViewId
       .mockReturnValueOnce(['a']); // selectedPatterns
     renderHook(() => useSyncSourcererUrlState(SourcererScopeName.default));
-    const onInitializeUrlParam = mockUseInitializeUrlParam.mock.calls[0][1];
-    onInitializeUrlParam(null);
-    expect(mockUpdateUrlParam).toHaveBeenCalledWith({
-      default: { id: 'test-id', selectedPatterns: ['a'] },
-    });
+    expect(mockUseInitializeUrlParam).toHaveBeenCalledWith(
+      'sourcerer',
+      expect.any(Function),
+      undefined,
+      {
+        skip: true,
+      }
+    );
   });
 });
 
@@ -94,9 +97,17 @@ describe('useRestoreDataViewManagerStateFromURL', () => {
     renderHook(() =>
       useRestoreDataViewManagerStateFromURL(initDataViewSelection, SourcererScopeName.default)
     );
-    const onInitializeUrlParam = mockUseInitializeUrlParam.mock.calls[0][1];
-    onInitializeUrlParam({ default: { id: 'test-id', selectedPatterns: ['a'] } });
-    expect(initDataViewSelection).not.toHaveBeenCalled();
+    renderHook(() =>
+      useRestoreDataViewManagerStateFromURL(initDataViewSelection, SourcererScopeName.default)
+    );
+    expect(mockUseInitializeUrlParam).toHaveBeenCalledWith(
+      'sourcerer',
+      expect.any(Function),
+      undefined,
+      {
+        skip: true,
+      }
+    );
   });
 
   it('should call initDataViewSelection for each scope if newDataViewPickerEnabled is true', () => {
