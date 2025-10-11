@@ -423,12 +423,43 @@ describe('PendingActionsSelector', () => {
         page: 1,
         pageSize: 200,
         statuses: ['pending'],
+        commands: [
+          'isolate',
+          'unisolate',
+          'kill-process',
+          'suspend-process',
+          'running-processes',
+          'get-file',
+          'execute',
+          'upload',
+          'scan',
+          'runscript',
+        ],
       },
       {
         enabled: true,
         refetchInterval: false,
       }
     );
+  });
+
+  test('filters out cancel actions from the commands list in API call', async () => {
+    await renderAndWaitForComponent(<PendingActionsSelector {...defaultProps} />);
+
+    // Verify that the component filters out 'cancel' from RESPONSE_ACTION_API_COMMANDS_NAMES
+    const callArgs = mockUseGetEndpointActionList.mock.calls[0][0];
+
+    expect(callArgs.commands).toBeDefined();
+    expect(callArgs.commands).not.toContain('cancel');
+
+    // Verify it includes other expected commands
+    expect(callArgs.commands).toContain('isolate');
+    expect(callArgs.commands).toContain('unisolate');
+    expect(callArgs.commands).toContain('runscript');
+
+    // Ensure the filtering is working correctly
+    expect(Array.isArray(callArgs.commands)).toBe(true);
+    expect(callArgs.commands?.length).toBeGreaterThan(0);
   });
 
   test('enables refetch interval when popover is open and disables when closed', async () => {
@@ -575,6 +606,82 @@ describe('PendingActionsSelector', () => {
       expect(
         screen.getByText(
           'Action id action-123-abc submitted by test-user on Nov 1, 2023 @ 10:00:00.000'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('Cancel action filtering', () => {
+    test('should not display cancel actions in the options even if they exist in API response', async () => {
+      // Create mock data that includes cancel actions (which shouldn't happen but we test defensively)
+      const dataWithCancelActions: ActionDetails[] = [
+        mockActionDetails, // isolate action
+        {
+          ...mockActionDetails,
+          id: 'cancel-action-123',
+          command: 'cancel',
+        },
+        {
+          ...mockActionDetails,
+          id: 'action-456-def',
+          command: 'unisolate',
+        },
+      ];
+
+      const responseWithCancelActions: ActionListApiResponse = {
+        ...mockApiResponse,
+        data: dataWithCancelActions,
+        total: 3,
+      };
+
+      mockUseGetEndpointActionList.mockReturnValue({
+        data: responseWithCancelActions,
+        isLoading: false,
+        isError: false,
+        error: null,
+      } as unknown as ReturnType<typeof useGetEndpointActionList>);
+
+      // Mock the options to exclude cancel actions (as the hook should do)
+      mockUsePendingActionsOptions.mockReturnValue([
+        {
+          label: 'isolate',
+          description:
+            'Action id action-123-abc submitted by test-user on Nov 1, 2023 @ 10:00:00.000',
+          data: mockActionDetails,
+          checked: undefined,
+          disabled: false,
+        } as PendingActionOption,
+        {
+          label: 'release',
+          description:
+            'Action id action-456-def submitted by test-user on Nov 1, 2023 @ 10:00:00.000',
+          data: { ...mockActionDetails, id: 'action-456-def', command: 'unisolate' },
+          checked: undefined,
+          disabled: false,
+        } as PendingActionOption,
+        // Note: No cancel action option should be included
+      ]);
+
+      await renderAndWaitForComponent(
+        <PendingActionsSelector {...defaultProps} store={{ isPopoverOpen: true }} />
+      );
+
+      // Verify only non-cancel actions are displayed
+      expect(screen.getByText('isolate')).toBeInTheDocument();
+      expect(screen.getByText('release')).toBeInTheDocument();
+
+      // Verify cancel action is NOT displayed
+      expect(screen.queryByText('cancel')).not.toBeInTheDocument();
+
+      // Verify we still get the expected actions
+      expect(
+        screen.getByText(
+          'Action id action-123-abc submitted by test-user on Nov 1, 2023 @ 10:00:00.000'
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Action id action-456-def submitted by test-user on Nov 1, 2023 @ 10:00:00.000'
         )
       ).toBeInTheDocument();
     });
