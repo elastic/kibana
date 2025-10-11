@@ -26,16 +26,17 @@ jest.mock('./process_versioned_router', () => {
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
+import { OpenAPIV3 } from 'openapi-types';
 import { generateOpenApiDocument } from './generate_oas';
+import {
+  createSharedConfigSchema,
+  createSharedZodSchema,
+  sharedOas,
+} from './generate_oas.test.fixture';
+import type { CreateTestRouterArgs } from './generate_oas.test.util';
+import { createRouter, createTestRouters, createVersionedRouter } from './generate_oas.test.util';
 import { processRouter } from './process_router';
 import { processVersionedRouter } from './process_versioned_router';
-import type { CreateTestRouterArgs } from './generate_oas.test.util';
-import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
-import {
-  sharedOas,
-  createSharedZodSchema,
-  createSharedConfigSchema,
-} from './generate_oas.test.fixture';
 
 interface RecursiveType {
   name: string;
@@ -619,6 +620,125 @@ describe('generateOpenApiDocument', () => {
         }
       }
     );
+  });
+
+  describe('postProcess handler', () => {
+    it('should be able to modify the generated OpenAPI document', async () => {
+      const postProcess = jest.fn((oas) => {
+        oas.info = {
+          title: 'Custom title from postProcess handler',
+          description: 'added by postProcess handler',
+          version: `${oas.info.version}-a.1`,
+        }
+        
+        return oas;
+      });
+
+      const [routers, versionedRouters] = createTestRouters({
+        routers: {
+          testRouter: {
+            routes: [{ method: 'get' }, { method: 'post' }],
+          },
+        },
+        versionedRouters: { testVersionedRouter: { routes: [{}] } },
+      });
+
+      const { info: oasInfo} = await generateOpenApiDocument(
+        {
+          routers,
+          versionedRouters,
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '0.0.1',
+          postProcess,
+        }
+      );
+      expect(postProcess).toHaveBeenCalledTimes(1);
+
+      expect(oasInfo).toMatchObject({
+        title: 'Custom title from postProcess handler',
+        version: '0.0.1-a.1',
+        description: 'added by postProcess handler',
+      });
+    });
+
+    it('can be async', async () => {
+      const postProcess = jest.fn(async (oas) => {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        oas.info.description = 'added by async postProcess handler';
+        return oas;
+      });
+
+      const [routers, versionedRouters] = createTestRouters({
+        routers: {
+          testRouter: {
+            routes: [{ method: 'get' }, { method: 'post' }],
+          },
+        },
+        versionedRouters: { testVersionedRouter: { routes: [{}] } },
+      });
+      
+      const oas = await generateOpenApiDocument(
+        {
+          routers,
+          versionedRouters,
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+          postProcess,
+        }
+      );
+
+      expect(postProcess).toHaveBeenCalledTimes(1);
+      expect(oas.info.description).toBe('added by async postProcess handler');
+    });
+
+    it('should allow applying operations reordering', async () => {
+      const initialOrder = ['/second/{id}/{path}', '/first/{id}/{path}'];
+      const expectedOrder = ['/first/{id}/{path}', '/second/{id}/{path}'];
+
+      const postProcess = jest.fn((oas) => {
+        const pathKeys = Object.keys(oas.paths);
+
+        expect(pathKeys).toEqual(initialOrder);
+
+        oas.paths = pathKeys.reverse()
+          .reduce<OpenAPIV3.PathsObject>((acc, key) => {
+            acc[key] = oas.paths[key];
+            return acc;
+          }, {});
+
+        return oas;
+      });
+
+      const [routers, versionedRouters] = createTestRouters({
+        routers: {
+          testRouter: {
+            routes: initialOrder.map((path) => ({ method: 'post', path })),
+          },
+        },
+        versionedRouters: {},
+      });
+
+      const { paths: oasPaths } = await generateOpenApiDocument(
+        {
+          routers,
+          versionedRouters,
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+          postProcess,
+        }
+      );
+
+      expect(Object.keys(oasPaths)).toEqual(expectedOrder);
+    });
   });
 
   it('merges operation objects', async () => {
