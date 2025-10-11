@@ -11,7 +11,7 @@ import type { ISessionService } from './session_service';
 import { SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
 import { first, take, toArray } from 'rxjs';
-import { getSessionsClientMock } from './mocks';
+import { getSearchSessionEBTManagerMock, getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
@@ -89,6 +89,7 @@ describe('Session service', () => {
           },
           ...rest,
         ]),
+      getSearchSessionEBTManagerMock(),
       sessionsClient,
       nowProvider,
       usageCollector,
@@ -158,9 +159,9 @@ describe('Session service', () => {
       }).complete;
 
       expect(state$.getValue()).toBe(SearchSessionState.Loading);
-      complete1();
+      complete1({ rawResponse: {} });
       expect(state$.getValue()).toBe(SearchSessionState.Loading);
-      complete2();
+      complete2({ rawResponse: {} });
       expect(state$.getValue()).toBe(SearchSessionState.Completed);
     });
 
@@ -173,9 +174,9 @@ describe('Session service', () => {
       sessionService.trackSearch({ abort, poll });
       sessionService.trackSearch({ abort, poll });
       const complete = sessionService.trackSearch({ abort, poll }).complete;
-      complete();
+      complete({ rawResponse: {} });
 
-      await sessionService.cancel();
+      await sessionService.cancel({ source: 'test' });
 
       expect(abort).toBeCalledTimes(3);
     });
@@ -212,7 +213,7 @@ describe('Session service', () => {
         sessionService.start();
 
         const searchTracker = sessionService.trackSearch({ abort, poll });
-        searchTracker.complete();
+        searchTracker.complete({ rawResponse: {} });
 
         expect(poll).toHaveBeenCalledTimes(0);
 
@@ -424,10 +425,10 @@ describe('Session service', () => {
     const poll = jest.fn(() => Promise.resolve());
 
     const search1 = sessionService.trackSearch({ poll, abort });
-    search1.complete();
+    search1.complete({ rawResponse: {} });
 
     const search2 = sessionService.trackSearch({ poll, abort });
-    search2.error();
+    search2.error(new Error());
 
     sessionService.trackSearch({ poll, abort });
 
@@ -551,7 +552,7 @@ describe('Session service', () => {
         poll: async () => {},
       }).complete;
 
-      complete();
+      complete({ rawResponse: {} });
 
       expect(emitResult).toEqual([false]);
 
@@ -581,7 +582,7 @@ describe('Session service', () => {
         poll: async () => {},
       }).complete;
 
-      complete();
+      complete({ rawResponse: {} });
 
       expect(emitResult).toEqual([false]);
 
@@ -611,7 +612,7 @@ describe('Session service', () => {
 
       expect(usageCollector.trackSessionIndicatorSaveDisabled).toHaveBeenCalledTimes(0);
 
-      complete();
+      complete({ rawResponse: {} });
 
       jest.advanceTimersByTime(5 * 60 * 1000); // 5 minutes
 
@@ -670,7 +671,7 @@ describe('Session service', () => {
         sessionService.start();
 
         // When
-        complete();
+        complete({ rawResponse: {} });
 
         // Then
         expect(sessionService.isCurrentSession(firstSessionId)).toBe(false);
