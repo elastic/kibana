@@ -218,6 +218,9 @@ truncation.
 [[enableESQL]]`enableESQL`::
 This setting enables ES|QL in Kibana.
 
+[[aiAssistant:preferredAIAssistantType]]`aiAssistant:preferredAIAssistantType`::
+This setting allows you to choose which AI Assistants are available to use and where. You can choose to only show the AI Assistants in their solutions, in other Kibana applications (for example, Discover, Dashboards, and Stack Management pages), or nowhere.
+
 [float]
 [[presentation-labs]]
 ==== Presentation Labs
