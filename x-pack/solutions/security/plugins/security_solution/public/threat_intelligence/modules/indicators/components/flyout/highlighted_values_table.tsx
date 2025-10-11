@@ -41,7 +41,10 @@ export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
   const indicatorType = unwrapValue(indicator, RawIndicatorFieldId.Type);
 
   const highlightedFields: string[] = useMemo(
-    () => Object.keys(indicator.fields).filter(byIndicatorType(indicatorType || '')),
+    () =>
+      Object.keys(indicator.fields).filter(
+        byIndicatorType((!Array.isArray(indicatorType) && indicatorType) || '')
+      ),
     [indicator.fields, indicatorType]
   );
 
