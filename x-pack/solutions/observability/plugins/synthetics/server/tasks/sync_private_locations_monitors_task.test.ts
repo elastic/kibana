@@ -52,6 +52,7 @@ const mockServerSetup: jest.Mocked<SyntheticsServerSetup> = {
   } as any,
   encryptedSavedObjects: mockEncryptedSoClient as any,
   logger: mockLogger,
+  fleet: mockFleet,
 } as any;
 
 const getMockTaskInstance = (state: Record<string, any> = {}): CustomTaskInstance => {
