@@ -131,7 +131,7 @@ export const RuleActionsConnectorsBody = ({
 
       const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
         .get(actionTypeId)
-        ?.validateParams(params);
+        ?.validateParams(params, 'config' in connector ? connector.config : undefined);
 
       dispatch({
         type: 'setActionParamsError',

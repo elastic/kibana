@@ -114,7 +114,8 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   selectMessagePreconfigured?: string;
   actionTypeTitle?: string;
   validateParams: (
-    actionParams: ActionParams
+    actionParams: ActionParams,
+    connectorConfig?: Record<string, unknown>
   ) => Promise<GenericValidationResult<Partial<ActionParams> | unknown>>;
   actionConnectorFields: React.LazyExoticComponent<
     ComponentType<ActionConnectorFieldsProps>
