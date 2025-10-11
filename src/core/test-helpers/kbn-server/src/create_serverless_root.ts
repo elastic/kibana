@@ -162,7 +162,7 @@ const getServerlessDefault = () => {
   };
 };
 
-function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+export function createServerlessKibana(settings = {}, cliArgs: Partial<CliArgs> = {}) {
   return createRoot(defaultsDeep(settings, getServerlessDefault()), {
     ...cliArgs,
     serverless: true,
