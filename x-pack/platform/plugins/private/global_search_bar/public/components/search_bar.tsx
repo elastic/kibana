@@ -7,22 +7,20 @@
 
 import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiText,
   EuiLoadingSpinner,
-  EuiSelectableTemplateSitewide,
-  euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
   useEuiBreakpoint,
   mathWithUnits,
   useEuiMinBreakpoint,
+  EuiPopover,
+  EuiFieldSearch,
+  useEuiShadow,
 } from '@elastic/eui';
-import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
@@ -35,14 +33,20 @@ import useMountedState from 'react-use/lib/useMountedState';
 import useObservable from 'react-use/lib/useObservable';
 import type { Subscription } from 'rxjs';
 import { blurEvent, isMac, sort } from '.';
-import { resultToOption, suggestionToOption } from '../lib';
+import { resultToOption, createInformationOption, createActionOption, createChatOption } from '../lib';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { parseSearchParams } from '../search_syntax';
 import { i18nStrings } from '../strings';
 import type { SearchSuggestion } from '../suggestions';
 import { getSuggestions } from '../suggestions';
-import { PopoverFooter } from './popover_footer';
-import { PopoverPlaceholder } from './popover_placeholder';
+import { SearchPopoverFooter } from './search_popover_footer';
+import { SearchPopoverPlaceholder } from './search_popover_placeholder';
 import type { SearchBarProps } from './types';
+import { getSearchHighlightStyles, useHighlightAnimation } from './highlight_animation';
+import { getOverlayBackdropStyles } from './overlay_styles';
+import { VersionSelectorPanel, type DesignVersion } from './version_selector_panel';
+import { SearchList } from './search_list';
+
 
 const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (
@@ -64,9 +68,9 @@ const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
     </>
   );
 
-  return (
-    <PopoverPlaceholder basePath={props.basePathUrl} customPlaceholderMessage={charLimitMessage} />
-  );
+    return (
+      <SearchPopoverPlaceholder basePath={props.basePathUrl} customPlaceholderMessage={charLimitMessage} />
+    );
 };
 
 const EmptyMessage = () => (
@@ -84,15 +88,12 @@ const EmptyMessage = () => (
 );
 
 export const SearchBar: FC<SearchBarProps> = (opts) => {
-  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
+  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, observabilityAIAssistant, elasticAssistant, ...props } = opts;
 
   const isMounted = useMountedState();
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const chromeStyle = useObservable(chromeStyle$);
-
-  // These hooks are used when on chromeStyle set to 'project'
-  const [isVisible, setIsVisible] = useState(false);
-  const visibilityButtonRef = useRef<HTMLButtonElement | null>(null);
+  const popoverShadow = useEuiShadow('l');
 
   // General hooks
   const [initialLoad, setInitialLoad] = useState(false);
@@ -102,12 +103,18 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   const searchSubscription = useRef<Subscription | null>(null);
   const [options, setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
-  const [showAppend, setShowAppend] = useState<boolean>(true);
   const UNKNOWN_TAG_ID = '__unknown__';
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchCharLimitExceeded, setSearchCharLimitExceeded] = useState(false);
+  const [isOverlayMode, setIsOverlayMode] = useState(false);
+  const [designVersion, setDesignVersion] = useState<DesignVersion>('regular-user');
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const styles = css({
+  // Highlight animation hook
+  const { isHighlighted, triggerHighlight } = useHighlightAnimation(chromeStyle === 'project');
+
+
+  const defaultStyles = css({
     [useEuiBreakpoint(['m', 'l'])]: {
       width: mathWithUnits(euiTheme.size.xxl, (x) => x * 10),
     },
@@ -115,6 +122,16 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       width: mathWithUnits(euiTheme.size.xxl, (x) => x * 15),
     },
   });
+  const projectStyles = css({
+    width: 240,
+  });
+  const baseStyles = chromeStyle === 'project' ? projectStyles : defaultStyles;
+  const highlightStyles = getSearchHighlightStyles(euiTheme, colorMode);
+  
+  // Overlay styles
+  const overlayBackdropStyles = getOverlayBackdropStyles(euiTheme);
+
+  const styles = css([baseStyles, highlightStyles]);
   // Initialize searchableTypes data
   useEffect(() => {
     if (initialLoad) {
@@ -130,6 +147,39 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
   useEffect(() => {
     setIsLoading(true);
   }, [searchValue]);
+
+  // Control popover visibility
+  useEffect(() => {
+    if (initialLoad && options.length > 0) {
+      setIsPopoverOpen(true);
+    } else {
+      setIsPopoverOpen(false);
+    }
+  }, [initialLoad, options.length]);
+
+  // When overlay mode is activated, ensure popover shows immediately and focus input
+  useEffect(() => {
+    if (isOverlayMode && chromeStyle === 'project') {
+      // Ensure we have initial load set and trigger search if no options
+      if (!initialLoad) {
+        setInitialLoad(true);
+      }
+      // If we don't have any options yet, set some placeholder to show popover
+      if (!options.length && !isLoading) {
+        // Set empty options to trigger popover display
+        setOptions([]);
+        setIsLoading(false);
+      }
+      
+      // Focus the search input and trigger highlight animation when overlay opens
+      setTimeout(() => {
+        if (searchRef) {
+          searchRef.focus();
+          triggerHighlight(); // Trigger highlight animation for overlay mode
+        }
+      }, 100);
+    }
+  }, [isOverlayMode, chromeStyle, initialLoad, options.length, isLoading, searchRef, triggerHighlight]);
 
   const loadSuggestions = useCallback(
     (term: string) => {
@@ -148,9 +198,60 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       suggestions: SearchSuggestion[],
       searchTagIds: string[] = []
     ) => {
+      // Filter and modify options based on design version
+      let filteredOptions = _options;
+
+      if (designVersion === 'new-user') {
+        // For new users, prioritize applications and basic features
+        filteredOptions = _options.filter((option) => {
+          // Prioritize applications and basic dashboards
+          return option.type === 'application' || 
+                 (option.type === 'dashboard' && !option.title?.toLowerCase().includes('advanced'));
+        });
+        
+        // Limit to top 5 results for new users to avoid overwhelming
+        filteredOptions = filteredOptions.slice(0, 5);
+      }
+
+      // Create custom items based on design version and search state
+      const customItems = searchValue.length === 0 ? [
+        // Action items - always shown
+        createActionOption({
+          id: 'add-data',
+          title: 'Add data',
+          description: 'Import or connect your data sources',
+          url: '/app/integrations',
+          icon: 'plusInCircle'
+        }),
+        
+        // Chat items - always shown
+        createChatOption({
+          id: 'ask-ai-agent',
+          title: 'Ask AI Agent to help',
+          description: 'Get assistance with your questions',
+          icon: 'discuss'
+        }),
+        
+        // Documentation items for all users
+        createInformationOption({
+          id: 'kibana-docs',
+          title: 'Kibana Documentation',
+          description: 'Complete guide to using Kibana',
+          url: 'https://www.elastic.co/guide/en/kibana/current/index.html',
+          icon: 'documentation'
+        }),
+        createInformationOption({
+          id: 'elasticsearch-docs', 
+          title: 'Elasticsearch Guide',
+          description: 'Learn about Elasticsearch features',
+          url: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html',
+          icon: 'logoElasticsearch'
+        })
+      ] : [];
+
       setOptions([
-        ...suggestions.map(suggestionToOption),
-        ..._options.map((option) =>
+        ...customItems,
+        ...filteredOptions.map((option) =>
           resultToOption(
             option,
             searchTagIds?.filter((id) => id !== UNKNOWN_TAG_ID) ?? [],
@@ -159,8 +260,36 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         ),
       ]);
     },
-    [setOptions, taggingApi]
+    [setOptions, taggingApi, designVersion, searchValue]
   );
+
+  // When design version changes, refresh the search results immediately
+  useEffect(() => {
+    if (initialLoad && searchableTypes.length > 0) {
+      // Directly trigger the search logic with current parameters
+      const suggestions = loadSuggestions(searchValue.toLowerCase());
+      let aggregatedResults: GlobalSearchResult[] = [];
+
+      const rawParams = parseSearchParams(searchValue.toLowerCase(), searchableTypes);
+      let tagIds: string[] | undefined;
+      if (taggingApi && rawParams.filters.tags) {
+        tagIds = rawParams.filters.tags.map(
+          (tagName) => taggingApi.ui.getTagIdFromName(tagName) ?? UNKNOWN_TAG_ID
+        );
+      } else {
+        tagIds = undefined;
+      }
+
+      // For empty search, show applications
+      if (searchValue.length === 0) {
+        // Create mock application results for immediate display
+        aggregatedResults = [];
+      }
+
+      // Update the options immediately with the new design version logic
+      setDecoratedOptions(aggregatedResults, suggestions, tagIds);
+    }
+  }, [designVersion, initialLoad, searchableTypes, searchValue, loadSuggestions, setDecoratedOptions, taggingApi]);
 
   useDebounce(
     () => {
@@ -237,45 +366,157 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }
     },
     350,
-    [searchValue, loadSuggestions, searchableTypes, initialLoad]
+    [searchValue, loadSuggestions, searchableTypes, initialLoad, designVersion]
   );
+
+  const closeOverlay = useCallback(() => {
+    setIsOverlayMode(false);
+    if (searchRef) {
+      searchRef.blur();
+    }
+  }, [searchRef]);
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOverlayMode) {
+        event.preventDefault();
+        closeOverlay();
+        return;
+      }
+      
       if (event.key === '/' && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
         reportEvent.shortcutUsed();
-        if (chromeStyle === 'project' && !isVisible) {
-          visibilityButtonRef.current?.click();
-        } else if (searchRef) {
+        if (searchRef) {
           searchRef.focus();
         } else if (buttonRef) {
           (buttonRef.children[0] as HTMLButtonElement).click();
         }
       }
     },
-    [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
+    [buttonRef, searchRef, reportEvent, isOverlayMode, closeOverlay]
   );
 
-  const onChange = useCallback(
-    (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
-      let selectedRank: number | null = null;
-      const selected = selection.find(({ checked }, rank) => {
-        const isChecked = checked === 'on';
-        if (isChecked) {
-          selectedRank = rank + 1;
+  // Function to open AI Assistant programmatically
+  const openAIAssistant = useCallback(
+    (initialQuery?: string) => {
+      try {
+        // Try to determine which space we're in and use the appropriate AI Assistant
+        const currentUrl = window.location.pathname;
+        
+        if (observabilityAIAssistant?.service) {
+          // For Observability space or when Observability AI Assistant is available
+          const messages = initialQuery 
+            ? [{
+                '@timestamp': new Date().toISOString(),
+                message: {
+                  role: MessageRole.User,
+                  content: initialQuery
+                }
+              }] 
+            : [];
+          
+          observabilityAIAssistant.service.conversations.openNewConversation({
+            messages,
+            title: initialQuery ? `Search: ${initialQuery}` : undefined,
+          });
+          
+          reportEvent.navigateToApplication({
+            application: 'observability_ai_assistant',
+            searchValue: searchValue,
+            selectedLabel: initialQuery || 'AI Assistant',
+            selectedRank: 1,
+          });
+          
+          return true;
+        } else if (elasticAssistant && typeof window !== 'undefined') {
+          // For Security space - trigger the assistant overlay
+          // We need to dispatch a custom event or use a global method
+          // Since we can't directly access the showAssistantOverlay from here,
+          // we'll use a keyboard shortcut simulation or URL navigation
+          
+          // Try to trigger the keyboard shortcut for AI Assistant (Ctrl/Cmd + ;)
+          const keyboardEvent = new KeyboardEvent('keydown', {
+            key: ';',
+            code: 'Semicolon',
+            ctrlKey: !isMac,
+            metaKey: isMac,
+            bubbles: true,
+          });
+          
+          document.dispatchEvent(keyboardEvent);
+          
+          reportEvent.navigateToApplication({
+            application: 'elastic_assistant',
+            searchValue: searchValue,
+            selectedLabel: initialQuery || 'AI Assistant',
+            selectedRank: 1,
+          });
+          
+          return true;
+        } else {
+          // Fallback: try to navigate to AI Assistant pages or show a message
+          console.warn('AI Assistant services not available');
+          
+          // Try navigating to known AI Assistant URLs
+          if (currentUrl.includes('/app/observability') || currentUrl.includes('/app/apm') || currentUrl.includes('/app/logs')) {
+            navigateToUrl('/app/observabilityAIAssistant/conversations/new');
+            return true;
+          } else if (currentUrl.includes('/app/security') || currentUrl.includes('/app/siem')) {
+            // For security, we'll try the keyboard shortcut approach
+            const keyboardEvent = new KeyboardEvent('keydown', {
+              key: ';',
+              code: 'Semicolon',
+              ctrlKey: !isMac,
+              metaKey: isMac,
+              bubbles: true,
+            });
+            document.dispatchEvent(keyboardEvent);
+            return true;
+          }
+          
+          return false;
         }
-        return isChecked;
-      });
-
-      if (!selected) {
-        return;
+      } catch (error) {
+        console.error('Error opening AI Assistant:', error);
+        return false;
       }
+    },
+    [observabilityAIAssistant, elasticAssistant, searchValue, navigateToUrl, reportEvent]
+  );
 
-      const selectedLabel = selected.label ?? null;
+  const handleOptionClick = useCallback(
+    (option: EuiSelectableTemplateSitewideOption, event: React.MouseEvent) => {
+      const selectedLabel = option.label ?? null;
+      const selectedRank = options.findIndex(opt => opt.key === option.key) + 1;
 
       // @ts-ignore - ts error is "union type is too complex to express"
-      const { url, type, suggestion } = selected;
+      const { url, type, suggestion } = option;
+      const itemType = (option as any).itemType;
+
+      // Handle chat items specially - open AI assistant flyout
+      if (type === 'chat' || itemType === 'chat') {
+        const success = openAIAssistant(selectedLabel || undefined);
+        
+        if (success) {
+          // Close the search interface only if AI Assistant opened successfully
+          (document.activeElement as HTMLElement).blur();
+          if (searchRef) {
+            clearField();
+            searchRef.dispatchEvent(blurEvent);
+          }
+          
+          if (isOverlayMode) {
+            setIsOverlayMode(false);
+          }
+          setIsPopoverOpen(false);
+        } else {
+          // If AI Assistant couldn't be opened, show a user-friendly message
+          console.warn('AI Assistant is not available in this space');
+          // Could optionally show a toast notification here
+        }
+        return;
+      }
 
       // if the type is a suggestion, we change the query on the input and trigger a new search
       // by setting the searchValue (only setting the field value does not trigger a search)
@@ -287,7 +528,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       // errors in tracking should not prevent selection behavior
       try {
         if (type === 'application') {
-          const key = selected.key ?? 'unknown';
+          const key = option.key ?? 'unknown';
           const application = `${key.toLowerCase().replaceAll(' ', '_')}`;
           reportEvent.navigateToApplication({
             application,
@@ -326,117 +567,210 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         clearField();
         searchRef.dispatchEvent(blurEvent);
       }
+      
+      // Close overlay/popover after navigation
+      if (isOverlayMode) {
+        setIsOverlayMode(false);
+      }
+      setIsPopoverOpen(false);
     },
-    [reportEvent, navigateToUrl, searchRef, searchValue]
+    [reportEvent, navigateToUrl, searchRef, searchValue, isOverlayMode, options, openAIAssistant]
   );
 
   const clearField = () => setSearchValue('');
 
-  const keyboardShortcutTooltip = `${i18nStrings.keyboardShortcutTooltip.prefix}: ${
-    isMac ? i18nStrings.keyboardShortcutTooltip.onMac : i18nStrings.keyboardShortcutTooltip.onNotMac
-  }`;
-
   useEvent('keydown', onKeyDown);
 
-  if (chromeStyle === 'project' && !isVisible) {
-    return (
-      <EuiHeaderSectionItemButton
-        aria-label={i18nStrings.showSearchAriaText}
-        buttonRef={visibilityButtonRef}
-        color="text"
-        data-test-subj="nav-search-reveal"
-        onClick={() => {
-          setIsVisible(true);
-        }}
-      >
-        <EuiIcon type="search" size="m" />
-      </EuiHeaderSectionItemButton>
-    );
-  }
+  // In project chrome style, render the input immediately (no reveal button)
 
-  const getAppendForChromeStyle = () => {
-    if (chromeStyle === 'project') {
+  const highlightClassName = isHighlighted ? 'search-highlighted' : undefined;
+
+  const renderSearchComponent = (isOverlay = false) => {
+    const searchInput = (
+      <EuiFieldSearch
+        autoFocus={chromeStyle === 'project' && isOverlay}
+        value={searchValue}
+        onInput={(e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value)}
+        data-test-subj="nav-search-input"
+        inputRef={setSearchRef}
+        compressed={isOverlay ? false : true}
+        aria-label={i18nStrings.placeholderText}
+        placeholder={i18nStrings.placeholderText}
+        onFocus={() => {
+          reportEvent.searchFocus();
+          setInitialLoad(true);
+          triggerHighlight();
+          if (chromeStyle === 'project') {
+            setIsOverlayMode(true);
+            // Force initial load to show popover immediately
+            if (!initialLoad) {
+              setInitialLoad(true);
+            }
+          } else {
+            // For non-project chrome, open popover on focus
+            setIsPopoverOpen(true);
+          }
+        }}
+        onBlur={(e) => {
+          reportEvent.searchBlur();
+          // Delay closing overlay/popover to allow for clicks on search results
+          setTimeout(() => {
+            if (isOverlayMode && !e.currentTarget.contains(document.activeElement)) {
+              setIsOverlayMode(false);
+            }
+            // For non-project chrome, close popover on blur if no results are being interacted with
+            if (chromeStyle !== 'project' && !e.currentTarget.contains(document.activeElement)) {
+              const popover = document.querySelector('[data-test-subj="nav-search-popover"]');
+              if (popover && !popover.contains(document.activeElement)) {
+                setIsPopoverOpen(false);
+              }
+            }
+          }, 150);
+        }}
+        fullWidth={true}
+        css={css`
+          .euiFormControlLayout {
+            ${isOverlay ? `
+              border-radius: ${euiTheme.border.radius.medium};
+              ${popoverShadow};
+              background-color: ${euiTheme.colors.body};
+            ` : ''}
+          }
+          ${highlightStyles}
+        `}
+        className={highlightClassName}
+      />
+    );
+
+    const listContent = (() => {
+      if (searchCharLimitExceeded) {
+        return <SearchCharLimitExceededMessage {...props} />;
+      }
+      
+      if (!initialLoad || (!options.length && isLoading)) {
+        return <EmptyMessage />;
+      }
+      
+      if (!options.length) {
+        return <SearchPopoverPlaceholder basePath={props.basePathUrl} />;
+      }
+
       return (
-        <EuiButtonIcon
-          aria-label={i18nStrings.closeSearchAriaText}
-          color="text"
-          data-test-subj="nav-search-conceal"
-          iconType="cross"
-          onClick={() => {
-            reportEvent.searchBlur();
-            setIsVisible(false);
-          }}
+        <SearchList
+          options={options}
+          searchValue={searchValue}
+          onOptionClick={handleOptionClick}
+          isLoading={isLoading}
+          customComponents={[]}
+          emptyMessage={<SearchPopoverPlaceholder basePath={props.basePathUrl} />}
+          showSuggestedTitle={true}
         />
       );
-    }
+    })();
 
-    if (showAppend) {
-      return (
-        <EuiFormLabel
-          title={keyboardShortcutTooltip}
-          css={{ fontFamily: euiTheme.font.familyCode }}
+    const popoverContent = (
+      <div
+        css={css`
+          width: 700px;
+          max-width: 90vw;
+        `}
+      >
+        {listContent}
+        <SearchPopoverFooter isMac={isMac} />
+      </div>
+    );
+
+    // For project chrome style, handle overlay mode differently
+    if (chromeStyle === 'project') {
+      return isOverlay ? (
+        <div
+          css={css`
+            width: 100%;
+            max-width: 700px;
+            position: relative;
+            ${highlightStyles}
+          `}
+          className={highlightClassName}
         >
-          {isMac ? '⌘/' : '^/'}
-        </EuiFormLabel>
+          {searchInput}
+          <div
+            css={css`
+              position: absolute;
+              top: 100%;
+              left: 0;
+              right: 0;
+              z-index: ${Number(euiTheme.levels.modal) + 1};
+              margin-top: 8px;
+              border-radius: ${euiTheme.border.radius.medium};
+              ${popoverShadow};
+              background-color: ${euiTheme.colors.backgroundBasePlain};
+            `}
+          >
+            {popoverContent}
+          </div>
+        </div>
+      ) : (
+        <div css={highlightStyles} className={highlightClassName}>
+          {searchInput}
+        </div>
       );
     }
+
+    // For non-project chrome styles, use regular popover
+    return (
+      <EuiPopover
+        button={
+          <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
+            <EuiIcon type="search" size="m" />
+          </EuiHeaderSectionItemButton>
+        }
+        isOpen={isPopoverOpen && !isOverlay}
+        closePopover={() => setIsPopoverOpen(false)}
+        panelPaddingSize="none"
+        zIndex={Number(euiTheme.levels.navigation)}
+        data-test-subj="nav-search-popover"
+        panelClassName="navSearch__panel"
+        repositionOnScroll={true}
+        popoverRef={setButtonRef}
+        panelStyle={{ marginTop: '6px' }}
+        hasArrow={false}
+        css={styles}
+        className={highlightClassName}
+      >
+        {searchInput}
+        {popoverContent}
+      </EuiPopover>
+    );
   };
 
   return (
-    <EuiSelectableTemplateSitewide
-      isLoading={isLoading}
-      isPreFiltered
-      onChange={onChange}
-      options={options}
-      css={styles}
-      popoverButtonBreakpoints={['xs', 's']}
-      singleSelection={true}
-      renderOption={(option) => euiSelectableTemplateSitewideRenderOptions(option, searchValue)}
-      colorModes={chromeStyle !== 'project' ? { search: 'dark', popover: 'global' } : undefined}
-      listProps={{
-        className: 'eui-yScroll',
-        css: css`
-          max-block-size: 75vh;
-        `,
-      }}
-      searchProps={{
-        autoFocus: chromeStyle === 'project',
-        value: searchValue,
-        onInput: (e: React.UIEvent<HTMLInputElement>) => setSearchValue(e.currentTarget.value),
-        'data-test-subj': 'nav-search-input',
-        inputRef: setSearchRef,
-        compressed: true,
-        'aria-label': i18nStrings.placeholderText,
-        placeholder: i18nStrings.placeholderText,
-        onFocus: () => {
-          reportEvent.searchFocus();
-          setInitialLoad(true);
-          setShowAppend(false);
-        },
-        onBlur: () => {
-          reportEvent.searchBlur();
-          setShowAppend(!searchValue.length);
-        },
-        fullWidth: true,
-        append: getAppendForChromeStyle(),
-      }}
-      errorMessage={searchCharLimitExceeded ? <SearchCharLimitExceededMessage {...props} /> : null}
-      emptyMessage={<EmptyMessage />}
-      noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
-      popoverProps={{
-        zIndex: Number(euiTheme.levels.navigation),
-        'data-test-subj': 'nav-search-popover',
-        panelClassName: 'navSearch__panel',
-        repositionOnScroll: true,
-        popoverRef: setButtonRef,
-        panelStyle: { marginTop: '6px' },
-      }}
-      popoverButton={
-        <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
-          <EuiIcon type="search" size="m" />
-        </EuiHeaderSectionItemButton>
-      }
-      popoverFooter={<PopoverFooter isMac={isMac} />}
-    />
+    <>
+      {/* Header search - hidden when overlay is active */}
+      <div style={{ visibility: isOverlayMode ? 'hidden' : 'visible' }}>
+        {renderSearchComponent(false)}
+      </div>
+      
+      {/* Overlay search */}
+      {isOverlayMode && (
+        <div
+          css={overlayBackdropStyles}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              closeOverlay();
+            }
+          }}
+        >
+          {renderSearchComponent(true)}
+        </div>
+      )}
+      
+      {/* Version selector panel - only show in project chrome style */}
+      {chromeStyle === 'project' && (
+        <VersionSelectorPanel
+          selectedVersion={designVersion}
+          onVersionChange={setDesignVersion}
+        />
+      )}
+    </>
   );
 };

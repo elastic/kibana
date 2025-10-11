@@ -7,14 +7,23 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
-interface PopoverFooterProps {
+interface SearchPopoverFooterProps {
   isMac: boolean;
 }
 
-export const PopoverFooter: FC<PopoverFooterProps> = ({ isMac }) => {
+export const SearchPopoverFooter: FC<SearchPopoverFooterProps> = ({ isMac }) => {
+  const { euiTheme } = useEuiTheme();
+  
+  const footerStyles = css`
+    border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
+    padding: 8px 16px;
+    overflow: hidden;
+  `;
+  
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -22,22 +31,23 @@ export const PopoverFooter: FC<PopoverFooterProps> = ({ isMac }) => {
       gutterSize="s"
       responsive={false}
       wrap
+      css={footerStyles}
     >
       <EuiFlexItem>
         <EuiText color="subdued" size="xs">
           <p>
             <FormattedMessage
               id="xpack.globalSearchBar.searchBar.helpText.helpTextPrefix"
-              defaultMessage="Filter by"
+              defaultMessage="Search by"
             />
             &nbsp;
-            <EuiCode>type:</EuiCode>&nbsp;
+            <EuiCode>type</EuiCode>&nbsp;
             <FormattedMessage
               id="xpack.globalSearchBar.searchBar.helpText.helpTextConjunction"
               defaultMessage="or"
             />
             &nbsp;
-            <EuiCode>tag:</EuiCode>
+            <EuiCode>tag</EuiCode>
           </p>
         </EuiText>
       </EuiFlexItem>
