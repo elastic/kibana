@@ -280,20 +280,23 @@ export const WorkflowYAMLEditor = ({
     saveAndRunRef.current = onSaveAndRun;
   }, [onSaveAndRun]);
 
-  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    editorRef.current = editor;
+  const handleEditorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      editorRef.current = editor;
 
-    registerKeyboardCommands({
-      editor,
-      openActionsPopover,
-      save: () => saveRef.current(),
-      run: () => runRef.current(),
-      saveAndRun: () => saveAndRunRef.current(),
-    });
+      registerKeyboardCommands({
+        editor,
+        openActionsPopover,
+        save: () => saveRef.current(),
+        run: () => runRef.current(),
+        saveAndRun: () => saveAndRunRef.current(),
+      });
 
-    // Listen to content changes to detect typing
-    const model = editor.getModel();
-    if (model) {
+      // Listen to content changes to detect typing
+      const model = editor.getModel();
+      if (!model) {
+        return;
+      }
       // Initial YAML parsing from main
       const value = model.getValue();
       if (value && value.trim() !== '') {
@@ -304,65 +307,62 @@ export const WorkflowYAMLEditor = ({
           setIsEditorMounted(true);
         }, 0);
       } else {
-        // If no content, just set the mounted state
+        // If no model, just set the mounted state
         setTimeout(() => {
           setIsEditorMounted(true);
         }, 0);
       }
-    } else {
-      // If no model, just set the mounted state
-      setTimeout(() => {
-        setIsEditorMounted(true);
-      }, 0);
-    }
 
-    // Setup Elasticsearch step providers if we have the required services
-    if (http && notifications) {
-      // Register Elasticsearch connector handler
-      const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
-        http,
-        notifications: notifications as any, // Temporary type cast
-        // esHost,
-        // kibanaHost || window.location.origin,
-      });
-      registerMonacoConnectorHandler(elasticsearchHandler);
-
-      // Register Kibana connector handler
-      const kibanaHandler = new KibanaMonacoConnectorHandler({
-        http,
-        notifications: notifications as any, // Temporary type cast
-        kibanaHost: kibanaHost || window.location.origin,
-      });
-      registerMonacoConnectorHandler(kibanaHandler);
-
-      const genericHandler = new GenericMonacoConnectorHandler();
-      registerMonacoConnectorHandler(genericHandler);
-
-      // Create unified providers
-      const providerConfig = {
-        getYamlDocument: () => yamlDocumentRef.current || null,
-        options: {
+      // Setup Elasticsearch step providers if we have the required services
+      if (http && notifications) {
+        // Register Elasticsearch connector handler
+        const elasticsearchHandler = new ElasticsearchMonacoConnectorHandler({
           http,
-          notifications: notifications as any,
-          esHost,
+          notifications: notifications as any, // Temporary type cast
+          // esHost,
+          // kibanaHost || window.location.origin,
+        });
+        registerMonacoConnectorHandler(elasticsearchHandler);
+
+        // Register Kibana connector handler
+        const kibanaHandler = new KibanaMonacoConnectorHandler({
+          http,
+          notifications: notifications as any, // Temporary type cast
           kibanaHost: kibanaHost || window.location.origin,
-        },
-      };
+        });
+        registerMonacoConnectorHandler(kibanaHandler);
 
-      // Monaco YAML hover is now disabled via configuration (hover: false)
-      // The unified hover provider will handle all hover content including validation errors
+        // Monaco YAML hover is now disabled via configuration (hover: false)
+        // The unified hover provider will handle all hover content including validation errors
 
-      // Register the unified hover provider for API documentation and other content
-      const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
-      disposablesRef.current.push(hoverDisposable);
-    }
+        const genericHandler = new GenericMonacoConnectorHandler();
+        registerMonacoConnectorHandler(genericHandler);
 
-    onMount?.(editor, monaco);
-  };
+        // Create unified providers
+        const providerConfig = {
+          getYamlDocument: () => yamlDocumentRef.current || null,
+          options: {
+            http,
+            notifications: notifications as any,
+            esHost,
+            kibanaHost: kibanaHost || window.location.origin,
+          },
+        };
 
-  const handleEditorWillUnmount = () => {
+        // Register the unified hover provider for API documentation and other content
+        const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
+        disposablesRef.current.push(hoverDisposable);
+      }
+
+      onMount?.(editor, monaco);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const handleEditorWillUnmount = useCallback(() => {
     unregisterKeyboardCommands();
-  };
+  }, [unregisterKeyboardCommands]);
 
   const changeSideEffects = useCallback(() => {
     if (editorRef.current) {

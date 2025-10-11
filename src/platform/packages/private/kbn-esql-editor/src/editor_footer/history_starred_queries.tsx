@@ -54,26 +54,24 @@ export function QueryHistoryAction({
   isHistoryOpen: boolean;
   isSpaceReduced?: boolean;
 }) {
+  const toggleHistoryLabel = isHistoryOpen
+    ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
+        defaultMessage: 'Hide recent queries',
+      })
+    : i18n.translate('esqlEditor.query.showQueriesLabel', {
+        defaultMessage: 'Show recent queries',
+      });
+
   return (
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="ESQLEditor-toggle-query-history-icon">
-          <EuiToolTip
-            position="top"
-            content={
-              isHistoryOpen
-                ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                    defaultMessage: 'Hide recent queries',
-                  })
-                : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                    defaultMessage: 'Show recent queries',
-                  })
-            }
-          >
+          <EuiToolTip position="top" content={toggleHistoryLabel} disableScreenReaderOutput>
             <EuiButtonIcon
               onClick={toggleHistory}
               iconType="clockCounter"
               data-test-subj="ESQLEditor-hide-queries-link"
+              aria-label={toggleHistoryLabel}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -91,13 +89,7 @@ export function QueryHistoryAction({
             iconType="clockCounter"
             data-test-subj="ESQLEditor-toggle-query-history-button"
           >
-            {isHistoryOpen
-              ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                  defaultMessage: 'Hide recent queries',
-                })
-              : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                  defaultMessage: 'Show recent queries',
-                })}
+            {toggleHistoryLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
