@@ -132,6 +132,7 @@ export class ReportingPlugin
       await reportingCore.pluginStart({
         logger,
         esClient: elasticsearch.client,
+        executionContext: core.executionContext,
         analytics: core.analytics,
         savedObjects,
         uiSettings,
