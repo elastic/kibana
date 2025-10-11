@@ -53,6 +53,8 @@ import {
   EVENT_ORIGINAL,
   TAGS,
   ALERT_INTENDED_TIMESTAMP,
+  ALERT_LAST_SCHEDULED_ACTIONS_GROUP,
+  ALERT_LAST_SCHEDULED_ACTIONS_DATE,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
@@ -256,6 +258,16 @@ export const alertFieldMap = {
   [ALERT_WORKFLOW_ASSIGNEE_IDS]: {
     type: 'keyword',
     array: true,
+    required: false,
+  },
+  [ALERT_LAST_SCHEDULED_ACTIONS_DATE]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_LAST_SCHEDULED_ACTIONS_GROUP]: {
+    type: 'keyword',
+    array: false,
     required: false,
   },
   [EVENT_ACTION]: {

@@ -15,6 +15,7 @@ const TIMESTAMP = '@timestamp' as const;
 const KIBANA_NAMESPACE = 'kibana' as const;
 const ALERT_NAMESPACE = `${KIBANA_NAMESPACE}.alert` as const;
 const ALERT_RULE_NAMESPACE = `${ALERT_NAMESPACE}.rule` as const;
+const ALERT_LAST_SCHEDULED_ACTIONS_NAMESPACE = `${ALERT_NAMESPACE}.last_scheduled_actions` as const;
 
 // kibana.space_ids - space ID(s) of the rule that created this alert
 const SPACE_IDS = `${KIBANA_NAMESPACE}.space_ids` as const;
@@ -137,6 +138,12 @@ const ALERT_RULE_UUID = `${ALERT_RULE_NAMESPACE}.uuid` as const;
 // kibana.alert.rule.execution.type - rule execution type for rule that generated this alert (manual /scheduled)
 const ALERT_RULE_EXECUTION_TYPE = `${ALERT_RULE_NAMESPACE}.execution.type` as const;
 
+const ALERT_LAST_SCHEDULED_ACTIONS_GROUP =
+  `${ALERT_LAST_SCHEDULED_ACTIONS_NAMESPACE}.group` as const;
+const ALERT_LAST_SCHEDULED_ACTIONS_DATE = `${ALERT_LAST_SCHEDULED_ACTIONS_NAMESPACE}.date` as const;
+const ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED =
+  `${ALERT_LAST_SCHEDULED_ACTIONS_NAMESPACE}.throttled` as const;
+
 const namespaces = {
   KIBANA_NAMESPACE,
   ALERT_NAMESPACE,
@@ -182,6 +189,9 @@ export const fields = {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_LAST_SCHEDULED_ACTIONS_GROUP,
+  ALERT_LAST_SCHEDULED_ACTIONS_DATE,
+  ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
@@ -232,6 +242,9 @@ export {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
+  ALERT_LAST_SCHEDULED_ACTIONS_GROUP,
+  ALERT_LAST_SCHEDULED_ACTIONS_DATE,
+  ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,

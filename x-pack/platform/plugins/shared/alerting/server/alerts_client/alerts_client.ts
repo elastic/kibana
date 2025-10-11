@@ -18,6 +18,9 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_STATUS_UNTRACKED,
   TIMESTAMP,
+  ALERT_LAST_SCHEDULED_ACTIONS_GROUP,
+  ALERT_LAST_SCHEDULED_ACTIONS_DATE,
+  ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED,
 } from '@kbn/rule-data-utils';
 import { flatMap, get, isEmpty, keys } from 'lodash';
 import type {
@@ -871,6 +874,61 @@ export class AlertsClient<
         this.logTags
       );
       return { alertIds: [], maintenanceWindowIds: [] };
+    }
+  }
+
+  public async updatePersistedAlertsWithScheduledActions() {
+    const { rawActiveAlerts } = this.getRawAlertInstancesForState(true);
+
+    const allAlertsToUpdate = Object.values(rawActiveAlerts).reduce((acc, rawAlert) => {
+      const { meta } = rawAlert;
+      if (!!meta?.uuid && meta.lastScheduledActions) {
+        const { group, date, actions } = meta.lastScheduledActions;
+        acc[meta.uuid] = {
+          group,
+          date,
+          ...(actions ? { throttled: actions } : {}),
+        };
+      }
+
+      return acc;
+    }, {} as { [key: string]: { group: string; date: string; throttled?: { [key: string]: { date: string } } } });
+
+    const idsToUpdate = Object.keys(allAlertsToUpdate);
+
+    if (idsToUpdate.length === 0) {
+      return;
+    }
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+      await esClient.updateByQuery({
+        query: {
+          terms: {
+            _id: idsToUpdate,
+          },
+        },
+        conflicts: 'proceed', // should we?
+        index: this.indexTemplateAndPattern.alias,
+        script: {
+          source: `
+            if (params.containsKey(ctx._source['${ALERT_UUID}'])) {
+              ctx._source['${ALERT_LAST_SCHEDULED_ACTIONS_GROUP}'] = params[ctx._source['${ALERT_UUID}']].group;
+              ctx._source['${ALERT_LAST_SCHEDULED_ACTIONS_DATE}'] = params[ctx._source['${ALERT_UUID}']].date;
+              if (params[ctx._source['${ALERT_UUID}']].containsKey('throttled')) {
+                ctx._source['${ALERT_LAST_SCHEDULED_ACTIONS_THROTTLED}'] = params[ctx._source['${ALERT_UUID}']].throttled;
+              }
+            }
+          `,
+          lang: 'painless',
+          params: allAlertsToUpdate,
+        },
+      });
+    } catch (err) {
+      this.options.logger.warn(
+        `Error updating alert last scheduled actions ${this.ruleInfoMessage}: ${err}`,
+        this.logTags
+      );
+      throw err;
     }
   }
 
