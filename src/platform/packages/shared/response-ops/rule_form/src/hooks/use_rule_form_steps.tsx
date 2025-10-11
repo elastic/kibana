@@ -93,6 +93,7 @@ const useCommonRuleFormSteps = ({
     actionsErrors = {},
     actionsParamsErrors = {},
     formData: { actions },
+    selectedRuleType,
   } = useRuleFormState();
 
   const canReadConnectors = !!application.capabilities.actions?.show;
@@ -157,14 +158,15 @@ const useCommonRuleFormSteps = ({
         children: <RuleDefinition />,
         'data-test-subj': 'ruleFormStep-definition',
       },
-      [RuleFormStepId.ACTIONS]: canReadConnectors
-        ? {
-            title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
-            status: actionsStatus,
-            children: <RuleActions />,
-            'data-test-subj': 'ruleFormStep-actions',
-          }
-        : null,
+      [RuleFormStepId.ACTIONS]:
+        canReadConnectors && selectedRuleType?.id !== 'esql'
+          ? {
+              title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
+              status: actionsStatus,
+              children: <RuleActions />,
+              'data-test-subj': 'ruleFormStep-actions',
+            }
+          : null,
       [RuleFormStepId.DETAILS]: {
         title: shortTitles
           ? RULE_FORM_PAGE_RULE_DETAILS_TITLE_SHORT
@@ -174,7 +176,14 @@ const useCommonRuleFormSteps = ({
         'data-test-subj': 'ruleFormStep-details',
       },
     }),
-    [ruleDefinitionStatus, canReadConnectors, actionsStatus, ruleDetailsStatus, shortTitles]
+    [
+      ruleDefinitionStatus,
+      canReadConnectors,
+      actionsStatus,
+      ruleDetailsStatus,
+      shortTitles,
+      selectedRuleType,
+    ]
   );
 
   const stepOrder: RuleFormStepId[] = useMemo(

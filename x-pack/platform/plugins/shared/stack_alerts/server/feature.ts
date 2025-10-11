@@ -41,6 +41,11 @@ const esQueryAlertingFeature = {
   consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID, DISCOVER_CONSUMER],
 };
 
+const esqlAlertingFeature = {
+  ruleTypeId: 'esql',
+  consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID, DISCOVER_CONSUMER],
+};
+
 /**
  * Only the stackAlerts consumer is valid
  * for the stackAlerts feature ID for the
@@ -64,6 +69,7 @@ const observabilityThresholdAlertingFeature = {
 const alertingFeatures = [
   ...basicAlertingFeatures,
   esQueryAlertingFeature,
+  esqlAlertingFeature,
   mlAnomalyDetectionAlertingFeature,
   observabilityThresholdAlertingFeature,
 ];
