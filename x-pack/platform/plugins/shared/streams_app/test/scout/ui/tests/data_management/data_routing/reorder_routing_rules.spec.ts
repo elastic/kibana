@@ -46,7 +46,7 @@ test.describe(
       await pageObjects.streams.dragRoutingRule('logs.first', 2);
 
       await pageObjects.streams.saveRuleOrder();
-      await pageObjects.streams.expectToastVisible();
+      await pageObjects.toasts.waitFor();
 
       await pageObjects.streams.expectRoutingOrder(['logs.second', 'logs.third', 'logs.first']);
     });
@@ -72,7 +72,7 @@ test.describe(
 
       // Save all changes
       await pageObjects.streams.saveRuleOrder();
-      await pageObjects.streams.expectToastVisible();
+      await pageObjects.toasts.waitFor();
 
       await pageObjects.streams.expectRoutingOrder(['logs.third', 'logs.second', 'logs.first']);
     });

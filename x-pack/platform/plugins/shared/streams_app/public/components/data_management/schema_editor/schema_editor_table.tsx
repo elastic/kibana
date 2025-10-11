@@ -23,6 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import type { TableColumnName } from './constants';
 import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
 import { FieldActionsCell } from './field_actions';
@@ -114,9 +115,9 @@ export function FieldsTable({
       leadingControlColumns={leadingColumns}
       trailingControlColumns={trailingColumns}
       gridStyle={{
-        border: 'none',
+        border: 'all',
         rowHover: 'highlight',
-        header: 'underline',
+        header: 'shade',
       }}
       inMemory={{ level: 'sorting' }}
     />
@@ -134,23 +135,34 @@ const createCellRenderer =
     const { parent, status } = field;
 
     if (columnId === 'type') {
+      // Prioritize showing esType if available and different from our supported type
+      if (field.esType && (!field.type || field.type === 'system')) {
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            {field.esType}
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.streams.streamDetailSchemaEditorFieldsTableTypeEsTypeTooltip',
+                {
+                  defaultMessage:
+                    'This field is not managed by Streams, but is defined in Elasticsearch. It can also be controlled via the underlying index template and component templates available in the "Advanced" tab.',
+                }
+              )}
+              position="right"
+            />
+          </EuiFlexGroup>
+        );
+      }
+
       if (!field.type) {
-        if (field.status === 'unmapped' && field.esType) {
-          return (
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              {field.esType}
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.streams.streamDetailSchemaEditorFieldsTableTypeEsTypeTooltip',
-                  {
-                    defaultMessage:
-                      'This field is not managed by Streams, but is defined in Elasticsearch. It can also be controlled via the underlying index template and component templates available in the "Advanced" tab.',
-                  }
-                )}
-                position="right"
-              />
-            </EuiFlexGroup>
-          );
+        // For fields with undefined type (unmanaged fields), show "dynamic" only for classic streams
+        if (field.status === 'unmapped') {
+          const streamType = getStreamTypeFromDefinition(stream);
+          if (streamType === 'classic') {
+            return <>{'<dynamic>'}</>;
+          }
+
+          return EMPTY_CONTENT;
         }
         return EMPTY_CONTENT;
       }
@@ -163,6 +175,13 @@ const createCellRenderer =
 
     if (columnId === 'status') {
       return <FieldStatusBadge status={status} />;
+    }
+
+    if (columnId === 'source') {
+      if (field.streamSource) {
+        return <>{field.streamSource}</>;
+      }
+      return EMPTY_CONTENT;
     }
 
     return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;

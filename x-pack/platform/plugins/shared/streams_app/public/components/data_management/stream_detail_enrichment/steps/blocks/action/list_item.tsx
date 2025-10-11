@@ -12,10 +12,13 @@ import {
   EuiBadge,
   EuiPanel,
   EuiTextTruncate,
+  useEuiTheme,
+  euiTextTruncate,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isActionBlock } from '@kbn/streamlang';
 import React from 'react';
+import { css } from '@emotion/react';
 import { useSelector } from '@xstate5/react';
 import { ProcessorMetricBadges } from './processor_metrics';
 import { getStepDescription } from './utils';
@@ -32,8 +35,11 @@ export const ActionBlockListItem = ({
   stepUnderEdit,
   rootLevelMap,
   stepsProcessingSummaryMap,
+  isFirstStepInLevel,
+  isLastStepInLevel,
 }: ActionBlockProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+  const { euiTheme } = useEuiTheme();
 
   const isUnsaved = useSelector(
     stepRef,
@@ -58,21 +64,29 @@ export const ActionBlockListItem = ({
       {stepUnderEdit && !step.parentId && <BlockDisableOverlay />}
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <ProcessorStatusIndicator
-                    stepRef={stepRef}
-                    stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <strong data-test-subj="streamsAppProcessorLegend">
-                    {step.action.toUpperCase()}
-                  </strong>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <ProcessorStatusIndicator
+                stepRef={stepRef}
+                stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={true}
+              css={css`
+                min-width: 0;
+                margin-right: ${euiTheme.size.s};
+              `}
+            >
+              <strong
+                data-test-subj="streamsAppProcessorLegend"
+                css={css`
+                  display: block;
+                  ${euiTextTruncate()}
+                `}
+              >
+                {step.action.toUpperCase()}
+              </strong>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -92,19 +106,36 @@ export const ActionBlockListItem = ({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem>
-                  <StepContextMenu stepRef={stepRef} stepUnderEdit={stepUnderEdit} />
+                  <StepContextMenu
+                    stepRef={stepRef}
+                    stepUnderEdit={stepUnderEdit}
+                    isFirstStepInLevel={isFirstStepInLevel}
+                    isLastStepInLevel={isLastStepInLevel}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiPanel hasShadow={false} color={descriptionPanelColour}>
+          <EuiPanel
+            hasShadow={false}
+            color={descriptionPanelColour}
+            css={css`
+              padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+            `}
+          >
             <EuiTextTruncate
               text={stepDescription}
               truncation="end"
               children={() => (
-                <EuiText size="s" color="subdued">
+                <EuiText
+                  size="xs"
+                  color="subdued"
+                  css={css`
+                    font-family: ${euiTheme.font.familyCode};
+                  `}
+                >
                   {stepDescription}
                 </EuiText>
               )}

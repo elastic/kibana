@@ -9,7 +9,7 @@ import type {
   SavedObjectsResolveResponse,
   SavedObjectReference,
 } from '@kbn/core-saved-objects-api-server';
-import type { MapAttributes } from '../../../../common/content_management';
+import type { MapAttributes } from '../../../../server';
 import { getMapClient } from '../../../content_management';
 
 export interface SharingSavedObjectProps {
@@ -28,7 +28,7 @@ export async function loadFromLibrary(savedObjectId: string): Promise<{
   const {
     item: savedObject,
     meta: { outcome, aliasPurpose, aliasTargetId },
-  } = await getMapClient<MapAttributes>().get(savedObjectId);
+  } = await getMapClient().get(savedObjectId);
 
   if (savedObject.error) {
     throw savedObject.error;

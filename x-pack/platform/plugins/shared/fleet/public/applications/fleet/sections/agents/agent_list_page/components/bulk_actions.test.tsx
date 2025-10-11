@@ -13,7 +13,6 @@ import type { Agent } from '../../../../types';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { LicenseService } from '../../../../services';
-import { ExperimentalFeaturesService } from '../../../../services';
 import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useLicense } from '../../../../../../hooks/use_license';
@@ -21,7 +20,6 @@ import { useLicense } from '../../../../../../hooks/use_license';
 import { AgentBulkActions } from './bulk_actions';
 
 jest.mock('../../../../../../services/experimental_features');
-const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 jest.mock('../../../../../../hooks/use_license');
 jest.mock('../../../../../../hooks/use_authz');
@@ -49,9 +47,6 @@ const defaultProps = {
 
 describe('AgentBulkActions', () => {
   beforeAll(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      enableAgentMigrations: true,
-    } as any);
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
@@ -69,6 +64,12 @@ describe('AgentBulkActions', () => {
     jest.mocked(AgentReassignAgentPolicyModal).mockReturnValue(null);
   });
 
+  afterEach(() => {
+    mockedUseLicence.mockReturnValue({
+      hasAtLeast: () => false,
+    } as unknown as LicenseService);
+  });
+
   function render(props: any) {
     const renderer = createFleetTestRendererMock();
     return renderer.render(<AgentBulkActions {...props} />);
@@ -76,6 +77,10 @@ describe('AgentBulkActions', () => {
 
   describe('When in manual selection mode', () => {
     it('should show the available actions for the selected agents', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
       const results = render({
         ...defaultProps,
         selectedAgents: [{ id: 'agent1', tags: ['oldTag'] }, { id: 'agent2' }] as Agent[],
@@ -119,6 +124,10 @@ describe('AgentBulkActions', () => {
 
   describe('When in query selection mode', () => {
     it('should show the available actions for all agents when no managed agents are listed', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
       const results = render({
         ...defaultProps,
         selectionMode: 'query',
@@ -142,6 +151,10 @@ describe('AgentBulkActions', () => {
     });
 
     it('should show the available actions for all agents except managed agents', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
       const results = render({
         ...defaultProps,
         totalManagedAgentIds: ['agentId1', 'agentId2'],
@@ -214,20 +227,6 @@ describe('AgentBulkActions', () => {
         }),
         expect.anything()
       );
-    });
-
-    it('should not show the migrate button when agent migrations flag is disabled', async () => {
-      mockedExperimentalFeaturesService.get.mockReturnValue({
-        enableAgentMigrations: false,
-      } as any);
-
-      const results = render({
-        ...defaultProps,
-        selectedAgents: [{ id: 'agent1', tags: ['oldTag'] }, { id: 'agent2' }] as Agent[],
-      });
-
-      const bulkActionsButton = results.queryByTestId('agentBulkActionsBulkMigrate');
-      expect(bulkActionsButton).not.toBeInTheDocument();
     });
   });
 });

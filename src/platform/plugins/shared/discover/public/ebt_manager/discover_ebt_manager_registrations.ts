@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
+import { TabsEventDataKeys } from '@kbn/unified-tabs';
 import type { BehaviorSubject } from 'rxjs';
 import type { DiscoverStartPlugins } from '../types';
 import type { DiscoverEBTContextProps } from './types';
@@ -29,6 +30,8 @@ export const FIELD_USAGE_FILTER_OPERATION = 'filterOperation';
 export const CONTEXTUAL_PROFILE_RESOLVED_EVENT_TYPE = 'discover_profile_resolved';
 export const CONTEXTUAL_PROFILE_LEVEL = 'contextLevel';
 export const CONTEXTUAL_PROFILE_ID = 'profileId';
+
+export const TABS_EVENT_TYPE = 'discover_tabs';
 
 /**
  * This function is statically imported since analytics registrations must happen at setup,
@@ -122,6 +125,68 @@ export const registerDiscoverEBTManagerAnalytics = (
         type: 'keyword',
         _meta: {
           description: 'The resolved name of the active profile',
+        },
+      },
+    },
+  });
+
+  core.analytics.registerEventType({
+    eventType: TABS_EVENT_TYPE,
+    schema: {
+      [TabsEventDataKeys.TABS_EVENT_NAME]: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The name of the tab event that is tracked in the metrics i.e. tabCreated, tabClosed',
+        },
+      },
+      [TabsEventDataKeys.TOTAL_TABS_OPEN]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of total tabs open at the time of an event',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.REMAINING_TABS_COUNT]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of remaining tabs after an event',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.CLOSED_TABS_COUNT]: {
+        type: 'integer',
+        _meta: {
+          description: 'The number of tabs closed in a single action',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.TAB_ID]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The unique identifier of the tab',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.FROM_INDEX]: {
+        type: 'integer',
+        _meta: {
+          description: 'The original index of the tab being moved',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.TO_INDEX]: {
+        type: 'integer',
+        _meta: {
+          description: 'The new index of the tab being moved',
+          optional: true,
+        },
+      },
+      [TabsEventDataKeys.SHORTCUT_USED]: {
+        type: 'keyword',
+        _meta: {
+          description: 'The keyboard key used for tab navigation',
+          optional: true,
         },
       },
     },

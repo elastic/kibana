@@ -219,6 +219,7 @@ export function VariableName({
           data-test-subj="esqlVariableName"
           fullWidth
           compressed
+          tabIndex={0}
         />
       </EuiToolTip>
     </EuiFormRow>
@@ -332,10 +333,10 @@ export function Header({
             <h2 id={ariaLabelledBy}>
               {isInEditMode
                 ? i18n.translate('esql.flyout.editTitle', {
-                    defaultMessage: 'Edit ES|QL control',
+                    defaultMessage: 'Edit variable control',
                   })
                 : i18n.translate('esql.flyout.title', {
-                    defaultMessage: 'Create ES|QL control',
+                    defaultMessage: 'Create variable control',
                   })}
             </h2>
           </EuiTitle>
@@ -353,6 +354,7 @@ export function Header({
               label=""
               iconType="beaker"
               size="s"
+              tabIndex={0}
               css={css`
                 vertical-align: middle;
               `}
@@ -365,15 +367,11 @@ export function Header({
 }
 
 export function Footer({
-  isControlInEditMode,
-  variableName,
   onCancelControl,
   isSaveDisabled,
   closeFlyout,
   onCreateControl,
 }: {
-  isControlInEditMode: boolean;
-  variableName: string;
   isSaveDisabled: boolean;
   closeFlyout: () => void;
   onCreateControl: () => void;

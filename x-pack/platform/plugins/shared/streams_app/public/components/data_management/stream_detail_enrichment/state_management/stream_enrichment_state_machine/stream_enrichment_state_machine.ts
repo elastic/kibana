@@ -28,6 +28,7 @@ import {
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type {
   StreamEnrichmentContextType,
   StreamEnrichmentEvent,
@@ -58,6 +59,7 @@ import {
   insertAtIndex,
   spawnDataSource,
   spawnStep,
+  reorderSteps,
 } from './utils';
 import { createUrlInitializerActor, createUrlSyncAction } from './url_state_actor';
 import {
@@ -184,6 +186,11 @@ export const streamEnrichmentMachine = setup({
         stepRefs: context.stepRefs.filter((proc) => !idsToDelete.has(proc.id)),
       };
     }),
+    reorderSteps: assign(({ context }, params: { stepId: string; direction: 'up' | 'down' }) => {
+      return {
+        stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
+      };
+    }),
     reassignSteps: assign(({ context }) => ({
       stepRefs: [...context.stepRefs],
     })),
@@ -276,6 +283,7 @@ export const streamEnrichmentMachine = setup({
       input: {
         steps: [],
         streamName: input.definition.stream.name,
+        streamType: getStreamTypeFromDefinition(input.definition.stream),
       },
     }),
   }),
@@ -458,8 +466,15 @@ export const streamEnrichmentMachine = setup({
                       guard: 'hasSimulatePrivileges',
                       target: 'editing',
                     },
+                    'step.reorder': {
+                      guard: 'hasSimulatePrivileges',
+                      actions: [{ type: 'reorderSteps', params: ({ event }) => event }],
+                      target: 'idle',
+                      reenter: true,
+                    },
                     'step.delete': {
                       target: 'idle',
+                      guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
@@ -490,6 +505,7 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.delete': {
                       target: 'idle',
+                      guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
@@ -513,6 +529,7 @@ export const streamEnrichmentMachine = setup({
                     'step.cancel': 'idle',
                     'step.delete': {
                       target: 'idle',
+                      guard: 'hasManagePrivileges',
                       actions: [
                         stopChild(({ event }) => event.id),
                         { type: 'deleteStep', params: ({ event }) => event },
