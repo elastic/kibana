@@ -30,6 +30,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
+  ALERT_GROUPING,
   ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
@@ -301,6 +302,7 @@ export function registerTransactionErrorRateRuleType({
           [ALERT_EVALUATION_VALUE]: errorRate,
           [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
           [ALERT_REASON]: reasonMessage,
+          [ALERT_GROUPING]: groupingObject,
           ...sourceFields,
           ...groupByFields,
         };
@@ -375,7 +377,7 @@ export function registerTransactionErrorRateRuleType({
           threshold: ruleParams.threshold,
           triggerValue: asDecimalOrInteger(alertHits?.[ALERT_EVALUATION_VALUE]),
           viewInAppUrl,
-          grouping: groupingObject,
+          grouping: alertHits?.[ALERT_GROUPING],
           ...groupByActionVariables,
         };
 
