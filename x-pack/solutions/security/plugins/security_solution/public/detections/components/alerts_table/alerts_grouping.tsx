@@ -188,6 +188,11 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [newDataViewPickerEnabled, props.dataView?.fields, props.dataViewSpec.fields]
   );
 
+  const multiValueFieldsToFlatten = useMemo(
+    () => fields.filter((field) => field.aggregatable).map((field) => field.name),
+    [fields]
+  );
+
   const runtimeMappings = useMemo(
     () =>
       newDataViewPickerEnabled
@@ -230,6 +235,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     onGroupChange,
     onOptionsChange,
     tracker: track,
+    multiValueFields: multiValueFieldsToFlatten,
   });
   const groupId = useMemo(() => groupIdSelector(), []);
   const groupInRedux = useDeepEqualSelector((state) => groupId(state, props.tableId));
@@ -363,6 +369,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
           signalIndexName={dataViewTitle}
+          multiValueFieldsToFlatten={multiValueFieldsToFlatten}
         />
       );
     },
@@ -376,6 +383,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       runtimeMappings,
       selectedGroups,
       setPageVar,
+      multiValueFieldsToFlatten,
     ]
   );
 
