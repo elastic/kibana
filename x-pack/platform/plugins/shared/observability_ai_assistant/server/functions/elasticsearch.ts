@@ -6,7 +6,76 @@
  */
 
 import type { FunctionRegistrationParameters } from '.';
-import { ELASTICSEARCH_FUNCTION_NAME } from '..';
+import { ELASTICSEARCH_FUNCTION_NAME, RETRIEVE_ES_API_DOC_FUNCTION_NAME } from '..';
+
+export function registerRetrieveEsApiDocFunction({
+  functions,
+  resources,
+}: FunctionRegistrationParameters) {
+  functions.registerFunction(
+    {
+      name: RETRIEVE_ES_API_DOC_FUNCTION_NAME,
+      description:
+        'Retrieve Elasticsearch API documentation to understand how to use Elasticsearch APIs',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description:
+              'The query to use to retrieve documentation for an Elasticsearch API endpoint, for example "search API" or "create index API", it uses descriptions, summary and title of Elasticsearch APIs to find the most relevant ones',
+          },
+        },
+        required: ['query'] as const,
+      },
+    },
+    async ({ arguments: { query } }) => {
+      const esClient = (await resources.context.core).elasticsearch.client;
+
+      const response = await esClient.asCurrentUser.transport.request({
+        method: 'POST',
+        path: `/kibana_ai_es_api_doc/_search`,
+        body: {
+          size: 3,
+          query: {
+            bool: {
+              should: [
+                {
+                  semantic: {
+                    field: 'description',
+                    query,
+                  },
+                },
+                {
+                  semantic: {
+                    field: 'summary',
+                    query,
+                  },
+                },
+                {
+                  semantic: {
+                    field: 'title',
+                    query,
+                  },
+                },
+              ],
+            },
+          },
+          highlight: {
+            fields: {
+              summary: {
+                type: 'semantic',
+                order: 'score',
+              },
+            },
+          },
+        },
+      });
+
+      return { content: { response } };
+    }
+  );
+}
 
 export function registerElasticsearchFunction({
   functions,
