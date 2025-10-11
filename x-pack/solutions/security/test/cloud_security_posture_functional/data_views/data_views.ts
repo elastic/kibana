@@ -391,7 +391,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const newDataViewId = `${CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
         // Create old v1 data view in test space
-        // Note: The space is already part of the data view ID and we've switched to the space
         await kibanaServer.savedObjects.create({
           type: 'index-pattern',
           id: oldDataViewId,
@@ -402,16 +401,18 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
             timeFieldName: '@timestamp',
             allowNoIndex: true,
           },
+          space: TEST_SPACE,
           overwrite: true,
         });
 
         // Switch to test space
+        await pageObjects.common.navigateToApp('home');
         await pageObjects.spaceSelector.openSpacesNav();
         await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
         await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
 
         // Navigate to findings page to trigger migration
-        await findings.navigateToLatestFindingsPage();
+        await findings.navigateToLatestFindingsPage(TEST_SPACE);
 
         // Wait for migration to complete
         await waitForDataViews({
@@ -600,7 +601,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const newDataViewId = `${CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX}-${TEST_SPACE}`;
 
         // Create old v1 data view in test space
-        // Note: The space is already part of the data view ID and we've switched to the space
         await kibanaServer.savedObjects.create({
           type: 'index-pattern',
           id: oldDataViewId,
@@ -610,16 +610,18 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
             timeFieldName: '@timestamp',
             allowNoIndex: true,
           },
+          space: TEST_SPACE,
           overwrite: true,
         });
 
         // Switch to test space
+        await pageObjects.common.navigateToApp('home');
         await pageObjects.spaceSelector.openSpacesNav();
         await pageObjects.spaceSelector.clickSpaceAvatar(TEST_SPACE);
         await pageObjects.spaceSelector.expectHomePage(TEST_SPACE);
 
         // Navigate to vulnerabilities page to trigger migration
-        await findings.navigateToLatestVulnerabilitiesPage();
+        await findings.navigateToLatestVulnerabilitiesPage(TEST_SPACE);
 
         // Wait for migration to complete
         await waitForDataViews({
