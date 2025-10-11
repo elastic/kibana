@@ -15,8 +15,10 @@ export {
   GraphGroupedNodePreviewPanelKey,
   GROUP_PREVIEW_BANNER,
 } from './graph_grouped_node_preview_panel/constants';
+export type { EntityOrEventItem } from './graph_grouped_node_preview_panel/components/grouped_item/types';
 export { GraphPopover } from './graph/graph_popover';
 export { useGraphPopover } from './graph/use_graph_popover';
+export { groupedItemClick$, emitGroupedItemClick } from './graph_grouped_node_preview_panel/events';
 export type { GraphProps } from './graph/graph';
 export type {
   NodeViewModel,

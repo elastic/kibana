@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import type {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+
 export interface BaseGroupedItemCommonFields {
   id?: string;
+  /** source index (used for opening single document previews) */
+  index?: string;
   /** raw timestamp */
   timestamp?: string | number | Date;
   /** optional ip address */
@@ -16,6 +24,8 @@ export interface BaseGroupedItemCommonFields {
 }
 
 export interface EventOrAlertSpecificFields extends BaseGroupedItemCommonFields {
+  /** document id - used to open flyout preview */
+  docId?: string;
   /** action becomes the title */
   action?: string; // if missing we fallback to '-')
   /** actor entity descriptor */
@@ -34,16 +44,16 @@ export interface EntitySpecificFields extends BaseGroupedItemCommonFields {
 }
 
 export interface EventItem extends EventOrAlertSpecificFields {
-  itemType: 'event';
+  itemType: typeof DOCUMENT_TYPE_EVENT;
 }
 export interface AlertItem extends EventOrAlertSpecificFields {
-  itemType: 'alert';
+  itemType: typeof DOCUMENT_TYPE_ALERT;
 }
 export interface EntityItem extends EntitySpecificFields {
-  itemType: 'entity';
+  itemType: typeof DOCUMENT_TYPE_ENTITY;
   type?: string;
   subType?: string;
 }
 
 export type EntityOrEventItem = EventItem | AlertItem | EntityItem;
-export type PanelItems = EntityItem[] | Array<EventItem | AlertItem>;
+export type PanelItems = EntityItem[] | (EventItem | AlertItem)[];
