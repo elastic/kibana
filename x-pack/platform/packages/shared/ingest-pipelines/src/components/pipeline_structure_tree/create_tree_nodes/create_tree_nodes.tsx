@@ -22,6 +22,8 @@ export const createTreeNodesFromPipelines = (
   clickMorePipelines: (name: string) => void,
   level: number = 1
 ): Node => {
+  const isSelected = treeNode.pipelineName === selectedPipeline;
+  
   const currentNode = {
     id: treeNode.pipelineName,
     label: (
@@ -29,12 +31,13 @@ export const createTreeNodesFromPipelines = (
         pipelineName={treeNode.pipelineName}
         isManaged={treeNode.isManaged}
         isDeprecated={treeNode.isDeprecated}
+        isSelected={isSelected}
       />
     ),
     'data-test-subj': `pipelineTreeNode-${treeNode.pipelineName}-moreChildrenPipelines`,
     className:
       (level === 1 ? 'cssTreeNode-root' : 'cssTreeNode-children') +
-      (treeNode.pipelineName === selectedPipeline ? '--active' : ''),
+      (isSelected ? '--active' : ''),
     children: treeNode.children.length ? [] : undefined,
     isExpanded: level === 1,
     callback: () => clickTreeNode(treeNode.pipelineName),
