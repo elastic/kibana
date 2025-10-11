@@ -1,6 +1,6 @@
 # Workplace AI Solution Serverless Tests
 
-This directory contains **WorkplaceAI-specific** serverless test scenarios. For detailed serverless testing guidelines, authentication setup, role-based testing, and MKI configuration, refer to the comprehensive platform documentation: [`x-pack/platform/test/serverless/README.md`](../../../../platform/test/serverless/README.md).
+This directory contains **Workplace AI-specific** serverless test scenarios. For detailed serverless testing guidelines, authentication setup, role-based testing, and MKI configuration, refer to the comprehensive platform documentation: [`x-pack/platform/test/serverless/README.md`](../../../../platform/test/serverless/README.md).
 
 **Important**: Platform-shared serverless functionality that works across all project types (Security, Observability, Search) is located in `x-pack/platform/test/serverless`. Only WorkplaceAI-unique serverless test scenarios should be added here.
 
@@ -11,13 +11,13 @@ x-pack/solutions/workplace_ai/test/serverless/
 ├─ api_integration/
 │  ├─ configs/
 │  ├─ services/             # Workplace AI serverless API services
-│  └─ test_suites/          # WorkplaceAI-specific API tests
+│  └─ test_suites/          # Workplace AI-specific API tests
 ├─ functional/
 │  ├─ configs/
 │  ├─ services/             # Workplace AI serverless UI services
 │  ├─ page_objects/         # Workplace AI serverless page objects
 │  ├─ configs/
-│  └─ test_suites/          # WorkplaceAI-specific UI tests
+│  └─ test_suites/          # Workplace AI-specific UI tests
 ```
 
 ## Running Tests

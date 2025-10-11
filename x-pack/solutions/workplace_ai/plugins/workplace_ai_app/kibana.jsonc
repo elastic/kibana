@@ -7,7 +7,7 @@
    ],
   "group": "workplace_ai",
   "visibility": "private",
-  "description": " application",
+  "description": "Workplace AI application",
   "plugin": {
     "id": "workplaceAIApp",
     "server": true,

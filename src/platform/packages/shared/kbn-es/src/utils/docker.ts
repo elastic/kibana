@@ -92,7 +92,7 @@ export const esServerlessProjectTypes = new Map<string, string>([
   ['es', 'elasticsearch'],
   ['oblt', 'observability'],
   ['security', 'security'],
-  ['chat', 'elasticsearch'],
+  ['workplace_ai', 'elasticsearch'],
 ]);
 
 export interface DockerOptions extends EsClusterExecOptions, BaseOptions {
