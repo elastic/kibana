@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import type { estypes } from '@elastic/elasticsearch';
+import { JOB_STATE } from '@kbn/ml-plugin/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
@@ -20,55 +21,85 @@ export default ({ getService }: FtrProviderContext) => {
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
 
-  async function deleteDatafeed(
-    datafeedId: string,
+  const farequoteMappings: estypes.MappingTypeMapping = {
+    properties: {
+      '@timestamp': {
+        type: 'date',
+      },
+      airline: {
+        type: 'keyword',
+      },
+      responsetime: {
+        type: 'float',
+      },
+    },
+  };
+
+  async function forceStopAndCloseJob(
+    { jobId }: { jobId: string },
     user: USER,
     expectedStatusCode: number,
     space?: string
   ) {
+    const requestBody = { jobId };
     const { body, status } = await supertest
-      .delete(`${space ? `/s/${space}` : ''}/internal/ml/datafeeds/${datafeedId}`)
+      .post(`${space ? `/s/${space}` : ''}/internal/ml/jobs/force_stop_and_close_job`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(getCommonRequestHeader('1'));
+      .set(getCommonRequestHeader('1'))
+      .send(requestBody);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
 
-  describe('delete datafeeds with spaces', () => {
+  describe('starts and stops datafeeds', () => {
     before(async () => {
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
-
+      await ml.api.createIndex('ft_farequote', farequoteMappings);
       const jobConfig = ml.commonConfig.getADFqSingleMetricJobConfig(jobIdSpace1);
       await ml.api.createAnomalyDetectionJob(jobConfig, idSpace1);
       const datafeedConfig = ml.commonConfig.getADFqDatafeedConfig(jobIdSpace1);
       await ml.api.createDatafeed(datafeedConfig, idSpace1);
-
+      await ml.api.openAnomalyDetectionJob(jobIdSpace1);
       await ml.testResources.setKibanaTimeZoneToUTC();
+      await ml.api.startDatafeed(datafeedIdSpace1);
     });
-
     after(async () => {
+      await ml.api.stopDatafeed(datafeedIdSpace1);
       await spacesService.delete(idSpace1);
       await spacesService.delete(idSpace2);
       await ml.api.cleanMlIndices();
+      await ml.api.deleteIndices('ft_farequote');
       await ml.testResources.cleanMLSavedObjects();
     });
 
-    it('should not be deletable by ml viewer user', async () => {
-      await deleteDatafeed(datafeedIdSpace1, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
+    it('should not stop and close the job by ml viewer user', async () => {
+      await forceStopAndCloseJob({ jobId: jobIdSpace1 }, USER.ML_VIEWER_ALL_SPACES, 403, idSpace1);
     });
 
-    it('should not delete datafeed with incorrect space', async () => {
-      await deleteDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 404, idSpace2);
+    it('should not stop and close the job with incorrect space', async () => {
+      await ml.api.waitForJobState(jobIdSpace1, JOB_STATE.OPENED);
+
+      await forceStopAndCloseJob(
+        { jobId: jobIdSpace1 },
+        USER.ML_POWERUSER_ALL_SPACES,
+        404,
+        idSpace2
+      );
     });
 
-    it('should delete datafeed with correct space', async () => {
-      await deleteDatafeed(datafeedIdSpace1, USER.ML_POWERUSER_ALL_SPACES, 200, idSpace1);
+    it('should force stop and close the job with correct space', async () => {
+      await ml.api.waitForJobState(jobIdSpace1, JOB_STATE.OPENED);
 
-      const exists = await ml.api.datafeedExist(datafeedIdSpace1);
+      await forceStopAndCloseJob(
+        { jobId: jobIdSpace1 },
+        USER.ML_POWERUSER_ALL_SPACES,
+        200,
+        idSpace1
+      );
 
-      expect(exists).to.eql(false, `expected datafeed exists to be false (got ${exists})`);
+      await ml.api.waitForJobState(jobIdSpace1, JOB_STATE.CLOSED);
     });
   });
 };

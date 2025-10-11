@@ -419,6 +419,22 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return state;
     },
 
+    async getInternalDatafeedState(datafeedId: string, space?: string): Promise<DATAFEED_STATE> {
+      log.debug(`Fetching datafeed state for datafeed ${datafeedId}`);
+      const { body: datafeedStats, status } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/internal/ml/datafeeds/${datafeedId}/_stats`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, datafeedStats);
+
+      expect(datafeedStats.datafeeds).to.have.length(
+        1,
+        `Expected datafeed stats to have exactly one datafeed (got '${datafeedStats.datafeeds.length}')`
+      );
+      const state: DATAFEED_STATE = datafeedStats.datafeeds[0].state;
+
+      return state;
+    },
+
     async waitForDatafeedState(
       datafeedId: string,
       expectedDatafeedState: DATAFEED_STATE,
@@ -429,6 +445,26 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         timeout,
         async () => {
           const state = await this.getDatafeedState(datafeedId);
+          if (state === expectedDatafeedState) {
+            return true;
+          } else {
+            throw new Error(`expected job state to be ${expectedDatafeedState} but got ${state}`);
+          }
+        }
+      );
+    },
+
+    async waitForInternalDatafeedState(
+      datafeedId: string,
+      expectedDatafeedState: DATAFEED_STATE,
+      space?: string,
+      timeout: number = 2 * 60 * 1000
+    ) {
+      await retry.waitForWithTimeout(
+        `datafeed state to be ${expectedDatafeedState}`,
+        timeout,
+        async () => {
+          const state = await this.getInternalDatafeedState(datafeedId, space);
           if (state === expectedDatafeedState) {
             return true;
           } else {
