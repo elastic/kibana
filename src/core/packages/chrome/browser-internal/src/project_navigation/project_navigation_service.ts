@@ -34,6 +34,9 @@ import {
   type Observable,
   type Subscription,
   timer,
+  from,
+  catchError,
+  shareReplay,
 } from 'rxjs';
 import { type Location, createLocation } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -100,6 +103,7 @@ export class ProjectNavigationService {
   private _http?: InternalHttpStart;
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
+  private deploymentName$: Observable<string | undefined> = of(undefined);
 
   constructor(private isServerless: boolean) {}
 
@@ -121,6 +125,8 @@ export class ProjectNavigationService {
 
     this.handleActiveNodesChange();
     this.handleSolutionNavDefinitionChange();
+
+    this.initDeploymentName$();
 
     this.deepLinksMap$ = navLinksService.getNavLinks$().pipe(
       map((navLinks) => {
@@ -175,17 +181,28 @@ export class ProjectNavigationService {
           chromeBreadcrumbs$,
           this.projectName$,
           this.cloudLinks$,
+          this.deploymentName$,
         ]).pipe(
-          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, projectName, cloudLinks]) => {
-            return buildBreadcrumbs({
-              projectName,
+          map(
+            ([
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,
+              projectName,
               cloudLinks,
-              isServerless: this.isServerless,
-            });
-          })
+              deploymentName,
+            ]) => {
+              return buildBreadcrumbs({
+                projectName,
+                projectBreadcrumbs,
+                activeNodes,
+                chromeBreadcrumbs,
+                cloudLinks,
+                isServerless: this.isServerless,
+                deploymentName,
+              });
+            }
+          )
         );
       },
       /** In stateful Kibana, get the registered solution navigations */
@@ -465,6 +482,31 @@ export class ProjectNavigationService {
       throw new Error('Http service not provided.');
     }
     return this._http;
+  }
+
+  private initDeploymentName$() {
+    if (!this._http || typeof this._http.get !== 'function') {
+      this.deploymentName$ = of(undefined);
+      return;
+    }
+
+    const response = this._http.get<{
+      resourceData: { deployment: { name?: string } | undefined } | undefined;
+    }>('/internal/cloud/solution', { version: '1' });
+
+    if (!response) {
+      this.deploymentName$ = of(undefined);
+      return;
+    }
+
+    this.deploymentName$ = from(response).pipe(
+      map(({ resourceData }) => resourceData?.deployment?.name),
+      catchError((err) => {
+        this.logger?.warn(`Failed to load deployment name: ${err?.message}`);
+        return of(undefined);
+      }),
+      shareReplay(1)
+    );
   }
 
   public stop() {
