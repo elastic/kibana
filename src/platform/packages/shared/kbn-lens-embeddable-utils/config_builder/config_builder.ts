@@ -21,6 +21,10 @@ import {
   buildPartitionChart,
 } from './charts';
 import { fromAPItoLensState, fromLensStateToAPI } from './transforms/charts/metric';
+import {
+  fromAPItoLensState as fromLegacyMetricAPItoLensState,
+  fromLensStateToAPI as fromLegacyMetricLensStateToAPI,
+} from './transforms/charts/legacy_metric';
 import type { LensApiState } from './schema';
 import { filtersAndQueryToApiFormat, filtersAndQueryToLensState } from './transforms/utils';
 
@@ -41,7 +45,11 @@ export class LensConfigBuilder {
 
   private apiConvertersByChart = {
     metric: { fromAPItoLensState, fromLensStateToAPI },
-  };
+    legacy_metric: {
+      fromAPItoLensState: fromLegacyMetricAPItoLensState,
+      fromLensStateToAPI: fromLegacyMetricLensStateToAPI,
+    },
+  } as const;
   private dataViewsAPI: DataViewsCommon | undefined;
 
   constructor(dataViewsAPI?: DataViewsCommon) {
@@ -101,6 +109,17 @@ export class LensConfigBuilder {
           ...filtersAndQueryToLensState(config),
         },
       };
+    } else if (chartType === 'legacy_metric') {
+      const converter = this.apiConvertersByChart[chartType];
+      const attributes = converter.fromAPItoLensState(config);
+
+      return {
+        ...attributes,
+        state: {
+          ...attributes.state,
+          ...filtersAndQueryToLensState(config),
+        },
+      };
     }
     throw new Error(`No attributes converter found for chart type: ${chartType}`);
   }
@@ -109,6 +128,12 @@ export class LensConfigBuilder {
     const chartType = config.visualizationType;
     if (chartType === 'lnsMetric') {
       const converter = this.apiConvertersByChart.metric;
+      return {
+        ...converter.fromLensStateToAPI(config),
+        ...filtersAndQueryToApiFormat(config),
+      };
+    } else if (chartType === 'lnsLegacyMetric') {
+      const converter = this.apiConvertersByChart.legacy_metric;
       return {
         ...converter.fromLensStateToAPI(config),
         ...filtersAndQueryToApiFormat(config),

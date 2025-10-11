@@ -1,0 +1,201 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+import type {
+  FormBasedLayer,
+  FormBasedPersistedState,
+  MetricState as LegacyMetricVisualizationState,
+  PersistedIndexPatternLayer,
+} from '@kbn/lens-plugin/public';
+import type { TextBasedLayer } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+import type { SavedObjectReference } from '@kbn/core/types';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { LensAttributes } from '../../types';
+import { DEFAULT_LAYER_ID } from '../../types';
+import {
+  addLayerColumn,
+  buildDatasetState,
+  buildDatasourceStates,
+  buildReferences,
+  generateApiLayer,
+  getAdhocDataviews,
+  operationFromColumn,
+} from '../utils';
+import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
+import type { LensApiState, LegacyMetricState } from '../../schema';
+import { fromMetricAPItoLensState } from '../columns/metric';
+import type { LensApiAllMetricOperations } from '../../schema/metric_ops';
+import type { DeepMutable, DeepPartial } from '../utils';
+import { generateLayer } from '../utils';
+import type {
+  LegacyMetricStateESQL,
+  LegacyMetricStateNoESQL,
+} from '../../schema/charts/legacy_metric';
+import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './utils';
+
+const ACCESSOR = 'metric_formula_accessor';
+const LENS_DEFAULT_LAYER_ID = 'layer_0';
+
+function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisualizationState {
+  const layer = config;
+
+  return {
+    layerId: DEFAULT_LAYER_ID,
+    layerType: 'data',
+    accessor: ACCESSOR,
+    size: layer.metric.size,
+    titlePosition: layer.metric.alignments.labels,
+    textAlign: layer.metric.alignments.value,
+    // todo: handle all color configs
+    ...(layer.metric.apply_color_to
+      ? layer.metric.apply_color_to === 'background'
+        ? { colorMode: 'Background' }
+        : { colorMode: 'Labels' }
+      : { colorMode: 'None' }),
+    // palette: colorConfig,
+  };
+}
+
+function reverseBuildVisualizationState(
+  visualization: LegacyMetricVisualizationState,
+  layer: FormBasedLayer | TextBasedLayer,
+  layerId: string,
+  adHocDataViews: Record<string, DataViewSpec>,
+  references: SavedObjectReference[],
+  adhocReferences?: SavedObjectReference[]
+): LegacyMetricState {
+  if (visualization.accessor === undefined) {
+    throw new Error('Metric accessor is missing in the visualization state');
+  }
+
+  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+
+  if (!dataset || dataset.type == null) {
+    throw new Error('Unsupported dataset type');
+  }
+
+  let props: DeepPartial<DeepMutable<LegacyMetricState>> = generateApiLayer(layer);
+
+  if (dataset.type === 'esql' || dataset.type === 'table') {
+    const esqlLayer = layer as TextBasedLayer;
+    props = {
+      ...props,
+      metric: getValueApiColumn(visualization.accessor, esqlLayer),
+    } as LegacyMetricState;
+  } else if (dataset.type === 'dataView' || dataset.type === 'index') {
+    const formLayer = layer as FormBasedLayer;
+    const metric = operationFromColumn(
+      visualization.accessor,
+      formLayer
+    ) as LensApiAllMetricOperations;
+
+    props = {
+      ...props,
+      metric,
+    } as LegacyMetricState;
+  }
+
+  if (props.metric) {
+    if (visualization.colorMode && visualization.colorMode !== 'None') {
+      props.metric.apply_color_to =
+        visualization.colorMode === 'Background' ? 'background' : 'value';
+      // toDo: handle more color configs
+    }
+
+    if (visualization.size) {
+      props.metric.size = visualization.size as LegacyMetricState['metric']['size'];
+    }
+
+    if (visualization.titlePosition || visualization.textAlign) {
+      props.metric.alignments = {
+        ...(visualization.titlePosition ? { labels: visualization.titlePosition } : {}),
+        ...(visualization.textAlign ? { value: visualization.textAlign } : {}),
+      };
+    }
+  }
+
+  return {
+    type: 'legacy_metric',
+    dataset: dataset satisfies LegacyMetricState['dataset'],
+    ...props,
+  } as LegacyMetricState;
+}
+
+function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersistedState['layers'] {
+  const columns = fromMetricAPItoLensState(layer.metric as LensApiAllMetricOperations);
+
+  const layers: Record<string, PersistedIndexPatternLayer> = {
+    ...generateLayer(DEFAULT_LAYER_ID, layer),
+  };
+
+  const defaultLayer = layers[DEFAULT_LAYER_ID];
+
+  addLayerColumn(defaultLayer, ACCESSOR, columns);
+
+  return layers;
+}
+
+function getValueColumns(layer: LegacyMetricStateESQL) {
+  return [getValueColumn(ACCESSOR, layer.metric.column, 'number')];
+}
+
+export function fromAPItoLensState(config: LegacyMetricState): LensAttributes {
+  const _buildDataLayer = (cfg: unknown, i: number) =>
+    buildFormBasedLayer(cfg as LegacyMetricStateNoESQL);
+
+  const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
+
+  const visualization = buildVisualizationState(config);
+
+  const { adHocDataViews, internalReferences } = getAdhocDataviews(usedDataviews);
+  const regularDataViews = Object.values(usedDataviews).filter(
+    (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
+  );
+  const references = regularDataViews.length
+    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    : [];
+
+  return {
+    visualizationType: 'lnsLegacyMetric',
+    ...getSharedChartAPIToLensState(config),
+    references,
+    state: {
+      datasourceStates: layers,
+      internalReferences,
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      visualization,
+      adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
+    },
+  };
+}
+
+export function fromLensStateToAPI(
+  config: LensAttributes
+): Extract<LensApiState, { type: 'legacy_metric' }> {
+  const { state } = config;
+  const visualization = state.visualization as LegacyMetricVisualizationState;
+  const layers =
+    state.datasourceStates.formBased?.layers ?? state.datasourceStates.textBased?.layers ?? [];
+
+  const [layerId, layer] = Object.entries(layers)[0];
+
+  const visualizationState = {
+    ...getSharedChartLensStateToAPI(config),
+    ...reverseBuildVisualizationState(
+      visualization,
+      layer,
+      layerId ?? LENS_DEFAULT_LAYER_ID,
+      config.state.adHocDataViews ?? {},
+      config.references,
+      config.state.internalReferences
+    ),
+  };
+
+  return visualizationState;
+}
