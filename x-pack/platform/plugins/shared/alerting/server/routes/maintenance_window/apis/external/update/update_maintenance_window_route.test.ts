@@ -132,7 +132,7 @@ describe('updateMaintenanceWindowRoute', () => {
         id: 'test-id',
         schedule: {
           custom: {
-            duration: '60m',
+            duration: '10d',
             recurring: {
               occurrences: 2,
             },

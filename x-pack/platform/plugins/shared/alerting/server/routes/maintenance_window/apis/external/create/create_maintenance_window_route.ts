@@ -65,6 +65,7 @@ export const createMaintenanceWindowRoute = (
         licenseState.ensureLicenseForMaintenanceWindow();
 
         const body: CreateMaintenanceWindowRequestBodyV1 = req.body;
+        const customSchedule = body.schedule.custom;
 
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
@@ -76,7 +77,12 @@ export const createMaintenanceWindowRoute = (
           transformInternalMaintenanceWindowToExternalV1(maintenanceWindow);
 
         return res.ok({
-          body: response,
+          body: {
+            ...response,
+            schedule: {
+              custom: { ...response.schedule.custom, duration: customSchedule.duration },
+            },
+          },
         });
       })
     )
