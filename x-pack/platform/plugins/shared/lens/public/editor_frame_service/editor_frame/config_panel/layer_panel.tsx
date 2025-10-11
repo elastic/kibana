@@ -7,13 +7,13 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
-  EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiText,
   EuiIconTip,
+  EuiCheckbox,
   useEuiTheme,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
@@ -38,6 +38,9 @@ import {
   selectIsFullscreenDatasource,
   selectResolvedDateRange,
   selectDatasourceStates,
+  selectTabType,
+  setTabType,
+  useLensDispatch,
 } from '../../../state_management';
 import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
@@ -92,6 +95,8 @@ export function LayerPanel(props: LayerPanelProps) {
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
 
   const isSaveable = useLensSelector((state) => state.lens.isSaveable);
+  const tabType = useLensSelector(selectTabType);
+  const dispatch = useLensDispatch();
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
@@ -386,11 +391,11 @@ export function LayerPanel(props: LayerPanelProps) {
         `}
         data-test-subj={`lns-layerPanel-${layerIndex}`}
       >
-        <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
+        <div>
           <header
             className="lnsLayerPanel__layerHeader"
             css={css`
-              padding: ${euiTheme.size.base};
+              padding: ${euiTheme.size.base} 0;
               border-bottom: ${euiTheme.border.thin};
             `}
           >
@@ -515,7 +520,7 @@ export function LayerPanel(props: LayerPanelProps) {
               return (
                 <EuiFormRow
                   css={css`
-                    padding: ${euiTheme.size.base};
+                    padding: ${euiTheme.size.base} 0;
                     &:last-child {
                       border-radius: 0 0 ${euiTheme.border.radius.medium}
                         ${euiTheme.border.radius.medium};
@@ -579,8 +584,8 @@ export function LayerPanel(props: LayerPanelProps) {
                       <ReorderProvider
                         dataTestSubj="lnsDragDrop"
                         css={css`
-                          margin: -${euiTheme.size.xs} -${euiTheme.size.base};
-                          padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+                          margin: -${euiTheme.size.xs} 0;
+                          padding: ${euiTheme.size.xs} 0;
                         `}
                       >
                         {group.accessors.map((accessorConfig, accessorIndex) => {
@@ -722,7 +727,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 </EuiFormRow>
               );
             })}
-        </EuiPanel>
+        </div>
       </section>
       {(layerDatasource?.LayerSettingsComponent || activeVisualization?.LayerSettingsComponent) && (
         <FlyoutContainer
@@ -851,7 +856,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 <>
                   <div
                     css={css`
-                      padding: ${euiTheme.size.base};
+                      padding: ${euiTheme.size.base} 0;
                     `}
                   >
                     <activeVisualization.DimensionEditorComponent
@@ -887,6 +892,17 @@ export function LayerPanel(props: LayerPanelProps) {
           </div>
         }
       />
+      <div>
+        <EuiCheckbox
+          id="lensUseUnifiedTabs"
+          label="Unified Tabs"
+          checked={tabType === 'unified'}
+          onChange={(e) => {
+            const newTabType = e.target.checked ? 'unified' : 'eui';
+            dispatch(setTabType(newTabType));
+          }}
+        />
+      </div>
     </>
   );
 }

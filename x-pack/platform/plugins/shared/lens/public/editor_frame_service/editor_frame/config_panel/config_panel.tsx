@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo, memo, useCallback } from 'react';
+import React, { useEffect, useMemo, memo, useCallback } from 'react';
 import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
   UPDATE_FILTER_REFERENCES_TRIGGER,
@@ -35,8 +34,10 @@ import {
   updateDatasourceState,
   updateVisualizationState,
   setToggleFullscreen,
+  setSelectedLayerId,
   useLensSelector,
   selectVisualization,
+  selectSelectedLayerId,
   registerLibraryAnnotationGroup,
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
@@ -59,9 +60,10 @@ export function LayerPanels(
   }
 ) {
   const { activeVisualization, datasourceMap, indexPatternService } = props;
-  const { activeDatasourceId, visualization, datasourceStates, query } = useLensSelector(
+  const { activeDatasourceId, visualization, datasourceStates } = useLensSelector(
     (state) => state.lens
   );
+  const selectedLayerId = useLensSelector(selectSelectedLayerId);
 
   const euiThemeContext = useEuiTheme();
   const { euiTheme } = euiThemeContext;
@@ -69,6 +71,7 @@ export function LayerPanels(
   const dispatchLens = useLensDispatch();
 
   const layerIds = activeVisualization.getLayerIds(visualization.state);
+
   const {
     setNextFocusedId: setNextFocusedLayerId,
     removeRef: removeLayerRef,
@@ -248,6 +251,7 @@ export function LayerPanels(
       dispatchLens(
         addLayerAction({ layerId, layerType, extraArg, ignoreInitialValues, seriesType })
       );
+      dispatchLens(setSelectedLayerId({ layerId }));
 
       setNextFocusedLayerId(layerId);
     },
@@ -258,31 +262,57 @@ export function LayerPanels(
     LayerPanelProps['registerLibraryAnnotationGroup']
   >((groupInfo) => dispatchLens(registerLibraryAnnotationGroup(groupInfo)), [dispatchLens]);
 
-  const hideAddLayerButton = query && isOfAggregateQueryType(query);
+  // if the selected tab got removed, switch back first tab
+  useEffect(() => {
+    if (selectedLayerId === null || (!layerIds.includes(selectedLayerId) && layerIds.length > 0)) {
+      dispatchLens(setSelectedLayerId({ layerId: layerIds[0] }));
+    }
+  }, [dispatchLens, selectedLayerId, layerIds]);
 
-  const LayerPanelComponents = useMemo(() => {
-    return layerIds.map((layerId, layerIndex) => {
-      const { hidden, groups } = activeVisualization.getConfiguration({
+  const layerConfigs = useMemo(() => {
+    return layerIds.map((layerId) => ({
+      layerId,
+      layerType: activeVisualization.getLayerType(layerId, visualization.state),
+      config: activeVisualization.getConfiguration({
         layerId,
         frame: props.framePublicAPI,
         state: visualization.state,
-      });
+      }),
+    }));
+  }, [activeVisualization, layerIds, props.framePublicAPI, visualization.state]);
 
-      if (hidden) {
-        return null;
-      }
+  const layerConfig = useMemo(
+    () => layerConfigs.find((l) => l.layerId === selectedLayerId),
+    [layerConfigs, selectedLayerId]
+  );
 
-      return (
+  return (
+    <EuiForm
+      css={css`
+        .lnsApp & {
+          padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
+            calc(400px + ${euiTheme.size.base});
+          margin-left: -400px;
+          ${useEuiOverflowScroll('y')}
+          ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
+            padding-left: ${euiTheme.size.base};
+            margin-left: 0;
+          }
+        }
+      `}
+    >
+      {/* Render the current layer panel */}
+      {selectedLayerId && layerConfig && (
         <LayerPanel
           {...props}
           onDropToDimension={handleDimensionDrop}
           registerLibraryAnnotationGroup={registerLibraryAnnotationGroupFunction}
-          dimensionGroups={groups}
+          dimensionGroups={layerConfig.config.groups}
           activeVisualization={activeVisualization}
           registerNewLayerRef={registerNewLayerRef}
-          key={layerId}
-          layerId={layerId}
-          layerIndex={layerIndex}
+          key={selectedLayerId}
+          layerId={selectedLayerId}
+          layerIndex={layerIds.indexOf(selectedLayerId)}
           visualizationState={visualization.state}
           updateVisualization={setVisualizationState}
           updateDatasource={updateDatasource}
@@ -301,7 +331,7 @@ export function LayerPanels(
             getRemoveOperation(
               activeVisualization,
               visualization.state,
-              layerId,
+              selectedLayerId,
               layerIds.length
             ) === 'clear'
           }
@@ -313,7 +343,7 @@ export function LayerPanels(
             ) {
               dispatchLens(
                 setLayerDefaultDimension({
-                  layerId,
+                  layerId: selectedLayerId,
                   columnId,
                   groupId,
                 })
@@ -323,101 +353,20 @@ export function LayerPanels(
           onCloneLayer={() => {
             dispatchLens(
               cloneLayer({
-                layerId,
+                layerId: selectedLayerId,
               })
             );
           }}
           onRemoveLayer={onRemoveLayer}
           onRemoveDimension={(dimensionProps) => {
-            const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[layerId];
+            const datasourcePublicAPI = props.framePublicAPI.datasourceLayers?.[selectedLayerId];
             const datasourceId = datasourcePublicAPI?.datasourceId;
             dispatchLens(removeDimension({ ...dimensionProps, datasourceId }));
           }}
           toggleFullscreen={toggleFullscreen}
           indexPatternService={indexPatternService}
         />
-      );
-    });
-  }, [
-    activeDatasourceId,
-    activeVisualization,
-    addLayer,
-    datasourceMap,
-    dispatchLens,
-    handleDimensionDrop,
-    indexPatternService,
-    layerIds,
-    onChangeIndexPattern,
-    onRemoveLayer,
-    props,
-    registerLibraryAnnotationGroupFunction,
-    registerNewLayerRef,
-    setVisualizationState,
-    toggleFullscreen,
-    updateAll,
-    updateDatasource,
-    updateDatasourceAsync,
-    visualization.state,
-  ]);
-
-  return (
-    <EuiForm
-      css={css`
-        .lnsApp & {
-          padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
-            calc(400px + ${euiTheme.size.base});
-          margin-left: -400px;
-          ${useEuiOverflowScroll('y')}
-          ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
-            padding-left: ${euiTheme.size.base};
-            margin-left: 0;
-          }
-        }
-      `}
-    >
-      {LayerPanelComponents}
-      {!hideAddLayerButton &&
-        activeVisualization?.getAddLayerButtonComponent?.({
-          state: visualization.state,
-          supportedLayers: activeVisualization.getSupportedLayers(
-            visualization.state,
-            props.framePublicAPI
-          ),
-          addLayer,
-          ensureIndexPattern: async (specOrId) => {
-            let indexPatternId;
-
-            if (typeof specOrId === 'string') {
-              indexPatternId = specOrId;
-            } else {
-              const dataView = await props.dataViews.create(specOrId);
-
-              if (!dataView.id) {
-                return;
-              }
-
-              indexPatternId = dataView.id;
-            }
-
-            const newIndexPatterns = await indexPatternService?.ensureIndexPattern({
-              id: indexPatternId,
-              cache: props.framePublicAPI.dataViews.indexPatterns,
-            });
-
-            if (newIndexPatterns) {
-              dispatchLens(
-                changeIndexPattern({
-                  dataViews: { indexPatterns: newIndexPatterns },
-                  datasourceIds: Object.keys(datasourceStates),
-                  visualizationIds: visualization.activeId ? [visualization.activeId] : [],
-                  indexPatternId,
-                })
-              );
-            }
-          },
-          registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
-          isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
-        })}
+      )}
     </EuiForm>
   );
 }

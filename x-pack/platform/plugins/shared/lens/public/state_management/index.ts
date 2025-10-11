@@ -49,6 +49,7 @@ export const {
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  setSelectedLayerId,
   cloneLayer,
   addLayer,
   onDropToDimension,
@@ -57,6 +58,7 @@ export const {
   setIsLoadLibraryVisible,
   registerLibraryAnnotationGroup,
   changeIndexPattern,
+  setTabType,
 } = lensActions;
 
 type CustomMiddleware = (store: MiddlewareAPI) => (next: Dispatch) => (action: Action) => void;

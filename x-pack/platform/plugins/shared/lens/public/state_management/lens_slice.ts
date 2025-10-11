@@ -63,6 +63,7 @@ export const initialState: LensAppState = {
   visualization: {
     state: null,
     activeId: null,
+    selectedLayerId: null,
   },
   dataViews: {
     indexPatternRefs: [],
@@ -70,6 +71,7 @@ export const initialState: LensAppState = {
   },
   annotationGroups: {},
   managed: false,
+  tabType: 'eui',
 };
 
 export const getPreloadedState = ({
@@ -138,6 +140,7 @@ export const getPreloadedState = ({
     visualization: {
       state: null,
       activeId: visualizationType ?? Object.keys(visualizationMap)[0] ?? null,
+      selectedLayerId: null,
     },
   };
   return state;
@@ -235,6 +238,10 @@ export const removeOrClearLayer = createAction<{
   layerId: string;
   layerIds: string[];
 }>('lens/removeOrClearLayer');
+export const setSelectedLayerId = createAction<{
+  layerId: string | null;
+}>('lens/setSelectedLayerId');
+export const setTabType = createAction<'unified' | 'eui'>('lens/setTabType');
 
 export const cloneLayer = createAction(
   'cloneLayer',
@@ -311,6 +318,8 @@ export const lensActions = {
   editVisualizationAction,
   removeLayers,
   removeOrClearLayer,
+  setSelectedLayerId,
+  setTabType,
   addLayer,
   onDropToDimension,
   cloneLayer,
@@ -465,6 +474,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
               removedId
             ))
         );
+      })
+      .addCase(setSelectedLayerId, (state, { payload }) => {
+        state.visualization.selectedLayerId = payload.layerId;
+      })
+      .addCase(setTabType, (state, { payload }) => {
+        state.tabType = payload;
       })
       .addCase(changeIndexPattern, (state, { payload }) => {
         const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;

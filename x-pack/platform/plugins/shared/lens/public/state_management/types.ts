@@ -28,6 +28,7 @@ import type {
 import type { StructuredDatasourceStates } from '../react_embeddable/types';
 export interface VisualizationState {
   activeId: string | null;
+  selectedLayerId: string | null;
   state: unknown;
 }
 
@@ -92,6 +93,9 @@ export interface LensAppState extends EditorFrameState {
 
   // Whether the current visualization is managed by the system
   managed: boolean;
+
+  // TODO remove after tab type decision
+  tabType: 'unified' | 'eui';
 }
 
 export interface LensState {
