@@ -44,12 +44,11 @@ export class FunctionalTestRunner {
 
   async run(abortSignal?: AbortSignal) {
     const testStats = await this.getTestStats();
+    const realServices =
+      !testStats || (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
 
-    return await this.runHarness(async (lifecycle, coreProviders) => {
+    return await this.runHarness({ realServices }, async (lifecycle, coreProviders) => {
       SuiteTracker.startTracking(lifecycle, this.config.path);
-
-      const realServices =
-        !testStats || (testStats.testCount > 0 && testStats.nonSkippedTestCount > 0);
 
       const providers = realServices
         ? new ProviderCollection(this.log, [
@@ -113,10 +112,12 @@ export class FunctionalTestRunner {
         return;
       }
 
-      await lifecycle.beforeTests.trigger(mocha.suite);
-      if (abortSignal?.aborted) {
-        this.log.warning('run aborted');
-        return;
+      if (realServices) {
+        await lifecycle.beforeTests.trigger(mocha.suite);
+        if (abortSignal?.aborted) {
+          this.log.warning('run aborted');
+          return;
+        }
       }
 
       this.log.info('Starting tests');
@@ -152,7 +153,7 @@ export class FunctionalTestRunner {
   }
 
   async getTestStats() {
-    return await this.runHarness(async (lifecycle, coreProviders) => {
+    return await this.runHarness({ realServices: false }, async (lifecycle, coreProviders) => {
       if (this.config.get('testRunner')) {
         return;
       }
@@ -222,6 +223,11 @@ export class FunctionalTestRunner {
   }
 
   private async runHarness<T = any>(
+    {
+      realServices,
+    }: {
+      realServices: boolean;
+    },
     handler: (lifecycle: Lifecycle, coreProviders: Providers) => Promise<T>
   ): Promise<T> {
     let runErrorOccurred = false;
@@ -239,7 +245,8 @@ export class FunctionalTestRunner {
       const dockerServers = new DockerServersService(
         this.config.get('dockerServers'),
         this.log,
-        lifecycle
+        lifecycle,
+        !realServices
       );
 
       // base level services that functional_test_runner exposes
