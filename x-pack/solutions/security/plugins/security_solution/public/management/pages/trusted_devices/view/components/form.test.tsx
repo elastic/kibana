@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, cleanup, act, fireEvent, within } from '@testing-library/react';
+import { screen, cleanup, act, fireEvent, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
@@ -48,8 +48,13 @@ describe('Trusted devices form', () => {
 
   const getUI = () => <TrustedDevicesForm {...formProps} />;
 
-  const render = () => {
-    return (renderResult = mockedContext.render(getUI()));
+  const render = async () => {
+    renderResult = mockedContext.render(getUI());
+    // Wait for async useEffect (getSuggestions) to complete
+    await waitFor(() => {
+      expect(mockedContext.coreStart.http.post).toHaveBeenCalled();
+    });
+    return renderResult;
   };
 
   const rerender = () => renderResult.rerender(getUI());
@@ -106,13 +111,25 @@ describe('Trusted devices form', () => {
   }
 
   // Helpers
-  const setTextFieldValue = (textField: HTMLInputElement | HTMLTextAreaElement, value: string) => {
-    act(() => {
-      fireEvent.change(textField, {
-        target: { value },
+  const setTextFieldValue = async (
+    textField: HTMLInputElement | HTMLTextAreaElement,
+    value: string
+  ) => {
+    // For EuiComboBox (has role="combobox"), use userEvent.type
+    if (textField.getAttribute('role') === 'combobox') {
+      await userEvent.clear(textField);
+      await userEvent.type(textField, value);
+      // Press Enter to create the custom option
+      await userEvent.keyboard('{Enter}');
+    } else {
+      // For regular text fields
+      act(() => {
+        fireEvent.change(textField, {
+          target: { value },
+        });
+        fireEvent.blur(textField);
       });
-      fireEvent.blur(textField);
-    });
+    }
   };
 
   const getDetailsBlurb = (dataTestSub: string = formPrefix): HTMLInputElement | null => {
@@ -147,7 +164,10 @@ describe('Trusted devices form', () => {
   };
 
   const getConditionsValueField = (dataTestSub: string = formPrefix): HTMLInputElement => {
-    return renderResult.getByTestId(`${dataTestSub}-valueField`) as HTMLInputElement;
+    const comboBox = renderResult.getByTestId(`${dataTestSub}-valueField`);
+    // EuiComboBox has a searchable input inside it
+    const searchInput = comboBox.querySelector('input[role="combobox"]');
+    return searchInput as HTMLInputElement;
   };
 
   beforeEach(() => {
@@ -156,6 +176,9 @@ describe('Trusted devices form', () => {
     (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
+
+    // Mock the getSuggestions API call
+    mockedContext.coreStart.http.post.mockResolvedValue([]);
 
     formProps = {
       item: latestUpdatedItem,
@@ -173,16 +196,18 @@ describe('Trusted devices form', () => {
     cleanup();
   });
 
-  it('should display form submission errors', () => {
+  it('should display form submission errors', async () => {
     const message = 'submit failure';
     formProps.error = new Error(message) as IHttpFetchError;
-    render();
+    await render();
 
     expect(renderResult.getByTestId(`${formPrefix}-submitError`).textContent).toMatch(message);
   });
 
   describe('Details and Conditions', () => {
-    beforeEach(() => render());
+    beforeEach(async () => {
+      await render();
+    });
 
     it('should NOT initially show any inline validation errors', () => {
       expect(renderResult.container.querySelectorAll('.euiFormErrorText').length).toBe(0);
@@ -194,8 +219,8 @@ describe('Trusted devices form', () => {
       expect(getDetailsBlurb()).toBeNull();
     });
 
-    it('should show name required on blur', () => {
-      setTextFieldValue(getNameField(), '  ');
+    it('should show name required on blur', async () => {
+      await setTextFieldValue(getNameField(), '  ');
       expect(renderResult.getByText(INPUT_ERRORS.name)).toBeTruthy();
     });
 
@@ -220,8 +245,8 @@ describe('Trusted devices form', () => {
       ]);
     });
 
-    it('should correctly edit name', () => {
-      setTextFieldValue(getNameField(), 'My TD');
+    it('should correctly edit name', async () => {
+      await setTextFieldValue(getNameField(), 'My TD');
       const expected = createOnChangeArgs({
         item: createItem({
           name: 'My TD',
@@ -231,8 +256,8 @@ describe('Trusted devices form', () => {
       expect(formProps.onChange).toHaveBeenCalledWith(expected);
     });
 
-    it('should correctly edit description', () => {
-      setTextFieldValue(getDescriptionField(), 'describe td');
+    it('should correctly edit description', async () => {
+      await setTextFieldValue(getDescriptionField(), 'describe td');
       const expected = createOnChangeArgs({
         item: createItem({
           description: 'describe td',
@@ -256,7 +281,9 @@ describe('Trusted devices form', () => {
   });
 
   describe('Conditions', () => {
-    beforeEach(() => render());
+    beforeEach(async () => {
+      await render();
+    });
 
     it('should render field, operator, and value controls with defaults', () => {
       const labels = Array.from(
@@ -377,7 +404,7 @@ describe('Trusted devices form', () => {
     });
 
     it('should show value required error after blur when empty', async () => {
-      setTextFieldValue(getNameField(), 'some name');
+      await setTextFieldValue(getNameField(), 'some name');
 
       act(() => {
         fireEvent.blur(getConditionsValueField());
@@ -394,7 +421,7 @@ describe('Trusted devices form', () => {
       rerenderWithLatestProps();
 
       const valueField = getConditionsValueField();
-      setTextFieldValue(valueField, 'prefix**suffix');
+      await setTextFieldValue(valueField, 'prefix**suffix');
 
       act(() => {
         fireEvent.blur(valueField);
@@ -470,8 +497,8 @@ describe('Trusted devices form', () => {
     });
   });
 
-  it('should display effective scope options', () => {
-    render();
+  it('should display effective scope options', async () => {
+    await render();
     const globalButton = renderResult.getByTestId(
       `${formPrefix}-effectedPolicies-global`
     ) as HTMLButtonElement;
@@ -484,41 +511,41 @@ describe('Trusted devices form', () => {
   });
 
   describe('Assignment section visibility', () => {
-    it('should show assignment section with enterprise license', () => {
+    it('should show assignment section with enterprise license', async () => {
       (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
-      render();
+      await render();
 
       expect(renderResult.getByTestId(`${formPrefix}-policySelection`)).toBeTruthy();
     });
 
-    it('should hide assignment section with non-enterprise license in create mode', () => {
+    it('should hide assignment section with non-enterprise license in create mode', async () => {
       (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
       formProps.mode = 'create';
-      render();
+      await render();
 
       expect(renderResult.queryByTestId(`${formPrefix}-policySelection`)).toBeNull();
     });
 
-    it('should show assignment section with non-enterprise license in edit mode for by-policy artifacts', () => {
+    it('should show assignment section with non-enterprise license in edit mode for by-policy artifacts', async () => {
       (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
       formProps.mode = 'edit';
       formProps.item = createItem({
         name: 'existing device',
         tags: ['policy:some-policy-id'],
       });
-      render();
+      await render();
 
       expect(renderResult.getByTestId(`${formPrefix}-policySelection`)).toBeTruthy();
     });
 
-    it('should hide assignment section with non-enterprise license in edit mode for global artifacts', () => {
+    it('should hide assignment section with non-enterprise license in edit mode for global artifacts', async () => {
       (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
       formProps.mode = 'edit';
       formProps.item = createItem({
         name: 'existing device',
         tags: ['policy:all'],
       });
-      render();
+      await render();
 
       expect(renderResult.queryByTestId(`${formPrefix}-policySelection`)).toBeNull();
     });

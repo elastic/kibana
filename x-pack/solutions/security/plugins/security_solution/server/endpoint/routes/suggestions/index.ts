@@ -26,6 +26,7 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import {
   eventsIndexPattern,
+  DEVICE_EVENTS_INDEX_PATTERN,
   SUGGESTIONS_INTERNAL_ROUTE,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
@@ -58,7 +59,7 @@ export function registerEndpointSuggestionsRoutes(
         },
       },
       withEndpointAuthz(
-        { any: ['canWriteEventFilters', 'canWriteTrustedApplications'] },
+        { any: ['canWriteEventFilters', 'canWriteTrustedApplications', 'canWriteTrustedDevices'] },
         endpointContext.logFactory.get('endpointSuggestions'),
         getEndpointSuggestionsRequestHandler(config$, endpointContext)
       )
@@ -93,12 +94,18 @@ export const getEndpointSuggestionsRequestHandler = (
       let suggestionMethod: typeof termsEnumSuggestions | typeof termsAggSuggestions =
         termsEnumSuggestions;
 
+      const suggestionType = request.params.suggestion_type;
+
       if (
-        request.params.suggestion_type === 'eventFilters' ||
-        (isTrustedAppsAdvancedModeFFEnabled && request.params.suggestion_type === 'trustedApps')
+        suggestionType === 'eventFilters' ||
+        (isTrustedAppsAdvancedModeFFEnabled && suggestionType === 'trustedApps') ||
+        suggestionType === 'trustedDevices'
       ) {
+        const baseIndexPattern =
+          suggestionType === 'trustedDevices' ? DEVICE_EVENTS_INDEX_PATTERN : eventsIndexPattern;
+
         if (!isSpaceAwarenessEnabled) {
-          index = eventsIndexPattern;
+          index = baseIndexPattern;
         } else {
           logger.debug('Using space-aware index pattern');
 
@@ -116,7 +123,7 @@ export const getEndpointSuggestionsRequestHandler = (
 
           const indexPattern = namespaces
             .map((namespace) =>
-              buildIndexNameWithNamespace(eventsIndexPattern, namespace, { preserveWildcard: true })
+              buildIndexNameWithNamespace(baseIndexPattern, namespace, { preserveWildcard: true })
             )
             .join(',');
 
@@ -130,7 +137,7 @@ export const getEndpointSuggestionsRequestHandler = (
             });
           }
         }
-      } else if (request.params.suggestion_type === 'endpoints') {
+      } else if (suggestionType === 'endpoints') {
         suggestionMethod = termsAggSuggestions;
         index = METADATA_UNITED_INDEX;
 
@@ -152,7 +159,7 @@ export const getEndpointSuggestionsRequestHandler = (
         fullFilters = [...fullFilters, baseFilters];
       } else {
         return response.badRequest({
-          body: `Invalid suggestion_type: ${request.params.suggestion_type}`,
+          body: `Invalid suggestion_type: ${suggestionType}`,
         });
       }
 

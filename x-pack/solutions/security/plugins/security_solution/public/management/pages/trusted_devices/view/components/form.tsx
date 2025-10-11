@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiForm,
@@ -35,6 +35,8 @@ import type { ArtifactFormComponentProps } from '../../../../components/artifact
 import { FormattedError } from '../../../../components/formatted_error';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { TrustedDevicesApiClient } from '../../service/api_client';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/translations';
@@ -170,11 +172,12 @@ const ConditionsSection = memo<{
   currentEntry: ExceptionListItemSchema['entries'][0];
   handleFieldChange: (value: string) => void;
   handleOperatorChange: (value: string) => void;
-  handleValueChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleValueChange: (options: Array<EuiComboBoxOptionOption<string>>) => void;
   handleValueBlur: () => void;
   disabled: boolean;
   visitedFields: Record<string, boolean>;
   validationResult: ValidationResult;
+  apiClient: TrustedDevicesApiClient;
 }>(
   ({
     getTestId,
@@ -188,11 +191,40 @@ const ConditionsSection = memo<{
     disabled,
     visitedFields,
     validationResult,
+    apiClient,
   }) => {
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+
     // Get field options based on selected OS
     const availableFieldOptions = useMemo(() => {
       return getFieldOptionsForOs(selectedOs);
     }, [selectedOs]);
+
+    // Load suggestions when field changes
+    useEffect(() => {
+      const loadSuggestions = async () => {
+        if (!currentEntry.field || disabled) {
+          setSuggestions([]);
+          return;
+        }
+
+        setIsLoadingSuggestions(true);
+        try {
+          const results = await apiClient.getSuggestions({
+            field: currentEntry.field,
+            query: '',
+          });
+          setSuggestions(results);
+        } catch (error) {
+          setSuggestions([]);
+        } finally {
+          setIsLoadingSuggestions(false);
+        }
+      };
+
+      loadSuggestions();
+    }, [currentEntry.field, disabled, apiClient]);
 
     return (
       <>
@@ -266,12 +298,24 @@ const ConditionsSection = memo<{
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow label="Value">
-                <EuiFieldText
-                  value={('value' in currentEntry ? currentEntry.value : '') || ''}
+                <EuiComboBox
+                  placeholder="Enter or select value"
+                  singleSelection={{ asPlainText: true }}
+                  options={suggestions.map((suggestion) => ({ label: suggestion }))}
+                  selectedOptions={
+                    'value' in currentEntry && currentEntry.value
+                      ? [{ label: String(currentEntry.value) }]
+                      : []
+                  }
                   onChange={handleValueChange}
                   onBlur={handleValueBlur}
+                  onCreateOption={(searchValue) => {
+                    handleValueChange([{ label: searchValue }]);
+                  }}
+                  isLoading={isLoadingSuggestions}
                   data-test-subj={getTestId('valueField')}
-                  disabled={disabled}
+                  isDisabled={disabled}
+                  isClearable={false}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -336,6 +380,8 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     const [hasFormChanged, setHasFormChanged] = useState(false);
 
     const getTestId = useTestIdGenerator('trustedDevices-form');
+    const { http } = useKibana().services;
+    const apiClient = useMemo(() => new TrustedDevicesApiClient(http), [http]);
 
     const [visitedFields, setVisitedFields] = useState<Record<string, boolean>>({});
 
@@ -546,8 +592,9 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     );
 
     const handleValueChange = useCallback(
-      (event: React.ChangeEvent<HTMLInputElement>) => {
-        updateConditionField({ value: event.target.value });
+      (options: Array<EuiComboBoxOptionOption<string>>) => {
+        const value = options.length > 0 ? options[0].label : '';
+        updateConditionField({ value });
       },
       [updateConditionField]
     );
@@ -622,6 +669,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           disabled={disabled}
           visitedFields={visitedFields}
           validationResult={validationResult}
+          apiClient={apiClient}
         />
 
         {showAssignmentSection ? (

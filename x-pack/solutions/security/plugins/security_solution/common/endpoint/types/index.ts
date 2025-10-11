@@ -816,6 +816,18 @@ export type SafeEndpointEvent = Partial<{
   }>;
   file: Partial<{ path: ECSField<string> }>;
   registry: Partial<{ path: ECSField<string>; key: ECSField<string> }>;
+  device: Partial<{
+    serial_number: ECSField<string>;
+    vendor: Partial<{
+      name: ECSField<string>;
+      id: ECSField<string>;
+    }>;
+    product: Partial<{
+      name: ECSField<string>;
+      id: ECSField<string>;
+    }>;
+    type: ECSField<string>;
+  }>;
 }>;
 
 export interface SafeLegacyEndpointEvent {
