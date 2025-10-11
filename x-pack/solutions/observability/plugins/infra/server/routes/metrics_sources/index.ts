@@ -241,6 +241,15 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
                     ...termQuery(DATASTREAM_DATASET, source.otel),
                   ]
                 : [],
+              must_not: [
+                {
+                  wildcard: {
+                    [DATASTREAM_DATASET]: {
+                      value: 'fleet_server*',
+                    },
+                  },
+                },
+              ],
             },
           },
         });
