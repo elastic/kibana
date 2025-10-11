@@ -443,6 +443,18 @@ export class SearchInterceptor {
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
+    if (request.id) {
+      // just polling an existing search, no need to send body
+      const { params, ...requestWithoutParams } = request;
+      if (params) {
+        const { body, ...paramsWithoutBody } = params;
+        request = {
+          ...requestWithoutParams,
+          params: paramsWithoutBody,
+        };
+      }
+    }
+
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
