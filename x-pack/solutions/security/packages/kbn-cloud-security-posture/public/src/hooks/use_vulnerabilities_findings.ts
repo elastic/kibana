@@ -19,12 +19,13 @@ import type {
   Vulnerability,
 } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { CoreStart } from '@kbn/core/public';
-import type { CspClientPluginStartDeps, UseCspOptions } from '../types';
-import { showErrorToast } from '../..';
+import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import {
   getVulnerabilitiesAggregationCount,
   getVulnerabilitiesQuery,
-} from '../utils/findings_query_builders';
+} from '@kbn/cloud-security-posture-common/utils/findings_query_builders';
+import type { CspClientPluginStartDeps } from '../types';
+import { showErrorToast } from '../..';
 
 export enum VULNERABILITY_FINDING {
   TITLE = 'vulnerability.title',
