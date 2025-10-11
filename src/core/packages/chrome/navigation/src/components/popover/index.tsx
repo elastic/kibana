@@ -84,6 +84,7 @@ export const SideNavPopover = ({
   const [isOpenedByClick, setIsOpenedByClick] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [shouldFocusOnOpen, setShouldFocusOnOpen] = useState(false);
+  const [wasKeyboardUsed, setWasKeyboardUsed] = useState(false);
 
   const setOpenedByClick = useCallback(() => setIsOpenedByClick(true), []);
 
@@ -185,6 +186,8 @@ export const SideNavPopover = ({
 
   const handleBlur: FocusEventHandler = useCallback(
     (e) => {
+      if (!wasKeyboardUsed) return;
+
       clearTimeout();
 
       const nextFocused = e.relatedTarget;
@@ -196,16 +199,37 @@ export const SideNavPopover = ({
         handleClose();
       }
     },
-    [clearTimeout, handleClose]
+    [clearTimeout, handleClose, wasKeyboardUsed]
   );
 
-  // Clean up on unmount
   useEffect(() => {
     return () => {
       clearTimeout();
       handleClose();
     };
   }, [clearTimeout, handleClose]);
+
+  // TODO: refactor to use non-portalled popover
+  // Track if the user has used the keyboard to interact with the popover.
+  // `wasKeyboardUsed` is used to determine if the popover should be closed when the user blurs the popover.
+  // If we blur it for mouse users as well, the popover isn't responsive when there are trap focus elements
+  // on the page.
+  useEffect(() => {
+    const handleKeyDown = () => {
+      setWasKeyboardUsed(true);
+    };
+    const handleMouseDown = () => {
+      setWasKeyboardUsed(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('mousedown', handleMouseDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('mousedown', handleMouseDown);
+    };
+  }, []);
 
   const enhancedTrigger = useMemo(
     () =>
@@ -248,8 +272,8 @@ export const SideNavPopover = ({
       onBlur={handleBlur}
     >
       <EuiPopover
-        aria-label={label}
         anchorPosition="rightUp"
+        aria-label={label}
         buffer={[TOP_BAR_HEIGHT + TOP_BAR_POPOVER_GAP, 0, BOTTOM_POPOVER_GAP, POPOVER_OFFSET]}
         button={enhancedTrigger}
         closePopover={handleClose}
@@ -263,15 +287,15 @@ export const SideNavPopover = ({
         repositionOnScroll
       >
         <div
-          ref={(ref) => {
-            popoverRef.current = ref;
+          ref={(node) => {
+            popoverRef.current = node;
 
-            if (ref) {
-              const elements = getFocusableElements(ref);
+            if (node) {
+              const elements = getFocusableElements(node);
               updateTabIndices(elements);
 
               if (shouldFocusOnOpen) {
-                focusFirstElement(popoverRef);
+                focusFirstElement(node);
                 setShouldFocusOnOpen(false);
               }
             }
