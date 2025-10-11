@@ -26,6 +26,7 @@ import type { CancellationToken, ReportingError } from '@kbn/reporting-common';
 import {
   AuthenticationExpiredError,
   byteSizeValueToNumber,
+  IndexPrivilegeError,
   ReportingSavedObjectNotFoundError,
 } from '@kbn/reporting-common';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
@@ -433,7 +434,10 @@ export class CsvGenerator {
       }
     } catch (err) {
       logger.error(err);
-      if (err instanceof esErrors.ResponseError) {
+      if (err instanceof IndexPrivilegeError) {
+        reportingError = err;
+        warnings.push(err.humanFriendlyMessage?.() || err.message);
+      } else if (err instanceof esErrors.ResponseError) {
         if ([401, 403].includes(err.statusCode ?? 0)) {
           reportingError = new AuthenticationExpiredError();
           warnings.push(i18nTexts.authenticationError.partialResultsMessage);

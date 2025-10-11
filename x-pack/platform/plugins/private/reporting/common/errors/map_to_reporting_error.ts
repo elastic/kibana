@@ -11,6 +11,7 @@ import {
   BrowserScreenshotError,
   BrowserUnexpectedlyClosedError,
   DisallowedOutgoingUrl,
+  IndexPrivilegeError,
   InvalidLayoutParametersError,
   PdfWorkerOutOfMemoryError,
   ReportingError,
@@ -68,6 +69,8 @@ export function mapToReportingError(error: ExecutionError | unknown): ReportingE
     case error instanceof errors.InsufficientMemoryAvailableOnCloudError ||
       errorName === 'InsufficientMemoryAvailableOnCloudError':
       return new VisualReportingSoftDisabledError();
+    case errorName === 'IndexPrivilegeError':
+      return new IndexPrivilegeError((error as Error).message);
   }
   return new UnknownError((error as Error)?.message);
 }
