@@ -11,8 +11,7 @@ import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
-import { useBrowserFields } from '../../../../../../../data_view_manager/hooks/use_browser_fields';
-import { DataViewManagerScopeName } from '../../../../../../../data_view_manager/constants';
+import { DataViewManagerScopeName, useBrowserFields } from '../../../../../../../data_view_manager';
 import type { AdditionalTableContext } from '../../../../../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
