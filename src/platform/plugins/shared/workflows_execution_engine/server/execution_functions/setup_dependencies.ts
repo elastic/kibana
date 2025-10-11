@@ -26,6 +26,7 @@ import { WorkflowExecutionState } from '../workflow_context_manager/workflow_exe
 import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
+import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 
 export async function setupDependencies(
   workflowRunId: string,
@@ -102,19 +103,29 @@ export async function setupDependencies(
     allowedHosts: config.http.allowedHosts,
   });
 
+  const stepExecutionRuntimeFactory = new StepExecutionRuntimeFactory({
+    workflowExecutionGraph,
+    workflowExecutionState,
+    workflowLogger,
+    esClient,
+    fakeRequest,
+    coreStart,
+  });
+
   const nodesFactory = new NodesFactory(
     connectorExecutor,
     workflowRuntime,
-    workflowExecutionState,
     workflowLogger,
     workflowTaskManager,
     urlValidator,
-    workflowExecutionGraph
+    workflowExecutionGraph,
+    stepExecutionRuntimeFactory
   );
 
   return {
     workflowExecutionGraph,
     workflowRuntime,
+    stepExecutionRuntimeFactory,
     workflowExecutionState,
     connectorExecutor,
     workflowLogger,

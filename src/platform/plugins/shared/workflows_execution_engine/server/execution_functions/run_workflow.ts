@@ -49,6 +49,7 @@ export async function runWorkflow({
 }): Promise<void> {
   const {
     workflowRuntime,
+    stepExecutionRuntimeFactory,
     workflowExecutionState,
     workflowLogger,
     nodesFactory,
@@ -74,6 +75,7 @@ export async function runWorkflow({
 
   await workflowExecutionLoop({
     workflowRuntime,
+    stepExecutionRuntimeFactory,
     workflowExecutionState,
     workflowExecutionRepository,
     workflowLogger,
