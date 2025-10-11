@@ -27,12 +27,14 @@ export function initializeEditApi(
           const stateTransfer = getEmbeddableService().getStateTransfer();
           await stateTransfer.navigateToEditor(APP_ID, {
             path: getEditPath(savedObjectId),
-            state: {
-              embeddableId: uuid,
-              valueInput: getState(),
-              originatingApp: parentApiContext.currentAppId,
-              originatingPath: parentApiContext.getCurrentPath?.(),
-            },
+            state: [
+              {
+                embeddableId: uuid,
+                valueInput: getState(),
+                originatingApp: parentApiContext.currentAppId,
+                originatingPath: parentApiContext.getCurrentPath?.(),
+              },
+            ],
           });
         },
         isEditingEnabled: () => {

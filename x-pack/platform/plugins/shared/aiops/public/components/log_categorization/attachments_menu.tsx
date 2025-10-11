@@ -95,17 +95,19 @@ export const AttachmentsMenu = ({
         ...(applyTimeRange && { timeRange }),
       };
 
-      const state = {
-        serializedState: {
-          rawState: embeddableInput,
-          references: getDataviewReferences(dataView.id, PATTERN_ANALYSIS_DATA_VIEW_REF_NAME),
+      const state = [
+        {
+          serializedState: {
+            rawState: embeddableInput,
+            references: getDataviewReferences(dataView.id, PATTERN_ANALYSIS_DATA_VIEW_REF_NAME),
+          },
+          type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
         },
-        type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
-      };
+      ];
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+      stateTransfer.navigateToWithMultipleEmbeddablePackage('dashboards', {
         state,
         path,
       });

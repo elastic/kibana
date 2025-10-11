@@ -496,17 +496,19 @@ const FieldPanel: FC<FieldPanelProps> = ({
         ...(selectedChangePoints[panelIndex]?.length ? { partitions: selectedPartitions } : {}),
       };
 
-      const state = {
-        serializedState: {
-          rawState: embeddableInput,
-          references: getDataviewReferences(dataView.id, CHANGE_POINT_CHART_DATA_VIEW_REF_NAME),
+      const state = [
+        {
+          serializedState: {
+            rawState: embeddableInput,
+            references: getDataviewReferences(dataView.id, CHANGE_POINT_CHART_DATA_VIEW_REF_NAME),
+          },
+          type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
         },
-        type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-      };
+      ];
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+      stateTransfer.navigateToWithMultipleEmbeddablePackage('dashboards', {
         state,
         path,
       });
@@ -748,6 +750,7 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
       {cardinalityExceeded ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningTitle', {
               defaultMessage: 'Analysis has been limited',
             })}

@@ -193,14 +193,16 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
         description: newDescription,
       };
 
-      const state = {
-        serializedState: { rawState: embeddableInput, references: [] },
-        type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-      };
+      const state = [
+        {
+          serializedState: { rawState: embeddableInput, references: [] },
+          type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+        },
+      ];
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+      stateTransfer.navigateToWithMultipleEmbeddablePackage('dashboards', {
         state,
         path,
       });

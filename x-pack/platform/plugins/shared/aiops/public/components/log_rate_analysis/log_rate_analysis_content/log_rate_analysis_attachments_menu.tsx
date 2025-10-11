@@ -91,17 +91,19 @@ export const LogRateAnalysisAttachmentsMenu = ({
         ...(applyTimeRange && { timeRange }),
       };
 
-      const state = {
-        serializedState: {
-          rawState: embeddableInput,
-          references: getDataviewReferences(dataView.id, LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME),
+      const state = [
+        {
+          serializedState: {
+            rawState: embeddableInput,
+            references: getDataviewReferences(dataView.id, LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME),
+          },
+          type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
         },
-        type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-      };
+      ];
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', { state, path });
+      stateTransfer.navigateToWithMultipleEmbeddablePackage('dashboards', { state, path });
     },
     [dataView.id, embeddable, applyTimeRange, timeRange]
   );

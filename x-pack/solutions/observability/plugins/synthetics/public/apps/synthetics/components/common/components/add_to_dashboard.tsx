@@ -60,14 +60,16 @@ export const useAddToDashboard = ({
     async ({ dashboardId }) => {
       const stateTransfer = embeddable.getStateTransfer();
 
-      const state = {
-        serializedState: { rawState: embeddableInput },
-        type,
-      };
+      const state = [
+        {
+          serializedState: { rawState: embeddableInput },
+          type,
+        },
+      ];
 
       const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
 
-      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+      stateTransfer.navigateToWithMultipleEmbeddablePackage('dashboards', {
         state,
         path,
       });

@@ -757,11 +757,13 @@ export class LensPlugin {
         transfer.navigateToEditor(APP_ID, {
           openInNewTab,
           path: getEditPath(undefined, (openInNewTab && input?.timeRange) || undefined),
-          state: {
-            originatingApp,
-            originatingPath,
-            valueInput: input,
-          },
+          state: [
+            {
+              originatingApp,
+              originatingPath,
+              valueInput: input,
+            },
+          ],
           skipAppLeave,
         });
       },
