@@ -7,10 +7,10 @@
 
 import React, { memo } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiIconTip, EuiText } from '@elastic/eui';
+import { EuiToolTip, EuiText, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT } from '../../../common/endpoint/service/artifacts/constants';
 
 interface ProcessDescendantsTooltipProps extends CommonProps {
   indicateExtraEntry?: boolean;
@@ -25,13 +25,13 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
     const getTestId = useTestIdGenerator(dataTestSubj);
 
     return (
-      <EuiIconTip
+      <EuiToolTip
         {...commonProps}
         content={
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltip"
+                id="xpack.securitySolution.filterProcessDescendants.tooltip"
                 defaultMessage="Filtering the descendants of a process means that events from the matched process are ingested, but events from its descendant processes are omitted."
               />
             </p>
@@ -39,7 +39,7 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
               <>
                 <p>
                   <FormattedMessage
-                    id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltipExtraEntry"
+                    id="xpack.securitySolution.filterProcessDescendants.tooltipExtraEntry"
                     defaultMessage="Note: the following additional condition is applied:"
                   />
                 </p>
@@ -50,17 +50,18 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
             )}
             <p>
               <FormattedMessage
-                id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltipVersionInfo"
+                id="xpack.securitySolution.filterProcessDescendants.tooltipVersionInfo"
                 defaultMessage="Process descendant filtering works only with Agents v8.15 and newer."
               />
             </p>
           </EuiText>
         }
         data-test-subj={getTestId('tooltipText')}
-        iconProps={{ 'data-test-subj': getTestId('tooltipIcon') }}
-        type="info"
-      />
+      >
+        <EuiIcon type="info" data-test-subj={getTestId('tooltipIcon')} />
+      </EuiToolTip>
     );
   }
 );
+
 ProcessDescendantsTooltip.displayName = 'ProcessDescendantsTooltip';
