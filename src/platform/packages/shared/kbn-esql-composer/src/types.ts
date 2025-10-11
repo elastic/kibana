@@ -13,6 +13,10 @@ export interface Command {
   body: string;
 }
 
+export interface CommandOptions {
+  comment?: string;
+}
+
 type StringToUnion<S> = S extends `${infer First}${infer Rest}`
   ? First | StringToUnion<Rest>
   : never;
@@ -49,9 +53,13 @@ export type NamedParameter<TQuery extends string = string> = Record<
 
 export type Params<TQuery extends string = string> = NamedParameter<TQuery> | FieldValue;
 
+export interface ToStringOptions {
+  withComments?: boolean;
+}
+
 export interface QueryPipeline {
   pipe: (...args: QueryOperator[]) => QueryPipeline;
-  toString: () => string;
+  toString: (options?: ToStringOptions) => string;
   asRequest: () => QueryRequest;
 }
 export interface Query {
