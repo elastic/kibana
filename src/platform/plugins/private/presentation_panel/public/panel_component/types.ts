@@ -41,12 +41,15 @@ export interface PresentationPanelInternalProps<
   showBadges?: boolean;
   showNotifications?: boolean;
 
+  disableReportingAttributes?: boolean;
+
   /**
    * Set to true to not show PanelLoader component while Panel is loading
    */
   hideLoader?: boolean;
   hideHeader?: boolean;
   hideInspector?: boolean;
+  hidePanelChrome?: boolean;
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;

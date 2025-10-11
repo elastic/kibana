@@ -99,7 +99,7 @@ export function MapRenderer(props: Props) {
             props.onApiAvailable(api);
           }
         }}
-        hidePanelChrome={true}
+        panelProps={{ hidePanelChrome: true }}
       />
     </div>
   );
