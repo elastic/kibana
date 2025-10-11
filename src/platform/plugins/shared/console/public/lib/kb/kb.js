@@ -131,9 +131,13 @@ export async function loadActiveApi(http) {
 
   try {
     const data = await http.get(`${API_BASE_PATH}/api_server`);
-    setActiveApi(loadApisFromJson(data));
+
+    // Handle both wrapped response (from external consumers) and direct response (from Kibana)
+    const apiData = data.body || data;
+
+    const api = loadApisFromJson(apiData);
+    setActiveApi(api);
   } catch (err) {
-    console.log(`failed to load API: ${err.responseText}`);
     // If we fail to load the API, clear this flag so it can be retried
     apiLoaded = false;
   }

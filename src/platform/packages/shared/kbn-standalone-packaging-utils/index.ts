@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SettingsEditor as SettingsEditorComponent } from './settings_editor';
-
-export { type Props } from './settings_editor';
-export { type AutocompleteOptions } from './types';
-
-export const SettingsEditor = SettingsEditorComponent;
+export * from './src/mocked_services';
