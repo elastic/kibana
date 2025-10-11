@@ -111,5 +111,10 @@ export const collapseBySchema = schema.oneOf(
      */
     schema.literal('min'),
   ],
-  { meta: { description: 'Collapse by function description' } }
+  {
+    meta: {
+      description:
+        'Collapse by function. This parameter is used to collapse the metric chart when the number of columns is bigger than the number of columns specified in the columns parameter. Possible values: avg, sum, max, min',
+    },
+  }
 );
