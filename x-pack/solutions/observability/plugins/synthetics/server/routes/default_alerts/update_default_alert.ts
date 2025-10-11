@@ -6,7 +6,7 @@
  */
 
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
-import { DefaultAlertService } from './default_alert_service';
+import { DefaultRuleService } from './default_alert_service';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
@@ -16,7 +16,7 @@ export const updateDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
   path: SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING,
   validate: {},
   handler: async ({ context, server, savedObjectsClient }): Promise<DEFAULT_ALERT_RESPONSE> => {
-    const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+    const defaultAlertService = new DefaultRuleService(context, server, savedObjectsClient);
     const { defaultTLSRuleEnabled, defaultStatusRuleEnabled } = await getSyntheticsDynamicSettings(
       savedObjectsClient
     );
