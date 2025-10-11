@@ -51,7 +51,7 @@ class ControlsTab extends PureComponent<ControlsTabProps, ControlsTabUiState> {
 
   getIndexPattern = async (indexPatternId: string): Promise<DataView> => {
     const [, startDeps] = await this.props.deps.core.getStartServices();
-    return await startDeps.data.indexPatterns.get(indexPatternId);
+    return await startDeps.data.dataViews.get(indexPatternId);
   };
 
   onChange = (value: ControlParams[]) => this.props.setValue('controls', value);
