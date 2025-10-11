@@ -71,8 +71,7 @@ export const PendingActionsSelector = memo<
       statuses: ['pending'],
     },
     {
-      refetchInterval: state.isPopoverOpen ? 3000 : false, // Only refetch when popover is open
-      enabled: true, // Always keep query enabled for initial load
+      enabled: state.isPopoverOpen,
     }
   );
 
@@ -220,7 +219,7 @@ export const PendingActionsSelector = memo<
             error ? (
               <FormattedMessage
                 id="xpack.securitySolution.baseArgumentSelector.errorLoading"
-                defaultMessage="Error loading data"
+                defaultMessage="Error loading pending actions"
               />
             ) : undefined
           }
