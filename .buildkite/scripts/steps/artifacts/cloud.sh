@@ -12,6 +12,17 @@ if [[ "${DRY_RUN:-}" =~ ^(true|1)$ ]]; then
   exit 0
 fi
 
+KIBANA_MEMORY_SIZE=${KIBANA_MEMORY_SIZE:-2048}
+case "$KIBANA_MEMORY_SIZE" in
+  1024|2048|4096|8192)
+    echo "--- Kibana node memory size: ${KIBANA_MEMORY_SIZE}MB"
+    ;;
+  *)
+    echo "Error: KIBANA_MEMORY_SIZE must be one of: 1024, 2048, 4096, 8192. Got: $KIBANA_MEMORY_SIZE"
+    exit 1
+    ;;
+esac
+
 echo "--- Push docker image"
 mkdir -p target
 
@@ -42,7 +53,8 @@ jq '
   .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_TEST_IMAGE'" |
   .resources.kibana[0].plan.kibana.version = "'$FULL_VERSION'" |
   .resources.elasticsearch[0].plan.elasticsearch.version = "'$FULL_VERSION'" |
-  .resources.integrations_server[0].plan.integrations_server.version = "'$FULL_VERSION'"
+  .resources.integrations_server[0].plan.integrations_server.version = "'$FULL_VERSION'" |
+  .resources.kibana[0].plan.cluster_topology[0].size.value = '$KIBANA_MEMORY_SIZE'
   ' .buildkite/scripts/steps/cloud/deploy.json > "$DEPLOYMENT_SPEC"
 
 function shutdown {
