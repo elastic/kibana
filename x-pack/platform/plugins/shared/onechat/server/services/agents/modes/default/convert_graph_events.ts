@@ -23,6 +23,7 @@ import {
   matchGraphName,
   matchEvent,
   matchName,
+  hasTag,
   createTextChunkEvent,
   createMessageEvent,
   createToolCallEvent,
@@ -62,8 +63,8 @@ export const convertGraphEvents = ({
           return EMPTY;
         }
 
-        // stream text chunks for the UI
-        if (matchEvent(event, 'on_chat_model_stream')) {
+        // stream answering text chunks for the UI
+        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, 'answering-step')) {
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
@@ -71,13 +72,12 @@ export const convertGraphEvents = ({
           }
         }
 
-        // emit tool calls or full message on each agent step
+        // emit tool calls for agent step
         if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
           const events: ConvertedEvents[] = [];
 
           // process last emitted message
-          const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
-          const lastMessage = addedMessages[addedMessages.length - 1];
+          const lastMessage: BaseMessage = event.data.output.nextMessage;
 
           const toolCalls = extractToolCalls(lastMessage);
           if (toolCalls.length > 0) {
@@ -88,6 +88,7 @@ export const convertGraphEvents = ({
               const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
               const { toolCallId, args } = toolCall;
 
+              // TODO: can also check message content now that can identify those
               const { _reasoning, ...toolCallArgs } = args;
               if (_reasoning) {
                 reasoningEvents.push(createReasoningEvent(_reasoning));
@@ -103,12 +104,23 @@ export const convertGraphEvents = ({
               );
             }
             events.push(...reasoningEvents, ...toolCallEvents);
-          } else {
-            const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
-              messageId,
-            });
-            events.push(messageEvent);
           }
+
+          return of(...events);
+        }
+
+        // emit messages for answering step
+        if (matchEvent(event, 'on_chain_end') && matchName(event, 'answer')) {
+          const events: ConvertedEvents[] = [];
+
+          // process last emitted message
+          const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
+          const lastMessage = addedMessages[addedMessages.length - 1];
+
+          const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
+            messageId,
+          });
+          events.push(messageEvent);
 
           return of(...events);
         }
