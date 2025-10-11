@@ -37,9 +37,9 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { runWorkflow } from './execution_functions/run_workflow';
-import { createContainer } from './execution_functions/create_container';
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { LogsRepository } from './repositories/logs_repository/logs_repository';
+import { setupDependencies } from './execution_functions/setup_dependencies';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -127,6 +127,7 @@ export class WorkflowsExecutionEnginePlugin
               const logsRepository = new LogsRepository(esClient, logger);
               const {
                 workflowRuntime,
+                stepExecutionRuntimeFactory,
                 workflowExecutionState,
                 workflowLogger,
                 nodesFactory,
@@ -134,7 +135,7 @@ export class WorkflowsExecutionEnginePlugin
                 clientToUse,
                 fakeRequest: fakeRequestFromContainer,
                 coreStart: coreStartFromContainer,
-              } = await createContainer(
+              } = await setupDependencies(
                 workflowRunId,
                 spaceId,
                 actions,
@@ -152,6 +153,7 @@ export class WorkflowsExecutionEnginePlugin
 
               await workflowExecutionLoop({
                 workflowRuntime,
+                stepExecutionRuntimeFactory,
                 workflowExecutionState,
                 workflowExecutionRepository,
                 workflowLogger,
@@ -220,6 +222,7 @@ export class WorkflowsExecutionEnginePlugin
 
         const {
           workflowRuntime,
+          stepExecutionRuntimeFactory,
           workflowExecutionState,
           workflowLogger,
           nodesFactory,
@@ -227,7 +230,7 @@ export class WorkflowsExecutionEnginePlugin
           fakeRequest,
           clientToUse,
           coreStart,
-        } = await createContainer(
+        } = await setupDependencies(
           workflowExecution.id!,
           workflowExecution.spaceId!,
           plugins.actions,
@@ -245,6 +248,7 @@ export class WorkflowsExecutionEnginePlugin
         await workflowRuntime.start();
         await workflowExecutionLoop({
           workflowRuntime,
+          stepExecutionRuntimeFactory,
           workflowExecutionState,
           workflowExecutionRepository,
           workflowLogger,
