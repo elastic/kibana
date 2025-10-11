@@ -31,7 +31,7 @@ export const getMessageFromRawResponse = (
   } else {
     return {
       role: 'assistant',
-      content: 'Error: Response from LLM API is empty or undefined.',
+      content: 'Error: Response from LLM API is empty or undefined. Foo',
       timestamp: dateTimeString,
       isError: true,
     };
