@@ -57,7 +57,7 @@ export class WorkflowEventLoggerService {
     if (!this.initialized) {
       throw new Error('WorkflowEventLoggerService not initialized. Call initialize() first.');
     }
-    return new WorkflowEventLogger(this.logsRepository, this.logger, this.indexName, context, {
+    return new WorkflowEventLogger(this.logsRepository, this.logger, context, {
       enableConsoleLogging: this.enableConsoleLogging,
     });
   }
