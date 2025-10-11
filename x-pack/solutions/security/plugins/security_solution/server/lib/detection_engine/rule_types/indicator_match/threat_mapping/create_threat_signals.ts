@@ -38,6 +38,9 @@ import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
 import { getQueryFields } from '../../utils/get_query_fields';
+import { buildTimeRangeFilter } from '../../utils/build_events_query';
+
+const PIT_KEEP_ALIVE = '5m';
 
 export const createThreatSignals = async ({
   sharedParams,
@@ -139,6 +142,24 @@ export const createThreatSignals = async ({
   });
 
   ruleExecutionLogger.debug(`Total event count: ${eventCount}`);
+
+  let sourcePitId: OpenPointInTimeResponse['id'] = (
+    await services.scopedClusterClient.asCurrentUser.openPointInTime({
+      index: inputIndex,
+      keep_alive: PIT_KEEP_ALIVE,
+      allow_partial_search_results: true,
+      ignore_unavailable: true,
+      index_filter: buildTimeRangeFilter({
+        from: sharedParams.tuple.from.toISOString(),
+        to: sharedParams.tuple.to.toISOString(),
+        primaryTimestamp: sharedParams.primaryTimestamp,
+        secondaryTimestamp: sharedParams.secondaryTimestamp,
+      }),
+    })
+  ).id;
+  const reassignSourcePitId = (newPitId: OpenPointInTimeResponse['id'] | undefined) => {
+    if (newPitId) sourcePitId = newPitId;
+  };
 
   let threatPitId: OpenPointInTimeResponse['id'] = (
     await services.scopedClusterClient.asCurrentUser.openPointInTime({
@@ -333,6 +354,8 @@ export const createThreatSignals = async ({
           eventListConfig,
           indexFields: inputIndexFields,
           sortOrder,
+          pitId: sourcePitId,
+          reassignPitId: reassignSourcePitId,
         }),
 
       createSignal: (slicedChunk) =>
@@ -342,10 +365,12 @@ export const createThreatSignals = async ({
           currentResult: results,
           eventsTelemetry,
           filters: allEventFilters,
-          reassignThreatPitId,
           services,
           threatFilters: allThreatFilters,
           threatPitId,
+          reassignThreatPitId,
+          sourcePitId,
+          reassignSourcePitId,
           wrapSuppressedHits,
           allowedFieldsForTermsQuery,
           inputIndexFields,
@@ -382,6 +407,8 @@ export const createThreatSignals = async ({
           threatFilters: allThreatFilters,
           threatPitId,
           reassignThreatPitId,
+          sourcePitId,
+          reassignSourcePitId,
           allowedFieldsForTermsQuery,
           inputIndexFields,
           threatIndexFields,
@@ -397,6 +424,14 @@ export const createThreatSignals = async ({
     // Don't fail due to a bad point in time closure. We have seen failures in e2e tests during nominal operations.
     ruleExecutionLogger.warn(
       `Error trying to close point in time: "${threatPitId}", it will expire within "${THREAT_PIT_KEEP_ALIVE}". Error is: "${error}"`
+    );
+  }
+  try {
+    await services.scopedClusterClient.asCurrentUser.closePointInTime({ id: sourcePitId });
+  } catch (error) {
+    // Don't fail due to a bad point in time closure. We have seen failures in e2e tests during nominal operations.
+    ruleExecutionLogger.warn(
+      `Error trying to close point in time: "${sourcePitId}", it will expire within "${PIT_KEEP_ALIVE}". Error is: "${error}"`
     );
   }
   scheduleNotificationResponseActionsService({

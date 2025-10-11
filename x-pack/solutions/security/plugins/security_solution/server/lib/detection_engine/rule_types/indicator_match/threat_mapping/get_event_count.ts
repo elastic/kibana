@@ -9,7 +9,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { EventCountOptions, EventsOptions, EventDoc } from './types';
 import { getQueryFilter } from '../../utils/get_query_filter';
 import { singleSearchAfter } from '../../utils/single_search_after';
-import { buildEventsSearchQuery } from '../../utils/build_events_query';
+import {
+  buildEventsSearchQuery,
+  buildEventsSearchQueryWithPit,
+} from '../../utils/build_events_query';
 
 export const MAX_PER_PAGE = 9000;
 
@@ -22,6 +25,8 @@ export const getEventList = async ({
   eventListConfig,
   indexFields,
   sortOrder = 'desc',
+  pitId,
+  reassignPitId,
 }: EventsOptions): Promise<estypes.SearchResponse<EventDoc, unknown>> => {
   const {
     inputIndex,
@@ -53,10 +58,9 @@ export const getEventList = async ({
     fields: indexFields,
   });
 
-  const searchRequest = buildEventsSearchQuery({
+  const searchRequest = buildEventsSearchQueryWithPit({
     aggregations: undefined,
     searchAfterSortIds: searchAfter,
-    index: inputIndex,
     from: tuple.from.toISOString(),
     to: tuple.to.toISOString(),
     size: calculatedPerPage,
@@ -67,6 +71,7 @@ export const getEventList = async ({
     trackTotalHits: false,
     runtimeMappings,
     overrideBody: eventListConfig,
+    pitId,
   });
 
   const { searchResult } = await singleSearchAfter({
@@ -74,6 +79,7 @@ export const getEventList = async ({
     services,
     ruleExecutionLogger,
   });
+  reassignPitId(pitId);
 
   ruleExecutionLogger.debug(`Retrieved events items of size: ${searchResult.hits.hits.length}`);
   return searchResult;

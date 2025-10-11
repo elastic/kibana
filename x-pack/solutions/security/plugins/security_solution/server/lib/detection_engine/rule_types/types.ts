@@ -328,6 +328,8 @@ export interface SearchAfterAndBulkCreateParams {
    * If defined, will override the value of max_signals found in sharedParams.tuple
    */
   maxSignalsOverride?: number;
+  pitId: string;
+  reassignPitId: (id: string | undefined) => void;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

@@ -57,6 +57,8 @@ export interface CreateThreatSignalOptions {
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  sourcePitId: OpenPointInTimeResponse['id'];
+  reassignSourcePitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
@@ -76,6 +78,8 @@ export interface CreateEventSignalOptions {
   perPage?: number;
   threatPitId: OpenPointInTimeResponse['id'];
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
+  sourcePitId: OpenPointInTimeResponse['id'];
+  reassignSourcePitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
@@ -206,6 +210,8 @@ export interface EventsOptions {
   eventListConfig?: OverrideBodyQuery;
   indexFields: DataViewFieldBase[];
   sortOrder?: SortOrderOrUndefined;
+  pitId: string;
+  reassignPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
 }
 
 export interface EventDoc {

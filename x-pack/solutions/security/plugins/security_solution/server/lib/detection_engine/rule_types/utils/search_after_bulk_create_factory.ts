@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
-import { buildEventsSearchQuery } from './build_events_query';
+import { buildEventsSearchQueryWithPit } from './build_events_query';
 import {
   createSearchAfterReturnType,
   createSearchAfterReturnTypeFromResponse,
@@ -71,6 +71,8 @@ export const searchAfterAndBulkCreateFactory = async ({
   getWarningMessage,
   isLoggedRequestsEnabled,
   maxSignalsOverride,
+  pitId,
+  reassignPitId,
 }: SearchAfterAndBulkCreateFactoryParams): Promise<SearchAfterAndBulkCreateReturnType> => {
   const {
     inputIndex: inputIndexPattern,
@@ -103,9 +105,8 @@ export const searchAfterAndBulkCreateFactory = async ({
           } in index pattern "${inputIndexPattern}"`
         );
 
-        const searchAfterQuery = buildEventsSearchQuery({
+        const searchAfterQuery = buildEventsSearchQueryWithPit({
           aggregations: undefined,
-          index: inputIndexPattern,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
           runtimeMappings,
@@ -117,6 +118,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           secondaryTimestamp,
           trackTotalHits,
           additionalFilters,
+          pitId,
         });
         const {
           searchResult,
@@ -133,6 +135,7 @@ export const searchAfterAndBulkCreateFactory = async ({
             searchingIteration
           ),
         });
+        reassignPitId(searchResult.pit_id);
         toReturn = mergeReturns([
           toReturn,
           createSearchAfterReturnTypeFromResponse({
