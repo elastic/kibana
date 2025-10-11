@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/observability-agent-plugin",
+  "owner": ["@elastic/obs-ai-assistant"],
+  "group": "observability",
+  "visibility": "private",
+  "plugin": {
+    "id": "observabilityAgent",
+    "browser": false,
+    "server": true,
+    "configPath": ["xpack", "observabilityAgent"],
+    "requiredPlugins": ["onechat", "apmDataAccess", "logsDataAccess"],
+    "optionalPlugins": [],
+    "requiredBundles": [],
+    "extraPublicDirs": []
+  }
+}
