@@ -19,7 +19,6 @@ const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
 const KIBANA_VERSION = '5.1.0';
-
 function createNodes(...versions: string[]): NodesInfo {
   const nodes = {} as any;
   versions
@@ -130,7 +129,6 @@ describe('mapNodesVersionCompatibility', () => {
     );
   });
 });
-
 describe('pollEsNodesVersion', () => {
   let internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
 

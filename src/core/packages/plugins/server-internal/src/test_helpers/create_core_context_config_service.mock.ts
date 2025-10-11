@@ -21,8 +21,8 @@ export const createCoreContextConfigServiceMock = (): IConfigService => {
       case 'elasticsearch':
         return {
           shardTimeout: duration(30, 's'),
-          requestTimeout: duration(30, 's'),
-          pingTimeout: duration(30, 's'),
+          requestTimeout: duration(120, 's'),
+          pingTimeout: duration(120, 's'),
           someOtherProps: 'unused',
         };
       case 'path':

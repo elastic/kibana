@@ -156,6 +156,13 @@ export interface IElasticsearchConfig {
    * Set to 0 to disable the cache (default Node.js behavior)
    */
   readonly dnsCacheTtl: Duration;
+
+  /**
+   * The number of consecutive nodes info request errors before the status is set to red.
+   * This is used to avoid status flapping when there are transient network issues.
+   * @default 3
+   */
+  readonly bufferThreshold: number;
 }
 
 /**

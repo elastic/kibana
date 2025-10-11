@@ -138,8 +138,8 @@ describe('createPluginInitializerContext', () => {
       expect(configObject).toStrictEqual({
         elasticsearch: {
           shardTimeout: duration(30, 's'),
-          requestTimeout: duration(30, 's'),
-          pingTimeout: duration(30, 's'),
+          requestTimeout: duration(120, 's'),
+          pingTimeout: duration(120, 's'),
         },
         path: { data: fromRoot('data') },
         savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },

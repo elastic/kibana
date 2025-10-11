@@ -116,7 +116,7 @@ export const configSchema = schema.object({
     },
   }),
   shardTimeout: schema.duration({ defaultValue: '30s' }),
-  requestTimeout: schema.duration({ defaultValue: '30s' }),
+  requestTimeout: schema.duration({ defaultValue: '120s' }),
   pingTimeout: schema.duration({ defaultValue: schema.siblingRef('requestTimeout') }),
   logQueries: schema.boolean({ defaultValue: false }),
   ssl: schema.object(
@@ -197,6 +197,7 @@ export const configSchema = schema.object({
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
   publicBaseUrl: schema.maybe(hostURISchema),
+  bufferThreshold: schema.number({ defaultValue: 3, min: 1 }),
 });
 
 const deprecations: ConfigDeprecationProvider = () => [
@@ -303,6 +304,13 @@ export const config: ServiceConfigDescriptor<ElasticsearchConfigType> = {
  * @internal
  */
 export class ElasticsearchConfig implements IElasticsearchConfig {
+  /**
+   * @internal
+   * The maximum number of consecutive failures allowed for the nodes info request
+   * until the ES status is set
+   */
+  public readonly bufferThreshold: number;
+
   /**
    * @internal
    * Only valid in dev mode. Skip the valid connection check during startup. The connection check allows
@@ -486,6 +494,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
     this.dnsCacheTtl = rawConfig.dnsCacheTtl;
     this.publicBaseUrl = rawConfig.publicBaseUrl;
+    this.bufferThreshold = rawConfig.bufferThreshold ? rawConfig.bufferThreshold : 3;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

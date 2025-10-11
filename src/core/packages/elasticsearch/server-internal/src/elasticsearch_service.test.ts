@@ -189,6 +189,7 @@ describe('#preboot', () => {
 
       expect(config).toMatchInlineSnapshot(`
         Object {
+          "bufferThreshold": 3,
           "healthCheckDelay": "PT0.01S",
           "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
@@ -460,6 +461,7 @@ describe('#start', () => {
 
       expect(config).toMatchInlineSnapshot(`
         Object {
+          "bufferThreshold": 3,
           "healthCheckDelay": "PT0.01S",
           "healthCheckStartupDelay": "PT0.01S",
           "hosts": Array [
@@ -487,7 +489,6 @@ describe('#stop', () => {
 
     expect(mockClusterClientInstance.close).toHaveBeenCalledTimes(1);
   });
-
   it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
     expect.assertions(3);
 
