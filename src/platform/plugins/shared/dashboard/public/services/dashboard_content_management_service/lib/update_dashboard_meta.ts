@@ -14,7 +14,7 @@ import type {
   DashboardUpdateOut,
 } from '../../../../server/content_management';
 import { findDashboardsByIds } from './find_dashboards';
-import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
+import { contentManagementService, savedObjectsTaggingService, coreServices } from '../../kibana_services';
 import { getDashboardContentManagementCache } from '..';
 
 export interface UpdateDashboardMetaProps {
@@ -41,11 +41,10 @@ export const updateDashboardMeta = async ({
       ? savedObjectsTaggingApi.ui.updateTagsReferences(dashboard.references, tags)
       : dashboard.references;
 
-  await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
-    contentTypeId: DASHBOARD_CONTENT_ID,
-    id,
-    data: { title, description },
-    options: { references },
+  await coreServices.http.put(`/api/dashboards/dashboard/${id}`, {
+    title,
+    description,
+    references,
   });
 
   getDashboardContentManagementCache().deleteDashboard(id);

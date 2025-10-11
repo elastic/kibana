@@ -10,24 +10,16 @@
 import type { DashboardSearchIn, DashboardSearchOut } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { extractTitleAndCount } from '../../../utils/extract_title_and_count';
-import { contentManagementService } from '../../kibana_services';
+import { contentManagementService, coreServices } from '../../kibana_services';
 
 export interface DashboardDuplicateTitleCheckProps {
   title: string;
   copyOnSave: boolean;
   lastSavedTitle: string;
-  /**
-   * invokes the onTitleDuplicate function if provided with a speculative title that should be collision free
-   */
   onTitleDuplicate?: (speculativeSuggestion: string) => void;
   isTitleDuplicateConfirmed: boolean;
 }
 
-/**
- * check for an existing dashboard with the same title in ES
- * returns Promise<true> when there is no duplicate, or runs the provided onTitleDuplicate
- * function when the title already exists
- */
 export async function checkForDuplicateDashboardTitle({
   title,
   copyOnSave,
@@ -53,30 +45,23 @@ export async function checkForDuplicateDashboardTitle({
 
   const [baseDashboardName] = extractTitleAndCount(title);
 
-  const { hits } = await contentManagementService.client.search<
-    DashboardSearchIn,
-    DashboardSearchOut
-  >({
-    contentTypeId: DASHBOARD_CONTENT_ID,
-    query: {
-      text: `${baseDashboardName}*`,
-      limit: 20,
-    },
-    options: {
-      onlyTitle: true,
-    },
+  const queryParams = new URLSearchParams({
+    perPage: '20',
+    search: `${baseDashboardName}*`,
   });
 
+  const response = await coreServices.http.get(`/api/dashboards/dashboard?${queryParams.toString()}`) as DashboardSearchResponse;
+
   const duplicate = Boolean(
-    hits.find((hit) => hit.attributes.title.toLowerCase() === title.toLowerCase())
+    response.items.find((item) => item.data.title.toLowerCase() === title.toLowerCase())
   );
 
   if (!duplicate) {
     return true;
   }
 
-  const [largestDuplicationId] = hits
-    .map((hit) => extractTitleAndCount(hit.attributes.title)[1])
+  const [largestDuplicationId] = response.items
+    .map((item) => extractTitleAndCount(item.data.title)[1])
     .sort((a, b) => b - a);
 
   const speculativeCollisionFreeTitle = `${baseDashboardName} (${largestDuplicationId + 1})`;

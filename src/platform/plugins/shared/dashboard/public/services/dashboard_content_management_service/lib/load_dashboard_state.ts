@@ -13,7 +13,7 @@ import { getDashboardContentManagementCache } from '..';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DEFAULT_DASHBOARD_STATE } from '../../../dashboard_api/default_dashboard_state';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { contentManagementService, savedObjectsTaggingService } from '../../kibana_services';
+import { contentManagementService, savedObjectsTaggingService, coreServices } from '../../kibana_services';
 import type { LoadDashboardFromSavedObjectProps, LoadDashboardReturn } from '../types';
 
 export const loadDashboardState = async ({
@@ -25,9 +25,6 @@ export const loadDashboardState = async ({
 
   const newDashboardState = { ...DEFAULT_DASHBOARD_STATE };
 
-  /**
-   * This is a newly created dashboard, so there is no saved object state to load.
-   */
   if (!savedObjectId) {
     return {
       dashboardInput: newDashboardState,
@@ -37,24 +34,15 @@ export const loadDashboardState = async ({
     };
   }
 
-  /**
-   * Load the saved object from Content Management
-   */
   let rawDashboardContent: DashboardGetOut['item'];
   let resolveMeta: DashboardGetOut['meta'];
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
 
   if (cachedDashboard) {
-    /** If the dashboard exists in the cache, use the cached version to load the dashboard */
     ({ item: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
   } else {
-    /** Otherwise, fetch and load the dashboard from the content management client, and add it to the cache */
-    const result = await contentManagementService.client
-      .get<DashboardGetIn, DashboardGetOut>({
-        contentTypeId: DASHBOARD_CONTENT_ID,
-        id,
-      })
+    const result = await coreServices.http.get(`/api/dashboards/dashboard/${id}`)
       .catch((e) => {
         if (e.response?.status === 404) {
           throw new SavedObjectNotFound({ type: DASHBOARD_CONTENT_ID, id });
@@ -63,14 +51,31 @@ export const loadDashboardState = async ({
         throw new Error(message);
       });
 
-    ({ item: rawDashboardContent, meta: resolveMeta } = result);
+    rawDashboardContent = {
+      id: result.id,
+      type: result.type,
+      attributes: result.data,
+      references: result.data.references || [],
+      version: result.meta.version,
+      createdAt: result.meta.createdAt,
+      updatedAt: result.meta.updatedAt,
+      createdBy: result.meta.createdBy,
+      updatedBy: result.meta.updatedBy,
+      managed: result.meta.managed,
+      error: result.meta.error,
+      namespaces: result.data.namespaces || result.data.spaces || [],
+      originId: undefined,
+    };
+
+    resolveMeta = {
+      outcome: 'exactMatch',
+      aliasTargetId: undefined,
+      aliasPurpose: undefined,
+    };
+
     const { outcome: loadOutcome } = resolveMeta;
     if (loadOutcome !== 'aliasMatch') {
-      /**
-       * Only add the dashboard to the cache if it does not require a redirect - otherwise, the meta
-       * alias info gets cached and prevents the dashboard contents from being updated
-       */
-      dashboardContentManagementCache.addDashboard(result);
+      dashboardContentManagementCache.addDashboard({ item: rawDashboardContent, meta: resolveMeta });
     }
   }
 

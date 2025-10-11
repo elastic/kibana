@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DeleteIn, DeleteResult } from '@kbn/content-management-plugin/common';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { getDashboardContentManagementCache } from '..';
-import { contentManagementService } from '../../kibana_services';
+import { coreServices } from '../../kibana_services';
 
 export const deleteDashboards = async (ids: string[]) => {
-  const deletePromises = ids.map((id) => {
+  const deletePromises = ids.map(async (id) => {
     getDashboardContentManagementCache().deleteDashboard(id);
-    return contentManagementService.client.delete<DeleteIn, DeleteResult>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      id,
-    });
+    await coreServices.http.delete(`/api/dashboards/dashboard/${id}`);
   });
 
   await Promise.all(deletePromises);

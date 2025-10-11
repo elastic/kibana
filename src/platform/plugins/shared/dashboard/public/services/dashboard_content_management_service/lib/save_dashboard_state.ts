@@ -32,36 +32,29 @@ export const saveDashboardState = async ({
 
   const { attributes, references } = getSerializedState({
     controlGroupReferences,
-    generateNewIds: saveOptions.saveAsCopy, // When saving a dashboard as a copy, we should generate new IDs for all panels
+    generateNewIds: saveOptions.saveAsCopy,
     dashboardState,
     panelReferences,
   });
 
-  /**
-   * Save the saved object using the content management
-   */
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
 
   try {
-    const result = idToSaveTo
-      ? await contentManagementService.client.update<DashboardUpdateIn, DashboardUpdateOut>({
-          id: idToSaveTo,
-          contentTypeId: DASHBOARD_CONTENT_ID,
-          data: attributes,
-          options: {
-            references,
-            /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
-            mergeAttributes: false,
-          },
-        })
-      : await contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
-          contentTypeId: DASHBOARD_CONTENT_ID,
-          data: attributes,
-          options: {
-            references,
-          },
-        });
-    const newId = result.item.id;
+    let result;
+
+    if (idToSaveTo) {
+      result = await coreServices.http.put(`/api/dashboards/dashboard/${idToSaveTo}`, {
+        ...attributes,
+        references,
+      });
+    } else {
+      result = await coreServices.http.post('/api/dashboards/dashboard', {
+        ...attributes,
+        references,
+      });
+    }
+
+    const newId = result.id;
 
     if (newId) {
       coreServices.notifications.toasts.addSuccess({
@@ -73,14 +66,11 @@ export const saveDashboardState = async ({
         'data-test-subj': 'saveDashboardSuccess',
       });
 
-      /**
-       * If the dashboard id has been changed, redirect to the new ID to keep the url param in sync.
-       */
       if (newId !== lastSavedId) {
         getDashboardBackupService().clearState(lastSavedId);
         return { redirectRequired: true, id: newId, references };
       } else {
-        dashboardContentManagementCache.deleteDashboard(newId); // something changed in an existing dashboard, so delete it from the cache so that it can be re-fetched
+        dashboardContentManagementCache.deleteDashboard(newId);
       }
     }
     return { id: newId, references };
