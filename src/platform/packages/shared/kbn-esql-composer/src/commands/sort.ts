@@ -9,7 +9,7 @@
 
 import type { Params, QueryOperator, CommandOptions } from '../types';
 import { append } from '../pipeline/append';
-import { isCommandOptions } from '../utils/extract_options';
+import { isCommandOptions, extractOptions } from '../utils/extract_options';
 
 export enum SortOrder {
   Asc = 'ASC',
@@ -23,48 +23,74 @@ type SortArgs = Sort | string | Array<Sort | string>;
 /**
  * Appends a `SORT` command to the ESQL composer pipeline.
  *
- * @param sorts The sort criteria.
- * @param options Optional configuration including comment.
+ * @param firstArg The parameterized query string or sort criteria.
+ * @param secondArg Optional parameters, sort criteria, or options.
+ * @param restArgs Additional sort criteria or options.
  * @returns A `QueryPipeline` instance with the `SORT` command appended.
  */
-export function sort<TQuery extends string, TParams extends Params<TQuery>>(
-  body: TQuery,
-  params?: TParams,
-  options?: CommandOptions
-): QueryOperator;
-export function sort(...sorts: SortArgs[]): QueryOperator;
-export function sort<TQuery extends string, TParams extends Params<TQuery>>(
-  firstArg: TQuery | SortArgs,
-  secondArg?: TParams | SortArgs | CommandOptions,
-  ...restSorts: Array<SortArgs | CommandOptions>
+export function sort(
+  firstArg: string | SortArgs,
+  secondArg?: Params | SortArgs | CommandOptions,
+  ...restArgs: Array<SortArgs | CommandOptions>
 ): QueryOperator {
   // Handle parameterized query case
   if (typeof firstArg === 'string' && firstArg.includes('?')) {
-    const thirdArg = restSorts[0];
+    const thirdArg = restArgs[0];
     const options = isCommandOptions(thirdArg) ? thirdArg : undefined;
     // When firstArg is a parameterized string, secondArg is the params object
-    // Type assertion is necessary here due to TypeScript's limitation with overload resolution
-    const params = secondArg;
-    return append({ 
-      command: `SORT ${firstArg}`, 
-      params: params as TParams, 
-      comment: options?.comment 
+    const params = secondArg as Params;
+    return append({
+      command: `SORT ${firstArg}`,
+      params,
+      comment: options?.comment,
     });
   }
 
+  // Handle single sort with options case
+  if (isCommandOptions(secondArg)) {
+    const options = secondArg;
+    const sortArgs = [firstArg];
+
+    const allSorts = sortArgs
+      .flatMap((sortInstruction): Array<string | Sort> => {
+        if (Array.isArray(sortInstruction)) {
+          return sortInstruction;
+        }
+        return [sortInstruction];
+      })
+      .map((sortInstruction): { column: string; order: SortOrder } => {
+        if (typeof sortInstruction === 'string') {
+          return { column: sortInstruction, order: SortOrder.Asc };
+        }
+        const column = Object.keys(sortInstruction)[0];
+        if (!column) {
+          throw new Error('Sort object must have at least one property');
+        }
+
+        return {
+          column,
+          order: sortInstruction[column],
+        };
+      });
+
+    const command = `SORT ${allSorts
+      .map((sortInstruction) => `${sortInstruction.column} ${sortInstruction.order}`)
+      .join(', ')}`;
+
+    return append({ command, comment: options?.comment });
+  }
+
   // Handle variadic sort arguments case
-  const allArgs: Array<SortArgs | CommandOptions> = [
-    firstArg,
-    ...(secondArg !== undefined ? [secondArg] : []),
-    ...restSorts
-  ];
-  
-  const lastArg = allArgs[allArgs.length - 1];
-  const options = isCommandOptions(lastArg) ? lastArg : undefined;
-  const sortArgs = options ? allArgs.slice(0, -1) : allArgs;
+  const allArgs = [firstArg, ...(secondArg !== undefined ? [secondArg] : []), ...restArgs];
+  const { options, remaining: sortArgs } = extractOptions(allArgs);
 
   const allSorts = sortArgs
-    .flatMap((sortInstruction) => sortInstruction)
+    .flatMap((sortInstruction): Array<string | Sort> => {
+      if (Array.isArray(sortInstruction)) {
+        return sortInstruction;
+      }
+      return [sortInstruction as string | Sort];
+    })
     .map((sortInstruction): { column: string; order: SortOrder } => {
       if (typeof sortInstruction === 'string') {
         return { column: sortInstruction, order: SortOrder.Asc };
