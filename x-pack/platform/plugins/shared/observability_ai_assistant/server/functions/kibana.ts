@@ -6,8 +6,8 @@
  */
 
 import axios from 'axios';
-import { format, parse } from 'url';
-import { castArray, first, pick, pickBy } from 'lodash';
+import { format } from 'url';
+import { pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
@@ -48,17 +48,13 @@ export function registerKibanaFunction({
         required: ['method', 'pathname'] as const,
       },
     },
-    ({ arguments: { method, pathname, body, query } }, signal) => {
-      const { request } = resources;
-
+    async ({ arguments: { method, pathname, body, query } }, signal) => {
+      const { request, logger } = resources;
       const { protocol, host, pathname: pathnameFromRequest } = request.rewrittenUrl || request.url;
-
-      const origin = first(castArray(request.headers.origin));
 
       const nextUrl = {
         host,
         protocol,
-        ...(origin ? pick(parse(origin), 'host', 'protocol') : {}),
         pathname: pathnameFromRequest.replace(
           '/internal/observability_ai_assistant/chat/complete',
           pathname
@@ -67,6 +63,7 @@ export function registerKibanaFunction({
       };
 
       const copiedHeaderNames = [
+        'authorization',
         'accept-encoding',
         'accept-language',
         'accept',
@@ -88,15 +85,25 @@ export function registerKibanaFunction({
         );
       });
 
-      return axios({
-        method,
-        headers,
-        url: format(nextUrl),
-        data: body ? JSON.stringify(body) : undefined,
-        signal,
-      }).then((response) => {
+      logger.debug(
+        `Forwarding requests from ${
+          request.headers.origin ?? host
+        } to call Kibana API: ${method} ${format(nextUrl)}`
+      );
+
+      try {
+        const response = await axios({
+          method,
+          headers,
+          url: format(nextUrl),
+          data: body ? JSON.stringify(body) : undefined,
+          signal,
+        });
         return { content: response.data };
-      });
+      } catch (e) {
+        logger.error(`Error calling Kibana API: ${method} ${format(nextUrl)}. Failed with ${e}`);
+        throw e;
+      }
     }
   );
 }
