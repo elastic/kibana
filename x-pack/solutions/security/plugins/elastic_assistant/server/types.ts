@@ -52,6 +52,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { OnechatPluginStart } from '@kbn/onechat-server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -145,6 +146,7 @@ export interface ElasticAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBaseStartContract;
   security: SecurityPluginStart;
+  onechat: OnechatPluginStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
@@ -178,6 +180,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
   userProfile: UserProfileServiceStart;
+  getHttpClient: () => any;
 }
 /**
  * @internal

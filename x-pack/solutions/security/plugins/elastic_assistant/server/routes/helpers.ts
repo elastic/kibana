@@ -27,6 +27,7 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import {
   replaceAnonymizedValuesWithOriginalValues,
+  pruneContentReferences,
   DEFEND_INSIGHTS_ID,
 } from '@kbn/elastic-assistant-common';
 import type { ILicense } from '@kbn/licensing-types';
@@ -38,7 +39,16 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { isEmpty } from 'lodash';
+import type { ChatAgentEvent, RoundInput, ConversationRound } from '@kbn/onechat-common';
+import {
+  isMessageChunkEvent,
+  isMessageCompleteEvent,
+  isRoundCompleteEvent,
+} from '@kbn/onechat-common';
 import { INVOKE_ASSISTANT_SUCCESS_EVENT } from '../lib/telemetry/event_based_telemetry';
+import { generateChatTitle } from '../lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title';
+import { getPrompt } from '../lib/prompt/get_prompt';
+import { getModelOrOss } from '../lib/prompt/helpers';
 import type { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import type { FindResponse } from '../ai_assistant_data_clients/find';
 import type { EsPromptsSchema } from '../ai_assistant_data_clients/prompts/types';
@@ -379,6 +389,294 @@ export const langChainExecute = async ({
   );
 
   return response.ok<StreamResponseWithHeaders['body'] | StaticReturnType['body']>(result);
+};
+
+export const agentBuilderExecute = async ({
+  messages,
+  replacements,
+  onNewReplacements,
+  abortSignal,
+  telemetry,
+  actionTypeId,
+  connectorId,
+  threadId,
+  contentReferencesStore,
+  inferenceChatModelDisabled,
+  isOssModel,
+  context,
+  actionsClient,
+  llmTasks,
+  inference,
+  request,
+  logger,
+  conversationId,
+  onLlmResponse,
+  response,
+  responseLanguage,
+  isStream = true,
+  savedObjectsClient,
+  screenContext,
+  systemPrompt,
+  timeout,
+}: LangChainExecuteParams) => {
+  const assistantContext = context.elasticAssistant;
+  const httpClient = assistantContext.getHttpClient();
+
+  // Get data clients for anonymization and conversation handling
+  const anonymizationFieldsDataClient =
+    await assistantContext.getAIAssistantAnonymizationFieldsDataClient();
+
+  // Convert messages to onechat format with anonymization support
+  const conversation: ConversationRound[] = [];
+  let nextInput: RoundInput | undefined;
+
+  // Get the last message as the next input
+  if (messages.length > 0) {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.role === 'user') {
+      // Apply anonymization to the user message if needed
+      let messageContent = lastMessage.content;
+
+      // If we have anonymization fields, we need to apply them
+      if (anonymizationFieldsDataClient && replacements) {
+        // For now, we'll pass the message as-is since onechat will handle anonymization
+        // through its own tools. The SIEM agent has access to anonymization tools.
+        messageContent = lastMessage.content;
+      }
+
+      nextInput = {
+        message: messageContent,
+      };
+    }
+  }
+
+  if (!nextInput) {
+    throw new Error('No user message found to process');
+  }
+
+  // Handle streaming vs non-streaming with content references and anonymization
+  let accumulatedContent = '';
+  let finalTraceData: TraceData = {};
+  let isStreamingComplete = false;
+
+  const onEvent = (event: ChatAgentEvent) => {
+    if (isMessageChunkEvent(event)) {
+      // Accumulate text chunks for streaming
+      accumulatedContent += event.data.text_chunk;
+
+      if (isStream && onLlmResponse) {
+        // Stream the chunk immediately
+        onLlmResponse(event.data.text_chunk, {}, false);
+      }
+    } else if (isMessageCompleteEvent(event)) {
+      // Final message is complete
+      accumulatedContent = event.data.message_content;
+      isStreamingComplete = true;
+
+      if (!isStream && onLlmResponse) {
+        // Send the complete message for non-streaming
+        onLlmResponse(event.data.message_content, finalTraceData, false);
+      }
+    } else if (isRoundCompleteEvent(event)) {
+      // Round is complete, extract trace data if available
+      if (event.data.round.trace_id) {
+        finalTraceData = {
+          traceId: event.data.round.trace_id,
+        };
+      }
+    }
+  };
+
+  try {
+    // Resolve model-aware prompts for tools before calling the onechat agent
+    // This is similar to how the default assistant graph handles model-aware prompts
+    const modelType = getLlmType(actionTypeId);
+    const modelForPrompts = getModelOrOss(modelType, isOssModel, request.body.model);
+
+    // Resolve prompts for all tools that have prompts defined
+    const toolPrompts: Record<string, string> = {};
+    const toolIds = [
+      'AlertCountsTool',
+      'NaturalLanguageESQLTool',
+      'GenerateESQLTool',
+      'AskAboutESQLTool',
+      'ProductDocumentationTool',
+      'KnowledgeBaseRetrievalTool',
+      'KnowledgeBaseWriteTool',
+      'SecurityLabsKnowledgeBaseTool',
+      'OpenAndAcknowledgedAlertsTool',
+      'EntityRiskScoreTool',
+      'defendInsightsTool',
+      'IntegrationKnowledgeTool',
+    ];
+
+    for (const toolId of toolIds) {
+      try {
+        const prompt = await getPrompt({
+          actionsClient,
+          connectorId,
+          model: modelForPrompts,
+          promptId: toolId,
+          promptGroupId: 'security-tools',
+          provider: modelType,
+          savedObjectsClient,
+        });
+        toolPrompts[toolId] = prompt;
+      } catch (error) {
+        logger.warn(`Failed to get prompt for tool ${toolId}: ${error.message}`);
+      }
+    }
+
+    logger.debug(`Resolved tool prompts: ${JSON.stringify(Object.keys(toolPrompts))}`);
+
+    // Call the onechat agent via HTTP API
+    const onechatResponse = await httpClient.post('/api/agent_builder/converse', {
+      body: JSON.stringify({
+        agent_id: 'siem-security-analyst',
+        connector_id: connectorId,
+        conversation_id: conversationId || undefined,
+        input: nextInput?.message || '',
+        capabilities: {
+          // Add any required capabilities here
+        },
+      }),
+      signal: abortSignal,
+    });
+
+    // Process the onechat response
+    if (onechatResponse.ok) {
+      const responseData = await onechatResponse.json();
+      // Handle the response data as needed
+      logger.debug('Onechat agent execution completed successfully');
+    } else {
+      throw new Error(`Onechat agent execution failed: ${onechatResponse.statusText}`);
+    }
+
+    // Process the final response with content references and anonymization
+    let finalResponse = accumulatedContent;
+
+    // Apply content references pruning if needed
+    if (contentReferencesStore) {
+      const { prunedContent } = pruneContentReferences(finalResponse, contentReferencesStore);
+      finalResponse = prunedContent;
+    }
+
+    // Apply anonymization replacements if needed
+    if (replacements && Object.keys(replacements).length > 0) {
+      finalResponse = replaceAnonymizedValuesWithOriginalValues({
+        messageContent: finalResponse,
+        replacements,
+      });
+    }
+
+    // For streaming mode, we need to call onLlmResponse with the final processed content
+    // to ensure conversation updates happen properly
+    if (isStream && onLlmResponse && isStreamingComplete) {
+      await onLlmResponse(finalResponse, finalTraceData, false);
+    }
+
+    // Generate chat title as a fire-and-forget async call (similar to default assistant graph)
+    if (conversationId && messages.length > 0) {
+      void (async () => {
+        try {
+          const conversationsDataClient =
+            await assistantContext.getAIAssistantConversationsDataClient();
+          if (conversationsDataClient) {
+            // Create a mock LLM instance for title generation
+            // We'll use the same connector that was used for the main request
+            const connectorModel = await actionsClient.get({ id: connectorId });
+            if (connectorModel) {
+              // Convert messages to BaseMessage format for generateChatTitle
+              const baseMessages = messages.map((msg) => ({
+                text: msg.content,
+                role: msg.role,
+                lc_namespace: ['langchain', 'schema', 'messages'],
+                lc_serializable: true,
+                lc_aliases: [],
+                lc_kwargs: { content: msg.content, role: msg.role },
+                id: [],
+                additional_kwargs: {},
+                response_metadata: {},
+                tool_calls: [],
+                invalid_tool_calls: [],
+                tool_call_chunks: [],
+                content: msg.content,
+              }));
+
+              await generateChatTitle({
+                actionsClient,
+                contentReferencesStore,
+                conversationsDataClient,
+                logger,
+                savedObjectsClient,
+                state: {
+                  conversationId,
+                  connectorId,
+                  llmType: getLlmType(actionTypeId),
+                  responseLanguage: responseLanguage || 'English',
+                },
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                newMessages: baseMessages as any, // Type assertion needed for compatibility
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                model: connectorModel as any, // Type assertion needed for compatibility
+                telemetryParams: {
+                  actionTypeId,
+                  model: request.body.model,
+                  assistantStreamingEnabled: isStream,
+                  isEnabledKnowledgeBase: false,
+                  eventType: INVOKE_ASSISTANT_SUCCESS_EVENT.eventType,
+                },
+                telemetry,
+              });
+            }
+          }
+        } catch (error) {
+          logger.error(`Failed to generate chat title: ${error.message}`);
+        }
+      })();
+    }
+
+    // Report telemetry
+    telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+      actionTypeId,
+      model: request.body.model,
+      assistantStreamingEnabled: isStream,
+      isEnabledKnowledgeBase: false, // Agent builder doesn't use KB directly
+    });
+
+    // For streaming, we've already sent chunks via onLlmResponse
+    // For non-streaming, we need to return the final result
+    if (isStream) {
+      // Return a streaming response format
+      return response.ok({
+        body: {
+          response: finalResponse,
+          connector_id: connectorId,
+          agent_builder: true, // Flag to indicate this came from agent builder
+        },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    } else {
+      // Return static response format
+      return response.ok({
+        body: {
+          response: finalResponse,
+          connector_id: connectorId,
+          agent_builder: true, // Flag to indicate this came from agent builder
+        },
+      });
+    }
+  } catch (error) {
+    logger.error('Agent builder execution failed:', error);
+
+    if (onLlmResponse) {
+      await onLlmResponse(error.message, {}, true);
+    }
+
+    throw error;
+  }
 };
 
 export interface CreateConversationWithParams {

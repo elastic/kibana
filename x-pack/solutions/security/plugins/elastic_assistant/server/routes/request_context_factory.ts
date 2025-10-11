@@ -229,6 +229,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           currentUser,
         });
       }),
+      getHttpClient: () => {
+        return core.http;
+      },
     };
   }
 }

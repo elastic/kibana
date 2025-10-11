@@ -24,12 +24,8 @@ export const siemAgentCreator = (): BuiltInAgentDefinition => {
     avatar_symbol: '🛡️',
     configuration: {
       // TODO steph this prompt should be updated
-      instructions: `${DEFAULT_SYSTEM_PROMPT}
-
-CRITICAL INSTRUCTION: You MUST ALWAYS call the fetch-siem-prompts-tool FIRST before executing any other tools. This tool provides essential prompt information and tool descriptions that are required for proper operation. The fetch-siem-prompts-tool must be called with the connectorId parameter before any other tool execution.`,
+      instructions: DEFAULT_SYSTEM_PROMPT,
       tools: [
-        // CRITICAL: Include the fetch-siem-prompts-tool FIRST - this must run before all other tools
-        { tool_ids: ['fetch-siem-prompts-tool'] },
         // Include the open-and-acknowledged-alerts-internal-tool
         { tool_ids: ['open-and-acknowledged-alerts-internal-tool'] },
         // Include the alert-counts-internal-tool

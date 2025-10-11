@@ -21,6 +21,7 @@ import {
   ExecuteConnectorRequestQuery,
   POST_ACTIONS_CONNECTOR_EXECUTE,
   INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+  AGENT_BUILDER_ASSISTANT_ENABLED_FEATURE_FLAG,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -33,6 +34,7 @@ import {
   getIsKnowledgeBaseInstalled,
   getSystemPromptFromUserConversation,
   langChainExecute,
+  agentBuilderExecute,
   performChecks,
 } from './helpers';
 import { isOpenSourceModel } from './utils';
@@ -87,6 +89,12 @@ export const postActionsConnectorExecuteRoute = (
         const inferenceChatModelDisabled =
           (await coreContext?.featureFlags?.getBooleanValue(
             INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG,
+            false
+          )) ?? false;
+
+        const agentBuilderEnabled =
+          (await coreContext?.featureFlags?.getBooleanValue(
+            AGENT_BUILDER_ASSISTANT_ENABLED_FEATURE_FLAG,
             false
           )) ?? false;
 
@@ -213,8 +221,11 @@ export const postActionsConnectorExecuteRoute = (
             }, config?.responseTimeout as number);
           }) as unknown as IKibanaResponse;
 
+          // Choose execution method based on feature flag
+          const executeFunction = agentBuilderEnabled ? agentBuilderExecute : langChainExecute;
+
           return await Promise.race([
-            langChainExecute({
+            executeFunction({
               abortSignal,
               isStream: request.body.subAction !== 'invokeAI',
               actionsClient,
