@@ -6,6 +6,7 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
+import { useMemo } from 'react';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
@@ -25,9 +26,18 @@ export const useStreamSystems = (definition: Streams.all.Definition) => {
     },
     [definition.name, streamsRepositoryClient]
   );
+
+  const systems = useMemo(() => value?.systems ?? [], [value?.systems]);
+
+  const systemsByName = useMemo(
+    () => Object.fromEntries(systems.map((s) => [s.name, s])),
+    [systems]
+  );
+
   return {
     refresh,
-    systems: value?.systems ?? [],
+    systems,
+    systemsByName,
     loading,
     error,
   };
