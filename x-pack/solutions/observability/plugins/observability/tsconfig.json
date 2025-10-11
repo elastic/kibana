@@ -132,7 +132,8 @@
     "@kbn/deeplinks-management",
     "@kbn/content-management-content-editor",
     "@kbn/saved-objects-tagging-plugin",
-    "@kbn/core-http-browser-mocks",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/core-http-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }
