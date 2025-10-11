@@ -13,7 +13,6 @@ import { URL_PARAM_KEY } from '../../common/hooks/constants';
 import type { State } from '../../common/store/types';
 import { sourcererSelectors } from '../../common/store/selectors';
 import { sourcererActions } from '../../common/store/actions';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { type SelectDataViewAsyncPayload } from '../redux/actions';
 
 // TODO: remove this in cleanup phase Remove deprecated sourcerer code https://github.com/elastic/security-team/issues/12665
@@ -30,20 +29,12 @@ export const useSyncSourcererUrlState = (
     return sourcererSelectors.sourcererScopeSelectedPatterns(state, scopeId);
   });
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const dispatch = useDispatch();
 
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
 
   const onInitializeUrlParam = useCallback(
     (initialState: SourcererUrlState | null) => {
-      // TODO: This is due to a new feature https://github.com/elastic/security-team/issues/11959
-      // if new picker flag is enabled, we should not kick off the legacy url flow
-      if (newDataViewPickerEnabled) {
-        return;
-      }
-
       // Initialize the store with value from UrlParam.
       if (initialState != null) {
         (Object.keys(initialState) as SourcererScopeName[]).forEach((scope) => {
@@ -72,7 +63,7 @@ export const useSyncSourcererUrlState = (
         }
       }
     },
-    [dispatch, newDataViewPickerEnabled, scopeDataViewId, scopeId, selectedPatterns, updateUrlParam]
+    [dispatch, scopeDataViewId, scopeId, selectedPatterns, updateUrlParam]
   );
 
   useInitializeUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer, onInitializeUrlParam);
@@ -90,16 +81,8 @@ export const useRestoreDataViewManagerStateFromURL = (
     | SourcererScopeName.explore
     | SourcererScopeName.detections = SourcererScopeName.default
 ) => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const onInitializeUrlParam = useCallback(
     (initialState: SourcererUrlState | null) => {
-      // TODO: This is due to a new feature https://github.com/elastic/security-team/issues/11959
-      // dont do anything if new picker is not enabled
-      if (!newDataViewPickerEnabled) {
-        return;
-      }
-
       if (initialState === null) {
         return initDataViewPickerWithSelection([]);
       }
@@ -123,7 +106,7 @@ export const useRestoreDataViewManagerStateFromURL = (
 
       initDataViewPickerWithSelection(urlBasedSelection);
     },
-    [initDataViewPickerWithSelection, newDataViewPickerEnabled, scopeId]
+    [initDataViewPickerWithSelection, scopeId]
   );
 
   useInitializeUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer, onInitializeUrlParam);

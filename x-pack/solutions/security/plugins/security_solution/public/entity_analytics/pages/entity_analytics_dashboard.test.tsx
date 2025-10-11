@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { EntityAnalyticsPage } from './entity_analytics_dashboard';
@@ -26,7 +26,6 @@ jest.mock('../../sourcerer/containers', () => ({
 
 jest.mock('../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn((flag: string) => {
-    if (flag === 'newDataViewPickerEnabled') return false;
     if (flag === 'entityStoreDisabled') return false;
     return false;
   }),
@@ -86,7 +85,6 @@ describe('EntityAnalyticsPage', () => {
     });
 
     (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation((flag: string) => {
-      if (flag === 'newDataViewPickerEnabled') return false;
       if (flag === 'entityStoreDisabled') return false;
       return false;
     });

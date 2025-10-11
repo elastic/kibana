@@ -30,10 +30,6 @@ export type PrimitiveOrArrayOfPrimitives =
 export interface CombineQueries {
   config: EsQueryConfig;
   dataProviders: DataProvider[];
-  /**
-   * @deprecated Use `dataView` instead. Which accepts a DataView instance instead of a DataViewSpec.
-   */
-  dataViewSpec?: DataViewSpec;
   dataView: DataView;
   browserFields: BrowserFields;
   filters: Filter[];
@@ -210,8 +206,7 @@ export const dataViewSpecToViewBase = (dataViewSpec?: DataViewSpec): DataViewBas
 
 export const convertToBuildEsQuery = ({
   config,
-  dataView, // New dataview with newDataViewPickerEnabled
-  dataViewSpec, // Account for the case where sourcerer is active, but this can just use dataView
+  dataView,
   queries,
   filters,
 }: {
@@ -225,11 +220,10 @@ export const convertToBuildEsQuery = ({
   filters: Filter[];
 }): [string, undefined] | [undefined, Error] => {
   try {
-    const newDataViewExists = dataView?.id && dataView?.getIndexPattern();
     return [
       JSON.stringify(
         buildEsQuery(
-          newDataViewExists ? dataView : (dataViewSpecToViewBase(dataViewSpec) as DataView),
+          dataView,
           queries,
           filters.filter((f) => f.meta.disabled === false),
           {
@@ -255,7 +249,6 @@ export interface CombinedQuery {
 export const combineQueries = ({
   config,
   dataProviders = [],
-  dataViewSpec,
   dataView,
   browserFields,
   filters = [],

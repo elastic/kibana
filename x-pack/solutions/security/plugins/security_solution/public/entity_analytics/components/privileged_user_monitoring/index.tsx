@@ -27,12 +27,12 @@ export const PrivilegedUserMonitoring = ({
   callout,
   error,
   onManageUserClicked,
-  sourcererDataView,
+  dataViewSpec,
 }: {
   callout?: OnboardingCallout;
   error?: string;
   onManageUserClicked: () => void;
-  sourcererDataView: DataViewSpec;
+  dataViewSpec: DataViewSpec;
 }) => {
   const spaceId = useSpaceId();
 
@@ -61,6 +61,7 @@ export const PrivilegedUserMonitoring = ({
       <EuiFlexItem>
         {error && (
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.errorTitle"
@@ -75,6 +76,7 @@ export const PrivilegedUserMonitoring = ({
         )}
         {callout && !dismissCallout && (
           <EuiCallOut
+            announceOnMount
             data-test-subj="privilegedUserMonitoringOnboardingCallout"
             title={
               callout.userCount > 0 ? (
@@ -118,14 +120,14 @@ export const PrivilegedUserMonitoring = ({
             {spaceId && <RiskLevelsPrivilegedUsersPanel spaceId={spaceId} />}
           </EuiFlexItem>
           <EuiFlexItem>
-            {spaceId && <KeyInsightsPanel spaceId={spaceId} sourcerDataView={sourcererDataView} />}
+            {spaceId && <KeyInsightsPanel spaceId={spaceId} dataViewSpec={dataViewSpec} />}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       {spaceId && <PrivilegedUsersTable spaceId={spaceId} />}
       {spaceId && <PrivilegedAccessDetectionsPanel spaceId={spaceId} />}
       <EuiFlexItem>
-        <UserActivityPrivilegedUsersPanel sourcererDataView={sourcererDataView} />
+        <UserActivityPrivilegedUsersPanel dataViewSpec={dataViewSpec} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

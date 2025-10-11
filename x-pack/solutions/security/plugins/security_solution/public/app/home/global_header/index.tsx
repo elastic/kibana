@@ -18,11 +18,9 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDetectionsPath, isDashboardViewPath } from '../../../helpers';
-import { Sourcerer } from '../../../sourcerer/components';
+import { isDashboardViewPath, isDetectionsPath } from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
@@ -43,7 +41,6 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  * right hand side of the Kibana global header
  */
 export const GlobalHeader = React.memo(() => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
   const {
     theme,
@@ -59,7 +56,7 @@ export const GlobalHeader = React.memo(() => {
     (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
   );
 
-  const sourcererScope = getScopeFromPath(pathname, newDataViewPickerEnabled);
+  const sourcererScope = getScopeFromPath(pathname);
   const showSourcerer = showSourcererByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
 
@@ -86,15 +83,6 @@ export const GlobalHeader = React.memo(() => {
     }
   }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
 
-  const dataViewPicker = newDataViewPickerEnabled ? (
-    <DataViewPicker
-      scope={sourcererScope}
-      disabled={sourcererScope === DataViewManagerScopeName.detections}
-    />
-  ) : (
-    <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
-  );
-
   return (
     <InPortal node={portalNode}>
       <EuiHeaderSection side="right">
@@ -117,7 +105,12 @@ export const GlobalHeader = React.memo(() => {
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
             )}
-            {showSourcerer && !showTimeline && dataViewPicker}
+            {showSourcerer && !showTimeline && (
+              <DataViewPicker
+                scope={sourcererScope}
+                disabled={sourcererScope === DataViewManagerScopeName.detections}
+              />
+            )}
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
       </EuiHeaderSection>

@@ -12,7 +12,6 @@ import { useSelector } from 'react-redux';
 import { type FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
 import { DataViewManagerScopeName } from '../constants';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
 
@@ -39,7 +38,6 @@ export const useDataView = (
   const { dataViewId, status: internalStatus } = useSelector(
     sourcererAdapterSelector(dataViewManagerScope)
   );
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const [localStatus, setLocalStatus] =
     useState<SharedDataViewSelectionState['status']>('pristine');
   const [retrievedDataView, setRetrievedDataView] = useState<DataView>(INITIAL_DV);
@@ -47,10 +45,6 @@ export const useDataView = (
 
   useEffect(() => {
     (async () => {
-      if (!newDataViewPickerEnabled) {
-        return;
-      }
-
       if (!dataViewId || internalStatus !== 'ready') {
         return;
       }
@@ -78,13 +72,10 @@ export const useDataView = (
         setLocalStatus('error');
       }
     })();
-  }, [dataViews, dataViewId, internalStatus, notifications, newDataViewPickerEnabled]);
+  }, [dataViews, dataViewId, internalStatus, notifications]);
 
-  return useMemo(() => {
-    if (!newDataViewPickerEnabled) {
-      return { dataView: retrievedDataView, status: localStatus };
-    }
-
-    return { dataView: retrievedDataView, status: localStatus };
-  }, [newDataViewPickerEnabled, retrievedDataView, localStatus]);
+  return useMemo(
+    () => ({ dataView: retrievedDataView, status: localStatus }),
+    [retrievedDataView, localStatus]
+  );
 };

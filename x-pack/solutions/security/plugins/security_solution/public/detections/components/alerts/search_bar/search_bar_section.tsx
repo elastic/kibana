@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
@@ -18,7 +18,7 @@ export interface SearchBarSectionProps {
   /**
    * DataView object to pass to the SiemSearchBar component.
    */
-  dataView: DataViewSpec | DataView; // TODO clean types when we remove the newDataViewPickerEnabled feature flag
+  dataView: DataView;
 }
 
 /**

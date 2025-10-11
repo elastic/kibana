@@ -9,13 +9,12 @@ import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiIcon,
-  useEuiTheme,
-  useEuiFontSize,
   EuiSkeletonText,
+  EuiText,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import {
@@ -24,7 +23,6 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { HOST_NAME_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
@@ -40,25 +38,24 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { getField } from '../../shared/utils';
 import { CellActions } from '../../shared/components/cell_actions';
 import {
   FAMILY,
-  LAST_SEEN,
   HOST_RISK_LEVEL,
+  LAST_SEEN,
 } from '../../../../overview/components/host_overview/translations';
 import {
-  ENTITIES_HOST_OVERVIEW_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
 } from './test_ids';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
@@ -93,14 +90,7 @@ export const HOST_PREVIEW_BANNER = {
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns();
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const selectedPatterns = useSelectedPatterns();
 
   const timerange = useMemo(
     () => ({

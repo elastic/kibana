@@ -7,32 +7,22 @@
 
 import { useMemo } from 'react';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
 import { buildBrowserFields } from '../utils/build_browser_fields';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const emptyFields = {};
 
 export const useBrowserFields = (
-  scope: DataViewManagerScopeName = DataViewManagerScopeName.default,
-  /**
-   * @deprecated remove when newDataViewPickerEnabled is removed
-   */
-  oldDataView?: DataView
+  scope: DataViewManagerScopeName = DataViewManagerScopeName.default
 ): BrowserFields => {
   const { dataView } = useDataView(scope);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const activeDataView = newDataViewPickerEnabled ? dataView : oldDataView;
 
   return useMemo(() => {
-    if (!activeDataView?.id) {
+    if (!dataView?.id) {
       return emptyFields;
     }
 
-    const browserFields = buildBrowserFields(activeDataView?.fields);
-
-    return browserFields;
-  }, [activeDataView]);
+    return buildBrowserFields(dataView?.fields);
+  }, [dataView]);
 };

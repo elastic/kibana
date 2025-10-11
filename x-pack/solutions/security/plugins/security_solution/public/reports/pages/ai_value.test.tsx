@@ -326,7 +326,6 @@ describe('AIValue', () => {
 
       expect(mockUseSyncTimerangeUrlParam).toHaveBeenCalled();
       expect(mockUseDeepEqualSelector).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockUseIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newDataViewPickerEnabled');
       expect(mockUseAiValueRoleCheck).toHaveBeenCalled();
       expect(mockUseAlertsPrivileges).toHaveBeenCalled();
     });

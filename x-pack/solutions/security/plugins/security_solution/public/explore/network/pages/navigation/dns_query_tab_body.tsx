@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
-
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { NetworkDnsTable } from '../../components/network_dns_table';
-import { useNetworkDns, ID } from '../../containers/network_dns';
+import { ID, useNetworkDns } from '../../containers/network_dns';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 
 import type { NetworkComponentQueryProps } from './types';
 
 import type {
-  MatrixHistogramOption,
   MatrixHistogramConfigs,
+  MatrixHistogramOption,
 } from '../../../../common/components/matrix_histogram/types';
 import * as i18n from './translations';
 import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
@@ -101,8 +99,6 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
     [getTitle]
   );
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   return (
     <>
       <MatrixHistogram
@@ -112,9 +108,7 @@ const DnsQueryTabBodyComponent: React.FC<NetworkComponentQueryProps> = ({
         filterQuery={filterQuery}
         startDate={startDate}
         {...dnsHistogramConfigs}
-        sourcererScopeId={
-          newDataViewPickerEnabled ? SourcererScopeName.explore : SourcererScopeName.default
-        }
+        sourcererScopeId={SourcererScopeName.explore}
       />
       <NetworkDnsTableManage
         data={networkDns}

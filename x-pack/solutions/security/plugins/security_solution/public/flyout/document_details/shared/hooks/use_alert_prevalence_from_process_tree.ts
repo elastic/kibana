@@ -7,11 +7,8 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 import { useAlertDocumentAnalyzerSchema } from './use_alert_document_analyzer_schema';
 import { useHttp } from '../../../../common/lib/kibana';
-import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 
 export interface StatsNode {
@@ -111,17 +108,11 @@ export function useAlertPrevalenceFromProcessTree({
 }: UseAlertPrevalenceFromProcessTreeParams): UserAlertPrevalenceFromProcessTreeResult {
   const http = useHttp();
 
-  const { newDataViewPickerEnabled } = useEnableExperimental();
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns } = useSecurityDefaultPatterns();
 
   const alertAndOriginalIndices = useMemo(
-    () => [...new Set(securityDefaultPatterns.concat(indices))],
-    [indices, securityDefaultPatterns]
+    () => [...new Set(indexPatterns.concat(indices))],
+    [indices, indexPatterns]
   );
   const { loading, id, schema, agentId } = useAlertDocumentAnalyzerSchema({
     documentId,
