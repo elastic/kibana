@@ -5,240 +5,211 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
-export const TelemtryMetadataSchema = schema.object({
-  pluginId: schema.maybe(schema.string()),
-  aggregateBy: schema.maybe(schema.string()),
+export const TelemetryMetadataSchema = z.object({
+  pluginId: z.string().optional(),
+  aggregateBy: z.string().optional(),
 });
 
 // Connector schema
-export const ConfigSchema = schema.oneOf([
-  schema.object({
-    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.AzureAi)]),
-    apiUrl: schema.string(),
-    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    contextWindowLength: schema.maybe(schema.number({})),
+export const ConfigSchema = z.union([
+  z.object({
+    apiProvider: z.enum([OpenAiProviderType.AzureAi]),
+    apiUrl: z.string(),
+    headers: z.record(z.string(), z.string()).optional(),
+    contextWindowLength: z.number().optional(),
   }),
-  schema.object({
-    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.OpenAi)]),
-    apiUrl: schema.string(),
-    organizationId: schema.maybe(schema.string()),
-    projectId: schema.maybe(schema.string()),
-    defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
-    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    contextWindowLength: schema.maybe(schema.number({})),
+  z.object({
+    apiProvider: z.enum([OpenAiProviderType.OpenAi]),
+    apiUrl: z.string(),
+    organizationId: z.string().optional(),
+    projectId: z.string().optional(),
+    defaultModel: z.string().default(DEFAULT_OPENAI_MODEL),
+    headers: z.record(z.string(), z.string()).optional(),
+    contextWindowLength: z.number().optional(),
   }),
-  schema.object({
-    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.Other)]),
-    apiUrl: schema.string(),
-    defaultModel: schema.string(),
-    verificationMode: schema.maybe(
-      schema.oneOf(
-        [schema.literal('full'), schema.literal('certificate'), schema.literal('none')],
-        { defaultValue: 'full' }
-      )
-    ),
-    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-    contextWindowLength: schema.maybe(schema.number({})),
-    enableNativeFunctionCalling: schema.maybe(schema.boolean()),
+  z.object({
+    apiProvider: z.enum([OpenAiProviderType.Other]),
+    apiUrl: z.string(),
+    defaultModel: z.string(),
+    verificationMode: z.enum(['full', 'certificate', 'none']).default('full').optional(),
+    headers: z.record(z.string(), z.string()).optional(),
+    contextWindowLength: z.number().optional(),
+    enableNativeFunctionCalling: z.boolean().optional(),
   }),
 ]);
 
-export const SecretsSchema = schema.oneOf([
-  schema.object({ apiKey: schema.string() }),
-  schema.object({
-    apiKey: schema.maybe(schema.string({ minLength: 1 })),
-    certificateData: schema.maybe(schema.string({ minLength: 1 })),
-    privateKeyData: schema.maybe(schema.string({ minLength: 1 })),
-    caData: schema.maybe(schema.string({ minLength: 1 })),
+export const SecretsSchema = z.union([
+  z.object({ apiKey: z.string() }),
+  z.object({
+    apiKey: z.string().min(1).optional(),
+    certificateData: z.string().min(1).optional(),
+    privateKeyData: z.string().min(1).optional(),
+    caData: z.string().min(1).optional(),
   }),
 ]);
 
 // Run action schema
-export const RunActionParamsSchema = schema.object({
-  body: schema.string(),
+export const RunActionParamsSchema = z.object({
+  body: z.string(),
   // abort signal from client
-  signal: schema.maybe(schema.any()),
-  timeout: schema.maybe(schema.number()),
-  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+  signal: z.any().optional(),
+  timeout: z.number().optional(),
+  telemetryMetadata: TelemetryMetadataSchema.optional(),
 });
 
-const AIMessage = schema.object({
-  role: schema.string(),
-  content: schema.string(),
-  name: schema.maybe(schema.string()),
-  function_call: schema.maybe(
-    schema.object({
-      arguments: schema.string(),
-      name: schema.string(),
+const AIMessage = z.object({
+  role: z.string(),
+  content: z.string(),
+  name: z.string().optional(),
+  function_call: z
+    .object({
+      arguments: z.string(),
+      name: z.string(),
     })
-  ),
-  tool_calls: schema.maybe(
-    schema.arrayOf(
-      schema.object({
-        id: schema.string(),
-        function: schema.object({
-          arguments: schema.string(),
-          name: schema.string(),
+    .optional(),
+  tool_calls: z
+    .array(
+      z.object({
+        id: z.string(),
+        function: z.object({
+          arguments: z.string(),
+          name: z.string(),
         }),
-        type: schema.string(),
+        type: z.string(),
       })
     )
-  ),
-  tool_call_id: schema.maybe(schema.string()),
+    .optional(),
+  tool_call_id: z.string().optional(),
 });
 
 // Run action schema
-export const InvokeAIActionParamsSchema = schema.object({
-  messages: schema.arrayOf(AIMessage),
-  model: schema.maybe(schema.string()),
-  tools: schema.maybe(
-    schema.arrayOf(
-      schema.object(
-        {
-          type: schema.literal('function'),
-          function: schema.object(
-            {
-              description: schema.maybe(schema.string()),
-              name: schema.string(),
-              parameters: schema.object({}, { unknowns: 'allow' }),
-              strict: schema.maybe(schema.boolean()),
-            },
-            { unknowns: 'allow' }
-          ),
-        },
+export const InvokeAIActionParamsSchema = z.object({
+  messages: z.array(AIMessage),
+  model: z.string().optional(),
+  tools: z
+    .array(
+      z
+        .object({
+          type: z.literal('function'),
+          function: z
+            .object({
+              description: z.string().optional(),
+              name: z.string(),
+              parameters: z.object({}).passthrough(),
+              strict: z.boolean().optional(),
+            })
+            .passthrough(),
+        })
         // Not sure if this will include other properties, we should pass them if it does
-        { unknowns: 'allow' }
-      )
+        .passthrough()
     )
-  ),
-  tool_choice: schema.maybe(
-    schema.oneOf([
-      schema.literal('none'),
-      schema.literal('auto'),
-      schema.literal('required'),
-      schema.object(
-        {
-          type: schema.literal('function'),
-          function: schema.object({ name: schema.string() }, { unknowns: 'allow' }),
-        },
-        { unknowns: 'ignore' }
-      ),
+    .optional(),
+  tool_choice: z
+    .union([
+      z.literal('none'),
+      z.literal('auto'),
+      z.literal('required'),
+      z.object({
+        type: z.literal('function'),
+        function: z.object({ name: z.string() }).passthrough(),
+      }),
     ])
-  ),
+    .optional(),
   // Deprecated in favor of tools
-  functions: schema.maybe(
-    schema.arrayOf(
-      schema.object(
-        {
-          name: schema.string(),
-          description: schema.string(),
-          parameters: schema.object(
-            {
-              type: schema.string(),
-              properties: schema.object({}, { unknowns: 'allow' }),
-              additionalProperties: schema.boolean(),
-              $schema: schema.string(),
-            },
-            { unknowns: 'allow' }
-          ),
-        },
+  functions: z
+    .array(
+      z
+        .object({
+          name: z.string(),
+          description: z.string(),
+          parameters: z
+            .object({
+              type: z.string(),
+              properties: z.object({}).passthrough(),
+              additionalProperties: z.boolean(),
+              $schema: z.string(),
+            })
+            .passthrough(),
+        })
         // Not sure if this will include other properties, we should pass them if it does
-        { unknowns: 'allow' }
-      )
+        .passthrough()
     )
-  ),
+    .optional(),
   // Deprecated in favor of tool_choice
-  function_call: schema.maybe(
-    schema.oneOf([
-      schema.literal('none'),
-      schema.literal('auto'),
-      schema.object(
-        {
-          name: schema.string(),
-        },
-        { unknowns: 'ignore' }
-      ),
+  function_call: z
+    .union([
+      z.literal('none'),
+      z.literal('auto'),
+      z.object({
+        name: z.string(),
+      }),
     ])
-  ),
-  n: schema.maybe(schema.number()),
-  stop: schema.maybe(
-    schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())]))
-  ),
-  temperature: schema.maybe(schema.number()),
-  response_format: schema.maybe(schema.any()),
+    .optional(),
+  n: z.number().optional(),
+  stop: z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .nullable(),
+  temperature: z.number().optional(),
+  response_format: z.any().optional(),
   // abort signal from client
-  signal: schema.maybe(schema.any()),
-  timeout: schema.maybe(schema.number()),
-  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+  signal: z.any().optional(),
+  timeout: z.number().optional(),
+  telemetryMetadata: TelemetryMetadataSchema.optional(),
 });
 
-export const InvokeAIActionResponseSchema = schema.object({
-  message: schema.string(),
-  usage: schema.object(
-    {
-      prompt_tokens: schema.number(),
-      completion_tokens: schema.number(),
-      total_tokens: schema.number(),
-    },
-    { unknowns: 'ignore' }
-  ),
+export const InvokeAIActionResponseSchema = z.object({
+  message: z.string(),
+  usage: z.object({
+    prompt_tokens: z.number(),
+    completion_tokens: z.number(),
+    total_tokens: z.number(),
+  }),
 });
 
 // Execute action schema
-export const StreamActionParamsSchema = schema.object({
-  body: schema.string(),
-  stream: schema.boolean({ defaultValue: false }),
+export const StreamActionParamsSchema = z.object({
+  body: z.string(),
+  stream: z.boolean().default(false),
   // abort signal from client
-  signal: schema.maybe(schema.any()),
-  timeout: schema.maybe(schema.number()),
-  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
+  signal: z.any().optional(),
+  timeout: z.number().optional(),
+  telemetryMetadata: TelemetryMetadataSchema.optional(),
 });
 
-export const StreamingResponseSchema = schema.any();
+export const StreamingResponseSchema = z.any();
 
-export const RunActionResponseSchema = schema.object(
-  {
-    id: schema.maybe(schema.string()),
-    object: schema.maybe(schema.string()),
-    created: schema.maybe(schema.number()),
-    model: schema.maybe(schema.string()),
-    usage: schema.object(
-      {
-        prompt_tokens: schema.number(),
-        completion_tokens: schema.number(),
-        total_tokens: schema.number(),
-      },
-      { unknowns: 'ignore' }
-    ),
-    choices: schema.arrayOf(
-      schema.object(
-        {
-          message: schema.object(
-            {
-              role: schema.string(),
-              // nullable because message can contain function calls instead of final response when used with RAG
-              content: schema.maybe(schema.nullable(schema.string())),
-            },
-            { unknowns: 'ignore' }
-          ),
-          finish_reason: schema.maybe(schema.string()),
-          index: schema.maybe(schema.number()),
-        },
-        { unknowns: 'ignore' }
-      )
-    ),
-  },
-  { unknowns: 'ignore' }
-);
+export const RunActionResponseSchema = z.object({
+  id: z.string().optional(),
+  object: z.string().optional(),
+  created: z.number().optional(),
+  model: z.string().optional(),
+  usage: z.object({
+    prompt_tokens: z.number(),
+    completion_tokens: z.number(),
+    total_tokens: z.number(),
+  }),
+  choices: z.array(
+    z.object({
+      message: z.object({
+        role: z.string(),
+        // nullable because message can contain function calls instead of final response when used with RAG
+        content: z.string().nullable().optional(),
+      }),
+      finish_reason: z.string().optional(),
+      index: z.number().optional(),
+    })
+  ),
+});
 
 // Run action schema
-export const DashboardActionParamsSchema = schema.object({
-  dashboardId: schema.string(),
+export const DashboardActionParamsSchema = z.object({
+  dashboardId: z.string(),
 });
 
-export const DashboardActionResponseSchema = schema.object({
-  available: schema.boolean(),
+export const DashboardActionResponseSchema = z.object({
+  available: z.boolean(),
 });

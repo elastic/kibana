@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -18,7 +18,7 @@ import {
 import type { ActionTypeRegistryOpts } from '../action_type_registry';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsClient } from './actions_client';
-import type { ExecutorType, ActionType } from '../types';
+import type { ActionType } from '../types';
 import type { ILicenseState } from '../lib';
 import { ActionExecutor, TaskRunnerFactory, asHttpRequestExecutionSource } from '../lib';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -51,6 +51,7 @@ import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '.
 
 import type { estypes } from '@elastic/elasticsearch';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
+import { getConnectorType } from '../fixtures';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -95,14 +96,11 @@ let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
-const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
-  return { status: 'ok', actionId: options.actionId };
-};
 
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
 
-const actionTypeIdFromSavedObjectMock = (actionTypeId = 'my-action-type') => {
+const actionTypeIdFromSavedObjectMock = (actionTypeId = 'my-connector-type') => {
   return {
     attributes: {
       actionTypeId,
@@ -164,30 +162,19 @@ describe('create()', () => {
         type: 'action',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
         references: [],
       };
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(getConnectorType());
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       await actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: {},
         },
@@ -195,7 +182,7 @@ describe('create()', () => {
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         operation: 'create',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       });
     });
 
@@ -205,44 +192,35 @@ describe('create()', () => {
         type: 'action',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
         references: [],
       };
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(getConnectorType());
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to create a "my-action-type" action`)
+        new Error(`Unauthorized to create a "my-connector-type" action`)
       );
 
       await expect(
         actionsClient.create({
           action: {
             name: 'my name',
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
             config: {},
             secrets: {},
           },
         })
-      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to create a "my-action-type" action]`);
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to create a "my-connector-type" action]`
+      );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         operation: 'create',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       });
     });
   });
@@ -254,24 +232,17 @@ describe('create()', () => {
         type: 'action',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
         references: [],
       };
-      actionTypeRegistry.register({
-        id: savedObjectCreateResult.attributes.actionTypeId,
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: savedObjectCreateResult.attributes.actionTypeId,
+        })
+      );
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       await actionsClient.create({
@@ -298,24 +269,17 @@ describe('create()', () => {
         type: 'action',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
         references: [],
       };
-      actionTypeRegistry.register({
-        id: savedObjectCreateResult.attributes.actionTypeId,
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: savedObjectCreateResult.attributes.actionTypeId,
+        })
+      );
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
@@ -356,31 +320,23 @@ describe('create()', () => {
       type: 'type',
       attributes: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         config: {},
       },
       references: [],
     };
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-      preSaveHook,
-      postSaveHook,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        preSaveHook,
+        postSaveHook,
+      })
+    );
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
       action: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         config: {},
         secrets: {},
       },
@@ -391,7 +347,7 @@ describe('create()', () => {
       isSystemAction: false,
       isDeprecated: false,
       name: 'my name',
-      actionTypeId: 'my-action-type',
+      actionTypeId: 'my-connector-type',
       isMissingSecrets: false,
       config: {},
     });
@@ -400,7 +356,7 @@ describe('create()', () => {
       Array [
         "action",
         Object {
-          "actionTypeId": "my-action-type",
+          "actionTypeId": "my-connector-type",
           "config": Object {},
           "isMissingSecrets": false,
           "name": "my name",
@@ -416,58 +372,62 @@ describe('create()', () => {
   });
 
   test('validates config', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-        config: {
-          schema: schema.object({
-            param1: schema.string(),
-          }),
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({}) },
+          config: {
+            schema: z.object({
+              param1: z.string(),
+            }),
+          },
         },
-      },
-      executor,
-    });
+      })
+    );
     await expect(
       actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [param1]: expected value of type [string] but got [undefined]"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type config: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"param1\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
   });
 
   test('validates connector: config and secrets', async () => {
     const connectorValidator = () => {
       return '[param1] is required';
     };
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({ param1: schema.string() }) },
-        params: { schema: schema.object({}) },
-        connector: connectorValidator,
-      },
-      executor,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          config: { schema: z.object({}) },
+          secrets: { schema: z.object({ param1: z.string() }) },
+          params: { schema: z.object({}) },
+          connector: connectorValidator,
+        },
+      })
+    );
     await expect(
       actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: { param1: '1' },
         },
@@ -493,26 +453,23 @@ describe('create()', () => {
   });
 
   test('encrypts action type options unless specified not to', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: {
-          schema: schema.object({ a: schema.boolean(), b: schema.boolean(), c: schema.boolean() }),
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          config: {
+            schema: z.object({ a: z.boolean(), b: z.boolean(), c: z.boolean() }),
+          },
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({}) },
         },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+      })
+    );
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'type',
       attributes: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         config: {
           a: true,
@@ -526,7 +483,7 @@ describe('create()', () => {
     const result = await actionsClient.create({
       action: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         config: {
           a: true,
           b: true,
@@ -541,7 +498,7 @@ describe('create()', () => {
       isSystemAction: false,
       isDeprecated: false,
       name: 'my name',
-      actionTypeId: 'my-action-type',
+      actionTypeId: 'my-connector-type',
       isMissingSecrets: false,
       config: {
         a: true,
@@ -554,7 +511,7 @@ describe('create()', () => {
       Array [
         "action",
         Object {
-          "actionTypeId": "my-action-type",
+          "actionTypeId": "my-connector-type",
           "config": Object {
             "a": true,
             "b": true,
@@ -629,37 +586,26 @@ describe('create()', () => {
       type: 'type',
       attributes: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         config: {},
       },
       references: [],
     };
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
     await expect(
       actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: {},
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"action type \\"my-action-type\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
+      `"action type \\"my-connector-type\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
     );
   });
 
@@ -669,24 +615,13 @@ describe('create()', () => {
       type: 'type',
       attributes: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         config: {},
       },
       references: [],
     };
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
       throw new Error('Fail');
     });
@@ -695,7 +630,7 @@ describe('create()', () => {
       actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: {},
         },
@@ -705,18 +640,7 @@ describe('create()', () => {
 
   test('throws error when predefined id match a pre-configure action id', async () => {
     const preDefinedId = 'mySuperRadTestPreconfiguredId';
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
 
     actionsClient = new ActionsClient({
       logger,
@@ -727,7 +651,7 @@ describe('create()', () => {
       inMemoryConnectors: [
         {
           id: preDefinedId,
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
@@ -753,7 +677,7 @@ describe('create()', () => {
       actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: {},
         },
@@ -767,19 +691,14 @@ describe('create()', () => {
   });
 
   it('throws when creating a system connector', async () => {
-    actionTypeRegistry.register({
-      id: '.cases',
-      name: 'Cases',
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      isSystemActionType: true,
-      executor,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        isSystemActionType: true,
+      })
+    );
 
     await expect(
       actionsClient.create({
@@ -843,7 +762,7 @@ describe('get()', () => {
         type: 'type',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
@@ -869,7 +788,7 @@ describe('get()', () => {
         inMemoryConnectors: [
           {
             id: 'testPreconfigured',
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
             secrets: {
               test: 'test1',
             },
@@ -929,7 +848,7 @@ describe('get()', () => {
         type: 'type',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
@@ -937,11 +856,11 @@ describe('get()', () => {
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get a "my-action-type" action`)
+        new Error(`Unauthorized to get a "my-connector-type" action`)
       );
 
       await expect(actionsClient.get({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "my-action-type" action]`
+        `[Error: Unauthorized to get a "my-connector-type" action]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
@@ -961,7 +880,7 @@ describe('get()', () => {
         inMemoryConnectors: [
           {
             id: 'testPreconfigured',
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
             secrets: {
               test: 'test1',
             },
@@ -979,11 +898,11 @@ describe('get()', () => {
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get a "my-action-type" action`)
+        new Error(`Unauthorized to get a "my-connector-type" action`)
       );
 
       await expect(actionsClient.get({ id: 'testPreconfigured' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "my-action-type" action]`
+        `[Error: Unauthorized to get a "my-connector-type" action]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
@@ -1037,7 +956,7 @@ describe('get()', () => {
         type: 'type',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
@@ -1063,7 +982,7 @@ describe('get()', () => {
         type: 'type',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
@@ -1944,19 +1863,12 @@ describe('getOAuthAccessToken()', () => {
 
 describe('delete()', () => {
   beforeEach(() => {
-    actionTypeRegistry.register({
-      id: 'my-action-delete',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-      postDeleteHook: async (options) => postDeleteHook(options),
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: 'my-action-delete',
+        postDeleteHook: async (options: unknown) => postDeleteHook(options),
+      })
+    );
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'action',
@@ -2069,7 +1981,7 @@ describe('delete()', () => {
       inMemoryConnectors: [
         {
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
@@ -2168,23 +2080,12 @@ describe('delete()', () => {
 
 describe('update()', () => {
   function updateOperation(): ReturnType<ActionsClient['update']> {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
       },
       references: [],
@@ -2193,7 +2094,7 @@ describe('update()', () => {
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         name: 'my name',
         config: {},
@@ -2277,25 +2178,17 @@ describe('update()', () => {
   });
 
   test('updates an action with all given properties', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-      preSaveHook,
-      postSaveHook,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        preSaveHook,
+        postSaveHook,
+      })
+    );
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
       },
       references: [],
@@ -2304,7 +2197,7 @@ describe('update()', () => {
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         name: 'my name',
         config: {},
@@ -2325,7 +2218,7 @@ describe('update()', () => {
       isPreconfigured: false,
       isSystemAction: false,
       isDeprecated: false,
-      actionTypeId: 'my-action-type',
+      actionTypeId: 'my-connector-type',
       isMissingSecrets: false,
       name: 'my name',
       config: {},
@@ -2335,7 +2228,7 @@ describe('update()', () => {
       Array [
         "action",
         Object {
-          "actionTypeId": "my-action-type",
+          "actionTypeId": "my-connector-type",
           "config": Object {},
           "isMissingSecrets": false,
           "name": "my name",
@@ -2361,23 +2254,12 @@ describe('update()', () => {
   });
 
   test('updates an action with isMissingSecrets "true" (set true as the import result), to isMissingSecrets', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: true,
       },
       references: [],
@@ -2386,7 +2268,7 @@ describe('update()', () => {
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: true,
         name: 'my name',
         config: {},
@@ -2407,7 +2289,7 @@ describe('update()', () => {
       isPreconfigured: false,
       isSystemAction: false,
       isDeprecated: false,
-      actionTypeId: 'my-action-type',
+      actionTypeId: 'my-connector-type',
       isMissingSecrets: true,
       name: 'my name',
       config: {},
@@ -2417,7 +2299,7 @@ describe('update()', () => {
       Array [
         "action",
         Object {
-          "actionTypeId": "my-action-type",
+          "actionTypeId": "my-connector-type",
           "config": Object {},
           "isMissingSecrets": false,
           "name": "my name",
@@ -2433,27 +2315,24 @@ describe('update()', () => {
   });
 
   test('validates config', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-        config: {
-          schema: schema.object({
-            param1: schema.string(),
-          }),
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({}) },
+          config: {
+            schema: z.object({
+              param1: z.string(),
+            }),
+          },
         },
-      },
-      executor,
-    });
+      })
+    );
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
       references: [],
     });
@@ -2466,32 +2345,39 @@ describe('update()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [param1]: expected value of type [string] but got [undefined]"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type config: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"string\\",
+          \\"received\\": \\"undefined\\",
+          \\"path\\": [
+            \\"param1\\"
+          ],
+          \\"message\\": \\"Required\\"
+        }
+      ]"
+    `);
   });
 
   test('validates connector: config and secrets', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-        connector: () => {
-          return '[param1] is required';
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          config: { schema: z.object({}) },
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({}) },
+          connector: () => {
+            return '[param1] is required';
+          },
         },
-      },
-      executor,
-    });
+      })
+    );
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
       references: [],
     });
@@ -2510,25 +2396,22 @@ describe('update()', () => {
   });
 
   test('encrypts action type options unless specified not to', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: {
-          schema: schema.object({ a: schema.boolean(), b: schema.boolean(), c: schema.boolean() }),
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          config: {
+            schema: z.object({ a: z.boolean(), b: z.boolean(), c: z.boolean() }),
+          },
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({}) },
         },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+      })
+    );
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
       references: [],
     });
@@ -2536,7 +2419,7 @@ describe('update()', () => {
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: true,
         name: 'my name',
         config: {
@@ -2565,7 +2448,7 @@ describe('update()', () => {
       isPreconfigured: false,
       isSystemAction: false,
       isDeprecated: false,
-      actionTypeId: 'my-action-type',
+      actionTypeId: 'my-connector-type',
       isMissingSecrets: true,
       name: 'my name',
       config: {
@@ -2579,7 +2462,7 @@ describe('update()', () => {
       Array [
         "action",
         Object {
-          "actionTypeId": "my-action-type",
+          "actionTypeId": "my-connector-type",
           "config": Object {
             "a": true,
             "b": true,
@@ -2599,18 +2482,7 @@ describe('update()', () => {
   });
 
   test('throws an error when ensureActionTypeEnabled throws', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
       throw new Error('Fail');
     });
@@ -2618,7 +2490,7 @@ describe('update()', () => {
       id: '1',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
       references: [],
     });
@@ -2626,7 +2498,7 @@ describe('update()', () => {
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         name: 'my name',
         config: {},
@@ -2656,7 +2528,7 @@ describe('update()', () => {
       inMemoryConnectors: [
         {
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
@@ -2746,7 +2618,7 @@ describe('execute()', () => {
         source: asHttpRequestExecutionSource(request),
       });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2770,7 +2642,7 @@ describe('execute()', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2806,20 +2678,16 @@ describe('execute()', () => {
         getEventLogClient,
       });
 
-      actionTypeRegistry.register({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges: () => ['test/create'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          getKibanaPrivileges: () => ['test/create'],
+          isSystemActionType: true,
+        })
+      );
 
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
 
@@ -2840,7 +2708,7 @@ describe('execute()', () => {
         inMemoryConnectors: [
           {
             id: 'testPreconfigured',
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
             secrets: {
               test: 'test1',
             },
@@ -2868,20 +2736,16 @@ describe('execute()', () => {
         getEventLogClient,
       });
 
-      actionTypeRegistry.register({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges: () => ['test/create'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          getKibanaPrivileges: () => ['test/create'],
+          isSystemActionType: true,
+        })
+      );
 
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
 
@@ -2891,7 +2755,7 @@ describe('execute()', () => {
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2929,20 +2793,16 @@ describe('execute()', () => {
         getEventLogClient,
       });
 
-      actionTypeRegistry.register({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges,
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          getKibanaPrivileges,
+          isSystemActionType: true,
+        })
+      );
 
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
 
@@ -3068,7 +2928,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
         },
         {
           id: uuidv4(),
@@ -3077,11 +2937,11 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
         },
       ]);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         operation: 'execute',
       });
     });
@@ -3100,7 +2960,7 @@ describe('bulkEnqueueExecution()', () => {
             executionId: '123abc',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
           },
           {
             id: uuidv4(),
@@ -3109,7 +2969,7 @@ describe('bulkEnqueueExecution()', () => {
             executionId: '456def',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
           },
         ])
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
@@ -3129,7 +2989,7 @@ describe('bulkEnqueueExecution()', () => {
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
       {
         id: uuidv4(),
@@ -3138,7 +2998,7 @@ describe('bulkEnqueueExecution()', () => {
         executionId: '456def',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
     ];
     await expect(actionsClient.bulkEnqueueExecution(opts)).resolves.toMatchInlineSnapshot(
@@ -3150,18 +3010,12 @@ describe('bulkEnqueueExecution()', () => {
 });
 
 describe('isActionTypeEnabled()', () => {
-  const fooActionType: ActionType = {
+  const fooActionType: ActionType = getConnectorType({
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
-    validate: {
-      config: { schema: schema.object({}) },
-      secrets: { schema: schema.object({}) },
-      params: { schema: schema.object({}) },
-    },
-    executor: jest.fn(),
-  };
+  });
   beforeEach(() => {
     actionTypeRegistry.register(fooActionType);
   });
@@ -3198,7 +3052,7 @@ describe('isPreconfigured()', () => {
       inMemoryConnectors: [
         {
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
@@ -3247,7 +3101,7 @@ describe('isPreconfigured()', () => {
       inMemoryConnectors: [
         {
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
@@ -3298,7 +3152,7 @@ describe('isSystemAction()', () => {
       inMemoryConnectors: [
         {
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
@@ -3347,7 +3201,7 @@ describe('isSystemAction()', () => {
       inMemoryConnectors: [
         {
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },

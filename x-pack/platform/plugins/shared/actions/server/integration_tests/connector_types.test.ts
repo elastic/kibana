@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import zodToJsonSchema from 'zod-to-json-schema';
+import type { z } from '@kbn/zod';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
@@ -117,9 +119,15 @@ describe('Connector type config checks', () => {
         });
       }
 
-      expect(config.schema.getSchema!().describe()).toMatchSnapshot();
-      expect(secrets.schema.getSchema!().describe()).toMatchSnapshot();
-      expect(params.schema.getSchema!().describe()).toMatchSnapshot();
+      expect(
+        zodToJsonSchema(config.schema as z.ZodType, { name: 'config', $refStrategy: 'none' })
+      ).toMatchSnapshot();
+      expect(
+        zodToJsonSchema(secrets.schema as z.ZodType, { name: 'secrets', $refStrategy: 'none' })
+      ).toMatchSnapshot();
+      expect(
+        zodToJsonSchema(params.schema as z.ZodType, { name: 'params', $refStrategy: 'none' })
+      ).toMatchSnapshot();
     });
   }
 });
