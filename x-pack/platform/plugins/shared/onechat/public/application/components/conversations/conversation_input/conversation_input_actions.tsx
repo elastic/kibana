@@ -9,6 +9,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { ConversationAgentSelector } from '../conversation_agent_selector';
 import { ConversationActionButton } from './conversation_action_button';
+import { ConnectorSelector } from '../../connector_selector';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
 
 interface ConversationInputActionsProps {
   onSubmit: () => void;
@@ -23,9 +25,20 @@ export const ConversationInputActions: React.FC<ConversationInputActionsProps> =
   resetToPendingMessage,
   agentId,
 }) => {
+  const { connectorSelection } = useSendMessage();
+
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <ConnectorSelector
+            connectors={connectorSelection.connectors}
+            selectedConnectorId={connectorSelection.selectedConnector}
+            onSelectConnector={connectorSelection.selectConnector}
+            isLoading={connectorSelection.isLoading}
+            defaultConnectorId={connectorSelection.defaultConnectorId}
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ConversationAgentSelector agentId={agentId} />
         </EuiFlexItem>
