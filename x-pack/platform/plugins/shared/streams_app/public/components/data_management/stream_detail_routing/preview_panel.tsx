@@ -137,10 +137,6 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
     return buildCellActions(documents, createNewRule, changeRule);
   }, [enableActions, documents, createNewRule, changeRule]);
 
-  const matchedDocumentPercentage = isNaN(parseFloat(approximateMatchingPercentage ?? ''))
-    ? Number.NaN
-    : parseFloat(approximateMatchingPercentage!);
-
   const [sorting, setSorting] = useState<{
     fieldName?: string;
     direction: 'asc' | 'desc';
@@ -231,9 +227,7 @@ const SamplePreviewPanel = ({ enableActions }: { enableActions: boolean }) => {
       <EuiFlexGroup gutterSize="m" direction="column">
         <DocumentMatchFilterControls
           onFilterChange={setDocumentMatchFilter}
-          matchedDocumentPercentage={
-            isNaN(matchedDocumentPercentage) ? undefined : Math.round(matchedDocumentPercentage)
-          }
+          matchedDocumentPercentage={approximateMatchingPercentage}
           isDisabled={!!documentsError || !condition}
         />
         {content}
