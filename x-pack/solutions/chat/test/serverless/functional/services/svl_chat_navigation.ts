@@ -20,7 +20,7 @@ export function SvlChatNavigationServiceProvider({
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('landingPage');
         await testSubjects.existOrFail('workChatHomePage', { timeout: 2000 });
-        await testSubjects.existOrFail('projectLayoutSideNav', { timeout: 2000 });
+        await testSubjects.existOrFail('~projectLayoutSideNav', { timeout: 2000 });
       });
     },
   };
