@@ -157,6 +157,8 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       account_type: { type: 'keyword' },
       is_setup_automatic: { type: 'boolean' },
       setup_access_option: { type: 'keyword' },
+      supports_cloud_connector: { type: 'boolean' },
+      cloud_connector_id: { type: 'keyword' },
     },
   },
   alerts_stats: {
@@ -214,6 +216,18 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       rule_number: { type: 'keyword' },
       posture_type: { type: 'keyword' },
       version: { type: 'keyword' },
+    },
+  },
+  cspm_cloud_connector_usage_stats: {
+    type: 'array',
+    items: {
+      id: { type: 'keyword' },
+      created_at: { type: 'date' },
+      updated_at: { type: 'date' },
+      hasCredentials: { type: 'boolean' },
+      cloud_provider: { type: 'keyword' },
+      packagePolicyIds: { type: 'array', items: { type: 'keyword' } },
+      packagePolicyCount: { type: 'long' },
     },
   },
 };
