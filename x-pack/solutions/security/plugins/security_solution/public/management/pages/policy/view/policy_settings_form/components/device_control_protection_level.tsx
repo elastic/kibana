@@ -24,7 +24,7 @@ import type { DeviceControlOSes } from '../../../types';
 const ALLOW_ALL_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl.allowReadWrite',
   {
-    defaultMessage: 'Allow all',
+    defaultMessage: 'Allow read, write and execute',
   }
 );
 
@@ -45,7 +45,7 @@ const READ_ONLY_LABEL = i18n.translate(
 const BLOCK_EXECUTE_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.deviceControl.executeOnly',
   {
-    defaultMessage: 'Block execute',
+    defaultMessage: 'Read and write',
   }
 );
 

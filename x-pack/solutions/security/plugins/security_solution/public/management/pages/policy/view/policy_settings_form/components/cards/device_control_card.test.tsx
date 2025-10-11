@@ -179,9 +179,9 @@ describe('Policy Device Control Card', () => {
     });
 
     it.each([
-      [DeviceControlAccessLevel.audit, 'Allow all'],
+      [DeviceControlAccessLevel.audit, 'Allow read, write and execute'],
       [DeviceControlAccessLevel.read_only, 'Read only'],
-      [DeviceControlAccessLevel.no_execute, 'Block execute'],
+      [DeviceControlAccessLevel.no_execute, 'Read and write'],
     ])(
       'should NOT display user notification section when access level is %s',
       (accessLevel, accessLevelLabel) => {
