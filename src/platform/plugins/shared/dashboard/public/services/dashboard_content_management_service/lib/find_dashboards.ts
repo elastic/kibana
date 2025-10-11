@@ -21,7 +21,7 @@ import type {
 } from '../../../../server/content_management';
 import { getDashboardContentManagementCache } from '..';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { contentManagementService } from '../../kibana_services';
+import { contentManagementService, coreServices } from '../../kibana_services';
 
 export interface SearchDashboardsArgs {
   options?: DashboardSearchOptions;
@@ -46,23 +46,35 @@ export async function searchDashboards({
   total: DashboardSearchAPIResult['pagination']['total'];
   hits: DashboardSearchAPIResult['hits'];
 }> {
-  const {
-    hits,
-    pagination: { total },
-  } = await contentManagementService.client.search<DashboardSearchIn, DashboardSearchAPIResult>({
-    contentTypeId: DASHBOARD_CONTENT_ID,
-    query: {
-      text: search ? `${search}*` : undefined,
-      limit: size,
-      tags: {
-        included: (hasReference ?? []).map(({ id }) => id),
-        excluded: (hasNoReference ?? []).map(({ id }) => id),
-      },
-    },
-    options,
+  const queryParams = new URLSearchParams({
+    perPage: size.toString(),
+    ...(search && { search: `${search}*` }),
   });
+
+  const response = await coreServices.http.get(`/api/dashboards/dashboard?${queryParams.toString()}`);
+
+  const hits = response.items.map((item) => ({
+    id: item.id,
+    type: item.type,
+    attributes: {
+      title: item.data.title,
+      description: item.data.description || '',
+      timeRestore: item.data.timeRestore,
+    },
+    references: item.data.references || [],
+    version: item.meta.version,
+    createdAt: item.meta.createdAt,
+    updatedAt: item.meta.updatedAt,
+    createdBy: item.meta.createdBy,
+    updatedBy: item.meta.updatedBy,
+    managed: item.meta.managed,
+    error: item.meta.error,
+    namespaces: item.data.namespaces || item.data.spaces || [],
+    originId: undefined,
+  }));
+
   return {
-    total,
+    total: response.total,
     hits,
   };
 }
@@ -75,7 +87,6 @@ export type FindDashboardsByIdResponse = { id: string } & (
 export async function findDashboardById(id: string): Promise<FindDashboardsByIdResponse> {
   const dashboardContentManagementCache = getDashboardContentManagementCache();
 
-  /** If the dashboard exists in the cache, then return the result from that */
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
   if (cachedDashboard) {
     return {
@@ -86,23 +97,37 @@ export async function findDashboardById(id: string): Promise<FindDashboardsByIdR
     };
   }
 
-  /** Otherwise, fetch the dashboard from the content management client, add it to the cache, and return the result */
   try {
-    const response = await contentManagementService.client.get<DashboardGetIn, DashboardGetOut>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      id,
-    });
+    const response = await coreServices.http.get(`/api/dashboards/dashboard/${id}`);
 
-    if ('error' in response.item) {
-      throw response.item.error;
-    }
+    const dashboardItem = {
+      id: response.id,
+      type: response.type,
+      attributes: response.data,
+      references: response.data.references || [],
+      version: response.meta.version,
+      createdAt: response.meta.createdAt,
+      updatedAt: response.meta.updatedAt,
+      createdBy: response.meta.createdBy,
+      updatedBy: response.meta.updatedBy,
+      managed: response.meta.managed,
+      error: response.meta.error,
+      namespaces: response.data.namespaces || response.data.spaces || [],
+      originId: undefined,
+    };
 
-    dashboardContentManagementCache.addDashboard(response);
+    const meta = {
+      outcome: 'exactMatch' as const,
+      aliasTargetId: undefined,
+      aliasPurpose: undefined,
+    };
+
+    dashboardContentManagementCache.addDashboard({ item: dashboardItem, meta });
     return {
       id,
       status: 'success',
-      attributes: response.item.attributes,
-      references: response.item.references ?? [],
+      attributes: dashboardItem.attributes,
+      references: dashboardItem.references,
     };
   } catch (e) {
     return {
@@ -120,21 +145,15 @@ export async function findDashboardsByIds(ids: string[]): Promise<FindDashboards
 }
 
 export async function findDashboardIdByTitle(title: string): Promise<{ id: string } | undefined> {
-  const { hits } = await contentManagementService.client.search<
-    DashboardSearchIn,
-    DashboardSearchOut
-  >({
-    contentTypeId: DASHBOARD_CONTENT_ID,
-    query: {
-      text: title ? `${title}*` : undefined,
-      limit: 10,
-    },
-    options: { onlyTitle: true },
+  const queryParams = new URLSearchParams({
+    perPage: '10',
+    search: title ? `${title}*` : '',
   });
 
-  // The search isn't an exact match, lets see if we can find a single exact match to use
-  const matchingDashboards = hits.filter(
-    (hit) => hit.attributes.title.toLowerCase() === title.toLowerCase()
+  const response = await coreServices.http.get(`/api/dashboards/dashboard?${queryParams.toString()}`);
+
+  const matchingDashboards = response.items.filter(
+    (item) => item.data.title.toLowerCase() === title.toLowerCase()
   );
   if (matchingDashboards.length === 1) {
     return { id: matchingDashboards[0].id };
