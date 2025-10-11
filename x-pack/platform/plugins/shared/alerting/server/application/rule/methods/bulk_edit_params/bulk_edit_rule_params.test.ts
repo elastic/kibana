@@ -28,6 +28,7 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('uuid', () => {
   let uuid = 100;
@@ -165,7 +166,7 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
     actionsClient = (await rulesClientParams.getActionsClient()) as jest.Mocked<ActionsClient>;
     actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockResolvedValue([
-      {
+      createMockConnector({
         id: '1',
         actionTypeId: 'test',
         config: {
@@ -176,12 +177,8 @@ describe('bulkEditRuleParamsWithReadAuth()', () => {
           secure: null,
           service: null,
         },
-        isMissingSecrets: false,
         name: 'email connector',
-        isPreconfigured: false,
-        isSystemAction: false,
-        isDeprecated: false,
-      },
+      }),
     ]);
     actionsClient.listTypes.mockReset();
     actionsClient.listTypes.mockResolvedValue([]);

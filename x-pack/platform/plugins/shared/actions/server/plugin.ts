@@ -269,11 +269,13 @@ export class ActionsPlugin
           id: preconfiguredId,
           isPreconfigured: true,
           isSystemAction: false,
+          isConnectorTypeDeprecated: false,
         };
 
         this.inMemoryConnectors.push({
           ...rawPreconfiguredConnector,
           isDeprecated: isConnectorDeprecated(rawPreconfiguredConnector),
+          isConnectorTypeDeprecated: false,
         });
       } else {
         this.logger.warn(
@@ -517,6 +519,7 @@ export class ActionsPlugin
         internalSavedObjectsRepository,
         kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
+        connectorTypeRegistry: actionTypeRegistry!,
       });
     };
 

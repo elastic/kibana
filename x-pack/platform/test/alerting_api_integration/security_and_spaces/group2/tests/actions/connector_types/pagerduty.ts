@@ -71,6 +71,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         config: {
           apiUrl: pagerdutySimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -90,6 +91,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         config: {
           apiUrl: pagerdutySimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
     });
 

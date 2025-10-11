@@ -52,6 +52,7 @@ export default function updateConnectorTests({ getService }: FtrProviderContext)
           is_preconfigured: false,
           is_system_action: false,
           is_deprecated: false,
+          is_connector_type_deprecated: false,
           connector_type_id: 'test.index-record',
           is_missing_secrets: false,
           name: 'My connector updated',

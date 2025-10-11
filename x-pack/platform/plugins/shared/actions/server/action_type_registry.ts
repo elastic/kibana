@@ -259,6 +259,7 @@ export class ActionTypeRegistry {
         supportedFeatureIds: actionType.supportedFeatureIds,
         isSystemActionType: !!actionType.isSystemActionType,
         subFeature: actionType.subFeature,
+        isDeprecated: !!actionType.isDeprecated,
       }));
   }
 
@@ -271,5 +272,9 @@ export class ActionTypeRegistry {
 
   public getAllTypes(): string[] {
     return [...this.list().map(({ id }) => id)];
+  }
+
+  isDeprecated(actionTypeId: string): boolean {
+    return Boolean(this.actionTypes.get(actionTypeId)?.isDeprecated);
   }
 }
